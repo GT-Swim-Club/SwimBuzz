@@ -22,6 +22,7 @@ enum Course {
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
+  emailVerified DateTime? 
   name          String?
   image         String?
   role          Role      @default(ATHLETE)
@@ -32,13 +33,14 @@ model User {
 }
 
 model Athlete {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id])
-  firstName String
-  lastName  String
-  gradYear  Int?
-  swims     Swim[]
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id])
+  firstName    String
+  lastName     String
+  gradYear     Int?
+  swimCloudId  Int?    
+  swims        Swim[]
 }
 
 model Meet {
@@ -56,12 +58,14 @@ model Swim {
   athlete   Athlete  @relation(fields: [athleteId], references: [id])
   meetId    String?
   meet      Meet?    @relation(fields: [meetId], references: [id])
-  event     String   // e.g. "100 Freestyle"
-  timeMs    Int      // milliseconds — all time math happens here
+  event     String
+  timeMs    Int
   course    Course
   date      DateTime
-  source    String   // "swimcloud", "upload", "manual"
+  source    String
   createdAt DateTime @default(now())
+
+  @@unique([athleteId, event, timeMs, date])  // 👈 add this
 }
 
 // NextAuth required tables

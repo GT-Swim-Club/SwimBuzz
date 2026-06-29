@@ -1,11 +1,14 @@
-import NextAuth from "next-auth"
+import NextAuth, { NextAuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
+import { Role } from "@prisma/client"
 
-
-const handler = NextAuth({
+export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as any,
+  session: {
+    strategy: "jwt",
+  },
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -13,12 +16,17 @@ const handler = NextAuth({
     }),
   ],
   callbacks: {
-    session({ session, user }) {
-      session.user.id = user.id
-      session.user.role = user.role  // attach role to session
+    jwt({ token, user }) {
+      if (user) token.role = user.role
+      return token
+    },
+    session({ session, token }) {
+      session.user.id = token.sub!
+      session.user.role = token.role as Role
       return session
     },
   },
-})
+}
 
+const handler = NextAuth(authOptions)
 export { handler as GET, handler as POST }
