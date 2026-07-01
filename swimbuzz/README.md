@@ -1,36 +1,117 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SwimBuzz
 
-## Getting Started
+Swim team management app for coaches and athletes. Track rosters, import meet results, manage swim history, and build optimal relay lineups.
 
-First, run the development server:
+Built with **Next.js 16**, **Prisma 5**, **NextAuth** (Google sign-in), and a **Python FastAPI scraper** that pulls data from SwimCloud and parses meet PDFs.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Features
+
+- **Roster** — Browse athletes by gender and season. Coaches can sync from SwimCloud, add athletes manually, or import swims from a meet PDF.
+- **Athlete profiles** — Personal bests, full swim history, manual time entry, and deletion of manually added swims.
+- **Relay builder** — Optimal lineup suggestions for free and medley relays based on stored times.
+- **Auth & roles** — Google OAuth with `COACH`, `MEET_DIRECTOR`, and `ATHLETE` roles.
+
+## Project structure
+
+```
+SwimBuzz/
+├── swimbuzz/          # Next.js app (this package)
+│   ├── prisma/        # Database schema
+│   └── src/
+│       ├── app/       # Pages and API routes
+│       ├── components/
+│       └── lib/
+└── scraper/           # FastAPI service (run separately)
+    ├── main.py
+    └── pdf_parse.py
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Prerequisites
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Node.js 20+
+- Python 3.11+
+- PostgreSQL database (e.g. Supabase)
+- Google OAuth credentials
+- Playwright browsers (for the scraper)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment variables
 
-## Learn More
+Copy `.env.example` from the repo root into `swimbuzz/.env` and fill in:
 
-To learn more about Next.js, take a look at the following resources:
+| Variable | Description |
+|----------|-------------|
+| `DIRECT_URL` | PostgreSQL connection string (used by Prisma) |
+| `DATABASE_URL` | Pooled connection string for runtime, if used |
+| `NEXTAUTH_SECRET` | Random secret for session signing |
+| `NEXTAUTH_URL` | App URL, e.g. `http://localhost:3000` |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
+| `SCRAPER_URL` | Scraper base URL (default `http://localhost:8000`) |
+| `SWIMCLOUD_TEAM_ID` | SwimCloud team ID for roster sync |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Coach-only actions require a user with role `COACH` or `MEET_DIRECTOR` in the database.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Setup
 
-## Deploy on Vercel
+### Web app
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+cd swimbuzz
+npm install
+npx prisma generate
+npx prisma db push
+npm run dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Open [http://localhost:3000](http://localhost:3000).
+
+### Scraper
+
+Required for SwimCloud roster sync, time scraping, and meet PDF parsing.
+
+```bash
+cd scraper
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+playwright install chromium
+uvicorn main:app --reload --port 8000
+```
+
+## Development
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start Next.js dev server |
+| `npm run build` | Production build |
+| `npm run lint` | Run ESLint |
+| `npx prisma studio` | Open database GUI |
+| `npx prisma db push` | Apply schema changes to the database |
+
+### API routes
+
+| Route | Purpose |
+|-------|---------|
+| `POST /api/roster/sync` | Sync roster from SwimCloud |
+| `POST /api/athletes` | Add athlete manually |
+| `POST /api/meets/import` | Import swims from meet PDF |
+| `POST /api/swims` | Add a manual swim |
+| `DELETE /api/swims/[id]` | Delete a manual swim |
+| `POST /api/relays/optimal` | Compute optimal relay lineups |
+| `POST /api/scrape` | Scrape SwimCloud times for an athlete |
+
+### Scraper endpoints
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /roster` | Fetch team roster from SwimCloud |
+| `GET /times` | Fetch athlete times from SwimCloud |
+| `POST /parse-meet-pdf` | Parse a meet results PDF |
+
+## Tech stack
+
+- **Frontend:** React 19, Tailwind CSS 4, next-themes
+- **Backend:** Next.js App Router API routes
+- **Database:** PostgreSQL via Prisma
+- **Auth:** NextAuth v4 with Google provider
+- **Scraper:** FastAPI, Playwright, pdfplumber
