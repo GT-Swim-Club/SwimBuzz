@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
-  const { athleteId, event, timeMs, course, date, source } = await req.json()
+  const { athleteId, event, timeMs, course, date, source, meet } = await req.json()
 
   const swim = await prisma.swim.create({
     data: {
@@ -19,6 +19,7 @@ export async function POST(req: Request) {
       course,
       date: new Date(date),
       source: source ?? "manual",
+      meet: meet ?? null, 
     },
   })
 

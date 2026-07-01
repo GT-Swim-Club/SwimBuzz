@@ -15,9 +15,15 @@ enum Role {
 
 enum Course {
   SCY
-  LCY
+  LCM
   SCM
 }
+
+enum Gender {
+  M
+  F
+}
+
 
 model User {
   id            String    @id @default(cuid())
@@ -38,34 +44,26 @@ model Athlete {
   user         User     @relation(fields: [userId], references: [id])
   firstName    String
   lastName     String
-  gradYear     Int?
+  gender       Gender
+  seasons      Int[]  
   swimCloudId  Int?    
   swims        Swim[]
-}
-
-model Meet {
-  id        String   @id @default(cuid())
-  name      String
-  date      DateTime
-  course    Course
-  location  String?
-  swims     Swim[]
 }
 
 model Swim {
   id        String   @id @default(cuid())
   athleteId String
   athlete   Athlete  @relation(fields: [athleteId], references: [id])
-  meetId    String?
-  meet      Meet?    @relation(fields: [meetId], references: [id])
+  meet      String?
   event     String
   timeMs    Int
+  tags      String?
   course    Course
   date      DateTime
   source    String
   createdAt DateTime @default(now())
 
-  @@unique([athleteId, event, timeMs, date])  // 👈 add this
+  @@unique([athleteId, event, timeMs, course, date]) 
 }
 
 // NextAuth required tables

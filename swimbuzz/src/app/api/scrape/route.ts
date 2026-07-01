@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
+import { Course } from "@prisma/client"
 
 const SCRAPER_URL = process.env.SCRAPER_URL ?? "http://localhost:8000"
 
@@ -14,6 +15,19 @@ function parseSwimTime(timeStr: string): number | null {
   }
   return Math.round(parseFloat(parts[0]) * 1000)
 }
+
+function parseCourse(event: string, rawCourse: string): Course {
+    const upper = (rawCourse ?? "").trim().toUpperCase()
+    if (upper === "SCY" || upper === "Y") return Course.SCY
+    if (upper === "LCM" || upper === "L") return Course.LCM
+    if (upper === "SCM" || upper === "S") return Course.SCM
+  
+    if (event.includes("SCY") || event.endsWith(" Y")) return Course.SCY
+    if (event.includes("LCM") || event.endsWith(" L")) return Course.LCM
+    if (event.includes("SCM") || event.endsWith(" S")) return Course.SCM
+  
+    return Course.SCY
+  }
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
@@ -36,33 +50,28 @@ export async function POST(req: Request) {
   const times = await res.json()
   let imported = 0
 
-  for (const swim of times) {
-    const timeMs = parseSwimTime(swim.time)
-    if (!timeMs) continue
+  const swims = []
+let skippedBadDate = 0
+for (const swim of times) {
+  const timeMs = parseSwimTime(swim.time)
+  if (!timeMs) continue
 
-    // upsert — don't create duplicates if scraped twice
-    await prisma.swim.upsert({
-      where: {
-        // you'll add this unique constraint to your schema below
-        athleteId_event_timeMs_date: {
-          athleteId,
-          event: swim.event,
-          timeMs,
-          date: new Date(swim.date),
-        },
-      },
-      update: {},
-      create: {
-        athleteId,
-        event: swim.event,
-        timeMs,
-        course: swim.course ?? "SCY",
-        date: new Date(swim.date),
-        source: "swimcloud",
-      },
-    })
-    imported++
+  const date = new Date(swim.date?.trim())
+  if (isNaN(date.getTime())) {
+    continue
   }
 
-  return NextResponse.json({ imported })
+  const course = parseCourse(swim.event, swim.course)
+  const event = swim.event.replace(/\s+(SCY|LCM|SCM|Y|L|S)$/i, "").trim()
+
+  swims.push({ athleteId, event, timeMs, course, date, source: "swimcloud" , meet: swim.meet, tags: swim.tags})
+}
+console.log("total parsed:", swims.length)
+console.log("sample:", swims.slice(0, 3))
+const result = await prisma.swim.createMany({
+  data: swims,
+  skipDuplicates: true, 
+})
+console.log(swims)
+return NextResponse.json({ imported: result.count })
 }

@@ -1,3 +1,11 @@
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+// "Jun 28, 2025" — fixed format, not locale-dependent
+export function formatSwimDate(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date
+  return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`
+}
+
 // converts milliseconds to "1:23.45" or "58.32"
 export function formatTime(ms: number): string {
     const totalSeconds = ms / 1000
