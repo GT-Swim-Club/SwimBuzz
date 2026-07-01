@@ -49,7 +49,7 @@ Copy `.env.example` from the repo root into `swimbuzz/.env` and fill in:
 | `SCRAPER_URL` | Scraper base URL (default `http://localhost:8000`) |
 | `SWIMCLOUD_TEAM_ID` | SwimCloud team ID for roster sync |
 
-Coach-only actions require a user with role `COACH` or `MEET_DIRECTOR` in the database.
+New Google sign-ups default to `COACH` for now. SwimCloud roster placeholders are still created as `ATHLETE`.
 
 ## Setup
 

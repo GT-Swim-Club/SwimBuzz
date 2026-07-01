@@ -31,7 +31,7 @@ model User {
   emailVerified DateTime? 
   name          String?
   image         String?
-  role          Role      @default(ATHLETE)
+  role          Role      @default(COACH)
   createdAt     DateTime  @default(now())
   accounts      Account[]
   sessions      Session[]
