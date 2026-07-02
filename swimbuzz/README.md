@@ -93,6 +93,7 @@ uvicorn main:app --reload --port 8000
 | Route | Purpose |
 |-------|---------|
 | `POST /api/roster/sync` | Sync roster from SwimCloud |
+| `POST /api/times/sync` | Import SwimCloud times for all roster athletes |
 | `POST /api/athletes` | Add athlete manually |
 | `POST /api/meets/import` | Import swims from meet PDF |
 | `POST /api/swims` | Add a manual swim |
@@ -106,6 +107,7 @@ uvicorn main:app --reload --port 8000
 |----------|---------|
 | `GET /roster` | Fetch team roster from SwimCloud |
 | `GET /times` | Fetch athlete times from SwimCloud |
+| `POST /times/bulk` | Fetch times for many athletes (rate-limited, single browser session) |
 | `POST /parse-meet-pdf` | Parse a meet results PDF |
 
 ## Tech stack

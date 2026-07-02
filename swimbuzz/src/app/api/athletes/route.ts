@@ -36,12 +36,27 @@ export async function POST(req: Request) {
   const seasons = Array.isArray(body.seasons)
     ? body.seasons.map((y: unknown) => parseInt(String(y), 10)).filter(Number.isFinite)
     : []
+  const swimCloudIdRaw = body.swimCloudId
+  const swimCloudId =
+    swimCloudIdRaw === null || swimCloudIdRaw === undefined || swimCloudIdRaw === ""
+      ? null
+      : parseInt(String(swimCloudIdRaw), 10)
 
   if (!firstName || !lastName || !email) {
     return NextResponse.json({ error: "First name, last name, and email are required" }, { status: 400 })
   }
   if (seasons.length === 0) {
     return NextResponse.json({ error: "Season year is required" }, { status: 400 })
+  }
+  if (swimCloudId !== null && (!Number.isFinite(swimCloudId) || swimCloudId <= 0)) {
+    return NextResponse.json({ error: "SwimCloud ID must be a positive number" }, { status: 400 })
+  }
+
+  if (swimCloudId !== null) {
+    const existingBySwimCloud = await prisma.athlete.findFirst({ where: { swimCloudId } })
+    if (existingBySwimCloud) {
+      return NextResponse.json({ error: "An athlete with this SwimCloud ID already exists" }, { status: 409 })
+    }
   }
 
   const existingUser = await prisma.user.findUnique({
@@ -75,6 +90,7 @@ export async function POST(req: Request) {
         lastName,
         gender,
         seasons,
+        ...(swimCloudId !== null ? { swimCloudId } : {}),
       },
     })
   }).catch((err) => {

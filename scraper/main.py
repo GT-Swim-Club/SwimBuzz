@@ -2,21 +2,30 @@ from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from playwright.async_api import async_playwright
 from playwright_stealth import Stealth
+from pydantic import BaseModel
 import asyncio
 import random
 import uvicorn
 
 from pdf_parse import parse_meet_pdf_bytes
+from swimphone_parse import (
+    SwimPhoneCaptchaError,
+    SwimPhoneParseError,
+    scrape_swimphone_meet,
+)
 
 app = FastAPI()
 
-# Adaptive pacing between batches of parallel in-browser fetches
-MIN_DELAY_SEC = 0.5
-MAX_DELAY_SEC = 3.0
-INITIAL_DELAY_SEC = 0.8
-BATCH_SIZE = 4
-MAX_RETRIES = 4
-RETRY_BASE_SEC = 8
+# Adaptive pacing — conservative to avoid SwimCloud 429s
+MIN_DELAY_SEC = 1.2
+MAX_DELAY_SEC = 8.0
+INITIAL_DELAY_SEC = 1.5
+MAX_RETRIES = 6
+RETRY_BASE_SEC = 12
+BULK_SWIMMER_GAP_SEC = 5.0
+BULK_INITIAL_DELAY_SEC = 2.0
+
+_scrape_lock = asyncio.Lock()
 
 STROKE_MAP = {
     "Free": "1", "Back": "2", "Breast": "3", "Fly": "4", "IM": "5",
@@ -87,7 +96,7 @@ class AdaptivePacer:
         self.delay = max(MIN_DELAY_SEC, self.delay * 0.85)
 
     def on_rate_limit(self):
-        self.delay = min(MAX_DELAY_SEC, self.delay * 1.6)
+        self.delay = min(MAX_DELAY_SEC, max(self.delay * 2.0, MIN_DELAY_SEC * 2))
 
 app.add_middleware(
     CORSMiddleware,
@@ -225,45 +234,99 @@ def append_times(results: list, data, stroke: str, distance: str, course: str):
             results.append(row)
 
 
-async def fetch_times_by_events(page, swimmer_id: int, pacer: AdaptivePacer) -> list:
-    """Fetch times in small parallel batches inside the browser."""
+async def fetch_times_by_events(
+    page,
+    swimmer_id: int,
+    pacer: AdaptivePacer,
+) -> list:
+    """Fetch times one event at a time to avoid rate limits."""
     results = []
     requests = build_event_requests(swimmer_id)
 
-    for i in range(0, len(requests), BATCH_SIZE):
-        batch = requests[i : i + BATCH_SIZE]
-        urls = [r["url"] for r in batch]
-        batch_results = await page.evaluate(BATCH_FETCH_JS, urls)
-
-        retry = []
-        for req, item in zip(batch, batch_results):
-            if not isinstance(item, dict):
-                retry.append(req)
-                continue
-            if item.get("error") == 429:
-                pacer.on_rate_limit()
-                retry.append(req)
-                continue
-            if item.get("error"):
-                continue
-            append_times(results, item.get("data"), req["stroke"], req["distance"], req["course"])
-            pacer.on_success()
-
-        # retry 429s one at a time
-        for req in retry:
-            data = await fetch_one(page, req["url"], pacer, req["label"])
-            if data:
-                append_times(results, data, req["stroke"], req["distance"], req["course"])
-            await pacer.wait()
-
-        if i + BATCH_SIZE < len(requests):
+    for i, req in enumerate(requests):
+        data = await fetch_one(page, req["url"], pacer, req["label"])
+        if data:
+            append_times(results, data, req["stroke"], req["distance"], req["course"])
+        if i + 1 < len(requests):
             await pacer.wait()
 
     return results
 
 
+async def open_swimmer_times_page(page, swimmer_id: int):
+    await page.goto(
+        f"https://www.swimcloud.com/swimmer/{swimmer_id}/times/",
+        wait_until="domcontentloaded",
+        timeout=60000,
+    )
+    await page.wait_for_selector("button.c-tabs__link", timeout=45000)
+
+
+class BulkTimesRequest(BaseModel):
+    swimmer_ids: list[int]
+
+
+class SwimPhoneMeetRequest(BaseModel):
+    url: str
+
+
+@app.post("/times/bulk")
+async def get_times_bulk(body: BulkTimesRequest):
+    async with _scrape_lock:
+        return await _get_times_bulk(body)
+
+
+async def _get_times_bulk(body: BulkTimesRequest):
+    swimmer_ids = [sid for sid in body.swimmer_ids if sid > 0]
+    if not swimmer_ids:
+        return {"swimmers": {}, "failed": []}
+
+    pacer = AdaptivePacer()
+    pacer.delay = BULK_INITIAL_DELAY_SEC
+    swimmers: dict[str, list] = {}
+    failed: list[int] = []
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(
+            headless=False,
+            args=["--disable-blink-features=AutomationControlled"],
+        )
+        context = await browser.new_context(
+            user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            viewport={"width": 1280, "height": 800},
+        )
+        page = await context.new_page()
+        stealth = Stealth()
+        await stealth.apply_stealth_async(page)
+
+        for idx, swimmer_id in enumerate(swimmer_ids):
+            label = f"{idx + 1}/{len(swimmer_ids)}"
+            try:
+                await open_swimmer_times_page(page, swimmer_id)
+                times = await fetch_times_by_events(page, swimmer_id, pacer)
+                swimmers[str(swimmer_id)] = times
+                print(f"Bulk sync [{label}] swimmer {swimmer_id}: {len(times)} times")
+            except Exception as e:
+                print(f"Bulk sync [{label}] swimmer {swimmer_id} failed: {e}")
+                failed.append(swimmer_id)
+
+            if idx + 1 < len(swimmer_ids):
+                gap = BULK_SWIMMER_GAP_SEC + random.uniform(0, 0.75)
+                await asyncio.sleep(gap)
+                await pacer.wait()
+
+        await browser.close()
+
+    return {"swimmers": swimmers, "failed": failed}
+
+
 @app.get("/times")
 async def get_times(swimmer_id: int):
+    async with _scrape_lock:
+        return await _get_times(swimmer_id)
+
+
+async def _get_times(swimmer_id: int):
     pacer = AdaptivePacer()
 
     async with async_playwright() as p:
@@ -280,12 +343,7 @@ async def get_times(swimmer_id: int):
         await stealth.apply_stealth_async(page)
 
         try:
-            await page.goto(
-                f"https://www.swimcloud.com/swimmer/{swimmer_id}/times/",
-                wait_until="domcontentloaded",
-                timeout=60000
-            )
-            await page.wait_for_selector("button.c-tabs__link", timeout=45000)
+            await open_swimmer_times_page(page, swimmer_id)
         except Exception as e:
             await browser.close()
             raise HTTPException(status_code=502, detail=f"Failed to load page: {str(e)}")
@@ -321,6 +379,25 @@ async def parse_meet_pdf(
         return parsed
     except Exception as e:
         raise HTTPException(status_code=422, detail=f"Could not parse PDF: {e}")
+
+
+@app.post("/scrape-swimphone-meet")
+async def scrape_swimphone_meet_endpoint(body: SwimPhoneMeetRequest):
+    async with _scrape_lock:
+        try:
+            parsed = await scrape_swimphone_meet(body.url)
+            print(
+                f"\n--- SwimPhone scrape: {parsed.get('meet_name')} "
+                f"({len(parsed.get('results', []))} swims) ---\n"
+            )
+            return parsed
+        except SwimPhoneCaptchaError as e:
+            raise HTTPException(status_code=403, detail=str(e))
+        except SwimPhoneParseError as e:
+            raise HTTPException(status_code=422, detail=str(e))
+        except Exception as e:
+            print(f"SwimPhone scrape failed: {e}")
+            raise HTTPException(status_code=502, detail=f"SwimPhone scrape failed: {e}")
 
 
 if __name__ == "__main__":

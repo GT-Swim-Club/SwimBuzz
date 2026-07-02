@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 
 type ImportResult = {
@@ -9,38 +9,28 @@ type ImportResult = {
   matched: number
   unmatchedCount: number
   unmatched: { name: string; event: string; time: string }[]
+  meetName?: string
+  meetDate?: string
+  captchaLimited?: boolean
 }
 
-export default function ImportMeetButton() {
+export default function ImportSwimPhoneButton() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const fileRef = useRef<HTMLInputElement>(null)
-
   const year = searchParams.get("year") ?? String(new Date().getFullYear())
 
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<ImportResult | null>(null)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [form, setForm] = useState({
-    meetName: "",
-    meetDate: new Date().toISOString().split("T")[0],
-    course: "SCY",
-  })
-
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0] ?? null
-    setSelectedFile(file)
-    setError(null)
-    setResult(null)
-  }
+  const [url, setUrl] = useState("")
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
-    if (!selectedFile) {
-      setError("Choose a PDF file first")
+    const trimmed = url.trim()
+    if (!trimmed) {
+      setError("Paste a SwimPhone meet URL")
       return
     }
 
@@ -48,15 +38,12 @@ export default function ImportMeetButton() {
     setError(null)
     setResult(null)
 
-    const body = new FormData()
-    body.append("file", selectedFile, selectedFile.name)
-    body.append("meetName", form.meetName)
-    body.append("meetDate", form.meetDate)
-    body.append("course", form.course)
-    body.append("year", year)
-
     try {
-      const res = await fetch("/api/meets/import", { method: "POST", body })
+      const res = await fetch("/api/meets/import/swimphone", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: trimmed, year }),
+      })
       const data = await res.json()
 
       if (!res.ok) {
@@ -65,11 +52,9 @@ export default function ImportMeetButton() {
       }
 
       setResult(data)
-      setSelectedFile(null)
-      if (fileRef.current) fileRef.current.value = ""
       router.refresh()
     } catch {
-      setError("Upload failed — check that the dev server and scraper are running")
+      setError("Import failed — check that the dev server and scraper are running")
     } finally {
       setLoading(false)
     }
@@ -101,7 +86,7 @@ export default function ImportMeetButton() {
           <polyline points="7 10 12 15 17 10" />
           <line x1="12" y1="15" x2="12" y2="3" />
         </svg>
-        Results PDF
+        SwimPhone
       </button>
 
       {open && (
@@ -118,78 +103,27 @@ export default function ImportMeetButton() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-lg font-medium text-gray-900 dark:text-zinc-100">
-              Import meet results
+              Import from SwimPhone
             </h2>
             <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">
-              Upload a meet results PDF. Times are matched to athletes on both the men&apos;s and women&apos;s {year} rosters.
+              Paste a SwimPhone meet link. Results are matched to athletes on both the men&apos;s and women&apos;s {year} rosters.
             </p>
 
             <form onSubmit={handleSubmit} className="mt-5 space-y-4">
               <div>
                 <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-                  Meet name
+                  Meet URL
                 </label>
                 <input
                   required
-                  value={form.meetName}
-                  onChange={(e) => setForm((f) => ({ ...f, meetName: e.target.value }))}
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://www.swimphone.com/meets/meet_menu.cfm?smid=..."
                   className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
-                  placeholder="Spring Invitational"
                 />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-                    Meet date
-                  </label>
-                  <input
-                    required
-                    type="date"
-                    value={form.meetDate}
-                    onChange={(e) => setForm((f) => ({ ...f, meetDate: e.target.value }))}
-                    className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-                    Course
-                  </label>
-                  <select
-                    value={form.course}
-                    onChange={(e) => setForm((f) => ({ ...f, course: e.target.value }))}
-                    className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
-                  >
-                    <option value="SCY">SCY</option>
-                    <option value="LCM">LCM</option>
-                    <option value="SCM">SCM</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <span className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-                  Results PDF
-                </span>
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept=".pdf,application/pdf"
-                  onChange={handleFileChange}
-                  className="sr-only"
-                  id="meet-pdf-upload"
-                />
-                <div className="flex items-center gap-3">
-                  <label
-                    htmlFor="meet-pdf-upload"
-                    className="cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
-                  >
-                    Choose PDF
-                  </label>
-                  <span className="text-sm text-gray-600 dark:text-zinc-400 truncate">
-                    {selectedFile ? selectedFile.name : "No file selected"}
-                  </span>
-                </div>
+                <p className="mt-1.5 text-xs text-gray-400 dark:text-zinc-500">
+                  Works best during or shortly after a meet. Archived meets may be blocked by SwimPhone.
+                </p>
               </div>
 
               {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
@@ -197,9 +131,16 @@ export default function ImportMeetButton() {
               {result && (
                 <div className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-800/50">
                   <p className="text-gray-900 dark:text-zinc-100">
-                    Imported <strong>{result.imported}</strong> new swims
-                    {" "}({result.parsed} parsed, {result.matched} matched to roster).
+                    Imported <strong>{result.imported}</strong> new swims from{" "}
+                    <strong>{result.meetName ?? "meet"}</strong>
+                    {result.meetDate ? ` (${result.meetDate})` : ""}
+                    {" "}— {result.parsed} parsed, {result.matched} matched.
                   </p>
+                  {result.captchaLimited && (
+                    <p className="mt-2 text-amber-700 dark:text-amber-400">
+                      SwimPhone blocked some archived results; only partial data was imported.
+                    </p>
+                  )}
                   {result.unmatchedCount > 0 && (
                     <p className="mt-2 text-gray-600 dark:text-zinc-400">
                       {result.unmatchedCount} result(s) could not be matched to a roster athlete.
@@ -224,10 +165,10 @@ export default function ImportMeetButton() {
                 </button>
                 <button
                   type="submit"
-                  disabled={loading || !selectedFile}
+                  disabled={loading || !url.trim()}
                   className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
                 >
-                  {loading ? "Importing…" : "Import"}
+                  {loading ? "Scraping…" : "Import"}
                 </button>
               </div>
             </form>

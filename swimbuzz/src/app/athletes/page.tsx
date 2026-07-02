@@ -5,7 +5,9 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import SyncRosterButton from "./SyncRosterButton"
+import SyncTimesButton from "./SyncTimesButton"
 import ImportMeetButton from "./ImportMeetButton"
+import ImportSwimPhoneButton from "./ImportSwimPhoneButton"
 import AddAthleteButton from "./AddAthleteButton"
 
 export default async function AthletesPage({
@@ -44,10 +46,16 @@ export default async function AthletesPage({
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-medium">Roster</h1>
           {isCoach && (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap justify-end">
               <SyncRosterButton />
               <Suspense fallback={null}>
+                <SyncTimesButton />
+              </Suspense>
+              <Suspense fallback={null}>
                 <ImportMeetButton />
+              </Suspense>
+              <Suspense fallback={null}>
+                <ImportSwimPhoneButton />
               </Suspense>
               <Suspense fallback={null}>
                 <AddAthleteButton />

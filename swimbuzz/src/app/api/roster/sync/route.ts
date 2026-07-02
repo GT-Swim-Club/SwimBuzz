@@ -3,8 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { Gender } from "@prisma/client"
-
-const SCRAPER_URL = process.env.SCRAPER_URL ?? "http://localhost:8000"
+import { fetchScraper, SCRAPER_URL } from "@/lib/scraper-fetch"
 const TEAM_ID = process.env.SWIMCLOUD_TEAM_ID ?? "10004130"
 
 export async function POST(req: Request) {
@@ -15,7 +14,7 @@ export async function POST(req: Request) {
 
   const { year, gender } = await req.json()
 
-  const res = await fetch(
+  const res = await fetchScraper(
     `${SCRAPER_URL}/roster?team_id=${TEAM_ID}&year=${year}&gender=${gender}`
   )
   if (!res.ok) {

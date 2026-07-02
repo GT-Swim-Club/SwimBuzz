@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
 
 export default function SyncRosterButton() {
@@ -57,9 +58,10 @@ export default function SyncRosterButton() {
       <button
         onClick={handleSync}
         disabled={status === "loading"}
-        className="text-sm px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
+        className="inline-flex items-center gap-2 text-sm px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
       >
-        {status === "loading" ? "Syncing..." : "Sync from SwimCloud"}
+        <Image src="/swimcloud.webp" alt="" width={36} height={36} className="shrink-0" />
+        {status === "loading" ? "Syncing..." : "Sync Roster"}
       </button>
       {status === "done" && result && (
         <span className="text-xs text-gray-500 dark:text-zinc-400">

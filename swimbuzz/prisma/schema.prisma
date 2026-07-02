@@ -54,16 +54,17 @@ model Swim {
   id        String   @id @default(cuid())
   athleteId String
   athlete   Athlete  @relation(fields: [athleteId], references: [id])
-  meet      String?
-  event     String
-  timeMs    Int
-  tags      String?
-  course    Course
-  date      DateTime
-  source    String
-  createdAt DateTime @default(now())
+  meet       String   @default("")
+  event      String
+  timeMs     Int
+  tags       String   @default("")
+  course     Course
+  date       DateTime
+  occurrence Int      @default(0)
+  source     String
+  createdAt  DateTime @default(now())
 
-  @@unique([athleteId, event, timeMs, course, date]) 
+  @@unique([athleteId, event, timeMs, course, date, tags, occurrence])
 }
 
 // NextAuth required tables

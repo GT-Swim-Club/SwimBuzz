@@ -1,27 +1,72 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import { prisma } from "@/lib/prisma"   
+import { Prisma } from "@prisma/client"
+import { prisma } from "@/lib/prisma"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { normalizeSwimForInsert, nextSwimOccurrence } from "@/lib/swim-dedup"
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions)
-  if (!session || !["COACH", "MEET_DIRECTOR"].includes(session.user.role)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-  }
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session || !["COACH", "MEET_DIRECTOR"].includes(session.user.role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
 
-  const { athleteId, event, timeMs, course, date, source, meet } = await req.json()
+    const { athleteId, event, timeMs, course, date, source, meet, tags } =
+      await req.json()
 
-  const swim = await prisma.swim.create({
-    data: {
+    if (!athleteId || !event || !Number.isFinite(timeMs) || !course || !date) {
+      return NextResponse.json({ error: "Missing required swim fields" }, { status: 400 })
+    }
+
+    const base = normalizeSwimForInsert({
       athleteId,
       event,
       timeMs,
       course,
-      date: new Date(date),
+      date,
       source: source ?? "manual",
-      meet: meet ?? null, 
-    },
-  })
+      meet,
+      tags,
+    })
 
-  return NextResponse.json(swim, { status: 201 })
+    let occurrence = await nextSwimOccurrence(prisma, base)
+
+    for (let attempt = 0; attempt < 5; attempt++) {
+      try {
+        const created = await prisma.swim.create({
+          data: { ...base, occurrence },
+        })
+        return NextResponse.json(created, { status: 201 })
+      } catch (err) {
+        if (
+          err instanceof Prisma.PrismaClientKnownRequestError &&
+          err.code === "P2002"
+        ) {
+          occurrence++
+          continue
+        }
+        throw err
+      }
+    }
+
+    return NextResponse.json(
+      { error: "Could not save swim — too many matching duplicates" },
+      { status: 409 }
+    )
+  } catch (err) {
+    console.error("POST /api/swims failed:", err)
+
+    if (err instanceof Prisma.PrismaClientValidationError) {
+      return NextResponse.json(
+        {
+          error:
+            "Database client is out of date — restart the dev server (npm run dev)",
+        },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ error: "Failed to save swim" }, { status: 500 })
+  }
 }

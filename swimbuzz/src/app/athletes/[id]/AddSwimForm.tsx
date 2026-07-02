@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { parseTime } from "@/lib/utils"
+import SetSwimCloudIdForm from "./SetSwimCloudIdForm"
 
 const EVENTS = [
   "50 Free", "100 Free", "200 Free", "400 Free", "500 Free",
@@ -16,32 +18,51 @@ export default function AddSwimForm({ athleteId, swimCloudId }: {
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [scrapeStatus, setScrapeStatus] = useState<"idle" | "loading" | "done" | "error">("idle")
   const [scrapeCount, setScrapeCount] = useState(0)
   const [form, setForm] = useState({
     event: "50 Free",
     time: "",
     course: "SCY",
-    date: new Date().toISOString().split("T")[0],
+    date: new Date().toLocaleDateString('en-CA'),
     meet: "",
   })
 
   async function handleSubmit() {
     if (!form.time) return
     setLoading(true)
+    setError(null)
 
-    const parts = form.time.split(":")
-    const ms = parts.length === 2
-      ? (parseInt(parts[0]) * 60 + parseFloat(parts[1])) * 1000
-      : parseFloat(parts[0]) * 1000
+    const timeMs = Math.round(parseTime(form.time))
 
-    await fetch("/api/swims", {
+    if (!Number.isFinite(timeMs) || timeMs <= 0) {
+      setError("Invalid time format")
+      setLoading(false)
+      return
+    }
+
+    const res = await fetch("/api/swims", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, athleteId, timeMs: ms }),
+      body: JSON.stringify({
+        athleteId,
+        event: form.event,
+        course: form.course,
+        date: form.date,
+        meet: form.meet,
+        timeMs,
+      }),
     })
 
     setLoading(false)
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      setError(data.error ?? "Failed to save swim")
+      return
+    }
+
     setForm(f => ({ ...f, time: "" }))
     router.refresh()
   }
@@ -90,7 +111,12 @@ export default function AddSwimForm({ athleteId, swimCloudId }: {
             )}
           </div>
         ) : (
-          <p className="text-xs text-gray-400">No SwimCloud ID set for this athlete.</p>
+          <div className="border rounded-xl p-4 bg-white dark:bg-zinc-900 space-y-3">
+            <p className="text-sm text-gray-500 dark:text-zinc-400">
+              Link this athlete to SwimCloud to import their times.
+            </p>
+            <SetSwimCloudIdForm athleteId={athleteId} />
+          </div>
         )}
       </section>
 
@@ -100,7 +126,7 @@ export default function AddSwimForm({ athleteId, swimCloudId }: {
           Log a swim manually
         </h2>
         <div className="border rounded-xl p-4 space-y-3 bg-white dark:bg-zinc-900">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="text-xs text-gray-500 dark:text-zinc-400 mb-1 block">Event</label>
               <select
@@ -123,8 +149,6 @@ export default function AddSwimForm({ athleteId, swimCloudId }: {
                 <option>SCM</option>
               </select>
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs text-gray-500 dark:text-zinc-400 mb-1 block">Time (m:ss.hh)</label>
               <input
@@ -133,6 +157,17 @@ export default function AddSwimForm({ athleteId, swimCloudId }: {
                 className="w-full border rounded-lg px-3 py-2 text-sm font-mono"
                 value={form.time}
                 onChange={e => setForm(f => ({ ...f, time: e.target.value }))}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-[1.5fr_1fr] gap-3">
+            <div>
+              <label className="text-xs text-gray-500 dark:text-zinc-400 mb-1 block">Meet</label>
+              <input
+                type="text"
+                className="w-full border rounded-lg px-3 py-2 text-sm"
+                value={form.meet}
+                onChange={e => setForm(f => ({ ...f, meet: e.target.value }))}
               />
             </div>
             <div>
@@ -144,16 +179,10 @@ export default function AddSwimForm({ athleteId, swimCloudId }: {
                 onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
               />
             </div>
-            <div>
-              <label className="text-xs text-gray-500 dark:text-zinc-400 mb-1 block">Meet</label>
-              <input
-                type="text"
-                className="w-full border rounded-lg px-3 py-2 text-sm"
-                value={form.meet}
-                onChange={e => setForm(f => ({ ...f, meet: e.target.value }))}
-              />
-            </div>
           </div>
+          {error && (
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          )}
           <button
             onClick={handleSubmit}
             disabled={loading || !form.time}

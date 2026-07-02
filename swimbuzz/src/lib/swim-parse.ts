@@ -43,3 +43,49 @@ export function parseMeetDate(dateStr: string): Date | null {
   if (isNaN(date.getTime())) return null
   return date
 }
+
+const STROKE_ORDER: Record<string, number> = {
+  Free: 0,
+  Back: 1,
+  Breast: 2,
+  Fly: 3,
+  IM: 4,
+}
+
+export const STROKE_LABELS = ["Free", "Back", "Breast", "Fly", "IM"] as const
+
+const COURSE_ORDER: Record<string, number> = {
+  SCY: 0,
+  SCM: 1,
+  LCM: 2,
+}
+
+export const COURSE_LABELS = ["SCY", "SCM", "LCM"] as const
+
+export function parseEventParts(event: string): { distance: number; stroke: string } {
+  const match = event.trim().match(/^(\d+)\s+(.+)$/)
+  if (!match) return { distance: 0, stroke: event.trim() }
+  return { distance: parseInt(match[1], 10), stroke: match[2].trim() }
+}
+
+export function compareSwimEvents(a: string, b: string): number {
+  const pa = parseEventParts(a)
+  const pb = parseEventParts(b)
+
+  const strokeCmp =
+    (STROKE_ORDER[pa.stroke] ?? 99) - (STROKE_ORDER[pb.stroke] ?? 99)
+  if (strokeCmp !== 0) return strokeCmp
+
+  return pa.distance - pb.distance
+}
+
+export function compareSwimPb(
+  a: { event: string; course: string },
+  b: { event: string; course: string }
+): number {
+  const courseCmp =
+    (COURSE_ORDER[a.course] ?? 99) - (COURSE_ORDER[b.course] ?? 99)
+  if (courseCmp !== 0) return courseCmp
+
+  return compareSwimEvents(a.event, b.event)
+}

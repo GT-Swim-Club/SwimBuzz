@@ -17,6 +17,7 @@ export default function AddAthleteButton() {
     firstName: "",
     lastName: "",
     email: "",
+    swimCloudId: "",
   })
 
   function openModal() {
@@ -42,7 +43,7 @@ export default function AddAthleteButton() {
         return
       }
 
-      setForm({ firstName: "", lastName: "", email: "" })
+      setForm({ firstName: "", lastName: "", email: "", swimCloudId: "" })
       setOpen(false)
       router.refresh()
     } catch {
@@ -57,9 +58,23 @@ export default function AddAthleteButton() {
       <button
         type="button"
         onClick={openModal}
-        className="text-sm px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
+        className="inline-flex items-center gap-2 text-sm px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
       >
-        Add athlete
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-4 w-4 shrink-0"
+          aria-hidden="true"
+        >
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Athlete
       </button>
 
       {open && (
@@ -117,6 +132,20 @@ export default function AddAthleteButton() {
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                  className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+                  SwimCloud ID <span className="font-normal text-gray-400">(optional)</span>
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  placeholder="e.g. 123456"
+                  value={form.swimCloudId}
+                  onChange={(e) => setForm((f) => ({ ...f, swimCloudId: e.target.value }))}
                   className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
                 />
               </div>
