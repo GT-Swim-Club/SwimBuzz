@@ -9,6 +9,8 @@ type ImportResult = {
   matched: number
   unmatchedCount: number
   unmatched: { name: string; event: string; time: string }[]
+  meetName?: string
+  meetDate?: string
 }
 
 export default function ImportMeetButton() {
@@ -24,8 +26,6 @@ export default function ImportMeetButton() {
   const [result, setResult] = useState<ImportResult | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [form, setForm] = useState({
-    meetName: "",
-    meetDate: new Date().toISOString().split("T")[0],
     course: "SCY",
   })
 
@@ -50,8 +50,6 @@ export default function ImportMeetButton() {
 
     const body = new FormData()
     body.append("file", selectedFile, selectedFile.name)
-    body.append("meetName", form.meetName)
-    body.append("meetDate", form.meetDate)
     body.append("course", form.course)
     body.append("year", year)
 
@@ -84,7 +82,7 @@ export default function ImportMeetButton() {
           setError(null)
           setResult(null)
         }}
-        className="inline-flex items-center gap-2 text-sm px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -94,7 +92,7 @@ export default function ImportMeetButton() {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="h-4 w-4 shrink-0"
+          className="h-3.5 w-3.5 shrink-0"
           aria-hidden="true"
         >
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -127,44 +125,17 @@ export default function ImportMeetButton() {
             <form onSubmit={handleSubmit} className="mt-5 space-y-4">
               <div>
                 <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-                  Meet name
+                  Course
                 </label>
-                <input
-                  required
-                  value={form.meetName}
-                  onChange={(e) => setForm((f) => ({ ...f, meetName: e.target.value }))}
+                <select
+                  value={form.course}
+                  onChange={(e) => setForm((f) => ({ ...f, course: e.target.value }))}
                   className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
-                  placeholder="Spring Invitational"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-                    Meet date
-                  </label>
-                  <input
-                    required
-                    type="date"
-                    value={form.meetDate}
-                    onChange={(e) => setForm((f) => ({ ...f, meetDate: e.target.value }))}
-                    className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-                    Course
-                  </label>
-                  <select
-                    value={form.course}
-                    onChange={(e) => setForm((f) => ({ ...f, course: e.target.value }))}
-                    className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
-                  >
-                    <option value="SCY">SCY</option>
-                    <option value="LCM">LCM</option>
-                    <option value="SCM">SCM</option>
-                  </select>
-                </div>
+                >
+                  <option value="SCY">SCY</option>
+                  <option value="LCM">LCM</option>
+                  <option value="SCM">SCM</option>
+                </select>
               </div>
 
               <div>
@@ -196,6 +167,21 @@ export default function ImportMeetButton() {
 
               {result && (
                 <div className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-800/50">
+                  {result.meetName && (
+                    <p className="mb-1 text-gray-900 dark:text-zinc-100">
+                      <strong>{result.meetName}</strong>
+                      {result.meetDate && (
+                        <span className="text-gray-500 dark:text-zinc-400">
+                          {" "}— {new Date(result.meetDate).toLocaleDateString(undefined, {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                            timeZone: "UTC",
+                          })}
+                        </span>
+                      )}
+                    </p>
+                  )}
                   <p className="text-gray-900 dark:text-zinc-100">
                     Imported <strong>{result.imported}</strong> new swims
                     {" "}({result.parsed} parsed, {result.matched} matched to roster).

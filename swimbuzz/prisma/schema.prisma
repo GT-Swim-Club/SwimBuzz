@@ -44,9 +44,11 @@ model Athlete {
   user         User     @relation(fields: [userId], references: [id])
   firstName    String
   lastName     String
+  nicknames    String[] @default([])
   gender       Gender
   seasons      Int[]  
   swimCloudId  Int?    
+  timesSyncedAt DateTime?
   swims        Swim[]
 }
 

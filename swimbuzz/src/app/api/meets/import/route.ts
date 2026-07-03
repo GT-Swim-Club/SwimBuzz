@@ -5,8 +5,8 @@ import { importMeetResults, resolveMeetDate } from "@/lib/meet-import"
 import { fetchScraper, SCRAPER_URL } from "@/lib/scraper-fetch"
 import { FormData as UndiciFormData } from "undici"
 
-function isUpload(value: FormDataEntryValue | null): value is File | Blob {
-  return value != null && typeof value !== "string" && "arrayBuffer" in value
+function isUpload(value: unknown): value is Blob {
+  return value != null && typeof value !== "string" && typeof (value as Blob).arrayBuffer === "function"
 }
 
 type ParsedResult = {
@@ -26,8 +26,6 @@ export async function POST(req: Request) {
 
   const formData = await req.formData()
   const file = formData.get("file")
-  const meetName = String(formData.get("meetName") ?? "").trim()
-  const meetDateRaw = String(formData.get("meetDate") ?? "").trim()
   const courseDefault = String(formData.get("course") ?? "SCY").trim().toUpperCase()
   const year = parseInt(String(formData.get("year") ?? ""), 10)
 
@@ -43,19 +41,8 @@ export async function POST(req: Request) {
   if (!fileName.toLowerCase().endsWith(".pdf") && fileType !== "application/pdf") {
     return NextResponse.json({ error: "File must be a PDF" }, { status: 400 })
   }
-  if (!meetName) {
-    return NextResponse.json({ error: "Meet name is required" }, { status: 400 })
-  }
-  if (!meetDateRaw) {
-    return NextResponse.json({ error: "Meet date is required" }, { status: 400 })
-  }
   if (!Number.isFinite(year)) {
     return NextResponse.json({ error: "Season year is required" }, { status: 400 })
-  }
-
-  const meetDate = resolveMeetDate(meetDateRaw)
-  if (!meetDate) {
-    return NextResponse.json({ error: "Invalid meet date" }, { status: 400 })
   }
 
   // Use undici's FormData/File so the multipart body is serialized correctly by
@@ -74,7 +61,7 @@ export async function POST(req: Request) {
   try {
     parseRes = await fetchScraper(`${SCRAPER_URL}/parse-meet-pdf`, {
       method: "POST",
-      body: scraperForm,
+      body: scraperForm as unknown as BodyInit,
     })
   } catch {
     return NextResponse.json(
@@ -97,8 +84,13 @@ export async function POST(req: Request) {
 
   const parsed = (await parseRes.json()) as {
     course?: string
+    meet_name?: string | null
+    meet_date?: string | null
     results: ParsedResult[]
   }
+
+  const meetName = (parsed.meet_name ?? "").trim() || fileName.replace(/\.pdf$/i, "")
+  const meetDate = resolveMeetDate(parsed.meet_date) ?? new Date()
 
   const summary = await importMeetResults({
     year,
@@ -109,5 +101,9 @@ export async function POST(req: Request) {
     courseDefault: parsed.course || courseDefault,
   })
 
-  return NextResponse.json(summary)
+  return NextResponse.json({
+    ...summary,
+    meetName,
+    meetDate: meetDate.toISOString(),
+  })
 }

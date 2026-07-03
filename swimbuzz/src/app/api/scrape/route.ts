@@ -34,5 +34,11 @@ export async function POST(req: Request) {
     skipDuplicates: true,
   })
 
-  return NextResponse.json({ imported: result.count })
+  const syncedAt = new Date()
+  await prisma.athlete.update({
+    where: { id: athleteId },
+    data: { timesSyncedAt: syncedAt },
+  })
+
+  return NextResponse.json({ imported: result.count, timesSyncedAt: syncedAt.toISOString() })
 }

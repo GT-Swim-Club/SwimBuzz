@@ -18,6 +18,7 @@ export default function AddAthleteButton() {
     lastName: "",
     email: "",
     swimCloudId: "",
+    nicknames: "",
   })
 
   function openModal() {
@@ -34,7 +35,15 @@ export default function AddAthleteButton() {
       const res = await fetch("/api/athletes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, gender, seasons: [year] }),
+        body: JSON.stringify({
+          ...form,
+          nicknames: form.nicknames
+            .split(",")
+            .map((n) => n.trim())
+            .filter(Boolean),
+          gender,
+          seasons: [year],
+        }),
       })
       const data = await res.json()
 
@@ -43,7 +52,7 @@ export default function AddAthleteButton() {
         return
       }
 
-      setForm({ firstName: "", lastName: "", email: "", swimCloudId: "" })
+      setForm({ firstName: "", lastName: "", email: "", swimCloudId: "", nicknames: "" })
       setOpen(false)
       router.refresh()
     } catch {
@@ -58,7 +67,7 @@ export default function AddAthleteButton() {
       <button
         type="button"
         onClick={openModal}
-        className="inline-flex items-center gap-2 text-sm px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -68,7 +77,7 @@ export default function AddAthleteButton() {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="h-4 w-4 shrink-0"
+          className="h-3.5 w-3.5 shrink-0"
           aria-hidden="true"
         >
           <line x1="12" y1="5" x2="12" y2="19" />
@@ -148,6 +157,21 @@ export default function AddAthleteButton() {
                   onChange={(e) => setForm((f) => ({ ...f, swimCloudId: e.target.value }))}
                   className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+                  Alternate names <span className="font-normal text-gray-400">(optional)</span>
+                </label>
+                <input
+                  placeholder="e.g. Dan, Danny"
+                  value={form.nicknames}
+                  onChange={(e) => setForm((f) => ({ ...f, nicknames: e.target.value }))}
+                  className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                />
+                <p className="mt-1 text-xs text-gray-400 dark:text-zinc-500">
+                  Comma-separated names used to match results to this athlete.
+                </p>
               </div>
 
               {error && (

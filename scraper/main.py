@@ -370,7 +370,11 @@ async def parse_meet_pdf(
     try:
         parsed = parse_meet_pdf_bytes(content, course.upper())
         results = parsed.get("results", [])
-        print(f"\n--- Parsed {len(results)} swims from {file.filename} (course: {parsed.get('course', course)}) ---")
+        print(
+            f"\n--- Parsed {len(results)} swims from {file.filename} "
+            f"(meet: {parsed.get('meet_name')!r}, date: {parsed.get('meet_date')}, "
+            f"course: {parsed.get('course', course)}) ---"
+        )
         for swim in results:
             print(
                 f"  {swim['name']:30}  {swim['event']:12}  {swim['time']:>8}  {swim.get('course', '')}"

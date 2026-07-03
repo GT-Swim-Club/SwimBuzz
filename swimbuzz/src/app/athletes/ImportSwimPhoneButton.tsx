@@ -69,7 +69,7 @@ export default function ImportSwimPhoneButton() {
           setError(null)
           setResult(null)
         }}
-        className="inline-flex items-center gap-2 text-sm px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -79,7 +79,7 @@ export default function ImportSwimPhoneButton() {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="h-4 w-4 shrink-0"
+          className="h-3.5 w-3.5 shrink-0"
           aria-hidden="true"
         >
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />

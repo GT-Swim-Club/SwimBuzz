@@ -32,6 +32,7 @@ export async function GET(req: Request) {
       lastName: true,
       gender: true,
       swimCloudId: true,
+      timesSyncedAt: true,
     },
     orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
   })
@@ -108,14 +109,15 @@ export async function POST(req: Request) {
   }
 
   const allSwims: ReturnType<typeof swimsFromSwimCloudTimes> = []
-  let athletesSynced = 0
+  const syncedAthleteIds: string[] = []
 
   for (const [swimCloudIdStr, times] of Object.entries(scraped.swimmers ?? {})) {
     const athlete = athleteBySwimCloudId.get(parseInt(swimCloudIdStr, 10))
     if (!athlete || !times?.length) continue
     allSwims.push(...swimsFromSwimCloudTimes(times, athlete.id))
-    athletesSynced++
+    syncedAthleteIds.push(athlete.id)
   }
+  const athletesSynced = syncedAthleteIds.length
 
   const swimsToInsert = assignSwimOccurrences(allSwims)
   let imported = 0
@@ -127,6 +129,14 @@ export async function POST(req: Request) {
       skipDuplicates: true,
     })
     imported += result.count
+  }
+
+  const syncedAt = new Date()
+  if (syncedAthleteIds.length > 0) {
+    await prisma.athlete.updateMany({
+      where: { id: { in: syncedAthleteIds } },
+      data: { timesSyncedAt: syncedAt },
+    })
   }
 
   const failed = (scraped.failed ?? []).map((id) => {
@@ -145,6 +155,8 @@ export async function POST(req: Request) {
     parsed: allSwims.length,
     athletes: athletes.length,
     athletesSynced,
+    syncedAthleteIds,
+    timesSyncedAt: syncedAt.toISOString(),
     failed,
   })
 }

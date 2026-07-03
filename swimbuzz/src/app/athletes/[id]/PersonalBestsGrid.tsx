@@ -35,9 +35,9 @@ function groupByCourse(swims: PbSwim[]) {
     groups.set(swim.course, list)
   }
 
-  const ordered = COURSE_LABELS.filter((course) => groups.has(course)).map(
-    (course) => ({ course, swims: groups.get(course)! })
-  )
+  const ordered: { course: string; swims: PbSwim[] }[] = COURSE_LABELS.filter(
+    (course) => groups.has(course)
+  ).map((course) => ({ course, swims: groups.get(course)! }))
 
   for (const [course, courseSwims] of groups) {
     if (!COURSE_LABELS.includes(course as (typeof COURSE_LABELS)[number])) {

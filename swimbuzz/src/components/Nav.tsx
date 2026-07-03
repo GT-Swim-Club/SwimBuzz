@@ -11,7 +11,7 @@ export default async function Nav() {
   return (
     <nav className="border-b bg-white dark:bg-zinc-900 px-6 py-3 flex items-center justify-between">
       <div className="flex items-center gap-6">
-        <span className="font-semibold text-sm tracking-tight">SwimBUZZ</span>
+        <span className="font-semibold text-sm tracking-tight">SwimBuzz</span>
         <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-zinc-400">
           <Link href="/athletes" className="hover:text-gray-900 dark:text-zinc-100 transition-colors">Roster</Link>
           <Link href="/relays" className="hover:text-gray-900 dark:text-zinc-100 transition-colors">Relays</Link>

@@ -7,8 +7,11 @@ import Nav from "@/components/Nav"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "GTSC Tools",
-  description: "Georgia Tech Swim Club",
+  title: "SwimBuzz",
+  description: "SwimBuzz is a tool for Georgia Tech Swim Club to manage their athletes and results.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

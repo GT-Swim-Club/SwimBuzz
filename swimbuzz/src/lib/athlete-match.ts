@@ -2,6 +2,7 @@ export type RosterAthlete = {
   id: string
   firstName: string
   lastName: string
+  nicknames?: string[]
 }
 
 export type AthleteLookup = {
@@ -9,39 +10,28 @@ export type AthleteLookup = {
   roster: RosterAthlete[]
 }
 
-/** Common first-name variants (e.g. Bob ↔ Robert) where prefix matching is not enough. */
-const FIRST_NAME_ALIAS_GROUPS = [
-  ["alexander", "alex", "xander"],
-  ["anthony", "tony"],
-  ["benjamin", "ben"],
-  ["charles", "charlie", "chuck"],
-  ["christopher", "chris"],
-  ["daniel", "dan", "danny"],
-  ["david", "dave"],
-  ["elizabeth", "liz", "beth", "betty"],
-  ["james", "jim", "jimmy"],
-  ["joseph", "joe", "joey"],
-  ["katherine", "kate", "katie", "kathy"],
-  ["matthew", "matt"],
-  ["michael", "mike"],
-  ["nicholas", "nick"],
-  ["patrick", "pat"],
-  ["richard", "rick", "dick"],
-  ["robert", "rob", "bob", "bobby"],
-  ["samuel", "sam"],
-  ["stephen", "steve"],
-  ["steven", "steve"],
-  ["thomas", "tom", "tommy"],
-  ["william", "will", "bill", "billy"],
-  ["zachary", "zach", "zack"],
-]
+/**
+ * Clean user-supplied alternate names into a deduped list. Accepts either an
+ * array of strings or a single comma-separated string.
+ */
+export function normalizeNicknames(input: unknown): string[] {
+  const raw = Array.isArray(input)
+    ? input
+    : typeof input === "string"
+      ? input.split(",")
+      : []
 
-const FIRST_NAME_ALIAS_GROUP = new Map<string, string>()
-for (const group of FIRST_NAME_ALIAS_GROUPS) {
-  const id = group[0]
-  for (const name of group) {
-    FIRST_NAME_ALIAS_GROUP.set(name, id)
+  const seen = new Set<string>()
+  const result: string[] = []
+  for (const item of raw) {
+    const trimmed = String(item ?? "").trim()
+    if (!trimmed) continue
+    const key = trimmed.toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    result.push(trimmed)
   }
+  return result
 }
 
 function normalize(value: string): string {
@@ -69,14 +59,28 @@ function parsePdfName(name: string): { first: string; last: string } | null {
 }
 
 function rosterKeys(athlete: RosterAthlete): string[] {
-  const first = normalize(athlete.firstName)
   const last = normalize(athlete.lastName)
-  return [normalize(`${first} ${last}`), normalize(`${last} ${first}`)]
-}
+  const keys: string[] = []
 
-function firstNameAliasKey(first: string): string | null {
-  const normalized = normalize(first)
-  return FIRST_NAME_ALIAS_GROUP.get(normalized) ?? null
+  // The roster first name plus any alternate names / nicknames.
+  const firstNames = [athlete.firstName, ...(athlete.nicknames ?? [])]
+  for (const raw of firstNames) {
+    const value = normalize(raw)
+    if (!value) continue
+
+    if (value.includes(" ")) {
+      // A full alternate name like "Alex Diachenko" — match it directly and reversed.
+      const parts = value.split(" ")
+      const altFirst = parts[0]
+      const altLast = parts[parts.length - 1]
+      keys.push(value, normalize(`${altLast} ${altFirst}`))
+    } else {
+      // A first-name nickname — pair it with the roster last name.
+      keys.push(normalize(`${value} ${last}`), normalize(`${last} ${value}`))
+    }
+  }
+
+  return keys
 }
 
 export function firstNamesCompatible(resultFirst: string, rosterFirst: string): boolean {
@@ -84,10 +88,6 @@ export function firstNamesCompatible(resultFirst: string, rosterFirst: string): 
   const b = normalize(rosterFirst)
   if (!a || !b) return false
   if (a === b) return true
-
-  const aliasA = firstNameAliasKey(a)
-  const aliasB = firstNameAliasKey(b)
-  if (aliasA && aliasB && aliasA === aliasB) return true
 
   const minLen = 3
   if (a.length >= minLen && b.length >= minLen) {
@@ -107,8 +107,13 @@ function matchFuzzy(
   )
   if (candidates.length === 0) return null
 
-  const matches = candidates.filter((athlete) =>
-    firstNamesCompatible(parsed.first, athlete.firstName)
+  const matches = candidates.filter(
+    (athlete) =>
+      firstNamesCompatible(parsed.first, athlete.firstName) ||
+      (athlete.nicknames ?? []).some((nick) =>
+        // Nicknames may be a bare first name or a full "First Last" string.
+        firstNamesCompatible(parsed.first, nick.trim().split(/\s+/)[0] ?? nick)
+      )
   )
   if (matches.length === 1) return matches[0].id
   return null

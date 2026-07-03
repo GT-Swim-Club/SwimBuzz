@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
+import { normalizeNicknames } from "@/lib/athlete-match"
 import { Gender } from "@prisma/client"
 
 export async function GET() {
@@ -32,6 +33,7 @@ export async function POST(req: Request) {
   const firstName = String(body.firstName ?? "").trim()
   const lastName = String(body.lastName ?? "").trim()
   const email = String(body.email ?? "").trim().toLowerCase()
+  const nicknames = normalizeNicknames(body.nicknames)
   const gender = body.gender === "F" ? Gender.F : Gender.M
   const seasons = Array.isArray(body.seasons)
     ? body.seasons.map((y: unknown) => parseInt(String(y), 10)).filter(Number.isFinite)
@@ -88,6 +90,7 @@ export async function POST(req: Request) {
         userId: user.id,
         firstName,
         lastName,
+        nicknames,
         gender,
         seasons,
         ...(swimCloudId !== null ? { swimCloudId } : {}),

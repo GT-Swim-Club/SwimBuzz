@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { parseTime } from "@/lib/utils"
+import { parseTime, formatRelativeTime, formatDateTime } from "@/lib/utils"
 import SetSwimCloudIdForm from "./SetSwimCloudIdForm"
 
 const EVENTS = [
@@ -12,15 +12,17 @@ const EVENTS = [
   "200 IM", "400 IM",
 ]
 
-export default function AddSwimForm({ athleteId, swimCloudId }: { 
+export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: { 
   athleteId: string
   swimCloudId: number | null 
+  timesSyncedAt: string | null
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [scrapeStatus, setScrapeStatus] = useState<"idle" | "loading" | "done" | "error">("idle")
   const [scrapeCount, setScrapeCount] = useState(0)
+  const [lastSynced, setLastSynced] = useState<string | null>(timesSyncedAt)
   const [form, setForm] = useState({
     event: "50 Free",
     time: "",
@@ -81,6 +83,7 @@ export default function AddSwimForm({ athleteId, swimCloudId }: {
     if (res.ok) {
       setScrapeCount(data.imported)
       setScrapeStatus("done")
+      if (data.timesSyncedAt) setLastSynced(data.timesSyncedAt)
       router.refresh()
     } else {
       setScrapeStatus("error")
@@ -108,6 +111,11 @@ export default function AddSwimForm({ athleteId, swimCloudId }: {
             )}
             {scrapeStatus === "error" && (
               <span className="text-xs text-red-500">Import failed — is the scraper running?</span>
+            )}
+            {scrapeStatus !== "done" && (
+              <span className="text-xs text-gray-400 dark:text-zinc-500" title={lastSynced ? formatDateTime(lastSynced) : undefined}>
+                {lastSynced ? `Last imported ${formatRelativeTime(lastSynced)}` : "Never imported"}
+              </span>
             )}
           </div>
         ) : (

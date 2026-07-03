@@ -13,6 +13,7 @@ export type ParsedMeetResult = {
   event: string
   time: string
   course: string
+  tags?: string
 }
 
 export type MeetImportSummary = {
@@ -41,7 +42,7 @@ export async function importMeetResults({
 }): Promise<MeetImportSummary> {
   const roster = await prisma.athlete.findMany({
     where: { seasons: { has: year } },
-    select: { id: true, firstName: true, lastName: true },
+    select: { id: true, firstName: true, lastName: true, nicknames: true },
   })
 
   const lookup = buildAthleteLookup(roster)
@@ -56,6 +57,7 @@ export async function importMeetResults({
     course: ReturnType<typeof parseCourse>
     date: Date
     meet: string
+    tags: string
     source: string
   }[] = []
 
@@ -96,6 +98,7 @@ export async function importMeetResults({
       course,
       date: meetDate,
       meet: meetName,
+      tags: row.tags ?? "",
       source,
     })
   }

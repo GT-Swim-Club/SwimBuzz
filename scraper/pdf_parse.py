@@ -39,6 +39,75 @@ EVENT_WITH_DISTANCE = re.compile(
 
 COURSE_HINT = re.compile(r"\b(SCY|LCM|SCM|short\s+course\s+yards?|long\s+course\s+meters?)\b", re.I)
 
+# Relay event header, e.g. "Event 1 Girls 200 Yard Medley Relay".
+# The distance is the number right before the (optional) course unit + stroke —
+# NOT the event number, which can also be 2 digits (e.g. "Event 19 ... Relay").
+RELAY_HEADER = re.compile(
+    r"\b(\d{2,4})\s+(?:yard|yd|meter|metre|m|scy|lcm|scm)?\s*"
+    r"(medley|freestyle|free)\s+relay\b",
+    re.I,
+)
+
+# Leadoff swimmer of a relay, e.g. "1) Chimidkhorloo, Sarnai 18 2) Mrzyglod, Sabina 22"
+LEADOFF_NAME = re.compile(
+    r"\b1\s*\)\s*"
+    r"([A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
+)
+
+
+MEET_DATE = re.compile(r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b")
+# A redundant date prefix some clubs put in the meet name, e.g. "9-27-25 ".
+MEET_NAME_DATE_PREFIX = re.compile(r"^\d{1,2}-\d{1,2}-\d{2,4}\s+")
+
+
+def _iso_date(mdy: str) -> str | None:
+    match = MEET_DATE.search(mdy)
+    if not match:
+        return None
+    month, day, year = match.groups()
+    return f"{year}-{int(month):02d}-{int(day):02d}"
+
+
+def parse_meet_header(lines: list[str]) -> tuple[str | None, str | None]:
+    """Pull the meet name and date from the Hy-Tek/Meet Manager header.
+
+    Standard layout:
+      line 1: "<Venue> ... HY-TEK's MEET MANAGER ... <time> <M/D/YYYY> Page 1"
+      line 2: "<Meet Name> - <M/D/YYYY>"   (start date; may be a range)
+    """
+    candidates = [l.strip() for l in lines[:8] if l.strip()]
+    meet_name: str | None = None
+    meet_date: str | None = None
+
+    for line in candidates:
+        low = line.lower()
+        if "hy-tek" in low or "meet manager" in low:
+            continue
+        if low.startswith("results") or low.startswith("meet "):
+            continue
+
+        # First plausible title line wins.
+        date_match = MEET_DATE.search(line)
+        if date_match:
+            name = line[: date_match.start()]
+            name = re.sub(r"\s*-\s*$", "", name).strip()
+            name = MEET_NAME_DATE_PREFIX.sub("", name).strip()
+            meet_name = name or line.strip()
+            meet_date = _iso_date(date_match.group(0))
+        else:
+            meet_name = MEET_NAME_DATE_PREFIX.sub("", line).strip() or line.strip()
+        break
+
+    # Fall back to any date in the header (e.g. the Meet Manager print timestamp).
+    if not meet_date:
+        for line in candidates:
+            iso = _iso_date(line)
+            if iso:
+                meet_date = iso
+                break
+
+    return meet_name, meet_date
+
 
 def normalize_stroke(raw: str) -> str | None:
     key = raw.strip().lower()
@@ -240,6 +309,78 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
     return results
 
 
+def _is_split_line(line: str) -> bool:
+    """A relay splits line is only split times — digits, colons, dots, spaces."""
+    if re.search(r"[A-Za-z)]", line):
+        return False
+    return len(extract_times_from_line(line)) >= 2
+
+
+def parse_relay_leadoffs(lines: list[str], course: str) -> list[dict]:
+    """Extract each relay's leadoff swimmer as an individual time.
+
+    Only the leadoff leg counts as an official individual time (later legs use a
+    flying start). Medley relay leadoffs are backstroke; free relay leadoffs are
+    freestyle. Each relay entry appears as a team result line, then the swimmer
+    names ("1) Last, First ..."), then a per-leg splits line whose first
+    value(s) are the leadoff's time."""
+    results: list[dict] = []
+    in_relay = False
+    leg_distance = 0
+    stroke: str | None = None
+    leadoff_name: str | None = None
+
+    for raw in lines:
+        line = raw.strip()
+        if not line:
+            continue
+
+        relay = RELAY_HEADER.search(line)
+        if relay:
+            total = int(relay.group(1))
+            leg_distance = total // 4
+            stroke = "Back" if relay.group(2).lower() == "medley" else "Free"
+            in_relay = True
+            leadoff_name = None
+            continue
+
+        # Any non-relay event header ends the current relay section.
+        if parse_event_from_line(line) and "relay" not in line.lower():
+            in_relay = False
+            leadoff_name = None
+            continue
+
+        if not in_relay:
+            continue
+
+        name_match = LEADOFF_NAME.search(line)
+        if name_match:
+            leadoff_name = name_match.group(1)
+            continue
+
+        if leadoff_name and stroke and leg_distance > 0 and _is_split_line(line):
+            splits = extract_times_from_line(line)
+            # Splits are printed every 50 and are cumulative within each leg, e.g.
+            # a 400 relay's 100 leg shows "<50 split> <100 time>". So the leadoff's
+            # official time is the cumulative value at the end of leg 1 — the
+            # (leg_distance / 50)-th split, not the first 50 or a sum of splits.
+            values_per_leg = max(1, leg_distance // 50)
+            if len(splits) >= values_per_leg:
+                time_value = splits[values_per_leg - 1]
+                results.append(
+                    {
+                        "name": leadoff_name,
+                        "event": f"{leg_distance} {stroke}",
+                        "time": time_value,
+                        "course": course,
+                        "tags": "R",
+                    }
+                )
+            leadoff_name = None
+
+    return results
+
+
 def group_words_into_lines(words: list[dict], y_tol: float = 3.0) -> list[str]:
     """Reconstruct text lines from positioned words, one visual row per line."""
     if not words:
@@ -297,15 +438,24 @@ def extract_page_lines(page: Any) -> list[str]:
 
 def parse_meet_pdf_bytes(content: bytes, default_course: str = "SCY") -> dict[str, Any]:
     all_text: list[str] = []
+    header_lines: list[str] = []
 
     with pdfplumber.open(io.BytesIO(content)) as pdf:
-        for page in pdf.pages:
+        for page_index, page in enumerate(pdf.pages):
+            if page_index == 0:
+                # The banner/title sit above the two-column body, so the plain
+                # top-to-bottom text read gives clean header lines.
+                header_lines = (page.extract_text() or "").split("\n")
             all_text.extend(extract_page_lines(page))
 
     course = detect_course("\n".join(all_text), default_course)
+    meet_name, meet_date = parse_meet_header(header_lines or all_text)
     results = parse_text_lines(all_text, course)
+    results.extend(parse_relay_leadoffs(all_text, course))
 
     return {
         "course": course,
+        "meet_name": meet_name,
+        "meet_date": meet_date,
         "results": dedupe_results(results),
     }

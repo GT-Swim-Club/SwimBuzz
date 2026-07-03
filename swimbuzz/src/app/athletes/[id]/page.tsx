@@ -6,6 +6,8 @@ import { compareSwimPb } from "@/lib/swim-parse"
 import AddSwimForm from "./AddSwimForm"
 import PersonalBestsGrid from "./PersonalBestsGrid"
 import SwimHistory from "./SwimHistory"
+import EditNicknamesForm from "./EditNicknamesForm"
+import AthleteActions from "./AthleteActions"
 
 export default async function AthletePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params  // 👈 await it
@@ -52,15 +54,29 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
         <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center font-medium text-indigo-700">
           {athlete.firstName[0]}{athlete.lastName[0]}
         </div>
-        <div>
+        <div className="flex-1 min-w-0">
           <h1 className="text-xl font-medium">{athlete.firstName} {athlete.lastName}</h1>
           <p className="text-sm text-gray-500 dark:text-zinc-400">{athlete.user?.email}</p>
+          {athlete.nicknames.length > 0 && (
+            <p className="text-xs text-gray-400 dark:text-zinc-500 mt-0.5">
+              Also known as: {athlete.nicknames.join(", ")}
+            </p>
+          )}
           {athlete.swimCloudId && (
             <p className="text-xs text-gray-400 dark:text-zinc-500 mt-0.5">
               SwimCloud ID: {athlete.swimCloudId}
             </p>
           )}
         </div>
+        {isCoach && (
+          <AthleteActions
+            athleteId={athlete.id}
+            firstName={athlete.firstName}
+            lastName={athlete.lastName}
+            email={athlete.user?.email ?? ""}
+            swimCloudId={athlete.swimCloudId ?? null}
+          />
+        )}
       </div>
 
       {/* PB grid */}
@@ -79,7 +95,25 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
         <SwimHistory swims={historySwims} isCoach={isCoach} />
       </section>
       
-      {isCoach && <AddSwimForm athleteId={athlete.id} swimCloudId={athlete.swimCloudId ?? null} />}
+      {isCoach && (
+        <section>
+          <h2 className="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide mb-3">
+            Alternate names
+          </h2>
+          <EditNicknamesForm
+            athleteId={athlete.id}
+            initialNicknames={athlete.nicknames}
+          />
+        </section>
+      )}
+
+      {isCoach && (
+        <AddSwimForm
+          athleteId={athlete.id}
+          swimCloudId={athlete.swimCloudId ?? null}
+          timesSyncedAt={athlete.timesSyncedAt?.toISOString() ?? null}
+        />
+      )}
     </main>
   )
 }

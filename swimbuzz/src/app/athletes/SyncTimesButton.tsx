@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
+import { formatRelativeTime, formatDateTime } from "@/lib/utils"
 
 type RosterAthlete = {
   id: string
@@ -10,12 +11,15 @@ type RosterAthlete = {
   lastName: string
   gender: "M" | "F"
   swimCloudId: number | null
+  timesSyncedAt: string | null
 }
 
 type SyncResult = {
   imported: number
   athletes: number
   athletesSynced: number
+  syncedAthleteIds: string[]
+  timesSyncedAt: string | null
   failed: string[]
 }
 
@@ -113,14 +117,22 @@ export default function SyncTimesButton() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error ?? "Sync failed")
+        setError(data.error ?? "Import failed")
         return
       }
 
       setResult(data)
+      if (data.timesSyncedAt && Array.isArray(data.syncedAthleteIds)) {
+        const syncedIds = new Set<string>(data.syncedAthleteIds)
+        setRoster((prev) =>
+          prev.map((a) =>
+            syncedIds.has(a.id) ? { ...a, timesSyncedAt: data.timesSyncedAt } : a
+          )
+        )
+      }
       router.refresh()
     } catch {
-      setError("Sync failed — check that the dev server and scraper are running")
+      setError("Import failed — check that the dev server and scraper are running")
     } finally {
       setLoading(false)
       setProgress(null)
@@ -132,10 +144,10 @@ export default function SyncTimesButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 text-sm px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
       >
-        <Image src="/swimcloud.webp" alt="" width={24} height={24} className="shrink-0" />
-        Sync times
+        <Image src="/swimcloud.webp" alt="" width={28} height={28} className="shrink-0" />
+        Import Times
       </button>
 
       {open && (
@@ -153,7 +165,7 @@ export default function SyncTimesButton() {
           >
             <div className="shrink-0 px-5 pt-5 pb-3">
               <h2 className="text-lg font-medium text-gray-900 dark:text-zinc-100">
-                Sync times from SwimCloud
+                Import times from SwimCloud
               </h2>
               <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">
                 Select athletes on the {gender === "F" ? "women's" : "men's"} {year} roster.
@@ -219,8 +231,14 @@ export default function SyncTimesButton() {
                                 {disabled ? (
                                   <p className="text-xs text-gray-400 dark:text-zinc-500">No SwimCloud ID</p>
                                 ) : (
-                                  <p className="text-xs text-gray-400 dark:text-zinc-500">
-                                    ID {athlete.swimCloudId}
+                                  <p
+                                    className="text-xs text-gray-400 dark:text-zinc-500"
+                                    title={athlete.timesSyncedAt ? formatDateTime(athlete.timesSyncedAt) : undefined}
+                                  >
+                                    ID {athlete.swimCloudId} ·{" "}
+                                    {athlete.timesSyncedAt
+                                      ? `imported ${formatRelativeTime(athlete.timesSyncedAt)}`
+                                      : "never imported"}
                                   </p>
                                 )}
                               </div>
@@ -269,7 +287,7 @@ export default function SyncTimesButton() {
                   disabled={loading || loadingRoster || selected.size === 0}
                   className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
                 >
-                  {loading ? "Syncing…" : `Import (${selected.size})`}
+                  {loading ? "Importing…" : `Import (${selected.size})`}
                 </button>
               </div>
             </form>
