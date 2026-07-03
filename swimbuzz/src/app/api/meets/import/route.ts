@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { importMeetResults, resolveMeetDate } from "@/lib/meet-import"
 import { fetchScraper, SCRAPER_URL } from "@/lib/scraper-fetch"
+import { prisma } from "@/lib/prisma"
 import { FormData as UndiciFormData } from "undici"
 
 function isUpload(value: unknown): value is Blob {
@@ -28,6 +29,7 @@ export async function POST(req: Request) {
   const file = formData.get("file")
   const courseDefault = String(formData.get("course") ?? "SCY").trim().toUpperCase()
   const year = parseInt(String(formData.get("year") ?? ""), 10)
+  const meetId = String(formData.get("meetId") ?? "").trim() || null
 
   if (!isUpload(file)) {
     return NextResponse.json({ error: "PDF file is required" }, { status: 400 })
@@ -89,16 +91,26 @@ export async function POST(req: Request) {
     results: ParsedResult[]
   }
 
-  const meetName = (parsed.meet_name ?? "").trim() || fileName.replace(/\.pdf$/i, "")
-  const meetDate = resolveMeetDate(parsed.meet_date) ?? new Date()
+  // When importing into an existing meet dashboard, anchor to that meet's own
+  // name/date/season so results link to it consistently.
+  const meet = meetId
+    ? await prisma.meet.findUnique({ where: { id: meetId } })
+    : null
+
+  const meetName =
+    meet?.name ?? ((parsed.meet_name ?? "").trim() || fileName.replace(/\.pdf$/i, ""))
+  const meetDate =
+    meet?.startDate ?? resolveMeetDate(parsed.meet_date) ?? new Date()
+  const seasonYear = meet?.season ?? year
 
   const summary = await importMeetResults({
-    year,
+    year: seasonYear,
     meetName,
     meetDate,
     results: parsed.results ?? [],
     source: "meet_pdf",
     courseDefault: parsed.course || courseDefault,
+    meetId: meet?.id ?? null,
   })
 
   return NextResponse.json({

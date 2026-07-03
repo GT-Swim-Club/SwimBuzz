@@ -25,6 +25,11 @@ STROKE_ALIASES: dict[str, str] = {
 TIME_PATTERN = re.compile(r"^\d{1,2}:\d{2}\.\d{2}$|^\d{1,3}\.\d{2}$")
 INVALID_TIMES = {"NT", "NS", "DQ", "DFS", "DNF", "SCR"}
 
+# A result carrying one of these markers (e.g. "--- Hancu, Andrei 20 GTSC-GA DQ
+# 26.12") is not an official time — Hy-Tek still prints the swum time next to the
+# marker, so we must skip the whole row instead of picking that trailing time up.
+SCRATCH_MARKER = re.compile(r"(?<![A-Za-z])(?:DQ|DFS|DNF|DNS|SCR)(?![A-Za-z])")
+
 EVENT_LINE = re.compile(
     r"(?:(\d{2,4})\s*(?:yard|meter|scy|lcm|scm)?\s*)?"
     r"(freestyle|free|backstroke|back|breaststroke|breast|butterfly|fly|individual\s+medley|im)\b",
@@ -253,6 +258,10 @@ def parse_table_rows(table: list[list[Any]], current_event: str | None, course: 
         if not name or name.lower() in {"name", "swimmer"}:
             continue
 
+        row_text = " ".join(str(c or "") for c in raw_row)
+        if SCRATCH_MARKER.search(row_text):
+            continue
+
         event = current_event
         if event_idx is not None and event_idx < len(raw_row):
             event = parse_event_from_line(str(raw_row[event_idx] or "")) or event
@@ -291,6 +300,10 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
 
         name = parse_name_from_line(stripped)
         if not name:
+            continue
+
+        # Disqualified/scratched swims still print a time; don't import them.
+        if SCRATCH_MARKER.search(stripped):
             continue
 
         time_value = pick_result_time(stripped)

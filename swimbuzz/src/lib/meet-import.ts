@@ -32,6 +32,7 @@ export async function importMeetResults({
   results,
   source,
   courseDefault = "SCY",
+  meetId = null,
 }: {
   year: number
   meetName: string
@@ -39,6 +40,7 @@ export async function importMeetResults({
   results: ParsedMeetResult[]
   source: string
   courseDefault?: string
+  meetId?: string | null
 }): Promise<MeetImportSummary> {
   const roster = await prisma.athlete.findMany({
     where: { seasons: { has: year } },
@@ -57,6 +59,7 @@ export async function importMeetResults({
     course: ReturnType<typeof parseCourse>
     date: Date
     meet: string
+    meetId: string | null
     tags: string
     source: string
   }[] = []
@@ -98,6 +101,7 @@ export async function importMeetResults({
       course,
       date: meetDate,
       meet: meetName,
+      meetId,
       tags: row.tags ?? "",
       source,
     })
@@ -108,6 +112,15 @@ export async function importMeetResults({
     data: swimsToInsert,
     skipDuplicates: true,
   })
+
+  // Link any pre-existing (duplicate) swims from this meet so re-imports still
+  // attach to the meet dashboard.
+  if (meetId) {
+    await prisma.swim.updateMany({
+      where: { meetId: null, meet: meetName, date: meetDate },
+      data: { meetId },
+    })
+  }
 
   console.log(
     `\n--- Meet import (${source}): ${meetName} (${matched.length} matched, ${unmatched.length} unmatched) ---`

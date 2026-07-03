@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { importMeetResults, resolveMeetDate } from "@/lib/meet-import"
 import { fetchScraper, SCRAPER_URL } from "@/lib/scraper-fetch"
+import { prisma } from "@/lib/prisma"
 
 export const runtime = "nodejs"
 export const maxDuration = 3600
@@ -20,9 +21,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
-  const { url, year } = await req.json()
+  const { url, year, meetId: meetIdRaw } = await req.json()
   const meetUrl = String(url ?? "").trim()
   const seasonYear = parseInt(String(year ?? ""), 10)
+  const meetId = String(meetIdRaw ?? "").trim() || null
 
   if (!meetUrl) {
     return NextResponse.json({ error: "SwimPhone meet URL is required" }, { status: 400 })
@@ -68,7 +70,11 @@ export async function POST(req: Request) {
     captcha_limited?: boolean
   }
 
-  const meetName = scraped.meet_name?.trim()
+  const meet = meetId
+    ? await prisma.meet.findUnique({ where: { id: meetId } })
+    : null
+
+  const meetName = meet?.name ?? scraped.meet_name?.trim()
   if (!meetName) {
     return NextResponse.json(
       { error: "Could not read meet name from SwimPhone page" },
@@ -76,7 +82,7 @@ export async function POST(req: Request) {
     )
   }
 
-  const meetDate = resolveMeetDate(scraped.meet_date)
+  const meetDate = meet?.startDate ?? resolveMeetDate(scraped.meet_date)
   if (!meetDate) {
     return NextResponse.json(
       { error: "Could not read meet date from SwimPhone page" },
@@ -85,18 +91,19 @@ export async function POST(req: Request) {
   }
 
   const summary = await importMeetResults({
-    year: seasonYear,
+    year: meet?.season ?? seasonYear,
     meetName,
     meetDate,
     results: scraped.results ?? [],
     source: "swimphone",
     courseDefault: scraped.course ?? "SCY",
+    meetId: meet?.id ?? null,
   })
 
   return NextResponse.json({
     ...summary,
     meetName,
-    meetDate: scraped.meet_date,
+    meetDate: (meet?.startDate ?? meetDate).toISOString?.() ?? scraped.meet_date,
     captchaLimited: scraped.captcha_limited ?? false,
   })
 }

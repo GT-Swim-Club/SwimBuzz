@@ -13,12 +13,18 @@ type ImportResult = {
   meetDate?: string
 }
 
-export default function ImportMeetButton() {
+export default function ImportMeetButton({
+  meetId,
+  seasonYear,
+}: {
+  meetId?: string
+  seasonYear?: string
+} = {}) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const year = searchParams.get("year") ?? String(new Date().getFullYear())
+  const year = seasonYear ?? searchParams.get("year") ?? String(new Date().getFullYear())
 
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -52,6 +58,7 @@ export default function ImportMeetButton() {
     body.append("file", selectedFile, selectedFile.name)
     body.append("course", form.course)
     body.append("year", year)
+    if (meetId) body.append("meetId", meetId)
 
     try {
       const res = await fetch("/api/meets/import", { method: "POST", body })

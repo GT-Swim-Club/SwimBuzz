@@ -8,6 +8,7 @@ export type SwimInsert = {
   course: Course
   date: Date | string
   meet?: string | null
+  meetId?: string | null
   tags?: string | null
   source: string
 }
@@ -15,6 +16,7 @@ export type SwimInsert = {
 export type SwimInsertWithOccurrence = Omit<SwimInsert, "date" | "meet" | "tags"> & {
   date: Date
   meet: string
+  meetId: string | null
   tags: string
   occurrence: number
 }
@@ -66,6 +68,7 @@ export function normalizeSwimForInsert(swim: SwimInsert): Omit<SwimInsertWithOcc
     timeMs: Math.round(swim.timeMs),
     date: normalizeSwimDate(swim.date),
     meet: swim.meet ?? "",
+    meetId: swim.meetId ?? null,
     tags: swim.tags ?? "",
   }
 }
