@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { formatSwimDate } from "@/lib/utils"
 
 type ImportResult = {
   imported: number
@@ -179,12 +180,7 @@ export default function ImportMeetButton({
                       <strong>{result.meetName}</strong>
                       {result.meetDate && (
                         <span className="text-gray-500 dark:text-zinc-400">
-                          {" "}— {new Date(result.meetDate).toLocaleDateString(undefined, {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                            timeZone: "UTC",
-                          })}
+                          {" "}— {formatSwimDate(result.meetDate)}
                         </span>
                       )}
                     </p>

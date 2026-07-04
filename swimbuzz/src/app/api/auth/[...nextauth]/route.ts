@@ -16,6 +16,13 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    redirect({ url, baseUrl }) {
+      // Honor explicit same-origin callback URLs (sign-in → /athletes, sign-out
+      // → /). Anything off-origin falls back to the site root.
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      if (new URL(url).origin === baseUrl) return url
+      return baseUrl
+    },
     jwt({ token, user }) {
       if (user) token.role = user.role
       return token

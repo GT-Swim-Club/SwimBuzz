@@ -20,6 +20,14 @@ const LEG_ORDER: Record<string, string[]> = {
   "400 Medley Relay": ["back", "breast", "fly", "free"],
 }
 
+const TIME_WINDOWS: { label: string; days: number | null }[] = [
+  { label: "All time", days: null },
+  { label: "Last 6 months", days: 180 },
+  { label: "Last 1 year", days: 365 },
+  { label: "Last 2 years", days: 730 },
+  { label: "Last 3 years", days: 1095 },
+]
+
 type Leg = {
   leg?: string
   name: string
@@ -43,6 +51,7 @@ export default function RelayBuilderPage() {
   const [result, setResult] = useState<RelayResult | null>(null)
   const [error, setError] = useState("")
   const [gender, setGender] = useState("M")
+  const [withinDays, setWithinDays] = useState<number | null>(null)
 
   async function handleBuild() {
     setLoading(true)
@@ -52,7 +61,7 @@ export default function RelayBuilderPage() {
     const res = await fetch("/api/relays/optimal", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ relayEvent: event, course, gender }),
+      body: JSON.stringify({ relayEvent: event, course, gender, withinDays }),
     })
 
     const data = await res.json()
@@ -105,6 +114,18 @@ export default function RelayBuilderPage() {
             <option>SCY</option>
             <option>LCM</option>
             <option>SCM</option>
+          </select>
+        </div>
+        <div>
+          <label className="text-xs text-gray-500 dark:text-zinc-400 mb-1 block">Times from</label>
+          <select
+            value={withinDays ?? ""}
+            onChange={e => setWithinDays(e.target.value === "" ? null : Number(e.target.value))}
+            className="border rounded-lg px-3 py-2 text-sm"
+          >
+            {TIME_WINDOWS.map(w => (
+              <option key={w.label} value={w.days ?? ""}>{w.label}</option>
+            ))}
           </select>
         </div>
         <button

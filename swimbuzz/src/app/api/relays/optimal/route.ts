@@ -24,11 +24,19 @@ export async function POST(req: Request) {
     const session = await getServerSession(authOptions)
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const { relayEvent, course = "SCY", lockedSwimmerIds = [] , gender = "M" } = await req.json()
+    const { relayEvent, course = "SCY", lockedSwimmerIds = [] , gender = "M", withinDays = null } = await req.json()
     // relayEvent: "400 Free Relay" | "200 Free Relay" | "800 Free Relay" | "400 Medley Relay" | "200 Medley Relay"
 
     const isMedley = relayEvent.includes("Medley")
     const courseEnum = course as Course
+
+    // Optional recency filter: only consider swims from the last N days.
+    const days = Number(withinDays)
+    const sinceDate =
+      Number.isFinite(days) && days > 0
+        ? new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+        : null
+    const dateFilter = sinceDate ? { date: { gte: sinceDate } } : {}
 
     // get athlete IDs filtered by gender first
     const eligibleAthletes = await prisma.athlete.findMany({
@@ -61,7 +69,7 @@ export async function POST(req: Request) {
       
         const menBests = await prisma.swim.groupBy({
           by: ["athleteId"],
-          where: { event: eventName, course: courseEnum, athleteId: { in: menIds } },
+          where: { event: eventName, course: courseEnum, athleteId: { in: menIds }, ...dateFilter },
           _min: { timeMs: true },
           orderBy: { _min: { timeMs: "asc" } },
           take: 2,
@@ -69,7 +77,7 @@ export async function POST(req: Request) {
       
         const womenBests = await prisma.swim.groupBy({
           by: ["athleteId"],
-          where: { event: eventName, course: courseEnum, athleteId: { in: womenIds } },
+          where: { event: eventName, course: courseEnum, athleteId: { in: womenIds }, ...dateFilter },
           _min: { timeMs: true },
           orderBy: { _min: { timeMs: "asc" } },
           take: 2,
@@ -103,6 +111,7 @@ export async function POST(req: Request) {
             event: eventName,
             course: courseEnum,
             athleteId: { in: eligibleIds },  // 👈
+            ...dateFilter,
             },
             _min: { timeMs: true },
             orderBy: { _min: { timeMs: "asc" } },
@@ -166,7 +175,7 @@ export async function POST(req: Request) {
 
       const bests = await prisma.swim.groupBy({
         by: ["athleteId"],
-        where: { event: { in: eventNames }, course: courseEnum, athleteId: { in: eligibleIds } },
+        where: { event: { in: eventNames }, course: courseEnum, athleteId: { in: eligibleIds }, ...dateFilter },
         _min: { timeMs: true },
         orderBy: { _min: { timeMs: "asc" } },
         take: 10,

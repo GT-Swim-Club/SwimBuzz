@@ -47,6 +47,7 @@ class SwimPhoneEvent:
     label: str
     results_url: str | None
     is_relay: bool = False
+    date: str | None = None
 
 
 # Stroke labels as they appear in the relay splits swimmer table
@@ -111,19 +112,17 @@ def _parse_meet_date(text: str) -> str | None:
     if iso:
         return f"{iso.group(1)}-{iso.group(2)}-{iso.group(3)}"
 
-    long = re.search(
-        r"\b(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),\s+"
-        r"([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})\b",
-        text,
-    )
-    if long:
-        try:
-            dt = datetime.strptime(
-                f"{long.group(1)} {long.group(2)} {long.group(3)}", "%B %d %Y"
-            )
-            return dt.strftime("%Y-%m-%d")
-        except ValueError:
-            pass
+    # "Friday, April 10, 2026" or abbreviated "Sat, Feb 28, 2026" — an optional
+    # weekday prefix followed by a month name (full or abbreviated), day, year.
+    named = re.search(r"\b([A-Za-z]{3,9})\.?\s+(\d{1,2}),\s+(\d{4})\b", text)
+    if named:
+        month, day, year = named.groups()
+        for fmt in ("%B", "%b"):
+            try:
+                dt = datetime.strptime(f"{month} {day} {year}", f"{fmt} %d %Y")
+                return dt.strftime("%Y-%m-%d")
+            except ValueError:
+                continue
 
     short = re.search(r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b", text)
     if short:
@@ -165,53 +164,95 @@ def parse_meet_metadata(html: str) -> tuple[str, str, str]:
     return meet_name, meet_date, meet_default
 
 
+def _is_event_table(table) -> bool:
+    heads = {th.get_text(strip=True).lower() for th in table.find_all("th")}
+    return "event" in heads and "sex" in heads
+
+
+def _parse_session_dates(soup) -> list[str]:
+    """Ordered distinct meet days from the session table on the event order page.
+
+    The event order page opens with a session table like
+    ``Friday, April 10, 2026 | Session 1 - Friday Prelims`` for each session.
+    Multi-day meets then list one event table per day, so the Nth event table
+    lines up with the Nth distinct date here."""
+    dates: list[str] = []
+    for table in soup.find_all("table"):
+        if _is_event_table(table):
+            continue
+        for row in table.find_all("tr"):
+            cells = row.find_all(["td", "th"])
+            if not cells:
+                continue
+            parsed = _parse_meet_date(cells[0].get_text(" ", strip=True))
+            if parsed and parsed not in dates:
+                dates.append(parsed)
+    return dates
+
+
 def parse_event_order(html: str, smid: int, meet_default: str) -> list[SwimPhoneEvent]:
     soup = BeautifulSoup(html, "html.parser")
     events: list[SwimPhoneEvent] = []
 
-    for row in soup.select("table tbody tr"):
-        cells = row.find_all("td")
-        if len(cells) < 5:
-            continue
+    event_tables = [t for t in soup.find_all("table") if _is_event_table(t)]
+    if not event_tables:
+        event_tables = soup.find_all("table")
 
-        event_num_text = cells[0].get_text(strip=True)
-        if not event_num_text.isdigit():
-            continue
+    # Each day gets its own event table; when the count of event tables matches
+    # the distinct session dates, map them positionally so every swim can carry
+    # the actual day it was swum. Otherwise leave dates unset and fall back to
+    # the meet's start date downstream.
+    session_dates = _parse_session_dates(soup)
+    table_dates: dict[int, str] = {}
+    if event_tables and len(event_tables) == len(session_dates):
+        table_dates = {id(t): d for t, d in zip(event_tables, session_dates)}
 
-        gender = cells[1].get_text(strip=True)
-        distance_raw = cells[2].get_text(" ", strip=True)
-        stroke_raw = cells[3].get_text(" ", strip=True)
-        is_relay = "relay" in stroke_raw.lower()
-        stroke = _normalize_stroke(stroke_raw)
-        if not stroke and not is_relay:
-            continue
+    for table in event_tables:
+        table_date = table_dates.get(id(table))
+        for row in table.find_all("tr"):
+            cells = row.find_all("td")
+            if len(cells) < 5:
+                continue
 
-        distance, course = _course_from_distance_token(distance_raw, meet_default)
-        if is_relay:
-            label = f"{distance} {stroke_raw}".strip()
-            stroke = stroke or "Relay"
-        else:
-            label = normalize_event(distance, stroke_raw) or f"{distance} {stroke}"
+            event_num_text = cells[0].get_text(strip=True)
+            if not event_num_text.isdigit():
+                continue
 
-        results_url = None
-        for link in row.select('a[href*="event_results.cfm"]'):
-            href = link.get("href")
-            if href:
-                results_url = urljoin(BASE_URL, href.replace("&amp;", "&"))
-                break
+            gender = cells[1].get_text(strip=True)
+            distance_raw = cells[2].get_text(" ", strip=True)
+            stroke_raw = cells[3].get_text(" ", strip=True)
+            is_relay = "relay" in stroke_raw.lower()
+            stroke = _normalize_stroke(stroke_raw)
+            if not stroke and not is_relay:
+                continue
 
-        events.append(
-            SwimPhoneEvent(
-                event_num=int(event_num_text),
-                gender=gender,
-                distance=distance,
-                stroke=stroke,
-                course=course,
-                label=label,
-                results_url=results_url,
-                is_relay=is_relay,
+            distance, course = _course_from_distance_token(distance_raw, meet_default)
+            if is_relay:
+                label = f"{distance} {stroke_raw}".strip()
+                stroke = stroke or "Relay"
+            else:
+                label = normalize_event(distance, stroke_raw) or f"{distance} {stroke}"
+
+            results_url = None
+            for link in row.select('a[href*="event_results.cfm"]'):
+                href = link.get("href")
+                if href:
+                    results_url = urljoin(BASE_URL, href.replace("&amp;", "&"))
+                    break
+
+            events.append(
+                SwimPhoneEvent(
+                    event_num=int(event_num_text),
+                    gender=gender,
+                    distance=distance,
+                    stroke=stroke,
+                    course=course,
+                    label=label,
+                    results_url=results_url,
+                    is_relay=is_relay,
+                    date=table_date,
+                )
             )
-        )
 
     if not events:
         raise SwimPhoneParseError(
@@ -224,6 +265,35 @@ def parse_event_order(html: str, smid: int, meet_default: str) -> list[SwimPhone
 def _is_captcha_page(html: str, title: str) -> bool:
     lower = f"{title} {html}".lower()
     return "captcha" in lower or "access archived meet" in lower
+
+
+def _swimmer_column_index(headers: list[str]) -> int | None:
+    """Locate the swimmer-name column across SwimPhone's table variants."""
+    for i, h in enumerate(headers):
+        if "swimmer" in h:
+            return i
+    for i, h in enumerate(headers):
+        if h == "name":
+            return i
+    return None
+
+
+def _result_time_indices(headers: list[str]) -> list[int]:
+    """Result-time column indices, most authoritative first (finals, then
+    prelims, then a generic time), always skipping the seed column."""
+    finals: list[int] = []
+    prelims: list[int] = []
+    generic: list[int] = []
+    for i, h in enumerate(headers):
+        if "time" not in h or "seed" in h:
+            continue
+        if "final" in h:
+            finals.append(i)
+        elif "prelim" in h:
+            prelims.append(i)
+        else:
+            generic.append(i)
+    return finals + prelims + generic
 
 
 def parse_event_results_html(html: str, event: SwimPhoneEvent) -> list[dict]:
@@ -261,29 +331,36 @@ def parse_event_results_html(html: str, event: SwimPhoneEvent) -> list[dict]:
     results: list[dict] = []
     for table in soup.find_all("table"):
         headers = [th.get_text(strip=True).lower() for th in table.find_all("th")]
-        if not headers or "swimmer" not in headers:
+        if not headers:
             continue
 
-        swimmer_idx = headers.index("swimmer")
-        time_idx = None
-        for candidate in ("time", "finals", "prelim"):
-            if candidate in headers:
-                time_idx = headers.index(candidate)
-                break
-        if time_idx is None:
+        swimmer_idx = _swimmer_column_index(headers)
+        if swimmer_idx is None:
+            continue
+
+        # Prelims/finals meets label columns "PrelimsTime"/"FinalsTime" rather
+        # than a bare "Time", so match by substring and prefer the finals swim,
+        # falling back to prelims (and never the seed time).
+        time_indices = _result_time_indices(headers)
+        if not time_indices:
             continue
 
         for row in table.find_all("tr"):
             cells = row.find_all("td")
-            if len(cells) <= max(swimmer_idx, time_idx):
+            if len(cells) <= swimmer_idx:
                 continue
 
             name = cells[swimmer_idx].get_text(" ", strip=True)
-            time_raw = cells[time_idx].get_text(" ", strip=True)
-            if not name or not time_raw:
+            if not name:
                 continue
 
-            time_val = parse_time_token(time_raw)
+            time_val = None
+            for ti in time_indices:
+                if ti < len(cells):
+                    parsed = parse_time_token(cells[ti].get_text(" ", strip=True))
+                    if parsed:
+                        time_val = parsed
+                        break
             if not time_val:
                 continue
 
@@ -313,6 +390,51 @@ def parse_relay_split_rids(html: str) -> list[str]:
     return rids
 
 
+def _club_matches(club: str, team_norm: str) -> bool:
+    """True if a results-row club code matches the requested team.
+
+    Tolerates region suffixes so "GTSC" matches "GTSC-GA" and vice versa."""
+    club_norm = club.strip().lower()
+    if not team_norm:
+        return True
+    if club_norm == team_norm:
+        return True
+    return club_norm.split("-")[0] == team_norm.split("-")[0]
+
+
+def parse_team_relay_split_rids(html: str, team: str | None) -> list[str]:
+    """Return relay splits-page ids (rid), optionally filtered to one club.
+
+    A relay results page lists every team's relay entry, each with its own
+    per-relay splits link. Visiting all of them is very slow for large meets
+    (many events x many teams), so when a team code is supplied we only return
+    that club's relays — which is all we can import leadoffs for anyway."""
+    team_norm = (team or "").strip().lower()
+    if not team_norm:
+        return parse_relay_split_rids(html)
+
+    soup = BeautifulSoup(html, "html.parser")
+    rids: list[str] = []
+    seen: set[str] = set()
+    for table in soup.find_all("table"):
+        headers = [th.get_text(strip=True).lower() for th in table.find_all("th")]
+        if "club" not in headers:
+            continue
+        club_i = headers.index("club")
+        for row in table.find_all("tr"):
+            cells = row.find_all("td")
+            if len(cells) <= club_i:
+                continue
+            if not _club_matches(cells[club_i].get_text(strip=True), team_norm):
+                continue
+            for link in row.select('a[href*="splits.cfm"]'):
+                match = re.search(r"[?&]rid=(\d+)", link.get("href", ""))
+                if match and match.group(1) not in seen:
+                    seen.add(match.group(1))
+                    rids.append(match.group(1))
+    return rids
+
+
 def _relay_leadoff_stroke_default(event_label: str) -> str | None:
     """Leadoff stroke implied by the relay type (medley → Back, free → Free)."""
     low = event_label.lower()
@@ -323,17 +445,8 @@ def _relay_leadoff_stroke_default(event_label: str) -> str | None:
     return None
 
 
-def parse_relay_leadoff(html: str, course: str, event_label: str = "") -> dict | None:
-    """Parse a relay splits page into the leadoff swimmer's individual time.
-
-    Only the leadoff leg is an official individual time. The leadoff is the
-    Position 1 swimmer; their time is the cumulative split at total distance / 4.
-    Their stroke comes from the swimmer table when present (medley relays list a
-    stroke per leg); free relays omit the stroke column, so we fall back to the
-    relay type from the event label."""
-    soup = BeautifulSoup(html, "html.parser")
-
-    leadoff_first = leadoff_last = leadoff_stroke = None
+def _parse_leadoff_swimmer(soup: BeautifulSoup) -> tuple[str, str, str | None] | None:
+    """Position-1 (leadoff) swimmer as (first, last, stroke) from a splits page."""
     for table in soup.find_all("table"):
         headers = [th.get_text(strip=True).lower() for th in table.find_all("th")]
         if "position" not in headers or "last name" not in headers:
@@ -348,22 +461,19 @@ def parse_relay_leadoff(html: str, course: str, event_label: str = "") -> dict |
                 continue
             if cells[pos_i].get_text(strip=True) != "1":
                 continue
-            leadoff_first = cells[first_i].get_text(strip=True)
-            leadoff_last = cells[last_i].get_text(strip=True)
+            first = cells[first_i].get_text(strip=True)
+            last = cells[last_i].get_text(strip=True)
+            stroke = None
             if stroke_i is not None and stroke_i < len(cells):
-                leadoff_stroke = cells[stroke_i].get_text(strip=True)
-            break
+                stroke = cells[stroke_i].get_text(strip=True)
+            if first and last:
+                return first, last, stroke
         break
+    return None
 
-    if not leadoff_first or not leadoff_last:
-        return None
 
-    stroke = STROKE_FROM_SPLIT.get((leadoff_stroke or "").lower())
-    if not stroke:
-        stroke = _relay_leadoff_stroke_default(event_label)
-    if not stroke:
-        return None
-
+def _parse_cum_splits(soup: BeautifulSoup) -> dict[int, str]:
+    """Map of distance -> cumulative split text from a relay splits page."""
     splits_table = soup.find("table", id="splitsTable")
     if splits_table is None:
         for table in soup.find_all("table"):
@@ -372,7 +482,7 @@ def parse_relay_leadoff(html: str, course: str, event_label: str = "") -> dict |
                 splits_table = table
                 break
     if splits_table is None:
-        return None
+        return {}
 
     headers = [th.get_text(strip=True).lower() for th in splits_table.find_all("th")]
     dist_i = headers.index("distance")
@@ -387,7 +497,24 @@ def parse_relay_leadoff(html: str, course: str, event_label: str = "") -> dict |
         cum_text = cells[cum_i].get_text(strip=True)
         if dist_text.isdigit():
             dist_to_cum[int(dist_text)] = cum_text
+    return dist_to_cum
 
+
+def parse_relay_leadoff(html: str, course: str, event_label: str = "") -> dict | None:
+    """Leadoff swim from a SINGLE session's splits page.
+
+    Only the leadoff leg is an official individual time: the Position-1 swimmer,
+    timed at the cumulative split at total distance / 4. The page must carry both
+    the relay roster (Position table) and the leadoff split on its own — we never
+    borrow the lineup from another session, since the relay roster/order can
+    change between prelims and finals."""
+    soup = BeautifulSoup(html, "html.parser")
+
+    swimmer = _parse_leadoff_swimmer(soup)
+    if not swimmer:
+        return None
+
+    dist_to_cum = _parse_cum_splits(soup)
     if not dist_to_cum:
         return None
 
@@ -397,8 +524,15 @@ def parse_relay_leadoff(html: str, course: str, event_label: str = "") -> dict |
     if not time_val:
         return None
 
+    stroke = STROKE_FROM_SPLIT.get((swimmer[2] or "").lower())
+    if not stroke:
+        stroke = _relay_leadoff_stroke_default(event_label)
+    if not stroke:
+        return None
+
+    first, last, _ = swimmer
     return {
-        "name": f"{leadoff_last}, {leadoff_first}",
+        "name": f"{last}, {first}",
         "event": f"{leg} {stroke}",
         "time": time_val,
         "course": course,
@@ -412,7 +546,7 @@ async def _fetch_html(client: httpx.AsyncClient, url: str) -> str:
     return response.text
 
 
-async def scrape_swimphone_meet(url: str) -> dict:
+async def scrape_swimphone_meet(url: str, team: str | None = None) -> dict:
     smid = extract_smid(url)
     meet_menu_url = f"{BASE_URL}{MEET_MENU_PATH}?smid={smid}"
     event_order_url = f"{BASE_URL}{EVENT_ORDER_PATH}?smid={smid}"
@@ -433,11 +567,20 @@ async def scrape_swimphone_meet(url: str) -> dict:
         meet_default = meet_default or order_default
 
     events = parse_event_order(order_html, smid, meet_default)
+
+    # The event order page carries the most reliable dates; use its earliest
+    # session day as the meet date when the menu metadata didn't yield one.
+    if not meet_date:
+        event_dates = [e.date for e in events if e.date]
+        if event_dates:
+            meet_date = min(event_dates)
+
     events_with_results = [e for e in events if e.results_url]
     if not events_with_results:
         raise SwimPhoneParseError("No event results are posted for this meet yet.")
 
     all_results: list[dict] = []
+    incomplete_relays: list[str] = []
     captcha = False
 
     async with async_playwright() as p:
@@ -467,21 +610,46 @@ async def scrape_swimphone_meet(url: str) -> dict:
 
             if event.is_relay:
                 # Relay leadoffs are official individual times, but they live on
-                # per-relay splits pages linked from the results page.
-                for rid in parse_relay_split_rids(html):
-                    splits_url = f"{BASE_URL}splits.cfm?smid={smid}&rid={rid}&s=finals"
-                    try:
-                        await page.goto(splits_url, wait_until="domcontentloaded", timeout=60000)
-                        leadoff = parse_relay_leadoff(
-                            await page.content(), event.course, event.label
-                        )
-                    except Exception:
-                        leadoff = None
+                # per-relay splits pages linked from the results page. Only fetch
+                # the requested team's relays — otherwise large meets (many teams
+                # x many relays) spawn hundreds of page loads and never finish.
+                relay_rids = parse_team_relay_split_rids(html, team)
+                relay_leadoff_found = False
+                for rid in relay_rids:
+                    # Try each session's own splits page (finals first) and take
+                    # the first one that has a relay roster + leadoff split. We
+                    # never combine sessions, since the lineup/order can differ
+                    # between prelims and finals.
+                    leadoff = None
+                    for sess in ("finals", "prelims"):
+                        splits_url = f"{BASE_URL}splits.cfm?smid={smid}&rid={rid}&s={sess}"
+                        try:
+                            await page.goto(splits_url, wait_until="domcontentloaded", timeout=60000)
+                            leadoff = parse_relay_leadoff(
+                                await page.content(), event.course, event.label
+                            )
+                        except Exception:
+                            leadoff = None
+                        await asyncio.sleep(0.2)
+                        if leadoff:
+                            break
                     if leadoff:
+                        if event.date:
+                            leadoff["date"] = event.date
                         all_results.append(leadoff)
-                    await asyncio.sleep(0.2)
+                        relay_leadoff_found = True
+                # The team entered this relay but no session had a complete
+                # roster + leadoff split, so its leadoff couldn't be imported.
+                if relay_rids and not relay_leadoff_found:
+                    label = f"{event.gender} {event.label}".strip()
+                    if label not in incomplete_relays:
+                        incomplete_relays.append(label)
             else:
-                all_results.extend(parse_event_results_html(html, event))
+                rows = parse_event_results_html(html, event)
+                if event.date:
+                    for r in rows:
+                        r["date"] = event.date
+                all_results.extend(rows)
 
             if idx + 1 < len(events_with_results):
                 await asyncio.sleep(0.35)
@@ -519,4 +687,5 @@ async def scrape_swimphone_meet(url: str) -> dict:
         "results": deduped,
         "events_scraped": len(events_with_results) if not captcha else None,
         "captcha_limited": captcha,
+        "incomplete_relays": incomplete_relays,
     }

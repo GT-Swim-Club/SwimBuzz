@@ -13,6 +13,8 @@ type ParsedResult = {
   event: string
   time: string
   course: string
+  tags?: string
+  date?: string
 }
 
 export async function POST(req: Request) {
@@ -21,10 +23,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
-  const { url, year, meetId: meetIdRaw } = await req.json()
+  const { url, year, meetId: meetIdRaw, team: teamRaw } = await req.json()
   const meetUrl = String(url ?? "").trim()
   const seasonYear = parseInt(String(year ?? ""), 10)
   const meetId = String(meetIdRaw ?? "").trim() || null
+  const team = String(teamRaw ?? "").trim() || null
 
   if (!meetUrl) {
     return NextResponse.json({ error: "SwimPhone meet URL is required" }, { status: 400 })
@@ -41,7 +44,7 @@ export async function POST(req: Request) {
     scrapeRes = await fetchScraper(`${SCRAPER_URL}/scrape-swimphone-meet`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: meetUrl }),
+      body: JSON.stringify({ url: meetUrl, team }),
     })
   } catch {
     return NextResponse.json(
@@ -68,6 +71,7 @@ export async function POST(req: Request) {
     course?: string
     results?: ParsedResult[]
     captcha_limited?: boolean
+    incomplete_relays?: string[]
   }
 
   const meet = meetId
@@ -105,5 +109,6 @@ export async function POST(req: Request) {
     meetName,
     meetDate: (meet?.startDate ?? meetDate).toISOString?.() ?? scraped.meet_date,
     captchaLimited: scraped.captcha_limited ?? false,
+    incompleteRelays: scraped.incomplete_relays ?? [],
   })
 }

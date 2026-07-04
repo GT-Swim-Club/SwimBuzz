@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { formatSwimDate } from "@/lib/utils"
 
 type ImportResult = {
   imported: number
@@ -12,6 +13,7 @@ type ImportResult = {
   meetName?: string
   meetDate?: string
   captchaLimited?: boolean
+  incompleteRelays?: string[]
 }
 
 export default function ImportSwimPhoneButton({
@@ -30,6 +32,7 @@ export default function ImportSwimPhoneButton({
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<ImportResult | null>(null)
   const [url, setUrl] = useState("")
+  const [team, setTeam] = useState("GTSC")
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -48,7 +51,7 @@ export default function ImportSwimPhoneButton({
       const res = await fetch("/api/meets/import/swimphone", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: trimmed, year, meetId }),
+        body: JSON.stringify({ url: trimmed, year, meetId, team: team.trim() }),
       })
       const data = await res.json()
 
@@ -132,6 +135,21 @@ export default function ImportSwimPhoneButton({
                 </p>
               </div>
 
+              <div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+                  Team code
+                </label>
+                <input
+                  value={team}
+                  onChange={(e) => setTeam(e.target.value)}
+                  placeholder="GTSC"
+                  className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                />
+                <p className="mt-1.5 text-xs text-gray-400 dark:text-zinc-500">
+                  Relay leadoff splits are only fetched for this team&apos;s relays. Leave blank to scan every team (much slower on large meets).
+                </p>
+              </div>
+
               {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
               {result && (
@@ -139,13 +157,22 @@ export default function ImportSwimPhoneButton({
                   <p className="text-gray-900 dark:text-zinc-100">
                     Imported <strong>{result.imported}</strong> new swims from{" "}
                     <strong>{result.meetName ?? "meet"}</strong>
-                    {result.meetDate ? ` (${result.meetDate})` : ""}
+                    {result.meetDate ? ` (${formatSwimDate(result.meetDate)})` : ""}
                     {" "}— {result.parsed} parsed, {result.matched} matched.
                   </p>
                   {result.captchaLimited && (
                     <p className="mt-2 text-amber-700 dark:text-amber-400">
                       SwimPhone blocked some archived results; only partial data was imported.
                     </p>
+                  )}
+                  {result.incompleteRelays && result.incompleteRelays.length > 0 && (
+                    <div className="mt-2 text-amber-700 dark:text-amber-400">
+                      <p>
+                        Relay leadoffs skipped for {result.incompleteRelays.length} event(s) with
+                        incomplete split data:
+                      </p>
+                      <p className="mt-0.5 text-xs">{result.incompleteRelays.join(", ")}</p>
+                    </div>
                   )}
                   {result.unmatchedCount > 0 && (
                     <p className="mt-2 text-gray-600 dark:text-zinc-400">

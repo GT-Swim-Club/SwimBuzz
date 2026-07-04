@@ -36,6 +36,8 @@ model User {
   accounts      Account[]
   sessions      Session[]
   athlete       Athlete?
+  practices     Practice[]
+  comments      PracticeComment[]
 }
 
 model Athlete {
@@ -87,6 +89,50 @@ model Swim {
 
   @@unique([athleteId, event, timeMs, course, date, tags, occurrence])
   @@index([meetId])
+}
+
+model Practice {
+  id          String        @id @default(cuid())
+  title       String
+  date        DateTime?
+  focus       String?
+  createdById String?
+  createdBy   User?              @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  sets        PracticeSet[]
+  comments    PracticeComment[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([date])
+}
+
+model PracticeSet {
+  id         String       @id @default(cuid())
+  practiceId String
+  practice   Practice     @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+  order      Int          @default(0)
+  title      String?
+  content    String
+  notes      String?
+  tags       String[]     @default([])
+  distance   Int?
+  createdAt  DateTime     @default(now())
+
+  @@index([practiceId])
+  @@index([tags])
+}
+
+model PracticeComment {
+  id         String    @id @default(cuid())
+  practiceId String
+  practice   Practice  @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+  authorId   String?
+  author     User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorName String
+  body       String
+  createdAt  DateTime  @default(now())
+
+  @@index([practiceId])
 }
 
 // NextAuth required tables

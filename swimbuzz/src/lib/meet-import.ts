@@ -14,6 +14,7 @@ export type ParsedMeetResult = {
   time: string
   course: string
   tags?: string
+  date?: string
 }
 
 export type MeetImportSummary = {
@@ -73,6 +74,7 @@ export async function importMeetResults({
     course: string
   }[] = []
   let skippedInvalid = 0
+  const swimDates = new Set<string>()
 
   for (const row of results) {
     const athleteId = matchAthleteIdFast(row.name, lookup)
@@ -94,12 +96,17 @@ export async function importMeetResults({
       course,
     })
 
+    // Prefer the actual day the swim happened (scraped per-event) so multi-day
+    // meets date each swim correctly; fall back to the meet's start date.
+    const rowDate = (row.date ? parseMeetDate(row.date) : null) ?? meetDate
+    swimDates.add(rowDate.toISOString())
+
     swims.push({
       athleteId,
       event,
       timeMs,
       course,
-      date: meetDate,
+      date: rowDate,
       meet: meetName,
       meetId,
       tags: row.tags ?? "",
@@ -116,8 +123,13 @@ export async function importMeetResults({
   // Link any pre-existing (duplicate) swims from this meet so re-imports still
   // attach to the meet dashboard.
   if (meetId) {
+    const dates = [...swimDates].map((iso) => new Date(iso))
     await prisma.swim.updateMany({
-      where: { meetId: null, meet: meetName, date: meetDate },
+      where: {
+        meetId: null,
+        meet: meetName,
+        date: { in: dates.length > 0 ? dates : [meetDate] },
+      },
       data: { meetId },
     })
   }

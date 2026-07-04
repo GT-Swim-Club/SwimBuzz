@@ -268,6 +268,7 @@ class BulkTimesRequest(BaseModel):
 
 class SwimPhoneMeetRequest(BaseModel):
     url: str
+    team: str | None = None
 
 
 @app.post("/times/bulk")
@@ -389,7 +390,7 @@ async def parse_meet_pdf(
 async def scrape_swimphone_meet_endpoint(body: SwimPhoneMeetRequest):
     async with _scrape_lock:
         try:
-            parsed = await scrape_swimphone_meet(body.url)
+            parsed = await scrape_swimphone_meet(body.url, team=body.team)
             print(
                 f"\n--- SwimPhone scrape: {parsed.get('meet_name')} "
                 f"({len(parsed.get('results', []))} swims) ---\n"

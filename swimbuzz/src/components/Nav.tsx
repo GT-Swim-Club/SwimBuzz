@@ -15,6 +15,7 @@ export default async function Nav() {
         <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-zinc-400">
           <Link href="/athletes" className="hover:text-gray-900 dark:text-zinc-100 transition-colors">Roster</Link>
           <Link href="/meets" className="hover:text-gray-900 dark:text-zinc-100 transition-colors">Meets</Link>
+          <Link href="/practices" className="hover:text-gray-900 dark:text-zinc-100 transition-colors">Practices</Link>
           <Link href="/relays" className="hover:text-gray-900 dark:text-zinc-100 transition-colors">Relays</Link>
           {isCoach && (
             <Link href="/admin" className="hover:text-gray-900 dark:text-zinc-100 transition-colors">Admin</Link>
@@ -27,14 +28,14 @@ export default async function Nav() {
           <>
             <span className="text-xs text-gray-400">{session.user.name}</span>
             <Link
-              href="/api/auth/signout"
+              href="/api/auth/signout?callbackUrl=/"
               className="text-xs text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:text-zinc-100 transition-colors"
             >
               Sign out
             </Link>
           </>
         ) : (
-          <Link href="/api/auth/signin" className="text-xs text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:text-zinc-100">
+          <Link href="/api/auth/signin?callbackUrl=/athletes" className="text-xs text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:text-zinc-100">
             Sign in
           </Link>
         )}
