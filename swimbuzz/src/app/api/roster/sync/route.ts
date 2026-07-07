@@ -4,18 +4,24 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { Gender } from "@prisma/client"
 import { fetchScraper, SCRAPER_URL } from "@/lib/scraper-fetch"
+import { parseSeason, seasonEndYear } from "@/lib/season"
 const TEAM_ID = process.env.SWIMCLOUD_TEAM_ID ?? "10004130"
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
-  if (!session || !["COACH", "MEET_DIRECTOR"].includes(session.user.role)) {
+  if (!session || !["COACH", "EXEC"].includes(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
-  const { year, gender } = await req.json()
+  const { season: seasonRaw, year, gender } = await req.json()
+  const season = parseSeason(seasonRaw ?? year)
+  if (!season) {
+    return NextResponse.json({ error: "Season is required (e.g. 2025-2026)" }, { status: 400 })
+  }
 
+  const swimCloudYear = seasonEndYear(season)
   const res = await fetchScraper(
-    `${SCRAPER_URL}/roster?team_id=${TEAM_ID}&year=${year}&gender=${gender}`
+    `${SCRAPER_URL}/roster?team_id=${TEAM_ID}&year=${swimCloudYear}&gender=${gender}`
   )
   if (!res.ok) {
     return NextResponse.json({ error: "Scraper failed" }, { status: 502 })
@@ -53,16 +59,16 @@ export async function POST(req: Request) {
               lastName,
               swimCloudId,
               gender: gender === "M" ? Gender.M : Gender.F,
-              seasons: [year],
+              seasons: [season],
             },
           })
           created++
         } else {
-          // add this year to seasons if not already there
-          if (!athlete.seasons.includes(year)) {
+          // add this season to roster if not already there
+          if (!athlete.seasons.includes(season)) {
             await prisma.athlete.update({
               where: { id: athlete.id },
-              data: { seasons: { push: year } },
+              data: { seasons: { push: season } },
             })
           }
           skipped++

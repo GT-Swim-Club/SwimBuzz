@@ -4,38 +4,69 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
-import { formatDateRange, formatTime } from "@/lib/utils"
-import { compareSwimEvents } from "@/lib/swim-parse"
+import { formatDateRange } from "@/lib/utils"
+import { Fragment } from "react"
 import ImportMeetButton from "@/app/athletes/ImportMeetButton"
-import ImportSwimPhoneButton from "@/app/athletes/ImportSwimPhoneButton"
+import ImportMeetResourcesButton from "./ImportMeetResourcesButton"
+import AddTravelInfoButton from "./AddTravelInfoButton"
 import MeetActions from "./MeetActions"
+import AddMeetSwimButton from "./AddMeetSwimButton"
+import { AddMeetRelayButton } from "./MeetRelayEditor"
+import EventOrderButton from "./EventOrderButton"
+import MeetSheetSummarySection from "./MeetSheetSummarySection"
 import type { MeetFormState } from "../MeetFields"
+import { isEventOrder } from "@/lib/meet-event-order"
+import { isSheetSummary, mergeMeetResultEntries, swimsToMeetResults, isResultStatusesSummary } from "@/lib/meet-sheet-summary"
+import { isRelayResultsSummary } from "@/lib/relay-results"
+import { Gender } from "@prisma/client"
+import MeetResourceIcon, { type MeetResourceKind } from "@/components/MeetResourceIcon"
+import { type TravelInfoKind } from "@/components/TravelInfoIcon"
+import TravelInfoButtons, { type TravelInfoItem } from "./TravelInfoButtons"
 
 function toDateInput(d: Date | null | undefined): string {
   if (!d) return ""
   return new Date(d).toISOString().slice(0, 10)
 }
 
-const RESOURCE_LINKS: { key: keyof MeetLinks; label: string }[] = [
-  { key: "packetUrl", label: "Meet packet" },
-  { key: "psychSheetUrl", label: "Psych sheet" },
-  { key: "heatSheetUrl", label: "Heat sheet" },
-  { key: "resultsUrl", label: "Results" },
+const RESOURCE_LINKS: { key: keyof MeetLinks; label: string; icon: MeetResourceKind }[] = [
+  { key: "packetUrl", label: "Meet Packet", icon: "packet" },
+  { key: "entriesSheetUrl", label: "Entries", icon: "entries" },
+  { key: "psychSheetUrl", label: "Psych Sheet", icon: "psych" },
+  { key: "heatSheetUrl", label: "Heat Sheet", icon: "heat" },
+  { key: "resultsUrl", label: "Results", icon: "results" },
+  { key: "liveStreamUrl", label: "Live Stream", icon: "liveStream" },
 ]
 
 type MeetLinks = {
   packetUrl: string | null
   psychSheetUrl: string | null
   heatSheetUrl: string | null
+  entriesSheetUrl: string | null
   resultsUrl: string | null
+  liveStreamUrl: string | null
 }
+
+const TRAVEL_LINKS: { key: "rideSignUpsUrl" | "roomsUrl"; label: string; icon: TravelInfoKind }[] = [
+  { key: "rideSignUpsUrl", label: "Ride Sign-Ups", icon: "rideSignUps" },
+  { key: "roomsUrl", label: "Rooms", icon: "rooms" },
+]
+
+const TRAVEL_TEXT_SECTIONS: {
+  key: "hotel" | "packingList" | "itinerary"
+  label: string
+  icon: TravelInfoKind
+}[] = [
+  { key: "hotel", label: "Hotel", icon: "hotel" },
+  { key: "packingList", label: "Packing List", icon: "packingList" },
+  { key: "itinerary", label: "Itinerary", icon: "itinerary" },
+]
 
 export default async function MeetPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const session = await getServerSession(authOptions)
   if (!session) redirect("/api/auth/signin")
 
-  const isCoach = ["COACH", "MEET_DIRECTOR"].includes(session.user.role)
+  const isCoach = ["COACH", "EXEC"].includes(session.user.role)
 
   const meet = await prisma.meet.findUnique({
     where: { id },
@@ -48,26 +79,25 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
 
   if (!meet) notFound()
 
-  // Group results into a roster keyed by athlete.
-  const byAthlete = new Map<
-    string,
-    { id: string; name: string; swims: typeof meet.swims }
-  >()
-  for (const swim of meet.swims) {
-    const key = swim.athleteId
-    if (!byAthlete.has(key)) {
-      byAthlete.set(key, {
-        id: swim.athlete.id,
-        name: `${swim.athlete.lastName}, ${swim.athlete.firstName}`,
-        swims: [],
-      })
-    }
-    byAthlete.get(key)!.swims.push(swim)
-  }
-  const roster = [...byAthlete.values()].sort((a, b) => a.name.localeCompare(b.name))
-  for (const entry of roster) {
-    entry.swims.sort((a, b) => compareSwimEvents(a.event, b.event))
-  }
+  const results = mergeMeetResultEntries(
+    swimsToMeetResults(
+      meet.swims.map((s) => ({
+        id: s.id,
+        source: s.source,
+        athleteId: s.athlete.id,
+        athleteName: `${s.athlete.lastName}, ${s.athlete.firstName}`,
+        event: s.event,
+        timeMs: s.timeMs,
+        tags: s.tags,
+        place: s.place,
+        course: s.course,
+        date: toDateInput(s.date),
+      }))
+    ),
+    isResultStatusesSummary(meet.resultStatusesSummary)
+      ? meet.resultStatusesSummary.entries
+      : []
+  )
 
   const initial: MeetFormState = {
     name: meet.name,
@@ -75,8 +105,7 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
     startDate: toDateInput(meet.startDate),
     endDate: toDateInput(meet.endDate),
     course: meet.course,
-    season: String(meet.season),
-    description: meet.description ?? "",
+    season: meet.season,
     packetUrl: meet.packetUrl ?? "",
     psychSheetUrl: meet.psychSheetUrl ?? "",
     heatSheetUrl: meet.heatSheetUrl ?? "",
@@ -84,6 +113,59 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
   }
 
   const links = RESOURCE_LINKS.filter((l) => meet[l.key])
+  const eventOrder = isEventOrder(meet.eventOrder) ? meet.eventOrder : null
+  const hasResources = links.length > 0 || eventOrder !== null
+  const resourceInitial = {
+    teamCode: meet.teamCode ?? "GTSC",
+    packetUrl: meet.packetUrl ?? "",
+    entriesSheetUrl: meet.entriesSheetUrl ?? "",
+    psychSheetUrl: meet.psychSheetUrl ?? "",
+    heatSheetUrl: meet.heatSheetUrl ?? "",
+    liveStreamUrl: meet.liveStreamUrl ?? "",
+  }
+  const travelLinks = TRAVEL_LINKS.filter((l) => meet[l.key])
+  const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => meet[s.key]?.trim())
+  const travelItems: TravelInfoItem[] = [
+    ...travelLinks.map((l) => ({
+      type: "link" as const,
+      label: l.label,
+      icon: l.icon,
+      href: meet[l.key] as string,
+    })),
+    ...travelTexts.map((s) => ({
+      type: "text" as const,
+      label: s.label,
+      icon: s.icon,
+      content: meet[s.key] as string,
+    })),
+  ]
+  const hasTravel = travelItems.length > 0
+  const psychSummary = isSheetSummary(meet.psychSheetSummary)
+    ? meet.psychSheetSummary
+    : null
+  const heatSummary = isSheetSummary(meet.heatSheetSummary)
+    ? meet.heatSheetSummary
+    : null
+  const entriesSummary = isSheetSummary(meet.entriesSheetSummary)
+    ? meet.entriesSheetSummary
+    : null
+  const relayResults = isRelayResultsSummary(meet.relayResultsSummary)
+    ? meet.relayResultsSummary.entries
+    : null
+
+  const rosterAthletes = isCoach
+    ? (
+        await prisma.athlete.findMany({
+          where: { seasons: { has: meet.season } },
+          orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+          select: { id: true, firstName: true, lastName: true, gender: true },
+        })
+      ).map((a) => ({
+        id: a.id,
+        name: `${a.lastName}, ${a.firstName}`,
+        gender: a.gender === Gender.F ? ("F" as const) : ("M" as const),
+      }))
+    : []
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-8 space-y-8">
@@ -102,125 +184,113 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
             {meet.location ? ` · ${meet.location}` : ""}
           </p>
           <p className="mt-0.5 text-xs text-gray-400 dark:text-zinc-500">
-            {meet.course} · {meet.season} season
+            {meet.course} · {meet.season}
           </p>
         </div>
         {isCoach && <MeetActions meetId={meet.id} initial={initial} meetName={meet.name} />}
       </div>
 
-      {meet.description && (
-        <p className="text-sm text-gray-600 dark:text-zinc-300 whitespace-pre-line">
-          {meet.description}
-        </p>
-      )}
-
-      {/* Resource links */}
-      {links.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {links.map((l) => (
-            <a
-              key={l.key}
-              href={meet[l.key] as string}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-3.5 w-3.5 shrink-0"
-                aria-hidden="true"
-              >
-                <path d="M14 3h7v7" />
-                <path d="M10 14 21 3" />
-                <path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" />
-              </svg>
-              {l.label}
-            </a>
-          ))}
-        </div>
-      )}
-
-      {/* Import (coach) */}
-      {isCoach && (
+      {/* Resources */}
+      {(hasResources || isCoach) && (
         <section>
-          <h2 className="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide mb-3">
-            Import results
-          </h2>
-          <div className="flex flex-wrap gap-3">
-            <Suspense fallback={null}>
-              <ImportMeetButton meetId={meet.id} seasonYear={String(meet.season)} />
-            </Suspense>
-            <Suspense fallback={null}>
-              <ImportSwimPhoneButton meetId={meet.id} seasonYear={String(meet.season)} />
-            </Suspense>
+          <div className="flex items-center flex-wrap gap-x-3 gap-y-2 mb-3">
+            <h2 className="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide">
+              Resources
+            </h2>
+            {isCoach && (
+              <div className="flex flex-wrap items-center gap-1.5">
+                <ImportMeetResourcesButton meetId={meet.id} initial={resourceInitial} />
+                <Suspense fallback={null}>
+                  <ImportMeetButton meetId={meet.id} season={meet.season} />
+                </Suspense>
+              </div>
+            )}
           </div>
+          {(hasResources || eventOrder) ? (
+            <div className="flex flex-wrap gap-2">
+              {links.map((l) => (
+                <Fragment key={l.key}>
+                  <a
+                    href={meet[l.key] as string}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
+                  >
+                    <MeetResourceIcon kind={l.icon} />
+                    {l.label}
+                  </a>
+                  {l.key === "packetUrl" && eventOrder ? (
+                    <EventOrderButton order={eventOrder} />
+                  ) : null}
+                </Fragment>
+              ))}
+              {!meet.packetUrl && eventOrder ? (
+                <EventOrderButton order={eventOrder} />
+              ) : null}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500 dark:text-zinc-400">
+              No resources yet.
+            </p>
+          )}
         </section>
       )}
 
-      {/* Roster + results */}
-      <section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide">
-            Roster &amp; results
-          </h2>
-          <span className="text-xs text-gray-400 dark:text-zinc-500">
-            {roster.length} athlete{roster.length === 1 ? "" : "s"} · {meet.swims.length} swim
-            {meet.swims.length === 1 ? "" : "s"}
-          </span>
-        </div>
+      {/* Travel */}
+      {(hasTravel || isCoach) && (
+        <section>
+          <div className="flex items-center flex-wrap gap-x-3 gap-y-2 mb-3">
+            <h2 className="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide">
+              Travel
+            </h2>
+            {isCoach && (
+              <AddTravelInfoButton
+                meetId={meet.id}
+                initial={{
+                  rideSignUpsUrl: meet.rideSignUpsUrl ?? "",
+                  roomsUrl: meet.roomsUrl ?? "",
+                  hotel: meet.hotel ?? "",
+                  packingList: meet.packingList ?? "",
+                  itinerary: meet.itinerary ?? "",
+                }}
+              />
+            )}
+          </div>
+          {hasTravel ? (
+            <TravelInfoButtons items={travelItems} />
+          ) : (
+            <p className="text-sm text-gray-500 dark:text-zinc-400">
+              No travel info yet.
+            </p>
+          )}
+        </section>
+      )}
 
-        {roster.length === 0 ? (
-          <div className="border rounded-xl px-4 py-10 text-center text-sm text-gray-500 dark:text-zinc-400 bg-white dark:bg-zinc-900">
-            No results imported yet.
-            {isCoach ? " Use “Import results” above to add a PDF or SwimPhone link." : ""}
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {roster.map((entry) => (
-              <div
-                key={entry.id}
-                className="border rounded-xl overflow-hidden bg-white dark:bg-zinc-900"
-              >
-                <Link
-                  href={`/athletes/${entry.id}`}
-                  className="block px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors border-b dark:border-zinc-800"
-                >
-                  {entry.name}
-                </Link>
-                <ul className="divide-y dark:divide-zinc-800">
-                  {entry.swims.map((s) => (
-                    <li
-                      key={s.id}
-                      className="flex items-center justify-between px-4 py-2 text-sm"
-                    >
-                      <span className="text-gray-700 dark:text-zinc-300">
-                        {s.event}
-                        {s.tags ? (
-                          <span className="ml-2 text-[10px] uppercase rounded bg-gray-100 dark:bg-zinc-800 px-1.5 py-0.5 text-gray-500 dark:text-zinc-400">
-                            {s.tags}
-                          </span>
-                        ) : null}
-                        {s.course !== meet.course ? (
-                          <span className="ml-2 text-xs text-gray-400">{s.course}</span>
-                        ) : null}
-                      </span>
-                      <span className="font-mono text-gray-900 dark:text-zinc-100">
-                        {formatTime(s.timeMs)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+      <MeetSheetSummarySection
+        psychSummary={psychSummary}
+        heatSummary={heatSummary}
+        entriesSummary={entriesSummary}
+        results={results}
+        relayResults={relayResults}
+        meetId={meet.id}
+        meetName={meet.name}
+        athletes={rosterAthletes}
+        canEdit={isCoach}
+        headerAction={
+          isCoach ? (
+            <div className="flex flex-wrap gap-2">
+              <AddMeetRelayButton meetId={meet.id} athletes={rosterAthletes} />
+              <AddMeetSwimButton
+                meetId={meet.id}
+                meetName={meet.name}
+                defaultCourse={meet.course}
+                defaultDate={toDateInput(meet.startDate)}
+                athletes={rosterAthletes}
+              />
+            </div>
+          ) : null
+        }
+      />
     </main>
   )
 }

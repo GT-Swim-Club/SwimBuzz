@@ -6,26 +6,27 @@ import { Gender } from "@prisma/client"
 import { assignSwimOccurrences } from "@/lib/swim-dedup"
 import { swimsFromSwimCloudTimes, type SwimCloudTime } from "@/lib/swimcloud-import"
 import { fetchScraper, SCRAPER_URL } from "@/lib/scraper-fetch"
+import { parseSeason } from "@/lib/season"
 
 export const runtime = "nodejs"
 export const maxDuration = 3600
 
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions)
-  if (!session || !["COACH", "MEET_DIRECTOR"].includes(session.user.role)) {
+  if (!session || !["COACH", "EXEC"].includes(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
   const params = new URL(req.url).searchParams
-  const year = parseInt(params.get("year") ?? "", 10)
+  const season = parseSeason(params.get("season") ?? params.get("year"))
   const gender = params.get("gender") === "F" ? Gender.F : Gender.M
 
-  if (!Number.isFinite(year)) {
-    return NextResponse.json({ error: "Season year is required" }, { status: 400 })
+  if (!season) {
+    return NextResponse.json({ error: "Season is required (e.g. 2025-2026)" }, { status: 400 })
   }
 
   const athletes = await prisma.athlete.findMany({
-    where: { seasons: { has: year }, gender },
+    where: { seasons: { has: season }, gender },
     select: {
       id: true,
       firstName: true,
@@ -42,13 +43,14 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
-  if (!session || !["COACH", "MEET_DIRECTOR"].includes(session.user.role)) {
+  if (!session || !["COACH", "EXEC"].includes(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
-  const { year, gender: genderRaw, athleteIds } = await req.json()
-  if (!Number.isFinite(year)) {
-    return NextResponse.json({ error: "Season year is required" }, { status: 400 })
+  const { season: seasonRaw, year, gender: genderRaw, athleteIds } = await req.json()
+  const season = parseSeason(seasonRaw ?? year)
+  if (!season) {
+    return NextResponse.json({ error: "Season is required (e.g. 2025-2026)" }, { status: 400 })
   }
   const gender = genderRaw === "F" ? Gender.F : Gender.M
   if (!Array.isArray(athleteIds) || athleteIds.length === 0) {
@@ -58,7 +60,7 @@ export async function POST(req: Request) {
   const athletes = await prisma.athlete.findMany({
     where: {
       id: { in: athleteIds },
-      seasons: { has: year },
+      seasons: { has: season },
       gender,
       swimCloudId: { not: null },
     },
@@ -147,7 +149,7 @@ export async function POST(req: Request) {
   })
 
   console.log(
-    `\n--- SwimCloud sync (${year}): ${athletesSynced}/${athletes.length} athletes, ${imported} new swims ---\n`
+    `\n--- SwimCloud sync (${season}): ${athletesSynced}/${athletes.length} athletes, ${imported} new swims ---\n`
   )
 
   return NextResponse.json({

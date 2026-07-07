@@ -1,5 +1,6 @@
 import { Course } from "@prisma/client"
 import { parseMeetDate } from "@/lib/swim-parse"
+import { parseSeason, seasonFromDate } from "@/lib/season"
 
 export class MeetInputError extends Error {}
 
@@ -51,20 +52,31 @@ export function buildMeetData(body: Record<string, unknown>, opts: BuildOptions 
   if ("course" in body) data.course = parseCourse(body.course)
 
   if ("season" in body) {
-    const season = parseInt(String(body.season ?? ""), 10)
-    if (!Number.isFinite(season)) throw new MeetInputError("Season year is invalid")
+    const season = parseSeason(body.season)
+    if (!season) throw new MeetInputError("Season must be like 2025-2026")
     data.season = season
   } else if (opts.requireStartDate && data.startDate instanceof Date) {
-    // Default the season to the start date's year when not provided.
-    data.season = (data.startDate as Date).getUTCFullYear()
+    data.season = seasonFromDate(data.startDate as Date)
+  }
+
+  if ("teamCode" in body) {
+    const team = String(body.teamCode ?? "").trim().toUpperCase()
+    if (!team) throw new MeetInputError("Team code is required")
+    data.teamCode = team
   }
 
   if ("location" in body) data.location = optionalString(body.location)
-  if ("description" in body) data.description = optionalString(body.description)
   if ("packetUrl" in body) data.packetUrl = optionalString(body.packetUrl)
   if ("psychSheetUrl" in body) data.psychSheetUrl = optionalString(body.psychSheetUrl)
   if ("heatSheetUrl" in body) data.heatSheetUrl = optionalString(body.heatSheetUrl)
+  if ("entriesSheetUrl" in body) data.entriesSheetUrl = optionalString(body.entriesSheetUrl)
   if ("resultsUrl" in body) data.resultsUrl = optionalString(body.resultsUrl)
+  if ("liveStreamUrl" in body) data.liveStreamUrl = optionalString(body.liveStreamUrl)
+  if ("rideSignUpsUrl" in body) data.rideSignUpsUrl = optionalString(body.rideSignUpsUrl)
+  if ("roomsUrl" in body) data.roomsUrl = optionalString(body.roomsUrl)
+  if ("hotel" in body) data.hotel = optionalString(body.hotel)
+  if ("packingList" in body) data.packingList = optionalString(body.packingList)
+  if ("itinerary" in body) data.itinerary = optionalString(body.itinerary)
 
   return data
 }

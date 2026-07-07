@@ -7,29 +7,33 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import SyncRosterButton from "./SyncRosterButton"
 import SyncTimesButton from "./SyncTimesButton"
 import AddAthleteButton from "./AddAthleteButton"
+import RosterFilters from "./RosterFilters"
+import { currentSeason, parseSeason } from "@/lib/season"
 
 export default async function AthletesPage({
     searchParams,
   }: {
-    searchParams: Promise<{ gender?: string; year?: string }>
+    searchParams: Promise<{ gender?: string; season?: string; year?: string }>
   }) {
-    const { gender, year } = await searchParams
+    const { gender, season: seasonParam, year: legacyYear } = await searchParams
+
+    const season =
+      parseSeason(seasonParam ?? legacyYear) ?? currentSeason()
 
     // if no params, redirect to defaults so URL and UI always match
-    if (!gender || !year) {
-        redirect(`/athletes?gender=${gender ?? "M"}&year=${year ?? String(new Date().getFullYear())}`)
+    if (!gender || (!seasonParam && !legacyYear)) {
+        redirect(`/athletes?gender=${gender ?? "M"}&season=${season}`)
     }
 
     const session = await getServerSession(authOptions)
     if (!session) redirect("/api/auth/signin")
 
-    const yearNum = parseInt(year)
     const genderFilter = gender === "F" ? "F" : "M"
   
     const athletes = await prisma.athlete.findMany({
         where: {
           gender: genderFilter,
-          seasons: { has: yearNum },  // 👈 array contains check
+          seasons: { has: season },
         },
       include: {
         user: { select: { name: true, email: true } },
@@ -37,14 +41,19 @@ export default async function AthletesPage({
       orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
     })
   
-    const isCoach = ["COACH", "MEET_DIRECTOR"].includes(session.user.role)
+    const isCoach = ["COACH", "EXEC"].includes(session.user.role)
   
     return (
       <main className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-medium">Roster</h1>
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-2xl font-medium">Roster</h1>
+            <Suspense fallback={null}>
+              <RosterFilters />
+            </Suspense>
+          </div>
           {isCoach && (
-            <div className="flex items-center gap-3 flex-wrap justify-end">
+            <div className="flex items-center gap-3 flex-wrap">
               <SyncRosterButton />
               <Suspense fallback={null}>
                 <SyncTimesButton />

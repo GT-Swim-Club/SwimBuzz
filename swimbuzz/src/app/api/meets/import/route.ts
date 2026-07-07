@@ -4,7 +4,11 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { importMeetResults, resolveMeetDate } from "@/lib/meet-import"
 import { fetchScraper, SCRAPER_URL } from "@/lib/scraper-fetch"
 import { prisma } from "@/lib/prisma"
+import { isStoredMeetFileUrl } from "@/lib/meet-files"
+import { deleteStoredMeetFile, uploadMeetFile } from "@/lib/meet-storage"
 import { FormData as UndiciFormData } from "undici"
+import { parseSeason } from "@/lib/season"
+import { coerceParsedRelayResults } from "@/lib/relay-results"
 
 function isUpload(value: unknown): value is Blob {
   return value != null && typeof value !== "string" && typeof (value as Blob).arrayBuffer === "function"
@@ -15,20 +19,23 @@ type ParsedResult = {
   event: string
   time: string
   course: string
+  tags?: string
+  place?: number
 }
 
 export const runtime = "nodejs"
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
-  if (!session || !["COACH", "MEET_DIRECTOR"].includes(session.user.role)) {
+  if (!session || !["COACH", "EXEC"].includes(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
   const formData = await req.formData()
   const file = formData.get("file")
   const courseDefault = String(formData.get("course") ?? "SCY").trim().toUpperCase()
-  const year = parseInt(String(formData.get("year") ?? ""), 10)
+  const team = String(formData.get("team") ?? "").trim() || null
+  const seasonRaw = formData.get("season") ?? formData.get("year")
   const meetId = String(formData.get("meetId") ?? "").trim() || null
 
   if (!isUpload(file)) {
@@ -43,13 +50,19 @@ export async function POST(req: Request) {
   if (!fileName.toLowerCase().endsWith(".pdf") && fileType !== "application/pdf") {
     return NextResponse.json({ error: "File must be a PDF" }, { status: 400 })
   }
-  if (!Number.isFinite(year)) {
-    return NextResponse.json({ error: "Season year is required" }, { status: 400 })
+  const meet = meetId
+    ? await prisma.meet.findUnique({ where: { id: meetId } })
+    : null
+
+  const season = parseSeason(meet?.season ?? seasonRaw)
+  if (!season) {
+    return NextResponse.json({ error: "Season is required (e.g. 2025-2026)" }, { status: 400 })
   }
 
-  // Use undici's FormData/File so the multipart body is serialized correctly by
-  // undici's fetch (fetchScraper). Mixing Node's global FormData with the
-  // standalone undici fetch drops the file part → scraper 422 "field required".
+  if (!team) {
+    return NextResponse.json({ error: "Team code is required" }, { status: 400 })
+  }
+
   const scraperForm = new UndiciFormData()
   const fileBytes = await file.arrayBuffer()
   scraperForm.append(
@@ -58,6 +71,7 @@ export async function POST(req: Request) {
     fileName
   )
   scraperForm.append("course", courseDefault)
+  scraperForm.append("team", team)
 
   let parseRes: Response
   try {
@@ -89,29 +103,43 @@ export async function POST(req: Request) {
     meet_name?: string | null
     meet_date?: string | null
     results: ParsedResult[]
+    relay_results?: unknown[]
   }
-
-  // When importing into an existing meet dashboard, anchor to that meet's own
-  // name/date/season so results link to it consistently.
-  const meet = meetId
-    ? await prisma.meet.findUnique({ where: { id: meetId } })
-    : null
 
   const meetName =
     meet?.name ?? ((parsed.meet_name ?? "").trim() || fileName.replace(/\.pdf$/i, ""))
   const meetDate =
     meet?.startDate ?? resolveMeetDate(parsed.meet_date) ?? new Date()
-  const seasonYear = meet?.season ?? year
 
   const summary = await importMeetResults({
-    year: seasonYear,
+    season,
     meetName,
     meetDate,
     results: parsed.results ?? [],
+    relayResults: coerceParsedRelayResults(parsed.relay_results),
     source: "meet_pdf",
     courseDefault: parsed.course || courseDefault,
     meetId: meet?.id ?? null,
   })
+
+  if (meet?.id) {
+    try {
+      if (meet.resultsUrl && isStoredMeetFileUrl(meet.resultsUrl)) {
+        await deleteStoredMeetFile(meet.resultsUrl)
+      }
+      const { url } = await uploadMeetFile(
+        Buffer.from(fileBytes),
+        fileName,
+        fileType
+      )
+      await prisma.meet.update({
+        where: { id: meet.id },
+        data: { resultsUrl: url },
+      })
+    } catch (err) {
+      console.error("Failed to save results PDF as meet resource:", err)
+    }
+  }
 
   return NextResponse.json({
     ...summary,

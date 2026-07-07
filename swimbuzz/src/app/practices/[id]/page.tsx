@@ -4,9 +4,11 @@ import { prisma } from "@/lib/prisma"
 import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
 import { formatSwimDate } from "@/lib/utils"
+import { isStaffRole } from "@/lib/auth-roles"
 import PracticeActions from "./PracticeActions"
 import CommentSection from "./CommentSection"
 import type { PracticeFormState } from "../PracticeEditor"
+import { FormattedText } from "@/components/FormattedText"
 
 function toDateInput(d: Date | null | undefined): string {
   if (!d) return ""
@@ -22,7 +24,7 @@ export default async function PracticePage({
   const session = await getServerSession(authOptions)
   if (!session) redirect("/api/auth/signin?callbackUrl=/practices")
 
-  const isCoach = ["COACH", "MEET_DIRECTOR"].includes(session.user.role)
+  const isCoach = isStaffRole(session.user.role)
 
   const practice = await prisma.practice.findUnique({
     where: { id },
@@ -32,7 +34,7 @@ export default async function PracticePage({
     },
   })
 
-  if (!practice) notFound()
+  if (!practice || (!practice.published && !isCoach)) notFound()
 
   const totalDistance = practice.sets.reduce((sum, s) => sum + (s.distance ?? 0), 0)
 
@@ -40,6 +42,7 @@ export default async function PracticePage({
     title: practice.title,
     date: toDateInput(practice.date),
     focus: practice.focus ?? "",
+    published: practice.published,
     sets: practice.sets.map((s) => ({
       id: s.id,
       title: s.title ?? "",
@@ -61,7 +64,14 @@ export default async function PracticePage({
           >
             ← All practices
           </Link>
-          <h1 className="mt-1 text-2xl font-medium">{practice.title}</h1>
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
+            <h1 className="text-2xl font-medium">{practice.title}</h1>
+            {isCoach && !practice.published && (
+              <span className="text-[10px] uppercase tracking-wide rounded-full bg-amber-100 text-amber-700 px-2 py-0.5 dark:bg-amber-950 dark:text-amber-300">
+                Draft
+              </span>
+            )}
+          </div>
           <p className="text-sm text-gray-500 dark:text-zinc-400">
             {practice.date ? formatSwimDate(practice.date) : "No date"}
             {" · "}
@@ -70,14 +80,19 @@ export default async function PracticePage({
           </p>
         </div>
         {isCoach && (
-          <PracticeActions practiceId={practice.id} initial={initial} title={practice.title} />
+          <PracticeActions
+            practiceId={practice.id}
+            initial={initial}
+            title={practice.title}
+            published={practice.published}
+          />
         )}
       </div>
 
       {practice.focus && (
-        <p className="text-sm text-gray-600 dark:text-zinc-300 whitespace-pre-line rounded-xl border border-gray-100 dark:border-zinc-800 bg-gray-50/60 dark:bg-zinc-950/40 px-4 py-3">
-          {practice.focus}
-        </p>
+        <div className="text-sm text-gray-600 dark:text-zinc-300 rounded-xl border border-gray-100 dark:border-zinc-800 bg-gray-50/60 dark:bg-zinc-950/40 px-4 py-3">
+          <FormattedText text={practice.focus} className="text-gray-600 dark:text-zinc-300" />
+        </div>
       )}
 
       {/* Sets */}
@@ -109,15 +124,16 @@ export default async function PracticePage({
               )}
             </div>
 
-            <pre className="mt-3 whitespace-pre-wrap font-mono text-sm text-gray-800 dark:text-zinc-200">
-              {set.content}
-            </pre>
+            <div className="mt-3">
+              <FormattedText text={set.content} mono />
+            </div>
 
             {set.notes && (
               <div className="mt-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/40 px-3 py-2">
-                <p className="text-sm text-amber-900 dark:text-amber-200 whitespace-pre-line">
-                  {set.notes}
-                </p>
+                <FormattedText
+                  text={set.notes}
+                  className="text-amber-900 dark:text-amber-200"
+                />
               </div>
             )}
           </section>

@@ -1,10 +1,26 @@
 import { Course } from "@prisma/client"
 import { parseTime } from "./utils"
 
+const SWIM_STATUS_CODES = new Set([
+  "NT",
+  "NS",
+  "DQ",
+  "DFS",
+  "DNF",
+  "SCR",
+  "DNS",
+])
+
+export function parseSwimStatus(timeStr: string): string | null {
+  if (!timeStr) return null
+  const cleaned = timeStr.trim().toUpperCase()
+  return SWIM_STATUS_CODES.has(cleaned) ? cleaned : null
+}
+
 export function parseSwimTime(timeStr: string): number | null {
   if (!timeStr) return null
   const cleaned = timeStr.trim().toUpperCase()
-  if (!cleaned || ["NT", "NS", "DQ", "DFS", "DNF", "SCR"].includes(cleaned)) {
+  if (!cleaned || SWIM_STATUS_CODES.has(cleaned)) {
     return null
   }
   try {
@@ -28,7 +44,32 @@ export function parseCourse(event: string, rawCourse: string): Course {
 }
 
 export function normalizeEventName(event: string): string {
-  return event.replace(/\s+(SCY|LCM|SCM|Y|L|S)$/i, "").trim()
+  let normalized = event
+    .replace(/\s+(SCY|LCM|SCM|Y|L|S)$/i, "")
+    .replace(/\s+/g, " ")
+    .trim()
+
+  // 4x50 Free Relay and 200 Free Relay are the same event.
+  const relayLeg = normalized.match(/^(\d+)\s*[xX]\s*(\d+)\s+(.+)$/i)
+  if (relayLeg) {
+    const legs = parseInt(relayLeg[1], 10)
+    const legDist = parseInt(relayLeg[2], 10)
+    const rest = relayLeg[3].trim()
+    if (
+      rest.toLowerCase().includes("relay") &&
+      Number.isFinite(legs) &&
+      Number.isFinite(legDist) &&
+      legs > 0 &&
+      legDist > 0
+    ) {
+      normalized = `${legs * legDist} ${rest}`
+        .replace(/\bfreestyle\b/gi, "Free")
+        .replace(/\s+/g, " ")
+        .trim()
+    }
+  }
+
+  return normalized
 }
 
 export function parseMeetDate(dateStr: string): Date | null {
@@ -75,6 +116,24 @@ export function compareSwimEvents(a: string, b: string): number {
   const strokeCmp =
     (STROKE_ORDER[pa.stroke] ?? 99) - (STROKE_ORDER[pb.stroke] ?? 99)
   if (strokeCmp !== 0) return strokeCmp
+
+  return pa.distance - pb.distance
+}
+
+/** Relay events: free relays before medley, then by distance. */
+export function compareRelayEvents(a: string, b: string): number {
+  const pa = parseEventParts(normalizeEventName(a))
+  const pb = parseEventParts(normalizeEventName(b))
+
+  const relayTypeOrder = (stroke: string) => {
+    const s = stroke.toLowerCase()
+    if (s.includes("free")) return 0
+    if (s.includes("medley")) return 1
+    return 99
+  }
+
+  const typeCmp = relayTypeOrder(pa.stroke) - relayTypeOrder(pb.stroke)
+  if (typeCmp !== 0) return typeCmp
 
   return pa.distance - pb.distance
 }

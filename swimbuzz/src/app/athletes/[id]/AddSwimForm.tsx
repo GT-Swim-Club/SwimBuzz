@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import DontReloadNotice from "@/components/DontReloadNotice"
+import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import { parseTime, formatRelativeTime, formatDateTime } from "@/lib/utils"
 import SetSwimCloudIdForm from "./SetSwimCloudIdForm"
 
@@ -30,6 +32,8 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
     date: new Date().toLocaleDateString('en-CA'),
     meet: "",
   })
+
+  useDontReloadWhileBusy(scrapeStatus === "loading")
 
   async function handleSubmit() {
     if (!form.time) return
@@ -98,25 +102,28 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
           Import from SwimCloud
         </h2>
         {swimCloudId ? (
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleScrape}
-              disabled={scrapeStatus === "loading"}
-              className="text-sm px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
-            >
-              {scrapeStatus === "loading" ? "Importing..." : "Import times"}
-            </button>
-            {scrapeStatus === "done" && (
-              <span className="text-xs text-gray-500 dark:text-zinc-400">{scrapeCount} swims imported</span>
-            )}
-            {scrapeStatus === "error" && (
-              <span className="text-xs text-red-500">Import failed — is the scraper running?</span>
-            )}
-            {scrapeStatus !== "done" && (
-              <span className="text-xs text-gray-400 dark:text-zinc-500" title={lastSynced ? formatDateTime(lastSynced) : undefined}>
-                {lastSynced ? `Last imported ${formatRelativeTime(lastSynced)}` : "Never imported"}
-              </span>
-            )}
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleScrape}
+                disabled={scrapeStatus === "loading"}
+                className="text-sm px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
+              >
+                {scrapeStatus === "loading" ? "Importing..." : "Import times"}
+              </button>
+              {scrapeStatus === "done" && (
+                <span className="text-xs text-gray-500 dark:text-zinc-400">{scrapeCount} swims imported</span>
+              )}
+              {scrapeStatus === "error" && (
+                <span className="text-xs text-red-500">Import failed — is the scraper running?</span>
+              )}
+              {scrapeStatus !== "done" && scrapeStatus !== "loading" && (
+                <span className="text-xs text-gray-400 dark:text-zinc-500" title={lastSynced ? formatDateTime(lastSynced) : undefined}>
+                  {lastSynced ? `Last imported ${formatRelativeTime(lastSynced)}` : "Never imported"}
+                </span>
+              )}
+            </div>
+            {scrapeStatus === "loading" && <DontReloadNotice />}
           </div>
         ) : (
           <div className="border rounded-xl p-4 bg-white dark:bg-zinc-900 space-y-3">

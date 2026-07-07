@@ -8,11 +8,11 @@ import { normalizeSwimForInsert, nextSwimOccurrence } from "@/lib/swim-dedup"
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session || !["COACH", "MEET_DIRECTOR"].includes(session.user.role)) {
+    if (!session || !["COACH", "EXEC"].includes(session.user.role)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    const { athleteId, event, timeMs, course, date, source, meet, tags } =
+    const { athleteId, event, timeMs, course, date, source, meet, meetId, tags } =
       await req.json()
 
     if (!athleteId || !event || !Number.isFinite(timeMs) || !course || !date) {
@@ -27,6 +27,7 @@ export async function POST(req: Request) {
       date,
       source: source ?? "manual",
       meet,
+      meetId,
       tags,
     })
 

@@ -10,7 +10,7 @@ export default async function MeetsPage() {
   const session = await getServerSession(authOptions)
   if (!session) redirect("/api/auth/signin")
 
-  const isCoach = ["COACH", "MEET_DIRECTOR"].includes(session.user.role)
+  const isCoach = ["COACH", "EXEC"].includes(session.user.role)
 
   const meets = await prisma.meet.findMany({
     orderBy: { startDate: "desc" },

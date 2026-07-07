@@ -27,31 +27,38 @@ export function formatDateRange(
   return `${formatSwimDate(s)} – ${formatSwimDate(e)}`
 }
 
-// "Jun 28, 2025, 3:04 PM" — for last-synced timestamps
-export function formatDateTime(date: Date | string): string {
-  const d = typeof date === "string" ? new Date(date) : date
+function formatTimeOfDay(d: Date): string {
   let hours = d.getHours()
   const minutes = d.getMinutes().toString().padStart(2, "0")
   const ampm = hours >= 12 ? "PM" : "AM"
   hours = hours % 12 || 12
-  return `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}, ${hours}:${minutes} ${ampm}`
+  return `${hours}:${minutes} ${ampm}`
 }
 
-// concise relative time, e.g. "just now", "5m ago", "3h ago", "2d ago"
+function startOfLocalDay(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate())
+}
+
+// "Jun 28, 2025, 3:04 PM" — for last-synced timestamps
+export function formatDateTime(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date
+  return `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}, ${formatTimeOfDay(d)}`
+}
+
+// "just now" if <45s, same day → "3:04 PM", yesterday → "Yesterday at 3:04 PM", else date + time
 export function formatRelativeTime(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date
   const diffMs = Date.now() - d.getTime()
-  const sec = Math.round(diffMs / 1000)
-  if (sec < 45) return "just now"
-  const min = Math.round(sec / 60)
-  if (min < 60) return `${min}m ago`
-  const hr = Math.round(min / 60)
-  if (hr < 24) return `${hr}h ago`
-  const day = Math.round(hr / 24)
-  if (day < 30) return `${day}d ago`
-  const mo = Math.round(day / 30)
-  if (mo < 12) return `${mo}mo ago`
-  return `${Math.round(mo / 12)}y ago`
+  if (Math.round(diffMs / 1000) < 45) return "just now"
+
+  const now = new Date()
+  const dayDiff = Math.round(
+    (startOfLocalDay(now).getTime() - startOfLocalDay(d).getTime()) / (24 * 60 * 60 * 1000)
+  )
+  const time = formatTimeOfDay(d)
+  if (dayDiff === 0) return time
+  if (dayDiff === 1) return `Yesterday at ${time}`
+  return formatDateTime(d)
 }
 
 // converts milliseconds to "1:23.45" or "58.32"
@@ -70,3 +77,21 @@ export function formatTime(ms: number): string {
     }
     return parseFloat(parts[0]) * 1000
   }
+
+/** Signed delta vs seed — negative is a drop (faster), positive is slower. */
+export function formatSeedTimeDelta(seed: string, result: string): string | null {
+  const seedMs = parseTime(seed)
+  const resultMs = parseTime(result)
+  if (!Number.isFinite(seedMs) || !Number.isFinite(resultMs) || seedMs <= 0 || resultMs <= 0) {
+    return null
+  }
+  const deltaMs = resultMs - seedMs
+  if (deltaMs === 0) return null
+
+  const sign = deltaMs < 0 ? "-" : "+"
+  const absSec = Math.abs(deltaMs) / 1000
+  if (absSec < 60) return `${sign}${absSec.toFixed(2)}`
+  const minutes = Math.floor(absSec / 60)
+  const seconds = (absSec % 60).toFixed(2).padStart(5, "0")
+  return `${sign}${minutes}:${seconds}`
+}

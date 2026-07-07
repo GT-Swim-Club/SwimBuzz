@@ -1,0 +1,228 @@
+"use client"
+
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { parseTime } from "@/lib/utils"
+import Modal, { ModalFooter } from "@/components/Modal"
+
+const EVENTS = [
+  "50 Free",
+  "100 Free",
+  "200 Free",
+  "400 Free",
+  "500 Free",
+  "1000 Free",
+  "1650 Free",
+  "100 Back",
+  "200 Back",
+  "100 Breast",
+  "200 Breast",
+  "100 Fly",
+  "200 Fly",
+  "200 IM",
+  "400 IM",
+]
+
+type AthleteOption = { id: string; name: string }
+
+export default function AddMeetSwimButton({
+  meetId,
+  meetName,
+  defaultCourse,
+  defaultDate,
+  athletes,
+}: {
+  meetId: string
+  meetName: string
+  defaultCourse: string
+  defaultDate: string
+  athletes: AthleteOption[]
+}) {
+  const router = useRouter()
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [form, setForm] = useState({
+    athleteId: "",
+    event: "50 Free",
+    time: "",
+    course: defaultCourse,
+    date: defaultDate,
+  })
+
+  function openModal() {
+    setForm({
+      athleteId: athletes[0]?.id ?? "",
+      event: "50 Free",
+      time: "",
+      course: defaultCourse,
+      date: defaultDate,
+    })
+    setError(null)
+    setOpen(true)
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!form.athleteId || !form.time) return
+
+    const timeMs = Math.round(parseTime(form.time))
+    if (!Number.isFinite(timeMs) || timeMs <= 0) {
+      setError("Invalid time format")
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch("/api/swims", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          athleteId: form.athleteId,
+          event: form.event,
+          course: form.course,
+          date: form.date,
+          meet: meetName,
+          meetId,
+          timeMs,
+          source: "manual",
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error ?? "Failed to save swim")
+        return
+      }
+      setOpen(false)
+      router.refresh()
+    } catch {
+      setError("Something went wrong")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={openModal}
+        disabled={athletes.length === 0}
+        className="text-xs px-3 py-1.5 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
+      >
+        Add swim
+      </button>
+
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        closeDisabled={loading}
+        title="Add swim"
+        description={meetName}
+        maxWidth="md"
+        onSubmit={handleSubmit}
+        footer={
+          <ModalFooter>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              disabled={loading}
+              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading || !form.time}
+              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+            >
+              {loading ? "Saving…" : "Save swim"}
+            </button>
+          </ModalFooter>
+        }
+      >
+        <div>
+          <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+            Athlete
+          </label>
+          <select
+            required
+            value={form.athleteId}
+            onChange={(e) => setForm((f) => ({ ...f, athleteId: e.target.value }))}
+            className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+          >
+            {athletes.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+              Event
+            </label>
+            <select
+              value={form.event}
+              onChange={(e) => setForm((f) => ({ ...f, event: e.target.value }))}
+              className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+            >
+              {EVENTS.map((event) => (
+                <option key={event}>{event}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+              Course
+            </label>
+            <select
+              value={form.course}
+              onChange={(e) => setForm((f) => ({ ...f, course: e.target.value }))}
+              className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+            >
+              <option>SCY</option>
+              <option>LCM</option>
+              <option>SCM</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+              Time
+            </label>
+            <input
+              required
+              type="text"
+              placeholder="1:23.45 or 58.32"
+              value={form.time}
+              onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))}
+              className="w-full rounded-lg border px-3 py-2 text-sm font-mono dark:bg-zinc-950 dark:border-zinc-700"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+              Date
+            </label>
+            <input
+              required
+              type="date"
+              value={form.date}
+              onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+              className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+            />
+          </div>
+        </div>
+
+        {error && (
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        )}
+      </Modal>
+    </>
+  )
+}

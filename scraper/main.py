@@ -8,6 +8,8 @@ import random
 import uvicorn
 
 from pdf_parse import parse_meet_pdf_bytes
+from packet_parse import parse_packet_pdf_bytes
+from sheet_parse import parse_sheet_pdf_bytes
 from swimphone_parse import (
     SwimPhoneCaptchaError,
     SwimPhoneParseError,
@@ -360,6 +362,7 @@ async def _get_times(swimmer_id: int):
 async def parse_meet_pdf(
     file: UploadFile = File(...),
     course: str = Form("SCY"),
+    team: str = Form(""),
 ):
     if not file.filename or not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="PDF file required")
@@ -369,7 +372,7 @@ async def parse_meet_pdf(
         raise HTTPException(status_code=400, detail="Empty file")
 
     try:
-        parsed = parse_meet_pdf_bytes(content, course.upper())
+        parsed = parse_meet_pdf_bytes(content, course.upper(), team=team.strip() or None)
         results = parsed.get("results", [])
         print(
             f"\n--- Parsed {len(results)} swims from {file.filename} "
@@ -384,6 +387,70 @@ async def parse_meet_pdf(
         return parsed
     except Exception as e:
         raise HTTPException(status_code=422, detail=f"Could not parse PDF: {e}")
+
+
+@app.post("/parse-meet-packet-pdf")
+async def parse_meet_packet_pdf(
+    file: UploadFile = File(...),
+):
+    if not file.filename or not file.filename.lower().endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="PDF file required")
+
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail="Empty file")
+
+    try:
+        parsed = parse_packet_pdf_bytes(content)
+        session_count = len(parsed.get("sessions", []))
+        row_count = sum(len(s.get("rows", [])) for s in parsed.get("sessions", []))
+        print(
+            f"\n--- Parsed packet {file.filename}: "
+            f"{session_count} session(s), {row_count} event row(s) ---\n"
+        )
+        return parsed
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"Could not parse packet PDF: {e}")
+
+
+@app.post("/parse-meet-sheet-pdf")
+async def parse_meet_sheet_pdf(
+    file: UploadFile = File(...),
+    sheet_type: str = Form("auto"),
+    team: str = Form("GTSC"),
+):
+    if not file.filename or not file.filename.lower().endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="PDF file required")
+
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail="Empty file")
+
+    st = sheet_type.strip().lower()
+    if st not in {"auto", "psych", "heat", "entries"}:
+        raise HTTPException(
+            status_code=400,
+            detail="sheet_type must be auto, psych, heat, or entries",
+        )
+
+    try:
+        parsed = parse_sheet_pdf_bytes(
+            content,
+            None if st == "auto" else st,
+            team=team.strip() or "GTSC",
+        )
+        team_label = (team or "GTSC").strip().upper()
+        print(
+            f"\n--- Parsed {file.filename} ({parsed.get('sheetType')}): "
+            f"{len(parsed.get('entries', []))} {team_label} entries ---\n"
+        )
+        return parsed
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"Could not parse sheet PDF: {e}")
 
 
 @app.post("/scrape-swimphone-meet")

@@ -9,7 +9,7 @@ datasource db {
 
 enum Role {
   COACH
-  MEET_DIRECTOR
+  EXEC
   ATHLETE
 }
 
@@ -48,7 +48,7 @@ model Athlete {
   lastName     String
   nicknames    String[] @default([])
   gender       Gender
-  seasons      Int[]  
+  seasons      String[]
   swimCloudId  Int?    
   timesSyncedAt DateTime?
   swims        Swim[]
@@ -61,12 +61,25 @@ model Meet {
   startDate     DateTime
   endDate       DateTime?
   course        Course    @default(SCY)
-  season        Int
-  description   String?
+  season        String
+  teamCode      String    @default("GTSC")
   packetUrl     String?
   psychSheetUrl String?
   heatSheetUrl  String?
+  entriesSheetUrl String?
   resultsUrl    String?
+  liveStreamUrl String?
+  rideSignUpsUrl String?
+  roomsUrl       String?
+  hotel          String?
+  packingList    String?
+  itinerary      String?
+  eventOrder    Json?
+  psychSheetSummary Json?
+  heatSheetSummary  Json?
+  entriesSheetSummary Json?
+  relayResultsSummary Json?
+  resultStatusesSummary Json?
   createdAt     DateTime  @default(now())
   swims         Swim[]
 }
@@ -80,6 +93,7 @@ model Swim {
   meetRef    Meet?    @relation(fields: [meetId], references: [id], onDelete: SetNull)
   event      String
   timeMs     Int
+  place      Int?
   tags       String   @default("")
   course     Course
   date       DateTime
@@ -96,6 +110,7 @@ model Practice {
   title       String
   date        DateTime?
   focus       String?
+  published   Boolean       @default(false)
   createdById String?
   createdBy   User?              @relation(fields: [createdById], references: [id], onDelete: SetNull)
   sets        PracticeSet[]
@@ -104,6 +119,7 @@ model Practice {
   updatedAt   DateTime           @updatedAt
 
   @@index([date])
+  @@index([published])
 }
 
 model PracticeSet {

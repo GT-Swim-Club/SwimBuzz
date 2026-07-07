@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react"
 import { formatTime, formatSwimDate } from "@/lib/utils"
 import { compareSwimEvents, COURSE_LABELS } from "@/lib/swim-parse"
+import { displaySwimHistoryTags } from "@/lib/swim-tags"
+import { isRelayLeadoffSwimTag } from "@/lib/relay-results"
 import DeleteSwimButton from "./DeleteSwimButton"
 
 const INITIAL_COUNT = 10
@@ -159,14 +161,16 @@ export default function SwimHistory({
             <span className="font-mono text-right text-gray-900 dark:text-zinc-100">
               {formatTime(swim.timeMs)}
             </span>
-            <span className="font-mono text-gray-900 dark:text-zinc-100">{swim.tags}</span>
+            <span className="font-mono text-gray-900 dark:text-zinc-100">
+              {displaySwimHistoryTags(swim.tags)}
+            </span>
             <span className="text-gray-600 dark:text-zinc-400 truncate text-xs">
               {swim.meet || "—"}
             </span>
             <span className="text-gray-600 dark:text-zinc-400 text-xs">
               {formatSwimDate(swim.date)}
             </span>
-            {isCoach && swim.source === "manual" && (
+            {isCoach && swim.source === "manual" && !isRelayLeadoffSwimTag(swim.tags) && (
               <div className="flex justify-end">
                 <DeleteSwimButton
                   swimId={swim.id}

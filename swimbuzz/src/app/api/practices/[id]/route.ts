@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { buildPracticeData, PracticeInputError } from "@/lib/practice-input"
+import { isStaffRole } from "@/lib/auth-roles"
 
 export async function GET(
   _req: Request,
@@ -20,6 +21,9 @@ export async function GET(
     },
   })
   if (!practice) return NextResponse.json({ error: "Not found" }, { status: 404 })
+  if (!practice.published && !isStaffRole(session.user.role)) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 })
+  }
 
   return NextResponse.json(practice)
 }
@@ -29,7 +33,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions)
-  if (!session || !["COACH", "MEET_DIRECTOR"].includes(session.user.role)) {
+  if (!session || !["COACH", "EXEC"].includes(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -84,7 +88,7 @@ export async function PATCH(
 
       return tx.practice.update({
         where: { id },
-        data: { title: data.title, date: data.date, focus: data.focus },
+        data: { title: data.title, date: data.date, focus: data.focus, published: data.published },
       })
     })
 
@@ -102,7 +106,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions)
-  if (!session || !["COACH", "MEET_DIRECTOR"].includes(session.user.role)) {
+  if (!session || !["COACH", "EXEC"].includes(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { buildPracticeData, PracticeInputError } from "@/lib/practice-input"
+import { isStaffRole } from "@/lib/auth-roles"
 import { Prisma } from "@prisma/client"
 
 export async function GET(req: Request) {
@@ -14,6 +15,10 @@ export async function GET(req: Request) {
   const tag = searchParams.get("tag")?.trim()
 
   const and: Prisma.PracticeWhereInput[] = []
+
+  if (!isStaffRole(session.user.role)) {
+    and.push({ published: true })
+  }
 
   if (q) {
     const contains = { contains: q, mode: "insensitive" as const }
@@ -44,7 +49,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
-  if (!session || !["COACH", "MEET_DIRECTOR"].includes(session.user.role)) {
+  if (!session || !["COACH", "EXEC"].includes(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -56,6 +61,7 @@ export async function POST(req: Request) {
         title: data.title,
         date: data.date,
         focus: data.focus,
+        published: data.published,
         createdById: session.user.id,
         sets: {
           create: data.sets.map((s) => ({

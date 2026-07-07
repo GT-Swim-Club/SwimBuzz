@@ -10,6 +10,7 @@ export type SwimInsert = {
   meet?: string | null
   meetId?: string | null
   tags?: string | null
+  place?: number | null
   source: string
 }
 

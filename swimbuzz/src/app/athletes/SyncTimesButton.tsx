@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
+import DontReloadNotice from "@/components/DontReloadNotice"
+import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import { formatRelativeTime, formatDateTime } from "@/lib/utils"
+import { currentSeason, parseSeason } from "@/lib/season"
 
 type RosterAthlete = {
   id: string
@@ -33,7 +36,8 @@ export default function SyncTimesButton() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const gender = searchParams.get("gender") === "F" ? "F" : "M"
-  const year = parseInt(searchParams.get("year") ?? String(new Date().getFullYear()), 10)
+  const season =
+    parseSeason(searchParams.get("season") ?? searchParams.get("year")) ?? currentSeason()
 
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -41,6 +45,8 @@ export default function SyncTimesButton() {
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<SyncResult | null>(null)
   const [progress, setProgress] = useState<SyncProgress | null>(null)
+
+  useDontReloadWhileBusy(loading)
   const [roster, setRoster] = useState<RosterAthlete[]>([])
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
@@ -56,7 +62,7 @@ export default function SyncTimesButton() {
     setResult(null)
     setProgress(null)
 
-    fetch(`/api/times/sync?year=${year}&gender=${gender}`)
+    fetch(`/api/times/sync?season=${encodeURIComponent(season)}&gender=${gender}`)
       .then(async (res) => {
         const data = await res.json()
         if (!res.ok) throw new Error(data.error ?? "Failed to load roster")
@@ -68,7 +74,7 @@ export default function SyncTimesButton() {
       })
       .catch((err) => setError(err.message ?? "Failed to load roster"))
       .finally(() => setLoadingRoster(false))
-  }, [open, year, gender])
+  }, [open, season, gender])
 
   function toggleAthlete(id: string) {
     setSelected((prev) => {
@@ -109,7 +115,7 @@ export default function SyncTimesButton() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          year,
+          season,
           gender,
           athleteIds: toSync.map((a) => a.id),
         }),
@@ -168,7 +174,7 @@ export default function SyncTimesButton() {
                 Import times from SwimCloud
               </h2>
               <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">
-                Select athletes on the {gender === "F" ? "women's" : "men's"} {year} roster.
+                Select athletes on the {gender === "F" ? "women's" : "men's"} {season} roster.
               </p>
             </div>
 
@@ -250,11 +256,16 @@ export default function SyncTimesButton() {
                   </div>
                 )}
 
-                {loading && progress && (
-                  <p className="text-sm text-gray-500 dark:text-zinc-400 py-2">
+                {loading && progress ? (
+                  <p className="py-2 text-sm text-gray-500 dark:text-zinc-400">
                     Importing {progress.current}/{progress.total}: {progress.name}
+                    <span className="mt-1 block text-xs text-gray-400 dark:text-zinc-500">
+                      Don&apos;t reload the page while import finishes.
+                    </span>
                   </p>
-                )}
+                ) : loading ? (
+                  <DontReloadNotice className="py-2" />
+                ) : null}
 
                 {error && (
                   <p className="text-sm text-red-600 dark:text-red-400 py-2">{error}</p>

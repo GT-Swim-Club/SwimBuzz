@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { SET_TAGS } from "@/lib/practice-tags"
+import RichTextField from "@/components/RichTextField"
 
 export type SetFormState = {
   id?: string
@@ -17,6 +18,7 @@ export type PracticeFormState = {
   title: string
   date: string
   focus: string
+  published?: boolean
   sets: SetFormState[]
 }
 
@@ -111,15 +113,14 @@ export default function PracticeEditor({
     })
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  async function save(published: boolean) {
     setLoading(true)
     setError(null)
     try {
       const res = await fetch(practiceId ? `/api/practices/${practiceId}` : "/api/practices", {
         method: practiceId ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, published }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -138,6 +139,11 @@ export default function PracticeEditor({
     } finally {
       setLoading(false)
     }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    await save(false)
   }
 
   return (
@@ -188,12 +194,11 @@ export default function PracticeEditor({
 
               <div>
                 <label className={labelCls}>Focus / notes (optional)</label>
-                <textarea
+                <RichTextField
                   rows={2}
-                  placeholder="Overall focus for the session…"
                   value={form.focus}
-                  onChange={(e) => setForm((f) => ({ ...f, focus: e.target.value }))}
-                  className={inputCls}
+                  onChange={(focus) => setForm((f) => ({ ...f, focus }))}
+                  className={`${inputCls} min-h-[3rem]`}
                 />
               </div>
 
@@ -263,24 +268,23 @@ export default function PracticeEditor({
 
                     <div>
                       <label className={labelCls}>Workout</label>
-                      <textarea
+                      <RichTextField
                         required
                         rows={4}
-                        placeholder={"e.g.\n8 x 100 free @ 1:20\n4 x 50 kick @ 1:00"}
+                        mono
                         value={set.content}
-                        onChange={(e) => updateSet(i, { content: e.target.value })}
-                        className={`${inputCls} font-mono`}
+                        onChange={(content) => updateSet(i, { content })}
+                        className={`${inputCls} min-h-[6rem] font-mono`}
                       />
                     </div>
 
                     <div>
                       <label className={labelCls}>Coach notes (optional)</label>
-                      <textarea
+                      <RichTextField
                         rows={2}
-                        placeholder="Intent, pacing, cues…"
                         value={set.notes}
-                        onChange={(e) => updateSet(i, { notes: e.target.value })}
-                        className={inputCls}
+                        onChange={(notes) => updateSet(i, { notes })}
+                        className={`${inputCls} min-h-[3rem]`}
                       />
                     </div>
 
@@ -351,16 +355,25 @@ export default function PracticeEditor({
                     type="button"
                     onClick={() => setOpen(false)}
                     disabled={loading}
-                    className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+                    className="rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
                   >
                     Cancel
                   </button>
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={() => save(false)}
+                    disabled={loading}
+                    className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700 disabled:opacity-50"
+                  >
+                    {loading ? "Saving…" : "Save draft"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => save(true)}
                     disabled={loading}
                     className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
                   >
-                    {loading ? "Saving…" : practiceId ? "Save changes" : "Create practice"}
+                    {loading ? "Saving…" : "Publish"}
                   </button>
                 </div>
               </div>

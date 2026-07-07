@@ -26,7 +26,7 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
 
     if (!athlete) notFound()
 
-  const isCoach = ["COACH", "MEET_DIRECTOR"].includes(session.user.role)
+  const isCoach = ["COACH", "EXEC"].includes(session.user.role)
 
   // group PBs by event
   const pbMap = new Map<string, typeof athlete.swims[0]>()

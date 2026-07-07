@@ -6,6 +6,7 @@ import Link from "next/link"
 import { Prisma } from "@prisma/client"
 import { formatSwimDate } from "@/lib/utils"
 import { SET_TAGS } from "@/lib/practice-tags"
+import { isStaffRole } from "@/lib/auth-roles"
 import PracticeEditor from "./PracticeEditor"
 
 export default async function PracticesPage({
@@ -16,12 +17,13 @@ export default async function PracticesPage({
   const session = await getServerSession(authOptions)
   if (!session) redirect("/api/auth/signin?callbackUrl=/practices")
 
-  const isCoach = ["COACH", "MEET_DIRECTOR"].includes(session.user.role)
+  const isCoach = isStaffRole(session.user.role)
   const { q, tag } = await searchParams
   const query = q?.trim() ?? ""
   const activeTag = tag?.trim() ?? ""
 
   const and: Prisma.PracticeWhereInput[] = []
+  if (!isCoach) and.push({ published: true })
   if (query) {
     const contains = { contains: query, mode: "insensitive" as const }
     and.push({
@@ -132,9 +134,16 @@ export default async function PracticesPage({
                 className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
               >
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm text-gray-900 dark:text-zinc-100 truncate">
-                    {p.title}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-sm text-gray-900 dark:text-zinc-100 truncate">
+                      {p.title}
+                    </p>
+                    {isCoach && !p.published && (
+                      <span className="text-[10px] uppercase tracking-wide rounded-full bg-amber-100 text-amber-700 px-2 py-0.5 dark:bg-amber-950 dark:text-amber-300 shrink-0">
+                        Draft
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-gray-500 dark:text-zinc-400">
                     {p.date ? formatSwimDate(p.date) : "No date"}
                     {" · "}

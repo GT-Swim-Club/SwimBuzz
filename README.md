@@ -9,7 +9,7 @@ Built with **Next.js 16**, **Prisma 5**, **NextAuth** (Google sign-in), and a **
 - **Roster** — Browse athletes by gender and season. Coaches can sync from SwimCloud, add athletes manually, or import swims from a meet PDF.
 - **Athlete profiles** — Personal bests, full swim history, manual time entry, and deletion of manually added swims.
 - **Relay builder** — Optimal lineup suggestions for free and medley relays based on stored times.
-- **Auth & roles** — Google OAuth with `COACH`, `MEET_DIRECTOR`, and `ATHLETE` roles.
+- **Auth & roles** — Google OAuth with `COACH`, `EXEC`, and `ATHLETE` roles.
 
 ## Project structure
 

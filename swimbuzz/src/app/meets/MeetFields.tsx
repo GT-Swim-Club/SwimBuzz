@@ -1,5 +1,7 @@
 "use client"
 
+import { currentSeason, seasonOptions } from "@/lib/season"
+
 export type MeetFormState = {
   name: string
   location: string
@@ -7,7 +9,6 @@ export type MeetFormState = {
   endDate: string
   course: string
   season: string
-  description: string
   packetUrl: string
   psychSheetUrl: string
   heatSheetUrl: string
@@ -20,8 +21,7 @@ export const emptyMeetForm: MeetFormState = {
   startDate: "",
   endDate: "",
   course: "SCY",
-  season: String(new Date().getFullYear()),
-  description: "",
+  season: currentSeason(),
   packetUrl: "",
   psychSheetUrl: "",
   heatSheetUrl: "",
@@ -105,63 +105,17 @@ export default function MeetFields({
         </div>
         <div>
           <label className={labelClass}>Season</label>
-          <input
-            type="number"
+          <select
             value={form.season}
             onChange={(e) => set("season", e.target.value)}
             className={inputClass}
-          />
-        </div>
-      </div>
-
-      <div>
-        <label className={labelClass}>
-          Description <span className="font-normal text-gray-400">(optional)</span>
-        </label>
-        <textarea
-          value={form.description}
-          onChange={(e) => set("description", e.target.value)}
-          rows={2}
-          className={inputClass}
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className={labelClass}>Meet packet URL</label>
-          <input
-            value={form.packetUrl}
-            onChange={(e) => set("packetUrl", e.target.value)}
-            placeholder="https://…"
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label className={labelClass}>Psych sheet URL</label>
-          <input
-            value={form.psychSheetUrl}
-            onChange={(e) => set("psychSheetUrl", e.target.value)}
-            placeholder="https://…"
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label className={labelClass}>Heat sheet URL</label>
-          <input
-            value={form.heatSheetUrl}
-            onChange={(e) => set("heatSheetUrl", e.target.value)}
-            placeholder="https://…"
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label className={labelClass}>Results URL</label>
-          <input
-            value={form.resultsUrl}
-            onChange={(e) => set("resultsUrl", e.target.value)}
-            placeholder="https://…"
-            className={inputClass}
-          />
+          >
+            {seasonOptions().map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
     </div>

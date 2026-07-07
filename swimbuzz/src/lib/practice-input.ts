@@ -51,6 +51,7 @@ export type NormalizedPractice = {
   title: string
   date: Date | null
   focus: string | null
+  published: boolean
   sets: NormalizedSet[]
 }
 
@@ -79,10 +80,13 @@ export function buildPracticeData(
     throw new PracticeInputError("Add at least one set to the practice")
   }
 
+  const published = body.published === true
+
   return {
     title,
     date,
     focus: optionalString(body.focus),
+    published,
     sets,
   }
 }
