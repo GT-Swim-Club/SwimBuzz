@@ -8,6 +8,7 @@ import {
 } from "@/lib/athlete-match"
 import { FormData as UndiciFormData } from "undici"
 import { normalizeEventName } from "@/lib/swim-parse"
+import { normalizeRelayLetter } from "@/lib/relay-results"
 
 /** Prisma JSON columns cannot store `undefined` — omit unset optional fields. */
 function jsonSafeSheetSummary(summary: SheetSummary): SheetSummary {
@@ -88,7 +89,7 @@ function roundToRelayRound(round?: string): "P" | "F" | undefined {
 
 function relaySeedAthleteId(row: ParsedSheetEntry): string {
   const gender = row.gender ?? ""
-  const letter = (row.relayLetter ?? "").trim().toUpperCase()
+  const letter = normalizeRelayLetter(row.relayLetter) ?? "A"
   const seed = row.seedTime ?? row.timeStatus ?? ""
   return `relay-seed:${row.eventNumber}:${gender}:${letter}:${seed}`
 }
@@ -145,7 +146,7 @@ function matchSheetToRoster(
           lane: row.lane,
           round: row.round,
           startTime: row.startTime,
-          relayLetter: row.relayLetter,
+          relayLetter: normalizeRelayLetter(row.relayLetter),
           relayRound,
           gender,
           relaySwimmers: [],
@@ -185,7 +186,7 @@ function matchSheetToRoster(
           lane: row.lane,
           round: row.round,
           startTime: row.startTime,
-          relayLetter: row.relayLetter,
+          relayLetter: normalizeRelayLetter(row.relayLetter),
           relayRound,
           gender,
           relaySwimmers: matchedLegs,

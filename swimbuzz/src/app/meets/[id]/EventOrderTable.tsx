@@ -1,6 +1,10 @@
 import type { EventOrder } from "@/lib/meet-event-order"
 import { cleanEventName } from "@/lib/meet-event-order"
 
+function showSessionLabel(label: string): boolean {
+  return label.trim().toLowerCase() !== "order of events"
+}
+
 export default function EventOrderTable({ order }: { order: EventOrder }) {
   if (!order.sessions.length) return null
 
@@ -8,9 +12,11 @@ export default function EventOrderTable({ order }: { order: EventOrder }) {
     <div className="space-y-6">
       {order.sessions.map((session, sessionIndex) => (
         <div key={`${session.label}-${sessionIndex}`}>
-          <h3 className="text-center text-sm font-semibold text-gray-900 dark:text-zinc-100 mb-2">
-            {session.label}
-          </h3>
+          {showSessionLabel(session.label) ? (
+            <h3 className="text-center text-sm font-semibold text-gray-900 dark:text-zinc-100 mb-2">
+              {session.label}
+            </h3>
+          ) : null}
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
               <thead>

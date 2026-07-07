@@ -17,6 +17,7 @@ from playwright.async_api import async_playwright
 from pdf_parse import (
     INVALID_TIMES,
     normalize_event,
+    normalize_relay_letter,
     parse_status_token,
     parse_time_token,
     leg_times_from_cumulative,
@@ -1024,7 +1025,7 @@ def parse_team_relay_split_rids(html: str, team: str | None) -> list[dict[str, A
                         "place": place,
                         "prelimPlace": prelim_place,
                         "finalPlace": final_place,
-                        "relayLetter": relay_letter,
+                        "relayLetter": normalize_relay_letter(relay_letter),
                     }
                     if prelim_heat is not None and prelim_heat >= 1:
                         item["prelimHeat"] = prelim_heat
@@ -1213,7 +1214,7 @@ def parse_relay_result(
     result: dict[str, Any] = {
         "entryType": "relay_team",
         "event": event,
-        "relayLetter": relay_letter,
+        "relayLetter": normalize_relay_letter(relay_letter),
         "gender": gender_code,
         "relaySwimmers": swimmers,
         "time": finish,

@@ -90,6 +90,16 @@ MEET_DATE = re.compile(r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b")
 # A redundant date prefix some clubs put in the meet name, e.g. "9-27-25 ".
 MEET_NAME_DATE_PREFIX = re.compile(r"^\d{1,2}-\d{1,2}-\d{2,4}\s+")
 
+_VALID_RELAY_LETTERS = frozenset({"A", "B", "C", "D"})
+
+
+def normalize_relay_letter(letter: str | None) -> str | None:
+    """Return A–D relay letter, or None when missing / not a team letter."""
+    token = (letter or "").strip().upper()
+    if token in _VALID_RELAY_LETTERS:
+        return token
+    return None
+
 
 def _iso_date(mdy: str) -> str | None:
     match = MEET_DATE.search(mdy)
@@ -782,7 +792,7 @@ def parse_relay_results(lines: list[str], course: str) -> list[dict[str, Any]]:
             row = {
                 "entryType": "relay_team",
                 "event": current_event,
-                "relayLetter": block.get("relayLetter"),
+                "relayLetter": normalize_relay_letter(block.get("relayLetter")),
                 "relaySwimmers": swimmers,
                 "time": round_time["time"],
                 "course": course,
@@ -832,7 +842,7 @@ def parse_relay_results(lines: list[str], course: str) -> list[dict[str, Any]]:
             place = int(place_str) if place_str.isdigit() else None
             seed_time = pick_seed_time(tail)
             block = {
-                "relayLetter": letter.upper() if letter else None,
+                "relayLetter": normalize_relay_letter(letter.upper() if letter else None),
                 "team": team_code.upper(),
                 "relaySwimmers": [],
                 "rounds": rounds,

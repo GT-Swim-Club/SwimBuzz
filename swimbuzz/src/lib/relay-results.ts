@@ -90,10 +90,16 @@ export function relayGenderLabel(gender: RelayGender): string {
   return ""
 }
 
+/** Valid relay team letter, or null when missing / not A–D. */
+export function normalizeRelayLetter(relayLetter: string | null | undefined): string | null {
+  const letter = (relayLetter ?? "").trim().toUpperCase()
+  if (letter === "A" || letter === "B" || letter === "C" || letter === "D") return letter
+  return null
+}
+
 /** Relay letter for display — defaults to A when missing. */
 export function displayRelayLetter(relayLetter: string | null | undefined): string {
-  const letter = (relayLetter ?? "").trim().toUpperCase()
-  return letter || "A"
+  return normalizeRelayLetter(relayLetter) ?? "A"
 }
 
 /** Drop missing/invalid relay leg splits (e.g. SwimPhone "No Data"). */
@@ -247,7 +253,12 @@ export function matchRelayResultsToRoster(
 
     const relayRound = relayRoundFromTags(row.tags ?? "")
     const gender = row.gender ?? ""
-    const teamKey = relayTeamKey(event, row.relayLetter, relayRound, gender)
+    const teamKey = relayTeamKey(
+      event,
+      normalizeRelayLetter(row.relayLetter),
+      relayRound,
+      gender
+    )
     if (byTeam.has(teamKey)) continue
 
     const relaySwimmers = row.relaySwimmers
@@ -286,7 +297,7 @@ export function matchRelayResultsToRoster(
       event,
       eventNumber: row.eventNumber ?? 0,
       entryType: "relay_team",
-      relayLetter: row.relayLetter ?? null,
+      relayLetter: normalizeRelayLetter(row.relayLetter),
       relayRound,
       gender,
       relaySwimmers,
@@ -346,7 +357,7 @@ export function coerceParsedRelayResults(raw: unknown): ParsedRelayResult[] {
     out.push({
       entryType: "relay_team",
       event,
-      relayLetter: r.relayLetter ? String(r.relayLetter) : null,
+      relayLetter: normalizeRelayLetter(r.relayLetter ? String(r.relayLetter) : null),
       gender: parseRelayGender(r.gender),
       relaySwimmers,
       time,
@@ -368,7 +379,7 @@ export function relayTeamKey(
   relayRound: RelayRound = "",
   gender: RelayGender = ""
 ): string {
-  return `${normalizeEventName(event)}|${(relayLetter ?? "").trim().toUpperCase()}|${relayRound}|${gender}`
+  return `${normalizeEventName(event)}|${normalizeRelayLetter(relayLetter) ?? "A"}|${relayRound}|${gender}`
 }
 
 export type RelayTeamInput = {
@@ -388,7 +399,7 @@ export function buildRelaySheetEntries(
   roster: RosterAthlete[]
 ): SheetEntry[] {
   const event = normalizeEventName(relay.event)
-  const letter = relay.relayLetter?.trim().toUpperCase() || null
+  const letter = normalizeRelayLetter(relay.relayLetter)
   const round = relay.relayRound ?? ""
   const gender = relay.gender ?? ""
   const byId = new Map(roster.map((a) => [a.id, a]))
@@ -418,7 +429,7 @@ export function buildRelaySheetEntries(
     .filter((n): n is string => Boolean(n))
   const athleteName =
     swimmerNames.join(", ") ||
-    `Relay ${letter ?? ""}`.trim() ||
+    `Relay ${displayRelayLetter(letter)}` ||
     event
 
   return [
@@ -444,21 +455,34 @@ export function preserveRelayEntryFields(
   updated: SheetEntry,
   existing: SheetEntry
 ): SheetEntry {
+  const round = effectiveRelayRound(existing) || effectiveRelayRound(updated)
+  const existingGenericHeat =
+    existing.heat != null && existing.heat > 0 ? existing.heat : undefined
+  const existingPrelimHeat =
+    existing.prelimHeat ?? (round === "P" ? existingGenericHeat : undefined)
+  const existingFinalHeat =
+    existing.finalHeat ?? (round === "F" ? existingGenericHeat : undefined)
+  const existingGenericLane = existing.lane
+  const existingPrelimLane =
+    existing.prelimLane ?? (round === "P" ? existingGenericLane : undefined)
+  const existingFinalLane =
+    existing.finalLane ?? (round === "F" ? existingGenericLane : undefined)
+
   return {
     ...updated,
     eventNumber: existing.eventNumber || updated.eventNumber,
     seedTime: existing.seedTime ?? updated.seedTime,
     timeStatus: existing.timeStatus ?? updated.timeStatus,
     seedRank: existing.seedRank ?? updated.seedRank,
-    heat: existing.heat ?? updated.heat,
+    heat: existingGenericHeat ?? updated.heat,
     heatTotal: existing.heatTotal ?? updated.heatTotal,
-    lane: existing.lane ?? updated.lane,
-    prelimHeat: existing.prelimHeat ?? updated.prelimHeat,
+    lane: existingGenericLane ?? updated.lane,
+    prelimHeat: existingPrelimHeat ?? updated.prelimHeat,
     prelimHeatTotal: existing.prelimHeatTotal ?? updated.prelimHeatTotal,
-    prelimLane: existing.prelimLane ?? updated.prelimLane,
-    finalHeat: existing.finalHeat ?? updated.finalHeat,
+    prelimLane: existingPrelimLane ?? updated.prelimLane,
+    finalHeat: existingFinalHeat ?? updated.finalHeat,
     finalHeatTotal: existing.finalHeatTotal ?? updated.finalHeatTotal,
-    finalLane: existing.finalLane ?? updated.finalLane,
+    finalLane: existingFinalLane ?? updated.finalLane,
     prelimTime: existing.prelimTime ?? updated.prelimTime,
     finalTime: existing.finalTime ?? updated.finalTime,
     prelimPlace: existing.prelimPlace ?? updated.prelimPlace,

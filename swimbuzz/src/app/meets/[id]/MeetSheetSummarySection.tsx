@@ -44,10 +44,25 @@ function formatHeat(entry: SheetSummary["entries"][number]) {
       heat = entry.heat ?? entry.prelimHeat ?? entry.finalHeat
       heatTotal = entry.heatTotal ?? entry.prelimHeatTotal ?? entry.finalHeatTotal
     }
+  } else if (entry.resultRound === "F") {
+    heat = entry.finalHeat ?? entry.heat
+    heatTotal = entry.finalHeatTotal ?? entry.heatTotal
+  } else if (entry.resultRound === "P") {
+    heat = entry.prelimHeat ?? entry.heat
+    heatTotal = entry.prelimHeatTotal ?? entry.heatTotal
+  } else {
+    heat = entry.heat ?? entry.finalHeat ?? entry.prelimHeat
+    heatTotal = entry.heatTotal ?? entry.finalHeatTotal ?? entry.prelimHeatTotal
   }
   if (heat == null || heat < 1) return null
   if (heatTotal != null) return `Heat ${heat} of ${heatTotal}`
   return `Heat ${heat}`
+}
+
+function individualLane(entry: SheetSummary["entries"][number]): number | undefined {
+  if (entry.resultRound === "F") return entry.finalLane ?? entry.lane
+  if (entry.resultRound === "P") return entry.prelimLane ?? entry.lane
+  return entry.lane ?? entry.finalLane ?? entry.prelimLane
 }
 
 function relayLane(entry: SheetSummary["entries"][number]): number | undefined {
@@ -189,7 +204,8 @@ function formatPlacement(entry: SheetSummary["entries"][number]) {
   }
   const heat = formatHeat(entry)
   if (heat) parts.push(heat)
-  if (entry.lane != null) parts.push(`Lane ${entry.lane}`)
+  const lane = individualLane(entry)
+  if (lane != null) parts.push(`Lane ${lane}`)
   const seed = formatSeed(entry)
   if (seed) parts.push(seed)
   return parts.join(" · ")

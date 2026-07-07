@@ -5,12 +5,20 @@ import { parseCourse, parseMeetDate, parseSwimStatus, parseSwimTime, normalizeEv
 import {
   matchRelayResultsToRoster,
   isRelayLeadoffSwimTag,
+  preserveRelayEntryFields,
+  relayTeamKey,
   type ParsedRelayResult,
 } from "@/lib/relay-results"
 import { importRelayLeadoffSwims } from "@/lib/relay-leadoff-sync"
 import {
+  buildHeatSheetLookup,
+  hasHeatSheetSummary,
+  individualSheetKey,
+  isResultStatusesSummary,
+  isSheetSummary,
   mergeMeetResultEntries,
   placementsToMeetResults,
+  resultHeatLanePatchFromSheet,
   seedsToMeetResults,
   statusesToMeetResults,
   type MeetResultEntry,
@@ -71,6 +79,18 @@ export async function importMeetResults({
     roster.map((a) => [a.id, `${a.firstName} ${a.lastName}`])
   )
 
+  const meetRecord = meetId
+    ? await prisma.meet.findUnique({
+        where: { id: meetId },
+        select: { heatSheetSummary: true, resultStatusesSummary: true },
+      })
+    : null
+  const heatSheetSummary = isSheetSummary(meetRecord?.heatSheetSummary)
+    ? meetRecord.heatSheetSummary
+    : null
+  const hasHeatSheet = hasHeatSheetSummary(heatSheetSummary)
+  const heatSheetLookup = buildHeatSheetLookup(heatSheetSummary)
+
   const swims: {
     athleteId: string
     event: string
@@ -117,6 +137,34 @@ export async function importMeetResults({
     seedTime: string
   }[] = []
 
+  function pushPlacementRow(
+    row: (typeof placementRows)[number]
+  ): void {
+    if (!hasHeatSheet) {
+      if (
+        (row.heat == null || row.heat < 1) &&
+        row.lane == null
+      ) {
+        return
+      }
+      placementRows.push(row)
+      return
+    }
+
+    const sheetEntry = heatSheetLookup.get(
+      individualSheetKey(row.athleteId, row.event)
+    )
+    const patch = resultHeatLanePatchFromSheet(
+      sheetEntry,
+      row.tags,
+      row.heat,
+      row.lane,
+      row.heatTotal
+    )
+    if (!patch) return
+    placementRows.push({ ...row, ...patch })
+  }
+
   for (const row of results) {
     // Relay leadoffs are synced from leg-1 relay splits, not individual result rows.
     if (isRelayLeadoffSwimTag(row.tags ?? "")) continue
@@ -153,7 +201,7 @@ export async function importMeetResults({
       const heat = row.heat != null && row.heat > 0 ? row.heat : undefined
       const lane = row.lane != null ? row.lane : undefined
       if (heat != null || lane != null) {
-        placementRows.push({
+        pushPlacementRow({
           athleteId,
           athleteName: athleteById.get(athleteId) ?? row.name,
           event,
@@ -201,7 +249,7 @@ export async function importMeetResults({
     const heat = row.heat != null && row.heat > 0 ? row.heat : undefined
     const lane = row.lane != null ? row.lane : undefined
     if (heat != null || lane != null) {
-      placementRows.push({
+      pushPlacementRow({
         athleteId,
         athleteName: athleteById.get(athleteId) ?? row.name,
         event,
@@ -244,7 +292,22 @@ export async function importMeetResults({
     }
   }
 
-  const relayEntries = matchRelayResultsToRoster(relayResults, roster)
+  const relayEntries = matchRelayResultsToRoster(relayResults, roster).map(
+    (entry) => {
+      if (!hasHeatSheet) return entry
+      const sheetEntry = heatSheetLookup.get(
+        relayTeamKey(
+          entry.event,
+          entry.relayLetter,
+          entry.relayRound ?? "",
+          entry.gender ?? ""
+        )
+      )
+      return sheetEntry
+        ? preserveRelayEntryFields(entry, sheetEntry)
+        : entry
+    }
+  )
   const courseForLeadoffs = parseCourse("", courseDefault)
   const leadoffsImported = await importRelayLeadoffSwims({
     meetName,
@@ -258,11 +321,22 @@ export async function importMeetResults({
   const statusEntries = statusesToMeetResults(statusRows)
   const placementEntries = placementsToMeetResults(placementRows)
   const seedEntries = seedsToMeetResults(seedRows)
-  const metaEntries = mergeMeetResultEntries(
-    statusEntries,
-    placementEntries,
-    seedEntries
-  )
+  const existingMeta = isResultStatusesSummary(meetRecord?.resultStatusesSummary)
+    ? meetRecord.resultStatusesSummary.entries
+    : []
+  const metaEntries = hasHeatSheet
+    ? mergeMeetResultEntries(
+        existingMeta,
+        statusEntries,
+        placementEntries,
+        seedEntries
+      )
+    : mergeMeetResultEntries(
+        statusEntries,
+        seedEntries,
+        existingMeta,
+        placementEntries
+      )
   if (meetId) {
     const meetUpdate: {
       relayResultsSummary?: { entries: typeof relayEntries }

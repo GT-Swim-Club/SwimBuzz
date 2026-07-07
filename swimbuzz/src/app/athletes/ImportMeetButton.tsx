@@ -38,7 +38,8 @@ export default function ImportMeetButton({
     currentSeason()
 
   const [open, setOpen] = useState(false)
-  const [source, setSource] = useState<ImportSource>("pdf")
+  const [resultOpen, setResultOpen] = useState(false)
+  const [source, setSource] = useState<ImportSource>("swimphone")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<ImportResult | null>(null)
@@ -49,6 +50,7 @@ export default function ImportMeetButton({
 
 
   function resetForm() {
+    setSource("swimphone")
     setError(null)
     setResult(null)
     setSelectedFile(null)
@@ -59,6 +61,13 @@ export default function ImportMeetButton({
     setSelectedFile(e.target.files?.[0] ?? null)
     setError(null)
     setResult(null)
+  }
+
+  function showImportResult(data: ImportResult) {
+    setResult(data)
+    setOpen(false)
+    setResultOpen(true)
+    router.refresh()
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -94,10 +103,9 @@ export default function ImportMeetButton({
           setError(data.error ?? "Import failed")
           return
         }
-        setResult(data)
+        showImportResult(data)
         setSelectedFile(null)
         if (fileRef.current) fileRef.current.value = ""
-        router.refresh()
       } catch {
         setError("Upload failed — check that the dev server and scraper are running")
       } finally {
@@ -127,8 +135,7 @@ export default function ImportMeetButton({
         setError(data.error ?? "Import failed")
         return
       }
-      setResult(data)
-      router.refresh()
+      showImportResult(data)
     } catch {
       setError("Import failed — check that the dev server and scraper are running")
     } finally {
@@ -175,8 +182,8 @@ export default function ImportMeetButton({
           <div className="mt-4 flex rounded-lg border dark:border-zinc-700 p-0.5 bg-gray-50 dark:bg-zinc-950">
             {(
               [
-                ["pdf", "Results PDF"],
                 ["swimphone", "SwimPhone"],
+                ["pdf", "Results PDF"],
               ] as const
             ).map(([value, label]) => (
               <button
@@ -270,7 +277,67 @@ export default function ImportMeetButton({
 
         {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
-        {result && (
+        <div
+          key={`options-${source}`}
+          className={`grid gap-3 ${source === "pdf" ? "grid-cols-2" : "grid-cols-1"}`}
+        >
+          <div>
+            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+              Team code
+            </label>
+            <input
+              required
+              value={team}
+              onChange={(e) => setTeam(e.target.value)}
+              placeholder="GTSC"
+              className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+            />
+          </div>
+          {source === "pdf" ? (
+            <div>
+              <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+                Course
+              </label>
+              <select
+                value={course}
+                onChange={(e) => setCourse(e.target.value)}
+                className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+              >
+                <option value="SCY">SCY</option>
+                <option value="LCM">LCM</option>
+                <option value="SCM">SCM</option>
+              </select>
+            </div>
+          ) : null}
+        </div>
+        <p className="text-xs text-gray-400 dark:text-zinc-500 -mt-2">
+          Only swimmers listed under this team in the results are imported.
+        </p>
+      </Modal>
+
+      <Modal
+        open={resultOpen}
+        onClose={() => {
+          setResultOpen(false)
+          setResult(null)
+        }}
+        title="Import complete"
+        footer={
+          <ModalFooter>
+            <button
+              type="button"
+              onClick={() => {
+                setResultOpen(false)
+                setResult(null)
+              }}
+              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
+            >
+              Done
+            </button>
+          </ModalFooter>
+        }
+      >
+        {result ? (
           <div className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-800/50">
             {result.meetName && (
               <p className="mb-1 text-gray-900 dark:text-zinc-100">
@@ -320,44 +387,7 @@ export default function ImportMeetButton({
               </p>
             )}
           </div>
-        )}
-
-        <div
-          key={`options-${source}`}
-          className={`grid gap-3 ${source === "pdf" ? "grid-cols-2" : "grid-cols-1"}`}
-        >
-          <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-              Team code
-            </label>
-            <input
-              required
-              value={team}
-              onChange={(e) => setTeam(e.target.value)}
-              placeholder="GTSC"
-              className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
-            />
-          </div>
-          {source === "pdf" ? (
-            <div>
-              <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-                Course
-              </label>
-              <select
-                value={course}
-                onChange={(e) => setCourse(e.target.value)}
-                className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
-              >
-                <option value="SCY">SCY</option>
-                <option value="LCM">LCM</option>
-                <option value="SCM">SCM</option>
-              </select>
-            </div>
-          ) : null}
-        </div>
-        <p className="text-xs text-gray-400 dark:text-zinc-500 -mt-2">
-          Only swimmers listed under this team in the results are imported.
-        </p>
+        ) : null}
       </Modal>
     </>
   )

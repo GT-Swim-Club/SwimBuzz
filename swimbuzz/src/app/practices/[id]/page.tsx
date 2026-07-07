@@ -125,7 +125,7 @@ export default async function PracticePage({
             </div>
 
             <div className="mt-3">
-              <FormattedText text={set.content} mono />
+              <FormattedText text={set.content} />
             </div>
 
             {set.notes && (

@@ -271,10 +271,9 @@ export default function PracticeEditor({
                       <RichTextField
                         required
                         rows={4}
-                        mono
                         value={set.content}
                         onChange={(content) => updateSet(i, { content })}
-                        className={`${inputCls} min-h-[6rem] font-mono`}
+                        className={`${inputCls} min-h-[6rem]`}
                       />
                     </div>
 

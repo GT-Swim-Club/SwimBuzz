@@ -67,7 +67,9 @@ def _use_sheet_team(team: str | None) -> _SheetTeam:
 
 SHEET_PSYCH = re.compile(r"Psych\s+Sheet", re.I)
 SHEET_HEAT = re.compile(r"Meet\s+Program", re.I)
-SHEET_ENTRIES = re.compile(r"Team Entries|Individual Meet Entries", re.I)
+SHEET_ENTRIES = re.compile(
+    r"Team Entries|Individual Meet Entries|Entry Report by Club", re.I
+)
 _SHEET_GENDER = r"(?:Women|Men|Mixed|Co-?ed)"
 USMS_MULTI_COL = re.compile(
     rf"#\d+\s+{_SHEET_GENDER}\s+(?:\d+x\d+|\d+)", re.I
@@ -142,6 +144,16 @@ SKIP_LINE = re.compile(
 _CID_LIGATURES = {
     "976": "f",
 }
+
+_VALID_RELAY_LETTERS = frozenset({"A", "B", "C", "D"})
+
+
+def normalize_relay_letter(letter: str | None) -> str | None:
+    """Return A–D relay letter, or None when missing / not a team letter."""
+    token = (letter or "").strip().upper()
+    if token in _VALID_RELAY_LETTERS:
+        return token
+    return None
 
 
 def _clean_line(line: str) -> str:
@@ -397,7 +409,7 @@ def _parse_relay_team(
     entry: dict[str, Any] = {
         "entryType": "relay_team",
         "team": team.upper(),
-        "relayLetter": letter.upper() if letter else None,
+        "relayLetter": normalize_relay_letter(letter),
         "eventNumber": event["eventNumber"],
         "event": event["event"],
         "gender": event["gender"],
@@ -470,7 +482,12 @@ ENTRY_SKIP = re.compile(
     r"^(HY-TEK|USMS|Total Individual|Georgia Tech Swim Club Total|"
     r"Page \d|All Events|Team Entries|Entries Report|Licensed To|Individual Meet|"
     r"Sanction:|Female IE|Male IE|Total IE|Total Athletes|\d{4}\s+TYR|-\s|"
-    r"\d{1,2}-\d{1,2}-\d{2,4}\s+GTSC|FEMALE|MALE)",
+    r"\d{1,2}-\d{1,2}-\d{2,4}\s+GTSC|FEMALE|MALE|"
+    r"National Championship|CCS National|Liaison|MEET MANAGER)",
+    re.I,
+)
+ENTRY_SKIP_STANDALONE = re.compile(
+    r"^(\d+\s*/\s*\d+|/\s*\d+|\d+|Ind/Rel:.*)$",
     re.I,
 )
 
@@ -479,6 +496,10 @@ def _entry_skip_line(line: str) -> bool:
     if ENTRY_SKIP.search(line):
         return True
     stripped = line.strip()
+    if ENTRY_SKIP_STANDALONE.match(stripped):
+        return True
+    if re.match(rf"^{re.escape(_sheet_team.base)}\s+[A-Za-z]", stripped, re.I):
+        return True
     # Bare team-code rows only — not entry lines that start with the team tag.
     if re.match(rf"^{re.escape(_sheet_team.base)}(?:-[A-Z]{{2}})?\s*$", stripped, re.I):
         return True
@@ -669,7 +690,7 @@ def _relay_team_from_legs(
         "event": event,
         "gender": gender,
         "isRelay": True,
-        "relayLetter": relay_letter,
+        "relayLetter": normalize_relay_letter(relay_letter),
         "relaySwimmers": [
             {"leg": leg["leg"], "name": leg["name"], "age": leg.get("age")}
             for leg in swimmers
@@ -833,13 +854,50 @@ def _group_relay_leg_entries(
     return teams
 
 
-def _entry_report_page_lines(page: Any) -> list[tuple[str, str | None]]:
+def _entry_report_uses_column_flow(pdf: Any) -> bool:
+    """Hy-Tek club entry lists read left column then right; USMS club reports pair rows."""
+    sample = "\n".join(page.extract_text() or "" for page in pdf.pages[: min(2, len(pdf.pages))])
+    if SWIMMER_HEADER.search(sample):
+        return False
+    if re.search(r"Ind/Rel\s*:", sample, re.I):
+        return False
+    return True
+
+
+def _entry_report_row_paired_lines(page: Any) -> list[str]:
+    """Merge each visual row left-to-right — USMS club entry reports."""
+    try:
+        words = page.extract_words(use_text_flow=False)
+    except Exception:
+        words = []
+    if not words:
+        return extract_page_lines(page)
+
+    bands: dict[int, list[dict]] = {}
+    for word in words:
+        band = round(float(word["top"]) / 3) * 3
+        bands.setdefault(band, []).append(word)
+
+    lines: list[str] = []
+    for band in sorted(bands):
+        row = sorted(bands[band], key=lambda w: w["x0"])
+        text = " ".join(w["text"] for w in row).strip()
+        cleaned = _clean_line(text)
+        if cleaned:
+            lines.append(cleaned)
+    return lines
+
+
+def _entry_report_page_lines(page: Any, *, column_flow: bool) -> list[tuple[str, str | None]]:
     """Return (line, column) for one entry-report page.
 
-  Hy-Tek entry reports use two side-by-side columns. Read the left column top to
-  bottom, then the right column, keeping swimmer context across the boundary.
-  column is ``L``, ``R``, or None for single-column fallback.
+  Row-paired layouts merge each horizontal band left-to-right (USMS club reports).
+  Column-flow layouts read the left column top-to-bottom, then the right column.
+  column is ``L``, ``R``, or None.
     """
+    if not column_flow:
+        return [(line, None) for line in _entry_report_row_paired_lines(page)]
+
     try:
         words = page.extract_words(use_text_flow=False)
     except Exception:
@@ -879,7 +937,12 @@ def parse_entry_report(content: bytes, team: str | None = None) -> dict[str, Any
     _use_sheet_team(team)
     with pdfplumber.open(io.BytesIO(content)) as pdf:
         pages = list(pdf.pages)
-        page_lines = [item for page in pages for item in _entry_report_page_lines(page)]
+        column_flow = _entry_report_uses_column_flow(pdf)
+        page_lines = [
+            item
+            for page in pages
+            for item in _entry_report_page_lines(page, column_flow=column_flow)
+        ]
         all_text = "\n".join(line for line, _ in page_lines)
         course = detect_course(all_text)
 
@@ -925,7 +988,7 @@ def parse_entry_report(content: bytes, team: str | None = None) -> dict[str, Any
     for page in pages:
         right_swimmer_seen = False
 
-        for line, column in _entry_report_page_lines(page):
+        for line, column in _entry_report_page_lines(page, column_flow=column_flow):
             in_right_prefix = column == "R" and not right_swimmer_seen
 
             if pending_name and _entry_report_team_only_line(line):
@@ -957,7 +1020,7 @@ def parse_entry_report(content: bytes, team: str | None = None) -> dict[str, Any
             roster_header = _match_relay_roster_header(line)
             if roster_header:
                 in_relay_section = True
-                pending_relay_letter = roster_header.group(3) or roster_header.group(1)
+                pending_relay_letter = "A"
                 continue
 
             if in_relay_section:
