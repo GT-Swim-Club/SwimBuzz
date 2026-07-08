@@ -26,7 +26,7 @@ export default async function AthletesPage({
     }
 
     const session = await getServerSession(authOptions)
-    if (!session) redirect("/api/auth/signin")
+    if (!session) redirect("/signin")
 
     const genderFilter = gender === "F" ? "F" : "M"
   

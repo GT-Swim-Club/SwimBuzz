@@ -12,7 +12,7 @@ import AthleteActions from "./AthleteActions"
 export default async function AthletePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params  // 👈 await it
     const session = await getServerSession(authOptions)
-    if (!session) redirect("/api/auth/signin")
+    if (!session) redirect("/signin")
 
     const athlete = await prisma.athlete.findUnique({
         where: { id },  // 👈 use the destructured id

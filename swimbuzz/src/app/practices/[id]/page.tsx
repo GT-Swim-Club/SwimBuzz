@@ -22,7 +22,7 @@ export default async function PracticePage({
 }) {
   const { id } = await params
   const session = await getServerSession(authOptions)
-  if (!session) redirect("/api/auth/signin?callbackUrl=/practices")
+  if (!session) redirect("/signin?callbackUrl=/practices")
 
   const isCoach = isStaffRole(session.user.role)
 

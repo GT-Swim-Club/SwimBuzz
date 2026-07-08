@@ -64,7 +64,7 @@ const TRAVEL_TEXT_SECTIONS: {
 export default async function MeetPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const session = await getServerSession(authOptions)
-  if (!session) redirect("/api/auth/signin")
+  if (!session) redirect("/signin")
 
   const isCoach = ["COACH", "EXEC"].includes(session.user.role)
 

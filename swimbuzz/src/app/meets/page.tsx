@@ -8,7 +8,7 @@ import CreateMeetButton from "./CreateMeetButton"
 
 export default async function MeetsPage() {
   const session = await getServerSession(authOptions)
-  if (!session) redirect("/api/auth/signin")
+  if (!session) redirect("/signin")
 
   const isCoach = ["COACH", "EXEC"].includes(session.user.role)
 

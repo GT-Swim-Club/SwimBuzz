@@ -15,6 +15,9 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
+  pages: {
+    signIn: "/signin",
+  },
   callbacks: {
     redirect({ url, baseUrl }) {
       // Honor explicit same-origin callback URLs (sign-in → /athletes, sign-out

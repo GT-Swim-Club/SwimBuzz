@@ -15,7 +15,7 @@ export default async function PracticesPage({
   searchParams: Promise<{ q?: string; tag?: string }>
 }) {
   const session = await getServerSession(authOptions)
-  if (!session) redirect("/api/auth/signin?callbackUrl=/practices")
+  if (!session) redirect("/signin?callbackUrl=/practices")
 
   const isCoach = isStaffRole(session.user.role)
   const { q, tag } = await searchParams
