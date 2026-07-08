@@ -9,7 +9,7 @@ import { fetchScraper, SCRAPER_URL } from "@/lib/scraper-fetch"
 import { parseSeason } from "@/lib/season"
 
 export const runtime = "nodejs"
-export const maxDuration = 3600
+export const maxDuration = 300
 
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions)

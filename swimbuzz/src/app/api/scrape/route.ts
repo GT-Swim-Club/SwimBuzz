@@ -7,7 +7,7 @@ import { fetchScraper, SCRAPER_URL } from "@/lib/scraper-fetch"
 import { assignSwimOccurrences } from "@/lib/swim-dedup"
 
 export const runtime = "nodejs"
-export const maxDuration = 3600
+export const maxDuration = 300
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
