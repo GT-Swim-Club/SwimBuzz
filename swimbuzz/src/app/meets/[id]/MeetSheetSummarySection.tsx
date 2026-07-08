@@ -582,6 +582,7 @@ export default function MeetSheetSummarySection({
       .filter((a): a is typeof a & { gender: "M" | "F" } => a.gender === "M" || a.gender === "F")
       .map((a) => [a.id, a.gender])
   )
+  const athleteNames = new Map(athletes.map((a) => [a.id, a.name]))
 
   const leadoffResults = mergeMeetResultEntries(
     results ?? [],
@@ -617,7 +618,7 @@ export default function MeetSheetSummarySection({
         hasImportedResults
       )
     : []
-  const grouped = summary ? groupSheetByAthlete(displayEntries) : []
+  const grouped = summary ? groupSheetByAthlete(displayEntries, athleteNames) : []
   const hasContent = relays.length > 0 || grouped.length > 0
 
   function renderRelayGroup(title: string, entries: SummaryEntry[]) {

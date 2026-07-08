@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import SyncRosterButton from "./SyncRosterButton"
+import ImportRosterButton from "./ImportRosterButton"
 import SyncTimesButton from "./SyncTimesButton"
 import AddAthleteButton from "./AddAthleteButton"
 import RosterFilters from "./RosterFilters"
@@ -54,7 +54,9 @@ export default async function AthletesPage({
           </div>
           {isCoach && (
             <div className="flex items-center gap-3 flex-wrap">
-              <SyncRosterButton />
+              <Suspense fallback={null}>
+                <ImportRosterButton />
+              </Suspense>
               <Suspense fallback={null}>
                 <SyncTimesButton />
               </Suspense>

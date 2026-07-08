@@ -153,19 +153,16 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
     ? meet.relayResultsSummary.entries
     : null
 
-  const rosterAthletes = isCoach
-    ? (
-        await prisma.athlete.findMany({
-          where: { seasons: { has: meet.season } },
-          orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
-          select: { id: true, firstName: true, lastName: true, gender: true },
-        })
-      ).map((a) => ({
-        id: a.id,
-        name: `${a.lastName}, ${a.firstName}`,
-        gender: a.gender === Gender.F ? ("F" as const) : ("M" as const),
-      }))
-    : []
+  const seasonRoster = await prisma.athlete.findMany({
+    where: { seasons: { has: meet.season } },
+    orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+    select: { id: true, firstName: true, lastName: true, gender: true },
+  })
+  const rosterAthletes = seasonRoster.map((a) => ({
+    id: a.id,
+    name: `${a.lastName}, ${a.firstName}`,
+    gender: a.gender === Gender.F ? ("F" as const) : ("M" as const),
+  }))
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-8 space-y-8">

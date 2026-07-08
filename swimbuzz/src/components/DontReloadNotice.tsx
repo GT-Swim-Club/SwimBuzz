@@ -1,6 +1,6 @@
 export default function DontReloadNotice({
   className = "",
-  label = "Don't reload the page — this may take a few minutes.",
+  label = "Don't close the page — this may take a moment.",
 }: {
   className?: string
   label?: string

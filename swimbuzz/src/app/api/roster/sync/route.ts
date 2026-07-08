@@ -1,10 +1,19 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import { prisma } from "@/lib/prisma"
 import { Gender } from "@prisma/client"
 import { fetchScraper, SCRAPER_URL } from "@/lib/scraper-fetch"
 import { parseSeason, seasonEndYear } from "@/lib/season"
+import {
+  createImportAthlete,
+  findAthleteForImport,
+  loadRosterImportContext,
+  mergeImportAthlete,
+  parseSwimCloudName,
+  registerImportAthlete,
+  swimCloudIdConflict,
+} from "@/lib/roster-import"
+
 const TEAM_ID = process.env.SWIMCLOUD_TEAM_ID ?? "10004130"
 
 export async function POST(req: Request) {
@@ -28,56 +37,57 @@ export async function POST(req: Request) {
   }
 
   const roster = await res.json()
-  console.log("roster sample:", roster[0]) // 👈 check terminal
-    console.log("roster length:", roster.length)
+  console.log("[roster swimcloud import] sample:", roster[0])
+  console.log("[roster swimcloud import] length:", roster.length)
+
   let created = 0
-  let skipped = 0
+  let updated = 0
+  const importGender = gender === "M" ? Gender.M : Gender.F
 
   try {
-    for (const swimmer of roster) {
-        const swimCloudId = parseInt(swimmer.swimmer_ID)
-        const [firstName, ...rest] = swimmer.swimmer_name.trim().split(" ")
-        const lastName = rest.join(" ")
-      
-        let athlete = await prisma.athlete.findFirst({ where: { swimCloudId } })
+    const context = await loadRosterImportContext()
 
-        if (!athlete) {
-          const user = await prisma.user.upsert({
-            where: { email: `${swimCloudId}@swimcloud.placeholder` },
-            update: {},
-            create: {
-              email: `${swimCloudId}@swimcloud.placeholder`,
-              name: swimmer.swimmer_name,
-              role: "ATHLETE",
-            },
-          })
-        
-          athlete = await prisma.athlete.create({
-            data: {
-              userId: user.id,
-              firstName,
-              lastName,
-              swimCloudId,
-              gender: gender === "M" ? Gender.M : Gender.F,
-              seasons: [season],
-            },
-          })
-          created++
-        } else {
-          // add this season to roster if not already there
-          if (!athlete.seasons.includes(season)) {
-            await prisma.athlete.update({
-              where: { id: athlete.id },
-              data: { seasons: { push: season } },
-            })
-          }
-          skipped++
-        }
+    for (const swimmer of roster) {
+      const swimCloudId = parseInt(swimmer.swimmer_ID, 10)
+      if (!swimCloudId || swimCloudId <= 0) continue
+
+      const { firstName, lastName, nicknames } = parseSwimCloudName(swimmer.swimmer_name.trim())
+      if (!firstName || !lastName) continue
+
+      const input = {
+        firstName,
+        lastName,
+        gender: importGender,
+        swimCloudId,
+        ...(nicknames.length > 0 ? { nicknames } : {}),
       }
-    } catch (err) {
-    console.error("Sync error:", err)
+
+      const existing = findAthleteForImport(input, context)
+      const conflict = swimCloudIdConflict(input, existing, context)
+      if (conflict) {
+        console.warn(
+          `[roster swimcloud import] SwimCloud ID ${swimCloudId} conflict for ${firstName} ${lastName}`
+        )
+        continue
+      }
+
+      if (existing) {
+        const merged = await mergeImportAthlete(existing, input, season)
+        registerImportAthlete(context, merged)
+        updated++
+        continue
+      }
+
+      const athlete = await createImportAthlete(input, season)
+      registerImportAthlete(context, athlete)
+      created++
+    }
+  } catch (err) {
+    console.error("SwimCloud roster import failed:", err)
     return NextResponse.json({ error: String(err) }, { status: 500 })
   }
 
-  return NextResponse.json({ created, skipped, total: roster.length })
+  console.log("[roster swimcloud import] summary:", { created, updated, total: roster.length })
+
+  return NextResponse.json({ created, updated, total: roster.length })
 }

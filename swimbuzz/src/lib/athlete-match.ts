@@ -34,6 +34,63 @@ export function normalizeNicknames(input: unknown): string[] {
   return result
 }
 
+/** Extract a parenthetical nickname from a single first-name cell. */
+export function parseFirstNameWithNicknames(value: string): {
+  firstName: string
+  nicknames: string[]
+} {
+  const trimmed = value.trim()
+  if (!trimmed) return { firstName: "", nicknames: [] }
+
+  const parenMatch = trimmed.match(/^(.+?)\s*\(([^)]+)\)\s*$/)
+  if (parenMatch) {
+    return {
+      firstName: parenMatch[1].trim(),
+      nicknames: normalizeNicknames(parenMatch[2]),
+    }
+  }
+
+  return { firstName: trimmed, nicknames: [] }
+}
+
+/** Parse a full or partial name, extracting parenthetical nicknames when present. */
+export function parseRosterName(fullName: string): {
+  firstName: string
+  lastName: string
+  nicknames: string[]
+} {
+  const trimmed = fullName.trim()
+  if (!trimmed) return { firstName: "", lastName: "", nicknames: [] }
+
+  if (trimmed.includes(",")) {
+    const [lastPart, ...rest] = trimmed.split(",")
+    const lastName = lastPart.trim()
+    const firstPart = rest.join(",").trim()
+    if (!lastName || !firstPart) return { firstName: "", lastName: "", nicknames: [] }
+
+    const parsedFirst = parseFirstNameWithNicknames(firstPart)
+    if (parsedFirst.firstName) {
+      return { firstName: parsedFirst.firstName, lastName, nicknames: parsedFirst.nicknames }
+    }
+    return { firstName: "", lastName: "", nicknames: [] }
+  }
+
+  const parenMatch = trimmed.match(/^(.+?)\s*\(([^)]+)\)\s+(.+)$/)
+  if (parenMatch) {
+    return {
+      firstName: parenMatch[1].trim(),
+      lastName: parenMatch[3].trim(),
+      nicknames: normalizeNicknames(parenMatch[2]),
+    }
+  }
+
+  const parts = trimmed.split(/\s+/).filter(Boolean)
+  if (parts.length < 2) {
+    return { firstName: parts[0] ?? "", lastName: "", nicknames: [] }
+  }
+  return { firstName: parts[0], lastName: parts[parts.length - 1], nicknames: [] }
+}
+
 function normalize(value: string): string {
   return value
     .toLowerCase()

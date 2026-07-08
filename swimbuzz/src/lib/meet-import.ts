@@ -12,13 +12,10 @@ import {
 import { importRelayLeadoffSwims } from "@/lib/relay-leadoff-sync"
 import {
   buildHeatSheetLookup,
-  hasHeatSheetSummary,
-  individualSheetKey,
   isResultStatusesSummary,
   isSheetSummary,
   mergeMeetResultEntries,
   placementsToMeetResults,
-  resultHeatLanePatchFromSheet,
   seedsToMeetResults,
   statusesToMeetResults,
   type MeetResultEntry,
@@ -76,7 +73,7 @@ export async function importMeetResults({
 
   const lookup = buildAthleteLookup(roster)
   const athleteById = new Map(
-    roster.map((a) => [a.id, `${a.firstName} ${a.lastName}`])
+    roster.map((a) => [a.id, `${a.lastName}, ${a.firstName}`])
   )
 
   const meetRecord = meetId
@@ -88,7 +85,6 @@ export async function importMeetResults({
   const heatSheetSummary = isSheetSummary(meetRecord?.heatSheetSummary)
     ? meetRecord.heatSheetSummary
     : null
-  const hasHeatSheet = hasHeatSheetSummary(heatSheetSummary)
   const heatSheetLookup = buildHeatSheetLookup(heatSheetSummary)
 
   const swims: {
@@ -140,29 +136,8 @@ export async function importMeetResults({
   function pushPlacementRow(
     row: (typeof placementRows)[number]
   ): void {
-    if (!hasHeatSheet) {
-      if (
-        (row.heat == null || row.heat < 1) &&
-        row.lane == null
-      ) {
-        return
-      }
-      placementRows.push(row)
-      return
-    }
-
-    const sheetEntry = heatSheetLookup.get(
-      individualSheetKey(row.athleteId, row.event)
-    )
-    const patch = resultHeatLanePatchFromSheet(
-      sheetEntry,
-      row.tags,
-      row.heat,
-      row.lane,
-      row.heatTotal
-    )
-    if (!patch) return
-    placementRows.push({ ...row, ...patch })
+    if ((row.heat == null || row.heat < 1) && row.lane == null) return
+    placementRows.push(row)
   }
 
   for (const row of results) {
@@ -294,7 +269,6 @@ export async function importMeetResults({
 
   const relayEntries = matchRelayResultsToRoster(relayResults, roster).map(
     (entry) => {
-      if (!hasHeatSheet) return entry
       const sheetEntry = heatSheetLookup.get(
         relayTeamKey(
           entry.event,
@@ -324,19 +298,12 @@ export async function importMeetResults({
   const existingMeta = isResultStatusesSummary(meetRecord?.resultStatusesSummary)
     ? meetRecord.resultStatusesSummary.entries
     : []
-  const metaEntries = hasHeatSheet
-    ? mergeMeetResultEntries(
-        existingMeta,
-        statusEntries,
-        placementEntries,
-        seedEntries
-      )
-    : mergeMeetResultEntries(
-        statusEntries,
-        seedEntries,
-        existingMeta,
-        placementEntries
-      )
+  const metaEntries = mergeMeetResultEntries(
+    existingMeta,
+    statusEntries,
+    seedEntries,
+    placementEntries
+  )
   if (meetId) {
     const meetUpdate: {
       relayResultsSummary?: { entries: typeof relayEntries }
