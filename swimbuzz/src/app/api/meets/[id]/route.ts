@@ -54,7 +54,7 @@ export async function PATCH(
         nextPacket !== existing.packetUrl || (nextPacket && !existing.eventOrder)
       if (shouldParse) {
         try {
-          data.eventOrder = await resolveEventOrderForPacket(nextPacket)
+          data.eventOrder = await resolveEventOrderForPacket(session.user.id, nextPacket)
         } catch (err) {
           console.error("Meet packet parse failed:", err)
           data.eventOrder = null
@@ -62,7 +62,7 @@ export async function PATCH(
       }
     }
 
-    await attachSheetSummaries(existing, data)
+    await attachSheetSummaries(session.user.id, existing, data)
 
     const meet = await prisma.meet.update({ where: { id }, data })
     return NextResponse.json(meet)

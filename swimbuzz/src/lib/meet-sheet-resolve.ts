@@ -24,6 +24,7 @@ function effectiveTeamCode(
 }
 
 export async function attachSheetSummaries(
+  userId: string,
   existing: {
     season: string
     teamCode: string | null
@@ -70,7 +71,7 @@ export async function attachSheetSummaries(
       (teamChanged && !!next)
     if (shouldParse) {
       try {
-        data.psychSheetSummary = await resolvePsychSheetSummary(next, roster, teamCode)
+        data.psychSheetSummary = await resolvePsychSheetSummary(userId, next, roster, teamCode)
       } catch (err) {
         console.error("Psych sheet parse failed:", err)
         data.psychSheetSummary = null
@@ -79,6 +80,7 @@ export async function attachSheetSummaries(
   } else if (teamChanged && existing.psychSheetUrl && roster) {
     try {
       data.psychSheetSummary = await resolvePsychSheetSummary(
+        userId,
         existing.psychSheetUrl,
         roster,
         teamCode
@@ -97,7 +99,7 @@ export async function attachSheetSummaries(
       (teamChanged && !!next)
     if (shouldParse) {
       try {
-        data.heatSheetSummary = await resolveHeatSheetSummary(next, roster, teamCode)
+        data.heatSheetSummary = await resolveHeatSheetSummary(userId, next, roster, teamCode)
       } catch (err) {
         console.error("Heat sheet parse failed:", err)
         data.heatSheetSummary = null
@@ -106,6 +108,7 @@ export async function attachSheetSummaries(
   } else if (teamChanged && existing.heatSheetUrl && roster) {
     try {
       data.heatSheetSummary = await resolveHeatSheetSummary(
+        userId,
         existing.heatSheetUrl,
         roster,
         teamCode
@@ -124,7 +127,7 @@ export async function attachSheetSummaries(
       (teamChanged && !!next)
     if (shouldParse) {
       try {
-        data.entriesSheetSummary = await resolveEntriesSheetSummary(next, roster, teamCode)
+        data.entriesSheetSummary = await resolveEntriesSheetSummary(userId, next, roster, teamCode)
       } catch (err) {
         console.error("Entries sheet parse failed:", err)
         data.entriesSheetSummary = null
@@ -133,6 +136,7 @@ export async function attachSheetSummaries(
   } else if (teamChanged && existing.entriesSheetUrl && roster) {
     try {
       data.entriesSheetSummary = await resolveEntriesSheetSummary(
+        userId,
         existing.entriesSheetUrl,
         roster,
         teamCode
@@ -145,6 +149,7 @@ export async function attachSheetSummaries(
 }
 
 export async function attachSheetSummariesOnCreate(
+  userId: string,
   season: string,
   data: Record<string, unknown>
 ) {
@@ -154,6 +159,7 @@ export async function attachSheetSummariesOnCreate(
   if (data.psychSheetUrl) {
     try {
       data.psychSheetSummary = await resolvePsychSheetSummary(
+        userId,
         data.psychSheetUrl as string,
         roster,
         teamCode
@@ -167,6 +173,7 @@ export async function attachSheetSummariesOnCreate(
   if (data.heatSheetUrl) {
     try {
       data.heatSheetSummary = await resolveHeatSheetSummary(
+        userId,
         data.heatSheetUrl as string,
         roster,
         teamCode
@@ -180,6 +187,7 @@ export async function attachSheetSummariesOnCreate(
   if (data.entriesSheetUrl) {
     try {
       data.entriesSheetSummary = await resolveEntriesSheetSummary(
+        userId,
         data.entriesSheetUrl as string,
         roster,
         teamCode

@@ -2,11 +2,10 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { importMeetResults, resolveMeetDate } from "@/lib/meet-import"
-import { fetchScraper, SCRAPER_URL } from "@/lib/scraper-fetch"
+import { parseMeetPdf } from "@/lib/scraper-or-bridge"
 import { prisma } from "@/lib/prisma"
 import { isStoredMeetFileUrl } from "@/lib/meet-files"
 import { deleteStoredMeetFile, uploadMeetFile } from "@/lib/meet-storage"
-import { FormData as UndiciFormData } from "undici"
 import { parseSeason } from "@/lib/season"
 import { coerceParsedRelayResults } from "@/lib/relay-results"
 
@@ -63,47 +62,24 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Team code is required" }, { status: 400 })
   }
 
-  const scraperForm = new UndiciFormData()
   const fileBytes = await file.arrayBuffer()
-  scraperForm.append(
-    "file",
-    new Blob([fileBytes], { type: "application/pdf" }),
-    fileName
-  )
-  scraperForm.append("course", courseDefault)
-  scraperForm.append("team", team)
 
-  let parseRes: Response
-  try {
-    parseRes = await fetchScraper(`${SCRAPER_URL}/parse-meet-pdf`, {
-      method: "POST",
-      body: scraperForm as unknown as BodyInit,
-    })
-  } catch {
-    return NextResponse.json(
-      { error: "Could not reach PDF parser — is the scraper running on port 8000?" },
-      { status: 502 }
-    )
-  }
-
-  if (!parseRes.ok) {
-    const err = await parseRes.json().catch(() => ({}))
-    const detail = err.detail
-    const message =
-      typeof detail === "string"
-        ? detail
-        : Array.isArray(detail)
-          ? detail.map((d: { msg?: string }) => d.msg).filter(Boolean).join(", ")
-          : "Failed to parse PDF"
-    return NextResponse.json({ error: message }, { status: 502 })
-  }
-
-  const parsed = (await parseRes.json()) as {
+  let parsed: {
     course?: string
     meet_name?: string | null
     meet_date?: string | null
     results: ParsedResult[]
     relay_results?: unknown[]
+  }
+  try {
+    parsed = await parseMeetPdf(session.user.id, fileBytes, {
+      course: courseDefault,
+      team,
+      fileName,
+    })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to parse PDF"
+    return NextResponse.json({ error: message }, { status: 502 })
   }
 
   const meetName =

@@ -1,12 +1,11 @@
-import { fetchScraper, SCRAPER_URL } from "@/lib/scraper-fetch"
 import { fetchMeetFileBytes } from "@/lib/meet-file-fetch"
+import { parseMeetSheetPdf } from "@/lib/scraper-or-bridge"
 import type { SheetSummary, SheetEntry } from "@/lib/meet-sheet-summary"
 import {
   buildAthleteLookup,
   matchAthleteIdFast,
   type RosterAthlete,
 } from "@/lib/athlete-match"
-import { FormData as UndiciFormData } from "undici"
 import { normalizeEventName } from "@/lib/swim-parse"
 import { normalizeRelayLetter } from "@/lib/relay-results"
 
@@ -34,44 +33,12 @@ type ParsedSheetEntry = {
 }
 
 async function callSheetParser(
+  userId: string,
   bytes: Buffer,
   sheetType: "psych" | "heat" | "entries",
   teamCode: string
 ): Promise<{ sheetType: "psych" | "heat" | "entries"; course: string; entries: ParsedSheetEntry[] }> {
-  const scraperForm = new UndiciFormData()
-  scraperForm.append(
-    "file",
-    new Blob([new Uint8Array(bytes)], { type: "application/pdf" }),
-    "meet-sheet.pdf"
-  )
-  scraperForm.append("sheet_type", sheetType)
-  scraperForm.append("team", teamCode)
-
-  let parseRes: Response
-  try {
-    parseRes = await fetchScraper(`${SCRAPER_URL}/parse-meet-sheet-pdf`, {
-      method: "POST",
-      body: scraperForm as unknown as BodyInit,
-    })
-  } catch {
-    throw new Error(
-      "Could not reach sheet parser — is the scraper running on port 8000?"
-    )
-  }
-
-  if (!parseRes.ok) {
-    const err = await parseRes.json().catch(() => ({}))
-    const detail = (err as { detail?: string | { msg?: string }[] }).detail
-    const message =
-      typeof detail === "string"
-        ? detail
-        : Array.isArray(detail)
-          ? detail.map((d) => d.msg).filter(Boolean).join(", ")
-          : "Failed to parse sheet"
-    throw new Error(message)
-  }
-
-  return parseRes.json()
+  return parseMeetSheetPdf(userId, bytes, { sheetType, team: teamCode })
 }
 
 function rosterName(athleteId: string, roster: RosterAthlete[]): string {
@@ -199,13 +166,14 @@ function matchSheetToRoster(
 }
 
 export async function parseMeetSheetForRoster(
+  userId: string,
   url: string,
   sheetType: "psych" | "heat" | "entries",
   roster: RosterAthlete[],
   teamCode = "GTSC"
 ): Promise<SheetSummary | null> {
   const bytes = await fetchMeetFileBytes(url)
-  const parsed = await callSheetParser(bytes, sheetType, teamCode)
+  const parsed = await callSheetParser(userId, bytes, sheetType, teamCode)
   const entries = matchSheetToRoster(parsed.entries ?? [], roster)
   if (entries.length === 0) return null
   return jsonSafeSheetSummary({
@@ -216,28 +184,31 @@ export async function parseMeetSheetForRoster(
 }
 
 export async function resolvePsychSheetSummary(
+  userId: string,
   url: string | null | undefined,
   roster: RosterAthlete[],
   teamCode = "GTSC"
 ): Promise<SheetSummary | null> {
   if (!url) return null
-  return parseMeetSheetForRoster(url, "psych", roster, teamCode)
+  return parseMeetSheetForRoster(userId, url, "psych", roster, teamCode)
 }
 
 export async function resolveHeatSheetSummary(
+  userId: string,
   url: string | null | undefined,
   roster: RosterAthlete[],
   teamCode = "GTSC"
 ): Promise<SheetSummary | null> {
   if (!url) return null
-  return parseMeetSheetForRoster(url, "heat", roster, teamCode)
+  return parseMeetSheetForRoster(userId, url, "heat", roster, teamCode)
 }
 
 export async function resolveEntriesSheetSummary(
+  userId: string,
   url: string | null | undefined,
   roster: RosterAthlete[],
   teamCode = "GTSC"
 ): Promise<SheetSummary | null> {
   if (!url) return null
-  return parseMeetSheetForRoster(url, "entries", roster, teamCode)
+  return parseMeetSheetForRoster(userId, url, "entries", roster, teamCode)
 }

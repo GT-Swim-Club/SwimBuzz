@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
     if (data.packetUrl) {
       try {
-        data.eventOrder = await resolveEventOrderForPacket(data.packetUrl as string)
+        data.eventOrder = await resolveEventOrderForPacket(session.user.id, data.packetUrl as string)
       } catch (err) {
         console.error("Meet packet parse failed:", err)
         data.eventOrder = null
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     }
 
     const season = data.season as string
-    await attachSheetSummariesOnCreate(season, data)
+    await attachSheetSummariesOnCreate(session.user.id, season, data)
 
     const meet = await prisma.meet.create({ data: data as Parameters<typeof prisma.meet.create>[0]["data"] })
     return NextResponse.json(meet, { status: 201 })
