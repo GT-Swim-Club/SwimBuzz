@@ -29,7 +29,14 @@ def playwright_headless() -> bool:
 
 
 PLAYWRIGHT_HEADLESS = playwright_headless()
-BROWSER_ARGS = ["--disable-blink-features=AutomationControlled"]
+BROWSER_ARGS = [
+    "--disable-blink-features=AutomationControlled",
+    # Required for Chromium in Docker / low-memory hosts (e.g. Render)
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--disable-dev-shm-usage",
+    "--disable-gpu",
+]
 BROWSER_USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -131,11 +138,39 @@ async def health():
     return {"ok": True}
 
 
+@app.get("/health/ready")
+async def health_ready():
+    """Verify Playwright can launch Chromium (catches OOM / sandbox issues on deploy)."""
+    try:
+        async with async_playwright() as p:
+            browser, page = await launch_browser(p)
+            await page.goto("about:blank", timeout=15_000)
+            await browser.close()
+        return {"ok": True, "playwright": True}
+    except Exception as e:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                f"Playwright browser failed: {e}. "
+                "On Render, use Standard (2 GB RAM) or higher for the scraper service."
+            ),
+        )
+
+
 async def launch_browser(playwright):
-    browser = await playwright.chromium.launch(
-        headless=PLAYWRIGHT_HEADLESS,
-        args=BROWSER_ARGS,
-    )
+    try:
+        browser = await playwright.chromium.launch(
+            headless=PLAYWRIGHT_HEADLESS,
+            args=BROWSER_ARGS,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                f"Browser launch failed: {e}. "
+                "On Render, use Standard (2 GB RAM) or higher for the scraper service."
+            ),
+        ) from e
     context = await browser.new_context(
         user_agent=BROWSER_USER_AGENT,
         viewport=BROWSER_VIEWPORT,

@@ -21,9 +21,33 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing athleteId or swimmerCloudId" }, { status: 400 })
   }
 
-  const res = await fetchScraper(`${SCRAPER_URL}/times?swimmer_id=${swimmerCloudId}`)
+  if (process.env.RENDER && SCRAPER_URL.includes("localhost")) {
+    return NextResponse.json(
+      {
+        error:
+          "SCRAPER_URL is not set on Render. In the web service Environment, set it to your scraper URL (e.g. https://swimbuzz-scraper.onrender.com).",
+      },
+      { status: 503 }
+    )
+  }
+
+  let res: Response
+  try {
+    res = await fetchScraper(`${SCRAPER_URL}/times?swimmer_id=${swimmerCloudId}`)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "connection failed"
+    return NextResponse.json(
+      { error: `Could not reach scraper at ${SCRAPER_URL}: ${message}` },
+      { status: 502 }
+    )
+  }
+
   if (!res.ok) {
-    return NextResponse.json({ error: "Scraper failed" }, { status: 502 })
+    const detail = (await res.text().catch(() => "")).trim()
+    return NextResponse.json(
+      { error: detail || `Scraper returned ${res.status}` },
+      { status: 502 }
+    )
   }
 
   const times = (await res.json()) as SwimCloudTime[]

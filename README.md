@@ -48,7 +48,7 @@ SwimBuzz/
 
 ## Prerequisites
 
-- Node.js 20+
+- Node.js 22+ (required by `undici` v8)
 - Python 3.11+
 - PostgreSQL database (e.g. Supabase)
 - Google OAuth credentials
@@ -125,6 +125,29 @@ The repo includes a [`render.yaml`](render.yaml) Blueprint with two services:
 3. **Render** — Dashboard → **New Blueprint** → connect this repo → apply `render.yaml`.
 4. **Web env vars** (`swimbuzz` service) — Set `DIRECT_URL`, `SUPABASE_*`, `GOOGLE_*`, `NEXTAUTH_URL` (your Render web URL), and `SCRAPER_URL` (your Render scraper URL).
 5. **Scraper env vars** (`swimbuzz-scraper` service) — Set `CORS_ORIGINS` to your web URL, e.g. `https://swimbuzz.onrender.com`.
+
+### Manual deploy checklist
+
+If you create services by hand instead of the Blueprint:
+
+| Service | Setting | Value |
+|---------|---------|-------|
+| **Web** (`swimbuzz`) | Root directory | `swimbuzz` |
+| | Build | `npm ci && npm run build` |
+| | Start | `npm run start` |
+| | `NODE_VERSION` | `22` |
+| | `HOSTNAME` | `0.0.0.0` |
+| | `NEXTAUTH_URL` | Your web URL, e.g. `https://swimbuzz.onrender.com` |
+| | `SCRAPER_URL` | Your scraper URL, e.g. `https://swimbuzz-scraper.onrender.com` (no trailing slash) |
+| **Scraper** | Root directory | `scraper` |
+| | Environment | Docker |
+| | Instance type | **Standard (2 GB RAM)** or higher — Playwright fails on 512 MB |
+| | `PLAYWRIGHT_HEADLESS` | `true` |
+| | `CORS_ORIGINS` | Your web URL |
+
+After deploy, verify the scraper: `GET https://YOUR-SCRAPER/health/ready` should return `{"ok":true,"playwright":true}`.
+
+**Note:** SwimCloud imports can take several minutes. Render free web services time out after **30 seconds**; use **Starter** or higher on the web service for a 5-minute request timeout.
 
 ### Docker (scraper only)
 

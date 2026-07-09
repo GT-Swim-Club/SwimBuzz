@@ -1,6 +1,6 @@
 import { Agent, fetch as undiciFetch } from "undici"
 
-const SCRAPER_URL = process.env.SCRAPER_URL ?? "http://localhost:8000"
+const SCRAPER_URL = (process.env.SCRAPER_URL ?? "http://localhost:8000").replace(/\/$/, "")
 
 /** Node's default fetch times out after 5 minutes; bulk SwimCloud sync can take much longer. */
 const SCRAPER_FETCH_TIMEOUT_MS = parseInt(
@@ -8,11 +8,18 @@ const SCRAPER_FETCH_TIMEOUT_MS = parseInt(
   10
 )
 
-const scraperAgent = new Agent({
-  headersTimeout: SCRAPER_FETCH_TIMEOUT_MS,
-  bodyTimeout: SCRAPER_FETCH_TIMEOUT_MS,
-  connectTimeout: 30_000,
-})
+let scraperAgent: Agent | undefined
+
+function getScraperAgent(): Agent {
+  if (!scraperAgent) {
+    scraperAgent = new Agent({
+      headersTimeout: SCRAPER_FETCH_TIMEOUT_MS,
+      bodyTimeout: SCRAPER_FETCH_TIMEOUT_MS,
+      connectTimeout: 30_000,
+    })
+  }
+  return scraperAgent
+}
 
 export { SCRAPER_URL }
 
@@ -22,6 +29,6 @@ export function fetchScraper(
 ): Promise<Response> {
   return undiciFetch(input, {
     ...init,
-    dispatcher: scraperAgent,
+    dispatcher: getScraperAgent(),
   } as Parameters<typeof undiciFetch>[1]) as unknown as Promise<Response>
 }

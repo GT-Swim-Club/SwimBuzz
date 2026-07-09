@@ -23,6 +23,7 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [scrapeStatus, setScrapeStatus] = useState<"idle" | "loading" | "done" | "error">("idle")
+  const [scrapeError, setScrapeError] = useState<string | null>(null)
   const [scrapeCount, setScrapeCount] = useState(0)
   const [lastSynced, setLastSynced] = useState<string | null>(timesSyncedAt)
   const [form, setForm] = useState({
@@ -76,13 +77,14 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
   async function handleScrape() {
     if (!swimCloudId) return
     setScrapeStatus("loading")
+    setScrapeError(null)
 
     const res = await fetch("/api/scrape", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ athleteId, swimmerCloudId: swimCloudId }),
     })
-    const data = await res.json()
+    const data = await res.json().catch(() => ({}))
 
     if (res.ok) {
       setScrapeCount(data.imported)
@@ -90,6 +92,7 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
       if (data.timesSyncedAt) setLastSynced(data.timesSyncedAt)
       router.refresh()
     } else {
+      setScrapeError(data.error ?? "Import failed — is the scraper running?")
       setScrapeStatus("error")
     }
   }
@@ -114,8 +117,8 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
               {scrapeStatus === "done" && (
                 <span className="text-xs text-gray-500 dark:text-zinc-400">{scrapeCount} swims imported</span>
               )}
-              {scrapeStatus === "error" && (
-                <span className="text-xs text-red-500">Import failed — is the scraper running?</span>
+              {scrapeStatus === "error" && scrapeError && (
+                <span className="text-xs text-red-500">{scrapeError}</span>
               )}
               {scrapeStatus !== "done" && scrapeStatus !== "loading" && (
                 <span className="text-xs text-gray-400 dark:text-zinc-500" title={lastSynced ? formatDateTime(lastSynced) : undefined}>
