@@ -151,6 +151,47 @@ When upgrading Playwright, update **both** `scraper/requirements.txt` (`playwrig
 
 **Note:** SwimCloud imports can take several minutes. Render free web services time out after **30 seconds**; use **Starter** or higher on the web service for a 5-minute request timeout.
 
+### Cloudflare / SwimCloud blocking
+
+SwimCloud sits behind Cloudflare. Datacenter IPs (including Render) are often blocked with a "Just a moment..." page, which causes scraper **502** errors.
+
+**Workaround — run the scraper on your laptop:**
+
+```bash
+cd scraper
+pip install -r requirements.txt
+playwright install chromium
+uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+In another terminal, expose port 8000 with a tunnel. Pick one:
+
+**Option A — Cloudflare Tunnel (no account):**
+
+```bash
+brew install cloudflared
+cloudflared tunnel --url http://localhost:8000
+```
+
+Copy the `https://….trycloudflare.com` URL.
+
+**Option B — localtunnel (no install, needs Node):**
+
+```bash
+npx localtunnel --port 8000
+```
+
+**Option C — ngrok:**
+
+```bash
+brew install ngrok/ngrok/ngrok
+ngrok http 8000
+```
+
+Set **`SCRAPER_URL`** on the Render **web** service to the tunnel URL (no trailing slash). Keep the scraper and tunnel running while importing.
+
+The Docker scraper uses headed Chromium via `xvfb` to reduce bot detection, but Cloudflare may still block Render IPs.
+
 ### Docker (scraper only)
 
 ```bash

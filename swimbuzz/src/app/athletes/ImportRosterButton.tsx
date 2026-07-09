@@ -5,6 +5,7 @@ import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
 import { currentSeason, parseSeason, seasonEndYear } from "@/lib/season"
 import Modal, { ModalFooter } from "@/components/Modal"
+import { useBridgeStatus } from "@/lib/use-bridge-status"
 
 type ImportSource = "swimcloud" | "csv"
 
@@ -34,6 +35,8 @@ export default function ImportRosterButton() {
     parseSeason(searchParams.get("season") ?? searchParams.get("year")) ?? currentSeason()
   const rosterLabel = `${gender === "F" ? "Women" : "Men"} ${season}`
   const csvRosterLabel = `Women's & Men's ${season}`
+
+  const { connected: bridgeConnected } = useBridgeStatus()
 
   const [open, setOpen] = useState(false)
   const [resultOpen, setResultOpen] = useState(false)
@@ -78,7 +81,12 @@ export default function ImportRosterButton() {
         const res = await fetch("/api/roster/sync", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ season, year: seasonEndYear(season), gender }),
+          body: JSON.stringify({
+            season,
+            year: seasonEndYear(season),
+            gender,
+            useBridge: bridgeConnected,
+          }),
         })
         const data = await res.json()
         if (!res.ok) {
@@ -237,9 +245,21 @@ export default function ImportRosterButton() {
         }
       >
         {source === "swimcloud" ? (
-          <p className="text-sm text-gray-600 dark:text-zinc-400">
-            Pulls the {rosterLabel} roster from SwimCloud. Existing athletes are merged.
-          </p>
+          <div className="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
+            <p>
+              Pulls the {rosterLabel} roster from SwimCloud. Existing athletes are merged.
+            </p>
+            {bridgeConnected ? (
+              <p className="text-emerald-700 dark:text-emerald-400">
+                Local sync is connected — Chromium will open on your computer if Cloudflare
+                prompts you.
+              </p>
+            ) : (
+              <p className="text-amber-700 dark:text-amber-400">
+                Connect Local sync first on hosted apps, or run the scraper locally for dev.
+              </p>
+            )}
+          </div>
         ) : (
           <div className="space-y-4">
             <div className="rounded-lg border border-gray-100 bg-gray-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-800/50">

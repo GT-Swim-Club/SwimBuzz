@@ -7,6 +7,7 @@ import DontReloadNotice from "@/components/DontReloadNotice"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import { formatRelativeTime, formatDateTime } from "@/lib/utils"
 import { currentSeason, parseSeason } from "@/lib/season"
+import { useBridgeStatus } from "@/lib/use-bridge-status"
 
 type RosterAthlete = {
   id: string
@@ -38,6 +39,8 @@ export default function SyncTimesButton() {
   const gender = searchParams.get("gender") === "F" ? "F" : "M"
   const season =
     parseSeason(searchParams.get("season") ?? searchParams.get("year")) ?? currentSeason()
+
+  const { connected: bridgeConnected } = useBridgeStatus()
 
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -118,6 +121,7 @@ export default function SyncTimesButton() {
           season,
           gender,
           athleteIds: toSync.map((a) => a.id),
+          useBridge: bridgeConnected,
         }),
       })
       const data = await res.json()
@@ -175,6 +179,9 @@ export default function SyncTimesButton() {
               </h2>
               <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">
                 Select athletes on the {gender === "F" ? "women's" : "men's"} {season} roster.
+                {bridgeConnected
+                  ? " Local sync is connected — complete any Cloudflare check in the browser window on your computer."
+                  : " Connect Local sync on hosted apps before importing."}
               </p>
             </div>
 

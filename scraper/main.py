@@ -6,7 +6,11 @@ from pydantic import BaseModel
 import asyncio
 import os
 import random
+from pathlib import Path
 import uvicorn
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 from pdf_parse import parse_meet_pdf_bytes
 from packet_parse import parse_packet_pdf_bytes
@@ -39,9 +43,15 @@ BROWSER_ARGS = [
 ]
 BROWSER_USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
-    "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
 )
 BROWSER_VIEWPORT = {"width": 1280, "height": 800}
+
+CLOUDFLARE_HINT = (
+    "SwimCloud is blocking this server's IP (Cloudflare). "
+    "Run the scraper on your laptop and set SCRAPER_URL on the web app to a tunnel URL "
+    "(e.g. ngrok http 8000)."
+)
 
 # Adaptive pacing — conservative to avoid SwimCloud 429s
 MIN_DELAY_SEC = 1.2
@@ -125,6 +135,59 @@ class AdaptivePacer:
     def on_rate_limit(self):
         self.delay = min(MAX_DELAY_SEC, max(self.delay * 2.0, MIN_DELAY_SEC * 2))
 
+
+def is_cloudflare_challenge(html: str, title: str = "") -> bool:
+    title_l = title.lower()
+    html_l = html.lower()
+    return (
+        "just a moment" in title_l
+        or "attention required" in title_l
+        or "cf-challenge" in html_l
+        or "challenges.cloudflare.com" in html_l
+    )
+
+
+async def wait_past_cloudflare(page, timeout_ms: int = 120_000) -> None:
+    deadline = asyncio.get_event_loop().time() + timeout_ms / 1000
+    while asyncio.get_event_loop().time() < deadline:
+        title = await page.title()
+        html = await page.content()
+        if not is_cloudflare_challenge(html, title):
+            return
+        await asyncio.sleep(2.5)
+
+    html = await page.content()
+    title = await page.title()
+    if is_cloudflare_challenge(html, title):
+        raise HTTPException(status_code=502, detail=f"Cloudflare blocked access to SwimCloud. {CLOUDFLARE_HINT}")
+    raise HTTPException(status_code=502, detail="Timed out waiting for SwimCloud to load.")
+
+
+async def navigate_swimcloud(
+    page,
+    url: str,
+    selector: str | None = None,
+    selector_timeout: int = 45_000,
+) -> None:
+    await page.goto("https://www.swimcloud.com/", wait_until="domcontentloaded", timeout=60_000)
+    await wait_past_cloudflare(page)
+    await page.goto(url, wait_until="domcontentloaded", timeout=60_000)
+    await wait_past_cloudflare(page)
+    if not selector:
+        return
+    try:
+        await page.wait_for_selector(selector, timeout=selector_timeout)
+    except Exception as e:
+        html = await page.content()
+        title = await page.title()
+        if is_cloudflare_challenge(html, title):
+            raise HTTPException(
+                status_code=502,
+                detail=f"Cloudflare blocked access to SwimCloud. {CLOUDFLARE_HINT}",
+            ) from e
+        raise
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins(),
@@ -162,6 +225,7 @@ async def launch_browser(playwright):
         browser = await playwright.chromium.launch(
             headless=PLAYWRIGHT_HEADLESS,
             args=BROWSER_ARGS,
+            ignore_default_args=["--enable-automation"],
         )
     except Exception as e:
         raise HTTPException(
@@ -174,6 +238,8 @@ async def launch_browser(playwright):
     context = await browser.new_context(
         user_agent=BROWSER_USER_AGENT,
         viewport=BROWSER_VIEWPORT,
+        locale="en-US",
+        timezone_id="America/New_York",
     )
     page = await context.new_page()
     stealth = Stealth()
@@ -183,6 +249,10 @@ async def launch_browser(playwright):
 
 @app.get("/roster")
 async def get_roster(team_id: int, year: int, gender: str = "M"):
+    return await scrape_team_roster(team_id, year, gender)
+
+
+async def scrape_team_roster(team_id: int, year: int, gender: str = "M"):
     # map year to season_id (SwimCloud uses season IDs)
     # 2021-22 = season 25, 2022-23 = 26, 2023-24 = 27, 2024-25 = 28
     season_id = (year - 1997)  # rough formula, adjust if off
@@ -192,15 +262,22 @@ async def get_roster(team_id: int, year: int, gender: str = "M"):
         browser, page = await launch_browser(p)
 
         try:
-            await page.goto(
+            await navigate_swimcloud(
+                page,
                 f"https://www.swimcloud.com/team/{team_id}/roster/?gender={gender}&season_id={season_id}",
-                wait_until="domcontentloaded",
-                timeout=60000
+                selector="table tbody tr",
             )
-            await page.wait_for_selector("table tbody tr", timeout=45000)
+        except HTTPException:
+            await browser.close()
+            raise
         except Exception as e:
             html = await page.content()
             await browser.close()
+            if is_cloudflare_challenge(html, await page.title()):
+                raise HTTPException(
+                    status_code=502,
+                    detail=f"Cloudflare blocked access to SwimCloud. {CLOUDFLARE_HINT}",
+                ) from e
             raise HTTPException(status_code=500, detail=f"Failed: {str(e)}\nHTML: {html[:500]}")
 
         rows = await page.query_selector_all("table tbody tr")
@@ -320,12 +397,11 @@ async def fetch_times_by_events(
 
 
 async def open_swimmer_times_page(page, swimmer_id: int):
-    await page.goto(
+    await navigate_swimcloud(
+        page,
         f"https://www.swimcloud.com/swimmer/{swimmer_id}/times/",
-        wait_until="domcontentloaded",
-        timeout=60000,
+        selector="button.c-tabs__link",
     )
-    await page.wait_for_selector("button.c-tabs__link", timeout=45000)
 
 
 class BulkTimesRequest(BaseModel):
@@ -340,7 +416,11 @@ class SwimPhoneMeetRequest(BaseModel):
 @app.post("/times/bulk")
 async def get_times_bulk(body: BulkTimesRequest):
     async with _scrape_lock:
-        return await _get_times_bulk(body)
+        return await scrape_bulk_times(body.swimmer_ids)
+
+
+async def scrape_bulk_times(swimmer_ids: list[int]):
+    return await _get_times_bulk(BulkTimesRequest(swimmer_ids=swimmer_ids))
 
 
 async def _get_times_bulk(body: BulkTimesRequest):
@@ -391,9 +471,12 @@ async def _get_times(swimmer_id: int):
 
         try:
             await open_swimmer_times_page(page, swimmer_id)
+        except HTTPException:
+            await browser.close()
+            raise
         except Exception as e:
             await browser.close()
-            raise HTTPException(status_code=502, detail=f"Failed to load page: {str(e)}")
+            raise HTTPException(status_code=502, detail=f"Failed to load page: {str(e)}") from e
 
         results = await fetch_times_by_events(page, swimmer_id, pacer)
 

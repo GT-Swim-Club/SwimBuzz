@@ -4,6 +4,7 @@ import {
   buildAthleteLookup,
   matchAthleteIdFast,
   normalizeNicknames,
+  parseRosterName,
   type AthleteLookup,
 } from "@/lib/athlete-match"
 
@@ -246,3 +247,56 @@ export function registerImportAthlete(
 }
 
 export { parseRosterName as parseSwimCloudName } from "@/lib/athlete-match"
+
+export type SwimCloudRosterRow = {
+  swimmer_name: string
+  swimmer_ID: string
+}
+
+export async function applySwimCloudRosterImport(
+  roster: SwimCloudRosterRow[],
+  season: string,
+  gender: Gender
+) {
+  let created = 0
+  let updated = 0
+  const context = await loadRosterImportContext()
+
+  for (const swimmer of roster) {
+    const swimCloudId = parseInt(swimmer.swimmer_ID, 10)
+    if (!swimCloudId || swimCloudId <= 0) continue
+
+    const { firstName, lastName, nicknames } = parseRosterName(swimmer.swimmer_name.trim())
+    if (!firstName || !lastName) continue
+
+    const input: RosterImportInput = {
+      firstName,
+      lastName,
+      gender,
+      swimCloudId,
+      ...(nicknames.length > 0 ? { nicknames } : {}),
+    }
+
+    const existing = findAthleteForImport(input, context)
+    const conflict = swimCloudIdConflict(input, existing, context)
+    if (conflict) {
+      console.warn(
+        `[roster swimcloud import] SwimCloud ID ${swimCloudId} conflict for ${firstName} ${lastName}`
+      )
+      continue
+    }
+
+    if (existing) {
+      const merged = await mergeImportAthlete(existing, input, season)
+      registerImportAthlete(context, merged)
+      updated++
+      continue
+    }
+
+    const athlete = await createImportAthlete(input, season)
+    registerImportAthlete(context, athlete)
+    created++
+  }
+
+  return { created, updated, total: roster.length }
+}

@@ -7,6 +7,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import ImportRosterButton from "./ImportRosterButton"
 import SyncTimesButton from "./SyncTimesButton"
 import AddAthleteButton from "./AddAthleteButton"
+import LocalBridgeButton from "./LocalBridgeButton"
 import RosterFilters from "./RosterFilters"
 import { currentSeason, parseSeason } from "@/lib/season"
 
@@ -54,6 +55,9 @@ export default async function AthletesPage({
           </div>
           {isCoach && (
             <div className="flex items-center gap-3 flex-wrap">
+              <Suspense fallback={null}>
+                <LocalBridgeButton />
+              </Suspense>
               <Suspense fallback={null}>
                 <ImportRosterButton />
               </Suspense>

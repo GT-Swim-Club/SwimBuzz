@@ -1,5 +1,6 @@
 fastapi
 uvicorn
+python-dotenv
 # Keep in sync with the Playwright version in scraper/Dockerfile (mcr.microsoft.com/playwright/python:vX.Y.Z-jammy)
 playwright==1.61.0
 playwright-stealth

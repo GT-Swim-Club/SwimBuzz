@@ -2,11 +2,12 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
-import { Gender } from "@prisma/client"
+import { Gender, BridgeJobType } from "@prisma/client"
 import { assignSwimOccurrences } from "@/lib/swim-dedup"
 import { swimsFromSwimCloudTimes, type SwimCloudTime } from "@/lib/swimcloud-import"
 import { fetchScraper, SCRAPER_URL } from "@/lib/scraper-fetch"
 import { parseSeason } from "@/lib/season"
+import { runBridgeJob } from "@/lib/bridge"
 
 export const runtime = "nodejs"
 export const maxDuration = 3600
@@ -47,7 +48,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
-  const { season: seasonRaw, year, gender: genderRaw, athleteIds } = await req.json()
+  const { season: seasonRaw, year, gender: genderRaw, athleteIds, useBridge } = await req.json()
   const season = parseSeason(seasonRaw ?? year)
   if (!season) {
     return NextResponse.json({ error: "Season is required (e.g. 2025-2026)" }, { status: 400 })
@@ -83,31 +84,45 @@ export async function POST(req: Request) {
     athletes.map((a) => [a.swimCloudId!, a])
   )
 
-  let scrapeRes: Response
-  try {
-    scrapeRes = await fetchScraper(`${SCRAPER_URL}/times/bulk`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ swimmer_ids: swimmerIds }),
-    })
-  } catch {
-    return NextResponse.json(
-      { error: "Could not reach scraper — is it running on port 8000?" },
-      { status: 502 }
-    )
-  }
-
-  if (!scrapeRes.ok) {
-    const err = await scrapeRes.json().catch(() => ({}))
-    return NextResponse.json(
-      { error: err.detail ?? "Scraper failed" },
-      { status: 502 }
-    )
-  }
-
-  const scraped = (await scrapeRes.json()) as {
+  let scraped: {
     swimmers: Record<string, SwimCloudTime[]>
     failed: number[]
+  }
+
+  try {
+    if (useBridge) {
+      scraped = await runBridgeJob(session.user.id, BridgeJobType.TIMES_BULK, {
+        swimmer_ids: swimmerIds,
+      })
+    } else {
+      const scrapeRes = await fetchScraper(`${SCRAPER_URL}/times/bulk`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ swimmer_ids: swimmerIds }),
+      })
+
+      if (!scrapeRes.ok) {
+        const err = await scrapeRes.json().catch(() => ({}))
+        return NextResponse.json(
+          { error: err.detail ?? "Scraper failed" },
+          { status: 502 }
+        )
+      }
+
+      scraped = await scrapeRes.json()
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Scraper failed"
+    if (message === "LOCAL_BRIDGE_NOT_CONNECTED") {
+      return NextResponse.json(
+        {
+          error:
+            "Local sync is not connected. Open Local sync, generate a code, and run the bridge on your computer.",
+        },
+        { status: 503 }
+      )
+    }
+    return NextResponse.json({ error: message }, { status: 502 })
   }
 
   const allSwims: ReturnType<typeof swimsFromSwimCloudTimes> = []

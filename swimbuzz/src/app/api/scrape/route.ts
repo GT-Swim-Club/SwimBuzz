@@ -4,6 +4,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { swimsFromSwimCloudTimes, type SwimCloudTime } from "@/lib/swimcloud-import"
 import { fetchScraper, SCRAPER_URL } from "@/lib/scraper-fetch"
+import { parseScraperError } from "@/lib/scraper-errors"
 import { assignSwimOccurrences } from "@/lib/swim-dedup"
 
 export const runtime = "nodejs"
@@ -43,9 +44,15 @@ export async function POST(req: Request) {
   }
 
   if (!res.ok) {
-    const detail = (await res.text().catch(() => "")).trim()
+    const raw = await res.text().catch(() => "")
+    let parsed: unknown = raw
+    try {
+      parsed = JSON.parse(raw)
+    } catch {
+      // keep raw text
+    }
     return NextResponse.json(
-      { error: detail || `Scraper returned ${res.status}` },
+      { error: parseScraperError(parsed, `Scraper returned ${res.status}`) },
       { status: 502 }
     )
   }
