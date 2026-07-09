@@ -16,17 +16,20 @@ export default function LocalBridgeButton() {
   const [pairingLoading, setPairingLoading] = useState(false)
   const [disconnecting, setDisconnecting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [installed, setInstalled] = useState<boolean | null>(null)
 
   const appUrl =
-    typeof window !== "undefined" ? window.location.origin : "https://your-app.onrender.com"
+    typeof window !== "undefined" ? window.location.origin : "https://swimbuzz.onrender.com"
 
-  const bridgeCommand = pairing
-    ? `cd scraper && source .venv/bin/activate && python bridge.py --url ${appUrl} --code ${pairing.code}`
+  const installCommand = `curl -fsSL ${appUrl}/bridge/install.sh | bash -s -- ${appUrl}`
+  const connectCommand = pairing
+    ? `swimbuzz-bridge --url ${appUrl} --code ${pairing.code}`
     : ""
 
   useEffect(() => {
     if (!open) return
     void refresh()
+    setInstalled(localStorage.getItem("swimbuzz-bridge-installed") === "1")
   }, [open, refresh])
 
   async function generateCode() {
@@ -61,13 +64,18 @@ export default function LocalBridgeButton() {
     }
   }
 
-  async function copyCommand() {
-    if (!bridgeCommand) return
+  async function copyText(text: string) {
+    if (!text) return
     try {
-      await navigator.clipboard.writeText(bridgeCommand)
+      await navigator.clipboard.writeText(text)
     } catch {
       // ignore
     }
+  }
+
+  function markInstalled() {
+    localStorage.setItem("swimbuzz-bridge-installed", "1")
+    setInstalled(true)
   }
 
   return (
@@ -97,7 +105,7 @@ export default function LocalBridgeButton() {
         open={open}
         onClose={() => setOpen(false)}
         title="Sync from this computer"
-        description="Run SwimCloud imports on your laptop so you can complete Cloudflare checks in Chromium."
+        description="No codebase needed — install a small helper once, then pair with a code."
         maxWidth="md"
         footer={
           <ModalFooter>
@@ -133,15 +141,59 @@ export default function LocalBridgeButton() {
               ? "Checking connection…"
               : connected
                 ? "Your computer is connected. SwimCloud imports will run locally."
-                : "Not connected — generate a code and run the bridge on your computer."}
+                : "Not connected yet."}
           </div>
 
+          {installed === false && (
+            <div className="space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-zinc-700 dark:bg-zinc-900/50">
+              <p className="font-medium text-gray-900 dark:text-zinc-100">One-time setup</p>
+              <p className="text-gray-600 dark:text-zinc-400">
+                Requires Python 3. Installs to <code className="text-xs">~/.swimbuzz-bridge</code>{" "}
+                and adds <code className="text-xs">swimbuzz-bridge</code> to your PATH.
+              </p>
+              <pre className="overflow-x-auto rounded-md bg-white p-3 text-xs text-gray-800 dark:bg-zinc-950 dark:text-zinc-200">
+                {installCommand}
+              </pre>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => void copyText(installCommand)}
+                  className="text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
+                >
+                  Copy install command
+                </button>
+                <button
+                  type="button"
+                  onClick={markInstalled}
+                  className="text-xs font-medium text-gray-600 hover:text-gray-800 dark:text-zinc-400"
+                >
+                  I&apos;ve installed it
+                </button>
+              </div>
+            </div>
+          )}
+
           <ol className="list-decimal space-y-2 pl-5 text-gray-700 dark:text-zinc-300">
-            <li>Install scraper deps once: <code className="text-xs">pip install -r requirements.txt && playwright install chromium</code></li>
+            {installed === false && (
+              <li>Run the one-time install command above (needs Python 3).</li>
+            )}
             <li>Generate a pairing code below (valid 15 minutes).</li>
-            <li>Run the command in your terminal and leave it open.</li>
-            <li>Import roster or sync times as usual — complete any Cloudflare check in the browser window.</li>
+            <li>
+              Run <code className="text-xs">swimbuzz-bridge --url … --code …</code> and leave it
+              open.
+            </li>
+            <li>Import roster or times — complete any Cloudflare check in the browser window.</li>
           </ol>
+
+          {installed && (
+            <button
+              type="button"
+              onClick={() => setInstalled(false)}
+              className="text-xs text-gray-500 hover:text-gray-700 dark:text-zinc-400"
+            >
+              Show install instructions again
+            </button>
+          )}
 
           {!pairing ? (
             <button
@@ -171,11 +223,11 @@ export default function LocalBridgeButton() {
                   Run in terminal
                 </p>
                 <pre className="overflow-x-auto rounded-md bg-white p-3 text-xs text-gray-800 dark:bg-zinc-950 dark:text-zinc-200">
-                  {bridgeCommand}
+                  {connectCommand}
                 </pre>
                 <button
                   type="button"
-                  onClick={() => void copyCommand()}
+                  onClick={() => void copyText(connectCommand)}
                   className="mt-2 text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
                 >
                   Copy command

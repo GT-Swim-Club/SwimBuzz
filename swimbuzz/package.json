@@ -6,8 +6,9 @@
     "node": ">=22.19.0"
   },
   "scripts": {
-    "dev": "prisma generate && node server.js",
-    "build": "prisma generate && next build",
+    "sync-bridge": "node scripts/sync-bridge.mjs",
+    "dev": "npm run sync-bridge && prisma generate && node server.js",
+    "build": "npm run sync-bridge && prisma generate && next build",
     "start": "NODE_ENV=production node server.js",
     "postinstall": "prisma generate",
     "lint": "eslint"
