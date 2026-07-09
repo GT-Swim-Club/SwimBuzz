@@ -8,7 +8,7 @@ import { parseSeason } from "@/lib/season"
 import { coerceParsedRelayResults } from "@/lib/relay-results"
 
 export const runtime = "nodejs"
-export const maxDuration = 300
+export const maxDuration = 3600
 
 type ParsedResult = {
   name: string
