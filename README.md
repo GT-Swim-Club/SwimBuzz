@@ -71,6 +71,8 @@ Copy `.env.example` from the repo root into `swimbuzz/.env` and fill in:
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
 | `SCRAPER_URL` | Scraper base URL (default `http://localhost:8000`) |
 | `SWIMCLOUD_TEAM_ID` | SwimCloud team ID for roster sync |
+| `CORS_ORIGINS` | Scraper only — comma-separated web app URLs allowed to call the API |
+| `PLAYWRIGHT_HEADLESS` | Scraper only — `true` in production (default); set `false` locally if needed |
 
 New Google sign-ups default to `COACH` for now. Athletes created via SwimCloud or CSV import are stored as `ATHLETE`.
 
@@ -104,6 +106,35 @@ uvicorn main:app --reload --port 8000
 ```
 
 Restart the scraper after pulling parser changes.
+
+For local debugging, if SwimCloud blocks headless browsers, run with `PLAYWRIGHT_HEADLESS=false`.
+
+## Deploy on Render
+
+The repo includes a [`render.yaml`](render.yaml) Blueprint with two services:
+
+| Service | Root | Runtime |
+|---------|------|---------|
+| `swimbuzz` | `swimbuzz/` | Node (`npm run start`) |
+| `swimbuzz-scraper` | `scraper/` | Docker (Playwright + FastAPI) |
+
+### Steps
+
+1. **Supabase** — Create a project, run `npx prisma db push` against it, and apply SQL in `swimbuzz/supabase/`.
+2. **Google OAuth** — Add redirect URI `https://YOUR_WEB_URL/api/auth/callback/google`.
+3. **Render** — Dashboard → **New Blueprint** → connect this repo → apply `render.yaml`.
+4. **Web env vars** (`swimbuzz` service) — Set `DIRECT_URL`, `SUPABASE_*`, `GOOGLE_*`, `NEXTAUTH_URL` (your Render web URL), and `SCRAPER_URL` (your Render scraper URL).
+5. **Scraper env vars** (`swimbuzz-scraper` service) — Set `CORS_ORIGINS` to your web URL, e.g. `https://swimbuzz.onrender.com`.
+
+### Docker (scraper only)
+
+```bash
+cd scraper
+docker build -t swimbuzz-scraper .
+docker run -p 8000:8000 -e CORS_ORIGINS=http://localhost:3000 swimbuzz-scraper
+```
+
+Health check: `GET /health` on the scraper, `GET /` on the web app.
 
 ## Development
 

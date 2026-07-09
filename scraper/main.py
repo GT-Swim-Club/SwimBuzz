@@ -4,6 +4,7 @@ from playwright.async_api import async_playwright
 from playwright_stealth import Stealth
 from pydantic import BaseModel
 import asyncio
+import os
 import random
 import uvicorn
 
@@ -17,6 +18,23 @@ from swimphone_parse import (
 )
 
 app = FastAPI()
+
+def cors_origins() -> list[str]:
+    raw = os.environ.get("CORS_ORIGINS", "http://localhost:3000")
+    return [origin.strip() for origin in raw.split(",") if origin.strip()]
+
+
+def playwright_headless() -> bool:
+    return os.environ.get("PLAYWRIGHT_HEADLESS", "true").lower() not in ("0", "false", "no")
+
+
+PLAYWRIGHT_HEADLESS = playwright_headless()
+BROWSER_ARGS = ["--disable-blink-features=AutomationControlled"]
+BROWSER_USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+)
+BROWSER_VIEWPORT = {"width": 1280, "height": 800}
 
 # Adaptive pacing — conservative to avoid SwimCloud 429s
 MIN_DELAY_SEC = 1.2
@@ -102,10 +120,31 @@ class AdaptivePacer:
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=cors_origins(),
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/health")
+async def health():
+    return {"ok": True}
+
+
+async def launch_browser(playwright):
+    browser = await playwright.chromium.launch(
+        headless=PLAYWRIGHT_HEADLESS,
+        args=BROWSER_ARGS,
+    )
+    context = await browser.new_context(
+        user_agent=BROWSER_USER_AGENT,
+        viewport=BROWSER_VIEWPORT,
+    )
+    page = await context.new_page()
+    stealth = Stealth()
+    await stealth.apply_stealth_async(page)
+    return browser, page
+
 
 @app.get("/roster")
 async def get_roster(team_id: int, year: int, gender: str = "M"):
@@ -115,17 +154,7 @@ async def get_roster(team_id: int, year: int, gender: str = "M"):
 
     results = []
     async with async_playwright() as p:
-        browser = await p.chromium.launch(
-            headless=False,
-            args=["--disable-blink-features=AutomationControlled"]
-        )
-        context = await browser.new_context(
-            user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            viewport={"width": 1280, "height": 800},
-        )
-        page = await context.new_page()
-        stealth = Stealth()
-        await stealth.apply_stealth_async(page)
+        browser, page = await launch_browser(p)
 
         try:
             await page.goto(
@@ -290,17 +319,7 @@ async def _get_times_bulk(body: BulkTimesRequest):
     failed: list[int] = []
 
     async with async_playwright() as p:
-        browser = await p.chromium.launch(
-            headless=False,
-            args=["--disable-blink-features=AutomationControlled"],
-        )
-        context = await browser.new_context(
-            user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            viewport={"width": 1280, "height": 800},
-        )
-        page = await context.new_page()
-        stealth = Stealth()
-        await stealth.apply_stealth_async(page)
+        browser, page = await launch_browser(p)
 
         for idx, swimmer_id in enumerate(swimmer_ids):
             label = f"{idx + 1}/{len(swimmer_ids)}"
@@ -333,17 +352,7 @@ async def _get_times(swimmer_id: int):
     pacer = AdaptivePacer()
 
     async with async_playwright() as p:
-        browser = await p.chromium.launch(
-            headless=False,
-            args=["--disable-blink-features=AutomationControlled"]
-        )
-        context = await browser.new_context(
-            user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            viewport={"width": 1280, "height": 800},
-        )
-        page = await context.new_page()
-        stealth = Stealth()
-        await stealth.apply_stealth_async(page)
+        browser, page = await launch_browser(p)
 
         try:
             await open_swimmer_times_page(page, swimmer_id)
@@ -473,6 +482,7 @@ async def scrape_swimphone_meet_endpoint(body: SwimPhoneMeetRequest):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.environ.get("PORT", "8000"))
+    uvicorn.run(app, host="0.0.0.0", port=port)
 
    

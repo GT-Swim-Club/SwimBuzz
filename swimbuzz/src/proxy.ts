@@ -9,7 +9,7 @@ export default withAuth(
 
     // only coaches/directors can access admin
     if (path.startsWith("/admin") && role === "ATHLETE") {
-      return NextResponse.redirect(new URL("/dashboard", req.url))
+      return NextResponse.redirect(new URL("/athletes", req.url))
     }
 
     return NextResponse.next()

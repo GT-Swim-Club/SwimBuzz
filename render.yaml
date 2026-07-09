@@ -1,0 +1,49 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# After deploy: set SCRAPER_URL on the web service to the scraper service URL,
+# and set CORS_ORIGINS on the scraper to the web service URL.
+
+services:
+  - type: web
+    name: swimbuzz
+    runtime: node
+    rootDir: swimbuzz
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: HOSTNAME
+        value: 0.0.0.0
+      - key: NEXTAUTH_URL
+        sync: false
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: DIRECT_URL
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: SCRAPER_URL
+        sync: false
+      - key: SWIMCLOUD_TEAM_ID
+        value: "10004130"
+
+  - type: web
+    name: swimbuzz-scraper
+    runtime: docker
+    rootDir: scraper
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: PLAYWRIGHT_HEADLESS
+        value: "true"
+      - key: CORS_ORIGINS
+        sync: false
