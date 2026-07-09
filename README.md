@@ -147,6 +147,8 @@ If you create services by hand instead of the Blueprint:
 
 After deploy, verify the scraper: `GET https://YOUR-SCRAPER/health/ready` should return `{"ok":true,"playwright":true}`.
 
+When upgrading Playwright, update **both** `scraper/requirements.txt` (`playwright==X.Y.Z`) and the Docker base image in `scraper/Dockerfile` (`mcr.microsoft.com/playwright/python:vX.Y.Z-jammy`).
+
 **Note:** SwimCloud imports can take several minutes. Render free web services time out after **30 seconds**; use **Starter** or higher on the web service for a 5-minute request timeout.
 
 ### Docker (scraper only)
