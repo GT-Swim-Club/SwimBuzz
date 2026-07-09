@@ -2,10 +2,12 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { importMeetResults, resolveMeetDate } from "@/lib/meet-import"
+import { getActiveBridgeConnection, runBridgeJob } from "@/lib/bridge"
 import { fetchScraper, SCRAPER_URL } from "@/lib/scraper-fetch"
 import { prisma } from "@/lib/prisma"
 import { parseSeason } from "@/lib/season"
 import { coerceParsedRelayResults } from "@/lib/relay-results"
+import { BridgeJobType } from "@prisma/client"
 
 export const runtime = "nodejs"
 export const maxDuration = 3600
@@ -22,6 +24,61 @@ type ParsedResult = {
   lane?: number
   heatTotal?: number
   seedTime?: string
+}
+
+type ScrapedMeet = {
+  meet_name?: string
+  meet_date?: string
+  course?: string
+  results?: ParsedResult[]
+  relay_results?: unknown[]
+  captcha_limited?: boolean
+  incomplete_relays?: string[]
+}
+
+const LOCAL_SYNC_HINT =
+  "SwimPhone blocked the server scraper. Open Local sync, run the bridge on your computer, then try again."
+
+async function scrapeSwimphoneMeet(
+  userId: string,
+  meetUrl: string,
+  team: string
+): Promise<ScrapedMeet> {
+  const bridge = await getActiveBridgeConnection(userId)
+  if (bridge) {
+    return runBridgeJob<ScrapedMeet>(userId, BridgeJobType.SWIMPHONE_MEET, {
+      url: meetUrl,
+      team,
+    })
+  }
+
+  let scrapeRes: Response
+  try {
+    scrapeRes = await fetchScraper(`${SCRAPER_URL}/scrape-swimphone-meet`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: meetUrl, team }),
+    })
+  } catch {
+    throw new Error("Could not reach scraper — is it running on port 8000?")
+  }
+
+  const body = await scrapeRes.json().catch(() => ({}))
+  if (!scrapeRes.ok) {
+    const detail = body.detail
+    const message =
+      typeof detail === "string"
+        ? detail
+        : Array.isArray(detail)
+          ? detail.map((d: { msg?: string }) => d.msg).filter(Boolean).join(", ")
+          : "Failed to scrape SwimPhone meet"
+    if (scrapeRes.status === 403) {
+      throw new Error(`${message} ${LOCAL_SYNC_HINT}`)
+    }
+    throw new Error(message)
+  }
+
+  return body as ScrapedMeet
 }
 
 export async function POST(req: Request) {
@@ -45,40 +102,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "URL must be a SwimPhone meet link" }, { status: 400 })
   }
 
-  let scrapeRes: Response
+  let scraped: ScrapedMeet
   try {
-    scrapeRes = await fetchScraper(`${SCRAPER_URL}/scrape-swimphone-meet`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: meetUrl, team }),
-    })
-  } catch {
-    return NextResponse.json(
-      { error: "Could not reach scraper — is it running on port 8000?" },
-      { status: 502 }
-    )
-  }
-
-  const body = await scrapeRes.json().catch(() => ({}))
-  if (!scrapeRes.ok) {
-    const detail = body.detail
-    const message =
-      typeof detail === "string"
-        ? detail
-        : Array.isArray(detail)
-          ? detail.map((d: { msg?: string }) => d.msg).filter(Boolean).join(", ")
-          : "Failed to scrape SwimPhone meet"
-    return NextResponse.json({ error: message }, { status: scrapeRes.status })
-  }
-
-  const scraped = body as {
-    meet_name?: string
-    meet_date?: string
-    course?: string
-    results?: ParsedResult[]
-    relay_results?: unknown[]
-    captcha_limited?: boolean
-    incomplete_relays?: string[]
+    scraped = await scrapeSwimphoneMeet(session.user.id, meetUrl, team)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to scrape SwimPhone meet"
+    const status = message.includes("Could not reach scraper") ? 502 : 403
+    return NextResponse.json({ error: message }, { status })
   }
 
   try {

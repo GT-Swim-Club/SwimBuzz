@@ -256,7 +256,7 @@ export default function ImportRosterButton() {
               </p>
             ) : (
               <p className="text-amber-700 dark:text-amber-400">
-                Connect Local sync first on hosted apps, or run the scraper locally for dev.
+                Connect Local sync before importing SwimCloud roster.
               </p>
             )}
           </div>

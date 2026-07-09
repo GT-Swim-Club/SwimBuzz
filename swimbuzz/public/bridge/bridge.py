@@ -76,12 +76,31 @@ async def complete_job(
 
 
 async def run_job(job: dict) -> object:
+    import base64
+
     from swimcloud_scrape import scrape_bulk_times, scrape_team_roster
 
     job_type = job["type"]
     payload = job["payload"]
 
     print(f"\n--- Local sync job: {job_type} ---")
+
+    if job_type in ("PARSE_MEET_PDF", "PARSE_MEET_SHEET", "PARSE_MEET_PACKET"):
+        from pdf_parse import parse_meet_pdf_bytes
+        from packet_parse import parse_packet_pdf_bytes
+        from sheet_parse import parse_sheet_pdf_bytes
+
+        content = base64.b64decode(payload["file_b64"])
+        if job_type == "PARSE_MEET_PDF":
+            course = str(payload.get("course", "SCY")).upper()
+            team = str(payload.get("team", "")).strip() or None
+            return parse_meet_pdf_bytes(content, course, team=team)
+        if job_type == "PARSE_MEET_SHEET":
+            sheet_type = str(payload.get("sheet_type", "psych"))
+            team = str(payload.get("team", "")).strip() or None
+            return parse_sheet_pdf_bytes(content, sheet_type, team=team)
+        return parse_packet_pdf_bytes(content)
+
     print(CLOUDFLARE_NOTE)
 
     if job_type == "ROSTER":
@@ -94,6 +113,14 @@ async def run_job(job: dict) -> object:
     if job_type == "TIMES_BULK":
         swimmer_ids = [int(sid) for sid in payload.get("swimmer_ids", [])]
         return await scrape_bulk_times(swimmer_ids)
+
+    if job_type == "SWIMPHONE_MEET":
+        from swimphone_parse import scrape_swimphone_meet
+
+        return await scrape_swimphone_meet(
+            str(payload["url"]),
+            team=str(payload.get("team") or "").strip() or None,
+        )
 
     raise RuntimeError(f"Unsupported job type: {job_type}")
 
@@ -113,8 +140,8 @@ async def heartbeat_loop(client: httpx.AsyncClient, base_url: str, token: str) -
 
 async def bridge_loop(base_url: str, token: str) -> None:
     print(f"Connected to {base_url}")
-    print("Waiting for SwimCloud sync requests from the app…")
-    print("Leave this running while you import rosters or times.\n")
+    print("Waiting for sync requests from the app (roster, times, SwimPhone meets)…")
+    print("Leave this running while you import rosters, times, or meet results.\n")
 
     async with httpx.AsyncClient() as client:
         heartbeat = asyncio.create_task(heartbeat_loop(client, base_url, token))

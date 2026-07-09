@@ -8,7 +8,15 @@ const out = join(root, "public", "bridge")
 
 mkdirSync(out, { recursive: true })
 
-for (const file of ["bridge.py", "swimcloud_scrape.py", "requirements-bridge.txt"]) {
+for (const file of [
+  "bridge.py",
+  "swimcloud_scrape.py",
+  "swimphone_parse.py",
+  "pdf_parse.py",
+  "packet_parse.py",
+  "sheet_parse.py",
+  "requirements-bridge.txt",
+]) {
   const dest = file === "requirements-bridge.txt" ? "requirements.txt" : file
   copyFileSync(join(scraper, file), join(out, dest))
 }

@@ -13,6 +13,7 @@ from pdf_parse import parse_meet_pdf_bytes
 from packet_parse import parse_packet_pdf_bytes
 from sheet_parse import parse_sheet_pdf_bytes
 from swimphone_parse import (
+    SwimPhoneAccessError,
     SwimPhoneCaptchaError,
     SwimPhoneParseError,
     scrape_swimphone_meet,
@@ -222,6 +223,8 @@ async def scrape_swimphone_meet_endpoint(body: SwimPhoneMeetRequest):
                 f"({len(parsed.get('results', []))} swims) ---\n"
             )
             return parsed
+        except SwimPhoneAccessError as e:
+            raise HTTPException(status_code=403, detail=str(e))
         except SwimPhoneCaptchaError as e:
             raise HTTPException(status_code=403, detail=str(e))
         except SwimPhoneParseError as e:

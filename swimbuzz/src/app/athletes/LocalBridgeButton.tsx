@@ -9,9 +9,29 @@ type Pairing = {
   expiresAt: string
 }
 
+type Platform = "mac" | "windows"
+
+function bridgeCommands(appUrl: string, code?: string) {
+  const macInstall = `curl -fsSL ${appUrl}/bridge/install.sh | bash -s -- ${appUrl}`
+  const macConnect = code
+    ? `~/.local/bin/swimbuzz-bridge --url ${appUrl} --code ${code}`
+    : ""
+
+  const winInstallPortable = `curl.exe -fsSL ${appUrl}/bridge/install.ps1 -o $env:TEMP\\swimbuzz-install.ps1; powershell -NoProfile -ExecutionPolicy Bypass -File $env:TEMP\\swimbuzz-install.ps1 -AppUrl ${appUrl}`
+  const winConnect = code
+    ? `& "$env:USERPROFILE\\.local\\bin\\swimbuzz-bridge.cmd" --url ${appUrl} --code ${code}`
+    : ""
+
+  return {
+    mac: { install: macInstall, connect: macConnect },
+    windows: { install: winInstallPortable, connect: winConnect },
+  }
+}
+
 export default function LocalBridgeButton() {
   const { connected, loading, refresh } = useBridgeStatus()
   const [open, setOpen] = useState(false)
+  const [platform, setPlatform] = useState<Platform>("mac")
   const [pairing, setPairing] = useState<Pairing | null>(null)
   const [pairingLoading, setPairingLoading] = useState(false)
   const [disconnecting, setDisconnecting] = useState(false)
@@ -21,16 +41,22 @@ export default function LocalBridgeButton() {
   const appUrl =
     typeof window !== "undefined" ? window.location.origin : "https://swimbuzz.onrender.com"
 
-  const installCommand = `curl -fsSL ${appUrl}/bridge/install.sh | bash -s -- ${appUrl}`
-  const connectCommand = pairing
-    ? `swimbuzz-bridge --url ${appUrl} --code ${pairing.code}`
-    : ""
+  const commands = bridgeCommands(appUrl, pairing?.code)
+  const installCommand = commands[platform].install
+  const connectCommand = commands[platform].connect
 
   useEffect(() => {
     if (!open) return
     void refresh()
     setInstalled(localStorage.getItem("swimbuzz-bridge-installed") === "1")
+    const saved = localStorage.getItem("swimbuzz-bridge-platform")
+    if (saved === "mac" || saved === "windows") setPlatform(saved)
   }, [open, refresh])
+
+  function setPlatformAndSave(next: Platform) {
+    setPlatform(next)
+    localStorage.setItem("swimbuzz-bridge-platform", next)
+  }
 
   async function generateCode() {
     setPairingLoading(true)
@@ -78,6 +104,30 @@ export default function LocalBridgeButton() {
     setInstalled(true)
   }
 
+  const platformToggle = (
+    <div className="flex rounded-lg border dark:border-zinc-700 p-0.5 bg-gray-50 dark:bg-zinc-950">
+      {(
+        [
+          ["mac", "Mac / Linux"],
+          ["windows", "Windows"],
+        ] as const
+      ).map(([value, label]) => (
+        <button
+          key={value}
+          type="button"
+          onClick={() => setPlatformAndSave(value)}
+          className={`flex flex-1 items-center justify-center rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+            platform === value
+              ? "bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 shadow-sm"
+              : "text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-300"
+          }`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  )
+
   return (
     <>
       <button
@@ -105,8 +155,9 @@ export default function LocalBridgeButton() {
         open={open}
         onClose={() => setOpen(false)}
         title="Sync from this computer"
-        description="No codebase needed — install a small helper once, then pair with a code."
-        maxWidth="md"
+        description="Install a small helper once, then run the connect command in your terminal."
+        maxWidth="lg"
+        header={platformToggle}
         footer={
           <ModalFooter>
             {connected && (
@@ -140,7 +191,7 @@ export default function LocalBridgeButton() {
             {loading
               ? "Checking connection…"
               : connected
-                ? "Your computer is connected. SwimCloud imports will run locally."
+                ? "Your computer is connected. SwimCloud and SwimPhone imports will run locally."
                 : "Not connected yet."}
           </div>
 
@@ -148,10 +199,10 @@ export default function LocalBridgeButton() {
             <div className="space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-zinc-700 dark:bg-zinc-900/50">
               <p className="font-medium text-gray-900 dark:text-zinc-100">One-time setup</p>
               <p className="text-gray-600 dark:text-zinc-400">
-                Requires Python 3. Installs to <code className="text-xs">~/.swimbuzz-bridge</code>{" "}
-                and adds <code className="text-xs">swimbuzz-bridge</code> to your PATH.
+                Downloads a small Python helper via <code className="text-xs">uv</code>.
+                {platform === "windows" ? " Run in PowerShell." : " Run in Terminal."}
               </p>
-              <pre className="overflow-x-auto rounded-md bg-white p-3 text-xs text-gray-800 dark:bg-zinc-950 dark:text-zinc-200">
+              <pre className="overflow-x-auto rounded-md bg-white p-3 text-xs text-gray-800 dark:bg-zinc-950 dark:text-zinc-200 whitespace-pre-wrap break-all">
                 {installCommand}
               </pre>
               <div className="flex gap-3">
@@ -174,15 +225,12 @@ export default function LocalBridgeButton() {
           )}
 
           <ol className="list-decimal space-y-2 pl-5 text-gray-700 dark:text-zinc-300">
-            {installed === false && (
-              <li>Run the one-time install command above (needs Python 3).</li>
-            )}
-            <li>Generate a pairing code below (valid 15 minutes).</li>
+            {installed === false && <li>Run the one-time install command above.</li>}
+            <li>Generate the connect command below (valid for 15 minutes).</li>
+            <li>Copy it into your terminal and leave it running.</li>
             <li>
-              Run <code className="text-xs">swimbuzz-bridge --url … --code …</code> and leave it
-              open.
+              Import SwimCloud roster or times, or SwimPhone meet results.
             </li>
-            <li>Import roster or times — complete any Cloudflare check in the browser window.</li>
           </ol>
 
           {installed && (
@@ -202,46 +250,33 @@ export default function LocalBridgeButton() {
               disabled={pairingLoading}
               className="w-full rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700 disabled:opacity-50"
             >
-              {pairingLoading ? "Generating…" : "Generate pairing code"}
+              {pairingLoading ? "Generating…" : "Generate connect command"}
             </button>
           ) : (
             <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-zinc-700 dark:bg-zinc-900/50">
-              <div className="text-center">
-                <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-zinc-400">
-                  Pairing code
-                </p>
-                <p className="mt-1 text-3xl font-semibold tracking-[0.3em] text-gray-900 dark:text-zinc-100">
-                  {pairing.code}
-                </p>
-                <p className="mt-1 text-xs text-gray-500 dark:text-zinc-500">
-                  Expires {new Date(pairing.expiresAt).toLocaleTimeString()}
-                </p>
-              </div>
-
-              <div>
-                <p className="mb-1 text-xs font-medium text-gray-500 dark:text-zinc-400">
-                  Run in terminal
-                </p>
-                <pre className="overflow-x-auto rounded-md bg-white p-3 text-xs text-gray-800 dark:bg-zinc-950 dark:text-zinc-200">
-                  {connectCommand}
-                </pre>
+              <p className="text-xs text-gray-500 dark:text-zinc-500">
+                Expires {new Date(pairing.expiresAt).toLocaleTimeString()}
+              </p>
+              <pre className="overflow-x-auto rounded-md bg-white p-3 text-xs text-gray-800 dark:bg-zinc-950 dark:text-zinc-200 whitespace-pre-wrap break-all">
+                {connectCommand}
+              </pre>
+              <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={() => void copyText(connectCommand)}
-                  className="mt-2 text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
+                  className="text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
                 >
                   Copy command
                 </button>
+                <button
+                  type="button"
+                  onClick={() => void generateCode()}
+                  disabled={pairingLoading}
+                  className="text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-zinc-400"
+                >
+                  Generate new command
+                </button>
               </div>
-
-              <button
-                type="button"
-                onClick={() => void generateCode()}
-                disabled={pairingLoading}
-                className="text-xs text-gray-500 hover:text-gray-700 dark:text-zinc-400 dark:hover:text-zinc-200"
-              >
-                Generate new code
-              </button>
             </div>
           )}
 

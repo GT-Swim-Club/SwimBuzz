@@ -71,9 +71,7 @@ export default function SyncTimesButton() {
         if (!res.ok) throw new Error(data.error ?? "Failed to load roster")
         const athletes = data.athletes as RosterAthlete[]
         setRoster(athletes)
-        setSelected(
-          new Set(athletes.filter((a) => a.swimCloudId !== null).map((a) => a.id))
-        )
+        setSelected(new Set())
       })
       .catch((err) => setError(err.message ?? "Failed to load roster"))
       .finally(() => setLoadingRoster(false))
@@ -170,7 +168,7 @@ export default function SyncTimesButton() {
           />
 
           <div
-            className="relative z-10 w-full max-w-md rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-900 flex flex-col max-h-[min(32rem,80vh)] overflow-hidden"
+            className="relative z-10 w-full max-w-xl rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-900 flex flex-col max-h-[min(40rem,85vh)] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="shrink-0 px-5 pt-5 pb-3">
@@ -178,10 +176,19 @@ export default function SyncTimesButton() {
                 Import times from SwimCloud
               </h2>
               <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">
-                Select athletes on the {gender === "F" ? "women's" : "men's"} {season} roster.
+                Select from the {gender === "F" ? "women's" : "men's"} {season} roster.
+                Takes about 1–2 minutes per athlete.
+              </p>
+              <p
+                className={`mt-1 text-sm ${
+                  bridgeConnected
+                    ? "text-gray-500 dark:text-zinc-400"
+                    : "text-amber-700 dark:text-amber-400"
+                }`}
+              >
                 {bridgeConnected
-                  ? " Local sync is connected — complete any Cloudflare check in the browser window on your computer."
-                  : " Connect Local sync on hosted apps before importing."}
+                  ? "Local sync is connected. Complete Cloudflare check for each athlete in the window that opens."
+                  : "Connect Local sync before importing times."}
               </p>
             </div>
 
@@ -267,7 +274,8 @@ export default function SyncTimesButton() {
                   <p className="py-2 text-sm text-gray-500 dark:text-zinc-400">
                     Importing {progress.current}/{progress.total}: {progress.name}
                     <span className="mt-1 block text-xs text-gray-400 dark:text-zinc-500">
-                      Don&apos;t reload the page while import finishes.
+                      About 1–2 minutes per athlete — don&apos;t reload the page while import
+                      finishes.
                     </span>
                   </p>
                 ) : loading ? (

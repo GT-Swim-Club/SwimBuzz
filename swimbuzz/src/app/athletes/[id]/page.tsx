@@ -55,7 +55,22 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
           {athlete.firstName[0]}{athlete.lastName[0]}
         </div>
         <div className="flex-1 min-w-0">
-          <h1 className="text-xl font-medium">{athlete.firstName} {athlete.lastName}</h1>
+          <h1 className="text-xl font-medium">
+            {athlete.swimCloudId ? (
+              <a
+                href={`https://www.swimcloud.com/swimmer/${athlete.swimCloudId}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+              >
+                {athlete.firstName} {athlete.lastName}
+              </a>
+            ) : (
+              <>
+                {athlete.firstName} {athlete.lastName}
+              </>
+            )}
+          </h1>
           <p className="text-sm text-gray-500 dark:text-zinc-400">{athlete.user?.email}</p>
           {athlete.nicknames.length > 0 && (
             <p className="text-xs text-gray-400 dark:text-zinc-500 mt-0.5">

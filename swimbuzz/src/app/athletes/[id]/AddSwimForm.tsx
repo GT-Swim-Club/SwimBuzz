@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import DontReloadNotice from "@/components/DontReloadNotice"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
+import { useBridgeStatus } from "@/lib/use-bridge-status"
 import { parseTime, formatRelativeTime, formatDateTime } from "@/lib/utils"
 import SetSwimCloudIdForm from "./SetSwimCloudIdForm"
 
@@ -20,6 +21,7 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
   timesSyncedAt: string | null
 }) {
   const router = useRouter()
+  const { connected: bridgeConnected } = useBridgeStatus()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [scrapeStatus, setScrapeStatus] = useState<"idle" | "loading" | "done" | "error">("idle")
@@ -123,9 +125,19 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
               {scrapeStatus !== "done" && scrapeStatus !== "loading" && (
                 <span className="text-xs text-gray-400 dark:text-zinc-500" title={lastSynced ? formatDateTime(lastSynced) : undefined}>
                   {lastSynced ? `Last imported ${formatRelativeTime(lastSynced)}` : "Never imported"}
+                  {!bridgeConnected && (
+                    <span className="block text-amber-600 dark:text-amber-400">
+                      Connect Local sync to import from hosted app
+                    </span>
+                  )}
                 </span>
               )}
             </div>
+            {scrapeStatus === "loading" && (
+              <p className="text-xs text-gray-500 dark:text-zinc-400">
+                Scraping SwimCloud events — typically 1–2 minutes…
+              </p>
+            )}
             {scrapeStatus === "loading" && <DontReloadNotice />}
           </div>
         ) : (
