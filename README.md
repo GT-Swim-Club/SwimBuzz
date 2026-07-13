@@ -2,7 +2,7 @@
 
 Team management app for **Georgia Tech Swim Club**. Track rosters, plan practices, run meets, import results, and build relay lineups.
 
-Built with **Next.js 16**, **Prisma 5**, **NextAuth** (Google sign-in), **Supabase Storage** (meet files), and a **Python FastAPI scraper** for SwimCloud, SwimPhone, and meet PDFs.
+Built with **Next.js 16**, **Prisma 5**, **NextAuth** (Google sign-in), **Supabase Storage** (meet files), and **Run scraper** (Python + Playwright on your computer) for SwimCloud, SwimPhone, and meet PDFs.
 
 ## Features
 
@@ -33,13 +33,14 @@ SwimBuzz/
 ├── swimbuzz/              # Next.js app
 │   ├── prisma/            # Database schema
 │   ├── supabase/          # SQL migrations (meet files, travel info, etc.)
-│   ├── public/            # Static assets
+│   ├── public/bridge/     # Run scraper install scripts + synced Python (from scraper/)
 │   └── src/
 │       ├── app/           # Pages and API routes
 │       ├── components/
 │       └── lib/           # Parsing, import, athlete matching, etc.
-└── scraper/               # FastAPI service (run separately)
-    ├── main.py
+└── scraper/               # Run scraper source (synced into public/bridge on build)
+    ├── bridge.py          # Run scraper client
+    ├── swimcloud_scrape.py
     ├── pdf_parse.py       # Meet results PDFs
     ├── sheet_parse.py     # Heat sheets, entry reports, psych sheets
     ├── swimphone_parse.py # SwimPhone meet results
@@ -48,12 +49,12 @@ SwimBuzz/
 
 ## Prerequisites
 
-- Node.js 22+ (required by `undici` v8)
-- Python 3.11+
+- Node.js 22+
+- Python 3.11+ (for Run scraper)
 - PostgreSQL database (e.g. Supabase)
 - Google OAuth credentials
 - Supabase project (for meet file storage)
-- Playwright browsers (for the scraper)
+- Playwright Chromium (installed by the Run scraper setup)
 
 ## Environment variables
 
@@ -69,10 +70,7 @@ Copy `.env.example` from the repo root into `swimbuzz/.env` and fill in:
 | `NEXTAUTH_URL` | App URL, e.g. `http://localhost:3000` |
 | `GOOGLE_CLIENT_ID` | Google OAuth client ID |
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
-| `SCRAPER_URL` | Scraper base URL (default `http://localhost:8000`) |
 | `SWIMCLOUD_TEAM_ID` | SwimCloud team ID for roster sync |
-| `CORS_ORIGINS` | Scraper only — comma-separated web app URLs allowed to call the API |
-| `PLAYWRIGHT_HEADLESS` | Scraper only — `true` in production (default); set `false` locally if needed |
 
 New Google sign-ups default to `COACH` for now. Athletes created via SwimCloud or CSV import are stored as `ATHLETE`.
 
@@ -92,121 +90,45 @@ Open [http://localhost:3000](http://localhost:3000).
 
 Apply any additional SQL migrations in `swimbuzz/supabase/` against your database as needed (meet file storage, travel info, season format, etc.).
 
-### Scraper
+### Run scraper (required for imports)
 
-Required for SwimCloud roster/time sync, SwimPhone imports, and meet PDF/sheet parsing.
+SwimCloud, SwimPhone, and meet PDF/sheet parsing run on **your computer** via **Run scraper** — not on the web server. That avoids Cloudflare blocking datacenter IPs.
 
-```bash
-cd scraper
-python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-playwright install chromium
-uvicorn main:app --reload --port 8000
-```
+1. In the app, open **Run scraper** and generate a run command.
+2. Install/run the helper (scripts under `/bridge/` on the running app, or from `swimbuzz/public/bridge/`).
+3. Keep it running while importing roster, times, SwimPhone meets, or PDFs.
 
-Restart the scraper after pulling parser changes.
-
-For local debugging, if SwimCloud blocks headless browsers, run with `PLAYWRIGHT_HEADLESS=false`.
+Bridge Python lives in `scraper/` and is copied into `swimbuzz/public/bridge/` on `npm run dev` / `npm run build`.
 
 ## Deploy on Render
 
-The repo includes a [`render.yaml`](render.yaml) Blueprint with two services:
-
-| Service | Root | Runtime |
-|---------|------|---------|
-| `swimbuzz` | `swimbuzz/` | Node (`npm run start`) |
-| `swimbuzz-scraper` | `scraper/` | Docker (Playwright + FastAPI) |
+Deploy the **web app only** (`swimbuzz/`). There is no separate scraper service.
 
 ### Steps
 
 1. **Supabase** — Create a project, run `npx prisma db push` against it, and apply SQL in `swimbuzz/supabase/`.
 2. **Google OAuth** — Add redirect URI `https://YOUR_WEB_URL/api/auth/callback/google`.
-3. **Render** — Dashboard → **New Blueprint** → connect this repo → apply `render.yaml`.
-4. **Web env vars** (`swimbuzz` service) — Set `DIRECT_URL`, `SUPABASE_*`, `GOOGLE_*`, `NEXTAUTH_URL` (your Render web URL), and `SCRAPER_URL` (your Render scraper URL).
-5. **Scraper env vars** (`swimbuzz-scraper` service) — Set `CORS_ORIGINS` to your web URL, e.g. `https://swimbuzz.onrender.com`.
+3. **Render** — Create a Node web service with root directory `swimbuzz`.
+4. **Env vars** — Set `DIRECT_URL`, `SUPABASE_*`, `GOOGLE_*`, and `NEXTAUTH_URL` (your Render web URL).
 
 ### Manual deploy checklist
 
-If you create services by hand instead of the Blueprint:
+| Setting | Value |
+|---------|-------|
+| Root directory | `swimbuzz` |
+| Build | `npm ci && npm run build` |
+| Start | `npm run start` |
+| `NODE_VERSION` | `22` |
+| `HOSTNAME` | `0.0.0.0` |
+| `NEXTAUTH_URL` | Your web URL, e.g. `https://swimbuzz.onrender.com` |
 
-| Service | Setting | Value |
-|---------|---------|-------|
-| **Web** (`swimbuzz`) | Root directory | `swimbuzz` |
-| | Build | `npm ci && npm run build` |
-| | Start | `npm run start` |
-| | `NODE_VERSION` | `22` |
-| | `HOSTNAME` | `0.0.0.0` |
-| | `NEXTAUTH_URL` | Your web URL, e.g. `https://swimbuzz.onrender.com` |
-| | `SCRAPER_URL` | Your scraper URL, e.g. `https://swimbuzz-scraper.onrender.com` (no trailing slash) |
-| **Scraper** | Root directory | `scraper` |
-| | Environment | Docker |
-| | Instance type | **Standard (2 GB RAM)** or higher — Playwright fails on 512 MB |
-| | `PLAYWRIGHT_HEADLESS` | `true` |
-| | `CORS_ORIGINS` | Your web URL |
-
-After deploy, verify the scraper: `GET https://YOUR-SCRAPER/health/ready` should return `{"ok":true,"playwright":true}`.
-
-When upgrading Playwright, update **both** `scraper/requirements.txt` (`playwright==X.Y.Z`) and the Docker base image in `scraper/Dockerfile` (`mcr.microsoft.com/playwright/python:vX.Y.Z-jammy`).
-
-**Note:** SwimCloud **times** imports take about **1–2 minutes per athlete** (roster import is much faster). Render free web services time out after **30 seconds**; use **Starter** or higher on the web service, or use **Local sync** so scraping runs on your computer.
-
-### Cloudflare / SwimCloud blocking
-
-SwimCloud sits behind Cloudflare. Datacenter IPs (including Render) are often blocked with a "Just a moment..." page, which causes scraper **502** errors.
-
-**Workaround — run the scraper on your laptop:**
-
-```bash
-cd scraper
-pip install -r requirements.txt
-playwright install chromium
-uvicorn main:app --host 0.0.0.0 --port 8000
-```
-
-In another terminal, expose port 8000 with a tunnel. Pick one:
-
-**Option A — Cloudflare Tunnel (no account):**
-
-```bash
-brew install cloudflared
-cloudflared tunnel --url http://localhost:8000
-```
-
-Copy the `https://….trycloudflare.com` URL.
-
-**Option B — localtunnel (no install, needs Node):**
-
-```bash
-npx localtunnel --port 8000
-```
-
-**Option C — ngrok:**
-
-```bash
-brew install ngrok/ngrok/ngrok
-ngrok http 8000
-```
-
-Set **`SCRAPER_URL`** on the Render **web** service to the tunnel URL (no trailing slash). Keep the scraper and tunnel running while importing.
-
-The Docker scraper uses headed Chromium via `xvfb` to reduce bot detection, but Cloudflare may still block Render IPs.
-
-### Docker (scraper only)
-
-```bash
-cd scraper
-docker build -t swimbuzz-scraper .
-docker run -p 8000:8000 -e CORS_ORIGINS=http://localhost:3000 swimbuzz-scraper
-```
-
-Health check: `GET /health` on the scraper, `GET /` on the web app.
+**Note:** SwimCloud **times** imports take about **1–2 minutes per athlete** (roster import is much faster). Render free web services time out after **30 seconds**; use **Starter** or higher on the web service so long jobs can finish. Always **run the scraper** before importing.
 
 ## Development
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start Next.js dev server |
+| `npm run dev` | Start Next.js (also syncs bridge files from `scraper/`) |
 | `npm run build` | Production build |
 | `npm run lint` | Run ESLint |
 | `npx prisma studio` | Open database GUI |
@@ -216,26 +138,17 @@ Health check: `GET /health` on the scraper, `GET /` on the web app.
 
 | Route | Purpose |
 |-------|---------|
-| `POST /api/roster/sync` | Import roster from SwimCloud |
+| `POST /api/roster/sync` | Import roster from SwimCloud (via Run scraper) |
 | `POST /api/roster/import` | Import roster from CSV |
-| `POST /api/times/sync` | Sync SwimCloud times for selected athletes |
+| `POST /api/times/sync` | Sync SwimCloud times for selected athletes (via Run scraper) |
 | `POST /api/athletes` | Add athlete manually |
-| `POST /api/meets/import` | Import meet results from PDF |
-| `POST /api/meets/import/swimphone` | Import meet results from SwimPhone URL |
+| `POST /api/meets/import` | Import meet results from PDF (via Run scraper) |
+| `POST /api/meets/import/swimphone` | Import meet results from SwimPhone URL (via Run scraper) |
 | `POST /api/meets/upload` | Upload meet resource files |
 | `POST /api/practices` | Create practice (coaches) |
 | `POST /api/relays/optimal` | Compute optimal relay lineups |
-| `POST /api/scrape` | Scrape SwimCloud times for one athlete |
-
-### Scraper endpoints
-
-| Endpoint | Purpose |
-|----------|---------|
-| `GET /roster` | Fetch team roster from SwimCloud |
-| `GET /times` | Fetch athlete times from SwimCloud |
-| `POST /times/bulk` | Fetch times for many athletes |
-| `POST /parse-meet-pdf` | Parse a meet results PDF |
-| SwimPhone / sheet routes | Parse heat sheets, entry reports, SwimPhone pages |
+| `POST /api/scrape` | Scrape SwimCloud times for one athlete (via Run scraper) |
+| `POST /api/bridge/*` | Run scraper pairing, jobs, and heartbeat |
 
 ## Tech stack
 
@@ -244,4 +157,4 @@ Health check: `GET /health` on the scraper, `GET /` on the web app.
 - **Database:** PostgreSQL via Prisma
 - **Storage:** Supabase (meet PDFs and related files)
 - **Auth:** NextAuth v4 with Google provider
-- **Scraper:** FastAPI, Playwright, pdfplumber
+- **Scraping:** Run scraper (Python, Playwright, pdfplumber)

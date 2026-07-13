@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { formatSwimDate } from "@/lib/utils"
 import { currentSeason, parseSeason } from "@/lib/season"
 import Modal, { ModalFooter } from "@/components/Modal"
+import { useScraperUi } from "@/components/ScraperUiProvider"
 
 type ImportSource = "pdf" | "swimphone"
 
@@ -36,6 +37,8 @@ export default function ImportMeetButton({
     seasonProp ??
     parseSeason(searchParams.get("season") ?? searchParams.get("year")) ??
     currentSeason()
+
+  const { requireScraper } = useScraperUi()
 
   const [open, setOpen] = useState(false)
   const [resultOpen, setResultOpen] = useState(false)
@@ -107,7 +110,7 @@ export default function ImportMeetButton({
         setSelectedFile(null)
         if (fileRef.current) fileRef.current.value = ""
       } catch {
-        setError("Upload failed — check that the dev server and scraper are running")
+        setError("Upload failed — check that the scraper is running")
       } finally {
         setLoading(false)
       }
@@ -137,7 +140,7 @@ export default function ImportMeetButton({
       }
       showImportResult(data)
     } catch {
-      setError("Import failed — check that the dev server and scraper are running")
+      setError("Import failed — check that the scraper is running")
     } finally {
       setLoading(false)
     }
@@ -148,8 +151,10 @@ export default function ImportMeetButton({
       <button
         type="button"
         onClick={() => {
-          setOpen(true)
-          resetForm()
+          requireScraper(() => {
+            setOpen(true)
+            resetForm()
+          })
         }}
         className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border rounded-md hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
       >
@@ -269,8 +274,7 @@ export default function ImportMeetButton({
                 className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
               />
               <p className="mt-1.5 text-xs text-gray-400 dark:text-zinc-500">
-                On the hosted app, connect Local sync first — SwimPhone often blocks the server.
-                Archived meets may also require email + reCAPTCHA on SwimPhone.
+                Archived meets may be blocked by SwimPhone.
               </p>
             </div>
           )}

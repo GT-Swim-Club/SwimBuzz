@@ -7,7 +7,8 @@ function isPrismaUniqueViolation(err: unknown) {
 }
 
 const PAIRING_TTL_MS = 15 * 60 * 1000
-const CONNECTION_TTL_MS = 90 * 1000
+/** Must exceed heartbeat interval (15s) and long-poll window (~25s). */
+const CONNECTION_TTL_MS = 45 * 1000
 const JOB_WAIT_MS = 20 * 60 * 1000
 
 function sleep(ms: number) {
@@ -27,7 +28,9 @@ export async function getActiveBridgeConnection(userId: string) {
     where: { userId },
     orderBy: { lastSeenAt: "desc" },
   })
-  if (!connection || !isBridgeConnectionAlive(connection.lastSeenAt)) {
+  if (!connection) return null
+  if (!isBridgeConnectionAlive(connection.lastSeenAt)) {
+    await prisma.bridgeConnection.delete({ where: { id: connection.id } }).catch(() => undefined)
     return null
   }
   return connection
@@ -92,6 +95,10 @@ export async function touchBridgeConnection(connectionId: string) {
 
 export async function disconnectBridge(userId: string) {
   await prisma.bridgeConnection.deleteMany({ where: { userId } })
+}
+
+export async function disconnectBridgeByToken(token: string) {
+  await prisma.bridgeConnection.deleteMany({ where: { token } })
 }
 
 export async function createBridgeJob(
@@ -179,7 +186,7 @@ export async function waitForBridgeJob(jobId: string, timeoutMs = JOB_WAIT_MS) {
       return job
     }
     if (job.status === BridgeJobStatus.FAILED) {
-      throw new Error(job.error ?? "Local sync failed")
+      throw new Error(job.error ?? "Run scraper failed")
     }
     await sleep(1000)
   }
@@ -197,6 +204,9 @@ export async function waitForBridgeJob(jobId: string, timeoutMs = JOB_WAIT_MS) {
     "Timed out waiting for your computer. Keep the bridge running and complete any Cloudflare check in the browser."
   )
 }
+
+export const LOCAL_BRIDGE_HINT =
+  "The scraper is not running. Open Run Scraper, install it on your computer if needed, and run the command."
 
 export async function runBridgeJob<T>(
   userId: string,

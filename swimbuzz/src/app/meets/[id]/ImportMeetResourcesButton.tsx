@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import MeetResourceField from "../MeetResourceField"
 import MeetResourceIcon from "@/components/MeetResourceIcon"
 import Modal, { ModalFooter } from "@/components/Modal"
+import { useScraperUi } from "@/components/ScraperUiProvider"
 import { useMeetResourceUploads } from "@/lib/use-meet-resource-uploads"
 
 type ResourceForm = {
@@ -24,6 +25,7 @@ export default function ImportMeetResourcesButton({
   initial: ResourceForm
 }) {
   const router = useRouter()
+  const { requireScraper } = useScraperUi()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -46,8 +48,7 @@ export default function ImportMeetResourcesButton({
     }
   }, [open, initial])
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  async function saveResources() {
     if (anyUploading) return
     const teamCode = form.teamCode.trim()
     if (!teamCode) {
@@ -75,6 +76,32 @@ export default function ImportMeetResourcesButton({
     } finally {
       setLoading(false)
     }
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const scrapableKeys = [
+      "packetUrl",
+      "entriesSheetUrl",
+      "psychSheetUrl",
+      "heatSheetUrl",
+    ] as const
+    const teamChanged =
+      form.teamCode.trim().toUpperCase() !== initial.teamCode.trim().toUpperCase()
+    const hasScrapableChange =
+      scrapableKeys.some((key) => {
+        const next = form[key].trim()
+        const prev = initial[key].trim()
+        return Boolean(next) && next !== prev
+      }) ||
+      (teamChanged &&
+        scrapableKeys.some((key) => form[key].trim() || initial[key].trim()))
+
+    if (hasScrapableChange) {
+      requireScraper(() => void saveResources())
+      return
+    }
+    void saveResources()
   }
 
   return (

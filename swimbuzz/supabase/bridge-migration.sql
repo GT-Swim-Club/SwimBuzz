@@ -1,4 +1,4 @@
--- Local sync bridge: pairing codes, connections, and scrape jobs.
+-- Run scraper bridge: pairing codes, connections, and scrape jobs.
 
 CREATE TYPE "BridgeJobStatus" AS ENUM ('PENDING', 'RUNNING', 'COMPLETED', 'FAILED');
 CREATE TYPE "BridgeJobType" AS ENUM ('ROSTER', 'TIMES_BULK');

@@ -16,20 +16,23 @@ export function useBridgeStatus(pollMs = 4000) {
       const res = await fetch("/api/bridge/status")
       const data = await res.json()
       if (res.ok) {
-        setStatus({
+        const next = {
           connected: !!data.connected,
-          lastSeenAt: data.lastSeenAt ?? null,
-        })
+          lastSeenAt: (data.lastSeenAt as string | null) ?? null,
+        }
+        setStatus(next)
+        return next
       }
     } catch {
-      setStatus({ connected: false, lastSeenAt: null })
-    } finally {
-      setLoading(false)
+      // fall through
     }
+    const next = { connected: false, lastSeenAt: null }
+    setStatus(next)
+    return next
   }, [])
 
   useEffect(() => {
-    void refresh()
+    void refresh().finally(() => setLoading(false))
     const id = window.setInterval(() => void refresh(), pollMs)
     return () => window.clearInterval(id)
   }, [pollMs, refresh])

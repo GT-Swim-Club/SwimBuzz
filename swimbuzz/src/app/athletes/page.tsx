@@ -7,7 +7,6 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import ImportRosterButton from "./ImportRosterButton"
 import SyncTimesButton from "./SyncTimesButton"
 import AddAthleteButton from "./AddAthleteButton"
-import LocalBridgeButton from "./LocalBridgeButton"
 import RosterFilters from "./RosterFilters"
 import { currentSeason, parseSeason } from "@/lib/season"
 
@@ -50,14 +49,11 @@ export default async function AthletesPage({
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-2xl font-medium">Roster</h1>
             <Suspense fallback={null}>
-              <RosterFilters />
+              <RosterFilters count={athletes.length} />
             </Suspense>
           </div>
           {isCoach && (
             <div className="flex items-center gap-3 flex-wrap">
-              <Suspense fallback={null}>
-                <LocalBridgeButton />
-              </Suspense>
               <Suspense fallback={null}>
                 <ImportRosterButton />
               </Suspense>
@@ -82,7 +78,14 @@ export default async function AthletesPage({
                 {a.firstName[0]}{a.lastName[0]}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm text-gray-900 dark:text-zinc-100">{a.lastName}, {a.firstName}</p>
+                <p className="font-medium text-sm text-gray-900 dark:text-zinc-100">
+                  {a.lastName}, {a.firstName}
+                  {a.nicknames.length > 0 && (
+                    <span className="font-normal text-gray-500 dark:text-zinc-400">
+                      {" "}({a.nicknames.join(", ")})
+                    </span>
+                  )}
+                </p>
               </div>
             </Link>
           ))}

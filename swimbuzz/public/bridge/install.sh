@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SwimBuzz local sync bridge — one-time installer (no repo clone required).
+# SwimBuzz Run scraper — one-time installer (no repo clone required).
 # Usage: curl -fsSL https://YOUR_APP/bridge/install.sh | bash -s -- https://YOUR_APP
 
 set -euo pipefail
@@ -92,6 +92,20 @@ for file in bridge.py swimcloud_scrape.py swimphone_parse.py pdf_parse.py packet
   curl -fsSL "$APP_URL/bridge/$file" -o "$BRIDGE_DIR/$file"
 done
 
+sync_deps() {
+  echo "Installing / updating Python packages…"
+  if command -v uv >/dev/null 2>&1 || [[ -x "$HOME/.local/bin/uv" ]]; then
+    export PATH="$HOME/.local/bin:$PATH"
+    uv pip install --python "$VENV_DIR/bin/python" -r "$BRIDGE_DIR/requirements.txt"
+  else
+    # shellcheck disable=SC1091
+    source "$VENV_DIR/bin/activate"
+    python -m pip install -q --upgrade pip
+    python -m pip install -q -r "$BRIDGE_DIR/requirements.txt"
+  fi
+  "$VENV_DIR/bin/python" -c "import pdfplumber, httpx, playwright" >/dev/null
+}
+
 if [[ ! -x "$VENV_DIR/bin/python" ]] || ! "$VENV_DIR/bin/python" -c "import httpx" 2>/dev/null; then
   if ! install_with_uv; then
     echo ""
@@ -107,6 +121,14 @@ if [[ ! -x "$VENV_DIR/bin/python" ]] || ! "$VENV_DIR/bin/python" -c "import http
       exit 1
     fi
   fi
+else
+  sync_deps
+fi
+
+# Ensure PDF parsing deps are present even after a partial older install
+if ! "$VENV_DIR/bin/python" -c "import pdfplumber" 2>/dev/null; then
+  echo "pdfplumber missing — reinstalling packages…"
+  sync_deps
 fi
 
 cat > "$BIN_DIR/swimbuzz-bridge" <<EOF
@@ -120,4 +142,4 @@ echo ""
 echo "Done! Then run:"
 echo "  ~/.local/bin/swimbuzz-bridge --url $APP_URL --code YOUR_CODE"
 echo ""
-echo "Generate a code in the app under Local sync."
+echo "Generate a run command in the app under Run scraper."

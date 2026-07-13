@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import DontReloadNotice from "@/components/DontReloadNotice"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
-import { useBridgeStatus } from "@/lib/use-bridge-status"
+import { useScraperUi } from "@/components/ScraperUiProvider"
 import { parseTime, formatRelativeTime, formatDateTime } from "@/lib/utils"
 import SetSwimCloudIdForm from "./SetSwimCloudIdForm"
 
@@ -21,7 +21,7 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
   timesSyncedAt: string | null
 }) {
   const router = useRouter()
-  const { connected: bridgeConnected } = useBridgeStatus()
+  const { requireScraper } = useScraperUi()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [scrapeStatus, setScrapeStatus] = useState<"idle" | "loading" | "done" | "error">("idle")
@@ -78,25 +78,29 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
 
   async function handleScrape() {
     if (!swimCloudId) return
-    setScrapeStatus("loading")
-    setScrapeError(null)
+    requireScraper(() => {
+      void (async () => {
+        setScrapeStatus("loading")
+        setScrapeError(null)
 
-    const res = await fetch("/api/scrape", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ athleteId, swimmerCloudId: swimCloudId }),
+        const res = await fetch("/api/scrape", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ athleteId, swimmerCloudId: swimCloudId }),
+        })
+        const data = await res.json().catch(() => ({}))
+
+        if (res.ok) {
+          setScrapeCount(data.imported)
+          setScrapeStatus("done")
+          if (data.timesSyncedAt) setLastSynced(data.timesSyncedAt)
+          router.refresh()
+        } else {
+          setScrapeError(data.error ?? "Import failed — is the scraper running?")
+          setScrapeStatus("error")
+        }
+      })()
     })
-    const data = await res.json().catch(() => ({}))
-
-    if (res.ok) {
-      setScrapeCount(data.imported)
-      setScrapeStatus("done")
-      if (data.timesSyncedAt) setLastSynced(data.timesSyncedAt)
-      router.refresh()
-    } else {
-      setScrapeError(data.error ?? "Import failed — is the scraper running?")
-      setScrapeStatus("error")
-    }
   }
 
   return (
@@ -125,11 +129,6 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
               {scrapeStatus !== "done" && scrapeStatus !== "loading" && (
                 <span className="text-xs text-gray-400 dark:text-zinc-500" title={lastSynced ? formatDateTime(lastSynced) : undefined}>
                   {lastSynced ? `Last imported ${formatRelativeTime(lastSynced)}` : "Never imported"}
-                  {!bridgeConnected && (
-                    <span className="block text-amber-600 dark:text-amber-400">
-                      Connect Local sync to import from hosted app
-                    </span>
-                  )}
                 </span>
               )}
             </div>

@@ -7,7 +7,7 @@ import DontReloadNotice from "@/components/DontReloadNotice"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import { formatRelativeTime, formatDateTime } from "@/lib/utils"
 import { currentSeason, parseSeason } from "@/lib/season"
-import { useBridgeStatus } from "@/lib/use-bridge-status"
+import { useScraperUi } from "@/components/ScraperUiProvider"
 
 type RosterAthlete = {
   id: string
@@ -40,7 +40,7 @@ export default function SyncTimesButton() {
   const season =
     parseSeason(searchParams.get("season") ?? searchParams.get("year")) ?? currentSeason()
 
-  const { connected: bridgeConnected } = useBridgeStatus()
+  const { connected: bridgeConnected, requireScraper } = useScraperUi()
 
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -119,7 +119,6 @@ export default function SyncTimesButton() {
           season,
           gender,
           athleteIds: toSync.map((a) => a.id),
-          useBridge: bridgeConnected,
         }),
       })
       const data = await res.json()
@@ -140,7 +139,7 @@ export default function SyncTimesButton() {
       }
       router.refresh()
     } catch {
-      setError("Import failed — check that the dev server and scraper are running")
+      setError("Import failed — check that the scraper is running")
     } finally {
       setLoading(false)
       setProgress(null)
@@ -151,7 +150,7 @@ export default function SyncTimesButton() {
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => requireScraper(() => setOpen(true))}
         className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
       >
         <Image src="/swimcloud.webp" alt="" width={28} height={28} className="shrink-0" />
@@ -178,17 +177,6 @@ export default function SyncTimesButton() {
               <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">
                 Select from the {gender === "F" ? "women's" : "men's"} {season} roster.
                 Takes about 1–2 minutes per athlete.
-              </p>
-              <p
-                className={`mt-1 text-sm ${
-                  bridgeConnected
-                    ? "text-gray-500 dark:text-zinc-400"
-                    : "text-amber-700 dark:text-amber-400"
-                }`}
-              >
-                {bridgeConnected
-                  ? "Local sync is connected. Complete Cloudflare check for each athlete in the window that opens."
-                  : "Connect Local sync before importing times."}
               </p>
             </div>
 

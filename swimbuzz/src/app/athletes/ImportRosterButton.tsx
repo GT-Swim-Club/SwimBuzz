@@ -5,13 +5,17 @@ import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
 import { currentSeason, parseSeason, seasonEndYear } from "@/lib/season"
 import Modal, { ModalFooter } from "@/components/Modal"
-import { useBridgeStatus } from "@/lib/use-bridge-status"
+import { useScraperUi } from "@/components/ScraperUiProvider"
 
 type ImportSource = "swimcloud" | "csv"
 
 type SwimCloudResult = {
   created: number
   updated: number
+  linked?: number
+  unmatched?: number
+  alreadyLinked?: number
+  skippedConflict?: number
 }
 
 type CsvResult = {
@@ -36,11 +40,11 @@ export default function ImportRosterButton() {
   const rosterLabel = `${gender === "F" ? "Women" : "Men"} ${season}`
   const csvRosterLabel = `Women's & Men's ${season}`
 
-  const { connected: bridgeConnected } = useBridgeStatus()
+  const { connected: bridgeConnected, requireScraper } = useScraperUi()
 
   const [open, setOpen] = useState(false)
   const [resultOpen, setResultOpen] = useState(false)
-  const [source, setSource] = useState<ImportSource>("swimcloud")
+  const [source, setSource] = useState<ImportSource>("csv")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<RosterImportResult | null>(null)
@@ -49,10 +53,10 @@ export default function ImportRosterButton() {
   const modalDescription =
     source === "csv"
       ? `Adds athletes to the ${csvRosterLabel} roster.`
-      : `Adds athletes to the ${rosterLabel} roster.`
+      : `Imports SwimCloud IDs onto the existing ${rosterLabel} roster.`
 
   function resetForm() {
-    setSource("swimcloud")
+    setSource("csv")
     setError(null)
     setSelectedFile(null)
     if (fileRef.current) fileRef.current.value = ""
@@ -74,31 +78,34 @@ export default function ImportRosterButton() {
     e.preventDefault()
 
     if (source === "swimcloud") {
-      setLoading(true)
-      setError(null)
+      requireScraper(() => {
+        void (async () => {
+          setLoading(true)
+          setError(null)
 
-      try {
-        const res = await fetch("/api/roster/sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            season,
-            year: seasonEndYear(season),
-            gender,
-            useBridge: bridgeConnected,
-          }),
-        })
-        const data = await res.json()
-        if (!res.ok) {
-          setError(data.error ?? "Import failed")
-          return
-        }
-        showImportResult({ source: "swimcloud", ...data })
-      } catch {
-        setError("Import failed — check that the dev server and scraper are running")
-      } finally {
-        setLoading(false)
-      }
+          try {
+            const res = await fetch("/api/roster/sync", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                season,
+                year: seasonEndYear(season),
+                gender,
+              }),
+            })
+            const data = await res.json()
+            if (!res.ok) {
+              setError(data.error ?? "Import failed")
+              return
+            }
+            showImportResult({ source: "swimcloud", ...data })
+          } catch {
+            setError("Import failed — check that the scraper is running")
+          } finally {
+            setLoading(false)
+          }
+        })()
+      })
       return
     }
 
@@ -173,8 +180,8 @@ export default function ImportRosterButton() {
           <div className="mt-4 flex rounded-lg border dark:border-zinc-700 p-0.5 bg-gray-50 dark:bg-zinc-950">
             {(
               [
-                ["swimcloud", "SwimCloud", "logo"] as const,
                 ["csv", "CSV", "icon"] as const,
+                ["swimcloud", "SwimCloud IDs", "logo"] as const,
               ] as const
             ).map(([value, label, adornment]) => (
               <button
@@ -245,20 +252,10 @@ export default function ImportRosterButton() {
         }
       >
         {source === "swimcloud" ? (
-          <div className="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
+          <div className="space-y-2 text-md text-gray-600 dark:text-zinc-400">
             <p>
-              Pulls the {rosterLabel} roster from SwimCloud. Existing athletes are merged.
+              Imports SwimCloud IDs for athletes already on your roster. Does not add new athletes.
             </p>
-            {bridgeConnected ? (
-              <p className="text-emerald-700 dark:text-emerald-400">
-                Local sync is connected — Chromium will open on your computer if Cloudflare
-                prompts you.
-              </p>
-            ) : (
-              <p className="text-amber-700 dark:text-amber-400">
-                Connect Local sync before importing SwimCloud roster.
-              </p>
-            )}
           </div>
         ) : (
           <div className="space-y-4">
@@ -276,7 +273,7 @@ export default function ImportRosterButton() {
                   <span className="font-medium text-gray-800 dark:text-zinc-200">Gender</span>
                   {" — "}
                   <span className="text-gray-600 dark:text-zinc-400">
-                    M/F, Male/Female, Men/Women, or Boys/Girls
+                    M/F, Male/Female, Men/Women, or Boy/Girl
                   </span>
                 </li>
               </ul>
@@ -340,15 +337,26 @@ export default function ImportRosterButton() {
         {result?.source === "swimcloud" && (
           <div className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-800/50">
             <p className="text-gray-900 dark:text-zinc-100">
-              Imported <strong>{result.created}</strong> new athlete
-              {result.created === 1 ? "" : "s"}
-              {result.updated > 0 && (
-                <>
-                  , merged <strong>{result.updated}</strong> existing
-                </>
-              )}
+              Imported SwimCloud IDs on <strong>{result.linked ?? result.updated}</strong> athlete
+              {(result.linked ?? result.updated) === 1 ? "" : "s"}
               .
             </p>
+            {(result.unmatched ?? 0) > 0 && (
+              <p className="mt-2 text-amber-700 dark:text-amber-400 text-xs">
+                {result.unmatched} SwimCloud name
+                {result.unmatched === 1 ? "" : "s"} had no roster match.
+              </p>
+            )}
+            {(result.alreadyLinked ?? 0) > 0 && (
+              <p className="mt-1 text-gray-500 dark:text-zinc-400 text-xs">
+                {result.alreadyLinked} already had a SwimCloud ID.
+              </p>
+            )}
+            {(result.skippedConflict ?? 0) > 0 && (
+              <p className="mt-1 text-amber-700 dark:text-amber-400 text-xs">
+                {result.skippedConflict} skipped due to SwimCloud ID conflicts.
+              </p>
+            )}
           </div>
         )}
 

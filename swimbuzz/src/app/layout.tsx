@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import SessionProvider from "@/components/SessionProvider"
 import ThemeProvider from "@/components/ThemeProvider"
+import ScraperUiProvider from "@/components/ScraperUiProvider"
 import Nav from "@/components/Nav"
 import "./globals.css"
 
@@ -22,10 +23,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="bg-white dark:bg-zinc-900 dark:bg-zinc-950 min-h-screen transition-colors">
         <ThemeProvider>
           <SessionProvider session={session}>
-            <Nav />
-            <div className="max-w-5xl mx-auto px-4 py-8">
-              {children}
-            </div>
+            <ScraperUiProvider>
+              <Nav />
+              <div className="max-w-5xl mx-auto px-4 py-8">
+                {children}
+              </div>
+            </ScraperUiProvider>
           </SessionProvider>
         </ThemeProvider>
       </body>

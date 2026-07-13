@@ -14,6 +14,10 @@ export async function GET(req: Request) {
   const deadline = Date.now() + 25_000
 
   while (Date.now() < deadline) {
+    if (req.signal.aborted) {
+      return new NextResponse(null, { status: 499 })
+    }
+
     const job = await claimNextBridgeJob(connection.id)
     if (job) {
       return NextResponse.json({

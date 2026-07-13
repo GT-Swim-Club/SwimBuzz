@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import NicknameTagsInput from "@/components/NicknameTagsInput"
 
 export default function EditNicknamesForm({
   athleteId,
@@ -11,69 +12,52 @@ export default function EditNicknamesForm({
   initialNicknames: string[]
 }) {
   const router = useRouter()
-  const [value, setValue] = useState(initialNicknames.join(", "))
+  const [nicknames, setNicknames] = useState(initialNicknames)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [saved, setSaved] = useState(false)
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  async function persist(next: string[]) {
+    setNicknames(next)
     setLoading(true)
     setError(null)
-    setSaved(false)
 
     try {
-      const nicknames = value
-        .split(",")
-        .map((n) => n.trim())
-        .filter(Boolean)
-
       const res = await fetch(`/api/athletes/${athleteId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nicknames }),
+        body: JSON.stringify({ nicknames: next }),
       })
       const data = await res.json()
 
       if (!res.ok) {
         setError(data.error ?? "Failed to save alternate names")
+        setNicknames(nicknames)
         return
       }
 
-      setValue((data.nicknames ?? []).join(", "))
-      setSaved(true)
+      setNicknames(data.nicknames ?? next)
       router.refresh()
     } catch {
       setError("Something went wrong")
+      setNicknames(nicknames)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="flex flex-wrap items-center gap-3">
-        <input
-          placeholder="e.g. Dan, Danny"
-          value={value}
-          onChange={(e) => {
-            setValue(e.target.value)
-            setSaved(false)
-          }}
-          className="flex-1 min-w-[200px] border rounded-lg px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="text-sm px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
-        >
-          {loading ? "Saving…" : saved ? "Saved" : "Save"}
-        </button>
-      </div>
+    <div>
+      <NicknameTagsInput
+        value={nicknames}
+        onChange={persist}
+        disabled={loading}
+        showAddButton
+        placeholder="Add alternate name"
+      />
       <p className="mt-1 text-xs text-gray-400 dark:text-zinc-500">
-        Comma-separated names used to match imported results to this athlete.
+        Names used to match imported results to this athlete.
       </p>
       {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
-    </form>
+    </div>
   )
 }

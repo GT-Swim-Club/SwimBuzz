@@ -52,7 +52,7 @@ export default function Modal({
   title?: ReactNode
   description?: ReactNode
   header?: ReactNode
-  children: ReactNode
+  children?: ReactNode
   footer: ReactNode
   maxWidth?: ModalMaxWidth
   portal?: boolean
@@ -68,13 +68,27 @@ export default function Modal({
 
   if (!open || (portal && !mounted)) return null
 
+  const hasBody = children != null && children !== false
+
+  const body = hasBody ? (
+    <div className={`min-h-0 flex-1 overflow-y-auto px-6 py-4 space-y-4 ${bodyClassName}`}>
+      {children}
+    </div>
+  ) : null
+
+  const busyNotice = busy ? (
+    <div className="shrink-0 px-6 pb-1">
+      <DontReloadNotice />
+    </div>
+  ) : null
+
   const panel = (
     <div
       className={`relative z-10 flex w-full ${MAX_WIDTH[maxWidth]} max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-900 ${panelClassName}`}
       onClick={(e) => e.stopPropagation()}
     >
       {(title || description || header) && (
-        <div className="shrink-0 px-6 pt-6 pb-2">
+        <div className={`shrink-0 px-6 pt-6 ${hasBody ? "pb-2" : "pb-4"}`}>
           {title ? (
             <h2 className="text-lg font-medium text-gray-900 dark:text-zinc-100">{title}</h2>
           ) : null}
@@ -87,26 +101,14 @@ export default function Modal({
 
       {onSubmit ? (
         <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col">
-          <div className={`min-h-0 flex-1 overflow-y-auto px-6 py-4 space-y-4 ${bodyClassName}`}>
-            {children}
-          </div>
-          {busy ? (
-            <div className="shrink-0 px-6 pb-1">
-              <DontReloadNotice />
-            </div>
-          ) : null}
+          {body}
+          {busyNotice}
           {footer}
         </form>
       ) : (
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className={`min-h-0 flex-1 overflow-y-auto px-6 py-4 space-y-4 ${bodyClassName}`}>
-            {children}
-          </div>
-          {busy ? (
-            <div className="shrink-0 px-6 pb-1">
-              <DontReloadNotice />
-            </div>
-          ) : null}
+          {body}
+          {busyNotice}
           {footer}
         </div>
       )}

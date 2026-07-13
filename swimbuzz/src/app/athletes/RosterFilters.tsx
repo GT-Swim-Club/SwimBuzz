@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation"
 import { currentSeason, parseSeason, seasonOptions } from "@/lib/season"
 
-export default function RosterFilters() {
+export default function RosterFilters({ count }: { count: number }) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -39,6 +39,9 @@ export default function RosterFilters() {
           </option>
         ))}
       </select>
+      <span className="text-xs text-gray-500 dark:text-zinc-400">
+        {count} athlete{count === 1 ? "" : "s"}
+      </span>
     </div>
   )
 }

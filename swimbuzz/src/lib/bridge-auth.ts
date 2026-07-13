@@ -17,6 +17,11 @@ export async function getBridgeConnectionFromRequest(req: Request) {
     return null
   }
 
+  if (!isBridgeConnectionAlive(connection.lastSeenAt)) {
+    await prisma.bridgeConnection.delete({ where: { id: connection.id } }).catch(() => undefined)
+    return null
+  }
+
   await touchBridgeConnection(connection.id)
   return connection
 }

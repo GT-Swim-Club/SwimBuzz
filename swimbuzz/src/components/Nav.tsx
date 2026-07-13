@@ -3,11 +3,13 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import ThemeToggle from "@/components/ThemeToggle"
 import SignOutButton from "@/components/SignOutButton"
+import RunScraperButton from "@/components/RunScraperButton"
 import { formatRoleLabel } from "@/lib/auth-roles"
-
 
 export default async function Nav() {
   const session = await getServerSession(authOptions)
+  const canRunScraper =
+    !!session && ["COACH", "EXEC"].includes(session.user.role)
 
   return (
     <nav className="border-b bg-white dark:bg-zinc-900 px-6 py-3 flex items-center justify-between">
@@ -25,6 +27,7 @@ export default async function Nav() {
         )}
       </div>
       <div className="flex items-center gap-3">
+        {canRunScraper ? <RunScraperButton /> : null}
         <ThemeToggle />
         {session ? (
           <>
@@ -43,7 +46,7 @@ export default async function Nav() {
             Sign in
           </Link>
         )}
-      </div>    
+      </div>
     </nav>
   )
 }

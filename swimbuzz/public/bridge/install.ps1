@@ -1,4 +1,4 @@
-# SwimBuzz local sync bridge — Windows installer
+# SwimBuzz Run scraper — Windows installer
 # Usage: powershell -ExecutionPolicy Bypass -File install.ps1 -AppUrl https://your-app
 
 param(
@@ -52,10 +52,32 @@ foreach ($file in @("bridge.py", "swimcloud_scrape.py", "swimphone_parse.py", "p
     curl.exe -fsSL "$AppUrl/bridge/$file" -o $dest
 }
 
+function Sync-Deps {
+    Write-Host "Installing / updating Python packages…"
+    $uv = Get-Command uv -ErrorAction SilentlyContinue
+    if ($uv) {
+        uv pip install --python $PythonExe -r (Join-Path $BridgeDir "requirements.txt")
+    } else {
+        & $PythonExe -m pip install -q --upgrade pip
+        & $PythonExe -m pip install -q -r (Join-Path $BridgeDir "requirements.txt")
+    }
+    & $PythonExe -c "import pdfplumber, httpx, playwright"
+}
+
 if (-not (Test-Path $PythonExe) -or -not (& $PythonExe -c "import httpx" 2>$null)) {
     if (-not (Install-WithUv)) {
         Write-Error "Could not set up Python. Try running PowerShell as your normal user (not restricted)."
     }
+} else {
+    Sync-Deps
+}
+
+try {
+    & $PythonExe -c "import pdfplumber" 2>$null
+    if ($LASTEXITCODE -ne 0) { throw "missing" }
+} catch {
+    Write-Host "pdfplumber missing — reinstalling packages…"
+    Sync-Deps
 }
 
 $cmdContent = @"
@@ -70,4 +92,4 @@ Write-Host ""
 Write-Host "Done! Then run:"
 Write-Host "  & `"$BridgeCmd`" --url $AppUrl --code YOUR_CODE"
 Write-Host ""
-Write-Host "Generate a connect command in the app under Local sync."
+Write-Host "Generate a run command in the app under Run scraper."

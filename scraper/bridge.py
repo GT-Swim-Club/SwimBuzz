@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run SwimBuzz local sync bridge on your computer.
+"""SwimBuzz Run scraper client for your computer.
 
 Pairs with the hosted app so SwimCloud imports use a headed browser on this
 machine (you can complete Cloudflare checks in the window that opens).
@@ -9,7 +9,9 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import atexit
 import os
+import signal
 import sys
 from pathlib import Path
 
@@ -23,9 +25,38 @@ CLOUDFLARE_NOTE = (
     "If Chromium opens, complete the Cloudflare 'I'm human' check in that window."
 )
 
+# Set after pairing so exit handlers can clear the app's "running" status.
+_session: dict[str, str | None] = {"base_url": None, "token": None}
+_disconnected = False
+
 
 def bridge_headers(token: str) -> dict[str, str]:
     return {"Authorization": f"Bearer {token}"}
+
+
+def disconnect_sync() -> None:
+    """Best-effort clear of the bridge session when the process exits."""
+    global _disconnected
+    if _disconnected:
+        return
+    base_url = _session.get("base_url")
+    token = _session.get("token")
+    if not base_url or not token:
+        return
+    _disconnected = True
+    try:
+        httpx.post(
+            f"{base_url.rstrip('/')}/api/bridge/disconnect",
+            headers=bridge_headers(token),
+            timeout=3.0,
+        )
+    except Exception:
+        pass
+
+
+def _handle_exit_signal(signum: int, _frame) -> None:
+    disconnect_sync()
+    raise SystemExit(128 + signum)
 
 
 async def register_client(base_url: str, code: str) -> str:
@@ -83,7 +114,7 @@ async def run_job(job: dict) -> object:
     job_type = job["type"]
     payload = job["payload"]
 
-    print(f"\n--- Local sync job: {job_type} ---")
+    print(f"\n--- Run scraper job: {job_type} ---")
 
     if job_type in ("PARSE_MEET_PDF", "PARSE_MEET_SHEET", "PARSE_MEET_PACKET"):
         from pdf_parse import parse_meet_pdf_bytes
@@ -139,7 +170,7 @@ async def heartbeat_loop(client: httpx.AsyncClient, base_url: str, token: str) -
 
 
 async def bridge_loop(base_url: str, token: str) -> None:
-    print(f"Connected to {base_url}")
+    print(f"Scraper running against {base_url}")
     print("Waiting for sync requests from the app (roster, times, SwimPhone meets)…")
     print("Leave this running while you import rosters, times, or meet results.\n")
 
@@ -168,10 +199,11 @@ async def bridge_loop(base_url: str, token: str) -> None:
                     raise
         finally:
             heartbeat.cancel()
+            disconnect_sync()
 
 
 async def async_main() -> None:
-    parser = argparse.ArgumentParser(description="SwimBuzz local sync bridge")
+    parser = argparse.ArgumentParser(description="SwimBuzz Run scraper")
     parser.add_argument(
         "--url",
         default=os.environ.get("SWIMBUZZ_URL", "http://localhost:3000"),
@@ -185,7 +217,7 @@ async def async_main() -> None:
     args = parser.parse_args()
 
     if not args.code:
-        print("Pairing code required. Generate one in the app under Local sync.")
+        print("Pairing code required. Generate a run command in the app under Run scraper.")
         print("Usage: swimbuzz-bridge --url https://swimbuzz.onrender.com --code 123456")
         print("       (or: python bridge.py --url ... --code ...)")
         sys.exit(1)
@@ -194,6 +226,20 @@ async def async_main() -> None:
         print("Tip: headed mode is recommended — the installer sets PLAYWRIGHT_HEADLESS=false automatically.")
 
     token = await register_client(args.url, args.code)
+    _session["base_url"] = args.url
+    _session["token"] = token
+    atexit.register(disconnect_sync)
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        try:
+            signal.signal(sig, _handle_exit_signal)
+        except (ValueError, OSError):
+            pass
+    if hasattr(signal, "SIGHUP"):
+        try:
+            signal.signal(signal.SIGHUP, _handle_exit_signal)
+        except (ValueError, OSError):
+            pass
+
     await bridge_loop(args.url, token)
 
 
@@ -201,7 +247,10 @@ def main() -> None:
     try:
         asyncio.run(async_main())
     except KeyboardInterrupt:
+        disconnect_sync()
         print("\nBridge stopped.")
+    finally:
+        disconnect_sync()
 
 
 if __name__ == "__main__":

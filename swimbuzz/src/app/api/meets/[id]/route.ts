@@ -6,6 +6,7 @@ import { buildMeetData, MeetInputError } from "@/lib/meet-input"
 import { deleteAllMeetFiles, deleteRemovedMeetFiles } from "@/lib/meet-storage"
 import { resolveEventOrderForPacket } from "@/lib/meet-packet-parse"
 import { attachSheetSummaries } from "@/lib/meet-sheet-resolve"
+import { LOCAL_BRIDGE_HINT } from "@/lib/bridge"
 import type { MeetFileUrlKey } from "@/lib/meet-files"
 
 export async function GET(
@@ -71,6 +72,9 @@ export async function PATCH(
       return NextResponse.json({ error: err.message }, { status: 400 })
     }
     const message = err instanceof Error ? err.message : "Failed to save meet"
+    if (message === "LOCAL_BRIDGE_NOT_CONNECTED") {
+      return NextResponse.json({ error: LOCAL_BRIDGE_HINT }, { status: 503 })
+    }
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }

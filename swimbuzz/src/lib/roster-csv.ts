@@ -33,6 +33,15 @@ function resolveHeaderField(header: string): string | undefined {
     return "lastName"
   }
   if (h.includes("full name") || compact === "fullname") return "name"
+  // Skip boolean / list columns that mention email but are not address fields
+  if (
+    h.includes("email list") ||
+    h.includes("in email list") ||
+    h.includes("parent email") ||
+    h.includes("family members")
+  ) {
+    return undefined
+  }
   if (h.includes("e-mail") || h.includes("email")) return "email"
   if (h.includes("gender") || h === "sex") return "gender"
 
@@ -55,12 +64,34 @@ function resolveHeaderField(header: string): string | undefined {
   return undefined
 }
 
+/** Prefer GT / "email address" columns when several headers match "email". */
+function emailHeaderScore(header: string): number {
+  const h = normalizeHeader(header)
+  if (h.includes("georgia tech") || h.includes("gatech")) return 3
+  if (h.includes("email address") || h.includes("e-mail address")) return 2
+  if (h.includes("email") || h.includes("e-mail")) return 1
+  return 0
+}
+
 function mapHeaders(cells: string[]): Map<string, number> {
   const map = new Map<string, number>()
+  const emailCandidates: Array<{ index: number; score: number }> = []
+
   cells.forEach((cell, index) => {
     const key = resolveHeaderField(cell)
-    if (key && !map.has(key)) map.set(key, index)
+    if (!key) return
+    if (key === "email") {
+      emailCandidates.push({ index, score: emailHeaderScore(cell) })
+      return
+    }
+    if (!map.has(key)) map.set(key, index)
   })
+
+  if (emailCandidates.length > 0) {
+    emailCandidates.sort((a, b) => b.score - a.score || a.index - b.index)
+    map.set("email", emailCandidates[0].index)
+  }
+
   return map
 }
 
@@ -116,10 +147,10 @@ function parseCsvRecords(text: string): string[][] {
 
 function parseGender(value: string): "M" | "F" | undefined {
   const g = value.trim().toUpperCase()
-  if (g === "F" || g === "FEMALE" || g === "W" || g === "WOMEN" || g === "GIRLS") {
+  if (g === "F" || g === "FEMALE" || g === "W" || g === "WOMEN" || g === "GIRL") {
     return "F"
   }
-  if (g === "M" || g === "MALE" || g === "MEN" || g === "BOYS") {
+  if (g === "M" || g === "MALE" || g === "MEN" || g === "BOY") {
     return "M"
   }
   return undefined

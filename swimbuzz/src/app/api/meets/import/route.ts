@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { importMeetResults, resolveMeetDate } from "@/lib/meet-import"
-import { parseMeetPdf } from "@/lib/scraper-or-bridge"
+import { parseMeetPdf, LOCAL_BRIDGE_HINT } from "@/lib/scraper-or-bridge"
 import { prisma } from "@/lib/prisma"
 import { isStoredMeetFileUrl } from "@/lib/meet-files"
 import { deleteStoredMeetFile, uploadMeetFile } from "@/lib/meet-storage"
@@ -79,6 +79,9 @@ export async function POST(req: Request) {
     })
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to parse PDF"
+    if (message === "LOCAL_BRIDGE_NOT_CONNECTED") {
+      return NextResponse.json({ error: LOCAL_BRIDGE_HINT }, { status: 503 })
+    }
     return NextResponse.json({ error: message }, { status: 502 })
   }
 

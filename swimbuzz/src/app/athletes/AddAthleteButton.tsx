@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { currentSeason, parseSeason } from "@/lib/season"
 import Modal, { ModalFooter } from "@/components/Modal"
+import NicknameTagsInput from "@/components/NicknameTagsInput"
 
 export default function AddAthleteButton() {
   const router = useRouter()
@@ -21,7 +22,7 @@ export default function AddAthleteButton() {
     lastName: "",
     email: "",
     swimCloudId: "",
-    nicknames: "",
+    nicknames: [] as string[],
   })
 
   function openModal() {
@@ -40,10 +41,6 @@ export default function AddAthleteButton() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
-          nicknames: form.nicknames
-            .split(",")
-            .map((n) => n.trim())
-            .filter(Boolean),
           gender,
           seasons: [season],
         }),
@@ -55,7 +52,7 @@ export default function AddAthleteButton() {
         return
       }
 
-      setForm({ firstName: "", lastName: "", email: "", swimCloudId: "", nicknames: "" })
+      setForm({ firstName: "", lastName: "", email: "", swimCloudId: "", nicknames: [] })
       setOpen(false)
       router.refresh()
     } catch {
@@ -173,14 +170,15 @@ export default function AddAthleteButton() {
                 <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
                   Alternate names <span className="font-normal text-gray-400">(optional)</span>
                 </label>
-                <input
-                  placeholder="e.g. Dan, Danny"
+                <NicknameTagsInput
                   value={form.nicknames}
-                  onChange={(e) => setForm((f) => ({ ...f, nicknames: e.target.value }))}
-                  className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                  onChange={(nicknames) => setForm((f) => ({ ...f, nicknames }))}
+                  disabled={loading}
+                  showAddButton
+                  placeholder="Add alternate name"
                 />
                 <p className="mt-1 text-xs text-gray-400 dark:text-zinc-500">
-                  Comma-separated names used to match results to this athlete.
+                  Names used to match results to this athlete.
                 </p>
               </div>
 

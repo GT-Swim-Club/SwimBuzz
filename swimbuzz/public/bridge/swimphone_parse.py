@@ -1219,9 +1219,9 @@ def parse_relay_result(
     event = re.sub(r"\s+", " ", event_label.strip())
     gender_code = ""
     g = gender.strip().lower()
-    if g in {"women", "girls", "female", "f"}:
+    if g in {"women", "girl", "female", "f"}:
         gender_code = "F"
-    elif g in {"men", "boys", "male", "m"}:
+    elif g in {"men", "boy", "male", "m"}:
         gender_code = "M"
     elif g in {"mixed", "x", "co-ed", "coed"}:
         gender_code = "X"
@@ -1291,8 +1291,8 @@ async def _fetch_page_html(page, url: str) -> str:
     response = await page.goto(url, wait_until="domcontentloaded", timeout=60000)
     if response and response.status == 403:
         raise SwimPhoneAccessError(
-            "SwimPhone blocked this request (403). On the hosted app, open Local sync, "
-            "run the bridge on your computer, then try the import again."
+            "SwimPhone blocked this request (403). Open Run scraper in the app, "
+            "run it on your computer, then try the import again."
         )
     if response and response.status >= 400:
         raise SwimPhoneParseError(f"SwimPhone returned HTTP {response.status} for {url}")

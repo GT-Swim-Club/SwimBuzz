@@ -1,4 +1,4 @@
-"""SwimCloud browser scraping — shared by the FastAPI scraper and local sync bridge."""
+"""SwimCloud browser scraping used by the Run scraper bridge."""
 
 from __future__ import annotations
 
