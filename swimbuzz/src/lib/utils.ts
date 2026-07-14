@@ -63,20 +63,45 @@ export function formatRelativeTime(date: Date | string): string {
 
 // converts milliseconds to "1:23.45" or "58.32"
 export function formatTime(ms: number): string {
-    const totalSeconds = ms / 1000
-    const minutes = Math.floor(totalSeconds / 60)
-    const seconds = (totalSeconds % 60).toFixed(2).padStart(5, "0")
-    return minutes > 0 ? `${minutes}:${seconds}` : `${seconds}`
-  }
-  
-  // converts "1:23.45" or "58.32" to milliseconds
-  export function parseTime(input: string): number {
-    const parts = input.trim().split(":")
-    if (parts.length === 2) {
-      return (parseInt(parts[0]) * 60 + parseFloat(parts[1])) * 1000
+  const totalSeconds = ms / 1000
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = (totalSeconds % 60).toFixed(2).padStart(5, "0")
+  return minutes > 0 ? `${minutes}:${seconds}` : `${seconds}`
+}
+
+/** Display swim times with exactly 2 decimals. NT stays NT; non-time text is unchanged. */
+export function formatDisplayTime(input: string): string {
+  const time = input.trim()
+  if (!time) return time
+  if (/^nt$/i.test(time)) return "NT"
+  if (!/^[\d:.]+$/.test(time)) return time
+
+  const parts = time.split(":")
+  if (parts.length === 2) {
+    const minutes = parseInt(parts[0], 10)
+    const sec = parseFloat(parts[1])
+    if (!Number.isFinite(minutes) || !Number.isFinite(sec) || minutes < 0 || sec < 0) {
+      return time
     }
-    return parseFloat(parts[0]) * 1000
+    return `${minutes}:${sec.toFixed(2).padStart(5, "0")}`
   }
+  if (parts.length === 1) {
+    const sec = parseFloat(parts[0])
+    if (!Number.isFinite(sec) || sec < 0) return time
+    if (sec >= 60) return formatTime(sec * 1000)
+    return sec.toFixed(2)
+  }
+  return time
+}
+
+// converts "1:23.45" or "58.32" to milliseconds
+export function parseTime(input: string): number {
+  const parts = input.trim().split(":")
+  if (parts.length === 2) {
+    return (parseInt(parts[0]) * 60 + parseFloat(parts[1])) * 1000
+  }
+  return parseFloat(parts[0]) * 1000
+}
 
 /** Signed delta vs seed — negative is a drop (faster), positive is slower. */
 export function formatSeedTimeDelta(seed: string, result: string): string | null {

@@ -68,6 +68,7 @@ model Athlete {
   swimCloudId  Int?    
   timesSyncedAt DateTime?
   swims        Swim[]
+  meetSignups  MeetSignupEntry[]
 }
 
 model Meet {
@@ -98,6 +99,45 @@ model Meet {
   resultStatusesSummary Json?
   createdAt     DateTime  @default(now())
   swims         Swim[]
+  signupForm    MeetSignupForm?
+}
+
+model MeetSignupForm {
+  id              String            @id @default(cuid())
+  meetId          String            @unique
+  meet            Meet              @relation(fields: [meetId], references: [id], onDelete: Cascade)
+  enabled         Boolean           @default(false)
+  instructions    String            @default("")
+  allowedEvents   String[]          @default([])
+  minEvents       Int?
+  maxEvents       Int?
+  maxRelayEvents  Int?
+  askNotes        Boolean           @default(true)
+  customQuestions Json?
+  openAt          DateTime?
+  closeAt         DateTime?
+  withdrawUntil   DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  entries         MeetSignupEntry[]
+}
+
+model MeetSignupEntry {
+  id        String         @id @default(cuid())
+  formId    String
+  form      MeetSignupForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+  athleteId String
+  athlete   Athlete        @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  events    String[]       @default([])
+  entryTimes Json?
+  notes     String         @default("")
+  answers   Json?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([formId, athleteId])
+  @@index([formId])
+  @@index([athleteId])
 }
 
 model Swim {

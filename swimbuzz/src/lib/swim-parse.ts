@@ -49,8 +49,8 @@ export function normalizeEventName(event: string): string {
     .replace(/\s+/g, " ")
     .trim()
 
-  // 4x50 Free Relay and 200 Free Relay are the same event.
-  const relayLeg = normalized.match(/^(\d+)\s*[xX]\s*(\d+)\s+(.+)$/i)
+  // 4x50 / 4x100 / 4x200 Free Relay ≡ 200 / 400 / 800 Free Relay.
+  const relayLeg = normalized.match(/^(\d+)\s*[xX×]\s*(\d+)\s+(.+)$/i)
   if (relayLeg) {
     const legs = parseInt(relayLeg[1], 10)
     const legDist = parseInt(relayLeg[2], 10)
@@ -70,6 +70,31 @@ export function normalizeEventName(event: string): string {
   }
 
   return normalized
+}
+
+/**
+ * Match meet-packet labels ("50 Freestyle", "200 Individual Medley")
+ * to SwimCloud-style names ("50 Free", "200 IM").
+ */
+export function canonicalizeStrokeEvent(event: string): string {
+  return normalizeEventName(event)
+    .replace(/\bfreestyle\b/gi, "Free")
+    .replace(/\bbackstroke\b/gi, "Back")
+    .replace(/\bbreaststroke\b/gi, "Breast")
+    .replace(/\bbreastroke\b/gi, "Breast")
+    .replace(/\bbutterfly\b/gi, "Fly")
+    .replace(/\bindividual\s+medley\b/gi, "IM")
+    .replace(/\s+/g, " ")
+    .trim()
+}
+
+/** Stable key for matching relay signup interest across packet / UI names. */
+export function relaySignupKey(event: string): string {
+  return canonicalizeStrokeEvent(event)
+    .replace(/\bMixed\s+/gi, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase()
 }
 
 export function parseMeetDate(dateStr: string): Date | null {

@@ -6,8 +6,8 @@ import Link from "next/link"
 import { Prisma } from "@prisma/client"
 import { formatSwimDate } from "@/lib/utils"
 import { SET_TAGS } from "@/lib/practice-tags"
-import { isStaffRole } from "@/lib/auth-roles"
 import PracticeEditor from "./PracticeEditor"
+import { isStaffUi } from "@/lib/athlete-view-server"
 
 export default async function PracticesPage({
   searchParams,
@@ -17,7 +17,7 @@ export default async function PracticesPage({
   const session = await getServerSession(authOptions)
   if (!session) redirect("/signin?callbackUrl=/practices")
 
-  const isCoach = isStaffRole(session.user.role)
+  const isCoach = await isStaffUi(session.user.role)
   const { q, tag } = await searchParams
   const query = q?.trim() ?? ""
   const activeTag = tag?.trim() ?? ""

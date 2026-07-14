@@ -7,7 +7,7 @@ export default function RosterFilters({ count }: { count: number }) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const gender = searchParams.get("gender") ?? "M"
+  const gender = searchParams.get("gender") ?? "all"
   const season =
     parseSeason(searchParams.get("season") ?? searchParams.get("year")) ?? currentSeason()
 
@@ -21,10 +21,11 @@ export default function RosterFilters({ count }: { count: number }) {
   return (
     <div className="flex items-center gap-2">
       <select
-        value={gender}
+        value={gender === "F" || gender === "M" || gender === "all" ? gender : "all"}
         onChange={(e) => updateParam("gender", e.target.value)}
         className="text-xs border rounded-lg px-2.5 py-1.5 bg-white dark:bg-zinc-900"
       >
+        <option value="all">All</option>
         <option value="M">Men</option>
         <option value="F">Women</option>
       </select>

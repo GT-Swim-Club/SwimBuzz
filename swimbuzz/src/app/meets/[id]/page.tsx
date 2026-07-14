@@ -18,10 +18,23 @@ import type { MeetFormState } from "../MeetFields"
 import { isEventOrder } from "@/lib/meet-event-order"
 import { isSheetSummary, mergeMeetResultEntries, swimsToMeetResults, isResultStatusesSummary } from "@/lib/meet-sheet-summary"
 import { isRelayResultsSummary } from "@/lib/relay-results"
+import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete-view-server"
+import { isStaffRole } from "@/lib/auth-roles"
 import { Gender } from "@prisma/client"
 import MeetResourceIcon, { type MeetResourceKind } from "@/components/MeetResourceIcon"
 import { type TravelInfoKind } from "@/components/TravelInfoIcon"
 import TravelInfoButtons, { type TravelInfoItem } from "./TravelInfoButtons"
+import MeetSignupSection from "./MeetSignupSection"
+import {
+  normalizeMeetSignupQuestions,
+  normalizeSignupEntryTimes,
+  isRelaySignupEvent,
+  resolveSignupEventOptions,
+  resolveEditableSignupSheetKeys,
+} from "@/lib/meet-signup"
+import { isSignupAnswers } from "@/lib/meet-signup"
+import MeetRelayBuilder from "./MeetRelayBuilder"
+import { relaySignupKey } from "@/lib/swim-parse"
 
 function toDateInput(d: Date | null | undefined): string {
   if (!d) return ""
@@ -66,7 +79,8 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
   const session = await getServerSession(authOptions)
   if (!session) redirect("/signin")
 
-  const isCoach = ["COACH", "EXEC"].includes(session.user.role)
+  const isCoach = await isStaffUi(session.user.role)
+  const isStaff = isStaffRole(session.user.role)
 
   const meet = await prisma.meet.findUnique({
     where: { id },
@@ -74,10 +88,24 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
       swims: {
         include: { athlete: { select: { id: true, firstName: true, lastName: true } } },
       },
+      signupForm: {
+        include: {
+          entries: {
+            include: {
+              athlete: {
+                select: { id: true, firstName: true, lastName: true, gender: true },
+              },
+            },
+            orderBy: [{ athlete: { lastName: "asc" } }, { athlete: { firstName: "asc" } }],
+          },
+        },
+      },
     },
   })
 
   if (!meet) notFound()
+
+  const viewerAthleteId = await resolveViewerAthleteId(session.user.id)
 
   const results = mergeMeetResultEntries(
     swimsToMeetResults(
@@ -163,6 +191,85 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
     name: `${a.lastName}, ${a.firstName}`,
     gender: a.gender === Gender.F ? ("F" as const) : ("M" as const),
   }))
+
+  const signupForm = meet.signupForm
+    ? {
+        id: meet.signupForm.id,
+        enabled: meet.signupForm.enabled,
+        instructions: meet.signupForm.instructions,
+        minEvents: meet.signupForm.minEvents,
+        maxEvents: meet.signupForm.maxEvents,
+        maxRelayEvents: meet.signupForm.maxRelayEvents,
+        askNotes: meet.signupForm.askNotes,
+        customQuestions: normalizeMeetSignupQuestions(meet.signupForm.customQuestions),
+        openAt: meet.signupForm.openAt?.toISOString() ?? null,
+        closeAt: meet.signupForm.closeAt?.toISOString() ?? null,
+        withdrawUntil: meet.signupForm.withdrawUntil?.toISOString() ?? null,
+      }
+    : null
+
+  const mySignupEntry = (() => {
+    if (!signupForm || !viewerAthleteId || !meet.signupForm) return null
+    const entry = meet.signupForm.entries.find((e) => e.athleteId === viewerAthleteId)
+    if (!entry) return null
+    return {
+      events: entry.events,
+      entryTimes: normalizeSignupEntryTimes(entry.entryTimes),
+      notes: entry.notes,
+      answers: isSignupAnswers(entry.answers) ? entry.answers : {},
+      updatedAt: entry.updatedAt.toISOString(),
+    }
+  })()
+
+  const signupEntries =
+    isCoach && meet.signupForm
+      ? meet.signupForm.entries.map((e) => ({
+          id: e.id,
+          athleteId: e.athleteId,
+          firstName: e.athlete.firstName,
+          lastName: e.athlete.lastName,
+          gender: e.athlete.gender === Gender.F ? ("F" as const) : ("M" as const),
+          events: e.events,
+          entryTimes: normalizeSignupEntryTimes(e.entryTimes),
+          notes: e.notes,
+          answers: e.answers,
+          updatedAt: e.updatedAt.toISOString(),
+        }))
+      : []
+
+  const signupAthleteIdsByEvent: Record<string, string[]> = {}
+  const signupAthleteIds: string[] = []
+  for (const entry of meet.signupForm?.entries ?? []) {
+    if (!signupAthleteIds.includes(entry.athleteId)) {
+      signupAthleteIds.push(entry.athleteId)
+    }
+    for (const ev of entry.events) {
+      if (!isRelaySignupEvent(ev)) continue
+      const key = relaySignupKey(ev)
+      if (!key) continue
+      if (!signupAthleteIdsByEvent[key]) signupAthleteIdsByEvent[key] = []
+      if (!signupAthleteIdsByEvent[key].includes(entry.athleteId)) {
+        signupAthleteIdsByEvent[key].push(entry.athleteId)
+      }
+    }
+  }
+
+  const signupEventOptions = resolveSignupEventOptions(meet.eventOrder)
+  const relayEventOptions = signupEventOptions
+    .filter((o) => o.isRelay)
+    .map((o) => o.event)
+  const individualEventOptions = signupEventOptions
+    .filter((o) => !o.isRelay)
+    .map((o) => o.event)
+  const editableSeedKeys = resolveEditableSignupSheetKeys(
+    entriesSummary,
+    psychSummary,
+    heatSummary,
+    (meet.signupForm?.entries ?? []).map((e) => ({
+      athleteId: e.athleteId,
+      events: e.events,
+    }))
+  )
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-8 space-y-8">
@@ -263,6 +370,34 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
         </section>
       )}
 
+      <MeetSignupSection
+        meetId={meet.id}
+        eventOrder={meet.eventOrder}
+        course={meet.course}
+        isCoach={isCoach}
+        isStaff={isStaff}
+        selfAthleteId={viewerAthleteId}
+        athletes={rosterAthletes.map((a) => ({
+          id: a.id,
+          name: a.name,
+          gender: a.gender,
+        }))}
+        form={signupForm}
+        myEntry={mySignupEntry}
+        entries={signupEntries}
+      />
+
+      {isCoach && (
+        <MeetRelayBuilder
+          meetId={meet.id}
+          defaultCourse={meet.course}
+          relayEvents={relayEventOptions}
+          athletes={rosterAthletes}
+          signupAthleteIds={signupAthleteIds}
+          signupAthleteIdsByEvent={signupAthleteIdsByEvent}
+        />
+      )}
+
       <MeetSheetSummarySection
         psychSummary={psychSummary}
         heatSummary={heatSummary}
@@ -273,10 +408,17 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
         meetName={meet.name}
         athletes={rosterAthletes}
         canEdit={isCoach}
+        viewerAthleteId={viewerAthleteId}
+        individualEventOptions={individualEventOptions}
+        editableSeedKeys={editableSeedKeys}
+        eventNumberOptions={signupEventOptions}
         headerAction={
           isCoach ? (
             <div className="flex flex-wrap gap-2">
-              <AddMeetRelayButton meetId={meet.id} athletes={rosterAthletes} />
+              <AddMeetRelayButton
+                meetId={meet.id}
+                athletes={rosterAthletes}
+              />
               <AddMeetSwimButton
                 meetId={meet.id}
                 meetName={meet.name}

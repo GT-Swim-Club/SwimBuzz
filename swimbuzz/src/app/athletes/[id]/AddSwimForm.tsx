@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import DontReloadNotice from "@/components/DontReloadNotice"
+import Modal, { ModalFooter } from "@/components/Modal"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import { useScraperUi } from "@/components/ScraperUiProvider"
 import { parseTime, formatRelativeTime, formatDateTime } from "@/lib/utils"
@@ -15,9 +16,9 @@ const EVENTS = [
   "200 IM", "400 IM",
 ]
 
-export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: { 
+export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
   athleteId: string
-  swimCloudId: number | null 
+  swimCloudId: number | null
   timesSyncedAt: string | null
 }) {
   const router = useRouter()
@@ -27,6 +28,7 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
   const [scrapeStatus, setScrapeStatus] = useState<"idle" | "loading" | "done" | "error">("idle")
   const [scrapeError, setScrapeError] = useState<string | null>(null)
   const [scrapeCount, setScrapeCount] = useState(0)
+  const [resultOpen, setResultOpen] = useState(false)
   const [lastSynced, setLastSynced] = useState<string | null>(timesSyncedAt)
   const [form, setForm] = useState({
     event: "50 Free",
@@ -82,6 +84,7 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
       void (async () => {
         setScrapeStatus("loading")
         setScrapeError(null)
+        setResultOpen(false)
 
         const res = await fetch("/api/scrape", {
           method: "POST",
@@ -91,16 +94,22 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
         const data = await res.json().catch(() => ({}))
 
         if (res.ok) {
-          setScrapeCount(data.imported)
+          setScrapeCount(typeof data.imported === "number" ? data.imported : 0)
           setScrapeStatus("done")
           if (data.timesSyncedAt) setLastSynced(data.timesSyncedAt)
+          setResultOpen(true)
           router.refresh()
         } else {
           setScrapeError(data.error ?? "Import failed — is the scraper running?")
           setScrapeStatus("error")
+          setResultOpen(true)
         }
       })()
     })
+  }
+
+  function closeResultModal() {
+    setResultOpen(false)
   }
 
   return (
@@ -120,13 +129,7 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
               >
                 {scrapeStatus === "loading" ? "Importing..." : "Import times"}
               </button>
-              {scrapeStatus === "done" && (
-                <span className="text-xs text-gray-500 dark:text-zinc-400">{scrapeCount} swims imported</span>
-              )}
-              {scrapeStatus === "error" && scrapeError && (
-                <span className="text-xs text-red-500">{scrapeError}</span>
-              )}
-              {scrapeStatus !== "done" && scrapeStatus !== "loading" && (
+              {scrapeStatus !== "loading" && (
                 <span className="text-xs text-gray-400 dark:text-zinc-500" title={lastSynced ? formatDateTime(lastSynced) : undefined}>
                   {lastSynced ? `Last imported ${formatRelativeTime(lastSynced)}` : "Never imported"}
                 </span>
@@ -148,6 +151,31 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
           </div>
         )}
       </section>
+
+      <Modal
+        open={resultOpen && (scrapeStatus === "done" || scrapeStatus === "error")}
+        onClose={closeResultModal}
+        title={scrapeStatus === "error" ? "Import failed" : "Import complete"}
+        description={
+          scrapeStatus === "error"
+            ? scrapeError ?? "Something went wrong while importing times."
+            : scrapeCount === 1
+              ? "1 new swim was imported from SwimCloud."
+              : `${scrapeCount} new swims were imported from SwimCloud.`
+        }
+        maxWidth="sm"
+        footer={
+          <ModalFooter>
+            <button
+              type="button"
+              onClick={closeResultModal}
+              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
+            >
+              Done
+            </button>
+          </ModalFooter>
+        }
+      />
 
       {/* Manual entry */}
       <section>

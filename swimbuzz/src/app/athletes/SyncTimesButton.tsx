@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
 import DontReloadNotice from "@/components/DontReloadNotice"
+import Modal, { ModalFooter } from "@/components/Modal"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import { formatRelativeTime, formatDateTime } from "@/lib/utils"
 import { currentSeason, parseSeason } from "@/lib/season"
@@ -24,7 +25,7 @@ type SyncResult = {
   athletesSynced: number
   syncedAthleteIds: string[]
   timesSyncedAt: string | null
-  failed: string[]
+  failed: Array<string | number>
 }
 
 type SyncProgress = {
@@ -40,13 +41,15 @@ export default function SyncTimesButton() {
   const season =
     parseSeason(searchParams.get("season") ?? searchParams.get("year")) ?? currentSeason()
 
-  const { connected: bridgeConnected, requireScraper } = useScraperUi()
+  const { requireScraper } = useScraperUi()
 
   const [open, setOpen] = useState(false)
+  const [resultOpen, setResultOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [loadingRoster, setLoadingRoster] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<SyncResult | null>(null)
+  const [resultError, setResultError] = useState<string | null>(null)
   const [progress, setProgress] = useState<SyncProgress | null>(null)
 
   useDontReloadWhileBusy(loading)
@@ -62,7 +65,6 @@ export default function SyncTimesButton() {
 
     setLoadingRoster(true)
     setError(null)
-    setResult(null)
     setProgress(null)
 
     fetch(`/api/times/sync?season=${encodeURIComponent(season)}&gender=${gender}`)
@@ -94,6 +96,21 @@ export default function SyncTimesButton() {
     }
   }
 
+  function closeResultModal() {
+    setResultOpen(false)
+    setResult(null)
+    setResultError(null)
+  }
+
+  function formatFailedLabels(failed: Array<string | number>): string[] {
+    return failed.map((id) => {
+      const num = typeof id === "number" ? id : parseInt(String(id), 10)
+      const athlete = roster.find((a) => a.swimCloudId === num)
+      if (athlete) return `${athlete.lastName}, ${athlete.firstName}`
+      return String(id)
+    })
+  }
+
   async function handleSync(e: React.FormEvent) {
     e.preventDefault()
 
@@ -109,6 +126,7 @@ export default function SyncTimesButton() {
     setLoading(true)
     setError(null)
     setResult(null)
+    setResultError(null)
     setProgress({ current: 0, total: toSync.length, name: "Starting…" })
 
     try {
@@ -124,11 +142,14 @@ export default function SyncTimesButton() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error ?? "Import failed")
+        setOpen(false)
+        setResultError(data.error ?? "Import failed")
+        setResultOpen(true)
         return
       }
 
-      setResult(data)
+      const nextResult = data as SyncResult
+      setResult(nextResult)
       if (data.timesSyncedAt && Array.isArray(data.syncedAthleteIds)) {
         const syncedIds = new Set<string>(data.syncedAthleteIds)
         setRoster((prev) =>
@@ -137,14 +158,20 @@ export default function SyncTimesButton() {
           )
         )
       }
+      setOpen(false)
+      setResultOpen(true)
       router.refresh()
     } catch {
-      setError("Import failed — check that the scraper is running")
+      setOpen(false)
+      setResultError("Import failed — check that the scraper is running")
+      setResultOpen(true)
     } finally {
       setLoading(false)
       setProgress(null)
     }
   }
+
+  const failedLabels = result?.failed?.length ? formatFailedLabels(result.failed) : []
 
   return (
     <>
@@ -176,7 +203,7 @@ export default function SyncTimesButton() {
               </h2>
               <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">
                 Select from the {gender === "F" ? "women's" : "men's"} {season} roster.
-                Takes about 1–2 minutes per athlete.
+                Takes about 2–3 minutes per athlete.
               </p>
             </div>
 
@@ -273,18 +300,6 @@ export default function SyncTimesButton() {
                 {error && (
                   <p className="text-sm text-red-600 dark:text-red-400 py-2">{error}</p>
                 )}
-
-                {result && (
-                  <div className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-800/50 my-2">
-                    <p className="text-gray-900 dark:text-zinc-100">
-                      Imported <strong>{result.imported}</strong> new swims from{" "}
-                      {result.athletesSynced}/{result.athletes} athletes
-                      {result.failed.length > 0 && (
-                        <> · failed: {result.failed.join(", ")}</>
-                      )}
-                    </p>
-                  </div>
-                )}
               </div>
 
               <div className="shrink-0 flex gap-3 px-5 py-4 border-t border-gray-100 dark:border-zinc-800">
@@ -308,6 +323,39 @@ export default function SyncTimesButton() {
           </div>
         </div>
       )}
+
+      <Modal
+        open={resultOpen}
+        onClose={closeResultModal}
+        title={resultError ? "Import failed" : "Import complete"}
+        description={
+          resultError
+            ? resultError
+            : result
+              ? [
+                  `Imported ${result.imported} new swim${result.imported === 1 ? "" : "s"} from ${result.athletesSynced}/${result.athletes} athlete${result.athletes === 1 ? "" : "s"}.`,
+                  failedLabels.length
+                    ? `Failed: ${failedLabels.join(", ")}.`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(" ")
+              : "Import finished."
+        }
+        maxWidth="sm"
+        overlayClassName="z-[60]"
+        footer={
+          <ModalFooter>
+            <button
+              type="button"
+              onClick={closeResultModal}
+              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
+            >
+              Done
+            </button>
+          </ModalFooter>
+        }
+      />
     </>
   )
 }

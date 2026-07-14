@@ -74,6 +74,7 @@ function parseRelayBody(body: unknown): RelayTeamInput | null {
     legs,
     resultTime: String(raw.resultTime ?? "").trim() || undefined,
     resultPlace: parseOptionalInt(raw.resultPlace),
+    seedTime: String(raw.seedTime ?? "").trim() || undefined,
   }
 }
 
@@ -153,6 +154,7 @@ export async function POST(
       gender: effectiveRelayGender(existingEntry, athleteGenders),
       resultTime: relayTeamTime(existingEntry),
       resultPlace: relayTeamPlace(existingEntry),
+      seedTime: existingEntry.seedTime,
       legs: relay.legs,
       manual: false,
     }
@@ -174,7 +176,11 @@ export async function POST(
       relayToSave.relayRound ?? ""
     )
   }
-  if (leg1) {
+  // Seed-only saves (e.g. relay builder → roster) omit splits/result times — leave leadoff swims alone.
+  if (
+    leg1 &&
+    (leg1.splitTime || rosterOnly || Boolean(relay.resultTime))
+  ) {
     await syncRelayLeadoffSwim(
       meet,
       relayToSave.event,

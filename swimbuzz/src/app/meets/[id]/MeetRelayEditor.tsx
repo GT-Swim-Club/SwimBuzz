@@ -7,10 +7,12 @@ import DontReloadNotice from "@/components/DontReloadNotice"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import type { SheetEntry } from "@/lib/meet-sheet-summary"
 import { normalizeEventName } from "@/lib/swim-parse"
+import { formatDisplayTime } from "@/lib/utils"
 import {
   displayRelayLetter,
   effectiveRelayGender,
   effectiveRelayRound,
+  relayEventKey,
   relayTeamPlace,
   relayTeamTime,
   relaySwimmerFullName,
@@ -84,7 +86,7 @@ function formFromEntry(
   const place = relayTeamPlace(entry)
 
   return {
-    event: normalizeEventName(entry.event),
+    event: relayEventKey(entry.event) || normalizeEventName(entry.event),
     relayLetter: entry.relayLetter ?? "A",
     relayRound: effectiveRelayRound(entry),
     gender: effectiveRelayGender(entry, athleteGenders) || "F",
@@ -263,7 +265,9 @@ function RelayModal({
               </label>
               <select
                 value={form.event}
-                onChange={(e) => setForm((f) => ({ ...f, event: e.target.value }))}
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, event: e.target.value }))
+                }}
                 className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
               >
                 {RELAY_EVENTS.map((event) => (
@@ -318,13 +322,15 @@ function RelayModal({
                 value={form.gender}
                 onChange={(e) => {
                   const gender = e.target.value as RelayGender
-                  const allowed = new Set(
+                  const genderAllowed = new Set(
                     athletesForRelayGender(athletes, gender).map((a) => a.id)
                   )
                   setForm((f) => ({
                     ...f,
                     gender,
-                    legs: f.legs.map((id) => (id && allowed.has(id) ? id : "")) as RelayForm["legs"],
+                    legs: f.legs.map((id) =>
+                      id && genderAllowed.has(id) ? id : ""
+                    ) as RelayForm["legs"],
                   }))
                 }}
                 className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
@@ -341,10 +347,12 @@ function RelayModal({
           ) : null}
 
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-zinc-400">
-              <span className="w-6 shrink-0">#</span>
-              <span className="flex-1">Swimmer</span>
-              <span className="w-24 shrink-0 text-right">Split</span>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-zinc-400">
+                <span className="w-6 shrink-0">#</span>
+                <span className="flex-1">Swimmer</span>
+                <span className="w-24 shrink-0 text-right">Split</span>
+              </div>
             </div>
             {form.legs.map((athleteId, i) => (
               <div key={i} className="flex items-center gap-2">
@@ -534,7 +542,10 @@ export function RelayDetailModal({
                 {relaySwimmerFullName(swimmer.name) ?? ""}
               </span>
               <span className="font-mono text-right text-gray-900 dark:text-zinc-100">
-                {sanitizeRelaySplitTime(swimmer.splitTime) ?? ""}
+                {(() => {
+                  const split = sanitizeRelaySplitTime(swimmer.splitTime)
+                  return split ? formatDisplayTime(split) : ""
+                })()}
               </span>
             </li>
           ))}
@@ -648,7 +659,7 @@ export function EditRelayButton({
           allowDelete={entry.manual === true}
           rosterOnly={rosterOnly}
           deleteParams={{
-            event: normalizeEventName(entry.event),
+            event: relayEventKey(entry.event) || normalizeEventName(entry.event),
             relayLetter: entry.relayLetter ?? null,
             relayRound: round,
             gender,

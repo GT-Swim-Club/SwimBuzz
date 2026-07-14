@@ -71,7 +71,7 @@ export type SheetEntry = {
   prelimStatus?: string
   finalStatus?: string
   resultTags?: string
-  /** Manually added relay or swim — fully editable. Imported relays omit this. */
+  /** Coach "add to roster" seed — overridden by psych/entries/heat/results. */
   manual?: boolean
   /** Swim row id when this entry is a single manual swim. */
   swimId?: string
@@ -676,6 +676,60 @@ export function isSheetSummary(value: unknown): value is SheetSummary {
   )
 }
 
+/** Unique roster athletes appearing on sheet/relay/result rows for a meet. */
+export function countMeetAthletes(opts: {
+  psychSheetSummary?: unknown
+  heatSheetSummary?: unknown
+  entriesSheetSummary?: unknown
+  relayResultsSummary?: unknown
+  resultStatusesSummary?: unknown
+  swimAthleteIds?: string[]
+}): number {
+  const ids = new Set<string>()
+
+  function addFromEntries(entries: SheetEntry[]) {
+    for (const entry of entries) {
+      if (entry.entryType === "relay_team") {
+        for (const swimmer of entry.relaySwimmers ?? []) {
+          if (swimmer.athleteId) ids.add(swimmer.athleteId)
+        }
+        continue
+      }
+      if (entry.athleteId) ids.add(entry.athleteId)
+    }
+  }
+
+  for (const summary of [
+    opts.psychSheetSummary,
+    opts.heatSheetSummary,
+    opts.entriesSheetSummary,
+  ]) {
+    if (isSheetSummary(summary)) addFromEntries(summary.entries)
+  }
+
+  const relays = opts.relayResultsSummary
+  if (relays && typeof relays === "object" && Array.isArray((relays as { entries?: unknown }).entries)) {
+    addFromEntries((relays as { entries: SheetEntry[] }).entries)
+  }
+
+  const statuses = opts.resultStatusesSummary
+  if (
+    statuses &&
+    typeof statuses === "object" &&
+    Array.isArray((statuses as { entries?: unknown }).entries)
+  ) {
+    for (const entry of (statuses as { entries: MeetResultEntry[] }).entries) {
+      if (entry.athleteId) ids.add(entry.athleteId)
+    }
+  }
+
+  for (const id of opts.swimAthleteIds ?? []) {
+    if (id) ids.add(id)
+  }
+
+  return ids.size
+}
+
 export function groupSheetByAthlete(
   entries: SheetEntry[],
   rosterNames?: Map<string, string>
@@ -773,12 +827,21 @@ export function isTimedFinalsEntry(
 /** Hide psych/heat seed rows for events with no imported result once results exist. */
 export function dropSeedOnlyAfterResults(
   entries: SheetEntry[],
-  hasImportedResults: boolean
+  hasImportedResults: boolean,
+  keepSeedKeys?: Set<string>
 ): SheetEntry[] {
   if (!hasImportedResults) return entries
   return entries.filter((entry) => {
     if (entry.entryType !== "individual" || entry.isRelayLeadoff) return true
-    return hasSwimResultData(entry)
+    if (hasSwimResultData(entry)) return true
+    // Keep coach / sign-up seeds visible (and editable) after other results arrive.
+    if (entry.manual === true) return true
+    if (
+      keepSeedKeys?.has(`${entry.athleteId}|${normalizeEventName(entry.event)}`)
+    ) {
+      return true
+    }
+    return false
   })
 }
 
@@ -1452,7 +1515,8 @@ function resultKey(
 
 function mergeRelaySwimmers(
   a: SheetEntry["relaySwimmers"],
-  b: SheetEntry["relaySwimmers"]
+  b: SheetEntry["relaySwimmers"],
+  preferFirst = false
 ): SheetEntry["relaySwimmers"] {
   if (!a?.length) return b
   if (!b?.length) return a
@@ -1463,6 +1527,16 @@ function mergeRelaySwimmers(
     const prev = byLeg.get(leg.leg)
     if (!prev) {
       byLeg.set(leg.leg, leg)
+      continue
+    }
+    if (preferFirst) {
+      // Keep preferred roster; only fill missing split times from the other side.
+      const splitTime =
+        sanitizeRelaySplitTime(prev.splitTime) ?? sanitizeRelaySplitTime(leg.splitTime)
+      byLeg.set(leg.leg, {
+        ...prev,
+        ...(splitTime ? { splitTime } : {}),
+      })
       continue
     }
     const splitTime = sanitizeRelaySplitTime(leg.splitTime) ?? prev.splitTime
@@ -1535,51 +1609,92 @@ function mergeHeatFields(a: SheetEntry, b: SheetEntry): Partial<SheetEntry> {
   return patch
 }
 
+/** Coach "add to roster summary" seeds — override with imported sheet/results data. */
+function isManualRosterSeed(entry: SheetEntry): boolean {
+  return entry.manual === true
+}
+
 function mergeEntries(a: SheetEntry, b: SheetEntry): SheetEntry {
-  const heatPatch = mergeHeatFields(a, b)
+  const aManual = isManualRosterSeed(a)
+  const bManual = isManualRosterSeed(b)
+  // Prefer psych/entries/heat/results over coach-added roster seeds.
+  const preferB = aManual && !bManual
+  const primary = preferB ? b : a
+  const secondary = preferB ? a : b
+  const preferPrimarySwimmers = aManual !== bManual
+
+  const heatPatch = mergeHeatFields(primary, secondary)
   const heatSide =
-    a.heat != null && a.heat > 0 ? a : b.heat != null && b.heat > 0 ? b : null
-  const psychSide = a.seedRank != null ? a : b.seedRank != null ? b : null
+    primary.heat != null && primary.heat > 0
+      ? primary
+      : secondary.heat != null && secondary.heat > 0
+        ? secondary
+        : null
+  const psychSide =
+    primary.seedRank != null
+      ? primary
+      : secondary.seedRank != null
+        ? secondary
+        : null
   return {
-    ...a,
-    ...b,
+    ...secondary,
+    ...primary,
     ...heatPatch,
-    athleteId: a.athleteId,
-    athleteName: a.athleteName || b.athleteName,
-    event: normalizeEventName(a.event || b.event),
-    eventNumber: a.eventNumber || b.eventNumber,
-    entryType: a.entryType,
-    seedTime: a.seedTime ?? b.seedTime,
-    timeStatus: a.timeStatus ?? b.timeStatus,
-    seedRank: psychSide?.seedRank ?? a.seedRank ?? b.seedRank,
-    heat: heatPatch.heat ?? validHeat(heatSide?.heat) ?? validHeat(a.heat) ?? validHeat(b.heat),
-    heatTotal: heatPatch.heatTotal ?? heatSide?.heatTotal ?? a.heatTotal ?? b.heatTotal,
-    lane: heatPatch.lane ?? heatSide?.lane ?? a.lane ?? b.lane,
-    round: heatSide?.round ?? a.round ?? b.round,
-    startTime: heatSide?.startTime ?? a.startTime ?? b.startTime,
-    relayLetter: normalizeRelayLetter(a.relayLetter) ?? normalizeRelayLetter(b.relayLetter),
-    relayRound: mergedRelayRound(a, b),
-    gender: a.gender ?? b.gender,
-    relaySwimmers: mergeRelaySwimmers(a.relaySwimmers, b.relaySwimmers),
-    resultTime: a.resultTime ?? b.resultTime,
-    prelimTime: a.prelimTime ?? b.prelimTime,
-    finalTime: a.finalTime ?? b.finalTime,
-    relayLeadoffTime: a.relayLeadoffTime ?? b.relayLeadoffTime,
-    isRelayLeadoff: a.isRelayLeadoff || b.isRelayLeadoff,
-    relayLeadoffSource: a.relayLeadoffSource ?? b.relayLeadoffSource,
-    relayLeadoffRound: a.relayLeadoffRound || b.relayLeadoffRound || "",
-    resultPlace: a.resultPlace ?? b.resultPlace,
-    prelimPlace: a.prelimPlace ?? b.prelimPlace,
-    finalPlace: a.finalPlace ?? b.finalPlace,
-    resultStatus: a.resultStatus ?? b.resultStatus,
-    prelimStatus: a.prelimStatus ?? b.prelimStatus,
-    finalStatus: a.finalStatus ?? b.finalStatus,
-    resultTags: a.resultTags ?? b.resultTags,
-    manual: a.manual || b.manual,
-    swimId: a.swimId ?? b.swimId,
-    course: a.course ?? b.course,
-    date: a.date ?? b.date,
-    timeMs: a.timeMs ?? b.timeMs,
+    athleteId: primary.relaySwimmers?.length
+      ? primary.athleteId
+      : secondary.relaySwimmers?.length
+        ? secondary.athleteId
+        : primary.athleteId || secondary.athleteId,
+    athleteName: primary.relaySwimmers?.length
+      ? primary.athleteName || secondary.athleteName
+      : secondary.relaySwimmers?.length
+        ? secondary.athleteName || primary.athleteName
+        : primary.athleteName || secondary.athleteName,
+    event: normalizeEventName(primary.event || secondary.event),
+    eventNumber: primary.eventNumber || secondary.eventNumber,
+    entryType: primary.entryType || secondary.entryType,
+    seedTime: primary.seedTime ?? secondary.seedTime,
+    timeStatus: primary.timeStatus ?? secondary.timeStatus,
+    seedRank: psychSide?.seedRank ?? primary.seedRank ?? secondary.seedRank,
+    heat:
+      heatPatch.heat ??
+      validHeat(heatSide?.heat) ??
+      validHeat(primary.heat) ??
+      validHeat(secondary.heat),
+    heatTotal:
+      heatPatch.heatTotal ?? heatSide?.heatTotal ?? primary.heatTotal ?? secondary.heatTotal,
+    lane: heatPatch.lane ?? heatSide?.lane ?? primary.lane ?? secondary.lane,
+    round: heatSide?.round ?? primary.round ?? secondary.round,
+    startTime: heatSide?.startTime ?? primary.startTime ?? secondary.startTime,
+    relayLetter:
+      normalizeRelayLetter(primary.relayLetter) ?? normalizeRelayLetter(secondary.relayLetter),
+    relayRound: mergedRelayRound(primary, secondary),
+    gender: primary.gender ?? secondary.gender,
+    relaySwimmers: mergeRelaySwimmers(
+      primary.relaySwimmers,
+      secondary.relaySwimmers,
+      preferPrimarySwimmers
+    ),
+    resultTime: primary.resultTime ?? secondary.resultTime,
+    prelimTime: primary.prelimTime ?? secondary.prelimTime,
+    finalTime: primary.finalTime ?? secondary.finalTime,
+    relayLeadoffTime: primary.relayLeadoffTime ?? secondary.relayLeadoffTime,
+    isRelayLeadoff: primary.isRelayLeadoff || secondary.isRelayLeadoff,
+    relayLeadoffSource: primary.relayLeadoffSource ?? secondary.relayLeadoffSource,
+    relayLeadoffRound: primary.relayLeadoffRound || secondary.relayLeadoffRound || "",
+    resultPlace: primary.resultPlace ?? secondary.resultPlace,
+    prelimPlace: primary.prelimPlace ?? secondary.prelimPlace,
+    finalPlace: primary.finalPlace ?? secondary.finalPlace,
+    resultStatus: primary.resultStatus ?? secondary.resultStatus,
+    prelimStatus: primary.prelimStatus ?? secondary.prelimStatus,
+    finalStatus: primary.finalStatus ?? secondary.finalStatus,
+    resultTags: primary.resultTags ?? secondary.resultTags,
+    // Once sheet/results data is present, treat as imported for edit/delete rules.
+    manual: aManual && bManual ? true : aManual !== bManual ? false : Boolean(a.manual || b.manual),
+    swimId: primary.swimId ?? secondary.swimId,
+    course: primary.course ?? secondary.course,
+    date: primary.date ?? secondary.date,
+    timeMs: primary.timeMs ?? secondary.timeMs,
   }
 }
 
@@ -1623,6 +1738,14 @@ export function mergeSheetSummaries(
     const existing = byKey.get(key)
     if (existing) {
       const heatPatch = mergeResultHeatIntoSheetEntry(existing, result)
+      const hasImportedResult = Boolean(
+        result.resultTime ||
+          result.prelimTime ||
+          result.finalTime ||
+          result.resultStatus ||
+          result.prelimStatus ||
+          result.finalStatus
+      )
       byKey.set(key, {
         ...existing,
         resultTime: result.resultTime ?? existing.resultTime,
@@ -1640,8 +1763,16 @@ export function mergeSheetSummaries(
         finalStatus: result.finalStatus ?? existing.finalStatus,
         resultTags: result.resultTags || existing.resultTags,
         ...heatPatch,
-        seedTime: existing.seedTime ?? result.seedTime,
-        manual: result.manual ?? existing.manual,
+        // Meet results override coach roster seeds; keep sheet seed when results omit one.
+        seedTime: existing.manual
+          ? (result.seedTime ?? existing.seedTime)
+          : (existing.seedTime ?? result.seedTime),
+        manual:
+          result.manual === true
+            ? true
+            : existing.manual && !hasImportedResult
+              ? true
+              : Boolean(result.manual),
         swimId: result.swimId ?? existing.swimId,
         course: result.course ?? existing.course,
         date: result.date ?? existing.date,

@@ -9,7 +9,11 @@ const MAX_WIDTH = {
   sm: "max-w-sm",
   md: "max-w-md",
   lg: "max-w-lg",
+  xl: "max-w-xl",
   "2xl": "max-w-2xl",
+  "3xl": "max-w-3xl",
+  "4xl": "max-w-4xl",
+  "5xl": "max-w-5xl",
 } as const
 
 type ModalMaxWidth = keyof typeof MAX_WIDTH
@@ -44,6 +48,7 @@ export default function Modal({
   onSubmit,
   panelClassName = "",
   bodyClassName = "",
+  overlayClassName = "",
   busy = false,
 }: {
   open: boolean
@@ -59,6 +64,7 @@ export default function Modal({
   onSubmit?: (e: FormEvent) => void
   panelClassName?: string
   bodyClassName?: string
+  overlayClassName?: string
   /** Long save/scrape in progress — show a don't-reload notice. */
   busy?: boolean
 }) {
@@ -116,7 +122,9 @@ export default function Modal({
   )
 
   const overlay = (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${overlayClassName}`}
+    >
       <button
         type="button"
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"

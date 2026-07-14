@@ -44,7 +44,8 @@ const coachFeatures: FeatureItem[] = [
   },
   {
     title: "Plan relays",
-    description: "Assign relay legs, import results, and track leadoff splits across the season.",
+    description:
+      "Build optimal lineups on each meet from PBs, filter by signup interest, and track leadoff splits.",
   },
 ]
 

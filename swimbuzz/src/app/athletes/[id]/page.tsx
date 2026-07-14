@@ -2,12 +2,14 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { notFound, redirect } from "next/navigation"
+import Link from "next/link"
 import { compareSwimPb } from "@/lib/swim-parse"
 import AddSwimForm from "./AddSwimForm"
 import PersonalBestsGrid from "./PersonalBestsGrid"
 import SwimHistory from "./SwimHistory"
 import EditNicknamesForm from "./EditNicknamesForm"
 import AthleteActions from "./AthleteActions"
+import { isStaffUi } from "@/lib/athlete-view-server"
 
 export default async function AthletePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params  // 👈 await it
@@ -26,7 +28,7 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
 
     if (!athlete) notFound()
 
-  const isCoach = ["COACH", "EXEC"].includes(session.user.role)
+  const isCoach = await isStaffUi(session.user.role)
 
   // group PBs by event
   const pbMap = new Map<string, typeof athlete.swims[0]>()
@@ -48,50 +50,60 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
     source: swim.source,
   }))
 
+  const rosterHref = `/athletes?gender=${athlete.gender}`
+
   return (
     <main className="max-w-3xl mx-auto px-4 py-8 space-y-8">
-      <div className="flex items-center gap-4">
-        <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center font-medium text-indigo-700">
-          {athlete.firstName[0]}{athlete.lastName[0]}
-        </div>
-        <div className="flex-1 min-w-0">
-          <h1 className="text-xl font-medium">
-            {athlete.swimCloudId ? (
-              <a
-                href={`https://www.swimcloud.com/swimmer/${athlete.swimCloudId}/`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-              >
-                {athlete.firstName} {athlete.lastName}
-              </a>
-            ) : (
-              <>
-                {athlete.firstName} {athlete.lastName}
-              </>
+      <div>
+        <Link
+          href={rosterHref}
+          className="text-xs text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300"
+        >
+          ← Roster
+        </Link>
+        <div className="mt-1 flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center font-medium text-indigo-700">
+            {athlete.firstName[0]}{athlete.lastName[0]}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl font-medium">
+              {athlete.swimCloudId ? (
+                <a
+                  href={`https://www.swimcloud.com/swimmer/${athlete.swimCloudId}/`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                >
+                  {athlete.firstName} {athlete.lastName}
+                </a>
+              ) : (
+                <>
+                  {athlete.firstName} {athlete.lastName}
+                </>
+              )}
+              {athlete.nicknames.length > 0 && (
+                <span className="font-normal text-gray-500 dark:text-zinc-400">
+                  {" "}({athlete.nicknames.join(", ")})
+                </span>
+              )}
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-zinc-400">{athlete.user?.email}</p>
+            {athlete.swimCloudId && (
+              <p className="text-xs text-gray-400 dark:text-zinc-500 mt-0.5">
+                SwimCloud ID: {athlete.swimCloudId}
+              </p>
             )}
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-zinc-400">{athlete.user?.email}</p>
-          {athlete.nicknames.length > 0 && (
-            <p className="text-xs text-gray-400 dark:text-zinc-500 mt-0.5">
-              Also known as: {athlete.nicknames.join(", ")}
-            </p>
-          )}
-          {athlete.swimCloudId && (
-            <p className="text-xs text-gray-400 dark:text-zinc-500 mt-0.5">
-              SwimCloud ID: {athlete.swimCloudId}
-            </p>
+          </div>
+          {isCoach && (
+            <AthleteActions
+              athleteId={athlete.id}
+              firstName={athlete.firstName}
+              lastName={athlete.lastName}
+              email={athlete.user?.email ?? ""}
+              swimCloudId={athlete.swimCloudId ?? null}
+            />
           )}
         </div>
-        {isCoach && (
-          <AthleteActions
-            athleteId={athlete.id}
-            firstName={athlete.firstName}
-            lastName={athlete.lastName}
-            email={athlete.user?.email ?? ""}
-            swimCloudId={athlete.swimCloudId ?? null}
-          />
-        )}
       </div>
 
       {/* PB grid */}

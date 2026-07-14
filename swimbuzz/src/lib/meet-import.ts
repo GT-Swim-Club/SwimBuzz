@@ -5,8 +5,10 @@ import { parseCourse, parseMeetDate, parseSwimStatus, parseSwimTime, normalizeEv
 import {
   matchRelayResultsToRoster,
   isRelayLeadoffSwimTag,
+  isRelayResultsSummary,
   preserveRelayEntryFields,
   relayTeamKey,
+  effectiveRelayRound,
   type ParsedRelayResult,
 } from "@/lib/relay-results"
 import { importRelayLeadoffSwims } from "@/lib/relay-leadoff-sync"
@@ -79,7 +81,11 @@ export async function importMeetResults({
   const meetRecord = meetId
     ? await prisma.meet.findUnique({
         where: { id: meetId },
-        select: { heatSheetSummary: true, resultStatusesSummary: true },
+        select: {
+          heatSheetSummary: true,
+          resultStatusesSummary: true,
+          relayResultsSummary: true,
+        },
       })
     : null
   const heatSheetSummary = isSheetSummary(meetRecord?.heatSheetSummary)
@@ -310,7 +316,33 @@ export async function importMeetResults({
       resultStatusesSummary?: { entries: MeetResultEntry[] }
     } = {}
     if (relayEntries.length > 0) {
-      meetUpdate.relayResultsSummary = { entries: relayEntries }
+      const existingRelays = isRelayResultsSummary(meetRecord?.relayResultsSummary)
+        ? meetRecord.relayResultsSummary.entries
+        : []
+      const importedKeys = new Set(
+        relayEntries.map((e) =>
+          relayTeamKey(
+            e.event,
+            e.relayLetter,
+            e.relayRound ?? "",
+            e.gender ?? ""
+          )
+        )
+      )
+      // Keep coach roster seeds for teams not present in imported results.
+      const leftoverManual = existingRelays.filter((e) => {
+        if (e.entryType !== "relay_team" || !e.manual) return false
+        const key = relayTeamKey(
+          e.event,
+          e.relayLetter,
+          effectiveRelayRound(e),
+          e.gender ?? ""
+        )
+        return !importedKeys.has(key)
+      })
+      meetUpdate.relayResultsSummary = {
+        entries: [...relayEntries, ...leftoverManual],
+      }
     }
     if (metaEntries.length > 0) {
       meetUpdate.resultStatusesSummary = { entries: metaEntries }

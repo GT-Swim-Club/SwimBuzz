@@ -9,6 +9,7 @@ import SyncTimesButton from "./SyncTimesButton"
 import AddAthleteButton from "./AddAthleteButton"
 import RosterFilters from "./RosterFilters"
 import { currentSeason, parseSeason } from "@/lib/season"
+import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete-view-server"
 
 export default async function AthletesPage({
     searchParams,
@@ -22,17 +23,18 @@ export default async function AthletesPage({
 
     // if no params, redirect to defaults so URL and UI always match
     if (!gender || (!seasonParam && !legacyYear)) {
-        redirect(`/athletes?gender=${gender ?? "M"}&season=${season}`)
+        redirect(`/athletes?gender=${gender ?? "all"}&season=${season}`)
     }
 
     const session = await getServerSession(authOptions)
     if (!session) redirect("/signin")
 
-    const genderFilter = gender === "F" ? "F" : "M"
+    const genderFilter =
+      gender === "F" ? "F" : gender === "M" ? "M" : null
   
     const athletes = await prisma.athlete.findMany({
         where: {
-          gender: genderFilter,
+          ...(genderFilter ? { gender: genderFilter } : {}),
           seasons: { has: season },
         },
       include: {
@@ -40,8 +42,18 @@ export default async function AthletesPage({
       },
       orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
     })
+
+    const viewerAthleteId = await resolveViewerAthleteId(session.user.id)
+    const sortedAthletes =
+      viewerAthleteId && athletes.some((a) => a.id === viewerAthleteId)
+        ? [
+            ...athletes.filter((a) => a.id === viewerAthleteId),
+            ...athletes.filter((a) => a.id !== viewerAthleteId),
+          ]
+        : athletes
   
-    const isCoach = ["COACH", "EXEC"].includes(session.user.role)
+    const isCoach = await isStaffUi(session.user.role)
+    const showGender = genderFilter == null
   
     return (
       <main className="space-y-6">
@@ -49,7 +61,7 @@ export default async function AthletesPage({
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-2xl font-medium">Roster</h1>
             <Suspense fallback={null}>
-              <RosterFilters count={athletes.length} />
+              <RosterFilters count={sortedAthletes.length} />
             </Suspense>
           </div>
           {isCoach && (
@@ -68,18 +80,28 @@ export default async function AthletesPage({
         </div>
   
         <div className="divide-y border rounded-xl overflow-hidden bg-white dark:bg-zinc-900">
-          {athletes.map((a) => (
+          {sortedAthletes.map((a) => {
+            const isYou = a.id === viewerAthleteId
+            return (
             <Link
               key={a.id}
               href={`/athletes/${a.id}`}
-              className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
+              className={
+                "flex items-center gap-4 px-4 py-3 hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors" +
+                (isYou ? " bg-indigo-50/70 dark:bg-indigo-950/30" : "")
+              }
             >
-              <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-medium text-indigo-700 shrink-0">
+              <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-medium text-indigo-700 shrink-0 dark:bg-indigo-950 dark:text-indigo-300">
                 {a.firstName[0]}{a.lastName[0]}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm text-gray-900 dark:text-zinc-100">
                   {a.lastName}, {a.firstName}
+                  {isYou && (
+                    <span className="font-normal text-indigo-600 dark:text-indigo-400">
+                      {" "}(you)
+                    </span>
+                  )}
                   {a.nicknames.length > 0 && (
                     <span className="font-normal text-gray-500 dark:text-zinc-400">
                       {" "}({a.nicknames.join(", ")})
@@ -87,12 +109,18 @@ export default async function AthletesPage({
                   )}
                 </p>
               </div>
+              {showGender ? (
+                <span className="text-[11px] font-medium uppercase tracking-wide text-gray-400 dark:text-zinc-500 shrink-0">
+                  {a.gender === "F" ? "Women" : "Men"}
+                </span>
+              ) : null}
             </Link>
-          ))}
+            )
+          })}
   
-          {athletes.length === 0 && (
+          {sortedAthletes.length === 0 && (
             <p className="text-sm text-gray-500 dark:text-zinc-400 px-4 py-8 text-center">
-              No athletes found for this gender and year.
+              No athletes found for this {showGender ? "season" : "gender and season"}.
             </p>
           )}
         </div>

@@ -112,17 +112,69 @@ def is_cloudflare_challenge(html: str, title: str = "") -> bool:
     )
 
 
+def is_transient_navigation_error(exc: BaseException) -> bool:
+    """Playwright throws when content/title is read mid-navigation."""
+    msg = str(exc).lower()
+    return (
+        "navigating and changing the content" in msg
+        or "execution context was destroyed" in msg
+        or "most likely because of a navigation" in msg
+        or "frame was detached" in msg
+    )
+
+
+async def settle_page(page, timeout_ms: int = 15_000) -> None:
+    """Wait for the document to stop thrashing after a goto/SPA redirect."""
+    try:
+        await page.wait_for_load_state("domcontentloaded", timeout=timeout_ms)
+    except Exception:
+        pass
+    try:
+        await page.wait_for_load_state("load", timeout=timeout_ms)
+    except Exception:
+        pass
+    await asyncio.sleep(0.35)
+
+
+async def safe_page_title(page, attempts: int = 8) -> str:
+    last: BaseException | None = None
+    for i in range(attempts):
+        try:
+            return await page.title()
+        except Exception as e:
+            last = e
+            if not is_transient_navigation_error(e):
+                raise
+            await settle_page(page)
+            await asyncio.sleep(0.4 + 0.2 * i)
+    raise SwimCloudScrapeError(f"Could not read page title: {last}") from last
+
+
+async def safe_page_content(page, attempts: int = 8) -> str:
+    last: BaseException | None = None
+    for i in range(attempts):
+        try:
+            return await page.content()
+        except Exception as e:
+            last = e
+            if not is_transient_navigation_error(e):
+                raise
+            await settle_page(page)
+            await asyncio.sleep(0.4 + 0.2 * i)
+    raise SwimCloudScrapeError(f"Could not read page content: {last}") from last
+
+
 async def wait_past_cloudflare(page, timeout_ms: int = 120_000) -> None:
     deadline = asyncio.get_event_loop().time() + timeout_ms / 1000
     while asyncio.get_event_loop().time() < deadline:
-        title = await page.title()
-        html = await page.content()
+        title = await safe_page_title(page)
+        html = await safe_page_content(page)
         if not is_cloudflare_challenge(html, title):
             return
         await asyncio.sleep(2.5)
 
-    html = await page.content()
-    title = await page.title()
+    html = await safe_page_content(page)
+    title = await safe_page_title(page)
     if is_cloudflare_challenge(html, title):
         raise SwimCloudScrapeError(
             "Cloudflare blocked access to SwimCloud. Complete the check in the browser window."
@@ -135,18 +187,26 @@ async def navigate_swimcloud(
     url: str,
     selector: str | None = None,
     selector_timeout: int = 45_000,
+    via_home: bool = True,
 ) -> None:
-    await page.goto("https://www.swimcloud.com/", wait_until="domcontentloaded", timeout=60_000)
-    await wait_past_cloudflare(page)
+    if via_home:
+        await page.goto(
+            "https://www.swimcloud.com/",
+            wait_until="domcontentloaded",
+            timeout=60_000,
+        )
+        await settle_page(page)
+        await wait_past_cloudflare(page)
     await page.goto(url, wait_until="domcontentloaded", timeout=60_000)
+    await settle_page(page)
     await wait_past_cloudflare(page)
     if not selector:
         return
     try:
         await page.wait_for_selector(selector, timeout=selector_timeout)
     except Exception as e:
-        html = await page.content()
-        title = await page.title()
+        html = await safe_page_content(page)
+        title = await safe_page_title(page)
         if is_cloudflare_challenge(html, title):
             raise SwimCloudScrapeError(
                 "Cloudflare blocked access to SwimCloud. Complete the check in the browser window."
@@ -187,9 +247,14 @@ async def scrape_team_roster(team_id: int, year: int, gender: str = "M"):
             await browser.close()
             raise
         except Exception as e:
-            html = await page.content()
+            try:
+                html = await safe_page_content(page)
+                title = await safe_page_title(page)
+            except Exception:
+                await browser.close()
+                raise SwimCloudScrapeError(f"Failed to load roster: {e}") from e
             await browser.close()
-            if is_cloudflare_challenge(html, await page.title()):
+            if is_cloudflare_challenge(html, title):
                 raise SwimCloudScrapeError(
                     "Cloudflare blocked access to SwimCloud. Complete the check in the browser window."
                 ) from e
@@ -299,11 +364,12 @@ async def fetch_times_by_events(page, swimmer_id: int, pacer: AdaptivePacer) -> 
     return results
 
 
-async def open_swimmer_times_page(page, swimmer_id: int):
+async def open_swimmer_times_page(page, swimmer_id: int, via_home: bool = True):
     await navigate_swimcloud(
         page,
         f"https://www.swimcloud.com/swimmer/{swimmer_id}/times/",
         selector="button.c-tabs__link",
+        via_home=via_home,
     )
 
 
@@ -321,14 +387,26 @@ async def scrape_bulk_times(swimmer_ids: list[int]):
         browser, page = await launch_browser(p)
         for idx, swimmer_id in enumerate(swimmer_ids):
             label = f"{idx + 1}/{len(swimmer_ids)}"
-            try:
-                await open_swimmer_times_page(page, swimmer_id)
-                times = await fetch_times_by_events(page, swimmer_id, pacer)
-                swimmers[str(swimmer_id)] = times
-                print(f"Bulk sync [{label}] swimmer {swimmer_id}: {len(times)} times")
-            except Exception as e:
-                print(f"Bulk sync [{label}] swimmer {swimmer_id} failed: {e}")
-                failed.append(swimmer_id)
+            for attempt in range(2):
+                try:
+                    # First swimmer (and retries) go via home to clear CF cookies / session.
+                    via_home = idx == 0 or attempt > 0
+                    await open_swimmer_times_page(page, swimmer_id, via_home=via_home)
+                    times = await fetch_times_by_events(page, swimmer_id, pacer)
+                    swimmers[str(swimmer_id)] = times
+                    print(f"Bulk sync [{label}] swimmer {swimmer_id}: {len(times)} times")
+                    break
+                except Exception as e:
+                    if attempt == 0 and is_transient_navigation_error(e):
+                        print(
+                            f"Bulk sync [{label}] swimmer {swimmer_id} "
+                            f"hit mid-navigation, retrying…"
+                        )
+                        await asyncio.sleep(1.5 + random.uniform(0, 0.5))
+                        continue
+                    print(f"Bulk sync [{label}] swimmer {swimmer_id} failed: {e}")
+                    failed.append(swimmer_id)
+                    break
             if idx + 1 < len(swimmer_ids):
                 gap = BULK_SWIMMER_GAP_SEC + random.uniform(0, 0.75)
                 await asyncio.sleep(gap)

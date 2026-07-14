@@ -44,7 +44,11 @@ export default function RelaySummaryRow({
             {timeDisplay}
             {canEdit && meetId ? (
               <div onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-                <EditRelayButton meetId={meetId} athletes={athletes} entry={entry} />
+                <EditRelayButton
+                  meetId={meetId}
+                  athletes={athletes}
+                  entry={entry}
+                />
               </div>
             ) : null}
           </>

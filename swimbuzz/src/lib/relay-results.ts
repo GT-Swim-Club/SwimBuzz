@@ -4,7 +4,7 @@ import {
   type RosterAthlete,
 } from "@/lib/athlete-match"
 import type { SheetEntry } from "@/lib/meet-sheet-summary"
-import { normalizeEventName, parseSwimTime } from "@/lib/swim-parse"
+import { canonicalizeStrokeEvent, normalizeEventName, parseSwimTime } from "@/lib/swim-parse"
 
 export type RelayRound = "P" | "F" | ""
 export type RelayGender = "M" | "F" | "X" | ""
@@ -56,9 +56,9 @@ export function relayGenderFromEventName(event: string): RelayGender {
   return ""
 }
 
-/** Canonical relay event for grouping — "200 Mixed Free Relay" matches "200 Free Relay". */
+/** Canonical relay event for grouping — "4x50 Mixed Freestyle Relay" matches "200 Free Relay". */
 export function relayEventKey(event: string): string {
-  return normalizeEventName(event)
+  return canonicalizeStrokeEvent(event)
     .replace(/\bMixed\s+/gi, "")
     .replace(/\s+/g, " ")
     .trim()
@@ -172,7 +172,7 @@ export function relaySwimmerFullName(name: string): string | null {
 
 /** Individual event for a relay leadoff (leg 1) — e.g. 200 Medley Relay → 50 Back. */
 export function leadoffEventFromRelay(relayEvent: string): string | null {
-  const event = normalizeEventName(relayEvent)
+  const event = relayEventKey(relayEvent)
   const match = event.match(/^(\d+)\s+(Medley|Free)\s+Relay$/i)
   if (!match) return null
   const total = parseInt(match[1], 10)
@@ -390,6 +390,7 @@ export type RelayTeamInput = {
   legs: Array<{ leg: number; athleteId: string; splitTime?: string }>
   resultTime?: string
   resultPlace?: number
+  seedTime?: string
   manual?: boolean
 }
 
@@ -445,6 +446,7 @@ export function buildRelaySheetEntries(
       relaySwimmers,
       resultTime: relay.resultTime,
       resultPlace: relay.resultPlace,
+      ...(relay.seedTime ? { seedTime: relay.seedTime } : {}),
       manual: relay.manual ?? true,
     },
   ]
@@ -471,7 +473,7 @@ export function preserveRelayEntryFields(
   return {
     ...updated,
     eventNumber: existing.eventNumber || updated.eventNumber,
-    seedTime: existing.seedTime ?? updated.seedTime,
+    seedTime: updated.seedTime ?? existing.seedTime,
     timeStatus: existing.timeStatus ?? updated.timeStatus,
     seedRank: existing.seedRank ?? updated.seedRank,
     heat: updated.heat ?? existingGenericHeat,

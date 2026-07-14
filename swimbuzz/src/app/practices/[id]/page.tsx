@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
 import { formatSwimDate } from "@/lib/utils"
-import { isStaffRole } from "@/lib/auth-roles"
+import { isStaffUi } from "@/lib/athlete-view-server"
 import PracticeActions from "./PracticeActions"
 import CommentSection from "./CommentSection"
 import type { PracticeFormState } from "../PracticeEditor"
@@ -24,7 +24,7 @@ export default async function PracticePage({
   const session = await getServerSession(authOptions)
   if (!session) redirect("/signin?callbackUrl=/practices")
 
-  const isCoach = isStaffRole(session.user.role)
+  const isCoach = await isStaffUi(session.user.role)
 
   const practice = await prisma.practice.findUnique({
     where: { id },
