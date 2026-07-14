@@ -151,8 +151,9 @@ export async function importRelayLeadoffSwims({
 
   for (const row of relayResults) {
     const leg1 = row.relaySwimmers.find((s) => s.leg === 1)
-    const splitTime = sanitizeRelaySplitTime(leg1?.splitTime)
-    if (!splitTime || !isRealRelaySwimmerName(leg1?.name)) continue
+    if (!leg1) continue
+    const splitTime = sanitizeRelaySplitTime(leg1.splitTime)
+    if (!splitTime || !isRealRelaySwimmerName(leg1.name)) continue
 
     const athleteId = matchAthleteIdFast(leg1.name, lookup, nameMappings)
     if (!athleteId) continue
