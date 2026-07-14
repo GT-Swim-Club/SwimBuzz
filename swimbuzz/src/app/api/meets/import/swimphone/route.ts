@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { importMeetResults, resolveMeetDate } from "@/lib/meet-import"
+import { normalizeNameMappings, normalizeRejectedNames } from "@/lib/athlete-match"
 import { runBridgeJob } from "@/lib/bridge"
 import { prisma } from "@/lib/prisma"
 import { parseSeason } from "@/lib/season"
@@ -24,6 +25,7 @@ type ParsedResult = {
   lane?: number
   heatTotal?: number
   seedTime?: string
+  splits?: Array<{ distance: number; splitTime: string }>
 }
 
 type ScrapedMeet = {
@@ -42,10 +44,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
-  const { url, season: seasonRaw, year, meetId: meetIdRaw, team: teamRaw } = await req.json()
+  const body = await req.json()
+  const {
+    url,
+    season: seasonRaw,
+    year,
+    meetId: meetIdRaw,
+    team: teamRaw,
+    nameMappings: nameMappingsRaw,
+    rejectedNames: rejectedNamesRaw,
+  } = body
   const meetUrl = String(url ?? "").trim()
   const meetId = String(meetIdRaw ?? "").trim() || null
   const team = String(teamRaw ?? "").trim() || null
+  const nameMappings = normalizeNameMappings(nameMappingsRaw)
+  const rejectedNames = normalizeRejectedNames(rejectedNamesRaw)
 
   if (!meetUrl) {
     return NextResponse.json({ error: "SwimPhone meet URL is required" }, { status: 400 })
@@ -106,6 +119,8 @@ export async function POST(req: Request) {
     source: "swimphone",
     courseDefault: scraped.course ?? "SCY",
     meetId: meet?.id ?? null,
+    nameMappings,
+    rejectedNames,
   })
 
   if (meet?.id) {

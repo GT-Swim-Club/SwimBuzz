@@ -78,6 +78,9 @@ export default function MeetSignupSection({
   const [responsesOpen, setResponsesOpen] = useState(false)
   const [syncConfirmOpen, setSyncConfirmOpen] = useState(false)
   const [syncingRoster, setSyncingRoster] = useState(false)
+  const [withdrawEntry, setWithdrawEntry] = useState<EntryRow | null>(null)
+  const [withdrawing, setWithdrawing] = useState(false)
+  const [withdrawError, setWithdrawError] = useState<string | null>(null)
   const [syncError, setSyncError] = useState<string | null>(null)
   const router = useRouter()
   const eventOptions = resolveSignupEventOptions(eventOrder)
@@ -150,6 +153,29 @@ export default function MeetSignupSection({
     if (entries.length === 0 || eventOptions.length === 0 || syncingRoster) return
     setSyncError(null)
     setSyncConfirmOpen(true)
+  }
+
+  async function withdrawSignup() {
+    if (!withdrawEntry || withdrawing) return
+    setWithdrawing(true)
+    setWithdrawError(null)
+    try {
+      const res = await fetch(
+        `/api/meets/${meetId}/signup/entry?athleteId=${encodeURIComponent(withdrawEntry.athleteId)}`,
+        { method: "DELETE" }
+      )
+      const data = (await res.json().catch(() => ({}))) as { error?: string }
+      if (!res.ok) {
+        setWithdrawError(data.error ?? "Failed to withdraw sign-up")
+        return
+      }
+      setWithdrawEntry(null)
+      router.refresh()
+    } catch {
+      setWithdrawError("Failed to withdraw sign-up")
+    } finally {
+      setWithdrawing(false)
+    }
   }
 
   if (!showSection) return null
@@ -272,12 +298,14 @@ export default function MeetSignupSection({
           <Modal
             open={responsesOpen}
             onClose={() => {
-              if (syncingRoster) return
+              if (syncingRoster || withdrawing) return
               setResponsesOpen(false)
               setSyncConfirmOpen(false)
               setSyncError(null)
+              setWithdrawEntry(null)
+              setWithdrawError(null)
             }}
-            closeDisabled={syncingRoster}
+            closeDisabled={syncingRoster || withdrawing}
             title="Sign-up responses"
             description={`${entries.length} response${entries.length === 1 ? "" : "s"}`}
             maxWidth="5xl"
@@ -289,8 +317,10 @@ export default function MeetSignupSection({
                     setResponsesOpen(false)
                     setSyncConfirmOpen(false)
                     setSyncError(null)
+                    setWithdrawEntry(null)
+                    setWithdrawError(null)
                   }}
-                  disabled={syncingRoster}
+                  disabled={syncingRoster || withdrawing}
                   className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700 disabled:opacity-50"
                 >
                   Close
@@ -300,6 +330,7 @@ export default function MeetSignupSection({
                   onClick={openSyncConfirm}
                   disabled={
                     syncingRoster ||
+                    withdrawing ||
                     entries.length === 0 ||
                     eventOptions.length === 0
                   }
@@ -328,6 +359,9 @@ export default function MeetSignupSection({
                       {form.askNotes && (
                         <th className="px-2 py-2 font-medium">Notes</th>
                       )}
+                      <th className="px-2 py-2 font-medium">
+                        <span className="sr-only">Actions</span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y dark:divide-zinc-800">
@@ -376,6 +410,19 @@ export default function MeetSignupSection({
                               {entry.notes || "—"}
                             </td>
                           )}
+                          <td className="px-2 py-2 whitespace-nowrap text-right">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setWithdrawError(null)
+                                setWithdrawEntry(entry)
+                              }}
+                              disabled={withdrawing}
+                              className="text-xs px-2 py-1 rounded-md border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950/30 disabled:opacity-50 transition-colors"
+                            >
+                              Withdraw
+                            </button>
+                          </td>
                         </tr>
                       )
                     })}
@@ -424,6 +471,52 @@ export default function MeetSignupSection({
           >
             {syncError ? (
               <p className="text-sm text-red-600 dark:text-red-400">{syncError}</p>
+            ) : null}
+          </Modal>
+
+          <Modal
+            open={withdrawEntry != null}
+            onClose={() => {
+              if (withdrawing) return
+              setWithdrawEntry(null)
+              setWithdrawError(null)
+            }}
+            closeDisabled={withdrawing}
+            busy={withdrawing}
+            title="Withdraw sign-up?"
+            description={
+              withdrawEntry
+                ? `This removes ${withdrawEntry.firstName} ${withdrawEntry.lastName}'s meet sign-up and event selections.`
+                : "This removes the meet sign-up and event selections."
+            }
+            maxWidth="md"
+            overlayClassName="z-[60]"
+            footer={
+              <ModalFooter>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setWithdrawEntry(null)
+                    setWithdrawError(null)
+                  }}
+                  disabled={withdrawing}
+                  className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void withdrawSignup()}
+                  disabled={withdrawing}
+                  className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                >
+                  {withdrawing ? "Withdrawing…" : "Withdraw"}
+                </button>
+              </ModalFooter>
+            }
+          >
+            {withdrawError ? (
+              <p className="text-sm text-red-600 dark:text-red-400">{withdrawError}</p>
             ) : null}
           </Modal>
         </>

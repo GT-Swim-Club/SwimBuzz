@@ -1,43 +1,34 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import LiveSearch from "@/components/LiveSearch"
 import { currentSeason, parseSeason, seasonOptions } from "@/lib/season"
 
-function useRosterParams() {
+export default function QualifierFilters({
+  qualifierCount,
+}: {
+  qualifierCount: number
+}) {
   const router = useRouter()
   const searchParams = useSearchParams()
-
   const gender = searchParams.get("gender") ?? "all"
   const season =
-    parseSeason(searchParams.get("season") ?? searchParams.get("year")) ?? currentSeason()
+    parseSeason(searchParams.get("season")) ?? currentSeason()
 
-  function updateParams(updates: Record<string, string | null>) {
+  function update(updates: Record<string, string | null>) {
     const params = new URLSearchParams(searchParams.toString())
-    params.delete("year")
     for (const [key, value] of Object.entries(updates)) {
       if (value == null || value === "") params.delete(key)
       else params.set(key, value)
     }
-    router.push(`/athletes?${params.toString()}`)
+    router.push(`/qualifiers?${params.toString()}`)
   }
 
-  return { gender, season, updateParams }
-}
-
-export function RosterSearch() {
-  return <LiveSearch pathname="/athletes" placeholder="Search athletes…" />
-}
-
-export default function RosterFilters({ count }: { count: number }) {
-  const { gender, season, updateParams } = useRosterParams()
-
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 flex-wrap">
       <select
         value={gender === "F" || gender === "M" || gender === "all" ? gender : "all"}
-        onChange={(e) => updateParams({ gender: e.target.value })}
-        className="text-xs border rounded-lg px-2.5 py-1.5 bg-white dark:bg-zinc-900"
+        onChange={(e) => update({ gender: e.target.value })}
+        className="text-xs border rounded-lg px-2.5 py-1.5 bg-white dark:bg-zinc-900 dark:border-zinc-700"
       >
         <option value="all">All</option>
         <option value="M">Men</option>
@@ -45,8 +36,8 @@ export default function RosterFilters({ count }: { count: number }) {
       </select>
       <select
         value={season}
-        onChange={(e) => updateParams({ season: e.target.value })}
-        className="text-xs border rounded-lg px-2.5 py-1.5 bg-white dark:bg-zinc-900"
+        onChange={(e) => update({ season: e.target.value })}
+        className="text-xs border rounded-lg px-2.5 py-1.5 bg-white dark:bg-zinc-900 dark:border-zinc-700"
       >
         {seasonOptions().map((s) => (
           <option key={s} value={s}>
@@ -55,7 +46,7 @@ export default function RosterFilters({ count }: { count: number }) {
         ))}
       </select>
       <span className="text-xs text-gray-500 dark:text-zinc-400">
-        {count} athlete{count === 1 ? "" : "s"}
+        {qualifierCount} qualifier{qualifierCount === 1 ? "" : "s"}
       </span>
     </div>
   )

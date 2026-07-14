@@ -110,10 +110,11 @@ export function sanitizeRelaySplitTime(value?: string | null): string | undefine
   return parseSwimTime(trimmed) ? trimmed : undefined
 }
 
-const PLACEHOLDER_LEG = /^Leg \d$/
+const PLACEHOLDER_LEG = /^leg\s*\d+$/i
 const RELAY_LEGS = [1, 2, 3, 4] as const
 
-function isRealRelaySwimmerName(name: string | undefined): boolean {
+/** False for empty / "Leg 1"-style placeholders used when roster is unknown. */
+export function isRealRelaySwimmerName(name: string | undefined): boolean {
   if (!name?.trim()) return false
   const trimmed = name.trim()
   if (PLACEHOLDER_LEG.test(trimmed)) return false
@@ -242,7 +243,8 @@ export function relayTeamPlace(entry: SheetEntry): number | undefined {
 /** Import relay team results — roster match optional; one stored row per team. */
 export function matchRelayResultsToRoster(
   parsed: ParsedRelayResult[],
-  roster: RosterAthlete[]
+  roster: RosterAthlete[],
+  nameMappings?: Record<string, string> | null
 ): SheetEntry[] {
   const lookup = buildAthleteLookup(roster)
   const byTeam = new Map<string, SheetEntry>()
@@ -265,8 +267,11 @@ export function matchRelayResultsToRoster(
       .slice()
       .sort((a, b) => a.leg - b.leg)
       .map((leg) => {
-        const name = leg.name.trim() || `Leg ${leg.leg}`
-        const athleteId = leg.name.trim() ? matchAthleteIdFast(leg.name, lookup) : undefined
+        const rawName = leg.name.trim()
+        const name = rawName || `Leg ${leg.leg}`
+        const athleteId = isRealRelaySwimmerName(rawName)
+          ? matchAthleteIdFast(rawName, lookup, nameMappings)
+          : undefined
         const splitTime = sanitizeRelaySplitTime(leg.splitTime)
         return {
           leg: leg.leg,

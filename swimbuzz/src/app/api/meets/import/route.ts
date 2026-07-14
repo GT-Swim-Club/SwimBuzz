@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { importMeetResults, resolveMeetDate } from "@/lib/meet-import"
+import { normalizeNameMappings, normalizeRejectedNames } from "@/lib/athlete-match"
 import { parseMeetPdf, LOCAL_BRIDGE_HINT } from "@/lib/scraper-or-bridge"
 import { prisma } from "@/lib/prisma"
 import { isStoredMeetFileUrl } from "@/lib/meet-files"
@@ -22,6 +23,15 @@ type ParsedResult = {
   place?: number
 }
 
+function parseJsonField(raw: FormDataEntryValue | null): unknown {
+  if (typeof raw !== "string" || !raw.trim()) return null
+  try {
+    return JSON.parse(raw)
+  } catch {
+    return null
+  }
+}
+
 export const runtime = "nodejs"
 
 export async function POST(req: Request) {
@@ -36,6 +46,8 @@ export async function POST(req: Request) {
   const team = String(formData.get("team") ?? "").trim() || null
   const seasonRaw = formData.get("season") ?? formData.get("year")
   const meetId = String(formData.get("meetId") ?? "").trim() || null
+  const nameMappings = normalizeNameMappings(parseJsonField(formData.get("nameMappings")))
+  const rejectedNames = normalizeRejectedNames(parseJsonField(formData.get("rejectedNames")))
 
   if (!isUpload(file)) {
     return NextResponse.json({ error: "PDF file is required" }, { status: 400 })
@@ -99,6 +111,8 @@ export async function POST(req: Request) {
     source: "meet_pdf",
     courseDefault: parsed.course || courseDefault,
     meetId: meet?.id ?? null,
+    nameMappings,
+    rejectedNames,
   })
 
   if (meet?.id) {

@@ -19,6 +19,7 @@ Built with **Next.js 16**, **Prisma 5**, **NextAuth** (Google sign-in), **Supaba
 - **Meets** — Create meets, upload packets/heat sheets/entries, import results from SwimPhone or PDF, manage event order, travel info, and per-meet relay assignments
 - **Practices** — Write practice plans with tagged sets; publish for the team
 - **Relays** — Optimal lineup suggestions and meet relay editing with leadoff import
+- **Qualifiers** — Upload Nationals NQT PDFs and track who has made cuts from season meets
 
 ### Auth & roles
 
@@ -44,7 +45,8 @@ SwimBuzz/
     ├── pdf_parse.py       # Meet results PDFs
     ├── sheet_parse.py     # Heat sheets, entry reports, psych sheets
     ├── swimphone_parse.py # SwimPhone meet results
-    └── packet_parse.py    # Meet packet parsing
+    ├── packet_parse.py    # Meet packet parsing
+    └── nqt_parse.py       # Nationals qualifying times PDFs
 ```
 
 ## Prerequisites
@@ -88,7 +90,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-Apply any additional SQL migrations in `swimbuzz/supabase/` against your database as needed (meet file storage, travel info, season format, etc.).
+Apply any additional SQL migrations in `swimbuzz/supabase/` against your database as needed (meet file storage, travel info, season format, nationals standards, etc.).
 
 ### Run scraper (required for imports)
 

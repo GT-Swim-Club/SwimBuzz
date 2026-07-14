@@ -24,14 +24,58 @@ BRIDGE_POLL_SEC = 2.0
 CLOUDFLARE_NOTE = (
     "If Chromium opens, complete the Cloudflare 'I'm human' check in that window."
 )
+# Modules re-downloaded from the app on each start so scrape fixes apply without reinstall.
+SYNC_FILES = (
+    "bridge.py",
+    "swimcloud_scrape.py",
+    "swimphone_parse.py",
+    "pdf_parse.py",
+    "packet_parse.py",
+    "sheet_parse.py",
+    "nqt_parse.py",
+)
 
 # Set after pairing so exit handlers can clear the app's "running" status.
 _session: dict[str, str | None] = {"base_url": None, "token": None}
 _disconnected = False
 
 
+class BridgeShutdown(Exception):
+    """Raised when the app terminates this scraper session."""
+
+
 def bridge_headers(token: str) -> dict[str, str]:
     return {"Authorization": f"Bearer {token}"}
+
+
+async def sync_bridge_modules(base_url: str) -> bool:
+    """Pull latest scrape modules from the app. True if bridge.py itself changed."""
+    root = Path(__file__).resolve().parent
+    updated: list[str] = []
+    bridge_changed = False
+
+    async with httpx.AsyncClient(timeout=45.0, follow_redirects=True) as client:
+        for name in SYNC_FILES:
+            url = f"{base_url.rstrip('/')}/bridge/{name}"
+            try:
+                res = await client.get(url)
+            except httpx.RequestError as exc:
+                print(f"Could not sync {name}: {exc}")
+                continue
+            if res.status_code != 200 or not res.content:
+                continue
+            dest = root / name
+            old = dest.read_bytes() if dest.exists() else b""
+            if old == res.content:
+                continue
+            dest.write_bytes(res.content)
+            updated.append(name)
+            if name == "bridge.py":
+                bridge_changed = True
+
+    if updated:
+        print("Updated scraper modules from app: " + ", ".join(updated))
+    return bridge_changed
 
 
 def disconnect_sync() -> None:
@@ -78,11 +122,13 @@ async def poll_next_job(client: httpx.AsyncClient, base_url: str, token: str) ->
         headers=bridge_headers(token),
         timeout=35.0,
     )
-    if res.status_code == 401:
-        raise RuntimeError("Bridge session expired — generate a new pairing code in the app")
+    if res.status_code in (401, 410):
+        raise BridgeShutdown()
     if res.status_code != 200:
         raise RuntimeError(f"Job poll failed ({res.status_code}): {res.text}")
     data = res.json()
+    if data.get("shutdown"):
+        raise BridgeShutdown()
     return data.get("job")
 
 
@@ -116,10 +162,16 @@ async def run_job(job: dict) -> object:
 
     print(f"\n--- Run scraper job: {job_type} ---")
 
-    if job_type in ("PARSE_MEET_PDF", "PARSE_MEET_SHEET", "PARSE_MEET_PACKET"):
+    if job_type in (
+        "PARSE_MEET_PDF",
+        "PARSE_MEET_SHEET",
+        "PARSE_MEET_PACKET",
+        "PARSE_NQT_PDF",
+    ):
         from pdf_parse import parse_meet_pdf_bytes
         from packet_parse import parse_packet_pdf_bytes
         from sheet_parse import parse_sheet_pdf_bytes
+        from nqt_parse import parse_nqt_pdf_bytes
 
         content = base64.b64decode(payload["file_b64"])
         if job_type == "PARSE_MEET_PDF":
@@ -130,6 +182,8 @@ async def run_job(job: dict) -> object:
             sheet_type = str(payload.get("sheet_type", "psych"))
             team = str(payload.get("team", "")).strip() or None
             return parse_sheet_pdf_bytes(content, sheet_type, team=team)
+        if job_type == "PARSE_NQT_PDF":
+            return parse_nqt_pdf_bytes(content)
         return parse_packet_pdf_bytes(content)
 
     print(CLOUDFLARE_NOTE)
@@ -156,15 +210,28 @@ async def run_job(job: dict) -> object:
     raise RuntimeError(f"Unsupported job type: {job_type}")
 
 
-async def heartbeat_loop(client: httpx.AsyncClient, base_url: str, token: str) -> None:
-    while True:
-        await asyncio.sleep(15)
+async def heartbeat_loop(
+    client: httpx.AsyncClient,
+    base_url: str,
+    token: str,
+    stop: asyncio.Event,
+) -> None:
+    """Keep the session alive and exit quickly when the app terminates us."""
+    while not stop.is_set():
         try:
-            await client.post(
+            await asyncio.wait_for(stop.wait(), timeout=5.0)
+            return
+        except asyncio.TimeoutError:
+            pass
+        try:
+            res = await client.post(
                 f"{base_url.rstrip('/')}/api/bridge/heartbeat",
                 headers=bridge_headers(token),
                 timeout=10.0,
             )
+            if res.status_code in (401, 410):
+                stop.set()
+                return
         except httpx.RequestError:
             pass
 
@@ -174,31 +241,96 @@ async def bridge_loop(base_url: str, token: str) -> None:
     print("Waiting for sync requests from the app (roster, times, SwimPhone meets)…")
     print("Leave this running while you import rosters, times, or meet results.\n")
 
+    stop = asyncio.Event()
+    stopped_by_app = False
     async with httpx.AsyncClient() as client:
-        heartbeat = asyncio.create_task(heartbeat_loop(client, base_url, token))
+        heartbeat = asyncio.create_task(heartbeat_loop(client, base_url, token, stop))
         try:
-            while True:
+            while not stop.is_set():
                 try:
                     job = await poll_next_job(client, base_url, token)
+                    if stop.is_set():
+                        stopped_by_app = True
+                        break
                     if not job:
                         continue
 
                     job_id = job["id"]
+                    job_task = asyncio.create_task(run_job(job))
+                    stop_task = asyncio.create_task(stop.wait())
                     try:
-                        result = await run_job(job)
-                        await complete_job(client, base_url, token, job_id, result=result)
-                        print(f"Job {job_id} completed.\n")
-                    except Exception as exc:
-                        print(f"Job {job_id} failed: {exc}")
-                        await complete_job(client, base_url, token, job_id, error=str(exc))
+                        done, pending = await asyncio.wait(
+                            {job_task, stop_task},
+                            return_when=asyncio.FIRST_COMPLETED,
+                        )
+                        for task in pending:
+                            task.cancel()
+                            try:
+                                await task
+                            except asyncio.CancelledError:
+                                pass
+
+                        if stop_task in done or stop.is_set():
+                            stopped_by_app = True
+                            print(f"Job {job_id} cancelled — scraper terminated from the app.")
+                            try:
+                                await complete_job(
+                                    client,
+                                    base_url,
+                                    token,
+                                    job_id,
+                                    error="Scraper terminated from the app",
+                                )
+                            except Exception:
+                                pass
+                            break
+
+                        try:
+                            result = job_task.result()
+                            await complete_job(
+                                client, base_url, token, job_id, result=result
+                            )
+                            print(f"Job {job_id} completed.\n")
+                        except Exception as exc:
+                            print(f"Job {job_id} failed: {exc}")
+                            await complete_job(
+                                client, base_url, token, job_id, error=str(exc)
+                            )
+                    finally:
+                        if not job_task.done():
+                            job_task.cancel()
+                            try:
+                                await job_task
+                            except asyncio.CancelledError:
+                                pass
+                        if not stop_task.done():
+                            stop_task.cancel()
+                            try:
+                                await stop_task
+                            except asyncio.CancelledError:
+                                pass
+                except BridgeShutdown:
+                    stopped_by_app = True
+                    stop.set()
+                    break
                 except httpx.RequestError as exc:
+                    if stop.is_set():
+                        stopped_by_app = True
+                        break
                     print(f"Connection error: {exc}. Retrying in {BRIDGE_POLL_SEC:.0f}s…")
                     await asyncio.sleep(BRIDGE_POLL_SEC)
                 except RuntimeError as exc:
                     print(str(exc))
                     raise
+            if stopped_by_app or stop.is_set():
+                print("\nScraper terminated from the app.")
         finally:
+            stop.set()
             heartbeat.cancel()
+            try:
+                await heartbeat
+            except asyncio.CancelledError:
+                pass
             disconnect_sync()
 
 
@@ -225,6 +357,17 @@ async def async_main() -> None:
     if os.environ.get("PLAYWRIGHT_HEADLESS", "true").lower() in ("1", "true", "yes"):
         print("Tip: headed mode is recommended — the installer sets PLAYWRIGHT_HEADLESS=false automatically.")
 
+    # Keep ~/.swimbuzz-bridge in sync with the app (e.g. SwimPhone mrid split URLs).
+    if os.environ.get("SWIMBUZZ_BRIDGE_NOSYNC", "").lower() not in ("1", "true", "yes"):
+        try:
+            bridge_changed = await sync_bridge_modules(args.url)
+        except Exception as exc:
+            print(f"Module sync skipped: {exc}")
+            bridge_changed = False
+        if bridge_changed:
+            print("Restarting with updated bridge client…")
+            os.execv(sys.executable, [sys.executable, str(Path(__file__).resolve()), *sys.argv[1:]])
+
     token = await register_client(args.url, args.code)
     _session["base_url"] = args.url
     _session["token"] = token
@@ -246,8 +389,9 @@ async def async_main() -> None:
 def main() -> None:
     try:
         asyncio.run(async_main())
+    except BridgeShutdown:
+        print("\nScraper terminated from the app.")
     except KeyboardInterrupt:
-        disconnect_sync()
         print("\nBridge stopped.")
     finally:
         disconnect_sync()

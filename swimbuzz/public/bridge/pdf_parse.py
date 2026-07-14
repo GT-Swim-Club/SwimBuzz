@@ -617,9 +617,116 @@ def parse_table_rows(table: list[list[Any]], current_event: str | None, course: 
     return rows
 
 
+def _is_split_line(line: str) -> bool:
+    """A relay splits line is only split times — digits, colons, dots, spaces."""
+    if re.search(r"[A-Za-z)]", line):
+        return False
+    return len(extract_times_from_line(line)) >= 2
+
+
+def event_race_distance(event: str) -> int | None:
+    """Lead distance from an event name like '200 Free' or '1650 Freestyle'."""
+    match = re.match(r"^(\d+)\b", event.strip())
+    if not match:
+        return None
+    distance = int(match.group(1))
+    return distance if distance >= 50 else None
+
+
+def individual_splits_from_tokens(
+    tokens: list[str],
+    event: str,
+    finish_time: str | None = None,
+) -> list[dict[str, Any]]:
+    """Map Hy-Tek split tokens to [{distance, splitTime}] interval times.
+
+    Cumulative sequences are converted to lap times (same as relay legs).
+    Interval (subtracted) sequences are kept as-is.
+    """
+    if not tokens:
+        return []
+    distance = event_race_distance(event)
+    if distance is None:
+        return []
+
+    working = list(tokens)
+    ms_vals = [time_token_to_ms(t) for t in working]
+    if any(v is None for v in ms_vals):
+        return []
+
+    finish = parse_time_token(finish_time or "")
+    finish_ms = time_token_to_ms(finish) if finish else None
+    total_ms = sum(v for v in ms_vals if v is not None)
+    last_ms = ms_vals[-1]
+    monotonic = all(ms_vals[i] > ms_vals[i - 1] for i in range(1, len(ms_vals)))
+
+    # Prefer interval when lap times sum to the finish (Hy-Tek "Subtracted" splits).
+    looks_interval = finish_ms is not None and abs(total_ms - finish_ms) <= 200
+    # Prefer cumulative when the last token matches the finish (Hy-Tek "Cumulative").
+    looks_cumulative = (
+        not looks_interval
+        and finish_ms is not None
+        and monotonic
+        and abs(last_ms - finish_ms) <= 200
+    )
+    if finish_ms is None and monotonic and last_ms > ms_vals[0] * 1.8:
+        looks_cumulative = True
+
+    if looks_cumulative:
+        leg_map = leg_times_from_cumulative(working)
+        if not leg_map:
+            return []
+        count = len(leg_map)
+        step = distance // count if count else 50
+        return [
+            {"distance": step * leg, "splitTime": leg_map[leg]}
+            for leg in range(1, count + 1)
+        ]
+
+    expected = max(1, distance // 50)
+    use = working[:expected] if len(working) >= expected else working
+    if not use:
+        return []
+    step = distance // len(use)
+    return [
+        {"distance": step * (i + 1), "splitTime": token}
+        for i, token in enumerate(use)
+    ]
+
+
+def extract_parenthetical_split_tokens(line: str) -> list[str]:
+    """Pull split times from parenthetical groups on a Hy-Tek result line."""
+    chunks = re.findall(r"\(([^)]*)\)", line)
+    best: list[str] = []
+    for chunk in chunks:
+        times = extract_times_from_line(chunk)
+        if len(times) > len(best):
+            best = times
+    return best
+
+
 def parse_text_lines(lines: list[str], course: str) -> list[dict]:
     results: list[dict] = []
     current_event: str | None = None
+    last_result_indices: list[int] = []
+    # Hy-Tek wraps long races (400+) onto multiple split-only lines; collect
+    # consecutive ones before mapping distances (same idea as relay _split_parts).
+    pending_split_tokens: list[str] = []
+
+    def attach_splits(tokens: list[str]) -> None:
+        if not tokens or not last_result_indices:
+            return
+        idx = last_result_indices[-1]
+        row = results[idx]
+        finish = row.get("time") if not parse_status_token(str(row.get("time", ""))) else None
+        splits = individual_splits_from_tokens(tokens, str(row.get("event", "")), finish)
+        if splits:
+            row["splits"] = splits
+
+    def flush_pending_splits() -> None:
+        if pending_split_tokens:
+            attach_splits(pending_split_tokens)
+            pending_split_tokens.clear()
 
     for line in lines:
         stripped = line.strip()
@@ -628,11 +735,24 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
 
         maybe_event = parse_event_from_line(stripped)
         if maybe_event and len(stripped) < 120:
+            flush_pending_splits()
             current_event = maybe_event
+            last_result_indices = []
             continue
 
         if not current_event:
             continue
+
+        split_times = extract_times_from_line(stripped)
+        # Continue a multi-row block even if the last row has a single leftover
+        # 50 (e.g. 1650 with 33 splits → …4 + 1).
+        if not re.search(r"[A-Za-z)]", stripped) and (
+            len(split_times) >= 2 or (pending_split_tokens and len(split_times) >= 1)
+        ):
+            pending_split_tokens.extend(split_times)
+            continue
+
+        flush_pending_splits()
 
         place = parse_place_from_line(stripped)
 
@@ -641,20 +761,21 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
             continue
 
         team = parse_team_from_line(stripped)
+        last_result_indices = []
 
         scratch = SCRATCH_MARKER.search(stripped)
         if scratch:
-            results.append(
-                {
-                    "name": name,
-                    "event": current_event,
-                    "time": scratch.group(0).upper(),
-                    "course": course,
-                    "tags": "",
-                    "place": place,
-                    "team": team,
-                }
-            )
+            row = {
+                "name": name,
+                "event": current_event,
+                "time": scratch.group(0).upper(),
+                "course": course,
+                "tags": "",
+                "place": place,
+                "team": team,
+            }
+            results.append(row)
+            last_result_indices = [len(results) - 1]
             continue
 
         rounds = pick_round_times(stripped)
@@ -662,6 +783,7 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
             continue
 
         seed_time = pick_seed_time(stripped)
+        paren_splits = extract_parenthetical_split_tokens(stripped)
         for round_time in rounds:
             row = {
                 "name": name,
@@ -675,15 +797,14 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
             if seed_time:
                 row["seedTime"] = seed_time
             results.append(row)
+            last_result_indices.append(len(results) - 1)
 
+        # Parenthetical splits on the result line apply to the last round (finals).
+        if paren_splits:
+            attach_splits(paren_splits)
+
+    flush_pending_splits()
     return results
-
-
-def _is_split_line(line: str) -> bool:
-    """A relay splits line is only split times — digits, colons, dots, spaces."""
-    if re.search(r"[A-Za-z)]", line):
-        return False
-    return len(extract_times_from_line(line)) >= 2
 
 
 def normalize_relay_event(distance: str, stroke_raw: str) -> str | None:

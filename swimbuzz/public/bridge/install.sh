@@ -88,7 +88,7 @@ mkdir -p "$BRIDGE_DIR" "$BIN_DIR"
 
 echo "Installing SwimBuzz bridge to $BRIDGE_DIR ..."
 
-for file in bridge.py swimcloud_scrape.py swimphone_parse.py pdf_parse.py packet_parse.py sheet_parse.py requirements.txt; do
+for file in bridge.py swimcloud_scrape.py swimphone_parse.py pdf_parse.py packet_parse.py sheet_parse.py nqt_parse.py requirements.txt; do
   curl -fsSL "$APP_URL/bridge/$file" -o "$BRIDGE_DIR/$file"
 done
 

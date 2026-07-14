@@ -7,23 +7,46 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import ImportRosterButton from "./ImportRosterButton"
 import SyncTimesButton from "./SyncTimesButton"
 import AddAthleteButton from "./AddAthleteButton"
-import RosterFilters from "./RosterFilters"
+import RosterFilters, { RosterSearch } from "./RosterFilters"
 import { currentSeason, parseSeason } from "@/lib/season"
 import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete-view-server"
+
+function matchesAthleteQuery(
+    athlete: { firstName: string; lastName: string; nicknames: string[] },
+    query: string
+  ) {
+    const q = query.toLowerCase()
+    const haystack = [
+      athlete.firstName,
+      athlete.lastName,
+      `${athlete.firstName} ${athlete.lastName}`,
+      `${athlete.lastName}, ${athlete.firstName}`,
+      ...athlete.nicknames,
+    ]
+      .join(" ")
+      .toLowerCase()
+    return haystack.includes(q)
+  }
 
 export default async function AthletesPage({
     searchParams,
   }: {
-    searchParams: Promise<{ gender?: string; season?: string; year?: string }>
+    searchParams: Promise<{ gender?: string; season?: string; year?: string; q?: string }>
   }) {
-    const { gender, season: seasonParam, year: legacyYear } = await searchParams
+    const { gender, season: seasonParam, year: legacyYear, q } = await searchParams
+    const query = q?.trim() ?? ""
 
     const season =
       parseSeason(seasonParam ?? legacyYear) ?? currentSeason()
 
     // if no params, redirect to defaults so URL and UI always match
     if (!gender || (!seasonParam && !legacyYear)) {
-        redirect(`/athletes?gender=${gender ?? "all"}&season=${season}`)
+        const params = new URLSearchParams({
+          gender: gender ?? "all",
+          season,
+        })
+        if (query) params.set("q", query)
+        redirect(`/athletes?${params.toString()}`)
     }
 
     const session = await getServerSession(authOptions)
@@ -43,14 +66,18 @@ export default async function AthletesPage({
       orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
     })
 
+    const filteredAthletes = query
+      ? athletes.filter((a) => matchesAthleteQuery(a, query))
+      : athletes
+
     const viewerAthleteId = await resolveViewerAthleteId(session.user.id)
     const sortedAthletes =
-      viewerAthleteId && athletes.some((a) => a.id === viewerAthleteId)
+      viewerAthleteId && filteredAthletes.some((a) => a.id === viewerAthleteId)
         ? [
-            ...athletes.filter((a) => a.id === viewerAthleteId),
-            ...athletes.filter((a) => a.id !== viewerAthleteId),
+            ...filteredAthletes.filter((a) => a.id === viewerAthleteId),
+            ...filteredAthletes.filter((a) => a.id !== viewerAthleteId),
           ]
-        : athletes
+        : filteredAthletes
   
     const isCoach = await isStaffUi(session.user.role)
     const showGender = genderFilter == null
@@ -78,6 +105,10 @@ export default async function AthletesPage({
             </div>
           )}
         </div>
+
+        <Suspense fallback={null}>
+          <RosterSearch />
+        </Suspense>
   
         <div className="divide-y border rounded-xl overflow-hidden bg-white dark:bg-zinc-900">
           {sortedAthletes.map((a) => {
@@ -120,7 +151,9 @@ export default async function AthletesPage({
   
           {sortedAthletes.length === 0 && (
             <p className="text-sm text-gray-500 dark:text-zinc-400 px-4 py-8 text-center">
-              No athletes found for this {showGender ? "season" : "gender and season"}.
+              {query
+                ? `No athletes matching “${query}”.`
+                : `No athletes found for this ${showGender ? "season" : "gender and season"}.`}
             </p>
           )}
         </div>

@@ -1,9 +1,11 @@
+import { Suspense } from "react"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { Prisma } from "@prisma/client"
+import LiveSearch from "@/components/LiveSearch"
 import { formatSwimDate } from "@/lib/utils"
 import { SET_TAGS } from "@/lib/practice-tags"
 import PracticeEditor from "./PracticeEditor"
@@ -66,24 +68,10 @@ export default async function PracticesPage({
         {isCoach && <PracticeEditor triggerLabel="+ New practice" />}
       </div>
 
-      {/* Search */}
       <div className="space-y-3">
-        <form action="/practices" method="get" className="flex gap-2">
-          {activeTag && <input type="hidden" name="tag" value={activeTag} />}
-          <input
-            type="search"
-            name="q"
-            defaultValue={query}
-            placeholder="Search practices and sets…"
-            className="flex-1 rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
-          />
-          <button
-            type="submit"
-            className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
-          >
-            Search
-          </button>
-        </form>
+        <Suspense fallback={null}>
+          <LiveSearch pathname="/practices" placeholder="Search practices and sets…" />
+        </Suspense>
 
         <div className="flex flex-wrap gap-1.5">
           <Link

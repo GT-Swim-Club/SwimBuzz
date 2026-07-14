@@ -4,13 +4,13 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import {
   deleteManualIndividualSheetEntry,
+  findSignupEventOption,
   isValidSignupEntryTime,
   normalizeSignupEntryTime,
   resolveSignupEventOptions,
   updateManualIndividualSheetEntry,
 } from "@/lib/meet-signup"
 import { isSheetSummary } from "@/lib/meet-sheet-summary"
-import { normalizeEventName } from "@/lib/swim-parse"
 import { Prisma } from "@prisma/client"
 
 export const runtime = "nodejs"
@@ -60,11 +60,7 @@ export async function PATCH(
 
   const eventOptions = resolveSignupEventOptions(meet.eventOrder)
   const nextEvent = body.newEvent ?? body.event
-  const nextEventNorm = normalizeEventName(nextEvent)
-  if (
-    eventOptions.length > 0 &&
-    !eventOptions.some((o) => normalizeEventName(o.event) === nextEventNorm)
-  ) {
+  if (eventOptions.length > 0 && !findSignupEventOption(nextEvent, eventOptions)) {
     return NextResponse.json({ error: "Invalid event" }, { status: 400 })
   }
 

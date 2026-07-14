@@ -21,12 +21,26 @@ export async function POST(
     return NextResponse.json({ error: "Comment is too long" }, { status: 400 })
   }
 
+  let parentId: string | null = null
+  if (body.parentId != null && body.parentId !== "") {
+    const parent = await prisma.practiceComment.findUnique({
+      where: { id: String(body.parentId) },
+      select: { id: true, practiceId: true, parentId: true },
+    })
+    if (!parent || parent.practiceId !== id) {
+      return NextResponse.json({ error: "Parent comment not found" }, { status: 400 })
+    }
+    // Flatten to one level: replies attach to the top-level comment
+    parentId = parent.parentId ?? parent.id
+  }
+
   const comment = await prisma.practiceComment.create({
     data: {
       practiceId: id,
       authorId: session.user.id,
       authorName: session.user.name ?? "Someone",
       body: text,
+      parentId,
     },
   })
 

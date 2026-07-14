@@ -38,6 +38,7 @@ enum BridgeJobType {
   PARSE_MEET_PDF
   PARSE_MEET_SHEET
   PARSE_MEET_PACKET
+  PARSE_NQT_PDF
 }
 
 
@@ -202,9 +203,13 @@ model PracticeComment {
   author     User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
   authorName String
   body       String
+  parentId   String?
+  parent     PracticeComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies    PracticeComment[] @relation("CommentReplies")
   createdAt  DateTime  @default(now())
 
   @@index([practiceId])
+  @@index([parentId])
 }
 
 // NextAuth required tables
@@ -278,4 +283,36 @@ model BridgeJob {
 
   @@index([userId, status])
   @@index([connectionId, status])
+}
+
+// Nationals qualifying-time standards for a season + course (from NQT PDF).
+model NationalsStandardSet {
+  id         String         @id @default(cuid())
+  season     String
+  course     Course         @default(SCY)
+  label      String         @default("Nationals")
+  sourceUrl  String?
+  yearLabel  String?
+  /// PDF-faithful rows: [{ women, event, men }, ...]
+  table      Json?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  cuts       NationalsCut[]
+
+  @@unique([season, course])
+  @@index([season])
+}
+
+model NationalsCut {
+  id      String               @id @default(cuid())
+  setId   String
+  set     NationalsStandardSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+  event   String
+  gender  Gender
+  timeMs  Int
+  note    String?
+  isRelay Boolean              @default(false)
+
+  @@unique([setId, event, gender])
+  @@index([setId])
 }

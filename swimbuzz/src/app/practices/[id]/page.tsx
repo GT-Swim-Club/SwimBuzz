@@ -149,6 +149,7 @@ export default async function PracticePage({
           authorName: c.authorName,
           authorId: c.authorId,
           body: c.body,
+          parentId: c.parentId,
           createdAt: c.createdAt.toISOString(),
         }))}
       />

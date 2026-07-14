@@ -37,6 +37,7 @@ export default async function Nav() {
             <Link href="/athletes" className="hover:text-gray-900 dark:hover:text-zinc-100 transition-colors">Roster</Link>
             <Link href="/meets" className="hover:text-gray-900 dark:hover:text-zinc-100 transition-colors">Meets</Link>
             <Link href="/practices" className="hover:text-gray-900 dark:hover:text-zinc-100 transition-colors">Practices</Link>
+            <Link href="/qualifiers" className="hover:text-gray-900 dark:hover:text-zinc-100 transition-colors">Nationals</Link>
           </div>
         )}
       </div>

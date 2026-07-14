@@ -41,3 +41,12 @@ export async function parseMeetPacketPdfResult<T>(
     file_b64: toBuffer(fileBytes).toString("base64"),
   } satisfies Prisma.InputJsonObject)
 }
+
+export async function parseNqtPdf<T>(
+  userId: string,
+  fileBytes: Buffer | ArrayBuffer | Uint8Array
+): Promise<T> {
+  return runBridgeJob<T>(userId, BridgeJobType.PARSE_NQT_PDF, {
+    file_b64: toBuffer(fileBytes).toString("base64"),
+  } satisfies Prisma.InputJsonObject)
+}

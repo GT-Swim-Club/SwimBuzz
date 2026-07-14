@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { buildAthleteLookup, matchAthleteIdFast, type RosterAthlete } from "@/lib/athlete-match"
 import { normalizeSwimForInsert, nextSwimOccurrence } from "@/lib/swim-dedup"
 import {
+  isRealRelaySwimmerName,
   leadoffEventFromRelay,
   leadoffSwimTags,
   relayRoundFromTags,
@@ -117,6 +118,7 @@ export async function importRelayLeadoffSwims({
   relayResults,
   roster,
   source,
+  nameMappings = null,
 }: {
   meetName: string
   meetId: string | null
@@ -125,6 +127,7 @@ export async function importRelayLeadoffSwims({
   relayResults: ParsedRelayResult[]
   roster: RosterAthlete[]
   source: string
+  nameMappings?: Record<string, string> | null
 }): Promise<number> {
   const lookup = buildAthleteLookup(roster)
   const meet: MeetLike = meetId
@@ -149,9 +152,9 @@ export async function importRelayLeadoffSwims({
   for (const row of relayResults) {
     const leg1 = row.relaySwimmers.find((s) => s.leg === 1)
     const splitTime = sanitizeRelaySplitTime(leg1?.splitTime)
-    if (!splitTime || !leg1?.name?.trim()) continue
+    if (!splitTime || !isRealRelaySwimmerName(leg1?.name)) continue
 
-    const athleteId = matchAthleteIdFast(leg1.name, lookup)
+    const athleteId = matchAthleteIdFast(leg1.name, lookup, nameMappings)
     if (!athleteId) continue
 
     const leadoffEvent = leadoffEventFromRelay(row.event)

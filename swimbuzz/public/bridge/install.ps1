@@ -47,7 +47,7 @@ New-Item -ItemType Directory -Force -Path $BridgeDir, $BinDir | Out-Null
 
 Write-Host "Installing SwimBuzz bridge to $BridgeDir …"
 
-foreach ($file in @("bridge.py", "swimcloud_scrape.py", "swimphone_parse.py", "pdf_parse.py", "packet_parse.py", "sheet_parse.py", "requirements.txt")) {
+foreach ($file in @("bridge.py", "swimcloud_scrape.py", "swimphone_parse.py", "pdf_parse.py", "packet_parse.py", "sheet_parse.py", "nqt_parse.py", "requirements.txt")) {
     $dest = Join-Path $BridgeDir $file
     curl.exe -fsSL "$AppUrl/bridge/$file" -o $dest
 }

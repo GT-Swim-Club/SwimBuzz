@@ -1,8 +1,10 @@
+import { Suspense } from "react"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import Link from "next/link"
+import LiveSearch from "@/components/LiveSearch"
 import { formatDateRange } from "@/lib/utils"
 import CreateMeetButton from "./CreateMeetButton"
 import { isStaffUi } from "@/lib/athlete-view-server"
@@ -74,29 +76,9 @@ export default async function MeetsPage({
         {isCoach && <CreateMeetButton />}
       </div>
 
-      <form action="/meets" method="get" className="flex gap-2">
-        <input
-          type="search"
-          name="q"
-          defaultValue={query}
-          placeholder="Search meets by name or location…"
-          className="flex-1 rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
-        />
-        <button
-          type="submit"
-          className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700 dark:bg-zinc-950 transition-colors"
-        >
-          Search
-        </button>
-        {query ? (
-          <Link
-            href="/meets"
-            className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700 dark:bg-zinc-950 transition-colors"
-          >
-            Clear
-          </Link>
-        ) : null}
-      </form>
+      <Suspense fallback={null}>
+        <LiveSearch pathname="/meets" placeholder="Search meets by name or location…" />
+      </Suspense>
 
       {meets.length === 0 ? (
         <div className="border rounded-xl px-4 py-12 text-center text-sm text-gray-500 dark:text-zinc-400 bg-white dark:bg-zinc-900">

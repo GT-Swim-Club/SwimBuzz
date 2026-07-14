@@ -21,6 +21,8 @@ from pdf_parse import (
     parse_status_token,
     parse_time_token,
     leg_times_from_cumulative,
+    time_token_to_ms,
+    ms_to_time_token,
 )
 
 BASE_URL = "https://www.swimphone.com/meets/"
@@ -285,8 +287,19 @@ def parse_event_order(html: str, smid: int, meet_default: str) -> list[SwimPhone
 
 
 def _is_captcha_page(html: str, title: str) -> bool:
-    lower = f"{title} {html}".lower()
-    return "captcha" in lower or "access archived meet" in lower
+    """True when SwimPhone is showing the archived-meet email/captcha gate.
+
+    Do not match ``captcha`` in raw HTML — normal pages load Google's
+    ``recaptcha/api.js``, which contains that substring.
+    """
+    title_l = (title or "").lower()
+    if "access archived meet" in title_l:
+        return True
+    if not html:
+        return False
+    # Visible text only so script/src URLs cannot false-positive.
+    text = BeautifulSoup(html, "html.parser").get_text(" ", strip=True).lower()
+    return "access archived meet" in f"{title_l} {text}"
 
 
 def _swimmer_column_index(headers: list[str]) -> int | None:
@@ -382,15 +395,39 @@ def _place_column_index(headers: list[str]) -> int | None:
     return generic_idx if generic_idx is not None else final_idx if final_idx is not None else prelim_idx
 
 
+def _split_href_from_cell(cell: Any) -> str | None:
+    """Extract a SwimPhone splits.cfm href (individual ``mrid`` or relay ``rid``)."""
+    if cell is None:
+        return None
+    for link in cell.select('a[href*="splits.cfm"]'):
+        href = (link.get("href") or "").strip()
+        if re.search(r"[?&](?:mrid|rid)=\d+", href):
+            return href
+    return None
+
+
+def _split_href_from_row(row: Any) -> str | None:
+    for link in row.select('a[href*="splits.cfm"]'):
+        href = (link.get("href") or "").strip()
+        if re.search(r"[?&](?:mrid|rid)=\d+", href):
+            return href
+    return None
+
+
 def _append_result_round(
     rounds: list[dict[str, str]], cells: list, idx: int | None, tags: str
 ) -> None:
     if idx is None or idx >= len(cells):
         return
-    text = cells[idx].get_text(" ", strip=True)
+    cell = cells[idx]
+    text = cell.get_text(" ", strip=True)
+    split_href = _split_href_from_cell(cell)
     time_val = parse_time_token(text)
     if time_val:
-        rounds.append({"time": time_val, "tags": tags})
+        item: dict[str, str] = {"time": time_val, "tags": tags}
+        if split_href:
+            item["splitHref"] = split_href
+        rounds.append(item)
         return
     status = parse_status_token(text)
     if status:
@@ -757,10 +794,117 @@ def merge_swimphone_result_rows(base: list[dict], overlay: list[dict]) -> list[d
                 prev["lane"] = row["lane"]
             if row.get("place") is not None and prev.get("place") is None:
                 prev["place"] = row["place"]
+            if row.get("splitHref") and not prev.get("splitHref"):
+                prev["splitHref"] = row["splitHref"]
+            if row.get("splits") and not prev.get("splits"):
+                prev["splits"] = row["splits"]
         else:
             by_key[key] = dict(row)
 
     return list(by_key.values())
+
+
+def _splits_session_for_result(tags: str, results_url: str | None) -> str:
+    """Session query value for splits.cfm from a result row's round tags."""
+    if tags == "P":
+        return "prelims"
+    if tags == "F":
+        return "finals"
+    return _results_url_session(results_url) or "finals"
+
+
+def _find_splits_table(soup: BeautifulSoup) -> Any | None:
+    splits_table = soup.find("table", id="splitsTable")
+    if splits_table is not None:
+        return splits_table
+    for table in soup.find_all("table"):
+        headers = [th.get_text(strip=True).lower() for th in table.find_all("th")]
+        if "distance" in headers and ("cum" in headers or "50s" in headers):
+            return table
+    return None
+
+
+def parse_individual_splits(html: str) -> list[dict[str, Any]]:
+    """Interval splits [{distance, splitTime}] from a SwimPhone individual splits page.
+
+    Prefers the 50s column (already interval). Falls back to converting cumulative.
+    """
+    if _is_captcha_page(html, ""):
+        return []
+    soup = BeautifulSoup(html, "html.parser")
+    splits_table = _find_splits_table(soup)
+    if splits_table is None:
+        return []
+
+    headers = [th.get_text(strip=True).lower() for th in splits_table.find_all("th")]
+    if "distance" not in headers:
+        return []
+    dist_i = headers.index("distance")
+    interval_i = headers.index("50s") if "50s" in headers else None
+    cum_i = headers.index("cum") if "cum" in headers else None
+
+    distances: list[int] = []
+    intervals: list[str | None] = []
+    cums: list[str | None] = []
+    for row in splits_table.find_all("tr"):
+        cells = row.find_all("td")
+        if len(cells) <= dist_i:
+            continue
+        dist_text = cells[dist_i].get_text(strip=True)
+        if not dist_text.isdigit():
+            continue
+        interval = None
+        if interval_i is not None and interval_i < len(cells):
+            interval = parse_time_token(cells[interval_i].get_text(strip=True))
+        cum = None
+        if cum_i is not None and cum_i < len(cells):
+            cum = parse_time_token(cells[cum_i].get_text(strip=True))
+        if not interval and not cum:
+            continue
+        distances.append(int(dist_text))
+        intervals.append(interval)
+        cums.append(cum)
+
+    if not distances:
+        return []
+
+    if all(intervals):
+        return [
+            {"distance": dist, "splitTime": token}
+            for dist, token in zip(distances, intervals)
+            if token
+        ]
+
+    if all(cums):
+        leg_map = leg_times_from_cumulative([c for c in cums if c])
+        return [
+            {"distance": distances[i], "splitTime": leg_map[i + 1]}
+            for i in range(len(distances))
+            if (i + 1) in leg_map
+        ]
+
+    # Mix interval + cumulative deltas when the page is partially filled.
+    out: list[dict[str, Any]] = []
+    prev_cum_ms = 0
+    for dist, interval, cum in zip(distances, intervals, cums):
+        if interval:
+            out.append({"distance": dist, "splitTime": interval})
+            if cum:
+                cum_ms = time_token_to_ms(cum)
+                if cum_ms is not None:
+                    prev_cum_ms = cum_ms
+            continue
+        if not cum:
+            continue
+        cum_ms = time_token_to_ms(cum)
+        if cum_ms is None:
+            continue
+        leg_ms = cum_ms - prev_cum_ms
+        formatted = ms_to_time_token(leg_ms)
+        if formatted:
+            out.append({"distance": dist, "splitTime": formatted})
+        prev_cum_ms = cum_ms
+    return out
 
 
 def parse_event_results_html(
@@ -895,7 +1039,11 @@ def parse_event_results_html(
                     final_place_idx,
                     generic_place_idx,
                 )
-                row: dict[str, Any] = {
+                split_href = round_time.get("splitHref")
+                # Row-level link is only safe when this is the sole round (timed finals).
+                if not split_href and not tags:
+                    split_href = _split_href_from_row(row)
+                result_row: dict[str, Any] = {
                     "name": name,
                     "event": event_label,
                     "time": round_time.get("time") or round_time.get("status", ""),
@@ -904,15 +1052,17 @@ def parse_event_results_html(
                     "place": place,
                 }
                 if heat is not None and heat >= 1:
-                    row["heat"] = heat
+                    result_row["heat"] = heat
                     total = max_heats.get(tags)
                     if total is not None and total >= heat:
-                        row["heatTotal"] = total
+                        result_row["heatTotal"] = total
                 if lane is not None:
-                    row["lane"] = lane
+                    result_row["lane"] = lane
                 if seed_time:
-                    row["seedTime"] = seed_time
-                results.append(row)
+                    result_row["seedTime"] = seed_time
+                if split_href:
+                    result_row["splitHref"] = split_href
+                results.append(result_row)
 
     return apply_heat_totals(results)
 
@@ -1444,6 +1594,30 @@ async def scrape_swimphone_meet(url: str, team: str | None = None) -> dict:
                 if event.date:
                     for r in rows:
                         r["date"] = event.date
+                for r in rows:
+                    split_href = r.pop("splitHref", None)
+                    if not split_href or parse_status_token(str(r.get("time", ""))):
+                        continue
+                    # Prefer the time-cell href (includes mrid/id/fn/ln). Fall back to
+                    # rewriting session when the link omitted s=.
+                    splits_url = urljoin(BASE_URL, split_href)
+                    if "s=" not in split_href.lower():
+                        sess = _splits_session_for_result(
+                            str(r.get("tags") or ""), event.results_url
+                        )
+                        sep = "&" if "?" in splits_url else "?"
+                        splits_url = f"{splits_url}{sep}s={sess}"
+                    try:
+                        await page.goto(
+                            splits_url, wait_until="domcontentloaded", timeout=60000
+                        )
+                        splits_html = await page.content()
+                        splits = parse_individual_splits(splits_html)
+                        if splits:
+                            r["splits"] = splits
+                    except Exception:
+                        pass
+                    await asyncio.sleep(0.2)
                 all_results.extend(rows)
 
             if idx + 1 < len(events_with_results):

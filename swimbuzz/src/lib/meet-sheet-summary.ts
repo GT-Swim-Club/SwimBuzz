@@ -5,6 +5,7 @@ import {
   displayRelayLetter,
   effectiveRelayGender,
   effectiveRelayRound,
+  isRealRelaySwimmerName,
   isRelayGender,
   isRelayLeadoffSwimTag,
   leadoffEventFromRelay,
@@ -78,6 +79,15 @@ export type SheetEntry = {
   course?: string
   date?: string
   timeMs?: number
+  /** Individual race splits (interval / lap times), like relay leg splits. */
+  splits?: ResultSplit[]
+  prelimSplits?: ResultSplit[]
+  finalSplits?: ResultSplit[]
+}
+
+export type ResultSplit = {
+  distance: number
+  splitTime: string
 }
 
 export type SheetSummary = {
@@ -116,6 +126,9 @@ export type MeetResultEntry = {
   course?: string
   date?: string
   timeMs?: number
+  splits?: ResultSplit[]
+  prelimSplits?: ResultSplit[]
+  finalSplits?: ResultSplit[]
 }
 
 function resultGroupKey(athleteId: string, event: string, tags: string): string {
@@ -358,6 +371,14 @@ function preferRosterDisplayName(a: string, b: string): string {
   return aTrim || bTrim
 }
 
+function preferResultSplits(
+  a: ResultSplit[] | undefined,
+  b: ResultSplit[] | undefined
+): ResultSplit[] | undefined {
+  if ((b?.length ?? 0) > (a?.length ?? 0)) return b
+  return a?.length ? a : b
+}
+
 function mergeMeetResultEntry(
   a: MeetResultEntry,
   b: MeetResultEntry
@@ -397,6 +418,9 @@ function mergeMeetResultEntry(
     course: a.course ?? b.course,
     date: a.date ?? b.date,
     timeMs: a.timeMs ?? b.timeMs,
+    splits: preferResultSplits(a.splits, b.splits),
+    prelimSplits: preferResultSplits(a.prelimSplits, b.prelimSplits),
+    finalSplits: preferResultSplits(a.finalSplits, b.finalSplits),
   }
 }
 
@@ -433,7 +457,7 @@ export function relayLeadoffsFromSplits(
     if (relay.entryType !== "relay_team") continue
     const leg1 = relay.relaySwimmers?.find((s) => s.leg === 1)
     const leadoffEvent = leadoffEventFromRelay(relay.event)
-    if (!leadoffEvent || !leg1?.athleteId) continue
+    if (!leadoffEvent || !leg1?.athleteId || !isRealRelaySwimmerName(leg1.name)) continue
 
     const split = sanitizeRelaySplitTime(leg1.splitTime)
     if (!split) continue
@@ -511,6 +535,47 @@ export function seedsToMeetResults(
       event: row.event,
     }
     byKey.set(key, { ...existing, seedTime: row.seedTime })
+  }
+
+  return [...byKey.values()]
+}
+
+/** Attach individual race splits from result import (prelim / final / timed finals). */
+export function splitsToMeetResults(
+  rows: Array<{
+    athleteId: string
+    athleteName: string
+    event: string
+    tags: string
+    splits: ResultSplit[]
+  }>
+): MeetResultEntry[] {
+  const byKey = new Map<string, MeetResultEntry>()
+
+  for (const row of rows) {
+    if (!row.splits.length) continue
+    const key = resultKey(row.athleteId, row.event, false)
+    const existing = byKey.get(key) ?? {
+      athleteId: row.athleteId,
+      athleteName: row.athleteName,
+      event: row.event,
+    }
+    if (isPrelimTag(row.tags)) {
+      byKey.set(key, {
+        ...existing,
+        prelimSplits: preferResultSplits(existing.prelimSplits, row.splits),
+      })
+    } else if (isFinalTag(row.tags)) {
+      byKey.set(key, {
+        ...existing,
+        finalSplits: preferResultSplits(existing.finalSplits, row.splits),
+      })
+    } else {
+      byKey.set(key, {
+        ...existing,
+        splits: preferResultSplits(existing.splits, row.splits),
+      })
+    }
   }
 
   return [...byKey.values()]
@@ -847,6 +912,33 @@ export function dropSeedOnlyAfterResults(
 
 const INDIVIDUAL_ROUND_ORDER: Record<string, number> = { P: 0, F: 1, "": 2 }
 
+/** Splits to show for a roster display row (after prelim/final expansion). */
+export function entryDisplaySplits(entry: SheetEntry): ResultSplit[] {
+  if (entry.resultRound === "P") {
+    return entry.prelimSplits ?? entry.splits ?? []
+  }
+  if (entry.resultRound === "F") {
+    return entry.finalSplits ?? entry.splits ?? []
+  }
+  return entry.splits ?? entry.finalSplits ?? entry.prelimSplits ?? []
+}
+
+function withRoundSplits(
+  entry: SheetEntry,
+  round: "P" | "F" | ""
+): SheetEntry {
+  const splits =
+    round === "P"
+      ? entry.prelimSplits ?? entry.splits
+      : round === "F"
+        ? entry.finalSplits ?? entry.splits
+        : entry.splits ?? entry.finalSplits ?? entry.prelimSplits
+  return {
+    ...entry,
+    ...(splits?.length ? { splits } : { splits: undefined }),
+  }
+}
+
 /** Split combined prelim+final entries into separate roster rows. */
 export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] {
   const out: SheetEntry[] = []
@@ -875,92 +967,122 @@ export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] 
     if (!hasPrelim || !hasFinal) {
       if (hasFinal && !hasPrelim) {
         if (eventIsTimedFinals(entry.event)) {
-          out.push({
-            ...entry,
-            resultRound: "",
-            resultTime: entry.resultTime ?? entry.finalTime,
-            resultPlace: entry.resultPlace ?? entry.finalPlace,
-            resultStatus:
-              entry.resultStatus ??
-              (entry.finalStatus && entry.finalStatus !== "NS"
-                ? entry.finalStatus
-                : undefined),
-            finalTime: undefined,
-            finalStatus: undefined,
-            finalPlace: undefined,
-            finalHeat: undefined,
-            finalLane: undefined,
-            finalHeatTotal: undefined,
-            heat: entry.finalHeat ?? entry.heat,
-            lane: entry.finalLane ?? entry.lane,
-            heatTotal: entry.finalHeatTotal ?? entry.heatTotal,
-          })
+          out.push(
+            withRoundSplits(
+              {
+                ...entry,
+                resultRound: "",
+                resultTime: entry.resultTime ?? entry.finalTime,
+                resultPlace: entry.resultPlace ?? entry.finalPlace,
+                resultStatus:
+                  entry.resultStatus ??
+                  (entry.finalStatus && entry.finalStatus !== "NS"
+                    ? entry.finalStatus
+                    : undefined),
+                finalTime: undefined,
+                finalStatus: undefined,
+                finalPlace: undefined,
+                finalHeat: undefined,
+                finalLane: undefined,
+                finalHeatTotal: undefined,
+                heat: entry.finalHeat ?? entry.heat,
+                lane: entry.finalLane ?? entry.lane,
+                heatTotal: entry.finalHeatTotal ?? entry.heatTotal,
+              },
+              ""
+            )
+          )
         } else {
-          out.push({
-            ...entry,
-            resultRound: "F",
-            heat: entry.finalHeat ?? entry.heat,
-            lane: entry.finalLane ?? entry.lane,
-            heatTotal: entry.finalHeatTotal ?? entry.heatTotal,
-          })
+          out.push(
+            withRoundSplits(
+              {
+                ...entry,
+                resultRound: "F",
+                heat: entry.finalHeat ?? entry.heat,
+                lane: entry.finalLane ?? entry.lane,
+                heatTotal: entry.finalHeatTotal ?? entry.heatTotal,
+              },
+              "F"
+            )
+          )
         }
       } else if (hasPrelim && !hasFinal) {
-        out.push({
-          ...entry,
-          resultRound: "P",
-          heat: entry.prelimHeat ?? entry.heat,
-          lane: entry.prelimLane ?? entry.lane,
-          heatTotal: entry.prelimHeatTotal ?? entry.heatTotal,
-        })
+        out.push(
+          withRoundSplits(
+            {
+              ...entry,
+              resultRound: "P",
+              heat: entry.prelimHeat ?? entry.heat,
+              lane: entry.prelimLane ?? entry.lane,
+              heatTotal: entry.prelimHeatTotal ?? entry.heatTotal,
+            },
+            "P"
+          )
+        )
       } else if (hasSwimResultData(entry)) {
-        out.push({
-          ...entry,
-          heat: entry.finalHeat ?? entry.prelimHeat ?? entry.heat,
-          lane: entry.finalLane ?? entry.prelimLane ?? entry.lane,
-          heatTotal:
-            entry.finalHeatTotal ?? entry.prelimHeatTotal ?? entry.heatTotal,
-        })
+        out.push(
+          withRoundSplits(
+            {
+              ...entry,
+              heat: entry.finalHeat ?? entry.prelimHeat ?? entry.heat,
+              lane: entry.finalLane ?? entry.prelimLane ?? entry.lane,
+              heatTotal:
+                entry.finalHeatTotal ?? entry.prelimHeatTotal ?? entry.heatTotal,
+            },
+            ""
+          )
+        )
       } else {
         out.push(entry)
       }
       continue
     }
 
-    out.push({
-      ...entry,
-      resultRound: "P",
-      heat: entry.prelimHeat ?? entry.heat,
-      lane: entry.prelimLane ?? entry.lane,
-      heatTotal: entry.prelimHeatTotal ?? entry.heatTotal,
-      finalTime: undefined,
-      finalStatus: undefined,
-      finalPlace: undefined,
-      finalHeat: undefined,
-      finalLane: undefined,
-      finalHeatTotal: undefined,
-      resultTime: undefined,
-      resultStatus: undefined,
-      resultPlace: undefined,
-    })
+    out.push(
+      withRoundSplits(
+        {
+          ...entry,
+          resultRound: "P",
+          heat: entry.prelimHeat ?? entry.heat,
+          lane: entry.prelimLane ?? entry.lane,
+          heatTotal: entry.prelimHeatTotal ?? entry.heatTotal,
+          finalTime: undefined,
+          finalStatus: undefined,
+          finalPlace: undefined,
+          finalHeat: undefined,
+          finalLane: undefined,
+          finalHeatTotal: undefined,
+          resultTime: undefined,
+          resultStatus: undefined,
+          resultPlace: undefined,
+        },
+        "P"
+      )
+    )
 
-    out.push({
-      ...entry,
-      resultRound: "F",
-      heat: entry.finalHeat ?? entry.heat,
-      lane: entry.finalLane ?? entry.lane,
-      heatTotal: entry.finalHeatTotal ?? entry.heatTotal,
-      prelimTime: undefined,
-      prelimStatus: undefined,
-      prelimPlace: undefined,
-      prelimHeat: undefined,
-      prelimLane: undefined,
-      prelimHeatTotal: undefined,
-      seedRank: undefined,
-      timeStatus: undefined,
-      resultTime: undefined,
-      resultStatus: undefined,
-      resultPlace: undefined,
-    })
+    out.push(
+      withRoundSplits(
+        {
+          ...entry,
+          resultRound: "F",
+          heat: entry.finalHeat ?? entry.heat,
+          lane: entry.finalLane ?? entry.lane,
+          heatTotal: entry.finalHeatTotal ?? entry.heatTotal,
+          prelimTime: undefined,
+          prelimStatus: undefined,
+          prelimPlace: undefined,
+          prelimHeat: undefined,
+          prelimLane: undefined,
+          prelimHeatTotal: undefined,
+          seedRank: undefined,
+          timeStatus: undefined,
+          resultTime: undefined,
+          resultStatus: undefined,
+          resultPlace: undefined,
+        },
+        "F"
+      )
+    )
   }
 
   return out
@@ -1001,6 +1123,13 @@ export function inferResultHeatTotals(entries: SheetEntry[]): SheetEntry[] {
 }
 
 export function compareIndividualEntries(a: SheetEntry, b: SheetEntry): number {
+  const an = a.eventNumber > 0 ? a.eventNumber : 0
+  const bn = b.eventNumber > 0 ? b.eventNumber : 0
+  if (an !== bn) {
+    if (an === 0) return 1
+    if (bn === 0) return -1
+    return an - bn
+  }
   const ev = compareSwimEvents(a.event, b.event)
   if (ev !== 0) return ev
   const src = (a.relayLeadoffSource ?? "").localeCompare(b.relayLeadoffSource ?? "")
@@ -1240,6 +1369,13 @@ export function uniqueRelayTeams(
     const gb = effectiveRelayGender(b, athleteGenders)
     const genderCmp = (RELAY_GENDER_ORDER[ga] ?? 3) - (RELAY_GENDER_ORDER[gb] ?? 3)
     if (genderCmp !== 0) return genderCmp
+    const an = a.eventNumber > 0 ? a.eventNumber : 0
+    const bn = b.eventNumber > 0 ? b.eventNumber : 0
+    if (an !== bn) {
+      if (an === 0) return 1
+      if (bn === 0) return -1
+      return an - bn
+    }
     const ev = compareRelayEvents(a.event, b.event)
     if (ev !== 0) return ev
     const letter = (a.relayLetter ?? "").localeCompare(b.relayLetter ?? "")
@@ -1540,10 +1676,15 @@ function mergeRelaySwimmers(
       continue
     }
     const splitTime = sanitizeRelaySplitTime(leg.splitTime) ?? prev.splitTime
+    const name = isRealRelaySwimmerName(leg.name)
+      ? leg.name
+      : isRealRelaySwimmerName(prev.name)
+        ? prev.name
+        : leg.name || prev.name
     byLeg.set(leg.leg, {
       ...prev,
       ...leg,
-      name: leg.name || prev.name,
+      name,
       athleteId: leg.athleteId ?? prev.athleteId,
       ...(splitTime ? { splitTime } : {}),
     })
@@ -1695,6 +1836,9 @@ function mergeEntries(a: SheetEntry, b: SheetEntry): SheetEntry {
     course: primary.course ?? secondary.course,
     date: primary.date ?? secondary.date,
     timeMs: primary.timeMs ?? secondary.timeMs,
+    splits: preferResultSplits(primary.splits, secondary.splits),
+    prelimSplits: preferResultSplits(primary.prelimSplits, secondary.prelimSplits),
+    finalSplits: preferResultSplits(primary.finalSplits, secondary.finalSplits),
   }
 }
 
@@ -1777,6 +1921,9 @@ export function mergeSheetSummaries(
         course: result.course ?? existing.course,
         date: result.date ?? existing.date,
         timeMs: result.timeMs ?? existing.timeMs,
+        splits: preferResultSplits(existing.splits, result.splits),
+        prelimSplits: preferResultSplits(existing.prelimSplits, result.prelimSplits),
+        finalSplits: preferResultSplits(existing.finalSplits, result.finalSplits),
       })
     } else {
       byKey.set(key, {
@@ -1806,6 +1953,9 @@ export function mergeSheetSummaries(
         course: result.course,
         date: result.date,
         timeMs: result.timeMs,
+        splits: result.splits,
+        prelimSplits: result.prelimSplits,
+        finalSplits: result.finalSplits,
       })
     }
   }

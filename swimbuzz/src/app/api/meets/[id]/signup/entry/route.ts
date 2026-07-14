@@ -194,39 +194,48 @@ export async function DELETE(
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  if (["COACH", "EXEC"].includes(session.user.role)) {
-    return NextResponse.json(
-      { error: "Coaches cannot withdraw athlete sign-ups." },
-      { status: 403 }
-    )
-  }
-
-  const target = await resolveLinkedAthleteId(session.user.id)
-  if ("error" in target) {
-    return NextResponse.json({ error: target.error }, { status: target.status })
-  }
-  const { athleteId } = target
-
+  const isCoach = ["COACH", "EXEC"].includes(session.user.role)
   const { id: meetId } = await params
   const form = await prisma.meetSignupForm.findUnique({ where: { meetId } })
   if (!form) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-  const window = signupWithdrawStatus({
-    enabled: form.enabled,
-    openAt: form.openAt,
-    closeAt: form.closeAt,
-    withdrawUntil: form.withdrawUntil,
-  })
-  if (!window.allowed) {
-    return NextResponse.json(
-      { error: window.reason ?? "Withdrawals are closed" },
-      { status: 403 }
-    )
+  let athleteId: string
+  if (isCoach) {
+    const athleteIdParam = new URL(req.url).searchParams.get("athleteId")?.trim() ?? ""
+    if (!athleteIdParam) {
+      return NextResponse.json(
+        { error: "athleteId is required to withdraw a sign-up" },
+        { status: 400 }
+      )
+    }
+    athleteId = athleteIdParam
+  } else {
+    const target = await resolveLinkedAthleteId(session.user.id)
+    if ("error" in target) {
+      return NextResponse.json({ error: target.error }, { status: target.status })
+    }
+    athleteId = target.athleteId
+
+    const window = signupWithdrawStatus({
+      enabled: form.enabled,
+      openAt: form.openAt,
+      closeAt: form.closeAt,
+      withdrawUntil: form.withdrawUntil,
+    })
+    if (!window.allowed) {
+      return NextResponse.json(
+        { error: window.reason ?? "Withdrawals are closed" },
+        { status: 403 }
+      )
+    }
   }
 
-  await prisma.meetSignupEntry.deleteMany({
+  const deleted = await prisma.meetSignupEntry.deleteMany({
     where: { formId: form.id, athleteId },
   })
+  if (deleted.count === 0) {
+    return NextResponse.json({ error: "Sign-up not found" }, { status: 404 })
+  }
 
   return NextResponse.json({ ok: true })
 }

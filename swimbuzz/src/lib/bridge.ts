@@ -94,11 +94,26 @@ export async function touchBridgeConnection(connectionId: string) {
 }
 
 export async function disconnectBridge(userId: string) {
-  await prisma.bridgeConnection.deleteMany({ where: { userId } })
+  await prisma.$transaction([
+    prisma.bridgeJob.updateMany({
+      where: {
+        userId,
+        status: { in: [BridgeJobStatus.PENDING, BridgeJobStatus.RUNNING] },
+      },
+      data: {
+        status: BridgeJobStatus.FAILED,
+        error: "Scraper terminated from the app",
+        completedAt: new Date(),
+      },
+    }),
+    prisma.bridgeConnection.deleteMany({ where: { userId } }),
+  ])
 }
 
 export async function disconnectBridgeByToken(token: string) {
-  await prisma.bridgeConnection.deleteMany({ where: { token } })
+  const connection = await prisma.bridgeConnection.findUnique({ where: { token } })
+  if (!connection) return
+  await disconnectBridge(connection.userId)
 }
 
 export async function createBridgeJob(

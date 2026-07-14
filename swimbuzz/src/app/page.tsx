@@ -23,6 +23,10 @@ const athleteFeatures: FeatureItem[] = [
       "Check meet dates, heat sheets, entries, travel info, and live stream links in one place.",
   },
   {
+    title: "See Nationals qualifiers",
+    description: "Check who has made qualifying standards from this season’s meet results.",
+  },
+  {
     title: "Read practice plans",
     description: "Access published workouts with sets, intervals, and coach notes.",
   },
@@ -46,6 +50,11 @@ const coachFeatures: FeatureItem[] = [
     title: "Plan relays",
     description:
       "Build optimal lineups on each meet from PBs, filter by signup interest, and track leadoff splits.",
+  },
+  {
+    title: "Track Nationals cuts",
+    description:
+      "Upload qualifying-time PDFs and see who has made Nationals standards from this season’s meets.",
   },
 ]
 

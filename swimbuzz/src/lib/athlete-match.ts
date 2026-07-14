@@ -176,12 +176,172 @@ function matchFuzzy(
   return null
 }
 
-export function matchAthleteId(
+/** Levenshtein edit distance for short personal-name comparisons. */
+export function editDistance(a: string, b: string): number {
+  if (a === b) return 0
+  if (!a.length) return b.length
+  if (!b.length) return a.length
+  const prev = new Array<number>(b.length + 1)
+  const curr = new Array<number>(b.length + 1)
+  for (let j = 0; j <= b.length; j++) prev[j] = j
+  for (let i = 1; i <= a.length; i++) {
+    curr[0] = i
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1
+      curr[j] = Math.min(curr[j - 1] + 1, prev[j] + 1, prev[j - 1] + cost)
+    }
+    for (let j = 0; j <= b.length; j++) prev[j] = curr[j]
+  }
+  return prev[b.length]
+}
+
+function isCloseToken(a: string, b: string): boolean {
+  if (!a || !b) return false
+  if (a === b) return true
+  const d = editDistance(a, b)
+  const maxLen = Math.max(a.length, b.length)
+  if (maxLen <= 3) return false
+  if (maxLen <= 5) return d <= 1
+  return d <= 2
+}
+
+function rosterFirstTokens(athlete: RosterAthlete): string[] {
+  const tokens: string[] = []
+  for (const raw of [athlete.firstName, ...(athlete.nicknames ?? [])]) {
+    const value = normalize(raw)
+    if (!value) continue
+    tokens.push(value.includes(" ") ? value.split(" ")[0]! : value)
+  }
+  return tokens
+}
+
+export type NearMatchAthlete = {
+  athleteId: string
+  firstName: string
+  lastName: string
+  /** Lower is closer; > 0 means not an exact auto-match. */
+  score: number
+}
+
+/**
+ * Suggest a single roster athlete when the PDF name looks like a typo of theirs.
+ * Returns null when an exact/fuzzy match already exists, or when no unique near match.
+ */
+export function findNearMatchAthlete(
   pdfName: string,
   roster: RosterAthlete[]
+): NearMatchAthlete | null {
+  const lookup = buildAthleteLookup(roster)
+  if (matchAthleteIdFast(pdfName, lookup)) return null
+
+  const parsed = parsePdfName(pdfName)
+  if (!parsed) return null
+  const pdfFirst = normalize(parsed.first)
+  const pdfLast = normalize(parsed.last)
+  if (!pdfFirst || !pdfLast) return null
+
+  const scored: NearMatchAthlete[] = []
+  for (const athlete of roster) {
+    const rosterLast = normalize(athlete.lastName)
+    if (!rosterLast) continue
+    if (!isCloseToken(pdfLast, rosterLast) && pdfLast !== rosterLast) continue
+
+    const firstTokens = rosterFirstTokens(athlete)
+    let bestFirst = Number.POSITIVE_INFINITY
+    for (const token of firstTokens) {
+      if (firstNamesCompatible(pdfFirst, token) || isCloseToken(pdfFirst, token)) {
+        bestFirst = Math.min(bestFirst, editDistance(pdfFirst, token))
+      }
+    }
+    if (!Number.isFinite(bestFirst)) continue
+
+    const lastDist = editDistance(pdfLast, rosterLast)
+    const score = lastDist * 3 + bestFirst
+    // Exact strings should have been caught by matchAthleteIdFast.
+    if (score === 0) continue
+    scored.push({
+      athleteId: athlete.id,
+      firstName: athlete.firstName,
+      lastName: athlete.lastName,
+      score,
+    })
+  }
+
+  if (scored.length === 0) return null
+  scored.sort((a, b) => a.score - b.score || a.lastName.localeCompare(b.lastName))
+  if (scored.length > 1 && scored[0]!.score === scored[1]!.score) return null
+  return scored[0]!
+}
+
+/** Normalized `first last` key used for name mapping / rejection. */
+export function nameMatchKey(pdfName: string): string | null {
+  const parsed = parsePdfName(pdfName)
+  if (!parsed) return null
+  return normalize(`${parsed.first} ${parsed.last}`)
+}
+
+/** Resolve a coach-confirmed PDF name → roster athlete id. */
+export function resolveMappedAthleteId(
+  pdfName: string,
+  nameMappings?: Record<string, string> | null
+): string | null {
+  if (!nameMappings) return null
+  const key = nameMatchKey(pdfName)
+  if (!key) return null
+  if (nameMappings[key]) return nameMappings[key] ?? null
+  for (const [raw, athleteId] of Object.entries(nameMappings)) {
+    if (!athleteId) continue
+    if (nameMatchKey(raw) === key || normalize(raw) === key) return athleteId
+  }
+  return null
+}
+
+export function isRejectedPdfName(
+  pdfName: string,
+  rejectedNames?: string[] | null
+): boolean {
+  if (!rejectedNames?.length) return false
+  const key = nameMatchKey(pdfName)
+  if (!key) return false
+  return rejectedNames.some((raw) => nameMatchKey(raw) === key || normalize(raw) === key)
+}
+
+/** Normalize coach-confirmed mappings to `first last` keys. */
+export function normalizeNameMappings(
+  raw: unknown
+): Record<string, string> | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null
+  const out: Record<string, string> = {}
+  for (const [pdfName, athleteId] of Object.entries(raw as Record<string, unknown>)) {
+    if (typeof athleteId !== "string" || !athleteId.trim()) continue
+    const key = nameMatchKey(pdfName) ?? normalize(pdfName)
+    if (!key) continue
+    out[key] = athleteId.trim()
+  }
+  return Object.keys(out).length > 0 ? out : null
+}
+
+export function normalizeRejectedNames(raw: unknown): string[] | null {
+  if (!Array.isArray(raw)) return null
+  const out: string[] = []
+  const seen = new Set<string>()
+  for (const item of raw) {
+    if (typeof item !== "string") continue
+    const key = nameMatchKey(item) ?? normalize(item)
+    if (!key || seen.has(key)) continue
+    seen.add(key)
+    out.push(item.trim() || key)
+  }
+  return out.length > 0 ? out : null
+}
+
+export function matchAthleteId(
+  pdfName: string,
+  roster: RosterAthlete[],
+  nameMappings?: Record<string, string> | null
 ): string | null {
   const lookup = buildAthleteLookup(roster)
-  return matchAthleteIdFast(pdfName, lookup)
+  return matchAthleteIdFast(pdfName, lookup, nameMappings)
 }
 
 export function buildAthleteLookup(roster: RosterAthlete[]): AthleteLookup {
@@ -196,8 +356,12 @@ export function buildAthleteLookup(roster: RosterAthlete[]): AthleteLookup {
 
 export function matchAthleteIdFast(
   pdfName: string,
-  lookup: AthleteLookup
+  lookup: AthleteLookup,
+  nameMappings?: Record<string, string> | null
 ): string | null {
+  const mapped = resolveMappedAthleteId(pdfName, nameMappings)
+  if (mapped) return mapped
+
   const parsed = parsePdfName(pdfName)
   if (!parsed) return null
 

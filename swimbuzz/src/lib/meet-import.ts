@@ -1,9 +1,16 @@
 import { prisma } from "@/lib/prisma"
-import { buildAthleteLookup, matchAthleteIdFast } from "@/lib/athlete-match"
+import {
+  buildAthleteLookup,
+  findNearMatchAthlete,
+  isRejectedPdfName,
+  matchAthleteIdFast,
+  nameMatchKey,
+} from "@/lib/athlete-match"
 import { assignSwimOccurrences } from "@/lib/swim-dedup"
 import { parseCourse, parseMeetDate, parseSwimStatus, parseSwimTime, normalizeEventName } from "@/lib/swim-parse"
 import {
   matchRelayResultsToRoster,
+  isRealRelaySwimmerName,
   isRelayLeadoffSwimTag,
   isRelayResultsSummary,
   preserveRelayEntryFields,
@@ -19,6 +26,7 @@ import {
   mergeMeetResultEntries,
   placementsToMeetResults,
   seedsToMeetResults,
+  splitsToMeetResults,
   statusesToMeetResults,
   type MeetResultEntry,
 } from "@/lib/meet-sheet-summary"
@@ -35,6 +43,21 @@ export type ParsedMeetResult = {
   lane?: number
   heatTotal?: number
   seedTime?: string
+  splits?: Array<{ distance: number; splitTime: string }>
+}
+
+export type NameConfirmation = {
+  pdfName: string
+  /** Near-match suggestion when available; coach may pick any roster athlete. */
+  athleteId?: string
+  athleteName?: string
+  occurrences: number
+}
+
+export type RosterPairingOption = {
+  id: string
+  firstName: string
+  lastName: string
 }
 
 export type MeetImportSummary = {
@@ -47,6 +70,44 @@ export type MeetImportSummary = {
   relayResultsMatched: number
   leadoffsImported: number
   statusesMatched: number
+  nameConfirmations: NameConfirmation[]
+  /** Season roster for the coach pairing UI (only when confirmations exist). */
+  rosterForPairing: RosterPairingOption[]
+}
+
+function collectNameConfirmations(
+  names: string[],
+  roster: Array<{ id: string; firstName: string; lastName: string; nicknames: string[] }>,
+  lookup: ReturnType<typeof buildAthleteLookup>,
+  nameMappings: Record<string, string> | null | undefined,
+  rejectedNames: string[] | null | undefined
+): NameConfirmation[] {
+  const counts = new Map<string, { pdfName: string; count: number }>()
+  for (const raw of names) {
+    const name = raw.trim()
+    if (!name) continue
+    if (matchAthleteIdFast(name, lookup, nameMappings)) continue
+    if (isRejectedPdfName(name, rejectedNames)) continue
+    const key = nameMatchKey(name) ?? name.toLowerCase()
+    const prev = counts.get(key)
+    if (prev) prev.count += 1
+    else counts.set(key, { pdfName: name, count: 1 })
+  }
+
+  const out: NameConfirmation[] = []
+  for (const { pdfName, count } of counts.values()) {
+    const near = findNearMatchAthlete(pdfName, roster)
+    out.push({
+      pdfName,
+      athleteId: near?.athleteId,
+      athleteName: near
+        ? `${near.firstName} ${near.lastName}`
+        : undefined,
+      occurrences: count,
+    })
+  }
+  out.sort((a, b) => a.pdfName.localeCompare(b.pdfName))
+  return out
 }
 
 export async function importMeetResults({
@@ -58,6 +119,8 @@ export async function importMeetResults({
   source,
   courseDefault = "SCY",
   meetId = null,
+  nameMappings = null,
+  rejectedNames = null,
 }: {
   season: string
   meetName: string
@@ -67,6 +130,10 @@ export async function importMeetResults({
   source: string
   courseDefault?: string
   meetId?: string | null
+  /** Coach-confirmed PDF name → athlete id (typo fixes). */
+  nameMappings?: Record<string, string> | null
+  /** PDF names the coach said are not the suggested roster athlete. */
+  rejectedNames?: string[] | null
 }): Promise<MeetImportSummary> {
   const roster = await prisma.athlete.findMany({
     where: { seasons: { has: season } },
@@ -77,6 +144,39 @@ export async function importMeetResults({
   const athleteById = new Map(
     roster.map((a) => [a.id, `${a.lastName}, ${a.firstName}`])
   )
+
+  const namesForConfirm: string[] = []
+  for (const row of results) {
+    if (isRelayLeadoffSwimTag(row.tags ?? "")) continue
+    if (!isRealRelaySwimmerName(row.name)) continue
+    namesForConfirm.push(row.name)
+  }
+  for (const relay of relayResults) {
+    for (const leg of relay.relaySwimmers ?? []) {
+      if (isRealRelaySwimmerName(leg.name)) namesForConfirm.push(leg.name)
+    }
+  }
+  const nameConfirmations = collectNameConfirmations(
+    namesForConfirm,
+    roster,
+    lookup,
+    nameMappings,
+    rejectedNames
+  )
+  const rosterForPairing: RosterPairingOption[] =
+    nameConfirmations.length > 0
+      ? roster
+          .map((a) => ({
+            id: a.id,
+            firstName: a.firstName,
+            lastName: a.lastName,
+          }))
+          .sort(
+            (a, b) =>
+              a.lastName.localeCompare(b.lastName) ||
+              a.firstName.localeCompare(b.firstName)
+          )
+      : []
 
   const meetRecord = meetId
     ? await prisma.meet.findUnique({
@@ -138,6 +238,13 @@ export async function importMeetResults({
     event: string
     seedTime: string
   }[] = []
+  const splitRows: {
+    athleteId: string
+    athleteName: string
+    event: string
+    tags: string
+    splits: Array<{ distance: number; splitTime: string }>
+  }[] = []
 
   function pushPlacementRow(
     row: (typeof placementRows)[number]
@@ -150,7 +257,7 @@ export async function importMeetResults({
     // Relay leadoffs are synced from leg-1 relay splits, not individual result rows.
     if (isRelayLeadoffSwimTag(row.tags ?? "")) continue
 
-    const athleteId = matchAthleteIdFast(row.name, lookup)
+    const athleteId = matchAthleteIdFast(row.name, lookup, nameMappings)
     const event = normalizeEventName(row.event)
     const timeMs = parseSwimTime(row.time)
     const status = parseSwimStatus(row.time)
@@ -168,6 +275,22 @@ export async function importMeetResults({
         athleteName: athleteById.get(athleteId) ?? row.name,
         event,
         seedTime,
+      })
+    }
+
+    const rowSplits = (row.splits ?? [])
+      .map((s) => ({
+        distance: Number(s.distance),
+        splitTime: String(s.splitTime ?? "").trim(),
+      }))
+      .filter((s) => Number.isFinite(s.distance) && s.distance > 0 && Boolean(parseSwimTime(s.splitTime)))
+    if (rowSplits.length > 0) {
+      splitRows.push({
+        athleteId,
+        athleteName: athleteById.get(athleteId) ?? row.name,
+        event,
+        tags: row.tags ?? "",
+        splits: rowSplits,
       })
     }
 
@@ -273,7 +396,7 @@ export async function importMeetResults({
     }
   }
 
-  const relayEntries = matchRelayResultsToRoster(relayResults, roster).map(
+  const relayEntries = matchRelayResultsToRoster(relayResults, roster, nameMappings).map(
     (entry) => {
       const sheetEntry = heatSheetLookup.get(
         relayTeamKey(
@@ -297,10 +420,12 @@ export async function importMeetResults({
     relayResults,
     roster,
     source,
+    nameMappings,
   })
   const statusEntries = statusesToMeetResults(statusRows)
   const placementEntries = placementsToMeetResults(placementRows)
   const seedEntries = seedsToMeetResults(seedRows)
+  const splitEntries = splitsToMeetResults(splitRows)
   const existingMeta = isResultStatusesSummary(meetRecord?.resultStatusesSummary)
     ? meetRecord.resultStatusesSummary.entries
     : []
@@ -308,7 +433,8 @@ export async function importMeetResults({
     existingMeta,
     statusEntries,
     seedEntries,
-    placementEntries
+    placementEntries,
+    splitEntries
   )
   if (meetId) {
     const meetUpdate: {
@@ -394,6 +520,8 @@ export async function importMeetResults({
     relayResultsMatched: relayEntries.length,
     leadoffsImported,
     statusesMatched: statusEntries.length,
+    nameConfirmations,
+    rosterForPairing,
   }
 }
 

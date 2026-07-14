@@ -9,6 +9,19 @@ import { useScraperUi } from "@/components/ScraperUiProvider"
 
 type ImportSource = "pdf" | "swimphone"
 
+type NameConfirmation = {
+  pdfName: string
+  athleteId?: string
+  athleteName?: string
+  occurrences: number
+}
+
+type RosterPairingOption = {
+  id: string
+  firstName: string
+  lastName: string
+}
+
 type ImportResult = {
   imported: number
   parsed: number
@@ -20,6 +33,8 @@ type ImportResult = {
   captchaLimited?: boolean
   incompleteRelays?: string[]
   leadoffsImported?: number
+  nameConfirmations?: NameConfirmation[]
+  rosterForPairing?: RosterPairingOption[]
 }
 
 export default function ImportMeetButton({
@@ -42,21 +57,30 @@ export default function ImportMeetButton({
 
   const [open, setOpen] = useState(false)
   const [resultOpen, setResultOpen] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const [source, setSource] = useState<ImportSource>("swimphone")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [confirmError, setConfirmError] = useState<string | null>(null)
   const [result, setResult] = useState<ImportResult | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [url, setUrl] = useState("")
   const [team, setTeam] = useState("GTSC")
   const [course, setCourse] = useState("SCY")
-
+  const [pendingConfirmations, setPendingConfirmations] = useState<NameConfirmation[]>([])
+  const [rosterOptions, setRosterOptions] = useState<RosterPairingOption[]>([])
+  /** Empty string = leave unmatched / skip. */
+  const [pairSelections, setPairSelections] = useState<Record<string, string>>({})
 
   function resetForm() {
     setSource("swimphone")
     setError(null)
+    setConfirmError(null)
     setResult(null)
     setSelectedFile(null)
+    setPendingConfirmations([])
+    setRosterOptions([])
+    setPairSelections({})
     if (fileRef.current) fileRef.current.value = ""
   }
 
@@ -66,11 +90,100 @@ export default function ImportMeetButton({
     setResult(null)
   }
 
+  function defaultPairSelections(confirmations: NameConfirmation[]): Record<string, string> {
+    const next: Record<string, string> = {}
+    for (const c of confirmations) {
+      next[c.pdfName] = c.athleteId ?? ""
+    }
+    return next
+  }
+
   function showImportResult(data: ImportResult) {
     setResult(data)
     setOpen(false)
+    setConfirmOpen(false)
     setResultOpen(true)
+    setPendingConfirmations([])
+    setRosterOptions([])
+    setPairSelections({})
     router.refresh()
+  }
+
+  function handleImportResponse(data: ImportResult) {
+    const confirmations = data.nameConfirmations ?? []
+    if (confirmations.length > 0) {
+      setResult(data)
+      setOpen(false)
+      setPendingConfirmations(confirmations)
+      setRosterOptions(data.rosterForPairing ?? [])
+      setPairSelections(defaultPairSelections(confirmations))
+      setConfirmError(null)
+      setConfirmOpen(true)
+      router.refresh()
+      return
+    }
+    showImportResult(data)
+    if (source === "pdf") {
+      setSelectedFile(null)
+      if (fileRef.current) fileRef.current.value = ""
+    }
+  }
+
+  async function runPdfImport(opts?: {
+    nameMappings?: Record<string, string>
+    rejectedNames?: string[]
+  }) {
+    if (!selectedFile) {
+      throw new Error("Choose a PDF file first")
+    }
+
+    const body = new FormData()
+    body.append("file", selectedFile, selectedFile.name)
+    body.append("course", course)
+    body.append("team", team.trim())
+    body.append("season", season)
+    if (meetId) body.append("meetId", meetId)
+    if (opts?.nameMappings) {
+      body.append("nameMappings", JSON.stringify(opts.nameMappings))
+    }
+    if (opts?.rejectedNames?.length) {
+      body.append("rejectedNames", JSON.stringify(opts.rejectedNames))
+    }
+
+    const res = await fetch("/api/meets/import", { method: "POST", body })
+    const data = await res.json()
+    if (!res.ok) {
+      throw new Error(data.error ?? "Import failed")
+    }
+    return data as ImportResult
+  }
+
+  async function runSwimphoneImport(opts?: {
+    nameMappings?: Record<string, string>
+    rejectedNames?: string[]
+  }) {
+    const trimmed = url.trim()
+    if (!trimmed) {
+      throw new Error("Paste a SwimPhone meet URL")
+    }
+
+    const res = await fetch("/api/meets/import/swimphone", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        url: trimmed,
+        season,
+        meetId,
+        team: team.trim(),
+        nameMappings: opts?.nameMappings,
+        rejectedNames: opts?.rejectedNames,
+      }),
+    })
+    const data = await res.json()
+    if (!res.ok) {
+      throw new Error(data.error ?? "Import failed")
+    }
+    return data as ImportResult
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -82,43 +195,11 @@ export default function ImportMeetButton({
       return
     }
 
-    if (source === "pdf") {
-      if (!selectedFile) {
-        setError("Choose a PDF file first")
-        return
-      }
-
-      setLoading(true)
-      setError(null)
-      setResult(null)
-
-      const body = new FormData()
-      body.append("file", selectedFile, selectedFile.name)
-      body.append("course", course)
-      body.append("team", teamCode)
-      body.append("season", season)
-      if (meetId) body.append("meetId", meetId)
-
-      try {
-        const res = await fetch("/api/meets/import", { method: "POST", body })
-        const data = await res.json()
-        if (!res.ok) {
-          setError(data.error ?? "Import failed")
-          return
-        }
-        showImportResult(data)
-        setSelectedFile(null)
-        if (fileRef.current) fileRef.current.value = ""
-      } catch {
-        setError("Upload failed — check that the scraper is running")
-      } finally {
-        setLoading(false)
-      }
+    if (source === "pdf" && !selectedFile) {
+      setError("Choose a PDF file first")
       return
     }
-
-    const trimmed = url.trim()
-    if (!trimmed) {
+    if (source === "swimphone" && !url.trim()) {
       setError("Paste a SwimPhone meet URL")
       return
     }
@@ -128,23 +209,81 @@ export default function ImportMeetButton({
     setResult(null)
 
     try {
-      const res = await fetch("/api/meets/import/swimphone", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: trimmed, season, meetId, team: teamCode }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Import failed")
-        return
-      }
-      showImportResult(data)
-    } catch {
-      setError("Import failed — check that the scraper is running")
+      const data =
+        source === "pdf" ? await runPdfImport() : await runSwimphoneImport()
+      handleImportResponse(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Import failed")
     } finally {
       setLoading(false)
     }
   }
+
+  function closeConfirmWithoutPairing() {
+    if (loading) return
+    setConfirmOpen(false)
+    setPendingConfirmations([])
+    setRosterOptions([])
+    setPairSelections({})
+    setConfirmError(null)
+    if (result) {
+      setResultOpen(true)
+    }
+    if (source === "pdf") {
+      setSelectedFile(null)
+      if (fileRef.current) fileRef.current.value = ""
+    }
+    router.refresh()
+  }
+
+  async function handleConfirmSubmit(e: React.FormEvent) {
+    e.preventDefault()
+
+    const nameMappings: Record<string, string> = {}
+    const rejectedNames: string[] = []
+    for (const c of pendingConfirmations) {
+      const selected = (pairSelections[c.pdfName] ?? "").trim()
+      if (selected) {
+        nameMappings[c.pdfName] = selected
+      } else {
+        rejectedNames.push(c.pdfName)
+      }
+    }
+
+    if (Object.keys(nameMappings).length === 0) {
+      closeConfirmWithoutPairing()
+      return
+    }
+
+    setLoading(true)
+    setConfirmError(null)
+
+    try {
+      const data =
+        source === "pdf"
+          ? await runPdfImport({ nameMappings, rejectedNames })
+          : await runSwimphoneImport({ nameMappings, rejectedNames })
+      showImportResult(data)
+      if (source === "pdf") {
+        setSelectedFile(null)
+        if (fileRef.current) fileRef.current.value = ""
+      }
+    } catch (err) {
+      setConfirmError(
+        err instanceof Error
+          ? err.message
+          : source === "swimphone"
+            ? "Import failed — check that the scraper is running"
+            : "Upload failed — check that the scraper is running"
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const pairedCount = pendingConfirmations.filter((c) =>
+    Boolean((pairSelections[c.pdfName] ?? "").trim())
+  ).length
 
   return (
     <>
@@ -318,6 +457,91 @@ export default function ImportMeetButton({
         <p className="text-xs text-gray-400 dark:text-zinc-500 -mt-2">
           Only swimmers listed under this team in the results are imported.
         </p>
+      </Modal>
+
+      <Modal
+        open={confirmOpen}
+        onClose={closeConfirmWithoutPairing}
+        closeDisabled={loading}
+        busy={loading}
+        title="Pair unmatched athletes"
+        description="These names matched your team code but not the roster. Pair them to a roster athlete to import their results."
+        onSubmit={handleConfirmSubmit}
+        footer={
+          <ModalFooter>
+            <button
+              type="button"
+              onClick={closeConfirmWithoutPairing}
+              disabled={loading}
+              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+            >
+              Skip
+            </button>
+            <button
+              type="submit"
+              disabled={loading || pairedCount === 0}
+              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+            >
+              {loading
+                ? "Importing…"
+                : pairedCount > 0
+                  ? `Import ${pairedCount} paired`
+                  : "Import paired"}
+            </button>
+          </ModalFooter>
+        }
+      >
+        <ul className="space-y-3">
+          {pendingConfirmations.map((c) => {
+            const selected = pairSelections[c.pdfName] ?? ""
+            const suggested =
+              c.athleteId && c.athleteName
+                ? { id: c.athleteId, name: c.athleteName }
+                : null
+            return (
+              <li
+                key={c.pdfName}
+                className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-800/50"
+              >
+                <p className="text-sm text-gray-900 dark:text-zinc-100">
+                  <strong>{c.pdfName}</strong>
+                </p>
+                <p className="mt-0.5 text-xs text-gray-500 dark:text-zinc-400">
+                  {c.occurrences} result{c.occurrences === 1 ? "" : "s"} with this spelling
+                  {suggested ? (
+                    <span>
+                      {" "}
+                      · suggested match: {suggested.name}
+                    </span>
+                  ) : null}
+                </p>
+                <label className="mt-3 block">
+                  <span className="sr-only">Roster athlete for {c.pdfName}</span>
+                  <select
+                    value={selected}
+                    onChange={(e) =>
+                      setPairSelections((prev) => ({
+                        ...prev,
+                        [c.pdfName]: e.target.value,
+                      }))
+                    }
+                    className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                  >
+                    <option value="">Leave unmatched</option>
+                    {rosterOptions.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.lastName}, {a.firstName}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </li>
+            )
+          })}
+        </ul>
+        {confirmError && (
+          <p className="text-sm text-red-600 dark:text-red-400">{confirmError}</p>
+        )}
       </Modal>
 
       <Modal
