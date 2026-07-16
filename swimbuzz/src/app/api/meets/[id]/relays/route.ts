@@ -18,6 +18,10 @@ import {
   type RelayRound,
   type RelayTeamInput,
 } from "@/lib/relay-results"
+import {
+  isResultStatusesSummary,
+  meetHasImportedResults,
+} from "@/lib/meet-sheet-summary"
 import { Gender } from "@prisma/client"
 import { syncRelayLeadoffSwim, deleteRelayLeadoffSwim } from "@/lib/relay-leadoff-sync"
 
@@ -88,7 +92,10 @@ export async function POST(
   }
 
   const { id } = await params
-  const meet = await prisma.meet.findUnique({ where: { id } })
+  const meet = await prisma.meet.findUnique({
+    where: { id },
+    include: { _count: { select: { swims: true } } },
+  })
   if (!meet) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
   const body = await req.json()
@@ -158,6 +165,26 @@ export async function POST(
       legs: relay.legs,
       manual: false,
     }
+  } else if (
+    !relay.resultTime &&
+    meetHasImportedResults({
+      swimCount: meet._count.swims,
+      resultStatusEntries: isResultStatusesSummary(meet.resultStatusesSummary)
+        ? meet.resultStatusesSummary.entries
+        : null,
+      relayResults: existing,
+    }) &&
+    // Allow editing leftover manual seeds; block new seed-only creates and
+    // overwriting imported relays from the relay builder.
+    (!existingEntry || !existingEntry.manual)
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          "Cannot add relay seeds to the roster summary after results have been imported.",
+      },
+      { status: 409 }
+    )
   }
 
   const entries = upsertRelayTeamEntries(existing, relayToSave, roster, athleteGenders)

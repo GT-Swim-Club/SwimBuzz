@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, type ReactNode } from "react"
+import { MAX_NICKNAMES } from "@/lib/athlete-match"
 
 type NicknameTagsInputProps = {
   value: string[]
@@ -10,6 +11,8 @@ type NicknameTagsInputProps = {
   id?: string
   /** Show an Add button next to the input (default false). */
   showAddButton?: boolean
+  /** Extra controls rendered after the Add button (e.g. Request). */
+  actions?: ReactNode
 }
 
 export default function NicknameTagsInput({
@@ -19,12 +22,14 @@ export default function NicknameTagsInput({
   disabled = false,
   id,
   showAddButton = false,
+  actions,
 }: NicknameTagsInputProps) {
   const [draft, setDraft] = useState("")
+  const atLimit = value.length >= MAX_NICKNAMES
 
   function addNickname(raw: string) {
     const name = raw.trim()
-    if (!name) return
+    if (!name || atLimit) return
     if (value.some((n) => n.toLowerCase() === name.toLowerCase())) {
       setDraft("")
       return
@@ -36,6 +41,8 @@ export default function NicknameTagsInput({
   function removeNickname(name: string) {
     onChange(value.filter((n) => n !== name))
   }
+
+  const showRow = showAddButton || actions != null
 
   return (
     <div>
@@ -54,12 +61,12 @@ export default function NicknameTagsInput({
           ))}
         </div>
       )}
-      <div className={showAddButton ? "flex flex-wrap items-center gap-3" : undefined}>
+      <div className={showRow ? "flex flex-wrap items-center gap-3" : undefined}>
         <input
           id={id}
           type="text"
-          disabled={disabled}
-          placeholder={placeholder}
+          disabled={disabled || atLimit}
+          placeholder={atLimit ? `Maximum of ${MAX_NICKNAMES} nicknames` : placeholder}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
@@ -72,19 +79,20 @@ export default function NicknameTagsInput({
           }}
           className={
             "rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700 disabled:opacity-40 " +
-            (showAddButton ? "flex-1 min-w-[160px]" : "w-full")
+            (showRow ? "flex-1 min-w-[160px]" : "w-full")
           }
         />
         {showAddButton && (
           <button
             type="button"
-            disabled={disabled || !draft.trim()}
+            disabled={disabled || atLimit || !draft.trim()}
             onClick={() => addNickname(draft)}
             className="text-sm px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
           >
             Add
           </button>
         )}
+        {actions}
       </div>
     </div>
   )

@@ -10,6 +10,7 @@ import {
   hasSwimResultData,
   inferResultHeatTotals,
   isTimedFinalsEntry,
+  meetHasImportedResults,
   mergeMeetResultEntries,
   mergeSheetSummaries,
   relayLeadoffsFromSplits,
@@ -733,20 +734,10 @@ export default function MeetSheetSummarySection({
   const otherRelays = relays.filter(
     (e) => effectiveRelayGender(e, athleteGenders) === ""
   )
-  const hasImportedResults = Boolean(
-    (results?.length ?? 0) > 0 ||
-      (relayResults ?? []).some(
-        (e) =>
-          Boolean(
-            e.resultTime ||
-              e.finalTime ||
-              e.prelimTime ||
-              e.resultStatus ||
-              e.prelimStatus ||
-              e.finalStatus
-          )
-      )
-  )
+  const hasImportedResults = meetHasImportedResults({
+    individualResults: results,
+    relayResults,
+  })
   const displayEntries = summary
     ? dropSeedOnlyAfterResults(
         expandIndividualResultRows(inferResultHeatTotals(summary.entries)),

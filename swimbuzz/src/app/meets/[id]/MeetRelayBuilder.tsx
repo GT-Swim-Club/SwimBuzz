@@ -95,6 +95,7 @@ export default function MeetRelayBuilder({
   athletes = [],
   signupAthleteIds = [],
   signupAthleteIdsByEvent,
+  hasImportedResults = false,
 }: {
   meetId: string
   defaultCourse: string
@@ -102,6 +103,8 @@ export default function MeetRelayBuilder({
   athletes?: Array<{ id: string; gender?: "M" | "F" }>
   signupAthleteIds?: string[]
   signupAthleteIdsByEvent: Record<string, string[]>
+  /** When true, hide "add to roster summary" actions. */
+  hasImportedResults?: boolean
 }) {
   const router = useRouter()
   const events = useMemo(() => {
@@ -198,7 +201,7 @@ export default function MeetRelayBuilder({
   }
 
   function requestAddTeam(team: RelayTeam) {
-    if (!result || savingLetter) return
+    if (hasImportedResults || !result || savingLetter) return
     if (team.legs.length !== 4 || team.legs.some((l) => !l.athleteId)) {
       setError(`Built ${team.letter} relay is missing four athletes.`)
       return
@@ -208,13 +211,13 @@ export default function MeetRelayBuilder({
   }
 
   function requestAddAll() {
-    if (!result?.teams.length || savingLetter) return
+    if (hasImportedResults || !result?.teams.length || savingLetter) return
     setConfirmError(null)
     setConfirmAdd("*")
   }
 
   async function confirmAddToRoster() {
-    if (!result || !confirmAdd || savingLetter) return
+    if (hasImportedResults || !result || !confirmAdd || savingLetter) return
 
     const teams =
       confirmAdd === "*"
@@ -421,7 +424,7 @@ export default function MeetRelayBuilder({
                   ? ` · ${result.teams.length} relays`
                   : ""}
               </h3>
-              {result.teams.length > 1 && (
+              {!hasImportedResults && result.teams.length > 1 && (
                 <button
                   type="button"
                   onClick={requestAddAll}
@@ -444,16 +447,18 @@ export default function MeetRelayBuilder({
                       {formatTime(team.totalMs)}
                     </span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => requestAddTeam(team)}
-                    disabled={savingLetter != null}
-                    className="px-3 py-1.5 text-sm border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
-                  >
-                    {savingLetter === team.letter
-                      ? "Adding…"
-                      : `Add ${team.letter} to roster summary`}
-                  </button>
+                  {!hasImportedResults && (
+                    <button
+                      type="button"
+                      onClick={() => requestAddTeam(team)}
+                      disabled={savingLetter != null}
+                      className="px-3 py-1.5 text-sm border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
+                    >
+                      {savingLetter === team.letter
+                        ? "Adding…"
+                        : `Add ${team.letter} to roster summary`}
+                    </button>
+                  )}
                 </div>
 
                 <div className="border rounded-xl overflow-hidden divide-y dark:border-zinc-800 dark:divide-zinc-800">

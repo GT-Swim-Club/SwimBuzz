@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Modal, { ModalFooter } from "@/components/Modal"
+import { isValidSwimCloudIdInput, SWIMCLOUD_ID_ERROR } from "@/lib/swimcloud-id"
 
 type AthleteActionsProps = {
   athleteId: string
@@ -42,8 +43,14 @@ export default function AthleteActions({
     setEditing(true)
   }
 
+  const swimCloudIdOk =
+    form.swimCloudId === "" || isValidSwimCloudIdInput(form.swimCloudId)
+  const showSwimCloudHint =
+    form.swimCloudId.length > 0 && !isValidSwimCloudIdInput(form.swimCloudId)
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
+    if (!swimCloudIdOk) return
     setLoading(true)
     setError(null)
     try {
@@ -131,7 +138,7 @@ export default function AthleteActions({
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !swimCloudIdOk}
               className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
             >
               {loading ? "Saving…" : "Save changes"}
@@ -182,13 +189,31 @@ export default function AthleteActions({
             SwimCloud ID
           </label>
           <input
-            type="number"
-            min={1}
-            placeholder="optional"
+            type="text"
+            inputMode="numeric"
+            pattern="\d{7}"
+            maxLength={7}
+            placeholder="e.g. 1234567"
+            title={SWIMCLOUD_ID_ERROR}
             value={form.swimCloudId}
-            onChange={(e) => setForm((f) => ({ ...f, swimCloudId: e.target.value }))}
+            onChange={(e) =>
+              setForm((f) => ({
+                ...f,
+                swimCloudId: e.target.value.replace(/\D/g, "").slice(0, 7),
+              }))
+            }
             className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+            aria-invalid={showSwimCloudHint}
+            aria-describedby={showSwimCloudHint ? "edit-swimcloud-id-hint" : undefined}
           />
+          {showSwimCloudHint && (
+            <p
+              id="edit-swimcloud-id-hint"
+              className="mt-1 text-xs text-amber-600 dark:text-amber-400"
+            >
+              {SWIMCLOUD_ID_ERROR} ({form.swimCloudId.length}/7)
+            </p>
+          )}
         </div>
 
         {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}

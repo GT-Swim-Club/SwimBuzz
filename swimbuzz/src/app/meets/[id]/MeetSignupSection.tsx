@@ -56,6 +56,7 @@ export default function MeetSignupSection({
   myEntry,
   entries,
   course,
+  hasImportedResults = false,
 }: {
   meetId: string
   eventOrder: unknown
@@ -74,6 +75,8 @@ export default function MeetSignupSection({
   } | null
   entries: EntryRow[]
   course: string
+  /** When true, hide "add sign-ups to roster summary". */
+  hasImportedResults?: boolean
 }) {
   const [responsesOpen, setResponsesOpen] = useState(false)
   const [syncConfirmOpen, setSyncConfirmOpen] = useState(false)
@@ -124,7 +127,7 @@ export default function MeetSignupSection({
   }
 
   async function syncIndividualSignupsToRoster() {
-    if (syncingRoster || entries.length === 0) return
+    if (hasImportedResults || syncingRoster || entries.length === 0) return
 
     setSyncingRoster(true)
     setSyncError(null)
@@ -150,7 +153,14 @@ export default function MeetSignupSection({
   }
 
   function openSyncConfirm() {
-    if (entries.length === 0 || eventOptions.length === 0 || syncingRoster) return
+    if (
+      hasImportedResults ||
+      entries.length === 0 ||
+      eventOptions.length === 0 ||
+      syncingRoster
+    ) {
+      return
+    }
     setSyncError(null)
     setSyncConfirmOpen(true)
   }
@@ -325,19 +335,21 @@ export default function MeetSignupSection({
                 >
                   Close
                 </button>
-                <button
-                  type="button"
-                  onClick={openSyncConfirm}
-                  disabled={
-                    syncingRoster ||
-                    withdrawing ||
-                    entries.length === 0 ||
-                    eventOptions.length === 0
-                  }
-                  className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
-                >
-                  Add individual sign-ups to roster summary
-                </button>
+                {!hasImportedResults && (
+                  <button
+                    type="button"
+                    onClick={openSyncConfirm}
+                    disabled={
+                      syncingRoster ||
+                      withdrawing ||
+                      entries.length === 0 ||
+                      eventOptions.length === 0
+                    }
+                    className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                  >
+                    Add individual sign-ups to roster summary
+                  </button>
+                )}
               </ModalFooter>
             }
           >

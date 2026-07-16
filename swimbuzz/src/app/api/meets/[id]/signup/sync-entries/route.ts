@@ -8,7 +8,12 @@ import {
   resolveSignupEventOptions,
   type SignupEntryForSheetSync,
 } from "@/lib/meet-signup"
-import { isSheetSummary } from "@/lib/meet-sheet-summary"
+import {
+  isResultStatusesSummary,
+  isSheetSummary,
+  meetHasImportedResults,
+} from "@/lib/meet-sheet-summary"
+import { isRelayResultsSummary } from "@/lib/relay-results"
 import { Prisma } from "@prisma/client"
 
 export async function POST(
@@ -28,6 +33,9 @@ export async function POST(
       course: true,
       eventOrder: true,
       entriesSheetSummary: true,
+      relayResultsSummary: true,
+      resultStatusesSummary: true,
+      _count: { select: { swims: true } },
       signupForm: {
         select: {
           entries: {
@@ -48,6 +56,26 @@ export async function POST(
   if (!meet) return NextResponse.json({ error: "Meet not found" }, { status: 404 })
   if (!meet.signupForm) {
     return NextResponse.json({ error: "Sign-up form not set up" }, { status: 404 })
+  }
+
+  if (
+    meetHasImportedResults({
+      swimCount: meet._count.swims,
+      resultStatusEntries: isResultStatusesSummary(meet.resultStatusesSummary)
+        ? meet.resultStatusesSummary.entries
+        : null,
+      relayResults: isRelayResultsSummary(meet.relayResultsSummary)
+        ? meet.relayResultsSummary.entries
+        : null,
+    })
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          "Cannot add sign-up entries to the roster summary after results have been imported.",
+      },
+      { status: 409 }
+    )
   }
 
   const eventOptions = resolveSignupEventOptions(meet.eventOrder)

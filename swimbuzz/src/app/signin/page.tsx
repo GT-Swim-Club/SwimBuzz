@@ -1,8 +1,10 @@
 import Link from "next/link"
+import Image from "next/image"
 import { getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import SignInButton from "@/components/SignInButton"
+import EmailSignInForm from "@/components/EmailSignInForm"
 
 export const metadata = {
   title: "Sign in — SwimBuzz",
@@ -20,7 +22,7 @@ export default async function SignInPage({
   const destination = callbackUrl?.startsWith("/") ? callbackUrl : "/athletes"
 
   return (
-    <div className="relative -mx-4 -my-8 flex min-h-[calc(100vh-57px)] items-center justify-center px-4 py-12">
+    <div className="relative -mx-4 -my-8 flex min-h-[calc(100vh-65px)] items-center justify-center px-4 py-12">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-24 left-1/2 h-72 w-[36rem] -translate-x-1/2 rounded-full bg-indigo-500/10 blur-3xl dark:bg-indigo-400/10" />
         <div className="absolute bottom-0 right-0 h-64 w-64 rounded-full bg-cyan-500/10 blur-3xl dark:bg-cyan-400/10" />
@@ -30,11 +32,16 @@ export default async function SignInPage({
         <div className="rounded-2xl border border-gray-200 bg-white/90 p-8 shadow-xl backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/90">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm font-semibold tracking-tight text-gray-900 dark:text-zinc-100"
+            className="inline-flex items-center gap-2.5 text-sm font-semibold tracking-tight text-gray-900 dark:text-zinc-100"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm text-white">
-              S
-            </span>
+            <Image
+              src="/swimbuzz-logo.png"
+              alt=""
+              width={32}
+              height={32}
+              className="h-8 w-8 rounded-lg"
+              priority
+            />
             SwimBuzz
           </Link>
 
@@ -42,8 +49,7 @@ export default async function SignInPage({
             Sign in to your team
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-zinc-400">
-            Use your Google account to access the Georgia Tech Swim Club roster,
-            meets, and practice tools.
+            Access the Georgia Tech Swim Club roster, meets, and practice tools.
           </p>
 
           {error && (
@@ -53,13 +59,31 @@ export default async function SignInPage({
             </p>
           )}
 
-          <div className="mt-8">
-            <SignInButton callbackUrl={destination} />
+          <div className="relative mt-4 mb-4">
+            <div className="absolute inset-0 flex items-center" aria-hidden="true">
+              <div className="w-full border-t border-gray-200 dark:border-zinc-700" />
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="bg-white px-3 text-gray-500 dark:bg-zinc-900 dark:text-zinc-500">
+                Athletes
+              </span>
+            </div>
           </div>
 
-          <p className="mt-6 text-center text-xs text-gray-500 dark:text-zinc-500">
-            Access is currently limited to @gtswimclub.com accounts.
-          </p>
+          <EmailSignInForm callbackUrl={destination} />
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center" aria-hidden="true">
+              <div className="w-full border-t border-gray-200 dark:border-zinc-700" />
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="bg-white px-3 text-gray-500 dark:bg-zinc-900 dark:text-zinc-500">
+                Coaches & Exec
+              </span>
+            </div>
+          </div>
+
+          <SignInButton callbackUrl={destination} />
         </div>
 
         <p className="mt-6 text-center text-xs text-gray-400 dark:text-zinc-600">

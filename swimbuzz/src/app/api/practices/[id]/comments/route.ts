@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { notifyPracticeComment } from "@/lib/notifications"
 import { prisma } from "@/lib/prisma"
 
 export async function POST(
@@ -11,7 +12,10 @@ export async function POST(
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
-  const practice = await prisma.practice.findUnique({ where: { id }, select: { id: true } })
+  const practice = await prisma.practice.findUnique({
+    where: { id },
+    select: { id: true, title: true, createdById: true },
+  })
   if (!practice) return NextResponse.json({ error: "Practice not found" }, { status: 404 })
 
   const body = await req.json().catch(() => ({}))
@@ -22,16 +26,26 @@ export async function POST(
   }
 
   let parentId: string | null = null
+  let parentAuthorId: string | null = null
   if (body.parentId != null && body.parentId !== "") {
     const parent = await prisma.practiceComment.findUnique({
       where: { id: String(body.parentId) },
-      select: { id: true, practiceId: true, parentId: true },
+      select: { id: true, practiceId: true, parentId: true, authorId: true },
     })
     if (!parent || parent.practiceId !== id) {
       return NextResponse.json({ error: "Parent comment not found" }, { status: 400 })
     }
     // Flatten to one level: replies attach to the top-level comment
     parentId = parent.parentId ?? parent.id
+    if (parent.parentId) {
+      const root = await prisma.practiceComment.findUnique({
+        where: { id: parentId },
+        select: { authorId: true },
+      })
+      parentAuthorId = root?.authorId ?? parent.authorId
+    } else {
+      parentAuthorId = parent.authorId
+    }
   }
 
   const comment = await prisma.practiceComment.create({
@@ -42,6 +56,17 @@ export async function POST(
       body: text,
       parentId,
     },
+  })
+
+  await notifyPracticeComment({
+    practiceId: practice.id,
+    practiceTitle: practice.title,
+    commentBody: text,
+    authorId: session.user.id,
+    authorName: session.user.name ?? "Someone",
+    practiceAuthorId: practice.createdById,
+    parentAuthorId,
+    isReply: parentId != null,
   })
 
   return NextResponse.json(comment, { status: 201 })

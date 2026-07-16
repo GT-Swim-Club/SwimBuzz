@@ -827,6 +827,46 @@ export function hasSwimResultData(entry: SheetEntry): boolean {
   )
 }
 
+type ResultPresenceFields = Pick<
+  SheetEntry,
+  | "resultTime"
+  | "prelimTime"
+  | "finalTime"
+  | "resultStatus"
+  | "prelimStatus"
+  | "finalStatus"
+>
+
+/** True when a sheet/relay row has a result time or status (not seed-only). */
+export function sheetEntryHasResultData(entry: ResultPresenceFields): boolean {
+  return Boolean(
+    entry.resultTime ||
+      entry.prelimTime ||
+      entry.finalTime ||
+      entry.resultStatus ||
+      entry.prelimStatus ||
+      entry.finalStatus
+  )
+}
+
+/**
+ * Whether the meet has imported or entered results (individual swims/statuses
+ * or relay result times/statuses). Used to lock signup/relay-builder seed adds.
+ */
+export function meetHasImportedResults(opts: {
+  /** Merged individual result rows (swims + statuses), or any array with length. */
+  individualResults?: { length: number } | null
+  /** Direct swim count when individualResults are not loaded. */
+  swimCount?: number
+  resultStatusEntries?: ResultPresenceFields[] | null
+  relayResults?: ResultPresenceFields[] | null
+}): boolean {
+  if ((opts.individualResults?.length ?? 0) > 0) return true
+  if ((opts.swimCount ?? 0) > 0) return true
+  if ((opts.resultStatusEntries ?? []).some(sheetEntryHasResultData)) return true
+  return (opts.relayResults ?? []).some(sheetEntryHasResultData)
+}
+
 /** True when an individual event has no separate prelim+final rounds (timed finals). */
 export function isTimedFinalsEvent(entries: SheetEntry[], event: string): boolean {
   const eventKey = normalizeEventName(event)

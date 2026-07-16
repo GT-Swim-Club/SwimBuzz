@@ -61,7 +61,7 @@ export default async function AthletesPage({
           seasons: { has: season },
         },
       include: {
-        user: { select: { name: true, email: true } },
+        user: { select: { name: true, email: true, image: true } },
       },
       orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
     })
@@ -70,7 +70,7 @@ export default async function AthletesPage({
       ? athletes.filter((a) => matchesAthleteQuery(a, query))
       : athletes
 
-    const viewerAthleteId = await resolveViewerAthleteId(session.user.id)
+    const viewerAthleteId = await resolveViewerAthleteId(session.user.id, session.user.role)
     const sortedAthletes =
       viewerAthleteId && filteredAthletes.some((a) => a.id === viewerAthleteId)
         ? [
@@ -122,8 +122,21 @@ export default async function AthletesPage({
                 (isYou ? " bg-indigo-50/70 dark:bg-indigo-950/30" : "")
               }
             >
-              <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-medium text-indigo-700 shrink-0 dark:bg-indigo-950 dark:text-indigo-300">
-                {a.firstName[0]}{a.lastName[0]}
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-indigo-100 text-sm font-medium text-indigo-700 dark:border-zinc-700 dark:bg-indigo-950 dark:text-indigo-300">
+                {a.user?.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={a.user.image}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <span aria-hidden>
+                    {a.firstName[0]}
+                    {a.lastName[0]}
+                  </span>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm text-gray-900 dark:text-zinc-100">

@@ -45,10 +45,16 @@ export async function getAthleteViewAthlete(): Promise<{
 
 /**
  * Athlete to treat as "you" in the UI: staff preview athlete, else linked profile.
+ * Preview cookie is only honored for staff so it can't leak across a later athlete login.
  */
-export async function resolveViewerAthleteId(sessionUserId: string): Promise<string | null> {
-  const previewId = await getAthleteViewAthleteId()
-  if (previewId) return previewId
+export async function resolveViewerAthleteId(
+  sessionUserId: string,
+  role: string
+): Promise<string | null> {
+  if (isStaffRole(role)) {
+    const previewId = await getAthleteViewAthleteId()
+    if (previewId) return previewId
+  }
   const linked = await prisma.athlete.findUnique({
     where: { userId: sessionUserId },
     select: { id: true },

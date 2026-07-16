@@ -7,6 +7,7 @@ import {
   resolveSignupEventOptions,
   signupWindowStatus,
 } from "@/lib/meet-signup"
+import { notifyMeetSignupOpen } from "@/lib/notifications"
 import { Prisma } from "@prisma/client"
 
 function parseOptionalDate(value: unknown): Date | null | undefined {
@@ -124,8 +125,13 @@ export async function PUT(
   }
 
   const { id: meetId } = await params
-  const meet = await prisma.meet.findUnique({ where: { id: meetId }, select: { id: true } })
+  const meet = await prisma.meet.findUnique({
+    where: { id: meetId },
+    select: { id: true, name: true, signupForm: { select: { enabled: true } } },
+  })
   if (!meet) return NextResponse.json({ error: "Not found" }, { status: 404 })
+
+  const wasEnabled = meet.signupForm?.enabled === true
 
   const body = await req.json()
   const enabled = Boolean(body.enabled)
@@ -226,6 +232,20 @@ export async function PUT(
     create: { meetId, ...data },
     update: data,
   })
+
+  if (enabled && !wasEnabled) {
+    const window = signupWindowStatus({
+      enabled: form.enabled,
+      openAt: form.openAt,
+      closeAt: form.closeAt,
+    })
+    if (window.open) {
+      await notifyMeetSignupOpen({
+        meetId: meet.id,
+        meetName: meet.name,
+      })
+    }
+  }
 
   return NextResponse.json({
     id: form.id,

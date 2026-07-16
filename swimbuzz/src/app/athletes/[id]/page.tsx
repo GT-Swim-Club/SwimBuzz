@@ -7,9 +7,12 @@ import { compareSwimPb } from "@/lib/swim-parse"
 import AddSwimForm from "./AddSwimForm"
 import PersonalBestsGrid from "./PersonalBestsGrid"
 import SwimHistory from "./SwimHistory"
-import EditNicknamesForm from "./EditNicknamesForm"
+import EditNicknamesForm from "@/components/EditNicknamesForm"
+import RequestTimesImportButton from "@/components/RequestTimesImportButton"
 import AthleteActions from "./AthleteActions"
+import PendingProfileChangesReview from "@/components/PendingProfileChangesReview"
 import { isStaffUi } from "@/lib/athlete-view-server"
+import { parsePendingProfileChanges } from "@/lib/pending-profile-changes"
 
 export default async function AthletePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params  // 👈 await it
@@ -19,7 +22,7 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
     const athlete = await prisma.athlete.findUnique({
         where: { id },  // 👈 use the destructured id
         include: {
-        user: { select: { name: true, email: true } },
+        user: { select: { name: true, email: true, image: true } },
         swims: {
             orderBy: { date: "desc" },
         },
@@ -29,6 +32,8 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
     if (!athlete) notFound()
 
   const isCoach = await isStaffUi(session.user.role)
+  const isOwnProfile = athlete.userId === session.user.id
+  const pending = parsePendingProfileChanges(athlete.pendingProfileChanges)
 
   // group PBs by event
   const pbMap = new Map<string, typeof athlete.swims[0]>()
@@ -62,8 +67,21 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
           ← Roster
         </Link>
         <div className="mt-1 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center font-medium text-indigo-700">
-            {athlete.firstName[0]}{athlete.lastName[0]}
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-indigo-100 font-medium text-indigo-700 dark:border-zinc-700 dark:bg-indigo-950 dark:text-indigo-200">
+            {athlete.user?.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={athlete.user.image}
+                alt=""
+                className="h-full w-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <span aria-hidden>
+                {athlete.firstName[0]}
+                {athlete.lastName[0]}
+              </span>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-xl font-medium">
@@ -94,7 +112,7 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
               </p>
             )}
           </div>
-          {isCoach && (
+          {isCoach ? (
             <AthleteActions
               athleteId={athlete.id}
               firstName={athlete.firstName}
@@ -102,9 +120,39 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
               email={athlete.user?.email ?? ""}
               swimCloudId={athlete.swimCloudId ?? null}
             />
-          )}
+          ) : isOwnProfile ? (
+            <Link
+              href="/settings"
+              className="inline-flex shrink-0 items-center gap-1.5 text-sm px-3 py-1.5 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700 transition-colors"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-3.5 w-3.5 shrink-0"
+                aria-hidden="true"
+              >
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+              </svg>
+              Edit profile
+            </Link>
+          ) : null}
         </div>
       </div>
+
+      {isCoach && pending && (
+        <PendingProfileChangesReview
+          athleteId={athlete.id}
+          pending={pending}
+          currentSwimCloudId={athlete.swimCloudId ?? null}
+          currentNicknames={athlete.nicknames}
+        />
+      )}
 
       {/* PB grid */}
       <section>
@@ -131,6 +179,9 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
             athleteId={athlete.id}
             initialNicknames={athlete.nicknames}
           />
+          <p className="mt-1 text-xs text-gray-400 dark:text-zinc-500">
+            Names used to match imported results to this athlete.
+          </p>
         </section>
       )}
 
@@ -140,6 +191,19 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
           swimCloudId={athlete.swimCloudId ?? null}
           timesSyncedAt={athlete.timesSyncedAt?.toISOString() ?? null}
         />
+      )}
+
+      {!isCoach && isOwnProfile && (
+        <section>
+          <h2 className="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide mb-3">
+            Import from SwimCloud
+          </h2>
+          <RequestTimesImportButton
+            athleteId={athlete.id}
+            hasSwimCloudId={athlete.swimCloudId != null}
+            timesSyncedAt={athlete.timesSyncedAt?.toISOString() ?? null}
+          />
+        </section>
       )}
     </main>
   )

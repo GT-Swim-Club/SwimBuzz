@@ -1,4 +1,6 @@
 import { normalizeNicknames, parseFirstNameWithNicknames, parseRosterName } from "@/lib/athlete-match"
+import { normalizeGatechEmail } from "@/lib/gatech-email"
+import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swimcloud-id"
 
 export type ParsedRosterCsvRow = {
   rowNumber: number
@@ -239,13 +241,13 @@ export function parseRosterCsv(text: string): RosterCsvParseResult {
       continue
     }
 
-    const emailRaw = cell(cells, headers, "email").toLowerCase()
-    const email = emailRaw && emailRaw.includes("@") ? emailRaw : undefined
+    // Only GT emails are imported; other domains are ignored for that row.
+    const email = normalizeGatechEmail(cell(cells, headers, "email")) ?? undefined
 
     const swimCloudRaw = cell(cells, headers, "swimCloudId")
-    const swimCloudId = swimCloudRaw ? parseInt(swimCloudRaw, 10) : undefined
-    if (swimCloudRaw && (!swimCloudId || swimCloudId <= 0)) {
-      errors.push({ row: rowNumber, message: "Invalid SwimCloud ID" })
+    const swimCloudId = swimCloudRaw ? parseSwimCloudId(swimCloudRaw) ?? undefined : undefined
+    if (swimCloudRaw && swimCloudId == null) {
+      errors.push({ row: rowNumber, message: SWIMCLOUD_ID_ERROR })
       continue
     }
 

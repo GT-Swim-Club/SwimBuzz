@@ -2,44 +2,33 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import NicknameTagsInput from "@/components/NicknameTagsInput"
 
-export default function EditNicknamesForm({
+export default function CancelPendingProfileChangesButton({
   athleteId,
-  initialNicknames,
 }: {
   athleteId: string
-  initialNicknames: string[]
 }) {
   const router = useRouter()
-  const [nicknames, setNicknames] = useState(initialNicknames)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function persist(next: string[]) {
-    setNicknames(next)
+  async function cancel() {
     setLoading(true)
     setError(null)
-
     try {
       const res = await fetch(`/api/athletes/${athleteId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nicknames: next }),
+        body: JSON.stringify({ cancelPendingProfileChanges: true }),
       })
       const data = await res.json()
-
       if (!res.ok) {
-        setError(data.error ?? "Failed to save alternate names")
-        setNicknames(nicknames)
+        setError(data.error ?? "Failed to cancel request")
         return
       }
-
-      setNicknames(data.nicknames ?? next)
       router.refresh()
     } catch {
       setError("Something went wrong")
-      setNicknames(nicknames)
     } finally {
       setLoading(false)
     }
@@ -47,16 +36,14 @@ export default function EditNicknamesForm({
 
   return (
     <div>
-      <NicknameTagsInput
-        value={nicknames}
-        onChange={persist}
+      <button
+        type="button"
+        onClick={() => void cancel()}
         disabled={loading}
-        showAddButton
-        placeholder="Add alternate name"
-      />
-      <p className="mt-1 text-xs text-gray-400 dark:text-zinc-500">
-        Names used to match imported results to this athlete.
-      </p>
+        className="text-sm text-gray-500 underline-offset-2 hover:text-gray-800 hover:underline dark:text-zinc-400 dark:hover:text-zinc-200 disabled:opacity-50"
+      >
+        {loading ? "Canceling…" : "Cancel pending request"}
+      </button>
       {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
     </div>
   )

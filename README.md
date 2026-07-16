@@ -2,7 +2,7 @@
 
 Team management app for **Georgia Tech Swim Club**. Track rosters, plan practices, run meets, import results, and build relay lineups.
 
-Built with **Next.js 16**, **Prisma 5**, **NextAuth** (Google sign-in), **Supabase Storage** (meet files), and **Run scraper** (Python + Playwright on your computer) for SwimCloud, SwimPhone, and meet PDFs.
+Built with **Next.js 16**, **Prisma 5**, **NextAuth** (Google + Georgia Tech email OTP), **Supabase Storage** (meet files), and **Run scraper** (Python + Playwright on your computer) for SwimCloud, SwimPhone, and meet PDFs.
 
 ## Features
 
@@ -23,7 +23,9 @@ Built with **Next.js 16**, **Prisma 5**, **NextAuth** (Google sign-in), **Supaba
 
 ### Auth & roles
 
-Google OAuth with three roles: `ATHLETE`, `COACH`, and `EXEC`. Coaches and execs share staff permissions for imports and editing.
+Google OAuth and Georgia Tech email verification codes, with three roles: `ATHLETE`, `COACH`, and `EXEC`. Coaches and execs share staff permissions for imports and editing.
+
+Athletes can sign in with their `@gatech.edu` email if it matches a roster entry: SwimBuzz emails a 6-digit code, then creates a session after verification. Coaches can continue using Google.
 
 Sign in at `/signin`. Signed-out users see a landing page at `/`.
 
@@ -55,6 +57,7 @@ SwimBuzz/
 - Python 3.11+ (for Run scraper)
 - PostgreSQL database (e.g. Supabase)
 - Google OAuth credentials
+- Resend API key (for @gatech.edu email sign-in codes; optional in local dev)
 - Supabase project (for meet file storage)
 - Playwright Chromium (installed by the Run scraper setup)
 
@@ -72,6 +75,8 @@ Copy `.env.example` from the repo root into `swimbuzz/.env` and fill in:
 | `NEXTAUTH_URL` | App URL, e.g. `http://localhost:3000` |
 | `GOOGLE_CLIENT_ID` | Google OAuth client ID |
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
+| `RESEND_API_KEY` | Resend API key for verification emails (required in production) |
+| `EMAIL_FROM` | From address for auth emails (must be verified in Resend) |
 | `SWIMCLOUD_TEAM_ID` | SwimCloud team ID for roster sync |
 
 New Google sign-ups default to `COACH` for now. Athletes created via SwimCloud or CSV import are stored as `ATHLETE`.

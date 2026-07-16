@@ -10,9 +10,11 @@ export type AthleteLookup = {
   roster: RosterAthlete[]
 }
 
+export const MAX_NICKNAMES = 2
+
 /**
  * Clean user-supplied alternate names into a deduped list. Accepts either an
- * array of strings or a single comma-separated string.
+ * array of strings or a single comma-separated string, up to the allowed limit.
  */
 export function normalizeNicknames(input: unknown): string[] {
   const raw = Array.isArray(input)
@@ -30,6 +32,7 @@ export function normalizeNicknames(input: unknown): string[] {
     if (seen.has(key)) continue
     seen.add(key)
     result.push(trimmed)
+    if (result.length === MAX_NICKNAMES) break
   }
   return result
 }

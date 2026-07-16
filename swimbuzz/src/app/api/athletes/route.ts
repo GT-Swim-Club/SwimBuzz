@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma"
 import { normalizeNicknames } from "@/lib/athlete-match"
 import { Gender } from "@prisma/client"
 import { parseSeasonList } from "@/lib/season"
+import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swimcloud-id"
 
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -38,10 +39,9 @@ export async function POST(req: Request) {
   const gender = body.gender === "F" ? Gender.F : Gender.M
   const seasons = parseSeasonList(body.seasons)
   const swimCloudIdRaw = body.swimCloudId
-  const swimCloudId =
+  const swimCloudIdEmpty =
     swimCloudIdRaw === null || swimCloudIdRaw === undefined || swimCloudIdRaw === ""
-      ? null
-      : parseInt(String(swimCloudIdRaw), 10)
+  const swimCloudId = swimCloudIdEmpty ? null : parseSwimCloudId(swimCloudIdRaw)
 
   if (!firstName || !lastName || !email) {
     return NextResponse.json({ error: "First name, last name, and email are required" }, { status: 400 })
@@ -49,8 +49,8 @@ export async function POST(req: Request) {
   if (seasons.length === 0) {
     return NextResponse.json({ error: "Season is required (e.g. 2025-2026)" }, { status: 400 })
   }
-  if (swimCloudId !== null && (!Number.isFinite(swimCloudId) || swimCloudId <= 0)) {
-    return NextResponse.json({ error: "SwimCloud ID must be a positive number" }, { status: 400 })
+  if (!swimCloudIdEmpty && swimCloudId === null) {
+    return NextResponse.json({ error: SWIMCLOUD_ID_ERROR }, { status: 400 })
   }
 
   if (swimCloudId !== null) {

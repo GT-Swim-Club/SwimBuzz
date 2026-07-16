@@ -16,7 +16,13 @@ import EventOrderButton from "./EventOrderButton"
 import MeetSheetSummarySection from "./MeetSheetSummarySection"
 import type { MeetFormState } from "../MeetFields"
 import { isEventOrder } from "@/lib/meet-event-order"
-import { isSheetSummary, mergeMeetResultEntries, swimsToMeetResults, isResultStatusesSummary } from "@/lib/meet-sheet-summary"
+import {
+  isSheetSummary,
+  meetHasImportedResults,
+  mergeMeetResultEntries,
+  swimsToMeetResults,
+  isResultStatusesSummary,
+} from "@/lib/meet-sheet-summary"
 import { isRelayResultsSummary } from "@/lib/relay-results"
 import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete-view-server"
 import { isStaffRole } from "@/lib/auth-roles"
@@ -105,7 +111,7 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
 
   if (!meet) notFound()
 
-  const viewerAthleteId = await resolveViewerAthleteId(session.user.id)
+  const viewerAthleteId = await resolveViewerAthleteId(session.user.id, session.user.role)
 
   const results = mergeMeetResultEntries(
     swimsToMeetResults(
@@ -180,6 +186,10 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
   const relayResults = isRelayResultsSummary(meet.relayResultsSummary)
     ? meet.relayResultsSummary.entries
     : null
+  const hasImportedResults = meetHasImportedResults({
+    individualResults: results,
+    relayResults,
+  })
 
   const seasonRoster = await prisma.athlete.findMany({
     where: { seasons: { has: meet.season } },
@@ -385,6 +395,7 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
         form={signupForm}
         myEntry={mySignupEntry}
         entries={signupEntries}
+        hasImportedResults={hasImportedResults}
       />
 
       {isCoach && (
@@ -395,6 +406,7 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
           athletes={rosterAthletes}
           signupAthleteIds={signupAthleteIds}
           signupAthleteIdsByEvent={signupAthleteIdsByEvent}
+          hasImportedResults={hasImportedResults}
         />
       )}
 

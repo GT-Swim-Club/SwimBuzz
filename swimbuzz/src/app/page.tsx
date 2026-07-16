@@ -112,7 +112,7 @@ export default async function HomePage() {
               href="/signin"
               className="inline-flex items-center rounded-xl bg-indigo-600 px-6 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700"
             >
-              Sign in with Google
+              Get Started
             </Link>
             <Link
               href="/signin?callbackUrl=/athletes"

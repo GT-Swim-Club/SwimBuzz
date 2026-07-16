@@ -17,14 +17,36 @@ function toDateInput(d: Date | null | undefined): string {
 
 export default async function PracticePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{
+    q?: string
+    tag?: string
+    view?: string
+    month?: string
+    week?: string
+  }>
 }) {
   const { id } = await params
+  const { q, tag, view, month, week } = await searchParams
   const session = await getServerSession(authOptions)
   if (!session) redirect("/signin?callbackUrl=/practices")
 
   const isCoach = await isStaffUi(session.user.role)
+
+  const backParams = new URLSearchParams()
+  if (q?.trim()) backParams.set("q", q.trim())
+  if (tag?.trim()) backParams.set("tag", tag.trim())
+  if (view === "list") {
+    backParams.set("view", "list")
+  } else if (view === "month" || view === "calendar") {
+    backParams.set("view", "month")
+    if (month && /^\d{4}-\d{2}$/.test(month)) backParams.set("month", month)
+  } else if (week && /^\d{4}-\d{2}-\d{2}$/.test(week)) {
+    backParams.set("week", week)
+  }
+  const backHref = backParams.toString() ? `/practices?${backParams}` : "/practices"
 
   const practice = await prisma.practice.findUnique({
     where: { id },
@@ -59,7 +81,7 @@ export default async function PracticePage({
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <Link
-            href="/practices"
+            href={backHref}
             className="text-xs text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300"
           >
             ← All practices

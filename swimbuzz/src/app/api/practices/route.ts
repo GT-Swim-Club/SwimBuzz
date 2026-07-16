@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { notifyPracticePublished } from "@/lib/notifications"
 import { prisma } from "@/lib/prisma"
 import { buildPracticeData, PracticeInputError } from "@/lib/practice-input"
 import { isStaffRole } from "@/lib/auth-roles"
@@ -75,6 +76,15 @@ export async function POST(req: Request) {
         },
       },
     })
+    if (practice.published) {
+      await notifyPracticePublished({
+        practiceId: practice.id,
+        title: practice.title,
+        date: practice.date,
+        focus: practice.focus,
+        excludeUserId: session.user.id,
+      })
+    }
     return NextResponse.json(practice, { status: 201 })
   } catch (err) {
     if (err instanceof PracticeInputError) {

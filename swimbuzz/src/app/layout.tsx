@@ -11,7 +11,8 @@ export const metadata: Metadata = {
   title: "SwimBuzz",
   description: "SwimBuzz is a tool for Georgia Tech Swim Club to manage their athletes and results.",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/swimbuzz-logo.png",
+    apple: "/swimbuzz-logo.png",
   },
 }
 

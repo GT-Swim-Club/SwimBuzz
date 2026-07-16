@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { signOut } from "next-auth/react"
 import Modal, { ModalFooter } from "@/components/Modal"
+import { ATHLETE_VIEW_COOKIE } from "@/lib/athlete-view"
 
 export default function SignOutButton() {
   const [open, setOpen] = useState(false)
@@ -10,6 +11,7 @@ export default function SignOutButton() {
 
   async function handleSignOut() {
     setLoading(true)
+    document.cookie = `${ATHLETE_VIEW_COOKIE}=; path=/; max-age=0; SameSite=Lax`
     await signOut({ callbackUrl: "/" })
   }
 
@@ -20,14 +22,14 @@ export default function SignOutButton() {
         onClick={() => setOpen(true)}
         className="text-xs text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-100 transition-colors"
       >
-        Sign out
+        Sign Out
       </button>
 
       <Modal
         open={open}
         onClose={() => !loading && setOpen(false)}
         closeDisabled={loading}
-        title="Sign out"
+        title="Sign Out"
         description="You'll need to sign in again to access the roster, meets, and other team tools."
         maxWidth="sm"
         footer={

@@ -7,7 +7,7 @@ import Modal, { ModalFooter } from "@/components/Modal"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import { useScraperUi } from "@/components/ScraperUiProvider"
 import { parseTime, formatRelativeTime, formatDateTime } from "@/lib/utils"
-import SetSwimCloudIdForm from "./SetSwimCloudIdForm"
+import SetSwimCloudIdForm from "@/components/SetSwimCloudIdForm"
 
 const EVENTS = [
   "50 Free", "100 Free", "200 Free", "400 Free", "500 Free",
