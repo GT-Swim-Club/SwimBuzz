@@ -19,6 +19,8 @@ export const NOTIFICATION_PREFERENCE_META: {
   key: NotificationPreferenceKey
   label: string
   description: string
+  /** Shown to athletes when it differs from the coach/staff description. */
+  athleteDescription?: string
 }[] = [
   {
     key: "practicePublished",
@@ -34,6 +36,7 @@ export const NOTIFICATION_PREFERENCE_META: {
     key: "practiceComments",
     label: "Practice comments",
     description: "When someone comments on your practice or replies to you",
+    athleteDescription: "When someone replies to your comment",
   },
   {
     key: "profileChanges",

@@ -195,6 +195,7 @@ export default async function SettingsPage() {
           </div>
           <NotificationPreferencesSettings
             initialPreferences={notificationPreferences}
+            isAthlete={!isStaffRole(session.user.role)}
           />
         </section>
 

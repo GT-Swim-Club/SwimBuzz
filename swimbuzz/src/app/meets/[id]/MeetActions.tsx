@@ -66,7 +66,7 @@ export default function MeetActions({
 
   return (
     <>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={() => {
@@ -74,7 +74,7 @@ export default function MeetActions({
             setError(null)
             setEditing(true)
           }}
-          className="text-xs px-3 py-1.5 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
+          className="text-xs px-3 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors sm:py-1.5"
         >
           Edit
         </button>

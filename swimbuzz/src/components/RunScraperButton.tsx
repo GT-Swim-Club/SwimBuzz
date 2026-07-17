@@ -9,7 +9,7 @@ export default function RunScraperButton() {
     <button
       type="button"
       onClick={openRunScraper}
-      className={`inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border rounded-lg transition-colors ${
+      className={`inline-flex w-full items-center justify-center gap-1.5 text-xs px-3 py-2 border rounded-lg transition-colors md:w-auto md:py-1.5 ${
         connected
           ? "border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
           : "hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950"

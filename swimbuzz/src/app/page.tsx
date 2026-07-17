@@ -166,26 +166,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Footer CTA */}
-      <section className="border-t border-gray-200 bg-gray-50 px-6 py-14 dark:border-zinc-800 dark:bg-zinc-950/50">
-        <div className="mx-auto flex max-w-5xl flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
-          <div>
-            <h2 className="text-lg font-medium text-gray-900 dark:text-zinc-100">
-              Ready to dive in?
-            </h2>
-            <p className="mt-1 text-sm text-gray-600 dark:text-zinc-400">
-              Sign in with your Google account to get started.
-            </p>
-          </div>
-          <Link
-            href="/signin"
-            className="inline-flex shrink-0 items-center rounded-xl bg-indigo-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
-          >
-            Sign in
-          </Link>
-        </div>
-      </section>
     </div>
   )
 }

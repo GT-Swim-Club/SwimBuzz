@@ -34,7 +34,6 @@ export default function NotificationsMenu({
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [notifications, setNotifications] = useState(initialNotifications)
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -43,29 +42,9 @@ export default function NotificationsMenu({
 
   const unreadCount = notifications.filter((n) => !n.readAt).length
 
-  function clearCloseTimer() {
-    if (closeTimer.current) {
-      clearTimeout(closeTimer.current)
-      closeTimer.current = null
-    }
-  }
-
-  function openMenu() {
-    clearCloseTimer()
-    setOpen(true)
-  }
-
-  function scheduleClose() {
-    clearCloseTimer()
-    closeTimer.current = setTimeout(() => setOpen(false), 120)
-  }
-
   function closeMenu() {
-    clearCloseTimer()
     setOpen(false)
   }
-
-  useEffect(() => () => clearCloseTimer(), [])
 
   useEffect(() => {
     if (!open) return
@@ -106,12 +85,7 @@ export default function NotificationsMenu({
   }
 
   return (
-    <div
-      ref={rootRef}
-      className="relative"
-      onMouseEnter={openMenu}
-      onMouseLeave={scheduleClose}
-    >
+    <div ref={rootRef} className="relative">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -149,7 +123,7 @@ export default function NotificationsMenu({
         <div className="absolute right-0 z-50 pt-2">
           <div
             role="menu"
-            className="w-80 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
+            className="w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
           >
             <div className="flex items-center justify-between gap-2 border-b border-gray-100 px-3 py-2.5 dark:border-zinc-800">
               <p className="text-sm font-medium text-gray-900 dark:text-zinc-100">

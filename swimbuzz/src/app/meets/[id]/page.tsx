@@ -282,9 +282,9 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
   )
 
   return (
-    <main className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+    <main className="mx-auto max-w-3xl space-y-8">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="min-w-0">
           <Link
             href="/meets"
@@ -292,7 +292,7 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
           >
             ← All meets
           </Link>
-          <h1 className="mt-1 text-2xl font-medium">{meet.name}</h1>
+          <h1 className="mt-1 text-xl font-medium sm:text-2xl">{meet.name}</h1>
           <p className="text-sm text-gray-500 dark:text-zinc-400">
             {formatDateRange(meet.startDate, meet.endDate)}
             {meet.location ? ` · ${meet.location}` : ""}

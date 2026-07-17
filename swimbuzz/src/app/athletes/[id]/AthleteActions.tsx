@@ -99,11 +99,11 @@ export default function AthleteActions({
 
   return (
     <>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={openEdit}
-          className="text-xs px-3 py-1.5 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
+          className="text-xs px-3 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors sm:py-1.5"
         >
           Edit
         </button>
@@ -113,7 +113,7 @@ export default function AthleteActions({
             setError(null)
             setConfirmDelete(true)
           }}
-          className="text-xs px-3 py-1.5 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/40 transition-colors"
+          className="text-xs px-3 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/40 transition-colors sm:py-1.5"
         >
           Delete
         </button>
@@ -146,7 +146,7 @@ export default function AthleteActions({
           </ModalFooter>
         }
       >
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
               First name

@@ -77,18 +77,18 @@ export default function PersonalBestsGrid({ swims }: { swims: PbSwim[] }) {
             </span>
           </div>
 
-          <div className="grid grid-cols-4 gap-2.5">
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
             {courseSwims.map((swim) => {
               const { stroke } = parseEventParts(swim.event)
               return (
                 <div
                   key={`${swim.event}-${swim.course}`}
-                  className={`rounded-xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 border-l-[3px] ${STROKE_ACCENT[stroke] ?? "border-l-gray-300"} px-3.5 py-3 shadow-sm hover:shadow-md hover:border-gray-200 dark:hover:border-zinc-700 transition-all`}
+                  className={`rounded-xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 border-l-[3px] ${STROKE_ACCENT[stroke] ?? "border-l-gray-300"} px-3 py-3 sm:px-3.5 shadow-sm hover:shadow-md hover:border-gray-200 dark:hover:border-zinc-700 transition-all`}
                 >
                   <p className="text-sm font-medium text-gray-900 dark:text-zinc-100 leading-tight mb-2">
                     {swim.event}
                   </p>
-                  <p className="text-xl font-semibold font-mono tabular-nums tracking-tight text-gray-900 dark:text-zinc-50">
+                  <p className="text-lg sm:text-xl font-semibold font-mono tabular-nums tracking-tight text-gray-900 dark:text-zinc-50">
                     {formatTime(swim.timeMs)}
                   </p>
                 </div>

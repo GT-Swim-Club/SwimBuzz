@@ -170,8 +170,8 @@ export default function PracticeEditor({
 
             <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
               <div className="flex-1 overflow-y-auto px-6 pb-5 space-y-5">
-              <div className="grid grid-cols-3 gap-3">
-                <div className="col-span-2">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div className="sm:col-span-2">
                   <label className={labelCls}>Title</label>
                   <input
                     required
@@ -243,8 +243,8 @@ export default function PracticeEditor({
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="col-span-2">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                      <div className="sm:col-span-2">
                         <label className={labelCls}>Set name (optional)</label>
                         <input
                           placeholder="e.g. Main set"

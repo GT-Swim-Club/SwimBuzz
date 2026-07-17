@@ -65,7 +65,7 @@ export default function PracticeActions({
 
   return (
     <>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         {published ? (
           <button
             type="button"

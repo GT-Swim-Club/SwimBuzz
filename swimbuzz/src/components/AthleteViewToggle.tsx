@@ -56,7 +56,7 @@ export default function AthleteViewToggle({
             : "Preview the app as a specific athlete"
         }
         className={
-          "max-w-[14rem] truncate text-xs rounded-lg px-2.5 py-1 border transition-colors disabled:opacity-50 " +
+          "w-full max-w-[14rem] truncate text-xs rounded-lg px-2.5 py-2 border transition-colors disabled:opacity-50 md:w-auto md:py-1 " +
           (selected
             ? "border-indigo-300 bg-indigo-50 text-indigo-800 dark:border-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-200"
             : "border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800")

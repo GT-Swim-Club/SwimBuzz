@@ -6,6 +6,7 @@ import ProfileMenu from "@/components/ProfileMenu"
 import NotificationsMenu from "@/components/NotificationsMenu"
 import RunScraperButton from "@/components/RunScraperButton"
 import AthleteViewToggle from "@/components/AthleteViewToggle"
+import MobileNavMenu from "@/components/MobileNavMenu"
 import { formatRoleLabel, isStaffRole } from "@/lib/auth-roles"
 import {
   getAthleteViewAthlete,
@@ -134,9 +135,21 @@ export default async function Nav() {
       ? "Athlete View"
       : formatRoleLabel(session?.user.role ?? "ATHLETE")
 
+  const athleteToggle = isStaff ? (
+    <AthleteViewToggle
+      athletes={previewAthletes.map((a) => ({
+        id: a.id,
+        name: `${a.lastName}, ${a.firstName}`,
+      }))}
+      selectedAthleteId={previewAthlete?.id ?? null}
+    />
+  ) : null
+
+  const scraperButton = showStaffTools ? <RunScraperButton /> : null
+
   return (
-    <nav className="sticky top-0 z-40 border-b bg-white dark:bg-zinc-900 px-6 py-4 flex items-center justify-between">
-      <div className="flex items-center gap-7">
+    <nav className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b bg-white px-4 py-3 dark:bg-zinc-900 sm:px-6 sm:py-4">
+      <div className="flex min-w-0 items-center gap-7">
         <Link
           href="/"
           className="inline-flex items-center gap-2.5 font-semibold text-base tracking-tight hover:opacity-90 transition-opacity"
@@ -149,10 +162,10 @@ export default async function Nav() {
             className="h-8 w-8 rounded-md"
             priority
           />
-          SwimBuzz
+          <span className="truncate">SwimBuzz</span>
         </Link>
         {session && (
-          <div className="flex items-center gap-5 text-[15px] text-gray-500 dark:text-zinc-400">
+          <div className="hidden items-center gap-5 text-[15px] text-gray-500 dark:text-zinc-400 md:flex">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -166,17 +179,9 @@ export default async function Nav() {
           </div>
         )}
       </div>
-      <div className="flex items-center gap-3">
-        {isStaff ? (
-          <AthleteViewToggle
-            athletes={previewAthletes.map((a) => ({
-              id: a.id,
-              name: `${a.lastName}, ${a.firstName}`,
-            }))}
-            selectedAthleteId={previewAthlete?.id ?? null}
-          />
-        ) : null}
-        {showStaffTools ? <RunScraperButton /> : null}
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        {athleteToggle ? <div className="hidden md:block">{athleteToggle}</div> : null}
+        {scraperButton ? <div className="hidden md:block">{scraperButton}</div> : null}
         {session ? (
           <>
             <NotificationsMenu
@@ -196,6 +201,17 @@ export default async function Nav() {
                 linkedAthlete?.swimCloudId
                   ? `https://www.swimcloud.com/swimmer/${linkedAthlete.swimCloudId}/`
                   : null
+              }
+            />
+            <MobileNavMenu
+              links={[...navLinks]}
+              staffTools={
+                athleteToggle || scraperButton ? (
+                  <>
+                    {athleteToggle}
+                    {scraperButton}
+                  </>
+                ) : undefined
               }
             />
           </>

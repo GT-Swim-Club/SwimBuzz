@@ -53,18 +53,20 @@ export default async function QualifiersPage({
       </div>
 
       {set ? (
-        <p className="text-sm text-gray-500 dark:text-zinc-400">
-          Nationals
-          {set.yearLabel ? ` ${set.yearLabel}` : ""} · {set.course}
-          {" · "}
+        <p className="flex flex-col gap-1 text-sm text-gray-500 dark:text-zinc-400 sm:block">
+          <span>
+            Nationals
+            {set.yearLabel ? ` ${set.yearLabel}` : ""} · {set.course}
+          </span>
+          <span className="hidden sm:inline"> · </span>
           <StandardsTableModal
             yearLabel={set.yearLabel}
             course={set.course}
             sourceUrl={set.sourceUrl}
             rows={standards}
           />
-          {" · "}
-          Updated {formatDateTime(set.updatedAt)}
+          <span className="hidden sm:inline"> · </span>
+          <span>Updated {formatDateTime(set.updatedAt)}</span>
         </p>
       ) : (
         <p className="text-sm text-gray-500 dark:text-zinc-400">

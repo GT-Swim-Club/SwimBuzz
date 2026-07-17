@@ -27,6 +27,7 @@ const MONTH_NAMES = [
 ]
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+const WEEKDAYS_SHORT = ["S", "M", "T", "W", "T", "F", "S"]
 
 type PracticeView = "week" | "month" | "list"
 
@@ -347,14 +348,14 @@ export default async function PracticesPage({
           key={option.view}
           href={buildHref({ view: option.view })}
           className={
-            "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 transition-colors " +
+            "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 transition-colors sm:px-3 " +
             (activeView === option.view
               ? "bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
               : "text-gray-600 hover:bg-gray-100 dark:text-zinc-300 dark:hover:bg-zinc-800")
           }
         >
           {option.icon}
-          {option.label}
+          <span className="hidden sm:inline">{option.label}</span>
         </Link>
       ))}
     </div>
@@ -406,15 +407,16 @@ export default async function PracticesPage({
 
       {activeView === "week" ? (
         <section className="space-y-3">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-2 sm:gap-3">
             <Link
               href={buildHref({ week: formatDayParam(addUtcDays(weekStart, -7)) })}
-              className="rounded-lg border px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              className="rounded-lg border px-2.5 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 sm:px-3"
             >
-              ← Previous
+              <span className="sm:hidden">←</span>
+              <span className="hidden sm:inline">← Previous</span>
             </Link>
-            <div className="text-center">
-              <h2 className="text-lg font-medium text-gray-900 dark:text-zinc-100">
+            <div className="min-w-0 text-center">
+              <h2 className="truncate text-base font-medium text-gray-900 dark:text-zinc-100 sm:text-lg">
                 {weekLabel}
               </h2>
               <p className="text-xs text-gray-500 dark:text-zinc-400">
@@ -423,13 +425,36 @@ export default async function PracticesPage({
             </div>
             <Link
               href={buildHref({ week: formatDayParam(addUtcDays(weekStart, 7)) })}
-              className="rounded-lg border px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              className="rounded-lg border px-2.5 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 sm:px-3"
             >
-              Next →
+              <span className="sm:hidden">→</span>
+              <span className="hidden sm:inline">Next →</span>
             </Link>
           </div>
 
-          <div className="overflow-hidden rounded-xl border bg-white dark:border-zinc-700 dark:bg-zinc-900">
+          {/* Mobile: stacked day list */}
+          <div className="space-y-2 md:hidden">
+            {weekDays.map((date) => {
+              const key = dayKey(date)
+              const practice = practicesByDay.get(key)?.[0]
+              const weekday = WEEKDAYS[date.getUTCDay()]
+              return (
+                <div
+                  key={key}
+                  className="min-h-16 rounded-xl border bg-white p-2 dark:border-zinc-700 dark:bg-zinc-900"
+                >
+                  {renderPracticeCell({
+                    dayLabel: `${weekday} ${date.getUTCDate()}`,
+                    practice,
+                    tall: true,
+                  })}
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Desktop: 7-column week grid */}
+          <div className="hidden overflow-hidden rounded-xl border bg-white dark:border-zinc-700 dark:bg-zinc-900 md:block">
             <div className="grid grid-cols-7 border-b bg-gray-50 text-center text-xs font-medium uppercase tracking-wide text-gray-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-400">
               {WEEKDAYS.map((weekday) => (
                 <div key={weekday} className="px-2 py-2">
@@ -444,7 +469,7 @@ export default async function PracticesPage({
                 return (
                   <div
                     key={key}
-                    className="flex min-h-40 flex-col border-b border-r p-1.5 last:border-r-0 dark:border-zinc-800 sm:min-h-52"
+                    className="flex min-h-52 flex-col border-b border-r p-1.5 last:border-r-0 dark:border-zinc-800"
                   >
                     {renderPracticeCell({
                       dayLabel: String(date.getUTCDate()),
@@ -459,15 +484,16 @@ export default async function PracticesPage({
         </section>
       ) : activeView === "month" ? (
         <section className="space-y-3">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-2 sm:gap-3">
             <Link
               href={buildHref({ month: formatMonthParam(addUtcMonths(calendarMonth, -1)) })}
-              className="rounded-lg border px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              className="rounded-lg border px-2.5 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 sm:px-3"
             >
-              ← Previous
+              <span className="sm:hidden">←</span>
+              <span className="hidden sm:inline">← Previous</span>
             </Link>
-            <div className="text-center">
-              <h2 className="text-lg font-medium text-gray-900 dark:text-zinc-100">
+            <div className="min-w-0 text-center">
+              <h2 className="truncate text-base font-medium text-gray-900 dark:text-zinc-100 sm:text-lg">
                 {monthLabel}
               </h2>
               <p className="text-xs text-gray-500 dark:text-zinc-400">
@@ -476,42 +502,46 @@ export default async function PracticesPage({
             </div>
             <Link
               href={buildHref({ month: formatMonthParam(addUtcMonths(calendarMonth, 1)) })}
-              className="rounded-lg border px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              className="rounded-lg border px-2.5 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 sm:px-3"
             >
-              Next →
+              <span className="sm:hidden">→</span>
+              <span className="hidden sm:inline">Next →</span>
             </Link>
           </div>
 
-          <div className="overflow-hidden rounded-xl border bg-white dark:border-zinc-700 dark:bg-zinc-900">
-            <div className="grid grid-cols-7 border-b bg-gray-50 text-center text-xs font-medium uppercase tracking-wide text-gray-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-400">
-              {WEEKDAYS.map((weekday) => (
-                <div key={weekday} className="px-2 py-2">
-                  {weekday}
-                </div>
-              ))}
-            </div>
-            <div className="grid grid-cols-7">
-              {monthCells.map((day, index) => {
-                const key =
-                  day == null
-                    ? `empty-${index}`
-                    : `${formatMonthParam(calendarMonth)}-${String(day).padStart(2, "0")}`
-                const practice =
-                  day == null ? undefined : practicesByDay.get(key)?.[0]
-                return (
-                  <div
-                    key={key}
-                    className="flex min-h-28 flex-col border-b border-r p-1.5 last:border-r-0 dark:border-zinc-800 sm:min-h-36"
-                  >
-                    {day == null
-                      ? null
-                      : renderPracticeCell({
-                          dayLabel: String(day),
-                          practice,
-                        })}
+          <div className="-mx-4 overflow-x-auto px-4 md:mx-0 md:overflow-visible md:px-0">
+            <div className="min-w-[28rem] overflow-hidden rounded-xl border bg-white dark:border-zinc-700 dark:bg-zinc-900 md:min-w-0">
+              <div className="grid grid-cols-7 border-b bg-gray-50 text-center text-xs font-medium uppercase tracking-wide text-gray-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-400">
+                {WEEKDAYS.map((weekday, i) => (
+                  <div key={weekday} className="px-1 py-2 sm:px-2">
+                    <span className="sm:hidden">{WEEKDAYS_SHORT[i]}</span>
+                    <span className="hidden sm:inline">{weekday}</span>
                   </div>
-                )
-              })}
+                ))}
+              </div>
+              <div className="grid grid-cols-7">
+                {monthCells.map((day, index) => {
+                  const key =
+                    day == null
+                      ? `empty-${index}`
+                      : `${formatMonthParam(calendarMonth)}-${String(day).padStart(2, "0")}`
+                  const practice =
+                    day == null ? undefined : practicesByDay.get(key)?.[0]
+                  return (
+                    <div
+                      key={key}
+                      className="flex min-h-24 flex-col border-b border-r p-1 last:border-r-0 dark:border-zinc-800 sm:min-h-28 sm:p-1.5 md:min-h-36"
+                    >
+                      {day == null
+                        ? null
+                        : renderPracticeCell({
+                            dayLabel: String(day),
+                            practice,
+                          })}
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           </div>
         </section>

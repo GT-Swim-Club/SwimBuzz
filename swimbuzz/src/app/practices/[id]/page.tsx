@@ -76,9 +76,9 @@ export default async function PracticePage({
   }
 
   return (
-    <main className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+    <main className="mx-auto max-w-3xl space-y-8">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="min-w-0">
           <Link
             href={backHref}
@@ -86,8 +86,8 @@ export default async function PracticePage({
           >
             ← All practices
           </Link>
-          <div className="flex items-center gap-2 mt-1 flex-wrap">
-            <h1 className="text-2xl font-medium">{practice.title}</h1>
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            <h1 className="text-xl font-medium sm:text-2xl">{practice.title}</h1>
             {isCoach && !practice.published && (
               <span className="text-[10px] uppercase tracking-wide rounded-full bg-amber-100 text-amber-700 px-2 py-0.5 dark:bg-amber-950 dark:text-amber-300">
                 Draft

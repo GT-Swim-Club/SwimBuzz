@@ -65,6 +65,10 @@ export default function SwimHistory({
   const selectClass =
     "rounded-lg border px-3 py-1.5 text-sm dark:bg-zinc-950 dark:border-zinc-700"
 
+  const desktopGrid = isCoach
+    ? "grid-cols-[75px_20px_90px_20px_minmax(0,1fr)_80px_auto]"
+    : "grid-cols-[75px_20px_90px_20px_minmax(0,1fr)_100px]"
+
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-3">
@@ -128,63 +132,118 @@ export default function SwimHistory({
           </p>
         </div>
       ) : (
-      <div className="divide-y border rounded-xl overflow-hidden">
-        <div
-          className={`grid ${isCoach ? "grid-cols-[75px_20px_90px_20px_310px_80px_10px]" : "grid-cols-[75px_20px_90px_20px_1fr_100px]"} px-4 py-2 gap-4 border-b border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-950/50`}
-        >
-          <span className="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide">
-            Event
-          </span>
-          <span className="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide">
-            Course
-          </span>
-          <span className="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide text-right">
-            Time
-          </span>
-          <span className="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide" />
-          <span className="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide">
-            Meet
-          </span>
-          <span className="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide">
-            Date
-          </span>
-          {isCoach && <span />}
-        </div>
-
-        {visible.map((swim) => (
-          <div
-            key={swim.id}
-            className={`grid ${isCoach ? "grid-cols-[75px_20px_90px_20px_310px_80px_10px]" : "grid-cols-[75px_20px_90px_20px_1fr_100px]"} items-center px-4 py-2 bg-white dark:bg-zinc-900 text-sm gap-4`}
-          >
-            <span className="font-medium text-gray-900 dark:text-zinc-100">{swim.event}</span>
-            <span className="text-gray-600 dark:text-zinc-400 text-xs">{swim.course}</span>
-            <span className="font-mono text-right text-gray-900 dark:text-zinc-100">
-              {formatTime(swim.timeMs)}
-            </span>
-            <span className="font-mono text-gray-900 dark:text-zinc-100">
-              {displaySwimHistoryTags(swim.tags)}
-            </span>
-            <span className="text-gray-600 dark:text-zinc-400 truncate text-xs">
-              {swim.meet || "—"}
-            </span>
-            <span className="text-gray-600 dark:text-zinc-400 text-xs">
-              {formatSwimDate(swim.date)}
-            </span>
-            {isCoach && swim.source === "manual" && !isRelayLeadoffSwimTag(swim.tags) && (
-              <div className="flex justify-end">
-                <DeleteSwimButton
-                  swimId={swim.id}
-                  event={swim.event}
-                  course={swim.course}
-                  timeLabel={formatTime(swim.timeMs)}
-                  dateLabel={formatSwimDate(swim.date)}
-                  meet={swim.meet || null}
-                />
-              </div>
-            )}
+        <>
+          {/* Mobile: stacked cards */}
+          <div className="divide-y border rounded-xl overflow-hidden md:hidden">
+            {visible.map((swim) => {
+              const tags = displaySwimHistoryTags(swim.tags)
+              const canDelete =
+                isCoach && swim.source === "manual" && !isRelayLeadoffSwimTag(swim.tags)
+              return (
+                <div
+                  key={swim.id}
+                  className="flex items-start justify-between gap-3 bg-white px-4 py-3 dark:bg-zinc-900"
+                >
+                  <div className="min-w-0 flex-1 space-y-0.5">
+                    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                      <span className="font-medium text-sm text-gray-900 dark:text-zinc-100">
+                        {swim.event}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-zinc-400">
+                        {swim.course}
+                      </span>
+                      {tags ? (
+                        <span className="font-mono text-xs text-gray-500 dark:text-zinc-400">
+                          {tags}
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-zinc-400 truncate">
+                      {swim.meet || "—"}
+                    </p>
+                    <p className="text-xs text-gray-400 dark:text-zinc-500">
+                      {formatSwimDate(swim.date)}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 flex-col items-end gap-1.5">
+                    <span className="font-mono text-sm font-medium tabular-nums text-gray-900 dark:text-zinc-100">
+                      {formatTime(swim.timeMs)}
+                    </span>
+                    {canDelete ? (
+                      <DeleteSwimButton
+                        swimId={swim.id}
+                        event={swim.event}
+                        course={swim.course}
+                        timeLabel={formatTime(swim.timeMs)}
+                        dateLabel={formatSwimDate(swim.date)}
+                        meet={swim.meet || null}
+                      />
+                    ) : null}
+                  </div>
+                </div>
+              )
+            })}
           </div>
-        ))}
-      </div>
+
+          {/* Desktop: table grid */}
+          <div className="hidden divide-y border rounded-xl overflow-hidden md:block">
+            <div
+              className={`grid ${desktopGrid} px-4 py-2 gap-4 border-b border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-950/50`}
+            >
+              <span className="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide">
+                Event
+              </span>
+              <span className="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide">
+                Course
+              </span>
+              <span className="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide text-right">
+                Time
+              </span>
+              <span className="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide" />
+              <span className="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide">
+                Meet
+              </span>
+              <span className="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide">
+                Date
+              </span>
+              {isCoach && <span />}
+            </div>
+
+            {visible.map((swim) => (
+              <div
+                key={swim.id}
+                className={`grid ${desktopGrid} items-center px-4 py-2 bg-white dark:bg-zinc-900 text-sm gap-4`}
+              >
+                <span className="font-medium text-gray-900 dark:text-zinc-100">{swim.event}</span>
+                <span className="text-gray-600 dark:text-zinc-400 text-xs">{swim.course}</span>
+                <span className="font-mono text-right text-gray-900 dark:text-zinc-100">
+                  {formatTime(swim.timeMs)}
+                </span>
+                <span className="font-mono text-gray-900 dark:text-zinc-100">
+                  {displaySwimHistoryTags(swim.tags)}
+                </span>
+                <span className="text-gray-600 dark:text-zinc-400 truncate text-xs">
+                  {swim.meet || "—"}
+                </span>
+                <span className="text-gray-600 dark:text-zinc-400 text-xs">
+                  {formatSwimDate(swim.date)}
+                </span>
+                {isCoach && swim.source === "manual" && !isRelayLeadoffSwimTag(swim.tags) && (
+                  <div className="flex justify-end">
+                    <DeleteSwimButton
+                      swimId={swim.id}
+                      event={swim.event}
+                      course={swim.course}
+                      timeLabel={formatTime(swim.timeMs)}
+                      dateLabel={formatSwimDate(swim.date)}
+                      meet={swim.meet || null}
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       {hasMore && (
