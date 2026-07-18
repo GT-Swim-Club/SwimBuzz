@@ -5,6 +5,11 @@ import { notifyPracticePublished } from "@/lib/notifications"
 import { prisma } from "@/lib/prisma"
 import { buildPracticeData, PracticeInputError } from "@/lib/practice-input"
 import { isStaffRole } from "@/lib/auth-roles"
+import {
+  PRACTICE_EDIT_LOCK_TOKEN_HEADER,
+  PracticeEditLockError,
+  assertCanMutatePractice,
+} from "@/lib/practice-edit-lock"
 
 export async function GET(
   _req: Request,
@@ -39,6 +44,16 @@ export async function PATCH(
   }
 
   const { id } = await params
+  const lockToken = req.headers.get(PRACTICE_EDIT_LOCK_TOKEN_HEADER)?.trim() || null
+  try {
+    await assertCanMutatePractice(id, session.user.id, lockToken)
+  } catch (err) {
+    if (err instanceof PracticeEditLockError) {
+      return NextResponse.json({ error: err.message, lock: err.lock }, { status: err.status })
+    }
+    throw err
+  }
+
   const existing = await prisma.practice.findUnique({
     where: { id },
     include: { sets: { select: { id: true } } },
@@ -113,7 +128,7 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions)
@@ -122,6 +137,16 @@ export async function DELETE(
   }
 
   const { id } = await params
+  const lockToken = req.headers.get(PRACTICE_EDIT_LOCK_TOKEN_HEADER)?.trim() || null
+  try {
+    await assertCanMutatePractice(id, session.user.id, lockToken)
+  } catch (err) {
+    if (err instanceof PracticeEditLockError) {
+      return NextResponse.json({ error: err.message, lock: err.lock }, { status: err.status })
+    }
+    throw err
+  }
+
   const existing = await prisma.practice.findUnique({ where: { id } })
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 })
 

@@ -1,0 +1,29 @@
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { redirect } from "next/navigation"
+import Link from "next/link"
+import { isStaffUi } from "@/lib/athlete-view-server"
+import PracticeEditor from "../PracticeEditor"
+
+export default async function NewPracticePage() {
+  const session = await getServerSession(authOptions)
+  if (!session) redirect("/signin?callbackUrl=/practices/new")
+
+  const isCoach = await isStaffUi(session.user.role)
+  if (!isCoach) redirect("/practices")
+
+  return (
+    <main className="mx-auto max-w-3xl space-y-6">
+      <div>
+        <Link
+          href="/practices"
+          className="text-xs text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300"
+        >
+          ← All practices
+        </Link>
+        <h1 className="mt-1 text-xl font-medium sm:text-2xl">New practice</h1>
+      </div>
+      <PracticeEditor />
+    </main>
+  )
+}

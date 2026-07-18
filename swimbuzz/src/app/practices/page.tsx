@@ -7,8 +7,12 @@ import Link from "next/link"
 import { Prisma } from "@prisma/client"
 import LiveSearch from "@/components/LiveSearch"
 import { formatDateRange, formatSwimDate } from "@/lib/utils"
-import { SET_TAGS } from "@/lib/practice-tags"
-import PracticeEditor from "./PracticeEditor"
+import { SET_TAGS, normalizeTag } from "@/lib/practice-tags"
+import {
+  DayLabel,
+  PracticeCardShell,
+  TodayButton,
+} from "./PracticeCalendarLocal"
 import { isStaffUi } from "@/lib/athlete-view-server"
 
 const MONTH_NAMES = [
@@ -86,10 +90,33 @@ function dayKey(date: Date) {
   return formatDayParam(date)
 }
 
+function parseTags(tag?: string | string[]): string[] {
+  const parts = Array.isArray(tag) ? tag : tag ? [tag] : []
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const part of parts) {
+    for (const raw of part.split(",")) {
+      const value = normalizeTag(raw)
+      if (!value) continue
+      const key = value.toLowerCase()
+      if (seen.has(key)) continue
+      seen.add(key)
+      out.push(value)
+    }
+  }
+  return out
+}
+
 export default async function PracticesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; tag?: string; view?: string; month?: string; week?: string }>
+  searchParams: Promise<{
+    q?: string
+    tag?: string | string[]
+    view?: string
+    month?: string
+    week?: string
+  }>
 }) {
   const session = await getServerSession(authOptions)
   if (!session) redirect("/signin?callbackUrl=/practices")
@@ -97,7 +124,7 @@ export default async function PracticesPage({
   const isCoach = await isStaffUi(session.user.role)
   const { q, tag, view, month, week } = await searchParams
   const query = q?.trim() ?? ""
-  const activeTag = tag?.trim() ?? ""
+  const activeTags = parseTags(tag)
   const activeView = parseView(view)
   const now = new Date()
   const calendarMonth = parseCalendarMonth(month) ?? startOfUtcMonth(now)
@@ -122,7 +149,9 @@ export default async function PracticesPage({
       ],
     })
   }
-  if (activeTag) and.push({ sets: { some: { tags: { has: activeTag } } } })
+  if (activeTags.length) {
+    and.push({ sets: { some: { tags: { hasSome: activeTags } } } })
+  }
 
   const dateFilter: Prisma.PracticeWhereInput | null =
     activeView === "week"
@@ -159,19 +188,19 @@ export default async function PracticesPage({
 
   function listParams(next: {
     q?: string
-    tag?: string
+    tags?: string[]
     view?: PracticeView
     month?: string
     week?: string
   } = {}) {
     const params = new URLSearchParams()
     const qv = next.q ?? query
-    const tv = next.tag ?? activeTag
+    const tags = next.tags ?? activeTags
     const vv = next.view ?? activeView
     const mv = next.month ?? (vv === "month" ? formatMonthParam(calendarMonth) : "")
     const wv = next.week ?? (vv === "week" ? formatDayParam(weekStart) : "")
     if (qv) params.set("q", qv)
-    if (tv) params.set("tag", tv)
+    for (const t of tags) params.append("tag", t)
     if (vv === "list") params.set("view", "list")
     if (vv === "month") {
       params.set("view", "month")
@@ -184,7 +213,7 @@ export default async function PracticesPage({
   function buildHref(
     next: {
       q?: string
-      tag?: string
+      tags?: string[]
       view?: PracticeView
       month?: string
       week?: string
@@ -194,6 +223,13 @@ export default async function PracticesPage({
     return s ? `/practices?${s}` : "/practices"
   }
 
+  function toggleTagHref(tagName: string) {
+    const next = activeTags.includes(tagName)
+      ? activeTags.filter((t) => t !== tagName)
+      : [...activeTags, tagName]
+    return buildHref({ tags: next })
+  }
+
   function practiceHref(id: string) {
     const s = listParams().toString()
     return s ? `/practices/${id}?${s}` : `/practices/${id}`
@@ -201,22 +237,34 @@ export default async function PracticesPage({
 
   const monthLabel = `${MONTH_NAMES[calendarMonth.getUTCMonth()]} ${calendarMonth.getUTCFullYear()}`
   const weekLabel = formatDateRange(weekStart, addUtcDays(weekStart, 6))
+  const todayCardClass = "ring-2 ring-indigo-500/70 dark:ring-indigo-400/50"
+  const todayButtonActiveClass =
+    "border-indigo-200 bg-indigo-50 text-indigo-700 pointer-events-none dark:border-indigo-900/50 dark:bg-indigo-950/40 dark:text-indigo-300"
   const firstWeekday = calendarMonth.getUTCDay()
   const daysInMonth = new Date(
     Date.UTC(calendarMonth.getUTCFullYear(), calendarMonth.getUTCMonth() + 1, 0)
   ).getUTCDate()
-  const monthCells = Array.from({ length: 42 }, (_, index) => {
-    const day = index - firstWeekday + 1
-    return day >= 1 && day <= daysInMonth ? day : null
+  const monthCellCount = Math.ceil((firstWeekday + daysInMonth) / 7) * 7
+  const monthCells = Array.from({ length: monthCellCount }, (_, index) => {
+    const dayOffset = index - firstWeekday
+    return {
+      date: addUtcDays(calendarMonth, dayOffset),
+      inMonth: dayOffset >= 0 && dayOffset < daysInMonth,
+    }
   })
+
+  const navButtonClass =
+    "rounded-lg border px-2.5 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 sm:px-3"
 
   type DayPractice = (typeof practices)[number]
 
   function renderPracticeCell({
+    dayKey: key,
     dayLabel,
     practice,
     tall,
   }: {
+    dayKey: string
     dayLabel: string
     practice?: DayPractice
     tall?: boolean
@@ -228,24 +276,24 @@ export default async function PracticesPage({
 
     if (!practice) {
       return (
-        <div className="px-1 text-xs font-medium text-gray-500 dark:text-zinc-400">
-          {dayLabel}
+        <div className="px-1">
+          <DayLabel dayKey={key}>{dayLabel}</DayLabel>
         </div>
       )
     }
 
     return (
-      <Link
+      <PracticeCardShell
+        dayKey={key}
         href={practiceHref(practice.id)}
+        todayClassName={todayCardClass}
         className={
           "flex min-h-0 flex-1 flex-col rounded-lg border border-indigo-100 bg-indigo-50 px-2 py-1.5 text-left transition-colors hover:bg-indigo-100 dark:border-indigo-900/50 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/40 " +
           (tall ? "px-3 py-2.5" : "")
         }
       >
         <div className="flex items-start justify-between gap-1">
-          <span className="text-xs font-medium text-indigo-700/70 dark:text-indigo-300/70">
-            {dayLabel}
-          </span>
+          <DayLabel dayKey={key}>{dayLabel}</DayLabel>
           {isCoach && !practice.published && (
             <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
           )}
@@ -276,7 +324,7 @@ export default async function PracticesPage({
           {practice._count.sets} set{practice._count.sets === 1 ? "" : "s"}
           {totalDistance > 0 ? ` · ${totalDistance.toLocaleString()}` : ""}
         </p>
-      </Link>
+      </PracticeCardShell>
     )
   }
 
@@ -367,7 +415,28 @@ export default async function PracticesPage({
         <h1 className="text-2xl font-medium">Practices</h1>
         <div className="flex items-center gap-2">
           {viewToggle}
-          {isCoach && <PracticeEditor triggerLabel="+ New practice" />}
+          {isCoach && (
+            <Link
+              href="/practices/new"
+              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4 shrink-0"
+                aria-hidden="true"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              New practice
+            </Link>
+          )}
         </div>
       </div>
 
@@ -378,43 +447,57 @@ export default async function PracticesPage({
 
         <div className="flex flex-wrap gap-1.5">
           <Link
-            href={buildHref({ tag: "" })}
+            href={buildHref({ tags: [] })}
             className={
               "text-xs px-2.5 py-1 rounded-full border transition-colors " +
-              (!activeTag
+              (activeTags.length === 0
                 ? "bg-gray-900 border-gray-900 text-white dark:bg-zinc-100 dark:border-zinc-100 dark:text-zinc-900"
                 : "border-gray-300 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800")
             }
           >
             All
           </Link>
-          {SET_TAGS.map((t) => (
-            <Link
-              key={t}
-              href={buildHref({ tag: activeTag === t ? "" : t })}
-              className={
-                "text-xs px-2.5 py-1 rounded-full border transition-colors " +
-                (activeTag === t
-                  ? "bg-indigo-600 border-indigo-600 text-white"
-                  : "border-gray-300 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800")
-              }
-            >
-              {t}
-            </Link>
-          ))}
+          {SET_TAGS.map((t) => {
+            const selected = activeTags.includes(t)
+            return (
+              <Link
+                key={t}
+                href={toggleTagHref(t)}
+                className={
+                  "text-xs px-2.5 py-1 rounded-full border transition-colors " +
+                  (selected
+                    ? "bg-indigo-600 border-indigo-600 text-white"
+                    : "border-gray-300 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800")
+                }
+              >
+                {t}
+              </Link>
+            )
+          })}
         </div>
       </div>
 
       {activeView === "week" ? (
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2 sm:gap-3">
-            <Link
-              href={buildHref({ week: formatDayParam(addUtcDays(weekStart, -7)) })}
-              className="rounded-lg border px-2.5 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 sm:px-3"
-            >
-              <span className="sm:hidden">←</span>
-              <span className="hidden sm:inline">← Previous</span>
-            </Link>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Link
+                href={buildHref({ week: formatDayParam(addUtcDays(weekStart, -7)) })}
+                className={navButtonClass}
+              >
+                <span className="sm:hidden">←</span>
+                <span className="hidden sm:inline">← Previous</span>
+              </Link>
+              <TodayButton
+                view="week"
+                query={query}
+                tags={activeTags}
+                currentWeek={formatDayParam(weekStart)}
+                currentMonth={formatMonthParam(calendarMonth)}
+                className={navButtonClass}
+                activeClassName={todayButtonActiveClass}
+              />
+            </div>
             <div className="min-w-0 text-center">
               <h2 className="truncate text-base font-medium text-gray-900 dark:text-zinc-100 sm:text-lg">
                 {weekLabel}
@@ -425,7 +508,7 @@ export default async function PracticesPage({
             </div>
             <Link
               href={buildHref({ week: formatDayParam(addUtcDays(weekStart, 7)) })}
-              className="rounded-lg border px-2.5 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 sm:px-3"
+              className={navButtonClass}
             >
               <span className="sm:hidden">→</span>
               <span className="hidden sm:inline">Next →</span>
@@ -444,6 +527,7 @@ export default async function PracticesPage({
                   className="min-h-16 rounded-xl border bg-white p-2 dark:border-zinc-700 dark:bg-zinc-900"
                 >
                   {renderPracticeCell({
+                    dayKey: key,
                     dayLabel: `${weekday} ${date.getUTCDate()}`,
                     practice,
                     tall: true,
@@ -472,6 +556,7 @@ export default async function PracticesPage({
                     className="flex min-h-52 flex-col border-b border-r p-1.5 last:border-r-0 dark:border-zinc-800"
                   >
                     {renderPracticeCell({
+                      dayKey: key,
                       dayLabel: String(date.getUTCDate()),
                       practice,
                       tall: true,
@@ -485,13 +570,26 @@ export default async function PracticesPage({
       ) : activeView === "month" ? (
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2 sm:gap-3">
-            <Link
-              href={buildHref({ month: formatMonthParam(addUtcMonths(calendarMonth, -1)) })}
-              className="rounded-lg border px-2.5 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 sm:px-3"
-            >
-              <span className="sm:hidden">←</span>
-              <span className="hidden sm:inline">← Previous</span>
-            </Link>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Link
+                href={buildHref({
+                  month: formatMonthParam(addUtcMonths(calendarMonth, -1)),
+                })}
+                className={navButtonClass}
+              >
+                <span className="sm:hidden">←</span>
+                <span className="hidden sm:inline">← Previous</span>
+              </Link>
+              <TodayButton
+                view="month"
+                query={query}
+                tags={activeTags}
+                currentWeek={formatDayParam(weekStart)}
+                currentMonth={formatMonthParam(calendarMonth)}
+                className={navButtonClass}
+                activeClassName={todayButtonActiveClass}
+              />
+            </div>
             <div className="min-w-0 text-center">
               <h2 className="truncate text-base font-medium text-gray-900 dark:text-zinc-100 sm:text-lg">
                 {monthLabel}
@@ -501,8 +599,10 @@ export default async function PracticesPage({
               </p>
             </div>
             <Link
-              href={buildHref({ month: formatMonthParam(addUtcMonths(calendarMonth, 1)) })}
-              className="rounded-lg border px-2.5 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 sm:px-3"
+              href={buildHref({
+                month: formatMonthParam(addUtcMonths(calendarMonth, 1)),
+              })}
+              className={navButtonClass}
             >
               <span className="sm:hidden">→</span>
               <span className="hidden sm:inline">Next →</span>
@@ -520,24 +620,25 @@ export default async function PracticesPage({
                 ))}
               </div>
               <div className="grid grid-cols-7">
-                {monthCells.map((day, index) => {
-                  const key =
-                    day == null
-                      ? `empty-${index}`
-                      : `${formatMonthParam(calendarMonth)}-${String(day).padStart(2, "0")}`
-                  const practice =
-                    day == null ? undefined : practicesByDay.get(key)?.[0]
+                {monthCells.map(({ date, inMonth }) => {
+                  const key = dayKey(date)
+                  const practice = inMonth ? practicesByDay.get(key)?.[0] : undefined
                   return (
                     <div
                       key={key}
                       className="flex min-h-24 flex-col border-b border-r p-1 last:border-r-0 dark:border-zinc-800 sm:min-h-28 sm:p-1.5 md:min-h-36"
                     >
-                      {day == null
-                        ? null
-                        : renderPracticeCell({
-                            dayLabel: String(day),
-                            practice,
-                          })}
+                      {inMonth ? (
+                        renderPracticeCell({
+                          dayKey: key,
+                          dayLabel: String(date.getUTCDate()),
+                          practice,
+                        })
+                      ) : (
+                        <div className="px-1 text-xs font-medium text-gray-300 dark:text-zinc-600">
+                          {date.getUTCDate()}
+                        </div>
+                      )}
                     </div>
                   )
                 })}
@@ -547,22 +648,25 @@ export default async function PracticesPage({
         </section>
       ) : practices.length === 0 ? (
         <div className="border rounded-xl px-4 py-12 text-center text-sm text-gray-500 dark:text-zinc-400 bg-white dark:bg-zinc-900">
-          {query || activeTag
+          {query || activeTags.length
             ? "No practices match your search."
             : isCoach
               ? "No practices yet. Create one to get started."
               : "No practices posted yet."}
         </div>
       ) : (
-        <div className="divide-y border rounded-xl overflow-hidden bg-white dark:bg-zinc-900">
+        <div className="space-y-2">
           {practices.map((p) => {
             const tags = [...new Set(p.sets.flatMap((s) => s.tags))]
             const totalDistance = p.sets.reduce((sum, s) => sum + (s.distance ?? 0), 0)
+            const key = p.date ? dayKey(p.date) : ""
             return (
-              <Link
+              <PracticeCardShell
                 key={p.id}
+                dayKey={key}
                 href={practiceHref(p.id)}
-                className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
+                todayClassName="!border-indigo-500 dark:!border-indigo-400"
+                className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white px-4 py-3 transition-colors hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -595,7 +699,7 @@ export default async function PracticesPage({
                   )}
                 </div>
                 <span className="text-gray-300 dark:text-zinc-600">→</span>
-              </Link>
+              </PracticeCardShell>
             )
           })}
         </div>

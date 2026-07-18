@@ -5,7 +5,11 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { currentSeason, parseSeason } from "@/lib/season"
 import Modal, { ModalFooter } from "@/components/Modal"
 import NicknameTagsInput from "@/components/NicknameTagsInput"
-import { isValidSwimCloudIdInput, SWIMCLOUD_ID_ERROR } from "@/lib/swimcloud-id"
+import {
+  isValidSwimCloudIdInput,
+  SWIMCLOUD_ID_ERROR,
+  SWIMCLOUD_ID_MAX_LENGTH,
+} from "@/lib/swimcloud-id"
 
 export default function AddAthleteButton() {
   const router = useRouter()
@@ -166,15 +170,17 @@ export default function AddAthleteButton() {
                 <input
                   type="text"
                   inputMode="numeric"
-                  pattern="\d{7}"
-                  maxLength={7}
+                  pattern={`\\d{6,${SWIMCLOUD_ID_MAX_LENGTH}}`}
+                  maxLength={SWIMCLOUD_ID_MAX_LENGTH}
                   placeholder="e.g. 1234567"
                   title={SWIMCLOUD_ID_ERROR}
                   value={form.swimCloudId}
                   onChange={(e) =>
                     setForm((f) => ({
                       ...f,
-                      swimCloudId: e.target.value.replace(/\D/g, "").slice(0, 7),
+                      swimCloudId: e.target.value
+                        .replace(/\D/g, "")
+                        .slice(0, SWIMCLOUD_ID_MAX_LENGTH),
                     }))
                   }
                   className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
@@ -186,7 +192,7 @@ export default function AddAthleteButton() {
                     id="add-swimcloud-id-hint"
                     className="mt-1 text-xs text-amber-600 dark:text-amber-400"
                   >
-                    {SWIMCLOUD_ID_ERROR} ({form.swimCloudId.length}/7)
+                    {SWIMCLOUD_ID_ERROR} ({form.swimCloudId.length}/{SWIMCLOUD_ID_MAX_LENGTH})
                   </p>
                 )}
               </div>

@@ -36,6 +36,7 @@ export default function ProfileMenu({
   const [open, setOpen] = useState(false)
   const [signOutOpen, setSignOutOpen] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const initials = initialsFromName(name, email)
 
@@ -45,9 +46,29 @@ export default function ProfileMenu({
     await signOut({ callbackUrl: "/" })
   }
 
+  function clearCloseTimer() {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current)
+      closeTimer.current = null
+    }
+  }
+
+  function openMenu() {
+    clearCloseTimer()
+    setOpen(true)
+  }
+
+  function scheduleClose() {
+    clearCloseTimer()
+    closeTimer.current = setTimeout(() => setOpen(false), 120)
+  }
+
   function closeMenu() {
+    clearCloseTimer()
     setOpen(false)
   }
+
+  useEffect(() => () => clearCloseTimer(), [])
 
   useEffect(() => {
     if (!open) return
@@ -72,7 +93,12 @@ export default function ProfileMenu({
 
   return (
     <>
-      <div ref={rootRef} className="relative">
+      <div
+        ref={rootRef}
+        className="relative"
+        onMouseEnter={openMenu}
+        onMouseLeave={scheduleClose}
+      >
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}

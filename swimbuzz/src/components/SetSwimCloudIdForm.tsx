@@ -2,7 +2,11 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { isValidSwimCloudIdInput, SWIMCLOUD_ID_ERROR } from "@/lib/swimcloud-id"
+import {
+  isValidSwimCloudIdInput,
+  SWIMCLOUD_ID_ERROR,
+  SWIMCLOUD_ID_MAX_LENGTH,
+} from "@/lib/swimcloud-id"
 
 export default function SetSwimCloudIdForm({
   athleteId,
@@ -81,14 +85,16 @@ export default function SetSwimCloudIdForm({
           <input
             type="text"
             inputMode="numeric"
-            pattern="\d{7}"
-            maxLength={7}
+            pattern={`\\d{6,${SWIMCLOUD_ID_MAX_LENGTH}}`}
+            maxLength={SWIMCLOUD_ID_MAX_LENGTH}
             required
             placeholder="e.g. 1234567"
             title={SWIMCLOUD_ID_ERROR}
             value={swimCloudId}
             onChange={(e) => {
-              setSwimCloudId(e.target.value.replace(/\D/g, "").slice(0, 7))
+              setSwimCloudId(
+                e.target.value.replace(/\D/g, "").slice(0, SWIMCLOUD_ID_MAX_LENGTH)
+              )
               setError(null)
             }}
             className="w-full border rounded-lg px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
@@ -112,7 +118,7 @@ export default function SetSwimCloudIdForm({
       </div>
       {showDigitHint && (
         <p id="swimcloud-id-hint" className="text-xs text-amber-600 dark:text-amber-400">
-          {SWIMCLOUD_ID_ERROR} ({swimCloudId.length}/7)
+          {SWIMCLOUD_ID_ERROR} ({swimCloudId.length}/{SWIMCLOUD_ID_MAX_LENGTH})
         </p>
       )}
       {pendingSwimCloudId != null && (

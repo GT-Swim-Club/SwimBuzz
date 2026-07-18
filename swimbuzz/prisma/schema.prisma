@@ -66,9 +66,10 @@ model User {
   accounts      Account[]
   sessions      Session[]
   athlete       Athlete?
-  practices     Practice[]
-  comments      PracticeComment[]
-  notifications Notification[]
+  practices         Practice[] @relation("PracticeCreatedBy")
+  practiceEditLocks Practice[] @relation("PracticeEditLocks")
+  comments          PracticeComment[]
+  notifications     Notification[]
 }
 
 model Athlete {
@@ -185,7 +186,14 @@ model Practice {
   focus       String?
   published   Boolean       @default(false)
   createdById String?
-  createdBy   User?              @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdBy   User?              @relation("PracticeCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  /// Exclusive edit lock — only the holder may save while active.
+  editLockedById    String?
+  editLockedBy      User?     @relation("PracticeEditLocks", fields: [editLockedById], references: [id], onDelete: SetNull)
+  editLockedAt      DateTime?
+  editLockExpiresAt DateTime?
+  /// Opaque per-tab session token — distinguishes same-user multi-tab editors.
+  editLockToken     String?
   sets        PracticeSet[]
   comments    PracticeComment[]
   createdAt   DateTime           @default(now())
@@ -193,6 +201,8 @@ model Practice {
 
   @@index([date])
   @@index([published])
+  @@index([editLockedById])
+  @@index([editLockExpiresAt])
 }
 
 model PracticeSet {

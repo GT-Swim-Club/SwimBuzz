@@ -10,7 +10,6 @@ import {
   hasSwimResultData,
   inferResultHeatTotals,
   isTimedFinalsEntry,
-  meetHasImportedResults,
   mergeMeetResultEntries,
   mergeSheetSummaries,
   relayLeadoffsFromSplits,
@@ -18,7 +17,7 @@ import {
 } from "@/lib/meet-sheet-summary"
 import { compareRelayEvents, normalizeEventName } from "@/lib/swim-parse"
 import {
-  resolveEventNumberFromOrder,
+  eventNumberForGender,
   type MeetSignupEventOption,
 } from "@/lib/meet-signup"
 import {
@@ -208,8 +207,8 @@ function formatPlacement(entry: SheetSummary["entries"][number]) {
   }
 
   if (entry.isRelayLeadoff) {
-    // Individual leadoff stroke (e.g. 50 Back) — parent relay is the row label.
-    parts.push(entry.event)
+    parts.push("Relay leadoff")
+    if (entry.relayLeadoffSource) parts.push(entry.relayLeadoffSource)
   }
   const heat = formatHeat(entry)
   if (heat) parts.push(heat)
@@ -463,39 +462,19 @@ function resolveDisplayEventNumber(
   athleteGenders?: Map<string, "M" | "F">,
   eventOptions?: MeetSignupEventOption[]
 ): number {
-  const eventForNumber =
-    entry.isRelayLeadoff && entry.relayLeadoffSource
-      ? entry.relayLeadoffSource
-      : entry.event
+  if (entry.eventNumber > 0) return entry.eventNumber
+  if (!eventOptions?.length) return 0
+  const key = normalizeEventName(entry.event)
+  const opt = eventOptions.find((o) => normalizeEventName(o.event) === key)
+  if (!opt) return 0
   const gender =
     entry.entryType === "relay_team"
       ? effectiveRelayGender(entry, athleteGenders)
       : athleteGenders?.get(entry.athleteId)
-  const fromOrder = resolveEventNumberFromOrder(eventForNumber, gender, eventOptions)
-  if (fromOrder != null && fromOrder > 0) return fromOrder
-  return entry.eventNumber > 0 ? entry.eventNumber : 0
-}
-
-/** Roster summary order: meet event number, then existing stroke/round ties. */
-function compareByDisplayEventNumber(
-  a: SummaryEntry,
-  b: SummaryEntry,
-  athleteGenders?: Map<string, "M" | "F">,
-  eventOptions?: MeetSignupEventOption[]
-): number {
-  const an = resolveDisplayEventNumber(a, athleteGenders, eventOptions)
-  const bn = resolveDisplayEventNumber(b, athleteGenders, eventOptions)
-  if (an !== bn) {
-    if (an <= 0) return 1
-    if (bn <= 0) return -1
-    return an - bn
+  if (gender === "F" || gender === "M") {
+    return eventNumberForGender(opt, gender) ?? 0
   }
-  if (a.entryType === "relay_team" && b.entryType === "relay_team") {
-    const letter = (a.relayLetter ?? "").localeCompare(b.relayLetter ?? "")
-    if (letter !== 0) return letter
-    return compareRelayEvents(a.event, b.event)
-  }
-  return compareIndividualEntries(a, b)
+  return opt.women ?? opt.men ?? 0
 }
 
 function SummaryEntryRow({
@@ -538,9 +517,7 @@ function SummaryEntryRow({
     eventLabel ??
       (entry.entryType === "relay_team"
         ? formatRelayEventLabel(entry, athleteGenders)
-        : entry.isRelayLeadoff && entry.relayLeadoffSource
-          ? entry.relayLeadoffSource
-          : entry.event)
+        : entry.event)
   )
 
   const editButton =
@@ -620,24 +597,21 @@ function SummaryEntryRow({
   const podiumPlace = finalsPodiumPlace(entry)
   const splits = entryDisplaySplits(entry)
   const roundSuffix =
-    entry.resultRound === "P" || entry.relayLeadoffRound === "P"
+    entry.resultRound === "P"
       ? " · Prelims"
-      : entry.resultRound === "F" || entry.relayLeadoffRound === "F"
+      : entry.resultRound === "F"
         ? " · Finals"
         : hasSwimResultData(entry)
           ? isTimedFinalsEntry(entry, { allEntries })
             ? " · Timed Finals"
             : ""
           : ""
-  const detailTitle = entry.isRelayLeadoff
-    ? `${label} · ${entry.event}${roundSuffix}`
-    : `${label}${roundSuffix}`
+  const detailTitle = `${label}${roundSuffix}`
   const timeDisplay = formatTime(entry, allEntries)
 
   if (splits.length > 0) {
     return (
       <IndividualSummaryRow
-        athleteName={entry.athleteName}
         label={label}
         details={details || undefined}
         timeDisplay={timeDisplay}
@@ -706,8 +680,6 @@ export default function MeetSheetSummarySection({
       .map((a) => [a.id, a.gender])
   )
   const athleteNames = new Map(athletes.map((a) => [a.id, a.name]))
-  const viewerName =
-    viewerAthleteId != null ? athleteNames.get(viewerAthleteId) ?? null : null
 
   const leadoffResults = mergeMeetResultEntries(
     results ?? [],
@@ -734,10 +706,20 @@ export default function MeetSheetSummarySection({
   const otherRelays = relays.filter(
     (e) => effectiveRelayGender(e, athleteGenders) === ""
   )
-  const hasImportedResults = meetHasImportedResults({
-    individualResults: results,
-    relayResults,
-  })
+  const hasImportedResults = Boolean(
+    (results?.length ?? 0) > 0 ||
+      (relayResults ?? []).some(
+        (e) =>
+          Boolean(
+            e.resultTime ||
+              e.finalTime ||
+              e.prelimTime ||
+              e.resultStatus ||
+              e.prelimStatus ||
+              e.finalStatus
+          )
+      )
+  )
   const displayEntries = summary
     ? dropSeedOnlyAfterResults(
         expandIndividualResultRows(inferResultHeatTotals(summary.entries)),
@@ -747,9 +729,6 @@ export default function MeetSheetSummarySection({
     : []
   const grouped = summary ? groupSheetByAthlete(displayEntries, athleteNames) : []
 
-  const sortByEventNumber = (a: SummaryEntry, b: SummaryEntry) =>
-    compareByDisplayEventNumber(a, b, athleteGenders, eventNumberOptions)
-
   const myIndividualEntries = viewerAthleteId
     ? displayEntries
         .filter(
@@ -757,13 +736,16 @@ export default function MeetSheetSummarySection({
             e.athleteId === viewerAthleteId &&
             (e.entryType === "individual" || e.isRelayLeadoff)
         )
+        .sort(compareIndividualEntries)
     : []
   const myRelays = viewerAthleteId
-    ? relays.filter((e) =>
-        e.relaySwimmers?.some((s) => s.athleteId === viewerAthleteId)
-      )
+    ? relays
+        .filter((e) =>
+          e.relaySwimmers?.some((s) => s.athleteId === viewerAthleteId)
+        )
+        .sort((a, b) => compareRelayEvents(a.event, b.event))
     : []
-  const myEntries = [...myIndividualEntries, ...myRelays].sort(sortByEventNumber)
+  const myEntries = [...myIndividualEntries, ...myRelays]
   const otherGrouped = viewerAthleteId
     ? grouped.filter((a) => a.entries[0]?.athleteId !== viewerAthleteId)
     : grouped
@@ -772,13 +754,12 @@ export default function MeetSheetSummarySection({
 
   function renderRelayGroup(title: string, entries: SummaryEntry[]) {
     if (entries.length === 0) return null
-    const sorted = [...entries].sort(sortByEventNumber)
     return (
       <>
         <li className="px-4 py-1.5 text-[11px] font-medium uppercase tracking-wide text-gray-400 dark:text-zinc-500 bg-gray-50 dark:bg-zinc-950/50">
           {title}
         </li>
-        {sorted.map((entry, i) => (
+        {entries.map((entry, i) => (
           <SummaryEntryRow
             key={entryRowKey(entry, i, athleteGenders)}
             entry={entry}
@@ -815,7 +796,7 @@ export default function MeetSheetSummarySection({
         {myEntries.length > 0 ? (
           <div className="border rounded-xl overflow-hidden bg-white dark:bg-zinc-900 ring-1 ring-indigo-200 dark:ring-indigo-900/60">
             <div className="px-4 py-2.5 text-sm font-medium border-b dark:border-zinc-800 text-indigo-700 dark:text-indigo-300">
-              {viewerName ? `${viewerName} (You)` : "Your Entries"}
+              Your Entries
             </div>
             <ul className="divide-y dark:divide-zinc-800">
               {myEntries.map((entry, i) => (
@@ -848,7 +829,7 @@ export default function MeetSheetSummarySection({
               {renderRelayGroup("Women's", womenRelays)}
               {renderRelayGroup("Men's", menRelays)}
               {renderRelayGroup("Mixed", mixedRelays)}
-              {[...otherRelays].sort(sortByEventNumber).map((entry, i) => (
+              {otherRelays.map((entry, i) => (
                 <SummaryEntryRow
                   key={entryRowKey(entry, i, athleteGenders)}
                   entry={entry}
@@ -867,7 +848,7 @@ export default function MeetSheetSummarySection({
           </div>
         ) : null}
         {otherGrouped.map((athlete) => {
-          const events = [...athlete.entries].sort(sortByEventNumber)
+          const events = [...athlete.entries].sort(compareIndividualEntries)
           return (
             <div
               key={athlete.name}

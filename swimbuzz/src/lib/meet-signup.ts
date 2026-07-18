@@ -1,11 +1,7 @@
 import type { EventOrder } from "@/lib/meet-event-order"
-import { cleanEventName, isEventOrder } from "@/lib/meet-event-order"
+import { isEventOrder } from "@/lib/meet-event-order"
 import type { SheetEntry, SheetSummary } from "@/lib/meet-sheet-summary"
-import {
-  canonicalizeStrokeEvent,
-  normalizeEventName,
-  relaySignupKey,
-} from "@/lib/swim-parse"
+import { normalizeEventName } from "@/lib/swim-parse"
 import { formatDisplayTime } from "@/lib/utils"
 
 export const MEET_SIGNUP_INDIVIDUAL_EVENTS = [
@@ -105,39 +101,6 @@ export type MeetSignupEventOption = {
   isRelay: boolean
 }
 
-/** Canonical key for matching packet order-of-events names to sheet/result events. */
-export function signupEventMatchKey(event: string): string {
-  return canonicalizeStrokeEvent(cleanEventName(event)).toLowerCase()
-}
-
-/** Find the order-of-events row for a sheet/result event name. */
-export function findSignupEventOption(
-  event: string,
-  options: MeetSignupEventOption[]
-): MeetSignupEventOption | undefined {
-  const key = signupEventMatchKey(event)
-  const exact = options.find((o) => signupEventMatchKey(o.event) === key)
-  if (exact) return exact
-  const relayKey = relaySignupKey(event)
-  return options.find((o) => relaySignupKey(o.event) === relayKey)
-}
-
-/**
- * Event number from the meet packet order of events for this event + gender.
- * Prefers women/men columns; mixed/unknown falls back to either column.
- */
-export function resolveEventNumberFromOrder(
-  event: string,
-  gender: "M" | "F" | "X" | "" | null | undefined,
-  options: MeetSignupEventOption[] | undefined
-): number | null {
-  if (!options?.length) return null
-  const opt = findSignupEventOption(event, options)
-  if (!opt) return null
-  if (gender === "F" || gender === "M") return eventNumberForGender(opt, gender)
-  return opt.women ?? opt.men
-}
-
 /** Sign-up events always come from the meet packet order of events. */
 export function resolveSignupEventOptions(eventOrder: unknown): MeetSignupEventOption[] {
   if (!isEventOrder(eventOrder)) return []
@@ -145,7 +108,7 @@ export function resolveSignupEventOptions(eventOrder: unknown): MeetSignupEventO
   const events: MeetSignupEventOption[] = []
   for (const session of (eventOrder as EventOrder).sessions) {
     for (const row of session.rows) {
-      const name = cleanEventName(row.event.trim())
+      const name = row.event.trim()
       if (!name || seen.has(name)) continue
       seen.add(name)
       events.push({
@@ -191,7 +154,7 @@ export function formatSignupEventLabel(
   gender: "M" | "F" | null | undefined
 ): string {
   const num = eventNumberForGender(option, gender)
-  return num != null && num > 0 ? `#${num} ${option.event}` : option.event
+  return num != null ? `#${num} ${option.event}` : option.event
 }
 
 export function isRelaySignupEvent(event: string): boolean {
@@ -312,6 +275,7 @@ export function buildIndividualSheetEntriesFromSignups(
   signups: SignupEntryForSheetSync[],
   eventOptions: MeetSignupEventOption[]
 ): SheetEntry[] {
+  const optionByEvent = new Map(eventOptions.map((o) => [o.event, o]))
   const entries: SheetEntry[] = []
 
   for (const signup of signups) {
@@ -319,7 +283,7 @@ export function buildIndividualSheetEntriesFromSignups(
       sortSignupEventsByOrder(signup.events, eventOptions)
     )
     for (const event of individual) {
-      const opt = findSignupEventOption(event, eventOptions)
+      const opt = optionByEvent.get(event)
       const eventName = normalizeEventName(opt?.event ?? event)
       if (!eventName) continue
       const eventNumber = opt ? eventNumberForGender(opt, signup.gender) ?? 0 : 0
@@ -576,9 +540,9 @@ export function updateManualIndividualSheetEntry(
     }
   }
 
-  const option = opts.eventOptions
-    ? findSignupEventOption(nextEventName, opts.eventOptions)
-    : undefined
+  const option = opts.eventOptions?.find(
+    (o) => normalizeEventName(o.event) === nextEventName
+  )
   let row: SheetEntry = {
     ...entries[idx],
     event: option?.event ?? nextEventName,

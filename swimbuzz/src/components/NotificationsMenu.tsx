@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { formatRelativeTime } from "@/lib/utils"
 
 export type NotificationItem = {
   id: string
@@ -12,18 +13,6 @@ export type NotificationItem = {
   href: string | null
   readAt: string | null
   createdAt: string
-}
-
-function formatRelative(iso: string): string {
-  const ms = Date.now() - new Date(iso).getTime()
-  const minutes = Math.floor(ms / 60000)
-  if (minutes < 1) return "just now"
-  if (minutes < 60) return `${minutes}m ago`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  if (days < 7) return `${days}d ago`
-  return new Date(iso).toLocaleDateString()
 }
 
 export default function NotificationsMenu({
@@ -163,7 +152,7 @@ export default function NotificationsMenu({
                         </p>
                       ) : null}
                       <p className="mt-1 text-[11px] text-gray-400 dark:text-zinc-500">
-                        {formatRelative(n.createdAt)}
+                        {formatRelativeTime(n.createdAt)}
                       </p>
                     </>
                   )
