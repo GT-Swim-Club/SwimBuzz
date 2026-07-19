@@ -375,3 +375,11 @@ export function matchAthleteIdFast(
 
   return matchFuzzy(parsed, lookup.roster)
 }
+
+export function isAutomaticallyMatched(
+  pdfName: string,
+  lookup: AthleteLookup
+): boolean {
+  return matchAthleteIdFast(pdfName, lookup, null) !== null
+}
+

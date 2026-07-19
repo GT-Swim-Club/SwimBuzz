@@ -66,6 +66,7 @@ export function buildMeetData(body: Record<string, unknown>, opts: BuildOptions 
   }
 
   if ("location" in body) data.location = optionalString(body.location)
+  if ("school" in body) data.school = optionalString(body.school)
   if ("packetUrl" in body) data.packetUrl = optionalString(body.packetUrl)
   if ("psychSheetUrl" in body) data.psychSheetUrl = optionalString(body.psychSheetUrl)
   if ("heatSheetUrl" in body) data.heatSheetUrl = optionalString(body.heatSheetUrl)

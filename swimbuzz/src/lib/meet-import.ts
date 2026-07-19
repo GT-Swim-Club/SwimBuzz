@@ -5,6 +5,7 @@ import {
   isRejectedPdfName,
   matchAthleteIdFast,
   nameMatchKey,
+  isAutomaticallyMatched,
 } from "@/lib/athlete-match"
 import { assignSwimOccurrences } from "@/lib/swim-dedup"
 import { parseCourse, parseMeetDate, parseSwimStatus, parseSwimTime, normalizeEventName } from "@/lib/swim-parse"
@@ -268,6 +269,10 @@ export async function importMeetResults({
       continue
     }
 
+    if (source === "swimphone" && nameMappings && isAutomaticallyMatched(row.name, lookup)) {
+      continue
+    }
+
     const seedTime = row.seedTime?.trim()
     if (seedTime && parseSwimTime(seedTime)) {
       seedRows.push({
@@ -417,7 +422,12 @@ export async function importMeetResults({
     meetId,
     meetDate,
     course: courseForLeadoffs,
-    relayResults,
+    relayResults: nameMappings && source === "swimphone"
+      ? relayResults.filter((relay) => {
+          const leg1 = relay.relaySwimmers?.find((s) => s.leg === 1)
+          return !leg1 || !isAutomaticallyMatched(leg1.name, lookup)
+        })
+      : relayResults,
     roster,
     source,
     nameMappings,

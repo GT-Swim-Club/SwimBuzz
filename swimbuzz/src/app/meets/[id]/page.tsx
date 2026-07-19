@@ -140,6 +140,7 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
     endDate: toDateInput(meet.endDate),
     course: meet.course,
     season: meet.season,
+    school: meet.school ?? "",
     packetUrl: meet.packetUrl ?? "",
     psychSheetUrl: meet.psychSheetUrl ?? "",
     heatSheetUrl: meet.heatSheetUrl ?? "",
@@ -296,6 +297,7 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
           <p className="text-sm text-gray-500 dark:text-zinc-400">
             {formatDateRange(meet.startDate, meet.endDate)}
             {meet.location ? ` · ${meet.location}` : ""}
+            {meet.school ? ` · ${meet.school}` : ""}
           </p>
           <p className="mt-0.5 text-xs text-gray-400 dark:text-zinc-500">
             {meet.course} · {meet.season}

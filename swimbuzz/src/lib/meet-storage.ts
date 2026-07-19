@@ -57,6 +57,44 @@ function formatStorageError(message: string) {
   return message
 }
 
+/** Check if a file exists in Supabase storage. */
+async function fileExists(
+  url: string,
+  key: string,
+  storagePath: string
+): Promise<boolean> {
+  const res = await fetch(
+    `${url}/storage/v1/object/${MEET_FILE_BUCKET}/${storagePath}`,
+    {
+      method: "HEAD",
+      headers: storageHeaders(key),
+    }
+  )
+  return res.ok
+}
+
+/** Find an available filename with counter suffix if needed. */
+async function findAvailableFilename(
+  url: string,
+  key: string,
+  nameWithoutExt: string,
+  ext: string
+): Promise<string> {
+  let storagePath = `uploads/${nameWithoutExt}${ext}`
+  if (!(await fileExists(url, key, storagePath))) {
+    return storagePath
+  }
+
+  for (let counter = 1; counter <= 1000; counter++) {
+    storagePath = `uploads/${nameWithoutExt} (${counter})${ext}`
+    if (!(await fileExists(url, key, storagePath))) {
+      return storagePath
+    }
+  }
+
+  throw new Error("Could not find available filename after 1000 attempts")
+}
+
 export async function uploadMeetFile(
   bytes: Buffer,
   originalName: string,
@@ -64,7 +102,8 @@ export async function uploadMeetFile(
 ): Promise<{ url: string; path: string }> {
   const { url, key } = getSupabaseConfig()
   const ext = path.extname(originalName).toLowerCase()
-  const storagePath = `uploads/${randomUUID()}${ext}`
+  const nameWithoutExt = path.basename(originalName, ext)
+  const storagePath = await findAvailableFilename(url, key, nameWithoutExt, ext)
 
   const res = await fetch(
     `${url}/storage/v1/object/${MEET_FILE_BUCKET}/${storagePath}`,

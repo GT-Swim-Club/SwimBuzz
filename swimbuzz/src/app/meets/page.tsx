@@ -25,12 +25,13 @@ export default async function MeetsPage({
 
   const meets = await prisma.meet.findMany({
     where: query
-      ? {
-          OR: [
+      ?       {
+        OR: [
             { name: { contains: query, mode: "insensitive" } },
             { location: { contains: query, mode: "insensitive" } },
+            { school: { contains: query, mode: "insensitive" } },
           ],
-        }
+      }
       : undefined,
     orderBy: { startDate: "desc" },
     select: {
@@ -41,6 +42,7 @@ export default async function MeetsPage({
       endDate: true,
       course: true,
       season: true,
+      school: true,
       psychSheetSummary: true,
       heatSheetSummary: true,
       entriesSheetSummary: true,
@@ -77,7 +79,7 @@ export default async function MeetsPage({
       </div>
 
       <Suspense fallback={null}>
-        <LiveSearch pathname="/meets" placeholder="Search meets by name or location…" />
+        <LiveSearch pathname="/meets" placeholder="Search meets by name, school, or location…" />
       </Suspense>
 
       {meets.length === 0 ? (
@@ -130,6 +132,7 @@ export default async function MeetsPage({
                           <p className="text-xs text-gray-500 dark:text-zinc-400">
                             {formatDateRange(m.startDate, m.endDate)}
                             {m.location ? ` · ${m.location}` : ""}
+                            {m.school ? ` · ${m.school}` : ""}
                           </p>
                         </div>
                         <div className="text-right shrink-0">

@@ -9,6 +9,7 @@ export type MeetFormState = {
   endDate: string
   course: string
   season: string
+  school: string
   packetUrl: string
   psychSheetUrl: string
   heatSheetUrl: string
@@ -22,6 +23,7 @@ export const emptyMeetForm: MeetFormState = {
   endDate: "",
   course: "SCY",
   season: currentSeason(),
+  school: "",
   packetUrl: "",
   psychSheetUrl: "",
   heatSheetUrl: "",
@@ -61,7 +63,17 @@ export default function MeetFields({
         <input
           value={form.location}
           onChange={(e) => set("location", e.target.value)}
-          placeholder="McAuley Aquatic Center, Atlanta GA"
+          placeholder="McAuley Aquatic Center"
+          className={inputClass}
+        />
+      </div>
+
+      <div>
+        <label className={labelClass}>School</label>
+        <input
+          value={form.school}
+          onChange={(e) => set("school", e.target.value)}
+          placeholder="Georgia Tech"
           className={inputClass}
         />
       </div>

@@ -60,7 +60,6 @@ model User {
   image         String?
   role          Role      @default(COACH)
   /// Per-type in-app notification toggles: { practicePublished?, meetSignupOpen?, practiceComments?, profileChanges? }
-  /// profileChanges also covers TIMES_IMPORT_REQUEST for staff.
   notificationPreferences Json?
   createdAt     DateTime  @default(now())
   accounts      Account[]
@@ -98,6 +97,7 @@ model Meet {
   course        Course    @default(SCY)
   season        String
   teamCode      String    @default("GTSC")
+  school        String?
   packetUrl     String?
   psychSheetUrl String?
   heatSheetUrl  String?
