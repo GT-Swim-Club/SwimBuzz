@@ -130,7 +130,7 @@ function podiumPlaceClass(place: number): string {
     case 3:
       return "text-orange-600 dark:text-orange-400 font-semibold"
     default:
-      return "text-gray-400 dark:text-zinc-500"
+      return "text-foreground-tertiary dark:text-foreground-tertiary"
   }
 }
 
@@ -143,7 +143,7 @@ function formatRoundPlace(
   return (
     <span
       className={`text-[11px] font-sans font-normal ${
-        isFinalsPodium ? podiumPlaceClass(place) : "text-gray-400 dark:text-zinc-500"
+        isFinalsPodium ? podiumPlaceClass(place) : "text-foreground-tertiary dark:text-foreground-tertiary"
       }`}
     >
       {formatOrdinal(place)}
@@ -158,7 +158,7 @@ function hasResultData(entry: SheetSummary["entries"][number]) {
 function formatSeedTime(time: string): ReactNode {
   return (
     <span className="inline-flex items-baseline gap-1">
-      <span className="text-[11px] font-sans font-normal text-gray-400 dark:text-zinc-500">
+      <span className="text-[11px] font-sans font-normal text-foreground-tertiary dark:text-foreground-tertiary">
         Seed
       </span>
       <span className="font-mono">{formatDisplayTime(time)}</span>
@@ -232,7 +232,7 @@ function formatSeedDeltaEl(
       className={`text-[11px] font-mono tabular-nums ${
         isDrop
           ? "text-emerald-600 dark:text-emerald-400"
-          : "text-red-600 dark:text-red-400"
+          : "text-error dark:text-error"
       }`}
     >
       {delta}
@@ -256,7 +256,7 @@ function formatRoundTime(
   const deltaEl = formatSeedDeltaEl(seedTime, time)
   return (
     <span className="inline-flex items-baseline gap-1">
-      <span className="text-[11px] font-sans font-normal text-gray-400 dark:text-zinc-500">
+      <span className="text-[11px] font-sans font-normal text-foreground-tertiary dark:text-foreground-tertiary">
         {label}
       </span>
       {deltaEl}
@@ -278,7 +278,7 @@ function formatTimedResult(time: string, place?: number, seedTime?: string) {
 function formatRoundStatus(label: string, status: string) {
   return (
     <span className="inline-flex items-baseline gap-1">
-      <span className="text-[11px] font-sans font-normal text-gray-400 dark:text-zinc-500">
+      <span className="text-[11px] font-sans font-normal text-foreground-tertiary dark:text-foreground-tertiary">
         {label}
       </span>
       <span className="font-mono text-amber-700 dark:text-amber-400">{status}</span>
@@ -577,9 +577,11 @@ function SummaryEntryRow({
     const detailTitle = `${label} ${displayRelayLetter(entry.relayLetter)}${genderSuffix}${roundSuffix}`
     const podium = finalsPodiumPlace(entry)
     const coachNote = canEdit ? relayCoachIncompleteNote(entry) ?? undefined : undefined
+    const rowId = entry.swimId ? `swim-${entry.swimId}` : undefined
 
     return (
       <RelaySummaryRow
+        id={rowId}
         entry={entry}
         label={label}
         details={details || undefined}
@@ -608,11 +610,14 @@ function SummaryEntryRow({
           : ""
   const detailTitle = `${label}${roundSuffix}`
   const timeDisplay = formatTime(entry, allEntries)
+  const rowId = entry.swimId ? `swim-${entry.swimId}` : undefined
 
   if (splits.length > 0) {
     return (
       <IndividualSummaryRow
+        id={rowId}
         label={label}
+        athleteName={entry.athleteName}
         details={details || undefined}
         timeDisplay={timeDisplay}
         detailTitle={detailTitle}
@@ -625,13 +630,14 @@ function SummaryEntryRow({
 
   return (
     <SummaryRowLayout
+      id={rowId}
       className={podiumPlace ? podiumRowClass(podiumPlace) : ""}
       label={label}
       details={details || undefined}
       right={
         <>
-          {timeDisplay}
-          {editButton}
+          <span key="time">{timeDisplay}</span>
+          <span key="edit">{editButton}</span>
         </>
       }
     />
@@ -756,7 +762,10 @@ export default function MeetSheetSummarySection({
     if (entries.length === 0) return null
     return (
       <>
-        <li className="px-4 py-1.5 text-[11px] font-medium uppercase tracking-wide text-gray-400 dark:text-zinc-500 bg-gray-50 dark:bg-zinc-950/50">
+        <li
+          key="title"
+          className="px-4 py-1.5 text-[11px] font-medium uppercase tracking-wide text-foreground-secondary bg-background/50"
+        >
           {title}
         </li>
         {entries.map((entry, i) => (
@@ -782,21 +791,21 @@ export default function MeetSheetSummarySection({
   return (
     <section>
       <div className="flex items-center justify-between gap-3 mb-3">
-        <h2 className="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide">
+        <h2 className="text-sm font-medium text-foreground-secondary text-foreground-secondary uppercase tracking-wide">
           Roster Summary
         </h2>
         {headerAction}
       </div>
       {!hasContent ? (
-        <div className="border rounded-xl px-4 py-10 text-center text-sm text-gray-500 dark:text-zinc-400 bg-white dark:bg-zinc-900">
+        <div className="border border-border border-border-secondary rounded-xl px-4 py-10 text-center text-sm text-foreground-secondary text-foreground-secondary bg-background bg-background">
           No entries yet.
         </div>
       ) : (
       <div className="space-y-3">
         {myEntries.length > 0 ? (
-          <div className="border rounded-xl overflow-hidden bg-white dark:bg-zinc-900 ring-1 ring-indigo-200 dark:ring-indigo-900/60">
-            <div className="px-4 py-2.5 text-sm font-medium border-b dark:border-zinc-800 text-indigo-700 dark:text-indigo-300">
-              Your Entries
+          <div className="rounded-xl overflow-hidden border border-border-secondary border-primary bg-primary/5 shadow-sm">
+            <div className="px-4 py-2.5 text-sm font-medium border-b dark:border-zinc-800 text-[var(--brand-color-primary-active)] dark:text-[var(--brand-color-primary-hover)]">
+              {athleteNames.get(viewerAthleteId!)}
             </div>
             <ul className="divide-y dark:divide-zinc-800">
               {myEntries.map((entry, i) => (
@@ -821,8 +830,8 @@ export default function MeetSheetSummarySection({
           </div>
         ) : null}
         {relays.length > 0 ? (
-          <div className="border rounded-xl overflow-hidden bg-white dark:bg-zinc-900">
-            <div className="px-4 py-2.5 text-sm font-medium border-b dark:border-zinc-800 text-gray-700 dark:text-zinc-300">
+          <div className="border border-border border-border-secondary rounded-xl overflow-hidden bg-background bg-background">
+            <div className="px-4 py-2.5 text-sm font-medium border-b dark:border-zinc-800 text-foreground-primary">
               Relays
             </div>
             <ul className="divide-y dark:divide-zinc-800">
@@ -852,11 +861,11 @@ export default function MeetSheetSummarySection({
           return (
             <div
               key={athlete.name}
-              className="border rounded-xl overflow-hidden bg-white dark:bg-zinc-900"
+              className="border border-border border-border-secondary rounded-xl overflow-hidden bg-background bg-background"
             >
               <Link
                 href={`/athletes/${athlete.entries[0]?.athleteId}`}
-                className="block px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors border-b dark:border-zinc-800"
+                className="block px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary transition-colors border-b dark:border-zinc-800"
               >
                 {athlete.name}
               </Link>

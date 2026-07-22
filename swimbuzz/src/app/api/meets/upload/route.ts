@@ -4,11 +4,12 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { uploadMeetFile, deleteStoredMeetFile } from "@/lib/meet-storage"
 import { isStoredMeetFileUrl } from "@/lib/meet-files"
+import sharp from "sharp"
 
 export const runtime = "nodejs"
 
-const MAX_BYTES = 20 * 1024 * 1024
-const ALLOWED_EXT = new Set([".pdf", ".doc", ".docx", ".xls", ".xlsx", ".csv", ".txt"])
+const MAX_BYTES = 50 * 1024 * 1024
+const ALLOWED_EXT = new Set([".pdf", ".doc", ".docx", ".xls", ".xlsx", ".csv", ".txt", ".png", ".jpg", ".jpeg", ".webp", ".gif"])
 
 const MIME: Record<string, string> = {
   ".pdf": "application/pdf",
@@ -18,6 +19,11 @@ const MIME: Record<string, string> = {
   ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   ".csv": "text/csv",
   ".txt": "text/plain",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+  ".gif": "image/gif",
 }
 
 function isUpload(value: unknown): value is File {
@@ -39,7 +45,7 @@ export async function POST(req: Request) {
   const ext = path.extname(file.name).toLowerCase()
   if (!ALLOWED_EXT.has(ext)) {
     return NextResponse.json(
-      { error: "Unsupported file type — use PDF, Word, Excel, CSV, or TXT" },
+      { error: "Unsupported file type — use PDF, Word, Excel, CSV, TXT, or images (PNG, JPG, WEBP, GIF)" },
       { status: 400 }
     )
   }
@@ -49,9 +55,39 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "File must be 20 MB or smaller" }, { status: 400 })
   }
 
+  let finalBytes = bytes
+  let finalContentType = file.type || MIME[ext] || "application/octet-stream"
+
+  const isImage = [".png", ".jpg", ".jpeg", ".webp", ".gif"].includes(ext)
+  if (isImage) {
+    try {
+      const image = sharp(bytes)
+      const metadata = await image.metadata()
+
+      if (metadata.width && metadata.height && (metadata.width > 1200 || metadata.height > 1200)) {
+        image.resize(1200, 1200, {
+          fit: "inside",
+          withoutEnlargement: true,
+        })
+      }
+
+      if (ext === ".png") {
+        finalBytes = await image.png({ quality: 80, compressionLevel: 9 }).toBuffer()
+      } else if (ext === ".webp") {
+        finalBytes = await image.webp({ quality: 75 }).toBuffer()
+      } else if (ext === ".gif") {
+        finalBytes = await image.gif().toBuffer()
+      } else {
+        finalBytes = await image.jpeg({ quality: 75, progressive: true }).toBuffer()
+      }
+    } catch (e) {
+      console.error("Image compression failed, using original file:", e)
+      finalBytes = bytes
+    }
+  }
+
   try {
-    const contentType = file.type || MIME[ext] || "application/octet-stream"
-    const { url } = await uploadMeetFile(bytes, file.name, contentType)
+    const { url } = await uploadMeetFile(finalBytes, file.name, finalContentType)
     return NextResponse.json({ url, name: file.name })
   } catch (err) {
     const message = err instanceof Error ? err.message : "Upload failed"

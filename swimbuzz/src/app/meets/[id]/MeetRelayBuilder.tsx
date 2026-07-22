@@ -298,13 +298,13 @@ export default function MeetRelayBuilder({
 
   return (
     <section>
-      <h2 className="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide mb-3">
+      <h2 className="text-sm font-medium text-foreground-secondary text-foreground-secondary uppercase tracking-wide mb-3">
         Relay builder
       </h2>
-      <div className="rounded-xl border bg-white p-4 space-y-4 dark:bg-zinc-900 dark:border-zinc-800">
+      <div className="rounded-xl border border-border border-border-secondary bg-background p-4 space-y-4 bg-background">
         <div className="flex flex-wrap gap-3 items-end">
           <div>
-            <label className="text-xs text-gray-500 dark:text-zinc-400 mb-1 block">Gender</label>
+            <label className="text-xs text-foreground-secondary text-foreground-secondary mb-1 block">Gender</label>
             <select
               value={gender}
               onChange={(e) => {
@@ -315,7 +315,7 @@ export default function MeetRelayBuilder({
                   setEvent(eventChoices.find((ev) => !/\bmedley\b/i.test(ev)) ?? event)
                 }
               }}
-              className="border rounded-lg px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+              className="border border-border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
             >
               <option value="M">Men</option>
               <option value="F">Women</option>
@@ -323,14 +323,14 @@ export default function MeetRelayBuilder({
             </select>
           </div>
           <div>
-            <label className="text-xs text-gray-500 dark:text-zinc-400 mb-1 block">Event</label>
+            <label className="text-xs text-foreground-secondary text-foreground-secondary mb-1 block">Event</label>
             <select
               value={event}
               onChange={(e) => {
                 setEvent(e.target.value)
                 setResult(null)
               }}
-              className="border rounded-lg px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+              className="border border-border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
             >
               {eventChoices.map((e) => (
                 <option key={e}>{e}</option>
@@ -338,13 +338,13 @@ export default function MeetRelayBuilder({
             </select>
           </div>
           <div>
-            <label className="text-xs text-gray-500 dark:text-zinc-400 mb-1 block">Times from</label>
+            <label className="text-xs text-foreground-secondary text-foreground-secondary mb-1 block">Times from</label>
             <select
               value={withinDays ?? ""}
               onChange={(e) =>
                 setWithinDays(e.target.value === "" ? null : Number(e.target.value))
               }
-              className="border rounded-lg px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+              className="border border-border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
             >
               {TIME_WINDOWS.map((w) => (
                 <option key={w.label} value={w.days ?? ""}>
@@ -354,14 +354,14 @@ export default function MeetRelayBuilder({
             </select>
           </div>
           <div>
-            <label className="text-xs text-gray-500 dark:text-zinc-400 mb-1 block">Relays</label>
+            <label className="text-xs text-foreground-secondary text-foreground-secondary mb-1 block">Relays</label>
             <select
               value={relayCount}
               onChange={(e) => {
                 setRelayCount(Number(e.target.value))
                 setResult(null)
               }}
-              className="border rounded-lg px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+              className="border border-border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
             >
               <option value={1}>1 (A)</option>
               <option value={2}>2 (A–B)</option>
@@ -372,14 +372,14 @@ export default function MeetRelayBuilder({
             type="button"
             onClick={handleBuild}
             disabled={loading}
-            className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
+            className="px-4 py-2 text-sm border border-border border-border-secondary rounded-lg dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary bg-background disabled:opacity-40 transition-colors"
           >
             {loading ? "Building..." : relayCount > 1 ? "Build relays" : "Build relay"}
           </button>
         </div>
 
         <div>
-          <label className="text-xs text-gray-500 dark:text-zinc-400 mb-1 block">
+          <label className="text-xs text-foreground-secondary text-foreground-secondary mb-1 block">
             Athlete pool
           </label>
           <select
@@ -388,7 +388,7 @@ export default function MeetRelayBuilder({
               setSignupPool(e.target.value as SignupPool)
               setResult(null)
             }}
-            className="border rounded-lg px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+            className="border border-border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
           >
             <option value="all">All athletes</option>
             <option value="meet">
@@ -405,7 +405,7 @@ export default function MeetRelayBuilder({
             </option>
           </select>
           {poolCount != null && poolCount === 0 ? (
-            <p className="mt-1 text-xs text-gray-500 dark:text-zinc-400">
+            <p className="mt-1 text-xs text-foreground-secondary text-foreground-secondary">
               {signupPool === "relay"
                 ? `No ${genderPeople} signed up for this relay yet.`
                 : `No ${genderPeople} signed up for this meet yet.`}
@@ -429,7 +429,7 @@ export default function MeetRelayBuilder({
                   type="button"
                   onClick={requestAddAll}
                   disabled={savingLetter != null}
-                  className="px-3 py-1.5 text-sm border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
+                  className="px-3 py-1.5 text-sm border border-border border-border-secondary rounded-lg dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary bg-background disabled:opacity-40 transition-colors"
                 >
                   {savingLetter === "*" ? "Adding…" : "Add all to roster summary"}
                 </button>
@@ -452,7 +452,7 @@ export default function MeetRelayBuilder({
                       type="button"
                       onClick={() => requestAddTeam(team)}
                       disabled={savingLetter != null}
-                      className="px-3 py-1.5 text-sm border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
+                      className="px-3 py-1.5 text-sm border border-border border-border-secondary rounded-lg dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary bg-background disabled:opacity-40 transition-colors"
                     >
                       {savingLetter === team.letter
                         ? "Adding…"
@@ -461,19 +461,19 @@ export default function MeetRelayBuilder({
                   )}
                 </div>
 
-                <div className="border rounded-xl overflow-hidden divide-y dark:border-zinc-800 dark:divide-zinc-800">
+                <div className="border border-border border-border-secondary rounded-xl overflow-hidden divide-y">
                   {team.legs.map((leg, i) => (
                     <div
                       key={`${team.letter}-${i}`}
-                      className="flex items-center justify-between px-4 py-3 bg-white dark:bg-zinc-950"
+                      className="flex items-center justify-between px-4 py-3 bg-background bg-background"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-medium flex items-center justify-center dark:bg-indigo-950 dark:text-indigo-300">
+                        <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-medium flex items-center justify-center dark:bg-primary-hover dark:text-primary-text">
                           {i + 1}
                         </span>
                         <div>
                           <p className="text-sm font-medium">{leg.name}</p>
-                          <p className="text-xs text-gray-500 dark:text-zinc-400">
+                          <p className="text-xs text-foreground-secondary text-foreground-secondary">
                             {leg.event}
                           </p>
                         </div>
@@ -487,17 +487,17 @@ export default function MeetRelayBuilder({
 
             {result.alternates && result.alternates.length > 0 && (
               <div>
-                <h4 className="text-xs text-gray-500 dark:text-zinc-400 uppercase tracking-wide mb-2">
+                <h4 className="text-xs text-foreground-secondary text-foreground-secondary uppercase tracking-wide mb-2">
                   Alternates
                 </h4>
-                <div className="border rounded-xl overflow-hidden divide-y dark:border-zinc-800 dark:divide-zinc-800">
+                <div className="border border-border border-border-secondary rounded-xl overflow-hidden divide-y">
                   {result.alternates.map((alt, i) => (
                     <div
                       key={i}
-                      className="flex items-center justify-between px-4 py-2 bg-white dark:bg-zinc-950 text-sm"
+                      className="flex items-center justify-between px-4 py-2 bg-background bg-background text-sm"
                     >
-                      <span className="text-gray-500 dark:text-zinc-300">{alt.name}</span>
-                      <span className="font-mono text-gray-500 dark:text-zinc-300">
+                      <span className="text-foreground-secondary text-foreground-secondary">{alt.name}</span>
+                      <span className="font-mono text-foreground-secondary text-foreground-secondary">
                         {formatTime(alt.timeMs)}
                       </span>
                     </div>
@@ -530,7 +530,7 @@ export default function MeetRelayBuilder({
                 setConfirmError(null)
               }}
               disabled={confirmBusy}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700 disabled:opacity-50"
+              className="flex-1 rounded-lg border border-border border-border-secondary px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border-secondary disabled:opacity-50"
             >
               Cancel
             </button>
@@ -538,7 +538,7 @@ export default function MeetRelayBuilder({
               type="button"
               onClick={() => void confirmAddToRoster()}
               disabled={confirmBusy}
-              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
               {confirmBusy ? "Adding…" : confirmAdd === "*" ? "Add all" : "Add"}
             </button>

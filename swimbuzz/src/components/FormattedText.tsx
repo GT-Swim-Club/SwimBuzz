@@ -12,7 +12,7 @@ export function FormattedText({
 }) {
   return (
     <div
-      className={`space-y-1 text-sm text-gray-800 dark:text-zinc-200${mono ? " font-mono" : ""} ${className}`}
+      className={`space-y-1 text-sm text-foreground${mono ? " font-mono" : ""} ${className}`}
     >
       {parseRichTextBlocks(text)}
     </div>

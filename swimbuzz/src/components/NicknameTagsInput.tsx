@@ -54,7 +54,7 @@ export default function NicknameTagsInput({
               type="button"
               disabled={disabled}
               onClick={() => removeNickname(name)}
-              className="text-xs px-2 py-0.5 rounded-full border bg-indigo-600 border-indigo-600 text-white disabled:opacity-40"
+              className="text-xs px-2 py-0.5 rounded-full border border-border-secondary bg-primary border-indigo-600 text-primary-text disabled:opacity-40"
             >
               {name} ✕
             </button>
@@ -78,7 +78,7 @@ export default function NicknameTagsInput({
             }
           }}
           className={
-            "rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700 disabled:opacity-40 " +
+            "rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary disabled:opacity-40 " +
             (showRow ? "flex-1 min-w-[160px]" : "w-full")
           }
         />
@@ -87,7 +87,7 @@ export default function NicknameTagsInput({
             type="button"
             disabled={disabled || atLimit || !draft.trim()}
             onClick={() => addNickname(draft)}
-            className="text-sm px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
+            className="text-sm px-4 py-2 border border-border-secondary rounded-lg hover:bg-fill-secondary hover:bg-fill-secondary bg-background disabled:opacity-40 transition-colors"
           >
             Add
           </button>

@@ -195,31 +195,31 @@ export default function PracticeDetail({
           <button
             type="button"
             onClick={() => setTakeoverMessage(null)}
-            className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
+            className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover"
           >
             OK
           </button>
         </ModalFooter>
       }
     >
-      <p className="text-sm text-gray-600 dark:text-zinc-300">{takeoverMessage}</p>
+      <p className="text-sm text-foreground-secondary text-foreground-secondary">{takeoverMessage}</p>
     </Modal>
   )
 
   if (editing && editLockToken) {
     return (
       <>
-        <main className="mx-auto max-w-3xl space-y-6">
+        <main className="mx-auto max-w-5xl space-y-6">
           <div>
             <button
               type="button"
               onClick={handleCancelEditing}
-              className="text-xs text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300"
+              className="text-xs text-foreground-tertiary dark:text-foreground-tertiary hover:text-foreground-secondary dark:hover:text-foreground-secondary"
             >
               ← Cancel editing
             </button>
             <h1 className="mt-1 text-xl font-medium sm:text-2xl">Edit practice</h1>
-            <p className="mt-1 text-xs text-gray-500 dark:text-zinc-400">
+            <p className="mt-1 text-xs text-foreground-secondary dark:text-foreground-secondary">
               Others can view but not edit until you save or cancel.
             </p>
           </div>
@@ -240,12 +240,12 @@ export default function PracticeDetail({
 
   return (
     <>
-    <main className="mx-auto max-w-3xl space-y-8">
+    <main className="mx-auto max-w-5xl space-y-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="min-w-0">
           <Link
             href={backHref}
-            className="text-xs text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300"
+            className="text-xs text-foreground-tertiary dark:text-foreground-tertiary hover:text-foreground-secondary dark:hover:text-foreground-secondary"
           >
             ← All practices
           </Link>
@@ -257,7 +257,7 @@ export default function PracticeDetail({
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-500 dark:text-zinc-400">
+          <p className="text-sm text-foreground-secondary dark:text-foreground-secondary">
             {dateIso ? formatSwimDate(dateIso) : "No date"}
             {" · "}
             {sets.length} set{sets.length === 1 ? "" : "s"}
@@ -281,8 +281,8 @@ export default function PracticeDetail({
       </div>
 
       {focus && (
-        <div className="text-sm text-gray-600 dark:text-zinc-300 rounded-xl border border-gray-100 dark:border-zinc-800 bg-gray-50/60 dark:bg-zinc-950/40 px-4 py-3">
-          <FormattedText text={focus} className="text-gray-600 dark:text-zinc-300" />
+        <div className="text-sm text-foreground-secondary dark:text-foreground-secondary rounded-xl border border-border-secondary dark:border border-border-secondary bg-fill-secondary dark:bg-background-elevated px-4 py-3">
+          <FormattedText text={focus} className="text-foreground-secondary dark:text-foreground-secondary" />
         </div>
       )}
 
@@ -290,25 +290,25 @@ export default function PracticeDetail({
         {sets.map((set) => (
           <section
             key={set.id}
-            className="rounded-2xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-5"
+            className="rounded-2xl border border-border-secondary bg-background dark:bg-background-elevated p-5"
           >
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center flex-wrap gap-x-2 gap-y-1 min-w-0">
-                <h2 className="font-medium text-gray-900 dark:text-zinc-100">
+                <h2 className="font-medium text-foreground dark:text-foreground">
                   {set.title || "Set"}
                 </h2>
                 {set.tags.map((t) => (
                   <Link
                     key={t}
                     href={`/practices?tag=${encodeURIComponent(t)}`}
-                    className="text-[10px] uppercase tracking-wide rounded-full bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
+                    className="text-[10px] uppercase tracking-wide rounded-full bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 text-primary dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
                   >
                     {t}
                   </Link>
                 ))}
               </div>
               {set.distance != null && (
-                <span className="text-xs text-gray-400 dark:text-zinc-500 shrink-0">
+                <span className="text-xs text-foreground-tertiary dark:text-foreground-tertiary shrink-0">
                   {set.distance.toLocaleString()}
                 </span>
               )}
@@ -319,7 +319,7 @@ export default function PracticeDetail({
             </div>
 
             {set.notes && (
-              <div className="mt-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/40 px-3 py-2">
+              <div className="mt-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-border-secondary border-amber-100 dark:border-amber-900/40 px-3 py-2">
                 <FormattedText
                   text={set.notes}
                   className="text-amber-900 dark:text-amber-200"

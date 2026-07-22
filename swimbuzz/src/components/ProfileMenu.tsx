@@ -105,7 +105,7 @@ export default function ProfileMenu({
           aria-expanded={open}
           aria-haspopup="menu"
           aria-label="Open profile menu"
-          className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-indigo-100 text-sm font-medium text-indigo-700 transition-opacity hover:opacity-90 dark:border-zinc-700 dark:bg-indigo-950 dark:text-indigo-200"
+          className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-border-secondary bg-primary/10 text-sm font-medium text-primary transition-opacity hover:opacity-90"
         >
           {image ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -119,17 +119,17 @@ export default function ProfileMenu({
           <div className="absolute right-0 z-50 pt-2">
             <div
               role="menu"
-              className="w-56 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
+              className="w-56 overflow-hidden rounded-xl border border-border-secondary bg-background shadow-lg"
             >
-              <div className="border-b border-gray-100 px-3 py-2.5 dark:border-zinc-800">
-                <p className="truncate text-sm font-medium text-gray-900 dark:text-zinc-100">
+              <div className="border-b border-border-secondary px-3 py-2.5">
+                <p className="truncate text-sm font-medium text-foreground">
                   {name || "Account"}
                 </p>
-                <p className="truncate text-xs text-gray-500 dark:text-zinc-400">
+                <p className="truncate text-xs text-foreground-secondary">
                   {email || roleLabel}
                 </p>
                 {email ? (
-                  <p className="mt-0.5 truncate text-xs text-gray-400 dark:text-zinc-500">
+                  <p className="mt-0.5 truncate text-xs text-foreground-tertiary">
                     {roleLabel}
                   </p>
                 ) : null}
@@ -141,7 +141,7 @@ export default function ProfileMenu({
                     href={rosterProfileHref}
                     role="menuitem"
                     onClick={closeMenu}
-                    className="flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                    className="flex items-center gap-2.5 px-3 py-2 text-sm text-foreground-secondary hover:bg-fill-secondary"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -151,7 +151,7 @@ export default function ProfileMenu({
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className="h-4 w-4 shrink-0 text-gray-400 dark:text-zinc-500"
+                      className="h-4 w-4 shrink-0 text-foreground-tertiary"
                       aria-hidden
                     >
                       <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
@@ -167,7 +167,7 @@ export default function ProfileMenu({
                     rel="noopener noreferrer"
                     role="menuitem"
                     onClick={closeMenu}
-                    className="flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                    className="flex items-center gap-2.5 px-3 py-2 text-sm text-foreground-secondary hover:bg-fill-secondary"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -177,7 +177,7 @@ export default function ProfileMenu({
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className="h-4 w-4 shrink-0 text-gray-400 dark:text-zinc-500"
+                      className="h-4 w-4 shrink-0 text-foreground-tertiary"
                       aria-hidden
                     >
                       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
@@ -191,7 +191,7 @@ export default function ProfileMenu({
                   href="/settings"
                   role="menuitem"
                   onClick={closeMenu}
-                  className="flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                  className="flex items-center gap-2.5 px-3 py-2 text-sm text-foreground-secondary hover:bg-fill-secondary"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -201,7 +201,7 @@ export default function ProfileMenu({
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="h-4 w-4 shrink-0 text-gray-400 dark:text-zinc-500"
+                    className="h-4 w-4 shrink-0 text-foreground-tertiary"
                     aria-hidden
                   >
                     <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
@@ -211,7 +211,7 @@ export default function ProfileMenu({
                 </Link>
               </div>
 
-              <div className="border-t border-gray-100 py-1 dark:border-zinc-800">
+              <div className="border-t border-border-secondary py-1">
                 <button
                   type="button"
                   role="menuitem"
@@ -219,7 +219,7 @@ export default function ProfileMenu({
                     closeMenu()
                     setSignOutOpen(true)
                   }}
-                  className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                  className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-foreground-secondary hover:bg-fill-secondary"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -229,7 +229,7 @@ export default function ProfileMenu({
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="h-4 w-4 shrink-0 text-gray-400 dark:text-zinc-500"
+                    className="h-4 w-4 shrink-0 text-foreground-tertiary"
                     aria-hidden
                   >
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -257,7 +257,7 @@ export default function ProfileMenu({
               type="button"
               onClick={() => setSignOutOpen(false)}
               disabled={signingOut}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700 disabled:opacity-50"
+              className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary disabled:opacity-50"
             >
               Cancel
             </button>
@@ -265,14 +265,14 @@ export default function ProfileMenu({
               type="button"
               onClick={handleSignOut}
               disabled={signingOut}
-              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
               {signingOut ? "Signing Out…" : "Sign Out"}
             </button>
           </ModalFooter>
         }
       >
-        <p className="text-sm text-gray-600 dark:text-zinc-400">
+        <p className="text-sm text-foreground-secondary">
           Are you sure you want to sign out of SwimBuzz?
         </p>
       </Modal>

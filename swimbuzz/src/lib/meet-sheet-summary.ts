@@ -76,6 +76,9 @@ export type SheetEntry = {
   manual?: boolean
   /** Swim row id when this entry is a single manual swim. */
   swimId?: string
+  prelimSwimId?: string
+  finalSwimId?: string
+  resultSwimId?: string
   course?: string
   date?: string
   timeMs?: number
@@ -123,6 +126,9 @@ export type MeetResultEntry = {
   finalLane?: number
   manual?: boolean
   swimId?: string
+  prelimSwimId?: string
+  finalSwimId?: string
+  resultSwimId?: string
   course?: string
   date?: string
   timeMs?: number
@@ -708,10 +714,13 @@ export function swimsToMeetResults(swims: SwimResultInput[]): MeetResultEntry[] 
       if (round) existing.relayLeadoffRound = round
     } else if (isPrelimTag(swim.tags)) {
       existing.prelimTime = time
+      existing.prelimSwimId = swim.id
     } else if (isFinalTag(swim.tags)) {
       existing.finalTime = time
+      existing.finalSwimId = swim.id
     } else {
       existing.resultTime = time
+      existing.resultSwimId = swim.id
       const tags = displayResultTags(swim.tags)
       if (tags) existing.resultTags = tags
     }
@@ -1012,6 +1021,7 @@ export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] 
               {
                 ...entry,
                 resultRound: "",
+                swimId: entry.resultSwimId ?? entry.finalSwimId ?? entry.swimId,
                 resultTime: entry.resultTime ?? entry.finalTime,
                 resultPlace: entry.resultPlace ?? entry.finalPlace,
                 resultStatus:
@@ -1038,6 +1048,7 @@ export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] 
               {
                 ...entry,
                 resultRound: "F",
+                swimId: entry.finalSwimId ?? entry.resultSwimId ?? entry.swimId,
                 heat: entry.finalHeat ?? entry.heat,
                 lane: entry.finalLane ?? entry.lane,
                 heatTotal: entry.finalHeatTotal ?? entry.heatTotal,
@@ -1052,6 +1063,7 @@ export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] 
             {
               ...entry,
               resultRound: "P",
+              swimId: entry.prelimSwimId ?? entry.swimId,
               heat: entry.prelimHeat ?? entry.heat,
               lane: entry.prelimLane ?? entry.lane,
               heatTotal: entry.prelimHeatTotal ?? entry.heatTotal,
@@ -1064,6 +1076,7 @@ export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] 
           withRoundSplits(
             {
               ...entry,
+              swimId: entry.resultSwimId ?? entry.finalSwimId ?? entry.swimId,
               heat: entry.finalHeat ?? entry.prelimHeat ?? entry.heat,
               lane: entry.finalLane ?? entry.prelimLane ?? entry.lane,
               heatTotal:
@@ -1083,6 +1096,7 @@ export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] 
         {
           ...entry,
           resultRound: "P",
+          swimId: entry.prelimSwimId ?? entry.swimId,
           heat: entry.prelimHeat ?? entry.heat,
           lane: entry.prelimLane ?? entry.lane,
           heatTotal: entry.prelimHeatTotal ?? entry.heatTotal,
@@ -1105,6 +1119,7 @@ export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] 
         {
           ...entry,
           resultRound: "F",
+          swimId: entry.finalSwimId ?? entry.resultSwimId ?? entry.swimId,
           heat: entry.finalHeat ?? entry.heat,
           lane: entry.finalLane ?? entry.lane,
           heatTotal: entry.finalHeatTotal ?? entry.heatTotal,
@@ -1958,6 +1973,9 @@ export function mergeSheetSummaries(
               ? true
               : Boolean(result.manual),
         swimId: result.swimId ?? existing.swimId,
+        prelimSwimId: result.prelimSwimId ?? existing.prelimSwimId,
+        finalSwimId: result.finalSwimId ?? existing.finalSwimId,
+        resultSwimId: result.resultSwimId ?? existing.resultSwimId,
         course: result.course ?? existing.course,
         date: result.date ?? existing.date,
         timeMs: result.timeMs ?? existing.timeMs,
@@ -1990,6 +2008,9 @@ export function mergeSheetSummaries(
         seedTime: result.seedTime,
         manual: result.manual,
         swimId: result.swimId,
+        prelimSwimId: result.prelimSwimId,
+        finalSwimId: result.finalSwimId,
+        resultSwimId: result.resultSwimId,
         course: result.course,
         date: result.date,
         timeMs: result.timeMs,

@@ -1,6 +1,10 @@
 "use client"
 
-import { currentSeason, seasonOptions } from "@/lib/season"
+import { useEffect, useState } from "react"
+import { currentSeason, seasonOptions, upcomingSeason } from "@/lib/season"
+import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
+import DontReloadNotice from "@/components/DontReloadNotice"
+import Modal, { ModalFooter } from "@/components/Modal"
 
 export type MeetFormState = {
   name: string
@@ -10,6 +14,8 @@ export type MeetFormState = {
   course: string
   season: string
   school: string
+  iconUrl: string
+  bannerUrl: string
   packetUrl: string
   psychSheetUrl: string
   heatSheetUrl: string
@@ -24,6 +30,8 @@ export const emptyMeetForm: MeetFormState = {
   course: "SCY",
   season: currentSeason(),
   school: "",
+  iconUrl: "",
+  bannerUrl: "",
   packetUrl: "",
   psychSheetUrl: "",
   heatSheetUrl: "",
@@ -31,9 +39,9 @@ export const emptyMeetForm: MeetFormState = {
 }
 
 const inputClass =
-  "w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+  "w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"
 const labelClass =
-  "block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1"
+  "block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1"
 
 export default function MeetFields({
   form,
@@ -42,13 +50,158 @@ export default function MeetFields({
   form: MeetFormState
   setForm: React.Dispatch<React.SetStateAction<MeetFormState>>
 }) {
+  const [iconUploading, setIconUploading] = useState(false)
+  const [iconError, setIconError] = useState<string | null>(null)
+  const [bannerUploading, setBannerUploading] = useState(false)
+  const [bannerError, setBannerError] = useState<string | null>(null)
+  const [fetchedSeasons, setFetchedSeasons] = useState<string[]>([])
+  
+  const [addSeasonModalOpen, setAddSeasonModalOpen] = useState(false)
+  const upcoming = upcomingSeason()
+  const [addingSeason, setAddingSeason] = useState(false)
+  const [addSeasonError, setAddSeasonError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetch("/api/seasons")
+      .then((res) => {
+        if (!res.ok) return []
+        return res.json().catch(() => [])
+      })
+      .then((data) => setFetchedSeasons(Array.isArray(data) ? data : []))
+      .catch(() => setFetchedSeasons([]))
+  }, [])
+
+  const options = Array.from(new Set([...fetchedSeasons]))
+
+  useDontReloadWhileBusy(iconUploading || bannerUploading)
+
   const set = <K extends keyof MeetFormState>(key: K, value: MeetFormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }))
+
+  async function handleAddSeason(e: React.FormEvent) {
+    e.preventDefault()
+    setAddingSeason(true)
+    setAddSeasonError(null)
+    
+    try {
+        const res = await fetch("/api/seasons", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ label: upcoming })
+        })
+        
+        if (!res.ok) {
+            const data = await res.json()
+            setAddSeasonError(data.error || "Failed to add season")
+            return
+        }
+        setFetchedSeasons(prev => [...prev, upcoming]);
+        console.log("Setting season to:", upcoming);
+        set("season", upcoming);
+        setAddSeasonModalOpen(false);
+    } finally {
+        setAddingSeason(false)
+    }
+  }
+
+  async function handleIconUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIconUploading(true)
+    setIconError(null)
+
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+
+      const res = await fetch("/api/meets/icon", {
+        method: "POST",
+        body: formData,
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        setIconError(data.error ?? "Upload failed")
+        return
+      }
+
+      set("iconUrl", data.url)
+    } catch {
+      setIconError("Something went wrong")
+    } finally {
+      setIconUploading(false)
+      e.target.value = ""
+    }
+  }
+
+  async function handleIconRemove() {
+    if (!form.iconUrl) return
+
+    try {
+      await fetch("/api/meets/icon", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: form.iconUrl }),
+      })
+    } catch {
+      // Ignore delete errors
+    }
+
+    set("iconUrl", "")
+  }
+
+  async function handleBannerUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setBannerUploading(true)
+    setBannerError(null)
+
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+
+      const res = await fetch("/api/meets/banner", {
+        method: "POST",
+        body: formData,
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        setBannerError(data.error ?? "Upload failed")
+        return
+      }
+
+      set("bannerUrl", data.url)
+    } catch {
+      setBannerError("Something went wrong")
+    } finally {
+      setBannerUploading(false)
+      e.target.value = ""
+    }
+  }
+
+  async function handleBannerRemove() {
+    if (!form.bannerUrl) return
+
+    try {
+      await fetch("/api/meets/banner", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: form.bannerUrl }),
+      })
+    } catch {
+      // Ignore delete errors
+    }
+
+    set("bannerUrl", "")
+  }
 
   return (
     <div className="space-y-4">
       <div>
-        <label className={labelClass}>Meet name</label>
+        <label className={labelClass}>Meet name <span className="text-error">*</span></label>
         <input
           required
           value={form.name}
@@ -56,6 +209,84 @@ export default function MeetFields({
           placeholder="Sting 'Em Classic"
           className={inputClass}
         />
+      </div>
+
+      <div>
+        <label className={labelClass}>
+          Meet icon
+        </label>
+        <div className="space-y-2">
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/jpg,image/gif,image/webp,image/svg+xml"
+            onChange={handleIconUpload}
+            disabled={iconUploading}
+            className="block w-full text-xs text-foreground-secondary file:mr-3 file:rounded-lg file:border file:border-border file:bg-primary file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-primary-text hover:file:bg-primary-hover"
+          />
+          {iconUploading && (
+            <DontReloadNotice label="Uploading… Don't reload the page." />
+          )}
+          {form.iconUrl && !iconUploading && (
+            <div className="flex items-center gap-3">
+              <img
+                src={form.iconUrl}
+                alt="Meet icon preview"
+                className="h-12 w-12 rounded-lg object-cover border border-border border-border"
+              />
+              <button
+                type="button"
+                onClick={handleIconRemove}
+                className="text-xs text-foreground-tertiary hover:text-red-500 dark:hover:text-red-400"
+              >
+                Remove file
+              </button>
+            </div>
+          )}
+          {iconError && (
+            <p className="text-xs text-error">
+              {iconError}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div>
+        <label className={labelClass}>
+          Meet banner
+        </label>
+        <div className="space-y-2">
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
+            onChange={handleBannerUpload}
+            disabled={bannerUploading}
+            className="block w-full text-xs text-foreground-secondary file:mr-3 file:rounded-lg file:border file:border-border file:bg-primary file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-primary-text hover:file:bg-primary-hover"
+          />
+          {bannerUploading && (
+            <DontReloadNotice label="Uploading… Don't reload the page." />
+          )}
+          {form.bannerUrl && !bannerUploading && (
+            <div className="flex items-center gap-3">
+              <img
+                src={form.bannerUrl}
+                alt="Meet banner preview"
+                className="h-20 w-full rounded-lg object-cover border border-border border-border"
+              />
+              <button
+                type="button"
+                onClick={handleBannerRemove}
+                className="text-xs text-foreground-tertiary hover:text-red-500 dark:hover:text-red-400"
+              >
+                Remove file
+              </button>
+            </div>
+          )}
+          {bannerError && (
+            <p className="text-xs text-error">
+              {bannerError}
+            </p>
+          )}
+        </div>
       </div>
 
       <div>
@@ -80,7 +311,7 @@ export default function MeetFields({
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <label className={labelClass}>Start date</label>
+          <label className={labelClass}>Start date <span className="text-error">*</span></label>
           <input
             required
             type="date"
@@ -91,7 +322,7 @@ export default function MeetFields({
         </div>
         <div>
           <label className={labelClass}>
-            End date <span className="font-normal text-gray-400">(optional)</span>
+            End date
           </label>
           <input
             type="date"
@@ -119,17 +350,85 @@ export default function MeetFields({
           <label className={labelClass}>Season</label>
           <select
             value={form.season}
-            onChange={(e) => set("season", e.target.value)}
+            onChange={(e) => {
+                if (e.target.value === "ADD_NEW") {
+                    setAddSeasonModalOpen(true)
+                } else {
+                    set("season", e.target.value)
+                }
+            }}
+            onBlur={(e) => {
+                // If it was just added via modal, it might already be selected
+                if (e.target.value === "ADD_NEW") {
+                    // Force re-select the newly added season if it exists in options now
+                    const newest = options[0];
+                    if (newest && newest !== "ADD_NEW") set("season", newest);
+                }
+            }}
             className={inputClass}
           >
-            {seasonOptions().map((s) => (
+            {options.map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>
             ))}
+            <option value="ADD_NEW">+ Add new season...</option>
           </select>
         </div>
       </div>
+      
+      <Modal
+        open={addSeasonModalOpen}
+        onClose={() => {
+            setAddSeasonModalOpen(false)
+            setAddSeasonError(null)
+        }}
+        title="Add new season"
+        onSubmit={handleAddSeason}
+        footer={
+          <ModalFooter>
+             {fetchedSeasons.includes(upcoming) ? (
+                <button
+                    type="button"
+                    onClick={() => {
+                        setAddSeasonModalOpen(false)
+                        setAddSeasonError(null)
+                    }}
+                    className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium bg-fill-secondary"
+                >
+                    Close
+                </button>
+             ) : (
+                <>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setAddSeasonModalOpen(false)
+                            setAddSeasonError(null)
+                        }}
+                        className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium bg-fill-secondary"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={addingSeason}
+                        className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
+                    >
+                        {addingSeason ? "Adding..." : "Confirm"}
+                    </button>
+                </>
+             )}
+          </ModalFooter>
+        }
+      >
+        {fetchedSeasons.includes(upcoming) ? (
+            <p className="text-sm text-foreground">Season {upcoming} already exists. You can add another season next year.</p>
+        ) : (
+            <p className="text-sm text-foreground">Confirm you want to add the {upcoming} season?</p>
+        )}
+        {addSeasonError && <p className="text-sm text-error">{addSeasonError}</p>}
+      </Modal>
     </div>
   )
 }

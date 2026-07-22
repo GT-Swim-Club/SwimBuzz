@@ -34,6 +34,7 @@ const navLinks = [
   {
     href: "/athletes",
     label: "Roster",
+    prefetch: false,
     icon: (
       <svg {...navIconProps}>
         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -46,6 +47,7 @@ const navLinks = [
   {
     href: "/meets",
     label: "Meets",
+    prefetch: false,
     icon: (
       <svg {...navIconProps}>
         <path d="M8 2v4" />
@@ -58,6 +60,7 @@ const navLinks = [
   {
     href: "/practices",
     label: "Practices",
+    prefetch: false,
     icon: (
       <svg {...navIconProps}>
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -71,6 +74,7 @@ const navLinks = [
   {
     href: "/qualifiers",
     label: "Nationals",
+    prefetch: false,
     icon: (
       <svg {...navIconProps}>
         <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
@@ -148,7 +152,7 @@ export default async function Nav() {
   const scraperButton = showStaffTools ? <RunScraperButton /> : null
 
   return (
-    <nav className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b bg-white px-4 py-3 dark:bg-zinc-900 sm:px-6 sm:py-4">
+    <nav className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-zinc-200 bg-background px-4 py-3 dark:border-zinc-800 sm:px-6 sm:py-4">
       <div className="flex min-w-0 items-center gap-7">
         <Link
           href="/"
@@ -165,12 +169,13 @@ export default async function Nav() {
           <span className="truncate">SwimBuzz</span>
         </Link>
         {session && (
-          <div className="hidden items-center gap-5 text-[15px] text-gray-500 dark:text-zinc-400 md:flex">
+          <div className="hidden items-center gap-5 text-[15px] text-foreground-secondary md:flex">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="inline-flex items-center gap-1.5 hover:text-gray-900 dark:hover:text-zinc-100 transition-colors"
+                prefetch={link.prefetch}
+                className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors"
               >
                 {link.icon}
                 {link.label}
@@ -218,7 +223,7 @@ export default async function Nav() {
         ) : (
           <Link
             href="/signin"
-            className="inline-flex items-center rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
+            className="inline-flex items-center rounded-lg bg-primary px-3.5 py-2 text-sm font-medium text-primary-text hover:bg-primary-hover transition-colors"
           >
             Sign in
           </Link>

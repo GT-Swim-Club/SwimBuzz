@@ -21,12 +21,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen bg-white transition-colors dark:bg-zinc-950">
-        <ThemeProvider>
+      <body className="min-h-screen bg-background">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <SessionProvider session={session}>
             <ScraperUiProvider>
               <Nav />
-              <div className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+              <div className="mx-auto max-w-7xl px-2 py-6 sm:py-8">
                 {children}
               </div>
             </ScraperUiProvider>

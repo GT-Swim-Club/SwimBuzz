@@ -7,11 +7,11 @@ export default function DontReloadNotice({
 }) {
   return (
     <p
-      className={`flex items-center gap-2 text-xs text-gray-500 dark:text-zinc-400 ${className}`}
+      className={`flex items-center gap-2 text-xs text-foreground-secondary ${className}`}
       role="status"
     >
       <span
-        className="inline-block h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600 dark:border-zinc-600 dark:border-t-zinc-300"
+        className="inline-block h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-border border-t-foreground"
         aria-hidden="true"
       />
       <span>{label}</span>

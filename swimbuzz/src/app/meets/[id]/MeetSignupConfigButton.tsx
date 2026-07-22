@@ -165,7 +165,7 @@ export default function MeetSignupConfigButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border rounded-md hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
+        className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border border-border border-border-secondary border-border-secondary-secondary-secondary rounded-md dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:bg-background-elevated transition-colors"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -189,14 +189,14 @@ export default function MeetSignupConfigButton({
         onClose={() => !loading && setOpen(false)}
         title="Meet Sign-up Form"
         description=""
-        maxWidth="xl"
+        maxWidth="3xl"
         footer={
           <ModalFooter>
             <button
               type="button"
               onClick={() => setOpen(false)}
               disabled={loading}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+              className="bg-background flex-1 rounded-lg border border-border border-border-secondary px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border-secondary-secondary"
             >
               Cancel
             </button>
@@ -204,7 +204,7 @@ export default function MeetSignupConfigButton({
               type="submit"
               form="meet-signup-config"
               disabled={loading}
-              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
               {loading ? "Saving…" : "Save"}
             </button>
@@ -222,7 +222,7 @@ export default function MeetSignupConfigButton({
             Accepting sign-ups
           </label>
 
-          <p className="text-sm text-gray-600 dark:text-zinc-400">
+          <p className="text-sm text-foreground-secondary text-foreground-secondary">
             {eventCount > 0
               ? `Swimmers can choose from the ${eventCount} events in this meet’s order of events.`
               : "No order of events yet — import the meet packet so swimmers have events to choose from."}
@@ -230,36 +230,36 @@ export default function MeetSignupConfigButton({
 
           <div className="grid gap-3 sm:grid-cols-3">
             <div>
-              <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-                Opens (optional)
+              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+                Opens
               </label>
               <input
                 type="datetime-local"
                 value={form.openAt}
                 onChange={(e) => setForm((f) => ({ ...f, openAt: e.target.value }))}
-                className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-                Closes (optional)
+              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+                Closes
               </label>
               <input
                 type="datetime-local"
                 value={form.closeAt}
                 onChange={(e) => setForm((f) => ({ ...f, closeAt: e.target.value }))}
-                className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-                Withdraw by (optional)
+              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+                Withdraw by
               </label>
               <input
                 type="datetime-local"
                 value={form.withdrawUntil}
                 onChange={(e) => setForm((f) => ({ ...f, withdrawUntil: e.target.value }))}
-                className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
               />
               <p className="mt-1 text-[11px] text-gray-400 dark:text-zinc-500">
                 Defaults to close time
@@ -268,7 +268,7 @@ export default function MeetSignupConfigButton({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+            <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
               Instructions
             </label>
             <textarea
@@ -276,13 +276,13 @@ export default function MeetSignupConfigButton({
               onChange={(e) => setForm((f) => ({ ...f, instructions: e.target.value }))}
               rows={3}
               placeholder=""
-              className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+              className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
             />
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
             <div>
-              <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
                 Min Individual Events{" "}
               </label>
               <input
@@ -290,11 +290,11 @@ export default function MeetSignupConfigButton({
                 min={1}
                 value={form.minEvents}
                 onChange={(e) => setForm((f) => ({ ...f, minEvents: e.target.value }))}
-                className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
                 Max Individual Events{" "}
               </label>
               <input
@@ -302,11 +302,11 @@ export default function MeetSignupConfigButton({
                 min={1}
                 value={form.maxEvents}
                 onChange={(e) => setForm((f) => ({ ...f, maxEvents: e.target.value }))}
-                className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
                 Max Relay Events{" "}
               </label>
               <input
@@ -314,7 +314,7 @@ export default function MeetSignupConfigButton({
                 min={1}
                 value={form.maxRelayEvents}
                 onChange={(e) => setForm((f) => ({ ...f, maxRelayEvents: e.target.value }))}
-                className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
               />
             </div>
           </div>
@@ -330,7 +330,7 @@ export default function MeetSignupConfigButton({
           </label>
 
           <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+            <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
               Custom questions
             </label>
             {form.customQuestions.length > 0 && (
@@ -338,7 +338,7 @@ export default function MeetSignupConfigButton({
                 {form.customQuestions.map((q) => (
                   <div
                     key={q.id}
-                    className="rounded-lg border px-3 py-2 space-y-2 dark:border-zinc-700"
+                    className="bg-background rounded-lg border border-border border-border-secondary px-3 py-2 space-y-2 border-border-secondary-secondary"
                   >
                     <div className="flex items-start gap-2">
                       <div className="flex-1 min-w-0">
@@ -347,7 +347,7 @@ export default function MeetSignupConfigButton({
                           {q.type === "choice" ? "Multiple choice" : "Short text"}
                         </p>
                       </div>
-                      <label className="flex items-center gap-1 text-xs text-gray-500 shrink-0">
+                      <label className="flex items-center gap-1 text-xs text-foreground-secondary shrink-0">
                         <input
                           type="checkbox"
                           checked={q.required}
@@ -373,7 +373,7 @@ export default function MeetSignupConfigButton({
                             customQuestions: f.customQuestions.filter((item) => item.id !== q.id),
                           }))
                         }}
-                        className="text-xs text-red-600 dark:text-red-400 shrink-0"
+                        className="text-xs text-error dark:text-error shrink-0"
                       >
                         Remove
                       </button>
@@ -385,29 +385,30 @@ export default function MeetSignupConfigButton({
                           {q.options.map((opt) => (
                             <span
                               key={opt}
-                              className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border dark:border-zinc-700"
+                              className="bg-background inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border border-border border-border-secondary border-border-secondary-secondary"
                             >
                               {opt}
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setForm((f) => ({
-                                    ...f,
-                                    customQuestions: f.customQuestions.map((item) =>
-                                      item.id === q.id
-                                        ? {
-                                            ...item,
-                                            options: item.options.filter((o) => o !== opt),
-                                          }
-                                        : item
-                                    ),
-                                  }))
-                                }
-                                className="text-gray-400 hover:text-red-500"
-                                aria-label={`Remove ${opt}`}
-                              >
-                                ×
-                              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!confirm(`Remove “${opt}” from choices?`)) return
+                  setForm((f) => ({
+                    ...f,
+                    customQuestions: f.customQuestions.map((item) =>
+                      item.id === q.id
+                        ? {
+                            ...item,
+                            options: item.options.filter((o) => o !== opt),
+                          }
+                        : item
+                    ),
+                  }))
+                }}
+                className="text-foreground-tertiary hover:text-red-500"
+                aria-label={`Remove ${opt}`}
+              >
+                ×
+              </button>
                             </span>
                           ))}
                         </div>
@@ -425,13 +426,13 @@ export default function MeetSignupConfigButton({
                               }
                             }}
                             placeholder="Add choice"
-                            className="flex-1 rounded-lg border px-2 py-1.5 text-xs dark:bg-zinc-950 dark:border-zinc-700"
+                            className="flex-1 rounded-lg border border-border border-border-secondary px-2 py-1.5 text-xs bg-background border-border-secondary-secondary"
                           />
                           <button
                             type="button"
                             onClick={() => addOption(q.id)}
                             disabled={!(optionDrafts[q.id] ?? "").trim()}
-                            className="text-xs px-2 py-1.5 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 disabled:opacity-40"
+                            className="bg-background text-xs px-2 py-1.5 border border-border border-border-secondary rounded-lg dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary disabled:opacity-40"
                           >
                             Add
                           </button>
@@ -459,12 +460,12 @@ export default function MeetSignupConfigButton({
                   }
                 }}
                 placeholder="Add question + Enter"
-                className="flex-1 min-w-[10rem] rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                className="flex-1 min-w-[10rem] rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
               />
               <select
                 value={questionType}
                 onChange={(e) => setQuestionType(e.target.value as MeetSignupQuestionType)}
-                className="rounded-lg border px-2 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                className="rounded-lg border border-border border-border-secondary px-2 py-2 text-sm bg-background border-border-secondary-secondary"
               >
                 <option value="text">Short text</option>
                 <option value="choice">Multiple choice</option>
@@ -473,14 +474,14 @@ export default function MeetSignupConfigButton({
                 type="button"
                 onClick={addQuestion}
                 disabled={!questionDraft.trim()}
-                className="text-sm px-3 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 disabled:opacity-40"
+                className="bg-background text-sm px-3 py-2 border border-border border-border-secondary rounded-lg dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary disabled:opacity-40"
               >
                 Add
               </button>
             </div>
           </div>
 
-          {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+          {error && <p className="text-sm text-error dark:text-error">{error}</p>}
         </form>
       </Modal>
     </>

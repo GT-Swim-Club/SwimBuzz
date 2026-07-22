@@ -1,7 +1,63 @@
 @import "tailwindcss";
+@import "./variables.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  /* Fonts */
+  --font-sans: var(--brand-font-family);
+  --font-mono: var(--brand-font-family-code);
+
+  /* Colors - Primary */
+  --color-primary: var(--brand-color-primary);
+  --color-primary-hover: var(--brand-color-primary-hover);
+  --color-primary-active: var(--brand-color-primary-active);
+  --color-primary-text: var(--brand-color-primary-text);
+  --color-primary-bg: var(--brand-color-primary-bg);
+
+  /* Colors - Status */
+  --color-success: var(--brand-color-success);
+  --color-success-bg: var(--brand-color-success-bg);
+  --color-warning: var(--brand-color-warning);
+  --color-warning-bg: var(--brand-color-warning-bg);
+  --color-error: var(--brand-color-error);
+  --color-error-bg: var(--brand-color-error-bg);
+  --color-info: var(--brand-color-info);
+  --color-info-bg: var(--brand-color-info-bg);
+  
+  /* Colors - Links */
+  --color-link: var(--brand-color-link);
+  
+  /* Colors - Text */
+  --color-foreground: var(--brand-color-text);
+  --color-foreground-secondary: var(--brand-color-text-secondary);
+  --color-foreground-tertiary: var(--brand-color-text-tertiary);
+  --color-foreground-quaternary: var(--brand-color-text-quaternary);
+  
+  /* Colors - Fill/Background */
+  --color-fill: var(--brand-color-fill);
+  --color-fill-secondary: var(--brand-color-fill-secondary);
+  --color-fill-tertiary: var(--brand-color-fill-tertiary);
+  --color-fill-quaternary: var(--brand-color-fill-quaternary);
+  --color-background-layout: var(--brand-color-bg-layout);
+  --color-background: var(--brand-color-bg-container);
+  --color-background-elevated: var(--brand-color-bg-elevated);
+  
+  /* Colors - Border */
+  --color-border: var(--brand-color-border);
+  --color-border-secondary: var(--brand-color-border-secondary);
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
+  background-color: var(--color-background-layout);
+  color: var(--color-foreground);
+}
+
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
 }

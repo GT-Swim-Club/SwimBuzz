@@ -12,7 +12,7 @@ export default function RunScraperButton() {
       className={`inline-flex w-full items-center justify-center gap-1.5 text-xs px-3 py-2 border rounded-lg transition-colors md:w-auto md:py-1.5 ${
         connected
           ? "border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
-          : "hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950"
+          : "border-border-secondary bg-fill-secondary hover:border-border hover:bg-fill-secondary dark:bg-background dark:hover:bg-fill-primary"
       }`}
     >
       <span

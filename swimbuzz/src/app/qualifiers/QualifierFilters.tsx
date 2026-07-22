@@ -1,7 +1,8 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { currentSeason, parseSeason, seasonOptions } from "@/lib/season"
+import { currentSeason, parseSeason } from "@/lib/season"
 
 export default function QualifierFilters({
   qualifierCount,
@@ -13,6 +14,14 @@ export default function QualifierFilters({
   const gender = searchParams.get("gender") ?? "all"
   const season =
     parseSeason(searchParams.get("season")) ?? currentSeason()
+  const [fetchedSeasons, setFetchedSeasons] = useState<string[]>([])
+
+  useEffect(() => {
+    fetch("/api/seasons")
+        .then(res => res.ok ? res.json() : [])
+        .then(setFetchedSeasons)
+        .catch(() => setFetchedSeasons([]))
+  }, [])
 
   function update(updates: Record<string, string | null>) {
     const params = new URLSearchParams(searchParams.toString())
@@ -28,7 +37,7 @@ export default function QualifierFilters({
       <select
         value={gender === "F" || gender === "M" || gender === "all" ? gender : "all"}
         onChange={(e) => update({ gender: e.target.value })}
-        className="text-xs border rounded-lg px-2.5 py-1.5 bg-white dark:bg-zinc-900 dark:border-zinc-700"
+        className="text-xs border rounded-lg px-2.5 py-1.5 bg-background border-border"
       >
         <option value="all">All</option>
         <option value="M">Men</option>
@@ -37,15 +46,15 @@ export default function QualifierFilters({
       <select
         value={season}
         onChange={(e) => update({ season: e.target.value })}
-        className="text-xs border rounded-lg px-2.5 py-1.5 bg-white dark:bg-zinc-900 dark:border-zinc-700"
+        className="text-xs border rounded-lg px-2.5 py-1.5 bg-background border-border"
       >
-        {seasonOptions().map((s) => (
+        {fetchedSeasons.map((s) => (
           <option key={s} value={s}>
             {s}
           </option>
         ))}
       </select>
-      <span className="text-xs text-gray-500 dark:text-zinc-400">
+      <span className="text-xs text-foreground-secondary">
         {qualifierCount} qualifier{qualifierCount === 1 ? "" : "s"}
       </span>
     </div>

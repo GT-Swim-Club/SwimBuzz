@@ -6,12 +6,12 @@ import type { StandardsTableRow } from "@/lib/nationals-qualifiers"
 
 function cellClass(value: string) {
   if (value.startsWith("QUAL")) {
-    return "text-[11px] leading-tight text-gray-600 dark:text-zinc-400"
+    return "text-[11px] leading-tight text-foreground-secondary dark:text-foreground-secondary"
   }
   if (value === "--") {
-    return "text-gray-400 dark:text-zinc-500"
+    return "text-foreground-tertiary dark:text-foreground-tertiary"
   }
-  return "tabular-nums text-gray-900 dark:text-zinc-100"
+  return "tabular-nums text-foreground dark:text-foreground"
 }
 
 export default function StandardsTableModal({
@@ -33,7 +33,7 @@ export default function StandardsTableModal({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-indigo-600 hover:underline dark:text-indigo-400"
+        className="text-primary hover:underline dark:text-primary"
       >
         View standards
       </button>
@@ -48,7 +48,7 @@ export default function StandardsTableModal({
               href={sourceUrl}
               target="_blank"
               rel="noreferrer"
-              className="text-indigo-600 hover:underline dark:text-indigo-400"
+              className="text-primary hover:underline dark:text-primary"
             >
               Open source PDF
             </a>
@@ -62,7 +62,7 @@ export default function StandardsTableModal({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="w-full rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+              className="w-full rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary dark:border border-border-secondary dark:hover:bg-fill-secondary"
             >
               Close
             </button>
@@ -72,7 +72,7 @@ export default function StandardsTableModal({
         <div className="overflow-x-auto -mx-1">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 text-xs font-medium text-gray-500 dark:border-zinc-700 dark:text-zinc-400">
+              <tr className="text-xs font-medium text-foreground-tertiary dark:text-foreground-tertiary">
                 <th className="py-1 pr-4 text-right w-[32%]">Women</th>
                 <th className="py-1 px-3 text-center">Event</th>
                 <th className="py-1 pl-4 text-left w-[32%]">Men</th>
@@ -82,12 +82,11 @@ export default function StandardsTableModal({
               {rows.map((row) => (
                 <tr
                   key={row.event}
-                  className="border-b border-gray-100 dark:border-zinc-800"
                 >
                   <td className={`py-0.5 pr-4 text-right ${cellClass(row.women)}`}>
                     {row.women}
                   </td>
-                  <td className="py-0.5 px-3 text-center font-medium text-gray-900 dark:text-zinc-100">
+                  <td className="py-0.5 px-3 text-center font-medium text-foreground dark:text-foreground">
                     {row.event}
                   </td>
                   <td className={`py-0.5 pl-4 text-left ${cellClass(row.men)}`}>
@@ -98,7 +97,7 @@ export default function StandardsTableModal({
             </tbody>
           </table>
           {rows.length === 0 ? (
-            <p className="py-6 text-center text-sm text-gray-500 dark:text-zinc-400">
+            <p className="py-6 text-center text-sm text-foreground-secondary dark:text-foreground-secondary">
               No standards loaded.
             </p>
           ) : null}

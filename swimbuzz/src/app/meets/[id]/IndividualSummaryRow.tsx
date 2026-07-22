@@ -15,6 +15,7 @@ export default function IndividualSummaryRow({
   rowClassName,
   splits,
   editButton,
+  id,
 }: {
   athleteName?: string
   label: string
@@ -24,6 +25,7 @@ export default function IndividualSummaryRow({
   rowClassName?: string
   splits: ResultSplit[]
   editButton?: ReactNode
+  id?: string
 }) {
   const [detailOpen, setDetailOpen] = useState(false)
   const hasSplits = splits.length > 0
@@ -31,15 +33,16 @@ export default function IndividualSummaryRow({
   return (
     <>
       <SummaryRowLayout
+        id={id}
         className={rowClassName}
         label={label}
         details={details}
         onClick={hasSplits ? () => setDetailOpen(true) : undefined}
         right={
           <>
-            {timeDisplay}
+            <span key="time">{timeDisplay}</span>
             {editButton ? (
-              <div onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+              <div key="edit" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
                 {editButton}
               </div>
             ) : null}

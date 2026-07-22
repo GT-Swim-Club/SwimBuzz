@@ -215,7 +215,7 @@ export default function PracticeActions({
             type="button"
             onClick={() => togglePublished(false)}
             disabled={loading || lockedElsewhere}
-            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors disabled:opacity-40"
+            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border border-border-secondary rounded-lg hover:bg-fill-secondary dark:hover:bg-fill-secondary dark:bg-background-elevated transition-colors disabled:opacity-40"
           >
             <UnpublishIcon />
             Unpublish
@@ -225,7 +225,7 @@ export default function PracticeActions({
             type="button"
             onClick={() => togglePublished(true)}
             disabled={loading || lockedElsewhere}
-            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors disabled:opacity-40"
+            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-text hover:bg-primary-hover transition-colors disabled:opacity-40"
           >
             <PublishIcon />
             Publish
@@ -239,7 +239,7 @@ export default function PracticeActions({
               setConfirmTakeOver(true)
             }}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors disabled:opacity-40"
+            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border border-border-secondary rounded-lg hover:bg-fill-secondary dark:hover:bg-fill-secondary dark:bg-background-elevated transition-colors disabled:opacity-40"
           >
             <PencilIcon />
             Take over
@@ -249,7 +249,7 @@ export default function PracticeActions({
             type="button"
             onClick={handleEdit}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors disabled:opacity-40"
+            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border border-border-secondary rounded-lg hover:bg-fill-secondary dark:hover:bg-fill-secondary dark:bg-background-elevated transition-colors disabled:opacity-40"
           >
             <PencilIcon />
             Edit
@@ -262,7 +262,7 @@ export default function PracticeActions({
             setConfirmDelete(true)
           }}
           disabled={loading || lockedElsewhere}
-          className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/40 transition-colors disabled:opacity-40"
+          className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border border-border-secondary border-red-200 text-error rounded-lg hover:bg-red-50 dark:border-red-900/50 dark:text-error dark:hover:bg-red-950/40 transition-colors disabled:opacity-40"
         >
           <TrashIcon />
           Delete
@@ -294,7 +294,7 @@ export default function PracticeActions({
               type="button"
               onClick={() => setConfirmTakeOver(false)}
               disabled={loading}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+              className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary dark:hover:bg-fill-secondary dark:border border-border-secondary"
             >
               Cancel
             </button>
@@ -302,17 +302,17 @@ export default function PracticeActions({
               type="button"
               onClick={confirmAndTakeOver}
               disabled={loading}
-              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
               {loading ? "Taking over…" : "Take over"}
             </button>
           </ModalFooter>
         }
       >
-        <p className="text-sm text-gray-500 dark:text-zinc-400">
+        <p className="text-sm text-foreground-secondary dark:text-foreground-secondary">
           {lockedByOtherUser ? (
             <>
-              <span className="font-medium text-gray-700 dark:text-zinc-200">{lockerName}</span> is
+              <span className="font-medium text-foreground dark:text-zinc-200">{lockerName}</span> is
               currently editing this practice. Taking over will kick them out of the editor and
               discard any unsaved changes they have.
             </>
@@ -338,7 +338,7 @@ export default function PracticeActions({
               type="button"
               onClick={() => setConfirmDelete(false)}
               disabled={loading}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+              className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary dark:hover:bg-fill-secondary dark:border border-border-secondary"
             >
               Cancel
             </button>
@@ -346,15 +346,15 @@ export default function PracticeActions({
               type="button"
               onClick={handleDelete}
               disabled={loading}
-              className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-red-700 disabled:opacity-50"
             >
               {loading ? "Deleting…" : "Delete"}
             </button>
           </ModalFooter>
         }
       >
-        <p className="text-sm text-gray-500 dark:text-zinc-400">
-          Permanently delete <span className="font-medium">{title}</span> and all of its sets and
+        <p className="text-sm text-foreground-secondary dark:text-foreground-secondary">
+          Permanently delete <span className="font-medium text-foreground">{title}</span> and all of its sets and
           comments? This cannot be undone.
         </p>
         {error && <p className="text-sm text-red-500">{error}</p>}

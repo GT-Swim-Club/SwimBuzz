@@ -27,7 +27,7 @@ export function ModalFooter({
 }) {
   return (
     <div
-      className={`shrink-0 flex gap-3 border-t border-gray-200 px-6 py-4 dark:border-zinc-700 ${className}`}
+      className={`shrink-0 flex gap-3 border-t border-border px-6 py-4 dark:border-border ${className}`}
     >
       {children}
     </div>
@@ -72,6 +72,15 @@ export default function Modal({
   useEffect(() => setMounted(true), [])
   useDontReloadWhileBusy(open && busy)
 
+  useEffect(() => {
+    if (!open) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [open])
+
   if (!open || (portal && !mounted)) return null
 
   const hasBody = children != null && children !== false
@@ -90,16 +99,16 @@ export default function Modal({
 
   const panel = (
     <div
-      className={`relative z-10 flex w-full ${MAX_WIDTH[maxWidth]} max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-900 ${panelClassName}`}
+      className={`relative z-10 flex w-full ${MAX_WIDTH[maxWidth]} max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-xl ${panelClassName}`}
       onClick={(e) => e.stopPropagation()}
     >
       {(title || description || header) && (
         <div className={`shrink-0 px-6 pt-6 ${hasBody ? "pb-2" : "pb-4"}`}>
           {title ? (
-            <h2 className="text-lg font-medium text-gray-900 dark:text-zinc-100">{title}</h2>
+            <h2 className="text-lg font-medium text-foreground">{title}</h2>
           ) : null}
           {description ? (
-            <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">{description}</p>
+            <p className="mt-1 text-sm text-foreground-secondary">{description}</p>
           ) : null}
           {header}
         </div>

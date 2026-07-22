@@ -1,15 +1,19 @@
+import LoadingComponent from "./loading"
 import { Suspense } from "react"
 import { getServerSession } from "next-auth"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
-import Link from "next/link"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import ImportRosterButton from "./ImportRosterButton"
 import SyncTimesButton from "./SyncTimesButton"
 import AddAthleteButton from "./AddAthleteButton"
+import AthletesClientWrapper from "./AthletesClientWrapper"
 import RosterFilters, { RosterSearch } from "./RosterFilters"
 import { currentSeason, parseSeason } from "@/lib/season"
 import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete-view-server"
+import Link from "next/link"
+
+export const dynamic = 'force-dynamic'
 
 function matchesAthleteQuery(
     athlete: { firstName: string; lastName: string; nicknames: string[] },
@@ -28,24 +32,21 @@ function matchesAthleteQuery(
     return haystack.includes(q)
   }
 
-export default async function AthletesPage({
-    searchParams,
-  }: {
-    searchParams: Promise<{ gender?: string; season?: string; year?: string; q?: string }>
-  }) {
-    const { gender, season: seasonParam, year: legacyYear, q } = await searchParams
+async function RosterContent({ searchParams }: { searchParams: Promise<{ gender?: string; season?: string; year?: string; q?: string; view?: string }> }) {
+    const { gender, season: seasonParam, year: legacyYear, q, view } = await searchParams
     const query = q?.trim() ?? ""
+    const activeView = view === "list" ? "list" : "gallery"
 
     const season =
       parseSeason(seasonParam ?? legacyYear) ?? currentSeason()
 
-    // if no params, redirect to defaults so URL and UI always match
     if (!gender || (!seasonParam && !legacyYear)) {
         const params = new URLSearchParams({
           gender: gender ?? "all",
           season,
         })
         if (query) params.set("q", query)
+        if (view) params.set("view", view)
         redirect(`/athletes?${params.toString()}`)
     }
 
@@ -82,94 +83,82 @@ export default async function AthletesPage({
     const isCoach = await isStaffUi(session.user.role)
     const showGender = genderFilter == null
   
-    return (
-      <main className="space-y-6">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-2xl font-medium">Roster</h1>
-            <Suspense fallback={null}>
-              <RosterFilters count={sortedAthletes.length} />
-            </Suspense>
-          </div>
-          {isCoach && (
-            <div className="flex items-center gap-3 flex-wrap">
-              <Suspense fallback={null}>
-                <ImportRosterButton />
-              </Suspense>
-              <Suspense fallback={null}>
-                <SyncTimesButton />
-              </Suspense>
-              <Suspense fallback={null}>
-                <AddAthleteButton />
-              </Suspense>
-            </div>
-          )}
-        </div>
+    function buildHref(next: { view?: "gallery" | "list" }) {
+        const params = new URLSearchParams({
+            gender: gender ?? "all",
+            season,
+        })
+        if (query) params.set("q", query)
+        const v = next.view ?? activeView
+        if (v === "list") params.set("view", "list")
+        return `/athletes?${params.toString()}`
+    }
 
-        <Suspense fallback={null}>
-          <RosterSearch />
-        </Suspense>
-  
-        <div className="divide-y border rounded-xl overflow-hidden bg-white dark:bg-zinc-900">
-          {sortedAthletes.map((a) => {
-            const isYou = a.id === viewerAthleteId
-            return (
-            <Link
-              key={a.id}
-              href={`/athletes/${a.id}`}
-              className={
-                "flex items-center gap-4 px-4 py-3 hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors" +
-                (isYou ? " bg-indigo-50/70 dark:bg-indigo-950/30" : "")
-              }
-            >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-indigo-100 text-sm font-medium text-indigo-700 dark:border-zinc-700 dark:bg-indigo-950 dark:text-indigo-300">
-                {a.user?.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={a.user.image}
-                    alt=""
-                    className="h-full w-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <span aria-hidden>
-                    {a.firstName[0]}
-                    {a.lastName[0]}
-                  </span>
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex items-center gap-3 flex-wrap">
+                    <h1 className="text-3xl font-semibold text-foreground">Roster</h1>
+                    <RosterFilters count={sortedAthletes.length} />
+                </div>
+                <div className="flex items-center gap-3 flex-wrap">
+                    <div className="inline-flex rounded-lg border border-border bg-background p-1 text-sm">
+                        <Link
+                            href={buildHref({ view: "gallery" })}
+                            className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 transition-colors ${activeView === "gallery" ? "bg-primary text-primary-text" : "text-foreground-secondary hover:border-border hover:bg-fill-secondary"}`}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 shrink-0" aria-hidden="true">
+                              <rect x="3" y="3" width="7" height="7" />
+                              <rect x="14" y="3" width="7" height="7" />
+                              <rect x="14" y="14" width="7" height="7" />
+                              <rect x="3" y="14" width="7" height="7" />
+                            </svg>
+                        </Link>
+                        <Link
+                            href={buildHref({ view: "list" })}
+                            className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 transition-colors ${activeView === "list" ? "bg-primary text-primary-text" : "text-foreground-secondary hover:border-border hover:bg-fill-secondary"}`}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 shrink-0" aria-hidden="true">
+                              <path d="M8 6h13" />
+                              <path d="M8 12h13" />
+                              <path d="M8 18h13" />
+                              <path d="M3 6h.01" />
+                              <path d="M3 12h.01" />
+                              <path d="M3 18h.01" />
+                            </svg>
+                        </Link>
+                    </div>
+                {isCoach && (
+                    <div className="flex items-center gap-3 flex-wrap">
+                        <ImportRosterButton />
+                        <SyncTimesButton />
+                        <AddAthleteButton />
+                    </div>
                 )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm text-gray-900 dark:text-zinc-100">
-                  {a.lastName}, {a.firstName}
-                  {isYou && (
-                    <span className="font-normal text-indigo-600 dark:text-indigo-400">
-                      {" "}(you)
-                    </span>
-                  )}
-                  {a.nicknames.length > 0 && (
-                    <span className="font-normal text-gray-500 dark:text-zinc-400">
-                      {" "}({a.nicknames.join(", ")})
-                    </span>
-                  )}
-                </p>
-              </div>
-              {showGender ? (
-                <span className="text-[11px] font-medium uppercase tracking-wide text-gray-400 dark:text-zinc-500 shrink-0">
-                  {a.gender === "F" ? "Women" : "Men"}
-                </span>
-              ) : null}
-            </Link>
-            )
-          })}
-  
-          {sortedAthletes.length === 0 && (
-            <p className="text-sm text-gray-500 dark:text-zinc-400 px-4 py-8 text-center">
-              {query
-                ? `No athletes matching “${query}”.`
-                : `No athletes found for this ${showGender ? "season" : "gender and season"}.`}
-            </p>
-          )}
+                </div>
+            </div>
+            
+            <RosterSearch />
+
+            <AthletesClientWrapper
+            athletes={sortedAthletes}
+            viewerAthleteId={viewerAthleteId}
+            showGender={showGender}
+            query={query}
+            view={activeView}
+            />
         </div>
-      </main>
     )
-  }
+}
+
+export default async function AthletesPage(props: {
+    searchParams: Promise<{ gender?: string; season?: string; year?: string; q?: string; view?: string }>
+  }) {
+    return (
+        <main className="space-y-6">
+            <Suspense fallback={<LoadingComponent />}>
+                <RosterContent {...props} />
+            </Suspense>
+        </main>
+    )
+}

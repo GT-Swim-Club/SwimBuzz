@@ -5,25 +5,34 @@ import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import LiveSearch from "@/components/LiveSearch"
-import { formatDateRange } from "@/lib/utils"
 import CreateMeetButton from "./CreateMeetButton"
 import { isStaffUi } from "@/lib/athlete-view-server"
 import { parseSeason, seasonEndYear } from "@/lib/season"
-import { countMeetAthletes } from "@/lib/meet-sheet-summary"
+import MeetsClientWrapper from "./MeetsClientWrapper"
 
 export default async function MeetsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>
+  searchParams: Promise<{ q?: string; view?: string }>
 }) {
   const session = await getServerSession(authOptions)
   if (!session) redirect("/signin")
 
   const isCoach = await isStaffUi(session.user.role)
-  const { q } = await searchParams
+  const { q, view } = await searchParams
   const query = q?.trim() ?? ""
+  const activeView = view === "list" ? "list" : "gallery"
+  
+  function buildHref(next: { view?: "gallery" | "list" }) {
+    const params = new URLSearchParams()
+    if (query) params.set("q", query)
+    const v = next.view ?? activeView
+    if (v === "list") params.set("view", "list")
+    const s = params.toString()
+    return s ? `/meets?${s}` : "/meets"
+  }
 
-  const meets = await prisma.meet.findMany({
+  const meetsRaw = await prisma.meet.findMany({
     where: query
       ?       {
         OR: [
@@ -43,6 +52,12 @@ export default async function MeetsPage({
       course: true,
       season: true,
       school: true,
+      iconUrl: true,
+      bannerUrl: true,
+      packetUrl: true,
+      psychSheetUrl: true,
+      heatSheetUrl: true,
+      resultsUrl: true,
       psychSheetSummary: true,
       heatSheetSummary: true,
       entriesSheetSummary: true,
@@ -51,6 +66,9 @@ export default async function MeetsPage({
       swims: { select: { athleteId: true } },
     },
   })
+
+  // Normalize data for client...
+  const meets = meetsRaw.map(m => ({ ...m, startDate: m.startDate, endDate: m.endDate, swims: m.swims }))
 
   const bySeason = new Map<string, typeof meets>()
   for (const meet of meets) {
@@ -69,89 +87,53 @@ export default async function MeetsPage({
     return b.localeCompare(a)
   })
 
-  const now = Date.now()
-
   return (
     <main className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-medium">Meets</h1>
-        {isCoach && <CreateMeetButton />}
+        <h1 className="text-3xl font-semibold text-foreground">Meets</h1>
+        <div className="flex items-center gap-3">
+            <div className="inline-flex rounded-lg border border-border bg-background p-1 text-sm border-border dark:bg-background">
+                <Link
+                    href={buildHref({ view: "gallery" })}
+                    className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 transition-colors ${activeView === "gallery" ? "bg-primary text-primary-text" : "text-foreground-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:text-foreground-secondary"}`}
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 shrink-0" aria-hidden="true">
+                      <rect x="3" y="3" width="7" height="7" />
+                      <rect x="14" y="3" width="7" height="7" />
+                      <rect x="14" y="14" width="7" height="7" />
+                      <rect x="3" y="14" width="7" height="7" />
+                    </svg>
+                </Link>
+                <Link
+                    href={buildHref({ view: "list" })}
+                    className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 transition-colors ${activeView === "list" ? "bg-primary text-primary-text" : "text-foreground-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary"}`}
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 shrink-0" aria-hidden="true">
+                      <path d="M8 6h13" />
+                      <path d="M8 12h13" />
+                      <path d="M8 18h13" />
+                      <path d="M3 6h.01" />
+                      <path d="M3 12h.01" />
+                      <path d="M3 18h.01" />
+                    </svg>
+                </Link>
+            </div>
+            {isCoach && <CreateMeetButton />}
+        </div>
       </div>
 
       <Suspense fallback={null}>
         <LiveSearch pathname="/meets" placeholder="Search meets by name, school, or location…" />
       </Suspense>
 
-      {meets.length === 0 ? (
-        <div className="border rounded-xl px-4 py-12 text-center text-sm text-gray-500 dark:text-zinc-400 bg-white dark:bg-zinc-900">
-          {query
-            ? "No meets match your search."
-            : `No meets yet.${isCoach ? " Create one to start tracking results." : ""}`}
-        </div>
-      ) : (
-        <div className="space-y-8">
-          {seasons.map((season) => {
-            const seasonMeets = bySeason.get(season) ?? []
-            return (
-              <section key={season} className="space-y-3">
-                <h2 className="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide">
-                  {season}
-                  <span className="ml-2 font-normal normal-case tracking-normal text-gray-400 dark:text-zinc-500">
-                    {seasonMeets.length} meet{seasonMeets.length === 1 ? "" : "s"}
-                  </span>
-                </h2>
-                <div className="divide-y border rounded-xl overflow-hidden bg-white dark:bg-zinc-900">
-                  {seasonMeets.map((m) => {
-                    const end = m.endDate ?? m.startDate
-                    const upcoming = new Date(end).getTime() >= now
-                    const athleteCount = countMeetAthletes({
-                      psychSheetSummary: m.psychSheetSummary,
-                      heatSheetSummary: m.heatSheetSummary,
-                      entriesSheetSummary: m.entriesSheetSummary,
-                      relayResultsSummary: m.relayResultsSummary,
-                      resultStatusesSummary: m.resultStatusesSummary,
-                      swimAthleteIds: m.swims.map((s) => s.athleteId),
-                    })
-                    return (
-                      <Link
-                        key={m.id}
-                        href={`/meets/${m.id}`}
-                        className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium text-sm text-gray-900 dark:text-zinc-100 truncate">
-                              {m.name}
-                            </p>
-                            {upcoming && (
-                              <span className="text-[10px] uppercase tracking-wide rounded-full bg-indigo-100 text-indigo-700 px-2 py-0.5 dark:bg-indigo-950 dark:text-indigo-300">
-                                Upcoming
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-xs text-gray-500 dark:text-zinc-400">
-                            {formatDateRange(m.startDate, m.endDate)}
-                            {m.location ? ` · ${m.location}` : ""}
-                            {m.school ? ` · ${m.school}` : ""}
-                          </p>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <p className="text-sm font-medium text-gray-700 dark:text-zinc-300">
-                            {m.course}
-                          </p>
-                          <p className="text-xs text-gray-400 dark:text-zinc-500">
-                            {athleteCount} athlete{athleteCount === 1 ? "" : "s"}
-                          </p>
-                        </div>
-                      </Link>
-                    )
-                  })}
-                </div>
-              </section>
-            )
-          })}
-        </div>
-      )}
+      <MeetsClientWrapper
+        meets={meets}
+        bySeason={Object.fromEntries(bySeason)}
+        seasons={seasons}
+        isCoach={isCoach}
+        query={query}
+        view={activeView}
+      />
     </main>
   )
 }

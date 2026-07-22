@@ -74,7 +74,7 @@ function renderInlineSegment(text: string): React.ReactNode[] {
               href: url,
               target: "_blank",
               rel: "noopener noreferrer",
-              className: "text-indigo-600 hover:underline dark:text-indigo-400",
+              className: "text-primary hover:underline",
             },
             label
           )

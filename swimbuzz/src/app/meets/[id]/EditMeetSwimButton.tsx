@@ -139,9 +139,9 @@ export default function EditMeetSwimButton({
       <button
         type="button"
         onClick={openModal}
-        className={
+          className={
           className ??
-          "p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 disabled:opacity-50 transition-colors"
+          "p-1 rounded text-foreground-tertiary hover:text-foreground dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:text-foreground-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary/80 disabled:opacity-50 transition-colors"
         }
         aria-label="Edit swim"
       >
@@ -170,7 +170,7 @@ export default function EditMeetSwimButton({
               type="button"
               onClick={handleDelete}
               disabled={loading}
-              className="rounded-lg border border-red-200 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950/30 disabled:opacity-50"
+              className="bg-background rounded-lg border border-border border-border-secondary border-red-200 px-4 py-2.5 text-sm font-medium text-error hover:bg-red-50 dark:border-red-900 dark:text-error dark:hover:bg-red-950/30 disabled:opacity-50"
             >
               Delete
             </button>
@@ -178,14 +178,14 @@ export default function EditMeetSwimButton({
               type="button"
               onClick={() => setOpen(false)}
               disabled={loading}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+              className="flex-1 rounded-lg border border-border border-border-secondary px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border-secondary-secondary"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !form.time}
-              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
               {loading ? "Saving…" : "Save swim"}
             </button>
@@ -193,14 +193,14 @@ export default function EditMeetSwimButton({
         }
       >
         <div>
-          <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-            Athlete
+          <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+            Athlete <span className="text-red-500">*</span>
           </label>
           <select
             required
             value={form.athleteId}
             onChange={(e) => setForm((f) => ({ ...f, athleteId: e.target.value }))}
-            className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+            className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
           >
             {athletes.map((a) => (
               <option key={a.id} value={a.id}>
@@ -212,13 +212,13 @@ export default function EditMeetSwimButton({
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+            <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
               Event
             </label>
             <select
               value={form.event}
               onChange={(e) => setForm((f) => ({ ...f, event: e.target.value }))}
-              className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+              className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
             >
               {EVENTS.map((ev) => (
                 <option key={ev}>{ev}</option>
@@ -226,13 +226,13 @@ export default function EditMeetSwimButton({
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+            <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
               Course
             </label>
             <select
               value={form.course}
               onChange={(e) => setForm((f) => ({ ...f, course: e.target.value }))}
-              className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+              className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
             >
               <option>SCY</option>
               <option>LCM</option>
@@ -243,8 +243,8 @@ export default function EditMeetSwimButton({
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-              Time
+            <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+              Time <span className="text-red-500">*</span>
             </label>
             <input
               required
@@ -252,24 +252,24 @@ export default function EditMeetSwimButton({
               placeholder="1:23.45 or 58.32"
               value={form.time}
               onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))}
-              className="w-full rounded-lg border px-3 py-2 text-sm font-mono dark:bg-zinc-950 dark:border-zinc-700"
+              className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm font-mono bg-background border-border-secondary-secondary"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-              Date
+            <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+              Date <span className="text-red-500">*</span>
             </label>
             <input
               required
               type="date"
               value={form.date}
               onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-              className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+              className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
             />
           </div>
         </div>
 
-        {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+        {error && <p className="text-sm text-error dark:text-error">{error}</p>}
       </Modal>
     </>
   )

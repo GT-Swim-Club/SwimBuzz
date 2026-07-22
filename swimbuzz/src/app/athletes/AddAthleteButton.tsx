@@ -78,7 +78,7 @@ export default function AddAthleteButton() {
       <button
         type="button"
         onClick={openModal}
-        className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-primary text-primary-text hover:bg-primary-hover transition-colors"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -88,13 +88,13 @@ export default function AddAthleteButton() {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="h-3.5 w-3.5 shrink-0"
+          className="h-4 w-4 shrink-0"
           aria-hidden="true"
         >
           <line x1="12" y1="5" x2="12" y2="19" />
           <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
-        Athlete
+        Add athlete
       </button>
 
       <Modal
@@ -111,14 +111,14 @@ export default function AddAthleteButton() {
               type="button"
               onClick={() => setOpen(false)}
               disabled={loading}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+              className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !swimCloudIdOk}
-              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
               {loading ? "Adding…" : "Add athlete"}
             </button>
@@ -127,45 +127,45 @@ export default function AddAthleteButton() {
       >
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-                    First name
+                  <label className="block text-xs font-medium text-foreground-secondary dark:text-foreground-secondary mb-1">
+                    First name <span className="text-red-500">*</span>
                   </label>
                   <input
                     required
                     value={form.firstName}
                     onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
-                    className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                    className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm dark:bg-background-elevated dark:border border-border-secondary"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-                    Last name
+                  <label className="block text-xs font-medium text-foreground-secondary dark:text-foreground-secondary mb-1">
+                    Last name <span className="text-red-500">*</span>
                   </label>
                   <input
                     required
                     value={form.lastName}
                     onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
-                    className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                    className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm dark:bg-background-elevated dark:border border-border-secondary"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-                  Email
+                  <label className="block text-xs font-medium text-foreground-secondary dark:text-foreground-secondary mb-1">
+                  Email <span className="text-red-500">*</span>
                 </label>
                 <input
                   required
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                  className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                  className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm dark:bg-background-elevated dark:border border-border-secondary"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-                  SwimCloud ID <span className="font-normal text-gray-400">(optional)</span>
+                  <label className="block text-xs font-medium text-foreground-secondary dark:text-foreground-secondary mb-1">
+                  SwimCloud ID
                 </label>
                 <input
                   type="text"
@@ -183,7 +183,7 @@ export default function AddAthleteButton() {
                         .slice(0, SWIMCLOUD_ID_MAX_LENGTH),
                     }))
                   }
-                  className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                  className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm dark:bg-background-elevated dark:border border-border-secondary"
                   aria-invalid={showSwimCloudHint}
                   aria-describedby={showSwimCloudHint ? "add-swimcloud-id-hint" : undefined}
                 />
@@ -198,8 +198,8 @@ export default function AddAthleteButton() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-                  Alternate names <span className="font-normal text-gray-400">(optional)</span>
+                  <label className="block text-xs font-medium text-foreground-secondary dark:text-foreground-secondary mb-1">
+                  Alternate names
                 </label>
                 <NicknameTagsInput
                   value={form.nicknames}
@@ -208,13 +208,13 @@ export default function AddAthleteButton() {
                   showAddButton
                   placeholder="Add alternate name"
                 />
-                <p className="mt-1 text-xs text-gray-400 dark:text-zinc-500">
+                <p className="mt-1 text-xs text-foreground-tertiary dark:text-foreground-tertiary">
                   Names used to match results to this athlete.
                 </p>
               </div>
 
         {error && (
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          <p className="text-sm text-error dark:text-error">{error}</p>
         )}
       </Modal>
     </>

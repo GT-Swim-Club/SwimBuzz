@@ -6,7 +6,7 @@ import { FormattedText } from "@/components/FormattedText"
 import Modal, { ModalFooter } from "@/components/Modal"
 
 const buttonClass =
-  "inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
+  "inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-lg dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary bg-background transition-colors"
 
 type TravelLinkItem = {
   type: "link"
@@ -68,7 +68,7 @@ export default function TravelInfoButtons({ items }: { items: TravelInfoItem[] }
             <button
               type="button"
               onClick={() => setOpenText(null)}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+              className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border"
             >
               Close
             </button>

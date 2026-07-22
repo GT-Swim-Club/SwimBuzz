@@ -13,6 +13,7 @@ export default function SummaryRowLayout({
   right,
   onClick,
   className = "",
+  id,
 }: {
   label: ReactNode
   details?: string
@@ -20,6 +21,7 @@ export default function SummaryRowLayout({
   right: ReactNode
   onClick?: () => void
   className?: string
+  id?: string
 }) {
   const rowRef = useRef<HTMLLIElement>(null)
   const labelRef = useRef<HTMLSpanElement>(null)
@@ -82,9 +84,9 @@ export default function SummaryRowLayout({
   }, [label, details, coachNote])
 
   const leftClassName =
-    "flex min-w-0 flex-1 items-baseline overflow-hidden text-left text-gray-800 dark:text-zinc-200 " +
+    "flex min-w-0 flex-1 items-baseline overflow-hidden text-left text-foreground " +
     (onClick
-      ? "hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+      ? "hover:text-primary transition-colors"
       : "")
 
   const left = (
@@ -96,7 +98,7 @@ export default function SummaryRowLayout({
         <span
           ref={detailsRef}
           className={
-            "font-sans text-gray-400 dark:text-zinc-500 " +
+            "font-sans text-foreground-tertiary " +
             (truncateDetails ? "min-w-0 truncate" : "whitespace-nowrap")
           }
           style={{
@@ -111,7 +113,7 @@ export default function SummaryRowLayout({
       {coachNote ? (
         <span
           ref={coachRef}
-          className="shrink-0 whitespace-nowrap text-xs text-amber-600 dark:text-amber-400"
+          className="shrink-0 whitespace-nowrap text-xs text-info"
         >
           {" · "}
           {coachNote}
@@ -122,6 +124,7 @@ export default function SummaryRowLayout({
 
   return (
     <li
+      id={id}
       ref={rowRef}
       className={`flex items-center justify-between gap-4 px-4 py-2 text-sm ${className}`}
     >
@@ -134,7 +137,7 @@ export default function SummaryRowLayout({
       )}
       <div
         ref={rightRef}
-        className="flex shrink-0 items-center gap-2 text-right text-gray-900 dark:text-zinc-100"
+        className="flex shrink-0 items-center justify-end gap-2 text-right text-foreground"
       >
         {right}
       </div>

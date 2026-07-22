@@ -6,6 +6,7 @@ export type MeetResourceKind =
   | "heat"
   | "results"
   | "liveStream"
+  | "photos"
 
 const svgProps = {
   xmlns: "http://www.w3.org/2000/svg",
@@ -85,5 +86,13 @@ export default function MeetResourceIcon({ kind }: { kind: MeetResourceKind }) {
           <rect x="2" y="6" width="14" height="12" rx="2" />
         </svg>
       )
+    case "photos":
+      return (
+        <svg {...svgProps}>
+          <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+          <circle cx="12" cy="13" r="3" />
+        </svg>
+      )
   }
 }
+

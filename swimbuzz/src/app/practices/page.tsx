@@ -237,9 +237,9 @@ export default async function PracticesPage({
 
   const monthLabel = `${MONTH_NAMES[calendarMonth.getUTCMonth()]} ${calendarMonth.getUTCFullYear()}`
   const weekLabel = formatDateRange(weekStart, addUtcDays(weekStart, 6))
-  const todayCardClass = "ring-2 ring-indigo-500/70 dark:ring-indigo-400/50"
+  const todayCardClass = "ring-2 ring-primary/70"
   const todayButtonActiveClass =
-    "border-indigo-200 bg-indigo-50 text-indigo-700 pointer-events-none dark:border-indigo-900/50 dark:bg-indigo-950/40 dark:text-indigo-300"
+    "border-primary bg-primary-bg text-primary pointer-events-none"
   const firstWeekday = calendarMonth.getUTCDay()
   const daysInMonth = new Date(
     Date.UTC(calendarMonth.getUTCFullYear(), calendarMonth.getUTCMonth() + 1, 0)
@@ -254,7 +254,7 @@ export default async function PracticesPage({
   })
 
   const navButtonClass =
-    "rounded-lg border px-2.5 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 sm:px-3"
+    "rounded-lg border border-border-secondary px-2.5 py-2 text-sm font-medium text-foreground-secondary transition-colors hover:bg-fill-secondary sm:px-3 bg-background border-border-secondary"
 
   type DayPractice = (typeof practices)[number]
 
@@ -288,19 +288,19 @@ export default async function PracticesPage({
         href={practiceHref(practice.id)}
         todayClassName={todayCardClass}
         className={
-          "flex min-h-0 flex-1 flex-col rounded-lg border border-indigo-100 bg-indigo-50 px-2 py-1.5 text-left transition-colors hover:bg-indigo-100 dark:border-indigo-900/50 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/40 " +
+          "flex min-h-0 flex-1 flex-col rounded-lg border border-border-secondary bg-[#fcf8e8] dark:bg-[#3d3320] px-2 py-1.5 text-left transition-colors hover:bg-[#f2e6b6] dark:hover:bg-[#52442b] " +
           (tall ? "px-3 py-2.5" : "")
         }
       >
         <div className="flex items-start justify-between gap-1">
           <DayLabel dayKey={key}>{dayLabel}</DayLabel>
           {isCoach && !practice.published && (
-            <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+            <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-warning" />
           )}
         </div>
         <p
           className={
-            "mt-1 font-medium leading-snug text-indigo-950 dark:text-indigo-100 " +
+            "mt-1 font-medium leading-snug text-foreground " +
             (tall
               ? "line-clamp-4 text-sm"
               : "line-clamp-2 text-xs sm:text-sm")
@@ -311,16 +311,16 @@ export default async function PracticesPage({
         {tags.length > 0 && (
           <div className="mt-1.5 flex flex-wrap gap-1">
             {tags.slice(0, tall ? 6 : 4).map((t) => (
-              <span
+                <span
                 key={t}
-                className="rounded bg-indigo-100/80 px-1 py-0.5 text-[9px] uppercase tracking-wide text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300"
+                className="rounded bg-[#fcf8e8] dark:bg-[#3d3320] px-1 py-0.5 text-[9px] uppercase tracking-wide text-foreground-tertiary"
               >
                 {t}
               </span>
             ))}
           </div>
         )}
-        <p className="mt-auto pt-1 text-[10px] text-indigo-700/80 dark:text-indigo-300/80 sm:text-xs">
+        <p className="mt-auto pt-1 text-[10px] text-foreground-secondary sm:text-xs">
           {practice._count.sets} set{practice._count.sets === 1 ? "" : "s"}
           {totalDistance > 0 ? ` · ${totalDistance.toLocaleString()}` : ""}
         </p>
@@ -336,28 +336,14 @@ export default async function PracticesPage({
     strokeWidth: 2,
     strokeLinecap: "round" as const,
     strokeLinejoin: "round" as const,
-    className: "h-3.5 w-3.5 shrink-0",
+    className: "h-4 w-4 shrink-0",
     "aria-hidden": true as const,
   }
 
   const viewToggle = (
-    <div className="inline-flex rounded-lg border border-gray-200 bg-white p-1 text-sm dark:border-zinc-700 dark:bg-zinc-950">
+    <div className="inline-flex rounded-lg border border-border-secondary bg-background p-1 text-sm">
       {(
         [
-          {
-            view: "week" as const,
-            label: "Week",
-            icon: (
-              <svg {...viewIconProps}>
-                <rect width="18" height="18" x="3" y="4" rx="2" />
-                <path d="M16 2v4" />
-                <path d="M8 2v4" />
-                <path d="M3 10h18" />
-                <path d="M10 14h4" />
-                <path d="M10 18h4" />
-              </svg>
-            ),
-          },
           {
             view: "month" as const,
             label: "Month",
@@ -377,6 +363,20 @@ export default async function PracticesPage({
             ),
           },
           {
+            view: "week" as const,
+            label: "Week",
+            icon: (
+              <svg {...viewIconProps}>
+                <rect width="18" height="18" x="3" y="4" rx="2" />
+                <path d="M16 2v4" />
+                <path d="M8 2v4" />
+                <path d="M3 10h18" />
+                <path d="M10 14h4" />
+                <path d="M10 18h4" />
+              </svg>
+            ),
+          },
+          {
             view: "list" as const,
             label: "List",
             icon: (
@@ -392,18 +392,17 @@ export default async function PracticesPage({
           },
         ] as const
       ).map((option) => (
-        <Link
+                <Link
           key={option.view}
           href={buildHref({ view: option.view })}
           className={
-            "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 transition-colors sm:px-3 " +
+            "inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 transition-colors " +
             (activeView === option.view
-              ? "bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
-              : "text-gray-600 hover:bg-gray-100 dark:text-zinc-300 dark:hover:bg-zinc-800")
+              ? "bg-primary text-primary-text"
+              : "text-foreground-secondary hover:bg-fill-secondary")
           }
         >
           {option.icon}
-          <span className="hidden sm:inline">{option.label}</span>
         </Link>
       ))}
     </div>
@@ -412,13 +411,13 @@ export default async function PracticesPage({
   return (
     <main className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-medium">Practices</h1>
+        <h1 className="text-3xl font-semibold text-foreground">Practices</h1>
         <div className="flex items-center gap-2">
           {viewToggle}
           {isCoach && (
             <Link
               href="/practices/new"
-              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-primary text-primary-text hover:bg-primary-hover transition-colors"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -449,10 +448,10 @@ export default async function PracticesPage({
           <Link
             href={buildHref({ tags: [] })}
             className={
-              "text-xs px-2.5 py-1 rounded-full border transition-colors " +
+              "text-xs px-2.5 py-1 rounded-full border border-border-secondary transition-colors " +
               (activeTags.length === 0
-                ? "bg-gray-900 border-gray-900 text-white dark:bg-zinc-100 dark:border-zinc-100 dark:text-zinc-900"
-                : "border-gray-300 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800")
+                ? "bg-foreground text-background border-foreground"
+                : "border-border-secondary text-foreground-secondary hover:bg-fill-secondary")
             }
           >
             All
@@ -464,10 +463,10 @@ export default async function PracticesPage({
                 key={t}
                 href={toggleTagHref(t)}
                 className={
-                  "text-xs px-2.5 py-1 rounded-full border transition-colors " +
+                  "text-xs px-2.5 py-1 rounded-full border border-border-secondary transition-colors " +
                   (selected
-                    ? "bg-indigo-600 border-indigo-600 text-white"
-                    : "border-gray-300 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800")
+                    ? "bg-primary border-primary text-primary-text"
+                    : "border-border-secondary text-foreground-secondary hover:bg-fill-secondary")
                 }
               >
                 {t}
@@ -499,10 +498,10 @@ export default async function PracticesPage({
               />
             </div>
             <div className="min-w-0 text-center">
-              <h2 className="truncate text-base font-medium text-gray-900 dark:text-zinc-100 sm:text-lg">
+              <h2 className="truncate text-base font-medium text-foreground sm:text-lg">
                 {weekLabel}
               </h2>
-              <p className="text-xs text-gray-500 dark:text-zinc-400">
+              <p className="text-xs text-foreground-secondary">
                 {practices.length} practice{practices.length === 1 ? "" : "s"}
               </p>
             </div>
@@ -524,7 +523,7 @@ export default async function PracticesPage({
               return (
                 <div
                   key={key}
-                  className="min-h-16 rounded-xl border bg-white p-2 dark:border-zinc-700 dark:bg-zinc-900"
+                  className="min-h-16 rounded-xl border border-border-secondary bg-background p-2 border-border-secondary"
                 >
                   {renderPracticeCell({
                     dayKey: key,
@@ -538,8 +537,8 @@ export default async function PracticesPage({
           </div>
 
           {/* Desktop: 7-column week grid */}
-          <div className="hidden overflow-hidden rounded-xl border bg-white dark:border-zinc-700 dark:bg-zinc-900 md:block">
-            <div className="grid grid-cols-7 border-b bg-gray-50 text-center text-xs font-medium uppercase tracking-wide text-gray-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-400">
+          <div className="hidden overflow-hidden rounded-xl border border-border-secondary bg-background border-border-secondary md:block">
+            <div className="grid grid-cols-7 border-b border-border-secondary bg-fill-secondary text-center text-xs font-medium uppercase tracking-wide text-foreground-secondary">
               {WEEKDAYS.map((weekday) => (
                 <div key={weekday} className="px-2 py-2">
                   {weekday}
@@ -553,7 +552,7 @@ export default async function PracticesPage({
                 return (
                   <div
                     key={key}
-                    className="flex min-h-52 flex-col border-b border-r p-1.5 last:border-r-0 dark:border-zinc-800"
+                    className="flex min-h-52 flex-col border-b border-r border-border-secondary p-1.5 last:border-r-0"
                   >
                     {renderPracticeCell({
                       dayKey: key,
@@ -591,10 +590,10 @@ export default async function PracticesPage({
               />
             </div>
             <div className="min-w-0 text-center">
-              <h2 className="truncate text-base font-medium text-gray-900 dark:text-zinc-100 sm:text-lg">
+              <h2 className="truncate text-base font-medium text-foreground sm:text-lg">
                 {monthLabel}
               </h2>
-              <p className="text-xs text-gray-500 dark:text-zinc-400">
+              <p className="text-xs text-foreground-secondary">
                 {practices.length} practice{practices.length === 1 ? "" : "s"}
               </p>
             </div>
@@ -610,8 +609,8 @@ export default async function PracticesPage({
           </div>
 
           <div className="-mx-4 overflow-x-auto px-4 md:mx-0 md:overflow-visible md:px-0">
-            <div className="min-w-[28rem] overflow-hidden rounded-xl border bg-white dark:border-zinc-700 dark:bg-zinc-900 md:min-w-0">
-              <div className="grid grid-cols-7 border-b bg-gray-50 text-center text-xs font-medium uppercase tracking-wide text-gray-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-400">
+            <div className="min-w-[28rem] overflow-hidden rounded-xl border border-border-secondary bg-background md:min-w-0">
+              <div className="grid grid-cols-7 border-b border-border-secondary bg-fill-secondary text-center text-xs font-medium uppercase tracking-wide text-foreground-secondary">
                 {WEEKDAYS.map((weekday, i) => (
                   <div key={weekday} className="px-1 py-2 sm:px-2">
                     <span className="sm:hidden">{WEEKDAYS_SHORT[i]}</span>
@@ -626,7 +625,7 @@ export default async function PracticesPage({
                   return (
                     <div
                       key={key}
-                      className="flex min-h-24 flex-col border-b border-r p-1 last:border-r-0 dark:border-zinc-800 sm:min-h-28 sm:p-1.5 md:min-h-36"
+                      className="flex min-h-24 flex-col border-b border-r border-border-secondary p-1 last:border-r-0 sm:min-h-28 sm:p-1.5 md:min-h-36"
                     >
                       {inMonth ? (
                         renderPracticeCell({
@@ -635,7 +634,7 @@ export default async function PracticesPage({
                           practice,
                         })
                       ) : (
-                        <div className="px-1 text-xs font-medium text-gray-300 dark:text-zinc-600">
+                        <div className="px-1 text-xs font-medium text-foreground-tertiary">
                           {date.getUTCDate()}
                         </div>
                       )}
@@ -647,7 +646,7 @@ export default async function PracticesPage({
           </div>
         </section>
       ) : practices.length === 0 ? (
-        <div className="border rounded-xl px-4 py-12 text-center text-sm text-gray-500 dark:text-zinc-400 bg-white dark:bg-zinc-900">
+        <div className="border border-border-secondary rounded-xl px-4 py-12 text-center text-sm text-foreground-secondary text-foreground-secondary bg-background bg-background">
           {query || activeTags.length
             ? "No practices match your search."
             : isCoach
@@ -665,21 +664,21 @@ export default async function PracticesPage({
                 key={p.id}
                 dayKey={key}
                 href={practiceHref(p.id)}
-                todayClassName="!border-indigo-500 dark:!border-indigo-400"
-                className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white px-4 py-3 transition-colors hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+                todayClassName="!border-primary"
+                className="flex items-center gap-4 rounded-xl border border-border-secondary bg-background px-4 py-3 transition-colors hover:bg-fill-secondary"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="font-medium text-sm text-gray-900 dark:text-zinc-100 truncate">
+                    <p className="font-medium text-sm text-foreground truncate">
                       {p.title}
                     </p>
                     {isCoach && !p.published && (
-                      <span className="text-[10px] uppercase tracking-wide rounded-full bg-amber-100 text-amber-700 px-2 py-0.5 dark:bg-amber-950 dark:text-amber-300 shrink-0">
+                      <span className="text-[10px] uppercase tracking-wide rounded-full bg-fill-secondary text-foreground-secondary px-2 py-0.5 shrink-0">
                         Draft
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-zinc-400">
+                  <p className="text-xs text-foreground-secondary">
                     {p.date ? formatSwimDate(p.date) : "No date"}
                     {" · "}
                     {p._count.sets} set{p._count.sets === 1 ? "" : "s"}
@@ -690,7 +689,7 @@ export default async function PracticesPage({
                       {tags.slice(0, 6).map((t) => (
                         <span
                           key={t}
-                          className="text-[10px] uppercase tracking-wide rounded bg-gray-100 dark:bg-zinc-800 px-1.5 py-0.5 text-gray-500 dark:text-zinc-400"
+                          className="text-[10px] uppercase tracking-wide rounded bg-fill-secondary px-1.5 py-0.5 text-foreground-tertiary"
                         >
                           {t}
                         </span>
@@ -698,7 +697,7 @@ export default async function PracticesPage({
                     </div>
                   )}
                 </div>
-                <span className="text-gray-300 dark:text-zinc-600">→</span>
+                <span className="text-border">→</span>
               </PracticeCardShell>
             )
           })}

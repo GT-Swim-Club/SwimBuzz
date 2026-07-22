@@ -17,6 +17,7 @@ export default function RelaySummaryRow({
   canEdit,
   meetId,
   athletes = [],
+  id,
 }: {
   entry: SheetEntry
   label: string
@@ -28,12 +29,14 @@ export default function RelaySummaryRow({
   canEdit?: boolean
   meetId?: string
   athletes?: Array<{ id: string; name: string; gender?: "M" | "F" }>
+  id?: string
 }) {
   const [detailOpen, setDetailOpen] = useState(false)
 
   return (
     <>
       <SummaryRowLayout
+        id={id}
         className={rowClassName}
         label={label}
         details={details}
@@ -41,9 +44,9 @@ export default function RelaySummaryRow({
         onClick={() => setDetailOpen(true)}
         right={
           <>
-            {timeDisplay}
+            <span key="time">{timeDisplay}</span>
             {canEdit && meetId ? (
-              <div onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+              <div key="edit" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
                 <EditRelayButton
                   meetId={meetId}
                   athletes={athletes}

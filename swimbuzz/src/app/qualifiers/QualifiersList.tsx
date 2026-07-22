@@ -10,29 +10,29 @@ export default function QualifiersList({
 }) {
   if (qualifiers.length === 0) {
     return (
-      <p className="text-sm text-gray-500 dark:text-zinc-400 px-4 py-8 text-center border rounded-xl bg-white dark:bg-zinc-900">
+      <p className="text-sm text-foreground-secondary px-4 py-8 text-center border border-border-secondary rounded-xl bg-background">
         {emptyMessage}
       </p>
     )
   }
 
   return (
-    <div className="divide-y border rounded-xl overflow-hidden bg-white dark:bg-zinc-900">
+    <div className="divide-y border border-border-secondary rounded-xl overflow-hidden bg-background">
       {qualifiers.map((athlete) => (
         <div key={athlete.athleteId} className="px-4 py-3 space-y-2">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-medium text-indigo-700 shrink-0 dark:bg-indigo-950 dark:text-indigo-300">
+            <div className="w-9 h-9 rounded-full bg-primary-bg flex items-center justify-center text-sm font-medium text-primary shrink-0">
               {athlete.firstName[0]}
               {athlete.lastName[0]}
             </div>
             <div className="flex-1 min-w-0">
               <Link
                 href={`/athletes/${athlete.athleteId}`}
-                className="font-medium text-sm text-gray-900 hover:text-indigo-600 dark:text-zinc-100 dark:hover:text-indigo-400"
+                className="font-medium text-sm text-foreground hover:text-primary"
               >
                 {athlete.lastName}, {athlete.firstName}
               </Link>
-              <p className="text-[11px] uppercase tracking-wide text-gray-400 dark:text-zinc-500">
+              <p className="text-[11px] uppercase tracking-wide text-foreground-tertiary">
                 {athlete.gender === "F" ? "Women" : "Men"} · {athlete.events.length} event
                 {athlete.events.length === 1 ? "" : "s"}
               </p>
@@ -45,10 +45,10 @@ export default function QualifiersList({
                 className="flex items-baseline justify-between gap-3 text-sm"
               >
                 <div className="min-w-0">
-                  <span className="font-medium text-gray-900 dark:text-zinc-100">
+                  <span className="font-medium text-foreground">
                     {ev.event}
                   </span>
-                  <span className="text-gray-500 dark:text-zinc-400">
+                  <span className="text-foreground-secondary">
                     {" "}
                     · {ev.meetName}
                     {ev.meetId ? (
@@ -57,7 +57,7 @@ export default function QualifiersList({
                         (
                         <Link
                           href={`/meets/${ev.meetId}`}
-                          className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                          className="hover:text-primary"
                         >
                           {ev.date}
                         </Link>
@@ -69,10 +69,10 @@ export default function QualifiersList({
                   </span>
                 </div>
                 <div className="shrink-0 text-right tabular-nums">
-                  <span className="font-medium text-emerald-700 dark:text-emerald-400">
+                  <span className="font-medium text-success">
                     {ev.time}
                   </span>
-                  <span className="text-xs text-gray-400 dark:text-zinc-500">
+                  <span className="text-xs text-foreground-tertiary">
                     {" "}
                     / {ev.cut}
                   </span>

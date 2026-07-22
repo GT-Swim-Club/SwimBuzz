@@ -116,7 +116,7 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
     <div className="space-y-6">
       {/* SwimCloud import */}
       <section>
-        <h2 className="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide mb-3">
+        <h2 className="text-sm font-medium text-foreground-secondary text-foreground-secondary uppercase tracking-wide mb-3">
           Import from SwimCloud
         </h2>
         {swimCloudId ? (
@@ -125,7 +125,7 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
               <button
                 onClick={handleScrape}
                 disabled={scrapeStatus === "loading"}
-                className="text-sm px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
+                className="text-sm px-4 py-2 border border-border-secondary rounded-lg hover:bg-fill-secondary dark:hover:bg-fill-secondary dark:bg-background-elevated disabled:opacity-40 transition-colors"
               >
                 {scrapeStatus === "loading" ? "Importing..." : "Import times"}
               </button>
@@ -136,15 +136,15 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
               )}
             </div>
             {scrapeStatus === "loading" && (
-              <p className="text-xs text-gray-500 dark:text-zinc-400">
+              <p className="text-xs text-foreground-secondary text-foreground-secondary">
                 Scraping SwimCloud events — typically 1–2 minutes…
               </p>
             )}
             {scrapeStatus === "loading" && <DontReloadNotice />}
           </div>
         ) : (
-          <div className="border rounded-xl p-4 bg-white dark:bg-zinc-900 space-y-3">
-            <p className="text-sm text-gray-500 dark:text-zinc-400">
+          <div className="border border-border-secondary rounded-xl p-4 bg-background dark:bg-background-elevated space-y-3">
+            <p className="text-sm text-foreground-secondary dark:text-foreground-secondary">
               Link this athlete to SwimCloud to import their times.
             </p>
             <SetSwimCloudIdForm athleteId={athleteId} />
@@ -169,7 +169,7 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
             <button
               type="button"
               onClick={closeResultModal}
-              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover"
             >
               Done
             </button>
@@ -179,15 +179,15 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
 
       {/* Manual entry */}
       <section>
-        <h2 className="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide mb-3">
+        <h2 className="text-sm font-medium text-foreground-secondary text-foreground-secondary uppercase tracking-wide mb-3">
           Log a swim manually
         </h2>
-        <div className="border rounded-xl p-4 space-y-3 bg-white dark:bg-zinc-900">
+        <div className="border border-border-secondary rounded-xl p-4 space-y-3 bg-background bg-background">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
-              <label className="text-xs text-gray-500 dark:text-zinc-400 mb-1 block">Event</label>
+              <label className="text-xs text-foreground-secondary text-foreground-secondary mb-1 block">Event</label>
               <select
-                className="w-full border rounded-lg px-3 py-2 text-sm"
+                className="w-full border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
                 value={form.event}
                 onChange={e => setForm(f => ({ ...f, event: e.target.value }))}
               >
@@ -195,9 +195,9 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-500 dark:text-zinc-400 mb-1 block">Course</label>
+              <label className="text-xs text-foreground-secondary mb-1 block">Course</label>
               <select
-                className="w-full border rounded-lg px-3 py-2 text-sm"
+                className="w-full border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
                 value={form.course}
                 onChange={e => setForm(f => ({ ...f, course: e.target.value }))}
               >
@@ -207,11 +207,11 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-500 dark:text-zinc-400 mb-1 block">Time (m:ss.hh)</label>
+              <label className="text-xs text-foreground-secondary mb-1 block">Time (m:ss.hh)</label>
               <input
                 type="text"
                 placeholder="1:23.45 or 58.32"
-                className="w-full border rounded-lg px-3 py-2 text-sm font-mono"
+                className="w-full border border-border-secondary rounded-lg px-3 py-2 text-sm font-mono bg-background border-border-secondary"
                 value={form.time}
                 onChange={e => setForm(f => ({ ...f, time: e.target.value }))}
               />
@@ -219,31 +219,31 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
           </div>
           <div className="grid grid-cols-[1.5fr_1fr] gap-3">
             <div>
-              <label className="text-xs text-gray-500 dark:text-zinc-400 mb-1 block">Meet</label>
+              <label className="text-xs text-foreground-secondary mb-1 block">Meet</label>
               <input
                 type="text"
-                className="w-full border rounded-lg px-3 py-2 text-sm"
+                className="w-full border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
                 value={form.meet}
                 onChange={e => setForm(f => ({ ...f, meet: e.target.value }))}
               />
             </div>
             <div>
-              <label className="text-xs text-gray-500 dark:text-zinc-400 mb-1 block">Date</label>
+              <label className="text-xs text-foreground-secondary mb-1 block">Date</label>
               <input
                 type="date"
-                className="w-full border rounded-lg px-3 py-2 text-sm"
+                className="w-full border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
                 value={form.date}
                 onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
               />
             </div>
           </div>
           {error && (
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            <p className="text-sm text-error">{error}</p>
           )}
           <button
             onClick={handleSubmit}
             disabled={loading || !form.time}
-            className="w-full py-2 text-sm border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
+            className="w-full py-2 text-sm border border-border-secondary rounded-lg hover:bg-fill-secondary hover:bg-fill-secondary bg-background disabled:opacity-40 transition-colors"
           >
             {loading ? "Saving..." : "Log swim"}
           </button>

@@ -109,11 +109,11 @@ export default function AthleteActions({
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 ml-auto">
         <button
           type="button"
           onClick={openEdit}
-          className="inline-flex items-center gap-1.5 text-xs px-3 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors sm:py-1.5"
+          className="inline-flex items-center gap-1.5 text-xs px-3 py-2 border border-border-secondary rounded-lg hover:bg-fill-secondary dark:hover:bg-fill-secondary dark:bg-background-elevated transition-colors sm:py-1.5"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -137,7 +137,7 @@ export default function AthleteActions({
             setError(null)
             setConfirmDelete(true)
           }}
-          className="inline-flex items-center gap-1.5 text-xs px-3 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/40 transition-colors sm:py-1.5"
+          className="inline-flex items-center gap-1.5 text-xs px-3 py-2 border border-border-secondary border-red-200 text-error rounded-lg hover:bg-red-50 dark:border-red-900/50 dark:text-error dark:hover:bg-red-950/40 transition-colors sm:py-1.5"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -169,18 +169,18 @@ export default function AthleteActions({
         onSubmit={handleSave}
         footer={
           <ModalFooter>
-            <button
-              type="button"
-              onClick={() => setEditing(false)}
-              disabled={loading}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
-            >
+              <button
+                type="button"
+                onClick={() => setEditing(false)}
+                disabled={loading}
+                className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary dark:hover:bg-fill-secondary dark:border border-border-secondary"
+              >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !swimCloudIdOk}
-              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
               {loading ? "Saving…" : "Save changes"}
             </button>
@@ -189,44 +189,44 @@ export default function AthleteActions({
       >
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-              First name
-            </label>
-            <input
-              required
-              value={form.firstName}
-              onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
-              className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-              Last name
+            <label className="block text-xs font-medium text-foreground-secondary dark:text-foreground-secondary mb-1">
+            First name <span className="text-red-500">*</span>
+          </label>
+          <input
+            required
+            value={form.firstName}
+            onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
+            className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+            Last name <span className="text-red-500">*</span>
             </label>
             <input
               required
               value={form.lastName}
               onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
-              className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+              className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-            Email
+          <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+            Email <span className="text-red-500">*</span>
           </label>
           <input
             required
             type="email"
             value={form.email}
             onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-            className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+            className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+          <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
             SwimCloud ID
           </label>
           <input
@@ -245,7 +245,7 @@ export default function AthleteActions({
                   .slice(0, SWIMCLOUD_ID_MAX_LENGTH),
               }))
             }
-            className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+            className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
             aria-invalid={showSwimCloudHint}
             aria-describedby={showSwimCloudHint ? "edit-swimcloud-id-hint" : undefined}
           />
@@ -260,8 +260,8 @@ export default function AthleteActions({
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-            Alternate names <span className="font-normal text-gray-400">(optional)</span>
+          <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+            Alternate names
           </label>
           <NicknameTagsInput
             value={form.nicknames}
@@ -270,12 +270,12 @@ export default function AthleteActions({
             showAddButton
             placeholder="Add alternate name"
           />
-          <p className="mt-1 text-xs text-gray-400 dark:text-zinc-500">
+          <p className="mt-1 text-xs text-foreground-tertiary">
             Names used to match imported results to this athlete.
           </p>
         </div>
 
-        {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+        {error && <p className="text-sm text-error dark:text-error">{error}</p>}
       </Modal>
 
       <Modal
@@ -290,7 +290,7 @@ export default function AthleteActions({
               type="button"
               onClick={() => setConfirmDelete(false)}
               disabled={loading}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+              className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary hover:bg-fill-secondary border-border-secondary"
             >
               Cancel
             </button>
@@ -298,18 +298,18 @@ export default function AthleteActions({
               type="button"
               onClick={handleDelete}
               disabled={loading}
-              className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-red-700 disabled:opacity-50"
             >
               {loading ? "Deleting…" : "Delete"}
             </button>
           </ModalFooter>
         }
       >
-        <p className="text-sm text-gray-500 dark:text-zinc-400">
+        <p className="text-sm text-foreground-secondary text-foreground-secondary">
           Permanently delete <span className="font-medium">{firstName} {lastName}</span> and all
           of their swim records? This cannot be undone.
         </p>
-        {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+        {error && <p className="text-sm text-error dark:text-error">{error}</p>}
       </Modal>
     </>
   )

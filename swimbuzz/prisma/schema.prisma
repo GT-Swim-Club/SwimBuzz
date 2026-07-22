@@ -55,7 +55,7 @@ enum NotificationType {
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
-  emailVerified DateTime? 
+  emailVerified DateTime?
   name          String?
   image         String?
   role          Role      @default(COACH)
@@ -80,7 +80,7 @@ model Athlete {
   nicknames    String[] @default([])
   gender       Gender
   seasons      String[]
-  swimCloudId  Int?    
+  swimCloudId  Int?
   timesSyncedAt DateTime?
   /// Self-service edits awaiting coach approval: { swimCloudId?: number, nicknames?: string[] }
   pendingProfileChanges Json?
@@ -98,6 +98,8 @@ model Meet {
   season        String
   teamCode      String    @default("GTSC")
   school        String?
+  iconUrl       String?
+  bannerUrl     String?
   packetUrl     String?
   psychSheetUrl String?
   heatSheetUrl  String?
@@ -115,6 +117,7 @@ model Meet {
   entriesSheetSummary Json?
   relayResultsSummary Json?
   resultStatusesSummary Json?
+  photos        Json?
   createdAt     DateTime  @default(now())
   swims         Swim[]
   signupForm    MeetSignupForm?
@@ -371,4 +374,9 @@ model NationalsCut {
 
   @@unique([setId, event, gender])
   @@index([setId])
+}
+
+model Season {
+  label     String   @id // e.g., "2026-2027"
+  createdAt DateTime @default(now())
 }

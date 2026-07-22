@@ -48,7 +48,7 @@ export default function CreateMeetButton() {
       <button
         type="button"
         onClick={openModal}
-        className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-primary text-primary-text hover:bg-primary-hover transition-colors"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -79,14 +79,14 @@ export default function CreateMeetButton() {
               type="button"
               onClick={() => setOpen(false)}
               disabled={loading}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+              className="flex-1 rounded-lg border border-border border-border px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={loading}
-              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              disabled={loading || !form.name.trim() || !form.startDate}
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
               {loading ? "Creating…" : "Create meet"}
             </button>
@@ -94,7 +94,7 @@ export default function CreateMeetButton() {
         }
       >
         <MeetFields form={form} setForm={setForm} />
-        {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+        {error && <p className="text-sm text-error dark:text-error">{error}</p>}
       </Modal>
     </>
   )

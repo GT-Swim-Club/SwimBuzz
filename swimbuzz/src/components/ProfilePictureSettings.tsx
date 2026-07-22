@@ -238,16 +238,16 @@ export default function ProfilePictureSettings({
 return (
     <div className="flex items-center justify-between gap-4 px-4 py-3">
       <div className="min-w-0">
-        <p className="text-sm text-gray-900 dark:text-zinc-100">
+        <p className="text-sm text-foreground">
           Profile picture
         </p>
         {canEdit && error ? (
-          <p className="mt-1 text-xs text-red-600 dark:text-red-400">{error}</p>
+          <p className="mt-1 text-xs text-error">{error}</p>
         ) : null}
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-indigo-100 text-sm font-medium text-indigo-700 dark:border-zinc-700 dark:bg-indigo-950 dark:text-indigo-200">
+        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-border bg-primary/10 text-sm font-medium text-primary">
           {image ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -275,7 +275,7 @@ return (
               type="button"
               disabled={busy}
               onClick={() => inputRef.current?.click()}
-              className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              className="rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground-secondary hover:bg-fill-secondary disabled:opacity-50"
             >
               {preparing
                 ? "Opening…"
@@ -291,7 +291,7 @@ return (
                 type="button"
                 disabled={busy}
                 onClick={removePhoto}
-                className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-500 hover:text-red-600 disabled:opacity-50 dark:text-zinc-400 dark:hover:text-red-400"
+                className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-foreground-secondary hover:text-error disabled:opacity-50"
               >
                 Remove
               </button>
@@ -317,7 +317,7 @@ return (
                 type="button"
                 disabled={loading}
                 onClick={closeCropper}
-                className="flex-1 rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground-secondary hover:bg-fill-secondary disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -325,7 +325,7 @@ return (
                 type="button"
                 disabled={loading || !croppedAreaPixels}
                 onClick={saveCroppedPhoto}
-                className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
               >
                 {loading ? "Saving…" : "Save"}
               </button>
@@ -350,7 +350,7 @@ return (
               <div>
                 <label
                   htmlFor="avatar-zoom"
-                  className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-zinc-400"
+                  className="mb-1.5 block text-xs font-medium text-foreground-secondary"
                 >
                   Zoom
                 </label>
@@ -362,11 +362,11 @@ return (
                   step={0.01}
                   value={zoom}
                   onChange={(e) => setZoom(Number(e.target.value))}
-                  className="w-full accent-indigo-600"
+                  className="w-full accent-primary"
                 />
               </div>
               {error ? (
-                <p className="text-xs text-red-600 dark:text-red-400">{error}</p>
+                <p className="text-xs text-error">{error}</p>
               ) : null}
             </div>
           ) : null}

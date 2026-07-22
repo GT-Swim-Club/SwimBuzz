@@ -48,7 +48,7 @@ export default function NotificationPreferencesSettings({
   }
 
   return (
-    <div className="divide-y divide-gray-100 dark:divide-zinc-800">
+    <div className="divide-y divide-border">
       {NOTIFICATION_PREFERENCE_META.map(
         ({ key, label, description, athleteDescription }) => (
           <div
@@ -56,8 +56,8 @@ export default function NotificationPreferencesSettings({
             className="flex items-center justify-between gap-4 px-4 py-3"
           >
             <div>
-              <p className="text-sm text-gray-900 dark:text-zinc-100">{label}</p>
-              <p className="text-xs text-gray-500 dark:text-zinc-400">
+              <p className="text-sm text-foreground">{label}</p>
+              <p className="text-xs text-foreground-secondary">
                 {isAthlete && athleteDescription
                   ? athleteDescription
                   : description}
@@ -72,12 +72,12 @@ export default function NotificationPreferencesSettings({
               onClick={() => toggle(key)}
               className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-60 ${
                 preferences[key]
-                  ? "bg-indigo-600"
-                  : "bg-gray-200 dark:bg-zinc-700"
+                  ? "bg-primary"
+                  : "bg-fill-secondary"
               }`}
             >
               <span
-                className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-background shadow transition-transform ${
                   preferences[key] ? "translate-x-5" : "translate-x-0"
                 }`}
               />
@@ -86,7 +86,7 @@ export default function NotificationPreferencesSettings({
         )
       )}
       {error ? (
-        <p className="px-4 py-2 text-xs text-red-600 dark:text-red-400">{error}</p>
+        <p className="px-4 py-2 text-xs text-error">{error}</p>
       ) : null}
     </div>
   )

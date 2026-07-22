@@ -40,8 +40,8 @@ export const emptyPractice: PracticeFormState = {
 }
 
 const inputCls =
-  "w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
-const labelCls = "block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1"
+  "w-full rounded-lg border border-border-secondary px-3 py-2 text-sm border-border-secondary bg-background"
+const labelCls = "block text-xs font-medium text-foreground-secondary mb-1"
 
 export default function PracticeEditor({
   practiceId,
@@ -65,8 +65,25 @@ export default function PracticeEditor({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState<PracticeFormState>(initial ?? emptyPractice)
+  const [isDirty, setIsDirty] = useState(false)
   const releasedRef = useRef(false)
   const lostRef = useRef(false)
+  
+  useEffect(() => {
+    setIsDirty(JSON.stringify(form) !== JSON.stringify(initial ?? emptyPractice))
+  }, [form, initial])
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault()
+        e.returnValue = ''
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [isDirty])
+
   const tokenRef = useRef(editLockToken)
   tokenRef.current = editLockToken
   const onLockLostRef = useRef(onLockLost)
@@ -265,7 +282,7 @@ export default function PracticeEditor({
       <div className="space-y-5">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="sm:col-span-2">
-            <label className={labelCls}>Title</label>
+            <label className={labelCls}>Title <span className="text-red-500">*</span></label>
             <input
               required
               placeholder="e.g. Thursday AM — Threshold"
@@ -286,7 +303,7 @@ export default function PracticeEditor({
         </div>
 
         <div>
-          <label className={labelCls}>Focus / notes (optional)</label>
+          <label className={labelCls}>Focus / notes</label>
           <RichTextField
             rows={2}
             value={form.focus}
@@ -299,10 +316,10 @@ export default function PracticeEditor({
           {form.sets.map((set, i) => (
             <div
               key={i}
-              className="rounded-2xl border border-gray-200 dark:border-zinc-700 p-5 space-y-3 bg-white dark:bg-zinc-900"
+              className="rounded-2xl border border-border-secondary p-5 space-y-3 bg-background-elevated"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-zinc-500">
+                <span className="text-xs font-semibold uppercase tracking-wide text-foreground-tertiary dark:text-foreground-tertiary">
                   Set {i + 1}
                 </span>
                 <div className="flex items-center gap-1">
@@ -310,7 +327,7 @@ export default function PracticeEditor({
                     type="button"
                     onClick={() => moveSet(i, -1)}
                     disabled={i === 0}
-                    className="px-1.5 py-0.5 text-xs rounded border dark:border-zinc-700 disabled:opacity-30"
+                    className="px-1.5 py-0.5 text-xs rounded border border-border-secondary dark:border border-border-secondary disabled:opacity-30"
                     aria-label="Move set up"
                   >
                     ↑
@@ -319,7 +336,7 @@ export default function PracticeEditor({
                     type="button"
                     onClick={() => moveSet(i, 1)}
                     disabled={i === form.sets.length - 1}
-                    className="px-1.5 py-0.5 text-xs rounded border dark:border-zinc-700 disabled:opacity-30"
+                    className="px-1.5 py-0.5 text-xs rounded border border-border-secondary dark:border border-border-secondary disabled:opacity-30"
                     aria-label="Move set down"
                   >
                     ↓
@@ -328,7 +345,7 @@ export default function PracticeEditor({
                     type="button"
                     onClick={() => removeSet(i)}
                     disabled={form.sets.length === 1}
-                    className="px-2 py-0.5 text-xs rounded border border-red-200 text-red-600 dark:border-red-900/50 dark:text-red-400 disabled:opacity-30"
+                    className="px-2 py-0.5 text-xs rounded border border-border-secondary border-red-200 text-red-600 dark:border-red-900/50 dark:text-red-400 disabled:opacity-30"
                   >
                     Remove
                   </button>
@@ -337,7 +354,7 @@ export default function PracticeEditor({
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div className="sm:col-span-2">
-                  <label className={labelCls}>Set name (optional)</label>
+                  <label className={labelCls}>Set name</label>
                   <input
                     placeholder="e.g. Main set"
                     value={set.title}
@@ -346,7 +363,7 @@ export default function PracticeEditor({
                   />
                 </div>
                 <div>
-                  <label className={labelCls}>Distance (optional)</label>
+                  <label className={labelCls}>Distance</label>
                   <input
                     type="number"
                     min={0}
@@ -359,7 +376,7 @@ export default function PracticeEditor({
               </div>
 
               <div>
-                <label className={labelCls}>Workout</label>
+                <label className={labelCls}>Workout <span className="text-red-500">*</span></label>
                 <RichTextField
                   required
                   rows={4}
@@ -370,7 +387,7 @@ export default function PracticeEditor({
               </div>
 
               <div>
-                <label className={labelCls}>Coach notes (optional)</label>
+                <label className={labelCls}>Coach notes</label>
                 <RichTextField
                   rows={2}
                   value={set.notes}
@@ -390,10 +407,10 @@ export default function PracticeEditor({
                         type="button"
                         onClick={() => toggleTag(i, tag)}
                         className={
-                          "text-xs px-2 py-0.5 rounded-full border transition-colors " +
+                          "text-xs px-2 py-0.5 rounded-full border border-border-secondary transition-colors " +
                           (active
-                            ? "bg-indigo-600 border-indigo-600 text-white"
-                            : "border-gray-300 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800")
+                            ? "bg-primary border-primary text-primary-text"
+                            : "border border-border-secondary dark:border border-border-secondary text-foreground-secondary dark:text-foreground-secondary hover:bg-fill-secondary dark:hover:bg-fill-secondary")
                         }
                       >
                         {tag}
@@ -407,7 +424,7 @@ export default function PracticeEditor({
                         key={tag}
                         type="button"
                         onClick={() => toggleTag(i, tag)}
-                        className="text-xs px-2 py-0.5 rounded-full border bg-indigo-600 border-indigo-600 text-white"
+                        className="text-xs px-2 py-0.5 rounded-full border border-border-secondary bg-primary border-primary text-primary-text"
                       >
                         {tag} ✕
                       </button>
@@ -432,36 +449,36 @@ export default function PracticeEditor({
         <button
           type="button"
           onClick={addSet}
-          className="w-full rounded-lg border border-dashed border-gray-300 dark:border-zinc-700 px-4 py-2.5 text-sm text-gray-500 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
+          className="w-full rounded-lg border border-border-secondary border-dashed border-border-secondary px-4 py-2.5 text-sm text-foreground-secondary hover:bg-fill-secondary transition-colors"
         >
           + Add set
         </button>
       </div>
 
-      <div className="sticky bottom-0 -mx-4 border-t border-gray-200 bg-white/95 px-4 py-4 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95 sm:mx-0 sm:rounded-xl sm:border sm:px-5">
+      <div className="sticky bottom-0 -mx-4 border-t border-border-secondary bg-background/95 px-4 py-4 backdrop-blur dark:border-zinc-800 bg-background/95 sm:mx-0 sm:rounded-xl sm:border border-border-secondary sm:px-5">
         {error && <p className="mb-3 text-sm text-red-600 dark:text-red-400">{error}</p>}
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:gap-3">
           <button
             type="button"
             onClick={handleCancel}
             disabled={loading}
-            className="rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+            className="rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary hover:bg-fill-secondary border-border-secondary"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={() => save(false)}
-            disabled={loading}
-            className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700 disabled:opacity-50"
+            disabled={loading || !form.title.trim() || form.sets.some(s => !s.content.trim())}
+            className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary hover:bg-fill-secondary border-border-secondary disabled:opacity-50"
           >
             {loading ? "Saving…" : "Save draft"}
           </button>
           <button
             type="button"
             onClick={() => save(true)}
-            disabled={loading}
-            className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+            disabled={loading || !form.title.trim() || form.sets.some(s => !s.content.trim())}
+            className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
           >
             {loading ? "Saving…" : "Publish"}
           </button>

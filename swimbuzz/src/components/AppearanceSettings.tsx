@@ -70,15 +70,15 @@ export default function AppearanceSettings() {
   return (
     <div className="flex items-center justify-between gap-4 px-4 py-3">
       <div>
-        <p className="text-sm text-gray-900 dark:text-zinc-100">Theme</p>
-        <p className="text-xs text-gray-500 dark:text-zinc-400">
+        <p className="text-sm text-foreground">Theme</p>
+        <p className="text-xs text-foreground-secondary">
           Light, dark, or match your device
         </p>
       </div>
       <div
         role="radiogroup"
         aria-label="Theme"
-        className="inline-flex shrink-0 rounded-lg border border-gray-200 p-0.5 dark:border-zinc-700"
+        className="inline-flex shrink-0 rounded-lg border border-border p-0.5"
       >
         {OPTIONS.map((option) => {
           const isSelected = selected === option.value
@@ -94,8 +94,8 @@ export default function AppearanceSettings() {
               onClick={() => setTheme(option.value)}
               className={`inline-flex items-center justify-center rounded-md p-2 transition-colors disabled:opacity-50 ${
                 isSelected
-                  ? "bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
-                  : "text-gray-600 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                  ? "bg-primary text-primary-text"
+                  : "text-foreground-secondary hover:text-foreground"
               }`}
             >
               {option.icon}

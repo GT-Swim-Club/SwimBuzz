@@ -76,13 +76,13 @@ export default function EmailSignInForm({
         <div>
           <label
             htmlFor="otp-code"
-            className="block text-sm font-medium text-gray-700 dark:text-zinc-300"
+            className="block text-sm font-medium text-foreground-secondary"
           >
             Verification code
           </label>
-          <p className="mt-1 text-xs text-gray-500 dark:text-zinc-500">
+          <p className="mt-1 text-xs text-foreground-tertiary">
             We sent a 6-digit code to{" "}
-            <span className="font-medium text-gray-700 dark:text-zinc-300">
+            <span className="font-medium text-foreground">
               {email}
             </span>
           </p>
@@ -97,14 +97,14 @@ export default function EmailSignInForm({
             required
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-            className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-center font-mono text-lg tracking-[0.35em] text-gray-900 outline-none ring-indigo-500/0 transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+            className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 text-center font-mono text-lg tracking-[0.35em] text-foreground outline-none ring-primary/20 transition focus:border-primary focus:ring-4 dark:border-border dark:bg-background-elevated"
             placeholder="000000"
             autoFocus
           />
         </div>
 
         {error && (
-          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
+          <p className="rounded-lg border border-error/20 bg-error/10 px-3 py-2 text-sm text-error-text">
             {error}
           </p>
         )}
@@ -112,15 +112,15 @@ export default function EmailSignInForm({
         <button
           type="submit"
           disabled={loading || code.length !== 6}
-          className="inline-flex w-full items-center justify-center rounded-xl bg-indigo-600 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-text transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? "Signing in…" : "Verify and sign in"}
         </button>
 
-        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-zinc-500">
+        <div className="flex items-center justify-between text-xs text-foreground-tertiary">
           <button
             type="button"
-            className="hover:text-gray-800 dark:hover:text-zinc-300"
+            className="hover:text-foreground"
             onClick={() => {
               setStep("email")
               setError(null)
@@ -132,7 +132,7 @@ export default function EmailSignInForm({
           <button
             type="button"
             disabled={loading}
-            className="hover:text-gray-800 disabled:opacity-50 dark:hover:text-zinc-300"
+            className="hover:text-foreground disabled:opacity-50"
             onClick={() => void requestCode()}
           >
             Resend code
@@ -147,7 +147,7 @@ export default function EmailSignInForm({
       <div>
         <label
           htmlFor="gatech-email"
-          className="block text-sm font-medium text-gray-700 dark:text-zinc-300"
+          className="block text-sm font-medium text-foreground-secondary"
         >
           Georgia Tech Email
         </label>
@@ -159,14 +159,14 @@ export default function EmailSignInForm({
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none ring-indigo-500/0 transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+          className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none ring-primary/20 transition focus:border-primary focus:ring-4 dark:border-border dark:bg-background-elevated"
           placeholder="gburdell3@gatech.edu"
           autoFocus
         />
       </div>
 
       {error && (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
+        <p className="rounded-lg border border-error/20 bg-error/10 px-3 py-2 text-sm text-error-text">
           {error}
         </p>
       )}
@@ -174,7 +174,7 @@ export default function EmailSignInForm({
       <button
         type="submit"
         disabled={loading || !email.trim()}
-        className="inline-flex w-full items-center justify-center rounded-xl bg-indigo-600 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-text transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? "Sending code…" : "Send verification code"}
       </button>

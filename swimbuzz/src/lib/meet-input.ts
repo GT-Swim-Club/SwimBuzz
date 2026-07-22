@@ -67,6 +67,8 @@ export function buildMeetData(body: Record<string, unknown>, opts: BuildOptions 
 
   if ("location" in body) data.location = optionalString(body.location)
   if ("school" in body) data.school = optionalString(body.school)
+  if ("iconUrl" in body) data.iconUrl = optionalString(body.iconUrl)
+  if ("bannerUrl" in body) data.bannerUrl = optionalString(body.bannerUrl)
   if ("packetUrl" in body) data.packetUrl = optionalString(body.packetUrl)
   if ("psychSheetUrl" in body) data.psychSheetUrl = optionalString(body.psychSheetUrl)
   if ("heatSheetUrl" in body) data.heatSheetUrl = optionalString(body.heatSheetUrl)
@@ -78,6 +80,26 @@ export function buildMeetData(body: Record<string, unknown>, opts: BuildOptions 
   if ("hotel" in body) data.hotel = optionalString(body.hotel)
   if ("packingList" in body) data.packingList = optionalString(body.packingList)
   if ("itinerary" in body) data.itinerary = optionalString(body.itinerary)
+  if ("photos" in body) {
+    const photos = body.photos
+    if (photos === null || photos === undefined) {
+      data.photos = null
+    } else if (Array.isArray(photos)) {
+      data.photos = photos.filter((p: any) => p && p.url && p.url.trim()).slice(0, 15)
+    } else if (typeof photos === "object") {
+      const links = (photos as any).links
+      const previews = (photos as any).previews
+      const validatedLinks = Array.isArray(links)
+        ? links.filter((p: any) => p && p.url && p.url.trim()).slice(0, 15)
+        : []
+      const validatedPreviews = Array.isArray(previews)
+        ? previews.filter((url: any) => url && typeof url === "string" && url.trim()).slice(0, 20)
+        : []
+      data.photos = { links: validatedLinks, previews: validatedPreviews }
+    } else {
+      throw new MeetInputError("Photos must be an array or an object")
+    }
+  }
 
   return data
 }

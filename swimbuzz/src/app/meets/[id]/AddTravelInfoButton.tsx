@@ -92,7 +92,7 @@ export default function AddTravelInfoButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border rounded-md hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
+        className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border rounded-md hover:bg-fill-secondary hover:bg-fill-secondary bg-background transition-colors"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -125,14 +125,14 @@ export default function AddTravelInfoButton({
               type="button"
               onClick={() => setOpen(false)}
               disabled={blocked}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary hover:bg-fill-secondary border-border"
             >
               Close
             </button>
             <button
               type="submit"
               disabled={blocked}
-              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
               {loading ? "Saving…" : anyUploading ? "Uploading…" : "Save"}
             </button>
@@ -162,7 +162,7 @@ export default function AddTravelInfoButton({
           />
         ))}
 
-        {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+        {error && <p className="text-sm text-error dark:text-error">{error}</p>}
       </Modal>
     </>
   )

@@ -50,7 +50,7 @@ export default function DeleteSwimButton({
         type="button"
         onClick={() => setOpen(true)}
         disabled={loading}
-        className="p-1 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950/40 disabled:opacity-50 transition-colors"
+        className="p-1 rounded text-foreground-tertiary hover:text-error hover:bg-fill-secondary dark:hover:text-error dark:hover:bg-red-950/40 disabled:opacity-50 transition-colors"
         aria-label="Delete swim"
       >
         <svg
@@ -81,7 +81,7 @@ export default function DeleteSwimButton({
               type="button"
               onClick={() => setOpen(false)}
               disabled={loading}
-              className="flex-1 rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+        className="rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary dark:hover:bg-fill-secondary dark:border-border-secondary disabled:opacity-50"
             >
               Cancel
             </button>
@@ -89,7 +89,7 @@ export default function DeleteSwimButton({
               type="button"
               onClick={handleDelete}
               disabled={loading}
-              className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 dark:bg-red-600 dark:hover:bg-red-500"
+              className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-red-700 disabled:opacity-50"
             >
               {loading ? "Deleting…" : "Delete"}
             </button>
@@ -101,7 +101,7 @@ export default function DeleteSwimButton({
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
             fill="currentColor"
-            className="h-5 w-5 text-red-600 dark:text-red-400"
+            className="h-5 w-5 text-error dark:text-error"
             aria-hidden="true"
           >
             <path
@@ -112,15 +112,15 @@ export default function DeleteSwimButton({
           </svg>
         </div>
 
-        <div className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-800/50">
-          <p className="font-medium text-gray-900 dark:text-zinc-100">
+        <div className="rounded-xl border border-border-secondary dark:border border-border-secondary bg-fill-secondary dark:bg-background-elevated px-4 py-3">
+          <p className="font-medium text-foreground dark:text-foreground">
             {event}{" "}
-            <span className="text-gray-500 dark:text-zinc-400">({course})</span>
+            <span className="text-foreground-secondary dark:text-foreground-secondary">({course})</span>
           </p>
-          <p className="mt-1 font-mono text-lg text-gray-900 dark:text-zinc-100">
+          <p className="mt-1 font-mono text-lg text-foreground dark:text-foreground">
             {timeLabel}
           </p>
-          <p className="mt-1 text-xs text-gray-500 dark:text-zinc-400">
+          <p className="mt-1 text-xs text-foreground-tertiary dark:text-foreground-tertiary">
             {dateLabel}
             {meet ? ` · ${meet}` : ""}
           </p>

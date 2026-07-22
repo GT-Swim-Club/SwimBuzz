@@ -13,21 +13,21 @@ export default function EventOrderTable({ order }: { order: EventOrder }) {
       {order.sessions.map((session, sessionIndex) => (
         <div key={`${session.label}-${sessionIndex}`}>
           {showSessionLabel(session.label) ? (
-            <h3 className="text-center text-sm font-semibold text-gray-900 dark:text-zinc-100 mb-2">
+            <h3 className="text-center text-sm font-semibold text-foreground text-foreground mb-2">
               {session.label}
             </h3>
           ) : null}
           <div className="overflow-x-auto">
-            <table className="w-full text-sm border-collapse">
+            <table className="w-full text-sm">
               <thead>
-                <tr className="border-b dark:border-zinc-700">
-                  <th className="py-1.5 pr-3 text-left font-semibold text-gray-900 dark:text-zinc-100 w-16">
+                <tr>
+                  <th className="py-1.5 pr-3 text-left font-semibold text-foreground dark:text-foreground w-16">
                     Women
                   </th>
-                  <th className="py-1.5 px-3 text-center font-semibold text-gray-900 dark:text-zinc-100">
+                  <th className="py-1.5 px-3 text-center font-semibold text-foreground dark:text-foreground">
                     Event
                   </th>
-                  <th className="py-1.5 pl-3 text-right font-semibold text-gray-900 dark:text-zinc-100 w-16">
+                  <th className="py-1.5 pl-3 text-right font-semibold text-foreground dark:text-foreground w-16">
                     Men
                   </th>
                 </tr>
@@ -36,15 +36,14 @@ export default function EventOrderTable({ order }: { order: EventOrder }) {
                 {session.rows.map((row, i) => (
                   <tr
                     key={`${session.label}-${i}`}
-                    className="border-b border-gray-100 dark:border-zinc-800 last:border-0"
                   >
-                    <td className="py-1 pr-3 text-left tabular-nums text-gray-700 dark:text-zinc-300">
+                    <td className="py-1 pr-3 text-left tabular-nums text-foreground-secondary dark:text-foreground-secondary">
                       {row.women ?? ""}
                     </td>
-                    <td className="py-1 px-3 text-center text-gray-800 dark:text-zinc-200">
+                    <td className="py-1 px-3 text-center text-foreground dark:text-foreground">
                       {cleanEventName(row.event)}
                     </td>
-                    <td className="py-1 pl-3 text-right tabular-nums text-gray-700 dark:text-zinc-300">
+                    <td className="py-1 pl-3 text-right tabular-nums text-foreground-secondary dark:text-foreground-secondary">
                       {row.men ?? ""}
                     </td>
                   </tr>

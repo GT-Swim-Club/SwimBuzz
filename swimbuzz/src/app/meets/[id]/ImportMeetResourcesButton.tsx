@@ -7,6 +7,7 @@ import MeetResourceIcon from "@/components/MeetResourceIcon"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { useScraperUi } from "@/components/ScraperUiProvider"
 import { useMeetResourceUploads } from "@/lib/use-meet-resource-uploads"
+import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 
 type ResourceForm = {
   teamCode: string
@@ -32,6 +33,8 @@ export default function ImportMeetResourcesButton({
   const [form, setForm] = useState<ResourceForm>(initial)
   const { anyUploading, getFieldUploadHandler } = useMeetResourceUploads()
   const blocked = loading || anyUploading
+
+  useDontReloadWhileBusy(loading || anyUploading)
 
   const hasResources = Object.values({
     packetUrl: initial.packetUrl,
@@ -109,7 +112,7 @@ export default function ImportMeetResourcesButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border rounded-md hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
+        className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border border-border rounded-md dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:bg-background-elevated transition-colors"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -132,6 +135,7 @@ export default function ImportMeetResourcesButton({
 
       <Modal
         open={open}
+        maxWidth="xl"
         onClose={() => setOpen(false)}
         closeDisabled={blocked}
         busy={loading}
@@ -144,14 +148,14 @@ export default function ImportMeetResourcesButton({
               type="button"
               onClick={() => setOpen(false)}
               disabled={blocked}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+              className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border"
             >
               Close
             </button>
             <button
               type="submit"
               disabled={blocked}
-              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
               {loading ? "Saving…" : anyUploading ? "Uploading…" : "Save"}
             </button>
@@ -159,8 +163,8 @@ export default function ImportMeetResourcesButton({
         }
       >
         <div>
-          <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-            Team code
+          <label className="block text-xs font-medium text-foreground-secondary mb-1">
+            Team code <span className="text-red-500">*</span>
           </label>
           <input
             required
@@ -169,7 +173,7 @@ export default function ImportMeetResourcesButton({
               setForm((f) => ({ ...f, teamCode: e.target.value.toUpperCase() }))
             }
             placeholder="GTSC"
-            className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"
           />
           <p className="mt-1 text-xs text-gray-400 dark:text-zinc-500">
             Only entries for this team are parsed from uploaded sheets.
@@ -206,7 +210,7 @@ export default function ImportMeetResourcesButton({
         />
 
         <div>
-          <label className="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+          <label className="flex items-center gap-1.5 text-xs font-medium text-foreground-secondary mb-1">
             <MeetResourceIcon kind="liveStream" />
             Live Stream
           </label>
@@ -217,11 +221,11 @@ export default function ImportMeetResourcesButton({
               setForm((f) => ({ ...f, liveStreamUrl: e.target.value }))
             }
             placeholder="https://…"
-            className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"
           />
         </div>
 
-        {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+        {error && <p className="text-sm text-error dark:text-error">{error}</p>}
       </Modal>
     </>
   )

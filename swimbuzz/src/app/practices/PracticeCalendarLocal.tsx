@@ -89,14 +89,14 @@ export function DayLabel({
 
   if (!isToday) {
     return (
-      <span className="text-xs font-medium text-gray-500 dark:text-zinc-400">
+      <span className="text-xs font-medium text-foreground-secondary">
         {children}
       </span>
     )
   }
 
   return (
-    <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-indigo-600 px-1.5 text-xs font-semibold text-white">
+    <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-text">
       {children}
     </span>
   )

@@ -129,19 +129,19 @@ export default function CommentSection({
     return (
       <div className="flex items-start justify-between gap-2 group text-sm">
         <div className="min-w-0 flex-1">
-          <span className="font-medium text-gray-700 dark:text-zinc-200">
+          <span className="font-medium text-foreground dark:text-foreground">
             {comment.authorName}
           </span>
-          <span className="ml-2 text-[11px] text-gray-400 dark:text-zinc-500">
+          <span className="ml-2 text-[11px] text-foreground-tertiary dark:text-foreground-tertiary">
             {formatRelativeTime(comment.createdAt)}
           </span>
-          <p className="text-gray-600 dark:text-zinc-300 whitespace-pre-line break-words">
+          <p className="text-foreground-secondary dark:text-foreground-secondary whitespace-pre-line break-words">
             {comment.body}
           </p>
           <button
             type="button"
             onClick={() => startReply(comment)}
-            className="mt-0.5 text-[11px] text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300"
+            className="mt-0.5 text-[11px] text-foreground-tertiary hover:text-foreground-secondary dark:hover:text-foreground-secondary"
           >
             Reply
           </button>
@@ -150,7 +150,7 @@ export default function CommentSection({
           <button
             type="button"
             onClick={() => handleDelete(comment.id)}
-            className="shrink-0 text-[11px] text-gray-400 hover:text-red-500 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+            className="shrink-0 text-[11px] text-foreground-tertiary hover:text-red-500 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
             aria-label="Delete comment"
           >
             Delete
@@ -162,7 +162,7 @@ export default function CommentSection({
 
   return (
     <section>
-      <h2 className="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide mb-3">
+      <h2 className="text-sm font-medium text-foreground-secondary dark:text-foreground-secondary uppercase tracking-wide mb-3">
         Comments {comments.length > 0 && `(${comments.length})`}
       </h2>
 
@@ -173,7 +173,7 @@ export default function CommentSection({
               <CommentBody comment={thread} />
 
               {thread.replies.length > 0 && (
-                <ul className="mt-2 ml-4 pl-3 border-l border-gray-200 dark:border-zinc-700 space-y-2">
+                <ul className="mt-2 ml-4 pl-3 border-l border border-border-secondary space-y-2">
                   {thread.replies.map((reply) => (
                     <li key={reply.id}>
                       <CommentBody comment={reply} />
@@ -189,12 +189,12 @@ export default function CommentSection({
                     onChange={(e) => setReplyBody(e.target.value)}
                     placeholder={`Reply to ${replyTo.authorName}…`}
                     autoFocus
-                    className="flex-1 rounded-lg border px-3 py-1.5 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                    className="flex-1 rounded-lg border border-border-secondary px-3 py-1.5 text-sm bg-background border-border-secondary"
                   />
                   <button
                     type="submit"
                     disabled={loading || !replyBody.trim()}
-                    className="px-3 py-1.5 text-sm border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
+                    className="px-3 py-1.5 text-sm border border-border-secondary rounded-lg hover:bg-fill-secondary dark:hover:bg-fill-secondary transition-colors"
                   >
                     {loading ? "…" : "Reply"}
                   </button>
@@ -204,7 +204,7 @@ export default function CommentSection({
                       setReplyTo(null)
                       setReplyBody("")
                     }}
-                    className="px-2 py-1.5 text-sm text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300"
+                    className="px-2 py-1.5 text-sm text-foreground-tertiary hover:text-foreground-secondary dark:hover:text-foreground-secondary"
                   >
                     Cancel
                   </button>
@@ -220,12 +220,12 @@ export default function CommentSection({
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder="Add a comment…"
-          className="flex-1 rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+          className="flex-1 rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
         />
         <button
           type="submit"
           disabled={loading || !body.trim()}
-          className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
+          className="px-4 py-2 text-sm border border-border-secondary rounded-lg hover:bg-fill-secondary dark:hover:bg-fill-secondary transition-colors"
         >
           {loading ? "…" : "Post"}
         </button>

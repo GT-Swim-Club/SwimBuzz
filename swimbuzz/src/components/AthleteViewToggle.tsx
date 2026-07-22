@@ -56,10 +56,10 @@ export default function AthleteViewToggle({
             : "Preview the app as a specific athlete"
         }
         className={
-          "w-full max-w-[14rem] truncate text-xs rounded-lg px-2.5 py-2 border transition-colors disabled:opacity-50 md:w-auto md:py-1 " +
+          "w-full max-w-[14rem] truncate text-xs rounded-lg px-3 py-2 border border-border-secondary transition-colors disabled:opacity-50 md:w-auto md:py-1.5 " +
           (selected
-            ? "border-indigo-300 bg-indigo-50 text-indigo-800 dark:border-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-200"
-            : "border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800")
+            ? "border-primary bg-primary-bg text-primary"
+            : "border-border-secondary bg-background text-foreground hover:bg-fill-secondary")
         }
       >
         {selected ? `As ${selected.name}` : "Athlete View"}
@@ -76,15 +76,15 @@ export default function AthleteViewToggle({
               setQuery("")
             }}
           />
-          <div className="absolute right-0 z-50 mt-1 w-64 rounded-xl border border-gray-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900 overflow-hidden">
-            <div className="p-2 border-b dark:border-zinc-800">
+          <div className="absolute right-0 z-50 mt-1 w-64 rounded-xl border border-border-secondary bg-background shadow-lg overflow-hidden">
+            <div className="p-2 border-b border-border-secondary">
               <input
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search athletes…"
                 autoFocus
-                className="w-full rounded-lg border px-2.5 py-1.5 text-xs dark:bg-zinc-950 dark:border-zinc-700"
+                className="w-full rounded-lg border border-border-secondary px-2.5 py-1.5 text-xs bg-background"
               />
             </div>
             <ul className="max-h-64 overflow-y-auto py-1 text-sm" role="listbox">
@@ -95,17 +95,17 @@ export default function AthleteViewToggle({
                   aria-selected={!selectedAthleteId}
                   onClick={() => setPreviewAthlete(null)}
                   className={
-                    "w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-zinc-800 " +
+                    "w-full text-left px-3 py-2 text-xs hover:bg-fill-secondary " +
                     (!selectedAthleteId
-                      ? "font-medium text-indigo-700 dark:text-indigo-300"
-                      : "text-gray-700 dark:text-zinc-300")
+                      ? "font-medium text-primary"
+                      : "text-foreground")
                   }
                 >
                   Coach View
                 </button>
               </li>
               {filtered.length === 0 ? (
-                <li className="px-3 py-2 text-xs text-gray-400 dark:text-zinc-500">
+                <li className="px-3 py-2 text-xs text-foreground-tertiary">
                   No matches
                 </li>
               ) : (
@@ -117,10 +117,10 @@ export default function AthleteViewToggle({
                       aria-selected={selectedAthleteId === athlete.id}
                       onClick={() => setPreviewAthlete(athlete.id)}
                       className={
-                        "w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-zinc-800 " +
+                        "w-full text-left px-3 py-2 text-xs hover:bg-fill-secondary " +
                         (selectedAthleteId === athlete.id
-                          ? "font-medium text-indigo-700 dark:text-indigo-300"
-                          : "text-gray-700 dark:text-zinc-300")
+                          ? "font-medium text-primary"
+                          : "text-foreground")
                       }
                     >
                       {athlete.name}

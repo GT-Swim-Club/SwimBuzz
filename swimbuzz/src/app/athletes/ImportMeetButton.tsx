@@ -295,7 +295,7 @@ export default function ImportMeetButton({
             resetForm()
           })
         }}
-        className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border rounded-md hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
+        className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border border-border-secondary rounded-md hover:bg-fill-secondary hover:bg-fill-secondary bg-background transition-colors"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -323,7 +323,7 @@ export default function ImportMeetButton({
         title="Import Meet Results"
         description={`Only results for your team code are imported, then matched to the ${season} roster.`}
         header={
-          <div className="mt-4 flex rounded-lg border dark:border-zinc-700 p-0.5 bg-gray-50 dark:bg-zinc-950">
+          <div className="mt-4 flex rounded-lg border border-border-secondary p-0.5 bg-fill-secondary">
             {(
               [
                 ["swimphone", "SwimPhone"],
@@ -340,8 +340,8 @@ export default function ImportMeetButton({
                 }}
                 className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                   source === value
-                    ? "bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 shadow-sm"
-                    : "text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-300"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-foreground-secondary hover:text-foreground"
                 }`}
               >
                 {label}
@@ -356,7 +356,7 @@ export default function ImportMeetButton({
               type="button"
               onClick={() => setOpen(false)}
               disabled={loading}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+              className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary hover:bg-fill-secondary border-border-secondary"
             >
               Close
             </button>
@@ -367,7 +367,7 @@ export default function ImportMeetButton({
                 !team.trim() ||
                 (source === "pdf" ? !selectedFile : !url.trim())
               }
-              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
               {loading ? (source === "swimphone" ? "Scraping…" : "Importing…") : "Import"}
             </button>
@@ -377,7 +377,7 @@ export default function ImportMeetButton({
         <div key={source}>
           {source === "pdf" ? (
             <div>
-              <span className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+              <span className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
                 Results PDF
               </span>
               <input
@@ -391,26 +391,26 @@ export default function ImportMeetButton({
               <div className="flex items-center gap-3">
                 <label
                   htmlFor="meet-pdf-upload"
-                  className="cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+                  className="cursor-pointer rounded-lg border border-border-secondary border-primary bg-primary px-4 py-2 text-sm font-medium text-primary-text hover:bg-primary-hover"
                 >
                   Choose PDF
                 </label>
-                <span className="text-sm text-gray-600 dark:text-zinc-400 truncate">
+                <span className="text-sm text-foreground-secondary text-foreground-secondary truncate">
                   {selectedFile ? selectedFile.name : "No file selected"}
                 </span>
               </div>
             </div>
           ) : (
             <div>
-              <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-                Meet URL
+              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+                Meet URL <span className="text-red-500">*</span>
               </label>
               <input
                 required
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://www.swimphone.com/meets/meet_menu.cfm?smid=..."
-                className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
               />
               <p className="mt-1.5 text-xs text-gray-400 dark:text-zinc-500">
                 Archived meets may be blocked by SwimPhone.
@@ -419,33 +419,33 @@ export default function ImportMeetButton({
           )}
         </div>
 
-        {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+        {error && <p className="text-sm text-error dark:text-error">{error}</p>}
 
         <div
           key={`options-${source}`}
           className={`grid gap-3 ${source === "pdf" ? "grid-cols-2" : "grid-cols-1"}`}
         >
           <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-              Team code
+            <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+              Team code <span className="text-red-500">*</span>
             </label>
             <input
               required
               value={team}
               onChange={(e) => setTeam(e.target.value)}
               placeholder="GTSC"
-              className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+              className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
             />
           </div>
           {source === "pdf" ? (
             <div>
-              <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
                 Course
               </label>
               <select
                 value={course}
                 onChange={(e) => setCourse(e.target.value)}
-                className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
               >
                 <option value="SCY">SCY</option>
                 <option value="LCM">LCM</option>
@@ -473,14 +473,14 @@ export default function ImportMeetButton({
               type="button"
               onClick={closeConfirmWithoutPairing}
               disabled={loading}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+              className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary hover:bg-fill-secondary border-border-secondary"
             >
               Skip
             </button>
             <button
               type="submit"
               disabled={loading || pairedCount === 0}
-              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
               {loading
                 ? "Importing…"
@@ -501,12 +501,12 @@ export default function ImportMeetButton({
             return (
               <li
                 key={c.pdfName}
-                className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-800/50"
+                className="rounded-xl border border-border-secondary border-gray-100 bg-gray-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-800/50"
               >
-                <p className="text-sm text-gray-900 dark:text-zinc-100">
+                <p className="text-sm text-foreground text-foreground">
                   <strong>{c.pdfName}</strong>
                 </p>
-                <p className="mt-0.5 text-xs text-gray-500 dark:text-zinc-400">
+                <p className="mt-0.5 text-xs text-foreground-secondary text-foreground-secondary">
                   {c.occurrences} result{c.occurrences === 1 ? "" : "s"} with this spelling
                   {suggested ? (
                     <span>
@@ -525,7 +525,7 @@ export default function ImportMeetButton({
                         [c.pdfName]: e.target.value,
                       }))
                     }
-                    className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                    className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
                   >
                     <option value="">Leave unmatched</option>
                     {rosterOptions.map((a) => (
@@ -540,7 +540,7 @@ export default function ImportMeetButton({
           })}
         </ul>
         {confirmError && (
-          <p className="text-sm text-red-600 dark:text-red-400">{confirmError}</p>
+          <p className="text-sm text-error dark:text-error">{confirmError}</p>
         )}
       </Modal>
 
@@ -559,7 +559,7 @@ export default function ImportMeetButton({
                 setResultOpen(false)
                 setResult(null)
               }}
-              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover"
             >
               Done
             </button>
@@ -567,23 +567,23 @@ export default function ImportMeetButton({
         }
       >
         {result ? (
-          <div className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-800/50">
+          <div className="rounded-xl border border-border-secondary border-gray-100 bg-gray-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-800/50">
             {result.meetName && (
-              <p className="mb-1 text-gray-900 dark:text-zinc-100">
+              <p className="mb-1 text-foreground text-foreground">
                 <strong>{result.meetName}</strong>
                 {result.meetDate && (
-                  <span className="text-gray-500 dark:text-zinc-400">
+                  <span className="text-foreground-secondary text-foreground-secondary">
                     {" "}
                     — {formatSwimDate(result.meetDate)}
                   </span>
                 )}
               </p>
             )}
-            <p className="text-gray-900 dark:text-zinc-100">
+            <p className="text-foreground text-foreground">
               Imported <strong>{result.imported}</strong> new swims ({result.parsed} parsed,{" "}
               {result.matched} matched to roster).
               {typeof result.leadoffsImported === "number" && result.leadoffsImported > 0 && (
-                <span className="text-gray-600 dark:text-zinc-400">
+                <span className="text-foreground-secondary text-foreground-secondary">
                   {" "}
                   Includes {result.leadoffsImported} relay leadoff
                   {result.leadoffsImported === 1 ? "" : "s"} from split times.
@@ -605,7 +605,7 @@ export default function ImportMeetButton({
               </div>
             )}
             {result.unmatchedCount > 0 && (
-              <p className="mt-2 text-gray-600 dark:text-zinc-400">
+              <p className="mt-2 text-foreground-secondary text-foreground-secondary">
                 {result.unmatchedCount} result(s) could not be matched to a roster athlete.
                 {result.unmatched.length > 0 && (
                   <span className="block mt-1 text-xs">

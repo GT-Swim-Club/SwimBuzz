@@ -51,8 +51,8 @@ function groupByCourse(swims: PbSwim[]) {
 export default function PersonalBestsGrid({ swims }: { swims: PbSwim[] }) {
   if (swims.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-gray-200 dark:border-zinc-800 px-4 py-10 text-center">
-        <p className="text-sm text-gray-400 dark:text-zinc-500">No times recorded yet.</p>
+      <div className="rounded-xl border border-border-secondary border-dashed border-border-secondary px-4 py-10 text-center">
+        <p className="text-sm text-foreground-tertiary dark:text-foreground-tertiary">No times recorded yet.</p>
       </div>
     )
   }
@@ -65,14 +65,12 @@ export default function PersonalBestsGrid({ swims }: { swims: PbSwim[] }) {
         <section key={course}>
           <div className="flex items-center gap-3 mb-3">
             <h3
-              className={`text-sm font-semibold uppercase tracking-wide ${
-                COURSE_HEADER_STYLES[course] ?? "text-gray-900 dark:text-zinc-100"
-              }`}
+              className={`text-sm font-semibold uppercase tracking-wide text-foreground`}
             >
               {course}
             </h3>
-            <div className="h-px flex-1 bg-gray-100 dark:bg-zinc-800" />
-            <span className="text-xs text-gray-400 dark:text-zinc-500 tabular-nums">
+            <div className="h-px flex-1 bg-border dark:bg-border" />
+            <span className="text-xs text-foreground-tertiary dark:text-foreground-tertiary tabular-nums">
               {courseSwims.length}
             </span>
           </div>
@@ -83,12 +81,12 @@ export default function PersonalBestsGrid({ swims }: { swims: PbSwim[] }) {
               return (
                 <div
                   key={`${swim.event}-${swim.course}`}
-                  className={`rounded-xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 border-l-[3px] ${STROKE_ACCENT[stroke] ?? "border-l-gray-300"} px-3 py-3 sm:px-3.5 shadow-sm hover:shadow-md hover:border-gray-200 dark:hover:border-zinc-700 transition-all`}
+                  className={`rounded-xl border border-border-secondary bg-background border-l-[3px] ${STROKE_ACCENT[stroke] ?? "border-l-foreground-tertiary"} px-3 py-3 sm:px-3.5 shadow-sm hover:border-foreground-tertiary transition-all`}
                 >
-                  <p className="text-sm font-medium text-gray-900 dark:text-zinc-100 leading-tight mb-2">
+                  <p className="text-sm font-medium text-foreground leading-tight mb-2">
                     {swim.event}
                   </p>
-                  <p className="text-lg sm:text-xl font-semibold font-mono tabular-nums tracking-tight text-gray-900 dark:text-zinc-50">
+                  <p className="text-lg sm:text-xl font-semibold font-mono tabular-nums tracking-tight text-foreground">
                     {formatTime(swim.timeMs)}
                   </p>
                 </div>

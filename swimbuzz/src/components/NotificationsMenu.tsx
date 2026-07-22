@@ -85,7 +85,7 @@ export default function NotificationsMenu({
             ? `Notifications, ${unreadCount} unread`
             : "Notifications"
         }
-        className="relative flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition-colors hover:bg-gray-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+        className="relative flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground-secondary transition-colors hover:bg-fill-secondary"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -102,7 +102,7 @@ export default function NotificationsMenu({
           <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
         </svg>
         {unreadCount > 0 ? (
-          <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1 text-[11px] font-medium text-white">
+          <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-medium text-primary-text">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         ) : null}
@@ -112,24 +112,24 @@ export default function NotificationsMenu({
         <div className="absolute right-0 z-50 pt-2">
           <div
             role="menu"
-            className="w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
+            className="w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-border bg-background shadow-lg"
           >
-            <div className="flex items-center justify-between gap-2 border-b border-gray-100 px-3 py-2.5 dark:border-zinc-800">
-              <p className="text-sm font-medium text-gray-900 dark:text-zinc-100">
+            <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2.5">
+              <p className="text-sm font-medium text-foreground">
                 Notifications
               </p>
               {unreadCount > 0 ? (
                 <button
                   type="button"
                   onClick={() => void markRead()}
-                  className="text-xs text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                  className="text-xs text-primary hover:text-primary-hover"
                 >
                   Mark all read
                 </button>
               ) : null}
             </div>
             {notifications.length === 0 ? (
-              <p className="px-3 py-6 text-center text-sm text-gray-500 dark:text-zinc-400">
+              <p className="px-3 py-6 text-center text-sm text-foreground-secondary">
                 No notifications yet
               </p>
             ) : (
@@ -140,25 +140,25 @@ export default function NotificationsMenu({
                       <p
                         className={`text-sm ${
                           n.readAt
-                            ? "font-normal text-gray-700 dark:text-zinc-300"
-                            : "font-medium text-gray-900 dark:text-zinc-100"
+                            ? "font-normal text-foreground-secondary"
+                            : "font-medium text-foreground"
                         }`}
                       >
                         {n.title}
                       </p>
                       {n.body ? (
-                        <p className="mt-0.5 line-clamp-2 text-xs text-gray-500 dark:text-zinc-400">
+                        <p className="mt-0.5 line-clamp-2 text-xs text-foreground-tertiary">
                           {n.body}
                         </p>
                       ) : null}
-                      <p className="mt-1 text-[11px] text-gray-400 dark:text-zinc-500">
+                      <p className="mt-1 text-[11px] text-foreground-quaternary">
                         {formatRelativeTime(n.createdAt)}
                       </p>
                     </>
                   )
 
-                  const className = `block px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-zinc-800 ${
-                    !n.readAt ? "bg-indigo-50/50 dark:bg-indigo-950/20" : ""
+                  const className = `block px-3 py-2.5 hover:bg-fill-secondary ${
+                    !n.readAt ? "bg-primary/10" : ""
                   }`
 
                   return (

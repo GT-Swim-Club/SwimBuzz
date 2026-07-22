@@ -26,6 +26,14 @@ export default function IndividualSplitsModal({
   useEffect(() => setMounted(true), [])
 
   useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [])
+
+  useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onClose()
     }
@@ -44,28 +52,28 @@ export default function IndividualSplitsModal({
         aria-label="Close dialog"
       />
       <div
-        className="relative z-10 flex w-full max-w-md max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-900"
+        className="relative z-10 flex w-full max-w-md max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-border border-border-secondary-secondary border-border-secondary-secondary bg-background shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="shrink-0 px-6 pt-6 pb-2">
           {athleteName ? (
-            <p className="text-sm font-medium text-gray-900 dark:text-zinc-100">{athleteName}</p>
+            <p className="text-sm font-medium text-foreground dark:text-foreground">{athleteName}</p>
           ) : null}
           <h2
-            className={`text-lg font-medium text-gray-900 dark:text-zinc-100 ${
+            className={`text-lg font-medium text-foreground dark:text-foreground ${
               athleteName ? "mt-0.5" : ""
             }`}
           >
             {title}
           </h2>
           {timeDisplay ? (
-            <div className="mt-2 text-gray-900 dark:text-zinc-100">{timeDisplay}</div>
+            <div className="mt-2 text-foreground dark:text-foreground">{timeDisplay}</div>
           ) : null}
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
-          <ul className="divide-y dark:divide-zinc-800 border rounded-lg dark:border-zinc-800 overflow-hidden">
-            <li className="grid grid-cols-[4.5rem_1fr] gap-2 px-3 py-2 text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-zinc-500 bg-gray-50 dark:bg-zinc-950/50">
+          <ul className="bg-background divide-y dark:divide-zinc-800 border border-border border-border-secondary-secondary rounded-lg dark:border-zinc-800 overflow-hidden">
+            <li className="grid grid-cols-[4.5rem_1fr] gap-2 px-3 py-2 text-xs font-medium uppercase tracking-wide text-foreground-tertiary dark:text-foreground-tertiary bg-background/50">
               <span>Distance</span>
               <span className="text-right">Split</span>
             </li>
@@ -76,8 +84,8 @@ export default function IndividualSplitsModal({
                   key={split.distance}
                   className="grid grid-cols-[4.5rem_1fr] gap-2 px-3 py-2.5 text-sm items-center"
                 >
-                  <span className="text-gray-800 dark:text-zinc-200">{split.distance}</span>
-                  <span className="font-mono text-right text-gray-900 dark:text-zinc-100">
+                  <span className="text-foreground dark:text-foreground">{split.distance}</span>
+                  <span className="font-mono text-right text-foreground dark:text-foreground">
                     {time ? formatDisplayTime(time) : ""}
                   </span>
                 </li>
@@ -86,11 +94,11 @@ export default function IndividualSplitsModal({
           </ul>
         </div>
 
-        <div className="shrink-0 border-t border-gray-200 px-6 py-4 dark:border-zinc-700">
+        <div className="bg-background shrink-0 border-t px-6 py-4" style={{ borderColor: 'var(--brand-color-border-subtle)' }}>
           <button
             type="button"
             onClick={onClose}
-            className="w-full rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+            className="bg-background w-full rounded-lg border border-border border-border-secondary-secondary border-border-secondary-secondary px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary"
           >
             Close
           </button>

@@ -6,7 +6,7 @@ import DontReloadNotice from "@/components/DontReloadNotice"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 
 const inputClass =
-  "w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+  "w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"
 
 function initialMode(value: string): "url" | "file" {
   return value && isStoredMeetFileUrl(value) ? "file" : "url"
@@ -88,7 +88,6 @@ export default function MeetResourceField({
 
   function switchToFile() {
     setUploadError(null)
-    setUrlValue("")
     setMode("file")
     onChange(fileValue)
   }
@@ -148,37 +147,39 @@ export default function MeetResourceField({
 
   return (
     <div>
-      <label className="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-        {icon}
-        {label}
-      </label>
-      <div className="mb-2 flex gap-1">
-        <button
-          type="button"
-          onClick={() => void switchToUrl()}
-          disabled={uploading}
-          className={
-            "text-xs px-2.5 py-1 rounded-md border transition-colors " +
-            (mode === "url"
-              ? "bg-gray-900 border-gray-900 text-white dark:bg-zinc-100 dark:border-zinc-100 dark:text-zinc-900"
-              : "border-gray-300 dark:border-zinc-700 text-gray-600 dark:text-zinc-300")
-          }
-        >
-          URL
-        </button>
-        <button
-          type="button"
-          onClick={switchToFile}
-          disabled={uploading}
-          className={
-            "text-xs px-2.5 py-1 rounded-md border transition-colors " +
-            (mode === "file"
-              ? "bg-gray-900 border-gray-900 text-white dark:bg-zinc-100 dark:border-zinc-100 dark:text-zinc-900"
-              : "border-gray-300 dark:border-zinc-700 text-gray-600 dark:text-zinc-300")
-          }
-        >
-          File
-        </button>
+      <div className="flex items-center gap-4 mb-2">
+        <label className="flex items-center gap-1.5 text-xs font-medium text-foreground-secondary text-foreground-secondary">
+          {icon}
+          {label}
+        </label>
+        <div className="flex gap-1">
+          <button
+            type="button"
+            onClick={() => void switchToUrl()}
+            disabled={uploading}
+            className={
+              "text-xs px-2 py-0.5 rounded-md border border-border transition-colors " +
+              (mode === "url"
+                ? "bg-primary text-primary-text border-primary"
+                : "border-border text-foreground-secondary")
+            }
+          >
+            URL
+          </button>
+          <button
+            type="button"
+            onClick={switchToFile}
+            disabled={uploading}
+            className={
+              "text-xs px-2 py-0.5 rounded-md border border-border transition-colors " +
+              (mode === "file"
+                ? "bg-primary text-primary-text border-primary"
+                : "border-border text-foreground-secondary")
+            }
+          >
+            File
+          </button>
+        </div>
       </div>
 
       {mode === "url" ? (
@@ -196,13 +197,13 @@ export default function MeetResourceField({
             accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt"
             disabled={uploading}
             onChange={handleFileSelect}
-            className="block w-full text-xs text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-indigo-700 hover:file:bg-indigo-100 dark:text-zinc-400 dark:file:bg-indigo-950 dark:file:text-indigo-300"
+            className="block w-full text-xs text-foreground-secondary file:mr-3 file:rounded-lg file:border file:border-border file:bg-background-elevated file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-foreground hover:file:dark:bg-background bg-fill-secondary"
           />
           {uploading && (
             <DontReloadNotice label="Uploading… Don't reload the page." />
           )}
           {fileName && !uploading && (
-            <p className="text-xs text-gray-500 dark:text-zinc-400 truncate">
+            <p className="text-xs text-foreground-secondary text-foreground-secondary truncate">
               Uploaded: {fileName}
             </p>
           )}
@@ -210,7 +211,7 @@ export default function MeetResourceField({
             <button
               type="button"
               onClick={() => void handleRemoveFile()}
-              className="text-xs text-gray-400 hover:text-red-500"
+              className="text-xs text-foreground-tertiary hover:text-red-500"
             >
               Remove file
             </button>

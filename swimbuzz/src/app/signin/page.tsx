@@ -28,11 +28,11 @@ export default async function SignInPage({
         <div className="absolute bottom-0 right-0 h-64 w-64 rounded-full bg-cyan-500/10 blur-3xl dark:bg-cyan-400/10" />
       </div>
 
-      <div className="relative w-full max-w-md">
-        <div className="rounded-2xl border border-gray-200 bg-white/90 p-8 shadow-xl backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/90">
+      <div className="relative w-full max-w-lg">
+        <div className="rounded-2xl border border-border bg-background/90 p-8 shadow-xl backdrop-blur-sm">
           <Link
             href="/"
-            className="inline-flex items-center gap-2.5 text-sm font-semibold tracking-tight text-gray-900 dark:text-zinc-100"
+            className="inline-flex items-center gap-2.5 text-sm font-semibold tracking-tight text-foreground"
           >
             <Image
               src="/swimbuzz-logo.png"
@@ -45,15 +45,15 @@ export default async function SignInPage({
             SwimBuzz
           </Link>
 
-          <h1 className="mt-8 text-2xl font-semibold tracking-tight text-gray-900 dark:text-zinc-100">
+          <h1 className="mt-8 text-2xl font-semibold tracking-tight text-foreground">
             Sign in to your team
           </h1>
-          <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-zinc-400">
+          <p className="mt-2 text-sm leading-relaxed text-foreground-secondary">
             Access the Georgia Tech Swim Club roster, meets, and practice tools.
           </p>
 
           {error && (
-            <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
+            <p className="mt-4 rounded-lg border border-error/20 bg-error/10 px-3 py-2 text-sm text-error-text">
               Sign in failed. Please try again or contact a coach if the problem
               continues.
             </p>
@@ -61,10 +61,10 @@ export default async function SignInPage({
 
           <div className="relative mt-4 mb-4">
             <div className="absolute inset-0 flex items-center" aria-hidden="true">
-              <div className="w-full border-t border-gray-200 dark:border-zinc-700" />
+              <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-3 text-gray-500 dark:bg-zinc-900 dark:text-zinc-500">
+              <span className="bg-background px-3 text-foreground-tertiary">
                 Athletes
               </span>
             </div>
@@ -74,10 +74,10 @@ export default async function SignInPage({
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center" aria-hidden="true">
-              <div className="w-full border-t border-gray-200 dark:border-zinc-700" />
+              <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-3 text-gray-500 dark:bg-zinc-900 dark:text-zinc-500">
+              <span className="bg-background px-3 text-foreground-tertiary">
                 Coaches & Exec
               </span>
             </div>
@@ -86,8 +86,8 @@ export default async function SignInPage({
           <SignInButton callbackUrl={destination} />
         </div>
 
-        <p className="mt-6 text-center text-xs text-gray-400 dark:text-zinc-600">
-          <Link href="/" className="hover:text-gray-600 dark:hover:text-zinc-400">
+        <p className="mt-6 text-center text-xs text-foreground-quaternary">
+          <Link href="/" className="hover:text-foreground">
             ← Back to home
           </Link>
         </p>

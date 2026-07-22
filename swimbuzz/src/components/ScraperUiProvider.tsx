@@ -45,8 +45,8 @@ function NeedScraperModal({
       open={open}
       onClose={onClose}
       title="Scraper required"
-      description={
-        <span className="mt-1 block text-base text-amber-700 dark:text-amber-400">
+        description={
+        <span className="mt-1 block text-base text-info">
           Imports from SwimCloud, SwimPhone, meet PDFs, and Nationals standards require you to run
           the scraper on your
           computer. Run the scraper, then try the import again.
@@ -58,14 +58,14 @@ function NeedScraperModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+            className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={onOpenRunScraper}
-            className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
+            className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover"
           >
             Run scraper
           </button>

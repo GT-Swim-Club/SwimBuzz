@@ -46,11 +46,11 @@ export default function RequestTimesImportButton({
 
   if (!hasSwimCloudId) {
     return (
-      <p className="text-sm text-gray-500 dark:text-zinc-400">
+      <p className="text-sm text-foreground-secondary">
         Set your SwimCloud ID in{" "}
         <a
           href="/settings"
-          className="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+          className="text-primary hover:text-primary-hover"
         >
           Settings
         </a>{" "}
@@ -66,13 +66,13 @@ export default function RequestTimesImportButton({
           type="button"
           onClick={() => void requestImport()}
           disabled={loading}
-          className="text-sm px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
+          className="text-sm px-4 py-2 border border-border-secondary rounded-lg hover:bg-fill-secondary bg-background disabled:opacity-40 transition-colors"
         >
-          {loading ? "Requesting…" : "Request import"}
+          {loading ? "Requesting…" : "Request Import"}
         </button>
         {!loading && (
           <span
-            className="text-xs text-gray-400 dark:text-zinc-500"
+            className="text-xs text-foreground-tertiary"
             title={timesSyncedAt ? formatDateTime(timesSyncedAt) : undefined}
           >
             {timesSyncedAt
@@ -81,13 +81,13 @@ export default function RequestTimesImportButton({
           </span>
         )}
       </div>
-      <p className="text-xs text-gray-500 dark:text-zinc-400">
+      <p className="text-xs text-foreground-secondary">
         Ask a coach to import or reimport your times from SwimCloud.
       </p>
       {message && (
-        <p className="text-xs text-amber-600 dark:text-amber-400">{message}</p>
+        <p className="text-xs text-info">{message}</p>
       )}
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-xs text-error">{error}</p>}
     </div>
   )
 }

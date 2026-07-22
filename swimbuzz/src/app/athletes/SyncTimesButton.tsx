@@ -53,6 +53,16 @@ export default function SyncTimesButton() {
   const [progress, setProgress] = useState<SyncProgress | null>(null)
 
   useDontReloadWhileBusy(loading)
+
+  useEffect(() => {
+    if (!open) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [open])
+
   const [roster, setRoster] = useState<RosterAthlete[]>([])
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
@@ -178,7 +188,7 @@ export default function SyncTimesButton() {
       <button
         type="button"
         onClick={() => requireScraper(() => setOpen(true))}
-        className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border-secondary rounded-lg hover:border-border hover:bg-fill-tertiary bg-fill-secondary dark:hover:bg-fill-tertiary dark:bg-background transition-colors"
       >
         <Image src="/swimcloud.webp" alt="" width={28} height={28} className="shrink-0" />
         Import Times
@@ -194,14 +204,14 @@ export default function SyncTimesButton() {
           />
 
           <div
-            className="relative z-10 w-full max-w-xl rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-900 flex flex-col max-h-[min(40rem,85vh)] overflow-hidden"
+            className="relative z-10 w-full max-w-xl rounded-2xl border border-border-secondary bg-background shadow-xl dark:border border-border-secondary dark:bg-background-elevated flex flex-col max-h-[min(40rem,85vh)] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="shrink-0 px-5 pt-5 pb-3">
-              <h2 className="text-lg font-medium text-gray-900 dark:text-zinc-100">
+              <h2 className="text-lg font-medium text-foreground dark:text-foreground">
                 Import times from SwimCloud
               </h2>
-              <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">
+              <p className="mt-1 text-sm text-foreground-secondary dark:text-foreground-secondary">
                 Select from the {gender === "F" ? "women's" : "men's"} {season} roster.
                 Takes about 2–3 minutes per athlete.
               </p>
@@ -210,15 +220,15 @@ export default function SyncTimesButton() {
             <form onSubmit={handleSync} className="flex flex-col min-h-0 flex-1">
               <div className="flex-1 overflow-y-auto px-5 min-h-0">
                 {loadingRoster ? (
-                  <p className="text-sm text-gray-500 dark:text-zinc-400 py-3">Loading roster…</p>
+                  <p className="text-sm text-foreground-secondary dark:text-foreground-secondary py-3">Loading roster…</p>
                 ) : roster.length === 0 ? (
-                  <p className="text-sm text-gray-500 dark:text-zinc-400 py-3">
+                  <p className="text-sm text-foreground-secondary dark:text-foreground-secondary py-3">
                     No athletes on this season&apos;s roster.
                   </p>
                 ) : (
                   <div className="flex flex-col gap-3 pb-3">
-                    <div className="flex items-center justify-between sticky top-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm py-1.5 z-10">
-                      <span className="text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide">
+                    <div className="flex items-center justify-between sticky top-0 bg-background/95 bg-background/95 backdrop-blur-sm py-1.5 z-10">
+                      <span className="text-xs font-medium text-foreground-secondary dark:text-foreground-secondary uppercase tracking-wide">
                         Athletes · {selected.size} selected
                       </span>
                       {selectable.length > 0 && (
@@ -226,7 +236,7 @@ export default function SyncTimesButton() {
                           type="button"
                           onClick={toggleAll}
                           disabled={loading}
-                          className="text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
+                          className="text-xs font-medium text-primary hover:text-primary-hover dark:text-primary"
                         >
                           {allSelected ? "Deselect all" : "Select all"}
                         </button>
@@ -241,12 +251,12 @@ export default function SyncTimesButton() {
                         return (
                           <li key={athlete.id}>
                             <label
-                              className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-colors ${
+                                  className={`flex items-center gap-3 rounded-xl border border-border-secondary px-3 py-2.5 transition-colors ${
                                 disabled
-                                  ? "border-gray-100 bg-gray-50/50 opacity-60 cursor-not-allowed dark:border-zinc-800 dark:bg-zinc-950/50"
+                                  ? "border-border-secondary bg-fill-secondary opacity-60 cursor-not-allowed"
                                   : checked
-                                    ? "border-indigo-200 bg-indigo-50/80 cursor-pointer dark:border-indigo-900/60 dark:bg-indigo-950/30"
-                                    : "border-gray-100 bg-white cursor-pointer hover:border-gray-200 hover:bg-gray-50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/50"
+                                    ? "border-primary bg-primary/10 cursor-pointer"
+                                    : "border-border-secondary bg-background cursor-pointer hover:bg-fill-secondary"
                               }`}
                             >
                               <input
@@ -254,20 +264,20 @@ export default function SyncTimesButton() {
                                 checked={checked}
                                 disabled={disabled || loading}
                                 onChange={() => !disabled && toggleAthlete(athlete.id)}
-                                className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                className="rounded border-border-secondary text-primary focus:ring-primary"
                               />
-                              <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-medium text-indigo-700 shrink-0 dark:bg-indigo-950 dark:text-indigo-300">
+                              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-medium text-primary shrink-0 dark:bg-primary/20 dark:text-primary">
                                 {athlete.firstName[0]}{athlete.lastName[0]}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-900 dark:text-zinc-100 truncate">
+                                <p className="text-sm font-medium text-foreground dark:text-foreground truncate">
                                   {athlete.lastName}, {athlete.firstName}
                                 </p>
                                 {disabled ? (
-                                  <p className="text-xs text-gray-400 dark:text-zinc-500">No SwimCloud ID</p>
+                                  <p className="text-xs text-foreground-tertiary dark:text-foreground-tertiary">No SwimCloud ID</p>
                                 ) : (
                                   <p
-                                    className="text-xs text-gray-400 dark:text-zinc-500"
+                                    className="text-xs text-foreground-secondary dark:text-foreground-secondary"
                                     title={athlete.timesSyncedAt ? formatDateTime(athlete.timesSyncedAt) : undefined}
                                   >
                                     ID {athlete.swimCloudId} ·{" "}
@@ -286,7 +296,7 @@ export default function SyncTimesButton() {
                 )}
 
                 {loading && progress ? (
-                  <p className="py-2 text-sm text-gray-500 dark:text-zinc-400">
+                  <p className="py-2 text-sm text-foreground-secondary text-foreground-secondary">
                     Importing {progress.current}/{progress.total}: {progress.name}
                     <span className="mt-1 block text-xs text-gray-400 dark:text-zinc-500">
                       About 1–2 minutes per athlete — don&apos;t reload the page while import
@@ -298,23 +308,23 @@ export default function SyncTimesButton() {
                 ) : null}
 
                 {error && (
-                  <p className="text-sm text-red-600 dark:text-red-400 py-2">{error}</p>
+                  <p className="text-sm text-error dark:text-error py-2">{error}</p>
                 )}
               </div>
 
-              <div className="shrink-0 flex gap-3 px-5 py-4 border-t border-gray-100 dark:border-zinc-800">
+              <div className="shrink-0 flex gap-3 px-5 py-4 border-t border-border-secondary dark:border border-border-secondary">
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
                   disabled={loading}
-                  className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+                  className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary dark:hover:bg-fill-secondary dark:border border-border-secondary"
                 >
                   Close
                 </button>
                 <button
                   type="submit"
                   disabled={loading || loadingRoster || selected.size === 0}
-                  className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                  className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
                 >
                   {loading ? "Importing…" : `Import (${selected.size})`}
                 </button>
@@ -349,7 +359,7 @@ export default function SyncTimesButton() {
             <button
               type="button"
               onClick={closeResultModal}
-              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover"
             >
               Done
             </button>

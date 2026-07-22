@@ -161,6 +161,14 @@ function RelayModal({
   useEffect(() => setMounted(true), [])
   useDontReloadWhileBusy(loading)
 
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [])
+
   const swimmerOptions = relayAthleteOptions(athletes, form.gender, form.legs)
 
   async function handleSubmit(e: React.FormEvent) {
@@ -242,13 +250,13 @@ function RelayModal({
         aria-label="Close dialog"
       />
       <div
-        className="relative z-10 flex w-full max-w-md max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-900"
+        className="relative z-10 flex w-full max-w-md max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-border border-border-secondary bg-background shadow-xl border-border-secondary bg-background"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="shrink-0 px-6 pt-6 pb-2">
-          <h2 className="text-lg font-medium text-gray-900 dark:text-zinc-100">{title}</h2>
+          <h2 className="text-lg font-medium text-foreground text-foreground">{title}</h2>
           {rosterOnly ? (
-            <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">
+            <p className="mt-1 text-sm text-foreground-secondary text-foreground-secondary">
               Update swimmers and leg splits — event, time, and place stay from the import.
             </p>
           ) : null}
@@ -260,7 +268,7 @@ function RelayModal({
             <>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
                 Event
               </label>
               <select
@@ -268,7 +276,7 @@ function RelayModal({
                 onChange={(e) => {
                   setForm((f) => ({ ...f, event: e.target.value }))
                 }}
-                className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
               >
                 {RELAY_EVENTS.map((event) => (
                   <option key={event}>{event}</option>
@@ -276,7 +284,7 @@ function RelayModal({
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
                 Team
               </label>
               <select
@@ -284,7 +292,7 @@ function RelayModal({
                 onChange={(e) =>
                   setForm((f) => ({ ...f, relayLetter: e.target.value }))
                 }
-                className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
               >
                 {RELAY_LETTERS.map((letter) => (
                   <option key={letter} value={letter}>
@@ -297,7 +305,7 @@ function RelayModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
                 Round
               </label>
               <select
@@ -305,7 +313,7 @@ function RelayModal({
                 onChange={(e) =>
                   setForm((f) => ({ ...f, relayRound: e.target.value as RelayRound }))
                 }
-                className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
               >
                 {RELAY_ROUNDS.map(({ value, label }) => (
                   <option key={value || "timed"} value={value}>
@@ -315,7 +323,7 @@ function RelayModal({
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
                 Gender
               </label>
               <select
@@ -333,7 +341,7 @@ function RelayModal({
                     ) as RelayForm["legs"],
                   }))
                 }}
-                className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
               >
                 {RELAY_GENDERS.map(({ value, label }) => (
                   <option key={value} value={value}>
@@ -348,7 +356,7 @@ function RelayModal({
 
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-zinc-400">
+              <div className="flex items-center gap-2 text-xs font-medium text-foreground-secondary text-foreground-secondary">
                 <span className="w-6 shrink-0">#</span>
                 <span className="flex-1">Swimmer</span>
                 <span className="w-24 shrink-0 text-right">Split</span>
@@ -356,7 +364,7 @@ function RelayModal({
             </div>
             {form.legs.map((athleteId, i) => (
               <div key={i} className="flex items-center gap-2">
-                <span className="w-6 text-xs text-gray-400 dark:text-zinc-500 shrink-0">
+                <span className="w-6 text-xs text-foreground-tertiary dark:text-foreground-tertiary shrink-0">
                   {i + 1}
                 </span>
                 <select
@@ -367,7 +375,7 @@ function RelayModal({
                     legs[i] = e.target.value
                     setForm((f) => ({ ...f, legs }))
                   }}
-                  className="flex-1 rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                  className="flex-1 rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
                 >
                   <option value="">Select swimmer…</option>
                   {swimmerOptions.map((a) => (
@@ -390,7 +398,7 @@ function RelayModal({
                     legSplits[i] = e.target.value
                     setForm((f) => ({ ...f, legSplits }))
                   }}
-                  className="w-24 rounded-lg border px-2 py-2 text-sm font-mono dark:bg-zinc-950 dark:border-zinc-700"
+                  className="w-24 rounded-lg border border-border border-border-secondary px-2 py-2 text-sm font-mono bg-background border-border-secondary"
                 />
               </div>
             ))}
@@ -399,8 +407,8 @@ function RelayModal({
           {!rosterOnly ? (
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-                Time (optional)
+              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+                Time
               </label>
               <input
                 type="text"
@@ -409,12 +417,12 @@ function RelayModal({
                 onChange={(e) =>
                   setForm((f) => ({ ...f, resultTime: e.target.value }))
                 }
-                className="w-full rounded-lg border px-3 py-2 text-sm font-mono dark:bg-zinc-950 dark:border-zinc-700"
+                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm font-mono bg-background border-border-secondary"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-                Place (optional)
+              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+                Place
               </label>
               <input
                 type="number"
@@ -424,14 +432,14 @@ function RelayModal({
                 onChange={(e) =>
                   setForm((f) => ({ ...f, resultPlace: e.target.value }))
                 }
-                className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
               />
             </div>
           </div>
           ) : null}
 
           {error && (
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            <p className="text-sm text-error dark:text-error">{error}</p>
           )}
           </div>
 
@@ -441,13 +449,13 @@ function RelayModal({
             </div>
           ) : null}
 
-          <div className="shrink-0 flex gap-3 border-t border-gray-200 px-6 py-4 dark:border-zinc-700">
+          <div className="shrink-0 flex gap-3 border-t border-border-secondary px-6 py-4 border-border-secondary">
             {allowDelete && (
               <button
                 type="button"
                 onClick={handleDelete}
                 disabled={loading}
-                className="rounded-lg border border-red-200 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950/30 disabled:opacity-50"
+                className="rounded-lg border border-border border-border-secondary border-red-200 px-4 py-2.5 text-sm font-medium text-error hover:bg-red-50 dark:border-red-900 dark:text-error dark:hover:bg-red-950/30 disabled:opacity-50"
               >
                 Delete
               </button>
@@ -456,14 +464,14 @@ function RelayModal({
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+              className="flex-1 rounded-lg border border-border border-border-secondary px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border-secondary"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || form.legs.some((id) => !id)}
-              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
               {loading ? "Saving…" : rosterOnly ? "Save roster" : "Save relay"}
             </button>
@@ -494,6 +502,14 @@ export function RelayDetailModal({
   useEffect(() => setMounted(true), [])
 
   useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [])
+
+  useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onClose()
     }
@@ -512,13 +528,13 @@ export function RelayDetailModal({
         aria-label="Close dialog"
       />
       <div
-        className="relative z-10 flex w-full max-w-md max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-900"
+        className="relative z-10 flex w-full max-w-md max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-border border-border-secondary bg-background shadow-xl border-border-secondary bg-background"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="shrink-0 px-6 pt-6 pb-2">
-          <h2 className="text-lg font-medium text-gray-900 dark:text-zinc-100">{title}</h2>
+          <h2 className="text-lg font-medium text-foreground text-foreground">{title}</h2>
           {timeDisplay ? (
-            <div className="mt-2 text-gray-900 dark:text-zinc-100">{timeDisplay}</div>
+            <div className="mt-2 text-foreground text-foreground">{timeDisplay}</div>
           ) : null}
           {coachNote ? (
             <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">{coachNote}</p>
@@ -526,8 +542,8 @@ export function RelayDetailModal({
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
-          <ul className="divide-y dark:divide-zinc-800 border rounded-lg dark:border-zinc-800 overflow-hidden">
-          <li className="grid grid-cols-[2rem_1fr_5.5rem] gap-2 px-3 py-2 text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-zinc-500 bg-gray-50 dark:bg-zinc-950/50">
+          <ul className="divide-y dark:divide-zinc-800 border border-border border-border-secondary rounded-lg dark:border-zinc-800 overflow-hidden">
+          <li className="grid grid-cols-[2rem_1fr_5.5rem] gap-2 px-3 py-2 text-xs font-medium uppercase tracking-wide text-foreground-tertiary dark:text-foreground-tertiary dark:bg-background bg-fill-secondary/50">
             <span>#</span>
             <span>Swimmer</span>
             <span className="text-right">Split</span>
@@ -537,11 +553,11 @@ export function RelayDetailModal({
               key={swimmer.leg}
               className="grid grid-cols-[2rem_1fr_5.5rem] gap-2 px-3 py-2.5 text-sm items-center"
             >
-              <span className="text-gray-400 dark:text-zinc-500">{swimmer.leg}</span>
-              <span className="truncate text-gray-800 dark:text-zinc-200">
+              <span className="text-foreground-tertiary dark:text-foreground-tertiary">{swimmer.leg}</span>
+              <span className="truncate text-foreground dark:text-foreground">
                 {relaySwimmerFullName(swimmer.name) ?? ""}
               </span>
-              <span className="font-mono text-right text-gray-900 dark:text-zinc-100">
+              <span className="font-mono text-right text-foreground text-foreground">
                 {(() => {
                   const split = sanitizeRelaySplitTime(swimmer.splitTime)
                   return split ? formatDisplayTime(split) : ""
@@ -552,11 +568,11 @@ export function RelayDetailModal({
         </ul>
         </div>
 
-        <div className="shrink-0 border-t border-gray-200 px-6 py-4 dark:border-zinc-700">
+        <div className="shrink-0 border-t border-border-secondary px-6 py-4 border-border-secondary">
         <button
           type="button"
           onClick={onClose}
-          className="w-full rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+          className="w-full rounded-lg border border-border border-border-secondary px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border-secondary"
         >
           Close
         </button>
@@ -582,7 +598,7 @@ export function AddMeetRelayButton({
         type="button"
         onClick={() => setOpen(true)}
         disabled={athletes.length < 4}
-        className="text-xs px-3 py-1.5 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
+        className="text-xs px-3 py-1.5 border border-border border-border-secondary rounded-lg dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary bg-background disabled:opacity-40 transition-colors"
       >
         Add relay
       </button>
@@ -629,9 +645,9 @@ export function EditRelayButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={
+          className={
           className ??
-          "p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 disabled:opacity-50 transition-colors"
+          "p-1 rounded text-foreground-tertiary hover:text-foreground dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:text-foreground-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary/80 disabled:opacity-50 transition-colors"
         }
         aria-label={rosterOnly ? "Edit relay roster" : "Edit relay"}
       >

@@ -79,7 +79,7 @@ export default function SetSwimCloudIdForm({
     <form onSubmit={handleSubmit} className="space-y-2">
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex-1 min-w-[140px]">
-          <label className="text-xs text-gray-500 dark:text-zinc-400 mb-1 block">
+          <label className="text-xs text-foreground-secondary mb-1 block">
             SwimCloud ID
           </label>
           <input
@@ -97,7 +97,7 @@ export default function SetSwimCloudIdForm({
               )
               setError(null)
             }}
-            className="w-full border rounded-lg px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+            className="w-full border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
             aria-invalid={showDigitHint}
             aria-describedby={showDigitHint ? "swimcloud-id-hint" : undefined}
           />
@@ -105,7 +105,7 @@ export default function SetSwimCloudIdForm({
         <button
           type="submit"
           disabled={!canSubmit}
-          className="text-sm px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
+          className="text-sm px-4 py-2 border border-border-secondary rounded-lg hover:bg-fill-secondary bg-background disabled:opacity-40 transition-colors"
         >
           {loading
             ? requiresApproval
@@ -117,20 +117,20 @@ export default function SetSwimCloudIdForm({
         </button>
       </div>
       {showDigitHint && (
-        <p id="swimcloud-id-hint" className="text-xs text-amber-600 dark:text-amber-400">
+        <p id="swimcloud-id-hint" className="text-xs text-info">
           {SWIMCLOUD_ID_ERROR} ({swimCloudId.length}/{SWIMCLOUD_ID_MAX_LENGTH})
         </p>
       )}
       {pendingSwimCloudId != null && (
-        <p className="text-xs text-amber-600 dark:text-amber-400">
+        <p className="text-xs text-info">
           Pending approval: {pendingSwimCloudId}
           {initialSwimCloudId != null ? ` (current: ${initialSwimCloudId})` : ""}
         </p>
       )}
       {message && (
-        <p className="text-xs text-amber-600 dark:text-amber-400">{message}</p>
+        <p className="text-xs text-info">{message}</p>
       )}
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-xs text-error">{error}</p>}
     </form>
   )
 }

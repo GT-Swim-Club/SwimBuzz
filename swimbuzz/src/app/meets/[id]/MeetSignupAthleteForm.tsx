@@ -78,6 +78,7 @@ export default function MeetSignupAthleteForm({
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [importingBests, setImportingBests] = useState(false)
+  const [importError, setImportError] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [confirmWithdrawOpen, setConfirmWithdrawOpen] = useState(false)
   const [withdrawError, setWithdrawError] = useState<string | null>(null)
@@ -138,6 +139,7 @@ export default function MeetSignupAthleteForm({
   async function fillLifetimeBests() {
     if (!athleteId || individual.length === 0 || importingBests || !canEdit) return
     setImportingBests(true)
+    setImportError(null)
     setError(null)
     try {
       const params = new URLSearchParams({
@@ -150,12 +152,12 @@ export default function MeetSignupAthleteForm({
         times?: Record<string, string>
       }
       if (!res.ok) {
-        setError(data.error || "Failed to load lifetime bests.")
+        setImportError(data.error || "Failed to load lifetime bests.")
         return
       }
       const times = data.times ?? {}
       if (Object.keys(times).length === 0) {
-        setError(`No ${course} lifetime bests found for the selected events.`)
+        setImportError(`No ${course} lifetime bests found for the selected events.`)
         return
       }
       setEntryTimes((prev) => {
@@ -166,7 +168,7 @@ export default function MeetSignupAthleteForm({
         return next
       })
     } catch {
-      setError("Failed to load lifetime bests.")
+      setImportError("Failed to load lifetime bests.")
     } finally {
       setImportingBests(false)
     }
@@ -253,7 +255,7 @@ export default function MeetSignupAthleteForm({
 
   if (!isCoach && !selfAthleteId) {
     return (
-      <p className="text-sm text-gray-500 dark:text-zinc-400">
+      <p className="text-sm text-foreground-secondary text-foreground-secondary">
         Your account isn&apos;t linked to a roster athlete, so you can&apos;t sign up yet. Ask a
         coach to add you to the roster.
       </p>
@@ -262,7 +264,7 @@ export default function MeetSignupAthleteForm({
 
   if (isCoach && athletes.length === 0) {
     return (
-      <p className="text-sm text-gray-500 dark:text-zinc-400">
+      <p className="text-sm text-foreground-secondary text-foreground-secondary">
         No athletes on this meet&apos;s season roster to sign up.
       </p>
     )
@@ -293,7 +295,7 @@ export default function MeetSignupAthleteForm({
               <button
                 type="button"
                 onClick={() => setOpen(true)}
-                className="text-xs px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                className="text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-text hover:bg-primary-hover transition-colors"
               >
                 {selfEntry ? "Edit Sign-Up" : "Sign Up"}
               </button>
@@ -301,7 +303,7 @@ export default function MeetSignupAthleteForm({
               <button
                 type="button"
                 onClick={() => setOpen(true)}
-                className="text-xs px-3 py-1.5 rounded-lg border hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700 transition-colors"
+                className="bg-background text-xs px-3 py-1.5 rounded-lg border border-border border-border-secondary-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border-secondary-secondary transition-colors"
               >
                 View Sign-Up
               </button>
@@ -309,7 +311,7 @@ export default function MeetSignupAthleteForm({
               <p className="text-sm text-amber-700 dark:text-amber-400">
                 {windowReason ?? "Sign-ups are closed for this meet."}
                 {!windowOpen && canWithdraw && withdrawDeadline && selfEntry && (
-                  <span className="block mt-1 text-gray-500 dark:text-zinc-400 font-normal">
+                  <span className="block mt-1 text-foreground-secondary text-foreground-secondary font-normal">
                     You can still withdraw until{" "}
                     {new Date(withdrawDeadline).toLocaleString()}.
                   </span>
@@ -319,7 +321,7 @@ export default function MeetSignupAthleteForm({
                   selfEntry &&
                   withdrawReason &&
                   withdrawReason !== windowReason && (
-                  <span className="block mt-1 text-gray-500 dark:text-zinc-400 font-normal">
+                  <span className="block mt-1 text-foreground-secondary text-foreground-secondary font-normal">
                     {withdrawReason}
                   </span>
                 )}
@@ -333,7 +335,7 @@ export default function MeetSignupAthleteForm({
                   setConfirmWithdrawOpen(true)
                 }}
                 disabled={loading}
-                className="text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950/30 disabled:opacity-50 transition-colors"
+                className="bg-background text-xs px-3 py-1.5 rounded-lg border border-border border-border-secondary-secondary border-red-200 text-error hover:bg-red-50 dark:border-red-900 dark:text-error dark:hover:bg-red-950/30 disabled:opacity-50 transition-colors"
               >
                 Withdraw
               </button>
@@ -341,7 +343,7 @@ export default function MeetSignupAthleteForm({
           </div>
 
           {selfEntry && selfEntry.events.length > 0 && (
-            <p className="text-sm text-gray-600 dark:text-zinc-400">
+            <p className="text-sm text-foreground-secondary text-foreground-secondary">
               Your submission:{" "}
               {formatEntrySummary(
                 selfEntry,
@@ -379,7 +381,7 @@ export default function MeetSignupAthleteForm({
                   setConfirmWithdrawOpen(true)
                 }}
                 disabled={loading}
-                className="w-full rounded-lg border px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30 dark:border-zinc-700 disabled:opacity-50"
+                className="bg-background w-full rounded-lg border border-border border-border-secondary-secondary px-4 py-2.5 text-sm font-medium text-error hover:bg-red-50 dark:text-error dark:hover:bg-red-950/30 border-border-secondary-secondary disabled:opacity-50"
               >
                 Withdraw
               </button>
@@ -388,7 +390,7 @@ export default function MeetSignupAthleteForm({
               type="button"
               onClick={() => setOpen(false)}
               disabled={loading}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700 disabled:opacity-50"
+              className="bg-background flex-1 rounded-lg border border-border border-border-secondary-secondary px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border-secondary-secondary disabled:opacity-50"
             >
               {previewOnly || (!canEdit && !isCoach) ? "Close" : "Cancel"}
             </button>
@@ -396,7 +398,7 @@ export default function MeetSignupAthleteForm({
               <button
                 type="submit"
                 disabled={submitDisabled || (!isCoach && !canEdit)}
-                className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
               >
                 {loading ? "Saving…" : initial ? "Update sign-up" : "Submit sign-up"}
               </button>
@@ -406,14 +408,14 @@ export default function MeetSignupAthleteForm({
       >
         {isCoach && (
           <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+            <label className="block text-xs font-medium text-foreground-secondary mb-1">
               Athlete
             </label>
             <select
               value={athleteId}
               onChange={(e) => setAthleteId(e.target.value)}
               disabled={loading}
-              className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+              className="w-full rounded-lg border border-border border-border-secondary-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
             >
               {athletes.map((a) => (
                 <option key={a.id} value={a.id}>
@@ -434,9 +436,9 @@ export default function MeetSignupAthleteForm({
         <div className="space-y-4">
           <div>
             <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
-              <p className="text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide">
-                Individual events
-              </p>
+                <p className="text-xs font-medium text-foreground-secondary text-foreground-secondary uppercase tracking-wide">
+                  Individual events {minEvents != null && minEvents > 0 ? <span className="text-red-500">*</span> : null}
+                </p>
               {(minEvents != null || maxEvents != null) && (
                 <span
                   className={
@@ -463,18 +465,18 @@ export default function MeetSignupAthleteForm({
                   const atLimit =
                     !active && maxEvents != null && individual.length >= maxEvents
                   return (
-                    <button
-                      key={opt.event}
-                      type="button"
-                      disabled={loading || atLimit}
-                      onClick={() => toggleEvent(opt.event)}
-                      className={
-                        "text-xs px-2 py-0.5 rounded-full border transition-colors disabled:opacity-40 " +
-                        (active
-                          ? "bg-indigo-600 border-indigo-600 text-white"
-                          : "border-gray-300 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800")
-                      }
-                    >
+                        <button
+                          key={opt.event}
+                          type="button"
+                          disabled={loading || atLimit}
+                          onClick={() => toggleEvent(opt.event)}
+                          className={
+                            "text-xs px-2 py-0.5 rounded-full border border-border border-border-secondary-secondary transition-colors disabled:opacity-40 " +
+                            (active
+                              ? "bg-primary border-primary text-primary-text"
+                              : "border-border-secondary-secondary text-foreground-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary")
+                          }
+                        >
                       {formatSignupEventLabel(opt, gender)}
                     </button>
                   )
@@ -485,17 +487,22 @@ export default function MeetSignupAthleteForm({
           {individual.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <p className="text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide">
-                  Entry times
+                <p className="text-xs font-medium text-foreground-secondary text-foreground-secondary uppercase tracking-wide">
+                  Entry times <span className="text-red-500">*</span>
                 </p>
-                <button
-                  type="button"
-                  onClick={() => void fillLifetimeBests()}
-                  disabled={loading || importingBests || !canEdit || !athleteId}
-                  className="text-[11px] px-2 py-0.5 border rounded-md hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
-                >
-                  {importingBests ? "Importing…" : `Import lifetime bests`}
-                </button>
+                <div className="flex items-center gap-2">
+                  {importError && (
+                    <p className="text-xs text-error dark:text-error">{importError}</p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => void fillLifetimeBests()}
+                    disabled={loading || importingBests || !canEdit || !athleteId}
+                    className="text-[11px] px-2 py-0.5 border border-border border-border-secondary-secondary rounded-md dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary bg-background disabled:opacity-40 transition-colors"
+                  >
+                    {importingBests ? "Importing…" : `Import lifetime bests`}
+                  </button>
+                </div>
               </div>
               {individual.map((event) => {
                 const opt = optionByEvent.get(event)
@@ -505,7 +512,7 @@ export default function MeetSignupAthleteForm({
                 return (
                   <div key={event} className="space-y-10">
                     <div className="flex items-center gap-3">
-                      <label className="w-45 shrink-0 text-sm text-gray-700 dark:text-zinc-300">
+                      <label className="w-45 shrink-0 text-sm text-foreground">
                         {label}
                       </label>
                       <input
@@ -527,15 +534,15 @@ export default function MeetSignupAthleteForm({
                           }
                         }}
                         className={
-                          "flex-1 rounded-lg border px-3 py-2 text-sm font-mono dark:bg-zinc-950 " +
+                          "flex-1 rounded-lg border border-border border-border-secondary-secondary px-3 py-2 text-sm font-mono bg-background " +
                           (invalid
                             ? "border-red-400 dark:border-red-700"
-                            : "dark:border-zinc-700")
+                            : "border-border-secondary-secondary")
                         }
                       />
                     </div>
                     {invalid && (
-                      <p className="pl-[10.5rem] text-xs text-red-600 dark:text-red-400">
+                      <p className="pl-[10.5rem] text-xs text-error dark:text-error">
                         Use NT or a time like 58.32 / 1:02.45
                       </p>
                     )}
@@ -548,7 +555,7 @@ export default function MeetSignupAthleteForm({
           {eventOptions.some((opt) => opt.isRelay) && (
             <div>
               <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
-                <p className="text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide">
+                <p className="text-xs font-medium text-foreground-secondary text-foreground-secondary uppercase tracking-wide">
                   Relay events
                 </p>
                 {maxRelayEvents != null && (
@@ -567,18 +574,18 @@ export default function MeetSignupAthleteForm({
                       maxRelayEvents != null &&
                       relay.length >= maxRelayEvents
                     return (
-                      <button
-                        key={opt.event}
-                        type="button"
-                        disabled={loading || atLimit}
-                        onClick={() => toggleEvent(opt.event)}
-                        className={
-                          "text-xs px-2 py-0.5 rounded-full border transition-colors disabled:opacity-40 " +
-                          (active
-                            ? "bg-indigo-600 border-indigo-600 text-white"
-                            : "border-gray-300 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800")
-                        }
-                      >
+                        <button
+                          key={opt.event}
+                          type="button"
+                          disabled={loading || atLimit}
+                          onClick={() => toggleEvent(opt.event)}
+                          className={
+                            "text-xs px-2 py-0.5 rounded-full border border-border border-border-secondary-secondary transition-colors disabled:opacity-40 " +
+                            (active
+                              ? "bg-primary border-primary text-primary-text"
+                              : "border-border-secondary-secondary text-foreground-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary")
+                          }
+                        >
                         {formatSignupEventLabel(opt, gender)}
                       </button>
                     )
@@ -589,7 +596,7 @@ export default function MeetSignupAthleteForm({
         </div>
 
         {relay.length > 0 && (
-          <p className="text-sm text-gray-500 dark:text-zinc-400">
+          <p className="text-sm text-foreground-secondary text-foreground-secondary">
             Signing up for relays does not guarantee a spot. We will form the most competitive
             relays.
           </p>
@@ -597,9 +604,9 @@ export default function MeetSignupAthleteForm({
 
         {customQuestions.map((q) => (
           <div key={q.id}>
-            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+            <label className="block text-xs font-medium text-foreground-secondary mb-1">
               {q.label}
-              {!q.required && <span className="font-normal text-gray-400"> (optional)</span>}
+              {q.required ? <span className="text-red-500"> *</span> : null}
             </label>
             {q.type === "choice" ? (
               <select
@@ -607,7 +614,7 @@ export default function MeetSignupAthleteForm({
                 onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
                 required={q.required}
                 disabled={loading}
-                className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                className="w-full rounded-lg border border-border border-border-secondary-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
               >
                 <option value="">{q.required ? "Select…" : "—"}</option>
                 {q.options.map((opt) => (
@@ -623,7 +630,7 @@ export default function MeetSignupAthleteForm({
                 onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
                 required={q.required}
                 disabled={loading}
-                className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+                className="w-full rounded-lg border border-border border-border-secondary-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
               />
             )}
           </div>
@@ -631,8 +638,8 @@ export default function MeetSignupAthleteForm({
 
         {askNotes && (
           <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
-              Notes <span className="font-normal text-gray-400">(optional)</span>
+            <label className="block text-xs font-medium text-foreground-secondary mb-1">
+              Notes
             </label>
             <textarea
               value={notes}
@@ -640,12 +647,12 @@ export default function MeetSignupAthleteForm({
               rows={2}
               disabled={loading}
               placeholder="Comments, questions, or concerns"
-              className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-zinc-950 dark:border-zinc-700"
+              className="w-full rounded-lg border border-border border-border-secondary-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
             />
           </div>
         )}
 
-        {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+        {error && <p className="text-sm text-error dark:text-error">{error}</p>}
       </Modal>
 
       <Modal
@@ -674,23 +681,23 @@ export default function MeetSignupAthleteForm({
                 setWithdrawError(null)
               }}
               disabled={loading}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700 disabled:opacity-50"
+              className="bg-background flex-1 rounded-lg border border-border border-border-secondary-secondary px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border-secondary-secondary disabled:opacity-50"
             >
               Cancel
             </button>
-            <button
-              type="button"
-              onClick={() => void handleWithdraw()}
-              disabled={loading}
-              className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
-            >
+                <button
+                type="button"
+                onClick={() => void handleWithdraw()}
+                disabled={loading}
+                className="flex-1 rounded-lg bg-error px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-error-hover disabled:opacity-50"
+              >
               {loading ? "Withdrawing…" : "Withdraw"}
             </button>
           </ModalFooter>
         }
       >
         {withdrawError ? (
-          <p className="text-sm text-red-600 dark:text-red-400">{withdrawError}</p>
+          <p className="text-sm text-error dark:text-error">{withdrawError}</p>
         ) : null}
       </Modal>
     </div>

@@ -17,7 +17,7 @@ export default function SignInButton({
       onClick={() => signIn("google", { callbackUrl })}
       className={
         className ||
-        "inline-flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-800 shadow-sm transition-colors hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+        "inline-flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-background px-5 py-3 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-fill-secondary"
       }
     >
       <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0" aria-hidden="true">

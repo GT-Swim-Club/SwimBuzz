@@ -25,7 +25,7 @@ const sectionIconProps = {
   strokeWidth: 2,
   strokeLinecap: "round" as const,
   strokeLinejoin: "round" as const,
-  className: "h-4 w-4 shrink-0 text-gray-500 dark:text-zinc-400",
+  className: "h-4 w-4 shrink-0 text-foreground-tertiary",
   "aria-hidden": true as const,
 }
 
@@ -58,18 +58,18 @@ export default async function SettingsPage() {
   )
 
   return (
-    <div className="mx-auto max-w-lg">
-      <h1 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-zinc-100">
+    <div className="mx-auto max-w-2xl">
+      <h1 className="text-2xl font-semibold tracking-tight text-foreground">
         Settings
       </h1>
-      <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">
+      <p className="mt-1 text-sm text-foreground-secondary">
         Manage your account, notifications, and appearance.
       </p>
 
       <div className="mt-8 space-y-6">
-        <section className="rounded-xl border border-gray-200 dark:border-zinc-800">
-          <div className="border-b border-gray-100 px-4 py-3 dark:border-zinc-800">
-            <h2 className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-zinc-100">
+        <section className="rounded-xl border border-border-secondary">
+          <div className="border-b border-border-secondary px-4 py-3">
+            <h2 className="flex items-center gap-2 text-sm font-medium text-foreground">
               <svg {...sectionIconProps}>
                 <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
@@ -77,7 +77,7 @@ export default async function SettingsPage() {
               Account
             </h2>
           </div>
-          <div className="divide-y divide-gray-100 dark:divide-zinc-800">
+          <div className="divide-y divide-border">
             <ProfilePictureSettings
               initialImage={user?.image ?? session.user.image}
               name={session.user.name}
@@ -85,29 +85,29 @@ export default async function SettingsPage() {
               canEdit={!isStaffRole(session.user.role)}
             />
             <div className="flex items-center justify-between gap-4 px-4 py-3">
-              <p className="text-sm text-gray-500 dark:text-zinc-400">Name</p>
-              <p className="truncate text-sm font-medium text-gray-900 dark:text-zinc-100">
+              <p className="text-sm text-foreground-secondary">Name</p>
+              <p className="truncate text-sm font-medium text-foreground">
                 {session.user.name || "—"}
               </p>
             </div>
             <div className="flex items-center justify-between gap-4 px-4 py-3">
-              <p className="text-sm text-gray-500 dark:text-zinc-400">Email</p>
-              <p className="truncate text-sm font-medium text-gray-900 dark:text-zinc-100">
+              <p className="text-sm text-foreground-secondary">Email</p>
+              <p className="truncate text-sm font-medium text-foreground">
                 {session.user.email || "—"}
               </p>
             </div>
             <div className="flex items-center justify-between gap-4 px-4 py-3">
-              <p className="text-sm text-gray-500 dark:text-zinc-400">Role</p>
-              <p className="text-sm font-medium text-gray-900 dark:text-zinc-100">
+              <p className="text-sm text-foreground-secondary">Role</p>
+              <p className="text-sm font-medium text-foreground">
                 {formatRoleLabel(session.user.role)}
               </p>
             </div>
           </div>
         </section>
 
-        <section className="rounded-xl border border-gray-200 dark:border-zinc-800">
-          <div className="flex items-center justify-between gap-4 border-b border-gray-100 px-4 py-3 dark:border-zinc-800">
-            <h2 className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-zinc-100">
+        <section className="rounded-xl border border-border-secondary">
+          <div className="flex items-center justify-between gap-4 border-b border-border-secondary px-4 py-3">
+            <h2 className="flex items-center gap-2 text-sm font-medium text-foreground">
               <svg {...sectionIconProps}>
                 <rect width="18" height="18" x="3" y="3" rx="2" />
                 <circle cx="9" cy="9" r="2" />
@@ -120,17 +120,17 @@ export default async function SettingsPage() {
             {athlete ? (
               <Link
                 href={`/athletes/${athlete.id}`}
-                className="shrink-0 text-sm text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                className="shrink-0 text-sm text-primary hover:text-primary-hover"
               >
                 View profile
               </Link>
             ) : null}
           </div>
           {athlete ? (
-            <div className="divide-y divide-gray-100 dark:divide-zinc-800">
+            <div className="divide-y divide-border">
               {requiresApproval && (
                 <div className="px-4 py-3">
-                  <p className="text-xs text-gray-500 dark:text-zinc-400">
+                  <p className="text-xs text-foreground-secondary">
                     SwimCloud ID and nickname changes need coach approval before
                     they take effect.
                   </p>
@@ -143,8 +143,8 @@ export default async function SettingsPage() {
               )}
               <div className="px-4 py-3 space-y-2">
                 <div>
-                  <p className="text-sm text-gray-900 dark:text-zinc-100">SwimCloud ID</p>
-                  <p className="text-xs text-gray-500 dark:text-zinc-400">
+                  <p className="text-sm text-foreground">SwimCloud ID</p>
+                  <p className="text-xs text-foreground-secondary">
                     Find it in your SwimCloud profile URL (e.g. swimcloud.com/swimmer/
                     <span className="font-mono">1234567</span>).
                   </p>
@@ -158,8 +158,8 @@ export default async function SettingsPage() {
               </div>
               <div className="px-4 py-3 space-y-2">
                 <div>
-                  <p className="text-sm text-gray-900 dark:text-zinc-100">Nicknames</p>
-                  <p className="text-xs text-gray-500 dark:text-zinc-400">
+                  <p className="text-sm text-foreground">Nicknames</p>
+                  <p className="text-xs text-foreground-secondary">
                     Alternate names used to match imported results to you.
                   </p>
                 </div>
@@ -174,22 +174,22 @@ export default async function SettingsPage() {
               </div>
             </div>
           ) : (
-            <p className="px-4 py-3 text-sm text-gray-500 dark:text-zinc-400">
+            <p className="px-4 py-3 text-sm text-foreground-secondary">
               Your account isn&apos;t linked to a roster athlete.
             </p>
           )}
         </section>
 
-        <section className="rounded-xl border border-gray-200 dark:border-zinc-800">
-          <div className="border-b border-gray-100 px-4 py-3 dark:border-zinc-800">
-            <h2 className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-zinc-100">
+        <section className="rounded-xl border border-border-secondary">
+          <div className="border-b border-border-secondary px-4 py-3">
+            <h2 className="flex items-center gap-2 text-sm font-medium text-foreground">
               <svg {...sectionIconProps}>
                 <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
                 <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
               </svg>
               Notifications
             </h2>
-            <p className="mt-0.5 text-xs text-gray-500 dark:text-zinc-400">
+            <p className="mt-0.5 text-xs text-foreground-secondary">
               Choose which in-app alerts you receive
             </p>
           </div>
@@ -199,9 +199,9 @@ export default async function SettingsPage() {
           />
         </section>
 
-        <section className="rounded-xl border border-gray-200 dark:border-zinc-800">
-          <div className="border-b border-gray-100 px-4 py-3 dark:border-zinc-800">
-            <h2 className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-zinc-100">
+        <section className="rounded-xl border border-border-secondary">
+          <div className="border-b border-border-secondary px-4 py-3">
+            <h2 className="flex items-center gap-2 text-sm font-medium text-foreground">
               <svg {...sectionIconProps}>
                 <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
                 <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />

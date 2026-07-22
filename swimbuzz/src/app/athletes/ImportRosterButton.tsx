@@ -149,7 +149,7 @@ export default function ImportRosterButton() {
           resetForm()
           setOpen(true)
         }}
-        className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border-secondary rounded-lg hover:border-border hover:bg-fill-tertiary bg-fill-secondary dark:hover:bg-fill-tertiary dark:bg-background transition-colors"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -177,7 +177,7 @@ export default function ImportRosterButton() {
         title="Import Roster"
         description={modalDescription}
         header={
-          <div className="mt-4 flex rounded-lg border dark:border-zinc-700 p-0.5 bg-gray-50 dark:bg-zinc-950">
+          <div className="mt-4 flex rounded-lg border border-border-secondary dark:border border-border-secondary p-0.5 bg-fill-secondary dark:bg-background-elevated">
             {(
               [
                 ["csv", "CSV", "icon"] as const,
@@ -193,8 +193,8 @@ export default function ImportRosterButton() {
                 }}
                 className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                   source === value
-                    ? "bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 shadow-sm"
-                    : "text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-300"
+                    ? "bg-background dark:bg-zinc-800 text-foreground dark:text-foreground shadow-sm"
+                    : "text-foreground-secondary dark:text-foreground-secondary hover:text-foreground dark:hover:text-foreground"
                 }`}
               >
                 {adornment === "logo" && (
@@ -237,14 +237,14 @@ export default function ImportRosterButton() {
               type="button"
               onClick={() => setOpen(false)}
               disabled={loading}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+              className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary hover:bg-fill-secondary border-border-secondary"
             >
               Close
             </button>
             <button
               type="submit"
               disabled={!canSubmit}
-              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
               {loading ? "Importing…" : "Import"}
             </button>
@@ -252,38 +252,38 @@ export default function ImportRosterButton() {
         }
       >
         {source === "swimcloud" ? (
-          <div className="space-y-2 text-md text-gray-600 dark:text-zinc-400">
+          <div className="space-y-2 text-md text-foreground-secondary text-foreground-secondary">
             <p>
               Imports SwimCloud IDs for athletes already on your roster. Does not add new athletes.
             </p>
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="rounded-lg border border-gray-100 bg-gray-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-800/50">
-              <p className="font-medium text-gray-900 dark:text-zinc-100">Required columns</p>
-              <ul className="mt-2 space-y-1.5 text-gray-600 dark:text-zinc-400">
+            <div className="rounded-lg border border-border-secondary bg-fill-secondary px-4 py-3 text-sm">
+              <p className="font-medium text-foreground text-foreground">Required columns</p>
+              <ul className="mt-2 space-y-1.5 text-foreground-secondary text-foreground-secondary">
                 <li>
                   <span className="font-medium text-gray-800 dark:text-zinc-200">Name</span>
                   {" — "}
-                  <span className="text-gray-600 dark:text-zinc-400">
+                  <span className="text-foreground-secondary text-foreground-secondary">
                     First Name & Last Name, or just a Full Name column
                   </span>
                 </li>
                 <li>
                   <span className="font-medium text-gray-800 dark:text-zinc-200">Gender</span>
                   {" — "}
-                  <span className="text-gray-600 dark:text-zinc-400">
+                  <span className="text-foreground-secondary text-foreground-secondary">
                     M/F, Male/Female, Men/Women, or Boy/Girl
                   </span>
                 </li>
               </ul>
-              <p className="mt-3 text-xs text-gray-500 dark:text-zinc-500">
+              <p className="mt-3 text-xs text-foreground-tertiary">
                 Optional: Email, SwimCloud ID, Nicknames.
               </p>
             </div>
 
             <div>
-              <span className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">
+              <span className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
                 Roster CSV
               </span>
               <input
@@ -297,11 +297,11 @@ export default function ImportRosterButton() {
               <div className="flex items-center gap-3">
                 <label
                   htmlFor="roster-csv-upload"
-                  className="cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 dark:border-zinc-700"
+                  className="cursor-pointer rounded-lg border border-border-secondary border-primary bg-primary px-4 py-2 text-sm font-medium text-primary-text hover:bg-primary-hover"
                 >
                   Choose CSV
                 </label>
-                <span className="text-sm text-gray-600 dark:text-zinc-400 truncate">
+                <span className="text-sm text-foreground-secondary text-foreground-secondary truncate">
                   {selectedFile ? selectedFile.name : "No file selected"}
                 </span>
               </div>
@@ -309,7 +309,7 @@ export default function ImportRosterButton() {
           </div>
         )}
 
-        {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+        {error && <p className="text-sm text-error">{error}</p>}
       </Modal>
 
       <Modal
@@ -327,7 +327,7 @@ export default function ImportRosterButton() {
                 setResultOpen(false)
                 setResult(null)
               }}
-              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover"
             >
               Done
             </button>
@@ -335,8 +335,8 @@ export default function ImportRosterButton() {
         }
       >
         {result?.source === "swimcloud" && (
-          <div className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-800/50">
-            <p className="text-gray-900 dark:text-zinc-100">
+          <div className="rounded-xl border border-border-secondary border-gray-100 bg-gray-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-800/50">
+            <p className="text-foreground text-foreground">
               Imported SwimCloud IDs on <strong>{result.linked ?? result.updated}</strong> athlete
               {(result.linked ?? result.updated) === 1 ? "" : "s"}
               .
@@ -348,7 +348,7 @@ export default function ImportRosterButton() {
               </p>
             )}
             {(result.alreadyLinked ?? 0) > 0 && (
-              <p className="mt-1 text-gray-500 dark:text-zinc-400 text-xs">
+              <p className="mt-1 text-foreground-secondary text-foreground-secondary text-xs">
                 {result.alreadyLinked} already had a SwimCloud ID.
               </p>
             )}
@@ -361,8 +361,8 @@ export default function ImportRosterButton() {
         )}
 
         {result?.source === "csv" && (
-          <div className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-800/50">
-            <p className="text-gray-900 dark:text-zinc-100">
+          <div className="rounded-xl border border-border-secondary border-gray-100 bg-gray-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-800/50">
+            <p className="text-foreground text-foreground">
               Imported <strong>{result.created}</strong> new athlete
               {result.created === 1 ? "" : "s"}
               {result.updated > 0 && (
@@ -371,7 +371,7 @@ export default function ImportRosterButton() {
                 </>
               )}
               {result.parsed > 0 && (
-                <span className="text-gray-500 dark:text-zinc-400">
+                <span className="text-foreground-secondary text-foreground-secondary">
                   {" "}
                   ({result.parsed} rows parsed)
                 </span>

@@ -105,7 +105,7 @@ export default function EditNicknamesForm({
               type="button"
               onClick={() => void requestApproval()}
               disabled={loading || !hasChanged}
-              className="text-sm px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 disabled:opacity-40 transition-colors"
+              className="text-sm px-4 py-2 border border-border rounded-lg hover:bg-fill-secondary disabled:opacity-40 transition-colors"
             >
               {loading ? "Requesting…" : "Request"}
             </button>
@@ -113,7 +113,7 @@ export default function EditNicknamesForm({
         }
       />
       {pendingNicknames != null && (
-        <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
+        <p className="mt-1 text-xs text-info">
           Pending approval:{" "}
           {pendingNicknames.length > 0
             ? pendingNicknames.join(", ")
@@ -124,9 +124,9 @@ export default function EditNicknamesForm({
         </p>
       )}
       {message && (
-        <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">{message}</p>
+        <p className="mt-1 text-xs text-info">{message}</p>
       )}
-      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+      {error && <p className="mt-1 text-xs text-error">{error}</p>}
     </div>
   )
 }

@@ -8,12 +8,15 @@ import { formatDateRange } from "@/lib/utils"
 import { Fragment } from "react"
 import ImportMeetButton from "@/app/athletes/ImportMeetButton"
 import ImportMeetResourcesButton from "./ImportMeetResourcesButton"
+import ManagePhotosButton from "./ManagePhotosButton"
 import AddTravelInfoButton from "./AddTravelInfoButton"
 import MeetActions from "./MeetActions"
 import AddMeetSwimButton from "./AddMeetSwimButton"
+import PhotosButtons, { PreviewSlideshow } from "./PhotosButtons"
 import { AddMeetRelayButton } from "./MeetRelayEditor"
 import EventOrderButton from "./EventOrderButton"
 import MeetSheetSummarySection from "./MeetSheetSummarySection"
+import ScrollToHash from "./ScrollToHash"
 import type { MeetFormState } from "../MeetFields"
 import { isEventOrder } from "@/lib/meet-event-order"
 import {
@@ -141,11 +144,29 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
     course: meet.course,
     season: meet.season,
     school: meet.school ?? "",
+    iconUrl: meet.iconUrl ?? "",
+    bannerUrl: meet.bannerUrl ?? "",
     packetUrl: meet.packetUrl ?? "",
     psychSheetUrl: meet.psychSheetUrl ?? "",
     heatSheetUrl: meet.heatSheetUrl ?? "",
     resultsUrl: meet.resultsUrl ?? "",
   }
+
+  let initialPhotos: { url: string; name: string }[] = []
+  let initialPreviews: string[] = []
+  if (meet.photos) {
+    if (Array.isArray(meet.photos)) {
+      initialPhotos = meet.photos as { url: string; name: string }[]
+    } else if (typeof meet.photos === "object") {
+      const obj = meet.photos as { links?: { url: string; name: string }[]; previews?: string[] }
+      initialPhotos = obj.links || []
+      initialPreviews = obj.previews || []
+    }
+  }
+
+  const today = new Date().toISOString().slice(0, 10)
+  const meetStartDate = toDateInput(meet.startDate)
+  const isBeforeOrToday = meetStartDate <= today
 
   const links = RESOURCE_LINKS.filter((l) => meet[l.key])
   const eventOrder = isEventOrder(meet.eventOrder) ? meet.eventOrder : null
@@ -157,6 +178,10 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
     psychSheetUrl: meet.psychSheetUrl ?? "",
     heatSheetUrl: meet.heatSheetUrl ?? "",
     liveStreamUrl: meet.liveStreamUrl ?? "",
+  }
+  const photosInitial = {
+    photos: initialPhotos,
+    previews: initialPreviews,
   }
   const travelLinks = TRAVEL_LINKS.filter((l) => meet[l.key])
   const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => meet[s.key]?.trim())
@@ -191,6 +216,18 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
     individualResults: results,
     relayResults,
   })
+
+  const now = new Date()
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
+  yesterday.setHours(0, 0, 0, 0)
+
+  const lastActiveDate = new Date(meet.endDate ?? meet.startDate)
+  lastActiveDate.setHours(0, 0, 0, 0)
+
+  const meetHasEnded = lastActiveDate <= yesterday
+
+  const hasSignupEntries = meet.signupForm ? meet.signupForm.entries.length > 0 : false
+  const showSignupSection = !meetHasEnded || hasSignupEntries
 
   const seasonRoster = await prisma.athlete.findMany({
     where: { seasons: { has: meet.season } },
@@ -283,25 +320,37 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
   )
 
   return (
-    <main className="mx-auto max-w-3xl space-y-8">
+    <main className="mx-auto max-w-4xl space-y-8">
+      <ScrollToHash />
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="min-w-0">
           <Link
             href="/meets"
-            className="text-xs text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300"
+            className="text-xs text-foreground-tertiary hover:text-foreground"
           >
             ← All meets
           </Link>
-          <h1 className="mt-1 text-xl font-medium sm:text-2xl">{meet.name}</h1>
-          <p className="text-sm text-gray-500 dark:text-zinc-400">
-            {formatDateRange(meet.startDate, meet.endDate)}
-            {meet.location ? ` · ${meet.location}` : ""}
-            {meet.school ? ` · ${meet.school}` : ""}
-          </p>
-          <p className="mt-0.5 text-xs text-gray-400 dark:text-zinc-500">
-            {meet.course} · {meet.season}
-          </p>
+          <div className="mt-1 flex items-center gap-3">
+            {meet.iconUrl && (
+              <img
+                src={meet.iconUrl}
+                alt={`${meet.name} icon`}
+                className="h-16 w-16 rounded-lg object-cover shrink-0"
+              />
+            )}
+            <div className="min-w-0">
+              <h1 className="text-xl font-medium sm:text-2xl">{meet.name}</h1>
+              <p className="text-sm text-foreground-secondary">
+                {formatDateRange(meet.startDate, meet.endDate)}
+                {meet.location ? ` · ${meet.location}` : ""}
+                {meet.school ? ` · ${meet.school}` : ""}
+              </p>
+              <p className="mt-0.5 text-xs text-foreground-tertiary">
+                {meet.course} · {meet.season}
+              </p>
+            </div>
+          </div>
         </div>
         {isCoach && <MeetActions meetId={meet.id} initial={initial} meetName={meet.name} />}
       </div>
@@ -310,7 +359,7 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
       {(hasResources || isCoach) && (
         <section>
           <div className="flex items-center flex-wrap gap-x-3 gap-y-2 mb-3">
-            <h2 className="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide">
+            <h2 className="text-sm font-medium text-foreground-secondary uppercase tracking-wide">
               Resources
             </h2>
             {isCoach && (
@@ -330,7 +379,7 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
                     href={meet[l.key] as string}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 dark:bg-zinc-950 transition-colors"
+                    className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border border-border-secondary rounded-lg dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary transition-colors"
                   >
                     <MeetResourceIcon kind={l.icon} />
                     {l.label}
@@ -345,7 +394,7 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
               ) : null}
             </div>
           ) : (
-            <p className="text-sm text-gray-500 dark:text-zinc-400">
+            <p className="text-sm text-foreground-secondary">
               No resources yet.
             </p>
           )}
@@ -356,7 +405,7 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
       {(hasTravel || isCoach) && (
         <section>
           <div className="flex items-center flex-wrap gap-x-3 gap-y-2 mb-3">
-            <h2 className="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide">
+            <h2 className="text-sm font-medium text-foreground-secondary uppercase tracking-wide">
               Travel
             </h2>
             {isCoach && (
@@ -375,32 +424,34 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
           {hasTravel ? (
             <TravelInfoButtons items={travelItems} />
           ) : (
-            <p className="text-sm text-gray-500 dark:text-zinc-400">
+            <p className="text-sm text-foreground-secondary">
               No travel info yet.
             </p>
           )}
         </section>
       )}
 
-      <MeetSignupSection
-        meetId={meet.id}
-        eventOrder={meet.eventOrder}
-        course={meet.course}
-        isCoach={isCoach}
-        isStaff={isStaff}
-        selfAthleteId={viewerAthleteId}
-        athletes={rosterAthletes.map((a) => ({
-          id: a.id,
-          name: a.name,
-          gender: a.gender,
-        }))}
-        form={signupForm}
-        myEntry={mySignupEntry}
-        entries={signupEntries}
-        hasImportedResults={hasImportedResults}
-      />
+      {showSignupSection && (
+        <MeetSignupSection
+          meetId={meet.id}
+          eventOrder={meet.eventOrder}
+          course={meet.course}
+          isCoach={isCoach}
+          isStaff={isStaff}
+          selfAthleteId={viewerAthleteId}
+          athletes={rosterAthletes.map((a) => ({
+            id: a.id,
+            name: a.name,
+            gender: a.gender,
+          }))}
+          form={signupForm}
+          myEntry={mySignupEntry}
+          entries={signupEntries}
+          hasImportedResults={hasImportedResults}
+        />
+      )}
 
-      {isCoach && (
+      {isCoach && !meetHasEnded && (
         <MeetRelayBuilder
           meetId={meet.id}
           defaultCourse={meet.course}
@@ -410,6 +461,32 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
           signupAthleteIdsByEvent={signupAthleteIdsByEvent}
           hasImportedResults={hasImportedResults}
         />
+      )}
+
+      {/* Photos Section */}
+      {isBeforeOrToday && (initialPhotos.length > 0 || initialPreviews.length > 0 || isCoach) && (
+        <section className="space-y-3">
+          <div className="flex items-center flex-wrap gap-x-3 gap-y-2 mb-3">
+            <h2 className="text-sm font-medium text-foreground-secondary uppercase tracking-wide">
+              Photos
+            </h2>
+            {isCoach && (
+              <ManagePhotosButton meetId={meet.id} initial={photosInitial} />
+            )}
+            {initialPhotos.length > 0 && (
+              <PhotosButtons photos={initialPhotos} label="All Photos" />
+            )}
+          </div>
+          {initialPhotos.length > 0 || initialPreviews.length > 0 ? (
+            initialPreviews.length > 0 && (
+              <PreviewSlideshow previews={initialPreviews} />
+            )
+          ) : (
+            <p className="text-sm text-foreground-secondary">
+              No photos yet.
+            </p>
+          )}
+        </section>
       )}
 
       <MeetSheetSummarySection

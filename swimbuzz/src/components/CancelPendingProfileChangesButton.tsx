@@ -40,7 +40,7 @@ export default function CancelPendingProfileChangesButton({
         type="button"
         onClick={() => void cancel()}
         disabled={loading}
-        className="text-sm text-gray-500 underline-offset-2 hover:text-gray-800 hover:underline dark:text-zinc-400 dark:hover:text-zinc-200 disabled:opacity-50"
+        className="text-sm text-foreground-secondary underline-offset-2 hover:text-foreground hover:underline disabled:opacity-50"
       >
         {loading ? "Canceling…" : "Cancel pending request"}
       </button>

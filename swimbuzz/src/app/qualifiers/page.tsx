@@ -1,3 +1,4 @@
+import LoadingComponent from "./loading"
 import { Suspense } from "react"
 import { getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
@@ -11,11 +12,9 @@ import QualifiersList from "./QualifiersList"
 import StandardsTableModal from "./StandardsTableModal"
 import UploadStandardsButton from "./UploadStandardsButton"
 
-export default async function QualifiersPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ season?: string; gender?: string }>
-}) {
+export const dynamic = 'force-dynamic'
+
+async function QualifiersContent({ searchParams }: { searchParams: Promise<{ season?: string; gender?: string }> }) {
   const session = await getServerSession(authOptions)
   if (!session) redirect("/signin")
 
@@ -39,13 +38,11 @@ export default async function QualifiersPage({
   })
 
   return (
-    <main className="space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3 flex-wrap">
-          <h1 className="text-2xl font-medium">Nationals Qualifiers</h1>
-          <Suspense fallback={null}>
-            <QualifierFilters qualifierCount={qualifierCount} />
-          </Suspense>
+          <h1 className="text-2xl font-medium text-foreground">Nationals Qualifiers</h1>
+          <QualifierFilters qualifierCount={qualifierCount} />
         </div>
         {isCoach ? (
           <UploadStandardsButton season={season} course={set?.course ?? "SCY"} />
@@ -53,7 +50,7 @@ export default async function QualifiersPage({
       </div>
 
       {set ? (
-        <p className="flex flex-col gap-1 text-sm text-gray-500 dark:text-zinc-400 sm:block">
+        <p className="flex flex-col gap-1 text-sm text-foreground-secondary sm:block">
           <span>
             Nationals
             {set.yearLabel ? ` ${set.yearLabel}` : ""} · {set.course}
@@ -69,7 +66,7 @@ export default async function QualifiersPage({
           <span>Updated {formatDateTime(set.updatedAt)}</span>
         </p>
       ) : (
-        <p className="text-sm text-gray-500 dark:text-zinc-400">
+        <p className="text-sm text-foreground-secondary">
           No time standards uploaded for {season} yet.
           {isCoach
             ? " Upload a Nationals qualifying times PDF to see who has made cuts from this season’s meets."
@@ -85,6 +82,16 @@ export default async function QualifiersPage({
             : "Upload standards to start tracking qualifiers."
         }
       />
-    </main>
+    </div>
   )
+}
+
+export default async function QualifiersPage(props: { searchParams: Promise<{ season?: string; gender?: string }> }) {
+    return (
+        <main className="space-y-6">
+            <Suspense fallback={<LoadingComponent />}>
+                <QualifiersContent {...props} />
+            </Suspense>
+        </main>
+    )
 }
