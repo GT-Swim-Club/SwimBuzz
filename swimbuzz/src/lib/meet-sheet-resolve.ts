@@ -4,12 +4,33 @@ import {
   resolveHeatSheetSummary,
   resolveEntriesSheetSummary,
 } from "@/lib/meet-sheet-parse"
+import { isSheetSummary } from "@/lib/meet-sheet-summary"
+import { isEditableSignupSheetSeed } from "@/lib/meet-signup"
+import { Prisma } from "@prisma/client"
 
 async function seasonRoster(season: string) {
   return prisma.athlete.findMany({
     where: { seasons: { has: season } },
     select: { id: true, firstName: true, lastName: true, nicknames: true },
   })
+}
+
+/**
+ * Remove manually-added and signup-synced individual entries from
+ * entriesSheetSummary, keeping only imported (PDF) rows and relay entries.
+ * Called whenever a psych sheet, heat sheet, or entries sheet PDF is imported
+ * so that manual/signup seeds don't persist alongside the authoritative sheet data.
+ */
+function stripManualEntriesFromSummary(
+  entriesSheetSummary: unknown
+): Prisma.InputJsonValue | null {
+  if (!isSheetSummary(entriesSheetSummary)) return null
+  const filtered = entriesSheetSummary.entries.filter(
+    (e) => !isEditableSignupSheetSeed(e)
+  )
+  return JSON.parse(
+    JSON.stringify({ ...entriesSheetSummary, entries: filtered })
+  ) as Prisma.InputJsonValue
 }
 
 function effectiveTeamCode(
@@ -63,15 +84,20 @@ export async function attachSheetSummaries(
 
   const roster = needsRoster ? await seasonRoster(existing.season) : null
 
+  // Track whether any sheet PDF is being newly imported so we can purge
+  // manual/signup seeds from entriesSheetSummary afterward.
+  let sheetImported = false
+
   if ("psychSheetUrl" in data && roster) {
     const next = (data.psychSheetUrl as string | null) ?? null
     const shouldParse =
       next !== existing.psychSheetUrl ||
-      (next && !existing.psychSheetSummary) ||
+    (next && !existing.psychSheetSummary) ||
       (teamChanged && !!next)
     if (shouldParse) {
       try {
         data.psychSheetSummary = await resolvePsychSheetSummary(userId, next, roster, teamCode)
+        if (next) sheetImported = true
       } catch (err) {
         console.error("Psych sheet parse failed:", err)
         data.psychSheetSummary = null
@@ -85,6 +111,7 @@ export async function attachSheetSummaries(
         roster,
         teamCode
       )
+      sheetImported = true
     } catch (err) {
       console.error("Psych sheet parse failed:", err)
       data.psychSheetSummary = null
@@ -100,6 +127,7 @@ export async function attachSheetSummaries(
     if (shouldParse) {
       try {
         data.heatSheetSummary = await resolveHeatSheetSummary(userId, next, roster, teamCode)
+        if (next) sheetImported = true
       } catch (err) {
         console.error("Heat sheet parse failed:", err)
         data.heatSheetSummary = null
@@ -113,6 +141,7 @@ export async function attachSheetSummaries(
         roster,
         teamCode
       )
+      sheetImported = true
     } catch (err) {
       console.error("Heat sheet parse failed:", err)
       data.heatSheetSummary = null
@@ -128,6 +157,7 @@ export async function attachSheetSummaries(
     if (shouldParse) {
       try {
         data.entriesSheetSummary = await resolveEntriesSheetSummary(userId, next, roster, teamCode)
+        if (next) sheetImported = true
       } catch (err) {
         console.error("Entries sheet parse failed:", err)
         data.entriesSheetSummary = null
@@ -141,10 +171,24 @@ export async function attachSheetSummaries(
         roster,
         teamCode
       )
+      sheetImported = true
     } catch (err) {
       console.error("Entries sheet parse failed:", err)
       data.entriesSheetSummary = null
     }
+  }
+
+  // When a psych/heat/entries PDF was imported, purge manual and signup-synced
+  // individual entries from entriesSheetSummary so the authoritative sheet data
+  // takes precedence. If the entries sheet itself was just resolved above we use
+  // that; otherwise we fall back to the existing DB value.
+  if (sheetImported) {
+    const currentEntries =
+      "entriesSheetSummary" in data
+        ? data.entriesSheetSummary
+        : existing.entriesSheetSummary
+    const stripped = stripManualEntriesFromSummary(currentEntries)
+    data.entriesSheetSummary = stripped
   }
 }
 
@@ -156,6 +200,8 @@ export async function attachSheetSummariesOnCreate(
   const roster = await seasonRoster(season)
   const teamCode = effectiveTeamCode({}, data)
 
+  let sheetImported = false
+
   if (data.psychSheetUrl) {
     try {
       data.psychSheetSummary = await resolvePsychSheetSummary(
@@ -164,6 +210,7 @@ export async function attachSheetSummariesOnCreate(
         roster,
         teamCode
       )
+      sheetImported = true
     } catch (err) {
       console.error("Psych sheet parse failed:", err)
       data.psychSheetSummary = null
@@ -178,6 +225,7 @@ export async function attachSheetSummariesOnCreate(
         roster,
         teamCode
       )
+      sheetImported = true
     } catch (err) {
       console.error("Heat sheet parse failed:", err)
       data.heatSheetSummary = null
@@ -192,9 +240,18 @@ export async function attachSheetSummariesOnCreate(
         roster,
         teamCode
       )
+      sheetImported = true
     } catch (err) {
       console.error("Entries sheet parse failed:", err)
       data.entriesSheetSummary = null
     }
+  }
+
+  // On create there are no pre-existing manual entries to strip, but if both a
+  // sheet URL and an entriesSheetSummary are set in the same payload, keep only
+  // imported rows.
+  if (sheetImported && "entriesSheetSummary" in data) {
+    const stripped = stripManualEntriesFromSummary(data.entriesSheetSummary)
+    data.entriesSheetSummary = stripped
   }
 }

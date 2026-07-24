@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { formatSwimDate } from "@/lib/utils"
-import { FormattedText } from "@/components/FormattedText"
+import { FormattedText, isHtmlEmpty } from "@/components/FormattedText"
 import PracticeActions from "./PracticeActions"
 import CommentSection from "./CommentSection"
 import PracticeEditor, { type PracticeFormState } from "../PracticeEditor"
@@ -17,7 +17,6 @@ type PracticeSetView = {
   title: string | null
   content: string
   notes: string | null
-  tags: string[]
   distance: number | null
 }
 
@@ -35,7 +34,11 @@ export default function PracticeDetail({
   title,
   published,
   dateIso,
+  startTime,
+  endTime,
+  location,
   focus,
+  tags,
   sets,
   totalDistance,
   initial,
@@ -49,7 +52,11 @@ export default function PracticeDetail({
   title: string
   published: boolean
   dateIso: string | null
+  startTime: string
+  endTime: string
+  location: string
   focus: string | null
+  tags: string[]
   sets: PracticeSetView[]
   totalDistance: number
   initial: PracticeFormState
@@ -240,7 +247,7 @@ export default function PracticeDetail({
 
   return (
     <>
-    <main className="mx-auto max-w-5xl space-y-8">
+    <main className="mx-auto max-w-5xl space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="min-w-0">
           <Link
@@ -260,7 +267,9 @@ export default function PracticeDetail({
           <p className="text-sm text-foreground-secondary dark:text-foreground-secondary">
             {dateIso ? formatSwimDate(dateIso) : "No date"}
             {" · "}
-            {sets.length} set{sets.length === 1 ? "" : "s"}
+            {startTime}–{endTime}
+            {" · "}
+            {location}
             {totalDistance > 0 ? ` · ${totalDistance.toLocaleString()} total` : ""}
           </p>
         </div>
@@ -280,9 +289,23 @@ export default function PracticeDetail({
         )}
       </div>
 
-      {focus && (
+      {focus && !isHtmlEmpty(focus) && (
         <div className="text-sm text-foreground-secondary dark:text-foreground-secondary rounded-xl border border-border-secondary dark:border border-border-secondary bg-fill-secondary dark:bg-background-elevated px-4 py-3">
           <FormattedText text={focus} className="text-foreground-secondary dark:text-foreground-secondary" />
+        </div>
+      )}
+
+      {tags.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {tags.map((t) => (
+            <Link
+              key={t}
+              href={`/practices?tag=${encodeURIComponent(t)}`}
+              className="text-[10px] uppercase tracking-wide rounded-full bg-primary/30 dark:bg-primary/30 px-2 py-0.5 text-warning dark:text-warning hover:bg-primary/40 dark:hover:bg-primary/40 transition-colors"
+            >
+              {t}
+            </Link>
+          ))}
         </div>
       )}
 
@@ -293,19 +316,10 @@ export default function PracticeDetail({
             className="rounded-2xl border border-border-secondary bg-background dark:bg-background-elevated p-5"
           >
             <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center flex-wrap gap-x-2 gap-y-1 min-w-0">
+              <div className="min-w-0">
                 <h2 className="font-medium text-foreground dark:text-foreground">
                   {set.title || "Set"}
                 </h2>
-                {set.tags.map((t) => (
-                  <Link
-                    key={t}
-                    href={`/practices?tag=${encodeURIComponent(t)}`}
-                    className="text-[10px] uppercase tracking-wide rounded-full bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 text-primary dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
-                  >
-                    {t}
-                  </Link>
-                ))}
               </div>
               {set.distance != null && (
                 <span className="text-xs text-foreground-tertiary dark:text-foreground-tertiary shrink-0">
@@ -318,7 +332,7 @@ export default function PracticeDetail({
               <FormattedText text={set.content} />
             </div>
 
-            {set.notes && (
+            {set.notes && !isHtmlEmpty(set.notes) && (
               <div className="mt-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-border-secondary border-amber-100 dark:border-amber-900/40 px-3 py-2">
                 <FormattedText
                   text={set.notes}

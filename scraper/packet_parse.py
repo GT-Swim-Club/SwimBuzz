@@ -24,7 +24,15 @@ SESSION_HEADER = re.compile(
 )
 
 TABLE_HEADER = re.compile(r"^women\s+event\s+men$", re.I)
-ORDER_OF_EVENTS_TITLE = re.compile(r"^order\s+of\s+events\b", re.I)
+# Alt header used by CCS packets: "Women's Event  Men's Event" or "Women's Event Number"
+TABLE_HEADER_ALT = re.compile(
+    r"women'?s?\s+event.*men'?s?\s+event|women'?s?\s+event\s+(number|num)\b",
+    re.I,
+)
+ORDER_OF_EVENTS_TITLE = re.compile(
+    r"^(order\s+of\s+events|event\s+list)\b",
+    re.I,
+)
 STOP_SECTION = re.compile(
     r"^(notes on the order of events|qualifying times|relay policies|table of contents)\b",
     re.I,
@@ -80,13 +88,16 @@ def _parse_event_row(line: str) -> dict[str, Any] | None:
 
 def _page_has_event_table(text: str) -> bool:
     lines = [line.strip() for line in text.split("\n") if line.strip()]
+    lower = text.lower()
     has_header = any(
-        TABLE_HEADER.match(line.replace("  ", " ").strip()) for line in lines
+        TABLE_HEADER.match(line.replace("  ", " ").strip())
+        or TABLE_HEADER_ALT.search(line)
+        for line in lines
     )
     event_rows = sum(1 for line in lines if _parse_event_row(line))
     if has_header and event_rows >= 1:
         return True
-    if "order of events" in text.lower() and (has_header or event_rows >= 1):
+    if ("order of events" in lower or "event list" in lower) and (has_header or event_rows >= 1):
         return True
     return False
 
@@ -105,7 +116,7 @@ def _parse_order_page_lines(lines: list[str]) -> list[dict[str, Any]]:
             in_table = True
             continue
 
-        if TABLE_HEADER.match(line.replace("  ", " ").strip()):
+        if TABLE_HEADER.match(line.replace("  ", " ").strip()) or TABLE_HEADER_ALT.search(line):
             in_table = True
             continue
 
@@ -142,18 +153,79 @@ def _merge_sessions(sessions: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return merged
 
 
+def _parse_table_fallback(pdf: Any) -> list[dict[str, Any]]:
+    """Extract order-of-events from pdfplumber table objects.
+
+    Handles meet packets where the event name is wrapped across rows
+    (e.g. '100 Individual\\nMedley') so the text-line path cannot reconstruct
+    the full name from individual lines.
+    """
+    sessions: list[dict[str, Any]] = []
+    current: dict[str, Any] | None = None
+
+    for page in pdf.pages:
+        text = page.extract_text() or ""
+        # Only process pages that look like an event-list page
+        lower = text.lower()
+        if "event list" not in lower and "order of events" not in lower and "women" not in lower:
+            continue
+
+        for table in page.extract_tables():
+            if not table or len(table) < 2:
+                continue
+            # Detect header row: expect three columns with women / event / men
+            header = [str(c or "").replace("\n", " ").strip().lower() for c in table[0]]
+            if len(header) < 3:
+                continue
+            if not (
+                ("women" in header[0] or "event" in header[0])
+                and ("event" in header[1] or "stroke" in header[1])
+                and ("men" in header[2] or "event" in header[2])
+            ):
+                continue
+
+            if current is None:
+                current = {"label": "Order of Events", "rows": []}
+                sessions.append(current)
+
+            for row in table[1:]:
+                if len(row) < 3:
+                    continue
+                women_raw = str(row[0] or "").strip()
+                event_raw = str(row[1] or "").replace("\n", " ").strip()
+                men_raw = str(row[2] or "").strip()
+                if not women_raw.isdigit() or not men_raw.isdigit():
+                    continue
+                if not _is_event_label(event_raw):
+                    continue
+                current["rows"].append({
+                    "women": int(women_raw),
+                    "event": _clean_event_name(event_raw),
+                    "men": int(men_raw),
+                })
+
+    return [s for s in sessions if s["rows"]]
+
+
 def parse_packet_pdf_bytes(content: bytes) -> dict[str, Any]:
     sessions: list[dict[str, Any]] = []
 
     with pdfplumber.open(io.BytesIO(content)) as pdf:
-        for page in pdf.pages:
-            text = page.extract_text() or ""
-            if not _page_has_event_table(text):
-                continue
-            lines = text.split("\n")
-            sessions.extend(_parse_order_page_lines(lines))
-
-    sessions = _merge_sessions(sessions)
+        # Primary pass: use pdfplumber table objects.
+        # This handles wrapped cells (e.g. "100 Individual\nMedley") and is
+        # more reliable than line-by-line text parsing.
+        table_sessions = _parse_table_fallback(pdf)
+        if table_sessions:
+            sessions = _merge_sessions(table_sessions)
+        else:
+            # Fallback: text-line approach for packets without extractable tables.
+            for page in pdf.pages:
+                text = page.extract_text() or ""
+                if not _page_has_event_table(text):
+                    continue
+                lines = text.split("\n")
+                sessions.extend(_parse_order_page_lines(lines))
+            sessions = _merge_sessions(sessions)
 
     if not sessions:
         raise ValueError("No order of events found in PDF")

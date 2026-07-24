@@ -83,10 +83,15 @@ export default function SummaryRowLayout({
     return () => ro.disconnect()
   }, [label, details, coachNote])
 
+  const rowClassName =
+    "flex items-center justify-between gap-4 px-4 py-2 text-sm " +
+    (onClick ? "cursor-pointer group transition-colors " : "") +
+    className
+
   const leftClassName =
     "flex min-w-0 flex-1 items-baseline overflow-hidden text-left text-foreground " +
     (onClick
-      ? "hover:text-primary transition-colors"
+      ? "group-hover:text-primary transition-colors"
       : "")
 
   const left = (
@@ -126,15 +131,10 @@ export default function SummaryRowLayout({
     <li
       id={id}
       ref={rowRef}
-      className={`flex items-center justify-between gap-4 px-4 py-2 text-sm ${className}`}
+      className={rowClassName}
+      onClick={onClick}
     >
-      {onClick ? (
-        <button type="button" onClick={onClick} className={leftClassName}>
-          {left}
-        </button>
-      ) : (
-        <div className={leftClassName}>{left}</div>
-      )}
+      <div className={leftClassName}>{left}</div>
       <div
         ref={rightRef}
         className="flex shrink-0 items-center justify-end gap-2 text-right text-foreground"

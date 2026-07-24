@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import AppearanceSettings from "@/components/AppearanceSettings"
+import ViewPreferencesSettings from "@/components/ViewPreferencesSettings"
 import CancelPendingProfileChangesButton from "@/components/CancelPendingProfileChangesButton"
 import EditNicknamesForm from "@/components/EditNicknamesForm"
 import NotificationPreferencesSettings from "@/components/NotificationPreferencesSettings"
@@ -45,7 +46,7 @@ export default async function SettingsPage() {
     }),
     prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { image: true, notificationPreferences: true },
+      select: { image: true, notificationPreferences: true, defaultView: true, defaultPracticesView: true },
     }),
   ])
 
@@ -213,7 +214,10 @@ export default async function SettingsPage() {
             </h2>
           </div>
           <AppearanceSettings />
+          <ViewPreferencesSettings defaultView={user?.defaultView ?? "gallery"} defaultPracticesView={user?.defaultPracticesView ?? "week"} />
         </section>
+
+
       </div>
     </div>
   )

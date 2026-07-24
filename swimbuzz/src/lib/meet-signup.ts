@@ -227,7 +227,7 @@ export function signupWindowStatus(opts: {
   return { open: true, reason: null }
 }
 
-/** Withdrawals may stay open after sign-ups close, until withdrawUntil (or closeAt if unset). */
+/** Drops may stay open after sign-ups close, until withdrawUntil (or closeAt if unset). */
 export function signupWithdrawStatus(opts: {
   enabled: boolean
   openAt: Date | null
@@ -250,7 +250,7 @@ export function signupWithdrawStatus(opts: {
   if (deadline && now > deadline) {
     return {
       allowed: false,
-      reason: `Withdrawals closed ${deadline.toLocaleString()}.`,
+      reason: `Drops closed ${deadline.toLocaleString()}.`,
       deadline,
     }
   }
@@ -461,7 +461,7 @@ export function resolveEditableSignupSheetKeys(
   return [...editable]
 }
 
-function applySeedTimeToRow(row: SheetEntry, seedTimeRaw: string): SheetEntry {
+export function applySeedTimeToRow(row: SheetEntry, seedTimeRaw: string): SheetEntry {
   const normalized = normalizeSignupEntryTime(seedTimeRaw.trim() || "NT")
   const next: SheetEntry = { ...row }
   delete next.seedTime
@@ -472,6 +472,81 @@ function applySeedTimeToRow(row: SheetEntry, seedTimeRaw: string): SheetEntry {
     next.seedTime = normalized
   }
   return next
+}
+
+/**
+ * Creates a new manual individual entry in entriesSheetSummary.
+ */
+export function createManualIndividualSheetEntry(
+  existing: SheetSummary | null | undefined,
+  course: string,
+  opts: {
+    athleteId: string
+    athleteName: string
+    event: string
+    gender?: "M" | "F" | null
+    seedTime?: string
+    eventOptions?: MeetSignupEventOption[]
+  }
+): { summary: SheetSummary; conflict?: boolean } {
+  const entries = [...(existing?.entries ?? [])]
+  const eventName = normalizeEventName(opts.event)
+  if (!eventName) {
+    return {
+      summary: {
+        sheetType: existing?.sheetType ?? "psych",
+        course: existing?.course || course,
+        entries,
+      },
+      conflict: true,
+    }
+  }
+
+  // Check for conflict
+  if (
+    entries.some(
+      (e) =>
+        e.entryType === "individual" &&
+        e.athleteId === opts.athleteId &&
+        normalizeEventName(e.event) === eventName
+    )
+  ) {
+    return {
+      summary: {
+        sheetType: existing?.sheetType ?? "psych",
+        course: existing?.course || course,
+        entries,
+      },
+      conflict: true,
+    }
+  }
+
+  const option = opts.eventOptions?.find(
+    (o) => normalizeEventName(o.event) === eventName
+  )
+
+  let row: SheetEntry = {
+    athleteId: opts.athleteId,
+    athleteName: opts.athleteName,
+    event: option?.event ?? eventName,
+    eventNumber: option ? eventNumberForGender(option, opts.gender) ?? 0 : 0,
+    manual: true,
+    entryType: "individual",
+  }
+
+  if (opts.seedTime !== undefined) {
+    row = applySeedTimeToRow(row, opts.seedTime)
+  }
+
+  entries.push(row)
+
+  return {
+    summary: {
+      sheetType: existing?.sheetType ?? "psych",
+      course: existing?.course || course,
+      entries,
+    },
+  }
 }
 
 /**

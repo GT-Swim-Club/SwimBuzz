@@ -61,6 +61,8 @@ model User {
   role          Role      @default(COACH)
   /// Per-type in-app notification toggles: { practicePublished?, meetSignupOpen?, practiceComments?, profileChanges? }
   notificationPreferences Json?
+  defaultView   String    @default("gallery")
+  defaultPracticesView String    @default("week")
   createdAt     DateTime  @default(now())
   accounts      Account[]
   sessions      Session[]
@@ -186,7 +188,11 @@ model Practice {
   id          String        @id @default(cuid())
   title       String
   date        DateTime?
+  startTime   String        @default("19:30")
+  endTime     String        @default("21:00")
+  location    String        @default("CRC Comp Pool")
   focus       String?
+  tags        String[]      @default([])
   published   Boolean       @default(false)
   createdById String?
   createdBy   User?              @relation("PracticeCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
@@ -204,6 +210,7 @@ model Practice {
 
   @@index([date])
   @@index([published])
+  @@index([tags])
   @@index([editLockedById])
   @@index([editLockExpiresAt])
 }
@@ -216,12 +223,10 @@ model PracticeSet {
   title      String?
   content    String
   notes      String?
-  tags       String[]     @default([])
   distance   Int?
   createdAt  DateTime     @default(now())
 
   @@index([practiceId])
-  @@index([tags])
 }
 
 model PracticeComment {

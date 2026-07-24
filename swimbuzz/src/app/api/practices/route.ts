@@ -33,14 +33,14 @@ export async function GET(req: Request) {
   }
 
   if (tag) {
-    and.push({ sets: { some: { tags: { has: tag } } } })
+    and.push({ tags: { has: tag } })
   }
 
   const practices = await prisma.practice.findMany({
     where: and.length ? { AND: and } : undefined,
     orderBy: [{ date: "desc" }, { createdAt: "desc" }],
     include: {
-      sets: { select: { tags: true, distance: true } },
+      sets: { select: { distance: true } },
       _count: { select: { sets: true } },
     },
   })
@@ -62,6 +62,7 @@ export async function POST(req: Request) {
         title: data.title,
         date: data.date,
         focus: data.focus,
+        tags: data.tags,
         published: data.published,
         createdById: session.user.id,
         sets: {
@@ -70,7 +71,6 @@ export async function POST(req: Request) {
             title: s.title,
             content: s.content,
             notes: s.notes,
-            tags: s.tags,
             distance: s.distance,
           })),
         },

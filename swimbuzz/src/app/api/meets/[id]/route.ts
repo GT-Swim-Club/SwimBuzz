@@ -80,7 +80,7 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions)
@@ -92,10 +92,29 @@ export async function DELETE(
   const existing = await prisma.meet.findUnique({ where: { id } })
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-  await deleteAllMeetFiles(existing as Record<MeetFileUrlKey, string | null>)
+  const { deleteMeet, deleteSwims } = await req.json().catch(() => ({
+    deleteMeet: true,
+    deleteSwims: false,
+  }))
 
-  // Swims stay in the DB; their meetId is cleared via onDelete: SetNull.
-  await prisma.meet.delete({ where: { id } })
+  if (deleteSwims) {
+    await prisma.swim.deleteMany({ where: { meetId: id } })
+    
+    // Also clear relayResultsSummary and result fields
+    await prisma.meet.update({
+      where: { id },
+      data: { 
+        relayResultsSummary: { entries: [] },
+        resultsUrl: null,
+        resultStatusesSummary: { entries: [] }
+      }
+    })
+  }
+
+  if (deleteMeet) {
+    await deleteAllMeetFiles(existing as Record<MeetFileUrlKey, string | null>)
+    await prisma.meet.delete({ where: { id } })
+  }
 
   return NextResponse.json({ ok: true })
 }

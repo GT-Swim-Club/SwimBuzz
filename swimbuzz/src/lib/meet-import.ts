@@ -26,11 +26,14 @@ import {
   isSheetSummary,
   mergeMeetResultEntries,
   placementsToMeetResults,
+  resultKey,
   seedsToMeetResults,
   splitsToMeetResults,
   statusesToMeetResults,
   type MeetResultEntry,
 } from "@/lib/meet-sheet-summary"
+import { isEditableSignupSheetSeed } from "@/lib/meet-signup"
+import { Prisma } from "@prisma/client"
 
 export type ParsedMeetResult = {
   name: string
@@ -186,6 +189,7 @@ export async function importMeetResults({
           heatSheetSummary: true,
           resultStatusesSummary: true,
           relayResultsSummary: true,
+          entriesSheetSummary: true,
         },
       })
     : null
@@ -439,8 +443,30 @@ export async function importMeetResults({
   const existingMeta = isResultStatusesSummary(meetRecord?.resultStatusesSummary)
     ? meetRecord.resultStatusesSummary.entries
     : []
+
+  const parsedResultsKeys = new Set(
+    results.map((r) => {
+      const athleteId = matchAthleteIdFast(r.name, lookup, nameMappings)
+      if (!athleteId) return null
+      const event = normalizeEventName(r.event)
+      return resultKey(athleteId, event, false)
+    }).filter(Boolean)
+  )
+
+  const filteredExistingMeta = existingMeta.filter((entry) => {
+    if (!entry.manual) return true
+    const key = resultKey(
+      entry.athleteId,
+      entry.event,
+      !!entry.isRelayLeadoff,
+      entry.relayLeadoffSource,
+      entry.relayLeadoffRound
+    )
+    return parsedResultsKeys.has(key)
+  })
+
   const metaEntries = mergeMeetResultEntries(
-    existingMeta,
+    filteredExistingMeta,
     statusEntries,
     seedEntries,
     placementEntries,
@@ -450,6 +476,7 @@ export async function importMeetResults({
     const meetUpdate: {
       relayResultsSummary?: { entries: typeof relayEntries }
       resultStatusesSummary?: { entries: MeetResultEntry[] }
+      entriesSheetSummary?: Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput
     } = {}
     if (relayEntries.length > 0) {
       const existingRelays = isRelayResultsSummary(meetRecord?.relayResultsSummary)
@@ -483,6 +510,19 @@ export async function importMeetResults({
     if (metaEntries.length > 0) {
       meetUpdate.resultStatusesSummary = { entries: metaEntries }
     }
+
+    // Strip manual/signup-synced individual entries from the roster summary
+    // when results (or any sheet) are imported — the authoritative sheet data
+    // takes precedence over manually-added or sign-up-synced seeds.
+    if (isSheetSummary(meetRecord?.entriesSheetSummary)) {
+      const filteredEntries = meetRecord.entriesSheetSummary.entries.filter(
+        (e) => !isEditableSignupSheetSeed(e)
+      )
+      meetUpdate.entriesSheetSummary = JSON.parse(
+        JSON.stringify({ ...meetRecord.entriesSheetSummary, entries: filteredEntries })
+      ) as Prisma.InputJsonValue
+    }
+
     await prisma.meet.update({
       where: { id: meetId },
       data: meetUpdate,

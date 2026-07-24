@@ -66,14 +66,17 @@ export default async function PracticePage({
   const initial: PracticeFormState = {
     title: practice.title,
     date: toDateInput(practice.date),
+    startTime: practice.startTime,
+    endTime: practice.endTime,
+    location: practice.location,
     focus: practice.focus ?? "",
+    tags: practice.tags,
     published: practice.published,
     sets: practice.sets.map((s) => ({
       id: s.id,
       title: s.title ?? "",
       content: s.content,
       notes: s.notes ?? "",
-      tags: s.tags,
       distance: s.distance != null ? String(s.distance) : "",
     })),
   }
@@ -84,13 +87,16 @@ export default async function PracticePage({
       title={practice.title}
       published={practice.published}
       dateIso={practice.date ? practice.date.toISOString() : null}
+      startTime={practice.startTime}
+      endTime={practice.endTime}
+      location={practice.location}
       focus={practice.focus}
+      tags={practice.tags}
       sets={practice.sets.map((s) => ({
         id: s.id,
         title: s.title,
         content: s.content,
         notes: s.notes,
-        tags: s.tags,
         distance: s.distance,
       }))}
       totalDistance={totalDistance}

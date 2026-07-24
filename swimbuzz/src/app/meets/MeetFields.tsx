@@ -1,5 +1,6 @@
 "use client"
 
+import BannerCropper from "@/components/BannerCropper"
 import { useEffect, useState } from "react"
 import { currentSeason, seasonOptions, upcomingSeason } from "@/lib/season"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
@@ -54,6 +55,7 @@ export default function MeetFields({
   const [iconError, setIconError] = useState<string | null>(null)
   const [bannerUploading, setBannerUploading] = useState(false)
   const [bannerError, setBannerError] = useState<string | null>(null)
+  const [bannerCroppingSrc, setBannerCroppingSrc] = useState<string | null>(null)
   const [fetchedSeasons, setFetchedSeasons] = useState<string[]>([])
   
   const [addSeasonModalOpen, setAddSeasonModalOpen] = useState(false)
@@ -154,13 +156,19 @@ export default function MeetFields({
   async function handleBannerUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    e.target.value = ""
 
+    setBannerError(null)
+    setBannerCroppingSrc(URL.createObjectURL(file))
+  }
+
+  async function onBannerCropped(blob: Blob) {
     setBannerUploading(true)
     setBannerError(null)
 
     try {
       const formData = new FormData()
-      formData.append("file", file)
+      formData.append("file", blob, "banner.jpg")
 
       const res = await fetch("/api/meets/banner", {
         method: "POST",
@@ -178,7 +186,8 @@ export default function MeetFields({
       setBannerError("Something went wrong")
     } finally {
       setBannerUploading(false)
-      e.target.value = ""
+      if (bannerCroppingSrc) URL.revokeObjectURL(bannerCroppingSrc)
+      setBannerCroppingSrc(null)
     }
   }
 
@@ -270,7 +279,7 @@ export default function MeetFields({
               <img
                 src={form.bannerUrl}
                 alt="Meet banner preview"
-                className="h-20 w-full rounded-lg object-cover border border-border border-border"
+                className="aspect-[2/1] w-64 rounded-lg object-cover border border-border border-border"
               />
               <button
                 type="button"
@@ -288,6 +297,16 @@ export default function MeetFields({
           )}
         </div>
       </div>
+
+      <BannerCropper
+        imageSrc={bannerCroppingSrc}
+        isOpen={bannerCroppingSrc !== null}
+        onClose={() => {
+            if (bannerCroppingSrc) URL.revokeObjectURL(bannerCroppingSrc)
+            setBannerCroppingSrc(null)
+        }}
+        onSave={onBannerCropped}
+      />
 
       <div>
         <label className={labelClass}>Location</label>
@@ -311,7 +330,7 @@ export default function MeetFields({
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <label className={labelClass}>Start date <span className="text-error">*</span></label>
+          <label className={labelClass}>Start Date <span className="text-error">*</span></label>
           <input
             required
             type="date"
@@ -322,7 +341,7 @@ export default function MeetFields({
         </div>
         <div>
           <label className={labelClass}>
-            End date
+            End Date
           </label>
           <input
             type="date"
@@ -335,8 +354,9 @@ export default function MeetFields({
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <label className={labelClass}>Course</label>
+          <label className={labelClass}>Course<span className="text-error">*</span></label>
           <select
+            required
             value={form.course}
             onChange={(e) => set("course", e.target.value)}
             className={inputClass}
@@ -347,8 +367,9 @@ export default function MeetFields({
           </select>
         </div>
         <div>
-          <label className={labelClass}>Season</label>
+          <label className={labelClass}>Season<span className="text-error">*</span></label>
           <select
+            required
             value={form.season}
             onChange={(e) => {
                 if (e.target.value === "ADD_NEW") {

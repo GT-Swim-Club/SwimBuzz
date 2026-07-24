@@ -253,7 +253,7 @@ export default function MeetSignupConfigButton({
             </div>
             <div>
               <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
-                Withdraw by
+                Drop by
               </label>
               <input
                 type="datetime-local"

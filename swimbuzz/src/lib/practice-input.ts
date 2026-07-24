@@ -9,7 +9,6 @@ export type NormalizedSet = {
   title: string | null
   content: string
   notes: string | null
-  tags: string[]
   distance: number | null
 }
 
@@ -42,7 +41,6 @@ function normalizeSet(raw: unknown, index: number): NormalizedSet {
     title: optionalString(s.title),
     content,
     notes: optionalString(s.notes),
-    tags: normalizeTags(s.tags),
     distance,
   }
 }
@@ -50,7 +48,11 @@ function normalizeSet(raw: unknown, index: number): NormalizedSet {
 export type NormalizedPractice = {
   title: string
   date: Date | null
+  startTime: string
+  endTime: string
+  location: string
   focus: string | null
+  tags: string[]
   published: boolean
   sets: NormalizedSet[]
 }
@@ -85,7 +87,11 @@ export function buildPracticeData(
   return {
     title,
     date,
+    startTime: optionalString(body.startTime) ?? "19:30",
+    endTime: optionalString(body.endTime) ?? "21:00",
+    location: optionalString(body.location) ?? "CRC Comp Pool",
     focus: optionalString(body.focus),
+    tags: normalizeTags(body.tags),
     published,
     sets,
   }

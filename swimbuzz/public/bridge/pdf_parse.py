@@ -4,6 +4,14 @@ from typing import Any
 
 import pdfplumber
 
+# Global flag to track if current PDF has Points column (results PDF format)
+_PDF_HAS_POINTS_COLUMN = False
+
+# CID ligatures from Hy-Tek PDFs (e.g., "Butter(cid:976)ly" where 976 = 'f')
+_CID_LIGATURES = {
+    "976": "f",
+}
+
 STROKE_ALIASES: dict[str, str] = {
     "freestyle": "Free",
     "free": "Free",
@@ -69,7 +77,7 @@ RELAY_LEG = re.compile(
 # e.g. "1 GTSC-GA A 1:52.14 50" — no swimmer name on this row (unlike individual results).
 RELAY_TEAM_RESULT = re.compile(
     r"^(\d+)\s+"
-    r"([A-Z0-9]{2,}(?:-[A-Z]{2})?)\s+"
+    r"((?:[A-Z][A-Za-z]+\s+)*[A-Z][A-Za-z]+(?:-[A-Z]{2})?)\s+"
     r"([ABC])?\s*"
     r"(.+)$",
     re.I,
@@ -236,8 +244,47 @@ def _append_result_round(
         rounds.append({"status": status, "tags": tags})
 
 
+def strip_points_column(line: str) -> str:
+    """Remove the trailing points column from results PDF lines when present.
+    
+    Results PDFs have format: place name age team seedTime finalTime [points]
+    where points is a number (typically 1-40, often X.50 for tied places).
+    
+    The points column is OPTIONAL - lines for DNF/DQ/DNS or missing points don't have it.
+    
+    Strategy:
+    1. If _PDF_HAS_POINTS_COLUMN flag is True (detected from header), we know points
+       MAY be present but are not always there.
+    2. Count times by looking for time patterns (MM:SS.HH or SS.HH). 
+    3. If exactly 2 times (seed + final), no points value present.
+    4. If 3+ times, the last numeric value is likely points, so strip it.
+    """
+    global _PDF_HAS_POINTS_COLUMN
+    
+    # Only consider stripping if we detected a Points column in the PDF
+    if not _PDF_HAS_POINTS_COLUMN:
+        return line
+    
+    # Count times by looking for time patterns (to avoid infinite recursion with extract_times_from_line)
+    time_pattern = r"[xX]?\d{1,2}:\d{2}\.\d{2}|[xX]?\d{2,3}\.\d{2}"
+    times = re.findall(time_pattern, line, re.I)
+    
+    # If exactly 2 times (seed and final), no points value present
+    if len(times) == 2:
+        return line
+    
+    # If 3+ times, the last numeric value is likely points - strip it
+    match = re.search(r'\s+(\d+(?:\.\d+)?)\s*$', line)
+    if match:
+        return line[:match.start()]
+    
+    return line
+
+
 def extract_times_from_line(line: str) -> list[str]:
-    tokens = re.findall(r"[xX]?\d{1,2}:\d{2}\.\d{2}|[xX]?\d{2,3}\.\d{2}", line, re.I)
+    # First strip potential points column
+    line_no_points = strip_points_column(line)
+    tokens = re.findall(r"[xX]?\d{1,2}:\d{2}\.\d{2}|[xX]?\d{2,3}\.\d{2}", line_no_points, re.I)
     times: list[str] = []
     for token in tokens:
         parsed = parse_time_token(token)
@@ -259,12 +306,25 @@ def pick_round_times(line: str) -> list[dict[str, str]]:
     """Extract prelim/final (or a single result) from a Hy-Tek result line.
 
     Hy-Tek prints seed, prelims, and finals as the last three times on the row
-    when all three are present."""
+    when all three are present. Results PDFs have a trailing points column,
+    so we need to distinguish between actual race times and points.
+    
+    In results PDFs: seed_time final_time points (where points is 1-40 or X.50)
+    In other sheets: seed_time prelim_time final_time (or fewer)
+    """
     cleaned = re.sub(r"\([^)]*\)", " ", line)
     times = extract_times_from_line(cleaned)
     if not times:
         return []
-    if len(times) >= 3:
+    
+    # Heuristic: if we have exactly 2 times and the line looks like a results entry
+    # (has team/age info), then seed=times[0], final=times[1], points is after
+    # If we have 3+ times, use the last 2 as prelim/final
+    if len(times) == 2:
+        # For 2 times: seed and final (results PDF format)
+        return [{"time": times[-1], "tags": ""}]
+    elif len(times) >= 3:
+        # For 3+ times: seed, prelim, final (psych/heat sheet format)
         return [
             {"time": times[-2], "tags": "P"},
             {"time": times[-1], "tags": "F"},
@@ -367,7 +427,15 @@ def cell_heat_lane(
 
 
 def club_matches(club: str, team_norm: str) -> bool:
-    """True if a club/team code matches the requested team (tolerates region suffixes)."""
+    """True if a club/team code matches the requested team (tolerates region suffixes).
+
+    Handles both short codes ('GTSC-GA' vs 'gtsc') and full club names
+    ('Georgia Tech Swim Club-GA' vs 'gtsc') by trying several strategies:
+    1. Exact match after normalisation.
+    2. Base code match (strip region suffix).
+    3. Full-name: check if any known alias for team_norm appears as a word
+       sequence in the club name.
+    """
     club_norm = club.strip().lower()
     if not team_norm:
         return True
@@ -375,11 +443,34 @@ def club_matches(club: str, team_norm: str) -> bool:
         return False
     if club_norm == team_norm:
         return True
-    return club_norm.split("-")[0] == team_norm.split("-")[0]
+    if club_norm.split("-")[0] == team_norm.split("-")[0]:
+        return True
+
+    # Strategy 3: check club words for known keyword sequences.
+    # Build a keyword from the team base (first component before '-').
+    team_base = team_norm.split("-")[0]
+    # Only apply word-based matching for bases that are >= 4 chars to avoid
+    # false positives with very short codes.
+    if len(team_base) >= 4:
+        # Split team base into constituent words if it looks like an acronym
+        # composed of initials — skip (can't word-match an acronym like 'gtsc').
+        # Only attempt if the team base itself is found as a substring of the
+        # club name words (e.g. 'gtsc' in 'georgia tech swim club').
+        club_words = re.sub(r"[^a-z\s]", " ", club_norm).split()
+        initials = "".join(w[0] for w in club_words if w)
+        if initials == team_base or team_base in initials:
+            return True
+
+    return False
 
 
 def parse_team_from_line(line: str) -> str | None:
-    """Extract team/club code from a Hy-Tek-style result line."""
+    """Extract team/club code from a Hy-Tek-style result line.
+
+    Handles both short codes (e.g. 'GTSC-GA') and full club names
+    (e.g. 'Georgia Tech Swim Club-GA') as printed in full-name result PDFs.
+    """
+    # Try short code first: name + optional age + short code + time/paren
     match = re.search(
         r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
         r"(?:\s+\d{1,3})?"
@@ -389,6 +480,19 @@ def parse_team_from_line(line: str) -> str | None:
     )
     if match:
         return match.group(1).upper()
+
+    # Full team name: title-case multi-word name optionally ending '-XX'
+    # e.g. 'Georgia Tech Swim Club-GA' or 'Uncw Club Swim-NC'
+    full_match = re.search(
+        r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
+        r"(?:\s+\d{1,3})?"
+        r"\s+((?:[A-Z][A-Za-z]+\s+){1,6}(?:[A-Z][A-Za-z]+)(?:-[A-Z]{2})?)"
+        r"\s+(?:NT|NQT|DQ|DFS|DNS|SCR|\d{1,2}:\d{2}\.\d{2}|\d{2,3}\.\d{2})",
+        line,
+    )
+    if full_match:
+        return full_match.group(1).strip()
+
     return None
 
 
@@ -452,17 +556,30 @@ def detect_course(text: str, default: str = "SCY") -> str:
     return "SCY"
 
 
+def _clean_cid_ligatures(line: str) -> str:
+    """Replace CID ligatures like (cid:976) with their actual characters (e.g., 'f')."""
+    line = re.sub(r"Butter\(cid:\d+\)ly", "Butterfly", line, flags=re.I)
+    
+    def _replace_cid(match: re.Match[str]) -> str:
+        return _CID_LIGATURES.get(match.group(1), "")
+    
+    line = re.sub(r"\(cid:(\d+)\)", _replace_cid, line)
+    return line
+
+
 def parse_event_from_line(line: str) -> str | None:
-    lower = line.lower()
+    # Clean CID ligatures before parsing (e.g., Butter(cid:976)ly -> Butterfly)
+    cleaned_line = _clean_cid_ligatures(line)
+    lower = cleaned_line.lower()
     if not any(
         word in lower
         for word in ("free", "back", "breast", "fly", "butterfly", " medley", " im")
     ):
         return None
 
-    match = EVENT_WITH_DISTANCE.search(line)
+    match = EVENT_WITH_DISTANCE.search(cleaned_line)
     if not match:
-        match = EVENT_LINE.search(line)
+        match = EVENT_LINE.search(cleaned_line)
         if not match:
             return None
         distance, stroke_raw = match.group(1), match.group(2)
@@ -1086,13 +1203,52 @@ def group_words_into_lines(words: list[dict], y_tol: float = 3.0) -> list[str]:
 def detect_column_split(words: list[dict], page_width: float) -> float | None:
     """Return the x mid-line if the page is two-column, else None (single column).
 
-    Meet Manager result sheets print two side-by-side columns. Detect this by
-    checking that very few words straddle the page center (the gutter)."""
+    Two-column detection uses two criteria that must both pass:
+    1. Very few words physically straddle the page center (the gutter check).
+    2. Both the left column and the right column contain substantial independent
+       content — specifically, there are many rows whose words stay entirely
+       within one half of the page.  A single-column results sheet (names on
+       the left, times on the right of the same row) fails this check because
+       the majority of rows span from the left margin well past the midpoint or
+       extend into the right half without a true gutter between them.
+    """
+    if not words:
+        return None
+
     mid = page_width / 2.0
     band = page_width * 0.03
+
+    # Criterion 1: few words span the gutter.
     crossing = sum(1 for w in words if w["x0"] < mid - band and w["x1"] > mid + band)
     if crossing > max(5, 0.06 * len(words)):
         return None
+
+    # Criterion 2: each column must have rows that stay entirely within that
+    # half.  Group words into rows by y-band, then count rows that are
+    # "left-only" (all words end before mid) vs "right-only" (all words start
+    # after mid).  For a true 2-column layout both counts should be substantial.
+    # For a single-column results sheet most rows span across mid, so the
+    # counts will be very low.
+    by_y: dict[int, list[dict]] = {}
+    for w in words:
+        by_y.setdefault(round(float(w["top"]) / 3) * 3, []).append(w)
+
+    left_only = 0
+    right_only = 0
+    for row_words in by_y.values():
+        max_x1 = max(float(w["x1"]) for w in row_words)
+        min_x0 = min(float(w["x0"]) for w in row_words)
+        if max_x1 <= mid + band:
+            left_only += 1
+        elif min_x0 >= mid - band:
+            right_only += 1
+
+    total_rows = len(by_y)
+    # Both columns must account for at least 15 % of rows each.
+    threshold = max(3, 0.15 * total_rows)
+    if left_only < threshold or right_only < threshold:
+        return None
+
     return mid
 
 
@@ -1123,6 +1279,7 @@ def parse_meet_pdf_bytes(
 ) -> dict[str, Any]:
     all_text: list[str] = []
     header_lines: list[str] = []
+    has_points_column = False
 
     with pdfplumber.open(io.BytesIO(content)) as pdf:
         for page_index, page in enumerate(pdf.pages):
@@ -1130,7 +1287,15 @@ def parse_meet_pdf_bytes(
                 # The banner/title sit above the two-column body, so the plain
                 # top-to-bottom text read gives clean header lines.
                 header_lines = (page.extract_text() or "").split("\n")
+            # Check if this PDF has a "Points" column (indicates results PDF format)
+            page_text = page.extract_text() or ""
+            if "Points" in page_text and ("Finals Time" in page_text or "Seed Time" in page_text):
+                has_points_column = True
             all_text.extend(extract_page_lines(page))
+
+    # Store this flag in a context variable for use in extract_times_from_line
+    global _PDF_HAS_POINTS_COLUMN
+    _PDF_HAS_POINTS_COLUMN = has_points_column
 
     course = detect_course("\n".join(all_text), default_course)
     meet_name, meet_date = parse_meet_header(header_lines or all_text)

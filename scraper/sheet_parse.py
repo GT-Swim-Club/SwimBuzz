@@ -70,7 +70,7 @@ SHEET_HEAT = re.compile(r"Meet\s+Program", re.I)
 SHEET_ENTRIES = re.compile(
     r"Team Entries|Individual Meet Entries|Entry Report by Club", re.I
 )
-_SHEET_GENDER = r"(?:Women|Men|Mixed|Co-?ed)"
+_SHEET_GENDER = r"(?:Women|Men|Mixed|Co-?ed|Girls|Boys)"
 USMS_MULTI_COL = re.compile(
     rf"#\d+\s+{_SHEET_GENDER}\s+(?:\d+x\d+|\d+)", re.I
 )
@@ -1160,7 +1160,11 @@ def _detect_usms_column_bounds(pdf: Any) -> list[float]:
                     and i + 1 < len(row)
                     and row[i + 1]["text"].endswith(",")
                 ):
-                    starts.append(float(word["x0"]))
+                    dist_prev = 999.0
+                    if i > 0:
+                        dist_prev = float(word["x0"]) - float(row[i - 1]["x1"])
+                    if dist_prev >= 18.0:
+                        starts.append(float(word["x0"]))
     return _cluster_column_starts(starts)
 
 

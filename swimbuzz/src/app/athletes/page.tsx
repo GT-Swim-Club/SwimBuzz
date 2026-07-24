@@ -35,7 +35,6 @@ function matchesAthleteQuery(
 async function RosterContent({ searchParams }: { searchParams: Promise<{ gender?: string; season?: string; year?: string; q?: string; view?: string }> }) {
     const { gender, season: seasonParam, year: legacyYear, q, view } = await searchParams
     const query = q?.trim() ?? ""
-    const activeView = view === "list" ? "list" : "gallery"
 
     const season =
       parseSeason(seasonParam ?? legacyYear) ?? currentSeason()
@@ -52,7 +51,12 @@ async function RosterContent({ searchParams }: { searchParams: Promise<{ gender?
 
     const session = await getServerSession(authOptions)
     if (!session) redirect("/signin")
+    
+    // Fetch user preference
+    const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { defaultView: true } })
+    const defaultView = user?.defaultView ?? "gallery"
 
+    const activeView = view ? (view === "list" ? "list" : "gallery") : (defaultView === "list" ? "list" : "gallery")
     const genderFilter =
       gender === "F" ? "F" : gender === "M" ? "M" : null
   

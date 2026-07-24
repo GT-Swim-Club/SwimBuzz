@@ -7,6 +7,29 @@ export function formatSwimDate(date: Date | string): string {
 }
 
 // "Jun 28, 2025" or "Jun 28 – 30, 2025" / "Dec 30, 2025 – Jan 2, 2026"
+export function formatOrdinal(n: number): string {
+  const mod100 = n % 100
+  if (mod100 >= 11 && mod100 <= 13) return `${n}th`
+  const mod10 = n % 10
+  if (mod10 === 1) return `${n}st`
+  if (mod10 === 2) return `${n}nd`
+  if (mod10 === 3) return `${n}rd`
+  return `${n}th`
+}
+
+export function podiumPlaceClass(place: number): string {
+  switch (place) {
+    case 1:
+      return "text-amber-600 dark:text-amber-400 font-semibold"
+    case 2:
+      return "text-slate-500 dark:text-slate-300 font-semibold"
+    case 3:
+      return "text-orange-600 dark:text-orange-400 font-semibold"
+    default:
+      return "text-foreground-tertiary dark:text-foreground-tertiary"
+  }
+}
+
 export function formatDateRange(
   start: Date | string,
   end?: Date | string | null

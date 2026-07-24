@@ -7,7 +7,7 @@ import DontReloadNotice from "@/components/DontReloadNotice"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import type { SheetEntry } from "@/lib/meet-sheet-summary"
 import { normalizeEventName } from "@/lib/swim-parse"
-import { formatDisplayTime } from "@/lib/utils"
+import { formatDisplayTime, formatSeedTimeDelta, formatOrdinal, podiumPlaceClass } from "@/lib/utils"
 import {
   displayRelayLetter,
   effectiveRelayGender,
@@ -489,12 +489,24 @@ export function RelayDetailModal({
   timeDisplay,
   coachNote,
   onClose,
+  swimInfo,
+  rawTime,
 }: {
   entry: SheetEntry
   title: string
   timeDisplay?: ReactNode
   coachNote?: string
   onClose: () => void
+    swimInfo?: {
+    seedTime?: string
+    rank?: number | string
+    heat?: number | string
+    lane?: number
+    resultPlace?: number
+    time?: string
+    rawTime?: string
+  }
+  rawTime?: string
 }) {
   const [mounted, setMounted] = useState(false)
   const swimmers = [...(entry.relaySwimmers ?? [])].sort((a, b) => a.leg - b.leg)
@@ -533,9 +545,43 @@ export function RelayDetailModal({
       >
         <div className="shrink-0 px-6 pt-6 pb-2">
           <h2 className="text-lg font-medium text-foreground text-foreground">{title}</h2>
-          {timeDisplay ? (
-            <div className="mt-2 text-foreground text-foreground">{timeDisplay}</div>
+          {(rawTime || timeDisplay) ? (
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-foreground text-foreground font-mono text-lg">{rawTime ?? timeDisplay}</span>
+              {(() => {
+                const delta = swimInfo?.seedTime && rawTime ? formatSeedTimeDelta(swimInfo.seedTime, rawTime) : null;
+                if (!delta) return null;
+                const isDrop = delta.startsWith("-");
+                return (
+                  <span className={`rounded-full px-2 py-0.5 text-xs font-mono font-medium ${
+                    isDrop 
+                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300"
+                      : "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300"
+                  }`}>
+                    {delta}
+                  </span>
+                );
+              })()}
+              {swimInfo?.resultPlace && (
+                <span className={swimInfo.resultPlace >= 1 && swimInfo.resultPlace <= 3 ? `font-medium ${podiumPlaceClass(swimInfo.resultPlace)}` : "text-foreground text-opacity-70 dark:text-foreground dark:text-opacity-70 font-medium"}>
+                  {formatOrdinal(swimInfo.resultPlace)}
+                </span>
+              )}
+            </div>
           ) : null}
+          {swimInfo && (
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-foreground-secondary">
+              {swimInfo.seedTime && (
+                <span className="flex items-center gap-1.5">
+                  <span className="text-foreground-tertiary">Seed:</span>
+                  {swimInfo.seedTime}
+                  {swimInfo.rank && ` #${swimInfo.rank}`}
+                </span>
+              )}
+              {swimInfo.heat && <span className="flex items-center gap-1.5"><span className="text-foreground-tertiary">Heat</span> {swimInfo.heat}</span>}
+              {swimInfo.lane != null && <span className="flex items-center gap-1.5"><span className="text-foreground-tertiary">Lane</span> {swimInfo.lane}</span>}
+            </div>
+          )}
           {coachNote ? (
             <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">{coachNote}</p>
           ) : null}
@@ -637,8 +683,9 @@ export function EditRelayButton({
   )
   const gender = effectiveRelayGender(entry, athleteGenders) || "F"
   const roundSuffix = round ? ` · ${roundLabel(round)}` : ""
-  const genderSuffix =
-    gender === "F" ? " · Women's" : gender === "M" ? " · Men's" : gender === "X" ? " · Mixed" : ""
+  const genderLabel = gender === "F" ? "Women's" : gender === "M" ? "Men's" : gender === "X" ? "Mixed" : "";
+  const eventNum = entry.eventNumber > 0 ? `#${entry.eventNumber} ` : ""
+  const baseTitle = `${eventNum}${genderLabel} ${entry.event} ${displayRelayLetter(entry.relayLetter)}`
 
   return (
     <>
@@ -667,8 +714,8 @@ export function EditRelayButton({
           athletes={athletes}
           title={
             rosterOnly
-              ? `Edit roster · ${entry.event} ${displayRelayLetter(entry.relayLetter)}${genderSuffix}${roundSuffix}`
-              : `Edit ${entry.event} ${displayRelayLetter(entry.relayLetter)}${genderSuffix}${roundSuffix}`
+              ? `Edit roster · ${baseTitle}${roundSuffix}`
+              : `Edit ${baseTitle}${roundSuffix}`
           }
           initial={formFromEntry(entry, athleteGenders)}
           onClose={() => setOpen(false)}

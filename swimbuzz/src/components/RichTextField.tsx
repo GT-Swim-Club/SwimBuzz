@@ -1,82 +1,98 @@
 "use client"
 
-import { useRef } from "react"
-import {
-  prefixRichTextLines,
-  wrapRichTextSelection,
-} from "@/lib/rich-text-format"
+import { useEditor, EditorContent } from "@tiptap/react"
+import { useRef, useState, useEffect } from "react"
+import StarterKit from "@tiptap/starter-kit"
+import Underline from "@tiptap/extension-underline"
+import Link from "@tiptap/extension-link"
+import Modal, { ModalFooter } from "@/components/Modal"
+import { TextSelection } from "@tiptap/pm/state"
 
 const toolbarBtn =
   "rounded-md border border-border px-2 py-1 text-xs font-medium text-foreground-secondary hover:bg-fill-secondary border-border text-foreground-secondary hover:bg-fill-secondary"
 
-function applyChange(
-  textarea: HTMLTextAreaElement,
-  next: string,
-  selectionStart: number,
-  selectionEnd: number,
-  onChange: (value: string) => void
-) {
-  onChange(next)
-  requestAnimationFrame(() => {
-    textarea.focus()
-    textarea.setSelectionRange(selectionStart, selectionEnd)
-  })
-}
+const toolbarBtnActive =
+  "rounded-md border border-primary bg-primary px-2 py-1 text-xs font-medium text-primary-text"
 
-export function RichTextToolbar({
-  onMutate,
-}: {
-  onMutate: (
-    fn: (value: string, start: number, end: number) => {
-      next: string
-      selectionStart: number
-      selectionEnd: number
+export function RichTextToolbar({ editor, onOpenLink }: { editor: any, onOpenLink: () => void }) {
+  const [, setTick] = useState(0)
+  
+  useEffect(() => {
+    const update = () => setTick(t => t + 1)
+    editor.on('transaction', update)
+    return () => {
+        editor.off('transaction', update)
     }
-  ) => void
-}) {
+  }, [editor])
+
+  if (!editor) return null
   return (
     <div className="mb-1.5 flex flex-wrap gap-1">
       <button
         type="button"
-        className={toolbarBtn}
-        onClick={() => onMutate((v, s, e) => wrapRichTextSelection(v, s, e, "**"))}
+        className={editor.isActive('bold') ? toolbarBtnActive : toolbarBtn}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().toggleBold().run();
+        }}
         title="Bold"
       >
         <span className="font-bold">B</span>
       </button>
       <button
         type="button"
-        className={toolbarBtn}
-        onClick={() => onMutate((v, s, e) => wrapRichTextSelection(v, s, e, "*"))}
+        className={editor.isActive('italic') ? toolbarBtnActive : toolbarBtn}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().toggleItalic().run();
+        }}
         title="Italic"
       >
         <span className="italic">I</span>
       </button>
       <button
         type="button"
-        className={toolbarBtn}
-        onClick={() => onMutate((v, s, e) => wrapRichTextSelection(v, s, e, "__"))}
+        className={editor.isActive('underline') ? toolbarBtnActive : toolbarBtn}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().toggleUnderline().run();
+        }}
         title="Underline"
       >
         <span className="underline">U</span>
       </button>
       <button
         type="button"
-        className={toolbarBtn}
-        onClick={() => onMutate((v, s, e) => prefixRichTextLines(v, s, e, "- "))}
+        className={editor.isActive('bulletList') ? toolbarBtnActive : toolbarBtn}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().toggleBulletList().run();
+        }}
+        
         title="Bullet list"
       >
-        • List
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="6" x2="3.01" y2="6"></line>
+          <line x1="3" y1="12" x2="3.01" y2="12"></line>
+          <line x1="3" y1="18" x2="3.01" y2="18"></line>
+        </svg>
       </button>
       <button
         type="button"
-        className={toolbarBtn}
-        onClick={() =>
-          onMutate((v, s, e) => wrapRichTextSelection(v, s, e, "[", "](https://)"))
-        }
+        className={editor.isActive('link') ? toolbarBtnActive : toolbarBtn}
+        onClick={(e) => {
+            e.preventDefault();
+            onOpenLink();
+        }}
         title="Link"
       >
-        Link
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+        </svg>
       </button>
     </div>
   )
@@ -103,47 +119,213 @@ export default function RichTextField({
   required?: boolean
   className?: string
 }) {
-  const ref = useRef<HTMLTextAreaElement>(null)
+  const [isFocused, setIsFocused] = useState(false)
+  const [linkModalOpen, setLinkModalOpen] = useState(false)
+  const [linkUrl, setLinkUrl] = useState("")
+  const [linkTitle, setLinkTitle] = useState("")
+  const [showTitleOption, setShowTitleOption] = useState(false)
+  const [urlError, setUrlError] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const selectionRef = useRef<any>(null);
+  const firstInputRef = useRef<HTMLInputElement>(null);
+  
+  const editor = useEditor({
+    parseOptions: {
+        preserveWhitespace: 'full',
+    },
+    extensions: [
+      StarterKit.configure({
+        bulletList: {
+          keepMarks: true,
+          keepAttributes: true,
+        },
+        orderedList: {
+          keepMarks: true,
+          keepAttributes: true,
+        },
+      }),
+      Underline,
+      Link.configure({ 
+        openOnClick: false,
+        autolink: false, // Prevents automatic link creation on click
+        HTMLAttributes: {
+            class: 'text-[var(--brand-color-primary)] underline',
+        },
+      }),
+    ],
+    content: value,
+    // Prevent default browser behavior of opening links in editor by clicking
+    editorProps: {
+      attributes: {
+        class: `prose prose-sm max-w-none focus:outline-none whitespace-pre-wrap min-h-[6rem] p-2 border border-border rounded-lg bg-background text-sm text-foreground [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-[var(--brand-color-primary)] [&_a]:underline ${className}`,
+        style: "font-family: inherit;",
+      },
+      handleClick: (view, pos, event) => {
+        const { state } = view;
+        const $pos = state.doc.resolve(pos);
+        const link = $pos.marks().find((m) => m.type.name === 'link');
+        if (link) {
+          event.preventDefault();
+          // Move cursor to link so getAttributes('link') works
+          view.dispatch(state.tr.setSelection(TextSelection.create(state.doc, pos)));
+          openLinkModal();
+          return true;
+        }
+        return false;
+      },
+    },
+    onUpdate: ({ editor }) => {
+      onChange(editor.getHTML())
+    },
+  })
 
-  function mutate(
-    fn: (value: string, start: number, end: number) => {
-      next: string
-      selectionStart: number
-      selectionEnd: number
+  useEffect(() => {
+    if (!linkModalOpen && selectionRef.current && editor) {
+      editor.commands.setTextSelection(selectionRef.current);
+      editor.commands.focus();
+      selectionRef.current = null;
     }
-  ) {
-    const textarea = ref.current
-    if (!textarea) return
-    const { selectionStart, selectionEnd } = textarea
-    const result = fn(value, selectionStart, selectionEnd)
-    applyChange(textarea, result.next, result.selectionStart, result.selectionEnd, onChange)
+  }, [linkModalOpen, editor]);
+
+  useEffect(() => {
+    if (linkModalOpen && firstInputRef.current) {
+        setTimeout(() => {
+            firstInputRef.current?.focus();
+        }, 100);
+    }
+  }, [linkModalOpen]);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const onFocus = () => setIsFocused(true);
+    const onBlur = ({ event }: { event: any }) => {
+      // If the new focus target is inside our container OR modal is open (linkModalOpen), keep focus
+      if (containerRef.current?.contains(event?.relatedTarget as Node) || linkModalOpen) return
+      setIsFocused(false)
+    };
+
+    editor.on('focus', onFocus);
+    editor.on('blur', onBlur);
+
+    return () => {
+        editor.off('focus', onFocus);
+        editor.off('blur', onBlur);
+    }
+  }, [editor, linkModalOpen]);
+
+  function openLinkModal() {
+    if (!editor) return;
+    
+    // Ensure the focus state is correct before opening modality
+    setIsFocused(true);
+
+    // Save the selection before we potentially modify it
+    selectionRef.current = editor.state.selection;
+
+    // Extend selection to cover the link range if we are in a link
+    editor.commands.extendMarkRange("link");
+    
+    const { from, to } = editor.state.selection;
+    const text = editor.state.doc.textBetween(from, to, ' ');
+    
+    const linkAttrs = editor.getAttributes("link");
+    
+    setLinkUrl(linkAttrs.href || "");
+    setLinkTitle(text || "");
+    // Always show title so it can be edited if desired
+    setShowTitleOption(true);
+    setUrlError(false);
+    setLinkModalOpen(true);
   }
 
-  const textareaClass =
-    className ??
-    `w-full rounded-lg border px-3 py-2 text-sm bg-background border-border resize-y ${
-      compact ? "min-h-[4rem]" : "min-h-[6rem]"
-    }${mono ? " font-mono" : ""}`
+  function handleAddLink() {
+    if (!editor) return;
+    if (!linkUrl) {
+        editor.chain().focus().extendMarkRange("link").unsetLink().run();
+    } else {
+        try {
+            new URL(linkUrl.startsWith('http') ? linkUrl : `https://${linkUrl}`);
+        } catch {
+            setUrlError(true);
+            return;
+        }
+
+        const urlToApply = linkUrl.startsWith('http') ? linkUrl : `https://${linkUrl}`;
+        
+        // Re-extend mark range to ensure we have the right range
+        editor.chain().focus().extendMarkRange("link").run();
+        
+        const { from, to } = editor.state.selection;
+        
+        // If the user changed the text, replace content
+        const currentText = editor.state.doc.textBetween(from, to, ' ');
+        if (currentText !== linkTitle) {
+            editor.chain().focus().deleteRange({from, to}).insertContent({
+                type: 'text',
+                text: linkTitle,
+                marks: [{
+                    type: 'link',
+                    attrs: { href: urlToApply }
+                }]
+            }).run();
+        } else {
+            editor.chain().focus().setLink({ href: urlToApply }).run();
+        }
+    }
+    setLinkModalOpen(false);
+  }
 
   return (
-    <div>
+    <div ref={containerRef}>
       {label ? (
-        <label className="flex items-center gap-1.5 text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+        <label className="flex items-center gap-1.5 text-xs font-medium text-foreground-secondary mb-1">
           {icon}
           {label}
         </label>
       ) : null}
-
-      <RichTextToolbar onMutate={mutate} />
-
-      <textarea
-        ref={ref}
-        required={required}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        rows={rows}
-        className={textareaClass}
-      />
+      
+      {isFocused && <RichTextToolbar editor={editor} onOpenLink={openLinkModal} />}
+      <EditorContent editor={editor} />
+      
+      <Modal 
+        open={linkModalOpen}
+        onClose={() => setLinkModalOpen(false)}
+        title="Link"
+        footer={
+            <ModalFooter>
+                <button type="button" onClick={() => setLinkModalOpen(false)} className="rounded-lg border px-4 py-2 text-sm">Cancel</button>
+                <button type="button" onClick={handleAddLink} className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-text">Apply</button>
+            </ModalFooter>
+        }
+      >
+        <div className="space-y-3" onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleAddLink();
+              }
+        }}>
+          {showTitleOption && (
+            <input 
+                ref={firstInputRef}
+                type="text" 
+                value={linkTitle} 
+                onChange={(e) => setLinkTitle(e.target.value)}
+                className="w-full rounded-lg border px-3 py-2 text-sm"
+                placeholder="Text"
+            />
+          )}
+          <input 
+              ref={!showTitleOption ? firstInputRef : null}
+              type="text" 
+              value={linkUrl} 
+              onChange={(e) => { setUrlError(false); setLinkUrl(e.target.value); }}
+              className={`w-full rounded-lg border px-3 py-2 text-sm ${urlError ? 'border-red-500' : ''}`}
+              placeholder="https://example.com"
+          />
+          {urlError && <p className="text-xs text-red-500">Please enter a valid URL</p>}
+        </div>
+      </Modal>
     </div>
   )
 }

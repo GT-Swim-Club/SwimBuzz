@@ -11,9 +11,9 @@ import ImportMeetResourcesButton from "./ImportMeetResourcesButton"
 import ManagePhotosButton from "./ManagePhotosButton"
 import AddTravelInfoButton from "./AddTravelInfoButton"
 import MeetActions from "./MeetActions"
-import AddMeetSwimButton from "./AddMeetSwimButton"
+import AddResultButton from "./AddResultButton"
+import AddIndividualEntryButton from "./AddIndividualEntryButton"
 import PhotosButtons, { PreviewSlideshow } from "./PhotosButtons"
-import { AddMeetRelayButton } from "./MeetRelayEditor"
 import EventOrderButton from "./EventOrderButton"
 import MeetSheetSummarySection from "./MeetSheetSummarySection"
 import ScrollToHash from "./ScrollToHash"
@@ -183,8 +183,11 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
     photos: initialPhotos,
     previews: initialPreviews,
   }
-  const travelLinks = TRAVEL_LINKS.filter((l) => meet[l.key])
-  const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => meet[s.key]?.trim())
+const isHtmlEmpty = (html: string | null | undefined) =>
+  !html || html.replace(/<[^>]*>?/gm, "").trim() === ""
+
+const travelLinks = TRAVEL_LINKS.filter((l) => meet[l.key])
+const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key]))
   const travelItems: TravelInfoItem[] = [
     ...travelLinks.map((l) => ({
       type: "link" as const,
@@ -232,12 +235,19 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
   const seasonRoster = await prisma.athlete.findMany({
     where: { seasons: { has: meet.season } },
     orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
-    select: { id: true, firstName: true, lastName: true, gender: true },
+    select: { 
+      id: true, 
+      firstName: true, 
+      lastName: true, 
+      gender: true,
+      user: { select: { image: true } }
+    },
   })
   const rosterAthletes = seasonRoster.map((a) => ({
     id: a.id,
     name: `${a.lastName}, ${a.firstName}`,
     gender: a.gender === Gender.F ? ("F" as const) : ("M" as const),
+    image: a.user.image,
   }))
 
   const signupForm = meet.signupForm
@@ -352,7 +362,7 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
             </div>
           </div>
         </div>
-        {isCoach && <MeetActions meetId={meet.id} initial={initial} meetName={meet.name} />}
+        {isCoach && <MeetActions meetId={meet.id} initial={initial} meetName={meet.name} hasSwims={meet.swims.length > 0 || (relayResults?.length ?? 0) > 0} />}
       </div>
 
       {/* Resources */}
@@ -506,15 +516,15 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
         headerAction={
           isCoach ? (
             <div className="flex flex-wrap gap-2">
-              <AddMeetRelayButton
-                meetId={meet.id}
-                athletes={rosterAthletes}
-              />
-              <AddMeetSwimButton
+              <AddResultButton
                 meetId={meet.id}
                 meetName={meet.name}
                 defaultCourse={meet.course}
                 defaultDate={toDateInput(meet.startDate)}
+                athletes={rosterAthletes}
+              />
+              <AddIndividualEntryButton
+                meetId={meet.id}
                 athletes={rosterAthletes}
               />
             </div>

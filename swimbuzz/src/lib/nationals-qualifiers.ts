@@ -50,6 +50,7 @@ export type QualifierAthlete = {
   athleteId: string
   firstName: string
   lastName: string
+  nicknames: string[]
   gender: Gender
   events: QualifierRow[]
 }
@@ -254,7 +255,7 @@ export async function computeNationalsQualifiers(opts: {
       seasons: { has: opts.season },
       ...(opts.gender ? { gender: opts.gender } : {}),
     },
-    select: { id: true, firstName: true, lastName: true, gender: true },
+    select: { id: true, firstName: true, lastName: true, nicknames: true, gender: true },
   })
   if (athletes.length === 0 || cuts.length === 0) {
     return {
@@ -359,6 +360,7 @@ export async function computeNationalsQualifiers(opts: {
         athleteId: athlete.id,
         firstName: athlete.firstName,
         lastName: athlete.lastName,
+        nicknames: athlete.nicknames,
         gender: athlete.gender,
         events: [],
       }

@@ -59,32 +59,34 @@ export default function MeetGalleryCard({
           </span>
         )}
       </div>
-      <div className="p-4 flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className="flex items-center gap-3">
-            {meet.iconUrl && (
-              <img
-                src={meet.iconUrl}
-                alt={meet.name}
-                className="h-5 w-5 rounded object-cover shrink-0"
-              />
-            )}
-            <h3 className="font-medium text-sm text-foreground text-foreground">
-              {meet.name}
-            </h3>
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <div className="flex items-center gap-3">
+              {meet.iconUrl && (
+                <img
+                  src={meet.iconUrl}
+                  alt={meet.name}
+                  className="h-5 w-5 rounded object-cover shrink-0"
+                />
+              )}
+              <h3 className="font-medium text-sm text-foreground text-foreground">
+                {meet.name}
+              </h3>
+            </div>
+            <p className="text-xs text-foreground-secondary dark:text-foreground-secondary mt-1">
+              {formatDateRange(meet.startDate, meet.endDate)}
+            </p>
           </div>
-          <p className="text-xs text-foreground-secondary dark:text-foreground-secondary mt-1">
-            {formatDateRange(meet.startDate, meet.endDate)}
-          </p>
-          <p className="text-xs text-foreground-tertiary dark:text-foreground-tertiary mt-0.5">
-            {[meet.location, meet.school].filter(Boolean).join(" · ")}
-          </p>
+          {isCoach && (
+            <div onClick={(e) => e.preventDefault()}>
+              <EditMeetButton meetId={meet.id} initial={initial} />
+            </div>
+          )}
         </div>
-        {isCoach && (
-          <div onClick={(e) => e.preventDefault()}>
-            <EditMeetButton meetId={meet.id} initial={initial} />
-          </div>
-        )}
+        <p className="text-xs text-foreground-tertiary dark:text-foreground-tertiary mt-2">
+          {[meet.location, meet.school].filter(Boolean).join(" · ")}
+        </p>
       </div>
     </Link>
   )

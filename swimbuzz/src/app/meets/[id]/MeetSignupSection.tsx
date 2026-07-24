@@ -176,13 +176,13 @@ export default function MeetSignupSection({
       )
       const data = (await res.json().catch(() => ({}))) as { error?: string }
       if (!res.ok) {
-        setWithdrawError(data.error ?? "Failed to withdraw sign-up")
+      setWithdrawError(data.error ?? "Failed to drop sign-up")
         return
       }
       setWithdrawEntry(null)
       router.refresh()
     } catch {
-      setWithdrawError("Failed to withdraw sign-up")
+      setWithdrawError("Failed to drop sign-up")
     } finally {
       setWithdrawing(false)
     }
@@ -432,7 +432,7 @@ export default function MeetSignupSection({
                               disabled={withdrawing}
                               className="text-xs px-2 py-1 rounded-md border border-border border-red-200 text-error hover:bg-red-50 dark:border-red-900 dark:text-error dark:hover:bg-red-950/30 disabled:opacity-50 transition-colors"
                             >
-                              Withdraw
+                              Drop
                             </button>
                           </td>
                         </tr>
@@ -495,7 +495,7 @@ export default function MeetSignupSection({
             }}
             closeDisabled={withdrawing}
             busy={withdrawing}
-            title="Withdraw sign-up?"
+            title="Drop sign-up?"
             description={
               withdrawEntry
                 ? `This removes ${withdrawEntry.firstName} ${withdrawEntry.lastName}'s meet sign-up and event selections.`
@@ -522,7 +522,7 @@ export default function MeetSignupSection({
                   disabled={withdrawing}
                   className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-red-700 disabled:opacity-50"
                 >
-                  {withdrawing ? "Withdrawing…" : "Withdraw"}
+                  {withdrawing ? "Dropping…" : "Drop"}
                 </button>
               </ModalFooter>
             }

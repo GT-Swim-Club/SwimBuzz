@@ -1,5 +1,7 @@
 import React from "react"
-import { parseRichTextBlocks } from "@/lib/rich-text-format"
+
+export const isHtmlEmpty = (html: string | null | undefined) =>
+  !html || html.replace(/<[^>]*>?/gm, "").trim() === ""
 
 export function FormattedText({
   text,
@@ -12,9 +14,9 @@ export function FormattedText({
 }) {
   return (
     <div
-      className={`space-y-1 text-sm text-foreground${mono ? " font-mono" : ""} ${className}`}
-    >
-      {parseRichTextBlocks(text)}
-    </div>
+      className={`prose prose-sm max-w-none text-foreground prose-a:text-[var(--brand-color-primary)] prose-a:underline ${mono ? "font-mono" : ""} ${className}`}
+      style={{ whiteSpace: 'pre-wrap' }}
+      dangerouslySetInnerHTML={{ __html: text.replace(/<(?:\/)?(?:div|p)(?:\s+[^>]*)?>/g, "") }}
+    />
   )
 }

@@ -1686,7 +1686,7 @@ function fuseRelayResultRows(byKey: Map<string, SheetEntry>): void {
   }
 }
 
-function resultKey(
+export function resultKey(
   athleteId: string,
   event: string,
   isLeadoff = false,

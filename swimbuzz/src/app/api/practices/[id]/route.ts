@@ -83,7 +83,6 @@ export async function PATCH(
               title: s.title,
               content: s.content,
               notes: s.notes,
-              tags: s.tags,
               distance: s.distance,
             },
           })
@@ -95,7 +94,6 @@ export async function PATCH(
               title: s.title,
               content: s.content,
               notes: s.notes,
-              tags: s.tags,
               distance: s.distance,
             },
           })
@@ -104,7 +102,7 @@ export async function PATCH(
 
       return tx.practice.update({
         where: { id },
-        data: { title: data.title, date: data.date, focus: data.focus, published: data.published },
+        data: { title: data.title, date: data.date, focus: data.focus, tags: data.tags, published: data.published },
       })
     })
 

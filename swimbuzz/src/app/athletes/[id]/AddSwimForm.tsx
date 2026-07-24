@@ -182,22 +182,22 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
         <h2 className="text-sm font-medium text-foreground-secondary text-foreground-secondary uppercase tracking-wide mb-3">
           Log a swim manually
         </h2>
-        <div className="border border-border-secondary rounded-xl p-4 space-y-3 bg-background bg-background">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div>
-              <label className="text-xs text-foreground-secondary text-foreground-secondary mb-1 block">Event</label>
+        <div className="border border-border-secondary rounded-xl p-4 bg-background">
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="w-[110px]">
+              <label className="text-xs text-foreground-secondary mb-1 block">Event</label>
               <select
-                className="w-full border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
+                className="w-full border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background"
                 value={form.event}
                 onChange={e => setForm(f => ({ ...f, event: e.target.value }))}
               >
                 {EVENTS.map(e => <option key={e}>{e}</option>)}
               </select>
             </div>
-            <div>
+            <div className="w-[80px]">
               <label className="text-xs text-foreground-secondary mb-1 block">Course</label>
               <select
-                className="w-full border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
+                className="w-full border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background"
                 value={form.course}
                 onChange={e => setForm(f => ({ ...f, course: e.target.value }))}
               >
@@ -206,44 +206,42 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
                 <option>SCM</option>
               </select>
             </div>
-            <div>
-              <label className="text-xs text-foreground-secondary mb-1 block">Time (m:ss.hh)</label>
+            <div className="w-[120px]">
+              <label className="text-xs text-foreground-secondary mb-1 block">Time</label>
               <input
                 type="text"
-                placeholder="1:23.45 or 58.32"
-                className="w-full border border-border-secondary rounded-lg px-3 py-2 text-sm font-mono bg-background border-border-secondary"
+                placeholder=""
+                className="w-full border border-border-secondary rounded-lg px-3 py-2 text-sm font-mono bg-background"
                 value={form.time}
                 onChange={e => setForm(f => ({ ...f, time: e.target.value }))}
               />
             </div>
-          </div>
-          <div className="grid grid-cols-[1.5fr_1fr] gap-3">
-            <div>
+            <div className="flex-1 min-w-[250px]">
               <label className="text-xs text-foreground-secondary mb-1 block">Meet</label>
               <input
                 type="text"
-                className="w-full border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
+                className="w-full border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background"
                 value={form.meet}
                 onChange={e => setForm(f => ({ ...f, meet: e.target.value }))}
               />
             </div>
-            <div>
+            <div className="w-[140px]">
               <label className="text-xs text-foreground-secondary mb-1 block">Date</label>
               <input
                 type="date"
-                className="w-full border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
+                className="w-full border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background"
                 value={form.date}
                 onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
               />
             </div>
           </div>
           {error && (
-            <p className="text-sm text-error">{error}</p>
+            <p className="text-sm text-error mt-3">{error}</p>
           )}
           <button
             onClick={handleSubmit}
             disabled={loading || !form.time}
-            className="w-full py-2 text-sm border border-border-secondary rounded-lg hover:bg-fill-secondary hover:bg-fill-secondary bg-background disabled:opacity-40 transition-colors"
+            className="w-full mt-4 py-2 text-sm border border-border-secondary rounded-lg hover:bg-fill-secondary bg-background disabled:opacity-40 transition-colors"
           >
             {loading ? "Saving..." : "Log swim"}
           </button>

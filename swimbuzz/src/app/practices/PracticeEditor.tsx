@@ -12,14 +12,17 @@ export type SetFormState = {
   title: string
   content: string
   notes: string
-  tags: string[]
   distance: string
 }
 
 export type PracticeFormState = {
   title: string
   date: string
+  startTime: string
+  endTime: string
+  location: string
   focus: string
+  tags: string[]
   published?: boolean
   sets: SetFormState[]
 }
@@ -28,14 +31,17 @@ export const emptySet: SetFormState = {
   title: "",
   content: "",
   notes: "",
-  tags: [],
   distance: "",
 }
 
 export const emptyPractice: PracticeFormState = {
   title: "",
-  date: "",
+  date: new Date().toISOString().slice(0, 10),
+  startTime: "19:30",
+  endTime: "21:00",
+  location: "CRC Comp Pool",
   focus: "",
+  tags: [],
   sets: [{ ...emptySet }],
 }
 
@@ -188,28 +194,20 @@ export default function PracticeEditor({
     }))
   }
 
-  function toggleTag(index: number, tag: string) {
-    setForm((f) => ({
-      ...f,
-      sets: f.sets.map((s, i) => {
-        if (i !== index) return s
-        const has = s.tags.includes(tag)
-        return { ...s, tags: has ? s.tags.filter((t) => t !== tag) : [...s.tags, tag] }
-      }),
-    }))
+  function toggleTag(tag: string) {
+    setForm((f) => {
+      const has = f.tags.includes(tag)
+      return { ...f, tags: has ? f.tags.filter((t) => t !== tag) : [...f.tags, tag] }
+    })
   }
 
-  function addCustomTag(index: number, raw: string) {
+  function addCustomTag(raw: string) {
     const tag = raw.trim()
     if (!tag) return
-    setForm((f) => ({
-      ...f,
-      sets: f.sets.map((s, i) => {
-        if (i !== index) return s
-        if (s.tags.some((t) => t.toLowerCase() === tag.toLowerCase())) return s
-        return { ...s, tags: [...s.tags, tag] }
-      }),
-    }))
+    setForm((f) => {
+      if (f.tags.some((t) => t.toLowerCase() === tag.toLowerCase())) return f
+      return { ...f, tags: [...f.tags, tag] }
+    })
   }
 
   function addSet() {
@@ -280,8 +278,8 @@ export default function PracticeEditor({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-5">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div className="sm:col-span-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-1">
+          <div>
             <label className={labelCls}>Title <span className="text-red-500">*</span></label>
             <input
               required
@@ -291,12 +289,46 @@ export default function PracticeEditor({
               className={inputCls}
             />
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
           <div>
-            <label className={labelCls}>Date</label>
+            <label className={labelCls}>Date <span className="text-red-500">*</span></label>
             <input
+              required
               type="date"
               value={form.date}
               onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+              className={inputCls}
+            />
+          </div>
+          <div>
+            <label className={labelCls}>Start time <span className="text-red-500">*</span></label>
+            <input
+              required
+              type="time"
+              value={form.startTime}
+              onChange={(e) => setForm((f) => ({ ...f, startTime: e.target.value }))}
+              className={inputCls}
+            />
+          </div>
+          <div>
+            <label className={labelCls}>End time <span className="text-red-500">*</span></label>
+            <input
+              required
+              type="time"
+              value={form.endTime}
+              onChange={(e) => setForm((f) => ({ ...f, endTime: e.target.value }))}
+              className={inputCls}
+            />
+          </div>
+          <div>
+            <label className={labelCls}>Location <span className="text-red-500">*</span></label>
+            <input
+              required
+              placeholder="e.g. CRC Comp Pool"
+              value={form.location}
+              onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
               className={inputCls}
             />
           </div>
@@ -309,6 +341,53 @@ export default function PracticeEditor({
             value={form.focus}
             onChange={(focus) => setForm((f) => ({ ...f, focus }))}
             className={`${inputCls} min-h-[3rem]`}
+          />
+        </div>
+
+        <div>
+          <label className={labelCls}>Practice Tags</label>
+          <div className="flex flex-wrap gap-1.5">
+            {SET_TAGS.map((tag) => {
+              const active = form.tags.includes(tag)
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => toggleTag(tag)}
+                  className={
+                    "text-xs px-2 py-0.5 rounded-full border border-border-secondary transition-colors " +
+                    (active
+                      ? "bg-primary border-primary text-primary-text"
+                      : "border border-border-secondary dark:border border-border-secondary text-foreground-secondary dark:text-foreground-secondary hover:bg-fill-secondary dark:hover:bg-fill-secondary")
+                  }
+                >
+                  {tag}
+                </button>
+              )
+            })}
+            {form.tags
+              .filter((t) => !SET_TAGS.includes(t as (typeof SET_TAGS)[number]))
+              .map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => toggleTag(tag)}
+                  className="text-xs px-2 py-0.5 rounded-full border border-border-secondary bg-primary border-primary text-primary-text"
+                >
+                  {tag} ✕
+                </button>
+              ))}
+          </div>
+          <input
+            placeholder="Add custom tag + Enter"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault()
+                addCustomTag(e.currentTarget.value)
+                e.currentTarget.value = ""
+              }
+            }}
+            className={`${inputCls} mt-2`}
           />
         </div>
 
@@ -363,11 +442,11 @@ export default function PracticeEditor({
                   />
                 </div>
                 <div>
-                  <label className={labelCls}>Distance</label>
+                  <label className={labelCls}>Distance (yards)</label>
                   <input
                     type="number"
                     min={0}
-                    placeholder="yds/m"
+                    placeholder=""
                     value={set.distance}
                     onChange={(e) => updateSet(i, { distance: e.target.value })}
                     className={inputCls}
@@ -382,64 +461,16 @@ export default function PracticeEditor({
                   rows={4}
                   value={set.content}
                   onChange={(content) => updateSet(i, { content })}
-                  className={`${inputCls} min-h-[6rem]`}
+                  className="bg-background"
                 />
               </div>
 
               <div>
                 <label className={labelCls}>Coach notes</label>
                 <RichTextField
-                  rows={2}
                   value={set.notes}
                   onChange={(notes) => updateSet(i, { notes })}
-                  className={`${inputCls} min-h-[3rem]`}
-                />
-              </div>
-
-              <div>
-                <label className={labelCls}>Set type tags</label>
-                <div className="flex flex-wrap gap-1.5">
-                  {SET_TAGS.map((tag) => {
-                    const active = set.tags.includes(tag)
-                    return (
-                      <button
-                        key={tag}
-                        type="button"
-                        onClick={() => toggleTag(i, tag)}
-                        className={
-                          "text-xs px-2 py-0.5 rounded-full border border-border-secondary transition-colors " +
-                          (active
-                            ? "bg-primary border-primary text-primary-text"
-                            : "border border-border-secondary dark:border border-border-secondary text-foreground-secondary dark:text-foreground-secondary hover:bg-fill-secondary dark:hover:bg-fill-secondary")
-                        }
-                      >
-                        {tag}
-                      </button>
-                    )
-                  })}
-                  {set.tags
-                    .filter((t) => !SET_TAGS.includes(t as (typeof SET_TAGS)[number]))
-                    .map((tag) => (
-                      <button
-                        key={tag}
-                        type="button"
-                        onClick={() => toggleTag(i, tag)}
-                        className="text-xs px-2 py-0.5 rounded-full border border-border-secondary bg-primary border-primary text-primary-text"
-                      >
-                        {tag} ✕
-                      </button>
-                    ))}
-                </div>
-                <input
-                  placeholder="Add custom tag + Enter"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault()
-                      addCustomTag(i, e.currentTarget.value)
-                      e.currentTarget.value = ""
-                    }
-                  }}
-                  className={`${inputCls} mt-2`}
+                  className="bg-background !min-h-[2.5rem]"
                 />
               </div>
             </div>
@@ -469,7 +500,15 @@ export default function PracticeEditor({
           <button
             type="button"
             onClick={() => save(false)}
-            disabled={loading || !form.title.trim() || form.sets.some(s => !s.content.trim())}
+            disabled={
+              loading ||
+              !form.title.trim() ||
+              !form.date.trim() ||
+              !form.startTime.trim() ||
+              !form.endTime.trim() ||
+              !form.location.trim() ||
+              form.sets.some((s) => !s.content.trim())
+            }
             className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary hover:bg-fill-secondary border-border-secondary disabled:opacity-50"
           >
             {loading ? "Saving…" : "Save draft"}
@@ -477,7 +516,15 @@ export default function PracticeEditor({
           <button
             type="button"
             onClick={() => save(true)}
-            disabled={loading || !form.title.trim() || form.sets.some(s => !s.content.trim())}
+            disabled={
+              loading ||
+              !form.title.trim() ||
+              !form.date.trim() ||
+              !form.startTime.trim() ||
+              !form.endTime.trim() ||
+              !form.location.trim() ||
+              form.sets.some((s) => !s.content.trim())
+            }
             className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
           >
             {loading ? "Saving…" : "Publish"}

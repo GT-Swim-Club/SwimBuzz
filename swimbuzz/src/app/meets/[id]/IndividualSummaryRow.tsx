@@ -16,6 +16,7 @@ export default function IndividualSummaryRow({
   splits,
   editButton,
   id,
+  swimInfo,
 }: {
   athleteName?: string
   label: string
@@ -26,9 +27,17 @@ export default function IndividualSummaryRow({
   splits: ResultSplit[]
   editButton?: ReactNode
   id?: string
+  swimInfo?: {
+    seedTime?: string
+    rank?: number | string
+    heat?: number | string
+    lane?: number
+    resultPlace?: number
+    time?: string
+    rawTime?: string
+  }
 }) {
   const [detailOpen, setDetailOpen] = useState(false)
-  const hasSplits = splits.length > 0
 
   return (
     <>
@@ -37,10 +46,10 @@ export default function IndividualSummaryRow({
         className={rowClassName}
         label={label}
         details={details}
-        onClick={hasSplits ? () => setDetailOpen(true) : undefined}
+        onClick={() => setDetailOpen(true)}
         right={
           <>
-            <span key="time">{timeDisplay}</span>
+            <span key="time" className="cursor-pointer">{timeDisplay}</span>
             {editButton ? (
               <div key="edit" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
                 {editButton}
@@ -49,12 +58,14 @@ export default function IndividualSummaryRow({
           </>
         }
       />
-      {detailOpen && hasSplits ? (
+      {detailOpen ? (
         <IndividualSplitsModal
           athleteName={athleteName}
           title={detailTitle}
           timeDisplay={timeDisplay}
           splits={splits}
+          swimInfo={swimInfo}
+          rawTime={swimInfo?.rawTime}
           onClose={() => setDetailOpen(false)}
         />
       ) : null}

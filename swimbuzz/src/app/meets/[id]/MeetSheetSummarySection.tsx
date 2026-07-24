@@ -29,13 +29,14 @@ import {
   relayTeamTime,
   relayCoachIncompleteNote,
 } from "@/lib/relay-results"
+import type { SheetEntry } from "@/lib/meet-sheet-summary"
 import EditMeetSwimButton from "./EditMeetSwimButton"
 import EditSheetSeedButton from "./EditSheetSeedButton"
 import IndividualSummaryRow from "./IndividualSummaryRow"
 import RelaySummaryRow from "./RelaySummaryRow"
 import SummaryRowLayout from "@/components/SummaryRowLayout"
 import { displayMeetResultTags } from "@/lib/swim-tags"
-import { formatDisplayTime, formatSeedTimeDelta } from "@/lib/utils"
+import { formatDisplayTime, formatSeedTimeDelta, podiumPlaceClass } from "@/lib/utils"
 
 function formatHeat(entry: SheetSummary["entries"][number]) {
   let heat = entry.heat
@@ -118,19 +119,6 @@ function podiumRowClass(place: number): string {
       return "bg-orange-50 dark:bg-orange-950/25"
     default:
       return ""
-  }
-}
-
-function podiumPlaceClass(place: number): string {
-  switch (place) {
-    case 1:
-      return "text-amber-600 dark:text-amber-400 font-semibold"
-    case 2:
-      return "text-slate-500 dark:text-slate-300 font-semibold"
-    case 3:
-      return "text-orange-600 dark:text-orange-400 font-semibold"
-    default:
-      return "text-foreground-tertiary dark:text-foreground-tertiary"
   }
 }
 
@@ -415,6 +403,12 @@ function formatIndividualResult(
   return "—"
 }
 
+function getRawTime(entry: SheetEntry): string | undefined {
+  if (entry.isRelayLeadoff && entry.relayLeadoffTime) return entry.relayLeadoffTime
+  if (entry.entryType === "relay_team") return relayTeamTime(entry) ?? undefined
+  return entry.resultTime ?? entry.finalTime ?? entry.prelimTime ?? undefined
+}
+
 function formatTime(
   entry: SheetSummary["entries"][number],
   allEntries?: SummaryEntry[]
@@ -477,6 +471,35 @@ function resolveDisplayEventNumber(
   return opt.women ?? opt.men ?? 0
 }
 
+function initialsFromName(name?: string | null) {
+  if (name?.includes(",")) {
+    const [lastName, firstName] = name.split(',').map(s => s.trim())
+    if (firstName && lastName) {
+      return `${firstName[0]}${lastName[0]}`.toUpperCase()
+    }
+  }
+  const parts = (name ?? "").trim().split(/\s+/).filter(Boolean)
+  if (parts.length >= 2) {
+    return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
+  }
+  if (parts.length === 1 && parts[0].length > 0) {
+    return parts[0].slice(0, 2).toUpperCase()
+  }
+  return "?"
+}
+
+function AthleteAvatar({ image, name }: { image?: string | null; name: string }) {
+  return (
+    <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border-secondary bg-primary/10 text-[10px] font-medium text-primary">
+      {image ? (
+        <img src={image} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+      ) : (
+        <span>{initialsFromName(name)}</span>
+      )}
+    </div>
+  )
+}
+
 function SummaryEntryRow({
   entry,
   canEdit,
@@ -494,7 +517,7 @@ function SummaryEntryRow({
   canEdit?: boolean
   meetId?: string
   meetName?: string
-  athletes?: Array<{ id: string; name: string }>
+  athletes?: Array<{ id: string; name: string; image?: string | null }>
   athleteGenders?: Map<string, "M" | "F">
   eventLabel?: string
   allEntries?: SummaryEntry[]
@@ -519,6 +542,17 @@ function SummaryEntryRow({
         ? formatRelayEventLabel(entry, athleteGenders)
         : entry.event)
   )
+
+  // Swim info for modal
+  const swimInfo = {
+    seedTime: entry.seedTime ?? undefined,
+    rank: entry.seedRank,
+    resultPlace: entry.resultPlace ?? entry.finalPlace ?? entry.prelimPlace,
+    heat: formatHeat(entry)?.replace("Heat ", ""),
+    lane: entry.entryType === "relay_team" ? relayLane(entry) : individualLane(entry),
+    time: typeof formatTime(entry, allEntries) === "string" ? (formatTime(entry, allEntries) as string) : undefined,
+    rawTime: getRawTime(entry)
+  }
 
   const editButton =
     canEdit && meetId ? (
@@ -572,9 +606,9 @@ function SummaryEntryRow({
               ? " · Timed Finals"
               : " · Finals"
             : ""
-    const genderSuffix =
-      gender === "F" ? " · Women's" : gender === "M" ? " · Men's" : gender === "X" ? " · Mixed" : ""
-    const detailTitle = `${label} ${displayRelayLetter(entry.relayLetter)}${genderSuffix}${roundSuffix}`
+    const genderLabel = gender === "F" ? "Women's" : gender === "M" ? "Men's" : gender === "X" ? "Mixed" : "";
+    const eventNum = entry.eventNumber > 0 ? `#${entry.eventNumber} ` : ""
+    const detailTitle = `${eventNum}${genderLabel} ${entry.event} ${displayRelayLetter(entry.relayLetter)}${roundSuffix}`
     const podium = finalsPodiumPlace(entry)
     const coachNote = canEdit ? relayCoachIncompleteNote(entry) ?? undefined : undefined
     const rowId = entry.swimId ? `swim-${entry.swimId}` : undefined
@@ -592,6 +626,7 @@ function SummaryEntryRow({
         canEdit={canEdit}
         meetId={meetId}
         athletes={athletes}
+        swimInfo={swimInfo}
       />
     )
   }
@@ -612,8 +647,7 @@ function SummaryEntryRow({
   const timeDisplay = formatTime(entry, allEntries)
   const rowId = entry.swimId ? `swim-${entry.swimId}` : undefined
 
-  if (splits.length > 0) {
-    return (
+  return (
       <IndividualSummaryRow
         id={rowId}
         label={label}
@@ -624,23 +658,8 @@ function SummaryEntryRow({
         rowClassName={podiumPlace ? podiumRowClass(podiumPlace) : undefined}
         splits={splits}
         editButton={editButton}
+        swimInfo={swimInfo}
       />
-    )
-  }
-
-  return (
-    <SummaryRowLayout
-      id={rowId}
-      className={podiumPlace ? podiumRowClass(podiumPlace) : ""}
-      label={label}
-      details={details || undefined}
-      right={
-        <>
-          <span key="time">{timeDisplay}</span>
-          <span key="edit">{editButton}</span>
-        </>
-      }
-    />
   )
 }
 
@@ -668,7 +687,7 @@ export default function MeetSheetSummarySection({
   headerAction?: ReactNode
   meetId?: string
   meetName?: string
-  athletes?: Array<{ id: string; name: string; gender?: "M" | "F" }>
+  athletes?: Array<{ id: string; name: string; gender?: "M" | "F"; image?: string | null }>
   canEdit?: boolean
   /** Linked roster athlete for the signed-in user — their rows pin to the top. */
   viewerAthleteId?: string | null
@@ -804,8 +823,14 @@ export default function MeetSheetSummarySection({
       <div className="space-y-3">
         {myEntries.length > 0 ? (
           <div className="rounded-xl overflow-hidden border border-border-secondary border-primary bg-primary/5 shadow-sm">
-            <div className="px-4 py-2.5 text-sm font-medium border-b dark:border-zinc-800 text-[var(--brand-color-primary-active)] dark:text-[var(--brand-color-primary-hover)]">
-              {athleteNames.get(viewerAthleteId!)}
+            <div className="group flex items-center gap-2 px-4 py-2 text-sm font-medium border-b dark:border-zinc-800 text-[var(--brand-color-primary-active)] dark:text-[var(--brand-color-primary-hover)]">
+              <AthleteAvatar 
+                image={athletes.find(a => a.id === viewerAthleteId)?.image} 
+                name={athleteNames.get(viewerAthleteId!) || "My Profile"}
+              />
+              <span className="group-hover:text-[var(--brand-color-primary-active)]">
+                {athleteNames.get(viewerAthleteId!)}
+              </span>
             </div>
             <ul className="divide-y dark:divide-zinc-800">
               {myEntries.map((entry, i) => (
@@ -856,18 +881,22 @@ export default function MeetSheetSummarySection({
             </ul>
           </div>
         ) : null}
-        {otherGrouped.map((athlete) => {
-          const events = [...athlete.entries].sort(compareIndividualEntries)
+        {otherGrouped.map((athleteGroup) => {
+          const events = [...athleteGroup.entries].sort(compareIndividualEntries)
+          const athleteData = athletes.find(a => a.id === athleteGroup.entries[0]?.athleteId);
           return (
             <div
-              key={athlete.name}
+              key={athleteGroup.name}
               className="border border-border border-border-secondary rounded-xl overflow-hidden bg-background bg-background"
             >
               <Link
-                href={`/athletes/${athlete.entries[0]?.athleteId}`}
-                className="block px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary transition-colors border-b dark:border-zinc-800"
+                href={`/athletes/${athleteGroup.entries[0]?.athleteId}`}
+                className="group flex items-center gap-2 block px-4 py-2 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary transition-colors border-b dark:border-zinc-800"
               >
-                {athlete.name}
+                <AthleteAvatar image={athleteData?.image} name={athleteGroup.name} />
+                <span className="group-hover:text-[var(--brand-color-primary-active)]">
+                  {athleteGroup.name}
+                </span>
               </Link>
               <ul className="divide-y dark:divide-zinc-800">
                 {events.map((entry, i) => (

@@ -9,14 +9,17 @@ export default function MeetActions({
   meetId,
   initial,
   meetName,
+  hasSwims,
 }: {
   meetId: string
   initial: MeetFormState
   meetName: string
+  hasSwims: boolean
 }) {
   const router = useRouter()
   const [editing, setEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleteOption, setDeleteOption] = useState<"meet" | "swims" | "both">("meet")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState<MeetFormState>(initial)
@@ -45,19 +48,28 @@ export default function MeetActions({
     }
   }
 
-  async function handleDelete() {
+  async function handleDelete(options: { deleteMeet: boolean, deleteSwims: boolean }) {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(`/api/meets/${meetId}`, { method: "DELETE" })
+      const res = await fetch(`/api/meets/${meetId}`, { 
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(options),
+      })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        setError(data.error ?? "Failed to delete meet")
+        setError(data.error ?? "Failed to delete")
         setLoading(false)
         return
       }
-      router.push("/meets")
-      router.refresh()
+      if (options.deleteMeet) {
+        router.push("/meets")
+      } else {
+        router.refresh()
+        setConfirmDelete(false)
+      }
+      setLoading(false)
     } catch {
       setError("Something went wrong")
       setLoading(false)
@@ -125,7 +137,7 @@ export default function MeetActions({
         open={confirmDelete}
         onClose={() => setConfirmDelete(false)}
         closeDisabled={loading}
-        title="Delete meet"
+        title={`Delete ${meetName}?`}
         maxWidth="sm"
         footer={
           <ModalFooter>
@@ -139,7 +151,12 @@ export default function MeetActions({
             </button>
             <button
               type="button"
-              onClick={handleDelete}
+              onClick={() => 
+                handleDelete({
+                  deleteMeet: deleteOption === "meet" || deleteOption === "both",
+                  deleteSwims: deleteOption === "swims" || deleteOption === "both",
+                })
+              }
               disabled={loading}
               className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-red-700 disabled:opacity-50"
             >
@@ -148,10 +165,32 @@ export default function MeetActions({
           </ModalFooter>
         }
       >
-        <p className="text-sm text-foreground-secondary text-foreground-secondary">
-          Delete <span className="font-medium">{meetName}</span>? Imported swims are kept but
-          will no longer be linked to this meet.
-        </p>
+   <p className="text-sm text-foreground-secondary text-foreground-secondary">
+            This cannot be undone.
+          </p>
+        {hasSwims ? (
+          <div className="space-y-2">
+            {[
+              { value: "meet", label: `Delete meet`, desc: "Keeps swims, disconnects from meet" },
+              { value: "swims", label: "Delete swims", desc: "Deletes associated swims, keeps meet" },
+              { value: "both", label: "Delete both", desc: "Deletes meet and associated swims" },
+            ].map((opt) => (
+              <label key={opt.value} className="flex items-center gap-3 p-3 border border-border-secondary rounded-lg cursor-pointer hover:bg-fill-secondary dark:border-border-secondary">
+                <input
+                  type="radio"
+                  name="deleteOption"
+                  checked={deleteOption === opt.value}
+                  onChange={() => setDeleteOption(opt.value as any)}
+                  className="accent-red-600"
+                />
+                <div>
+                  <div className="text-sm font-medium">{opt.label}</div>
+                  <div className="text-xs text-foreground-tertiary">{opt.desc}</div>
+                </div>
+              </label>
+            ))}
+          </div>
+        ) : null}
         {error && <p className="text-sm text-error dark:text-error">{error}</p>}
       </Modal>
     </>
