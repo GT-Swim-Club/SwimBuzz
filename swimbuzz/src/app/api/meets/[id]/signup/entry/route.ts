@@ -216,7 +216,6 @@ export async function DELETE(
     athleteId = target.athleteId
 
     const window = signupWithdrawStatus({
-      enabled: form.enabled,
       openAt: form.openAt,
       closeAt: form.closeAt,
       withdrawUntil: form.withdrawUntil,

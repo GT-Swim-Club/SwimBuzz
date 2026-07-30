@@ -132,7 +132,7 @@ model MeetSignupForm {
   id              String            @id @default(cuid())
   meetId          String            @unique
   meet            Meet              @relation(fields: [meetId], references: [id], onDelete: Cascade)
-  enabled         Boolean           @default(false)
+  // enabled         Boolean           @default(false)
   instructions    String            @default("")
   allowedEvents   String[]          @default([])
   minEvents       Int?

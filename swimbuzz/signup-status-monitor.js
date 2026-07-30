@@ -16,14 +16,7 @@ let isChecking = false
  * Check if a signup window is currently open.
  * Mirrors the logic from signupWindowStatus in src/lib/meet-signup.ts
  */
-function isSignupWindowOpen(enabled, openAt, closeAt, now = new Date()) {
-  if (!enabled) {
-    // Window is open if within the time boundaries, even if disabled
-    if (openAt && now >= openAt && (!closeAt || now <= closeAt)) {
-      return true
-    }
-    return false
-  }
+function isSignupWindowOpen(openAt, closeAt, now = new Date()) {
   if (openAt && now < openAt) {
     return false
   }
@@ -163,7 +156,6 @@ async function checkSignupStatus() {
         name: true,
         signupForm: {
           select: {
-            enabled: true,
             openAt: true,
             closeAt: true,
           },
@@ -178,7 +170,6 @@ async function checkSignupStatus() {
 
       // Track if signup is currently open
       const isOpen = isSignupWindowOpen(
-        meet.signupForm.enabled,
         meet.signupForm.openAt,
         meet.signupForm.closeAt,
         now

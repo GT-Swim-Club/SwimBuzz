@@ -71,7 +71,6 @@ export async function GET(
         form: form
       ? {
           id: form.id,
-          enabled: form.enabled,
           instructions: form.instructions,
           minEvents: form.minEvents,
           maxEvents: form.maxEvents,
@@ -130,7 +129,7 @@ export async function PUT(
       id: true,
       name: true,
       eventOrder: true,
-      signupForm: { select: { enabled: true } },
+      signupForm: { select: { id: true  },
     },
   })
   if (!meet) return NextResponse.json({ error: "Not found" }, { status: 404 })
@@ -142,10 +141,7 @@ export async function PUT(
     )
   }
 
-  const wasEnabled = meet.signupForm?.enabled === true
-
   const body = await req.json()
-  const enabled = Boolean(body.enabled)
   const instructions = typeof body.instructions === "string" ? body.instructions.trim() : ""
   const askNotes = body.askNotes !== false
 
@@ -224,7 +220,6 @@ export async function PUT(
   const customQuestions = normalizeMeetSignupQuestions(body.customQuestions)
 
   const data = {
-    enabled,
     instructions,
     // Events always come from meet event order — keep this empty.
     allowedEvents: [] as string[],
@@ -244,22 +239,8 @@ export async function PUT(
     update: data,
   })
 
-  if (enabled && !wasEnabled) {
-    const window = signupWindowStatus({
-      openAt: form.openAt,
-      closeAt: form.closeAt,
-    })
-    if (window.open) {
-      await notifyMeetSignupOpen({
-        meetId: meet.id,
-        meetName: meet.name,
-      })
-    }
-  }
-
   return NextResponse.json({
     id: form.id,
-    enabled: form.enabled,
     instructions: form.instructions,
     minEvents: form.minEvents,
     maxEvents: form.maxEvents,

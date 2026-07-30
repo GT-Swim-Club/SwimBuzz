@@ -254,7 +254,6 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
   const signupForm = meet.signupForm
     ? {
         id: meet.signupForm.id,
-        enabled: meet.signupForm.enabled,
         instructions: meet.signupForm.instructions,
         minEvents: meet.signupForm.minEvents,
         maxEvents: meet.signupForm.maxEvents,
