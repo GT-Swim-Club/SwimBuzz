@@ -63,7 +63,6 @@ export async function PUT(
 
   const form = meet.signupForm
   const window = signupWindowStatus({
-    enabled: form.enabled,
     openAt: form.openAt,
     closeAt: form.closeAt,
   })

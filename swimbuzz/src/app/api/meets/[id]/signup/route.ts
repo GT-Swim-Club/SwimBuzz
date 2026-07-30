@@ -83,7 +83,6 @@ export async function GET(
           withdrawUntil: form.withdrawUntil?.toISOString() ?? null,
           eventOptions: resolveSignupEventOptions(meet.eventOrder),
           window: signupWindowStatus({
-            enabled: form.enabled,
             openAt: form.openAt,
             closeAt: form.closeAt,
           }),
@@ -247,7 +246,6 @@ export async function PUT(
 
   if (enabled && !wasEnabled) {
     const window = signupWindowStatus({
-      enabled: form.enabled,
       openAt: form.openAt,
       closeAt: form.closeAt,
     })
