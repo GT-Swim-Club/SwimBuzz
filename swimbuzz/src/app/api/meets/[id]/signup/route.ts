@@ -129,7 +129,7 @@ export async function PUT(
       id: true,
       name: true,
       eventOrder: true,
-      signupForm: { select: { id: true  },
+      signupForm: { select: { id: true } },
     },
   })
   if (!meet) return NextResponse.json({ error: "Not found" }, { status: 404 })
