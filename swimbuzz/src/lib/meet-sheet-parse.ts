@@ -42,14 +42,22 @@ async function callSheetParser(
   let lastResult: { sheetType: "psych" | "heat" | "entries"; course: string } | null = null
   
   try {
-    const result = await parseMeetSheetPdf(userId, bytes, { sheetType, team: teamCode })
+    const result = await parseMeetSheetPdf<{
+      sheetType: "psych" | "heat" | "entries";
+      course: string;
+      entries: ParsedSheetEntry[];
+    }>(userId, bytes, { sheetType, team: teamCode })
     lastResult = { sheetType: result.sheetType, course: result.course }
     if (result.entries && result.entries.length > 0) {
       allEntries.push(...result.entries)
     }
   } catch (err) {
     // If team code parsing fails, try without team filter
-    const result = await parseMeetSheetPdf(userId, bytes, { sheetType, team: undefined })
+    const result = await parseMeetSheetPdf<{
+      sheetType: "psych" | "heat" | "entries";
+      course: string;
+      entries: ParsedSheetEntry[];
+    }>(userId, bytes, { sheetType, team: undefined })
     lastResult = { sheetType: result.sheetType, course: result.course }
     allEntries.push(...(result.entries ?? []))
   }
