@@ -29,6 +29,10 @@ export type RosterImportInput = {
   gender: Gender
   email?: string
   nicknames?: string[]
+  gtid?: string | null
+  dob?: Date | null
+  year?: string | null
+  swimCloudId?: number
 }
 
 export type RosterImportContext = {

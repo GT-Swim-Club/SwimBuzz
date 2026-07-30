@@ -57,7 +57,7 @@ async function callSheetParser(
       sheetType: "psych" | "heat" | "entries";
       course: string;
       entries: ParsedSheetEntry[];
-    }>(userId, bytes, { sheetType, team: undefined })
+    }>(userId, bytes, { sheetType, team: "" })
     lastResult = { sheetType: result.sheetType, course: result.course }
     allEntries.push(...(result.entries ?? []))
   }
