@@ -17,7 +17,7 @@ export const maxDuration = 30
 
 async function requireStaff() {
   const session = await getServerSession(authOptions)
-  if (!session || !session.user.role === "COACH") {
+  if (!session || session.user.role !== "COACH") {
     return null
   }
   return session
