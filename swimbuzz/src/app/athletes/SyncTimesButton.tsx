@@ -190,7 +190,7 @@ export default function SyncTimesButton() {
         onClick={() => requireScraper(() => setOpen(true))}
         className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border-secondary rounded-lg hover:border-border hover:bg-fill-tertiary bg-fill-secondary dark:hover:bg-fill-tertiary dark:bg-background transition-colors"
       >
-        <Image src="/swimcloud.webp" alt="" width={28} height={28} className="shrink-0" />
+        <Image src="/swimcloud.webp" alt="" width={28} height={28} className="shrink-0" style={{ width: "auto" }} />
         Import Times
       </button>
 

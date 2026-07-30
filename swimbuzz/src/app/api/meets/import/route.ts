@@ -36,12 +36,13 @@ export const runtime = "nodejs"
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
-  if (!session || !["COACH", "EXEC"].includes(session.user.role)) {
+  if (!session || !session.user.role === "COACH") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
   const formData = await req.formData()
   const file = formData.get("file")
+  const pdfUrl = String(formData.get("pdfUrl") ?? "").trim() || null
   const courseDefault = String(formData.get("course") ?? "SCY").trim().toUpperCase()
   const team = String(formData.get("team") ?? "").trim() || null
   const seasonRaw = formData.get("season") ?? formData.get("year")
@@ -49,17 +50,42 @@ export async function POST(req: Request) {
   const nameMappings = normalizeNameMappings(parseJsonField(formData.get("nameMappings")))
   const rejectedNames = normalizeRejectedNames(parseJsonField(formData.get("rejectedNames")))
 
-  if (!isUpload(file)) {
-    return NextResponse.json({ error: "PDF file is required" }, { status: 400 })
+  if (!isUpload(file) && !pdfUrl) {
+    return NextResponse.json({ error: "PDF file or URL is required" }, { status: 400 })
   }
 
-  const fileName =
-    file instanceof File && file.name ? file.name : "meet-results.pdf"
-  const fileType =
-    (file instanceof File && file.type) || "application/pdf"
+  let fileName = "meet-results.pdf"
+  let fileType = "application/pdf"
+  let fileBytes: ArrayBuffer
 
-  if (!fileName.toLowerCase().endsWith(".pdf") && fileType !== "application/pdf") {
-    return NextResponse.json({ error: "File must be a PDF" }, { status: 400 })
+  if (pdfUrl) {
+    // Handle URL-based PDF
+    try {
+      const response = await fetch(pdfUrl)
+      if (!response.ok) {
+        return NextResponse.json({ error: "Failed to fetch PDF from URL" }, { status: 400 })
+      }
+      fileBytes = await response.arrayBuffer()
+      // Extract filename from URL if possible
+      const urlPath = new URL(pdfUrl).pathname
+      const urlFileName = urlPath.split("/").pop()
+      if (urlFileName && urlFileName.toLowerCase().endsWith(".pdf")) {
+        fileName = urlFileName
+      }
+    } catch (err) {
+      return NextResponse.json({ error: "Invalid PDF URL" }, { status: 400 })
+    }
+  } else if (isUpload(file)) {
+    // Handle file upload
+    fileName = file instanceof File && file.name ? file.name : "meet-results.pdf"
+    fileType = (file instanceof File && file.type) || "application/pdf"
+
+    if (!fileName.toLowerCase().endsWith(".pdf") && fileType !== "application/pdf") {
+      return NextResponse.json({ error: "File must be a PDF" }, { status: 400 })
+    }
+    fileBytes = await file.arrayBuffer()
+  } else {
+    return NextResponse.json({ error: "PDF file or URL is required" }, { status: 400 })
   }
   const meet = meetId
     ? await prisma.meet.findUnique({ where: { id: meetId } })
@@ -73,8 +99,6 @@ export async function POST(req: Request) {
   if (!team) {
     return NextResponse.json({ error: "Team code is required" }, { status: 400 })
   }
-
-  const fileBytes = await file.arrayBuffer()
 
   let parsed: {
     course?: string
@@ -120,14 +144,22 @@ export async function POST(req: Request) {
       if (meet.resultsUrl && isStoredMeetFileUrl(meet.resultsUrl)) {
         await deleteStoredMeetFile(meet.resultsUrl)
       }
-      const { url } = await uploadMeetFile(
-        Buffer.from(fileBytes),
-        fileName,
-        fileType
-      )
+      let resultsUrl: string
+      if (pdfUrl) {
+        // If imported via URL, save the URL directly
+        resultsUrl = pdfUrl
+      } else {
+        // If uploaded as file, store it
+        const { url } = await uploadMeetFile(
+          Buffer.from(fileBytes),
+          fileName,
+          fileType
+        )
+        resultsUrl = url
+      }
       await prisma.meet.update({
         where: { id: meet.id },
-        data: { resultsUrl: url },
+        data: { resultsUrl },
       })
     } catch (err) {
       console.error("Failed to save results PDF as meet resource:", err)

@@ -1447,10 +1447,10 @@ function entryKey(entry: SheetEntry): string {
     if (!entry.relaySwimmers?.length) {
       return `relay_seed|${relayTeamSeedKey(entry)}`
     }
-    const relay = entry.relayLetter ?? ""
+    const relay = normalizeRelayLetter(entry.relayLetter) ?? "A"
     const round = entry.relayRound ?? ""
     const gender = entry.gender ?? ""
-    return `${entry.athleteId}|${normalizeEventName(entry.event)}|relay_team|${relay}|${round}|${gender}`
+    return `${normalizeEventName(entry.event)}|relay_team|${relay}|${round}|${gender}`
   }
   if (entry.isRelayLeadoff) {
     return leadoffResultKey(
@@ -1578,7 +1578,7 @@ function relayEntriesOverlap(a: SheetEntry, b: SheetEntry): boolean {
 }
 
 function isRelaySeedOnly(entry: SheetEntry): boolean {
-  return entry.entryType === "relay_team" && !entry.relaySwimmers?.length
+  return entry.entryType === "relay_team" && !entry.relaySwimmers?.length && !hasRelayResultData(entry)
 }
 
 function fuseSheetRelaySeedRows(byKey: Map<string, SheetEntry>): void {
@@ -1603,6 +1603,11 @@ function fuseSheetRelaySeedRows(byKey: Map<string, SheetEntry>): void {
     for (let j = i + 1; j < remainingSeeds.length; j++) {
       const [keyB, b] = remainingSeeds[j]
       if (!byKey.has(keyB)) continue
+      // Never merge two seed rows that have distinct relay letters — they are
+      // different relay teams (e.g. B and C) that both happen to be NT.
+      const letterA = normalizeRelayLetter(a.relayLetter)
+      const letterB = normalizeRelayLetter(b.relayLetter)
+      if (letterA && letterB && letterA !== letterB) continue
       if (!relayEntriesOverlap(a, b)) continue
       byKey.set(keyA, mergeEntries(a, b))
       byKey.delete(keyB)

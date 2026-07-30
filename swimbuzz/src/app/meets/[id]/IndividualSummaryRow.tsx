@@ -8,6 +8,7 @@ import IndividualSplitsModal from "./IndividualSplitsModal"
 
 export default function IndividualSummaryRow({
   athleteName,
+  athleteId,
   label,
   details,
   timeDisplay,
@@ -19,7 +20,8 @@ export default function IndividualSummaryRow({
   swimInfo,
 }: {
   athleteName?: string
-  label: string
+  athleteId?: string
+  label: ReactNode,
   details?: string
   timeDisplay: ReactNode
   detailTitle: string
@@ -61,6 +63,7 @@ export default function IndividualSummaryRow({
       {detailOpen ? (
         <IndividualSplitsModal
           athleteName={athleteName}
+          athleteId={athleteId}
           title={detailTitle}
           timeDisplay={timeDisplay}
           splits={splits}

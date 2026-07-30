@@ -135,8 +135,10 @@ export function parseEventParts(event: string): { distance: number; stroke: stri
 }
 
 export function compareSwimEvents(a: string, b: string): number {
-  const pa = parseEventParts(a)
-  const pb = parseEventParts(b)
+  const sa = a.replace(/^Mixed\s+/i, "");
+  const sb = b.replace(/^Mixed\s+/i, "");
+  const pa = parseEventParts(sa)
+  const pb = parseEventParts(sb)
 
   const strokeCmp =
     (STROKE_ORDER[pa.stroke] ?? 99) - (STROKE_ORDER[pb.stroke] ?? 99)

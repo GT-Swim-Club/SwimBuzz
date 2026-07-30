@@ -38,17 +38,17 @@ function effectiveTeamCode(
   data: Record<string, unknown>
 ): string {
   if ("teamCode" in data) {
-    const next = String(data.teamCode ?? "").trim().toUpperCase()
-    return next || "GTSC"
+    const code = String(data.teamCode ?? "").trim()
+    return code || "GTSC"
   }
-  return (existing.teamCode ?? "GTSC").trim().toUpperCase() || "GTSC"
+  return existing.teamCode?.trim() || "GTSC"
 }
 
 export async function attachSheetSummaries(
   userId: string,
   existing: {
     season: string
-    teamCode: string | null
+    teamCode?: string | null
     psychSheetUrl: string | null
     heatSheetUrl: string | null
     resultsUrl: string | null
@@ -62,7 +62,7 @@ export async function attachSheetSummaries(
   const teamCode = effectiveTeamCode(existing, data)
   const teamChanged =
     "teamCode" in data &&
-    teamCode !== ((existing.teamCode ?? "GTSC").trim().toUpperCase() || "GTSC")
+    teamCode !== effectiveTeamCode(existing, {})
 
   const needsRoster =
     teamChanged ||

@@ -6,6 +6,7 @@ import { currentSeason, seasonOptions, upcomingSeason } from "@/lib/season"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import DontReloadNotice from "@/components/DontReloadNotice"
 import Modal, { ModalFooter } from "@/components/Modal"
+import { FileDropzone } from "@/components/FileDropzone"
 
 export type MeetFormState = {
   name: string
@@ -29,7 +30,7 @@ export const emptyMeetForm: MeetFormState = {
   startDate: "",
   endDate: "",
   course: "SCY",
-  season: currentSeason(),
+  season: "",
   school: "",
   iconUrl: "",
   bannerUrl: "",
@@ -69,9 +70,17 @@ export default function MeetFields({
         if (!res.ok) return []
         return res.json().catch(() => [])
       })
-      .then((data) => setFetchedSeasons(Array.isArray(data) ? data : []))
+      .then((data) => {
+        setFetchedSeasons(Array.isArray(data) ? data : [])
+      })
       .catch(() => setFetchedSeasons([]))
   }, [])
+
+  useEffect(() => {
+    if (fetchedSeasons.length > 0 && !form.season) {
+      set("season", fetchedSeasons[0])
+    }
+  }, [fetchedSeasons, form.season])
 
   const options = Array.from(new Set([...fetchedSeasons]))
 
@@ -225,15 +234,16 @@ export default function MeetFields({
           Meet icon
         </label>
         <div className="space-y-2">
-          <input
-            type="file"
+          <FileDropzone
+            onFilesSelected={(files) => handleIconUpload({ target: { files: files as any } } as any)}
             accept="image/png,image/jpeg,image/jpg,image/gif,image/webp,image/svg+xml"
-            onChange={handleIconUpload}
             disabled={iconUploading}
-            className="block w-full text-xs text-foreground-secondary file:mr-3 file:rounded-lg file:border file:border-border file:bg-primary file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-primary-text hover:file:bg-primary-hover"
-          />
+            className="block w-full rounded-lg border border-border bg-fill-secondary p-4 text-center text-xs text-foreground hover:bg-fill-primary"
+          >
+            {iconUploading ? "Uploading..." : "Click or drag and drop to upload icon"}
+          </FileDropzone>
           {iconUploading && (
-            <DontReloadNotice label="Uploading… Don't reload the page." />
+            <DontReloadNotice label="Uploading…" />
           )}
           {form.iconUrl && !iconUploading && (
             <div className="flex items-center gap-3">
@@ -264,15 +274,16 @@ export default function MeetFields({
           Meet banner
         </label>
         <div className="space-y-2">
-          <input
-            type="file"
+          <FileDropzone
+            onFilesSelected={(files) => handleBannerUpload({ target: { files: files as any } } as any)}
             accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
-            onChange={handleBannerUpload}
             disabled={bannerUploading}
-            className="block w-full text-xs text-foreground-secondary file:mr-3 file:rounded-lg file:border file:border-border file:bg-primary file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-primary-text hover:file:bg-primary-hover"
-          />
+            className="block w-full rounded-lg border border-border bg-fill-secondary p-4 text-center text-xs text-foreground hover:bg-fill-primary"
+          >
+            {bannerUploading ? "Uploading..." : "Click or drag and drop to upload banner"}
+          </FileDropzone>
           {bannerUploading && (
-            <DontReloadNotice label="Uploading… Don't reload the page." />
+            <DontReloadNotice label="Uploading…" />
           )}
           {form.bannerUrl && !bannerUploading && (
             <div className="flex items-center gap-3">
@@ -393,7 +404,7 @@ export default function MeetFields({
                 {s}
               </option>
             ))}
-            <option value="ADD_NEW">+ Add new season...</option>
+            <option value="ADD_NEW">+ New Season</option>
           </select>
         </div>
       </div>
@@ -405,6 +416,7 @@ export default function MeetFields({
             setAddSeasonError(null)
         }}
         title="Add new season"
+        maxWidth="sm"
         onSubmit={handleAddSeason}
         footer={
           <ModalFooter>

@@ -6,9 +6,11 @@ export type ParsedRosterCsvRow = {
   rowNumber: number
   firstName: string
   lastName: string
+  gtid?: string
+  dob?: Date
+  year?: string
   email?: string
   gender: "M" | "F"
-  swimCloudId?: number
   nicknames: string[]
 }
 
@@ -26,7 +28,9 @@ function resolveHeaderField(header: string): string | undefined {
   const h = normalizeHeader(header)
   const compact = h.replace(/\s/g, "")
 
-  if (compact.includes("swimcloud") || h.includes("swimmer id")) return "swimCloudId"
+  if (h.includes("gtid") || h.includes("student id")) return "gtid"
+  if (h.includes("dob") || h.includes("date of birth") || h.includes("birthday")) return "dob"
+  if (h.includes("academic year") || h.includes("class year") || (h.includes("year") && !h.includes("season"))) return "year"
   if (h.includes("nickname") || h.includes("alternate name")) return "nicknames"
   if (h.includes("first name") || compact === "firstname" || h === "first") {
     return "firstName"
@@ -243,13 +247,10 @@ export function parseRosterCsv(text: string): RosterCsvParseResult {
 
     // Only GT emails are imported; other domains are ignored for that row.
     const email = normalizeGatechEmail(cell(cells, headers, "email")) ?? undefined
-
-    const swimCloudRaw = cell(cells, headers, "swimCloudId")
-    const swimCloudId = swimCloudRaw ? parseSwimCloudId(swimCloudRaw) ?? undefined : undefined
-    if (swimCloudRaw && swimCloudId == null) {
-      errors.push({ row: rowNumber, message: SWIMCLOUD_ID_ERROR })
-      continue
-    }
+    const gtid = cell(cells, headers, "gtid") || undefined
+    const dobRaw = cell(cells, headers, "dob")
+    const dob = dobRaw ? new Date(dobRaw) : undefined
+    const year = cell(cells, headers, "year") || undefined
 
     const genderRaw = cell(cells, headers, "gender")
     const gender = parseGender(genderRaw)
@@ -273,7 +274,9 @@ export function parseRosterCsv(text: string): RosterCsvParseResult {
       lastName,
       gender,
       ...(email ? { email } : {}),
-      ...(swimCloudId ? { swimCloudId } : {}),
+      ...(gtid ? { gtid } : {}),
+      ...(dob ? { dob } : {}),
+      ...(year ? { year } : {}),
       nicknames,
     })
   }

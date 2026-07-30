@@ -4,6 +4,15 @@ import { useMemo } from "react"
 import Link from "next/link"
 import AthleteGalleryCard from "./AthleteGalleryCard"
 
+function formatYear(year: string): string {
+  if (year.toLowerCase().includes("phd")) return "PhD"
+  if (year.toLowerCase().includes("master")) return "Masters"
+  const num = parseInt(year)
+  if (isNaN(num)) return year
+  const suffixes = ["th", "st", "nd", "rd"]
+  const v = num % 100
+  return num + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]) + " Year"
+}
 export default function AthletesClientWrapper({
   athletes,
   viewerAthleteId,
@@ -96,6 +105,7 @@ export default function AthletesClientWrapper({
                     {viewerAthlete.firstName}
                     {" "}
                     {viewerAthlete.lastName}
+                    {viewerAthlete.year && <span className="text-foreground-secondary text-lg font-normal ml-2">({formatYear(viewerAthlete.year)})</span>}
                     {viewerAthlete.nicknames.length > 0 && (
                       <span className="ml-2 font-normal text-foreground-secondary text-sm">
                         ({viewerAthlete.nicknames.join(", ")})
@@ -104,6 +114,7 @@ export default function AthletesClientWrapper({
                   </h3>
                   <div className="text-sm text-foreground-secondary space-y-0.5">
                     {viewerAthlete.user?.email && <p>{viewerAthlete.user.email}</p>}
+                    {viewerAthlete.year && <p>{formatYear(viewerAthlete.year)}</p>}
                     {viewerAthlete.swimCloudId && <p>SwimCloud: {viewerAthlete.swimCloudId}</p>}
                   </div>
                 </div>
@@ -148,6 +159,7 @@ export default function AthletesClientWrapper({
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm text-foreground">
                           {a.lastName}, {a.firstName}
+                          {a.year && <span className="text-foreground-secondary text-xs ml-1">({formatYear(a.year)})</span>}
                           {a.nicknames.length > 0 && (
                             <span className="font-normal text-foreground-secondary">
                               {" "}({a.nicknames.join(", ")})
@@ -196,6 +208,7 @@ export default function AthletesClientWrapper({
                     {viewerAthlete.firstName}
                     {" "}
                     {viewerAthlete.lastName}
+                    {viewerAthlete.year && <span className="text-foreground-secondary text-lg font-normal ml-2">({formatYear(viewerAthlete.year)})</span>}
                     {viewerAthlete.nicknames.length > 0 && (
                       <span className="ml-2 font-normal text-foreground-secondary text-sm">
                         ({viewerAthlete.nicknames.join(", ")})
@@ -204,6 +217,7 @@ export default function AthletesClientWrapper({
                   </h3>
                   <div className="text-sm text-foreground-secondary space-y-0.5">
                     {viewerAthlete.user?.email && <p>{viewerAthlete.user.email}</p>}
+                    {viewerAthlete.year && <p>{formatYear(viewerAthlete.year)}</p>}
                     {viewerAthlete.swimCloudId && <p>SwimCloud: {viewerAthlete.swimCloudId}</p>}
                   </div>
                 </div>
@@ -230,7 +244,7 @@ export default function AthletesClientWrapper({
               }
               return (
                   <div key={a.id} className="h-full col-span-1">
-                      <AthleteGalleryCard athlete={a} showGender={showGender} isYou={false} />
+                          <AthleteGalleryCard athlete={a} showGender={showGender} isYou={false} />
                   </div>
               )
             })}

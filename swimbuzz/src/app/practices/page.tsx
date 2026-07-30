@@ -286,7 +286,7 @@ export default async function PracticesPage({
             {(practice.tags as string[]).map((tag) => (
               <span
                 key={tag}
-                className="rounded-full bg-[#c9b78a] px-2 py-0.5 text-[10px] font-medium text-[#4a3f2a]"
+                className="text-xs px-2 py-0.5 rounded-full bg-primary/80 dark:bg-primary border-primary text-primary-text"
               >
                 {tag}
               </span>
@@ -321,13 +321,13 @@ export default async function PracticesPage({
     if (practices.length > 0) {
       const [first, ...rest] = practices
       return (
-        <div className="flex min-h-0 flex-1 flex-col gap-2">
+        <div className="flex min-h-0 flex-1 flex-col gap-2 h-full">
           <PracticeCardShell
             dayKey={key}
             href={practiceHref(first.id)}
             todayClassName={todayCardClass}
             className={
-              "flex flex-col rounded-lg border border-border-secondary bg-[#fcf8e8] dark:bg-[#3d3320] text-left transition-colors hover:bg-[#f2e6b6] dark:hover:bg-[#52442b] " +
+              "flex flex-col flex-1 rounded-lg border border-border-secondary bg-[#fcf8e8] dark:bg-[#3d3320] text-left transition-colors hover:bg-[#f2e6b6] dark:hover:bg-[#52442b] " +
               (tall ? "px-3 py-2.5" : "px-2 py-1.5")
             }
           >
@@ -348,7 +348,7 @@ export default async function PracticesPage({
               href={practiceHref(practice.id)}
               todayClassName={todayCardClass}
               className={
-                "flex flex-col rounded-lg border border-border-secondary bg-[#fcf8e8] dark:bg-[#3d3320] text-left transition-colors hover:bg-[#f2e6b6] dark:hover:bg-[#52442b] " +
+                "flex flex-col flex-1 rounded-lg border border-border-secondary bg-[#fcf8e8] dark:bg-[#3d3320] text-left transition-colors hover:bg-[#f2e6b6] dark:hover:bg-[#52442b] " +
                 (tall ? "px-3 py-2.5" : "px-2 py-1.5")
               }
             >
@@ -727,7 +727,7 @@ export default async function PracticesPage({
                     {tags.map((tag) => (
                       <span
                         key={tag}
-                        className="rounded-full bg-[#c9b78a] px-2 py-0.5 text-xs font-medium text-[#4a3f2a]"
+                        className="text-xs px-2 py-0.5 rounded-full bg-primary/80 dark:bg-primary border-primary text-primary-text"
                       >
                         {tag}
                       </span>

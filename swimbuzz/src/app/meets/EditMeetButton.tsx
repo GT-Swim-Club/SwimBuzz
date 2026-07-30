@@ -87,7 +87,7 @@ export default function EditMeetButton({
             </button>
             <button
               type="submit"
-              disabled={loading || !form.name.trim() || !form.startDate}
+              disabled={loading || !form.name.trim() || !form.startDate || !form.course || !form.season}
               className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
               {loading ? "Saving…" : "Save changes"}

@@ -13,10 +13,6 @@ import {
   isAthleteViewEnabled,
 } from "@/lib/athlete-view-server"
 import { prisma } from "@/lib/prisma"
-import {
-  notificationRetentionCutoff,
-  purgeExpiredNotifications,
-} from "@/lib/notifications"
 
 const navIconProps = {
   xmlns: "http://www.w3.org/2000/svg",
@@ -112,15 +108,10 @@ export default async function Nav() {
       })
     : null
 
-  if (session) {
-    await purgeExpiredNotifications(session.user.id)
-  }
-
   const notifications = session
     ? await prisma.notification.findMany({
         where: {
           userId: session.user.id,
-          createdAt: { gte: notificationRetentionCutoff() },
         },
         orderBy: { createdAt: "desc" },
         take: 30,

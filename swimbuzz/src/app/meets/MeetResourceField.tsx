@@ -2,14 +2,15 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { isStoredMeetFileUrl } from "@/lib/meet-files"
-import DontReloadNotice from "@/components/DontReloadNotice"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
+import { FileDropzone } from "@/components/FileDropzone"
 
 const inputClass =
   "w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"
 
 function initialMode(value: string): "url" | "file" {
-  return value && isStoredMeetFileUrl(value) ? "file" : "url"
+  if (value && !isStoredMeetFileUrl(value)) return "url"
+  return "file"
 }
 
 export default function MeetResourceField({
@@ -155,29 +156,29 @@ export default function MeetResourceField({
         <div className="flex gap-1">
           <button
             type="button"
-            onClick={() => void switchToUrl()}
-            disabled={uploading}
-            className={
-              "text-xs px-2 py-0.5 rounded-md border border-border transition-colors " +
-              (mode === "url"
-                ? "bg-primary text-primary-text border-primary"
-                : "border-border text-foreground-secondary")
-            }
-          >
-            URL
-          </button>
-          <button
-            type="button"
             onClick={switchToFile}
             disabled={uploading}
             className={
               "text-xs px-2 py-0.5 rounded-md border border-border transition-colors " +
               (mode === "file"
                 ? "bg-primary text-primary-text border-primary"
-                : "border-border text-foreground-secondary")
+                : "border-border text-foreground-secondary hover:bg-fill-secondary")
             }
           >
             File
+          </button>
+          <button
+            type="button"
+            onClick={() => void switchToUrl()}
+            disabled={uploading}
+            className={
+              "text-xs px-2 py-0.5 rounded-md border border-border transition-colors " +
+              (mode === "url"
+                ? "bg-primary text-primary-text border-primary"
+                : "border-border text-foreground-secondary hover:bg-fill-secondary")
+            }
+          >
+            URL
           </button>
         </div>
       </div>
@@ -192,29 +193,42 @@ export default function MeetResourceField({
         />
       ) : (
         <div key="file" className="space-y-2">
-          <input
-            type="file"
+          <FileDropzone
+            onFilesSelected={(files) => handleFileSelect({ target: { files: files as any } } as any)}
             accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt"
             disabled={uploading}
-            onChange={handleFileSelect}
-            className="block w-full text-xs text-foreground-secondary file:mr-3 file:rounded-lg file:border file:border-border file:bg-background-elevated file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-foreground hover:file:dark:bg-background bg-fill-secondary"
-          />
-          {uploading && (
-            <DontReloadNotice label="Uploading… Don't reload the page." />
-          )}
-          {fileName && !uploading && (
-            <p className="text-xs text-foreground-secondary text-foreground-secondary truncate">
-              Uploaded: {fileName}
-            </p>
-          )}
+            className="block w-full rounded-lg border border-border border-dashed p-4 text-center text-xs text-foreground cursor-pointer hover:bg-fill-secondary"
+          >
+            {uploading ? "Uploading..." : "Click or drag and drop to upload file"}
+          </FileDropzone>
           {fileValue && !uploading && (
-            <button
-              type="button"
-              onClick={() => void handleRemoveFile()}
-              className="text-xs text-foreground-tertiary hover:text-red-500"
-            >
-              Remove file
-            </button>
+            <div className="flex items-center gap-2">
+              {fileName && (
+                <p className="text-xs text-foreground-secondary text-foreground-secondary truncate">
+                  Uploaded: {fileName}
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={() => void handleRemoveFile()}
+                className="text-foreground-tertiary hover:text-red-500"
+                aria-label="Remove file"
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
           )}
         </div>
       )}

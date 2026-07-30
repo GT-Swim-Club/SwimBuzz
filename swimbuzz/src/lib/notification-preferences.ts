@@ -6,13 +6,19 @@ export type NotificationPreferenceKey =
   | "practiceComments"
   | "profileChanges"
 
-export type NotificationPreferences = Record<NotificationPreferenceKey, boolean>
+export type NotificationPreferences = Record<NotificationPreferenceKey, boolean> & {
+  meetSignupNotificationTimes?: number[]
+}
+
+// Keys used to iterate over notification preferences
+export type AllPreferenceKey = NotificationPreferenceKey | "meetSignupNotificationTimes"
 
 export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
   practicePublished: true,
   meetSignupOpen: true,
   practiceComments: true,
   profileChanges: true,
+  meetSignupNotificationTimes: [0],
 }
 
 export const NOTIFICATION_PREFERENCE_META: {
@@ -30,7 +36,7 @@ export const NOTIFICATION_PREFERENCE_META: {
   {
     key: "meetSignupOpen",
     label: "Meet signups",
-    description: "When meet event signup opens",
+    description: "When meet signups open",
   },
   {
     key: "practiceComments",
@@ -46,7 +52,10 @@ export const NOTIFICATION_PREFERENCE_META: {
   },
 ]
 
-const PREFERENCE_KEYS = NOTIFICATION_PREFERENCE_META.map((m) => m.key)
+const ALL_PREFERENCE_KEYS: AllPreferenceKey[] = [
+  ...NOTIFICATION_PREFERENCE_META.map((m) => m.key),
+  "meetSignupNotificationTimes",
+]
 
 export function preferenceKeyForType(
   type: NotificationType
@@ -73,11 +82,29 @@ export function parseNotificationPreferences(
   if (raw == null || typeof raw !== "object" || Array.isArray(raw)) return prefs
 
   const obj = raw as Record<string, unknown>
-  for (const key of PREFERENCE_KEYS) {
-    if (typeof obj[key] === "boolean") {
-      prefs[key] = obj[key]
+  for (const key of ALL_PREFERENCE_KEYS) {
+    if (key === "meetSignupNotificationTimes") {
+      if (Array.isArray(obj.meetSignupNotificationTimes)) {
+        prefs.meetSignupNotificationTimes = obj.meetSignupNotificationTimes.filter(
+          (m): m is number => typeof m === "number" && m >= 0 && m <= 60
+        )
+      } else if ("meetSignupOpen" in obj || "meetSignupOpenAdvanceEnabled" in obj) {
+        // Backward compatibility migration
+        const times = []
+        if (obj.meetSignupOpen === true) times.push(0)
+        if (
+          obj.meetSignupOpenAdvanceEnabled === true &&
+          typeof obj.meetSignupOpenAdvanceMinutes === "number"
+        ) {
+          times.push(Math.max(0, Math.min(60, obj.meetSignupOpenAdvanceMinutes)))
+        }
+        prefs.meetSignupNotificationTimes = times
+      }
+    } else if (typeof obj[key] === "boolean") {
+      prefs[key as NotificationPreferenceKey] = obj[key] as boolean
     }
   }
+
   return prefs
 }
 
@@ -86,9 +113,15 @@ export function mergeNotificationPreferences(
   patch: Partial<NotificationPreferences>
 ): NotificationPreferences {
   const prefs = parseNotificationPreferences(current)
-  for (const key of PREFERENCE_KEYS) {
-    if (typeof patch[key] === "boolean") {
-      prefs[key] = patch[key]!
+  for (const key of ALL_PREFERENCE_KEYS) {
+    if (key === "meetSignupNotificationTimes") {
+      if (Array.isArray(patch.meetSignupNotificationTimes)) {
+        prefs.meetSignupNotificationTimes = patch.meetSignupNotificationTimes.filter(
+          (m): m is number => typeof m === "number" && m >= 0 && m <= 60
+        )
+      }
+    } else if (key in patch && typeof patch[key as NotificationPreferenceKey] === "boolean") {
+      prefs[key as NotificationPreferenceKey] = patch[key as NotificationPreferenceKey]!
     }
   }
   return prefs

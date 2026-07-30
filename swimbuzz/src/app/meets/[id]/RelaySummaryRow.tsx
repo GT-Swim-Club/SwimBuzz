@@ -21,7 +21,7 @@ export default function RelaySummaryRow({
   swimInfo,
 }: {
   entry: SheetEntry
-  label: string
+  label: ReactNode
   details?: string
   coachNote?: string
   timeDisplay: ReactNode

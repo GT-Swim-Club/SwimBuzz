@@ -6,6 +6,8 @@ import { formatSwimDate } from "@/lib/utils"
 import { currentSeason, parseSeason } from "@/lib/season"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { useScraperUi } from "@/components/ScraperUiProvider"
+import { useImportTask } from "@/components/ImportTaskProvider"
+import { FileDropzone } from "@/components/FileDropzone"
 
 type ImportSource = "pdf" | "swimphone"
 
@@ -46,7 +48,6 @@ export default function ImportMeetButton({
 } = {}) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const fileRef = useRef<HTMLInputElement>(null)
 
   const season =
     seasonProp ??
@@ -54,16 +55,18 @@ export default function ImportMeetButton({
     currentSeason()
 
   const { requireScraper } = useScraperUi()
+  const { startTask } = useImportTask()
 
   const [open, setOpen] = useState(false)
   const [resultOpen, setResultOpen] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const [source, setSource] = useState<ImportSource>("swimphone")
+  const [source, setSource] = useState<ImportSource>("pdf")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [confirmError, setConfirmError] = useState<string | null>(null)
   const [result, setResult] = useState<ImportResult | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [mode, setMode] = useState<"url" | "file">("file")
   const [url, setUrl] = useState("")
   const [team, setTeam] = useState("GTSC")
   const [course, setCourse] = useState("SCY")
@@ -81,7 +84,6 @@ export default function ImportMeetButton({
     setPendingConfirmations([])
     setRosterOptions([])
     setPairSelections({})
-    if (fileRef.current) fileRef.current.value = ""
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -125,7 +127,6 @@ export default function ImportMeetButton({
     showImportResult(data)
     if (source === "pdf") {
       setSelectedFile(null)
-      if (fileRef.current) fileRef.current.value = ""
     }
   }
 
@@ -195,8 +196,12 @@ export default function ImportMeetButton({
       return
     }
 
-    if (source === "pdf" && !selectedFile) {
+    if (source === "pdf" && mode === "file" && !selectedFile) {
       setError("Choose a PDF file first")
+      return
+    }
+    if (source === "pdf" && mode === "url" && !url.trim()) {
+      setError("Enter a PDF URL")
       return
     }
     if (source === "swimphone" && !url.trim()) {
@@ -209,8 +214,13 @@ export default function ImportMeetButton({
     setResult(null)
 
     try {
-      const data =
-        source === "pdf" ? await runPdfImport() : await runSwimphoneImport()
+      let data: ImportResult
+      if (source === "pdf" && mode === "file") {
+        data = await runPdfImport()
+      } else {
+        // Assuming SwimPhone importer handles URLs or we need a new endpoint
+        data = await runSwimphoneImport()
+      }
       handleImportResponse(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Import failed")
@@ -231,7 +241,6 @@ export default function ImportMeetButton({
     }
     if (source === "pdf") {
       setSelectedFile(null)
-      if (fileRef.current) fileRef.current.value = ""
     }
     router.refresh()
   }
@@ -266,7 +275,6 @@ export default function ImportMeetButton({
       showImportResult(data)
       if (source === "pdf") {
         setSelectedFile(null)
-        if (fileRef.current) fileRef.current.value = ""
       }
     } catch (err) {
       setConfirmError(
@@ -338,10 +346,10 @@ export default function ImportMeetButton({
                   setError(null)
                   setResult(null)
                 }}
-                className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+              className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                   source === value
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-foreground-secondary hover:text-foreground"
+                      ? "bg-primary text-white shadow-sm"
+                      : "bg-fill-secondary text-foreground-secondary hover:bg-fill-primary"
                 }`}
               >
                 {label}
@@ -374,50 +382,70 @@ export default function ImportMeetButton({
           </ModalFooter>
         }
       >
-        <div key={source}>
           {source === "pdf" ? (
-            <div>
-              <span className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
-                Results PDF
-              </span>
-              <input
-                ref={fileRef}
-                type="file"
-                accept=".pdf,application/pdf"
-                onChange={handleFileChange}
-                className="sr-only"
-                id="meet-pdf-upload"
-              />
-              <div className="flex items-center gap-3">
-                <label
-                  htmlFor="meet-pdf-upload"
-                  className="cursor-pointer rounded-lg border border-border-secondary border-primary bg-primary px-4 py-2 text-sm font-medium text-primary-text hover:bg-primary-hover"
-                >
-                  Choose PDF
+            <div className="space-y-2">
+              <div className="flex items-center gap-4">
+                <label className="text-xs font-medium text-foreground-secondary">
+                  Results PDF
                 </label>
-                <span className="text-sm text-foreground-secondary text-foreground-secondary truncate">
-                  {selectedFile ? selectedFile.name : "No file selected"}
-                </span>
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setMode("file")}
+                    className={`text-xs px-2 py-1 rounded-md transition-colors ${
+                      mode === "file"
+                      ? "bg-primary text-white shadow-sm"
+                      : "bg-fill-secondary text-foreground-secondary hover:bg-fill-primary"
+                    }`}
+                  >
+                    File
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMode("url")}
+                    className={`text-xs px-2 py-1 rounded-md transition-colors ${
+                      mode === "url"
+                      ? "bg-primary text-white shadow-sm"
+                      : "bg-fill-secondary text-foreground-secondary hover:bg-fill-primary"
+                    }`}
+                  >
+                    URL
+                  </button>
+                </div>
               </div>
+
+              {mode === "file" ? (
+                <FileDropzone
+                  onFilesSelected={(files) => handleFileChange({ target: { files: files as any } } as any)}
+                  accept=".pdf,application/pdf"
+                  disabled={loading}
+                  className="block w-full rounded-lg border border-border-secondary bg-fill-secondary p-4 text-center text-xs text-foreground cursor-pointer hover:bg-fill-primary"
+                >
+                  {selectedFile ? selectedFile.name : "Click or drag and drop to upload PDF"}
+                </FileDropzone>
+              ) : (
+                <input
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://…"
+                  className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background"
+                />
+              )}
             </div>
           ) : (
             <div>
-              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Meet URL <span className="text-red-500">*</span>
               </label>
               <input
                 required
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://www.swimphone.com/meets/meet_menu.cfm?smid=..."
-                className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
+                placeholder="https://…"
+                className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background"
               />
-              <p className="mt-1.5 text-xs text-gray-400 dark:text-zinc-500">
-                Archived meets may be blocked by SwimPhone.
-              </p>
             </div>
           )}
-        </div>
 
         {error && <p className="text-sm text-error dark:text-error">{error}</p>}
 

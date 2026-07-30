@@ -3,12 +3,14 @@
 import type { ReactNode } from "react"
 import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
+import Link from "next/link"
 import type { ResultSplit } from "@/lib/meet-sheet-summary"
 import { formatDisplayTime, formatSeedTimeDelta, formatOrdinal, podiumPlaceClass } from "@/lib/utils"
 import { sanitizeRelaySplitTime } from "@/lib/relay-results"
 
 export default function IndividualSplitsModal({
   athleteName,
+  athleteId,
   title,
   timeDisplay,
   splits,
@@ -17,6 +19,7 @@ export default function IndividualSplitsModal({
   rawTime,
 }: {
   athleteName?: string
+  athleteId?: string
   title: string
   timeDisplay?: ReactNode
   splits: ResultSplit[]
@@ -69,7 +72,17 @@ export default function IndividualSplitsModal({
       >
         <div className="shrink-0 px-6 pt-6 pb-2">
           {athleteName ? (
-            <p className="text-sm font-medium text-foreground dark:text-foreground">{athleteName}</p>
+            athleteId ? (
+              <Link 
+                href={`/athletes/${athleteId}`}
+                className="text-sm font-medium text-foreground dark:text-foreground hover:text-primary transition-colors"
+                onClick={onClose}
+              >
+                {athleteName}
+              </Link>
+            ) : (
+              <p className="text-sm font-medium text-foreground dark:text-foreground">{athleteName}</p>
+            )
           ) : null}
           <h2
             className={`text-lg font-medium text-foreground dark:text-foreground ${
@@ -104,7 +117,7 @@ export default function IndividualSplitsModal({
           ) : null}
           {swimInfo && (
             <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-foreground-secondary">
-              {swimInfo.seedTime && (
+              {swimInfo.seedTime && (swimInfo.time || swimInfo.resultPlace) && (
                 <span className="flex items-center gap-1.5">
                   <span className="text-foreground-tertiary">Seed:</span>
                   {formatDisplayTime(swimInfo.seedTime)}

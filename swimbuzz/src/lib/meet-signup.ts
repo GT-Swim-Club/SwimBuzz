@@ -211,13 +211,11 @@ export function normalizeSignupEntryTime(input: string): string {
 }
 
 export function signupWindowStatus(opts: {
-  enabled: boolean
   openAt: Date | null
   closeAt: Date | null
   now?: Date
 }): { open: boolean; reason: string | null } {
   const now = opts.now ?? new Date()
-  if (!opts.enabled) return { open: false, reason: "Sign-ups are closed for this meet." }
   if (opts.openAt && now < opts.openAt) {
     return { open: false, reason: `Sign-ups open ${opts.openAt.toLocaleString()}.` }
   }
@@ -229,7 +227,6 @@ export function signupWindowStatus(opts: {
 
 /** Drops may stay open after sign-ups close, until withdrawUntil (or closeAt if unset). */
 export function signupWithdrawStatus(opts: {
-  enabled: boolean
   openAt: Date | null
   closeAt: Date | null
   withdrawUntil: Date | null
@@ -237,9 +234,6 @@ export function signupWithdrawStatus(opts: {
 }): { allowed: boolean; reason: string | null; deadline: Date | null } {
   const now = opts.now ?? new Date()
   const deadline = opts.withdrawUntil ?? opts.closeAt
-  if (!opts.enabled) {
-    return { allowed: false, reason: "Sign-ups are closed for this meet.", deadline }
-  }
   if (opts.openAt && now < opts.openAt) {
     return {
       allowed: false,

@@ -6,72 +6,38 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { currentSeason, parseSeason, seasonEndYear } from "@/lib/season"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { useScraperUi } from "@/components/ScraperUiProvider"
+import { useImportTask } from "@/components/ImportTaskProvider"
+import { FileDropzone } from "@/components/FileDropzone"
 
 type ImportSource = "swimcloud" | "csv"
-
-type SwimCloudResult = {
-  created: number
-  updated: number
-  linked?: number
-  unmatched?: number
-  alreadyLinked?: number
-  skippedConflict?: number
-}
-
-type CsvResult = {
-  created: number
-  updated: number
-  parsed: number
-  errors: Array<{ row: number; message: string }>
-}
-
-type RosterImportResult =
-  | ({ source: "swimcloud" } & SwimCloudResult)
-  | ({ source: "csv" } & CsvResult)
 
 export default function ImportRosterButton() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const fileRef = useRef<HTMLInputElement>(null)
 
-  const gender = searchParams.get("gender") === "F" ? "F" : "M"
+  const gender = searchParams.get("gender") ?? "all"
   const season =
     parseSeason(searchParams.get("season") ?? searchParams.get("year")) ?? currentSeason()
-  const rosterLabel = `${gender === "F" ? "Women" : "Men"} ${season}`
-  const csvRosterLabel = `Women's & Men's ${season}`
+  const genderLabel = gender === "F" ? "Women's" : gender === "M" ? "Men's" : ""
+  const rosterLabel = `${genderLabel} ${season}`
 
   const { connected: bridgeConnected, requireScraper } = useScraperUi()
+  const { startTask } = useImportTask()
 
   const [open, setOpen] = useState(false)
-  const [resultOpen, setResultOpen] = useState(false)
   const [source, setSource] = useState<ImportSource>("csv")
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [result, setResult] = useState<RosterImportResult | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
   const modalDescription =
     source === "csv"
-      ? `Adds athletes to the ${csvRosterLabel} roster.`
-      : `Imports SwimCloud IDs onto the existing ${rosterLabel} roster.`
+      ? `Adds athletes to the ${season} roster.`
+      : `Imports SwimCloud IDs to the ${rosterLabel} roster.`
 
   function resetForm() {
     setSource("csv")
     setError(null)
     setSelectedFile(null)
-    if (fileRef.current) fileRef.current.value = ""
-  }
-
-  function showImportResult(data: RosterImportResult) {
-    setResult(data)
-    setOpen(false)
-    setResultOpen(true)
-    router.refresh()
-  }
-
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setSelectedFile(e.target.files?.[0] ?? null)
-    setError(null)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -80,30 +46,35 @@ export default function ImportRosterButton() {
     if (source === "swimcloud") {
       requireScraper(() => {
         void (async () => {
-          setLoading(true)
-          setError(null)
+          setOpen(false)
 
-          try {
-            const res = await fetch("/api/roster/sync", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                season,
-                year: seasonEndYear(season),
-                gender,
-              }),
-            })
-            const data = await res.json()
-            if (!res.ok) {
-              setError(data.error ?? "Import failed")
-              return
-            }
-            showImportResult({ source: "swimcloud", ...data })
-          } catch {
-            setError("Import failed — check that the scraper is running")
-          } finally {
-            setLoading(false)
-          }
+          const season_ = season
+          const gender_ = gender
+
+          startTask(
+            "Importing roster (SwimCloud)…",
+            (async () => {
+              const res = await fetch("/api/roster/sync", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  season: season_,
+                  year: seasonEndYear(season_),
+                  gender: gender_,
+                }),
+              })
+              const data = await res.json()
+              if (!res.ok) throw new Error(data.error ?? "Import failed")
+              const linked = data.linked ?? data.updated ?? 0
+              const parts: string[] = [`Imported SwimCloud IDs on ${linked} athlete${linked === 1 ? "" : "s"}`]
+              if ((data.unmatched ?? 0) > 0)
+                parts.push(`${data.unmatched} unmatched`)
+              if ((data.skippedConflict ?? 0) > 0)
+                parts.push(`${data.skippedConflict} skipped (conflict)`)
+              router.refresh()
+              return parts.join(" · ")
+            })()
+          )
         })()
       })
       return
@@ -114,32 +85,34 @@ export default function ImportRosterButton() {
       return
     }
 
-    setLoading(true)
-    setError(null)
+    const file = selectedFile
+    setOpen(false)
 
-    const body = new FormData()
-    body.append("file", selectedFile, selectedFile.name)
-    body.append("season", season)
+    startTask(
+      "Importing roster (CSV)…",
+      (async () => {
+        const body = new FormData()
+        body.append("file", file, file.name)
+        body.append("season", season)
 
-    try {
-      const res = await fetch("/api/roster/import", { method: "POST", body })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Import failed")
-        return
-      }
-      showImportResult({ source: "csv", ...data })
-      setSelectedFile(null)
-      if (fileRef.current) fileRef.current.value = ""
-    } catch {
-      setError("Import failed — check that the dev server is running")
-    } finally {
-      setLoading(false)
-    }
+        const res = await fetch("/api/roster/import", { method: "POST", body })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error ?? "Import failed")
+
+        const parts: string[] = [
+          `Imported ${data.created} new athlete${data.created === 1 ? "" : "s"}`,
+        ]
+        if (data.updated > 0) parts.push(`updated ${data.updated}`)
+        if (data.parsed > 0) parts.push(`${data.parsed} rows parsed`)
+        if (data.errors?.length > 0)
+          parts.push(`${data.errors.length} row(s) skipped`)
+        router.refresh()
+        return parts.join(" · ")
+      })()
+    )
   }
 
-  const canSubmit =
-    source === "swimcloud" ? !loading : !loading && !!selectedFile
+  const canSubmit = source === "swimcloud" ? true : !!selectedFile
 
   return (
     <>
@@ -172,12 +145,10 @@ export default function ImportRosterButton() {
       <Modal
         open={open}
         onClose={() => setOpen(false)}
-        closeDisabled={loading}
-        busy={loading}
         title="Import Roster"
         description={modalDescription}
         header={
-          <div className="mt-4 flex rounded-lg border border-border-secondary dark:border border-border-secondary p-0.5 bg-fill-secondary dark:bg-background-elevated">
+          <div className="mt-4 flex rounded-lg border border-border-secondary p-0.5 bg-background">
             {(
               [
                 ["csv", "CSV", "icon"] as const,
@@ -193,17 +164,18 @@ export default function ImportRosterButton() {
                 }}
                 className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                   source === value
-                    ? "bg-background dark:bg-zinc-800 text-foreground dark:text-foreground shadow-sm"
+                    ? "bg-primary text-primary-text shadow-sm"
                     : "text-foreground-secondary dark:text-foreground-secondary hover:text-foreground dark:hover:text-foreground"
                 }`}
               >
                 {adornment === "logo" && (
-                  <Image
+                    <Image
                     src="/swimcloud.webp"
                     alt=""
                     width={20}
                     height={20}
                     className="shrink-0"
+                    style={{ width: "auto" }}
                   />
                 )}
                 {adornment === "icon" && (
@@ -236,7 +208,6 @@ export default function ImportRosterButton() {
             <button
               type="button"
               onClick={() => setOpen(false)}
-              disabled={loading}
               className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary hover:bg-fill-secondary border-border-secondary"
             >
               Close
@@ -246,7 +217,7 @@ export default function ImportRosterButton() {
               disabled={!canSubmit}
               className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
-              {loading ? "Importing…" : "Import"}
+              Import
             </button>
           </ModalFooter>
         }
@@ -266,7 +237,7 @@ export default function ImportRosterButton() {
                   <span className="font-medium text-gray-800 dark:text-zinc-200">Name</span>
                   {" — "}
                   <span className="text-foreground-secondary text-foreground-secondary">
-                    First Name & Last Name, or just a Full Name column
+                    First Name &amp; Last Name
                   </span>
                 </li>
                 <li>
@@ -277,119 +248,33 @@ export default function ImportRosterButton() {
                   </span>
                 </li>
               </ul>
-              <p className="mt-3 text-xs text-foreground-tertiary">
-                Optional: Email, SwimCloud ID, Nicknames.
-              </p>
+              <p className="mt-3 font-medium text-foreground text-foreground">Optional columns</p>
+              <ul className="mt-2 space-y-1.5 text-foreground-secondary text-foreground-secondary text-xs">
+                <li>Email, Nicknames, GTID, DOB, Year</li>
+              </ul>
             </div>
 
             <div>
               <span className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
                 Roster CSV
               </span>
-              <input
-                ref={fileRef}
-                type="file"
+              <FileDropzone
+                onFilesSelected={(files) => {
+                  setSelectedFile(files[0] ?? null);
+                  setError(null);
+                }}
                 accept=".csv,text/csv"
-                onChange={handleFileChange}
-                className="sr-only"
-                id="roster-csv-upload"
-              />
-              <div className="flex items-center gap-3">
-                <label
-                  htmlFor="roster-csv-upload"
-                  className="cursor-pointer rounded-lg border border-border-secondary border-primary bg-primary px-4 py-2 text-sm font-medium text-primary-text hover:bg-primary-hover"
-                >
-                  Choose CSV
-                </label>
-                <span className="text-sm text-foreground-secondary text-foreground-secondary truncate">
-                  {selectedFile ? selectedFile.name : "No file selected"}
-                </span>
-              </div>
+                className="block w-full rounded-lg border border-border-secondary p-4 text-center text-sm text-foreground-secondary hover:bg-fill-secondary"
+              >
+                <p className="text-sm">
+                  {selectedFile ? selectedFile.name : "Click or drag and drop a CSV file"}
+                </p>
+              </FileDropzone>
             </div>
           </div>
         )}
 
         {error && <p className="text-sm text-error">{error}</p>}
-      </Modal>
-
-      <Modal
-        open={resultOpen}
-        onClose={() => {
-          setResultOpen(false)
-          setResult(null)
-        }}
-        title="Import complete"
-        footer={
-          <ModalFooter>
-            <button
-              type="button"
-              onClick={() => {
-                setResultOpen(false)
-                setResult(null)
-              }}
-              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover"
-            >
-              Done
-            </button>
-          </ModalFooter>
-        }
-      >
-        {result?.source === "swimcloud" && (
-          <div className="rounded-xl border border-border-secondary border-gray-100 bg-gray-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-800/50">
-            <p className="text-foreground text-foreground">
-              Imported SwimCloud IDs on <strong>{result.linked ?? result.updated}</strong> athlete
-              {(result.linked ?? result.updated) === 1 ? "" : "s"}
-              .
-            </p>
-            {(result.unmatched ?? 0) > 0 && (
-              <p className="mt-2 text-amber-700 dark:text-amber-400 text-xs">
-                {result.unmatched} SwimCloud name
-                {result.unmatched === 1 ? "" : "s"} had no roster match.
-              </p>
-            )}
-            {(result.alreadyLinked ?? 0) > 0 && (
-              <p className="mt-1 text-foreground-secondary text-foreground-secondary text-xs">
-                {result.alreadyLinked} already had a SwimCloud ID.
-              </p>
-            )}
-            {(result.skippedConflict ?? 0) > 0 && (
-              <p className="mt-1 text-amber-700 dark:text-amber-400 text-xs">
-                {result.skippedConflict} skipped due to SwimCloud ID conflicts.
-              </p>
-            )}
-          </div>
-        )}
-
-        {result?.source === "csv" && (
-          <div className="rounded-xl border border-border-secondary border-gray-100 bg-gray-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-800/50">
-            <p className="text-foreground text-foreground">
-              Imported <strong>{result.created}</strong> new athlete
-              {result.created === 1 ? "" : "s"}
-              {result.updated > 0 && (
-                <>
-                  , updated <strong>{result.updated}</strong> existing
-                </>
-              )}
-              {result.parsed > 0 && (
-                <span className="text-foreground-secondary text-foreground-secondary">
-                  {" "}
-                  ({result.parsed} rows parsed)
-                </span>
-              )}
-              .
-            </p>
-            {result.errors.length > 0 && (
-              <p className="mt-2 text-amber-700 dark:text-amber-400 text-xs">
-                {result.errors.length} row(s) skipped:{" "}
-                {result.errors
-                  .slice(0, 3)
-                  .map((e) => `row ${e.row} (${e.message})`)
-                  .join("; ")}
-                {result.errors.length > 3 ? "…" : ""}
-              </p>
-            )}
-          </div>
-        )}
       </Modal>
     </>
   )

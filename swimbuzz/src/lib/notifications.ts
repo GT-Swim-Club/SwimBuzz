@@ -8,31 +8,16 @@ import type { PendingProfileChanges } from "@/lib/pending-profile-changes"
 import { prisma } from "@/lib/prisma"
 import { formatRelativeTime, formatSwimDate } from "@/lib/utils"
 
-/** How long notifications stay visible before being purged. */
-export const NOTIFICATION_RETENTION_DAYS = 30
-
-export function notificationRetentionCutoff(): Date {
-  return new Date(
-    Date.now() - NOTIFICATION_RETENTION_DAYS * 24 * 60 * 60 * 1000
-  )
-}
-
-export async function purgeExpiredNotifications(userId: string): Promise<void> {
-  await prisma.notification.deleteMany({
-    where: {
-      userId,
-      createdAt: { lt: notificationRetentionCutoff() },
-    },
-  })
-}
-
 async function userIdsWithPreference(
   userIds: string[],
   key: NotificationPreferenceKey
 ): Promise<string[]> {
   if (userIds.length === 0) return []
   const users = await prisma.user.findMany({
-    where: { id: { in: [...new Set(userIds)] } },
+    where: {
+      id: { in: [...new Set(userIds)] },
+      OR: [{ emailVerified: { not: null } }, { accounts: { some: {} } }],
+    },
     select: { id: true, notificationPreferences: true },
   })
   return users
@@ -111,7 +96,10 @@ export async function syncProfileChangeRequestNotifications(input: {
   if (!input.pending) return
 
   const staff = await prisma.user.findMany({
-    where: { role: { in: [Role.COACH, Role.EXEC] } },
+    where: {
+      role: { in: [Role.COACH, Role.EXEC] },
+      OR: [{ emailVerified: { not: null } }, { accounts: { some: {} } }],
+    },
     select: { id: true, notificationPreferences: true },
   })
   const recipients = staff
@@ -178,6 +166,7 @@ export async function notifyPracticePublished(input: {
     where: {
       role: Role.ATHLETE,
       ...(input.excludeUserId ? { id: { not: input.excludeUserId } } : {}),
+      OR: [{ emailVerified: { not: null } }, { accounts: { some: {} } }],
     },
     select: { id: true, notificationPreferences: true },
   })
@@ -210,7 +199,10 @@ export async function notifyMeetSignupOpen(input: {
   meetName: string
 }): Promise<void> {
   const athletes = await prisma.user.findMany({
-    where: { role: Role.ATHLETE },
+    where: {
+      role: Role.ATHLETE,
+      OR: [{ emailVerified: { not: null } }, { accounts: { some: {} } }],
+    },
     select: { id: true, notificationPreferences: true },
   })
   const recipients = athletes
@@ -299,7 +291,10 @@ export async function notifyTimesImportRequest(input: {
   await dismissTimesImportRequestNotifications(input.athleteId)
 
   const staff = await prisma.user.findMany({
-    where: { role: { in: [Role.COACH, Role.EXEC] } },
+    where: {
+      role: { in: [Role.COACH, Role.EXEC] },
+      OR: [{ emailVerified: { not: null } }, { accounts: { some: {} } }],
+    },
     select: { id: true, notificationPreferences: true },
   })
   const recipients = staff

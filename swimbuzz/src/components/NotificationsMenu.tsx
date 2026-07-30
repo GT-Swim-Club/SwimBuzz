@@ -38,6 +38,15 @@ export default function NotificationsMenu({
   useEffect(() => {
     if (!open) return
 
+    async function fetchNotifications() {
+      const res = await fetch("/api/notifications")
+      if (res.ok) {
+        const data = await res.json()
+        setNotifications(data.notifications)
+      }
+    }
+    fetchNotifications()
+
     function onPointerDown(event: PointerEvent) {
       if (!rootRef.current?.contains(event.target as Node)) {
         closeMenu()

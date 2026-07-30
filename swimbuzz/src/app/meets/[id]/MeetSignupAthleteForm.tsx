@@ -12,6 +12,7 @@ import {
   sortSignupEventsByOrder,
 } from "@/lib/meet-signup"
 import { formatDisplayTime } from "@/lib/utils"
+import { formatDateTime } from "@/lib/utils"
 
 export type MeetSignupAthleteInitial = {
   events: string[]
@@ -37,6 +38,9 @@ export default function MeetSignupAthleteForm({
   canWithdraw,
   withdrawReason,
   withdrawDeadline,
+  formOpenAt,
+  formCloseAt,
+  formWithdrawUntil,
   isCoach,
   isStaff = false,
   selfAthleteId,
@@ -59,6 +63,9 @@ export default function MeetSignupAthleteForm({
   canWithdraw: boolean
   withdrawReason: string | null
   withdrawDeadline: string | null
+  formOpenAt: string | null
+  formCloseAt: string | null
+  formWithdrawUntil: string | null
   isCoach: boolean
   /** Real staff role — send athleteId on API even during athlete preview. */
   isStaff?: boolean
@@ -295,7 +302,7 @@ export default function MeetSignupAthleteForm({
               <button
                 type="button"
                 onClick={() => setOpen(true)}
-                className="text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-text hover:bg-primary-hover transition-colors"
+                className="text-sm px-4 py-2 rounded-lg bg-primary text-primary-text hover:bg-primary-hover transition-colors"
               >
                 {selfEntry ? "Edit Sign-Up" : "Sign Up"}
               </button>
@@ -303,29 +310,10 @@ export default function MeetSignupAthleteForm({
               <button
                 type="button"
                 onClick={() => setOpen(true)}
-                className="bg-background text-xs px-3 py-1.5 rounded-lg border border-border border-border-secondary-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border-secondary-secondary transition-colors"
+                className="bg-background text-sm px-4 py-2 rounded-lg border border-border border-border-secondary-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border-secondary-secondary transition-colors"
               >
                 View Sign-Up
               </button>
-            ) : !previewOnly ? (
-              <p className="text-sm text-amber-700 dark:text-amber-400">
-                {windowReason ?? "Sign-ups are closed for this meet."}
-                {!windowOpen && canWithdraw && withdrawDeadline && selfEntry && (
-                  <span className="block mt-1 text-foreground-secondary text-foreground-secondary font-normal">
-                    You can still drop until{" "}
-                    {new Date(withdrawDeadline).toLocaleString()}.
-                  </span>
-                )}
-                {!windowOpen &&
-                  !canWithdraw &&
-                  selfEntry &&
-                  withdrawReason &&
-                  withdrawReason !== windowReason && (
-                  <span className="block mt-1 text-foreground-secondary text-foreground-secondary font-normal">
-                    {withdrawReason}
-                  </span>
-                )}
-              </p>
             ) : null}
             {!canEdit && !previewOnly && canWithdraw && selfEntry && (
               <button
@@ -335,10 +323,36 @@ export default function MeetSignupAthleteForm({
                   setConfirmWithdrawOpen(true)
                 }}
                 disabled={loading}
-                className="bg-background text-xs px-3 py-1.5 rounded-lg border border-border border-border-secondary-secondary border-red-200 text-error hover:bg-red-50 dark:border-red-900 dark:text-error dark:hover:bg-red-950/30 disabled:opacity-50 transition-colors"
+                className="text-sm px-4 py-2 rounded-lg border border-border border-red-200 text-error hover:bg-red-50 dark:border-red-900 dark:text-error dark:hover:bg-red-950/30 disabled:opacity-50 transition-colors"
               >
                 Drop
               </button>
+            )}
+          </div>
+          {!previewOnly && !canEdit && (
+            <p className="text-sm text-amber-700 dark:text-amber-400">
+              {windowReason === "Sign-ups are closed for this meet." ? null : windowReason}
+              {!windowOpen &&
+                !canWithdraw &&
+                selfEntry &&
+                withdrawReason &&
+                withdrawReason !== windowReason && (
+                <span className="block mt-1 text-foreground-secondary text-foreground-secondary font-normal">
+                  {withdrawReason}
+                </span>
+              )}
+            </p>
+          )}
+
+          <div className="text-sm text-foreground-secondary flex flex-col gap-y-1 mt-2">
+            {formOpenAt && new Date(formOpenAt) > new Date() && (
+              <span>Opens: {formatDateTime(new Date(formOpenAt))}</span>
+            )}
+            {formCloseAt && new Date(formCloseAt) > new Date() && (
+              <span>Closes: {formatDateTime(new Date(formCloseAt))}</span>
+            )}
+            {formWithdrawUntil && new Date(formWithdrawUntil) > new Date() && (
+              <span>Drop until: {formatDateTime(new Date(formWithdrawUntil))}</span>
             )}
           </div>
 
@@ -541,11 +555,6 @@ export default function MeetSignupAthleteForm({
                         }
                       />
                     </div>
-                    {invalid && (
-                      <p className="pl-[10.5rem] text-xs text-error dark:text-error">
-                        Use NT or a time like 58.32 / 1:02.45
-                      </p>
-                    )}
                   </div>
                 )
               })}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import {
   eventsFromEventOrder,
@@ -33,7 +33,6 @@ type EntryRow = {
 
 type FormData = {
   id: string
-  enabled: boolean
   instructions: string
   minEvents: number | null
   maxEvents: number | null
@@ -86,27 +85,71 @@ export default function MeetSignupSection({
   const [withdrawError, setWithdrawError] = useState<string | null>(null)
   const [syncError, setSyncError] = useState<string | null>(null)
   const router = useRouter()
+
+  // Poll signup status every 10 seconds to detect when signups open/close in real-time
+  useEffect(() => {
+    // Only poll if there's a signup form configured (even if closed)
+    if (!form) return
+
+    let initialTimeout: NodeJS.Timeout | null = null
+    let pollInterval: NodeJS.Timeout | null = null
+    let hasStartedPolling = false
+
+    const checkAndRefreshSignupStatus = async () => {
+      try {
+        const response = await fetch(`/api/meets/${meetId}/signup`, {
+          method: "GET",
+          cache: "no-store",
+        })
+        if (response.ok) {
+          // If we got a successful response, refresh to update the component
+          router.refresh()
+        }
+      } catch (error) {
+        // Silently handle errors - polling continues
+      }
+    }
+
+    // Sync to minute boundary, then poll every 10 seconds
+    const schedulePolling = () => {
+      if (hasStartedPolling) return
+      hasStartedPolling = true
+
+      // Start polling every 10 seconds
+      pollInterval = setInterval(checkAndRefreshSignupStatus, 10000)
+    }
+
+    // Calculate time until next minute boundary
+    const timeUntilNextMinute = 60000 - ((Date.now() % 60000) + 500)
+    initialTimeout = setTimeout(() => {
+      checkAndRefreshSignupStatus()
+      schedulePolling()
+    }, timeUntilNextMinute)
+
+    return () => {
+      if (initialTimeout) clearTimeout(initialTimeout)
+      if (pollInterval) clearInterval(pollInterval)
+    }
+  }, [router, meetId, form])
   const eventOptions = resolveSignupEventOptions(eventOrder)
   const optionByEvent = new Map(eventOptions.map((o) => [o.event, o]))
   const questions = form ? form.customQuestions : []
   const window = form
     ? signupWindowStatus({
-        enabled: form.enabled,
         openAt: form.openAt ? new Date(form.openAt) : null,
         closeAt: form.closeAt ? new Date(form.closeAt) : null,
       })
     : { open: false, reason: "Sign-ups have not been set up yet." }
   const withdraw = form
     ? signupWithdrawStatus({
-        enabled: form.enabled,
         openAt: form.openAt ? new Date(form.openAt) : null,
         closeAt: form.closeAt ? new Date(form.closeAt) : null,
         withdrawUntil: form.withdrawUntil ? new Date(form.withdrawUntil) : null,
       })
     : { allowed: false, reason: null, deadline: null }
 
-  const showAthleteForm = !isCoach && (Boolean(form?.enabled) || Boolean(myEntry))
-  const showSection = isCoach || showAthleteForm
+  const showAthleteForm = form && !isCoach && ((form.openAt && new Date(form.openAt) > new Date()) || (form.closeAt && new Date(form.closeAt) > new Date()) || !form.closeAt || Boolean(myEntry))
+  const showSection = isCoach || showAthleteForm || (entries && entries.length > 0)
 
   const entriesByAthleteId: Record<
     string,
@@ -204,7 +247,6 @@ export default function MeetSignupSection({
               initial={
                 form
                   ? {
-                      enabled: form.enabled,
                       instructions: form.instructions,
                       minEvents: form.minEvents,
                       maxEvents: form.maxEvents,
@@ -295,6 +337,9 @@ export default function MeetSignupSection({
           canWithdraw={withdraw.allowed}
           withdrawReason={withdraw.reason}
           withdrawDeadline={withdraw.deadline?.toISOString() ?? null}
+          formOpenAt={form.openAt}
+          formCloseAt={form.closeAt}
+          formWithdrawUntil={form.withdrawUntil}
           isCoach={false}
           isStaff={isStaff}
           selfAthleteId={selfAthleteId}

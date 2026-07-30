@@ -301,7 +301,7 @@ export default function PracticeDetail({
             <Link
               key={t}
               href={`/practices?tag=${encodeURIComponent(t)}`}
-              className="text-[10px] uppercase tracking-wide rounded-full bg-primary/30 dark:bg-primary/30 px-2 py-0.5 text-warning dark:text-warning hover:bg-primary/40 dark:hover:bg-primary/40 transition-colors"
+              className="text-xs px-2 py-0.5 rounded-full bg-primary/80 dark:bg-primary border-primary text-primary-text hover:opacity-90 transition-opacity"
             >
               {t}
             </Link>

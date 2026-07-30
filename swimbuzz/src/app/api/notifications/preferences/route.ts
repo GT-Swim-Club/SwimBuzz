@@ -12,7 +12,6 @@ import { prisma } from "@/lib/prisma"
 
 const PATCH_KEYS: NotificationPreferenceKey[] = [
   "practicePublished",
-  "meetSignupOpen",
   "practiceComments",
   "profileChanges",
 ]
@@ -55,6 +54,12 @@ export async function PATCH(req: Request) {
       }
       patch[key] = (body as Record<string, boolean>)[key]
     }
+  }
+
+  if (Array.isArray(body.meetSignupNotificationTimes)) {
+    patch.meetSignupNotificationTimes = body.meetSignupNotificationTimes.filter(
+      (m: any): m is number => typeof m === "number" && m >= 0 && m <= 60
+    )
   }
 
   if (Object.keys(patch).length === 0) {

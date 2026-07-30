@@ -89,7 +89,7 @@ export default function SummaryRowLayout({
     className
 
   const leftClassName =
-    "flex min-w-0 flex-1 items-baseline overflow-hidden text-left text-foreground " +
+    "flex min-w-0 flex-1 items-center overflow-hidden text-left text-foreground " +
     (onClick
       ? "group-hover:text-primary transition-colors"
       : "")
@@ -109,9 +109,9 @@ export default function SummaryRowLayout({
           style={{
             fontSize: `${detailFontPx}px`,
             maxWidth: truncateDetails && detailsMaxWidth != null ? detailsMaxWidth : undefined,
+            paddingLeft: '0.375rem'
           }}
         >
-          {" · "}
           {details}
         </span>
       ) : null}
@@ -119,8 +119,8 @@ export default function SummaryRowLayout({
         <span
           ref={coachRef}
           className="shrink-0 whitespace-nowrap text-xs text-info"
+          style={{ paddingLeft: '0.25rem' }}
         >
-          {" · "}
           {coachNote}
         </span>
       ) : null}

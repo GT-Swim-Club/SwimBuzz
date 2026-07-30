@@ -10,7 +10,7 @@ export const runtime = "nodejs"
 const MAX_BYTES = 10 * 1024 * 1024 // 10 MB for banner upload
 const BANNER_MAX_WIDTH = 1200 
 const BANNER_JPEG_QUALITY = 85
-const ALLOWED_EXT = new Set([".png", ".jpg", ".jpeg", ".webp", ".svg"])
+const ALLOWED_EXT = new Set([".png", ".jpg", ".jpeg", ".webp", ".svg", ".heic", ".heif"])
 
 const MIME: Record<string, string> = {
   ".png": "image/png",
@@ -18,6 +18,8 @@ const MIME: Record<string, string> = {
   ".jpeg": "image/jpeg",
   ".webp": "image/webp",
   ".svg": "image/svg+xml",
+  ".heic": "image/heic",
+  ".heif": "image/heif",
 }
 
 function isUpload(value: unknown): value is File {
@@ -43,7 +45,7 @@ function storageHeaders(key: string, extra: Record<string, string> = {}) {
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
-  if (!session || !["COACH", "EXEC"].includes(session.user.role)) {
+  if (!session || !session.user.role === "COACH") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -56,7 +58,7 @@ export async function POST(req: Request) {
   const ext = path.extname(file.name).toLowerCase()
   if (!ALLOWED_EXT.has(ext)) {
     return NextResponse.json(
-      { error: "Unsupported file type — use PNG, JPG, WebP, or SVG" },
+      { error: "Unsupported file type — use PNG, JPG, WebP, SVG, or HEIC" },
       { status: 400 }
     )
   }
@@ -129,7 +131,7 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   const session = await getServerSession(authOptions)
-  if (!session || !["COACH", "EXEC"].includes(session.user.role)) {
+  if (!session || !session.user.role === "COACH") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

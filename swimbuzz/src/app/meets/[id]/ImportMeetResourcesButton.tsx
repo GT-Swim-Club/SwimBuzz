@@ -6,8 +6,8 @@ import MeetResourceField from "../MeetResourceField"
 import MeetResourceIcon from "@/components/MeetResourceIcon"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { useScraperUi } from "@/components/ScraperUiProvider"
+import { useImportTask } from "@/components/ImportTaskProvider"
 import { useMeetResourceUploads } from "@/lib/use-meet-resource-uploads"
-import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 
 type ResourceForm = {
   teamCode: string
@@ -27,14 +27,10 @@ export default function ImportMeetResourcesButton({
 }) {
   const router = useRouter()
   const { requireScraper } = useScraperUi()
+  const { startTask } = useImportTask()
   const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState<ResourceForm>(initial)
   const { anyUploading, getFieldUploadHandler } = useMeetResourceUploads()
-  const blocked = loading || anyUploading
-
-  useDontReloadWhileBusy(loading || anyUploading)
 
   const hasResources = Object.values({
     packetUrl: initial.packetUrl,
@@ -47,38 +43,23 @@ export default function ImportMeetResourcesButton({
   useEffect(() => {
     if (open) {
       setForm(initial)
-      setError(null)
     }
   }, [open, initial])
 
   async function saveResources() {
-    if (anyUploading) return
     const teamCode = form.teamCode.trim()
-    if (!teamCode) {
-      setError("Team code is required")
-      return
-    }
-    setLoading(true)
-    setError(null)
+    if (!teamCode) throw new Error("Team code is required")
 
-    try {
-      const res = await fetch(`/api/meets/${meetId}`, {
+    const res = await fetch(`/api/meets/${meetId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, teamCode }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Failed to save resources")
-        return
-      }
-      setOpen(false)
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error ?? "Failed to save resources")
+    
+    router.refresh()
+    return "Imported resources successfully"
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -89,8 +70,9 @@ export default function ImportMeetResourcesButton({
       "psychSheetUrl",
       "heatSheetUrl",
     ] as const
-    const teamChanged =
-      form.teamCode.trim().toUpperCase() !== initial.teamCode.trim().toUpperCase()
+    
+    const teamChanged = initial.teamCode.trim().toUpperCase() !== form.teamCode.trim().toUpperCase()
+    
     const hasScrapableChange =
       scrapableKeys.some((key) => {
         const next = form[key].trim()
@@ -100,11 +82,9 @@ export default function ImportMeetResourcesButton({
       (teamChanged &&
         scrapableKeys.some((key) => form[key].trim() || initial[key].trim()))
 
-    if (hasScrapableChange) {
-      requireScraper(() => void saveResources())
-      return
-    }
-    void saveResources()
+    setOpen(false) // Close immediately
+    const action = hasScrapableChange ? () => requireScraper(() => void startTask("Importing resources...", saveResources())) : () => void startTask("Importing resources...", saveResources())
+    action()
   }
 
   return (
@@ -137,8 +117,6 @@ export default function ImportMeetResourcesButton({
         open={open}
         maxWidth="xl"
         onClose={() => setOpen(false)}
-        closeDisabled={blocked}
-        busy={loading}
         title={hasResources ? "Edit Resources" : "Add Resources"}
         description="Upload or link meet documents, or add a live stream URL."
         onSubmit={handleSubmit}
@@ -147,17 +125,16 @@ export default function ImportMeetResourcesButton({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              disabled={blocked}
               className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border"
             >
               Close
             </button>
             <button
               type="submit"
-              disabled={blocked}
+              disabled={anyUploading}
               className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
-              {loading ? "Saving…" : anyUploading ? "Uploading…" : "Save"}
+              {anyUploading ? "Uploading…" : "Save"}
             </button>
           </ModalFooter>
         }
@@ -167,16 +144,14 @@ export default function ImportMeetResourcesButton({
             Team code <span className="text-red-500">*</span>
           </label>
           <input
-            required
+            type="text"
             value={form.teamCode}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, teamCode: e.target.value.toUpperCase() }))
-            }
-            placeholder="GTSC"
+            onChange={(e) => setForm((f) => ({ ...f, teamCode: e.target.value }))}
+            placeholder="e.g., GTSC"
             className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"
           />
           <p className="mt-1 text-xs text-gray-400 dark:text-zinc-500">
-            Only entries for this team are parsed from uploaded sheets.
+            Entries for this team will be parsed from uploaded sheets.
           </p>
         </div>
 
@@ -224,8 +199,6 @@ export default function ImportMeetResourcesButton({
             className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"
           />
         </div>
-
-        {error && <p className="text-sm text-error dark:text-error">{error}</p>}
       </Modal>
     </>
   )

@@ -19,7 +19,7 @@ export default function MeetActions({
   const router = useRouter()
   const [editing, setEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const [deleteOption, setDeleteOption] = useState<"meet" | "swims" | "both">("meet")
+  const [deleteOption, setDeleteOption] = useState<"meet" | "swims" | "both">("both")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState<MeetFormState>(initial)

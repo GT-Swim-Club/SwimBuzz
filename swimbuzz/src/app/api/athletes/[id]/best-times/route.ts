@@ -42,7 +42,7 @@ export async function GET(
     return NextResponse.json({ times: {} as Record<string, string> })
   }
 
-  const isCoach = ["COACH", "EXEC"].includes(session.user.role)
+  const isCoach = session.user.role === "COACH"
   if (!isCoach) {
     const linked = await prisma.athlete.findUnique({
       where: { userId: session.user.id },

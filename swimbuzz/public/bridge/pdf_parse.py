@@ -294,12 +294,33 @@ def extract_times_from_line(line: str) -> list[str]:
 
 
 def pick_seed_time(line: str) -> str | None:
-    """Seed time from a Hy-Tek result line when seed, prelim, and final are present."""
+    """Seed time from a Hy-Tek result line when seed, prelim, and final are present.
+
+    Only applicable for heat/psych sheets where 3 large times appear (seed, prelim, final).
+    For results PDFs we typically only have 1-2 large times, so no seed is returned.
+    """
     cleaned = re.sub(r"\([^)]*\)", " ", line)
     times = extract_times_from_line(cleaned)
-    if len(times) >= 3:
-        return times[-3]
+    result_scale = [t for t in times if _is_result_scale_time(t)]
+    if len(result_scale) >= 3:
+        return result_scale[-3]
     return None
+
+
+def _is_result_scale_time(token: str) -> bool:
+    """Return True if the time token is plausibly a full-race result (not a 50-yard split).
+    
+    50-yard splits are typically < 35 seconds.  A result time for ANY event >= 100y
+    will be >= ~35s, and even for a 50 Free the finals time is >=  ~18s.
+    We use a conservative threshold of 35 seconds (35000ms) — any time under this
+    must be a split or a 50-yard result, which is fine for 50 events but would be
+    suspicious as a main result for a longer event.
+    
+    This is only used to distinguish column-bleed splits from results times when
+    multiple time tokens appear on one result row.
+    """
+    ms = time_token_to_ms(token)
+    return ms is not None and ms >= 35000
 
 
 def pick_round_times(line: str) -> list[dict[str, str]]:
@@ -309,27 +330,58 @@ def pick_round_times(line: str) -> list[dict[str, str]]:
     when all three are present. Results PDFs have a trailing points column,
     so we need to distinguish between actual race times and points.
     
-    In results PDFs: seed_time final_time points (where points is 1-40 or X.50)
-    In other sheets: seed_time prelim_time final_time (or fewer)
+    In results PDFs: seed_time final_time [column-bleed splits]
+    In psych/heat sheets: seed_time prelim_time final_time (or fewer)
+    
+    Column-bleed problem (3-column layouts): When a PDF uses 2 or 3 columns,
+    the 50-yard split times printed below an adjacent column's result rows can
+    bleed onto the same text line as a result from another column.  These bleed
+    values are always small (< 35 seconds), so if we see a large time followed
+    by small times, the large time is the result and the small ones are splits.
     """
     cleaned = re.sub(r"\([^)]*\)", " ", line)
     times = extract_times_from_line(cleaned)
     if not times:
         return []
-    
-    # Heuristic: if we have exactly 2 times and the line looks like a results entry
-    # (has team/age info), then seed=times[0], final=times[1], points is after
-    # If we have 3+ times, use the last 2 as prelim/final
+
+    if len(times) == 1:
+        return [{"time": times[0], "tags": ""}]
+
     if len(times) == 2:
-        # For 2 times: seed and final (results PDF format)
+        # Could be: seed+final, or final+bleed-split, or two bleed splits.
+        # If the first time is large (result-scale) and second is small (split-scale),
+        # the second is a column-bleed — treat as just a single result.
+        if _is_result_scale_time(times[0]) and not _is_result_scale_time(times[1]):
+            return [{"time": times[0], "tags": ""}]
+        # Otherwise: seed and final (the common case).
         return [{"time": times[-1], "tags": ""}]
-    elif len(times) >= 3:
-        # For 3+ times: seed, prelim, final (psych/heat sheet format)
+
+    # 3+ times on the line.
+    # Identify which times are "result-scale" (>= 35s) and which are "split-scale".
+    result_scale = [t for t in times if _is_result_scale_time(t)]
+    
+    if len(result_scale) == 1:
+        # Exactly one large time — it is the result; the rest are splits or column bleeds.
+        return [{"time": result_scale[0], "tags": ""}]
+    
+    if len(result_scale) == 2:
+        # Two large times: could be seed + final (results PDF) or prelim + final.
+        # In a results PDF we only want the final; in psych/heat sheet we want both.
+        # Since results PDFs use a single Finals Time column we return just the last
+        # large time (the final) — this matches historical behaviour for 2-time lines.
+        return [{"time": result_scale[-1], "tags": ""}]
+    
+    if len(result_scale) >= 3:
+        # Three or more large times: seed, prelim, final (heat sheet / psych sheet).
         return [
-            {"time": times[-2], "tags": "P"},
-            {"time": times[-1], "tags": "F"},
+            {"time": result_scale[-2], "tags": "P"},
+            {"time": result_scale[-1], "tags": "F"},
         ]
-    return [{"time": times[-1], "tags": ""}]
+
+    # All times are small (split-scale): this is a 50-yard event where the result
+    # time is < 35s, and the subsequent times are column-bleed splits from an adjacent
+    # event.  Take the first time as the result.
+    return [{"time": times[0], "tags": ""}]
 
 
 def pick_result_time(line: str) -> str | None:
@@ -435,6 +487,9 @@ def club_matches(club: str, team_norm: str) -> bool:
     2. Base code match (strip region suffix).
     3. Full-name: check if any known alias for team_norm appears as a word
        sequence in the club name.
+    4. Prefix match: the club name may be an abbreviated prefix of the full
+       club name whose acronym is the team code (e.g. 'Georgia Tech' is a
+       prefix of 'Georgia Tech Swim Club', whose acronym is 'gtsc').
     """
     club_norm = club.strip().lower()
     if not team_norm:
@@ -449,17 +504,54 @@ def club_matches(club: str, team_norm: str) -> bool:
     # Strategy 3: check club words for known keyword sequences.
     # Build a keyword from the team base (first component before '-').
     team_base = team_norm.split("-")[0]
+    club_base = club_norm.split("-")[0]
+    
     # Only apply word-based matching for bases that are >= 4 chars to avoid
     # false positives with very short codes.
-    if len(team_base) >= 4:
-        # Split team base into constituent words if it looks like an acronym
-        # composed of initials — skip (can't word-match an acronym like 'gtsc').
-        # Only attempt if the team base itself is found as a substring of the
-        # club name words (e.g. 'gtsc' in 'georgia tech swim club').
-        club_words = re.sub(r"[^a-z\s]", " ", club_norm).split()
-        initials = "".join(w[0] for w in club_words if w)
-        if initials == team_base or team_base in initials:
+    if len(team_base) >= 4 or len(club_base) >= 4:
+        # Normalize both club and team to just alphanumeric + spaces
+        club_words = re.sub(r"[^a-z\s]", " ", club_base).split()
+        team_words = re.sub(r"[^a-z\s]", " ", team_base).split()
+        
+        # Check if the club name contains the team name as a word sequence
+        # e.g., "georgia tech swim club" in "georgia tech swim club-ga"
+        if team_words and len(team_words) > 1:
+            # Multi-word team name: check if it appears as a subsequence in club
+            club_text = " ".join(club_words)
+            team_text = " ".join(team_words)
+            if team_text in club_text:
+                return True
+        
+        # Check if the team name contains the club name as a word sequence
+        # e.g., "gtsc" in "georgia tech swim club"
+        if club_words and len(club_words) > 1:
+            # Multi-word club name: check if it appears as a subsequence in team
+            club_text = " ".join(club_words)
+            team_text = " ".join(team_words)
+            if club_text in team_text:
+                return True
+        
+        # Check if team is an acronym of the club name
+        # e.g., 'gtsc' matches 'georgia tech swim club'
+        club_initials = "".join(w[0] for w in club_words if w)
+        if club_initials == team_base or team_base in club_initials:
             return True
+        
+        # Check if club is an acronym of the team name (reverse check)
+        # e.g., 'GTSC-GA' matches 'georgia tech swim club'
+        team_initials = "".join(w[0] for w in team_words if w)
+        if team_initials == club_base or club_base in team_initials:
+            return True
+
+        # Strategy 4: prefix match — the club words are the leading words of a
+        # longer name whose full acronym equals the team base code.
+        # e.g. club='georgia tech' (initials 'gt') and team='gtsc' (4 letters)
+        # → 'georgia tech' starts with 'g' and 't', first two letters of 'gtsc'.
+        # Accept if the club words are a prefix of the initialism expansion.
+        if len(club_words) >= 2:
+            prefix_initials = "".join(w[0] for w in club_words if w)
+            if team_base.startswith(prefix_initials):
+                return True
 
     return False
 
@@ -469,7 +561,19 @@ def parse_team_from_line(line: str) -> str | None:
 
     Handles both short codes (e.g. 'GTSC-GA') and full club names
     (e.g. 'Georgia Tech Swim Club-GA') as printed in full-name result PDFs.
+    Also handles cases where age is concatenated with team code (e.g. '18GTSC').
     """
+    # Try short code with concatenated age+team: name + age+team (no space) + time/paren
+    # e.g. "Smith, Benjamin 18GTSC 1:52.91"
+    concat_match = re.search(
+        r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
+        r"\s+\d{1,3}([A-Z0-9]{2,10}(?:-[A-Z]{2})?)"
+        r"\s+(?:\(|[\d:xX])",
+        line,
+    )
+    if concat_match:
+        return concat_match.group(1).upper()
+    
     # Try short code first: name + optional age + short code + time/paren
     match = re.search(
         r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
@@ -497,14 +601,31 @@ def parse_team_from_line(line: str) -> str | None:
 
 
 def filter_results_by_team(rows: list[dict[str, Any]], team: str | None) -> list[dict[str, Any]]:
-    team_norm = (team or "").strip().lower()
-    if not team_norm:
+    """Filter results to only include rows matching any of the provided team codes.
+    
+    Args:
+        rows: List of result dictionaries with 'team' field
+        team: Single team code or comma-separated list of team codes (e.g. "GTSC, Georgia Tech Swim Club")
+    
+    Returns:
+        Filtered list containing only rows matching one of the team codes
+    """
+    team_input = (team or "").strip()
+    if not team_input:
         return rows
+    
+    # Split by comma to support multiple team codes
+    team_codes = [t.strip().lower() for t in team_input.split(",") if t.strip()]
+    if not team_codes:
+        return rows
+    
     filtered: list[dict[str, Any]] = []
     for row in rows:
         row_team = row.get("team")
-        if row_team and club_matches(str(row_team), team_norm):
-            filtered.append(row)
+        if row_team:
+            # Check if row team matches ANY of the provided team codes
+            if any(club_matches(str(row_team), team_code) for team_code in team_codes):
+                filtered.append(row)
     return filtered
 
 
@@ -568,6 +689,10 @@ def _clean_cid_ligatures(line: str) -> str:
 
 
 def parse_event_from_line(line: str) -> str | None:
+    """Extract swim event from a header line.
+    
+    Returns None if the line contains multiple event headers (cross-column headers),
+    as these shouldn't override the current event context."""
     # Clean CID ligatures before parsing (e.g., Butter(cid:976)ly -> Butterfly)
     cleaned_line = _clean_cid_ligatures(line)
     lower = cleaned_line.lower()
@@ -575,6 +700,13 @@ def parse_event_from_line(line: str) -> str | None:
         word in lower
         for word in ("free", "back", "breast", "fly", "butterfly", " medley", " im")
     ):
+        return None
+
+    # Check for multiple event numbers on one line (e.g., "#18 Boys... #21 Girls...")
+    # These are cross-column headers and should be ignored for event tracking
+    event_number_pattern = r'#\d+'
+    event_numbers = re.findall(event_number_pattern, cleaned_line)
+    if len(event_numbers) > 1:
         return None
 
     match = EVENT_WITH_DISTANCE.search(cleaned_line)
@@ -826,6 +958,7 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
     results: list[dict] = []
     current_event: str | None = None
     last_result_indices: list[int] = []
+    in_relay_section: bool = False
     # Hy-Tek wraps long races (400+) onto multiple split-only lines; collect
     # consecutive ones before mapping distances (same idea as relay _split_parts).
     pending_split_tokens: list[str] = []
@@ -850,14 +983,33 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
         if not stripped:
             continue
 
+        # Relay-event headers: track that we're in a relay block so relay team
+        # lines (e.g. "1 UNC Chapel Hill-NC A 1:42.53") are not mistakenly parsed
+        # as individual-athlete results.  parse_relay_results() owns those lines.
+        if RELAY_HEADER.search(stripped):
+            flush_pending_splits()
+            in_relay_section = True
+            last_result_indices = []
+            continue
+
         maybe_event = parse_event_from_line(stripped)
         if maybe_event and len(stripped) < 120:
             flush_pending_splits()
             current_event = maybe_event
+            in_relay_section = False
             last_result_indices = []
             continue
 
+        # Skip lines that belong to a relay section (handled by parse_relay_results).
+        if in_relay_section:
+            continue
+
         if not current_event:
+            continue
+
+        # Skip relay team result lines: they match "place  TEAM-CODE  [letter]  time"
+        # but have no comma-separated "LastName, FirstName" pattern.
+        if RELAY_TEAM_RESULT.match(stripped) and not re.search(r"[A-Z][a-z]+,", stripped):
             continue
 
         split_times = extract_times_from_line(stripped)
@@ -1094,13 +1246,33 @@ def parse_relay_results(lines: list[str], course: str) -> list[dict[str, Any]]:
             block.setdefault("_split_parts", []).append(line)
             continue
 
-        legs = [
+        # Try explicit leg format (1), 2)...)
+        found_legs = [
             {"leg": int(leg_num), "name": name.strip()}
             for leg_num, name, _age in RELAY_LEG.findall(line)
         ]
-        if legs and block:
+        
+        # Try result format (Name, Name Age)
+        if not found_legs:
+            matches = re.findall(r"([A-Za-z'\-]+,\s*[A-Za-z'\-]+)(?:\s+(\d+))?", line)
+            
+            if matches and block:
+                # Use current length of relaySwimmers to assign leg numbers
+                current_swimmers = block.setdefault("relaySwimmers", [])
+                start_leg = len(current_swimmers) + 1
+                for i, (name, age) in enumerate(matches):
+                    new_leg = {
+                        "leg": start_leg + i,
+                        "name": name.strip(),
+                        "age": int(age) if age else None
+                    }
+                    found_legs.append(new_leg)
+                    # Update block immediately
+                    current_swimmers.append(new_leg)
+        
+        if found_legs and block:
             block["relaySwimmers"] = _merge_relay_swimmers(
-                block.get("relaySwimmers") or [], legs
+                block.get("relaySwimmers") or [], found_legs
             )
             continue
 
@@ -1200,39 +1372,149 @@ def group_words_into_lines(words: list[dict], y_tol: float = 3.0) -> list[str]:
     return out
 
 
-def detect_column_split(words: list[dict], page_width: float) -> float | None:
-    """Return the x mid-line if the page is two-column, else None (single column).
-
-    Two-column detection uses two criteria that must both pass:
-    1. Very few words physically straddle the page center (the gutter check).
-    2. Both the left column and the right column contain substantial independent
-       content — specifically, there are many rows whose words stay entirely
-       within one half of the page.  A single-column results sheet (names on
-       the left, times on the right of the same row) fails this check because
-       the majority of rows span from the left margin well past the midpoint or
-       extend into the right half without a true gutter between them.
+def detect_column_split(words: list[dict], page_width: float, lines: list[dict] | None = None) -> list[float]:
+    """Return list of column boundaries (x-coordinates) for multi-column layouts.
+    
+    Returns empty list for single-column, or list of split points for 2+ columns.
+    For 2 columns: returns [midpoint]
+    For 3 columns: returns [1/3 point, 2/3 point]
+    
+    Can also use visual separators (vertical lines) to detect columns when word
+    distribution analysis is inconclusive.
     """
     if not words:
-        return None
+        return []
 
+    # Check for vertical lines that indicate column splits (e.g., Raleighwood format)
+    if lines:
+        vertical_lines = [
+            float(line["x0"])
+            for line in lines
+            if abs(line["x0"] - line["x1"]) < 1  # Vertical line (x0 ≈ x1)
+            and abs(line["y1"] - line["y0"]) > page_width * 0.5  # Long line (spans most of page height)
+        ]
+        
+        # Sort by x position
+        vertical_lines.sort()
+        
+        # If we found vertical lines, use them as column boundaries
+        # Typically we'd expect splits to be roughly evenly spaced
+        if vertical_lines:
+            # Filter to keep only lines that are reasonably spaced (not noise)
+            # For 2-column: one line near the middle
+            # For 3-column: two lines roughly at 1/3 and 2/3
+            mid = page_width / 2.0
+            
+            # Look for line(s) near middle for 2-column
+            near_mid = [x for x in vertical_lines if abs(x - mid) < page_width * 0.1]
+            if near_mid:
+                return [near_mid[0]]  # Use the first (most prominent) line near middle
+            
+            # Look for lines at roughly 1/3 and 2/3 for 3-column
+            third1 = page_width / 3.0
+            third2 = 2.0 * page_width / 3.0
+            near_third1 = [x for x in vertical_lines if abs(x - third1) < page_width * 0.1]
+            near_third2 = [x for x in vertical_lines if abs(x - third2) < page_width * 0.1]
+            if near_third1 and near_third2:
+                return [near_third1[0], near_third2[0]]
+
+
+    # Priority 2: Check for Event/Heat headers as column indicators
+    # This is more reliable than word distribution when visual lines aren't detected
     mid = page_width / 2.0
+    third1 = page_width / 3.0
+    third2 = 2.0 * page_width / 3.0
+    
+    header_words = [w for w in words if w['text'].lower() in ('event', 'heat')]
+    
+    if len(header_words) >= 2:
+        # Group header words by y-position (same row)
+        header_rows = {}
+        y_tol = 3.0
+        for w in header_words:
+            y_key = None
+            for existing_y in header_rows.keys():
+                if abs(float(w['top']) - existing_y) <= y_tol:
+                    y_key = existing_y
+                    break
+            if y_key is None:
+                y_key = float(w['top'])
+            header_rows.setdefault(y_key, []).append(w)
+        
+        # Analyze rows to detect 2-column or 3-column layouts
+        rows_with_2_headers = 0
+        rows_with_3_headers = 0
+        
+        for row_headers in header_rows.values():
+            sorted_headers = sorted(row_headers, key=lambda w: w['x0'])
+            
+            if len(sorted_headers) == 3:
+                left, middle, right = sorted_headers[0], sorted_headers[1], sorted_headers[2]
+                gap1 = middle['x0'] - left['x1']
+                gap2 = right['x0'] - middle['x1']
+                if gap1 > page_width * 0.1 and gap2 > page_width * 0.1:
+                    rows_with_3_headers += 1
+            
+            elif len(sorted_headers) == 2:
+                left, right = sorted_headers[0], sorted_headers[1]
+                gap = right['x0'] - left['x1']
+                if gap > page_width * 0.2:
+                    rows_with_2_headers += 1
+        
+        # If we have 2+ rows with 3 headers, it's a 3-column layout
+        if rows_with_3_headers >= 2:
+            return [third1, third2]
+        
+        # If we have 2+ rows with 2 headers, it's a 2-column layout
+        if rows_with_2_headers >= 2:
+            return [mid]
+
+    # Priority 3: Word distribution analysis
+    third1 = page_width / 3.0
+    third2 = 2.0 * page_width / 3.0
     band = page_width * 0.03
 
-    # Criterion 1: few words span the gutter.
-    crossing = sum(1 for w in words if w["x0"] < mid - band and w["x1"] > mid + band)
-    if crossing > max(5, 0.06 * len(words)):
-        return None
-
-    # Criterion 2: each column must have rows that stay entirely within that
-    # half.  Group words into rows by y-band, then count rows that are
-    # "left-only" (all words end before mid) vs "right-only" (all words start
-    # after mid).  For a true 2-column layout both counts should be substantial.
-    # For a single-column results sheet most rows span across mid, so the
-    # counts will be very low.
+    # Check if words cluster into 3 columns
     by_y: dict[int, list[dict]] = {}
     for w in words:
         by_y.setdefault(round(float(w["top"]) / 3) * 3, []).append(w)
 
+    left_only = 0
+    middle_only = 0
+    right_only = 0
+    
+    for row_words in by_y.values():
+        max_x1 = max(float(w["x1"]) for w in row_words)
+        min_x0 = min(float(w["x0"]) for w in row_words)
+        
+        # Left column: ends before first third
+        if max_x1 <= third1 + band:
+            left_only += 1
+        # Middle column: starts after first third, ends before second third
+        elif min_x0 >= third1 - band and max_x1 <= third2 + band:
+            middle_only += 1
+        # Right column: starts after second third
+        elif min_x0 >= third2 - band:
+            right_only += 1
+
+    # Both columns must account for at least 5% of rows each for 3-column,
+    # and 10% for 2-column, to allow for frequent cross-column result lines.
+    total_rows = len(by_y)
+    threshold_3col = max(2, 0.05 * total_rows)
+    threshold_2col = max(3, 0.10 * total_rows)
+    
+    if left_only >= threshold_3col and middle_only >= threshold_3col and right_only >= threshold_3col:
+        return [third1, third2]
+
+    # Fall back to 2-column detection
+    mid = page_width / 2.0
+
+    # Criterion 1: increased gutter tolerance to 10% of words for results PDFs.
+    crossing = sum(1 for w in words if w["x0"] < mid - band and w["x1"] > mid + band)
+    if crossing > max(10, 0.10 * len(words)):
+        return []
+
+    # Criterion 2: each column must have rows that stay entirely within that half.
     left_only = 0
     right_only = 0
     for row_words in by_y.values():
@@ -1243,21 +1525,24 @@ def detect_column_split(words: list[dict], page_width: float) -> float | None:
         elif min_x0 >= mid - band:
             right_only += 1
 
-    total_rows = len(by_y)
-    # Both columns must account for at least 15 % of rows each.
-    threshold = max(3, 0.15 * total_rows)
-    if left_only < threshold or right_only < threshold:
-        return None
+    # Before giving up, check for event/heat headers as a strong signal of columns
+    # Final fallback: use word distribution results if they passed the threshold
+    if left_only >= threshold_2col and right_only >= threshold_2col:
+        return [mid]
+    
+    return []
 
-    return mid
+def extract_page_lines(page: Any, forced_splits: list[float] | None = None) -> list[str]:
+    """Extract lines in human reading order, handling multi-column layouts.
 
+    For multi-column layouts, processes each column separately top-to-bottom,
+    then concatenates left-to-right. This keeps event headers with their results.
 
-def extract_page_lines(page: Any) -> list[str]:
-    """Extract lines in human reading order, handling two-column layouts.
-
-    pdfplumber's extract_text() reads across both columns and interleaves
-    swimmers from different events. Splitting by column first keeps each
-    event's results together so event headers apply to the right swimmers."""
+    Args:
+        page: A pdfplumber page object.
+        forced_splits: If provided, use these column boundaries instead of auto-detecting.
+            This ensures consistent multi-column treatment across all pages of the same PDF.
+    """
     try:
         words = page.extract_words(use_text_flow=False)
     except Exception:
@@ -1265,13 +1550,36 @@ def extract_page_lines(page: Any) -> list[str]:
     if not words:
         return (page.extract_text() or "").split("\n")
 
-    mid = detect_column_split(words, float(page.width))
-    if mid is None:
+    if forced_splits is not None:
+        splits = forced_splits
+    else:
+        splits = detect_column_split(words, float(page.width), lines=page.lines)
+    if not splits:
         return group_words_into_lines(words)
 
-    left = [w for w in words if (w["x0"] + w["x1"]) / 2.0 < mid]
-    right = [w for w in words if (w["x0"] + w["x1"]) / 2.0 >= mid]
-    return group_words_into_lines(left) + group_words_into_lines(right)
+    # Split words into columns
+    columns: list[list[dict]] = []
+    
+    if len(splits) == 1:
+        # 2-column layout
+        mid = splits[0]
+        left = [w for w in words if (w["x0"] + w["x1"]) / 2.0 < mid]
+        right = [w for w in words if (w["x0"] + w["x1"]) / 2.0 >= mid]
+        columns = [left, right]
+    elif len(splits) == 2:
+        # 3-column layout
+        third1, third2 = splits
+        left = [w for w in words if (w["x0"] + w["x1"]) / 2.0 < third1]
+        middle = [w for w in words if third1 <= (w["x0"] + w["x1"]) / 2.0 < third2]
+        right = [w for w in words if (w["x0"] + w["x1"]) / 2.0 >= third2]
+        columns = [left, middle, right]
+    
+    # Process each column separately to maintain event context
+    result = []
+    for col_words in columns:
+        result.extend(group_words_into_lines(col_words))
+    
+    return result
 
 
 def parse_meet_pdf_bytes(
@@ -1282,16 +1590,39 @@ def parse_meet_pdf_bytes(
     has_points_column = False
 
     with pdfplumber.open(io.BytesIO(content)) as pdf:
+        # Detect column layout once from the first data page (usually page 1 or 2),
+        # then apply it consistently to ALL pages.  Per-page detection can fail on
+        # pages that happen to have long cross-column header lines or sparse content.
+        pdf_splits: list[float] | None = None
+        page_width: float | None = None
+
         for page_index, page in enumerate(pdf.pages):
             if page_index == 0:
                 # The banner/title sit above the two-column body, so the plain
                 # top-to-bottom text read gives clean header lines.
                 header_lines = (page.extract_text() or "").split("\n")
+                page_width = float(page.width)
+
             # Check if this PDF has a "Points" column (indicates results PDF format)
             page_text = page.extract_text() or ""
             if "Points" in page_text and ("Finals Time" in page_text or "Seed Time" in page_text):
                 has_points_column = True
-            all_text.extend(extract_page_lines(page))
+
+            # Try to detect the column split from each page until we find one.
+            # Once found, reuse for all remaining pages (consistent layout assumption).
+            if pdf_splits is None and page_width is not None:
+                try:
+                    words = page.extract_words(use_text_flow=False)
+                    if words:
+                        candidate = detect_column_split(words, page_width)
+                        if candidate:
+                            pdf_splits = candidate
+                except Exception:
+                    pass
+
+        # Second pass: extract lines using the globally-detected split points.
+        for page in pdf.pages:
+            all_text.extend(extract_page_lines(page, forced_splits=pdf_splits))
 
     # Store this flag in a context variable for use in extract_times_from_line
     global _PDF_HAS_POINTS_COLUMN

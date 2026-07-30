@@ -18,7 +18,7 @@ const TEAM_ID = process.env.SWIMCLOUD_TEAM_ID ?? "10004130"
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
-  if (!session || !["COACH", "EXEC"].includes(session.user.role)) {
+  if (!session || !session.user.role === "COACH") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -28,16 +28,30 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Season is required (e.g. 2025-2026)" }, { status: 400 })
   }
 
-  const importGender = gender === "F" ? Gender.F : Gender.M
   const swimCloudYear = seasonEndYear(season)
-  let roster: SwimCloudRosterRow[]
+  const gendersToFetch = gender === "all" ? ["M", "F"] : [gender]
+  const allSummary = { linked: 0, unmatched: 0, skippedConflict: 0, alreadyLinked: 0, total: 0 }
 
   try {
-    roster = await runBridgeJob<SwimCloudRosterRow[]>(session.user.id, BridgeJobType.ROSTER, {
-      team_id: parseInt(TEAM_ID, 10),
-      year: swimCloudYear,
-      gender,
-    })
+    for (const g of gendersToFetch) {
+      const rosterRows = await runBridgeJob<SwimCloudRosterRow[]>(session.user.id, BridgeJobType.ROSTER, {
+        team_id: parseInt(TEAM_ID, 10),
+        year: swimCloudYear,
+        gender: g,
+      })
+      
+      const summary = await applySwimCloudRosterImport(
+        rosterRows,
+        season,
+        g === "F" ? Gender.F : Gender.M
+      )
+
+      allSummary.linked += summary.linked
+      allSummary.unmatched += summary.unmatched
+      allSummary.skippedConflict += summary.skippedConflict
+      allSummary.alreadyLinked += summary.alreadyLinked
+      allSummary.total += summary.total
+    }
   } catch (err) {
     const message = err instanceof Error ? err.message : "Import failed"
     if (message === "LOCAL_BRIDGE_NOT_CONNECTED") {
@@ -46,19 +60,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: message }, { status: 502 })
   }
 
-  console.log("[roster swimcloud ids] sample:", roster[0])
-  console.log("[roster swimcloud ids] length:", roster.length)
-
-  try {
-    const summary = await applySwimCloudRosterImport(
-      roster,
-      season,
-      importGender
-    )
-    console.log("[roster swimcloud ids] summary:", summary)
-    return NextResponse.json(summary)
-  } catch (err) {
-    console.error("SwimCloud roster import failed:", err)
-    return NextResponse.json({ error: String(err) }, { status: 500 })
-  }
+  console.log("[roster swimcloud ids] summary:", allSummary)
+  return NextResponse.json(allSummary)
 }

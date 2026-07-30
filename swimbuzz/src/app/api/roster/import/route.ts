@@ -21,7 +21,7 @@ function isUpload(value: unknown): value is Blob {
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
-  if (!session || !["COACH", "EXEC"].includes(session.user.role)) {
+  if (!session || !session.user.role === "COACH") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -78,23 +78,14 @@ export async function POST(req: Request) {
         lastName: row.lastName,
         gender: row.gender === "F" ? Gender.F : Gender.M,
         ...(row.email ? { email: row.email } : {}),
-        ...(row.swimCloudId != null ? { swimCloudId: row.swimCloudId } : {}),
+        ...(row.gtid ? { gtid: row.gtid } : {}),
+        ...(row.dob ? { dob: row.dob } : {}),
+        ...(row.year ? { year: row.year } : {}),
         ...(row.nicknames.length > 0 ? { nicknames: row.nicknames } : {}),
       }
 
       const existing = findAthleteForImport(input, context)
-      const conflict = swimCloudIdConflict(input, existing, context)
-      if (conflict) {
-        const message = `SwimCloud ID ${input.swimCloudId} already belongs to another athlete`
-        importErrors.push({ row: row.rowNumber, message })
-        rowOutcomes.push({
-          row: row.rowNumber,
-          action: "skipped",
-          name: `${row.lastName}, ${row.firstName}`,
-          detail: message,
-        })
-        continue
-      }
+      // Conflict check removed as swimCloudId is no longer in CSV input
 
       if (existing) {
         const hadSeason = existing.seasons.includes(season)

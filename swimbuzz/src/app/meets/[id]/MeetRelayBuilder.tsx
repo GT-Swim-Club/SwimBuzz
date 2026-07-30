@@ -292,9 +292,7 @@ export default function MeetRelayBuilder({
         ? `Add this ${genderLabel} ${result.relay} ${confirmTeam.letter} as a roster seed (${formatTime(confirmTeam.totalMs)}).`
         : undefined
 
-  const eventChoices = events.filter((e) =>
-    gender === "X" ? !/\bmedley\b/i.test(e) : true
-  )
+  const eventChoices = events
 
   return (
     <section>
@@ -311,15 +309,12 @@ export default function MeetRelayBuilder({
                 const next = e.target.value
                 setGender(next)
                 setResult(null)
-                if (next === "X" && /\bmedley\b/i.test(event)) {
-                  setEvent(eventChoices.find((ev) => !/\bmedley\b/i.test(ev)) ?? event)
-                }
               }}
-              className="border border-border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
+              className="w-auto border border-border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
             >
               <option value="M">Men</option>
               <option value="F">Women</option>
-              {!/\bmedley\b/i.test(event) && <option value="X">Mixed</option>}
+              <option value="X">Mixed</option>
             </select>
           </div>
           <div>
@@ -330,7 +325,7 @@ export default function MeetRelayBuilder({
                 setEvent(e.target.value)
                 setResult(null)
               }}
-              className="border border-border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
+              className="w-auto border border-border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
             >
               {eventChoices.map((e) => (
                 <option key={e}>{e}</option>
@@ -344,7 +339,7 @@ export default function MeetRelayBuilder({
               onChange={(e) =>
                 setWithinDays(e.target.value === "" ? null : Number(e.target.value))
               }
-              className="border border-border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
+              className="w-auto border border-border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
             >
               {TIME_WINDOWS.map((w) => (
                 <option key={w.label} value={w.days ?? ""}>
@@ -361,56 +356,49 @@ export default function MeetRelayBuilder({
                 setRelayCount(Number(e.target.value))
                 setResult(null)
               }}
-              className="border border-border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
+              className="w-auto border border-border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
             >
-              <option value={1}>1 (A)</option>
-              <option value={2}>2 (A–B)</option>
-              <option value={3}>3 (A–C)</option>
+              <option value={1}>A</option>
+              <option value={2}>A, B</option>
+              <option value={3}>A, B, C</option>
             </select>
+          </div>
+          <div>
+            <label className="text-xs text-foreground-secondary text-foreground-secondary mb-1 block">Athlete pool</label>
+            <select
+              value={signupPool}
+              onChange={(e) => {
+                setSignupPool(e.target.value as SignupPool)
+                setResult(null)
+              }}
+              className="w-auto border border-border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
+            >
+              <option value="all">All athletes</option>
+              <option value="meet">
+                Signed up for meet
+                {meetSignedUpIds.length > 0 ? ` (${meetSignedUpIds.length})` : ""}
+              </option>
+              <option value="relay">
+                Signed up for relay
+                {relaySignedUpIds.length > 0 ? ` (${relaySignedUpIds.length})` : ""}
+              </option>
+            </select>
+            {poolCount != null && poolCount === 0 ? (
+              <p className="mt-1 text-xs text-foreground-secondary text-foreground-secondary">
+                {signupPool === "relay"
+                  ? `No ${genderPeople} signed up for this relay yet.`
+                  : `No ${genderPeople} signed up for this meet yet.`}
+              </p>
+            ) : null}
           </div>
           <button
             type="button"
             onClick={handleBuild}
             disabled={loading}
-            className="px-4 py-2 text-sm border border-border border-border-secondary rounded-lg dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary bg-background disabled:opacity-40 transition-colors"
+            className="px-4 py-2 text-sm rounded-lg bg-primary text-primary-text hover:bg-primary-hover disabled:opacity-50 transition-colors"
           >
             {loading ? "Building..." : relayCount > 1 ? "Build relays" : "Build relay"}
           </button>
-        </div>
-
-        <div>
-          <label className="text-xs text-foreground-secondary text-foreground-secondary mb-1 block">
-            Athlete pool
-          </label>
-          <select
-            value={signupPool}
-            onChange={(e) => {
-              setSignupPool(e.target.value as SignupPool)
-              setResult(null)
-            }}
-            className="border border-border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
-          >
-            <option value="all">All athletes</option>
-            <option value="meet">
-              Signed up for this meet
-              {meetSignedUpIds.length > 0
-                ? ` (${meetSignedUpIds.length})`
-                : ` (no ${genderPeople})`}
-            </option>
-            <option value="relay">
-              Signed up for this relay
-              {relaySignedUpIds.length > 0
-                ? ` (${relaySignedUpIds.length})`
-                : ` (no ${genderPeople})`}
-            </option>
-          </select>
-          {poolCount != null && poolCount === 0 ? (
-            <p className="mt-1 text-xs text-foreground-secondary text-foreground-secondary">
-              {signupPool === "relay"
-                ? `No ${genderPeople} signed up for this relay yet.`
-                : `No ${genderPeople} signed up for this meet yet.`}
-            </p>
-          ) : null}
         </div>
 
         {error && <p className="text-sm text-red-500">{error}</p>}

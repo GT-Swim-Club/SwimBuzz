@@ -6,9 +6,8 @@
     "node": ">=22.19.0"
   },
   "scripts": {
-    "sync-bridge": "node scripts/sync-bridge.mjs",
-    "dev": "npm run sync-bridge && prisma generate && node server.js",
-    "build": "npm run sync-bridge && prisma generate && next build",
+    "dev": "prisma generate && node server.js",
+    "build": "prisma generate && next build",
     "start": "NODE_ENV=production node server.js",
     "postinstall": "prisma generate",
     "lint": "eslint"
@@ -22,6 +21,8 @@
     "@tiptap/pm": "^3.28.0",
     "@tiptap/react": "^3.28.0",
     "@tiptap/starter-kit": "^3.28.0",
+    "@tiptap/extension-link": "^3.28.0",
+    "@tiptap/extension-underline": "^3.28.0",
     "heic2any": "^0.0.4",
     "next": "16.2.9",
     "next-auth": "^4.24.14",

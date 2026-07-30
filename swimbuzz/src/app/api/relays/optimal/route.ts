@@ -344,7 +344,7 @@ export async function POST(req: Request) {
   ]
   const athletes = await prisma.athlete.findMany({
     where: { id: { in: allAthleteIds } },
-    select: { id: true, firstName: true, lastName: true },
+    select: { id: true, firstName: true, lastName: true, gender: true },
   })
   const athleteMap = Object.fromEntries(athletes.map((a) => [a.id, a]))
 
@@ -356,12 +356,21 @@ export async function POST(req: Request) {
     }
   }
 
-  function bestMedleyFromPool(available: Set<string>) {
+  function bestMedleyFromPool(available: Set<string>, isMixed: boolean) {
     const candidates = [...available].filter((id) => timeLookup[id])
     let bestTotal = Infinity
     let bestAssignment: { leg: string; athleteId: string; timeMs: number }[] = []
 
     for (const combo of combinations(candidates, 4)) {
+      if (isMixed) {
+        let men = 0
+        let women = 0
+        for (const id of combo) {
+          if (athleteMap[id].gender === "M") men++
+          else if (athleteMap[id].gender === "F") women++
+        }
+        if (men !== 2 || women !== 2) continue
+      }
       for (const perm of permutations([...medleyLegs])) {
         let total = 0
         let valid = true
@@ -393,7 +402,7 @@ export async function POST(req: Request) {
   const LEG_ORDER = ["back", "breast", "fly", "free"]
 
   for (let t = 0; t < relayCount; t++) {
-    const found = bestMedleyFromPool(available)
+    const found = bestMedleyFromPool(available, gender === "X")
     if (!found) break
     for (const a of found.bestAssignment) available.delete(a.athleteId)
 

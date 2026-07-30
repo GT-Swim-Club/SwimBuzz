@@ -3,8 +3,7 @@
 import { useEditor, EditorContent } from "@tiptap/react"
 import { useRef, useState, useEffect } from "react"
 import StarterKit from "@tiptap/starter-kit"
-import Underline from "@tiptap/extension-underline"
-import Link from "@tiptap/extension-link"
+
 import Modal, { ModalFooter } from "@/components/Modal"
 import { TextSelection } from "@tiptap/pm/state"
 
@@ -130,6 +129,7 @@ export default function RichTextField({
   const firstInputRef = useRef<HTMLInputElement>(null);
   
   const editor = useEditor({
+    immediatelyRender: true,
     parseOptions: {
         preserveWhitespace: 'full',
     },
@@ -143,22 +143,26 @@ export default function RichTextField({
           keepMarks: true,
           keepAttributes: true,
         },
-      }),
-      Underline,
-      Link.configure({ 
-        openOnClick: false,
-        autolink: false, // Prevents automatic link creation on click
-        HTMLAttributes: {
-            class: 'text-[var(--brand-color-primary)] underline',
+        link: { 
+          openOnClick: false,
+          autolink: false, // Prevents automatic link creation on click
+          HTMLAttributes: {
+              class: 'text-[var(--brand-color-primary)] underline',
+          },
+        },
+        underline: {
+            HTMLAttributes: {
+                class: 'underline',
+            }
         },
       }),
     ],
     content: value,
     // Prevent default browser behavior of opening links in editor by clicking
-    editorProps: {
+      editorProps: {
       attributes: {
-        class: `prose prose-sm max-w-none focus:outline-none whitespace-pre-wrap min-h-[6rem] p-2 border border-border rounded-lg bg-background text-sm text-foreground [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-[var(--brand-color-primary)] [&_a]:underline ${className}`,
-        style: "font-family: inherit;",
+        class: `prose prose-sm max-w-none focus:outline-none whitespace-pre-wrap p-2 border border-border rounded-lg bg-background text-sm text-foreground [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-[var(--brand-color-primary)] [&_a]:underline ${className}`,
+        style: `font-family: inherit; min-height: ${rows * 1.5}rem;`,
       },
       handleClick: (view, pos, event) => {
         const { state } = view;
@@ -276,6 +280,12 @@ export default function RichTextField({
     setLinkModalOpen(false);
   }
 
+  function handleRemoveLink() {
+    if (!editor) return;
+    editor.chain().focus().extendMarkRange("link").unsetLink().run();
+    setLinkModalOpen(false);
+  }
+
   return (
     <div ref={containerRef}>
       {label ? (
@@ -294,7 +304,11 @@ export default function RichTextField({
         title="Link"
         footer={
             <ModalFooter>
-                <button type="button" onClick={() => setLinkModalOpen(false)} className="rounded-lg border px-4 py-2 text-sm">Cancel</button>
+                <button type="button" onClick={() => setLinkModalOpen(false)} className="rounded-lg border border-border px-4 py-2 text-sm hover:bg-fill-secondary">Cancel</button>
+                <div className="flex-1" />
+                {linkUrl && (
+                    <button type="button" onClick={handleRemoveLink} className="rounded-lg border border-border px-4 py-2 text-sm text-red-600 hover:bg-fill-secondary">Remove</button>
+                )}
                 <button type="button" onClick={handleAddLink} className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-text">Apply</button>
             </ModalFooter>
         }
@@ -311,7 +325,7 @@ export default function RichTextField({
                 type="text" 
                 value={linkTitle} 
                 onChange={(e) => setLinkTitle(e.target.value)}
-                className="w-full rounded-lg border px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
                 placeholder="Text"
             />
           )}
@@ -320,7 +334,7 @@ export default function RichTextField({
               type="text" 
               value={linkUrl} 
               onChange={(e) => { setUrlError(false); setLinkUrl(e.target.value); }}
-              className={`w-full rounded-lg border px-3 py-2 text-sm ${urlError ? 'border-red-500' : ''}`}
+              className={`w-full rounded-lg border border-border px-3 py-2 text-sm bg-background ${urlError ? 'border-error' : ''}`}
               placeholder="https://example.com"
           />
           {urlError && <p className="text-xs text-red-500">Please enter a valid URL</p>}

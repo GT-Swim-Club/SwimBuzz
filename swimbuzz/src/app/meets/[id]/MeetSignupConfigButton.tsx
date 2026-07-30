@@ -22,7 +22,6 @@ function fromDatetimeLocal(value: string): string | null {
 }
 
 export type MeetSignupConfigInitial = {
-  enabled: boolean
   instructions: string
   minEvents: number | null
   maxEvents: number | null
@@ -51,7 +50,6 @@ export default function MeetSignupConfigButton({
   const [questionType, setQuestionType] = useState<MeetSignupQuestionType>("text")
   const [optionDrafts, setOptionDrafts] = useState<Record<string, string>>({})
   const [form, setForm] = useState({
-    enabled: initial?.enabled ?? false,
     instructions: initial?.instructions ?? "",
     minEvents: initial?.minEvents?.toString() ?? "",
     maxEvents: initial?.maxEvents?.toString() ?? "",
@@ -70,7 +68,6 @@ export default function MeetSignupConfigButton({
     setQuestionType("text")
     setOptionDrafts({})
     setForm({
-      enabled: initial?.enabled ?? false,
       instructions: initial?.instructions ?? "",
       minEvents: initial?.minEvents?.toString() ?? "",
       maxEvents: initial?.maxEvents?.toString() ?? "",
@@ -127,6 +124,19 @@ export default function MeetSignupConfigButton({
       setError(`"${incompleteChoice.label}" needs at least 2 choices`)
       return
     }
+
+    const openAt = fromDatetimeLocal(form.openAt)
+    const closeAt = fromDatetimeLocal(form.closeAt)
+    if (openAt && closeAt && new Date(openAt) > new Date(closeAt)) {
+      setError("Close time must be on or after the open time")
+      return
+    }
+
+    if (eventCount === 0) {
+      setError("Must have an order of events to set up a sign-up form.")
+      return
+    }
+
     setLoading(true)
     setError(null)
     try {
@@ -134,7 +144,6 @@ export default function MeetSignupConfigButton({
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          enabled: form.enabled,
           instructions: form.instructions,
           minEvents: form.minEvents.trim() === "" ? null : form.minEvents,
           maxEvents: form.maxEvents.trim() === "" ? null : form.maxEvents,
@@ -212,16 +221,6 @@ export default function MeetSignupConfigButton({
         }
       >
         <form id="meet-signup-config" onSubmit={handleSubmit} className="space-y-5">
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={form.enabled}
-              onChange={(e) => setForm((f) => ({ ...f, enabled: e.target.checked }))}
-              className="rounded border-gray-300"
-            />
-            Accepting sign-ups
-          </label>
-
           <p className="text-sm text-foreground-secondary text-foreground-secondary">
             {eventCount > 0
               ? `Swimmers can choose from the ${eventCount} events in this meet’s order of events.`

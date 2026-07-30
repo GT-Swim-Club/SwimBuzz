@@ -1,5 +1,15 @@
 import Link from "next/link"
 
+function formatYear(year: string): string {
+  if (year.toLowerCase().includes("phd")) return "PhD"
+  if (year.toLowerCase().includes("master")) return "Masters"
+  const num = parseInt(year)
+  if (isNaN(num)) return year
+  const suffixes = ["th", "st", "nd", "rd"]
+  const v = num % 100
+  return num + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]) + " Year"
+}
+
 export default function AthleteGalleryCard({
   athlete,
   showGender,
@@ -13,6 +23,7 @@ export default function AthleteGalleryCard({
     nicknames: string[]
     gender: string
     swimCloudId: number | null
+    year: string | null
   }
   showGender: boolean
   isYou?: boolean
@@ -49,8 +60,7 @@ export default function AthleteGalleryCard({
         {athlete.lastName}
       </h3>
       <div className="text-xs text-foreground-secondary mt-0.5 space-y-0.5 w-full">
-        {athlete.user?.email && <p className="truncate">{athlete.user.email}</p>}
-        {athlete.swimCloudId && <p className="truncate">SwimCloud: {athlete.swimCloudId}</p>}
+        {athlete.year && <p className="truncate">{formatYear(athlete.year)}</p>}
         {showGender && (
           <p className="font-medium uppercase tracking-wide text-foreground-tertiary">
             {athlete.gender === "F" ? "Women" : "Men"}

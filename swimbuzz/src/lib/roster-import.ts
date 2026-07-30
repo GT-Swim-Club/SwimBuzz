@@ -17,6 +17,9 @@ export type RosterImportAthlete = {
   gender: Gender
   seasons: string[]
   swimCloudId: number | null
+  gtid: string | null
+  dob: Date | null
+  year: string | null
   userEmail: string
 }
 
@@ -25,7 +28,6 @@ export type RosterImportInput = {
   lastName: string
   gender: Gender
   email?: string
-  swimCloudId?: number
   nicknames?: string[]
 }
 
@@ -47,6 +49,9 @@ export async function loadRosterImportContext(): Promise<RosterImportContext> {
       gender: true,
       seasons: true,
       swimCloudId: true,
+      gtid: true,
+      dob: true,
+      year: true,
       user: { select: { email: true } },
     },
   })
@@ -60,6 +65,9 @@ export async function loadRosterImportContext(): Promise<RosterImportContext> {
     gender: athlete.gender,
     seasons: athlete.seasons,
     swimCloudId: athlete.swimCloudId,
+    gtid: athlete.gtid,
+    dob: athlete.dob,
+    year: athlete.year,
     userEmail: athlete.user.email,
   }))
 
@@ -84,11 +92,6 @@ export function findAthleteForImport(
   input: RosterImportInput,
   context: RosterImportContext
 ): RosterImportAthlete | null {
-  if (input.swimCloudId != null) {
-    const byId = context.bySwimCloudId.get(input.swimCloudId)
-    if (byId) return byId
-  }
-
   if (input.email) {
     const byMail = context.byEmail.get(input.email.toLowerCase())
     if (byMail) return byMail
@@ -101,14 +104,11 @@ export function findAthleteForImport(
 }
 
 export function swimCloudIdConflict(
-  input: RosterImportInput,
-  athlete: RosterImportAthlete | null,
-  context: RosterImportContext
+  _input: RosterImportInput,
+  _athlete: RosterImportAthlete | null,
+  _context: RosterImportContext
 ): RosterImportAthlete | null {
-  if (input.swimCloudId == null) return null
-  const owner = context.bySwimCloudId.get(input.swimCloudId)
-  if (!owner || owner.id === athlete?.id) return null
-  return owner
+  return null
 }
 
 function placeholderEmail(
@@ -139,6 +139,9 @@ const athleteSelect = {
   gender: true,
   seasons: true,
   swimCloudId: true,
+  gtid: true,
+  dob: true,
+  year: true,
   user: { select: { email: true } },
 } as const
 
@@ -151,6 +154,9 @@ function toRosterAthlete(updated: {
   gender: Gender
   seasons: string[]
   swimCloudId: number | null
+  gtid: string | null
+  dob: Date | null
+  year: string | null
   user: { email: string }
 }): RosterImportAthlete {
   return {
@@ -162,6 +168,9 @@ function toRosterAthlete(updated: {
     gender: updated.gender,
     seasons: updated.seasons,
     swimCloudId: updated.swimCloudId,
+    gtid: updated.gtid ?? null,
+    dob: updated.dob ?? null,
+    year: updated.year ?? null,
     userEmail: updated.user.email,
   }
 }
@@ -225,9 +234,9 @@ export async function mergeImportAthlete(
     data: {
       seasons,
       nicknames,
-      ...(input.swimCloudId != null && athlete.swimCloudId == null
-        ? { swimCloudId: input.swimCloudId }
-        : {}),
+  ...(input.gtid != null && athlete.gtid == null ? { gtid: input.gtid } : {}),
+      ...(input.dob != null && athlete.dob == null ? { dob: input.dob } : {}),
+      ...(input.year != null && athlete.year == null ? { year: input.year } : {}),
     },
     select: athleteSelect,
   })
@@ -240,7 +249,7 @@ export async function createImportAthlete(
   season: string,
   rowNumber?: number
 ): Promise<RosterImportAthlete> {
-  let email = input.email ?? placeholderEmail(input.firstName, input.lastName, input.swimCloudId)
+  let email = input.email ?? placeholderEmail(input.firstName, input.lastName, undefined)
   const nicknames = normalizeNicknames(input.nicknames ?? [])
 
   const existingUser = await prisma.user.findUnique({
@@ -258,7 +267,9 @@ export async function createImportAthlete(
         nicknames,
         gender: input.gender,
         seasons: [season],
-        ...(input.swimCloudId != null ? { swimCloudId: input.swimCloudId } : {}),
+        ...(input.gtid != null ? { gtid: input.gtid } : {}),
+        ...(input.dob != null ? { dob: input.dob } : {}),
+        ...(input.year != null ? { year: input.year } : {}),
       },
       select: athleteSelect,
     })
@@ -298,7 +309,9 @@ export async function createImportAthlete(
       nicknames,
       gender: input.gender,
       seasons: [season],
-      ...(input.swimCloudId != null ? { swimCloudId: input.swimCloudId } : {}),
+      ...(input.gtid != null ? { gtid: input.gtid } : {}),
+      ...(input.dob != null ? { dob: input.dob } : {}),
+      ...(input.year != null ? { year: input.year } : {}),
     },
     select: athleteSelect,
   })

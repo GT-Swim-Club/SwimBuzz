@@ -38,21 +38,106 @@ class _SheetTeam:
     def matches(self, team: str) -> bool:
         return club_matches(team.strip(), self.code.lower())
 
-    def individual_re(self) -> re.Pattern[str]:
+    def _team_name_pattern(self) -> str:
+        """Return a regex fragment matching any recognised form of the team name.
+
+        Covers:
+          * Short code only — e.g. ``GTSC``
+          * Code with region suffix — e.g. ``GTSC-GA``
+          * Full club name with optional region — e.g. ``Georgia Tech Swim Club-GA``
+          * Partial name prefixes that ``club_matches`` considers equivalent, e.g.
+            ``Georgia Tech`` (first two words of the expansion) or
+            ``Georgia Tech Swim`` (three words).
+
+        The longest alternates are listed first so the regex engine greedily
+        matches the most complete team name when multiple alternates could fit.
+        """
         base = re.escape(self.base)
+        # Short-code variants: GTSC or GTSC-GA
+        code_pat = rf"{base}(?:-[A-Z]{{2}})?"
+
+        # Build full-name alternates by expanding each letter of the base code to
+        # "any word starting with that letter" (\S+), then producing one alternate
+        # per prefix length (longest first, minimum two words so we don't match
+        # single-letter tokens):
+        #   GTSC → Georgia Tech Swim Club, Georgia Tech Swim, Georgia Tech
+        word_parts: list[str] = []
+        for ch in self.base:
+            word_parts.append(rf"[{ch.upper()}{ch.lower()}]\S*")
+
+        full_name_alts: list[str] = []
+        for length in range(len(word_parts), 1, -1):
+            full_name_alts.append(r"\s+".join(word_parts[:length]) + r"(?:\s+\S+)*")
+
+        if full_name_alts:
+            # Allow an optional region suffix like -GA after the full name.
+            full_name_pat = (
+                "(?:" + "|".join(full_name_alts) + r")(?:-[A-Z]{2})?"
+            )
+            return f"(?:{code_pat}|{full_name_pat})"
+
+        return code_pat
+
+    def _relay_team_pattern(self) -> str:
+        """Return a regex fragment for the team field in a relay entry line.
+
+        Unlike *_team_name_pattern*, this variant must NOT greedily consume the
+        relay letter (A/B/C/D) or the seed time that follow the team name.  It
+        stops at the last word that doesn't look like a relay letter or a time.
+
+        Strategy: build explicit alternates from longest to shortest, each
+        terminated by a lookahead that asserts the next token is a relay letter
+        or a time value.
+        """
+        base = re.escape(self.base)
+        code_pat = rf"{base}(?:-[A-Z]{{2}})?"
+
+        word_parts: list[str] = []
+        for ch in self.base:
+            word_parts.append(rf"[{ch.upper()}{ch.lower()}]\S*")
+
+        # Lookahead: next non-space must be a relay letter followed by space,
+        # or a time / NT token.
+        time_look = (
+            r"(?=\s*(?:[ABCD]\s+|NT\b|NQT\b|DFS\b|SCR\b"
+            r"|\d{1,2}:\d{2}\.\d{2}|\d{2,3}\.\d{2}))"
+        )
+
+        full_name_alts: list[str] = []
+        for length in range(len(word_parts), 1, -1):
+            core = r"\s+".join(word_parts[:length])
+            # Allow extra words only when they don't look like relay letters / times
+            extra = r"(?:\s+(?![ABCD]\s+|NT\b|NQT\b|DFS\b|SCR\b|\d)\S+)*"
+            region = r"(?:-[A-Z]{2})?"
+            full_name_alts.append(core + extra + region + time_look)
+
+        if full_name_alts:
+            full_name_pat = "(?:" + "|".join(full_name_alts) + ")"
+            return f"(?:{code_pat}|{full_name_pat})"
+
+        return code_pat
+
+    def individual_re(self) -> re.Pattern[str]:
+        team_pat = self._team_name_pattern()
+        time_pat = r"NT|NQT|DFS|SCR|\d{1,2}:\d{2}\.\d{2}|\d{2,3}\.\d{2}"
+        # Match individual entries with optional age before team (with or without space).
+        # Formats:
+        #   "1 Carlton, Delaney 23 Georgia Tech 1:56.69"  (age with space)
+        #   "7 Elvambuena, Ella 20GTSC-GA 1:14.69"        (age concatenated)
         return re.compile(
-            rf"(\d+)\s+(.+?)\s*{base}(?:-[A-Z]{{2}})?\s+"
-            rf"(NT|NQT|DFS|SCR|\d{{1,2}}:\d{{2}}\.\d{{2}}|\d{{2,3}}\.\d{{2}})",
+            rf"(\d+)\s+(.+?)\s+(?:\d{{1,2}}\s*)?{team_pat}\s+"
+            rf"({time_pat})",
             re.I,
         )
 
     def relay_re(self) -> re.Pattern[str]:
-        base = re.escape(self.base)
+        team_pat = self._relay_team_pattern()
+        time_pat = r"NT|NQT|DFS|SCR|\d{1,2}:\d{2}\.\d{2}|\d{2,3}\.\d{2}"
         return re.compile(
-            rf"^(\d+)\s+"
-            rf"({base}(?:-[A-Z]{{2}})?)\s*"
-            rf"([ABC])?\s*"
-            rf"(NT|NQT|DFS|SCR|\d{{1,2}}:\d{{2}}\.\d{{2}}|\d{{2,3}}\.\d{{2}})",
+            rf"(\d+)\s+"
+            rf"({team_pat})\s*"
+            rf"([ABCD])?\s*"
+            rf"({time_pat})",
             re.I,
         )
 
@@ -166,6 +251,11 @@ def _clean_line(line: str) -> str:
     line = line.replace("Butterfly", "Fly").replace("Butter fly", "Fly")
     line = line.replace("Backstroke", "Back").replace("Breaststroke", "Breast")
     line = line.replace("Freestyle", "Free").replace("Individual Medley", "IM")
+    # Strip trailing blank-fill columns that some Hy-Tek formats append for
+    # hand-written results (e.g. "1:55.24 _________________ _______").
+    line = re.sub(r"\s*_{4,}[\s_]*$", "", line)
+    # Strip non-conforming "X" prefix from seed times (e.g. X2:03.00, XNT).
+    line = re.sub(r"\bX(NT|NQT|\d{1,2}:\d{2}\.\d{2}|\d{2,3}\.\d{2})\b", r"\1", line, flags=re.I)
     return re.sub(r"\s+", " ", line).strip()
 
 
@@ -443,8 +533,10 @@ def _parse_relay_team(
     return entry
 
 
-def _parse_relay_leg(line: str) -> list[dict[str, Any]]:
+def _parse_relay_leg(line: str, offset: int = 0) -> list[dict[str, Any]]:
     legs: list[dict[str, Any]] = []
+    
+    # Try explicit leg format (1), 2)...)
     for leg_num, name, age in RELAY_LEG.findall(line):
         legs.append(
             {
@@ -453,6 +545,17 @@ def _parse_relay_leg(line: str) -> list[dict[str, Any]]:
                 "age": int(age) if age else None,
             }
         )
+    
+    # Try result format (Name, Name Age)
+    if not legs:
+        matches = re.findall(r"([A-Za-z'\-]+,\s*[A-Za-z'\-]+)(?:\s+(\d+))?", line)
+        for i, (name, age) in enumerate(matches):
+            legs.append({
+                "leg": offset + i + 1,
+                "name": name.strip(),
+                "age": int(age) if age else None,
+            })
+            
     return legs
 
 
@@ -905,8 +1008,8 @@ def _entry_report_page_lines(page: Any, *, column_flow: bool) -> list[tuple[str,
     if not words:
         return [(line, None) for line in extract_page_lines(page)]
 
-    mid = detect_column_split(words, float(page.width))
-    if mid is None:
+    splits = detect_column_split(words, float(page.width))
+    if not splits:
         return [
             (cleaned, None)
             for line in group_words_into_lines(words)
@@ -914,14 +1017,18 @@ def _entry_report_page_lines(page: Any, *, column_flow: bool) -> list[tuple[str,
             if cleaned
         ]
 
-    left_words = [w for w in words if (w["x0"] + w["x1"]) / 2.0 < mid]
-    right_words = [w for w in words if (w["x0"] + w["x1"]) / 2.0 >= mid]
     items: list[tuple[str, str | None]] = []
-    for column, column_words in (("L", left_words), ("R", right_words)):
+    # Add a boundary at the end to cover the last column
+    boundaries = splits + [float(page.width)]
+    start = 0.0
+    for i, boundary in enumerate(boundaries):
+        column_label = chr(ord('L') + i) if i < 2 else 'R' # Keep 'L'/'R' as expected by row-pairing logic
+        column_words = [w for w in words if start <= (w["x0"] + w["x1"]) / 2.0 < boundary]
         for raw in group_words_into_lines(column_words):
             cleaned = _clean_line(raw)
             if cleaned:
-                items.append((cleaned, column))
+                items.append((cleaned, column_label))
+        start = boundary
     return items
 
 
@@ -1107,10 +1214,35 @@ def _page_lines(page: Any, *, split_columns: bool) -> list[str]:
     if not words:
         return extract_page_lines(page)
 
-    mid = float(page.width) / 2.0
-    left = [w for w in words if (w["x0"] + w["x1"]) / 2.0 < mid]
-    right = [w for w in words if (w["x0"] + w["x1"]) / 2.0 >= mid]
-    return group_words_into_lines(left) + group_words_into_lines(right)
+    # Use detect_column_split to determine if this page is genuinely multi-column.
+    # Fall back to single-column reading when no real column gap is found
+    # (e.g. White & Gold format with a wide "Finals Place" column that sits beyond
+    # the page midpoint but is actually part of a single-column layout).
+    splits = detect_column_split(words, float(page.width), lines=page.lines)
+    if not splits:
+        return group_words_into_lines(words)
+
+    # Handle 2-column or 3-column layouts
+    if len(splits) == 1:
+        # 2-column layout
+        mid = splits[0]
+        left = [w for w in words if (w["x0"] + w["x1"]) / 2.0 < mid]
+        right = [w for w in words if (w["x0"] + w["x1"]) / 2.0 >= mid]
+        return group_words_into_lines(left) + group_words_into_lines(right)
+    elif len(splits) == 2:
+        # 3-column layout
+        split1, split2 = splits
+        left = [w for w in words if (w["x0"] + w["x1"]) / 2.0 < split1]
+        middle = [w for w in words if split1 <= (w["x0"] + w["x1"]) / 2.0 < split2]
+        right = [w for w in words if (w["x0"] + w["x1"]) / 2.0 >= split2]
+        return (
+            group_words_into_lines(left)
+            + group_words_into_lines(middle)
+            + group_words_into_lines(right)
+        )
+    else:
+        # Fallback for unexpected split count
+        return group_words_into_lines(words)
 
 
 def _cluster_column_starts(xs: list[float], gap: float = 50.0, min_size: int = 10) -> list[float]:
@@ -1339,7 +1471,8 @@ def _parse_usms_sheet_pages(pdf: Any, sheet_type: str) -> list[dict[str, Any]]:
                         continue
 
                     if pending_relay and len(pending_relay.get("relaySwimmers", [])) < 4:
-                        legs = _parse_relay_leg(line)
+                        offset = len(pending_relay["relaySwimmers"])
+                        legs = _parse_relay_leg(line, offset=offset)
                         if legs:
                             swimmers = pending_relay["relaySwimmers"]
                             for leg in legs:
@@ -1367,7 +1500,9 @@ def _parse_usms_sheet_pages(pdf: Any, sheet_type: str) -> list[dict[str, Any]]:
 
 
 def _extract_lines(pdf: Any, sheet_type: str) -> list[str]:
-    split_columns = sheet_type == "heat"
+    # Enable column splitting for both psych sheets and heat sheets to handle
+    # two-column layouts where women's and men's events are side-by-side.
+    split_columns = sheet_type in ("heat", "psych")
     lines: list[str] = []
     for page in pdf.pages:
         for line in _page_lines(page, split_columns=split_columns):
@@ -1451,19 +1586,40 @@ def parse_sheet_pdf_bytes(
             continue
 
         if current_event.get("isRelay"):
-            relay = _parse_relay_team(
-                line,
-                sheet_type=detected,
-                event=current_event,
-                heat=current_heat,
-            )
-            if relay:
+            # Use finditer to handle multiple relay entries on the same line (2-column layout)
+            found_any_relay = False
+            for match in _sheet_team.relay_re().finditer(line):
+                rank, team, letter, time = match.groups()
+                relay = {
+                    "entryType": "relay_team",
+                    "team": team.upper(),
+                    "relayLetter": normalize_relay_letter(letter),
+                    "eventNumber": current_event["eventNumber"],
+                    "event": current_event["event"],
+                    "gender": current_event["gender"],
+                    "isRelay": True,
+                    "relaySwimmers": [],
+                    "seedTime": time if time.upper() not in {"NT", "NQT", "DFS", "SCR"} else None,
+                    "timeStatus": time.upper() if time.upper() in {"NT", "NQT", "DFS", "SCR"} else None,
+                }
+                
+                if sheet_type == "psych" or not current_heat:
+                    relay["seedRank"] = int(rank)
+                else:
+                    relay["lane"] = int(rank)
+                    relay.update(current_heat)
+
                 pending_relay = relay
                 entries.append(relay)
+                found_any_relay = True
+            
+            if found_any_relay:
                 continue
 
+            # If no matches, try to parse legs for an existing relay
             if pending_relay and len(pending_relay.get("relaySwimmers", [])) < 4:
-                legs = _parse_relay_leg(line)
+                offset = len(pending_relay.get("relaySwimmers", []))
+                legs = _parse_relay_leg(line, offset=offset)
                 if legs:
                     swimmers = pending_relay["relaySwimmers"]
                     for leg in legs:

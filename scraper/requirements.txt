@@ -1,7 +1,0 @@
-# Run scraper dependencies (also copied via sync-bridge as public/bridge/requirements.txt)
-httpx
-python-dotenv
-playwright==1.61.0
-playwright-stealth
-pdfplumber
-beautifulsoup4

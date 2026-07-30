@@ -55,7 +55,7 @@ export async function GET(
   })
   if (!meet) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-  const isCoach = ["COACH", "EXEC"].includes(session.user.role)
+  const isCoach = session.user.role === "COACH"
   const form = meet.signupForm
   const athlete = await prisma.athlete.findUnique({
     where: { userId: session.user.id },
@@ -120,16 +120,28 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions)
-  if (!session || !["COACH", "EXEC"].includes(session.user.role)) {
+  if (!session || !session.user.role === "COACH") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
   const { id: meetId } = await params
   const meet = await prisma.meet.findUnique({
     where: { id: meetId },
-    select: { id: true, name: true, signupForm: { select: { enabled: true } } },
+    select: {
+      id: true,
+      name: true,
+      eventOrder: true,
+      signupForm: { select: { enabled: true } },
+    },
   })
   if (!meet) return NextResponse.json({ error: "Not found" }, { status: 404 })
+
+  if (resolveSignupEventOptions(meet.eventOrder).length === 0) {
+    return NextResponse.json(
+      { error: "Must have an order of events to set up a sign-up form." },
+      { status: 400 }
+    )
+  }
 
   const wasEnabled = meet.signupForm?.enabled === true
 

@@ -3,6 +3,17 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
+
+function formatYear(year: string): string {
+  if (year.toLowerCase().includes("phd")) return "PhD"
+  if (year.toLowerCase().includes("master")) return "Masters"
+  const num = parseInt(year)
+  if (isNaN(num)) return year
+  const suffixes = ["th", "st", "nd", "rd"]
+  const v = num % 100
+  return num + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]) + " Year"
+}
+
 import { compareSwimPb } from "@/lib/swim-parse"
 import AddSwimForm from "./AddSwimForm"
 import PersonalBestsGrid from "./PersonalBestsGrid"
@@ -19,12 +30,12 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
     if (!session) redirect("/signin")
 
     const athlete = await prisma.athlete.findUnique({
-        where: { id },  // 👈 use the destructured id
+        where: { id },
         include: {
-        user: { select: { name: true, email: true, image: true } },
-        swims: {
+          user: { select: { name: true, email: true, image: true } },
+          swims: {
             orderBy: { date: "desc" },
-        },
+          },
         },
     })
 
@@ -107,6 +118,9 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
                 )}
               </h1>
               <p className="truncate text-sm text-foreground-secondary">{athlete.user?.email}</p>
+              {isCoach && athlete.gtid && <p className="mt-0.5 text-xs text-foreground-tertiary">GTID: {athlete.gtid}</p>}
+              {isCoach && athlete.dob && <p className="mt-0.5 text-xs text-foreground-tertiary">DOB: {athlete.dob.toLocaleDateString()}</p>}
+              {athlete.year && <p className="mt-0.5 text-xs text-foreground-tertiary">{formatYear(athlete.year)}</p>}
               {athlete.swimCloudId && (
                 <p className="mt-0.5 text-xs text-foreground-tertiary">
                   SwimCloud ID: {athlete.swimCloudId}

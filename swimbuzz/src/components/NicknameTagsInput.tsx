@@ -13,6 +13,8 @@ type NicknameTagsInputProps = {
   showAddButton?: boolean
   /** Extra controls rendered after the Add button (e.g. Request). */
   actions?: ReactNode
+  /** Maximum number of items (default MAX_NICKNAMES). */
+  maxItems?: number
 }
 
 export default function NicknameTagsInput({
@@ -23,9 +25,10 @@ export default function NicknameTagsInput({
   id,
   showAddButton = false,
   actions,
+  maxItems = MAX_NICKNAMES,
 }: NicknameTagsInputProps) {
   const [draft, setDraft] = useState("")
-  const atLimit = value.length >= MAX_NICKNAMES
+  const atLimit = value.length >= maxItems
 
   function addNickname(raw: string) {
     const name = raw.trim()
@@ -54,7 +57,7 @@ export default function NicknameTagsInput({
               type="button"
               disabled={disabled}
               onClick={() => removeNickname(name)}
-              className="text-xs px-2 py-0.5 rounded-full border border-border-secondary bg-primary border-indigo-600 text-primary-text disabled:opacity-40"
+              className="text-xs px-2 py-0.5 rounded-full border border-border-secondary bg-primary text-primary-text disabled:opacity-40"
             >
               {name} ✕
             </button>
@@ -66,7 +69,7 @@ export default function NicknameTagsInput({
           id={id}
           type="text"
           disabled={disabled || atLimit}
-          placeholder={atLimit ? `Maximum of ${MAX_NICKNAMES} nicknames` : placeholder}
+          placeholder={atLimit ? `Maximum of ${maxItems} items` : placeholder}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {

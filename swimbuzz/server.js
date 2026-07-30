@@ -1,6 +1,9 @@
 const { createServer } = require("node:http")
 const { parse } = require("node:url")
 const next = require("next")
+const compression = require("compression")
+const { startSignupMonitor } = require("./signup-status-monitor")
+const { startNotificationCleanupMonitor } = require("./notification-cleanup-monitor")
 
 const dev = process.env.NODE_ENV !== "production"
 const hostname = process.env.HOSTNAME ?? "0.0.0.0"
@@ -14,19 +17,22 @@ const REQUEST_TIMEOUT_MS = parseInt(
 
 const app = next({ dev, hostname, port })
 const handle = app.getRequestHandler()
+const compress = compression()
 
 app.prepare().then(() => {
-  const server = createServer(async (req, res) => {
-    try {
-      const parsedUrl = parse(req.url, true)
-      await handle(req, res, parsedUrl)
-    } catch (err) {
-      console.error("Error handling request:", err)
-      if (!res.headersSent) {
-        res.statusCode = 500
-        res.end("Internal server error")
+  const server = createServer((req, res) => {
+    compress(req, res, async () => {
+      try {
+        const parsedUrl = parse(req.url, true)
+        await handle(req, res, parsedUrl)
+      } catch (err) {
+        console.error("Error handling request:", err)
+        if (!res.headersSent) {
+          res.statusCode = 500
+          res.end("Internal server error")
+        }
       }
-    }
+    })
   })
 
   server.requestTimeout = REQUEST_TIMEOUT_MS
@@ -39,5 +45,10 @@ app.prepare().then(() => {
     } else {
       console.log("> HTTP request timeout: disabled")
     }
+
+    // Start the signup status monitor
+    startSignupMonitor()
+    // Start the notification cleanup monitor
+    startNotificationCleanupMonitor()
   })
 })

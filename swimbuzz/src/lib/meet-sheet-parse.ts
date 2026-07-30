@@ -38,7 +38,27 @@ async function callSheetParser(
   sheetType: "psych" | "heat" | "entries",
   teamCode: string
 ): Promise<{ sheetType: "psych" | "heat" | "entries"; course: string; entries: ParsedSheetEntry[] }> {
-  return parseMeetSheetPdf(userId, bytes, { sheetType, team: teamCode })
+  const allEntries: ParsedSheetEntry[] = []
+  let lastResult: { sheetType: "psych" | "heat" | "entries"; course: string } | null = null
+  
+  try {
+    const result = await parseMeetSheetPdf(userId, bytes, { sheetType, team: teamCode })
+    lastResult = { sheetType: result.sheetType, course: result.course }
+    if (result.entries && result.entries.length > 0) {
+      allEntries.push(...result.entries)
+    }
+  } catch (err) {
+    // If team code parsing fails, try without team filter
+    const result = await parseMeetSheetPdf(userId, bytes, { sheetType, team: undefined })
+    lastResult = { sheetType: result.sheetType, course: result.course }
+    allEntries.push(...(result.entries ?? []))
+  }
+  
+  return {
+    sheetType: lastResult?.sheetType ?? sheetType,
+    course: lastResult?.course ?? "SCY",
+    entries: allEntries,
+  }
 }
 
 function rosterName(athleteId: string, roster: RosterAthlete[]): string {
@@ -170,7 +190,7 @@ export async function parseMeetSheetForRoster(
   url: string,
   sheetType: "psych" | "heat" | "entries",
   roster: RosterAthlete[],
-  teamCode = "GTSC"
+  teamCode: string = "GTSC"
 ): Promise<SheetSummary | null> {
   const bytes = await fetchMeetFileBytes(url)
   const parsed = await callSheetParser(userId, bytes, sheetType, teamCode)
@@ -187,7 +207,7 @@ export async function resolvePsychSheetSummary(
   userId: string,
   url: string | null | undefined,
   roster: RosterAthlete[],
-  teamCode = "GTSC"
+  teamCode: string = "GTSC"
 ): Promise<SheetSummary | null> {
   if (!url) return null
   return parseMeetSheetForRoster(userId, url, "psych", roster, teamCode)
@@ -197,7 +217,7 @@ export async function resolveHeatSheetSummary(
   userId: string,
   url: string | null | undefined,
   roster: RosterAthlete[],
-  teamCode = "GTSC"
+  teamCode: string = "GTSC"
 ): Promise<SheetSummary | null> {
   if (!url) return null
   return parseMeetSheetForRoster(userId, url, "heat", roster, teamCode)
@@ -207,7 +227,7 @@ export async function resolveEntriesSheetSummary(
   userId: string,
   url: string | null | undefined,
   roster: RosterAthlete[],
-  teamCode = "GTSC"
+  teamCode: string = "GTSC"
 ): Promise<SheetSummary | null> {
   if (!url) return null
   return parseMeetSheetForRoster(userId, url, "entries", roster, teamCode)

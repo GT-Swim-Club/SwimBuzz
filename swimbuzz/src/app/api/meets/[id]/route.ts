@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { buildMeetData, MeetInputError } from "@/lib/meet-input"
-import { deleteAllMeetFiles, deleteRemovedMeetFiles } from "@/lib/meet-storage"
+import { deleteAllMeetFiles, deleteRemovedMeetFiles, deleteStoredFileByUrl } from "@/lib/meet-storage"
 import { resolveEventOrderForPacket } from "@/lib/meet-packet-parse"
 import { attachSheetSummaries } from "@/lib/meet-sheet-resolve"
 import { LOCAL_BRIDGE_HINT } from "@/lib/bridge"
@@ -28,7 +28,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions)
-  if (!session || !["COACH", "EXEC"].includes(session.user.role)) {
+  if (!session || !session.user.role === "COACH") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -84,7 +84,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions)
-  if (!session || !["COACH", "EXEC"].includes(session.user.role)) {
+  if (!session || !session.user.role === "COACH") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -113,6 +113,8 @@ export async function DELETE(
 
   if (deleteMeet) {
     await deleteAllMeetFiles(existing as Record<MeetFileUrlKey, string | null>)
+    await deleteStoredFileByUrl(existing.iconUrl)
+    await deleteStoredFileByUrl(existing.bannerUrl)
     await prisma.meet.delete({ where: { id } })
   }
 

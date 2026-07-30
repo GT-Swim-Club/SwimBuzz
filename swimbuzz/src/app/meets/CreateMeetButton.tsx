@@ -35,7 +35,6 @@ export default function CreateMeetButton() {
       }
       setOpen(false)
       router.push(`/meets/${data.id}`)
-      router.refresh()
     } catch {
       setError("Something went wrong")
     } finally {

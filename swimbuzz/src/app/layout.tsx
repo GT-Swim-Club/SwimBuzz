@@ -4,6 +4,8 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import SessionProvider from "@/components/SessionProvider"
 import ThemeProvider from "@/components/ThemeProvider"
 import ScraperUiProvider from "@/components/ScraperUiProvider"
+import ImportTaskProvider from "@/components/ImportTaskProvider"
+import ImportToast from "@/components/ImportToast"
 import Nav from "@/components/Nav"
 import "./globals.css"
 
@@ -24,12 +26,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="min-h-screen bg-background">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <SessionProvider session={session}>
-            <ScraperUiProvider>
-              <Nav />
-              <div className="mx-auto max-w-7xl px-2 py-6 sm:py-8">
-                {children}
-              </div>
-            </ScraperUiProvider>
+            <ImportTaskProvider>
+              <ScraperUiProvider>
+                <Nav />
+                <div className="mx-auto max-w-7xl px-2 py-6 sm:py-8">
+                  {children}
+                </div>
+              </ScraperUiProvider>
+              <ImportToast />
+            </ImportTaskProvider>
           </SessionProvider>
         </ThemeProvider>
       </body>

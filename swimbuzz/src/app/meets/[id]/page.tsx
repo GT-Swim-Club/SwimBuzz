@@ -31,6 +31,7 @@ import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete-view-server"
 import { isStaffRole } from "@/lib/auth-roles"
 import { Gender } from "@prisma/client"
 import MeetResourceIcon, { type MeetResourceKind } from "@/components/MeetResourceIcon"
+import InfoIcon, { type InfoKind } from "@/components/InfoIcon"
 import { type TravelInfoKind } from "@/components/TravelInfoIcon"
 import TravelInfoButtons, { type TravelInfoItem } from "./TravelInfoButtons"
 import MeetSignupSection from "./MeetSignupSection"
@@ -351,14 +352,24 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
             )}
             <div className="min-w-0">
               <h1 className="text-xl font-medium sm:text-2xl">{meet.name}</h1>
-              <p className="text-sm text-foreground-secondary">
-                {formatDateRange(meet.startDate, meet.endDate)}
-                {meet.location ? ` · ${meet.location}` : ""}
-                {meet.school ? ` · ${meet.school}` : ""}
-              </p>
-              <p className="mt-0.5 text-xs text-foreground-tertiary">
-                {meet.course} · {meet.season}
-              </p>
+              <div className="mt-1 space-y-1 text-sm text-foreground-secondary">
+                <div className="flex items-center gap-1.5">
+                  <InfoIcon kind="calendar" />
+                  {formatDateRange(meet.startDate, meet.endDate)}
+                </div>
+                <div className="flex flex-wrap items-center gap-x-1.25">
+                  {meet.location && (
+                    <span className="flex items-center gap-1.5">
+                      <InfoIcon kind="location" />
+                      {meet.location}
+                    </span>
+                  )}
+                  {meet.location && meet.school && <span>·</span>}
+                  {meet.school && (
+                    <span>{meet.school}</span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -515,8 +526,9 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
         eventNumberOptions={signupEventOptions}
         headerAction={
           isCoach ? (
-            <div className="flex flex-wrap gap-2">
+            <div key="header-actions" className="flex flex-wrap gap-2">
               <AddResultButton
+                key="add-result-btn"
                 meetId={meet.id}
                 meetName={meet.name}
                 defaultCourse={meet.course}
@@ -524,6 +536,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
                 athletes={rosterAthletes}
               />
               <AddIndividualEntryButton
+                key="add-entry-btn"
                 meetId={meet.id}
                 athletes={rosterAthletes}
               />

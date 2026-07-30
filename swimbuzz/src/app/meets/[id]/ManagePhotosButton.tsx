@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
+import { FileDropzone } from "@/components/FileDropzone"
 
 type Photo = { url: string; name: string }
 
@@ -339,20 +340,18 @@ export default function ManagePhotosButton({
 
           {form.previews.length < 20 && (
             <div>
-              <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium cursor-pointer dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:bg-background-elevated transition-colors">
+              <FileDropzone
+                onFilesSelected={(files) => handlePreviewFileSelect({ target: { files: files as any } } as any)}
+                accept="image/*"
+                multiple={true}
+                disabled={previewsUploading}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium cursor-pointer dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:bg-background-elevated transition-colors"
+              >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
                 {previewsUploading ? "Uploading..." : "Upload Gallery Photos"}
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  disabled={previewsUploading}
-                  onChange={handlePreviewFileSelect}
-                  className="hidden"
-                />
-              </label>
+              </FileDropzone>
             </div>
           )}
 

@@ -60,7 +60,7 @@ export function buildMeetData(body: Record<string, unknown>, opts: BuildOptions 
   }
 
   if ("teamCode" in body) {
-    const team = String(body.teamCode ?? "").trim().toUpperCase()
+    const team = String(body.teamCode ?? "").trim()
     if (!team) throw new MeetInputError("Team code is required")
     data.teamCode = team
   }

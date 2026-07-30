@@ -46,6 +46,15 @@ export default function RunScraperModal({
   const [terminating, setTerminating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [installed, setInstalled] = useState<boolean | null>(null)
+  const [copied, setCopied] = useState<"install" | "run" | null>(null)
+
+  const copyIcon = (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+  )
+
+  const checkIcon = (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  )
 
   const appUrl =
     typeof window !== "undefined" ? window.location.origin : "https://swimbuzz.onrender.com"
@@ -100,10 +109,12 @@ export default function RunScraperModal({
     }
   }
 
-  async function copyText(text: string) {
+  async function copyText(text: string, type: "install" | "run") {
     if (!text) return
     try {
       await navigator.clipboard.writeText(text)
+      setCopied(type)
+      setTimeout(() => setCopied(null), 2000)
     } catch {
       // ignore
     }
@@ -137,6 +148,8 @@ export default function RunScraperModal({
       ))}
     </div>
   )
+
+  const isExpired = pairing ? new Date(pairing.expiresAt).getTime() < Date.now() : false;
 
   return (
     <Modal
@@ -196,9 +209,10 @@ export default function RunScraperModal({
             <div className="flex gap-3">
               <button
                 type="button"
-                onClick={() => void copyText(installCommand)}
-                className="text-xs font-medium text-primary hover:text-primary-hover"
+                onClick={() => void copyText(installCommand, "install")}
+                className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary-hover"
               >
+                {copied === "install" ? checkIcon : copyIcon}
                 Copy install command
               </button>
               <button
@@ -229,42 +243,44 @@ export default function RunScraperModal({
           </button>
         )}
 
-        {!pairing ? (
-          <button
-            type="button"
-            onClick={() => void generateCode()}
-            disabled={pairingLoading}
-            className="w-full rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary disabled:opacity-50"
-          >
-            {pairingLoading ? "Generating…" : "Generate run command"}
-          </button>
-        ) : (
-          <div className="space-y-3 rounded-lg border border-border-secondary bg-fill-secondary p-4">
-            <p className="text-xs text-foreground-secondary">
-              Expires {new Date(pairing.expiresAt).toLocaleTimeString()}
-            </p>
-            <pre className="overflow-x-auto rounded-md bg-background-elevated p-3 text-xs text-foreground whitespace-pre-wrap break-all">
-              {runCommand}
-            </pre>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => void copyText(runCommand)}
-                className="text-xs font-medium text-primary hover:text-primary-hover"
-              >
-                Copy command
-              </button>
-              <button
-                type="button"
-                onClick={() => void generateCode()}
-                disabled={pairingLoading}
-                className="text-xs font-medium text-foreground-secondary hover:text-foreground"
-              >
-                Generate new command
-              </button>
+        {!connected &&
+          (!pairing || isExpired ? (
+            <button
+              type="button"
+              onClick={() => void generateCode()}
+              disabled={pairingLoading}
+              className="w-full rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary disabled:opacity-50"
+            >
+              {pairingLoading ? "Generating…" : "Generate run command"}
+            </button>
+          ) : (
+            <div className="space-y-3 rounded-lg border border-border-secondary bg-fill-secondary p-4">
+              <p className="text-xs text-foreground-secondary">
+                Expires {new Date(pairing.expiresAt).toLocaleTimeString()}
+              </p>
+              <pre className="overflow-x-auto rounded-md bg-background-elevated p-3 text-xs text-foreground whitespace-pre-wrap break-all">
+                {runCommand}
+              </pre>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => void copyText(runCommand, "run")}
+                  className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary-hover"
+                >
+                  {copied === "run" ? checkIcon : copyIcon}
+                  Copy command
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void generateCode()}
+                  disabled={pairingLoading}
+                  className="text-xs font-medium text-foreground-secondary hover:text-foreground"
+                >
+                  Generate new command
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          ))}
 
         <p className="text-sm text-error">{error}</p>
       </div>

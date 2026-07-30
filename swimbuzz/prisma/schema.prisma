@@ -83,6 +83,9 @@ model Athlete {
   gender       Gender
   seasons      String[]
   swimCloudId  Int?
+  gtid         String?
+  dob          DateTime?
+  year         String?
   timesSyncedAt DateTime?
   /// Self-service edits awaiting coach approval: { swimCloudId?: number, nicknames?: string[] }
   pendingProfileChanges Json?

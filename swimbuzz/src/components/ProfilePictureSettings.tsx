@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import EasyCropper, { type Area } from "react-easy-crop"
 import Modal, { ModalFooter } from "@/components/Modal"
+import { FileDropzone } from "@/components/FileDropzone"
 
 // react-easy-crop is a class component; React 19's JSX types need this cast.
 const Cropper = EasyCropper as unknown as ComponentType<{
@@ -247,57 +248,58 @@ return (
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-border bg-primary/10 text-sm font-medium text-primary">
-          {image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={image}
-              alt=""
-              className="h-full w-full object-cover"
-              referrerPolicy="no-referrer"
-            />
-          ) : (
-            <span aria-hidden>{initials}</span>
-          )}
-        </div>
-
-        {canEdit ? (
-          <>
-            <input
-              ref={inputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif,image/*"
-              className="hidden"
-              onChange={onFileChange}
-            />
-
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => inputRef.current?.click()}
-              className="rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground-secondary hover:bg-fill-secondary disabled:opacity-50"
-            >
-              {preparing
-                ? "Opening…"
-                : loading
-                  ? "Saving…"
-                  : image
-                    ? "Change"
-                    : "Upload"}
-            </button>
-
+        <FileDropzone
+          onFilesSelected={(files) => onFileChange({ target: { files: files as any } } as any)}
+          accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif,image/*"
+          disabled={busy || !canEdit}
+          className="flex items-center gap-2"
+        >
+          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-border bg-primary/10 text-sm font-medium text-primary">
             {image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={image}
+                alt=""
+                className="h-full w-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <span aria-hidden>{initials}</span>
+            )}
+          </div>
+
+          {canEdit ? (
+            <>
               <button
                 type="button"
                 disabled={busy}
-                onClick={removePhoto}
-                className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-foreground-secondary hover:text-error disabled:opacity-50"
+                className="rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground-secondary hover:bg-fill-secondary disabled:opacity-50"
               >
-                Remove
+                {preparing
+                  ? "Opening…"
+                  : loading
+                    ? "Saving…"
+                    : image
+                      ? "Change"
+                      : "Upload"}
               </button>
-            ) : null}
-          </>
-        ) : null}
+
+              {image ? (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removePhoto();
+                  }}
+                  className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-foreground-secondary hover:text-error disabled:opacity-50"
+                >
+                  Remove
+                </button>
+              ) : null}
+            </>
+          ) : null}
+        </FileDropzone>
       </div>
 
       {canEdit ? (

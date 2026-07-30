@@ -32,9 +32,9 @@ const TRAVEL_TEXT_FIELDS: {
   rows: number
   compact?: boolean
 }[] = [
-  { key: "hotel", label: "Hotel", icon: "hotel", rows: 3, compact: true },
-  { key: "packingList", label: "Packing List", icon: "packingList", rows: 12 },
-  { key: "itinerary", label: "Itinerary", icon: "itinerary", rows: 12 },
+  { key: "hotel", label: "Hotel", icon: "hotel", rows: 1, compact: true },
+  { key: "packingList", label: "Packing List", icon: "packingList", rows: 1 },
+  { key: "itinerary", label: "Itinerary", icon: "itinerary", rows: 1 },
 ]
 
 export default function AddTravelInfoButton({

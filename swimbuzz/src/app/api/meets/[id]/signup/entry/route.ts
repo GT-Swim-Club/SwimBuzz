@@ -37,7 +37,7 @@ export async function PUT(
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  if (["COACH", "EXEC"].includes(session.user.role)) {
+  if (session.user.role === "COACH") {
     return NextResponse.json(
       { error: "Coaches cannot edit athlete sign-ups." },
       { status: 403 }
@@ -194,7 +194,7 @@ export async function DELETE(
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const isCoach = ["COACH", "EXEC"].includes(session.user.role)
+  const isCoach = session.user.role === "COACH"
   const { id: meetId } = await params
   const form = await prisma.meetSignupForm.findUnique({ where: { meetId } })
   if (!form) return NextResponse.json({ error: "Not found" }, { status: 404 })

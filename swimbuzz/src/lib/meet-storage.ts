@@ -132,10 +132,12 @@ export async function uploadMeetFile(
   }
 }
 
-/** Remove a stored meet file from Supabase (or legacy local disk). */
-export async function deleteStoredMeetFile(url: string | null | undefined) {
-  if (!url || !isStoredMeetFileUrl(url)) return
 
+/** Remove a stored file from Supabase (or legacy local disk) using its public URL. */
+export async function deleteStoredFileByUrl(url: string | null | undefined) {
+  if (!url) return
+
+  // Handle legacy local files
   if (url.startsWith("/meet-files/")) {
     try {
       await unlink(path.join(process.cwd(), "public", url))
@@ -145,12 +147,16 @@ export async function deleteStoredMeetFile(url: string | null | undefined) {
     return
   }
 
-  const storagePath = storagePathFromMeetFileUrl(url)
-  if (!storagePath) return
+  // Handle Supabase files
+  const match = url.match(/\/storage\/v1\/object\/public\/([^/]+)\/(.+)$/)
+  if (!match) return
+
+  const bucket = match[1]
+  const storagePath = match[2]
 
   const { url: baseUrl, key } = getSupabaseConfig()
   const res = await fetch(
-    `${baseUrl}/storage/v1/object/${MEET_FILE_BUCKET}/${storagePath}`,
+    `${baseUrl}/storage/v1/object/${bucket}/${storagePath}`,
     {
       method: "DELETE",
       headers: storageHeaders(key),
@@ -167,6 +173,12 @@ export async function deleteStoredMeetFile(url: string | null | undefined) {
     if (/not found/i.test(message)) return
     throw new Error(formatStorageError(message))
   }
+}
+
+/** Remove a stored meet file from Supabase (or legacy local disk). */
+export async function deleteStoredMeetFile(url: string | null | undefined) {
+  if (!url || !isStoredMeetFileUrl(url)) return
+  await deleteStoredFileByUrl(url)
 }
 
 export async function deleteRemovedMeetFiles(

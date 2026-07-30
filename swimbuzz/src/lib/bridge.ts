@@ -59,9 +59,6 @@ export async function registerBridgeConnection(code: string) {
   if (!pairing) {
     throw new Error("Invalid pairing code")
   }
-  if (pairing.usedAt) {
-    throw new Error("Pairing code already used")
-  }
   if (pairing.expiresAt.getTime() < Date.now()) {
     throw new Error("Pairing code expired")
   }
@@ -69,9 +66,8 @@ export async function registerBridgeConnection(code: string) {
   const token = randomUUID().replace(/-/g, "") + randomUUID().replace(/-/g, "")
 
   return prisma.$transaction(async (tx) => {
-    await tx.bridgePairing.update({
+    await tx.bridgePairing.delete({
       where: { id: pairing.id },
-      data: { usedAt: new Date() },
     })
 
     await tx.bridgeConnection.deleteMany({ where: { userId: pairing.userId } })
@@ -167,6 +163,12 @@ export async function completeBridgeJob(jobId: string, connectionId: string, res
       result: result as object,
       completedAt: new Date(),
     },
+  }).then((job) => {
+    setTimeout(
+      () => prisma.bridgeJob.delete({ where: { id: jobId } }).catch(() => undefined),
+      5000
+    )
+    return job
   })
 }
 
@@ -186,6 +188,12 @@ export async function failBridgeJob(jobId: string, connectionId: string, error: 
       error,
       completedAt: new Date(),
     },
+  }).then((job) => {
+    setTimeout(
+      () => prisma.bridgeJob.delete({ where: { id: jobId } }).catch(() => undefined),
+      5000
+    )
+    return job
   })
 }
 
