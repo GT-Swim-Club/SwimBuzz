@@ -9,16 +9,21 @@ coverage
 # production
 build
 dist
+.next
+.expo
+.turbo
 
 # misc
 .DS_Store
+.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 npm-debug.log*
 yarn-debug.log*
-yarn-test.log*
+yarn-error.log*
+pnpm-debug.log*
 
 # python virtual environment
 test_env
@@ -29,3 +34,9 @@ env.bak
 venv.bak
 __pycache__
 *.pyc
+
+# locks (use root pnpm-lock.yaml)
+apps/web/package-lock.json
+
+# pnpm local store (never commit)
+.pnpm-store

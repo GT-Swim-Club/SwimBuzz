@@ -1,0 +1,62 @@
+/** Shared brand colors — keep in sync with apps/web CSS variables. */
+export const colors = {
+  light: {
+    primary: "#DEBD88",
+    primaryHover: "#bfa775",
+    primaryActive: "#8c6b38",
+    primaryText: "#402b13",
+    primaryBg: "#f2efe4",
+    success: "#22C55E",
+    warning: "#faad14",
+    error: "#ff4d4f",
+    info: "#b39051",
+    link: "#eaaa00",
+    text: "#1f1f1f",
+    textSecondary: "#595959",
+    textTertiary: "#8c8c8c",
+    fill: "#d9d9d9",
+    fillSecondary: "#f0f0f0",
+    bgLayout: "#f5f5f5",
+    bgContainer: "#ffffff",
+    bgElevated: "#ffffff",
+    border: "#e5e5e5",
+  },
+  dark: {
+    primary: "#8F713D",
+    primaryHover: "#ad8746",
+    primaryActive: "#837453",
+    primaryText: "#e0dcd2",
+    primaryBg: "#262119",
+    success: "#22C55E",
+    warning: "#dcaa37",
+    error: "#dc6966",
+    info: "#a59166",
+    link: "#d5aa25",
+    text: "#dcdcdc",
+    textSecondary: "#adadad",
+    textTertiary: "#7e7e7e",
+    fill: "#252525",
+    fillSecondary: "#161616",
+    bgLayout: "#1a1a1a",
+    bgContainer: "#141414",
+    bgElevated: "#272727",
+    border: "#4a4a4a",
+  },
+} as const
+
+export const spacing = {
+  xxs: 4,
+  xs: 8,
+  sm: 12,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 48,
+} as const
+
+export const radii = {
+  xs: 3,
+  sm: 5,
+  md: 8,
+  lg: 10,
+} as const

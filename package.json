@@ -1,0 +1,22 @@
+{
+  "name": "swimbuzz-monorepo",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev --filter=@swimbuzz/web",
+    "dev:web": "turbo run dev --filter=@swimbuzz/web",
+    "dev:mobile": "turbo run start --filter=@swimbuzz/mobile",
+    "build": "turbo run build",
+    "build:web": "turbo run build --filter=@swimbuzz/web",
+    "lint": "turbo run lint",
+    "db:generate": "pnpm --filter @swimbuzz/web exec prisma generate",
+    "db:push": "pnpm --filter @swimbuzz/web exec prisma db push"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.4",
+    "typescript": "^5"
+  }
+}

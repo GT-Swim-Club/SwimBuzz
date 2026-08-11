@@ -1,0 +1,26 @@
+{
+  "name": "@swimbuzz/ui",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.tsx",
+  "types": "./src/index.tsx",
+  "exports": {
+    ".": "./src/index.tsx"
+  },
+  "scripts": {
+    "lint": "echo \"no lint\""
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
+  "dependencies": {
+    "@swimbuzz/tokens": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "react": "19.1.0",
+    "react-native": "0.81.4",
+    "typescript": "^5"
+  }
+}

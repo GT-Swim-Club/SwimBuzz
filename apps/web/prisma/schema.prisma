@@ -1,0 +1,490 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DIRECT_URL")
+}
+
+enum Role {
+  COACH
+  EXEC
+  ATHLETE
+}
+
+enum Course {
+  SCY
+  LCM
+  SCM
+}
+
+enum Gender {
+  M
+  F
+}
+
+enum ScraperJobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum ScraperJobType {
+  ROSTER
+  TIMES_BULK
+  SWIMPHONE_MEET
+  PARSE_MEET_PDF
+  PARSE_MEET_SHEET
+  PARSE_MEET_PACKET
+  PARSE_NQT_PDF
+}
+
+enum NotificationType {
+  PROFILE_CHANGE_REQUEST
+  PROFILE_CHANGE_APPROVED
+  PROFILE_CHANGE_REJECTED
+  PRACTICE_PUBLISHED
+  MEET_SIGNUP_OPEN
+  MEET_ROSTER_INFO
+  PRACTICE_COMMENT
+  TIMES_IMPORT_REQUEST
+}
+
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String?
+  image         String?
+  role          Role      @default(COACH)
+  /// Per-type in-app notification toggles: { practicePublished?, meetSignupOpen?, practiceComments?, profileChanges? }
+  notificationPreferences Json?
+  defaultView   String    @default("gallery")
+  defaultPracticesView String    @default("week")
+  createdAt     DateTime  @default(now())
+  accounts      Account[]
+  sessions      Session[]
+  athlete       Athlete?
+  practices         Practice[] @relation("PracticeCreatedBy")
+  practiceEditLocks Practice[] @relation("PracticeEditLocks")
+  comments          PracticeComment[]
+  notifications     Notification[]
+  mobileRefreshTokens MobileRefreshToken[]
+  devicePushTokens    DevicePushToken[]
+}
+
+model Athlete {
+  id           String   @id @default(cuid())
+  slug         String?  @unique
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id])
+  firstName    String
+  lastName     String
+  nicknames    String[] @default([])
+  gender       Gender
+  seasons      String[]
+  swimCloudId  Int?
+  gtid         String?
+  dob          DateTime?
+  year         String?
+  timesSyncedAt DateTime?
+  /// Self-service edits awaiting coach approval: { swimCloudId?: number, nicknames?: string[] }
+  pendingProfileChanges Json?
+  swims        Swim[]
+  meetSignups  MeetSignupEntry[]
+  meetRoomPreferences MeetRoomPreference[]
+  meetRoomAssignments MeetRoomAssignment[]
+}
+
+model Meet {
+  id            String    @id @default(cuid())
+  slug          String?   @unique
+  name          String
+  location      String?
+  startDate     DateTime
+  startTime     String?
+  endDate       DateTime?
+  course        Course    @default(SCY)
+  season        String
+  teamCode      String    @default("GTSC")
+  school        String?
+  iconUrl       String?
+  bannerUrl     String?
+  packetUrl     String?
+  psychSheetUrl String?
+  heatSheetUrl  String?
+  /// Multiple finals heat sheet PDFs: [{ url, name? }, ...]
+  finalsHeatSheetUrls Json?
+  entriesSheetUrl String?
+  resultsUrl    String?
+  liveStreamUrl String?
+  rideSignUpsUrl String?
+  roomsUrl       String?
+  hotel          String?
+  packingList    String?
+  itinerary      String?
+  eventOrder    Json?
+  psychSheetSummary Json?
+  heatSheetSummary  Json?
+  /// Merged roster-matched summary from all finalsHeatSheetUrls
+  finalsHeatSheetSummary Json?
+  entriesSheetSummary Json?
+  relayResultsSummary Json?
+  resultStatusesSummary Json?
+  photos        Json?
+  createdAt     DateTime  @default(now())
+  swims         Swim[]
+  signupForm    MeetSignupForm?
+  roomForm      MeetRoomForm?
+}
+
+model MeetSignupForm {
+  id              String            @id @default(cuid())
+  meetId          String            @unique
+  meet            Meet              @relation(fields: [meetId], references: [id], onDelete: Cascade)
+  // enabled         Boolean           @default(false)
+  instructions    String            @default("")
+  allowedEvents   String[]          @default([])
+  minEvents       Int?
+  maxEvents       Int?
+  maxRelayEvents  Int?
+  askNotes        Boolean           @default(true)
+  customQuestions Json?
+  openAt          DateTime?
+  closeAt         DateTime?
+  withdrawUntil   DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  entries         MeetSignupEntry[]
+}
+
+model MeetSignupEntry {
+  id        String         @id @default(cuid())
+  formId    String
+  form      MeetSignupForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+  athleteId String
+  athlete   Athlete        @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  events    String[]       @default([])
+  entryTimes Json?
+  notes     String         @default("")
+  answers   Json?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([formId, athleteId])
+  @@index([formId])
+  @@index([athleteId])
+}
+
+model MeetRoomForm {
+  id                     String               @id @default(cuid())
+  meetId                 String               @unique
+  meet                   Meet                 @relation(fields: [meetId], references: [id], onDelete: Cascade)
+  instructions           String               @default("")
+  maxPreferences         Int                  @default(3)
+  openAt                 DateTime?
+  closeAt                DateTime?
+  assignmentsPublishedAt DateTime?
+  customQuestions        Json?
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+  preferences            MeetRoomPreference[]
+  rooms                  MeetRoom[]
+}
+
+model MeetRoomPreference {
+  id                  String       @id @default(cuid())
+  formId              String
+  form                MeetRoomForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+  athleteId           String
+  athlete             Athlete      @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  preferredAthleteIds String[]     @default([])
+  excludedAthleteIds  String[]     @default([])
+  notes               String       @default("")
+  answers             Json?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  @@unique([formId, athleteId])
+  @@index([formId])
+  @@index([athleteId])
+}
+
+model MeetRoom {
+  id          String               @id @default(cuid())
+  formId      String
+  form        MeetRoomForm         @relation(fields: [formId], references: [id], onDelete: Cascade)
+  label       String
+  sortOrder   Int                  @default(0)
+  assignments MeetRoomAssignment[]
+
+  @@index([formId])
+}
+
+model MeetRoomAssignment {
+  id        String   @id @default(cuid())
+  roomId    String
+  room      MeetRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  athleteId String
+  athlete   Athlete  @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, athleteId])
+  @@index([roomId])
+  @@index([athleteId])
+}
+
+model Swim {
+  id        String   @id @default(cuid())
+  athleteId String
+  athlete   Athlete  @relation(fields: [athleteId], references: [id])
+  meet       String   @default("")
+  meetId     String?
+  meetRef    Meet?    @relation(fields: [meetId], references: [id], onDelete: SetNull)
+  event      String
+  timeMs     Int
+  place      Int?
+  tags       String   @default("")
+  course     Course
+  date       DateTime
+  occurrence Int      @default(0)
+  source     String
+  createdAt  DateTime @default(now())
+
+  @@unique([athleteId, event, timeMs, course, date, tags, occurrence])
+  @@index([meetId])
+}
+
+model Practice {
+  id          String        @id @default(cuid())
+  slug        String?       @unique
+  title       String
+  date        DateTime?
+  startTime   String        @default("19:30")
+  endTime     String        @default("21:00")
+  location    String        @default("CRC Comp Pool")
+  focus       String?
+  tags        String[]      @default([])
+  published   Boolean       @default(false)
+  createdById String?
+  createdBy   User?              @relation("PracticeCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  /// Exclusive edit lock — only the holder may save while active.
+  editLockedById    String?
+  editLockedBy      User?     @relation("PracticeEditLocks", fields: [editLockedById], references: [id], onDelete: SetNull)
+  editLockedAt      DateTime?
+  editLockExpiresAt DateTime?
+  /// Opaque per-tab session token — distinguishes same-user multi-tab editors.
+  editLockToken     String?
+  sets        PracticeSet[]
+  comments    PracticeComment[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([date])
+  @@index([published])
+  @@index([tags])
+  @@index([editLockedById])
+  @@index([editLockExpiresAt])
+}
+
+model PracticeSet {
+  id         String       @id @default(cuid())
+  practiceId String
+  practice   Practice     @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+  order      Int          @default(0)
+  title      String?
+  content    String
+  notes      String?
+  distance   Int?
+  createdAt  DateTime     @default(now())
+
+  @@index([practiceId])
+}
+
+model PracticeComment {
+  id         String    @id @default(cuid())
+  practiceId String
+  practice   Practice  @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+  authorId   String?
+  author     User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorName String
+  body       String
+  parentId   String?
+  parent     PracticeComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies    PracticeComment[] @relation("CommentReplies")
+  createdAt  DateTime  @default(now())
+
+  @@index([practiceId])
+  @@index([parentId])
+}
+
+// NextAuth required tables
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  @@unique([identifier, token])
+}
+
+/// One-time codes for Georgia Tech email sign-in (roster emails only).
+model EmailLoginCode {
+  id        String   @id @default(cuid())
+  email     String
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String           @default("")
+  href      String?
+  /// Athlete this notification relates to (e.g. profile change request).
+  athleteId String?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@index([userId, createdAt])
+  @@index([userId, readAt])
+  @@index([athleteId, type])
+}
+
+model ScraperPairing {
+  id        String    @id @default(cuid())
+  userId    String
+  code      String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model ScraperConnection {
+  id         String      @id @default(cuid())
+  userId     String
+  token      String      @unique
+  lastSeenAt DateTime    @default(now())
+  createdAt  DateTime    @default(now())
+  jobs       ScraperJob[]
+
+  @@index([userId])
+}
+
+model ScraperJob {
+  id           String            @id @default(cuid())
+  userId       String
+  connectionId String?
+  connection   ScraperConnection? @relation(fields: [connectionId], references: [id], onDelete: SetNull)
+  type         ScraperJobType
+  payload      Json
+  status       ScraperJobStatus   @default(PENDING)
+  result       Json?
+  error        String?
+  createdAt    DateTime          @default(now())
+  startedAt    DateTime?
+  completedAt  DateTime?
+
+  @@index([userId, status])
+  @@index([connectionId, status])
+}
+
+// Nationals qualifying-time standards for a season + course (from NQT PDF).
+model NationalsStandardSet {
+  id         String         @id @default(cuid())
+  season     String
+  course     Course         @default(SCY)
+  label      String         @default("Nationals")
+  sourceUrl  String?
+  yearLabel  String?
+  /// PDF-faithful rows: [{ women, event, men }, ...]
+  table      Json?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  cuts       NationalsCut[]
+
+  @@unique([season, course])
+  @@index([season])
+}
+
+model NationalsCut {
+  id      String               @id @default(cuid())
+  setId   String
+  set     NationalsStandardSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+  event   String
+  gender  Gender
+  timeMs  Int
+  note    String?
+  isRelay Boolean              @default(false)
+
+  @@unique([setId, event, gender])
+  @@index([setId])
+}
+
+model Season {
+  label     String   @id // e.g., "2026-2027"
+  createdAt DateTime @default(now())
+}
+
+/// Long-lived refresh tokens for the React Native app.
+model MobileRefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// sha256 hex of the raw refresh token
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  lastUsedAt DateTime?
+
+  @@index([userId])
+}
+
+/// Expo / FCM / APNs device tokens for push delivery.
+model DevicePushToken {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token      String   @unique
+  platform   String   // "ios" | "android"
+  deviceId   String?
+  updatedAt  DateTime @updatedAt
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+}
