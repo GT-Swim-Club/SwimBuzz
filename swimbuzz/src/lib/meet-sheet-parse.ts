@@ -388,7 +388,11 @@ export async function applyPairedSheetEntries(
     newEntries = newEntries.map(coercePrelimHeatTimedFinalsEntry)
   }
   if (newEntries.length === 0) {
-    return { summary: existingSummary, sheetNames, cachedParse }
+    return {
+      summary: existingSummary,
+      sheetNames,
+      cachedParse: cachedParse ?? undefined,
+    }
   }
 
   return {
