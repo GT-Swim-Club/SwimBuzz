@@ -42,9 +42,9 @@ export function upcomingSeason(): string {
   const date = new Date()
   const year = date.getUTCFullYear()
   const month = date.getUTCMonth()
-  // Before Aug (month 7), upcoming is this year-next.
-  if (month < 7) return `${year}-${year + 1}`
-  // Aug or later, upcoming is next year-next+1.
+  // Up to and including Aug (month 7), upcoming is this year-next.
+  if (month <= 7) return `${year}-${year + 1}`
+  // Sep or later, upcoming is next year-next+1.
   return `${year + 1}-${year + 2}`
 }
 

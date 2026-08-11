@@ -36,13 +36,13 @@ SwimBuzz/
 ├── swimbuzz/              # Next.js app
 │   ├── prisma/            # Database schema
 │   ├── supabase/          # SQL migrations (meet files, travel info, etc.)
-│   ├── public/bridge/     # Run scraper install scripts + synced Python (from scraper/)
+│   ├── public/scraper/     # Run scraper install scripts + synced Python (from scraper/)
 │   └── src/
 │       ├── app/           # Pages and API routes
 │       ├── components/
 │       └── lib/           # Parsing, import, athlete matching, etc.
-└── scraper/               # Run scraper source (synced into public/bridge on build)
-    ├── bridge.py          # Run scraper client
+└── scraper/               # Run scraper source (synced into public/scraper on build)
+    ├── scraper.py          # Run scraper client
     ├── swimcloud_scrape.py
     ├── pdf_parse.py       # Meet results PDFs
     ├── sheet_parse.py     # Heat sheets, entry reports, psych sheets
@@ -102,10 +102,10 @@ Apply any additional SQL migrations in `swimbuzz/supabase/` against your databas
 SwimCloud, SwimPhone, and meet PDF/sheet parsing run on **your computer** via **Run scraper** — not on the web server. That avoids Cloudflare blocking datacenter IPs.
 
 1. In the app, open **Run scraper** and generate a run command.
-2. Install/run the helper (scripts under `/bridge/` on the running app, or from `swimbuzz/public/bridge/`).
+2. Install/run the helper (scripts under `/scraper/` on the running app, or from `swimbuzz/public/scraper/`).
 3. Keep it running while importing roster, times, SwimPhone meets, or PDFs.
 
-Bridge Python lives in `scraper/` and is copied into `swimbuzz/public/bridge/` on `npm run dev` / `npm run build`.
+Scraper Python lives in `scraper/` and is copied into `swimbuzz/public/scraper/` on `npm run dev` / `npm run build`.
 
 ## Deploy on Render
 
@@ -135,7 +135,7 @@ Deploy the **web app only** (`swimbuzz/`). There is no separate scraper service.
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start Next.js (also syncs bridge files from `scraper/`) |
+| `npm run dev` | Start Next.js (also syncs scraper files from `scraper/`) |
 | `npm run build` | Production build |
 | `npm run lint` | Run ESLint |
 | `npx prisma studio` | Open database GUI |
@@ -155,7 +155,7 @@ Deploy the **web app only** (`swimbuzz/`). There is no separate scraper service.
 | `POST /api/practices` | Create practice (coaches) |
 | `POST /api/relays/optimal` | Compute optimal relay lineups |
 | `POST /api/scrape` | Scrape SwimCloud times for one athlete (via Run scraper) |
-| `POST /api/bridge/*` | Run scraper pairing, jobs, and heartbeat |
+| `POST /api/scraper/*` | Run scraper pairing, jobs, and heartbeat |
 
 ## Tech stack
 

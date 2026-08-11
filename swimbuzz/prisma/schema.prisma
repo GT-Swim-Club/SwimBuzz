@@ -24,14 +24,14 @@ enum Gender {
   F
 }
 
-enum BridgeJobStatus {
+enum ScraperJobStatus {
   PENDING
   RUNNING
   COMPLETED
   FAILED
 }
 
-enum BridgeJobType {
+enum ScraperJobType {
   ROSTER
   TIMES_BULK
   SWIMPHONE_MEET
@@ -47,6 +47,7 @@ enum NotificationType {
   PROFILE_CHANGE_REJECTED
   PRACTICE_PUBLISHED
   MEET_SIGNUP_OPEN
+  MEET_ROSTER_INFO
   PRACTICE_COMMENT
   TIMES_IMPORT_REQUEST
 }
@@ -75,6 +76,7 @@ model User {
 
 model Athlete {
   id           String   @id @default(cuid())
+  slug         String?  @unique
   userId       String   @unique
   user         User     @relation(fields: [userId], references: [id])
   firstName    String
@@ -91,13 +93,17 @@ model Athlete {
   pendingProfileChanges Json?
   swims        Swim[]
   meetSignups  MeetSignupEntry[]
+  meetRoomPreferences MeetRoomPreference[]
+  meetRoomAssignments MeetRoomAssignment[]
 }
 
 model Meet {
   id            String    @id @default(cuid())
+  slug          String?   @unique
   name          String
   location      String?
   startDate     DateTime
+  startTime     String?
   endDate       DateTime?
   course        Course    @default(SCY)
   season        String
@@ -108,6 +114,8 @@ model Meet {
   packetUrl     String?
   psychSheetUrl String?
   heatSheetUrl  String?
+  /// Multiple finals heat sheet PDFs: [{ url, name? }, ...]
+  finalsHeatSheetUrls Json?
   entriesSheetUrl String?
   resultsUrl    String?
   liveStreamUrl String?
@@ -119,6 +127,8 @@ model Meet {
   eventOrder    Json?
   psychSheetSummary Json?
   heatSheetSummary  Json?
+  /// Merged roster-matched summary from all finalsHeatSheetUrls
+  finalsHeatSheetSummary Json?
   entriesSheetSummary Json?
   relayResultsSummary Json?
   resultStatusesSummary Json?
@@ -126,6 +136,7 @@ model Meet {
   createdAt     DateTime  @default(now())
   swims         Swim[]
   signupForm    MeetSignupForm?
+  roomForm      MeetRoomForm?
 }
 
 model MeetSignupForm {
@@ -166,6 +177,63 @@ model MeetSignupEntry {
   @@index([athleteId])
 }
 
+model MeetRoomForm {
+  id                     String               @id @default(cuid())
+  meetId                 String               @unique
+  meet                   Meet                 @relation(fields: [meetId], references: [id], onDelete: Cascade)
+  instructions           String               @default("")
+  maxPreferences         Int                  @default(3)
+  openAt                 DateTime?
+  closeAt                DateTime?
+  assignmentsPublishedAt DateTime?
+  customQuestions        Json?
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+  preferences            MeetRoomPreference[]
+  rooms                  MeetRoom[]
+}
+
+model MeetRoomPreference {
+  id                  String       @id @default(cuid())
+  formId              String
+  form                MeetRoomForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+  athleteId           String
+  athlete             Athlete      @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  preferredAthleteIds String[]     @default([])
+  excludedAthleteIds  String[]     @default([])
+  notes               String       @default("")
+  answers             Json?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  @@unique([formId, athleteId])
+  @@index([formId])
+  @@index([athleteId])
+}
+
+model MeetRoom {
+  id          String               @id @default(cuid())
+  formId      String
+  form        MeetRoomForm         @relation(fields: [formId], references: [id], onDelete: Cascade)
+  label       String
+  sortOrder   Int                  @default(0)
+  assignments MeetRoomAssignment[]
+
+  @@index([formId])
+}
+
+model MeetRoomAssignment {
+  id        String   @id @default(cuid())
+  roomId    String
+  room      MeetRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  athleteId String
+  athlete   Athlete  @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, athleteId])
+  @@index([roomId])
+  @@index([athleteId])
+}
+
 model Swim {
   id        String   @id @default(cuid())
   athleteId String
@@ -189,6 +257,7 @@ model Swim {
 
 model Practice {
   id          String        @id @default(cuid())
+  slug        String?       @unique
   title       String
   date        DateTime?
   startTime   String        @default("19:30")
@@ -312,7 +381,7 @@ model Notification {
   @@index([athleteId, type])
 }
 
-model BridgePairing {
+model ScraperPairing {
   id        String    @id @default(cuid())
   userId    String
   code      String    @unique
@@ -323,25 +392,25 @@ model BridgePairing {
   @@index([userId])
 }
 
-model BridgeConnection {
+model ScraperConnection {
   id         String      @id @default(cuid())
   userId     String
   token      String      @unique
   lastSeenAt DateTime    @default(now())
   createdAt  DateTime    @default(now())
-  jobs       BridgeJob[]
+  jobs       ScraperJob[]
 
   @@index([userId])
 }
 
-model BridgeJob {
+model ScraperJob {
   id           String            @id @default(cuid())
   userId       String
   connectionId String?
-  connection   BridgeConnection? @relation(fields: [connectionId], references: [id], onDelete: SetNull)
-  type         BridgeJobType
+  connection   ScraperConnection? @relation(fields: [connectionId], references: [id], onDelete: SetNull)
+  type         ScraperJobType
   payload      Json
-  status       BridgeJobStatus   @default(PENDING)
+  status       ScraperJobStatus   @default(PENDING)
   result       Json?
   error        String?
   createdAt    DateTime          @default(now())

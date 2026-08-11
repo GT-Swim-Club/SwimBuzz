@@ -6,6 +6,7 @@ import { normalizeNicknames } from "@/lib/athlete-match"
 import { Gender } from "@prisma/client"
 import { parseSeasonList } from "@/lib/season"
 import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swimcloud-id"
+import { uniqueAthleteSlug } from "@/lib/slug"
 
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -87,6 +88,7 @@ export async function POST(req: Request) {
     return tx.athlete.create({
       data: {
         userId: user.id,
+        slug: await uniqueAthleteSlug(firstName, lastName),
         firstName,
         lastName,
         nicknames,

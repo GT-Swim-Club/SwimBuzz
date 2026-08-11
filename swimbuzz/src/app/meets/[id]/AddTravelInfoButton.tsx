@@ -92,7 +92,7 @@ export default function AddTravelInfoButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border rounded-md hover:bg-fill-secondary hover:bg-fill-secondary bg-background transition-colors"
+        className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border border-border rounded-md bg-background hover:bg-fill transition-colors"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -125,7 +125,7 @@ export default function AddTravelInfoButton({
               type="button"
               onClick={() => setOpen(false)}
               disabled={blocked}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary hover:bg-fill-secondary border-border"
+              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-fill border-border"
             >
               Close
             </button>
@@ -162,7 +162,7 @@ export default function AddTravelInfoButton({
           />
         ))}
 
-        {error && <p className="text-sm text-error dark:text-error">{error}</p>}
+        {error && <p className="text-sm text-error">{error}</p>}
       </Modal>
     </>
   )

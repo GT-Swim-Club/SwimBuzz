@@ -4,11 +4,14 @@ import type { ReactNode } from "react"
 import { useState } from "react"
 import type { ResultSplit } from "@/lib/meet-sheet-summary"
 import SummaryRowLayout from "@/components/SummaryRowLayout"
-import IndividualSplitsModal from "./IndividualSplitsModal"
+import IndividualSplitsModal, {
+  type ResultRoundSection,
+} from "./IndividualSplitsModal"
 
 export default function IndividualSummaryRow({
   athleteName,
   athleteId,
+  athleteSlug,
   label,
   details,
   timeDisplay,
@@ -18,10 +21,12 @@ export default function IndividualSummaryRow({
   editButton,
   id,
   swimInfo,
+  rounds,
 }: {
   athleteName?: string
   athleteId?: string
-  label: ReactNode,
+  athleteSlug?: string | null
+  label: ReactNode
   details?: string
   timeDisplay: ReactNode
   detailTitle: string
@@ -38,6 +43,7 @@ export default function IndividualSummaryRow({
     time?: string
     rawTime?: string
   }
+  rounds?: ResultRoundSection[]
 }) {
   const [detailOpen, setDetailOpen] = useState(false)
 
@@ -53,7 +59,11 @@ export default function IndividualSummaryRow({
           <>
             <span key="time" className="cursor-pointer">{timeDisplay}</span>
             {editButton ? (
-              <div key="edit" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+              <div
+                key="edit"
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
+              >
                 {editButton}
               </div>
             ) : null}
@@ -64,11 +74,13 @@ export default function IndividualSummaryRow({
         <IndividualSplitsModal
           athleteName={athleteName}
           athleteId={athleteId}
+          athleteSlug={athleteSlug}
           title={detailTitle}
           timeDisplay={timeDisplay}
           splits={splits}
           swimInfo={swimInfo}
           rawTime={swimInfo?.rawTime}
+          rounds={rounds}
           onClose={() => setDetailOpen(false)}
         />
       ) : null}

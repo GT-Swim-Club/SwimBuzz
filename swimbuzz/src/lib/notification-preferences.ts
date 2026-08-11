@@ -3,6 +3,7 @@ import { NotificationType } from "@prisma/client"
 export type NotificationPreferenceKey =
   | "practicePublished"
   | "meetSignupOpen"
+  | "meetRosterInfo"
   | "practiceComments"
   | "profileChanges"
 
@@ -16,6 +17,7 @@ export type AllPreferenceKey = NotificationPreferenceKey | "meetSignupNotificati
 export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
   practicePublished: true,
   meetSignupOpen: true,
+  meetRosterInfo: true,
   practiceComments: true,
   profileChanges: true,
   meetSignupNotificationTimes: [0],
@@ -27,6 +29,8 @@ export const NOTIFICATION_PREFERENCE_META: {
   description: string
   /** Shown to athletes when it differs from the coach/staff description. */
   athleteDescription?: string
+  /** Hidden from coaches/staff in notification settings. */
+  athletesOnly?: boolean
 }[] = [
   {
     key: "practicePublished",
@@ -37,6 +41,14 @@ export const NOTIFICATION_PREFERENCE_META: {
     key: "meetSignupOpen",
     label: "Meet signups",
     description: "When meet signups open",
+  },
+  {
+    key: "meetRosterInfo",
+    label: "Meet updates",
+    description: "When new meet info is posted for a meet you're entered in",
+    athleteDescription:
+      "When psych sheets, heat sheets, results, or other meet info is posted for a meet you're on",
+    athletesOnly: true,
   },
   {
     key: "practiceComments",
@@ -65,6 +77,8 @@ export function preferenceKeyForType(
       return "practicePublished"
     case NotificationType.MEET_SIGNUP_OPEN:
       return "meetSignupOpen"
+    case NotificationType.MEET_ROSTER_INFO:
+      return "meetRosterInfo"
     case NotificationType.PRACTICE_COMMENT:
       return "practiceComments"
     case NotificationType.PROFILE_CHANGE_REQUEST:

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import Modal, { ModalFooter } from "@/components/Modal"
+import { MeetFormCustomQuestionFields } from "@/components/MeetFormCustomQuestions"
 import type { MeetSignupEventOption, MeetSignupQuestion } from "@/lib/meet-signup"
 import {
   formatSignupEventLabel,
@@ -262,7 +263,7 @@ export default function MeetSignupAthleteForm({
 
   if (!isCoach && !selfAthleteId) {
     return (
-      <p className="text-sm text-foreground-secondary text-foreground-secondary">
+      <p className="text-sm text-foreground-secondary">
         Your account isn&apos;t linked to a roster athlete, so you can&apos;t sign up yet. Ask a
         coach to add you to the roster.
       </p>
@@ -271,7 +272,7 @@ export default function MeetSignupAthleteForm({
 
   if (isCoach && athletes.length === 0) {
     return (
-      <p className="text-sm text-foreground-secondary text-foreground-secondary">
+      <p className="text-sm text-foreground-secondary">
         No athletes on this meet&apos;s season roster to sign up.
       </p>
     )
@@ -310,7 +311,7 @@ export default function MeetSignupAthleteForm({
               <button
                 type="button"
                 onClick={() => setOpen(true)}
-                className="bg-background text-sm px-4 py-2 rounded-lg border border-border border-border-secondary-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border-secondary-secondary transition-colors"
+                className="bg-background hover:bg-fill text-sm px-4 py-2 rounded-lg border border-border transition-colors"
               >
                 View Sign-Up
               </button>
@@ -323,7 +324,7 @@ export default function MeetSignupAthleteForm({
                   setConfirmWithdrawOpen(true)
                 }}
                 disabled={loading}
-                className="text-sm px-4 py-2 rounded-lg border border-border border-red-200 text-error hover:bg-red-50 dark:border-red-900 dark:text-error dark:hover:bg-red-950/30 disabled:opacity-50 transition-colors"
+                className="text-sm px-4 py-2 rounded-lg border border-border border-red-200 text-error hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-950/30 disabled:opacity-50 transition-colors"
               >
                 Drop
               </button>
@@ -337,7 +338,7 @@ export default function MeetSignupAthleteForm({
                 selfEntry &&
                 withdrawReason &&
                 withdrawReason !== windowReason && (
-                <span className="block mt-1 text-foreground-secondary text-foreground-secondary font-normal">
+                <span className="block mt-1 text-foreground-secondary font-normal">
                   {withdrawReason}
                 </span>
               )}
@@ -357,7 +358,7 @@ export default function MeetSignupAthleteForm({
           </div>
 
           {selfEntry && selfEntry.events.length > 0 && (
-            <p className="text-sm text-foreground-secondary text-foreground-secondary">
+            <p className="text-sm text-foreground-secondary">
               Your submission:{" "}
               {formatEntrySummary(
                 selfEntry,
@@ -395,7 +396,7 @@ export default function MeetSignupAthleteForm({
                   setConfirmWithdrawOpen(true)
                 }}
                 disabled={loading}
-                className="bg-background w-full rounded-lg border border-border border-border-secondary-secondary px-4 py-2.5 text-sm font-medium text-error hover:bg-red-50 dark:text-error dark:hover:bg-red-950/30 border-border-secondary-secondary disabled:opacity-50"
+                className="bg-background w-full rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-error hover:bg-red-50 dark:hover:bg-red-950/30 disabled:opacity-50"
               >
                 Drop
               </button>
@@ -404,7 +405,7 @@ export default function MeetSignupAthleteForm({
               type="button"
               onClick={() => setOpen(false)}
               disabled={loading}
-              className="bg-background flex-1 rounded-lg border border-border border-border-secondary-secondary px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border-secondary-secondary disabled:opacity-50"
+              className="bg-background hover:bg-fill flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium disabled:opacity-50"
             >
               {previewOnly || (!canEdit && !isCoach) ? "Close" : "Cancel"}
             </button>
@@ -429,7 +430,7 @@ export default function MeetSignupAthleteForm({
               value={athleteId}
               onChange={(e) => setAthleteId(e.target.value)}
               disabled={loading}
-              className="w-full rounded-lg border border-border border-border-secondary-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
             >
               {athletes.map((a) => (
                 <option key={a.id} value={a.id}>
@@ -450,7 +451,7 @@ export default function MeetSignupAthleteForm({
         <div className="space-y-4">
           <div>
             <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
-                <p className="text-xs font-medium text-foreground-secondary text-foreground-secondary uppercase tracking-wide">
+                <p className="text-xs font-medium text-foreground-secondary uppercase tracking-wide">
                   Individual events {minEvents != null && minEvents > 0 ? <span className="text-red-500">*</span> : null}
                 </p>
               {(minEvents != null || maxEvents != null) && (
@@ -485,10 +486,10 @@ export default function MeetSignupAthleteForm({
                           disabled={loading || atLimit}
                           onClick={() => toggleEvent(opt.event)}
                           className={
-                            "text-xs px-2 py-0.5 rounded-full border border-border border-border-secondary-secondary transition-colors disabled:opacity-40 " +
+                            "text-xs px-2 py-0.5 rounded-full border transition-colors disabled:opacity-40 " +
                             (active
                               ? "bg-primary border-primary text-primary-text"
-                              : "border-border-secondary-secondary text-foreground-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary")
+                              : "border-border text-foreground-secondary bg-background hover:bg-fill")
                           }
                         >
                       {formatSignupEventLabel(opt, gender)}
@@ -501,18 +502,18 @@ export default function MeetSignupAthleteForm({
           {individual.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <p className="text-xs font-medium text-foreground-secondary text-foreground-secondary uppercase tracking-wide">
+                <p className="text-xs font-medium text-foreground-secondary uppercase tracking-wide">
                   Entry times <span className="text-red-500">*</span>
                 </p>
                 <div className="flex items-center gap-2">
                   {importError && (
-                    <p className="text-xs text-error dark:text-error">{importError}</p>
+                    <p className="text-xs text-error">{importError}</p>
                   )}
                   <button
                     type="button"
                     onClick={() => void fillLifetimeBests()}
                     disabled={loading || importingBests || !canEdit || !athleteId}
-                    className="text-[11px] px-2 py-0.5 border border-border border-border-secondary-secondary rounded-md dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary bg-background disabled:opacity-40 transition-colors"
+                    className="text-[11px] px-2 py-0.5 border border-border rounded-md bg-background hover:bg-fill disabled:opacity-40 transition-colors"
                   >
                     {importingBests ? "Importing…" : `Import lifetime bests`}
                   </button>
@@ -548,10 +549,10 @@ export default function MeetSignupAthleteForm({
                           }
                         }}
                         className={
-                          "flex-1 rounded-lg border border-border border-border-secondary-secondary px-3 py-2 text-sm font-mono bg-background " +
+                          "flex-1 rounded-lg border px-3 py-2 text-sm font-mono bg-background " +
                           (invalid
                             ? "border-red-400 dark:border-red-700"
-                            : "border-border-secondary-secondary")
+                            : "border-border")
                         }
                       />
                     </div>
@@ -564,7 +565,7 @@ export default function MeetSignupAthleteForm({
           {eventOptions.some((opt) => opt.isRelay) && (
             <div>
               <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
-                <p className="text-xs font-medium text-foreground-secondary text-foreground-secondary uppercase tracking-wide">
+                <p className="text-xs font-medium text-foreground-secondary uppercase tracking-wide">
                   Relay events
                 </p>
                 {maxRelayEvents != null && (
@@ -589,10 +590,10 @@ export default function MeetSignupAthleteForm({
                           disabled={loading || atLimit}
                           onClick={() => toggleEvent(opt.event)}
                           className={
-                            "text-xs px-2 py-0.5 rounded-full border border-border border-border-secondary-secondary transition-colors disabled:opacity-40 " +
+                            "text-xs px-2 py-0.5 rounded-full border transition-colors disabled:opacity-40 " +
                             (active
                               ? "bg-primary border-primary text-primary-text"
-                              : "border-border-secondary-secondary text-foreground-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary")
+                              : "border-border text-foreground-secondary bg-background hover:bg-fill")
                           }
                         >
                         {formatSignupEventLabel(opt, gender)}
@@ -605,45 +606,18 @@ export default function MeetSignupAthleteForm({
         </div>
 
         {relay.length > 0 && (
-          <p className="text-sm text-foreground-secondary text-foreground-secondary">
+          <p className="text-sm text-foreground-secondary">
             Signing up for relays does not guarantee a spot. We will form the most competitive
             relays.
           </p>
         )}
 
-        {customQuestions.map((q) => (
-          <div key={q.id}>
-            <label className="block text-xs font-medium text-foreground-secondary mb-1">
-              {q.label}
-              {q.required ? <span className="text-red-500"> *</span> : null}
-            </label>
-            {q.type === "choice" ? (
-              <select
-                value={answers[q.id] ?? ""}
-                onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
-                required={q.required}
-                disabled={loading}
-                className="w-full rounded-lg border border-border border-border-secondary-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
-              >
-                <option value="">{q.required ? "Select…" : "—"}</option>
-                {q.options.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <input
-                type="text"
-                value={answers[q.id] ?? ""}
-                onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
-                required={q.required}
-                disabled={loading}
-                className="w-full rounded-lg border border-border border-border-secondary-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
-              />
-            )}
-          </div>
-        ))}
+        <MeetFormCustomQuestionFields
+          questions={customQuestions}
+          answers={answers}
+          onChange={setAnswers}
+          disabled={loading}
+        />
 
         {askNotes && (
           <div>
@@ -656,12 +630,12 @@ export default function MeetSignupAthleteForm({
               rows={2}
               disabled={loading}
               placeholder="Comments, questions, or concerns"
-              className="w-full rounded-lg border border-border border-border-secondary-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
             />
           </div>
         )}
 
-        {error && <p className="text-sm text-error dark:text-error">{error}</p>}
+        {error && <p className="text-sm text-error">{error}</p>}
       </Modal>
 
       <Modal
@@ -690,7 +664,7 @@ export default function MeetSignupAthleteForm({
                 setWithdrawError(null)
               }}
               disabled={loading}
-              className="bg-background flex-1 rounded-lg border border-border border-border-secondary-secondary px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border-secondary-secondary disabled:opacity-50"
+              className="bg-background hover:bg-fill flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium disabled:opacity-50"
             >
               Cancel
             </button>
@@ -706,7 +680,7 @@ export default function MeetSignupAthleteForm({
         }
       >
         {withdrawError ? (
-          <p className="text-sm text-error dark:text-error">{withdrawError}</p>
+          <p className="text-sm text-error">{withdrawError}</p>
         ) : null}
       </Modal>
     </div>

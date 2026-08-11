@@ -4,11 +4,11 @@ import { useEffect, useState } from "react"
 import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
 import DontReloadNotice from "@/components/DontReloadNotice"
-import Modal, { ModalFooter } from "@/components/Modal"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import { formatRelativeTime, formatDateTime } from "@/lib/utils"
 import { currentSeason, parseSeason } from "@/lib/season"
 import { useScraperUi } from "@/components/ScraperUiProvider"
+import { useImportTask } from "@/components/ImportTaskProvider"
 
 type RosterAthlete = {
   id: string
@@ -37,20 +37,20 @@ type SyncProgress = {
 export default function SyncTimesButton() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const gender = searchParams.get("gender") === "F" ? "F" : "M"
+  const rawGender = searchParams.get("gender")
+  const gender = rawGender === "all" ? "all" : rawGender === "F" ? "F" : "M"
   const season =
     parseSeason(searchParams.get("season") ?? searchParams.get("year")) ?? currentSeason()
 
   const { requireScraper } = useScraperUi()
+  const { startTask } = useImportTask()
 
   const [open, setOpen] = useState(false)
-  const [resultOpen, setResultOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [loadingRoster, setLoadingRoster] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [result, setResult] = useState<SyncResult | null>(null)
-  const [resultError, setResultError] = useState<string | null>(null)
   const [progress, setProgress] = useState<SyncProgress | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
 
   useDontReloadWhileBusy(loading)
 
@@ -106,21 +106,6 @@ export default function SyncTimesButton() {
     }
   }
 
-  function closeResultModal() {
-    setResultOpen(false)
-    setResult(null)
-    setResultError(null)
-  }
-
-  function formatFailedLabels(failed: Array<string | number>): string[] {
-    return failed.map((id) => {
-      const num = typeof id === "number" ? id : parseInt(String(id), 10)
-      const athlete = roster.find((a) => a.swimCloudId === num)
-      if (athlete) return `${athlete.lastName}, ${athlete.firstName}`
-      return String(id)
-    })
-  }
-
   async function handleSync(e: React.FormEvent) {
     e.preventDefault()
 
@@ -133,13 +118,7 @@ export default function SyncTimesButton() {
       return
     }
 
-    setLoading(true)
-    setError(null)
-    setResult(null)
-    setResultError(null)
-    setProgress({ current: 0, total: toSync.length, name: "Starting…" })
-
-    try {
+    const promise = (async () => {
       const res = await fetch("/api/times/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -150,16 +129,8 @@ export default function SyncTimesButton() {
         }),
       })
       const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? "Import failed")
 
-      if (!res.ok) {
-        setOpen(false)
-        setResultError(data.error ?? "Import failed")
-        setResultOpen(true)
-        return
-      }
-
-      const nextResult = data as SyncResult
-      setResult(nextResult)
       if (data.timesSyncedAt && Array.isArray(data.syncedAthleteIds)) {
         const syncedIds = new Set<string>(data.syncedAthleteIds)
         setRoster((prev) =>
@@ -168,27 +139,22 @@ export default function SyncTimesButton() {
           )
         )
       }
-      setOpen(false)
-      setResultOpen(true)
       router.refresh()
-    } catch {
-      setOpen(false)
-      setResultError("Import failed — check that the scraper is running")
-      setResultOpen(true)
-    } finally {
-      setLoading(false)
-      setProgress(null)
-    }
-  }
+      
+      const result = data as SyncResult
+      return `Imported ${result.imported} new swim${result.imported === 1 ? "" : "s"} from ${result.athletesSynced}/${result.athletes} athlete${result.athletes === 1 ? "" : "s"}.`
+    })()
 
-  const failedLabels = result?.failed?.length ? formatFailedLabels(result.failed) : []
+    startTask("Importing times…", promise)
+    setOpen(false)
+  }
 
   return (
     <>
       <button
         type="button"
         onClick={() => requireScraper(() => setOpen(true))}
-        className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border-secondary rounded-lg hover:border-border hover:bg-fill-tertiary bg-fill-secondary dark:hover:bg-fill-tertiary dark:bg-background transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border-secondary rounded-lg hover:border-border hover:bg-fill-tertiary bg-background dark:hover:bg-fill-tertiary dark:bg-background transition-colors"
       >
         <Image src="/swimcloud.webp" alt="" width={28} height={28} className="shrink-0" style={{ width: "auto" }} />
         Import Times
@@ -204,21 +170,21 @@ export default function SyncTimesButton() {
           />
 
           <div
-            className="relative z-10 w-full max-w-xl rounded-2xl border border-border-secondary bg-background shadow-xl dark:border border-border-secondary dark:bg-background-elevated flex flex-col max-h-[min(40rem,85vh)] overflow-hidden"
+            className="relative z-10 w-full max-w-xl rounded-2xl border border-border bg-background shadow-xl flex flex-col max-h-[min(40rem,85vh)] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="shrink-0 px-5 pt-5 pb-3">
-              <h2 className="text-lg font-medium text-foreground dark:text-foreground">
+            <div className="shrink-0 px-6 pt-6 pb-2">
+              <h2 className="text-lg font-medium text-foreground">
                 Import times from SwimCloud
               </h2>
-              <p className="mt-1 text-sm text-foreground-secondary dark:text-foreground-secondary">
-                Select from the {gender === "F" ? "women's" : "men's"} {season} roster.
+              <p className="mt-1 text-sm text-foreground-secondary">
+                Select from the {gender === "all" ? "" : gender === "F" ? "women's" : "men's"} {season} roster.
                 Takes about 2–3 minutes per athlete.
               </p>
             </div>
 
             <form onSubmit={handleSync} className="flex flex-col min-h-0 flex-1">
-              <div className="flex-1 overflow-y-auto px-5 min-h-0">
+              <div className="flex-1 overflow-y-auto px-6 min-h-0">
                 {loadingRoster ? (
                   <p className="text-sm text-foreground-secondary dark:text-foreground-secondary py-3">Loading roster…</p>
                 ) : roster.length === 0 ? (
@@ -227,26 +193,41 @@ export default function SyncTimesButton() {
                   </p>
                 ) : (
                   <div className="flex flex-col gap-3 pb-3">
-                    <div className="flex items-center justify-between sticky top-0 bg-background/95 bg-background/95 backdrop-blur-sm py-1.5 z-10">
-                      <span className="text-xs font-medium text-foreground-secondary dark:text-foreground-secondary uppercase tracking-wide">
-                        Athletes · {selected.size} selected
-                      </span>
-                      {selectable.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={toggleAll}
-                          disabled={loading}
-                          className="text-xs font-medium text-primary hover:text-primary-hover dark:text-primary"
-                        >
-                          {allSelected ? "Deselect all" : "Select all"}
-                        </button>
-                      )}
+                    <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-10 py-1.5 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-foreground-secondary dark:text-foreground-secondary uppercase tracking-wide">
+                          Athletes · {selected.size} selected
+                        </span>
+                        {selectable.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={toggleAll}
+                            disabled={loading}
+                            className="text-xs font-medium text-primary hover:text-primary-hover dark:text-primary"
+                          >
+                            {allSelected ? "Deselect all" : "Select all"}
+                          </button>
+                        )}
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Search athletes…"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full text-sm px-3 py-2 rounded-lg border border-border bg-background focus:ring-1 focus:ring-primary outline-none"
+                      />
                     </div>
 
                     <ul className="space-y-1.5">
-                      {roster.map((athlete) => {
-                        const disabled = athlete.swimCloudId === null
-                        const checked = selected.has(athlete.id)
+                      {roster
+                        .filter((a) =>
+                          `${a.firstName} ${a.lastName}`
+                            .toLowerCase()
+                            .includes(searchQuery.toLowerCase())
+                        )
+                        .map((athlete) => {
+                          const disabled = athlete.swimCloudId === null
+                          const checked = selected.has(athlete.id)
 
                         return (
                           <li key={athlete.id}>
@@ -295,29 +276,17 @@ export default function SyncTimesButton() {
                   </div>
                 )}
 
-                {loading && progress ? (
-                  <p className="py-2 text-sm text-foreground-secondary text-foreground-secondary">
-                    Importing {progress.current}/{progress.total}: {progress.name}
-                    <span className="mt-1 block text-xs text-gray-400 dark:text-zinc-500">
-                      About 1–2 minutes per athlete — don&apos;t reload the page while import
-                      finishes.
-                    </span>
-                  </p>
-                ) : loading ? (
-                  <DontReloadNotice className="py-2" />
-                ) : null}
-
                 {error && (
                   <p className="text-sm text-error dark:text-error py-2">{error}</p>
                 )}
               </div>
 
-              <div className="shrink-0 flex gap-3 px-5 py-4 border-t border-border-secondary dark:border border-border-secondary">
+              <div className="shrink-0 flex gap-3 px-6 py-4 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
                   disabled={loading}
-                  className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary dark:hover:bg-fill-secondary dark:border border-border-secondary"
+                  className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary"
                 >
                   Close
                 </button>
@@ -333,39 +302,6 @@ export default function SyncTimesButton() {
           </div>
         </div>
       )}
-
-      <Modal
-        open={resultOpen}
-        onClose={closeResultModal}
-        title={resultError ? "Import failed" : "Import complete"}
-        description={
-          resultError
-            ? resultError
-            : result
-              ? [
-                  `Imported ${result.imported} new swim${result.imported === 1 ? "" : "s"} from ${result.athletesSynced}/${result.athletes} athlete${result.athletes === 1 ? "" : "s"}.`,
-                  failedLabels.length
-                    ? `Failed: ${failedLabels.join(", ")}.`
-                    : null,
-                ]
-                  .filter(Boolean)
-                  .join(" ")
-              : "Import finished."
-        }
-        maxWidth="sm"
-        overlayClassName="z-[60]"
-        footer={
-          <ModalFooter>
-            <button
-              type="button"
-              onClick={closeResultModal}
-              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover"
-            >
-              Done
-            </button>
-          </ModalFooter>
-        }
-      />
     </>
   )
 }

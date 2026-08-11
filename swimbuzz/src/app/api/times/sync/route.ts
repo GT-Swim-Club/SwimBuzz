@@ -2,12 +2,12 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
-import { Gender, BridgeJobType } from "@prisma/client"
+import { Gender, ScraperJobType } from "@prisma/client"
 import { assignSwimOccurrences } from "@/lib/swim-dedup"
 import { swimsFromSwimCloudTimes, type SwimCloudTime } from "@/lib/swimcloud-import"
 import { parseSeason } from "@/lib/season"
-import { runBridgeJob } from "@/lib/bridge"
-import { LOCAL_BRIDGE_HINT } from "@/lib/scraper-or-bridge"
+import { runScraperJob } from "@/lib/scraper"
+import { LOCAL_SCRAPER_HINT } from "@/lib/scraper-proxy"
 
 export const runtime = "nodejs"
 export const maxDuration = 3600
@@ -20,14 +20,18 @@ export async function GET(req: Request) {
 
   const params = new URL(req.url).searchParams
   const season = parseSeason(params.get("season") ?? params.get("year"))
-  const gender = params.get("gender") === "F" ? Gender.F : Gender.M
+  const genderRaw = params.get("gender")
+  const gender = genderRaw === "all" ? undefined : (genderRaw === "F" ? Gender.F : Gender.M)
 
   if (!season) {
     return NextResponse.json({ error: "Season is required (e.g. 2025-2026)" }, { status: 400 })
   }
 
   const athletes = await prisma.athlete.findMany({
-    where: { seasons: { has: season }, gender },
+    where: { 
+      seasons: { has: season }, 
+      ...(gender ? { gender } : {}) 
+    },
     select: {
       id: true,
       firstName: true,
@@ -53,7 +57,7 @@ export async function POST(req: Request) {
   if (!season) {
     return NextResponse.json({ error: "Season is required (e.g. 2025-2026)" }, { status: 400 })
   }
-  const gender = genderRaw === "F" ? Gender.F : Gender.M
+  const gender = genderRaw === "all" ? undefined : (genderRaw === "F" ? Gender.F : Gender.M)
   if (!Array.isArray(athleteIds) || athleteIds.length === 0) {
     return NextResponse.json({ error: "Select at least one athlete" }, { status: 400 })
   }
@@ -62,7 +66,7 @@ export async function POST(req: Request) {
     where: {
       id: { in: athleteIds },
       seasons: { has: season },
-      gender,
+      ...(gender ? { gender } : {}),
       swimCloudId: { not: null },
     },
     select: { id: true, firstName: true, lastName: true, swimCloudId: true },
@@ -90,13 +94,13 @@ export async function POST(req: Request) {
   }
 
   try {
-    scraped = await runBridgeJob(session.user.id, BridgeJobType.TIMES_BULK, {
+    scraped = await runScraperJob(session.user.id, ScraperJobType.TIMES_BULK, {
       swimmer_ids: swimmerIds,
     })
   } catch (err) {
     const message = err instanceof Error ? err.message : "Run scraper failed"
     if (message === "LOCAL_BRIDGE_NOT_CONNECTED") {
-      return NextResponse.json({ error: LOCAL_BRIDGE_HINT }, { status: 503 })
+      return NextResponse.json({ error: LOCAL_SCRAPER_HINT }, { status: 503 })
     }
     return NextResponse.json({ error: message }, { status: 502 })
   }

@@ -383,3 +383,24 @@ export function isAutomaticallyMatched(
   return matchAthleteIdFast(pdfName, lookup, null) !== null
 }
 
+export function pairedPdfNameKeys(
+  nameMappings: Record<string, string>
+): Set<string> {
+  const keys = new Set<string>()
+  for (const raw of Object.keys(nameMappings)) {
+    const key = nameMatchKey(raw) ?? normalize(raw)
+    if (key) keys.add(key)
+  }
+  return keys
+}
+
+export function isPairedPdfName(
+  pdfName: string,
+  nameMappings: Record<string, string> | null | undefined
+): boolean {
+  if (!nameMappings) return false
+  const key = nameMatchKey(pdfName) ?? normalize(pdfName)
+  if (!key) return false
+  return pairedPdfNameKeys(nameMappings).has(key)
+}
+

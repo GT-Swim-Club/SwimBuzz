@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { formatRelativeTime } from "@/lib/utils"
+import ActionIcon from "@/components/ActionIcon"
 
 export type CommentDTO = {
   id: string
@@ -153,7 +154,7 @@ export default function CommentSection({
             className="shrink-0 text-[11px] text-foreground-tertiary hover:text-red-500 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
             aria-label="Delete comment"
           >
-            Delete
+            <ActionIcon kind="delete" className="w-3.5 h-3.5" />
           </button>
         )}
       </div>

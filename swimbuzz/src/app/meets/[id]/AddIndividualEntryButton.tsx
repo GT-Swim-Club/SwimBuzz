@@ -131,7 +131,7 @@ export default function AddIndividualEntryButton({
         type="button"
         onClick={openModal}
         disabled={athletes.length === 0}
-        className="text-xs px-3 py-1.5 border border-border rounded-lg dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary bg-background disabled:opacity-40 transition-colors"
+        className="text-xs px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill disabled:opacity-40 transition-colors"
       >
         Add entry
       </button>
@@ -149,7 +149,7 @@ export default function AddIndividualEntryButton({
               type="button"
               onClick={() => setOpen(false)}
               disabled={loading}
-              className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border"
+              className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium bg-background hover:bg-fill"
             >
               Cancel
             </button>
@@ -164,21 +164,21 @@ export default function AddIndividualEntryButton({
         }
       >
         <div className="flex gap-2 mb-4 p-1 rounded-lg border border-border">
-          <button type="button" onClick={() => setType("individual")} className={`flex-1 text-sm py-1.5 rounded-lg ${type === "individual" ? "bg-primary text-primary-text" : "hover:bg-fill-secondary"}`}>Individual</button>
-          <button type="button" onClick={() => setType("relay")} className={`flex-1 text-sm py-1.5 rounded-lg ${type === "relay" ? "bg-primary text-primary-text" : "hover:bg-fill-secondary"}`}>Relay</button>
+          <button type="button" onClick={() => setType("individual")} className={`flex-1 text-sm py-1.5 rounded-lg ${type === "individual" ? "bg-primary text-primary-text" : "hover:bg-fill"}`}>Individual</button>
+          <button type="button" onClick={() => setType("relay")} className={`flex-1 text-sm py-1.5 rounded-lg ${type === "relay" ? "bg-primary text-primary-text" : "hover:bg-fill"}`}>Relay</button>
         </div>
 
         {type === "individual" ? (
           <>
             <div>
-              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Athlete <span className="text-red-500">*</span>
               </label>
               <select
                 required
                 value={form.athleteId}
                 onChange={(e) => setForm((f) => ({ ...f, athleteId: e.target.value }))}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
               >
                 <option value="">Select swimmer...</option>
                 {athletes.map((a) => (
@@ -190,7 +190,7 @@ export default function AddIndividualEntryButton({
             </div>
             <div className="grid grid-cols-2 gap-3 mt-3">
               <div>
-                <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+                <label className="block text-xs font-medium text-foreground-secondary mb-1">
                   Event <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -199,11 +199,11 @@ export default function AddIndividualEntryButton({
                   placeholder="e.g., 50 Free"
                   value={form.event}
                   onChange={(e) => setForm((f) => ({ ...f, event: e.target.value }))}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+                <label className="block text-xs font-medium text-foreground-secondary mb-1">
                   Seed Time
                 </label>
                 <input
@@ -212,7 +212,7 @@ export default function AddIndividualEntryButton({
                   placeholder="1:23.45 or NT"
                   value={form.seedTime}
                   onChange={(e) => setForm((f) => ({ ...f, seedTime: e.target.value }))}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm font-mono bg-background border-border"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm font-mono bg-background"
                 />
               </div>
             </div>
@@ -221,25 +221,25 @@ export default function AddIndividualEntryButton({
           <>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+                <label className="block text-xs font-medium text-foreground-secondary mb-1">
                   Relay Event
                 </label>
                 <select
                   value={form.relayForm.event}
                   onChange={(e) => setForm(f => ({ ...f, relayForm: {...f.relayForm, event: e.target.value} }))}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
                 >
                   {RELAY_EVENTS.map(ev => <option key={ev} value={ev}>{ev}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+                <label className="block text-xs font-medium text-foreground-secondary mb-1">
                   Gender
                 </label>
                 <select
                   value={form.relayForm.gender}
                   onChange={(e) => setForm(f => ({ ...f, relayForm: {...f.relayForm, gender: e.target.value as "F" | "M"} }))}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
                 >
                   <option value="F">Women's</option>
                   <option value="M">Men's</option>
@@ -248,7 +248,7 @@ export default function AddIndividualEntryButton({
             </div>
             
             <div className="space-y-2 mt-3">
-              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary">Athletes <span className="text-red-500">*</span></label>
+              <label className="block text-xs font-medium text-foreground-secondary">Athletes <span className="text-red-500">*</span></label>
               {[0, 1, 2, 3].map(i => (
                 <select
                   key={i}
@@ -259,7 +259,7 @@ export default function AddIndividualEntryButton({
                     legs[i] = e.target.value
                     setForm(f => ({ ...f, relayForm: {...f.relayForm, legs} }))
                   }}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
                 >
                   <option value="">Select swimmer...</option>
                   {swimmerOptions.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
@@ -268,21 +268,21 @@ export default function AddIndividualEntryButton({
             </div>
             
             <div className="mt-3">
-              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Seed Time
               </label>
               <input
                 type="text"
                 value={form.seedTime}
                 onChange={(e) => setForm((f) => ({ ...f, seedTime: e.target.value }))}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm font-mono bg-background border-border"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm font-mono bg-background"
               />
             </div>
           </>
         )}
 
         {error && (
-          <p className="text-sm text-error dark:text-error mt-4">{error}</p>
+          <p className="text-sm text-error mt-4">{error}</p>
         )}
       </Modal>
     </>

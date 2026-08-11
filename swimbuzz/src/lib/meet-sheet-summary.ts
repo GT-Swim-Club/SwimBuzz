@@ -15,6 +15,7 @@ import {
   relayEventKey,
   relayGenderFromEventName,
   relayTeamKey,
+  sanitizeRelayLegSplits,
   sanitizeRelaySplitTime,
 } from "@/lib/relay-results"
 
@@ -53,6 +54,8 @@ export type SheetEntry = {
     athleteId?: string
     /** Individual leg split time (not cumulative). */
     splitTime?: string
+    /** Interval 50 splits within the leg when leg distance > 50. */
+    splits?: ResultSplit[]
   }>
   /** Formatted result time from imported/manual swims (timed-finals meets). */
   resultTime?: string
@@ -74,6 +77,10 @@ export type SheetEntry = {
   resultTags?: string
   /** Coach "add to roster" seed — overridden by psych/entries/heat/results. */
   manual?: boolean
+  /** Finals heat-sheet alternate (not a scored heat/lane). */
+  alternate?: boolean
+  /** Athlete on meet roster without entering an event. */
+  rosterOnly?: boolean
   /** Swim row id when this entry is a single manual swim. */
   swimId?: string
   prelimSwimId?: string
@@ -155,14 +162,40 @@ function isFinalTag(tags: string): boolean {
   return t === "F" || t.includes("FINAL")
 }
 
+export function isTimedFinalsRound(round?: string): boolean {
+  const r = (round ?? "").toLowerCase()
+  return r.includes("timed") && r.includes("final")
+}
+
 function isFinalsRound(round?: string): boolean {
   const r = (round ?? "").toLowerCase()
+  if (!r || isTimedFinalsRound(r)) return false
   return r === "f" || r === "finals" || r.includes("final")
 }
 
 function isPrelimsRound(round?: string): boolean {
   const r = (round ?? "").toLowerCase()
   return r === "p" || r === "prelims" || r.includes("prelim")
+}
+
+/**
+ * On the main (prelims) heat sheet, heats labeled "Finals" are timed finals —
+ * a single swim, not a separate finals round. Dedicated finals heat sheets are
+ * left unchanged (passed in separately to mergeSheetSummaries).
+ */
+export function coercePrelimHeatTimedFinalsEntry(entry: SheetEntry): SheetEntry {
+  if (isTimedFinalsRound(entry.round)) {
+    if (entry.entryType === "relay_team" && entry.relayRound === "F") {
+      return { ...entry, relayRound: "" }
+    }
+    return entry
+  }
+  if (!isFinalsRound(entry.round)) return entry
+  return {
+    ...entry,
+    round: "timed_finals",
+    ...(entry.entryType === "relay_team" ? { relayRound: "" as const } : {}),
+  }
 }
 
 export function individualSheetKey(athleteId: string, event: string): string {
@@ -474,6 +507,8 @@ export function relayLeadoffsFromSplits(
     if (seen.has(key)) continue
     seen.add(key)
 
+    const leadoffSplits = sanitizeRelayLegSplits(leg1.splits)
+
     out.push({
       athleteId: leg1.athleteId,
       athleteName: leg1.name || relay.athleteName,
@@ -482,6 +517,7 @@ export function relayLeadoffsFromSplits(
       relayLeadoffTime: split,
       relayLeadoffSource: source,
       relayLeadoffRound: round,
+      ...(leadoffSplits?.length ? { splits: leadoffSplits } : {}),
     })
   }
 
@@ -710,6 +746,7 @@ export function swimsToMeetResults(swims: SwimResultInput[]): MeetResultEntry[] 
       const { relayEvent, round } = parseLeadoffTag(swim.tags)
       existing.isRelayLeadoff = true
       existing.relayLeadoffTime = time
+      existing.swimId = swim.id
       if (relayEvent) existing.relayLeadoffSource = relayEvent
       if (round) existing.relayLeadoffRound = round
     } else if (isPrelimTag(swim.tags)) {
@@ -751,14 +788,16 @@ export function isSheetSummary(value: unknown): value is SheetSummary {
 }
 
 /** Unique roster athletes appearing on sheet/relay/result rows for a meet. */
-export function countMeetAthletes(opts: {
+export function collectMeetRosterAthleteIds(opts: {
   psychSheetSummary?: unknown
   heatSheetSummary?: unknown
+  finalsHeatSheetSummary?: unknown
   entriesSheetSummary?: unknown
   relayResultsSummary?: unknown
   resultStatusesSummary?: unknown
   swimAthleteIds?: string[]
-}): number {
+  signupAthleteIds?: string[]
+}): string[] {
   const ids = new Set<string>()
 
   function addFromEntries(entries: SheetEntry[]) {
@@ -776,6 +815,7 @@ export function countMeetAthletes(opts: {
   for (const summary of [
     opts.psychSheetSummary,
     opts.heatSheetSummary,
+    opts.finalsHeatSheetSummary,
     opts.entriesSheetSummary,
   ]) {
     if (isSheetSummary(summary)) addFromEntries(summary.entries)
@@ -801,7 +841,23 @@ export function countMeetAthletes(opts: {
     if (id) ids.add(id)
   }
 
-  return ids.size
+  for (const id of opts.signupAthleteIds ?? []) {
+    if (id) ids.add(id)
+  }
+
+  return [...ids]
+}
+
+export function countMeetAthletes(opts: {
+  psychSheetSummary?: unknown
+  heatSheetSummary?: unknown
+  finalsHeatSheetSummary?: unknown
+  entriesSheetSummary?: unknown
+  relayResultsSummary?: unknown
+  resultStatusesSummary?: unknown
+  swimAthleteIds?: string[]
+}): number {
+  return collectMeetRosterAthleteIds(opts).length
 }
 
 export function groupSheetByAthlete(
@@ -881,10 +937,13 @@ export function isTimedFinalsEvent(entries: SheetEntry[], event: string): boolea
   const eventKey = normalizeEventName(event)
   let hasPrelim = false
   let hasFinal = false
+  let hasTimedFinalsRound = false
 
   for (const e of entries) {
-    if (e.entryType !== "individual" || e.isRelayLeadoff) continue
+    if (e.isRelayLeadoff) continue
     if (normalizeEventName(e.event) !== eventKey) continue
+    if (isTimedFinalsRound(e.round)) hasTimedFinalsRound = true
+    if (e.entryType !== "individual") continue
     if (!hasSwimResultData(e)) continue
 
     const prelim = Boolean(e.prelimTime || e.prelimStatus)
@@ -896,6 +955,8 @@ export function isTimedFinalsEvent(entries: SheetEntry[], event: string): boolea
     if (finals) hasFinal = true
   }
 
+  if (hasPrelim && hasFinal) return false
+  if (hasTimedFinalsRound) return true
   return !(hasPrelim && hasFinal)
 }
 
@@ -904,6 +965,8 @@ export function isTimedFinalsEntry(
   entry: SheetEntry,
   options?: { allEntries?: SheetEntry[] }
 ): boolean {
+  if (isTimedFinalsRound(entry.round) && entry.resultRound !== "P") return true
+
   const hasRelayResult =
     entry.entryType === "relay_team" &&
     Boolean(entry.resultTime || entry.prelimTime || entry.finalTime)
@@ -1003,19 +1066,68 @@ export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] 
   }
 
   for (const entry of entries) {
-    if (entry.entryType !== "individual" || entry.isRelayLeadoff) {
+    if (entry.entryType === "relay_team") {
+      out.push(
+        ...expandRelayTeamRows(
+          entry,
+          eventIsTimedFinals(entry.event) || isTimedFinalsRound(entry.round)
+        )
+      )
+      continue
+    }
+    if (entry.isRelayLeadoff) {
       out.push(entry)
       continue
     }
 
-    const hasPrelim = Boolean(entry.prelimTime || entry.prelimStatus)
+    if (isTimedFinalsRound(entry.round)) {
+      out.push(
+        withRoundSplits(
+          {
+            ...entry,
+            resultRound: "",
+            heat: entry.heat ?? entry.finalHeat ?? entry.prelimHeat,
+            lane: entry.lane ?? entry.finalLane ?? entry.prelimLane,
+            heatTotal:
+              entry.heatTotal ?? entry.finalHeatTotal ?? entry.prelimHeatTotal,
+          },
+          ""
+        )
+      )
+      continue
+    }
+
+    // Heat sheets merge prelim + finals onto one athlete/event entry
+    // (prelimHeat / finalHeat). Split those back into separate list rows —
+    // not only when both result times exist.
+    const hasPrelimPlacement = Boolean(
+      positiveHeat(entry.prelimHeat) ||
+        ((isPrelimsRound(entry.round) || entry.relayRound === "P") &&
+          positiveHeat(entry.heat))
+    )
+    const hasFinalPlacement = Boolean(
+      positiveHeat(entry.finalHeat) ||
+        entry.alternate ||
+        ((isFinalsRound(entry.round) || entry.relayRound === "F") &&
+          positiveHeat(entry.heat) &&
+          !positiveHeat(entry.prelimHeat))
+    )
+    const hasPrelim = Boolean(
+      entry.prelimTime || entry.prelimStatus || hasPrelimPlacement
+    )
     const hasFinal = Boolean(
-      entry.finalTime || (entry.finalStatus && entry.finalStatus !== "NS")
+      entry.finalTime ||
+        (entry.finalStatus && entry.finalStatus !== "NS") ||
+        hasFinalPlacement
     )
 
     if (!hasPrelim || !hasFinal) {
       if (hasFinal && !hasPrelim) {
-        if (eventIsTimedFinals(entry.event)) {
+        const fromFinalsHeatSheet =
+          isFinalsRound(entry.round) ||
+          positiveHeat(entry.finalHeat) ||
+          Boolean(entry.alternate)
+        if (eventIsTimedFinals(entry.event) && !fromFinalsHeatSheet) {
           out.push(
             withRoundSplits(
               {
@@ -1052,6 +1164,7 @@ export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] 
                 heat: entry.finalHeat ?? entry.heat,
                 lane: entry.finalLane ?? entry.lane,
                 heatTotal: entry.finalHeatTotal ?? entry.heatTotal,
+                seedTime: entry.prelimTime ?? entry.seedTime,
               },
               "F"
             )
@@ -1063,6 +1176,7 @@ export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] 
             {
               ...entry,
               resultRound: "P",
+              alternate: undefined,
               swimId: entry.prelimSwimId ?? entry.swimId,
               heat: entry.prelimHeat ?? entry.heat,
               lane: entry.prelimLane ?? entry.lane,
@@ -1096,19 +1210,12 @@ export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] 
         {
           ...entry,
           resultRound: "P",
+          // Alternates come from finals heat sheets — don't label the prelim row.
+          alternate: undefined,
           swimId: entry.prelimSwimId ?? entry.swimId,
           heat: entry.prelimHeat ?? entry.heat,
           lane: entry.prelimLane ?? entry.lane,
           heatTotal: entry.prelimHeatTotal ?? entry.heatTotal,
-          finalTime: undefined,
-          finalStatus: undefined,
-          finalPlace: undefined,
-          finalHeat: undefined,
-          finalLane: undefined,
-          finalHeatTotal: undefined,
-          resultTime: undefined,
-          resultStatus: undefined,
-          resultPlace: undefined,
         },
         "P"
       )
@@ -1123,17 +1230,7 @@ export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] 
           heat: entry.finalHeat ?? entry.heat,
           lane: entry.finalLane ?? entry.lane,
           heatTotal: entry.finalHeatTotal ?? entry.heatTotal,
-          prelimTime: undefined,
-          prelimStatus: undefined,
-          prelimPlace: undefined,
-          prelimHeat: undefined,
-          prelimLane: undefined,
-          prelimHeatTotal: undefined,
-          seedRank: undefined,
-          timeStatus: undefined,
-          resultTime: undefined,
-          resultStatus: undefined,
-          resultPlace: undefined,
+          seedTime: entry.prelimTime ?? entry.seedTime,
         },
         "F"
       )
@@ -1141,6 +1238,107 @@ export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] 
   }
 
   return out
+}
+
+/** Split a merged relay team entry into prelims / finals display rows. */
+function expandRelayTeamRows(entry: SheetEntry, timedFinals: boolean): SheetEntry[] {
+  const hasPrelim = Boolean(
+    entry.prelimTime ||
+      positiveHeat(entry.prelimHeat) ||
+      entry.relayRound === "P" ||
+      (isPrelimsRound(entry.round) &&
+        (positiveHeat(entry.heat) || entry.lane != null || entry.seedRank != null))
+  )
+  const hasFinal = Boolean(
+    entry.finalTime ||
+      (entry.resultTime && entry.relayRound === "F") ||
+      (entry.resultTime &&
+        !entry.prelimTime &&
+        entry.relayRound !== "P" &&
+        positiveHeat(entry.finalHeat)) ||
+      positiveHeat(entry.finalHeat) ||
+      entry.alternate ||
+      entry.relayRound === "F" ||
+      (isFinalsRound(entry.round) &&
+        (positiveHeat(entry.heat) || entry.lane != null || entry.seedRank != null) &&
+        !positiveHeat(entry.prelimHeat) &&
+        entry.relayRound !== "P")
+  )
+
+  if (hasPrelim && hasFinal) {
+    return [
+      {
+        ...entry,
+        relayRound: "P",
+        alternate: undefined,
+        heat: entry.prelimHeat ?? (entry.relayRound === "P" ? entry.heat : undefined),
+        lane: entry.prelimLane ?? (entry.relayRound === "P" ? entry.lane : undefined),
+        heatTotal:
+          entry.prelimHeatTotal ??
+          (entry.relayRound === "P" ? entry.heatTotal : undefined),
+        resultTime: entry.prelimTime,
+        resultPlace: entry.prelimPlace,
+      },
+      {
+        ...entry,
+        relayRound: "F",
+        heat: entry.finalHeat ?? (entry.relayRound === "F" ? entry.heat : undefined),
+        lane: entry.finalLane ?? (entry.relayRound === "F" ? entry.lane : undefined),
+        heatTotal:
+          entry.finalHeatTotal ??
+          (entry.relayRound === "F" ? entry.heatTotal : undefined),
+        resultTime: entry.finalTime ?? (entry.relayRound === "F" ? entry.resultTime : undefined),
+        resultPlace:
+          entry.finalPlace ?? (entry.relayRound === "F" ? entry.resultPlace : undefined),
+        seedTime: entry.prelimTime ?? entry.seedTime,
+      },
+    ]
+  }
+
+  if (hasFinal && !hasPrelim) {
+    const knownFinals =
+      entry.relayRound === "F" ||
+      isFinalsRound(entry.round) ||
+      positiveHeat(entry.finalHeat) ||
+      Boolean(entry.alternate)
+    if (timedFinals && !knownFinals) {
+      return [
+        {
+          ...entry,
+          relayRound: "",
+          heat: entry.finalHeat ?? entry.heat,
+          lane: entry.finalLane ?? entry.lane,
+          heatTotal: entry.finalHeatTotal ?? entry.heatTotal,
+          seedTime: entry.prelimTime ?? entry.seedTime,
+        },
+      ]
+    }
+    return [
+      {
+        ...entry,
+        relayRound: "F",
+        heat: entry.finalHeat ?? entry.heat,
+        lane: entry.finalLane ?? entry.lane,
+        heatTotal: entry.finalHeatTotal ?? entry.heatTotal,
+        seedTime: entry.prelimTime ?? entry.seedTime,
+      },
+    ]
+  }
+
+  if (hasPrelim && !hasFinal) {
+    return [
+      {
+        ...entry,
+        relayRound: "P",
+        alternate: undefined,
+        heat: entry.prelimHeat ?? entry.heat,
+        lane: entry.prelimLane ?? entry.lane,
+        heatTotal: entry.prelimHeatTotal ?? entry.heatTotal,
+      },
+    ]
+  }
+
+  return [entry]
 }
 
 /** Fill missing prelim/final heat totals from the max heat in each event. */
@@ -1346,14 +1544,23 @@ function coalesceMixedRelayGroup(
 function collapseRelayLetterGroup(entries: SheetEntry[]): SheetEntry[] {
   if (entries.length <= 1) return entries
 
-  let seed: SheetEntry | undefined
+  let unscopedSeed: SheetEntry | undefined
+  let prelimSeed: SheetEntry | undefined
+  let finalSeed: SheetEntry | undefined
   let prelims: SheetEntry | undefined
   let finals: SheetEntry | undefined
   let timed: SheetEntry | undefined
 
   for (const entry of entries) {
     if (!hasRelayResultData(entry)) {
-      seed = seed ? mergeEntries(seed, entry) : entry
+      const round = relayHeatSheetRound(entry)
+      if (round === "P") {
+        prelimSeed = prelimSeed ? mergeEntries(prelimSeed, entry) : entry
+      } else if (round === "F") {
+        finalSeed = finalSeed ? mergeEntries(finalSeed, entry) : entry
+      } else {
+        unscopedSeed = unscopedSeed ? mergeEntries(unscopedSeed, entry) : entry
+      }
       continue
     }
     const round = entryRelayRound(entry)
@@ -1368,22 +1575,51 @@ function collapseRelayLetterGroup(entries: SheetEntry[]): SheetEntry[] {
 
   const out: SheetEntry[] = []
 
-  if (prelims) {
-    out.push(seed ? mergeEntries(seed, prelims) : prelims)
-    seed = undefined
-  } else if (finals) {
-    out.push(seed ? mergeEntries(seed, finals) : finals)
-    seed = undefined
-  } else if (timed) {
-    out.push(seed ? mergeEntries(seed, timed) : timed)
-    seed = undefined
+  if (prelims || prelimSeed) {
+    let row = prelims && prelimSeed
+      ? mergeEntries(prelims, prelimSeed)
+      : (prelims ?? prelimSeed)!
+    if (unscopedSeed) row = mergeEntries(row, unscopedSeed)
+    if (!entryRelayRound(row)) row = { ...row, relayRound: "P" }
+    out.push(row)
   }
 
-  if (seed) out.push(seed)
-  if (finals && prelims) out.push(finals)
-  if (timed && (prelims || finals)) out.push(timed)
+  if (finals || finalSeed) {
+    let row = finals && finalSeed
+      ? mergeEntries(finals, finalSeed)
+      : (finals ?? finalSeed)!
+    // Unscoped psych/entries seed applies to both rounds when both exist.
+    if (unscopedSeed) row = mergeEntries(row, unscopedSeed)
+    if (!entryRelayRound(row)) row = { ...row, relayRound: "F" }
+    out.push(row)
+  }
+
+  if (!out.length && timed) {
+    out.push(unscopedSeed ? mergeEntries(timed, unscopedSeed) : timed)
+  } else if (timed) {
+    out.push(timed)
+  }
+
+  if (!out.length && unscopedSeed) out.push(unscopedSeed)
 
   return out
+}
+
+/** Round for a heat/psych relay seed row (no result time yet). */
+function relayHeatSheetRound(entry: SheetEntry): "P" | "F" | "" {
+  const round = entryRelayRound(entry)
+  if (round === "P" || round === "F") return round
+  if (positiveHeat(entry.prelimHeat) || entry.prelimLane != null) return "P"
+  if (
+    positiveHeat(entry.finalHeat) ||
+    entry.finalLane != null ||
+    entry.alternate
+  ) {
+    return "F"
+  }
+  if (isPrelimsRound(entry.round)) return "P"
+  if (isFinalsRound(entry.round)) return "F"
+  return ""
 }
 
 function collapseRelayGroup(entries: SheetEntry[]): SheetEntry[] {
@@ -1483,8 +1719,8 @@ function entryRelayRound(entry: SheetEntry): "P" | "F" | "" {
 
 /** Seed/psych/heat rows merge with prelims, or finals when there are no prelims. */
 function relayRoundsCompatibleForMerge(a: SheetEntry, b: SheetEntry): boolean {
-  const ra = entryRelayRound(a)
-  const rb = entryRelayRound(b)
+  const ra = relayHeatSheetRound(a) || entryRelayRound(a)
+  const rb = relayHeatSheetRound(b) || entryRelayRound(b)
   if (ra === rb) return true
   if (!ra && (rb === "P" || rb === "F")) return true
   if ((ra === "P" || ra === "F") && !rb) return true
@@ -1555,7 +1791,9 @@ function relayTeamSeedKey(entry: SheetEntry): string {
   const gender = entry.gender ?? ""
   const letter = normalizeRelayLetter(entry.relayLetter) ?? "A"
   const seed = entry.seedTime ?? entry.timeStatus ?? ""
-  return `${relayEventKey(entry.event)}|${gender}|${letter}|${seed}`
+  // Keep prelims / finals heat-sheet seeds as separate rows.
+  const round = entry.relayRound ?? ""
+  return `${relayEventKey(entry.event)}|${gender}|${letter}|${seed}|${round}`
 }
 
 function relayRosterMatchKeys(entry: SheetEntry): string[] {
@@ -1589,25 +1827,45 @@ function fuseSheetRelaySeedRows(byKey: Map<string, SheetEntry>): void {
   for (const [seedKey, seed] of [...byKey.entries()]) {
     if (!isRelaySeedOnly(seed)) continue
     const matches = teamEntries.filter(([, target]) => relaySeedMatchesTeam(seed, target))
-    if (matches.length !== 1) continue
-    const [targetKey, target] = matches[0]
-    if (!byKey.has(seedKey) || !byKey.has(targetKey)) continue
-    byKey.set(targetKey, mergeEntries(target, seed))
-    byKey.delete(seedKey)
+    if (matches.length === 0) continue
+    if (matches.length === 1) {
+      const [targetKey, target] = matches[0]
+      if (!byKey.has(seedKey) || !byKey.has(targetKey)) continue
+      byKey.set(targetKey, mergeEntries(target, seed))
+      byKey.delete(seedKey)
+      continue
+    }
+    // Unscoped psych/entries seeds: copy onto each prelims/finals team row.
+    if (!entryRelayRound(seed)) {
+      let applied = false
+      for (const [targetKey, target] of matches) {
+        if (!byKey.has(targetKey)) continue
+        byKey.set(targetKey, mergeEntries(target, seed))
+        applied = true
+      }
+      if (applied) byKey.delete(seedKey)
+    }
   }
 
-  const remainingSeeds = [...byKey.entries()].filter(([, entry]) => isRelaySeedOnly(entry))
-  for (let i = 0; i < remainingSeeds.length; i++) {
-    const [keyA, a] = remainingSeeds[i]
-    if (!byKey.has(keyA)) continue
-    for (let j = i + 1; j < remainingSeeds.length; j++) {
-      const [keyB, b] = remainingSeeds[j]
-      if (!byKey.has(keyB)) continue
+  const remainingSeedKeys = [...byKey.entries()]
+    .filter(([, entry]) => isRelaySeedOnly(entry))
+    .map(([key]) => key)
+  for (let i = 0; i < remainingSeedKeys.length; i++) {
+    const keyA = remainingSeedKeys[i]
+    for (let j = i + 1; j < remainingSeedKeys.length; j++) {
+      const a = byKey.get(keyA)
+      if (!a || !isRelaySeedOnly(a)) break
+      const keyB = remainingSeedKeys[j]
+      const b = byKey.get(keyB)
+      if (!b || !isRelaySeedOnly(b)) continue
       // Never merge two seed rows that have distinct relay letters — they are
       // different relay teams (e.g. B and C) that both happen to be NT.
       const letterA = normalizeRelayLetter(a.relayLetter)
       const letterB = normalizeRelayLetter(b.relayLetter)
       if (letterA && letterB && letterA !== letterB) continue
+      // Keep prelims / finals heat sheets as separate rows. Re-read both sides
+      // from byKey every pass so an earlier merge that assigned a round sticks.
+      if (!relayRoundsCompatibleForMerge(a, b)) continue
       if (!relayEntriesOverlap(a, b)) continue
       byKey.set(keyA, mergeEntries(a, b))
       byKey.delete(keyB)
@@ -1623,13 +1881,15 @@ function fuseSheetRelaySeedRows(byKey: Map<string, SheetEntry>): void {
   for (const item of unmatchedSeeds) {
     const [, entry] = item
     const letter = normalizeRelayLetter(entry.relayLetter) ?? "A"
-    const key = `${relayEventKey(entry.event)}|${entry.gender ?? ""}|${letter}`
+    const round = entryRelayRound(entry)
+    const key = `${relayEventKey(entry.event)}|${entry.gender ?? ""}|${letter}|${round}`
     seedsByEventGender.set(key, [...(seedsByEventGender.get(key) ?? []), item])
   }
   for (const item of unmatchedRosters) {
     const [, entry] = item
     const letter = normalizeRelayLetter(entry.relayLetter) ?? "A"
-    const key = `${relayEventKey(entry.event)}|${entry.gender ?? ""}|${letter}`
+    const round = entryRelayRound(entry)
+    const key = `${relayEventKey(entry.event)}|${entry.gender ?? ""}|${letter}|${round}`
     rostersByEventGender.set(key, [...(rostersByEventGender.get(key) ?? []), item])
   }
   for (const [groupKey, seeds] of seedsByEventGender) {
@@ -1729,13 +1989,16 @@ function mergeRelaySwimmers(
       // Keep preferred roster; only fill missing split times from the other side.
       const splitTime =
         sanitizeRelaySplitTime(prev.splitTime) ?? sanitizeRelaySplitTime(leg.splitTime)
+      const splits = preferResultSplits(prev.splits, leg.splits)
       byLeg.set(leg.leg, {
         ...prev,
         ...(splitTime ? { splitTime } : {}),
+        ...(splits?.length ? { splits } : {}),
       })
       continue
     }
     const splitTime = sanitizeRelaySplitTime(leg.splitTime) ?? prev.splitTime
+    const splits = preferResultSplits(leg.splits, prev.splits)
     const name = isRealRelaySwimmerName(leg.name)
       ? leg.name
       : isRealRelaySwimmerName(prev.name)
@@ -1747,6 +2010,7 @@ function mergeRelaySwimmers(
       name,
       athleteId: leg.athleteId ?? prev.athleteId,
       ...(splitTime ? { splitTime } : {}),
+      ...(splits?.length ? { splits } : {}),
     })
   }
   return [...byLeg.values()].sort((x, y) => x.leg - y.leg)
@@ -1760,6 +2024,52 @@ function mergedRelayRound(a: SheetEntry, b: SheetEntry): "P" | "F" | "" {
 
 function validHeat(heat?: number): number | undefined {
   return heat != null && heat > 0 ? heat : undefined
+}
+
+function isFinalsSheetSide(entry: SheetEntry): boolean {
+  return (
+    entry.relayRound === "F" ||
+    isFinalsRound(entry.round) ||
+    Boolean(entry.alternate) ||
+    validHeat(entry.finalHeat) != null
+  )
+}
+
+/**
+ * Keep psych/entry seeds on seedTime for prelims rows, and map finals heat-sheet
+ * "Prelims" column times onto prelimTime so finals rows can use them as seed.
+ */
+function mergeSeedFields(
+  a: SheetEntry,
+  b: SheetEntry
+): Pick<SheetEntry, "seedTime" | "timeStatus" | "prelimTime"> {
+  const aFinals = isFinalsSheetSide(a)
+  const bFinals = isFinalsSheetSide(b)
+
+  // Prefer non-finals-sheet seed (psych / prelims heat). Fall back to whichever
+  // exists when only a finals sheet is present.
+  const seedTime =
+    (!aFinals ? a.seedTime : undefined) ??
+    (!bFinals ? b.seedTime : undefined) ??
+    a.seedTime ??
+    b.seedTime
+  const timeStatus =
+    (!aFinals ? a.timeStatus : undefined) ??
+    (!bFinals ? b.timeStatus : undefined) ??
+    a.timeStatus ??
+    b.timeStatus
+
+  let prelimTime = a.prelimTime ?? b.prelimTime
+  if (!prelimTime) {
+    if (aFinals && a.seedTime) prelimTime = a.seedTime
+    else if (bFinals && b.seedTime) prelimTime = b.seedTime
+  }
+
+  return {
+    seedTime,
+    timeStatus,
+    prelimTime,
+  }
 }
 
 function mergeHeatFields(a: SheetEntry, b: SheetEntry): Partial<SheetEntry> {
@@ -1825,6 +2135,9 @@ function mergeEntries(a: SheetEntry, b: SheetEntry): SheetEntry {
   const preferPrimarySwimmers = aManual !== bManual
 
   const heatPatch = mergeHeatFields(primary, secondary)
+  const seedPatch = mergeSeedFields(primary, secondary)
+  const bothRoundHeats =
+    validHeat(heatPatch.prelimHeat) != null && validHeat(heatPatch.finalHeat) != null
   const heatSide =
     primary.heat != null && primary.heat > 0
       ? primary
@@ -1854,19 +2167,29 @@ function mergeEntries(a: SheetEntry, b: SheetEntry): SheetEntry {
     event: normalizeEventName(primary.event || secondary.event),
     eventNumber: primary.eventNumber || secondary.eventNumber,
     entryType: primary.entryType || secondary.entryType,
-    seedTime: primary.seedTime ?? secondary.seedTime,
-    timeStatus: primary.timeStatus ?? secondary.timeStatus,
+    seedTime: seedPatch.seedTime,
+    timeStatus: seedPatch.timeStatus,
     seedRank: psychSide?.seedRank ?? primary.seedRank ?? secondary.seedRank,
-    heat:
-      heatPatch.heat ??
-      validHeat(heatSide?.heat) ??
-      validHeat(primary.heat) ??
-      validHeat(secondary.heat),
-    heatTotal:
-      heatPatch.heatTotal ?? heatSide?.heatTotal ?? primary.heatTotal ?? secondary.heatTotal,
-    lane: heatPatch.lane ?? heatSide?.lane ?? primary.lane ?? secondary.lane,
-    round: heatSide?.round ?? primary.round ?? secondary.round,
-    startTime: heatSide?.startTime ?? primary.startTime ?? secondary.startTime,
+    // When both prelim and finals heats are known, don't keep a single generic
+    // heat/lane/round (that would prefer whichever sheet was primary).
+    heat: bothRoundHeats
+      ? undefined
+      : heatPatch.heat ??
+        validHeat(heatSide?.heat) ??
+        validHeat(primary.heat) ??
+        validHeat(secondary.heat),
+    heatTotal: bothRoundHeats
+      ? undefined
+      : heatPatch.heatTotal ?? heatSide?.heatTotal ?? primary.heatTotal ?? secondary.heatTotal,
+    lane: bothRoundHeats
+      ? undefined
+      : heatPatch.lane ?? heatSide?.lane ?? primary.lane ?? secondary.lane,
+    round: bothRoundHeats
+      ? undefined
+      : heatSide?.round ?? primary.round ?? secondary.round,
+    startTime: bothRoundHeats
+      ? primary.startTime ?? secondary.startTime
+      : heatSide?.startTime ?? primary.startTime ?? secondary.startTime,
     relayLetter:
       normalizeRelayLetter(primary.relayLetter) ?? normalizeRelayLetter(secondary.relayLetter),
     relayRound: mergedRelayRound(primary, secondary),
@@ -1877,7 +2200,7 @@ function mergeEntries(a: SheetEntry, b: SheetEntry): SheetEntry {
       preferPrimarySwimmers
     ),
     resultTime: primary.resultTime ?? secondary.resultTime,
-    prelimTime: primary.prelimTime ?? secondary.prelimTime,
+    prelimTime: seedPatch.prelimTime,
     finalTime: primary.finalTime ?? secondary.finalTime,
     relayLeadoffTime: primary.relayLeadoffTime ?? secondary.relayLeadoffTime,
     isRelayLeadoff: primary.isRelayLeadoff || secondary.isRelayLeadoff,
@@ -1890,6 +2213,7 @@ function mergeEntries(a: SheetEntry, b: SheetEntry): SheetEntry {
     prelimStatus: primary.prelimStatus ?? secondary.prelimStatus,
     finalStatus: primary.finalStatus ?? secondary.finalStatus,
     resultTags: primary.resultTags ?? secondary.resultTags,
+    alternate: Boolean(primary.alternate || secondary.alternate),
     // Once sheet/results data is present, treat as imported for edit/delete rules.
     manual: aManual && bManual ? true : aManual !== bManual ? false : Boolean(a.manual || b.manual),
     swimId: primary.swimId ?? secondary.swimId,
@@ -1902,15 +2226,36 @@ function mergeEntries(a: SheetEntry, b: SheetEntry): SheetEntry {
   }
 }
 
-/** Merge psych + entries + heat summaries, individual results, and relay results into one list. */
+/** Merge new sheet rows into an existing summary without dropping prior entries. */
+export function appendSheetSummaryEntries(
+  existing: SheetSummary,
+  additions: SheetEntry[]
+): SheetSummary {
+  const byKey = new Map<string, SheetEntry>()
+  for (const entry of existing.entries) {
+    byKey.set(entryKey(entry), entry)
+  }
+  for (const entry of additions) {
+    const key = entryKey(entry)
+    const prev = byKey.get(key)
+    byKey.set(key, prev ? mergeEntries(prev, entry) : entry)
+  }
+  return {
+    ...existing,
+    entries: [...byKey.values()],
+  }
+}
+
+/** Merge psych + entries + heat + finals heat summaries, individual results, and relay results into one list. */
 export function mergeSheetSummaries(
   psych: SheetSummary | null | undefined,
   heat: SheetSummary | null | undefined,
   results?: MeetResultEntry[] | null,
   relayResults?: SheetEntry[] | null,
-  entries?: SheetSummary | null | undefined
+  entries?: SheetSummary | null | undefined,
+  finalsHeat?: SheetSummary | null | undefined
 ): SheetSummary | null {
-  const hasSheets = Boolean(psych || heat || entries)
+  const hasSheets = Boolean(psych || heat || entries || finalsHeat)
   const hasResults = Boolean(results?.length)
   const hasRelayResults = Boolean(relayResults?.length)
   if (!hasSheets && !hasResults && !hasRelayResults) return null
@@ -1919,7 +2264,9 @@ export function mergeSheetSummaries(
   for (const entry of [
     ...(psych?.entries ?? []),
     ...(entries?.entries ?? []),
-    ...(heat?.entries ?? []),
+    // Main heat sheet "Finals" heats → timed finals (not P/F finals).
+    ...(heat?.entries ?? []).map(coercePrelimHeatTimedFinalsEntry),
+    ...(finalsHeat?.entries ?? []),
     ...(relayResults ?? []),
   ]) {
     const key = entryKey(entry)

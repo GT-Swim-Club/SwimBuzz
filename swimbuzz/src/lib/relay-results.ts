@@ -3,8 +3,16 @@ import {
   matchAthleteIdFast,
   type RosterAthlete,
 } from "@/lib/athlete-match"
-import type { SheetEntry } from "@/lib/meet-sheet-summary"
+import type { ResultSplit, SheetEntry } from "@/lib/meet-sheet-summary"
 import { canonicalizeStrokeEvent, normalizeEventName, parseSwimTime } from "@/lib/swim-parse"
+
+export type ParsedRelaySwimmer = {
+  leg: number
+  name: string
+  athleteId?: string
+  splitTime?: string
+  splits?: ResultSplit[]
+}
 
 export type RelayRound = "P" | "F" | ""
 export type RelayGender = "M" | "F" | "X" | ""
@@ -19,7 +27,7 @@ export type ParsedRelayResult = {
   eventNumber?: number
   relayLetter?: string | null
   gender?: RelayGender
-  relaySwimmers: Array<{ leg: number; name: string; splitTime?: string }>
+  relaySwimmers: ParsedRelaySwimmer[]
   time: string
   tags?: string
   place?: number
@@ -108,6 +116,22 @@ export function sanitizeRelaySplitTime(value?: string | null): string | undefine
   const trimmed = value.trim()
   if (/^no data$/i.test(trimmed)) return undefined
   return parseSwimTime(trimmed) ? trimmed : undefined
+}
+
+/** Sanitize interval 50 splits attached to a relay leg. */
+export function sanitizeRelayLegSplits(value: unknown): ResultSplit[] | undefined {
+  if (!Array.isArray(value)) return undefined
+  const out: ResultSplit[] = []
+  for (const row of value) {
+    if (!row || typeof row !== "object") continue
+    const r = row as Record<string, unknown>
+    const distance = Number(r.distance)
+    const splitTime = sanitizeRelaySplitTime(String(r.splitTime ?? ""))
+    if (!Number.isFinite(distance) || distance <= 0 || !splitTime) continue
+    out.push({ distance, splitTime })
+  }
+  out.sort((a, b) => a.distance - b.distance)
+  return out.length > 0 ? out : undefined
 }
 
 const PLACEHOLDER_LEG = /^leg\s*\d+$/i
@@ -273,11 +297,13 @@ export function matchRelayResultsToRoster(
           ? matchAthleteIdFast(rawName, lookup, nameMappings)
           : undefined
         const splitTime = sanitizeRelaySplitTime(leg.splitTime)
+        const splits = sanitizeRelayLegSplits(leg.splits)
         return {
           leg: leg.leg,
           name,
           ...(athleteId ? { athleteId } : {}),
           ...(splitTime ? { splitTime } : {}),
+          ...(splits ? { splits } : {}),
         }
       })
 
@@ -342,12 +368,17 @@ export function coerceParsedRelayResults(raw: unknown): ParsedRelayResult[] {
         const legNum = parseInt(String(l.leg ?? ""), 10)
         if (!Number.isFinite(legNum)) return null
         const splitTime = sanitizeRelaySplitTime(String(l.splitTime ?? ""))
-        if (!name && !splitTime) return null
-        return splitTime
-          ? { leg: legNum, name: name || `Leg ${legNum}`, splitTime }
-          : { leg: legNum, name: name || `Leg ${legNum}` }
+        const splits = sanitizeRelayLegSplits(l.splits)
+        if (!name && !splitTime && !splits?.length) return null
+        const swimmer: ParsedRelaySwimmer = {
+          leg: legNum,
+          name: name || `Leg ${legNum}`,
+        }
+        if (splitTime) swimmer.splitTime = splitTime
+        if (splits) swimmer.splits = splits
+        return swimmer
       })
-      .filter((leg): leg is { leg: number; name: string; splitTime?: string } => leg !== null)
+      .filter((leg): leg is ParsedRelaySwimmer => leg !== null)
     const time = String(r.time ?? "").trim()
     const event = normalizeEventName(String(r.event ?? ""))
     if (!time || !event) continue
@@ -392,7 +423,12 @@ export type RelayTeamInput = {
   relayLetter?: string | null
   relayRound?: RelayRound
   gender?: RelayGender
-  legs: Array<{ leg: number; athleteId: string; splitTime?: string }>
+  legs: Array<{
+    leg: number
+    athleteId: string
+    splitTime?: string
+    splits?: ResultSplit[]
+  }>
   resultTime?: string
   resultPlace?: number
   seedTime?: string
@@ -419,11 +455,13 @@ export function buildRelaySheetEntries(
         ? `${athlete.lastName}, ${athlete.firstName}`
         : leg.athleteId
       const splitTime = sanitizeRelaySplitTime(leg.splitTime)
+      const splits = sanitizeRelayLegSplits(leg.splits)
       return {
         leg: leg.leg,
         name,
         athleteId: leg.athleteId,
         ...(splitTime ? { splitTime } : {}),
+        ...(splits ? { splits } : {}),
       }
     })
 

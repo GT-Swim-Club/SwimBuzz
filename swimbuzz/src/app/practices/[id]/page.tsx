@@ -6,6 +6,7 @@ import { isStaffUi } from "@/lib/athlete-view-server"
 import PracticeDetail from "./PracticeDetail"
 import type { PracticeFormState } from "../PracticeEditor"
 import { serializePracticeEditLock } from "@/lib/practice-edit-lock"
+import { isCuid, practicePath } from "@/lib/slug"
 
 function toDateInput(d: Date | null | undefined): string {
   if (!d) return ""
@@ -14,43 +15,17 @@ function toDateInput(d: Date | null | undefined): string {
 
 export default async function PracticePage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{
-    q?: string
-    tag?: string | string[]
-    view?: string
-    month?: string
-    week?: string
-  }>
 }) {
-  const { id } = await params
-  const { q, tag, view, month, week } = await searchParams
+  const { id: param } = await params
   const session = await getServerSession(authOptions)
   if (!session) redirect("/signin?callbackUrl=/practices")
 
   const isCoach = await isStaffUi(session.user.role)
 
-  const backParams = new URLSearchParams()
-  if (q?.trim()) backParams.set("q", q.trim())
-  const tags = Array.isArray(tag) ? tag : tag ? [tag] : []
-  for (const t of tags) {
-    const value = t.trim()
-    if (value) backParams.append("tag", value)
-  }
-  if (view === "list") {
-    backParams.set("view", "list")
-  } else if (view === "month" || view === "calendar") {
-    backParams.set("view", "month")
-    if (month && /^\d{4}-\d{2}$/.test(month)) backParams.set("month", month)
-  } else if (week && /^\d{4}-\d{2}-\d{2}$/.test(week)) {
-    backParams.set("week", week)
-  }
-  const backHref = backParams.toString() ? `/practices?${backParams}` : "/practices"
-
-  const practice = await prisma.practice.findUnique({
-    where: { id },
+  const practice = await prisma.practice.findFirst({
+    where: isCuid(param) ? { OR: [{ id: param }, { slug: param }] } : { slug: param },
     include: {
       sets: { orderBy: { order: "asc" } },
       comments: { orderBy: { createdAt: "asc" } },
@@ -59,6 +34,7 @@ export default async function PracticePage({
   })
 
   if (!practice || (!practice.published && !isCoach)) notFound()
+  if (practice.slug && param !== practice.slug) redirect(practicePath(practice.slug))
 
   const totalDistance = practice.sets.reduce((sum, s) => sum + (s.distance ?? 0), 0)
   const initialEditLock = serializePracticeEditLock(practice, session.user.id)
@@ -101,7 +77,6 @@ export default async function PracticePage({
       }))}
       totalDistance={totalDistance}
       initial={initial}
-      backHref={backHref}
       isCoach={isCoach}
       currentUserId={session.user.id}
       comments={practice.comments.map((c) => ({

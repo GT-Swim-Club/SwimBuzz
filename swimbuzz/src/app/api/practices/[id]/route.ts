@@ -10,6 +10,7 @@ import {
   PracticeEditLockError,
   assertCanMutatePractice,
 } from "@/lib/practice-edit-lock"
+import { uniquePracticeSlug } from "@/lib/slug"
 
 export async function GET(
   _req: Request,
@@ -69,6 +70,9 @@ export async function PATCH(
     )
 
     // Diff sets so comments on untouched sets survive edits.
+    const dateChanged =
+      (existing.date?.getTime() ?? null) !== (data.date?.getTime() ?? null)
+
     const practice = await prisma.$transaction(async (tx) => {
       await tx.practiceSet.deleteMany({
         where: { practiceId: id, id: { notIn: [...keepIds] } },
@@ -102,7 +106,14 @@ export async function PATCH(
 
       return tx.practice.update({
         where: { id },
-        data: { title: data.title, date: data.date, focus: data.focus, tags: data.tags, published: data.published },
+        data: {
+          title: data.title,
+          date: data.date,
+          focus: data.focus,
+          tags: data.tags,
+          published: data.published,
+          ...(dateChanged ? { slug: await uniquePracticeSlug(data.date, id) } : {}),
+        },
       })
     })
 

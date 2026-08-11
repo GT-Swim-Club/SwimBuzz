@@ -13,7 +13,7 @@ export default function EventOrderTable({ order }: { order: EventOrder }) {
       {order.sessions.map((session, sessionIndex) => (
         <div key={`${session.label}-${sessionIndex}`}>
           {showSessionLabel(session.label) ? (
-            <h3 className="text-center text-sm font-semibold text-foreground text-foreground mb-2">
+            <h3 className="text-center text-sm font-semibold text-foreground mb-2">
               {session.label}
             </h3>
           ) : null}

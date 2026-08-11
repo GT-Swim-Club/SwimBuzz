@@ -11,33 +11,25 @@ import AthletesClientWrapper from "./AthletesClientWrapper"
 import RosterFilters, { RosterSearch } from "./RosterFilters"
 import { currentSeason, parseSeason } from "@/lib/season"
 import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete-view-server"
-import Link from "next/link"
+import {
+  GalleryListViewToggle,
+  ViewNavPanel,
+  ViewNavigationProvider,
+} from "@/components/ViewNavigation"
 
 export const dynamic = 'force-dynamic'
-
-function matchesAthleteQuery(
-    athlete: { firstName: string; lastName: string; nicknames: string[] },
-    query: string
-  ) {
-    const q = query.toLowerCase()
-    const haystack = [
-      athlete.firstName,
-      athlete.lastName,
-      `${athlete.firstName} ${athlete.lastName}`,
-      `${athlete.lastName}, ${athlete.firstName}`,
-      ...athlete.nicknames,
-    ]
-      .join(" ")
-      .toLowerCase()
-    return haystack.includes(q)
-  }
 
 async function RosterContent({ searchParams }: { searchParams: Promise<{ gender?: string; season?: string; year?: string; q?: string; view?: string }> }) {
     const { gender, season: seasonParam, year: legacyYear, q, view } = await searchParams
     const query = q?.trim() ?? ""
 
+    const seasons = await prisma.season.findMany({
+        orderBy: { label: "desc" },
+    }).then(list => list.map(s => s.label))
+    const latestSeason = seasons[0]
+
     const season =
-      parseSeason(seasonParam ?? legacyYear) ?? currentSeason()
+      parseSeason(seasonParam ?? legacyYear) ?? latestSeason ?? currentSeason()
 
     if (!gender || (!seasonParam && !legacyYear)) {
         const params = new URLSearchParams({
@@ -59,11 +51,25 @@ async function RosterContent({ searchParams }: { searchParams: Promise<{ gender?
     const activeView = view ? (view === "list" ? "list" : "gallery") : (defaultView === "list" ? "list" : "gallery")
     const genderFilter =
       gender === "F" ? "F" : gender === "M" ? "M" : null
-  
+
+    // Build a DB-level search filter so we only fetch matching rows instead of
+    // loading the full roster and filtering in JS.
+    // Note: Prisma cannot do substring search on String[] (nicknames), so we
+    // filter first/last name in the DB and then post-filter nicknames in JS.
+    const firstLastWhere = query
+      ? {
+          OR: [
+            { firstName: { contains: query, mode: "insensitive" as const } },
+            { lastName: { contains: query, mode: "insensitive" as const } },
+          ],
+        }
+      : {}
+
     const athletes = await prisma.athlete.findMany({
         where: {
           ...(genderFilter ? { gender: genderFilter } : {}),
           seasons: { has: season },
+          ...firstLastWhere,
         },
       include: {
         user: { select: { name: true, email: true, image: true } },
@@ -71,8 +77,18 @@ async function RosterContent({ searchParams }: { searchParams: Promise<{ gender?
       orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
     })
 
+    // Post-filter: also match athletes whose nickname contains the query
+    // (Prisma can't do substring search on array fields).
     const filteredAthletes = query
-      ? athletes.filter((a) => matchesAthleteQuery(a, query))
+      ? athletes.filter((a) => {
+          const q = query.toLowerCase()
+          // firstName/lastName already matched by DB; re-check nicknames too
+          return (
+            a.firstName.toLowerCase().includes(q) ||
+            a.lastName.toLowerCase().includes(q) ||
+            a.nicknames.some((n) => n.toLowerCase().includes(q))
+          )
+        })
       : athletes
 
     const viewerAthleteId = await resolveViewerAthleteId(session.user.id, session.user.role)
@@ -86,7 +102,7 @@ async function RosterContent({ searchParams }: { searchParams: Promise<{ gender?
   
     const isCoach = await isStaffUi(session.user.role)
     const showGender = genderFilter == null
-  
+
     function buildHref(next: { view?: "gallery" | "list" }) {
         const params = new URLSearchParams({
             gender: gender ?? "all",
@@ -99,59 +115,42 @@ async function RosterContent({ searchParams }: { searchParams: Promise<{ gender?
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between gap-4 flex-wrap">
-                <div className="flex items-center gap-3 flex-wrap">
-                    <h1 className="text-3xl font-semibold text-foreground">Roster</h1>
-                    <RosterFilters count={sortedAthletes.length} />
-                </div>
-                <div className="flex items-center gap-3 flex-wrap">
-                    <div className="inline-flex rounded-lg border border-border bg-background p-1 text-sm">
-                        <Link
-                            href={buildHref({ view: "gallery" })}
-                            className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 transition-colors ${activeView === "gallery" ? "bg-primary text-primary-text" : "text-foreground-secondary hover:border-border hover:bg-fill-secondary"}`}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 shrink-0" aria-hidden="true">
-                              <rect x="3" y="3" width="7" height="7" />
-                              <rect x="14" y="3" width="7" height="7" />
-                              <rect x="14" y="14" width="7" height="7" />
-                              <rect x="3" y="14" width="7" height="7" />
-                            </svg>
-                        </Link>
-                        <Link
-                            href={buildHref({ view: "list" })}
-                            className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 transition-colors ${activeView === "list" ? "bg-primary text-primary-text" : "text-foreground-secondary hover:border-border hover:bg-fill-secondary"}`}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 shrink-0" aria-hidden="true">
-                              <path d="M8 6h13" />
-                              <path d="M8 12h13" />
-                              <path d="M8 18h13" />
-                              <path d="M3 6h.01" />
-                              <path d="M3 12h.01" />
-                              <path d="M3 18h.01" />
-                            </svg>
-                        </Link>
-                    </div>
-                {isCoach && (
+        <ViewNavigationProvider>
+            <div className="space-y-6">
+                <div className="flex items-center justify-between gap-4 flex-wrap">
                     <div className="flex items-center gap-3 flex-wrap">
-                        <ImportRosterButton />
-                        <SyncTimesButton />
-                        <AddAthleteButton />
+                        <h1 className="text-3xl font-semibold text-foreground">Roster</h1>
+                        <RosterFilters count={sortedAthletes.length} seasons={seasons} />
                     </div>
-                )}
+                    <div className="flex items-center gap-3 flex-wrap">
+                        <GalleryListViewToggle
+                            activeView={activeView}
+                            galleryHref={buildHref({ view: "gallery" })}
+                            listHref={buildHref({ view: "list" })}
+                        />
+                    {isCoach && (
+                        <div className="flex items-center gap-3 flex-wrap">
+                            <ImportRosterButton />
+                            <SyncTimesButton />
+                            <AddAthleteButton />
+                        </div>
+                    )}
+                    </div>
                 </div>
-            </div>
-            
-            <RosterSearch />
+                
+                <RosterSearch />
 
-            <AthletesClientWrapper
-            athletes={sortedAthletes}
-            viewerAthleteId={viewerAthleteId}
-            showGender={showGender}
-            query={query}
-            view={activeView}
-            />
-        </div>
+                <ViewNavPanel>
+                    <AthletesClientWrapper
+                    athletes={sortedAthletes}
+                    viewerAthleteId={viewerAthleteId}
+                    showGender={showGender}
+                    query={query}
+                    view={activeView}
+                    />
+                </ViewNavPanel>
+            </div>
+        </ViewNavigationProvider>
     )
 }
 

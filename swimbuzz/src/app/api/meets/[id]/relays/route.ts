@@ -14,6 +14,8 @@ import {
   relayTeamPlace,
   effectiveRelayRound,
   effectiveRelayGender,
+  sanitizeRelayLegSplits,
+  sanitizeRelaySplitTime,
   type RelayGender,
   type RelayRound,
   type RelayTeamInput,
@@ -42,10 +44,21 @@ function parseRelayBody(body: unknown): RelayTeamInput | null {
       const legNum = parseInt(String(l.leg ?? ""), 10)
       if (!athleteId || !Number.isFinite(legNum)) return null
       const splitTime = String(l.splitTime ?? "").trim() || undefined
+      const splits = Array.isArray(l.splits)
+        ? (l.splits as Array<{ distance?: unknown; splitTime?: unknown }>)
+            .map((s) => {
+              const distance = Number(s.distance)
+              const time = String(s.splitTime ?? "").trim()
+              if (!Number.isFinite(distance) || distance <= 0 || !time) return null
+              return { distance, splitTime: time }
+            })
+            .filter((s): s is { distance: number; splitTime: string } => s !== null)
+        : undefined
       return {
         leg: legNum,
         athleteId,
         ...(splitTime ? { splitTime } : {}),
+        ...(splits?.length ? { splits } : {}),
       }
     })
     .filter((leg): leg is NonNullable<typeof leg> => leg !== null)
@@ -162,7 +175,15 @@ export async function POST(
       resultTime: relayTeamTime(existingEntry),
       resultPlace: relayTeamPlace(existingEntry),
       seedTime: existingEntry.seedTime,
-      legs: relay.legs,
+      legs: relay.legs.map((leg) => {
+        const prev = existingEntry.relaySwimmers?.find((s) => s.leg === leg.leg)
+        const splits = sanitizeRelayLegSplits(prev?.splits)
+        return {
+          ...leg,
+          splitTime: sanitizeRelaySplitTime(prev?.splitTime),
+          ...(splits ? { splits } : {}),
+        }
+      }),
       manual: false,
     }
   } else if (
@@ -185,6 +206,23 @@ export async function POST(
       },
       { status: 409 }
     )
+  }
+
+  // Keep imported nested 50s when the editor only sent leg totals.
+  if (existingEntry && !rosterOnly) {
+    relayToSave = {
+      ...relayToSave,
+      legs: relayToSave.legs.map((leg) => {
+        if (leg.splits?.length) return leg
+        const prev = existingEntry.relaySwimmers?.find((s) => s.leg === leg.leg)
+        const prevSplits = sanitizeRelayLegSplits(prev?.splits)
+        if (!prevSplits?.length) return leg
+        const prevTotal = sanitizeRelaySplitTime(prev?.splitTime)
+        const nextTotal = sanitizeRelaySplitTime(leg.splitTime)
+        if (!prevTotal || !nextTotal || prevTotal !== nextTotal) return leg
+        return { ...leg, splits: prevSplits }
+      }),
+    }
   }
 
   const entries = upsertRelayTeamEntries(existing, relayToSave, roster, athleteGenders)

@@ -10,15 +10,15 @@ type Pairing = {
 
 type Platform = "mac" | "windows"
 
-function bridgeCommands(appUrl: string, code?: string) {
-  const macInstall = `curl -fsSL ${appUrl}/bridge/install.sh | bash -s -- ${appUrl}`
+function scraperCommands(appUrl: string, code?: string) {
+  const macInstall = `curl -fsSL ${appUrl}/scraper/install.sh | bash -s -- ${appUrl}`
   const macRun = code
-    ? `~/.local/bin/swimbuzz-bridge --url ${appUrl} --code ${code}`
+    ? `~/.local/bin/swimbuzz-scraper --url ${appUrl} --code ${code}`
     : ""
 
-  const winInstallPortable = `curl.exe -fsSL ${appUrl}/bridge/install.ps1 -o $env:TEMP\\swimbuzz-install.ps1; powershell -NoProfile -ExecutionPolicy Bypass -File $env:TEMP\\swimbuzz-install.ps1 -AppUrl ${appUrl}`
+  const winInstallPortable = `curl.exe -fsSL ${appUrl}/scraper/install.ps1 -o $env:TEMP\\swimbuzz-install.ps1; powershell -NoProfile -ExecutionPolicy Bypass -File $env:TEMP\\swimbuzz-install.ps1 -AppUrl ${appUrl}`
   const winRun = code
-    ? `& "$env:USERPROFILE\\.local\\bin\\swimbuzz-bridge.cmd" --url ${appUrl} --code ${code}`
+    ? `& "$env:USERPROFILE\\.local\\bin\\swimbuzz-scraper.cmd" --url ${appUrl} --code ${code}`
     : ""
 
   return {
@@ -59,7 +59,7 @@ export default function RunScraperModal({
   const appUrl =
     typeof window !== "undefined" ? window.location.origin : "https://swimbuzz.onrender.com"
 
-  const commands = bridgeCommands(appUrl, pairing?.code)
+  const commands = scraperCommands(appUrl, pairing?.code)
   const installCommand = commands[platform].install
   const runCommand = commands[platform].run
 
@@ -67,21 +67,21 @@ export default function RunScraperModal({
     if (!open) return
     setError(null)
     void refresh()
-    setInstalled(localStorage.getItem("swimbuzz-bridge-installed") === "1")
-    const saved = localStorage.getItem("swimbuzz-bridge-platform")
+    setInstalled(localStorage.getItem("swimbuzz-scraper-installed") === "1")
+    const saved = localStorage.getItem("swimbuzz-scraper-platform")
     if (saved === "mac" || saved === "windows") setPlatform(saved)
   }, [open, refresh])
 
   function setPlatformAndSave(next: Platform) {
     setPlatform(next)
-    localStorage.setItem("swimbuzz-bridge-platform", next)
+    localStorage.setItem("swimbuzz-scraper-platform", next)
   }
 
   async function generateCode() {
     setPairingLoading(true)
     setError(null)
     try {
-      const res = await fetch("/api/bridge/pairing", { method: "POST" })
+      const res = await fetch("/api/scraper/pairing", { method: "POST" })
       const data = await res.json()
       if (!res.ok) {
         setError(data.error ?? "Could not generate code")
@@ -99,7 +99,7 @@ export default function RunScraperModal({
     setTerminating(true)
     setError(null)
     try {
-      await fetch("/api/bridge/status", { method: "DELETE" })
+      await fetch("/api/scraper/status", { method: "DELETE" })
       setPairing(null)
       await refresh()
     } catch {
@@ -121,7 +121,7 @@ export default function RunScraperModal({
   }
 
   function markInstalled() {
-    localStorage.setItem("swimbuzz-bridge-installed", "1")
+    localStorage.setItem("swimbuzz-scraper-installed", "1")
     setInstalled(true)
   }
 
@@ -230,7 +230,7 @@ export default function RunScraperModal({
           {installed === false && <li>Run the one-time install command above.</li>}
           <li>Generate the run command below (valid for 15 minutes).</li>
           <li>Copy it into your terminal and leave it running.</li>
-          <li>Import SwimCloud IDs &amp; times, SwimPhone results, meet PDFs</li>
+          <li>Import data, e.g. SwimCloud times, SwimPhone results, meet PDFs</li>
         </ol>
 
         {installed && (

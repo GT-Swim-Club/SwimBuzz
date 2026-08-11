@@ -5,6 +5,7 @@ import {
   MEET_FILE_BUCKET,
   MEET_FILE_URL_KEYS,
   type MeetFileUrlKey,
+  finalsHeatSheetUrlList,
   isStoredMeetFileUrl,
   storagePathFromMeetFileUrl,
 } from "@/lib/meet-files"
@@ -182,7 +183,9 @@ export async function deleteStoredMeetFile(url: string | null | undefined) {
 }
 
 export async function deleteRemovedMeetFiles(
-  before: Record<MeetFileUrlKey, string | null>,
+  before: Record<MeetFileUrlKey, string | null> & {
+    finalsHeatSheetUrls?: unknown
+  },
   after: Record<string, unknown>
 ) {
   for (const key of MEET_FILE_URL_KEYS) {
@@ -193,8 +196,27 @@ export async function deleteRemovedMeetFiles(
       await deleteStoredMeetFile(oldUrl)
     }
   }
+
+  if ("finalsHeatSheetUrls" in after) {
+    const oldUrls = new Set(finalsHeatSheetUrlList(before.finalsHeatSheetUrls))
+    const newUrls = new Set(finalsHeatSheetUrlList(after.finalsHeatSheetUrls))
+    await Promise.all(
+      [...oldUrls]
+        .filter((url) => !newUrls.has(url))
+        .map((url) => deleteStoredMeetFile(url))
+    )
+  }
 }
 
-export async function deleteAllMeetFiles(meet: Record<MeetFileUrlKey, string | null>) {
-  await Promise.all(MEET_FILE_URL_KEYS.map((key) => deleteStoredMeetFile(meet[key])))
+export async function deleteAllMeetFiles(
+  meet: Record<MeetFileUrlKey, string | null> & {
+    finalsHeatSheetUrls?: unknown
+  }
+) {
+  await Promise.all([
+    ...MEET_FILE_URL_KEYS.map((key) => deleteStoredMeetFile(meet[key])),
+    ...finalsHeatSheetUrlList(meet.finalsHeatSheetUrls).map((url) =>
+      deleteStoredMeetFile(url)
+    ),
+  ])
 }

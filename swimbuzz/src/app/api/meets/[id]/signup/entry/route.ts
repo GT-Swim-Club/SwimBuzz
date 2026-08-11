@@ -3,11 +3,11 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import {
-  isSignupAnswers,
   isValidSignupEntryTime,
   normalizeMeetSignupQuestions,
   normalizeSignupEntryTime,
   normalizeSignupEntryTimes,
+  parseCustomQuestionAnswers,
   partitionSignupEvents,
   resolveSignupEventOptions,
   sortSignupEventsByOrder,
@@ -139,18 +139,11 @@ export async function PUT(
   }
 
   const questions = normalizeMeetSignupQuestions(form.customQuestions)
-  const rawAnswers = isSignupAnswers(body.answers) ? body.answers : {}
-  const answers: Record<string, string> = {}
-  for (const q of questions) {
-    const value = String(rawAnswers[q.id] ?? "").trim()
-    if (q.required && !value) {
-      return NextResponse.json({ error: `"${q.label}" is required` }, { status: 400 })
-    }
-    if (q.type === "choice" && value && !q.options.includes(value)) {
-      return NextResponse.json({ error: `Invalid answer for "${q.label}"` }, { status: 400 })
-    }
-    if (value) answers[q.id] = value
+  const parsedAnswers = parseCustomQuestionAnswers(questions, body.answers)
+  if (!parsedAnswers.ok) {
+    return NextResponse.json({ error: parsedAnswers.error }, { status: 400 })
   }
+  const answers = parsedAnswers.answers
 
   const notes =
     form.askNotes && typeof body.notes === "string" ? body.notes.trim().slice(0, 2000) : ""

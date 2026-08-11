@@ -12,6 +12,7 @@ import { prisma } from "@/lib/prisma"
 
 const PATCH_KEYS: NotificationPreferenceKey[] = [
   "practicePublished",
+  "meetRosterInfo",
   "practiceComments",
   "profileChanges",
 ]

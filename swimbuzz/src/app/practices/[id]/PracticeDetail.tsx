@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import BackLink from "@/components/BackLink"
 import { useRouter } from "next/navigation"
 import { formatSwimDate } from "@/lib/utils"
 import { FormattedText, isHtmlEmpty } from "@/components/FormattedText"
@@ -42,7 +43,6 @@ export default function PracticeDetail({
   sets,
   totalDistance,
   initial,
-  backHref,
   isCoach,
   currentUserId,
   comments,
@@ -60,7 +60,6 @@ export default function PracticeDetail({
   sets: PracticeSetView[]
   totalDistance: number
   initial: PracticeFormState
-  backHref: string
   isCoach: boolean
   currentUserId: string
   comments: PracticeCommentView[]
@@ -250,12 +249,11 @@ export default function PracticeDetail({
     <main className="mx-auto max-w-5xl space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="min-w-0">
-          <Link
-            href={backHref}
+          <BackLink
+            fallbackHref="/practices"
+            fallbackLabel="Practices"
             className="text-xs text-foreground-tertiary dark:text-foreground-tertiary hover:text-foreground-secondary dark:hover:text-foreground-secondary"
-          >
-            ← All practices
-          </Link>
+          />
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <h1 className="text-xl font-medium sm:text-2xl">{title}</h1>
             {isCoach && !published && (

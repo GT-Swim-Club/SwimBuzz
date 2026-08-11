@@ -13,6 +13,7 @@ import {
   isAthleteViewEnabled,
 } from "@/lib/athlete-view-server"
 import { prisma } from "@/lib/prisma"
+import { athletePath } from "@/lib/slug"
 
 const navIconProps = {
   xmlns: "http://www.w3.org/2000/svg",
@@ -104,7 +105,7 @@ export default async function Nav() {
   const linkedAthlete = session
     ? await prisma.athlete.findUnique({
         where: { userId: session.user.id },
-        select: { id: true, swimCloudId: true },
+        select: { id: true, slug: true, swimCloudId: true },
       })
     : null
 
@@ -195,7 +196,7 @@ export default async function Nav() {
               email={session.user.email}
               image={session.user.image}
               roleLabel={roleLabel}
-              rosterProfileHref={linkedAthlete ? `/athletes/${linkedAthlete.id}` : null}
+              rosterProfileHref={linkedAthlete ? athletePath(linkedAthlete.slug ?? linkedAthlete.id) : null}
               swimCloudProfileHref={
                 linkedAthlete?.swimCloudId
                   ? `https://www.swimcloud.com/swimmer/${linkedAthlete.swimCloudId}/`

@@ -6,6 +6,7 @@ import { SET_TAGS } from "@/lib/practice-tags"
 import RichTextField from "@/components/RichTextField"
 import { PRACTICE_EDIT_LOCK_HEARTBEAT_MS, PRACTICE_EDIT_LOCK_TOKEN_HEADER, type PracticeEditLockInfo } from "@/lib/practice-edit-lock-shared"
 import { broadcastPracticeEditLockChanged } from "@/lib/practice-edit-lock-client"
+import { practicePath } from "@/lib/slug"
 
 export type SetFormState = {
   id?: string
@@ -260,7 +261,7 @@ export default function PracticeEditor({
         onCancel?.()
         router.refresh()
       } else {
-        router.push(`/practices/${data.id}`)
+        router.push(practicePath(data.slug ?? data.id))
         router.refresh()
       }
     } catch {

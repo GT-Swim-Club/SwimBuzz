@@ -256,6 +256,31 @@ export function isSignupAnswers(value: unknown): value is Record<string, string>
   return Object.values(value).every((v) => typeof v === "string")
 }
 
+export function parseCustomQuestionAnswers(
+  questions: MeetSignupQuestion[],
+  rawAnswers: unknown
+): { ok: true; answers: Record<string, string> } | { ok: false; error: string } {
+  const raw = isSignupAnswers(rawAnswers) ? rawAnswers : {}
+  const answers: Record<string, string> = {}
+  for (const q of questions) {
+    const value = String(raw[q.id] ?? "").trim()
+    if (q.required && !value) {
+      return { ok: false, error: `"${q.label}" is required` }
+    }
+    if (q.type === "choice" && value && !q.options.includes(value)) {
+      return { ok: false, error: `Invalid answer for "${q.label}"` }
+    }
+    if (value) answers[q.id] = value
+  }
+  return { ok: true, answers }
+}
+
+export function findIncompleteChoiceQuestion(
+  questions: MeetSignupQuestion[]
+): MeetSignupQuestion | undefined {
+  return questions.find((q) => q.type === "choice" && q.options.length < 2)
+}
+
 export type SignupEntryForSheetSync = {
   athleteId: string
   athleteName: string
@@ -386,6 +411,7 @@ function hasImportedSheetMarkers(entry: SheetEntry): boolean {
  * Accepts legacy synced rows that may be missing `manual: true`.
  */
 export function isEditableSignupSheetSeed(entry: SheetEntry): boolean {
+  if (entry.rosterOnly === true) return false
   if (entry.entryType === "relay_team" || entry.isRelayLeadoff || entry.swimId) {
     return false
   }
@@ -646,6 +672,83 @@ export function deleteManualIndividualSheetEntry(
   const entries = existing?.entries ?? []
   const next = entries.filter(
     (e) => !matchesManualIndividual(e, opts.athleteId, opts.event)
+  )
+  return {
+    summary: {
+      sheetType: existing?.sheetType ?? "psych",
+      course: existing?.course || course,
+      entries: next,
+    },
+    found: next.length < entries.length,
+  }
+}
+
+export function isRosterOnlySheetEntry(entry: SheetEntry): boolean {
+  return entry.rosterOnly === true
+}
+
+export function athleteHasRosterSummaryEntry(
+  entries: SheetEntry[],
+  athleteId: string
+): boolean {
+  return entries.some(
+    (e) =>
+      e.athleteId === athleteId &&
+      (e.entryType === "individual" || e.isRelayLeadoff || e.rosterOnly === true)
+  )
+}
+
+/** Add an athlete to entriesSheetSummary without an event (attending only). */
+export function createRosterOnlySheetEntry(
+  existing: SheetSummary | null | undefined,
+  course: string,
+  opts: {
+    athleteId: string
+    athleteName: string
+    gender?: "M" | "F" | null
+  }
+): { summary: SheetSummary; conflict?: boolean } {
+  const entries = [...(existing?.entries ?? [])]
+
+  if (athleteHasRosterSummaryEntry(entries, opts.athleteId)) {
+    return {
+      summary: {
+        sheetType: existing?.sheetType ?? "psych",
+        course: existing?.course || course,
+        entries,
+      },
+      conflict: true,
+    }
+  }
+
+  entries.push({
+    athleteId: opts.athleteId,
+    athleteName: opts.athleteName,
+    event: "Attending",
+    eventNumber: 0,
+    entryType: "individual",
+    manual: true,
+    rosterOnly: true,
+    gender: opts.gender ?? undefined,
+  })
+
+  return {
+    summary: {
+      sheetType: existing?.sheetType ?? "psych",
+      course: existing?.course || course,
+      entries,
+    },
+  }
+}
+
+export function deleteRosterOnlySheetEntry(
+  existing: SheetSummary | null | undefined,
+  course: string,
+  athleteId: string
+): { summary: SheetSummary; found: boolean } {
+  const entries = existing?.entries ?? []
+  const next = entries.filter(
+    (e) => !(e.rosterOnly === true && e.athleteId === athleteId)
   )
   return {
     summary: {

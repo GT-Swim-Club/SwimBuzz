@@ -4,7 +4,7 @@ export const PRACTICE_EDIT_LOCK_TTL_MS = 30 * 1000
 export const PRACTICE_EDIT_LOCK_HEARTBEAT_MS = 5 * 1000
 /** How often non-editing viewers poll for lock status changes. */
 export const PRACTICE_EDIT_LOCK_POLL_MS = 5 * 1000
-/** Long-poll timeout before re-checking lock status (matches bridge long-poll window). */
+/** Long-poll timeout before re-checking lock status (matches scraper long-poll window). */
 export const PRACTICE_EDIT_LOCK_WATCH_TIMEOUT_MS = 25 * 1000
 
 export const PRACTICE_EDIT_LOCK_TOKEN_HEADER = "x-practice-edit-lock-token"

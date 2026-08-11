@@ -19,6 +19,7 @@ import {
   syncProfileChangeRequestNotifications,
 } from "@/lib/notifications"
 import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swimcloud-id"
+import { uniqueAthleteSlug } from "@/lib/slug"
 
 async function parseSwimCloudIdForSet(
   raw: unknown,
@@ -225,6 +226,12 @@ export async function PATCH(
       return NextResponse.json({ error: "Last name cannot be empty" }, { status: 400 })
     }
     data.lastName = lastName
+  }
+
+  const nextFirstName = typeof data.firstName === "string" ? data.firstName : athlete.firstName
+  const nextLastName = typeof data.lastName === "string" ? data.lastName : athlete.lastName
+  if (nextFirstName !== athlete.firstName || nextLastName !== athlete.lastName) {
+    data.slug = await uniqueAthleteSlug(nextFirstName, nextLastName, id)
   }
 
   if (body.gender === "M" || body.gender === "F") {

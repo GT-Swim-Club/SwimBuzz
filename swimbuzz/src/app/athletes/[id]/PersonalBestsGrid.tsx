@@ -81,7 +81,7 @@ export default function PersonalBestsGrid({ swims }: { swims: PbSwim[] }) {
               return (
                 <div
                   key={`${swim.event}-${swim.course}`}
-                  className={`rounded-xl border border-border-secondary bg-background border-l-[3px] ${STROKE_ACCENT[stroke] ?? "border-l-foreground-tertiary"} px-3 py-3 sm:px-3.5 shadow-sm hover:border-foreground-tertiary transition-all`}
+                  className={`rounded-xl border border-border-secondary bg-background border-l-[3px] ${STROKE_ACCENT[stroke] ?? "border-l-foreground-tertiary"} px-3 py-3 sm:px-3.5 shadow-sm`}
                 >
                   <p className="text-sm font-medium text-foreground leading-tight mb-2">
                     {swim.event}

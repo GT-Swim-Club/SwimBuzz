@@ -7,6 +7,7 @@ import {
   parseRosterName,
   type AthleteLookup,
 } from "@/lib/athlete-match"
+import { uniqueAthleteSlug } from "@/lib/slug"
 
 export type RosterImportAthlete = {
   id: string
@@ -263,9 +264,11 @@ export async function createImportAthlete(
 
   // Reuse an existing user account that has no athlete profile yet.
   if (existingUser && !existingUser.athlete) {
+    const slug = await uniqueAthleteSlug(input.firstName, input.lastName)
     const athlete = await prisma.athlete.create({
       data: {
         userId: existingUser.id,
+        slug,
         firstName: input.firstName,
         lastName: input.lastName,
         nicknames,
@@ -305,9 +308,11 @@ export async function createImportAthlete(
     },
   })
 
+  const slug = await uniqueAthleteSlug(input.firstName, input.lastName)
   const athlete = await prisma.athlete.create({
     data: {
       userId: user.id,
+      slug,
       firstName: input.firstName,
       lastName: input.lastName,
       nicknames,

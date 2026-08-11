@@ -10,7 +10,8 @@
     "build": "prisma generate && next build",
     "start": "NODE_ENV=production node server.js",
     "postinstall": "prisma generate",
-    "lint": "eslint"
+    "lint": "eslint",
+    "backfill-slugs": "node scripts/backfill-slugs.mjs"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",

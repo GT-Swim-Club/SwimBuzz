@@ -2,11 +2,11 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
-import { BridgeJobType } from "@prisma/client"
+import { ScraperJobType } from "@prisma/client"
 import { swimsFromSwimCloudTimes, type SwimCloudTime } from "@/lib/swimcloud-import"
 import { assignSwimOccurrences } from "@/lib/swim-dedup"
-import { runBridgeJob } from "@/lib/bridge"
-import { LOCAL_BRIDGE_HINT } from "@/lib/scraper-or-bridge"
+import { runScraperJob } from "@/lib/scraper"
+import { LOCAL_SCRAPER_HINT } from "@/lib/scraper-proxy"
 
 export const runtime = "nodejs"
 export const maxDuration = 3600
@@ -15,10 +15,10 @@ async function fetchSwimCloudTimes(
   userId: string,
   swimmerCloudId: number
 ): Promise<SwimCloudTime[]> {
-  const scraped = await runBridgeJob<{
+  const scraped = await runScraperJob<{
     swimmers: Record<string, SwimCloudTime[]>
     failed: number[]
-  }>(userId, BridgeJobType.TIMES_BULK, { swimmer_ids: [swimmerCloudId] })
+  }>(userId, ScraperJobType.TIMES_BULK, { swimmer_ids: [swimmerCloudId] })
 
   if (scraped.failed?.includes(swimmerCloudId)) {
     throw new Error("SwimCloud scrape failed for this athlete")
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
   } catch (err) {
     const message = err instanceof Error ? err.message : "Import failed"
     if (message === "LOCAL_BRIDGE_NOT_CONNECTED") {
-      return NextResponse.json({ error: LOCAL_BRIDGE_HINT }, { status: 503 })
+      return NextResponse.json({ error: LOCAL_SCRAPER_HINT }, { status: 503 })
     }
     return NextResponse.json({ error: message }, { status: 502 })
   }

@@ -4,6 +4,8 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
+import BackLink from "@/components/BackLink"
+import PageLabelRegistrar from "@/components/PageLabelRegistrar"
 import { formatDateRange } from "@/lib/utils"
 import { Fragment } from "react"
 import ImportMeetButton from "@/app/athletes/ImportMeetButton"
@@ -13,7 +15,9 @@ import AddTravelInfoButton from "./AddTravelInfoButton"
 import MeetActions from "./MeetActions"
 import AddResultButton from "./AddResultButton"
 import AddIndividualEntryButton from "./AddIndividualEntryButton"
+import AddToRosterSummaryButton from "./AddToRosterSummaryButton"
 import PhotosButtons, { PreviewSlideshow } from "./PhotosButtons"
+import MeetPageBackground from "./MeetPageBackground"
 import EventOrderButton from "./EventOrderButton"
 import MeetSheetSummarySection from "./MeetSheetSummarySection"
 import ScrollToHash from "./ScrollToHash"
@@ -25,8 +29,10 @@ import {
   mergeMeetResultEntries,
   swimsToMeetResults,
   isResultStatusesSummary,
+  collectMeetRosterAthleteIds,
 } from "@/lib/meet-sheet-summary"
 import { isRelayResultsSummary } from "@/lib/relay-results"
+import { normalizeFinalsHeatSheetUrls } from "@/lib/meet-files"
 import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete-view-server"
 import { isStaffRole } from "@/lib/auth-roles"
 import { Gender } from "@prisma/client"
@@ -35,6 +41,8 @@ import InfoIcon, { type InfoKind } from "@/components/InfoIcon"
 import { type TravelInfoKind } from "@/components/TravelInfoIcon"
 import TravelInfoButtons, { type TravelInfoItem } from "./TravelInfoButtons"
 import MeetSignupSection from "./MeetSignupSection"
+import MeetRoomSection from "./MeetRoomSection"
+import MeetCountdown from "@/components/MeetCountdown"
 import {
   normalizeMeetSignupQuestions,
   normalizeSignupEntryTimes,
@@ -45,6 +53,13 @@ import {
 import { isSignupAnswers } from "@/lib/meet-signup"
 import MeetRelayBuilder from "./MeetRelayBuilder"
 import { relaySignupKey } from "@/lib/swim-parse"
+import { athletePath, isCuid, meetPath } from "@/lib/slug"
+import StatsHighlights from "@/components/StatsHighlights"
+import {
+  buildAthletePbMap,
+  computeMeetPrepHighlights,
+  computeMeetResultHighlights,
+} from "@/lib/meet-stats"
 
 function toDateInput(d: Date | null | undefined): string {
   if (!d) return ""
@@ -85,15 +100,15 @@ const TRAVEL_TEXT_SECTIONS: {
 ]
 
 export default async function MeetPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
+  const { id: param } = await params
   const session = await getServerSession(authOptions)
   if (!session) redirect("/signin")
 
   const isCoach = await isStaffUi(session.user.role)
   const isStaff = isStaffRole(session.user.role)
 
-  const meet = await prisma.meet.findUnique({
-    where: { id },
+  const meet = await prisma.meet.findFirst({
+    where: isCuid(param) ? { OR: [{ id: param }, { slug: param }] } : { slug: param },
     include: {
       swims: {
         include: { athlete: { select: { id: true, firstName: true, lastName: true } } },
@@ -110,10 +125,35 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
           },
         },
       },
+      roomForm: {
+        include: {
+          preferences: {
+            include: {
+              athlete: {
+                select: { id: true, firstName: true, lastName: true, gender: true },
+              },
+            },
+            orderBy: [{ updatedAt: "desc" }],
+          },
+          rooms: {
+            include: {
+              assignments: {
+                include: {
+                  athlete: {
+                    select: { id: true, firstName: true, lastName: true, gender: true },
+                  },
+                },
+              },
+            },
+            orderBy: [{ sortOrder: "asc" }, { label: "asc" }],
+          },
+        },
+      },
     },
   })
 
   if (!meet) notFound()
+  if (meet.slug && param !== meet.slug) redirect(meetPath(meet.slug))
 
   const viewerAthleteId = await resolveViewerAthleteId(session.user.id, session.user.role)
 
@@ -141,6 +181,7 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
     name: meet.name,
     location: meet.location ?? "",
     startDate: toDateInput(meet.startDate),
+    startTime: meet.startTime ?? "",
     endDate: toDateInput(meet.endDate),
     course: meet.course,
     season: meet.season,
@@ -168,16 +209,20 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
   const today = new Date().toISOString().slice(0, 10)
   const meetStartDate = toDateInput(meet.startDate)
   const isBeforeOrToday = meetStartDate <= today
+  const isUpcomingMeet = new Date(meet.endDate ?? meet.startDate).getTime() >= Date.now()
 
+  const finalsHeatSheetLinks = normalizeFinalsHeatSheetUrls(meet.finalsHeatSheetUrls) ?? []
   const links = RESOURCE_LINKS.filter((l) => meet[l.key])
   const eventOrder = isEventOrder(meet.eventOrder) ? meet.eventOrder : null
-  const hasResources = links.length > 0 || eventOrder !== null
+  const hasResources =
+    links.length > 0 || eventOrder !== null || finalsHeatSheetLinks.length > 0
   const resourceInitial = {
     teamCode: meet.teamCode ?? "GTSC",
     packetUrl: meet.packetUrl ?? "",
     entriesSheetUrl: meet.entriesSheetUrl ?? "",
     psychSheetUrl: meet.psychSheetUrl ?? "",
     heatSheetUrl: meet.heatSheetUrl ?? "",
+    finalsHeatSheetUrls: finalsHeatSheetLinks,
     liveStreamUrl: meet.liveStreamUrl ?? "",
   }
   const photosInitial = {
@@ -210,6 +255,9 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
   const heatSummary = isSheetSummary(meet.heatSheetSummary)
     ? meet.heatSheetSummary
     : null
+  const finalsHeatSummary = isSheetSummary(meet.finalsHeatSheetSummary)
+    ? meet.finalsHeatSheetSummary
+    : null
   const entriesSummary = isSheetSummary(meet.entriesSheetSummary)
     ? meet.entriesSheetSummary
     : null
@@ -233,11 +281,70 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
   const hasSignupEntries = meet.signupForm ? meet.signupForm.entries.length > 0 : false
   const showSignupSection = !meetHasEnded || hasSignupEntries
 
+  const showRoomSection = !meetHasEnded
+
+  const roomForm = meet.roomForm
+    ? {
+        id: meet.roomForm.id,
+        instructions: meet.roomForm.instructions,
+        maxPreferences: meet.roomForm.maxPreferences,
+        openAt: meet.roomForm.openAt?.toISOString() ?? null,
+        closeAt: meet.roomForm.closeAt?.toISOString() ?? null,
+        assignmentsPublishedAt: meet.roomForm.assignmentsPublishedAt?.toISOString() ?? null,
+        customQuestions: normalizeMeetSignupQuestions(meet.roomForm.customQuestions),
+      }
+    : null
+
+  const myRoomPreference = (() => {
+    if (!roomForm || !viewerAthleteId || !meet.roomForm) return null
+    const pref = meet.roomForm.preferences.find((p) => p.athleteId === viewerAthleteId)
+    if (!pref) return null
+    return {
+      preferredAthleteIds: pref.preferredAthleteIds,
+      excludedAthleteIds: pref.excludedAthleteIds,
+      notes: pref.notes,
+      answers: isSignupAnswers(pref.answers) ? pref.answers : {},
+      updatedAt: pref.updatedAt.toISOString(),
+    }
+  })()
+
+  const roomPreferences =
+    isCoach && meet.roomForm
+      ? meet.roomForm.preferences.map((p) => ({
+          id: p.id,
+          athleteId: p.athleteId,
+          firstName: p.athlete.firstName,
+          lastName: p.athlete.lastName,
+          gender: p.athlete.gender === Gender.F ? ("F" as const) : ("M" as const),
+          preferredAthleteIds: p.preferredAthleteIds,
+          excludedAthleteIds: p.excludedAthleteIds,
+          notes: p.notes,
+          answers: isSignupAnswers(p.answers) ? p.answers : {},
+          updatedAt: p.updatedAt.toISOString(),
+        }))
+      : []
+
+  const roomAssignments =
+    meet.roomForm && (isCoach || meet.roomForm.assignmentsPublishedAt)
+      ? meet.roomForm.rooms.map((r) => ({
+          id: r.id,
+          label: r.label,
+          sortOrder: r.sortOrder,
+          athleteIds: r.assignments.map((a) => a.athleteId),
+          athletes: r.assignments.map((a) => ({
+            id: a.athlete.id,
+            firstName: a.athlete.firstName,
+            lastName: a.athlete.lastName,
+          })),
+        }))
+      : []
+
   const seasonRoster = await prisma.athlete.findMany({
     where: { seasons: { has: meet.season } },
     orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
     select: { 
-      id: true, 
+      id: true,
+      slug: true,
       firstName: true, 
       lastName: true, 
       gender: true,
@@ -246,6 +353,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
   })
   const rosterAthletes = seasonRoster.map((a) => ({
     id: a.id,
+    slug: a.slug ?? a.id,
     name: `${a.lastName}, ${a.firstName}`,
     gender: a.gender === Gender.F ? ("F" as const) : ("M" as const),
     image: a.user.image,
@@ -312,6 +420,20 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
     }
   }
 
+  const meetRosterAthleteIds = new Set(
+    collectMeetRosterAthleteIds({
+      psychSheetSummary: meet.psychSheetSummary,
+      heatSheetSummary: meet.heatSheetSummary,
+      finalsHeatSheetSummary: meet.finalsHeatSheetSummary,
+      entriesSheetSummary: meet.entriesSheetSummary,
+      relayResultsSummary: meet.relayResultsSummary,
+      resultStatusesSummary: meet.resultStatusesSummary,
+      swimAthleteIds: meet.swims.map((s) => s.athlete.id),
+      signupAthleteIds,
+    })
+  )
+  const meetRosterAthletes = rosterAthletes.filter((a) => meetRosterAthleteIds.has(a.id))
+
   const signupEventOptions = resolveSignupEventOptions(meet.eventOrder)
   const relayEventOptions = signupEventOptions
     .filter((o) => o.isRelay)
@@ -329,18 +451,73 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
     }))
   )
 
+  const meetSwimsForStats = meet.swims.map((s) => ({
+    id: s.id,
+    athleteId: s.athlete.id,
+    event: s.event,
+    course: s.course,
+    timeMs: s.timeMs,
+  }))
+
+  let meetHighlights = null
+  if (hasImportedResults || meet.swims.length > 0) {
+    const athleteIds = [
+      ...new Set([
+        ...meet.swims.map((s) => s.athlete.id),
+        ...results.map((r) => r.athleteId),
+      ]),
+    ]
+    const pbSwims =
+      athleteIds.length > 0
+        ? await prisma.swim.findMany({
+            where: { athleteId: { in: athleteIds } },
+            select: {
+              athleteId: true,
+              event: true,
+              course: true,
+              timeMs: true,
+            },
+          })
+        : []
+    const athleteHrefById = new Map(
+      seasonRoster.map((a) => [a.id, athletePath(a.slug ?? a.id)])
+    )
+    meetHighlights = computeMeetResultHighlights({
+      results,
+      meetSwims: meetSwimsForStats,
+      pbMap: buildAthletePbMap(pbSwims),
+      athleteHrefById,
+      relayResults,
+    })
+  } else if (meet.signupForm && meet.signupForm.entries.length > 0) {
+    meetHighlights = computeMeetPrepHighlights(
+      meet.signupForm.entries.map((e) => ({
+        athleteId: e.athleteId,
+        events: e.events,
+      }))
+    )
+  }
+
   return (
-    <main className="mx-auto max-w-4xl space-y-8">
+    <div className="relative">
+      {meet.bannerUrl && (
+        <MeetPageBackground
+          bannerUrl={meet.bannerUrl}
+          photoUrls={initialPreviews}
+        />
+      )}
+    <main className="relative mx-auto max-w-4xl">
+      <div className="relative z-10 space-y-8">
+      <PageLabelRegistrar label={meet.name} />
       <ScrollToHash />
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="min-w-0">
-          <Link
-            href="/meets"
+          <BackLink
+            fallbackHref="/meets"
+            fallbackLabel="Meets"
             className="text-xs text-foreground-tertiary hover:text-foreground"
-          >
-            ← All meets
-          </Link>
+          />
           <div className="mt-1 flex items-center gap-3">
             {meet.iconUrl && (
               <img
@@ -355,7 +532,16 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
                 <div className="flex items-center gap-1.5">
                   <InfoIcon kind="calendar" />
                   {formatDateRange(meet.startDate, meet.endDate)}
+                  {meet.startTime ? ` · ${meet.startTime}` : ""}
                 </div>
+                {isUpcomingMeet && meet.startTime && (
+                  <MeetCountdown
+                    startDate={meet.startDate}
+                    startTime={meet.startTime}
+                    upcoming={false}
+                    variant="banner"
+                  />
+                )}
                 <div className="flex flex-wrap items-center gap-x-1.25">
                   {meet.location && (
                     <span className="flex items-center gap-1.5">
@@ -372,8 +558,24 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
             </div>
           </div>
         </div>
-        {isCoach && <MeetActions meetId={meet.id} initial={initial} meetName={meet.name} hasSwims={meet.swims.length > 0 || (relayResults?.length ?? 0) > 0} />}
+        {isCoach && (
+          <MeetActions
+            meetId={meet.id}
+            meetSlug={meet.slug}
+            initial={initial}
+            meetName={meet.name}
+            hasSwims={meet.swims.length > 0 || (relayResults?.length ?? 0) > 0}
+          />
+        )}
       </div>
+
+      {meetHighlights && (
+        <StatsHighlights
+          title="Highlights"
+          counters={meetHighlights.counters}
+          spotlight={meetHighlights.spotlight}
+        />
+      )}
 
       {/* Resources */}
       {(hasResources || isCoach) && (
@@ -399,7 +601,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
                     href={meet[l.key] as string}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border border-border-secondary rounded-lg dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary transition-colors"
+                    className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill transition-colors"
                   >
                     <MeetResourceIcon kind={l.icon} />
                     {l.label}
@@ -408,6 +610,21 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
                     <EventOrderButton order={eventOrder} />
                   ) : null}
                 </Fragment>
+              ))}
+              {finalsHeatSheetLinks.map((link, index) => (
+                <a
+                  key={`finals-${index}-${link.url}`}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill transition-colors"
+                >
+                  <MeetResourceIcon kind="heat" />
+                  {link.name?.trim() ||
+                    (finalsHeatSheetLinks.length > 1
+                      ? `Finals Heat Sheet ${index + 1}`
+                      : "Finals Heat Sheet")}
+                </a>
               ))}
               {!meet.packetUrl && eventOrder ? (
                 <EventOrderButton order={eventOrder} />
@@ -449,6 +666,24 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
             </p>
           )}
         </section>
+      )}
+
+      {showRoomSection && (
+        <MeetRoomSection
+          meetId={meet.id}
+          isCoach={isCoach}
+          selfAthleteId={viewerAthleteId}
+          athletes={meetRosterAthletes.map((a) => ({
+            id: a.id,
+            name: a.name,
+            gender: a.gender,
+          }))}
+          form={roomForm}
+          myPreference={myRoomPreference}
+          preferences={roomPreferences}
+          rooms={roomAssignments}
+          meetHasEnded={meetHasEnded}
+        />
       )}
 
       {showSignupSection && (
@@ -512,6 +747,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       <MeetSheetSummarySection
         psychSummary={psychSummary}
         heatSummary={heatSummary}
+        finalsHeatSummary={finalsHeatSummary}
         entriesSummary={entriesSummary}
         results={results}
         relayResults={relayResults}
@@ -526,6 +762,12 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
         headerAction={
           isCoach ? (
             <div key="header-actions" className="flex flex-wrap gap-2">
+              <AddToRosterSummaryButton
+                key="add-roster-btn"
+                meetId={meet.id}
+                athletes={rosterAthletes}
+                rosterSummaryEntries={entriesSummary?.entries ?? []}
+              />
               <AddResultButton
                 key="add-result-btn"
                 meetId={meet.id}
@@ -543,6 +785,8 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
           ) : null
         }
       />
+      </div>
     </main>
+    </div>
   )
 }

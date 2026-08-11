@@ -5,8 +5,10 @@ import {
   type NotificationPreferenceKey,
 } from "@/lib/notification-preferences"
 import type { PendingProfileChanges } from "@/lib/pending-profile-changes"
+import { collectMeetRosterAthleteIds } from "@/lib/meet-sheet-summary"
 import { prisma } from "@/lib/prisma"
 import { formatRelativeTime, formatSwimDate } from "@/lib/utils"
+import { athleteHrefForId, meetHrefForId, practiceHrefForId } from "@/lib/slug"
 
 async function userIdsWithPreference(
   userIds: string[],
@@ -111,7 +113,7 @@ export async function syncProfileChangeRequestNotifications(input: {
 
   const title = `${input.firstName} ${input.lastName} requested profile changes`
   const body = describePendingProfileChanges(input.pending)
-  const href = `/athletes/${input.athleteId}`
+  const href = await athleteHrefForId(input.athleteId)
 
   await prisma.notification.createMany({
     data: recipients.map((userId) => ({
@@ -183,13 +185,15 @@ export async function notifyPracticePublished(input: {
   ].filter(Boolean)
   const body = details.length > 0 ? details.join(" · ") : "A new practice is available."
 
+  const practiceHref = await practiceHrefForId(input.practiceId)
+
   await prisma.notification.createMany({
     data: recipients.map((userId) => ({
       userId,
       type: NotificationType.PRACTICE_PUBLISHED,
       title: `Practice published: ${input.title}`,
       body,
-      href: `/practices/${input.practiceId}`,
+      href: practiceHref,
     })),
   })
 }
@@ -212,13 +216,77 @@ export async function notifyMeetSignupOpen(input: {
     .map((u) => u.id)
   if (recipients.length === 0) return
 
+  const meetHref = await meetHrefForId(input.meetId)
+
   await prisma.notification.createMany({
     data: recipients.map((userId) => ({
       userId,
       type: NotificationType.MEET_SIGNUP_OPEN,
       title: `Signup open: ${input.meetName}`,
       body: "Event signup is now open for this meet.",
-      href: `/meets/${input.meetId}`,
+      href: meetHref,
+    })),
+  })
+}
+
+export async function notifyMeetRosterInfoDropped(input: {
+  meetId: string
+  meetName: string
+  infoLabel: string
+  body?: string
+}): Promise<void> {
+  const meet = await prisma.meet.findUnique({
+    where: { id: input.meetId },
+    select: {
+      psychSheetSummary: true,
+      heatSheetSummary: true,
+      finalsHeatSheetSummary: true,
+      entriesSheetSummary: true,
+      relayResultsSummary: true,
+      resultStatusesSummary: true,
+      signupForm: {
+        select: { entries: { select: { athleteId: true } } },
+      },
+      swims: { select: { athleteId: true }, distinct: ["athleteId"] },
+    },
+  })
+  if (!meet) return
+
+  const athleteIds = collectMeetRosterAthleteIds({
+    psychSheetSummary: meet.psychSheetSummary,
+    heatSheetSummary: meet.heatSheetSummary,
+    finalsHeatSheetSummary: meet.finalsHeatSheetSummary,
+    entriesSheetSummary: meet.entriesSheetSummary,
+    relayResultsSummary: meet.relayResultsSummary,
+    resultStatusesSummary: meet.resultStatusesSummary,
+    swimAthleteIds: meet.swims.map((s) => s.athleteId),
+    signupAthleteIds: meet.signupForm?.entries.map((e) => e.athleteId) ?? [],
+  })
+  if (athleteIds.length === 0) return
+
+  const athletes = await prisma.athlete.findMany({
+    where: { id: { in: athleteIds } },
+    select: { userId: true },
+  })
+  const recipients = await userIdsWithPreference(
+    athletes.map((a) => a.userId),
+    "meetRosterInfo"
+  )
+  if (recipients.length === 0) return
+
+  const body =
+    input.body?.trim() ||
+    `New ${input.infoLabel.toLowerCase()} is available for this meet.`
+
+  const meetHref = await meetHrefForId(input.meetId)
+
+  await prisma.notification.createMany({
+    data: recipients.map((userId) => ({
+      userId,
+      type: NotificationType.MEET_ROSTER_INFO,
+      title: `${input.infoLabel}: ${input.meetName}`,
+      body,
+      href: meetHref,
     })),
   })
 }
@@ -257,13 +325,15 @@ export async function notifyPracticeComment(input: {
     ? `${input.authorName} replied to your comment`
     : `${input.authorName} commented on ${input.practiceTitle}`
 
+  const practiceHref = await practiceHrefForId(input.practiceId)
+
   await prisma.notification.createMany({
     data: recipients.map((userId) => ({
       userId,
       type: NotificationType.PRACTICE_COMMENT,
       title,
       body: snippet,
-      href: `/practices/${input.practiceId}`,
+      href: practiceHref,
     })),
   })
 }
@@ -308,13 +378,15 @@ export async function notifyTimesImportRequest(input: {
     ? `SwimCloud ID ${input.swimCloudId} · last imported ${formatRelativeTime(input.timesSyncedAt)}`
     : `SwimCloud ID ${input.swimCloudId} · never imported`
 
+  const href = await athleteHrefForId(input.athleteId)
+
   await prisma.notification.createMany({
     data: recipients.map((userId) => ({
       userId,
       type: NotificationType.TIMES_IMPORT_REQUEST,
       title: `${input.firstName} ${input.lastName} requested a times import`,
       body,
-      href: `/athletes/${input.athleteId}`,
+      href,
       athleteId: input.athleteId,
     })),
   })

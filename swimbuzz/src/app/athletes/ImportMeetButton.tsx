@@ -1,8 +1,7 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { formatSwimDate } from "@/lib/utils"
 import { currentSeason, parseSeason } from "@/lib/season"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { useScraperUi } from "@/components/ScraperUiProvider"
@@ -37,6 +36,19 @@ type ImportResult = {
   leadoffsImported?: number
   nameConfirmations?: NameConfirmation[]
   rosterForPairing?: RosterPairingOption[]
+  cachedParse?: unknown
+}
+
+type CachedImportData = {
+  cachedParse?: unknown
+}
+
+function buildImportSummary(data: ImportResult): string {
+  let summary = `Imported ${data.imported} new swim${data.imported === 1 ? "" : "s"}`
+  if (data.unmatchedCount > 0) {
+    summary += ` (${data.unmatchedCount} unmatched)`
+  }
+  return summary
 }
 
 export default function ImportMeetButton({
@@ -58,13 +70,10 @@ export default function ImportMeetButton({
   const { startTask } = useImportTask()
 
   const [open, setOpen] = useState(false)
-  const [resultOpen, setResultOpen] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [source, setSource] = useState<ImportSource>("pdf")
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [confirmError, setConfirmError] = useState<string | null>(null)
-  const [result, setResult] = useState<ImportResult | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [mode, setMode] = useState<"url" | "file">("file")
   const [url, setUrl] = useState("")
@@ -74,22 +83,38 @@ export default function ImportMeetButton({
   const [rosterOptions, setRosterOptions] = useState<RosterPairingOption[]>([])
   /** Empty string = leave unmatched / skip. */
   const [pairSelections, setPairSelections] = useState<Record<string, string>>({})
+  const [cachedImportData, setCachedImportData] = useState<CachedImportData | null>(null)
 
-  function resetForm() {
-    setSource("swimphone")
+  function resetFormState() {
     setError(null)
     setConfirmError(null)
-    setResult(null)
-    setSelectedFile(null)
     setPendingConfirmations([])
     setRosterOptions([])
     setPairSelections({})
+    setCachedImportData(null)
+  }
+
+  function finishImportCleanup() {
+    setOpen(false)
+    setConfirmOpen(false)
+    setPendingConfirmations([])
+    setRosterOptions([])
+    setPairSelections({})
+    setCachedImportData(null)
+    router.refresh()
+  }
+
+  function resetFormForNewImport() {
+    setSource("swimphone")
+    setTeam("GTSC")
+    setCourse("SCY")
+    setSelectedFile(null)
+    resetFormState()
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     setSelectedFile(e.target.files?.[0] ?? null)
     setError(null)
-    setResult(null)
   }
 
   function defaultPairSelections(confirmations: NameConfirmation[]): Record<string, string> {
@@ -100,21 +125,12 @@ export default function ImportMeetButton({
     return next
   }
 
-  function showImportResult(data: ImportResult) {
-    setResult(data)
-    setOpen(false)
-    setConfirmOpen(false)
-    setResultOpen(true)
-    setPendingConfirmations([])
-    setRosterOptions([])
-    setPairSelections({})
-    router.refresh()
-  }
-
-  function handleImportResponse(data: ImportResult) {
+  function handleImportResponse(data: ImportResult): string {
     const confirmations = data.nameConfirmations ?? []
     if (confirmations.length > 0) {
-      setResult(data)
+      if (data.cachedParse) {
+        setCachedImportData({ cachedParse: data.cachedParse })
+      }
       setOpen(false)
       setPendingConfirmations(confirmations)
       setRosterOptions(data.rosterForPairing ?? [])
@@ -122,24 +138,29 @@ export default function ImportMeetButton({
       setConfirmError(null)
       setConfirmOpen(true)
       router.refresh()
-      return
+      return buildImportSummary(data)
     }
-    showImportResult(data)
+
+    finishImportCleanup()
     if (source === "pdf") {
       setSelectedFile(null)
     }
+    return buildImportSummary(data)
   }
 
   async function runPdfImport(opts?: {
     nameMappings?: Record<string, string>
     rejectedNames?: string[]
+    cachedParse?: unknown
   }) {
-    if (!selectedFile) {
+    if (!opts?.cachedParse && !selectedFile) {
       throw new Error("Choose a PDF file first")
     }
 
     const body = new FormData()
-    body.append("file", selectedFile, selectedFile.name)
+    if (selectedFile && !opts?.cachedParse) {
+      body.append("file", selectedFile, selectedFile.name)
+    }
     body.append("course", course)
     body.append("team", team.trim())
     body.append("season", season)
@@ -149,6 +170,9 @@ export default function ImportMeetButton({
     }
     if (opts?.rejectedNames?.length) {
       body.append("rejectedNames", JSON.stringify(opts.rejectedNames))
+    }
+    if (opts?.cachedParse) {
+      body.append("cachedParse", JSON.stringify(opts.cachedParse))
     }
 
     const res = await fetch("/api/meets/import", { method: "POST", body })
@@ -208,44 +232,40 @@ export default function ImportMeetButton({
       setError("Paste a SwimPhone meet URL")
       return
     }
-
-    setLoading(true)
     setError(null)
-    setResult(null)
 
     try {
-      let data: ImportResult
+      let importPromise: Promise<ImportResult>
       if (source === "pdf" && mode === "file") {
-        data = await runPdfImport()
+        importPromise = runPdfImport()
       } else {
-        // Assuming SwimPhone importer handles URLs or we need a new endpoint
-        data = await runSwimphoneImport()
+        importPromise = runSwimphoneImport()
       }
-      handleImportResponse(data)
+
+      startTask(
+        source === "swimphone" ? "Scraping meet…" : "Importing results…",
+        importPromise.then((data) => handleImportResponse(data))
+      )
+      setOpen(false)
+      resetFormState()
     } catch (err) {
       setError(err instanceof Error ? err.message : "Import failed")
-    } finally {
-      setLoading(false)
     }
   }
 
   function closeConfirmWithoutPairing() {
-    if (loading) return
     setConfirmOpen(false)
     setPendingConfirmations([])
     setRosterOptions([])
     setPairSelections({})
     setConfirmError(null)
-    if (result) {
-      setResultOpen(true)
-    }
     if (source === "pdf") {
       setSelectedFile(null)
     }
     router.refresh()
   }
 
-  async function handleConfirmSubmit(e: React.FormEvent) {
+  function handleConfirmSubmit(e: React.FormEvent) {
     e.preventDefault()
 
     const nameMappings: Record<string, string> = {}
@@ -264,29 +284,28 @@ export default function ImportMeetButton({
       return
     }
 
-    setLoading(true)
     setConfirmError(null)
+    setConfirmOpen(false)
 
-    try {
-      const data =
-        source === "pdf"
-          ? await runPdfImport({ nameMappings, rejectedNames })
-          : await runSwimphoneImport({ nameMappings, rejectedNames })
-      showImportResult(data)
-      if (source === "pdf") {
-        setSelectedFile(null)
-      }
-    } catch (err) {
-      setConfirmError(
-        err instanceof Error
-          ? err.message
-          : source === "swimphone"
-            ? "Import failed — check that the scraper is running"
-            : "Upload failed — check that the scraper is running"
-      )
-    } finally {
-      setLoading(false)
-    }
+    const importPromise =
+      source === "pdf"
+        ? runPdfImport({
+            nameMappings,
+            rejectedNames,
+            cachedParse: cachedImportData?.cachedParse,
+          })
+        : runSwimphoneImport({ nameMappings, rejectedNames })
+
+    startTask(
+      "Importing paired results…",
+      importPromise.then((data) => {
+        finishImportCleanup()
+        if (source === "pdf") {
+          setSelectedFile(null)
+        }
+        return buildImportSummary(data)
+      })
+    )
   }
 
   const pairedCount = pendingConfirmations.filter((c) =>
@@ -300,10 +319,10 @@ export default function ImportMeetButton({
         onClick={() => {
           requireScraper(() => {
             setOpen(true)
-            resetForm()
+            resetFormForNewImport()
           })
         }}
-        className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border border-border-secondary rounded-md hover:bg-fill-secondary hover:bg-fill-secondary bg-background transition-colors"
+        className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border border-border-secondary rounded-md bg-background hover:bg-fill transition-colors"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -326,10 +345,8 @@ export default function ImportMeetButton({
       <Modal
         open={open}
         onClose={() => setOpen(false)}
-        closeDisabled={loading}
-        busy={loading}
         title="Import Meet Results"
-        description={`Only results for your team code are imported, then matched to the ${season} roster.`}
+        description={`Results for your team code are imported, then matched to the ${season} roster.`}
         header={
           <div className="mt-4 flex rounded-lg border border-border-secondary p-0.5 bg-fill-secondary">
             {(
@@ -344,12 +361,11 @@ export default function ImportMeetButton({
                 onClick={() => {
                   setSource(value)
                   setError(null)
-                  setResult(null)
                 }}
               className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                   source === value
                       ? "bg-primary text-white shadow-sm"
-                      : "bg-fill-secondary text-foreground-secondary hover:bg-fill-primary"
+                      : "text-foreground-secondary hover:bg-fill"
                 }`}
               >
                 {label}
@@ -363,21 +379,19 @@ export default function ImportMeetButton({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              disabled={loading}
-              className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary hover:bg-fill-secondary border-border-secondary"
+              className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill"
             >
               Close
             </button>
             <button
               type="submit"
               disabled={
-                loading ||
                 !team.trim() ||
                 (source === "pdf" ? !selectedFile : !url.trim())
               }
               className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
-              {loading ? (source === "swimphone" ? "Scraping…" : "Importing…") : "Import"}
+              Import
             </button>
           </ModalFooter>
         }
@@ -395,7 +409,7 @@ export default function ImportMeetButton({
                     className={`text-xs px-2 py-1 rounded-md transition-colors ${
                       mode === "file"
                       ? "bg-primary text-white shadow-sm"
-                      : "bg-fill-secondary text-foreground-secondary hover:bg-fill-primary"
+                      : "bg-fill-secondary text-foreground-secondary hover:bg-fill"
                     }`}
                   >
                     File
@@ -406,7 +420,7 @@ export default function ImportMeetButton({
                     className={`text-xs px-2 py-1 rounded-md transition-colors ${
                       mode === "url"
                       ? "bg-primary text-white shadow-sm"
-                      : "bg-fill-secondary text-foreground-secondary hover:bg-fill-primary"
+                      : "bg-fill-secondary text-foreground-secondary hover:bg-fill"
                     }`}
                   >
                     URL
@@ -418,8 +432,7 @@ export default function ImportMeetButton({
                 <FileDropzone
                   onFilesSelected={(files) => handleFileChange({ target: { files: files as any } } as any)}
                   accept=".pdf,application/pdf"
-                  disabled={loading}
-                  className="block w-full rounded-lg border border-border-secondary bg-fill-secondary p-4 text-center text-xs text-foreground cursor-pointer hover:bg-fill-primary"
+                  className="block w-full rounded-lg border border-border-secondary bg-background p-4 text-center text-xs text-foreground cursor-pointer hover:bg-fill"
                 >
                   {selectedFile ? selectedFile.name : "Click or drag and drop to upload PDF"}
                 </FileDropzone>
@@ -441,20 +454,20 @@ export default function ImportMeetButton({
                 required
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://…"
+                placeholder="https://www.swimphone.com/meets/..."
                 className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background"
               />
             </div>
           )}
 
-        {error && <p className="text-sm text-error dark:text-error">{error}</p>}
+        {error && <p className="text-sm text-error">{error}</p>}
 
         <div
           key={`options-${source}`}
           className={`grid gap-3 ${source === "pdf" ? "grid-cols-2" : "grid-cols-1"}`}
         >
           <div>
-            <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+            <label className="block text-xs font-medium text-foreground-secondary mb-1">
               Team code <span className="text-red-500">*</span>
             </label>
             <input
@@ -462,18 +475,18 @@ export default function ImportMeetButton({
               value={team}
               onChange={(e) => setTeam(e.target.value)}
               placeholder="GTSC"
-              className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
+              className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background"
             />
           </div>
           {source === "pdf" ? (
             <div>
-              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Course
               </label>
               <select
                 value={course}
                 onChange={(e) => setCourse(e.target.value)}
-                className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
+                className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background"
               >
                 <option value="SCY">SCY</option>
                 <option value="LCM">LCM</option>
@@ -490,8 +503,6 @@ export default function ImportMeetButton({
       <Modal
         open={confirmOpen}
         onClose={closeConfirmWithoutPairing}
-        closeDisabled={loading}
-        busy={loading}
         title="Pair unmatched athletes"
         description="These names matched your team code but not the roster. Pair them to a roster athlete to import their results."
         onSubmit={handleConfirmSubmit}
@@ -500,21 +511,16 @@ export default function ImportMeetButton({
             <button
               type="button"
               onClick={closeConfirmWithoutPairing}
-              disabled={loading}
-              className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary hover:bg-fill-secondary border-border-secondary"
+              className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill"
             >
               Skip
             </button>
             <button
               type="submit"
-              disabled={loading || pairedCount === 0}
+              disabled={pairedCount === 0}
               className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
-              {loading
-                ? "Importing…"
-                : pairedCount > 0
-                  ? `Import ${pairedCount} paired`
-                  : "Import paired"}
+              {pairedCount > 0 ? `Import ${pairedCount} paired` : "Import paired"}
             </button>
           </ModalFooter>
         }
@@ -529,12 +535,12 @@ export default function ImportMeetButton({
             return (
               <li
                 key={c.pdfName}
-                className="rounded-xl border border-border-secondary border-gray-100 bg-gray-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-800/50"
+                className="rounded-xl border bg-fill-secondary px-4 py-3 border-border"
               >
-                <p className="text-sm text-foreground text-foreground">
+                <p className="text-sm text-foreground">
                   <strong>{c.pdfName}</strong>
                 </p>
-                <p className="mt-0.5 text-xs text-foreground-secondary text-foreground-secondary">
+                <p className="mt-0.5 text-xs text-foreground-secondary">
                   {c.occurrences} result{c.occurrences === 1 ? "" : "s"} with this spelling
                   {suggested ? (
                     <span>
@@ -553,7 +559,7 @@ export default function ImportMeetButton({
                         [c.pdfName]: e.target.value,
                       }))
                     }
-                    className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
+                    className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background"
                   >
                     <option value="">Leave unmatched</option>
                     {rosterOptions.map((a) => (
@@ -568,83 +574,8 @@ export default function ImportMeetButton({
           })}
         </ul>
         {confirmError && (
-          <p className="text-sm text-error dark:text-error">{confirmError}</p>
+          <p className="text-sm text-error">{confirmError}</p>
         )}
-      </Modal>
-
-      <Modal
-        open={resultOpen}
-        onClose={() => {
-          setResultOpen(false)
-          setResult(null)
-        }}
-        title="Import complete"
-        footer={
-          <ModalFooter>
-            <button
-              type="button"
-              onClick={() => {
-                setResultOpen(false)
-                setResult(null)
-              }}
-              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover"
-            >
-              Done
-            </button>
-          </ModalFooter>
-        }
-      >
-        {result ? (
-          <div className="rounded-xl border border-border-secondary border-gray-100 bg-gray-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-800/50">
-            {result.meetName && (
-              <p className="mb-1 text-foreground text-foreground">
-                <strong>{result.meetName}</strong>
-                {result.meetDate && (
-                  <span className="text-foreground-secondary text-foreground-secondary">
-                    {" "}
-                    — {formatSwimDate(result.meetDate)}
-                  </span>
-                )}
-              </p>
-            )}
-            <p className="text-foreground text-foreground">
-              Imported <strong>{result.imported}</strong> new swims ({result.parsed} parsed,{" "}
-              {result.matched} matched to roster).
-              {typeof result.leadoffsImported === "number" && result.leadoffsImported > 0 && (
-                <span className="text-foreground-secondary text-foreground-secondary">
-                  {" "}
-                  Includes {result.leadoffsImported} relay leadoff
-                  {result.leadoffsImported === 1 ? "" : "s"} from split times.
-                </span>
-              )}
-            </p>
-            {result.captchaLimited && (
-              <p className="mt-2 text-amber-700 dark:text-amber-400">
-                SwimPhone blocked some archived results; only partial data was imported.
-              </p>
-            )}
-            {result.incompleteRelays && result.incompleteRelays.length > 0 && (
-              <div className="mt-2 text-amber-700 dark:text-amber-400">
-                <p>
-                  Relay results skipped for {result.incompleteRelays.length} event(s) with
-                  incomplete split data:
-                </p>
-                <p className="mt-0.5 text-xs">{result.incompleteRelays.join(", ")}</p>
-              </div>
-            )}
-            {result.unmatchedCount > 0 && (
-              <p className="mt-2 text-foreground-secondary text-foreground-secondary">
-                {result.unmatchedCount} result(s) could not be matched to a roster athlete.
-                {result.unmatched.length > 0 && (
-                  <span className="block mt-1 text-xs">
-                    e.g. {result.unmatched[0].name} — {result.unmatched[0].event}{" "}
-                    {result.unmatched[0].time}
-                  </span>
-                )}
-              </p>
-            )}
-          </div>
-        ) : null}
       </Modal>
     </>
   )

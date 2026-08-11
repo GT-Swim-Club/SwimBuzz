@@ -5,7 +5,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { parseSeason } from "@/lib/season"
 import { fetchMeetFileBytes } from "@/lib/meet-file-fetch"
 import { isParsablePacketUrl } from "@/lib/meet-event-order"
-import { parseNqtPdf, LOCAL_BRIDGE_HINT } from "@/lib/scraper-or-bridge"
+import { parseNqtPdf, LOCAL_SCRAPER_HINT } from "@/lib/scraper-proxy"
 import {
   isNqtParseResult,
   parseNationalsCourse,
@@ -122,7 +122,7 @@ export async function POST(req: Request) {
     parsed = await parseNqtPdf(session.user.id, fileBytes)
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to parse NQT PDF"
-    const status = message.includes(LOCAL_BRIDGE_HINT) || /not connected/i.test(message) ? 503 : 502
+    const status = message.includes(LOCAL_SCRAPER_HINT) || /not connected/i.test(message) ? 503 : 502
     return NextResponse.json({ error: message }, { status })
   }
 

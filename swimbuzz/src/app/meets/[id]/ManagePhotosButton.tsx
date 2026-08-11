@@ -186,7 +186,7 @@ export default function ManagePhotosButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border border-border rounded-md dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:bg-background-elevated transition-colors"
+        className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border border-border rounded-md bg-background hover:bg-fill transition-colors"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -220,7 +220,7 @@ export default function ManagePhotosButton({
               type="button"
               onClick={() => setOpen(false)}
               disabled={blocked}
-              className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border"
+              className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium bg-background hover:bg-fill"
             >
               Close
             </button>
@@ -248,7 +248,7 @@ export default function ManagePhotosButton({
                   setForm((f) => ({ ...f, photos: newPhotos }))
                 }}
                 placeholder="Name"
-                className="w-1/3 rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"
+                className="w-1/3 rounded-lg border border-border px-3 py-2 text-sm bg-background"
               />
               <input
                 type="url"
@@ -259,7 +259,7 @@ export default function ManagePhotosButton({
                   setForm((f) => ({ ...f, photos: newPhotos }))
                 }}
                 placeholder="URL"
-                className="flex-1 rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"
+                className="flex-1 rounded-lg border border-border px-3 py-2 text-sm bg-background"
               />
               <button
                 type="button"
@@ -285,7 +285,7 @@ export default function ManagePhotosButton({
                     photos: [...f.photos, { url: "", name: "" }],
                   }))
                 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:bg-background-elevated transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium bg-background hover:bg-fill transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -345,7 +345,7 @@ export default function ManagePhotosButton({
                 accept="image/*"
                 multiple={true}
                 disabled={previewsUploading}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium cursor-pointer dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:bg-background-elevated transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium cursor-pointer bg-background hover:bg-fill transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -360,7 +360,7 @@ export default function ManagePhotosButton({
           )}
         </div>
 
-        {error && <p className="text-sm text-error dark:text-error">{error}</p>}
+        {error && <p className="text-sm text-error">{error}</p>}
       </Modal>
     </>
   )

@@ -5,6 +5,12 @@ import { prisma } from "@/lib/prisma"
 import { buildMeetData, MeetInputError } from "@/lib/meet-input"
 import { resolveEventOrderForPacket } from "@/lib/meet-packet-parse"
 import { attachSheetSummariesOnCreate } from "@/lib/meet-sheet-resolve"
+import { MeetImportValidationError } from "@/lib/meet-import-validate"
+import {
+  detectMeetResourceDrops,
+  notifyMeetRosterOfInfoDrops,
+} from "@/lib/meet-roster-notify"
+import { uniqueMeetSlug } from "@/lib/slug"
 
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -29,9 +35,11 @@ export async function POST(req: Request) {
   try {
     const data = buildMeetData(body, { requireName: true, requireStartDate: true })
 
+    let packetParsed = false
     if (data.packetUrl) {
       try {
         data.eventOrder = await resolveEventOrderForPacket(session.user.id, data.packetUrl as string)
+        packetParsed = true
       } catch (err) {
         console.error("Meet packet parse failed:", err)
         data.eventOrder = null
@@ -39,12 +47,41 @@ export async function POST(req: Request) {
     }
 
     const season = data.season as string
-    await attachSheetSummariesOnCreate(session.user.id, season, data)
+    const { sheetDrops } = await attachSheetSummariesOnCreate(session.user.id, season, data)
 
-    const meet = await prisma.meet.create({ data: data as Parameters<typeof prisma.meet.create>[0]["data"] })
+    const resourceDrops = detectMeetResourceDrops(
+      {
+        packetUrl: null,
+        resultsUrl: null,
+        liveStreamUrl: null,
+        rideSignUpsUrl: null,
+        roomsUrl: null,
+        hotel: null,
+        packingList: null,
+        itinerary: null,
+      },
+      data,
+      { packetParsed }
+    )
+
+    const meet = await prisma.meet.create({
+      data: {
+        ...(data as Parameters<typeof prisma.meet.create>[0]["data"]),
+        slug: await uniqueMeetSlug(data.name as string),
+      },
+    })
+
+    void notifyMeetRosterOfInfoDrops({
+      meetId: meet.id,
+      meetName: meet.name,
+      drops: [...sheetDrops, ...resourceDrops],
+    })
     return NextResponse.json(meet, { status: 201 })
   } catch (err) {
     if (err instanceof MeetInputError) {
+      return NextResponse.json({ error: err.message }, { status: 400 })
+    }
+    if (err instanceof MeetImportValidationError) {
       return NextResponse.json({ error: err.message }, { status: 400 })
     }
     throw err

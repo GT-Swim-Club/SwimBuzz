@@ -4,7 +4,9 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import {
   createManualIndividualSheetEntry,
+  createRosterOnlySheetEntry,
   deleteManualIndividualSheetEntry,
+  deleteRosterOnlySheetEntry,
   isValidSignupEntryTime,
   normalizeSignupEntryTime,
   resolveSignupEventOptions,
@@ -44,7 +46,57 @@ export async function POST(
   }
 
   const { id: meetId } = await params
-  const body = parseBody(await req.json())
+  const rawBody = await req.json().catch(() => null)
+
+  if (rawBody && typeof rawBody === "object" && rawBody.rosterOnly === true) {
+    const athleteId = String(rawBody.athleteId ?? "").trim()
+    if (!athleteId) {
+      return NextResponse.json({ error: "athleteId is required" }, { status: 400 })
+    }
+
+    const meet = await prisma.meet.findUnique({
+      where: { id: meetId },
+      select: { course: true, entriesSheetSummary: true, season: true },
+    })
+    if (!meet) return NextResponse.json({ error: "Meet not found" }, { status: 404 })
+
+    const athlete = await prisma.athlete.findUnique({
+      where: { id: athleteId },
+      select: { id: true, firstName: true, lastName: true, gender: true, seasons: true },
+    })
+    if (!athlete) {
+      return NextResponse.json({ error: "Athlete not found" }, { status: 404 })
+    }
+    if (!athlete.seasons.includes(meet.season)) {
+      return NextResponse.json(
+        { error: "Athlete must be on this meet's season roster" },
+        { status: 400 }
+      )
+    }
+
+    const existing = isSheetSummary(meet.entriesSheetSummary)
+      ? meet.entriesSheetSummary
+      : null
+    const { summary, conflict } = createRosterOnlySheetEntry(existing, meet.course, {
+      athleteId,
+      athleteName: `${athlete.lastName}, ${athlete.firstName}`,
+      gender: athlete.gender === "F" ? "F" : athlete.gender === "M" ? "M" : null,
+    })
+    if (conflict) {
+      return NextResponse.json(
+        { error: "Athlete is already on the roster summary" },
+        { status: 409 }
+      )
+    }
+
+    await prisma.meet.update({
+      where: { id: meetId },
+      data: { entriesSheetSummary: summary as Prisma.InputJsonValue },
+    })
+    return NextResponse.json({ ok: true })
+  }
+
+  const body = parseBody(rawBody)
   if (!body) {
     return NextResponse.json({ error: "athleteId and event are required" }, { status: 400 })
   }
@@ -217,7 +269,40 @@ export async function DELETE(
   }
 
   const { id: meetId } = await params
-  const body = parseBody(await req.json().catch(() => null))
+  const rawBody = await req.json().catch(() => null)
+
+  if (rawBody && typeof rawBody === "object" && rawBody.rosterOnly === true) {
+    const athleteId = String(rawBody.athleteId ?? "").trim()
+    if (!athleteId) {
+      return NextResponse.json({ error: "athleteId is required" }, { status: 400 })
+    }
+
+    const meet = await prisma.meet.findUnique({
+      where: { id: meetId },
+      select: { course: true, entriesSheetSummary: true },
+    })
+    if (!meet) return NextResponse.json({ error: "Meet not found" }, { status: 404 })
+
+    const existing = isSheetSummary(meet.entriesSheetSummary)
+      ? meet.entriesSheetSummary
+      : null
+    const { summary, found } = deleteRosterOnlySheetEntry(
+      existing,
+      meet.course,
+      athleteId
+    )
+    if (!found) {
+      return NextResponse.json({ error: "Athlete not found on roster summary" }, { status: 404 })
+    }
+
+    await prisma.meet.update({
+      where: { id: meetId },
+      data: { entriesSheetSummary: summary as Prisma.InputJsonValue },
+    })
+    return NextResponse.json({ ok: true })
+  }
+
+  const body = parseBody(rawBody)
   if (!body) {
     return NextResponse.json({ error: "athleteId and event are required" }, { status: 400 })
   }

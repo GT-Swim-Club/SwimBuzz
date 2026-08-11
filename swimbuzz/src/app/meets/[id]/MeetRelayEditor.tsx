@@ -250,13 +250,13 @@ function RelayModal({
         aria-label="Close dialog"
       />
       <div
-        className="relative z-10 flex w-full max-w-md max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-border border-border-secondary bg-background shadow-xl border-border-secondary bg-background"
+        className="relative z-10 flex w-full max-w-md max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="shrink-0 px-6 pt-6 pb-2">
-          <h2 className="text-lg font-medium text-foreground text-foreground">{title}</h2>
+          <h2 className="text-lg font-medium text-foreground">{title}</h2>
           {rosterOnly ? (
-            <p className="mt-1 text-sm text-foreground-secondary text-foreground-secondary">
+            <p className="mt-1 text-sm text-foreground-secondary">
               Update swimmers and leg splits — event, time, and place stay from the import.
             </p>
           ) : null}
@@ -268,7 +268,7 @@ function RelayModal({
             <>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Event
               </label>
               <select
@@ -276,7 +276,7 @@ function RelayModal({
                 onChange={(e) => {
                   setForm((f) => ({ ...f, event: e.target.value }))
                 }}
-                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
               >
                 {RELAY_EVENTS.map((event) => (
                   <option key={event}>{event}</option>
@@ -284,7 +284,7 @@ function RelayModal({
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Team
               </label>
               <select
@@ -292,7 +292,7 @@ function RelayModal({
                 onChange={(e) =>
                   setForm((f) => ({ ...f, relayLetter: e.target.value }))
                 }
-                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
               >
                 {RELAY_LETTERS.map((letter) => (
                   <option key={letter} value={letter}>
@@ -305,7 +305,7 @@ function RelayModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Round
               </label>
               <select
@@ -313,7 +313,7 @@ function RelayModal({
                 onChange={(e) =>
                   setForm((f) => ({ ...f, relayRound: e.target.value as RelayRound }))
                 }
-                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
               >
                 {RELAY_ROUNDS.map(({ value, label }) => (
                   <option key={value || "timed"} value={value}>
@@ -323,7 +323,7 @@ function RelayModal({
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Gender
               </label>
               <select
@@ -341,7 +341,7 @@ function RelayModal({
                     ) as RelayForm["legs"],
                   }))
                 }}
-                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
               >
                 {RELAY_GENDERS.map(({ value, label }) => (
                   <option key={value} value={value}>
@@ -356,7 +356,7 @@ function RelayModal({
 
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-xs font-medium text-foreground-secondary text-foreground-secondary">
+              <div className="flex items-center gap-2 text-xs font-medium text-foreground-secondary">
                 <span className="w-6 shrink-0">#</span>
                 <span className="flex-1">Swimmer</span>
                 <span className="w-24 shrink-0 text-right">Split</span>
@@ -375,7 +375,7 @@ function RelayModal({
                     legs[i] = e.target.value
                     setForm((f) => ({ ...f, legs }))
                   }}
-                  className="flex-1 rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
+                  className="flex-1 rounded-lg border border-border px-3 py-2 text-sm bg-background"
                 >
                   <option value="">Select swimmer…</option>
                   {swimmerOptions.map((a) => (
@@ -398,7 +398,7 @@ function RelayModal({
                     legSplits[i] = e.target.value
                     setForm((f) => ({ ...f, legSplits }))
                   }}
-                  className="w-24 rounded-lg border border-border border-border-secondary px-2 py-2 text-sm font-mono bg-background border-border-secondary"
+                  className="w-24 rounded-lg border border-border px-2 py-2 text-sm font-mono bg-background"
                 />
               </div>
             ))}
@@ -407,7 +407,7 @@ function RelayModal({
           {!rosterOnly ? (
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Time
               </label>
               <input
@@ -417,11 +417,11 @@ function RelayModal({
                 onChange={(e) =>
                   setForm((f) => ({ ...f, resultTime: e.target.value }))
                 }
-                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm font-mono bg-background border-border-secondary"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm font-mono bg-background"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Place
               </label>
               <input
@@ -432,14 +432,14 @@ function RelayModal({
                 onChange={(e) =>
                   setForm((f) => ({ ...f, resultPlace: e.target.value }))
                 }
-                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
               />
             </div>
           </div>
           ) : null}
 
           {error && (
-            <p className="text-sm text-error dark:text-error">{error}</p>
+            <p className="text-sm text-error">{error}</p>
           )}
           </div>
 
@@ -449,13 +449,13 @@ function RelayModal({
             </div>
           ) : null}
 
-          <div className="shrink-0 flex gap-3 border-t border-border-secondary px-6 py-4 border-border-secondary">
+          <div className="shrink-0 flex gap-3 border-t border-border-secondary px-6 py-4">
             {allowDelete && (
               <button
                 type="button"
                 onClick={handleDelete}
                 disabled={loading}
-                className="rounded-lg border border-border border-border-secondary border-red-200 px-4 py-2.5 text-sm font-medium text-error hover:bg-red-50 dark:border-red-900 dark:text-error dark:hover:bg-red-950/30 disabled:opacity-50"
+                className="rounded-lg border border-border border-red-200 px-4 py-2.5 text-sm font-medium text-error hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-950/30 disabled:opacity-50"
               >
                 Delete
               </button>
@@ -464,7 +464,7 @@ function RelayModal({
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="flex-1 rounded-lg border border-border border-border-secondary px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border-secondary"
+              className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium bg-background hover:bg-fill"
             >
               Cancel
             </button>
@@ -540,14 +540,14 @@ export function RelayDetailModal({
         aria-label="Close dialog"
       />
       <div
-        className="relative z-10 flex w-full max-w-md max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-border border-border-secondary bg-background shadow-xl border-border-secondary bg-background"
+        className="relative z-10 flex w-full max-w-md max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="shrink-0 px-6 pt-6 pb-2">
-          <h2 className="text-lg font-medium text-foreground text-foreground">{title}</h2>
+          <h2 className="text-lg font-medium text-foreground">{title}</h2>
           {(rawTime || timeDisplay) ? (
             <div className="mt-2 flex items-center gap-2">
-              <span className="text-foreground text-foreground font-mono text-lg">{rawTime ?? timeDisplay}</span>
+              <span className="text-foreground font-mono text-lg">{rawTime ?? timeDisplay}</span>
               {(() => {
                 const delta = swimInfo?.seedTime && rawTime ? formatSeedTimeDelta(swimInfo.seedTime, rawTime) : null;
                 if (!delta) return null;
@@ -588,37 +588,53 @@ export function RelayDetailModal({
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
-          <ul className="divide-y dark:divide-zinc-800 border border-border border-border-secondary rounded-lg dark:border-zinc-800 overflow-hidden">
-          <li className="grid grid-cols-[2rem_1fr_5.5rem] gap-2 px-3 py-2 text-xs font-medium uppercase tracking-wide text-foreground-tertiary dark:text-foreground-tertiary dark:bg-background bg-fill-secondary/50">
+          <ul className="divide-y divide-border border border-border rounded-lg overflow-hidden">
+          <li className="grid grid-cols-[2rem_1fr_auto] gap-2 px-3 py-2 text-xs font-medium uppercase tracking-wide text-foreground-tertiary dark:text-foreground-tertiary dark:bg-background bg-fill-secondary/50">
             <span>#</span>
             <span>Swimmer</span>
-            <span className="text-right">Split</span>
+            <span className="min-w-[5.5rem] text-right">Split</span>
           </li>
-          {swimmers.map((swimmer) => (
-            <li
-              key={swimmer.leg}
-              className="grid grid-cols-[2rem_1fr_5.5rem] gap-2 px-3 py-2.5 text-sm items-center"
-            >
-              <span className="text-foreground-tertiary dark:text-foreground-tertiary">{swimmer.leg}</span>
-              <span className="truncate text-foreground dark:text-foreground">
-                {relaySwimmerFullName(swimmer.name) ?? ""}
-              </span>
-              <span className="font-mono text-right text-foreground text-foreground">
-                {(() => {
-                  const split = sanitizeRelaySplitTime(swimmer.splitTime)
-                  return split ? formatDisplayTime(split) : ""
-                })()}
-              </span>
-            </li>
-          ))}
+          {swimmers.map((swimmer) => {
+            const split = sanitizeRelaySplitTime(swimmer.splitTime)
+            const nestedTimes =
+              swimmer.splits
+                ?.slice()
+                .sort((a, b) => a.distance - b.distance)
+                .map((s) => sanitizeRelaySplitTime(s.splitTime))
+                .filter((t): t is string => Boolean(t)) ?? []
+            const showNested = nestedTimes.length > 1
+            return (
+              <li
+                key={swimmer.leg}
+                className="grid grid-cols-[2rem_1fr_auto] gap-2 px-3 py-2.5 text-sm items-center"
+              >
+                <span className="text-foreground-tertiary dark:text-foreground-tertiary">
+                  {swimmer.leg}
+                </span>
+                <span className="truncate text-foreground dark:text-foreground">
+                  {relaySwimmerFullName(swimmer.name) ?? ""}
+                </span>
+                <span className="min-w-[5.5rem] text-right">
+                  <span className="block font-mono text-foreground">
+                    {split ? formatDisplayTime(split) : ""}
+                  </span>
+                  {showNested ? (
+                    <span className="block font-mono text-xs text-foreground-tertiary">
+                      {nestedTimes.map((t) => formatDisplayTime(t)).join(" · ")}
+                    </span>
+                  ) : null}
+                </span>
+              </li>
+            )
+          })}
         </ul>
         </div>
 
-        <div className="shrink-0 border-t border-border-secondary px-6 py-4 border-border-secondary">
+        <div className="shrink-0 border-t border-border-secondary px-6 py-4">
         <button
           type="button"
           onClick={onClose}
-          className="w-full rounded-lg border border-border border-border-secondary px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border-secondary"
+          className="w-full rounded-lg border border-border px-4 py-2.5 text-sm font-medium bg-background hover:bg-fill"
         >
           Close
         </button>
@@ -644,7 +660,7 @@ export function AddMeetRelayButton({
         type="button"
         onClick={() => setOpen(true)}
         disabled={athletes.length < 4}
-        className="text-xs px-3 py-1.5 border border-border border-border-secondary rounded-lg dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary bg-background disabled:opacity-40 transition-colors"
+        className="text-xs px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill disabled:opacity-40 transition-colors"
       >
         Add relay
       </button>
@@ -694,7 +710,7 @@ export function EditRelayButton({
         onClick={() => setOpen(true)}
           className={
           className ??
-          "p-1 rounded text-foreground-tertiary hover:text-foreground dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:text-foreground-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary/80 disabled:opacity-50 transition-colors"
+          "p-1 rounded text-foreground-tertiary hover:text-foreground hover:bg-fill disabled:opacity-50 transition-colors"
         }
         aria-label={rosterOnly ? "Edit relay roster" : "Edit relay"}
       >

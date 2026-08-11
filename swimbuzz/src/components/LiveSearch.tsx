@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useRef, useState, useTransition } from "react"
 
-const DEBOUNCE_MS = 200
+const DEBOUNCE_MS = 400
 
 export default function LiveSearch({
   pathname,

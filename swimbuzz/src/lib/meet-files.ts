@@ -22,6 +22,36 @@ export type MeetResourceUrlKey = (typeof MEET_RESOURCE_URL_KEYS)[number]
 export type MeetTravelUrlKey = (typeof MEET_TRAVEL_URL_KEYS)[number]
 export type MeetFileUrlKey = (typeof MEET_FILE_URL_KEYS)[number]
 
+export type FinalsHeatSheetLink = {
+  url: string
+  name?: string
+}
+
+export function normalizeFinalsHeatSheetUrls(
+  value: unknown
+): FinalsHeatSheetLink[] | null {
+  if (value === null || value === undefined) return null
+  if (!Array.isArray(value)) return null
+  const links: FinalsHeatSheetLink[] = []
+  for (const item of value) {
+    if (!item || typeof item !== "object") continue
+    const url = String((item as { url?: unknown }).url ?? "").trim()
+    if (!url) continue
+    const nameRaw = (item as { name?: unknown }).name
+    const name =
+      nameRaw === undefined || nameRaw === null
+        ? undefined
+        : String(nameRaw).trim() || undefined
+    links.push(name ? { url, name } : { url })
+  }
+  return links.length > 0 ? links.slice(0, 20) : null
+}
+
+export function finalsHeatSheetUrlList(value: unknown): string[] {
+  const links = normalizeFinalsHeatSheetUrls(value)
+  return links?.map((l) => l.url) ?? []
+}
+
 /** Uploaded meet doc (Supabase public URL or legacy local /meet-files path). */
 export function isStoredMeetFileUrl(url: string | null | undefined): boolean {
   if (!url) return false

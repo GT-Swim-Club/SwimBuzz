@@ -1,17 +1,21 @@
 "use client"
 
 import { useState } from "react"
+import ActionIcon from "@/components/ActionIcon"
 import { useRouter } from "next/navigation"
 import MeetFields, { type MeetFormState } from "../MeetFields"
 import Modal, { ModalFooter } from "@/components/Modal"
+import { meetPath } from "@/lib/slug"
 
 export default function MeetActions({
   meetId,
+  meetSlug,
   initial,
   meetName,
   hasSwims,
 }: {
   meetId: string
+  meetSlug: string | null
   initial: MeetFormState
   meetName: string
   hasSwims: boolean
@@ -40,7 +44,12 @@ export default function MeetActions({
         return
       }
       setEditing(false)
-      router.refresh()
+      const nextSlug = data.slug as string | null | undefined
+      if (nextSlug && nextSlug !== meetSlug) {
+        router.replace(meetPath(nextSlug))
+      } else {
+        router.refresh()
+      }
     } catch {
       setError("Something went wrong")
     } finally {
@@ -86,8 +95,9 @@ export default function MeetActions({
             setError(null)
             setEditing(true)
           }}
-          className="text-xs px-3 py-2 border rounded-lg hover:bg-fill-secondary dark:hover:bg-fill-secondary bg-background transition-colors sm:py-1.5"
+          className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill transition-colors"
         >
+          <ActionIcon kind="edit" />
           Edit
         </button>
         <button
@@ -96,8 +106,9 @@ export default function MeetActions({
             setError(null)
             setConfirmDelete(true)
           }}
-          className="text-xs px-3 py-1.5 border border-red-200 text-error rounded-lg hover:bg-red-50 dark:border-red-900/50 dark:text-error dark:hover:bg-red-950/40 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border border-red-200 text-error rounded-lg hover:bg-red-50 dark:border-red-900/50 dark:hover:bg-red-950/40 transition-colors"
         >
+          <ActionIcon kind="delete" />
           Delete
         </button>
       </div>
@@ -115,7 +126,7 @@ export default function MeetActions({
               type="button"
               onClick={() => setEditing(false)}
               disabled={loading}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary hover:bg-fill-secondary border-border"
+              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-fill border-border"
             >
               Cancel
             </button>
@@ -130,7 +141,7 @@ export default function MeetActions({
         }
       >
         <MeetFields form={form} setForm={setForm} />
-        {error && <p className="text-sm text-error dark:text-error">{error}</p>}
+        {error && <p className="text-sm text-error">{error}</p>}
       </Modal>
 
       <Modal
@@ -145,7 +156,7 @@ export default function MeetActions({
               type="button"
               onClick={() => setConfirmDelete(false)}
               disabled={loading}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary hover:bg-fill-secondary border-border"
+              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-fill border-border"
             >
               Cancel
             </button>
@@ -165,7 +176,7 @@ export default function MeetActions({
           </ModalFooter>
         }
       >
-   <p className="text-sm text-foreground-secondary text-foreground-secondary">
+   <p className="text-sm text-foreground-secondary">
             This cannot be undone.
           </p>
         {hasSwims ? (
@@ -175,7 +186,7 @@ export default function MeetActions({
               { value: "swims", label: "Delete swims", desc: "Deletes associated swims, keeps meet" },
               { value: "both", label: "Delete both", desc: "Deletes meet and associated swims" },
             ].map((opt) => (
-              <label key={opt.value} className="flex items-center gap-3 p-3 border border-border-secondary rounded-lg cursor-pointer hover:bg-fill-secondary dark:border-border-secondary">
+              <label key={opt.value} className="flex items-center gap-3 p-3 border border-border-secondary rounded-lg cursor-pointer hover:bg-fill">
                 <input
                   type="radio"
                   name="deleteOption"
@@ -191,7 +202,7 @@ export default function MeetActions({
             ))}
           </div>
         ) : null}
-        {error && <p className="text-sm text-error dark:text-error">{error}</p>}
+        {error && <p className="text-sm text-error">{error}</p>}
       </Modal>
     </>
   )

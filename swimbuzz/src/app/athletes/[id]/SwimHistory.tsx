@@ -7,9 +7,12 @@ import { compareSwimEvents, COURSE_LABELS } from "@/lib/swim-parse"
 import { displaySwimHistoryTags } from "@/lib/swim-tags"
 import { isRelayLeadoffSwimTag } from "@/lib/relay-results"
 import DeleteSwimButton from "./DeleteSwimButton"
+import { meetSwimPath } from "@/lib/slug"
 
 const INITIAL_COUNT = 10
 const ALL = "all"
+const TIMES_ALL = "all"
+const TIMES_BEST = "best"
 
 export type SwimHistoryRow = {
   id: string
@@ -19,6 +22,7 @@ export type SwimHistoryRow = {
   tags: string
   meet: string
   meetId: string | null
+  meetSlug: string | null
   date: string
   source: string
 }
@@ -31,26 +35,44 @@ export default function SwimHistory({
   isCoach: boolean
 }) {
   const [expanded, setExpanded] = useState(false)
+  const [timesFilter, setTimesFilter] = useState<string>(TIMES_ALL)
   const [eventFilter, setEventFilter] = useState<string>(ALL)
   const [courseFilter, setCourseFilter] = useState<string>(ALL)
 
+  const bestSwimIds = useMemo(() => {
+    const pbMap = new Map<string, string>()
+    for (const swim of [...swims].sort((a, b) => a.timeMs - b.timeMs)) {
+      const key = `${swim.event}-${swim.course}`
+      if (!pbMap.has(key)) pbMap.set(key, swim.id)
+    }
+    return new Set(pbMap.values())
+  }, [swims])
+
+  const timesFiltered = useMemo(
+    () =>
+      timesFilter === TIMES_BEST
+        ? swims.filter((s) => bestSwimIds.has(s.id))
+        : swims,
+    [swims, timesFilter, bestSwimIds]
+  )
+
   const eventOptions = useMemo(
-    () => Array.from(new Set(swims.map((s) => s.event))).sort(compareSwimEvents),
-    [swims]
+    () => Array.from(new Set(timesFiltered.map((s) => s.event))).sort(compareSwimEvents),
+    [timesFiltered]
   )
   const courseOptions = useMemo(() => {
-    const present = new Set(swims.map((s) => s.course))
+    const present = new Set(timesFiltered.map((s) => s.course))
     return COURSE_LABELS.filter((c) => present.has(c))
-  }, [swims])
+  }, [timesFiltered])
 
   const filtered = useMemo(
     () =>
-      swims.filter(
+      timesFiltered.filter(
         (s) =>
           (eventFilter === ALL || s.event === eventFilter) &&
           (courseFilter === ALL || s.course === courseFilter)
       ),
-    [swims, eventFilter, courseFilter]
+    [timesFiltered, eventFilter, courseFilter]
   )
 
   const hasMore = filtered.length > INITIAL_COUNT
@@ -58,9 +80,14 @@ export default function SwimHistory({
 
   if (swims.length === 0) {
     return (
-      <div className="rounded-xl border border-border-secondary border-dashed border-border-secondary px-4 py-8 text-center">
-        <p className="text-sm text-foreground-tertiary">No swims logged yet.</p>
-      </div>
+      <section>
+        <h2 className="text-sm font-medium text-foreground-secondary uppercase tracking-wide mb-3">
+          History
+        </h2>
+        <div className="rounded-xl border border-border-secondary border-dashed border-border-secondary px-4 py-8 text-center">
+          <p className="text-sm text-foreground-tertiary">No swims logged yet.</p>
+        </div>
+      </section>
     )
   }
 
@@ -71,60 +98,84 @@ export default function SwimHistory({
     ? "grid-cols-[75px_20px_90px_20px_minmax(0,1fr)_80px_auto]"
     : "grid-cols-[75px_20px_90px_20px_minmax(0,1fr)_100px]"
 
+  const hasActiveFilters =
+    timesFilter !== TIMES_ALL || eventFilter !== ALL || courseFilter !== ALL
+
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-3">
-        <select
-          value={eventFilter}
-          onChange={(e) => {
-            setEventFilter(e.target.value)
-            setExpanded(false)
-          }}
-          className={selectClass}
-          aria-label="Filter by event"
-        >
-          <option value={ALL}>All events</option>
-          {eventOptions.map((ev) => (
-            <option key={ev} value={ev}>
-              {ev}
-            </option>
-          ))}
-        </select>
+    <section className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+        <h2 className="text-sm font-medium text-foreground-secondary uppercase tracking-wide">
+          History
+        </h2>
 
-        <select
-          value={courseFilter}
-          onChange={(e) => {
-            setCourseFilter(e.target.value)
-            setExpanded(false)
-          }}
-          className={selectClass}
-          aria-label="Filter by course"
-        >
-          <option value={ALL}>All courses</option>
-          {courseOptions.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
+        <div className="flex flex-wrap items-center gap-3">
+          {hasActiveFilters && (
+            <>
+              <span className="text-xs text-foreground-secondary">
+                {filtered.length} swim{filtered.length === 1 ? "" : "s"}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setTimesFilter(TIMES_ALL)
+                  setEventFilter(ALL)
+                  setCourseFilter(ALL)
+                  setExpanded(false)
+                }}
+                className="text-xs font-medium text-primary hover:text-primary-hover"
+              >
+                Clear
+              </button>
+            </>
+          )}
 
-        {(eventFilter !== ALL || courseFilter !== ALL) && (
-          <>
-            <span className="text-xs text-foreground-secondary">
-              {filtered.length} swim{filtered.length === 1 ? "" : "s"}
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                setEventFilter(ALL)
-                setCourseFilter(ALL)
-              }}
-              className="text-xs font-medium text-primary hover:text-primary-hover"
-            >
-              Clear
-            </button>
-          </>
-        )}
+          <select
+            value={timesFilter}
+            onChange={(e) => {
+              setTimesFilter(e.target.value)
+              setExpanded(false)
+            }}
+            className={selectClass}
+            aria-label="Filter by times"
+          >
+            <option value={TIMES_ALL}>All times</option>
+            <option value={TIMES_BEST}>Best times</option>
+          </select>
+
+          <select
+            value={eventFilter}
+            onChange={(e) => {
+              setEventFilter(e.target.value)
+              setExpanded(false)
+            }}
+            className={selectClass}
+            aria-label="Filter by event"
+          >
+            <option value={ALL}>All events</option>
+            {eventOptions.map((ev) => (
+              <option key={ev} value={ev}>
+                {ev}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={courseFilter}
+            onChange={(e) => {
+              setCourseFilter(e.target.value)
+              setExpanded(false)
+            }}
+            className={selectClass}
+            aria-label="Filter by course"
+          >
+            <option value={ALL}>All courses</option>
+            {courseOptions.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {filtered.length === 0 ? (
@@ -190,7 +241,7 @@ export default function SwimHistory({
                 return (
                   <Link
                     key={swim.id}
-                    href={`/meets/${swim.meetId}#swim-${swim.id}`}
+                    href={swim.meetSlug ? meetSwimPath(swim.meetSlug, swim.id) : swim.meetId ? `/meets/${swim.meetId}#swim-${swim.id}` : "#"}
                     className="group flex items-start border-border justify-between gap-3 bg-background px-4 py-3 hover:bg-fill-secondary transition-colors"
                   >
                     {cardContent}
@@ -271,7 +322,7 @@ export default function SwimHistory({
                 return (
                   <Link
                     key={swim.id}
-                    href={`/meets/${swim.meetId}#swim-${swim.id}`}
+                    href={swim.meetSlug ? meetSwimPath(swim.meetSlug, swim.id) : swim.meetId ? `/meets/${swim.meetId}#swim-${swim.id}` : "#"}
                     className={`group grid ${desktopGrid} items-center border-border px-4 py-2 bg-background text-sm gap-4 hover:bg-fill-secondary transition-colors`}
                   >
                     {rowContent}
@@ -303,6 +354,6 @@ export default function SwimHistory({
             : `Show all ${filtered.length} swims (${filtered.length - INITIAL_COUNT} more)`}
         </button>
       )}
-    </div>
+    </section>
   )
 }

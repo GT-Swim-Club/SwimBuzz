@@ -1,14 +1,6 @@
 import Link from "next/link"
-
-function formatYear(year: string): string {
-  if (year.toLowerCase().includes("phd")) return "PhD"
-  if (year.toLowerCase().includes("master")) return "Masters"
-  const num = parseInt(year)
-  if (isNaN(num)) return year
-  const suffixes = ["th", "st", "nd", "rd"]
-  const v = num % 100
-  return num + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]) + " Year"
-}
+import { athletePath } from "@/lib/slug"
+import { formatAthleteYearAndAge } from "@/lib/utils"
 
 export default function AthleteGalleryCard({
   athlete,
@@ -17,6 +9,7 @@ export default function AthleteGalleryCard({
 }: {
   athlete: {
     id: string
+    slug: string | null
     firstName: string
     lastName: string
     user: { image: string | null; email: string | null } | null
@@ -24,13 +17,16 @@ export default function AthleteGalleryCard({
     gender: string
     swimCloudId: number | null
     year: string | null
+    dob: string | Date | null
   }
   showGender: boolean
   isYou?: boolean
 }) {
+  const yearAndAge = formatAthleteYearAndAge(athlete.year, athlete.dob)
+
   return (
     <Link
-      href={`/athletes/${athlete.id}`}
+      href={athletePath(athlete.slug ?? athlete.id)}
       className={`group block rounded-xl overflow-hidden border p-4 flex flex-col items-center text-center h-full transition-all ${isYou ? "border-primary bg-primary/5 shadow-sm hover:shadow-md" : "border-border bg-background shadow-sm hover:shadow-md hover:border-border hover:bg-fill-secondary"}`}
     >
       <div className="h-20 w-20 rounded-full overflow-hidden border border-primary/30 bg-primary/20 mb-4">
@@ -60,7 +56,7 @@ export default function AthleteGalleryCard({
         {athlete.lastName}
       </h3>
       <div className="text-xs text-foreground-secondary mt-0.5 space-y-0.5 w-full">
-        {athlete.year && <p className="truncate">{formatYear(athlete.year)}</p>}
+        {yearAndAge && <p className="truncate">{yearAndAge}</p>}
         {showGender && (
           <p className="font-medium uppercase tracking-wide text-foreground-tertiary">
             {athlete.gender === "F" ? "Women" : "Men"}

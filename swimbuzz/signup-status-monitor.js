@@ -26,6 +26,14 @@ function isSignupWindowOpen(openAt, closeAt, now = new Date()) {
   return true
 }
 
+async function meetHref(meetId) {
+  const meet = await prisma.meet.findUnique({
+    where: { id: meetId },
+    select: { slug: true },
+  })
+  return `/meets/${meet?.slug ?? meetId}`
+}
+
 /**
  * Send advance notification when signups are opening soon.
  */
@@ -60,13 +68,15 @@ async function notifyMeetSignupOpeningSoon(meetId, meetName, advanceMinutes) {
       return
     }
 
+    const href = await meetHref(meetId)
+
     await prisma.notification.createMany({
       data: recipients.map((userId) => ({
         userId,
         type: NotificationType.MEET_SIGNUP_OPEN,
         title: `Signup opening soon: ${meetName}`,
         body: `Signup will open in ${advanceMinutes} minute${advanceMinutes === 1 ? "" : "s"}.`,
-        href: `/meets/${meetId}`,
+        href,
       })),
     })
 
@@ -110,13 +120,15 @@ async function notifyMeetSignupOpenNow(meetId, meetName) {
       return
     }
 
+    const href = await meetHref(meetId)
+
     await prisma.notification.createMany({
       data: recipients.map((userId) => ({
         userId,
         type: NotificationType.MEET_SIGNUP_OPEN,
         title: `Signup open: ${meetName}`,
         body: "Signup is now open for this meet.",
-        href: `/meets/${meetId}`,
+        href,
       })),
     })
 

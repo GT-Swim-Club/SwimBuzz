@@ -1,6 +1,7 @@
 import { normalizeNicknames, parseFirstNameWithNicknames, parseRosterName } from "@/lib/athlete-match"
 import { normalizeGatechEmail } from "@/lib/gatech-email"
 import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swimcloud-id"
+import { toTitleCase } from "@/lib/utils"
 
 export type ParsedRosterCsvRow = {
   rowNumber: number
@@ -270,8 +271,8 @@ export function parseRosterCsv(text: string): RosterCsvParseResult {
 
     rows.push({
       rowNumber,
-      firstName,
-      lastName,
+      firstName: toTitleCase(firstName),
+      lastName: toTitleCase(lastName),
       gender,
       ...(email ? { email } : {}),
       ...(gtid ? { gtid } : {}),

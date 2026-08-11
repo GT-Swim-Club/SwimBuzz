@@ -1,6 +1,7 @@
 import { Course } from "@prisma/client"
 import { parseMeetDate } from "@/lib/swim-parse"
 import { parseSeason, seasonFromDate } from "@/lib/season"
+import { normalizeFinalsHeatSheetUrls } from "@/lib/meet-files"
 
 export class MeetInputError extends Error {}
 
@@ -49,6 +50,18 @@ export function buildMeetData(body: Record<string, unknown>, opts: BuildOptions 
     }
   }
 
+  if ("startTime" in body) {
+    const raw = optionalString(body.startTime)
+    if (raw) {
+      // Accept HH:MM or HH:MM:SS from <input type="time">
+      const match = raw.match(/^(\d{2}:\d{2})(?::\d{2})?$/)
+      if (!match) throw new MeetInputError("Start time must be HH:MM")
+      data.startTime = match[1]
+    } else {
+      data.startTime = null
+    }
+  }
+
   if ("course" in body) data.course = parseCourse(body.course)
 
   if ("season" in body) {
@@ -72,6 +85,9 @@ export function buildMeetData(body: Record<string, unknown>, opts: BuildOptions 
   if ("packetUrl" in body) data.packetUrl = optionalString(body.packetUrl)
   if ("psychSheetUrl" in body) data.psychSheetUrl = optionalString(body.psychSheetUrl)
   if ("heatSheetUrl" in body) data.heatSheetUrl = optionalString(body.heatSheetUrl)
+  if ("finalsHeatSheetUrls" in body) {
+    data.finalsHeatSheetUrls = normalizeFinalsHeatSheetUrls(body.finalsHeatSheetUrls)
+  }
   if ("entriesSheetUrl" in body) data.entriesSheetUrl = optionalString(body.entriesSheetUrl)
   if ("resultsUrl" in body) data.resultsUrl = optionalString(body.resultsUrl)
   if ("liveStreamUrl" in body) data.liveStreamUrl = optionalString(body.liveStreamUrl)

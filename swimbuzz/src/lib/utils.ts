@@ -143,3 +143,45 @@ export function formatSeedTimeDelta(seed: string, result: string): string | null
   const seconds = (absSec % 60).toFixed(2).padStart(5, "0")
   return `${sign}${minutes}:${seconds}`
 }
+
+export function toTitleCase(str: string): string {
+  if (!str) return str
+  return str
+    .toLowerCase()
+    .replace(/(^|\s)\S/g, (match) => match.toUpperCase())
+}
+
+export function formatAcademicYear(year: string): string {
+  if (year.toLowerCase().includes("phd")) return "PhD"
+  if (year.toLowerCase().includes("master")) return "Masters"
+  const num = parseInt(year)
+  if (isNaN(num)) return year
+  return `${formatOrdinal(num)} Year`
+}
+
+export function athleteAge(dob: Date | string | null | undefined): number | null {
+  if (!dob) return null
+  const birth = typeof dob === "string" ? new Date(dob) : dob
+  if (Number.isNaN(birth.getTime())) return null
+
+  const today = new Date()
+  let age = today.getUTCFullYear() - birth.getUTCFullYear()
+  const monthDiff = today.getUTCMonth() - birth.getUTCMonth()
+  const dayDiff = today.getUTCDate() - birth.getUTCDate()
+  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) age--
+  return age >= 0 ? age : null
+}
+
+export function formatAthleteYearAndAge(
+  year: string | null | undefined,
+  dob: Date | string | null | undefined,
+): string | null {
+  const yearPart = year ? formatAcademicYear(year) : null
+  const age = athleteAge(dob)
+  const agePart = age != null ? String(age) : null
+
+  if (yearPart && agePart) return `${yearPart} · ${agePart}`
+  if (yearPart) return yearPart
+  if (agePart) return agePart
+  return null
+}

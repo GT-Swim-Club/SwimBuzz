@@ -21,7 +21,7 @@ export default function ImportRosterButton() {
   const genderLabel = gender === "F" ? "Women's" : gender === "M" ? "Men's" : ""
   const rosterLabel = `${genderLabel} ${season}`
 
-  const { connected: bridgeConnected, requireScraper } = useScraperUi()
+  const { connected: scraperConnected, requireScraper } = useScraperUi()
   const { startTask } = useImportTask()
 
   const [open, setOpen] = useState(false)
@@ -122,7 +122,7 @@ export default function ImportRosterButton() {
           resetForm()
           setOpen(true)
         }}
-        className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border-secondary rounded-lg hover:border-border hover:bg-fill-tertiary bg-fill-secondary dark:hover:bg-fill-tertiary dark:bg-background transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border-secondary rounded-lg hover:border-border hover:bg-fill-tertiary bg-background dark:hover:bg-fill-tertiary dark:bg-background transition-colors"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

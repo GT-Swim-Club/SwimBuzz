@@ -51,8 +51,9 @@ export default function NotificationPreferencesSettings({
 
   return (
     <div className="divide-y divide-border">
-      {NOTIFICATION_PREFERENCE_META.map(
-        ({ key, label, description, athleteDescription }) => (
+      {NOTIFICATION_PREFERENCE_META.filter(
+        ({ athletesOnly }) => !athletesOnly || isAthlete
+      ).map(({ key, label, description, athleteDescription }) => (
           <div key={key}>
             <div className="flex items-center justify-between gap-4 px-4 py-3">
               <div>

@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import { Gender } from "@prisma/client"
-import { BridgeJobType } from "@prisma/client"
+import { Gender, ScraperJobType } from "@prisma/client"
 import { parseSeason, seasonEndYear } from "@/lib/season"
-import { runBridgeJob } from "@/lib/bridge"
-import { LOCAL_BRIDGE_HINT } from "@/lib/scraper-or-bridge"
+import { runScraperJob } from "@/lib/scraper"
+import { LOCAL_SCRAPER_HINT } from "@/lib/scraper-proxy"
 import {
   applySwimCloudRosterImport,
   type SwimCloudRosterRow,
@@ -34,7 +33,7 @@ export async function POST(req: Request) {
 
   try {
     for (const g of gendersToFetch) {
-      const rosterRows = await runBridgeJob<SwimCloudRosterRow[]>(session.user.id, BridgeJobType.ROSTER, {
+      const rosterRows = await runScraperJob<SwimCloudRosterRow[]>(session.user.id, ScraperJobType.ROSTER, {
         team_id: parseInt(TEAM_ID, 10),
         year: swimCloudYear,
         gender: g,
@@ -55,7 +54,7 @@ export async function POST(req: Request) {
   } catch (err) {
     const message = err instanceof Error ? err.message : "Import failed"
     if (message === "LOCAL_BRIDGE_NOT_CONNECTED") {
-      return NextResponse.json({ error: LOCAL_BRIDGE_HINT }, { status: 503 })
+      return NextResponse.json({ error: LOCAL_SCRAPER_HINT }, { status: 503 })
     }
     return NextResponse.json({ error: message }, { status: 502 })
   }

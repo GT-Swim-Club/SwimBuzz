@@ -11,7 +11,7 @@ import {
 } from "react"
 import Modal, { ModalFooter } from "@/components/Modal"
 import RunScraperModal from "@/components/RunScraperModal"
-import { useBridgeStatus } from "@/lib/use-bridge-status"
+import { useScraperStatus } from "@/lib/use-scraper-status"
 
 type ScraperUiContextValue = {
   connected: boolean
@@ -75,7 +75,7 @@ function NeedScraperModal({
 }
 
 export default function ScraperUiProvider({ children }: { children: ReactNode }) {
-  const { connected, loading, refresh } = useBridgeStatus()
+  const { connected, loading, refresh } = useScraperStatus()
   const [runOpen, setRunOpen] = useState(false)
   const [needOpen, setNeedOpen] = useState(false)
   const pendingRef = useRef<(() => void) | null>(null)

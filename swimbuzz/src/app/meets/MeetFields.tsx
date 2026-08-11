@@ -7,11 +7,13 @@ import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import DontReloadNotice from "@/components/DontReloadNotice"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { FileDropzone } from "@/components/FileDropzone"
+import { useSession } from "next-auth/react"
 
 export type MeetFormState = {
   name: string
   location: string
   startDate: string
+  startTime: string
   endDate: string
   course: string
   season: string
@@ -28,6 +30,7 @@ export const emptyMeetForm: MeetFormState = {
   name: "",
   location: "",
   startDate: "",
+  startTime: "",
   endDate: "",
   course: "SCY",
   season: "",
@@ -48,16 +51,19 @@ const labelClass =
 export default function MeetFields({
   form,
   setForm,
+  initialSeasons
 }: {
   form: MeetFormState
   setForm: React.Dispatch<React.SetStateAction<MeetFormState>>
+  initialSeasons?: string[]
 }) {
+  const { data: session } = useSession()
   const [iconUploading, setIconUploading] = useState(false)
   const [iconError, setIconError] = useState<string | null>(null)
   const [bannerUploading, setBannerUploading] = useState(false)
   const [bannerError, setBannerError] = useState<string | null>(null)
   const [bannerCroppingSrc, setBannerCroppingSrc] = useState<string | null>(null)
-  const [fetchedSeasons, setFetchedSeasons] = useState<string[]>([])
+  const [fetchedSeasons, setFetchedSeasons] = useState<string[]>(initialSeasons ?? [])
   
   const [addSeasonModalOpen, setAddSeasonModalOpen] = useState(false)
   const upcoming = upcomingSeason()
@@ -65,16 +71,18 @@ export default function MeetFields({
   const [addSeasonError, setAddSeasonError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch("/api/seasons")
-      .then((res) => {
-        if (!res.ok) return []
-        return res.json().catch(() => [])
-      })
-      .then((data) => {
-        setFetchedSeasons(Array.isArray(data) ? data : [])
-      })
-      .catch(() => setFetchedSeasons([]))
-  }, [])
+    if (!initialSeasons) {
+        fetch("/api/seasons")
+        .then((res) => {
+            if (!res.ok) return []
+            return res.json().catch(() => [])
+        })
+        .then((data) => {
+            setFetchedSeasons(Array.isArray(data) ? data : [])
+        })
+        .catch(() => setFetchedSeasons([]))
+    }
+  }, [initialSeasons])
 
   useEffect(() => {
     if (fetchedSeasons.length > 0 && !form.season) {
@@ -238,7 +246,7 @@ export default function MeetFields({
             onFilesSelected={(files) => handleIconUpload({ target: { files: files as any } } as any)}
             accept="image/png,image/jpeg,image/jpg,image/gif,image/webp,image/svg+xml"
             disabled={iconUploading}
-            className="block w-full rounded-lg border border-border bg-fill-secondary p-4 text-center text-xs text-foreground hover:bg-fill-primary"
+            className="block w-full rounded-lg border border-border bg-background p-4 text-center text-xs text-foreground hover:bg-fill-secondary"
           >
             {iconUploading ? "Uploading..." : "Click or drag and drop to upload icon"}
           </FileDropzone>
@@ -278,7 +286,7 @@ export default function MeetFields({
             onFilesSelected={(files) => handleBannerUpload({ target: { files: files as any } } as any)}
             accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
             disabled={bannerUploading}
-            className="block w-full rounded-lg border border-border bg-fill-secondary p-4 text-center text-xs text-foreground hover:bg-fill-primary"
+            className="block w-full rounded-lg border border-border bg-background p-4 text-center text-xs text-foreground hover:bg-fill-secondary"
           >
             {bannerUploading ? "Uploading..." : "Click or drag and drop to upload banner"}
           </FileDropzone>
@@ -352,15 +360,27 @@ export default function MeetFields({
         </div>
         <div>
           <label className={labelClass}>
-            End Date
+            Start Time
           </label>
           <input
-            type="date"
-            value={form.endDate}
-            onChange={(e) => set("endDate", e.target.value)}
+            type="time"
+            value={form.startTime}
+            onChange={(e) => set("startTime", e.target.value)}
             className={inputClass}
           />
         </div>
+      </div>
+
+      <div>
+        <label className={labelClass}>
+          End Date
+        </label>
+        <input
+          type="date"
+          value={form.endDate}
+          onChange={(e) => set("endDate", e.target.value)}
+          className={inputClass}
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -404,7 +424,7 @@ export default function MeetFields({
                 {s}
               </option>
             ))}
-            <option value="ADD_NEW">+ New Season</option>
+             {session?.user?.role === "COACH" && !fetchedSeasons.includes(upcoming) && <option value="ADD_NEW">+ New Season</option>}
           </select>
         </div>
       </div>

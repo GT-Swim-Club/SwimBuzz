@@ -264,7 +264,7 @@ export default function MeetSignupSection({
               <button
                 type="button"
                 onClick={() => setResponsesOpen(true)}
-                className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border border-border rounded-md dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:bg-background-elevated transition-colors"
+                className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border border-border rounded-md bg-background hover:bg-fill transition-colors"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -376,7 +376,7 @@ export default function MeetSignupSection({
                     setWithdrawError(null)
                   }}
                   disabled={syncingRoster || withdrawing}
-                  className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:border disabled:opacity-50"
+                  className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium bg-background hover:bg-fill disabled:opacity-50"
                 >
                   Close
                 </button>
@@ -399,11 +399,11 @@ export default function MeetSignupSection({
             }
           >
             {entries.length === 0 ? (
-              <p className="text-sm text-foreground-secondary text-foreground-secondary">No sign-ups yet.</p>
+              <p className="text-sm text-foreground-secondary">No sign-ups yet.</p>
             ) : (
               <div className="overflow-x-auto -mx-1">
                 <table className="min-w-full text-sm">
-                  <thead className="text-left text-xs uppercase tracking-wide text-foreground-secondary text-foreground-secondary">
+                  <thead className="text-left text-xs uppercase tracking-wide text-foreground-secondary">
                     <tr>
                       <th className="px-2 py-2 font-medium">Athlete</th>
                       <th className="px-2 py-2 font-medium">Individual</th>
@@ -421,7 +421,7 @@ export default function MeetSignupSection({
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y dark:divide-zinc-800">
+                  <tbody className="divide-y divide-border">
                     {entries.map((entry) => {
                       const answers = isSignupAnswers(entry.answers) ? entry.answers : {}
                       const { individual, relay } = partitionSignupEvents(
@@ -441,7 +441,7 @@ export default function MeetSignupSection({
                               return (
                                 <span
                                   key={ev}
-                                  className="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-zinc-800"
+                                  className="text-xs px-1.5 py-0.5 rounded bg-fill-secondary"
                                 >
                                   {label}
                                   {time ? ` · ${formatDisplayTime(time)}` : ""}
@@ -458,12 +458,12 @@ export default function MeetSignupSection({
                           <td className="px-2 py-2">{renderEventChips(individual)}</td>
                           <td className="px-2 py-2">{renderEventChips(relay)}</td>
                           {questions.map((q) => (
-                            <td key={q.id} className="px-2 py-2 text-foreground-secondary text-foreground-secondary">
+                            <td key={q.id} className="px-2 py-2 text-foreground-secondary">
                               {answers[q.id] || "—"}
                             </td>
                           ))}
                           {form.askNotes && (
-                            <td className="px-2 py-2 text-foreground-secondary text-foreground-secondary max-w-xs">
+                            <td className="px-2 py-2 text-foreground-secondary max-w-xs">
                               {entry.notes || "—"}
                             </td>
                           )}
@@ -475,7 +475,7 @@ export default function MeetSignupSection({
                                 setWithdrawEntry(entry)
                               }}
                               disabled={withdrawing}
-                              className="text-xs px-2 py-1 rounded-md border border-border border-red-200 text-error hover:bg-red-50 dark:border-red-900 dark:text-error dark:hover:bg-red-950/30 disabled:opacity-50 transition-colors"
+                              className="text-xs px-2 py-1 rounded-md border border-border border-red-200 text-error hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-950/30 disabled:opacity-50 transition-colors"
                             >
                               Drop
                             </button>
@@ -511,7 +511,7 @@ export default function MeetSignupSection({
                     setSyncError(null)
                   }}
                   disabled={syncingRoster}
-                  className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:border disabled:opacity-50"
+                  className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium bg-background hover:bg-fill disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -527,7 +527,7 @@ export default function MeetSignupSection({
             }
           >
             {syncError ? (
-              <p className="text-sm text-error dark:text-error">{syncError}</p>
+              <p className="text-sm text-error">{syncError}</p>
             ) : null}
           </Modal>
 
@@ -557,7 +557,7 @@ export default function MeetSignupSection({
                     setWithdrawError(null)
                   }}
                   disabled={withdrawing}
-                  className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:border disabled:opacity-50"
+                  className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium bg-background hover:bg-fill disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -573,7 +573,7 @@ export default function MeetSignupSection({
             }
           >
             {withdrawError ? (
-                  <p className="text-sm text-error dark:text-error">{withdrawError}</p>
+                  <p className="text-sm text-error">{withdrawError}</p>
             ) : null}
           </Modal>
         </>

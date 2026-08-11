@@ -109,7 +109,7 @@ export default function AddMeetSwimButton({
         type="button"
         onClick={openModal}
         disabled={athletes.length === 0}
-        className="text-xs px-3 py-1.5 border border-border rounded-lg dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary bg-background disabled:opacity-40 transition-colors"
+        className="text-xs px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill disabled:opacity-40 transition-colors"
       >
         Add swim
       </button>
@@ -128,7 +128,7 @@ export default function AddMeetSwimButton({
               type="button"
               onClick={() => setOpen(false)}
               disabled={loading}
-              className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border"
+              className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium bg-background hover:bg-fill"
             >
               Cancel
             </button>
@@ -143,14 +143,14 @@ export default function AddMeetSwimButton({
         }
       >
         <div>
-          <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+          <label className="block text-xs font-medium text-foreground-secondary mb-1">
             Athlete <span className="text-red-500">*</span>
           </label>
           <select
             required
             value={form.athleteId}
             onChange={(e) => setForm((f) => ({ ...f, athleteId: e.target.value }))}
-            className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
           >
             {athletes.map((a) => (
               <option key={a.id} value={a.id}>
@@ -162,13 +162,13 @@ export default function AddMeetSwimButton({
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+            <label className="block text-xs font-medium text-foreground-secondary mb-1">
               Event
             </label>
             <select
               value={form.event}
               onChange={(e) => setForm((f) => ({ ...f, event: e.target.value }))}
-              className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
             >
               {EVENTS.map((event) => (
                 <option key={event}>{event}</option>
@@ -176,13 +176,13 @@ export default function AddMeetSwimButton({
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+            <label className="block text-xs font-medium text-foreground-secondary mb-1">
               Course
             </label>
             <select
               value={form.course}
               onChange={(e) => setForm((f) => ({ ...f, course: e.target.value }))}
-              className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
             >
               <option>SCY</option>
               <option>LCM</option>
@@ -193,7 +193,7 @@ export default function AddMeetSwimButton({
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+            <label className="block text-xs font-medium text-foreground-secondary mb-1">
               Time <span className="text-red-500">*</span>
             </label>
             <input
@@ -202,11 +202,11 @@ export default function AddMeetSwimButton({
               placeholder="1:23.45 or 58.32"
               value={form.time}
               onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))}
-              className="w-full rounded-lg border border-border px-3 py-2 text-sm font-mono bg-background border-border"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm font-mono bg-background"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+            <label className="block text-xs font-medium text-foreground-secondary mb-1">
               Date <span className="text-red-500">*</span>
             </label>
             <input
@@ -214,13 +214,13 @@ export default function AddMeetSwimButton({
               type="date"
               value={form.date}
               onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-              className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
             />
           </div>
         </div>
 
         {error && (
-          <p className="text-sm text-error dark:text-error">{error}</p>
+          <p className="text-sm text-error">{error}</p>
         )}
       </Modal>
     </>

@@ -1,7 +1,7 @@
 import { fetchMeetFileBytes } from "@/lib/meet-file-fetch"
 import type { EventOrder } from "@/lib/meet-event-order"
 import { isEventOrder, isParsablePacketUrl } from "@/lib/meet-event-order"
-import { parseMeetPacketPdfResult } from "@/lib/scraper-or-bridge"
+import { parseMeetPacketPdfResult } from "@/lib/scraper-proxy"
 
 export async function parseMeetPacketPdf(
   userId: string,

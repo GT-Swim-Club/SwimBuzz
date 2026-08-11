@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma"
 import { buildPracticeData, PracticeInputError } from "@/lib/practice-input"
 import { isStaffRole } from "@/lib/auth-roles"
 import { Prisma } from "@prisma/client"
+import { uniquePracticeSlug } from "@/lib/slug"
 
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions)
@@ -59,6 +60,7 @@ export async function POST(req: Request) {
     const data = buildPracticeData(body, { requireSets: true })
     const practice = await prisma.practice.create({
       data: {
+        slug: await uniquePracticeSlug(data.date),
         title: data.title,
         date: data.date,
         focus: data.focus,

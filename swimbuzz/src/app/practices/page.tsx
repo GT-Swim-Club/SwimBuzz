@@ -6,14 +6,20 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import { Prisma } from "@prisma/client"
 import LiveSearch from "@/components/LiveSearch"
+import {
+  ViewNavPanel,
+  ViewNavigationProvider,
+} from "@/components/ViewNavigation"
 import { formatDateRange, formatSwimDate } from "@/lib/utils"
 import { SET_TAGS, normalizeTag } from "@/lib/practice-tags"
+import PracticeViewToggle from "./PracticeViewToggle"
 import {
   DayLabel,
   PracticeCardShell,
   TodayButton,
 } from "./PracticeCalendarLocal"
 import { isStaffUi } from "@/lib/athlete-view-server"
+import { practicePath } from "@/lib/slug"
 
 const MONTH_NAMES = [
   "January",
@@ -230,9 +236,8 @@ export default async function PracticesPage({
     return buildHref({ tags: next })
   }
 
-  function practiceHref(id: string) {
-    const s = listParams().toString()
-    return s ? `/practices/${id}?${s}` : `/practices/${id}`
+  function practiceHref(practice: { id: string; slug: string | null }) {
+    return practicePath(practice.slug ?? practice.id)
   }
 
   const monthLabel = `${MONTH_NAMES[calendarMonth.getUTCMonth()]} ${calendarMonth.getUTCFullYear()}`
@@ -324,7 +329,7 @@ export default async function PracticesPage({
         <div className="flex min-h-0 flex-1 flex-col gap-2 h-full">
           <PracticeCardShell
             dayKey={key}
-            href={practiceHref(first.id)}
+            href={practiceHref(first)}
             todayClassName={todayCardClass}
             className={
               "flex flex-col flex-1 rounded-lg border border-border-secondary bg-[#fcf8e8] dark:bg-[#3d3320] text-left transition-colors hover:bg-[#f2e6b6] dark:hover:bg-[#52442b] " +
@@ -345,7 +350,7 @@ export default async function PracticesPage({
             <PracticeCardShell
               key={practice.id}
               dayKey={key}
-              href={practiceHref(practice.id)}
+              href={practiceHref(practice)}
               todayClassName={todayCardClass}
               className={
                 "flex flex-col flex-1 rounded-lg border border-border-secondary bg-[#fcf8e8] dark:bg-[#3d3320] text-left transition-colors hover:bg-[#f2e6b6] dark:hover:bg-[#52442b] " +
@@ -366,92 +371,24 @@ export default async function PracticesPage({
     )
   }
 
-  const viewIconProps = {
-    xmlns: "http://www.w3.org/2000/svg",
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 2,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-    className: "h-4 w-4 shrink-0",
-    "aria-hidden": true as const,
-  }
-
   const viewToggle = (
-    <div className="inline-flex rounded-lg border border-border-secondary bg-background p-1 text-sm">
-      {(
-        [
-          {
-            view: "week" as const,
-            label: "Week",
-            icon: (
-              <svg {...viewIconProps}>
-                <rect width="18" height="18" x="3" y="4" rx="2" />
-                <path d="M16 2v4" />
-                <path d="M8 2v4" />
-                <path d="M3 10h18" />
-                <path d="M10 14h4" />
-                <path d="M10 18h4" />
-              </svg>
-            ),
-          },
-          {
-            view: "month" as const,
-            label: "Month",
-            icon: (
-              <svg {...viewIconProps}>
-                <rect width="18" height="18" x="3" y="4" rx="2" />
-                <path d="M16 2v4" />
-                <path d="M8 2v4" />
-                <path d="M3 10h18" />
-                <path d="M8 14h.01" />
-                <path d="M12 14h.01" />
-                <path d="M16 14h.01" />
-                <path d="M8 18h.01" />
-                <path d="M12 18h.01" />
-                <path d="M16 18h.01" />
-              </svg>
-            ),
-          },
-          {
-            view: "list" as const,
-            label: "List",
-            icon: (
-              <svg {...viewIconProps}>
-                <path d="M8 6h13" />
-                <path d="M8 12h13" />
-                <path d="M8 18h13" />
-                <path d="M3 6h.01" />
-                <path d="M3 12h.01" />
-                <path d="M3 18h.01" />
-              </svg>
-            ),
-          },
-        ] as const
-      ).map((option) => (
-                <Link
-          key={option.view}
-          href={buildHref({ view: option.view })}
-          className={
-            "inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 transition-colors " +
-            (activeView === option.view
-              ? "bg-primary text-primary-text"
-              : "text-foreground-secondary hover:bg-fill-secondary")
-          }
-        >
-          {option.icon}
-        </Link>
-      ))}
-    </div>
+    <PracticeViewToggle
+      activeView={activeView}
+      hrefs={{
+        week: buildHref({ view: "week" }),
+        month: buildHref({ view: "month" }),
+        list: buildHref({ view: "list" }),
+      }}
+    />
   )
 
   return (
-    <main className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-3xl font-semibold text-foreground">Practices</h1>
-        <div className="flex items-center gap-2">
-          {viewToggle}
+    <ViewNavigationProvider>
+      <main className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-3xl font-semibold text-foreground">Practices</h1>
+          <div className="flex items-center gap-2">
+            {viewToggle}
           {isCoach && (
             <Link
               href="/practices/new"
@@ -486,9 +423,9 @@ export default async function PracticesPage({
           <Link
             href={buildHref({ tags: [] })}
             className={
-              "text-xs px-2.5 py-1 rounded-full border border-border-secondary transition-colors " +
+              "text-xs px-2.5 py-1 rounded-full border border-border-secondary transition-colors font-semibold " +
               (activeTags.length === 0
-                ? "bg-foreground text-background border-foreground"
+                ? "bg-primary border-primary text-primary-text"
                 : "border-border-secondary text-foreground-secondary hover:bg-fill-secondary")
             }
           >
@@ -514,6 +451,7 @@ export default async function PracticesPage({
         </div>
       </div>
 
+      <ViewNavPanel>
       {activeView === "week" ? (
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2 sm:gap-3">
@@ -701,7 +639,7 @@ export default async function PracticesPage({
               <PracticeCardShell
                 key={p.id}
                 dayKey={key}
-                href={practiceHref(p.id)}
+                href={practiceHref(p)}
                 todayClassName="!border-primary"
                 className="flex items-center gap-4 rounded-xl border border-border-secondary bg-background px-6 py-4 transition-colors hover:bg-fill-secondary"
             >
@@ -757,6 +695,8 @@ export default async function PracticesPage({
           })}
         </div>
       )}
+      </ViewNavPanel>
     </main>
+    </ViewNavigationProvider>
   )
 }

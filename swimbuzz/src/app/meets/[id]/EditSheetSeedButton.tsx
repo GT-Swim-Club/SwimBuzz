@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Modal, { ModalFooter } from "@/components/Modal"
+import ActionIcon from "@/components/ActionIcon"
 
 const FALLBACK_EVENTS = [
   "50 Free",
@@ -128,19 +129,11 @@ export default function EditSheetSeedButton({
         onClick={openModal}
         className={
           className ??
-          "p-1 rounded text-foreground-tertiary hover:text-foreground dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:text-foreground dark:dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary disabled:opacity-50 transition-colors"
+          "p-1 rounded text-foreground-tertiary hover:text-foreground hover:bg-fill disabled:opacity-50 transition-colors"
         }
         aria-label="Edit sign-up entry"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          className="w-4 h-4"
-          aria-hidden="true"
-        >
-          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-        </svg>
+        <ActionIcon kind="edit" className="w-4 h-4" />
       </button>
 
       <Modal
@@ -157,7 +150,7 @@ export default function EditSheetSeedButton({
               type="button"
               onClick={handleDelete}
               disabled={loading}
-              className="rounded-lg border border-border border-border-secondary border-border-secondary-secondary-secondary px-4 py-2.5 text-sm font-medium text-error dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:text-error dark:dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:border-red-900 disabled:opacity-50"
+              className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-error bg-background hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-950/30 disabled:opacity-50"
             >
               Delete
             </button>
@@ -165,7 +158,7 @@ export default function EditSheetSeedButton({
               type="button"
               onClick={() => setOpen(false)}
               disabled={loading}
-              className="flex-1 rounded-lg border border-border border-border-secondary border-border-secondary-secondary-secondary px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border-secondary-secondary border-border-secondary-secondary-secondary"
+              className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium bg-background hover:bg-fill"
             >
               Cancel
             </button>
@@ -180,13 +173,13 @@ export default function EditSheetSeedButton({
         }
       >
         <div>
-          <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+          <label className="block text-xs font-medium text-foreground-secondary mb-1">
             Event
           </label>
           <select
             value={form.event}
             onChange={(e) => setForm((f) => ({ ...f, event: e.target.value }))}
-            className="w-full rounded-lg border border-border border-border-secondary border-border-secondary-secondary-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary border-border-secondary-secondary-secondary"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
           >
             {!events.includes(form.event) ? <option value={form.event}>{form.event}</option> : null}
             {events.map((ev) => (
@@ -198,7 +191,7 @@ export default function EditSheetSeedButton({
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+          <label className="block text-xs font-medium text-foreground-secondary mb-1">
             Seed time <span className="text-red-500">*</span>
           </label>
           <input
@@ -207,11 +200,11 @@ export default function EditSheetSeedButton({
             placeholder="1:23.45, 58.32, or NT"
             value={form.time}
             onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))}
-            className="w-full rounded-lg border border-border border-border-secondary border-border-secondary-secondary-secondary px-3 py-2 text-sm font-mono bg-background border-border-secondary-secondary border-border-secondary-secondary-secondary"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm font-mono bg-background"
           />
         </div>
 
-        {error && <p className="text-sm text-error dark:text-error">{error}</p>}
+        {error && <p className="text-sm text-error">{error}</p>}
       </Modal>
     </>
   )

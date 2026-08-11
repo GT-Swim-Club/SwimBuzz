@@ -2,10 +2,12 @@ import { prisma } from "@/lib/prisma"
 import {
   buildAthleteLookup,
   findNearMatchAthlete,
+  isAutomaticallyMatched,
+  isPairedPdfName,
   isRejectedPdfName,
   matchAthleteIdFast,
   nameMatchKey,
-  isAutomaticallyMatched,
+  type RosterAthlete,
 } from "@/lib/athlete-match"
 import { assignSwimOccurrences } from "@/lib/swim-dedup"
 import { parseCourse, parseMeetDate, parseSwimStatus, parseSwimTime, normalizeEventName } from "@/lib/swim-parse"
@@ -79,9 +81,9 @@ export type MeetImportSummary = {
   rosterForPairing: RosterPairingOption[]
 }
 
-function collectNameConfirmations(
+export function collectNameConfirmations(
   names: string[],
-  roster: Array<{ id: string; firstName: string; lastName: string; nicknames: string[] }>,
+  roster: RosterAthlete[],
   lookup: ReturnType<typeof buildAthleteLookup>,
   nameMappings: Record<string, string> | null | undefined,
   rejectedNames: string[] | null | undefined
@@ -125,6 +127,9 @@ export async function importMeetResults({
   meetId = null,
   nameMappings = null,
   rejectedNames = null,
+  pairOnly = false,
+  allResults = null,
+  allRelayResults = null,
 }: {
   season: string
   meetName: string
@@ -138,6 +143,11 @@ export async function importMeetResults({
   nameMappings?: Record<string, string> | null
   /** PDF names the coach said are not the suggested roster athlete. */
   rejectedNames?: string[] | null
+  /** When true, only import rows for coach-paired names (re-import after pairing). */
+  pairOnly?: boolean
+  /** Full parsed result set for unmatched-name detection when pairOnly. */
+  allResults?: ParsedMeetResult[] | null
+  allRelayResults?: ParsedRelayResult[] | null
 }): Promise<MeetImportSummary> {
   const roster = await prisma.athlete.findMany({
     where: { seasons: { has: season } },
@@ -149,13 +159,36 @@ export async function importMeetResults({
     roster.map((a) => [a.id, `${a.lastName}, ${a.firstName}`])
   )
 
+  const resultsForConfirm = allResults ?? results
+  const relayResultsForConfirm = allRelayResults ?? relayResults
+
+  const activeResults =
+    pairOnly && nameMappings
+      ? results.filter(
+          (row) =>
+            isPairedPdfName(row.name, nameMappings) &&
+            !isAutomaticallyMatched(row.name, lookup)
+        )
+      : results
+
+  const activeRelayResults =
+    pairOnly && nameMappings
+      ? relayResults.filter((relay) =>
+          (relay.relaySwimmers ?? []).some(
+            (leg) =>
+              isPairedPdfName(leg.name, nameMappings) &&
+              !isAutomaticallyMatched(leg.name, lookup)
+          )
+        )
+      : relayResults
+
   const namesForConfirm: string[] = []
-  for (const row of results) {
+  for (const row of resultsForConfirm) {
     if (isRelayLeadoffSwimTag(row.tags ?? "")) continue
     if (!isRealRelaySwimmerName(row.name)) continue
     namesForConfirm.push(row.name)
   }
-  for (const relay of relayResults) {
+  for (const relay of relayResultsForConfirm) {
     for (const leg of relay.relaySwimmers ?? []) {
       if (isRealRelaySwimmerName(leg.name)) namesForConfirm.push(leg.name)
     }
@@ -187,6 +220,7 @@ export async function importMeetResults({
         where: { id: meetId },
         select: {
           heatSheetSummary: true,
+          finalsHeatSheetSummary: true,
           resultStatusesSummary: true,
           relayResultsSummary: true,
           entriesSheetSummary: true,
@@ -196,7 +230,20 @@ export async function importMeetResults({
   const heatSheetSummary = isSheetSummary(meetRecord?.heatSheetSummary)
     ? meetRecord.heatSheetSummary
     : null
-  const heatSheetLookup = buildHeatSheetLookup(heatSheetSummary)
+  const finalsHeatSheetSummary = isSheetSummary(meetRecord?.finalsHeatSheetSummary)
+    ? meetRecord.finalsHeatSheetSummary
+    : null
+  const heatSheetLookup = buildHeatSheetLookup(
+    heatSheetSummary && finalsHeatSheetSummary
+      ? {
+          ...heatSheetSummary,
+          entries: [
+            ...heatSheetSummary.entries,
+            ...finalsHeatSheetSummary.entries,
+          ],
+        }
+      : heatSheetSummary ?? finalsHeatSheetSummary
+  )
 
   const swims: {
     athleteId: string
@@ -258,7 +305,7 @@ export async function importMeetResults({
     placementRows.push(row)
   }
 
-  for (const row of results) {
+  for (const row of activeResults) {
     // Relay leadoffs are synced from leg-1 relay splits, not individual result rows.
     if (isRelayLeadoffSwimTag(row.tags ?? "")) continue
 
@@ -273,7 +320,7 @@ export async function importMeetResults({
       continue
     }
 
-    if (source === "swimphone" && nameMappings && isAutomaticallyMatched(row.name, lookup)) {
+    if (!pairOnly && source === "swimphone" && nameMappings && isAutomaticallyMatched(row.name, lookup)) {
       continue
     }
 
@@ -405,7 +452,7 @@ export async function importMeetResults({
     }
   }
 
-  const relayEntries = matchRelayResultsToRoster(relayResults, roster, nameMappings).map(
+  const relayEntries = matchRelayResultsToRoster(activeRelayResults, roster, nameMappings).map(
     (entry) => {
       const sheetEntry = heatSheetLookup.get(
         relayTeamKey(
@@ -426,12 +473,14 @@ export async function importMeetResults({
     meetId,
     meetDate,
     course: courseForLeadoffs,
-    relayResults: nameMappings && source === "swimphone"
-      ? relayResults.filter((relay) => {
-          const leg1 = relay.relaySwimmers?.find((s) => s.leg === 1)
-          return !leg1 || !isAutomaticallyMatched(leg1.name, lookup)
-        })
-      : relayResults,
+    relayResults: pairOnly
+      ? activeRelayResults
+      : nameMappings && source === "swimphone"
+        ? relayResults.filter((relay) => {
+            const leg1 = relay.relaySwimmers?.find((s) => s.leg === 1)
+            return !leg1 || !isAutomaticallyMatched(leg1.name, lookup)
+          })
+        : activeRelayResults,
     roster,
     source,
     nameMappings,
@@ -445,7 +494,7 @@ export async function importMeetResults({
     : []
 
   const parsedResultsKeys = new Set(
-    results.map((r) => {
+    activeResults.map((r) => {
       const athleteId = matchAthleteIdFast(r.name, lookup, nameMappings)
       if (!athleteId) return null
       const event = normalizeEventName(r.event)
@@ -453,17 +502,19 @@ export async function importMeetResults({
     }).filter(Boolean)
   )
 
-  const filteredExistingMeta = existingMeta.filter((entry) => {
-    if (!entry.manual) return true
-    const key = resultKey(
-      entry.athleteId,
-      entry.event,
-      !!entry.isRelayLeadoff,
-      entry.relayLeadoffSource,
-      entry.relayLeadoffRound
-    )
-    return parsedResultsKeys.has(key)
-  })
+  const filteredExistingMeta = pairOnly
+    ? existingMeta
+    : existingMeta.filter((entry) => {
+        if (!entry.manual) return true
+        const key = resultKey(
+          entry.athleteId,
+          entry.event,
+          !!entry.isRelayLeadoff,
+          entry.relayLeadoffSource,
+          entry.relayLeadoffRound
+        )
+        return parsedResultsKeys.has(key)
+      })
 
   const metaEntries = mergeMeetResultEntries(
     filteredExistingMeta,
@@ -492,7 +543,6 @@ export async function importMeetResults({
           )
         )
       )
-      // Keep coach roster seeds for teams not present in imported results.
       const leftoverManual = existingRelays.filter((e) => {
         if (e.entryType !== "relay_team" || !e.manual) return false
         const key = relayTeamKey(
@@ -503,8 +553,19 @@ export async function importMeetResults({
         )
         return !importedKeys.has(key)
       })
+      const keptExisting = pairOnly
+        ? existingRelays.filter((e) => {
+            const key = relayTeamKey(
+              e.event,
+              e.relayLetter,
+              effectiveRelayRound(e),
+              e.gender ?? ""
+            )
+            return !importedKeys.has(key)
+          })
+        : []
       meetUpdate.relayResultsSummary = {
-        entries: [...relayEntries, ...leftoverManual],
+        entries: [...keptExisting, ...relayEntries, ...leftoverManual],
       }
     }
     if (metaEntries.length > 0) {
@@ -562,7 +623,7 @@ export async function importMeetResults({
 
   return {
     imported: result.count + leadoffsImported,
-    parsed: results.length,
+    parsed: resultsForConfirm.length,
     matched: swims.length,
     unmatched: unmatched.slice(0, 25),
     unmatchedCount: unmatched.length,

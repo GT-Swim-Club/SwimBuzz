@@ -2,18 +2,23 @@ import Link from "next/link"
 import { formatDateRange } from "@/lib/utils"
 import EditMeetButton from "./EditMeetButton"
 import { type MeetFormState } from "./MeetFields"
+import { meetPath } from "@/lib/slug"
+import MeetCountdown from "@/components/MeetCountdown"
 
 export default function MeetGalleryCard({
   meet,
   upcoming,
   isCoach,
   initial,
+  seasons,
 }: {
   meet: {
     id: string
+    slug: string | null
     name: string
     location: string | null
     startDate: Date
+    startTime: string | null
     endDate: Date | null
     school: string | null
     iconUrl: string | null
@@ -22,10 +27,11 @@ export default function MeetGalleryCard({
   upcoming: boolean
   isCoach: boolean
   initial: MeetFormState
+  seasons: string[]
 }) {
   return (
     <Link
-      href={`/meets/${meet.id}`}
+      href={meetPath(meet.slug ?? meet.id)}
       className="group block rounded-xl overflow-hidden border border-border border-border-secondary-secondary bg-background dark:bg-fill-secondary shadow-sm hover:shadow-md transition-shadow dark:border-border-secondary-secondary"
     >
       <div className="aspect-[2/1] bg-gray-100 dark:bg-fill relative">
@@ -54,8 +60,13 @@ export default function MeetGalleryCard({
           </div>
         )}
         {upcoming && (
-          <span className="absolute top-2 right-2 text-[10px] uppercase font-semibold tracking-wide rounded-full bg-primary/90 text-primary-text px-2 py-0.5 backdrop-blur-sm">
-            Upcoming
+          <span className="absolute top-2 right-2">
+            <MeetCountdown
+              startDate={meet.startDate}
+              startTime={meet.startTime}
+              upcoming
+              className="backdrop-blur-sm"
+            />
           </span>
         )}
       </div>
@@ -80,7 +91,7 @@ export default function MeetGalleryCard({
           </div>
           {isCoach && (
             <div onClick={(e) => e.preventDefault()}>
-              <EditMeetButton meetId={meet.id} initial={initial} />
+              <EditMeetButton meetId={meet.id} initial={initial} seasons={seasons} />
             </div>
           )}
         </div>

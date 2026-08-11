@@ -3,6 +3,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
+import BackLink from "@/components/BackLink"
 
 function formatYear(year: string): string {
   if (year.toLowerCase().includes("phd")) return "PhD"
@@ -22,27 +23,34 @@ import RequestTimesImportButton from "@/components/RequestTimesImportButton"
 import AthleteActions from "./AthleteActions"
 import PendingProfileChangesReview from "@/components/PendingProfileChangesReview"
 import { isStaffUi } from "@/lib/athlete-view-server"
+import { isStaffRole } from "@/lib/auth-roles"
 import { parsePendingProfileChanges } from "@/lib/pending-profile-changes"
+import { athletePath, isCuid } from "@/lib/slug"
+import StatsHighlights from "@/components/StatsHighlights"
+import { computeAthleteHighlights } from "@/lib/athlete-stats"
 
 export default async function AthletePage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params  // 👈 await it
+    const { id: param } = await params
     const session = await getServerSession(authOptions)
     if (!session) redirect("/signin")
 
-    const athlete = await prisma.athlete.findUnique({
-        where: { id },
+    const athlete = await prisma.athlete.findFirst({
+        where: isCuid(param) ? { OR: [{ id: param }, { slug: param }] } : { slug: param },
         include: {
           user: { select: { name: true, email: true, image: true } },
           swims: {
             orderBy: { date: "desc" },
+            include: { meetRef: { select: { slug: true, season: true, name: true } } },
           },
         },
     })
 
     if (!athlete) notFound()
+    if (athlete.slug && param !== athlete.slug) redirect(athletePath(athlete.slug))
 
   const isCoach = await isStaffUi(session.user.role)
   const isOwnProfile = athlete.userId === session.user.id
+  const isStaff = isStaffRole(session.user.role)
   const pending = parsePendingProfileChanges(athlete.pendingProfileChanges)
 
   // group PBs by event
@@ -62,21 +70,41 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
     tags: swim.tags ?? "",
     meet: swim.meet ?? "",
     meetId: swim.meetId ?? null,
+    meetSlug: swim.meetRef?.slug ?? null,
     date: swim.date.toISOString(),
     source: swim.source,
   }))
+
+  const athleteHighlights = computeAthleteHighlights(
+    athlete.swims.map((swim) => ({
+      id: swim.id,
+      event: swim.event,
+      course: swim.course,
+      timeMs: swim.timeMs,
+      place: swim.place,
+      date: swim.date,
+      meetId: swim.meetId ?? null,
+      meetRef: swim.meetRef
+        ? {
+            slug: swim.meetRef.slug,
+            season: swim.meetRef.season,
+            name: swim.meetRef.name,
+          }
+        : null,
+    })),
+    athlete.seasons
+  )
 
   const rosterHref = "/athletes?gender=all"
 
   return (
     <main className="mx-auto max-w-4xl space-y-8">
       <div>
-        <Link
-          href={rosterHref}
+        <BackLink
+          fallbackHref={rosterHref}
+          fallbackLabel="Roster"
           className="text-xs text-foreground-tertiary hover:text-foreground"
-        >
-          ← Roster
-        </Link>
+        />
         <div className="mt-2 flex flex-wrap items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3 sm:gap-4">
             <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-primary/10 font-medium text-primary">
@@ -118,10 +146,22 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
                 )}
               </h1>
               <p className="truncate text-sm text-foreground-secondary">{athlete.user?.email}</p>
-              {isCoach && athlete.gtid && <p className="mt-0.5 text-xs text-foreground-tertiary">GTID: {athlete.gtid}</p>}
-              {isCoach && athlete.dob && <p className="mt-0.5 text-xs text-foreground-tertiary">DOB: {athlete.dob.toLocaleDateString()}</p>}
-              {athlete.year && <p className="mt-0.5 text-xs text-foreground-tertiary">{formatYear(athlete.year)}</p>}
-              {athlete.swimCloudId && (
+              {athlete.year && (
+                <p className="mt-0.5 text-xs text-foreground-tertiary">
+                  {formatYear(athlete.year)}
+                </p>
+              )}
+              {(isStaff || isOwnProfile) && athlete.gtid && (
+                <p className="mt-0.5 text-xs text-foreground-tertiary">
+                  GTID: {athlete.gtid}
+                </p>
+              )}
+              {(isStaff || isOwnProfile) && athlete.dob && (
+                <p className="mt-0.5 text-xs text-foreground-tertiary">
+                  DOB: {athlete.dob.toLocaleDateString()}
+                </p>
+              )}
+              {(isStaff || isOwnProfile) && athlete.swimCloudId && (
                 <p className="mt-0.5 text-xs text-foreground-tertiary">
                   SwimCloud ID: {athlete.swimCloudId}
                 </p>
@@ -174,6 +214,14 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
         />
       )}
 
+      {athleteHighlights && (
+        <StatsHighlights
+          title={`${athleteHighlights.season} highlights`}
+          counters={athleteHighlights.counters}
+          spotlight={athleteHighlights.spotlight}
+        />
+      )}
+
       {/* PB grid */}
       <section>
         <h2 className="text-sm font-medium text-foreground-secondary uppercase tracking-wide mb-4">
@@ -183,12 +231,7 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
       </section>
 
       {/* Swim history */}
-      <section>
-        <h2 className="text-sm font-medium text-foreground-secondary uppercase tracking-wide mb-3">
-          History
-        </h2>
-        <SwimHistory swims={historySwims} isCoach={isCoach} />
-      </section>
+      <SwimHistory swims={historySwims} isCoach={isCoach} />
       
       {isCoach && (
         <AddSwimForm

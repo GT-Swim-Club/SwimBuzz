@@ -7,6 +7,8 @@ import { countMeetAthletes } from "@/lib/meet-sheet-summary"
 import MeetGalleryCard from "./MeetGalleryCard"
 import EditMeetButton from "./EditMeetButton"
 import { type MeetFormState } from "./MeetFields"
+import { meetPath } from "@/lib/slug"
+import MeetCountdown from "@/components/MeetCountdown"
 
 function toDateInput(d: Date | null | undefined): string {
   if (!d) return ""
@@ -63,6 +65,7 @@ export default function MeetsClientWrapper({
                     const athleteCount = countMeetAthletes({
                       psychSheetSummary: m.psychSheetSummary,
                       heatSheetSummary: m.heatSheetSummary,
+                      finalsHeatSheetSummary: m.finalsHeatSheetSummary,
                       entriesSheetSummary: m.entriesSheetSummary,
                       relayResultsSummary: m.relayResultsSummary,
                       resultStatusesSummary: m.resultStatusesSummary,
@@ -72,6 +75,7 @@ export default function MeetsClientWrapper({
                       name: m.name,
                       location: m.location ?? "",
                       startDate: toDateInput(m.startDate),
+                      startTime: m.startTime ?? "",
                       endDate: toDateInput(m.endDate),
                       course: m.course,
                       season: m.season,
@@ -85,7 +89,7 @@ export default function MeetsClientWrapper({
                     }
                     return (
                       <div key={m.id} className="flex items-center gap-4 px-4 py-3 dark:hover:bg-zinc-800 hover:dark:bg-background bg-background transition-colors">
-                        <Link href={`/meets/${m.id}`} className="flex-1 flex items-center gap-4 min-w-0">
+                        <Link href={meetPath(m.slug ?? m.id)} className="flex-1 flex items-center gap-4 min-w-0">
                           {m.iconUrl && (
                             <img
                               src={m.iconUrl}
@@ -99,9 +103,11 @@ export default function MeetsClientWrapper({
                                 {m.name}
                               </p>
                               {upcoming && (
-                                <span className="text-[10px] uppercase font-semibold tracking-wide rounded-full bg-primary/90 text-primary-text px-2 py-0.5">
-                                  Upcoming
-                                </span>
+                                <MeetCountdown
+                                  startDate={m.startDate}
+                                  startTime={m.startTime}
+                                  upcoming
+                                />
                               )}
                             </div>
                             <p className="text-xs text-foreground-secondary">
@@ -120,7 +126,7 @@ export default function MeetsClientWrapper({
                               {athleteCount} athlete{athleteCount === 1 ? "" : "s"}
                             </p>
                           </div>
-                          {isCoach && <EditMeetButton meetId={m.id} initial={initial} />}
+                          {isCoach && <EditMeetButton meetId={m.id} initial={initial} seasons={seasons} />}
                         </div>
                       </div>
                     )
@@ -135,6 +141,7 @@ export default function MeetsClientWrapper({
                       name: m.name,
                       location: m.location ?? "",
                       startDate: toDateInput(m.startDate),
+                      startTime: m.startTime ?? "",
                       endDate: toDateInput(m.endDate),
                       course: m.course,
                       season: m.season,
@@ -147,7 +154,7 @@ export default function MeetsClientWrapper({
                       resultsUrl: m.resultsUrl ?? "",
                     }
                     return (
-                      <MeetGalleryCard key={m.id} meet={m} upcoming={upcoming} isCoach={isCoach} initial={initial} />
+                      <MeetGalleryCard key={m.id} meet={m} upcoming={upcoming} isCoach={isCoach} initial={initial} seasons={seasons} />
                     )
                   })}
                 </div>

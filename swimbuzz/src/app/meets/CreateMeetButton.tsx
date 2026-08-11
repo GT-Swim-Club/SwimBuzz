@@ -4,8 +4,9 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import MeetFields, { emptyMeetForm, type MeetFormState } from "./MeetFields"
 import Modal, { ModalFooter } from "@/components/Modal"
+import { meetPath } from "@/lib/slug"
 
-export default function CreateMeetButton() {
+export default function CreateMeetButton({ seasons }: { seasons: string[] }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -34,7 +35,7 @@ export default function CreateMeetButton() {
         return
       }
       setOpen(false)
-      router.push(`/meets/${data.id}`)
+      router.push(meetPath(data.slug ?? data.id))
     } catch {
       setError("Something went wrong")
     } finally {
@@ -92,7 +93,7 @@ export default function CreateMeetButton() {
           </ModalFooter>
         }
       >
-        <MeetFields form={form} setForm={setForm} />
+        <MeetFields form={form} setForm={setForm} initialSeasons={seasons} />
         {error && <p className="text-sm text-error dark:text-error">{error}</p>}
       </Modal>
     </>

@@ -13,6 +13,7 @@ import {
   hasSwimResultData,
   inferResultHeatTotals,
   isTimedFinalsEntry,
+  isTimedFinalsRound,
   mergeMeetResultEntries,
   mergeSheetSummaries,
   relayLeadoffsFromSplits,
@@ -21,6 +22,7 @@ import {
 import { compareRelayEvents, compareSwimEvents, normalizeEventName } from "@/lib/swim-parse"
 import {
   eventNumberForGender,
+  isRosterOnlySheetEntry,
   type MeetSignupEventOption,
 } from "@/lib/meet-signup"
 import {
@@ -35,13 +37,21 @@ import {
 import type { SheetEntry } from "@/lib/meet-sheet-summary"
 import EditMeetSwimButton from "./EditMeetSwimButton"
 import EditSheetSeedButton from "./EditSheetSeedButton"
+import RemoveRosterOnlyButton from "./RemoveRosterOnlyButton"
 import IndividualSummaryRow from "./IndividualSummaryRow"
+import type { ResultRoundSection } from "./IndividualSplitsModal"
 import RelaySummaryRow from "./RelaySummaryRow"
 import SummaryRowLayout from "@/components/SummaryRowLayout"
 import { displayMeetResultTags } from "@/lib/swim-tags"
 import { formatDisplayTime, formatSeedTimeDelta, podiumPlaceClass, parseTime } from "@/lib/utils"
+import { athletePath } from "@/lib/slug"
 
 function formatHeat(entry: SheetSummary["entries"][number]) {
+  // Alternates are finals-only; prelim rows may still carry the flag from merge.
+  if (entry.alternate && entry.resultRound !== "P") {
+    const rank = entry.seedRank
+    return rank != null ? `Alt ${rank}` : "Alt"
+  }
   let heat = entry.heat
   let heatTotal = entry.heatTotal
   if (entry.entryType === "relay_team") {
@@ -72,12 +82,14 @@ function formatHeat(entry: SheetSummary["entries"][number]) {
 }
 
 function individualLane(entry: SheetSummary["entries"][number]): number | undefined {
+  if (entry.alternate) return undefined
   if (entry.resultRound === "F") return entry.finalLane ?? entry.lane
   if (entry.resultRound === "P") return entry.prelimLane ?? entry.lane
   return entry.lane ?? entry.finalLane ?? entry.prelimLane
 }
 
 function relayLane(entry: SheetSummary["entries"][number]): number | undefined {
+  if (entry.alternate) return undefined
   if (entry.entryType !== "relay_team") return entry.lane
   const round = effectiveRelayRound(entry)
   if (round === "F") return entry.finalLane ?? entry.lane
@@ -166,13 +178,23 @@ function formatSeedTime(time: string, rank?: number): ReactNode {
 }
 
 function formatSeed(entry: SheetSummary["entries"][number]) {
-  const hideSeedTime = entry.resultRound === "F"
-  const seedValue = entry.seedTime || entry.timeStatus
-  const showTime = seedValue && !hideSeedTime
-  if (showTime && entry.seedRank != null) {
-    return `Seed ${formatDisplayTime(seedValue!)} #${entry.seedRank}`
+  // Finals result rows omit seed in details (prelims row / seed delta cover it).
+  // Finals heat-sheet rows still show the prelims time used as seed.
+  if (
+    entry.resultRound === "F" &&
+    (entry.finalTime || (entry.resultTime && !entry.prelimTime))
+  ) {
+    return null
   }
-  if (showTime) return `Seed ${formatDisplayTime(seedValue!)}`
+  // Finals seed is the prelims time; prelims seed is the entry/psych time.
+  const seedValue =
+    entry.resultRound === "F"
+      ? entry.prelimTime || entry.seedTime || entry.timeStatus
+      : entry.seedTime || entry.timeStatus
+  if (seedValue && entry.seedRank != null) {
+    return `Seed ${formatDisplayTime(seedValue)} #${entry.seedRank}`
+  }
+  if (seedValue) return `Seed ${formatDisplayTime(seedValue)}`
   if (entry.seedRank != null) return `Seed #${entry.seedRank}`
   return null
 }
@@ -182,9 +204,11 @@ function hasRelayResultData(entry: SheetSummary["entries"][number]) {
 }
 
 function formatRelaySeedDetail(entry: SheetSummary["entries"][number]): string | null {
-  const hideSeedTime = effectiveRelayRound(entry) === "F"
-  const seedValue = entry.seedTime || entry.timeStatus
-  const showTime = seedValue && !hideSeedTime
+  const round = effectiveRelayRound(entry)
+  const hasFinalsResult =
+    round === "F" && Boolean(entry.finalTime || entry.resultTime)
+  const seedValue = entry.seedTime || entry.prelimTime || entry.timeStatus
+  const showTime = seedValue && !hasFinalsResult
   if (showTime && entry.seedRank != null) {
     return `Seed ${formatDisplayTime(seedValue!)} #${entry.seedRank}`
   }
@@ -195,6 +219,24 @@ function formatRelaySeedDetail(entry: SheetSummary["entries"][number]): string |
 
 function formatPlacement(entry: SheetSummary["entries"][number], skipRelayLabel = false, hasResults: boolean) {
   const parts: string[] = []
+
+  const roundLabel =
+    entry.entryType === "relay_team"
+      ? effectiveRelayRound(entry) === "P"
+        ? "Prelims"
+        : effectiveRelayRound(entry) === "F"
+          ? "Finals"
+          : isTimedFinalsRound(entry.round)
+            ? "Timed Finals"
+            : null
+      : entry.resultRound === "P"
+        ? "Prelims"
+        : entry.resultRound === "F"
+          ? "Finals"
+          : isTimedFinalsRound(entry.round)
+            ? "Timed Finals"
+            : null
+  if (roundLabel) parts.push(roundLabel)
 
   if (entry.entryType === "relay_team") {
     if (!skipRelayLabel) {
@@ -309,7 +351,10 @@ function formatRelayTeamTime(entry: SheetSummary["entries"][number]): ReactNode 
   const round = effectiveRelayRound(entry)
   const time = relayTeamTime(entry)
   const place = relayTeamPlace(entry)
-  const seed = entry.seedTime || (entry.timeStatus === "NT" ? "NT" : undefined)
+  const seed =
+    entry.seedTime ||
+    entry.prelimTime ||
+    (entry.timeStatus === "NT" ? "NT" : undefined)
 
   if (round === "P" && time) return formatRoundTime("Prelims", time, place, seed)
   if (round === "F" && time) return formatRoundTime("Finals", time, place, seed)
@@ -317,6 +362,26 @@ function formatRelayTeamTime(entry: SheetSummary["entries"][number]): ReactNode 
     return isTimedFinalsEntry(entry)
       ? formatTimedResult(time, place, seed)
       : formatRoundTime("Finals", time, place, seed)
+  }
+  if (round === "P") {
+    return seed ? formatSeedTime(seed, entry.seedRank) : (
+      <span className="inline-flex items-baseline gap-1">
+        <span className="text-[11px] font-sans font-normal text-foreground-tertiary dark:text-foreground-tertiary">
+          Prelims
+        </span>
+        <span className="font-mono">—</span>
+      </span>
+    )
+  }
+  if (round === "F") {
+    return seed ? formatSeedTime(seed, entry.seedRank) : (
+      <span className="inline-flex items-baseline gap-1">
+        <span className="text-[11px] font-sans font-normal text-foreground-tertiary dark:text-foreground-tertiary">
+          Finals
+        </span>
+        <span className="font-mono">—</span>
+      </span>
+    )
   }
   if (seed) return formatSeedTime(seed, entry.seedRank)
   if (entry.timeStatus) return entry.timeStatus
@@ -327,10 +392,11 @@ function formatIndividualResult(
   entry: SheetSummary["entries"][number],
   allEntries?: SummaryEntry[]
 ): ReactNode {
-  const seed = entry.seedTime || (entry.timeStatus === "NT" ? "NT" : undefined)
   const timedOpts = allEntries ? { allEntries } : undefined
 
   if (entry.resultRound === "P") {
+    const seed =
+      entry.seedTime || (entry.timeStatus === "NT" ? "NT" : undefined)
     return (
       formatRoundResult(
         "Prelims",
@@ -339,11 +405,25 @@ function formatIndividualResult(
         entry.prelimPlace,
         seed
       ) ??
-      (seed ? formatSeedTime(seed, entry.seedRank) : "—")
+      (seed ? (
+        formatSeedTime(seed, entry.seedRank)
+      ) : (
+        <span className="inline-flex items-baseline gap-1">
+          <span className="text-[11px] font-sans font-normal text-foreground-tertiary dark:text-foreground-tertiary">
+            Prelims
+          </span>
+          <span className="font-mono">—</span>
+        </span>
+      ))
     )
   }
 
   if (entry.resultRound === "F") {
+    // Finals seed = prelims time from results or finals heat sheet, not psych seed.
+    const seed =
+      entry.prelimTime ||
+      entry.seedTime ||
+      (entry.timeStatus === "NT" ? "NT" : undefined)
     if (isTimedFinalsEntry(entry, timedOpts)) {
       const time = entry.finalTime ?? entry.resultTime
       const status =
@@ -367,9 +447,24 @@ function formatIndividualResult(
         finalStatus,
         entry.finalPlace,
         seed
-      ) ?? "—"
+      ) ??
+      (seed ? (
+        formatSeedTime(seed, entry.seedRank)
+      ) : (
+        <span className="inline-flex items-baseline gap-1">
+          <span className="text-[11px] font-sans font-normal text-foreground-tertiary dark:text-foreground-tertiary">
+            Finals
+          </span>
+          <span className="font-mono">—</span>
+        </span>
+      ))
     )
   }
+
+  const seed =
+    entry.seedTime ||
+    entry.prelimTime ||
+    (entry.timeStatus === "NT" ? "NT" : undefined)
 
   const prelim = formatRoundResult(
     "Prelims",
@@ -421,7 +516,101 @@ function formatIndividualResult(
 function getRawTime(entry: SheetEntry): string | undefined {
   if (entry.isRelayLeadoff && entry.relayLeadoffTime) return entry.relayLeadoffTime
   if (entry.entryType === "relay_team") return relayTeamTime(entry) ?? undefined
+  if (entry.resultRound === "P") {
+    return entry.prelimTime ?? entry.resultTime ?? undefined
+  }
+  if (entry.resultRound === "F") {
+    return entry.finalTime ?? entry.resultTime ?? undefined
+  }
   return entry.resultTime ?? entry.finalTime ?? entry.prelimTime ?? undefined
+}
+
+function formatHeatNumber(heat: string | null): string | undefined {
+  return heat?.replace(/^Heat\s+/i, "") || undefined
+}
+
+function buildIndividualRoundSections(
+  entry: SheetEntry,
+  allEntries?: SummaryEntry[]
+): ResultRoundSection[] {
+  if (entry.entryType === "relay_team" || entry.isRelayLeadoff) return []
+
+  const timedOpts = { allEntries }
+  const sections: ResultRoundSection[] = []
+  const hasPrelim = Boolean(entry.prelimTime || entry.prelimStatus)
+  const hasFinal = Boolean(
+    entry.finalTime || (entry.finalStatus && entry.finalStatus !== "NS")
+  )
+
+  if (hasPrelim) {
+    const prelimHeat =
+      entry.prelimHeat != null && entry.prelimHeat > 0
+        ? entry.prelimHeatTotal != null
+          ? `${entry.prelimHeat} of ${entry.prelimHeatTotal}`
+          : String(entry.prelimHeat)
+        : entry.resultRound === "P"
+          ? formatHeatNumber(formatHeat(entry))
+          : undefined
+    sections.push({
+      label: "Prelims",
+      time: entry.prelimTime,
+      place: entry.prelimPlace,
+      status: entry.prelimStatus,
+      heat: prelimHeat,
+      lane:
+        entry.prelimLane ??
+        (entry.resultRound === "P" ? individualLane(entry) : undefined),
+      splits: entry.prelimSplits ?? (entry.resultRound === "P" ? entry.splits : undefined) ?? [],
+      seedTime: entry.seedTime,
+      seedRank: entry.seedRank,
+    })
+  }
+
+  if (hasFinal) {
+    const finalLabel = isTimedFinalsEntry(entry, timedOpts) ? "Timed Finals" : "Finals"
+    const finalHeat =
+      entry.finalHeat != null && entry.finalHeat > 0
+        ? entry.finalHeatTotal != null
+          ? `${entry.finalHeat} of ${entry.finalHeatTotal}`
+          : String(entry.finalHeat)
+        : entry.resultRound === "F"
+          ? formatHeatNumber(formatHeat(entry))
+          : undefined
+    sections.push({
+      label: finalLabel,
+      time: entry.finalTime,
+      place: entry.finalPlace,
+      status:
+        entry.finalStatus === "NS" ? undefined : entry.finalStatus,
+      heat: finalHeat,
+      lane:
+        entry.finalLane ??
+        (entry.resultRound === "F" ? individualLane(entry) : undefined),
+      splits: entry.finalSplits ?? (entry.resultRound === "F" ? entry.splits : undefined) ?? [],
+      seedTime: hasPrelim ? undefined : entry.seedTime,
+      seedRank: hasPrelim ? undefined : entry.seedRank,
+    })
+  }
+
+  if (
+    sections.length === 0 &&
+    (entry.resultTime || entry.resultStatus || entryDisplaySplits(entry).length > 0)
+  ) {
+    const timed = isTimedFinalsEntry(entry, timedOpts)
+    sections.push({
+      label: timed ? "Timed Finals" : "Result",
+      time: entry.resultTime,
+      place: entry.resultPlace,
+      status: entry.resultStatus,
+      heat: formatHeatNumber(formatHeat(entry)),
+      lane: individualLane(entry),
+      splits: entryDisplaySplits(entry),
+      seedTime: entry.seedTime,
+      seedRank: entry.seedRank,
+    })
+  }
+
+  return sections
 }
 
 function formatTime(
@@ -573,7 +762,7 @@ function SummaryEntryRow({
   canEdit?: boolean
   meetId?: string
   meetName?: string
-  athletes?: Array<{ id: string; name: string; image?: string | null }>
+  athletes?: Array<{ id: string; slug?: string | null; name: string; image?: string | null }>
   athleteGenders?: Map<string, "M" | "F">
   eventLabel?: string
   showAthleteInfo?: boolean
@@ -596,14 +785,17 @@ function SummaryEntryRow({
     .filter(Boolean)
     .join(" · ")
   
+  const athleteRecord = athletes?.find((a) => a.id === entry.athleteId)
   const athleteAvatar = showAthleteInfo && entry.entryType !== "relay_team" ? (
-      <AthleteAvatar image={athletes?.find(a => a.id === entry.athleteId)?.image} name={entry.athleteName} />
+      <AthleteAvatar image={athleteRecord?.image} name={entry.athleteName} />
   ) : null;
 
   const eventName = eventLabel ??
-      (entry.entryType === "relay_team"
-        ? formatRelayEventLabel(entry, athleteGenders)
-        : entry.event);
+      (entry.rosterOnly
+        ? "Attending"
+        : entry.entryType === "relay_team"
+          ? formatRelayEventLabel(entry, athleteGenders)
+          : entry.event);
 
   const eventWithNum = withEventNumber(
     (entry.entryType === "relay_team" && eventLabel && !forceEventNumber) ? null : resolveDisplayEventNumber(entry, athleteGenders, eventNumberOptions),
@@ -633,7 +825,13 @@ function SummaryEntryRow({
 
   const editButton =
     canEdit && meetId ? (
-      entry.manual &&
+      isRosterOnlySheetEntry(entry) ? (
+        <RemoveRosterOnlyButton
+          meetId={meetId}
+          athleteId={entry.athleteId}
+          athleteName={entry.athleteName}
+        />
+      ) : entry.manual &&
       !entry.isRelayLeadoff &&
       entry.swimId &&
       entry.course &&
@@ -710,21 +908,25 @@ function SummaryEntryRow({
 
   const podiumPlace = finalsPodiumPlace(entry)
   const splits = entryDisplaySplits(entry)
+  const roundSections = buildIndividualRoundSections(entry, allEntries)
+  const hasBothRounds = roundSections.length > 1
   const roundSuffix =
-    entry.resultRound === "P"
-      ? " · Prelims"
-      : entry.resultRound === "F"
-        ? " · Finals"
-        : hasSwimResultData(entry)
-          ? isTimedFinalsEntry(entry, { allEntries })
-            ? " · Timed Finals"
+    hasBothRounds
+      ? ""
+      : entry.resultRound === "P"
+        ? " · Prelims"
+        : entry.resultRound === "F"
+          ? " · Finals"
+          : hasSwimResultData(entry)
+            ? isTimedFinalsEntry(entry, { allEntries })
+              ? " · Timed Finals"
+              : ""
             : ""
-          : ""
   const detailTitle = `${withEventNumber(
     resolveDisplayEventNumber(entry, athleteGenders, eventNumberOptions),
     eventName
   )}${roundSuffix}`
-  const timeDisplay = formatTime(entry, allEntries)
+  const timeDisplay = entry.rosterOnly ? "—" : formatTime(entry, allEntries)
   const rowId = entry.swimId ? `swim-${entry.swimId}` : undefined
 
   return (
@@ -733,6 +935,7 @@ function SummaryEntryRow({
         label={label}
         athleteName={entry.athleteName}
         athleteId={entry.athleteId}
+        athleteSlug={athleteRecord?.slug}
         details={details || undefined}
         timeDisplay={timeDisplay}
         detailTitle={detailTitle}
@@ -740,6 +943,7 @@ function SummaryEntryRow({
         splits={splits}
         editButton={editButton}
         swimInfo={swimInfo}
+        rounds={roundSections.length > 0 ? roundSections : undefined}
       />
   )
 }
@@ -747,6 +951,7 @@ function SummaryEntryRow({
 export default function MeetSheetSummarySection({
   psychSummary,
   heatSummary,
+  finalsHeatSummary,
   entriesSummary,
   results,
   relayResults,
@@ -762,13 +967,14 @@ export default function MeetSheetSummarySection({
 }: {
   psychSummary?: SheetSummary | null
   heatSummary?: SheetSummary | null
+  finalsHeatSummary?: SheetSummary | null
   entriesSummary?: SheetSummary | null
   results?: MeetResultEntry[] | null
   relayResults?: SheetSummary["entries"] | null
   headerAction?: ReactNode
   meetId?: string
   meetName?: string
-  athletes?: Array<{ id: string; name: string; gender?: "M" | "F"; image?: string | null }>
+  athletes?: Array<{ id: string; slug?: string | null; name: string; gender?: "M" | "F"; image?: string | null }>
   canEdit?: boolean
   /** Linked roster athlete for the signed-in user — their rows pin to the top. */
   viewerAthleteId?: string | null
@@ -800,7 +1006,8 @@ export default function MeetSheetSummarySection({
     heatSummary,
     leadoffResults,
     relayResults,
-    entriesSummary
+    entriesSummary,
+    finalsHeatSummary
   )
   const relays = summary ? uniqueRelayTeams(summary.entries, athleteGenders) : []
   const womenRelays = relays.filter(
@@ -957,7 +1164,7 @@ export default function MeetSheetSummarySection({
   return (
     <section>
       <div className="flex items-center justify-between gap-3 mb-3">
-        <h2 className="text-sm font-medium text-foreground-secondary text-foreground-secondary uppercase tracking-wide">
+        <h2 className="text-sm font-medium text-foreground-secondary uppercase tracking-wide">
           Roster Summary
         </h2>
         {headerAction}
@@ -968,7 +1175,7 @@ export default function MeetSheetSummarySection({
           placeholder="Search athletes or events..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"
+          className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
         />
         <button
           onClick={() => setViewByEvent(!viewByEvent)}
@@ -978,7 +1185,7 @@ export default function MeetSheetSummarySection({
         </button>
       </div>
       {!hasContent ? (
-        <div className="border border-border border-border-secondary rounded-xl px-4 py-10 text-center text-sm text-foreground-secondary text-foreground-secondary bg-background bg-background">
+        <div className="border border-border rounded-xl px-4 py-10 text-center text-sm text-foreground-secondary bg-background">
           No entries yet.
         </div>
       ) : (
@@ -988,10 +1195,10 @@ export default function MeetSheetSummarySection({
             {sortedEventHeaders.map((group) => {
               return (
               <div key={group.header} className="mb-4 border border-border-secondary rounded-xl overflow-hidden bg-background">
-                <div className="px-4 py-2.5 text-sm font-medium text-foreground-primary bg-background/50">
+                <div className="px-4 py-2.5 text-sm font-medium text-foreground bg-background/50 border-b border-border">
                   {group.header}
                 </div>
-                <ul className="divide-y dark:divide-zinc-800">
+                <ul className="divide-y divide-border">
                   {group.entries.sort((a, b) => compareByPlace(a, b, hasImportedResults)).map((entry, j) => (
                       <SummaryEntryRow
                           key={`event-${entryRowKey(entry, j, athleteGenders)}`}
@@ -1019,17 +1226,17 @@ export default function MeetSheetSummarySection({
         {!viewByEvent && (
           <>
             {filteredMyEntries.length > 0 ? (
-              <div key="my-entries" className="rounded-xl overflow-hidden border border-border-secondary border-primary bg-primary/5 shadow-sm">
-                <div className="group flex items-center gap-2 px-4 py-2 text-sm font-medium border-b dark:border-zinc-800 text-[var(--brand-color-primary-active)] dark:text-[var(--brand-color-primary-hover)]">
+              <div key="my-entries" className="rounded-xl overflow-hidden border border-primary bg-background shadow-sm">
+                <div className="flex items-center gap-2 px-4 py-2 text-sm font-medium border-b border-border text-primary-active dark:text-primary-hover">
                   <AthleteAvatar 
                     image={athletes.find(a => a.id === viewerAthleteId)?.image} 
                     name={athleteNames.get(viewerAthleteId!) || "My Profile"}
                   />
-                  <span className="group-hover:text-[var(--brand-color-primary-active)]">
+                  <span>
                     {athleteNames.get(viewerAthleteId!)}
                   </span>
                 </div>
-                <ul className="divide-y dark:divide-zinc-800">
+                <ul className="divide-y divide-border">
                   {filteredMyEntries.map((entry, i) => (
                     <SummaryEntryRow
                       key={`mine-${entryRowKey(entry, i, athleteGenders)}`}
@@ -1052,11 +1259,11 @@ export default function MeetSheetSummarySection({
               </div>
             ) : null}
             {filteredRelays.length > 0 ? (
-              <div key="relays" className="border border-border border-border-secondary rounded-xl overflow-hidden bg-background bg-background">
-                <div className="px-4 py-2.5 text-sm font-medium border-b dark:border-zinc-800 text-foreground-primary">
+              <div key="relays" className="border border-border rounded-xl overflow-hidden bg-background">
+                <div className="px-4 py-2.5 text-sm font-medium border-b border-border text-foreground">
                   Relays
                 </div>
-                <ul className="divide-y dark:divide-zinc-800">
+                <ul className="divide-y divide-border">
                   {renderRelayGroup("Women's", filteredRelays.filter(
                     (e) => effectiveRelayGender(e, athleteGenders) === "F"
                   ), "womens")}
@@ -1093,18 +1300,18 @@ export default function MeetSheetSummarySection({
               return (
                 <div
                   key={athleteGroup.name}
-                  className="border border-border border-border-secondary rounded-xl overflow-hidden bg-background bg-background"
+                  className="border border-border rounded-xl overflow-hidden bg-background"
                 >
                   <Link
-                    href={`/athletes/${athleteGroup.entries[0]?.athleteId}`}
-                    className="group flex items-center gap-2 block px-4 py-2 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary transition-colors border-b dark:border-zinc-800"
+                    href={athletePath(athleteData?.slug ?? athleteGroup.entries[0]?.athleteId ?? "")}
+                    className="group flex items-center gap-2 block px-4 py-2 text-sm font-medium border-b border-border"
                   >
                     <AthleteAvatar image={athleteData?.image} name={athleteGroup.name} />
-                    <span className="group-hover:text-[var(--brand-color-primary-active)]">
+                    <span className="group-hover:text-primary transition-colors">
                       {athleteGroup.name}
                     </span>
                   </Link>
-                  <ul className="divide-y dark:divide-zinc-800">
+                  <ul className="divide-y divide-border">
                     {events.map((entry, i) => (
                       <SummaryEntryRow
                         key={`${athleteGroup.entries[0]?.athleteId}-${entryRowKey(entry, i, athleteGenders)}`}

@@ -1,5 +1,6 @@
 import { Course, Gender, Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
+import { cache } from "react"
 import {
   canonicalizeStrokeEvent,
   compareRelayEvents,
@@ -42,12 +43,15 @@ export type QualifierRow = {
   cut: string
   course: Course
   meetId: string | null
+  meetSlug: string | null
   meetName: string
   date: string
+  id: string
 }
 
 export type QualifierAthlete = {
   athleteId: string
+  athleteSlug: string | null
   firstName: string
   lastName: string
   nicknames: string[]
@@ -189,8 +193,13 @@ export async function saveNationalsStandards(opts: {
 /**
  * Athletes on the season roster whose best swim (from meets in that season)
  * is at or under the Nationals cut for an individual event.
+ *
+ * Wrapped with React `cache()` so repeated calls with the same arguments
+ * within the same server-render are deduplicated. This is especially important
+ * on the Qualifiers page where the search param (`q`) changes on every
+ * keystroke but the underlying DB computation (season + gender) stays the same.
  */
-export async function computeNationalsQualifiers(opts: {
+export const computeNationalsQualifiers = cache(async function computeNationalsQualifiers(opts: {
   season: string
   course?: Course
   gender?: Gender | null
@@ -255,7 +264,7 @@ export async function computeNationalsQualifiers(opts: {
       seasons: { has: opts.season },
       ...(opts.gender ? { gender: opts.gender } : {}),
     },
-    select: { id: true, firstName: true, lastName: true, nicknames: true, gender: true },
+    select: { id: true, slug: true, firstName: true, lastName: true, nicknames: true, gender: true },
   })
   if (athletes.length === 0 || cuts.length === 0) {
     return {
@@ -293,7 +302,8 @@ export async function computeNationalsQualifiers(opts: {
       date: true,
       meetId: true,
       meet: true,
-      meetRef: { select: { id: true, name: true } },
+      id: true,
+      meetRef: { select: { id: true, name: true, slug: true } },
     },
     orderBy: { timeMs: "asc" },
   })
@@ -303,7 +313,9 @@ export async function computeNationalsQualifiers(opts: {
     timeMs: number
     date: Date
     meetId: string | null
+    meetSlug: string | null
     meetName: string
+    id: string
   }
   const bestByAthleteEvent = new Map<string, Best>()
 
@@ -323,7 +335,9 @@ export async function computeNationalsQualifiers(opts: {
       timeMs: swim.timeMs,
       date: swim.date,
       meetId: swim.meetRef?.id ?? swim.meetId,
+      meetSlug: swim.meetRef?.slug ?? null,
       meetName: swim.meetRef?.name || swim.meet || "Meet",
+      id: swim.id,
     })
   }
 
@@ -349,8 +363,10 @@ export async function computeNationalsQualifiers(opts: {
       cut: formatDisplayTime(formatTime(cut.timeMs)),
       course: set.course,
       meetId: best.meetId,
+      meetSlug: best.meetSlug,
       meetName: best.meetName,
       date: formatSwimDate(best.date),
+      id: best.id,
     }
 
     eventsQualified.add(cut.event)
@@ -358,6 +374,7 @@ export async function computeNationalsQualifiers(opts: {
     if (!group) {
       group = {
         athleteId: athlete.id,
+        athleteSlug: athlete.slug,
         firstName: athlete.firstName,
         lastName: athlete.lastName,
         nicknames: athlete.nicknames,
@@ -396,6 +413,6 @@ export async function computeNationalsQualifiers(opts: {
     eventCount: eventsQualified.size,
     standards,
   }
-}
+})
 
 export { parseCourse as parseNationalsCourse }

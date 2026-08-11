@@ -3,10 +3,16 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { importMeetResults, resolveMeetDate } from "@/lib/meet-import"
 import { normalizeNameMappings, normalizeRejectedNames } from "@/lib/athlete-match"
-import { parseMeetPdf, LOCAL_BRIDGE_HINT } from "@/lib/scraper-or-bridge"
+import {
+  assertDocTypeMatches,
+  assertMeetNameMatches,
+  MeetImportValidationError,
+} from "@/lib/meet-import-validate"
+import { parseMeetPdf, LOCAL_SCRAPER_HINT } from "@/lib/scraper-proxy"
 import { prisma } from "@/lib/prisma"
 import { isStoredMeetFileUrl } from "@/lib/meet-files"
 import { deleteStoredMeetFile, uploadMeetFile } from "@/lib/meet-storage"
+import { notifyMeetRosterOfInfoDrops } from "@/lib/meet-roster-notify"
 import { parseSeason } from "@/lib/season"
 import { coerceParsedRelayResults } from "@/lib/relay-results"
 
@@ -49,43 +55,59 @@ export async function POST(req: Request) {
   const meetId = String(formData.get("meetId") ?? "").trim() || null
   const nameMappings = normalizeNameMappings(parseJsonField(formData.get("nameMappings")))
   const rejectedNames = normalizeRejectedNames(parseJsonField(formData.get("rejectedNames")))
+  const cachedParse = parseJsonField(formData.get("cachedParse")) as {
+    course?: string
+    meet_name?: string | null
+    meet_date?: string | null
+    detectedSheetType?: string | null
+    results?: ParsedResult[]
+    relay_results?: unknown[]
+  } | null
 
-  if (!isUpload(file) && !pdfUrl) {
+  const pairOnly = Boolean(nameMappings)
+
+  if (!pairOnly && !isUpload(file) && !pdfUrl) {
     return NextResponse.json({ error: "PDF file or URL is required" }, { status: 400 })
   }
 
   let fileName = "meet-results.pdf"
   let fileType = "application/pdf"
-  let fileBytes: ArrayBuffer
+  let fileBytes: ArrayBuffer | undefined
 
-  if (pdfUrl) {
-    // Handle URL-based PDF
-    try {
-      const response = await fetch(pdfUrl)
-      if (!response.ok) {
-        return NextResponse.json({ error: "Failed to fetch PDF from URL" }, { status: 400 })
+  if (!pairOnly) {
+    if (pdfUrl) {
+      // Handle URL-based PDF
+      try {
+        const response = await fetch(pdfUrl)
+        if (!response.ok) {
+          return NextResponse.json({ error: "Failed to fetch PDF from URL" }, { status: 400 })
+        }
+        fileBytes = await response.arrayBuffer()
+        // Extract filename from URL if possible
+        const urlPath = new URL(pdfUrl).pathname
+        const urlFileName = urlPath.split("/").pop()
+        if (urlFileName && urlFileName.toLowerCase().endsWith(".pdf")) {
+          fileName = urlFileName
+        }
+      } catch (err) {
+        return NextResponse.json({ error: "Invalid PDF URL" }, { status: 400 })
       }
-      fileBytes = await response.arrayBuffer()
-      // Extract filename from URL if possible
-      const urlPath = new URL(pdfUrl).pathname
-      const urlFileName = urlPath.split("/").pop()
-      if (urlFileName && urlFileName.toLowerCase().endsWith(".pdf")) {
-        fileName = urlFileName
-      }
-    } catch (err) {
-      return NextResponse.json({ error: "Invalid PDF URL" }, { status: 400 })
-    }
-  } else if (isUpload(file)) {
-    // Handle file upload
-    fileName = file instanceof File && file.name ? file.name : "meet-results.pdf"
-    fileType = (file instanceof File && file.type) || "application/pdf"
+    } else if (isUpload(file)) {
+      // Handle file upload
+      fileName = file instanceof File && file.name ? file.name : "meet-results.pdf"
+      fileType = (file instanceof File && file.type) || "application/pdf"
 
-    if (!fileName.toLowerCase().endsWith(".pdf") && fileType !== "application/pdf") {
-      return NextResponse.json({ error: "File must be a PDF" }, { status: 400 })
+      if (!fileName.toLowerCase().endsWith(".pdf") && fileType !== "application/pdf") {
+        return NextResponse.json({ error: "File must be a PDF" }, { status: 400 })
+      }
+      fileBytes = await file.arrayBuffer()
+    } else {
+      return NextResponse.json({ error: "PDF file or URL is required" }, { status: 400 })
     }
-    fileBytes = await file.arrayBuffer()
-  } else {
-    return NextResponse.json({ error: "PDF file or URL is required" }, { status: 400 })
+  }
+
+  if (pairOnly && !cachedParse?.results) {
+    return NextResponse.json({ error: "Cached parse data is required when pairing athletes" }, { status: 400 })
   }
   const meet = meetId
     ? await prisma.meet.findUnique({ where: { id: meetId } })
@@ -104,21 +126,45 @@ export async function POST(req: Request) {
     course?: string
     meet_name?: string | null
     meet_date?: string | null
+    detectedSheetType?: string | null
     results: ParsedResult[]
     relay_results?: unknown[]
   }
-  try {
-    parsed = await parseMeetPdf(session.user.id, fileBytes, {
-      course: courseDefault,
-      team,
-      fileName,
-    })
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to parse PDF"
-    if (message === "LOCAL_BRIDGE_NOT_CONNECTED") {
-      return NextResponse.json({ error: LOCAL_BRIDGE_HINT }, { status: 503 })
+  if (cachedParse?.results) {
+    parsed = {
+      course: cachedParse.course,
+      meet_name: cachedParse.meet_name,
+      meet_date: cachedParse.meet_date,
+      detectedSheetType: cachedParse.detectedSheetType,
+      results: cachedParse.results,
+      relay_results: cachedParse.relay_results,
     }
-    return NextResponse.json({ error: message }, { status: 502 })
+  } else {
+    try {
+      parsed = await parseMeetPdf(session.user.id, fileBytes!, {
+        course: courseDefault,
+        team,
+        fileName,
+      })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to parse PDF"
+      if (message === "LOCAL_BRIDGE_NOT_CONNECTED") {
+        return NextResponse.json({ error: LOCAL_SCRAPER_HINT }, { status: 503 })
+      }
+      return NextResponse.json({ error: message }, { status: 502 })
+    }
+  }
+
+  try {
+    assertDocTypeMatches("results", parsed.detectedSheetType)
+    if (meet?.name) {
+      assertMeetNameMatches(meet.name, parsed.meet_name, "PDF")
+    }
+  } catch (err) {
+    if (err instanceof MeetImportValidationError) {
+      return NextResponse.json({ error: err.message }, { status: 400 })
+    }
+    throw err
   }
 
   const meetName =
@@ -137,9 +183,12 @@ export async function POST(req: Request) {
     meetId: meet?.id ?? null,
     nameMappings,
     rejectedNames,
+    pairOnly,
+    allResults: parsed.results ?? [],
+    allRelayResults: coerceParsedRelayResults(parsed.relay_results),
   })
 
-  if (meet?.id) {
+  if (meet?.id && !pairOnly) {
     try {
       if (meet.resultsUrl && isStoredMeetFileUrl(meet.resultsUrl)) {
         await deleteStoredMeetFile(meet.resultsUrl)
@@ -151,7 +200,7 @@ export async function POST(req: Request) {
       } else {
         // If uploaded as file, store it
         const { url } = await uploadMeetFile(
-          Buffer.from(fileBytes),
+          Buffer.from(fileBytes!),
           fileName,
           fileType
         )
@@ -161,6 +210,13 @@ export async function POST(req: Request) {
         where: { id: meet.id },
         data: { resultsUrl },
       })
+      if (summary.imported > 0) {
+        void notifyMeetRosterOfInfoDrops({
+          meetId: meet.id,
+          meetName: meet.name,
+          drops: ["results"],
+        })
+      }
     } catch (err) {
       console.error("Failed to save results PDF as meet resource:", err)
     }
@@ -170,5 +226,16 @@ export async function POST(req: Request) {
     ...summary,
     meetName,
     meetDate: meetDate.toISOString(),
+    cachedParse:
+      summary.nameConfirmations.length > 0
+        ? {
+            course: parsed.course,
+            meet_name: parsed.meet_name,
+            meet_date: parsed.meet_date,
+            detectedSheetType: parsed.detectedSheetType,
+            results: parsed.results ?? [],
+            relay_results: parsed.relay_results ?? [],
+          }
+        : undefined,
   })
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useSession } from "next-auth/react"
 import LiveSearch from "@/components/LiveSearch"
 import { currentSeason, parseSeason, upcomingSeason } from "@/lib/season"
 import Modal, { ModalFooter } from "@/components/Modal"
@@ -31,21 +32,15 @@ export function RosterSearch() {
   return <LiveSearch pathname="/athletes" placeholder="Search athletes…" />
 }
 
-export default function RosterFilters({ count }: { count: number }) {
+export default function RosterFilters({ count, seasons }: { count: number, seasons: string[] }) {
+  const { data: session } = useSession()
   const { gender, season, updateParams } = useRosterParams()
-  const [fetchedSeasons, setFetchedSeasons] = useState<string[]>([])
+  const [fetchedSeasons, setFetchedSeasons] = useState<string[]>(seasons)
   
   const [addSeasonModalOpen, setAddSeasonModalOpen] = useState(false)
   const upcoming = upcomingSeason()
   const [addingSeason, setAddingSeason] = useState(false)
   const [addSeasonError, setAddSeasonError] = useState<string | null>(null)
-
-  useEffect(() => {
-    fetch("/api/seasons")
-        .then(res => res.ok ? res.json() : [])
-        .then(setFetchedSeasons)
-        .catch(() => setFetchedSeasons([]))
-  }, [])
 
   async function handleAddSeason(e: React.FormEvent) {
     e.preventDefault()
@@ -99,7 +94,7 @@ export default function RosterFilters({ count }: { count: number }) {
             {s}
           </option>
         ))}
-        <option value="ADD_NEW">+ New Season</option>
+        {session?.user?.role === "COACH" && !fetchedSeasons.includes(upcoming) && <option value="ADD_NEW">+ New Season</option>}
       </select>
       <span className="text-xs text-foreground-secondary">
         {count} athlete{count === 1 ? "" : "s"}

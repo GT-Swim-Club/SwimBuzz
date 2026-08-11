@@ -13,6 +13,7 @@ import { formatRoleLabel, isStaffRole } from "@/lib/auth-roles"
 import { parseNotificationPreferences } from "@/lib/notification-preferences"
 import { parsePendingProfileChanges } from "@/lib/pending-profile-changes"
 import { prisma } from "@/lib/prisma"
+import { athletePath } from "@/lib/slug"
 
 export const metadata = {
   title: "Settings — SwimBuzz",
@@ -39,6 +40,7 @@ export default async function SettingsPage() {
       where: { userId: session.user.id },
       select: {
         id: true,
+        slug: true,
         nicknames: true,
         swimCloudId: true,
         pendingProfileChanges: true,
@@ -120,7 +122,7 @@ export default async function SettingsPage() {
             </h2>
             {athlete ? (
               <Link
-                href={`/athletes/${athlete.id}`}
+                href={athletePath(athlete.slug ?? athlete.id)}
                 className="shrink-0 text-sm text-primary hover:text-primary-hover"
               >
                 View profile

@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Modal, { ModalFooter } from "@/components/Modal"
-import type { MeetSignupQuestion, MeetSignupQuestionType } from "@/lib/meet-signup"
+import { MeetFormCustomQuestionsEditor } from "@/components/MeetFormCustomQuestions"
+import type { MeetSignupQuestion } from "@/lib/meet-signup"
+import {
+  findIncompleteChoiceQuestion,
+  normalizeMeetSignupQuestions,
+} from "@/lib/meet-signup"
 
 function toDatetimeLocal(iso: string | null): string {
   if (!iso) return ""
@@ -46,9 +51,6 @@ export default function MeetSignupConfigButton({
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [questionDraft, setQuestionDraft] = useState("")
-  const [questionType, setQuestionType] = useState<MeetSignupQuestionType>("text")
-  const [optionDrafts, setOptionDrafts] = useState<Record<string, string>>({})
   const [form, setForm] = useState({
     instructions: initial?.instructions ?? "",
     minEvents: initial?.minEvents?.toString() ?? "",
@@ -64,9 +66,6 @@ export default function MeetSignupConfigButton({
   useEffect(() => {
     if (!open) return
     setError(null)
-    setQuestionDraft("")
-    setQuestionType("text")
-    setOptionDrafts({})
     setForm({
       instructions: initial?.instructions ?? "",
       minEvents: initial?.minEvents?.toString() ?? "",
@@ -80,46 +79,9 @@ export default function MeetSignupConfigButton({
     })
   }, [open, initial])
 
-  function addQuestion() {
-    const label = questionDraft.trim()
-    if (!label) return
-    const id = `q_${Date.now().toString(36)}`
-    setForm((f) => ({
-      ...f,
-      customQuestions: [
-        ...f.customQuestions,
-        {
-          id,
-          label,
-          required: false,
-          type: questionType,
-          options: questionType === "choice" ? ["Yes", "No"] : [],
-        },
-      ],
-    }))
-    setQuestionDraft("")
-    setQuestionType("text")
-  }
-
-  function addOption(questionId: string) {
-    const draft = (optionDrafts[questionId] ?? "").trim()
-    if (!draft) return
-    setForm((f) => ({
-      ...f,
-      customQuestions: f.customQuestions.map((item) => {
-        if (item.id !== questionId) return item
-        if (item.options.includes(draft)) return item
-        return { ...item, options: [...item.options, draft] }
-      }),
-    }))
-    setOptionDrafts((d) => ({ ...d, [questionId]: "" }))
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const incompleteChoice = form.customQuestions.find(
-      (q) => q.type === "choice" && q.options.length < 2
-    )
+    const incompleteChoice = findIncompleteChoiceQuestion(form.customQuestions)
     if (incompleteChoice) {
       setError(`"${incompleteChoice.label}" needs at least 2 choices`)
       return
@@ -174,7 +136,7 @@ export default function MeetSignupConfigButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border border-border border-border-secondary border-border-secondary-secondary-secondary rounded-md dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:bg-background-elevated transition-colors"
+        className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border border-border rounded-md bg-background hover:bg-fill transition-colors"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -205,7 +167,7 @@ export default function MeetSignupConfigButton({
               type="button"
               onClick={() => setOpen(false)}
               disabled={loading}
-              className="bg-background flex-1 rounded-lg border border-border border-border-secondary px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary border-border-secondary-secondary"
+              className="bg-background hover:bg-fill flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium"
             >
               Cancel
             </button>
@@ -221,7 +183,7 @@ export default function MeetSignupConfigButton({
         }
       >
         <form id="meet-signup-config" onSubmit={handleSubmit} className="space-y-5">
-          <p className="text-sm text-foreground-secondary text-foreground-secondary">
+          <p className="text-sm text-foreground-secondary">
             {eventCount > 0
               ? `Swimmers can choose from the ${eventCount} events in this meet’s order of events.`
               : "No order of events yet — import the meet packet so swimmers have events to choose from."}
@@ -229,36 +191,36 @@ export default function MeetSignupConfigButton({
 
           <div className="grid gap-3 sm:grid-cols-3">
             <div>
-              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Opens
               </label>
               <input
                 type="datetime-local"
                 value={form.openAt}
                 onChange={(e) => setForm((f) => ({ ...f, openAt: e.target.value }))}
-                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Closes
               </label>
               <input
                 type="datetime-local"
                 value={form.closeAt}
                 onChange={(e) => setForm((f) => ({ ...f, closeAt: e.target.value }))}
-                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Drop by
               </label>
               <input
                 type="datetime-local"
                 value={form.withdrawUntil}
                 onChange={(e) => setForm((f) => ({ ...f, withdrawUntil: e.target.value }))}
-                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
               />
               <p className="mt-1 text-[11px] text-gray-400 dark:text-zinc-500">
                 Defaults to close time
@@ -267,7 +229,7 @@ export default function MeetSignupConfigButton({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+            <label className="block text-xs font-medium text-foreground-secondary mb-1">
               Instructions
             </label>
             <textarea
@@ -275,13 +237,13 @@ export default function MeetSignupConfigButton({
               onChange={(e) => setForm((f) => ({ ...f, instructions: e.target.value }))}
               rows={3}
               placeholder=""
-              className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
             />
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
             <div>
-              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Min Individual Events{" "}
               </label>
               <input
@@ -289,11 +251,11 @@ export default function MeetSignupConfigButton({
                 min={1}
                 value={form.minEvents}
                 onChange={(e) => setForm((f) => ({ ...f, minEvents: e.target.value }))}
-                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Max Individual Events{" "}
               </label>
               <input
@@ -301,11 +263,11 @@ export default function MeetSignupConfigButton({
                 min={1}
                 value={form.maxEvents}
                 onChange={(e) => setForm((f) => ({ ...f, maxEvents: e.target.value }))}
-                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+              <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Max Relay Events{" "}
               </label>
               <input
@@ -313,7 +275,7 @@ export default function MeetSignupConfigButton({
                 min={1}
                 value={form.maxRelayEvents}
                 onChange={(e) => setForm((f) => ({ ...f, maxRelayEvents: e.target.value }))}
-                className="w-full rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
               />
             </div>
           </div>
@@ -328,159 +290,17 @@ export default function MeetSignupConfigButton({
             Include a notes field
           </label>
 
-          <div>
-            <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
-              Custom questions
-            </label>
-            {form.customQuestions.length > 0 && (
-              <div className="space-y-3 mb-3">
-                {form.customQuestions.map((q) => (
-                  <div
-                    key={q.id}
-                    className="bg-background rounded-lg border border-border border-border-secondary px-3 py-2 space-y-2 border-border-secondary-secondary"
-                  >
-                    <div className="flex items-start gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium">{q.label}</p>
-                        <p className="text-xs text-gray-400">
-                          {q.type === "choice" ? "Multiple choice" : "Short text"}
-                        </p>
-                      </div>
-                      <label className="flex items-center gap-1 text-xs text-foreground-secondary shrink-0">
-                        <input
-                          type="checkbox"
-                          checked={q.required}
-                          onChange={(e) =>
-                            setForm((f) => ({
-                              ...f,
-                              customQuestions: f.customQuestions.map((item) =>
-                                item.id === q.id
-                                  ? { ...item, required: e.target.checked }
-                                  : item
-                              ),
-                            }))
-                          }
-                        />
-                        Required
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (!confirm(`Remove custom question “${q.label}”?`)) return
-                          setForm((f) => ({
-                            ...f,
-                            customQuestions: f.customQuestions.filter((item) => item.id !== q.id),
-                          }))
-                        }}
-                        className="text-xs text-error dark:text-error shrink-0"
-                      >
-                        Remove
-                      </button>
-                    </div>
+          <MeetFormCustomQuestionsEditor
+            questions={form.customQuestions}
+            onChange={(customQuestions) =>
+              setForm((f) => ({
+                ...f,
+                customQuestions: normalizeMeetSignupQuestions(customQuestions),
+              }))
+            }
+          />
 
-                    {q.type === "choice" && (
-                      <div className="space-y-1.5 pl-0.5">
-                        <div className="flex flex-wrap gap-1.5">
-                          {q.options.map((opt) => (
-                            <span
-                              key={opt}
-                              className="bg-background inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border border-border border-border-secondary border-border-secondary-secondary"
-                            >
-                              {opt}
-              <button
-                type="button"
-                onClick={() => {
-                  if (!confirm(`Remove “${opt}” from choices?`)) return
-                  setForm((f) => ({
-                    ...f,
-                    customQuestions: f.customQuestions.map((item) =>
-                      item.id === q.id
-                        ? {
-                            ...item,
-                            options: item.options.filter((o) => o !== opt),
-                          }
-                        : item
-                    ),
-                  }))
-                }}
-                className="text-foreground-tertiary hover:text-red-500"
-                aria-label={`Remove ${opt}`}
-              >
-                ×
-              </button>
-                            </span>
-                          ))}
-                        </div>
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            value={optionDrafts[q.id] ?? ""}
-                            onChange={(e) =>
-                              setOptionDrafts((d) => ({ ...d, [q.id]: e.target.value }))
-                            }
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                e.preventDefault()
-                                addOption(q.id)
-                              }
-                            }}
-                            placeholder="Add choice"
-                            className="flex-1 rounded-lg border border-border border-border-secondary px-2 py-1.5 text-xs bg-background border-border-secondary-secondary"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => addOption(q.id)}
-                            disabled={!(optionDrafts[q.id] ?? "").trim()}
-                            className="bg-background text-xs px-2 py-1.5 border border-border border-border-secondary rounded-lg dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary disabled:opacity-40"
-                          >
-                            Add
-                          </button>
-                        </div>
-                        {q.options.length < 2 && (
-                          <p className="text-xs text-amber-600 dark:text-amber-400">
-                            Add at least 2 choices
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="flex flex-wrap gap-2">
-              <input
-                type="text"
-                value={questionDraft}
-                onChange={(e) => setQuestionDraft(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault()
-                    addQuestion()
-                  }
-                }}
-                placeholder="Add question + Enter"
-                className="flex-1 min-w-[10rem] rounded-lg border border-border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary-secondary"
-              />
-              <select
-                value={questionType}
-                onChange={(e) => setQuestionType(e.target.value as MeetSignupQuestionType)}
-                className="rounded-lg border border-border border-border-secondary px-2 py-2 text-sm bg-background border-border-secondary-secondary"
-              >
-                <option value="text">Short text</option>
-                <option value="choice">Multiple choice</option>
-              </select>
-              <button
-                type="button"
-                onClick={addQuestion}
-                disabled={!questionDraft.trim()}
-                className="bg-background text-sm px-3 py-2 border border-border border-border-secondary rounded-lg dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary disabled:opacity-40"
-              >
-                Add
-              </button>
-            </div>
-          </div>
-
-          {error && <p className="text-sm text-error dark:text-error">{error}</p>}
+          {error && <p className="text-sm text-error">{error}</p>}
         </form>
       </Modal>
     </>
