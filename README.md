@@ -72,7 +72,7 @@ Copy `.env.example` from the repo root into `swimbuzz/.env` and fill in:
 | `SUPABASE_URL` | Supabase project URL |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase **service_role** key (not the anon key) |
 | `NEXTAUTH_SECRET` | Random secret for session signing |
-| `NEXTAUTH_URL` | App URL, e.g. `http://localhost:3000` |
+| `NEXTAUTH_URL` | App URL — local `http://localhost:3000`, production `https://swimbuzz.gtswimclub.com` |
 | `GOOGLE_CLIENT_ID` | Google OAuth client ID |
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
 | `RESEND_API_KEY` | Resend API key for verification emails (required in production) |
@@ -114,9 +114,9 @@ Deploy the **web app only** (`swimbuzz/`). There is no separate scraper service.
 ### Steps
 
 1. **Supabase** — Create a project, run `npx prisma db push` against it, and apply SQL in `swimbuzz/supabase/`.
-2. **Google OAuth** — Add redirect URI `https://YOUR_WEB_URL/api/auth/callback/google`.
-3. **Render** — Create a Node web service with root directory `swimbuzz`.
-4. **Env vars** — Set `DIRECT_URL`, `SUPABASE_*`, `GOOGLE_*`, and `NEXTAUTH_URL` (your Render web URL).
+2. **Google OAuth** — Add redirect URI `https://swimbuzz.gtswimclub.com/api/auth/callback/google` (and authorized JS origin `https://swimbuzz.gtswimclub.com`).
+3. **Render** — Create a Node web service with root directory `swimbuzz`. Attach custom domain `swimbuzz.gtswimclub.com`.
+4. **Env vars** — Set `DIRECT_URL`, `SUPABASE_*`, `GOOGLE_*`, and `NEXTAUTH_URL=https://swimbuzz.gtswimclub.com`.
 
 ### Manual deploy checklist
 
@@ -127,7 +127,7 @@ Deploy the **web app only** (`swimbuzz/`). There is no separate scraper service.
 | Start | `npm run start` |
 | `NODE_VERSION` | `22` |
 | `HOSTNAME` | `0.0.0.0` |
-| `NEXTAUTH_URL` | Your web URL, e.g. `https://swimbuzz.onrender.com` |
+| `NEXTAUTH_URL` | `https://swimbuzz.gtswimclub.com` |
 
 **Note:** SwimCloud **times** imports take about **1–2 minutes per athlete** (roster import is much faster). Render free web services time out after **30 seconds**; use **Starter** or higher on the web service so long jobs can finish. Always **run the scraper** before importing.
 

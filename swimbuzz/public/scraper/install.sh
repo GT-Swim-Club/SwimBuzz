@@ -9,7 +9,7 @@ if [[ -z "$APP_URL" ]]; then
   echo "SwimBuzz scraper installer"
   echo ""
   echo "Usage:"
-  echo "  curl -fsSL https://swimbuzz.onrender.com/scraper/install.sh | bash -s -- https://swimbuzz.onrender.com"
+  echo "  curl -fsSL https://swimbuzz.gtswimclub.com/scraper/install.sh | bash -s -- https://swimbuzz.gtswimclub.com"
   exit 1
 fi
 

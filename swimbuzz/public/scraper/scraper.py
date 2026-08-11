@@ -351,7 +351,7 @@ async def async_main() -> None:
 
     if not args.code:
         print("Pairing code required. Generate a run command in the app under Run scraper.")
-        print("Usage: swimbuzz-scraper --url https://swimbuzz.onrender.com --code 123456")
+        print("Usage: swimbuzz-scraper --url https://swimbuzz.gtswimclub.com --code 123456")
         print("       (or: python scraper.py --url ... --code ...)")
         sys.exit(1)
 

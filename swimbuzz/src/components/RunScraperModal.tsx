@@ -57,7 +57,7 @@ export default function RunScraperModal({
   )
 
   const appUrl =
-    typeof window !== "undefined" ? window.location.origin : "https://swimbuzz.onrender.com"
+    typeof window !== "undefined" ? window.location.origin : "https://swimbuzz.gtswimclub.com"
 
   const commands = scraperCommands(appUrl, pairing?.code)
   const installCommand = commands[platform].install
