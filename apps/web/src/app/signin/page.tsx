@@ -29,7 +29,7 @@ export default async function SignInPage({
         <div className="rounded-2xl border border-border bg-background/90 p-8 shadow-xl backdrop-blur-sm">
           <Link
             href="/"
-            className="inline-flex items-center gap-2.5 text-sm font-semibold tracking-tight text-foreground"
+            className="flex w-full items-center justify-center gap-2.5 text-sm font-semibold tracking-tight text-foreground"
           >
             <Image
               src="/swimbuzz-logo.png"
@@ -42,12 +42,14 @@ export default async function SignInPage({
             SwimBuzz
           </Link>
 
-          <h1 className="mt-8 text-2xl font-semibold tracking-tight text-foreground">
-            Sign in to your team
-          </h1>
-          <p className="mt-2 text-sm leading-relaxed text-foreground-secondary">
-            Access the Georgia Tech Swim Club roster, meets, and practice tools.
-          </p>
+          <div className="mt-5 text-center">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+              Sign in to your team
+            </h1>
+            <p className="mt-2 text-sm leading-relaxed text-foreground-secondary">
+              Access the GT Swim Club roster, meets, and practice tools.
+            </p>
+          </div>
 
           {error && (
             <p className="mt-4 rounded-lg border border-error/20 bg-error/10 px-3 py-2 text-sm text-error-text">

@@ -95,10 +95,10 @@ export default async function HomePage() {
             Georgia Tech Swim Club
           </p>
           <h1 className="mt-4 max-w-2xl text-4xl font-semibold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-            Keep the team up to date.
+            SwimBuzz.
           </h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-foreground-secondary sm:text-lg">
-            Meet info, practice plans, and roster updates—without chasing messages or spreadsheets.
+            Meet, practice, and times management—all in one place.
           </p>
           <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <Link

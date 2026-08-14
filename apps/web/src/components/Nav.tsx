@@ -2,9 +2,7 @@ import Link from "next/link"
 import Image from "next/image"
 import ProfileMenu from "@/components/ProfileMenu"
 import NotificationsMenu from "@/components/NotificationsMenu"
-import RunScraperButton from "@/components/RunScraperButton"
-import AthleteViewToggle from "@/components/AthleteViewToggle"
-import ResponsiveNavLinks from "@/components/ResponsiveNavLinks"
+import AdaptiveHeaderLayout from "@/components/AdaptiveHeaderLayout"
 import { formatRoleLabel, isStaffRole } from "@/lib/auth-roles"
 import { athletePreferredNameLastFirst } from "@swimbuzz/shared"
 import {
@@ -123,69 +121,58 @@ export default async function Nav() {
       ? "Athlete View"
       : formatRoleLabel(session?.user.role ?? "ATHLETE")
 
-  const athleteToggle = isStaff ? (
-    <AthleteViewToggle
-      athletes={previewAthletes.map((a) => ({
-        id: a.id,
-        name: athletePreferredNameLastFirst(a)}))}
-      selectedAthleteId={previewAthlete?.id ?? null}
-    />
-  ) : null
+  const headerBrand = (
+    <Link
+      href="/"
+      className="inline-flex items-center gap-2.5 font-semibold text-base tracking-tight transition-opacity hover:opacity-90"
+    >
+      <Image src="/swimbuzz-logo.png" alt="" width={32} height={32} className="h-8 w-8 rounded-md" priority />
+      <span className="truncate">SwimBuzz</span>
+    </Link>
+  )
 
-  const scraperButton = showStaffTools ? <RunScraperButton /> : null
+  const headerUtilities = session ? (
+    <>
+      <NotificationsMenu
+        initialNotifications={notifications.map((notification) => ({
+          ...notification,
+          readAt: notification.readAt?.toISOString() ?? null,
+          createdAt: notification.createdAt.toISOString(),
+        }))}
+      />
+      <ProfileMenu
+        name={session.user.name}
+        email={session.user.email}
+        image={session.user.image}
+        roleLabel={roleLabel}
+        rosterProfileHref={linkedAthlete ? athletePath(linkedAthlete.slug ?? linkedAthlete.id) : null}
+        swimCloudProfileHref={linkedAthlete?.swimCloudId ? `https://www.swimcloud.com/swimmer/${linkedAthlete.swimCloudId}/` : null}
+      />
+    </>
+  ) : (
+    <Link href="/signin" className="inline-flex items-center rounded-lg bg-primary px-3.5 py-2 text-sm font-medium text-primary-text transition-colors hover:bg-primary-hover">
+      Sign in
+    </Link>
+  )
 
   return (
     <nav className="sticky top-0 z-40 flex items-center justify-between gap-2 border-b border-zinc-200 bg-background px-6 py-4 dark:border-zinc-800">
-      <div className="flex min-w-0 flex-1 items-center gap-3">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2.5 font-semibold text-base tracking-tight hover:opacity-90 transition-opacity"
-        >
-          <Image
-            src="/swimbuzz-logo.png"
-            alt=""
-            width={32}
-            height={32}
-            className="h-8 w-8 rounded-md"
-            priority
-          />
-          <span className="truncate">SwimBuzz</span>
-        </Link>
-        {session ? <ResponsiveNavLinks links={navLinks} /> : null}
-      </div>
-      <div className="flex shrink-0 items-center gap-3">
-        {athleteToggle ? <div className="hidden lg:block">{athleteToggle}</div> : null}
-        {scraperButton ? <div className="hidden lg:block">{scraperButton}</div> : null}
-        {session ? (
-          <>
-            <NotificationsMenu
-              initialNotifications={notifications.map((n) => ({
-                ...n,
-                readAt: n.readAt?.toISOString() ?? null,
-                createdAt: n.createdAt.toISOString()}))}
-            />
-            <ProfileMenu
-              name={session.user.name}
-              email={session.user.email}
-              image={session.user.image}
-              roleLabel={roleLabel}
-              rosterProfileHref={linkedAthlete ? athletePath(linkedAthlete.slug ?? linkedAthlete.id) : null}
-              swimCloudProfileHref={
-                linkedAthlete?.swimCloudId
-                  ? `https://www.swimcloud.com/swimmer/${linkedAthlete.swimCloudId}/`
-                  : null
-              }
-            />
-          </>
-        ) : (
-          <Link
-            href="/signin"
-            className="inline-flex items-center rounded-lg bg-primary px-3.5 py-2 text-sm font-medium text-primary-text hover:bg-primary-hover transition-colors"
-          >
-            Sign in
-          </Link>
-        )}
-      </div>
+      {session ? (
+        <AdaptiveHeaderLayout
+          brand={headerBrand}
+          utilities={headerUtilities}
+          links={navLinks}
+          athletes={previewAthletes.map((athlete) => ({ id: athlete.id, name: athletePreferredNameLastFirst(athlete) }))}
+          selectedAthleteId={previewAthlete?.id ?? null}
+          showAthleteView={isStaff}
+          showScraper={showStaffTools}
+        />
+      ) : (
+        <>
+          <div className="flex min-w-0 flex-1 items-center">{headerBrand}</div>
+          <div className="flex shrink-0 items-center">{headerUtilities}</div>
+        </>
+      )}
     </nav>
   )
 }

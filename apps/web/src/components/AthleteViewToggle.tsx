@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation"
 import { useMemo, useState, useTransition } from "react"
+import HoverDetail from "@/components/HoverDetail"
 import {
   ATHLETE_VIEW_COOKIE,
   athleteViewCookieValue,
@@ -11,12 +12,25 @@ const MAX_AGE_SECONDS = 60 * 60 * 24 * 30
 
 type AthleteOption = { id: string; name: string }
 
+function AthleteViewIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 shrink-0">
+      <circle cx="9" cy="7" r="4" />
+      <path d="M2 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2" />
+      <path d="M16 11.5a3.5 3.5 0 0 1 0-7" />
+      <path d="M22 21v-2a5 5 0 0 0-3-4.58" />
+    </svg>
+  )
+}
+
 export default function AthleteViewToggle({
   athletes,
   selectedAthleteId,
+  compact = false,
 }: {
   athletes: AthleteOption[]
   selectedAthleteId: string | null
+  compact?: boolean
 }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -50,21 +64,20 @@ export default function AthleteViewToggle({
         disabled={pending}
         aria-expanded={open}
         aria-haspopup="listbox"
-        title={
-          selected
-            ? `Previewing as ${selected.name}. Click to change or exit.`
-            : "Preview the app as a specific athlete"
-        }
+        aria-label={compact ? "Athlete View" : undefined}
+        title={selected ? `Previewing as ${selected.name}. Click to change or exit.` : "Preview the app as a specific athlete"}
         className={
-          "w-full max-w-[14rem] truncate text-xs rounded-lg px-3 py-2 border border-border-secondary transition-colors disabled:opacity-50 md:w-auto md:py-1.5 " +
+          "group relative inline-flex h-9 items-center justify-center rounded-lg border border-border-secondary transition-colors disabled:opacity-50 " +
+          (compact ? "w-9" : "max-w-[14rem] gap-2 px-3 text-xs") +
           (selected
-            ? "border-primary bg-primary-bg text-primary"
-            : "border-border-secondary bg-background text-foreground hover:bg-fill-secondary")
+            ? " border-primary bg-primary-bg text-primary"
+            : " bg-background text-foreground hover:bg-fill-secondary")
         }
       >
-        {selected ? `As ${selected.name}` : "Athlete View"}
+        <AthleteViewIcon />
+        {compact ? <HoverDetail label="Athlete View" /> : null}
+        {!compact ? <span className="truncate">{selected ? `As ${selected.name}` : "Athlete View"}</span> : null}
       </button>
-
       {open ? (
         <>
           <button

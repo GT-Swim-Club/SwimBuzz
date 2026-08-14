@@ -207,7 +207,7 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
                 <option>SCM</option>
               </select>
             </div>
-            <div className="w-[120px]">
+            <div className="w-[100px]">
               <label className="text-xs text-foreground-secondary mb-1 block">Time</label>
               <input
                 type="text"
@@ -226,7 +226,7 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
                 onChange={e => setForm(f => ({ ...f, meet: e.target.value }))}
               />
             </div>
-            <div className="w-[140px]">
+            <div className="w-[180px]">
               <label className="text-xs text-foreground-secondary mb-1 block">Date</label>
               <DatePicker
                 value={form.date}
