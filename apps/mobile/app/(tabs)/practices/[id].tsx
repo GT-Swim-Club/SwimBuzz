@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { Alert, ScrollView, Switch, View } from "react-native"
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router"
-import { isStaffRole } from "@swimbuzz/shared"
+import { formatClockTimeRange, formatDateTime, isStaffRole } from "@swimbuzz/shared"
 import {
   Body,
   Button,
@@ -23,7 +23,6 @@ type PracticeSet = {
   order: number
   title?: string | null
   content: string
-  notes?: string | null
   distance?: number | null
 }
 
@@ -162,7 +161,6 @@ export default function PracticeDetailScreen() {
           order: index,
           title: s.title?.trim() || null,
           content: s.content.trim(),
-          notes: s.notes?.trim() || null,
           distance: s.distance ?? null,
         })),
       })
@@ -219,7 +217,7 @@ export default function PracticeDetailScreen() {
             practice.date
               ? new Date(String(practice.date)).toLocaleDateString()
               : null,
-            `${practice.startTime}–${practice.endTime}`,
+            formatClockTimeRange(String(practice.startTime ?? ""), String(practice.endTime ?? "")),
             practice.location,
             practice.focus,
           ]
@@ -317,7 +315,6 @@ export default function PracticeDetailScreen() {
                     {set.distance ? ` · ${set.distance}y` : ""}
                   </Body>
                   <Body>{set.content}</Body>
-                  {set.notes ? <Muted>{set.notes}</Muted> : null}
                 </View>
               ))
           )}
@@ -335,7 +332,7 @@ export default function PracticeDetailScreen() {
                   comment.parentId ? "Reply" : null,
                   comment.body,
                   comment.createdAt
-                    ? new Date(String(comment.createdAt)).toLocaleString()
+                    ? formatDateTime(String(comment.createdAt))
                     : null,
                 ]
                   .filter(Boolean)

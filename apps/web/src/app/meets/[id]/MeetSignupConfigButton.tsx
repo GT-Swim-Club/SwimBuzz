@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Modal, { ModalFooter } from "@/components/Modal"
+import { DatePicker, TimePicker } from "@/components/CustomDateTimePicker"
 import { MeetFormCustomQuestionsEditor } from "@/components/MeetFormCustomQuestions"
 import type { MeetSignupQuestion } from "@/lib/meet-signup"
 import {
@@ -10,18 +11,27 @@ import {
   normalizeMeetSignupQuestions,
 } from "@/lib/meet-signup"
 
-function toDatetimeLocal(iso: string | null): string {
+function toDatePart(iso: string | null): string {
   if (!iso) return ""
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return ""
   const pad = (n: number) => String(n).padStart(2, "0")
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
-function fromDatetimeLocal(value: string): string | null {
-  const trimmed = value.trim()
-  if (!trimmed) return null
-  const d = new Date(trimmed)
+function toTimePart(iso: string | null): string {
+  if (!iso) return ""
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ""
+  const pad = (n: number) => String(n).padStart(2, "0")
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+function fromDateTimeParts(date: string, time: string): string | null {
+  const datePart = date.trim()
+  const timePart = time.trim()
+  if (!datePart || !timePart) return null
+  const d = new Date(`${datePart}T${timePart}`)
   if (Number.isNaN(d.getTime())) return null
   return d.toISOString()
 }
@@ -42,13 +52,15 @@ export default function MeetSignupConfigButton({
   meetId,
   initial,
   eventCount,
+  inline = false,
 }: {
   meetId: string
   initial: MeetSignupConfigInitial | null
   eventCount: number
+  inline?: boolean
 }) {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(inline)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState({
@@ -58,26 +70,36 @@ export default function MeetSignupConfigButton({
     maxRelayEvents: initial?.maxRelayEvents?.toString() ?? "",
     askNotes: initial?.askNotes ?? true,
     customQuestions: initial?.customQuestions ?? [],
-    openAt: toDatetimeLocal(initial?.openAt ?? null),
-    closeAt: toDatetimeLocal(initial?.closeAt ?? null),
-    withdrawUntil: toDatetimeLocal(initial?.withdrawUntil ?? null),
+    openDate: toDatePart(initial?.openAt ?? null),
+    openTime: toTimePart(initial?.openAt ?? null),
+    closeDate: toDatePart(initial?.closeAt ?? null),
+    closeTime: toTimePart(initial?.closeAt ?? null),
+    withdrawDate: toDatePart(initial?.withdrawUntil ?? null),
+    withdrawTime: toTimePart(initial?.withdrawUntil ?? null),
   })
 
   useEffect(() => {
     if (!open) return
-    setError(null)
-    setForm({
-      instructions: initial?.instructions ?? "",
-      minEvents: initial?.minEvents?.toString() ?? "",
-      maxEvents: initial?.maxEvents?.toString() ?? "",
-      maxRelayEvents: initial?.maxRelayEvents?.toString() ?? "",
-      askNotes: initial?.askNotes ?? true,
-      customQuestions: initial?.customQuestions ?? [],
-      openAt: toDatetimeLocal(initial?.openAt ?? null),
-      closeAt: toDatetimeLocal(initial?.closeAt ?? null),
-      withdrawUntil: toDatetimeLocal(initial?.withdrawUntil ?? null),
-    })
+    const resetTimer = window.setTimeout(() => {
+      setError(null)
+      setForm({
+        instructions: initial?.instructions ?? "",
+        minEvents: initial?.minEvents?.toString() ?? "",
+        maxEvents: initial?.maxEvents?.toString() ?? "",
+        maxRelayEvents: initial?.maxRelayEvents?.toString() ?? "",
+        askNotes: initial?.askNotes ?? true,
+        customQuestions: initial?.customQuestions ?? [],
+        openDate: toDatePart(initial?.openAt ?? null),
+        openTime: toTimePart(initial?.openAt ?? null),
+        closeDate: toDatePart(initial?.closeAt ?? null),
+        closeTime: toTimePart(initial?.closeAt ?? null),
+        withdrawDate: toDatePart(initial?.withdrawUntil ?? null),
+        withdrawTime: toTimePart(initial?.withdrawUntil ?? null),
+      })
+    }, 0)
+    return () => window.clearTimeout(resetTimer)
   }, [open, initial])
+
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -87,8 +109,8 @@ export default function MeetSignupConfigButton({
       return
     }
 
-    const openAt = fromDatetimeLocal(form.openAt)
-    const closeAt = fromDatetimeLocal(form.closeAt)
+    const openAt = fromDateTimeParts(form.openDate, form.openTime)
+    const closeAt = fromDateTimeParts(form.closeDate, form.closeTime)
     if (openAt && closeAt && new Date(openAt) > new Date(closeAt)) {
       setError("Close time must be on or after the open time")
       return
@@ -112,9 +134,9 @@ export default function MeetSignupConfigButton({
           maxRelayEvents: form.maxRelayEvents.trim() === "" ? null : form.maxRelayEvents,
           askNotes: form.askNotes,
           customQuestions: form.customQuestions,
-          openAt: fromDatetimeLocal(form.openAt),
-          closeAt: fromDatetimeLocal(form.closeAt),
-          withdrawUntil: fromDatetimeLocal(form.withdrawUntil),
+          openAt: fromDateTimeParts(form.openDate, form.openTime),
+          closeAt: fromDateTimeParts(form.closeDate, form.closeTime),
+          withdrawUntil: fromDateTimeParts(form.withdrawDate, form.withdrawTime),
         }),
       })
       const data = await res.json()
@@ -122,7 +144,7 @@ export default function MeetSignupConfigButton({
         setError(data.error ?? "Failed to save sign-up form")
         return
       }
-      setOpen(false)
+      if (!inline) setOpen(false)
       router.refresh()
     } catch {
       setError("Something went wrong")
@@ -131,11 +153,22 @@ export default function MeetSignupConfigButton({
     }
   }
 
+  function handleOpen() {
+    if (eventCount === 0) {
+      alert(
+        "Add an order of events before setting up the sign-up form. Import the meet packet (or add the order of events) first.",
+      )
+      return
+    }
+    setOpen(true)
+  }
+
   return (
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={handleOpen}
+        hidden={inline}
         className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border border-border rounded-md bg-background hover:bg-fill transition-colors"
       >
         <svg
@@ -158,7 +191,10 @@ export default function MeetSignupConfigButton({
       <Modal
         open={open}
         onClose={() => !loading && setOpen(false)}
-        title="Meet Sign-up Form"
+        presentation={inline ? "inline" : "dialog"}
+        portal={!inline}
+        panelClassName={inline ? "w-full max-w-none max-h-none overflow-visible shadow-sm" : ""}
+        title={inline ? (initial ? "Sign-up settings" : "Set up sign-ups") : "Meet Sign-up Form"}
         description=""
         maxWidth="3xl"
         footer={
@@ -166,6 +202,7 @@ export default function MeetSignupConfigButton({
             <button
               type="button"
               onClick={() => setOpen(false)}
+              hidden={inline}
               disabled={loading}
               className="bg-background hover:bg-fill flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium"
             >
@@ -194,34 +231,91 @@ export default function MeetSignupConfigButton({
               <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Opens
               </label>
-              <input
-                type="datetime-local"
-                value={form.openAt}
-                onChange={(e) => setForm((f) => ({ ...f, openAt: e.target.value }))}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
-              />
+              <div className="space-y-2">
+                <DatePicker
+                  value={form.openDate}
+                  onChange={(value) => setForm((form) => ({
+                    ...form,
+                    openDate: value,
+                    openTime: value ? form.openTime || "00:00" : "",
+                  }))}
+                  placeholder="Date"
+                  ariaLabel="Opening date"
+                  clearable
+                />
+                <TimePicker
+                  key={form.openDate}
+                  value={form.openTime}
+                  onChange={(value) => setForm((form) => ({
+                    ...form,
+                    openDate: value ? form.openDate : "",
+                    openTime: value,
+                  }))}
+                  placeholder="Time"
+                  ariaLabel="Opening time"
+                  disabled={!form.openDate}
+                />
+              </div>
             </div>
             <div>
               <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Closes
               </label>
-              <input
-                type="datetime-local"
-                value={form.closeAt}
-                onChange={(e) => setForm((f) => ({ ...f, closeAt: e.target.value }))}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
-              />
+              <div className="space-y-2">
+                <DatePicker
+                  value={form.closeDate}
+                  onChange={(value) => setForm((form) => ({
+                    ...form,
+                    closeDate: value,
+                    closeTime: value ? form.closeTime || "00:00" : "",
+                  }))}
+                  placeholder="Date"
+                  ariaLabel="Closing date"
+                  clearable
+                />
+                <TimePicker
+                  key={form.closeDate}
+                  value={form.closeTime}
+                  onChange={(value) => setForm((form) => ({
+                    ...form,
+                    closeDate: value ? form.closeDate : "",
+                    closeTime: value,
+                  }))}
+                  placeholder="Time"
+                  ariaLabel="Closing time"
+                  disabled={!form.closeDate}
+                />
+              </div>
             </div>
             <div>
               <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Drop by
               </label>
-              <input
-                type="datetime-local"
-                value={form.withdrawUntil}
-                onChange={(e) => setForm((f) => ({ ...f, withdrawUntil: e.target.value }))}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
-              />
+              <div className="space-y-2">
+                <DatePicker
+                  value={form.withdrawDate}
+                  onChange={(value) => setForm((form) => ({
+                    ...form,
+                    withdrawDate: value,
+                    withdrawTime: value ? form.withdrawTime || "00:00" : "",
+                  }))}
+                  placeholder="Date"
+                  ariaLabel="Withdrawal deadline date"
+                  clearable
+                />
+                <TimePicker
+                  key={form.withdrawDate}
+                  value={form.withdrawTime}
+                  onChange={(value) => setForm((form) => ({
+                    ...form,
+                    withdrawDate: value ? form.withdrawDate : "",
+                    withdrawTime: value,
+                  }))}
+                  placeholder="Time"
+                  ariaLabel="Withdrawal deadline time"
+                  disabled={!form.withdrawDate}
+                />
+              </div>
               <p className="mt-1 text-[11px] text-gray-400 dark:text-zinc-500">
                 Defaults to close time
               </p>

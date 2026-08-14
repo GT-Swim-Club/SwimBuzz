@@ -22,7 +22,7 @@ export async function getAthleteViewAthleteId(): Promise<string | null> {
   if (!enabled || !athleteId) return null
   const athlete = await prisma.athlete.findUnique({
     where: { id: athleteId },
-    select: { id: true, firstName: true, lastName: true },
+    select: { id: true, firstName: true, lastName: true, nicknames: true },
   })
   return athlete?.id ?? null
 }
@@ -31,6 +31,7 @@ export async function getAthleteViewAthlete(): Promise<{
   id: string
   firstName: string
   lastName: string
+  nicknames: string[]
 } | null> {
   const store = await cookies()
   const { enabled, athleteId } = parseAthleteViewCookie(
@@ -39,7 +40,7 @@ export async function getAthleteViewAthlete(): Promise<{
   if (!enabled || !athleteId) return null
   return prisma.athlete.findUnique({
     where: { id: athleteId },
-    select: { id: true, firstName: true, lastName: true },
+    select: { id: true, firstName: true, lastName: true, nicknames: true },
   })
 }
 

@@ -4,8 +4,9 @@ import ProfileMenu from "@/components/ProfileMenu"
 import NotificationsMenu from "@/components/NotificationsMenu"
 import RunScraperButton from "@/components/RunScraperButton"
 import AthleteViewToggle from "@/components/AthleteViewToggle"
-import MobileNavMenu from "@/components/MobileNavMenu"
+import ResponsiveNavLinks from "@/components/ResponsiveNavLinks"
 import { formatRoleLabel, isStaffRole } from "@/lib/auth-roles"
+import { athletePreferredNameLastFirst } from "@swimbuzz/shared"
 import {
   getAthleteViewAthlete,
   isAthleteViewEnabled } from "@/lib/athlete-view-server"
@@ -91,7 +92,7 @@ export default async function Nav() {
   const previewAthletes = isStaff
     ? await prisma.athlete.findMany({
         orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
-        select: { id: true, firstName: true, lastName: true }})
+        select: { id: true, firstName: true, lastName: true, nicknames: true }})
     : []
 
   const linkedAthlete = session
@@ -117,7 +118,7 @@ export default async function Nav() {
     : []
 
   const roleLabel = previewAthlete
-    ? `As ${previewAthlete.lastName}, ${previewAthlete.firstName}`
+    ? `As ${athletePreferredNameLastFirst(previewAthlete)}`
     : athleteView
       ? "Athlete View"
       : formatRoleLabel(session?.user.role ?? "ATHLETE")
@@ -126,7 +127,7 @@ export default async function Nav() {
     <AthleteViewToggle
       athletes={previewAthletes.map((a) => ({
         id: a.id,
-        name: `${a.lastName}, ${a.firstName}`}))}
+        name: athletePreferredNameLastFirst(a)}))}
       selectedAthleteId={previewAthlete?.id ?? null}
     />
   ) : null
@@ -134,8 +135,8 @@ export default async function Nav() {
   const scraperButton = showStaffTools ? <RunScraperButton /> : null
 
   return (
-    <nav className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-zinc-200 bg-background px-4 py-3 dark:border-zinc-800 sm:px-6 sm:py-4">
-      <div className="flex min-w-0 items-center gap-7">
+    <nav className="sticky top-0 z-40 flex items-center justify-between gap-2 border-b border-zinc-200 bg-background px-6 py-4 dark:border-zinc-800">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
         <Link
           href="/"
           className="inline-flex items-center gap-2.5 font-semibold text-base tracking-tight hover:opacity-90 transition-opacity"
@@ -150,25 +151,11 @@ export default async function Nav() {
           />
           <span className="truncate">SwimBuzz</span>
         </Link>
-        {session && (
-          <div className="hidden items-center gap-5 text-[15px] text-foreground-secondary md:flex">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                prefetch={link.prefetch}
-                className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors"
-              >
-                {link.icon}
-                {link.label}
-              </Link>
-            ))}
-          </div>
-        )}
+        {session ? <ResponsiveNavLinks links={navLinks} /> : null}
       </div>
-      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-        {athleteToggle ? <div className="hidden md:block">{athleteToggle}</div> : null}
-        {scraperButton ? <div className="hidden md:block">{scraperButton}</div> : null}
+      <div className="flex shrink-0 items-center gap-3">
+        {athleteToggle ? <div className="hidden lg:block">{athleteToggle}</div> : null}
+        {scraperButton ? <div className="hidden lg:block">{scraperButton}</div> : null}
         {session ? (
           <>
             <NotificationsMenu
@@ -187,17 +174,6 @@ export default async function Nav() {
                 linkedAthlete?.swimCloudId
                   ? `https://www.swimcloud.com/swimmer/${linkedAthlete.swimCloudId}/`
                   : null
-              }
-            />
-            <MobileNavMenu
-              links={[...navLinks]}
-              staffTools={
-                athleteToggle || scraperButton ? (
-                  <>
-                    {athleteToggle}
-                    {scraperButton}
-                  </>
-                ) : undefined
               }
             />
           </>

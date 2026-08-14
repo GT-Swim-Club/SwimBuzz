@@ -48,6 +48,10 @@ export function practicePath(slug: string): string {
   return `/practices/${slug}`
 }
 
+export function practiceEditPath(slug: string): string {
+  return `/practices/${slug}/edit`
+}
+
 export async function uniquePracticeSlug(
   date: Date | null,
   excludeId?: string

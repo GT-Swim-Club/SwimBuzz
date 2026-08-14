@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Modal, { ModalFooter } from "@/components/Modal"
+import { DatePicker, TimePicker } from "@/components/CustomDateTimePicker"
 import { MeetFormCustomQuestionsEditor } from "@/components/MeetFormCustomQuestions"
 import {
   findIncompleteChoiceQuestion,
@@ -10,18 +11,27 @@ import {
   type MeetSignupQuestion,
 } from "@/lib/meet-signup"
 
-function toDatetimeLocal(iso: string | null): string {
+function toDatePart(iso: string | null): string {
   if (!iso) return ""
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return ""
   const pad = (n: number) => String(n).padStart(2, "0")
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
-function fromDatetimeLocal(value: string): string | null {
-  const trimmed = value.trim()
-  if (!trimmed) return null
-  const d = new Date(trimmed)
+function toTimePart(iso: string | null): string {
+  if (!iso) return ""
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ""
+  const pad = (n: number) => String(n).padStart(2, "0")
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+function fromDateTimeParts(date: string, time: string): string | null {
+  const datePart = date.trim()
+  const timePart = time.trim()
+  if (!datePart || !timePart) return null
+  const d = new Date(`${datePart}T${timePart}`)
   if (Number.isNaN(d.getTime())) return null
   return d.toISOString()
 }
@@ -37,19 +47,23 @@ export type MeetRoomConfigInitial = {
 export default function MeetRoomConfigButton({
   meetId,
   initial,
+  inline = false,
 }: {
   meetId: string
   initial: MeetRoomConfigInitial | null
+  inline?: boolean
 }) {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(inline)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState({
     instructions: initial?.instructions ?? "",
     maxPreferences: initial?.maxPreferences?.toString() ?? "3",
-    openAt: toDatetimeLocal(initial?.openAt ?? null),
-    closeAt: toDatetimeLocal(initial?.closeAt ?? null),
+    openDate: toDatePart(initial?.openAt ?? null),
+    openTime: toTimePart(initial?.openAt ?? null),
+    closeDate: toDatePart(initial?.closeAt ?? null),
+    closeTime: toTimePart(initial?.closeAt ?? null),
     customQuestions: initial?.customQuestions ?? [],
   })
 
@@ -59,16 +73,18 @@ export default function MeetRoomConfigButton({
     setForm({
       instructions: initial?.instructions ?? "",
       maxPreferences: initial?.maxPreferences?.toString() ?? "3",
-      openAt: toDatetimeLocal(initial?.openAt ?? null),
-      closeAt: toDatetimeLocal(initial?.closeAt ?? null),
+      openDate: toDatePart(initial?.openAt ?? null),
+      openTime: toTimePart(initial?.openAt ?? null),
+      closeDate: toDatePart(initial?.closeAt ?? null),
+      closeTime: toTimePart(initial?.closeAt ?? null),
       customQuestions: initial?.customQuestions ?? [],
     })
   }, [open, initial])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const openAt = fromDatetimeLocal(form.openAt)
-    const closeAt = fromDatetimeLocal(form.closeAt)
+    const openAt = fromDateTimeParts(form.openDate, form.openTime)
+    const closeAt = fromDateTimeParts(form.closeDate, form.closeTime)
     if (openAt && closeAt && new Date(openAt) > new Date(closeAt)) {
       setError("Close time must be on or after the open time")
       return
@@ -104,8 +120,8 @@ export default function MeetRoomConfigButton({
         body: JSON.stringify({
           instructions: form.instructions,
           maxPreferences,
-          openAt: fromDatetimeLocal(form.openAt),
-          closeAt: fromDatetimeLocal(form.closeAt),
+          openAt: fromDateTimeParts(form.openDate, form.openTime),
+          closeAt: fromDateTimeParts(form.closeDate, form.closeTime),
           customQuestions: form.customQuestions,
         }),
       })
@@ -114,7 +130,7 @@ export default function MeetRoomConfigButton({
         setError(data.error ?? "Failed to save")
         return
       }
-      setOpen(false)
+      if (!inline) setOpen(false)
       router.refresh()
     } catch {
       setError("Something went wrong")
@@ -127,6 +143,7 @@ export default function MeetRoomConfigButton({
     <>
       <button
         type="button"
+        hidden={inline}
         onClick={() => setOpen(true)}
         className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border border-border rounded-md hover:bg-fill transition-colors"
       >
@@ -148,15 +165,19 @@ export default function MeetRoomConfigButton({
       </button>
 
       <Modal
+        presentation={inline ? "inline" : "dialog"}
+        portal={!inline}
+        panelClassName={inline ? "w-full max-w-none max-h-none overflow-visible shadow-sm" : ""}
         open={open}
-        onClose={() => !loading && setOpen(false)}
-        title="Roommate Preference Form"
+        onClose={() => !loading && !inline && setOpen(false)}
+        title={inline ? (initial ? "Roommate preference settings" : "Set up roommate preferences") : "Roommate Preference Form"}
         description=""
         maxWidth="2xl"
         footer={
           <ModalFooter>
             <button
               type="button"
+              hidden={inline}
               onClick={() => setOpen(false)}
               disabled={loading}
               className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium hover:bg-fill"
@@ -180,23 +201,61 @@ export default function MeetRoomConfigButton({
               <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Opens
               </label>
-              <input
-                type="datetime-local"
-                value={form.openAt}
-                onChange={(e) => setForm((f) => ({ ...f, openAt: e.target.value }))}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
-              />
+              <div className="space-y-2">
+                <DatePicker
+                  value={form.openDate}
+                  onChange={(value) => setForm((form) => ({
+                    ...form,
+                    openDate: value,
+                    openTime: value ? form.openTime || "00:00" : "",
+                  }))}
+                  placeholder="Date"
+                  ariaLabel="Opening date"
+                  clearable
+                />
+                <TimePicker
+                  key={form.openDate}
+                  value={form.openTime}
+                  onChange={(value) => setForm((form) => ({
+                    ...form,
+                    openDate: value ? form.openDate : "",
+                    openTime: value,
+                  }))}
+                  placeholder="Time"
+                  ariaLabel="Opening time"
+                  disabled={!form.openDate}
+                />
+              </div>
             </div>
             <div>
               <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Closes
               </label>
-              <input
-                type="datetime-local"
-                value={form.closeAt}
-                onChange={(e) => setForm((f) => ({ ...f, closeAt: e.target.value }))}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
-              />
+              <div className="space-y-2">
+                <DatePicker
+                  value={form.closeDate}
+                  onChange={(value) => setForm((form) => ({
+                    ...form,
+                    closeDate: value,
+                    closeTime: value ? form.closeTime || "00:00" : "",
+                  }))}
+                  placeholder="Date"
+                  ariaLabel="Closing date"
+                  clearable
+                />
+                <TimePicker
+                  key={form.closeDate}
+                  value={form.closeTime}
+                  onChange={(value) => setForm((form) => ({
+                    ...form,
+                    closeDate: value ? form.closeDate : "",
+                    closeTime: value,
+                  }))}
+                  placeholder="Time"
+                  ariaLabel="Closing time"
+                  disabled={!form.closeDate}
+                />
+              </div>
             </div>
           </div>
 

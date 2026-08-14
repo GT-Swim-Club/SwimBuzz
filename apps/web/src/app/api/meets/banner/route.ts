@@ -1,8 +1,8 @@
-import path from "path"
 import { NextResponse } from "next/server"
 import { randomUUID } from "crypto"
 import sharp from "sharp"
 import { getSession } from "@/lib/session"
+import { resolvedFileExt } from "@/lib/upload-file-ext"
 
 export const runtime = "nodejs"
 
@@ -52,8 +52,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "File is required" }, { status: 400 })
   }
 
-  const ext = path.extname(file.name).toLowerCase()
-  if (!ALLOWED_EXT.has(ext)) {
+  const ext = resolvedFileExt(file, ALLOWED_EXT, MIME)
+  if (!ext) {
     return NextResponse.json(
       { error: "Unsupported file type — use PNG, JPG, WebP, SVG, or HEIC" },
       { status: 400 }

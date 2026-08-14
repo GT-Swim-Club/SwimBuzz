@@ -6,7 +6,7 @@ import Modal, { ModalFooter } from "@/components/Modal"
 import { useScraperUi } from "@/components/ScraperUiProvider"
 import { useImportTask } from "@/components/ImportTaskProvider"
 import { currentSeason } from "@/lib/season"
-import { FileDropzone } from "@/components/FileDropzone"
+import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/FileDropzone"
 
 type Source = "pdf" | "url"
 
@@ -155,11 +155,13 @@ export default function UploadStandardsButton({
                 setError(null);
               }}
               accept="application/pdf,.pdf"
-              className="block w-full rounded-lg border border-border p-4 text-center text-sm text-foreground-secondary hover:bg-fill-secondary cursor-pointer"
+              className={fileDropzoneSurfaceClassName(Boolean(selectedFile))}
             >
-              <p className="text-sm">
-                {selectedFile ? selectedFile.name : "Click or drag and drop a PDF file"}
-              </p>
+              <FileDropzoneContent
+                fileName={selectedFile?.name}
+                emptyLabel="Click or drag and drop to upload a PDF"
+                onRemove={() => setSelectedFile(null)}
+              />
             </FileDropzone>
           </label>
         )}

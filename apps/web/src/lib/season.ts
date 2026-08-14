@@ -52,6 +52,20 @@ export function currentSeason(): string {
   return seasonFromDate(new Date())
 }
 
+/**
+ * Prefer a requested season if it exists in `seasons` (latest-first).
+ * Otherwise use the latest listed season, then the calendar season.
+ */
+export function resolveListedSeason(
+  requested: unknown,
+  seasons: string[],
+  fallback = currentSeason()
+): string {
+  const parsed = parseSeason(requested)
+  if (parsed && seasons.includes(parsed)) return parsed
+  return seasons[0] ?? fallback
+}
+
 /** Recent seasons for dropdowns, most recent first. */
 export function seasonOptions(count = 6): string[] {
   const end = seasonEndYear(currentSeason())

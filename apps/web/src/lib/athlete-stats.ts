@@ -1,6 +1,6 @@
 import type { MeetHighlights, StatCounter, StatSpotlight } from "@/lib/meet-stats"
 import { currentSeason, parseSeason, seasonFromDate } from "@/lib/season"
-import { normalizeEventName } from "@/lib/swim-parse"
+import { canonicalizeStrokeEvent, normalizeEventName } from "@/lib/swim-parse"
 import { formatDisplayTime, formatTime } from "@/lib/utils"
 
 export type AthleteSwimForStats = {
@@ -176,7 +176,7 @@ export function computeAthleteHighlights(
   if (signature && signature.count >= 2) {
     counters.push({
       label: "Signature",
-      value: signature.event,
+      value: canonicalizeStrokeEvent(signature.event),
       hint: `${signature.course} · ${signature.count} swims`,
     })
   }

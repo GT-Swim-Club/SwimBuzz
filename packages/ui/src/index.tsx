@@ -189,6 +189,7 @@ export function Button({
   label,
   loading,
   variant = "primary",
+  icon,
   style,
   disabled,
   ...props
@@ -196,6 +197,7 @@ export function Button({
   label: string
   loading?: boolean
   variant?: "primary" | "secondary" | "danger"
+  icon?: React.ReactNode
 }) {
   const isPrimary = variant === "primary"
   const isDanger = variant === "danger"
@@ -216,15 +218,18 @@ export function Button({
       {loading ? (
         <ActivityIndicator color={isPrimary ? c.primaryText : c.text} />
       ) : (
-        <Text
-          style={[
-            styles.buttonLabel,
-            isPrimary && styles.buttonLabelPrimary,
-            isDanger && styles.buttonLabelDanger,
-          ]}
-        >
-          {label}
-        </Text>
+        <View style={styles.buttonContent}>
+          {icon}
+          <Text
+            style={[
+              styles.buttonLabel,
+              isPrimary && styles.buttonLabelPrimary,
+              isDanger && styles.buttonLabelDanger,
+            ]}
+          >
+            {label}
+          </Text>
+        </View>
       )}
     </Pressable>
   )
@@ -399,6 +404,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: spacing.lg,
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
   },
   buttonPrimary: {
     backgroundColor: c.primary,

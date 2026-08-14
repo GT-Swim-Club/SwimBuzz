@@ -30,6 +30,7 @@ export async function PUT(
   const body = await req.json()
   const rooms: RoomInput[] = Array.isArray(body.rooms) ? body.rooms : []
   const rosterIds = new Set(ctx.roster.map((a) => a.id))
+  const rosterGenderById = new Map(ctx.roster.map((athlete) => [athlete.id, athlete.gender]))
   const assigned = new Set<string>()
 
   for (let i = 0; i < rooms.length; i++) {
@@ -37,6 +38,7 @@ export async function PUT(
     const athleteIds = Array.isArray(room.athleteIds)
       ? room.athleteIds.filter((id): id is string => typeof id === "string")
       : []
+    let roomGender: (typeof ctx.roster)[number]["gender"] | undefined
     for (const athleteId of athleteIds) {
       if (!rosterIds.has(athleteId)) {
         return NextResponse.json(
@@ -47,6 +49,20 @@ export async function PUT(
       if (assigned.has(athleteId)) {
         return NextResponse.json({ error: "Each athlete can only be in one room" }, { status: 400 })
       }
+      const athleteGender = rosterGenderById.get(athleteId)
+      if (!athleteGender) {
+        return NextResponse.json(
+          { error: "Athlete gender is required for room assignment" },
+          { status: 400 }
+        )
+      }
+      if (roomGender && athleteGender !== roomGender) {
+        return NextResponse.json(
+          { error: "A room can only include athletes of the same gender" },
+          { status: 400 }
+        )
+      }
+      roomGender = athleteGender
       assigned.add(athleteId)
     }
   }

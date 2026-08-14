@@ -74,6 +74,48 @@ export function formatMeetDateRange(
   return `${start.toLocaleDateString(undefined, opts)} – ${end.toLocaleDateString(undefined, opts)}`
 }
 
+export function formatClockTime(value: string | Date): string {
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) return ""
+    return formatClockTime(`${String(value.getHours()).padStart(2, "0")}:${String(value.getMinutes()).padStart(2, "0")}`)
+  }
+  const match = value.trim().match(/^(\d{1,2}):(\d{2})$/)
+  if (!match) return value
+  const hour = Number(match[1])
+  const minute = Number(match[2])
+  if (hour > 23 || minute > 59) return value
+  const period = hour >= 12 ? "PM" : "AM"
+  const hour12 = String(hour % 12 || 12).padStart(2, "0")
+  return `${hour12}:${String(minute).padStart(2, "0")} ${period}`
+}
+
+/** "07:30–09:00 PM" when both share AM/PM; otherwise "07:30 AM–12:00 PM". */
+export function formatClockTimeRange(
+  start: string | Date,
+  end: string | Date
+): string {
+  const startText = formatClockTime(start)
+  const endText = formatClockTime(end)
+  if (!startText || !endText) return [startText, endText].filter(Boolean).join("–")
+  const periodRe = /\s(AM|PM)$/
+  const startPeriod = startText.match(periodRe)?.[1]
+  const endPeriod = endText.match(periodRe)?.[1]
+  if (startPeriod && endPeriod && startPeriod === endPeriod) {
+    return `${startText.replace(periodRe, "")}–${endText}`
+  }
+  return `${startText}–${endText}`
+}
+
+export function formatDateTime(value: string | Date): string {
+  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(date.getTime())) return ""
+  return `${date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })}, ${formatClockTime(date)}`
+}
+
 export function athleteDisplayName(athlete: {
   firstName: string
   lastName: string
@@ -84,6 +126,40 @@ export function athleteDisplayName(athlete: {
   return `${athlete.firstName} ${athlete.lastName}`
 }
 
+/**
+ * Format an athlete for everyday, non-roster display. When an athlete has a
+ * nickname, use it in place of their legal first name; otherwise fall back to
+ * the legal name. Roster and athlete-profile views should continue to use
+ * athleteDisplayName so they retain legal-name visibility.
+ */
+export function athletePreferredName(athlete: {
+  firstName: string
+  lastName: string
+  nicknames?: string[]
+}): string {
+  const nickname = athlete.nicknames?.find((name) => name.trim().length > 0)?.trim()
+  return `${nickname ?? athlete.firstName} ${athlete.lastName}`.trim()
+}
+
+/** Format a preferred athlete name in last-name-first order for compact lists. */
+export function athletePreferredNameLastFirst(athlete: {
+  firstName: string
+  lastName: string
+  nicknames?: string[]
+}): string {
+  const nickname = athlete.nicknames?.find((name) => name.trim().length > 0)?.trim()
+  return `${athlete.lastName}, ${nickname ?? athlete.firstName}`
+}
+
+/** Return initials matching the athlete's preferred display name. */
+export function athletePreferredInitials(athlete: {
+  firstName: string
+  lastName: string
+  nicknames?: string[]
+}): string {
+  const preferredName = athlete.nicknames?.find((name) => name.trim().length > 0)?.trim()
+  return `${(preferredName ?? athlete.firstName)[0] ?? ""}${athlete.lastName[0] ?? ""}`
+}
 /** Convert milliseconds to "1:23.45" or "58.32". */
 export function formatTime(ms: number): string {
   const totalSeconds = ms / 1000

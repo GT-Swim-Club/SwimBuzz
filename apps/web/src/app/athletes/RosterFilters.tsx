@@ -1,19 +1,21 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useSession } from "next-auth/react"
 import LiveSearch from "@/components/LiveSearch"
-import { currentSeason, parseSeason, upcomingSeason } from "@/lib/season"
+import { resolveListedSeason, upcomingSeason } from "@/lib/season"
 import Modal, { ModalFooter } from "@/components/Modal"
 
-function useRosterParams() {
+function useRosterParams(seasons: string[]) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
   const gender = searchParams.get("gender") ?? "all"
-  const season =
-    parseSeason(searchParams.get("season") ?? searchParams.get("year")) ?? currentSeason()
+  const season = resolveListedSeason(
+    searchParams.get("season") ?? searchParams.get("year"),
+    seasons
+  )
 
   function updateParams(updates: Record<string, string | null>) {
     const params = new URLSearchParams(searchParams.toString())
@@ -34,8 +36,8 @@ export function RosterSearch() {
 
 export default function RosterFilters({ count, seasons }: { count: number, seasons: string[] }) {
   const { data: session } = useSession()
-  const { gender, season, updateParams } = useRosterParams()
   const [fetchedSeasons, setFetchedSeasons] = useState<string[]>(seasons)
+  const { gender, season, updateParams } = useRosterParams(fetchedSeasons)
   
   const [addSeasonModalOpen, setAddSeasonModalOpen] = useState(false)
   const upcoming = upcomingSeason()

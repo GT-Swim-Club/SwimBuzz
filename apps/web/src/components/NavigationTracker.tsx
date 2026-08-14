@@ -6,6 +6,7 @@ import {
   buildFullPath,
   formatBackLabel,
   isBackNavigation,
+  isSameLogicalPage,
   NAV_CURR_KEY,
   NAV_CURR_LABEL_KEY,
   setBackTarget,
@@ -19,7 +20,12 @@ export default function NavigationTracker() {
     const current = buildFullPath(pathname, searchParams.toString())
     const stored = sessionStorage.getItem(NAV_CURR_KEY)
 
-    if (stored && stored !== current && !isBackNavigation(stored, current)) {
+    if (
+      stored &&
+      stored !== current &&
+      !isBackNavigation(stored, current) &&
+      !isSameLogicalPage(stored, current)
+    ) {
       const fromLabel =
         sessionStorage.getItem(NAV_CURR_LABEL_KEY) ?? formatBackLabel(stored, "Back")
       setBackTarget(current, { href: stored, label: fromLabel })

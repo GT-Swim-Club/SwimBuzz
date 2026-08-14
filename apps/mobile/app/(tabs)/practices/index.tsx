@@ -7,7 +7,7 @@ import {
 } from "react-native"
 import { useFocusEffect, useRouter } from "expo-router"
 import type { PracticeSummary } from "@swimbuzz/shared"
-import { isStaffRole } from "@swimbuzz/shared"
+import { formatClockTimeRange, isStaffRole } from "@swimbuzz/shared"
 import {
   Button,
   Chip,
@@ -148,7 +148,7 @@ export default function PracticesScreen() {
                       day: "numeric",
                     })
                   : null,
-                `${item.startTime}–${item.endTime}`,
+                formatClockTimeRange(item.startTime, item.endTime),
                 item.location,
                 item.focus,
               ]

@@ -1,12 +1,17 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import type { ResultSplit } from "@/lib/meet-sheet-summary"
 import SummaryRowLayout from "@/components/SummaryRowLayout"
 import IndividualSplitsModal, {
   type ResultRoundSection,
 } from "./IndividualSplitsModal"
+
+function hashMatchesId(id: string) {
+  const hashes = window.location.hash.split("#").filter(Boolean)
+  return hashes[hashes.length - 1] === id
+}
 
 export default function IndividualSummaryRow({
   athleteName,
@@ -46,6 +51,16 @@ export default function IndividualSummaryRow({
   rounds?: ResultRoundSection[]
 }) {
   const [detailOpen, setDetailOpen] = useState(false)
+
+  useEffect(() => {
+    if (!id) return
+    const openIfHash = () => {
+      if (hashMatchesId(id)) setDetailOpen(true)
+    }
+    openIfHash()
+    window.addEventListener("hashchange", openIfHash)
+    return () => window.removeEventListener("hashchange", openIfHash)
+  }, [id])
 
   return (
     <>

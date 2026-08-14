@@ -6,6 +6,7 @@ import type { PracticeFormState } from "../PracticeEditor"
 import { serializePracticeEditLock } from "@/lib/practice-edit-lock"
 import { isCuid, practicePath } from "@/lib/slug"
 import { getSession } from "@/lib/session"
+import { practiceSetSelect } from "@/lib/practice-input"
 
 function toDateInput(d: Date | null | undefined): string {
   if (!d) return ""
@@ -25,8 +26,11 @@ export default async function PracticePage({
   const practice = await prisma.practice.findFirst({
     where: isCuid(param) ? { OR: [{ id: param }, { slug: param }] } : { slug: param },
     include: {
-      sets: { orderBy: { order: "asc" } },
-      comments: { orderBy: { createdAt: "asc" } },
+      sets: { orderBy: { order: "asc" }, select: practiceSetSelect },
+      comments: {
+        orderBy: { createdAt: "asc" },
+        include: { author: { select: { image: true } } },
+      },
       editLockedBy: { select: { id: true, name: true } }}})
 
   if (!practice || (!practice.published && !isCoach)) notFound()
@@ -48,12 +52,12 @@ export default async function PracticePage({
       id: s.id,
       title: s.title ?? "",
       content: s.content,
-      notes: s.notes ?? "",
       distance: s.distance != null ? String(s.distance) : ""}))}
 
   return (
     <PracticeDetail
       practiceId={practice.id}
+      practiceSlug={practice.slug}
       title={practice.title}
       published={practice.published}
       dateIso={practice.date ? practice.date.toISOString() : null}
@@ -66,7 +70,6 @@ export default async function PracticePage({
         id: s.id,
         title: s.title,
         content: s.content,
-        notes: s.notes,
         distance: s.distance}))}
       totalDistance={totalDistance}
       initial={initial}
@@ -76,6 +79,7 @@ export default async function PracticePage({
         id: c.id,
         authorName: c.authorName,
         authorId: c.authorId,
+        authorImage: c.author?.image ?? null,
         body: c.body,
         parentId: c.parentId,
         createdAt: c.createdAt.toISOString()}))}

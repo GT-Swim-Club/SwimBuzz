@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
-  eventsFromEventOrder,
   formatSignupEventLabel,
   partitionSignupEvents,
   resolveSignupEventOptions,
@@ -15,7 +15,6 @@ import {
 import { isSignupAnswers } from "@/lib/meet-signup"
 import { formatDisplayTime } from "@/lib/utils"
 import Modal, { ModalFooter } from "@/components/Modal"
-import MeetSignupConfigButton from "./MeetSignupConfigButton"
 import MeetSignupAthleteForm from "./MeetSignupAthleteForm"
 
 type EntryRow = {
@@ -45,6 +44,7 @@ type FormData = {
 }
 
 export default function MeetSignupSection({
+  meetPath,
   meetId,
   eventOrder,
   isCoach,
@@ -57,6 +57,7 @@ export default function MeetSignupSection({
   course,
   hasImportedResults = false,
 }: {
+  meetPath: string
   meetId: string
   eventOrder: unknown
   isCoach: boolean
@@ -105,7 +106,7 @@ export default function MeetSignupSection({
           // If we got a successful response, refresh to update the component
           router.refresh()
         }
-      } catch (error) {
+      } catch {
         // Silently handle errors - polling continues
       }
     }
@@ -148,7 +149,15 @@ export default function MeetSignupSection({
       })
     : { allowed: false, reason: null, deadline: null }
 
-  const showAthleteForm = form && !isCoach && ((form.openAt && new Date(form.openAt) > new Date()) || (form.closeAt && new Date(form.closeAt) > new Date()) || !form.closeAt || Boolean(myEntry))
+  const openAtDate = form?.openAt ? new Date(form.openAt) : null
+  const closeAtDate = form?.closeAt ? new Date(form.closeAt) : null
+  const now = new Date()
+  const showAthleteForm = Boolean(
+    form &&
+      !isCoach &&
+      openAtDate &&
+      (openAtDate > now || (closeAtDate ? closeAtDate > now : true) || myEntry)
+  )
   const showSection = isCoach || showAthleteForm || (entries && entries.length > 0)
 
   const entriesByAthleteId: Record<
@@ -235,67 +244,18 @@ export default function MeetSignupSection({
 
   return (
     <section>
-      <div className="flex items-center flex-wrap gap-x-3 gap-y-2 mb-3">
-        <h2 className="text-sm font-medium text-foreground-secondary uppercase tracking-wide">
+      <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+        <h2 className="text-sm font-medium uppercase tracking-wide text-foreground-secondary">
           Sign-ups
         </h2>
-        {isCoach && (
-          <div className="flex flex-wrap items-center gap-1.5">
-            <MeetSignupConfigButton
-              meetId={meetId}
-              eventCount={eventOptions.length}
-              initial={
-                form
-                  ? {
-                      instructions: form.instructions,
-                      minEvents: form.minEvents,
-                      maxEvents: form.maxEvents,
-                      maxRelayEvents: form.maxRelayEvents,
-                      askNotes: form.askNotes,
-                      customQuestions: form.customQuestions,
-                      openAt: form.openAt,
-                      closeAt: form.closeAt,
-                      withdrawUntil: form.withdrawUntil,
-                    }
-                  : null
-              }
-            />
-            {form && (
-              <button
-                type="button"
-                onClick={() => setResponsesOpen(true)}
-                className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border border-border rounded-md bg-background hover:bg-fill transition-colors"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-3 w-3 shrink-0"
-                  aria-hidden="true"
-                >
-                  <path d="M8 6h13" />
-                  <path d="M8 12h13" />
-                  <path d="M8 18h13" />
-                  <path d="M3 6h.01" />
-                  <path d="M3 12h.01" />
-                  <path d="M3 18h.01" />
-                </svg>
-                Responses{entries.length > 0 ? ` (${entries.length})` : ""}
-              </button>
-            )}
-          </div>
-        )}
         {form && (
           <span
             className={
-              "text-xs px-2 py-0.5 rounded-full border border-border " +
+              "rounded-full border px-2 py-0.5 text-xs " +
               (window.open
-                ? "border-emerald-300 text-emerald-800 bg-emerald-50 dark:border-emerald-800 dark:text-emerald-300 dark:bg-emerald-950/40"
-                : "border border-border text-foreground-tertiary dark:text-foreground-tertiary")
+                ? "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                : "border-border text-foreground-tertiary"
+              )
             }
           >
             {window.open ? "Open" : "Closed"}
@@ -303,13 +263,14 @@ export default function MeetSignupSection({
         )}
       </div>
 
-      {!form && isCoach && (
-        <p className="text-sm text-foreground-secondary dark:text-foreground-secondary">
-          Set up a sign-up form so swimmers can enter events for this meet.
-          {eventsFromEventOrder(eventOrder).length === 0
-            ? " Import a meet packet first so the order of events is available."
-            : ""}
-        </p>
+      {isCoach && (
+        <Link
+          href={`${meetPath}/signups`}
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm text-primary-text transition-colors hover:bg-primary-hover"
+        >
+          {form ? "Manage sign-ups" : "Set up sign-ups"}
+          <span aria-hidden="true">→</span>
+        </Link>
       )}
 
       {form && eventOptions.length === 0 ? (
@@ -321,7 +282,7 @@ export default function MeetSignupSection({
         </p>
       ) : null}
 
-      {form && eventOptions.length > 0 && !isCoach ? (
+      {form && eventOptions.length > 0 && !isCoach && isStaff ? (
         <MeetSignupAthleteForm
           meetId={meetId}
           course={course}
@@ -348,6 +309,22 @@ export default function MeetSignupSection({
         />
       ) : null}
 
+      {form && eventOptions.length > 0 && !isCoach && !isStaff ? (
+        <>
+          {!window.open && !myEntry && window.reason && (
+            <p className="mb-3 text-sm text-foreground-secondary">{window.reason}</p>
+          )}
+          {(window.open || myEntry) && (
+            <Link
+              href={`${meetPath}/signup`}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm text-primary-text transition-colors hover:bg-primary-hover"
+            >
+              {myEntry ? "Review sign-up" : "Open sign-up"}
+              <span aria-hidden="true">→</span>
+            </Link>
+          )}
+        </>
+      ) : null}
       {isCoach && form && (
         <>
           <Modal
@@ -498,7 +475,7 @@ export default function MeetSignupSection({
             }}
             closeDisabled={syncingRoster}
             busy={syncingRoster}
-            title="Add to roster summary?"
+            title="Add To Roster Summary?"
             description="This updates Roster Summary entry seeds from individual event sign-ups. Relay interest is left alone. Athletes without a sign-up keep their existing rows."
             maxWidth="md"
             overlayClassName="z-[60]"

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react"
 import { createPortal } from "react-dom"
 import Modal, { ModalFooter } from "@/components/Modal"
+import { FilePreviewDialog } from "@/components/FilePreview"
 import MeetResourceIcon from "@/components/MeetResourceIcon"
 
 function PhotoLightbox({
@@ -235,6 +236,10 @@ export default function PhotosButtons({
   label?: string
 }) {
   const [open, setOpen] = useState(false)
+  const [selectedPhoto, setSelectedPhoto] = useState<{
+    url: string
+    name: string
+  } | null>(null)
 
   if (photos.length === 0) return null
 
@@ -246,21 +251,29 @@ export default function PhotosButtons({
 
   if (photos.length === 1) {
     return (
-      <a
-        href={photos[0].url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={photosButtonClassName}
-      >
-        <MeetResourceIcon kind="photos" />
-        {buttonLabel}
-      </a>
+      <>
+        <button
+          type="button"
+          onClick={() => setSelectedPhoto(photos[0])}
+          className={photosButtonClassName}
+        >
+          <MeetResourceIcon kind="photos" />
+          {buttonLabel}
+        </button>
+        <FilePreviewDialog
+          open={selectedPhoto !== null}
+          onClose={() => setSelectedPhoto(null)}
+          title={selectedPhoto?.name || buttonLabel}
+          url={selectedPhoto?.url ?? ""}
+        />
+      </>
     )
   }
 
   return (
     <>
       <button
+        type="button"
         onClick={() => setOpen(true)}
         className={photosButtonClassName}
       >
@@ -286,20 +299,30 @@ export default function PhotosButtons({
         }
       >
         <div className="space-y-2">
-          {photos.map((p, i) => (
-            <a
-              key={i}
-              href={p.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 p-3 rounded-lg border border-border bg-background hover:bg-fill transition-colors"
+          {photos.map((photo, index) => (
+            <button
+              key={`${photo.url}-${index}`}
+              type="button"
+              onClick={() => {
+                setOpen(false)
+                setSelectedPhoto(photo)
+              }}
+              className="flex w-full items-center gap-3 p-3 text-left rounded-lg border border-border bg-background hover:bg-fill transition-colors"
             >
               <MeetResourceIcon kind="photos" />
-              <span className="text-sm font-medium">{p.name || `Photo Link ${i + 1}`}</span>
-            </a>
+              <span className="text-sm font-medium">
+                {photo.name || `Photo Link ${index + 1}`}
+              </span>
+            </button>
           ))}
         </div>
       </Modal>
+      <FilePreviewDialog
+        open={selectedPhoto !== null}
+        onClose={() => setSelectedPhoto(null)}
+        title={selectedPhoto?.name || "Photo"}
+        url={selectedPhoto?.url ?? ""}
+      />
     </>
   )
 }

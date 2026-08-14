@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { buildMeetData, MeetInputError } from "@/lib/meet-input"
+import { buildMeetData, MeetInputError, toPrismaMeetWriteData } from "@/lib/meet-input"
 import { resolveEventOrderForPacket } from "@/lib/meet-packet-parse"
 import { attachSheetSummariesOnCreate } from "@/lib/meet-sheet-resolve"
 import { MeetImportValidationError } from "@/lib/meet-import-validate"
@@ -50,6 +50,7 @@ export async function POST(req: Request) {
       {
         packetUrl: null,
         resultsUrl: null,
+        swimphoneUrl: null,
         liveStreamUrl: null,
         rideSignUpsUrl: null,
         roomsUrl: null,
@@ -62,7 +63,7 @@ export async function POST(req: Request) {
 
     const meet = await prisma.meet.create({
       data: {
-        ...(data as Parameters<typeof prisma.meet.create>[0]["data"]),
+        ...(toPrismaMeetWriteData(data) as Parameters<typeof prisma.meet.create>[0]["data"]),
         slug: await uniqueMeetSlug(data.name as string)}})
 
     void notifyMeetRosterOfInfoDrops({

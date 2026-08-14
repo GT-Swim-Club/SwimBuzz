@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import DontReloadNotice from "@/components/DontReloadNotice"
 import Modal, { ModalFooter } from "@/components/Modal"
+import { DatePicker } from "@/components/CustomDateTimePicker"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import { useScraperUi } from "@/components/ScraperUiProvider"
 import { parseTime, formatRelativeTime, formatDateTime } from "@/lib/utils"
@@ -227,11 +228,11 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
             </div>
             <div className="w-[140px]">
               <label className="text-xs text-foreground-secondary mb-1 block">Date</label>
-              <input
-                type="date"
-                className="w-full border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background"
+              <DatePicker
                 value={form.date}
-                onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
+                onChange={(value) => setForm((form) => ({ ...form, date: value }))}
+                ariaLabel="Date"
+                clearable
               />
             </div>
           </div>

@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react"
 import { Redirect, useFocusEffect, useRouter } from "expo-router"
 import { ScrollView, View } from "react-native"
 import type { MeetSummary, PracticeSummary } from "@swimbuzz/shared"
-import { formatMeetDateRange, formatRoleLabel } from "@swimbuzz/shared"
+import { formatClockTimeRange, formatMeetDateRange, formatRoleLabel } from "@swimbuzz/shared"
 import {
   Body,
   Button,
@@ -142,7 +142,7 @@ export default function HomeScreen() {
                   subtitle={[
                     "Practice",
                     formatPracticeDate(nextPractice.date),
-                    `${nextPractice.startTime}–${nextPractice.endTime}`,
+                    formatClockTimeRange(nextPractice.startTime, nextPractice.endTime),
                     nextPractice.location,
                   ]
                     .filter(Boolean)

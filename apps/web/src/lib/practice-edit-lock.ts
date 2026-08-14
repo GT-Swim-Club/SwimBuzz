@@ -2,16 +2,23 @@ import { randomUUID } from "crypto"
 import { prisma } from "@/lib/prisma"
 import {
   PRACTICE_EDIT_LOCK_TTL_MS,
+  PRACTICE_EDIT_LOCK_YIELD_TIMEOUT_MS,
   type PracticeEditLockHolder,
   type PracticeEditLockInfo,
 } from "@/lib/practice-edit-lock-shared"
-import { notifyPracticeEditLockChanged } from "@/lib/practice-edit-lock-watch"
+import { notifyPracticeEditLockChanged, waitForPracticeEditLockChange } from "@/lib/practice-edit-lock-watch"
+import {
+  clearPracticeEditLockYield,
+  isPracticeEditLockYieldRequested,
+  requestPracticeEditLockYield,
+} from "@/lib/practice-edit-lock-yield"
 
 export {
   PRACTICE_EDIT_LOCK_TTL_MS,
   PRACTICE_EDIT_LOCK_HEARTBEAT_MS,
   PRACTICE_EDIT_LOCK_POLL_MS,
   PRACTICE_EDIT_LOCK_WATCH_TIMEOUT_MS,
+  PRACTICE_EDIT_LOCK_YIELD_TIMEOUT_MS,
   PRACTICE_EDIT_LOCK_TOKEN_HEADER,
   type PracticeEditLockHolder,
   type PracticeEditLockInfo,
@@ -134,6 +141,29 @@ export async function acquirePracticeEditLock(
     throw new PracticeEditLockError(conflictMessage(info), 409, info)
   }
 
+  if (info.locked && opts.force) {
+    requestPracticeEditLockYield(practiceId)
+    notifyPracticeEditLockChanged(practiceId)
+    const deadline = Date.now() + PRACTICE_EDIT_LOCK_YIELD_TIMEOUT_MS
+    while (Date.now() < deadline) {
+      const remaining = deadline - Date.now()
+      if (remaining <= 0) break
+      await waitForPracticeEditLockChange(practiceId, Math.min(1500, remaining))
+      const latest = await loadLock(practiceId)
+      if (!latest) {
+        clearPracticeEditLockYield(practiceId)
+        throw new PracticeEditLockError("Not found", 404, {
+          locked: false,
+          lockedByMe: false,
+          lockedBy: null,
+          expiresAt: null,
+          token: null,
+        })
+      }
+      if (!isPracticeEditLockActive(latest)) break
+    }
+  }
+
   const expiresAt = lockExpiry(now)
   const token = randomUUID()
   const data = {
@@ -165,6 +195,7 @@ export async function acquirePracticeEditLock(
   }
 
   notifyPracticeEditLockChanged(practiceId)
+  clearPracticeEditLockYield(practiceId)
 
   return {
     locked: true,
@@ -213,7 +244,7 @@ export async function heartbeatPracticeEditLock(
         ? info.lockedByMe
           ? "This tab lost the edit lock — another tab took over"
           : "Someone else took over editing"
-        : "Edit lock expired — click Edit again to continue",
+        : "Your session expired — click Edit again to continue",
       409,
       info
     )
@@ -224,6 +255,7 @@ export async function heartbeatPracticeEditLock(
     lockedBy: { id: userId, name: null },
     expiresAt: expiresAt.toISOString(),
     token,
+    yieldRequested: isPracticeEditLockYieldRequested(practiceId),
   }
 }
 

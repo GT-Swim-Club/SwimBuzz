@@ -22,6 +22,7 @@ import {
 } from "@swimbuzz/ui"
 import { spacing } from "@swimbuzz/tokens"
 import { api } from "../../../src/lib/api"
+import { DateSelector } from "../../../src/components/DateTimeSelector"
 import { useAuth } from "../../../src/lib/auth"
 
 type SwimRow = {
@@ -399,13 +400,12 @@ export default function AthleteDetailScreen() {
               autoCapitalize="none"
               autoCorrect={false}
             />
-            <TextField
+            <DateSelector
               label="Date"
               value={swimDate}
-              onChangeText={setSwimDate}
-              placeholder="YYYY-MM-DD"
-              autoCapitalize="none"
-              autoCorrect={false}
+              onChange={setSwimDate}
+              placeholder="Select a date"
+              optional
             />
             <Button
               label="Add swim"

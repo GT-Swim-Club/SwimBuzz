@@ -1,6 +1,4 @@
-const { PrismaClient } = require("@prisma/client")
-
-const prisma = new PrismaClient()
+const { prisma } = require("./prisma-singleton")
 
 // Track the state of each meet's signup window
 const meetSignupState = new Map()

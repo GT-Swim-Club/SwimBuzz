@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { isStoredMeetFileUrl } from "@/lib/meet-files"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
-import { FileDropzone } from "@/components/FileDropzone"
+import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/FileDropzone"
 
 const inputClass =
   "w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"
@@ -19,12 +19,16 @@ export default function MeetResourceField({
   value,
   onChange,
   onUploadingChange,
+  onUploaded,
+  bodyLeading,
 }: {
   label: string
   icon: ReactNode
   value: string
   onChange: (url: string) => void
   onUploadingChange?: (uploading: boolean) => void
+  onUploaded?: (url: string) => void
+  bodyLeading?: ReactNode
 }) {
   const [mode, setMode] = useState<"url" | "file">(() => initialMode(value))
   const [urlValue, setUrlValue] = useState(() =>
@@ -63,26 +67,8 @@ export default function MeetResourceField({
     }
   }, [value, mode, urlValue, fileValue])
 
-  async function deleteStoredFile(url: string) {
-    if (!isStoredMeetFileUrl(url)) return
-    await fetch("/api/meets/upload", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url }),
-    })
-  }
-
-  async function switchToUrl() {
+  function switchToUrl() {
     setUploadError(null)
-    if (fileValue) {
-      try {
-        await deleteStoredFile(fileValue)
-      } catch {
-        setUploadError("Failed to delete file")
-        return
-      }
-      setFileValue("")
-    }
     setMode("url")
     onChange(urlValue)
   }
@@ -103,16 +89,11 @@ export default function MeetResourceField({
     if (mode === "file") onChange(next)
   }
 
-  async function handleRemoveFile() {
+  function handleRemoveFile() {
     if (!fileValue || uploading) return
     setUploadError(null)
-    try {
-      await deleteStoredFile(fileValue)
-      setFileValue("")
-      if (mode === "file") onChange("")
-    } catch {
-      setUploadError("Failed to remove file")
-    }
+    setFileValue("")
+    if (mode === "file") onChange("")
   }
 
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
@@ -121,8 +102,6 @@ export default function MeetResourceField({
     setUploading(true)
     setUploadError(null)
     try {
-      if (fileValue) await deleteStoredFile(fileValue)
-
       const body = new FormData()
       body.append("file", file)
       const res = await fetch("/api/meets/upload", { method: "POST", body })
@@ -131,6 +110,7 @@ export default function MeetResourceField({
         setUploadError(data.error ?? "Upload failed")
         return
       }
+      onUploaded?.(data.url)
       updateFile(data.url)
     } catch {
       setUploadError("Upload failed")
@@ -183,7 +163,10 @@ export default function MeetResourceField({
         </div>
       </div>
 
-      {mode === "url" ? (
+      <div className={bodyLeading ? "flex items-stretch gap-2" : undefined}>
+        {bodyLeading ? <div className="flex w-32 shrink-0">{bodyLeading}</div> : null}
+        <div className={bodyLeading ? "min-w-0 flex-1" : undefined}>
+        {mode === "url" ? (
         <input
           key="url"
           value={urlValue}
@@ -197,41 +180,19 @@ export default function MeetResourceField({
             onFilesSelected={(files) => handleFileSelect({ target: { files: files as any } } as any)}
             accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt"
             disabled={uploading}
-            className="block w-full rounded-lg border border-border border-dashed p-4 text-center text-xs text-foreground cursor-pointer hover:bg-fill-secondary"
+            className={fileDropzoneSurfaceClassName(Boolean(fileValue), uploading)}
           >
-            {uploading ? "Uploading..." : "Click or drag and drop to upload file"}
+            <FileDropzoneContent
+              fileName={fileName}
+              emptyLabel="Click or drag and drop to upload a file"
+              uploading={uploading}
+              onRemove={handleRemoveFile}
+            />
           </FileDropzone>
-          {fileValue && !uploading && (
-            <div className="flex items-center gap-2">
-              {fileName && (
-                <p className="text-xs text-foreground-secondary text-foreground-secondary truncate">
-                  Uploaded: {fileName}
-                </p>
-              )}
-              <button
-                type="button"
-                onClick={() => void handleRemoveFile()}
-                className="text-foreground-tertiary hover:text-red-500"
-                aria-label="Remove file"
-              >
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-          )}
         </div>
-      )}
+        )}
+        </div>
+      </div>
 
       {uploadError && <p className="mt-1 text-xs text-red-500">{uploadError}</p>}
     </div>

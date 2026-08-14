@@ -6,8 +6,8 @@ import {
   MEET_FILE_URL_KEYS,
   type MeetFileUrlKey,
   finalsHeatSheetUrlList,
+  heatSheetUrlList,
   isStoredMeetFileUrl,
-  storagePathFromMeetFileUrl,
 } from "@/lib/meet-files"
 
 function getSupabaseConfig() {
@@ -134,30 +134,54 @@ export async function uploadMeetFile(
 }
 
 
+function parsePublicStorageUrl(
+  url: string
+): { bucket: string; path: string } | null {
+  const marker = "/storage/v1/object/public/"
+  const idx = url.indexOf(marker)
+  if (idx === -1) return null
+  const rest = url.slice(idx + marker.length)
+  const slash = rest.indexOf("/")
+  if (slash <= 0) return null
+  const bucket = rest.slice(0, slash)
+  const rawPath = rest.slice(slash + 1).split("?")[0].split("#")[0]
+  if (!bucket || !rawPath) return null
+  try {
+    return { bucket, path: decodeURIComponent(rawPath) }
+  } catch {
+    return { bucket, path: rawPath }
+  }
+}
+
+function encodeStoragePath(storagePath: string) {
+  return storagePath
+    .split("/")
+    .map((segment) => encodeURIComponent(segment))
+    .join("/")
+}
+
 /** Remove a stored file from Supabase (or legacy local disk) using its public URL. */
 export async function deleteStoredFileByUrl(url: string | null | undefined) {
   if (!url) return
+  const trimmed = url.trim()
+  if (!trimmed) return
 
   // Handle legacy local files
-  if (url.startsWith("/meet-files/")) {
+  if (trimmed.startsWith("/meet-files/")) {
     try {
-      await unlink(path.join(process.cwd(), "public", url))
+      await unlink(path.join(process.cwd(), "public", trimmed))
     } catch {
       // File may already be gone.
     }
     return
   }
 
-  // Handle Supabase files
-  const match = url.match(/\/storage\/v1\/object\/public\/([^/]+)\/(.+)$/)
-  if (!match) return
-
-  const bucket = match[1]
-  const storagePath = match[2]
+  const parsed = parsePublicStorageUrl(trimmed)
+  if (!parsed) return
 
   const { url: baseUrl, key } = getSupabaseConfig()
   const res = await fetch(
-    `${baseUrl}/storage/v1/object/${bucket}/${storagePath}`,
+    `${baseUrl}/storage/v1/object/${parsed.bucket}/${encodeStoragePath(parsed.path)}`,
     {
       method: "DELETE",
       headers: storageHeaders(key),
@@ -182,19 +206,105 @@ export async function deleteStoredMeetFile(url: string | null | undefined) {
   await deleteStoredFileByUrl(url)
 }
 
+export type MeetStoredFiles = Record<MeetFileUrlKey, string | null> & {
+  heatSheetUrls?: unknown
+  finalsHeatSheetUrls?: unknown
+  iconUrl?: string | null
+  bannerUrl?: string | null
+  photos?: unknown
+}
+
+function pushPhotoUrl(urls: string[], value: unknown) {
+  if (typeof value === "string") {
+    const trimmed = value.trim()
+    if (trimmed) urls.push(trimmed)
+    return
+  }
+  if (value && typeof value === "object" && "url" in value) {
+    const url = (value as { url?: unknown }).url
+    if (typeof url === "string" && url.trim()) urls.push(url.trim())
+  }
+}
+
+function photoPreviewUrls(photos: unknown): string[] {
+  if (!photos || typeof photos !== "object") return []
+
+  const urls: string[] = []
+  if (Array.isArray(photos)) {
+    for (const item of photos) pushPhotoUrl(urls, item)
+    return urls
+  }
+
+  const obj = photos as { previews?: unknown; links?: unknown }
+  if (Array.isArray(obj.previews)) {
+    for (const item of obj.previews) pushPhotoUrl(urls, item)
+  }
+  if (Array.isArray(obj.links)) {
+    for (const item of obj.links) pushPhotoUrl(urls, item)
+  }
+  return urls
+}
+
+function allMeetStoredUrls(meet: MeetStoredFiles): string[] {
+  return [
+    ...MEET_FILE_URL_KEYS.map((key) => meet[key]),
+    meet.iconUrl,
+    meet.bannerUrl,
+    ...heatSheetUrlList(meet.heatSheetUrls),
+    ...finalsHeatSheetUrlList(meet.finalsHeatSheetUrls),
+    ...photoPreviewUrls(meet.photos),
+  ].filter((url): url is string => Boolean(url && url.trim()))
+}
+
+async function deleteStoredUrls(urls: Iterable<string>) {
+  const unique = [...new Set([...urls].map((url) => url.trim()).filter(Boolean))]
+  const results = await Promise.allSettled(
+    unique.map((url) =>
+      isStoredMeetFileUrl(url) ? deleteStoredMeetFile(url) : deleteStoredFileByUrl(url)
+    )
+  )
+  for (const result of results) {
+    if (result.status === "rejected") {
+      console.error("Failed to delete stored meet file:", result.reason)
+    }
+  }
+}
+
 export async function deleteRemovedMeetFiles(
-  before: Record<MeetFileUrlKey, string | null> & {
-    finalsHeatSheetUrls?: unknown
-  },
+  before: MeetStoredFiles,
   after: Record<string, unknown>
 ) {
   for (const key of MEET_FILE_URL_KEYS) {
+    // heatSheetUrls owns the lifecycle of the legacy primary heatSheetUrl.
+    if (key === "heatSheetUrl" && "heatSheetUrls" in after) continue
     if (!(key in after)) continue
     const oldUrl = before[key]
     const newUrl = (after[key] as string | null) ?? null
     if (oldUrl && oldUrl !== newUrl) {
       await deleteStoredMeetFile(oldUrl)
     }
+  }
+
+  for (const key of ["iconUrl", "bannerUrl"] as const) {
+    if (!(key in after)) continue
+    const oldUrl = before[key]
+    const newUrl = (after[key] as string | null) ?? null
+    if (oldUrl && oldUrl !== newUrl) {
+      await deleteStoredFileByUrl(oldUrl)
+    }
+  }
+
+  if ("heatSheetUrls" in after) {
+    const oldUrls = new Set([
+      ...(before.heatSheetUrl ? [before.heatSheetUrl] : []),
+      ...heatSheetUrlList(before.heatSheetUrls),
+    ])
+    const newUrls = new Set(heatSheetUrlList(after.heatSheetUrls))
+    await Promise.all(
+      [...oldUrls]
+        .filter((url) => !newUrls.has(url))
+        .map((url) => deleteStoredMeetFile(url))
+    )
   }
 
   if ("finalsHeatSheetUrls" in after) {
@@ -206,17 +316,73 @@ export async function deleteRemovedMeetFiles(
         .map((url) => deleteStoredMeetFile(url))
     )
   }
+
+  if ("photos" in after) {
+    const oldUrls = new Set(photoPreviewUrls(before.photos))
+    const newUrls = new Set(photoPreviewUrls(after.photos))
+    await Promise.all(
+      [...oldUrls]
+        .filter((url) => !newUrls.has(url))
+        .map((url) => deleteStoredMeetFile(url))
+    )
+  }
 }
 
-export async function deleteAllMeetFiles(
-  meet: Record<MeetFileUrlKey, string | null> & {
-    finalsHeatSheetUrls?: unknown
-  }
+/** Delete newly added stored files in `after` that are not on `before`. */
+export async function deleteAddedMeetFiles(
+  before: MeetStoredFiles,
+  after: Record<string, unknown>
 ) {
-  await Promise.all([
-    ...MEET_FILE_URL_KEYS.map((key) => deleteStoredMeetFile(meet[key])),
-    ...finalsHeatSheetUrlList(meet.finalsHeatSheetUrls).map((url) =>
-      deleteStoredMeetFile(url)
-    ),
-  ])
+  for (const key of MEET_FILE_URL_KEYS) {
+    if (key === "heatSheetUrl" && "heatSheetUrls" in after) continue
+    if (!(key in after)) continue
+    const oldUrl = before[key] ?? null
+    const newUrl = (after[key] as string | null) ?? null
+    if (newUrl && newUrl !== oldUrl) {
+      await deleteStoredMeetFile(newUrl)
+    }
+  }
+
+  for (const key of ["iconUrl", "bannerUrl"] as const) {
+    if (!(key in after)) continue
+    const oldUrl = before[key] ?? null
+    const newUrl = (after[key] as string | null) ?? null
+    if (newUrl && newUrl !== oldUrl) {
+      await deleteStoredFileByUrl(newUrl)
+    }
+  }
+
+  if ("heatSheetUrls" in after) {
+    const oldUrls = new Set([
+      ...(before.heatSheetUrl ? [before.heatSheetUrl] : []),
+      ...heatSheetUrlList(before.heatSheetUrls),
+    ])
+    await Promise.all(
+      heatSheetUrlList(after.heatSheetUrls)
+        .filter((url) => !oldUrls.has(url))
+        .map((url) => deleteStoredMeetFile(url))
+    )
+  }
+
+  if ("finalsHeatSheetUrls" in after) {
+    const oldUrls = new Set(finalsHeatSheetUrlList(before.finalsHeatSheetUrls))
+    await Promise.all(
+      finalsHeatSheetUrlList(after.finalsHeatSheetUrls)
+        .filter((url) => !oldUrls.has(url))
+        .map((url) => deleteStoredMeetFile(url))
+    )
+  }
+
+  if ("photos" in after) {
+    const oldUrls = new Set(photoPreviewUrls(before.photos))
+    await Promise.all(
+      photoPreviewUrls(after.photos)
+        .filter((url) => !oldUrls.has(url))
+        .map((url) => deleteStoredMeetFile(url))
+    )
+  }
+}
+
+export async function deleteAllMeetFiles(meet: MeetStoredFiles) {
+  await deleteStoredUrls(allMeetStoredUrls(meet))
 }

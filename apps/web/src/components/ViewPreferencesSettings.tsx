@@ -1,6 +1,7 @@
 "use client"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
+import HoverDetail from "@/components/HoverDetail"
 
 const iconProps = {
   xmlns: "http://www.w3.org/2000/svg",
@@ -76,8 +77,7 @@ export default function ViewPreferencesSettings({
               onClick={() => updateView("gallery")} 
               disabled={pending} 
               aria-label="Gallery View"
-              title="Gallery View"
-              className={`inline-flex items-center justify-center rounded-md p-2 transition-colors ${view === "gallery" ? "bg-primary text-primary-text" : "text-foreground-secondary hover:text-foreground"}`}
+              className={`group relative inline-flex items-center justify-center rounded-md p-2 transition-colors ${view === "gallery" ? "bg-primary text-primary-text" : "text-foreground-secondary hover:text-foreground"}`}
             >
               <svg {...iconProps}>
                 <rect x="3" y="3" width="7" height="7" />
@@ -85,13 +85,13 @@ export default function ViewPreferencesSettings({
                 <rect x="14" y="14" width="7" height="7" />
                 <rect x="3" y="14" width="7" height="7" />
               </svg>
+              <HoverDetail label="Gallery" />
             </button>
             <button 
               onClick={() => updateView("list")} 
               disabled={pending} 
               aria-label="List View"
-              title="List View"
-              className={`inline-flex items-center justify-center rounded-md p-2 transition-colors ${view === "list" ? "bg-primary text-primary-text" : "text-foreground-secondary hover:text-foreground"}`}
+              className={`group relative inline-flex items-center justify-center rounded-md p-2 transition-colors ${view === "list" ? "bg-primary text-primary-text" : "text-foreground-secondary hover:text-foreground"}`}
             >
               <svg {...iconProps}>
                 <path d="M8 6h13" />
@@ -101,6 +101,7 @@ export default function ViewPreferencesSettings({
                 <path d="M3 12h.01" />
                 <path d="M3 18h.01" />
               </svg>
+              <HoverDetail label="List" />
             </button>
         </div>
       </div>
@@ -117,8 +118,7 @@ export default function ViewPreferencesSettings({
             onClick={() => updatePracticesView("week")} 
             disabled={pending} 
             aria-label="Weekly View"
-            title="Weekly View"
-            className={`inline-flex items-center justify-center rounded-md p-2 transition-colors ${practicesView === "week" ? "bg-primary text-primary-text" : "text-foreground-secondary hover:text-foreground"}`}
+            className={`group relative inline-flex items-center justify-center rounded-md p-2 transition-colors ${practicesView === "week" ? "bg-primary text-primary-text" : "text-foreground-secondary hover:text-foreground"}`}
           >
             <svg {...iconProps}>
               <rect width="18" height="18" x="3" y="4" rx="2" />
@@ -128,13 +128,13 @@ export default function ViewPreferencesSettings({
               <path d="M10 14h4" />
               <path d="M10 18h4" />
             </svg>
+              <HoverDetail label="Week" />
           </button>
           <button 
             onClick={() => updatePracticesView("month")} 
             disabled={pending} 
             aria-label="Monthly View"
-            title="Monthly View"
-            className={`inline-flex items-center justify-center rounded-md p-2 transition-colors ${practicesView === "month" ? "bg-primary text-primary-text" : "text-foreground-secondary hover:text-foreground"}`}
+            className={`group relative inline-flex items-center justify-center rounded-md p-2 transition-colors ${practicesView === "month" ? "bg-primary text-primary-text" : "text-foreground-secondary hover:text-foreground"}`}
           >
             <svg {...iconProps}>
               <rect width="18" height="18" x="3" y="4" rx="2" />
@@ -148,13 +148,13 @@ export default function ViewPreferencesSettings({
               <path d="M12 18h.01" />
               <path d="M16 18h.01" />
             </svg>
+              <HoverDetail label="Month" />
           </button>
           <button 
             onClick={() => updatePracticesView("list")} 
             disabled={pending} 
             aria-label="List View"
-            title="List View"
-            className={`inline-flex items-center justify-center rounded-md p-2 transition-colors ${practicesView === "list" ? "bg-primary text-primary-text" : "text-foreground-secondary hover:text-foreground"}`}
+            className={`group relative inline-flex items-center justify-center rounded-md p-2 transition-colors ${practicesView === "list" ? "bg-primary text-primary-text" : "text-foreground-secondary hover:text-foreground"}`}
           >
             <svg {...iconProps}>
               <path d="M8 6h13" />
@@ -164,6 +164,7 @@ export default function ViewPreferencesSettings({
               <path d="M3 12h.01" />
               <path d="M3 18h.01" />
             </svg>
+              <HoverDetail label="List" />
           </button>
         </div>
       </div>

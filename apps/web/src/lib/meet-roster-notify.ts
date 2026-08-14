@@ -16,6 +16,7 @@ export type MeetInfoDropKind = keyof typeof MEET_INFO_LABELS
 type MeetResourceSnapshot = {
   packetUrl: string | null
   resultsUrl: string | null
+  swimphoneUrl: string | null
   liveStreamUrl: string | null
   rideSignUpsUrl: string | null
   roomsUrl: string | null
@@ -50,6 +51,11 @@ export function detectMeetResourceDrops(
     const next = (data.resultsUrl as string | null) ?? null
     if (next && next !== existing.resultsUrl) drops.push("results")
   }
+  if ("swimphoneUrl" in data) {
+    const next = (data.swimphoneUrl as string | null) ?? null
+    if (next && next !== existing.swimphoneUrl) drops.push("results")
+  }
+
 
   if ("liveStreamUrl" in data) {
     const next = (data.liveStreamUrl as string | null) ?? null

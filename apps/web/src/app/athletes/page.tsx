@@ -7,7 +7,7 @@ import SyncTimesButton from "./SyncTimesButton"
 import AddAthleteButton from "./AddAthleteButton"
 import AthletesClientWrapper from "./AthletesClientWrapper"
 import RosterFilters, { RosterSearch } from "./RosterFilters"
-import { currentSeason, parseSeason } from "@/lib/season"
+import { parseSeason, resolveListedSeason } from "@/lib/season"
 import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete-view-server"
 import { getSession } from "@/lib/session"
 import {
@@ -23,12 +23,10 @@ async function RosterContent({ searchParams }: { searchParams: Promise<{ gender?
 
     const seasons = await prisma.season.findMany({
         orderBy: { label: "desc" }}).then(list => list.map(s => s.label))
-    const latestSeason = seasons[0]
+    const requestedSeason = parseSeason(seasonParam ?? legacyYear)
+    const season = resolveListedSeason(requestedSeason, seasons)
 
-    const season =
-      parseSeason(seasonParam ?? legacyYear) ?? latestSeason ?? currentSeason()
-
-    if (!gender || (!seasonParam && !legacyYear)) {
+    if (!gender || requestedSeason !== season) {
         const params = new URLSearchParams({
           gender: gender ?? "all",
           season})

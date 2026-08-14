@@ -1,7 +1,10 @@
-import { Course } from "@prisma/client"
+import { Course, Prisma } from "@prisma/client"
 import { parseMeetDate } from "@/lib/swim-parse"
 import { parseSeason, seasonFromDate } from "@/lib/season"
-import { normalizeFinalsHeatSheetUrls } from "@/lib/meet-files"
+import {
+  normalizeFinalsHeatSheetUrls,
+  normalizeHeatSheetUrls,
+} from "@/lib/meet-files"
 
 export class MeetInputError extends Error {}
 
@@ -19,6 +22,34 @@ function optionalString(value: unknown): string | null {
 }
 
 type BuildOptions = { requireName?: boolean; requireStartDate?: boolean }
+
+const MEET_JSON_KEYS = [
+  "heatSheetUrls",
+  "finalsHeatSheetUrls",
+  "eventOrder",
+  "photos",
+  "psychSheetSummary",
+  "heatSheetSummary",
+  "finalsHeatSheetSummary",
+  "entriesSheetSummary",
+  "relayResultsSummary",
+  "resultStatusesSummary",
+] as const
+
+/**
+ * Prisma JSON columns reject JavaScript `null`. Convert those clears to DbNull
+ * at the write boundary so resource toggles (empty packet URL, no heat sheets)
+ * persist as SQL NULL.
+ */
+export function toPrismaMeetWriteData<T extends Record<string, unknown>>(data: T): T {
+  const next: Record<string, unknown> = { ...data }
+  for (const key of MEET_JSON_KEYS) {
+    if (key in next && next[key] === null) {
+      next[key] = Prisma.DbNull
+    }
+  }
+  return next as T
+}
 
 /**
  * Validate and normalize meet form input into Prisma create/update data.
@@ -48,6 +79,17 @@ export function buildMeetData(body: Record<string, unknown>, opts: BuildOptions 
     } else {
       data.endDate = null
     }
+  }
+
+  const startForCompare =
+    data.startDate instanceof Date
+      ? (data.startDate as Date)
+      : "startDate" in body
+        ? parseMeetDate(String(body.startDate ?? ""))
+        : null
+  const endForCompare = data.endDate instanceof Date ? (data.endDate as Date) : null
+  if (startForCompare && endForCompare && endForCompare.getTime() < startForCompare.getTime()) {
+    throw new MeetInputError("End date must be on or after the start date")
   }
 
   if ("startTime" in body) {
@@ -85,11 +127,18 @@ export function buildMeetData(body: Record<string, unknown>, opts: BuildOptions 
   if ("packetUrl" in body) data.packetUrl = optionalString(body.packetUrl)
   if ("psychSheetUrl" in body) data.psychSheetUrl = optionalString(body.psychSheetUrl)
   if ("heatSheetUrl" in body) data.heatSheetUrl = optionalString(body.heatSheetUrl)
+  if ("heatSheetUrls" in body) {
+    const links = normalizeHeatSheetUrls(body.heatSheetUrls)
+    data.heatSheetUrls = links
+    // Preserve legacy consumers by mirroring the first current heat sheet URL.
+    data.heatSheetUrl = links?.[0]?.url ?? null
+  }
   if ("finalsHeatSheetUrls" in body) {
     data.finalsHeatSheetUrls = normalizeFinalsHeatSheetUrls(body.finalsHeatSheetUrls)
   }
   if ("entriesSheetUrl" in body) data.entriesSheetUrl = optionalString(body.entriesSheetUrl)
   if ("resultsUrl" in body) data.resultsUrl = optionalString(body.resultsUrl)
+  if ("swimphoneUrl" in body) data.swimphoneUrl = optionalString(body.swimphoneUrl)
   if ("liveStreamUrl" in body) data.liveStreamUrl = optionalString(body.liveStreamUrl)
   if ("rideSignUpsUrl" in body) data.rideSignUpsUrl = optionalString(body.rideSignUpsUrl)
   if ("roomsUrl" in body) data.roomsUrl = optionalString(body.roomsUrl)

@@ -49,6 +49,7 @@ export default function MeetSignupAthleteForm({
   entriesByAthleteId,
   openRequest = null,
   onOpenRequestHandled,
+  pageMode = false,
 }: {
   meetId: string
   course: string
@@ -75,10 +76,12 @@ export default function MeetSignupAthleteForm({
   entriesByAthleteId: Record<string, MeetSignupAthleteInitial>
   openRequest?: { type: "edit"; athleteId: string } | { type: "add" } | null
   onOpenRequestHandled?: () => void
+  /** Render this sign-up in the dedicated route instead of behind a trigger modal. */
+  pageMode?: boolean
 }) {
   const router = useRouter()
   const defaultAthleteId = selfAthleteId ?? athletes[0]?.id ?? ""
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(pageMode)
   const [athleteId, setAthleteId] = useState(defaultAthleteId)
   const [events, setEvents] = useState<string[]>([])
   const [entryTimes, setEntryTimes] = useState<Record<string, string>>({})
@@ -230,8 +233,12 @@ export default function MeetSignupAthleteForm({
         setError(data.error ?? "Failed to save sign-up")
         return
       }
-      setOpen(false)
-      router.refresh()
+      if (pageMode) {
+        router.push(`/meets/${meetId}`)
+      } else {
+        setOpen(false)
+        router.refresh()
+      }
     } catch {
       setError("Something went wrong")
     } finally {
@@ -252,8 +259,12 @@ export default function MeetSignupAthleteForm({
         return
       }
       setConfirmWithdrawOpen(false)
-      setOpen(false)
-      router.refresh()
+      if (pageMode) {
+        router.push(`/meets/${meetId}`)
+      } else {
+        setOpen(false)
+        router.refresh()
+      }
     } catch {
       setWithdrawError("Something went wrong")
     } finally {
@@ -296,7 +307,7 @@ export default function MeetSignupAthleteForm({
           Athlete view preview — coaches cannot edit sign-ups.
         </p>
       )}
-      {!isCoach && (
+      {!pageMode && !isCoach && (
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             {canEdit ? (
@@ -371,19 +382,30 @@ export default function MeetSignupAthleteForm({
 
       <Modal
         open={open}
-        onClose={() => !loading && setOpen(false)}
+        onClose={() => {
+          if (loading) return
+          if (pageMode) router.push(`/meets/${meetId}`)
+          else setOpen(false)
+        }}
+        presentation={pageMode ? "inline" : "dialog"}
+        portal={!pageMode}
+        panelClassName={pageMode ? "max-h-none overflow-visible shadow-sm" : ""}
         closeDisabled={loading}
         title={
-          isCoach
+          pageMode
             ? initial
-              ? "Edit Sign-Up"
-              : "Add Sign-Up"
-            : selfEntry
-              ? "Edit Sign-Up"
-              : "Meet Sign-up"
+              ? "Review your entry"
+              : "Choose your events"
+            : isCoach
+              ? initial
+                ? "Edit Sign-Up"
+                : "Add Sign-Up"
+              : selfEntry
+                ? "Edit Sign-Up"
+                : "Meet Sign-up"
         }
         description={instructions.trim() || undefined}
-        maxWidth="3xl"
+        maxWidth={pageMode ? "6xl" : "3xl"}
         busy={loading}
         onSubmit={handleSubmit}
         footer={
@@ -403,11 +425,14 @@ export default function MeetSignupAthleteForm({
             )}
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={() => {
+                if (pageMode) router.push(`/meets/${meetId}`)
+                else setOpen(false)
+              }}
               disabled={loading}
               className="bg-background hover:bg-fill flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium disabled:opacity-50"
             >
-              {previewOnly || (!canEdit && !isCoach) ? "Close" : "Cancel"}
+              {pageMode ? "Back to meet" : previewOnly || (!canEdit && !isCoach) ? "Close" : "Cancel"}
             </button>
             {!previewOnly && (
               <button

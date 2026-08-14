@@ -156,6 +156,15 @@ export default function IndividualSplitsModal({
   const multiRound = (rounds?.length ?? 0) > 1
   const singleRound = rounds?.length === 1 ? rounds[0] : null
   const legacyRows = [...splits].sort((a, b) => a.distance - b.distance)
+  const isPendingEntry =
+    !multiRound &&
+    !rawTime &&
+    !singleRound?.time &&
+    !singleRound?.status &&
+    singleRound?.place == null &&
+    swimInfo?.resultPlace == null &&
+    !singleRound?.splits.length &&
+    legacyRows.length === 0
 
   useEffect(() => setMounted(true), [])
 
@@ -189,7 +198,7 @@ export default function IndividualSplitsModal({
         className="relative z-10 flex w-full max-w-md max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="shrink-0 px-6 pt-6 pb-2">
+        <div className="shrink-0 px-6 pt-5 pb-1">
           {athleteName ? (
             athleteId ? (
               <Link
@@ -204,7 +213,7 @@ export default function IndividualSplitsModal({
             )
           ) : null}
           <h2
-            className={`text-lg font-medium text-foreground ${
+            className={`text-lg font-semibold tracking-tight text-foreground ${
               athleteName ? "mt-0.5" : ""
             }`}
           >
@@ -214,13 +223,26 @@ export default function IndividualSplitsModal({
           {!multiRound ? (
             <>
               {(rawTime || singleRound?.time || timeDisplay) && (
-                <div className="mt-2 flex flex-wrap items-center gap-2">
+                <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">
                   <span className="font-mono text-lg text-foreground">
                     {rawTime ??
                       (singleRound?.time
                         ? formatDisplayTime(singleRound.time)
                         : timeDisplay)}
                   </span>
+                  {isPendingEntry && (singleRound?.heat ?? swimInfo?.heat) && (
+                    <span className="flex items-center gap-1.5 text-sm text-foreground-secondary">
+                      <span className="text-foreground-tertiary">Heat</span>{" "}
+                      {singleRound?.heat ?? swimInfo?.heat}
+                    </span>
+                  )}
+                  {isPendingEntry && (singleRound?.lane ?? swimInfo?.lane) != null && (
+                    <span className="flex items-center gap-1.5 text-sm text-foreground-secondary">
+                      <span className="text-foreground-tertiary">Lane</span>{" "}
+                      {singleRound?.lane ?? swimInfo?.lane}
+                    </span>
+                  )}
+
                   {(() => {
                     const seed = singleRound?.seedTime ?? swimInfo?.seedTime
                     const time = rawTime ?? singleRound?.time
@@ -258,8 +280,8 @@ export default function IndividualSplitsModal({
                   )}
                 </div>
               )}
-              {(singleRound || swimInfo) && (
-                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-foreground-secondary">
+              {!isPendingEntry && (singleRound || swimInfo) && (
+                <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-foreground-secondary">
                   {(singleRound?.seedTime ?? swimInfo?.seedTime) &&
                     (singleRound?.time ||
                       swimInfo?.time ||
@@ -293,9 +315,9 @@ export default function IndividualSplitsModal({
           ) : null}
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 pt-1 pb-3 empty:flex-none empty:h-2 empty:p-0">
           {multiRound ? (
-            <div className="space-y-6">
+            <div className="space-y-4">
               {rounds!.map((round) => (
                 <RoundSection key={round.label} round={round} />
               ))}
@@ -329,13 +351,13 @@ export default function IndividualSplitsModal({
         </div>
 
         <div
-          className="shrink-0 border-t px-6 py-4 bg-background"
+          className="shrink-0 border-t border-border px-6 py-3"
           style={{ borderColor: "var(--brand-color-border-subtle)" }}
         >
           <button
             type="button"
             onClick={onClose}
-            className="w-full rounded-lg border border-border px-4 py-2.5 text-sm font-medium bg-background hover:bg-fill"
+            className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-fill"
           >
             Close
           </button>

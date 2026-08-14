@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { notifyPracticePublished } from "@/lib/notifications"
 import { prisma } from "@/lib/prisma"
-import { buildPracticeData, PracticeInputError } from "@/lib/practice-input"
+import { buildPracticeData, PracticeInputError, practiceSetSelect } from "@/lib/practice-input"
 import { isStaffRole } from "@/lib/auth-roles"
 import {
   PRACTICE_EDIT_LOCK_TOKEN_HEADER,
@@ -9,6 +9,7 @@ import {
   assertCanMutatePractice } from "@/lib/practice-edit-lock"
 import { uniquePracticeSlug } from "@/lib/slug"
 import { getSession } from "@/lib/session"
+import { findUnmanagedPracticeTags } from "@/lib/practice-tag-catalog"
 
 export async function GET(
   _req: Request,
@@ -21,7 +22,7 @@ export async function GET(
   const practice = await prisma.practice.findUnique({
     where: { id },
     include: {
-      sets: { orderBy: { order: "asc" } },
+      sets: { orderBy: { order: "asc" }, select: practiceSetSelect },
       comments: { orderBy: { createdAt: "asc" } }}})
   if (!practice) return NextResponse.json({ error: "Not found" }, { status: 404 })
   if (!practice.published && !isStaffRole(session.user.role)) {
@@ -59,6 +60,13 @@ export async function PATCH(
   const body = await req.json()
   try {
     const data = buildPracticeData(body, { requireSets: true })
+    const unmanagedTags = await findUnmanagedPracticeTags(data.tags)
+    if (unmanagedTags.length) {
+      return NextResponse.json(
+        { error: "Use tags managed from the Practices page: " + unmanagedTags.join(", ") },
+        { status: 400 }
+      )
+    }
     const existingIds = new Set(existing.sets.map((s) => s.id))
     const keepIds = new Set(
       data.sets.map((s) => s.id).filter((sid): sid is string => !!sid && existingIds.has(sid))
@@ -80,7 +88,6 @@ export async function PATCH(
               order: s.order,
               title: s.title,
               content: s.content,
-              notes: s.notes,
               distance: s.distance}})
         } else {
           await tx.practiceSet.create({
@@ -89,7 +96,6 @@ export async function PATCH(
               order: s.order,
               title: s.title,
               content: s.content,
-              notes: s.notes,
               distance: s.distance}})
         }
       }
@@ -99,10 +105,16 @@ export async function PATCH(
         data: {
           title: data.title,
           date: data.date,
+          startTime: data.startTime,
+          endTime: data.endTime,
+          location: data.location,
           focus: data.focus,
           tags: data.tags,
           published: data.published,
-          ...(dateChanged ? { slug: await uniquePracticeSlug(data.date, id) } : {})}})
+          ...(dateChanged ? { slug: await uniquePracticeSlug(data.date, id) } : {}),
+        },
+        include: { sets: { orderBy: { order: "asc" }, select: practiceSetSelect } },
+      })
     })
 
     if (!existing.published && practice.published) {

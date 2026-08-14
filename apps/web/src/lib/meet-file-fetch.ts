@@ -2,7 +2,7 @@ import path from "path"
 import { readFile } from "fs/promises"
 import { isParsablePacketUrl } from "@/lib/meet-event-order"
 
-function normalizeFileUrl(url: string): string {
+export function normalizeFileUrl(url: string): string {
   try {
     const parsed = new URL(url)
 

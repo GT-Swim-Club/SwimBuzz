@@ -2,7 +2,7 @@ import type { EventOrder } from "@/lib/meet-event-order"
 import { isEventOrder } from "@/lib/meet-event-order"
 import type { SheetEntry, SheetSummary } from "@/lib/meet-sheet-summary"
 import { normalizeEventName } from "@/lib/swim-parse"
-import { formatDisplayTime } from "@/lib/utils"
+import { formatDateTime, formatDisplayTime } from "@/lib/utils"
 
 export const MEET_SIGNUP_INDIVIDUAL_EVENTS = [
   "50 Free",
@@ -216,11 +216,14 @@ export function signupWindowStatus(opts: {
   now?: Date
 }): { open: boolean; reason: string | null } {
   const now = opts.now ?? new Date()
-  if (opts.openAt && now < opts.openAt) {
-    return { open: false, reason: `Sign-ups open ${opts.openAt.toLocaleString()}.` }
+  if (!opts.openAt) {
+    return { open: false, reason: "Sign-ups are not open yet." }
+  }
+  if (now < opts.openAt) {
+    return { open: false, reason: `Sign-ups open ${formatDateTime(opts.openAt)}.` }
   }
   if (opts.closeAt && now > opts.closeAt) {
-    return { open: false, reason: `Sign-ups closed ${opts.closeAt.toLocaleString()}.` }
+    return { open: false, reason: `Sign-ups closed ${formatDateTime(opts.closeAt)}.` }
   }
   return { open: true, reason: null }
 }
@@ -234,17 +237,24 @@ export function signupWithdrawStatus(opts: {
 }): { allowed: boolean; reason: string | null; deadline: Date | null } {
   const now = opts.now ?? new Date()
   const deadline = opts.withdrawUntil ?? opts.closeAt
-  if (opts.openAt && now < opts.openAt) {
+  if (!opts.openAt) {
     return {
       allowed: false,
-      reason: `Sign-ups open ${opts.openAt.toLocaleString()}.`,
+      reason: "Sign-ups are not open yet.",
+      deadline,
+    }
+  }
+  if (now < opts.openAt) {
+    return {
+      allowed: false,
+      reason: `Sign-ups open ${formatDateTime(opts.openAt)}.`,
       deadline,
     }
   }
   if (deadline && now > deadline) {
     return {
       allowed: false,
-      reason: `Drops closed ${deadline.toLocaleString()}.`,
+      reason: `Drops closed ${formatDateTime(deadline)}.`,
       deadline,
     }
   }

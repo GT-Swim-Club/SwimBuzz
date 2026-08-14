@@ -4,9 +4,9 @@ import BannerCropper from "@/components/BannerCropper"
 import { useEffect, useState } from "react"
 import { currentSeason, seasonOptions, upcomingSeason } from "@/lib/season"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
-import DontReloadNotice from "@/components/DontReloadNotice"
 import Modal, { ModalFooter } from "@/components/Modal"
-import { FileDropzone } from "@/components/FileDropzone"
+import { DatePicker, TimePicker } from "@/components/CustomDateTimePicker"
+import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/FileDropzone"
 import { useSession } from "next-auth/react"
 
 export type MeetFormState = {
@@ -51,11 +51,13 @@ const labelClass =
 export default function MeetFields({
   form,
   setForm,
-  initialSeasons
+  initialSeasons,
+  onUploaded,
 }: {
   form: MeetFormState
   setForm: React.Dispatch<React.SetStateAction<MeetFormState>>
   initialSeasons?: string[]
+  onUploaded?: (url: string) => void
 }) {
   const { data: session } = useSession()
   const [iconUploading, setIconUploading] = useState(false)
@@ -64,7 +66,7 @@ export default function MeetFields({
   const [bannerError, setBannerError] = useState<string | null>(null)
   const [bannerCroppingSrc, setBannerCroppingSrc] = useState<string | null>(null)
   const [fetchedSeasons, setFetchedSeasons] = useState<string[]>(initialSeasons ?? [])
-  
+
   const [addSeasonModalOpen, setAddSeasonModalOpen] = useState(false)
   const upcoming = upcomingSeason()
   const [addingSeason, setAddingSeason] = useState(false)
@@ -101,14 +103,14 @@ export default function MeetFields({
     e.preventDefault()
     setAddingSeason(true)
     setAddSeasonError(null)
-    
+
     try {
         const res = await fetch("/api/seasons", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ label: upcoming })
         })
-        
+
         if (!res.ok) {
             const data = await res.json()
             setAddSeasonError(data.error || "Failed to add season")
@@ -146,6 +148,7 @@ export default function MeetFields({
       }
 
       set("iconUrl", data.url)
+      onUploaded?.(data.url)
     } catch {
       setIconError("Something went wrong")
     } finally {
@@ -154,19 +157,8 @@ export default function MeetFields({
     }
   }
 
-  async function handleIconRemove() {
+  function handleIconRemove() {
     if (!form.iconUrl) return
-
-    try {
-      await fetch("/api/meets/icon", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: form.iconUrl }),
-      })
-    } catch {
-      // Ignore delete errors
-    }
-
     set("iconUrl", "")
   }
 
@@ -199,6 +191,7 @@ export default function MeetFields({
       }
 
       set("bannerUrl", data.url)
+      onUploaded?.(data.url)
     } catch {
       setBannerError("Something went wrong")
     } finally {
@@ -208,19 +201,8 @@ export default function MeetFields({
     }
   }
 
-  async function handleBannerRemove() {
+  function handleBannerRemove() {
     if (!form.bannerUrl) return
-
-    try {
-      await fetch("/api/meets/banner", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: form.bannerUrl }),
-      })
-    } catch {
-      // Ignore delete errors
-    }
-
     set("bannerUrl", "")
   }
 
@@ -246,13 +228,15 @@ export default function MeetFields({
             onFilesSelected={(files) => handleIconUpload({ target: { files: files as any } } as any)}
             accept="image/png,image/jpeg,image/jpg,image/gif,image/webp,image/svg+xml"
             disabled={iconUploading}
-            className="block w-full rounded-lg border border-border bg-background p-4 text-center text-xs text-foreground hover:bg-fill-secondary"
+            className={fileDropzoneSurfaceClassName(Boolean(form.iconUrl), iconUploading)}
           >
-            {iconUploading ? "Uploading..." : "Click or drag and drop to upload icon"}
+            <FileDropzoneContent
+              fileName={form.iconUrl ? decodeURIComponent(form.iconUrl.split("/").pop() ?? "Meet icon") : null}
+              emptyLabel="Click or drag and drop to upload an icon"
+              uploading={iconUploading}
+              onRemove={handleIconRemove}
+            />
           </FileDropzone>
-          {iconUploading && (
-            <DontReloadNotice label="Uploading…" />
-          )}
           {form.iconUrl && !iconUploading && (
             <div className="flex items-center gap-3">
               <img
@@ -260,13 +244,6 @@ export default function MeetFields({
                 alt="Meet icon preview"
                 className="h-12 w-12 rounded-lg object-cover border border-border border-border"
               />
-              <button
-                type="button"
-                onClick={handleIconRemove}
-                className="text-xs text-foreground-tertiary hover:text-red-500 dark:hover:text-red-400"
-              >
-                Remove file
-              </button>
             </div>
           )}
           {iconError && (
@@ -286,13 +263,15 @@ export default function MeetFields({
             onFilesSelected={(files) => handleBannerUpload({ target: { files: files as any } } as any)}
             accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
             disabled={bannerUploading}
-            className="block w-full rounded-lg border border-border bg-background p-4 text-center text-xs text-foreground hover:bg-fill-secondary"
+            className={fileDropzoneSurfaceClassName(Boolean(form.bannerUrl), bannerUploading)}
           >
-            {bannerUploading ? "Uploading..." : "Click or drag and drop to upload banner"}
+            <FileDropzoneContent
+              fileName={form.bannerUrl ? decodeURIComponent(form.bannerUrl.split("/").pop() ?? "Meet banner") : null}
+              emptyLabel="Click or drag and drop to upload a banner"
+              uploading={bannerUploading}
+              onRemove={handleBannerRemove}
+            />
           </FileDropzone>
-          {bannerUploading && (
-            <DontReloadNotice label="Uploading…" />
-          )}
           {form.bannerUrl && !bannerUploading && (
             <div className="flex items-center gap-3">
               <img
@@ -300,13 +279,6 @@ export default function MeetFields({
                 alt="Meet banner preview"
                 className="aspect-[2/1] w-64 rounded-lg object-cover border border-border border-border"
               />
-              <button
-                type="button"
-                onClick={handleBannerRemove}
-                className="text-xs text-foreground-tertiary hover:text-red-500 dark:hover:text-red-400"
-              >
-                Remove file
-              </button>
             </div>
           )}
           {bannerError && (
@@ -336,7 +308,6 @@ export default function MeetFields({
           className={inputClass}
         />
       </div>
-
       <div>
         <label className={labelClass}>School</label>
         <input
@@ -346,27 +317,33 @@ export default function MeetFields({
           className={inputClass}
         />
       </div>
-
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <label className={labelClass}>Start Date <span className="text-error">*</span></label>
-          <input
-            required
-            type="date"
+          <DatePicker
             value={form.startDate}
-            onChange={(e) => set("startDate", e.target.value)}
-            className={inputClass}
+            onChange={(value) =>
+              setForm((f) => ({
+                ...f,
+                startDate: value,
+                // Keep end on/after start as soon as start moves past it.
+                endDate: f.endDate && value && f.endDate < value ? value : f.endDate,
+              }))
+            }
+            ariaLabel="Start date"
+            placeholder="Choose a start date"
+            required
           />
         </div>
         <div>
           <label className={labelClass}>
             Start Time
           </label>
-          <input
-            type="time"
+          <TimePicker
             value={form.startTime}
-            onChange={(e) => set("startTime", e.target.value)}
-            className={inputClass}
+            onChange={(value) => set("startTime", value)}
+            ariaLabel="Start time"
+            placeholder="Choose a start time"
           />
         </div>
       </div>
@@ -375,12 +352,17 @@ export default function MeetFields({
         <label className={labelClass}>
           End Date
         </label>
-        <input
-          type="date"
+        <DatePicker
           value={form.endDate}
-          onChange={(e) => set("endDate", e.target.value)}
-          className={inputClass}
+          onChange={(value) => set("endDate", value)}
+          ariaLabel="End date"
+          placeholder="Choose an end date"
+          clearable
+          min={form.startDate || undefined}
         />
+        {form.startDate && form.endDate && form.endDate < form.startDate ? (
+          <p className="mt-1 text-xs text-error">End date must be on or after the start date.</p>
+        ) : null}
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -428,7 +410,7 @@ export default function MeetFields({
           </select>
         </div>
       </div>
-      
+
       <Modal
         open={addSeasonModalOpen}
         onClose={() => {

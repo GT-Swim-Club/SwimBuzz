@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { buildMeetData, MeetInputError } from "@/lib/meet-input"
-import { deleteAllMeetFiles, deleteRemovedMeetFiles, deleteStoredFileByUrl } from "@/lib/meet-storage"
+import { buildMeetData, MeetInputError, toPrismaMeetWriteData } from "@/lib/meet-input"
+import {
+  deleteAddedMeetFiles,
+  deleteAllMeetFiles,
+  deleteRemovedMeetFiles,
+  deleteStoredMeetFile,
+  type MeetStoredFiles,
+} from "@/lib/meet-storage"
 import { resolveEventOrderForPacket } from "@/lib/meet-packet-parse"
 import { attachSheetSummaries } from "@/lib/meet-sheet-resolve"
 import { normalizeNameMappings, normalizeRejectedNames } from "@/lib/athlete-match"
@@ -10,7 +16,6 @@ import {
   detectMeetResourceDrops,
   notifyMeetRosterOfInfoDrops } from "@/lib/meet-roster-notify"
 import { LOCAL_SCRAPER_HINT } from "@/lib/scraper"
-import type { MeetFileUrlKey } from "@/lib/meet-files"
 import { isCuid, uniqueMeetSlug } from "@/lib/slug"
 import { getSession } from "@/lib/session"
 import { isStaffRole } from "@/lib/auth-roles"
@@ -141,7 +146,9 @@ export async function GET(
   const showSignup = !ended || (form?.entries.length ?? 0) > 0
 
   const roomForm = meet.roomForm
-  const showRooms = !ended
+  const viewerOnMeetRoster =
+    viewerAthleteId != null && meetRosterIds.has(viewerAthleteId)
+  const showRooms = !ended && (isStaff || viewerOnMeetRoster)
   const myPreference =
     roomForm && viewerAthleteId
       ? roomForm.preferences.find((p) => p.athleteId === viewerAthleteId) ?? null
@@ -274,34 +281,36 @@ export async function GET(
     },
     rooms: {
       show: showRooms,
-      form: serializedRooms
-        ? {
-            id: serializedRooms.id,
-            instructions: serializedRooms.instructions,
-            maxPreferences: serializedRooms.maxPreferences,
-            openAt: serializedRooms.openAt,
-            closeAt: serializedRooms.closeAt,
-            assignmentsPublishedAt: serializedRooms.assignmentsPublishedAt,
-            customQuestions: serializedRooms.customQuestions,
-            window: serializedRooms.window,
-          }
-        : null,
-      myPreference: myPreference
-        ? {
-            id: myPreference.id,
-            preferredAthleteIds: myPreference.preferredAthleteIds,
-            excludedAthleteIds: myPreference.excludedAthleteIds,
-            notes: myPreference.notes,
-            answers: isSignupAnswers(myPreference.answers)
-              ? myPreference.answers
-              : {},
-            updatedAt: myPreference.updatedAt.toISOString(),
-          }
-        : null,
-      myRoom: !isStaff || roomForm?.assignmentsPublishedAt ? myRoom : null,
-      preferences: isStaff ? serializedRooms?.preferences : undefined,
-      rooms: serializedRooms?.rooms ?? [],
-      athletes: roomAthletes,
+      form:
+        showRooms && serializedRooms
+          ? {
+              id: serializedRooms.id,
+              instructions: serializedRooms.instructions,
+              maxPreferences: serializedRooms.maxPreferences,
+              openAt: serializedRooms.openAt,
+              closeAt: serializedRooms.closeAt,
+              assignmentsPublishedAt: serializedRooms.assignmentsPublishedAt,
+              customQuestions: serializedRooms.customQuestions,
+              window: serializedRooms.window,
+            }
+          : null,
+      myPreference:
+        showRooms && myPreference
+          ? {
+              id: myPreference.id,
+              preferredAthleteIds: myPreference.preferredAthleteIds,
+              excludedAthleteIds: myPreference.excludedAthleteIds,
+              notes: myPreference.notes,
+              answers: isSignupAnswers(myPreference.answers)
+                ? myPreference.answers
+                : {},
+              updatedAt: myPreference.updatedAt.toISOString(),
+            }
+          : null,
+      myRoom: showRooms && (!isStaff || roomForm?.assignmentsPublishedAt) ? myRoom : null,
+      preferences: isStaff && showRooms ? serializedRooms?.preferences : undefined,
+      rooms: showRooms ? serializedRooms?.rooms ?? [] : [],
+      athletes: showRooms ? roomAthletes : [],
     },
   })
 }
@@ -324,31 +333,27 @@ export async function PATCH(
   const rejectedNames = normalizeRejectedNames(body.rejectedNames)
   const cachedSheetParses = body.cachedSheetParses ?? null
 
+  let data: Record<string, unknown> | null = null
   try {
-    const data = buildMeetData(body)
+    data = buildMeetData(body)
     if (Object.keys(data).length === 0) {
       return NextResponse.json({ error: "No valid fields to update" }, { status: 400 })
     }
 
-    await deleteRemovedMeetFiles(
-      existing as Record<MeetFileUrlKey, string | null> & {
-        finalsHeatSheetUrls?: unknown
-      },
-      data
-    )
-
     let packetParsed = false
     if ("packetUrl" in data) {
       const nextPacket = (data.packetUrl as string | null) ?? null
-      const shouldParse =
-        nextPacket !== existing.packetUrl || (nextPacket && !existing.eventOrder)
-      if (shouldParse) {
-        try {
-          data.eventOrder = await resolveEventOrderForPacket(session.user.id, nextPacket)
-          if (nextPacket) packetParsed = true
-        } catch (err) {
-          console.error("Meet packet parse failed:", err)
+      if (nextPacket !== existing.packetUrl) {
+        if (!nextPacket) {
           data.eventOrder = null
+        } else {
+          try {
+            data.eventOrder = await resolveEventOrderForPacket(session.user.id, nextPacket)
+            packetParsed = true
+          } catch (err) {
+            console.error("Meet packet parse failed:", err)
+            data.eventOrder = null
+          }
         }
       }
     }
@@ -367,7 +372,11 @@ export async function PATCH(
 
     const resourceDrops = detectMeetResourceDrops(existing, data, { packetParsed })
 
-    const meet = await prisma.meet.update({ where: { id }, data })
+    const meet = await prisma.meet.update({
+      where: { id },
+      data: toPrismaMeetWriteData(data),
+    })
+    await deleteRemovedMeetFiles(existing as MeetStoredFiles, data)
 
     void notifyMeetRosterOfInfoDrops({
       meetId: meet.id,
@@ -383,7 +392,12 @@ export async function PATCH(
       return NextResponse.json({ error: err.message }, { status: 400 })
     }
     if (err instanceof MeetImportValidationError) {
-      return NextResponse.json({ error: err.message }, { status: 400 })
+      if (data) {
+        await deleteAddedMeetFiles(existing as MeetStoredFiles, data).catch((deleteErr) => {
+          console.error("Failed to delete rejected meet uploads:", deleteErr)
+        })
+      }
+      return NextResponse.json({ error: err.message, rejected: true }, { status: 400 })
     }
     const message = err instanceof Error ? err.message : "Failed to save meet"
     if (message === "LOCAL_BRIDGE_NOT_CONNECTED") {
@@ -412,27 +426,32 @@ export async function DELETE(
 
   if (deleteSwims) {
     await prisma.swim.deleteMany({ where: { meetId: id } })
-    
+
     // Also clear relayResultsSummary and result fields
     await prisma.meet.update({
       where: { id },
-      data: { 
+      data: {
         relayResultsSummary: { entries: [] },
         resultsUrl: null,
-        resultStatusesSummary: { entries: [] }
-      }
+        swimphoneUrl: null,
+        resultStatusesSummary: { entries: [] },
+      },
     })
   }
 
   if (deleteMeet) {
-    await deleteAllMeetFiles(
-      existing as Record<MeetFileUrlKey, string | null> & {
-        finalsHeatSheetUrls?: unknown
-      }
-    )
-    await deleteStoredFileByUrl(existing.iconUrl)
-    await deleteStoredFileByUrl(existing.bannerUrl)
+    try {
+      await deleteAllMeetFiles(existing as MeetStoredFiles)
+    } catch (err) {
+      console.error("Failed to delete stored files for meet", id, err)
+    }
     await prisma.meet.delete({ where: { id } })
+  } else if (deleteSwims) {
+    try {
+      await deleteStoredMeetFile(existing.resultsUrl)
+    } catch (err) {
+      console.error("Failed to delete results file for meet", id, err)
+    }
   }
 
   return NextResponse.json({ ok: true })

@@ -6,6 +6,10 @@ export const PRACTICE_EDIT_LOCK_HEARTBEAT_MS = 5 * 1000
 export const PRACTICE_EDIT_LOCK_POLL_MS = 5 * 1000
 /** Long-poll timeout before re-checking lock status (matches scraper long-poll window). */
 export const PRACTICE_EDIT_LOCK_WATCH_TIMEOUT_MS = 25 * 1000
+/** How long takeover waits for the current editor to save and release. */
+export const PRACTICE_EDIT_LOCK_YIELD_TIMEOUT_MS = 10 * 1000
+/** Expire the edit session if the user makes no practice changes for this long. */
+export const PRACTICE_EDIT_IDLE_TIMEOUT_MS = 10 * 60 * 1000
 
 export const PRACTICE_EDIT_LOCK_TOKEN_HEADER = "x-practice-edit-lock-token"
 
@@ -23,4 +27,6 @@ export type PracticeEditLockInfo = {
   token?: string | null
   /** Revision token for long-poll watching. */
   rev?: string
+  /** True when another session asked this holder to save and release. */
+  yieldRequested?: boolean
 }

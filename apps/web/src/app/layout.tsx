@@ -9,6 +9,7 @@ import Nav from "@/components/Nav"
 import NavigationTracker from "@/components/NavigationTracker"
 import "./variables.css"
 import "./globals.css"
+import "react-pdf/dist/Page/TextLayer.css"
 import { getSession } from "@/lib/session"
 
 export const metadata: Metadata = {
@@ -34,7 +35,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <Suspense fallback={null}>
                   <NavigationTracker />
                 </Suspense>
-                <div className="mx-auto max-w-7xl px-2 py-6 sm:py-8">
+                <div className="mx-auto w-full min-w-0 max-w-7xl px-3 py-5 sm:px-6 sm:py-8 lg:px-8 xl:max-w-none xl:px-[clamp(8rem,10vw,18rem)]">
                   {children}
                 </div>
               </ScraperUiProvider>

@@ -2,6 +2,7 @@
 
 import { useTheme } from "next-themes"
 import { useEffect, useState, type ReactNode } from "react"
+import HoverDetail from "@/components/HoverDetail"
 
 const iconProps = {
   xmlns: "http://www.w3.org/2000/svg",
@@ -89,16 +90,16 @@ export default function AppearanceSettings() {
               role="radio"
               aria-checked={isSelected}
               aria-label={option.label}
-              title={option.label}
               disabled={!mounted}
               onClick={() => setTheme(option.value)}
-              className={`inline-flex items-center justify-center rounded-md p-2 transition-colors disabled:opacity-50 ${
+              className={`group relative inline-flex items-center justify-center rounded-md p-2 transition-colors disabled:opacity-50 ${
                 isSelected
                   ? "bg-primary text-primary-text"
                   : "text-foreground-secondary hover:text-foreground"
               }`}
             >
               {option.icon}
+              <HoverDetail label={option.label} />
             </button>
           )
         })}

@@ -2,10 +2,17 @@
 
 import { useState } from "react"
 import ActionIcon from "@/components/ActionIcon"
+import HoverDetail from "@/components/HoverDetail"
 import { useRouter } from "next/navigation"
 import MeetFields, { type MeetFormState } from "../MeetFields"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { meetPath } from "@/lib/slug"
+import { useUnsavedUploads } from "@/lib/unsaved-uploads"
+
+function meetImageUrls(form: Pick<MeetFormState, "iconUrl" | "bannerUrl">) {
+  return [form.iconUrl, form.bannerUrl]
+}
+
 
 export default function MeetActions({
   meetId,
@@ -27,6 +34,13 @@ export default function MeetActions({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState<MeetFormState>(initial)
+  const { begin, trackUpload, release } = useUnsavedUploads()
+
+  function closeWithoutSaving() {
+    if (loading) return
+    release(meetImageUrls(initial))
+    setEditing(false)
+  }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
@@ -43,6 +57,7 @@ export default function MeetActions({
         setError(data.error ?? "Failed to save changes")
         return
       }
+      release(meetImageUrls(form))
       setEditing(false)
       const nextSlug = data.slug as string | null | undefined
       if (nextSlug && nextSlug !== meetSlug) {
@@ -87,18 +102,20 @@ export default function MeetActions({
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex shrink-0 flex-nowrap items-center gap-2">
         <button
           type="button"
           onClick={() => {
+            begin()
             setForm(initial)
             setError(null)
             setEditing(true)
           }}
-          className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill transition-colors"
+          aria-label="Edit meet"
+          className="group relative inline-flex shrink-0 items-center justify-center p-2 border border-border rounded-lg bg-background hover:bg-fill transition-colors"
         >
-          <ActionIcon kind="edit" />
-          Edit
+          <ActionIcon kind="edit" className="h-4 w-4" />
+          <HoverDetail label="Edit meet" />
         </button>
         <button
           type="button"
@@ -106,16 +123,17 @@ export default function MeetActions({
             setError(null)
             setConfirmDelete(true)
           }}
-          className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border border-red-200 text-error rounded-lg hover:bg-red-50 dark:border-red-900/50 dark:hover:bg-red-950/40 transition-colors"
+          aria-label="Delete meet"
+          className="group relative inline-flex shrink-0 items-center justify-center p-2 border border-red-200 text-error rounded-lg bg-background hover:bg-red-50 dark:border-red-900/50 dark:hover:bg-red-950/40 transition-colors"
         >
-          <ActionIcon kind="delete" />
-          Delete
+          <ActionIcon kind="delete" className="h-4 w-4" />
+          <HoverDetail label="Delete meet" />
         </button>
       </div>
 
       <Modal
         open={editing}
-        onClose={() => setEditing(false)}
+        onClose={closeWithoutSaving}
         closeDisabled={loading}
         busy={loading}
         title="Edit meet"
@@ -124,7 +142,7 @@ export default function MeetActions({
           <ModalFooter>
             <button
               type="button"
-              onClick={() => setEditing(false)}
+              onClick={closeWithoutSaving}
               disabled={loading}
               className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-fill border-border"
             >
@@ -140,7 +158,7 @@ export default function MeetActions({
           </ModalFooter>
         }
       >
-        <MeetFields form={form} setForm={setForm} />
+        <MeetFields form={form} setForm={setForm} onUploaded={trackUpload} />
         {error && <p className="text-sm text-error">{error}</p>}
       </Modal>
 
@@ -181,17 +199,17 @@ export default function MeetActions({
           </p>
         {hasSwims ? (
           <div className="space-y-2">
-            {[
+            {([
               { value: "meet", label: `Delete meet`, desc: "Keeps swims, disconnects from meet" },
               { value: "swims", label: "Delete swims", desc: "Deletes associated swims, keeps meet" },
               { value: "both", label: "Delete both", desc: "Deletes meet and associated swims" },
-            ].map((opt) => (
+            ] as const).map((opt) => (
               <label key={opt.value} className="flex items-center gap-3 p-3 border border-border-secondary rounded-lg cursor-pointer hover:bg-fill">
                 <input
                   type="radio"
                   name="deleteOption"
                   checked={deleteOption === opt.value}
-                  onChange={() => setDeleteOption(opt.value as any)}
+                  onChange={() => setDeleteOption(opt.value)}
                   className="accent-red-600"
                 />
                 <div>

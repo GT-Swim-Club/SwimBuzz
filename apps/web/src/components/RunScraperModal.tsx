@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Modal, { ModalFooter } from "@/components/Modal"
+import { formatClockTime } from "@swimbuzz/shared"
 
 type Pairing = {
   code: string
@@ -126,7 +127,7 @@ export default function RunScraperModal({
   }
 
   const platformToggle = (
-    <div className="mt-4 flex rounded-lg border border-border-secondary p-0.5 bg-background">
+    <div className="mt-5 flex gap-1 rounded-xl border border-border bg-fill-secondary p-1">
       {(
         [
           ["mac", "Mac / Linux"],
@@ -137,9 +138,9 @@ export default function RunScraperModal({
           key={value}
           type="button"
           onClick={() => setPlatformAndSave(value)}
-          className={`flex flex-1 items-center justify-center rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+          className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
             platform === value
-              ? "bg-background-elevated text-foreground shadow-sm"
+              ? "bg-primary text-primary-text shadow-sm"
               : "text-foreground-secondary hover:text-foreground"
           }`}
         >
@@ -159,6 +160,7 @@ export default function RunScraperModal({
       description="Install the scraper once, and then run it whenever importing data."
       maxWidth="lg"
       header={platformToggle}
+      bodyClassName="!flex-initial py-5 sm:py-5"
       footer={
         <ModalFooter>
           {connected && (
@@ -166,7 +168,7 @@ export default function RunScraperModal({
               type="button"
               onClick={() => void terminateScraper()}
               disabled={terminating}
-              className="rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary disabled:opacity-50"
+              className="rounded-lg border border-error bg-error-bg px-4 py-2.5 text-sm font-medium text-error transition-colors hover:bg-error/10 disabled:opacity-50"
             >
               {terminating ? "Terminating…" : "Terminate scraper"}
             </button>
@@ -174,43 +176,57 @@ export default function RunScraperModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover"
+            className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text transition-colors hover:bg-primary-hover"
           >
             Done
           </button>
         </ModalFooter>
       }
     >
-      <div className="space-y-4 text-sm">
+      <div className="space-y-5 text-sm">
         <div
-          className={`rounded-lg border border-border-secondary px-4 py-3 ${
-            connected
-              ? "border-success bg-success-bg text-success"
-              : "border-warning bg-warning-bg text-warning"
+          className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${
+            loading
+              ? "border-border-secondary bg-fill-secondary text-foreground-secondary"
+              : connected
+                ? "border-success bg-success-bg text-success"
+                : "border-warning bg-warning-bg text-warning"
           }`}
         >
-          {loading
-            ? "Checking status…"
-            : connected
-              ? "The scraper is running. You can now import data."
-              : "The scraper is not running."}
+          <span
+            aria-hidden="true"
+            className={`h-2.5 w-2.5 shrink-0 rounded-full ${
+              loading
+                ? "bg-foreground-tertiary"
+                : connected
+                  ? "bg-success motion-safe:animate-pulse"
+                  : "bg-warning"
+            }`}
+          />
+          <p className="font-medium">
+            {loading
+              ? ["Checking", "status…"].join(" ")
+              : connected
+                ? "The scraper is running. You can now import data."
+                : "The scraper is not running."}
+          </p>
         </div>
 
         {installed === false && (
-          <div className="space-y-2 rounded-lg border border-border-secondary bg-fill-secondary p-4">
+          <div className="space-y-3 rounded-xl border border-border-secondary bg-fill-secondary p-4">
             <p className="font-medium text-foreground">One-time setup</p>
             <p className="text-foreground-secondary">
               Downloads the scraper via <code className="text-xs">uv</code>.
               {platform === "windows" ? " Run in PowerShell." : " Run in Terminal."}
             </p>
-            <pre className="overflow-x-auto rounded-md bg-background-elevated p-3 text-xs text-foreground whitespace-pre-wrap break-all">
+            <pre className="overflow-x-auto rounded-lg border border-border-subtle bg-background px-3 py-2.5 text-xs leading-5 text-foreground whitespace-pre-wrap break-all">
               {installCommand}
             </pre>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               <button
                 type="button"
                 onClick={() => void copyText(installCommand, "install")}
-                className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary-hover"
+                className="flex items-center gap-1.5 text-xs font-medium text-primary transition-colors hover:text-primary-hover"
               >
                 {copied === "install" ? checkIcon : copyIcon}
                 Copy install command
@@ -218,7 +234,7 @@ export default function RunScraperModal({
               <button
                 type="button"
                 onClick={markInstalled}
-                className="text-xs font-medium text-foreground-secondary hover:text-foreground"
+                className="text-xs font-medium text-foreground-secondary transition-colors hover:text-foreground"
               >
                 I&apos;ve installed it
               </button>
@@ -226,7 +242,7 @@ export default function RunScraperModal({
           </div>
         )}
 
-        <ol className="list-decimal space-y-2 pl-5 text-foreground">
+        <ol className="list-decimal space-y-2.5 pl-5 leading-6 text-foreground marker:font-semibold marker:text-foreground-secondary">
           {installed === false && <li>Run the one-time install command above.</li>}
           <li>Generate the run command below (valid for 15 minutes).</li>
           <li>Copy it into your terminal and leave it running.</li>
@@ -237,7 +253,7 @@ export default function RunScraperModal({
           <button
             type="button"
             onClick={() => setInstalled(false)}
-            className="text-xs text-foreground-secondary hover:text-foreground"
+            className="inline-flex rounded-md px-1 py-0.5 text-xs font-medium text-foreground-secondary transition-colors hover:text-foreground"
           >
             Show install instructions again
           </button>
@@ -254,18 +270,18 @@ export default function RunScraperModal({
               {pairingLoading ? "Generating…" : "Generate run command"}
             </button>
           ) : (
-            <div className="space-y-3 rounded-lg border border-border-secondary bg-fill-secondary p-4">
+            <div className="space-y-3 rounded-xl border border-border-secondary bg-fill-secondary p-4">
               <p className="text-xs text-foreground-secondary">
-                Expires {new Date(pairing.expiresAt).toLocaleTimeString()}
+                Expires {formatClockTime(new Date(pairing.expiresAt))}
               </p>
-              <pre className="overflow-x-auto rounded-md bg-background-elevated p-3 text-xs text-foreground whitespace-pre-wrap break-all">
+              <pre className="overflow-x-auto rounded-lg border border-border-subtle bg-background px-3 py-2.5 text-xs leading-5 text-foreground whitespace-pre-wrap break-all">
                 {runCommand}
               </pre>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                 <button
                   type="button"
                   onClick={() => void copyText(runCommand, "run")}
-                  className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary-hover"
+                  className="flex items-center gap-1.5 text-xs font-medium text-primary transition-colors hover:text-primary-hover"
                 >
                   {copied === "run" ? checkIcon : copyIcon}
                   Copy command
@@ -274,7 +290,7 @@ export default function RunScraperModal({
                   type="button"
                   onClick={() => void generateCode()}
                   disabled={pairingLoading}
-                  className="text-xs font-medium text-foreground-secondary hover:text-foreground"
+                  className="text-xs font-medium text-foreground-secondary transition-colors hover:text-foreground"
                 >
                   Generate new command
                 </button>
@@ -282,7 +298,7 @@ export default function RunScraperModal({
             </div>
           ))}
 
-        <p className="text-sm text-error">{error}</p>
+        {error ? <p className="text-sm text-error">{error}</p> : null}
       </div>
     </Modal>
   )

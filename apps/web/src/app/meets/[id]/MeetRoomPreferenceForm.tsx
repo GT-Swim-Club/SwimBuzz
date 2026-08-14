@@ -27,6 +27,7 @@ export default function MeetRoomPreferenceForm({
   selfAthleteId,
   athletes,
   myPreference,
+  pageMode = false,
   openRequest = null,
   onOpenRequestHandled,
 }: {
@@ -40,11 +41,12 @@ export default function MeetRoomPreferenceForm({
   selfAthleteId: string | null
   athletes: AthleteOption[]
   myPreference: MeetRoomPreferenceInitial | null
+  pageMode?: boolean
   openRequest?: "edit" | null
   onOpenRequestHandled?: () => void
 }) {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(pageMode)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selected, setSelected] = useState<string[]>(myPreference?.preferredAthleteIds ?? [])
@@ -115,7 +117,7 @@ export default function MeetRoomPreferenceForm({
         setError(data.error ?? "Failed to save preferences")
         return
       }
-      setOpen(false)
+      if (!pageMode) setOpen(false)
       router.refresh()
     } catch {
       setError("Something went wrong")
@@ -125,12 +127,15 @@ export default function MeetRoomPreferenceForm({
   }
 
   if (isCoach || !selfAthleteId) return null
+  if (!athletes.some((a) => a.id === selfAthleteId)) return null
 
   const canEdit = window.open
   const athleteNameById = new Map(athletes.map((a) => [a.id, a.name]))
 
   return (
     <>
+      {!pageMode && (
+
       <div className="space-y-3">
         {instructions && (
           <p className="text-sm text-foreground-secondary whitespace-pre-wrap">{instructions}</p>
@@ -200,20 +205,25 @@ export default function MeetRoomPreferenceForm({
         )}
       </div>
 
+      )}
+
       <Modal
+        presentation={pageMode ? "inline" : "dialog"}
+        portal={!pageMode}
+        panelClassName={pageMode ? "max-h-none overflow-visible shadow-sm" : ""}
         open={open}
-        onClose={() => !loading && setOpen(false)}
-        title="Roommate preferences"
-        maxWidth="2xl"
+        onClose={() => { if (loading) return; if (pageMode) router.push(`/meets/${meetId}`); else setOpen(false) }}
+        title={pageMode ? (myPreference ? "Review your preferences" : "Roommate preferences") : "Roommate preferences"}
+        maxWidth="3xl"
         footer={
           <ModalFooter>
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={() => { if (pageMode) router.push(`/meets/${meetId}`); else setOpen(false) }}
               disabled={loading}
               className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium hover:bg-fill"
             >
-              Cancel
+              {pageMode ? "Back to meet" : "Cancel"}
             </button>
             <button
               type="submit"

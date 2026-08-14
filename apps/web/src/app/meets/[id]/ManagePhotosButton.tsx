@@ -4,7 +4,8 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
-import { FileDropzone } from "@/components/FileDropzone"
+import { useUnsavedUploads } from "@/lib/unsaved-uploads"
+import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/FileDropzone"
 
 type Photo = { url: string; name: string }
 
@@ -28,11 +29,18 @@ export default function ManagePhotosButton({
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null)
   const [previewsUploading, setPreviewsUploading] = useState(false)
   const [previewsError, setPreviewsError] = useState<string | null>(null)
+  const { begin, trackUpload, release } = useUnsavedUploads()
   const blocked = loading || previewsUploading
 
   useDontReloadWhileBusy(loading || previewsUploading)
 
   const hasPhotos = initial.photos.length > 0 || initial.previews.length > 0
+
+  function closeWithoutSaving() {
+    if (blocked) return
+    release(initial.previews)
+    setOpen(false)
+  }
 
   useEffect(() => {
     if (open) {
@@ -42,26 +50,11 @@ export default function ManagePhotosButton({
     }
   }, [open, initial])
 
-  async function deleteStoredFile(url: string) {
-    if (!url || !url.startsWith("http")) return
-    try {
-      await fetch("/api/meets/upload", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
-      })
-    } catch (e) {
-      console.error("Failed to delete stored preview photo:", e)
-    }
-  }
-
-  async function handleRemovePreview(index: number) {
-    const url = form.previews[index]
+  function handleRemovePreview(index: number) {
     setForm((f) => ({
       ...f,
       previews: f.previews.filter((_, i) => i !== index),
     }))
-    await deleteStoredFile(url)
   }
 
   const handleDragStart = (index: number) => {
@@ -123,6 +116,7 @@ export default function ManagePhotosButton({
       results.forEach((result, idx) => {
         if (result.status === "fulfilled") {
           successfulUrls.push(result.value)
+          trackUpload(result.value)
         } else {
           errors.push(result.reason?.message ?? `Upload failed for file ${idx + 1}`)
         }
@@ -167,6 +161,7 @@ export default function ManagePhotosButton({
         setError(data.error ?? "Failed to save photos")
         return
       }
+      release(form.previews)
       setOpen(false)
       router.refresh()
     } catch {
@@ -185,7 +180,10 @@ export default function ManagePhotosButton({
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          begin()
+          setOpen(true)
+        }}
         className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border border-border rounded-md bg-background hover:bg-fill transition-colors"
       >
         <svg
@@ -208,7 +206,7 @@ export default function ManagePhotosButton({
       <Modal
         open={open}
         maxWidth="xl"
-        onClose={() => setOpen(false)}
+        onClose={closeWithoutSaving}
         closeDisabled={blocked}
         busy={loading}
         title={hasPhotos ? "Edit Photos" : "Add Photos"}
@@ -218,7 +216,7 @@ export default function ManagePhotosButton({
           <ModalFooter>
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={closeWithoutSaving}
               disabled={blocked}
               className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium bg-background hover:bg-fill"
             >
@@ -325,7 +323,7 @@ export default function ManagePhotosButton({
                   />
                   <button
                     type="button"
-                    onClick={() => void handleRemovePreview(index)}
+                    onClick={() => handleRemovePreview(index)}
                     className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
                     title="Remove photo"
                   >
@@ -345,12 +343,12 @@ export default function ManagePhotosButton({
                 accept="image/*"
                 multiple={true}
                 disabled={previewsUploading}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium cursor-pointer bg-background hover:bg-fill transition-colors"
+                className={fileDropzoneSurfaceClassName(false, previewsUploading)}
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                {previewsUploading ? "Uploading..." : "Upload Gallery Photos"}
+                <FileDropzoneContent
+                  emptyLabel="Click or drag and drop to add gallery photos"
+                  uploading={previewsUploading}
+                />
               </FileDropzone>
             </div>
           )}

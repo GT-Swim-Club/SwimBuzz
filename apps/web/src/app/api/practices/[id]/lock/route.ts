@@ -7,6 +7,7 @@ import {
   releasePracticeEditLock,
   serializePracticeEditLock } from "@/lib/practice-edit-lock"
 import { waitForPracticeEditLockChange } from "@/lib/practice-edit-lock-watch"
+import { isPracticeEditLockYieldRequested } from "@/lib/practice-edit-lock-yield"
 import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/session"
 
@@ -55,6 +56,10 @@ export async function GET(
   if (!practice) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
   let info = serializePracticeEditLock(practice, session.user.id)
+  const yieldRequested = isPracticeEditLockYieldRequested(id)
+  if (yieldRequested) {
+    return NextResponse.json({ ...info, yieldRequested: true })
+  }
   if (watch && clientRev && clientRev === info.rev) {
     await waitForPracticeEditLockChange(id)
     if (req.signal.aborted) {
@@ -65,7 +70,10 @@ export async function GET(
     info = serializePracticeEditLock(practice, session.user.id)
   }
 
-  return NextResponse.json(info)
+  return NextResponse.json({
+    ...info,
+    yieldRequested: isPracticeEditLockYieldRequested(id),
+  })
 }
 
 export async function POST(

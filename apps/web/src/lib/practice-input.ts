@@ -2,15 +2,23 @@ import { parseMeetDate } from "@/lib/swim-parse"
 import { normalizeTags } from "@/lib/practice-tags"
 
 export class PracticeInputError extends Error {}
+export const MAX_PRACTICE_SETS = 10
 
 export type NormalizedSet = {
   id?: string
   order: number
   title: string | null
   content: string
-  notes: string | null
   distance: number | null
 }
+
+export const practiceSetSelect = {
+  id: true,
+  order: true,
+  title: true,
+  content: true,
+  distance: true,
+} as const
 
 function optionalString(value: unknown): string | null {
   if (value === undefined || value === null) return null
@@ -18,12 +26,37 @@ function optionalString(value: unknown): string | null {
   return trimmed || null
 }
 
+function parseClockTime(value: string): string | null {
+  const normalized = value.trim().toUpperCase()
+  const canonical = /^(\d{1,2}):(\d{2})(?::\d{2})?/.exec(normalized)
+  const twelveHour = /^(\d{1,2}):(\d{2})\s*(AM|PM)/.exec(normalized)
+  let hour: number
+  let minute: number
+  if (twelveHour && twelveHour[0] === normalized) {
+    const rawHour = Number(twelveHour[1])
+    minute = Number(twelveHour[2])
+    if (rawHour < 1 || rawHour > 12 || minute > 59) return null
+    hour = rawHour % 12 + (twelveHour[3] === "PM" ? 12 : 0)
+  } else if (canonical && canonical[0] === normalized) {
+    hour = Number(canonical[1])
+    minute = Number(canonical[2])
+    if (hour > 23 || minute > 59) return null
+  } else {
+    return null
+  }
+
+  return String(hour).padStart(2, "0") + ":" + String(minute).padStart(2, "0")
+}
+
+function clockToMinutes(value: string): number | null {
+  const match = /^(\d{2}):(\d{2})$/.exec(value)
+  if (!match) return null
+  return Number(match[1]) * 60 + Number(match[2])
+}
+
 function normalizeSet(raw: unknown, index: number): NormalizedSet {
   const s = (raw ?? {}) as Record<string, unknown>
   const content = String(s.content ?? "").trim()
-  if (!content) {
-    throw new PracticeInputError(`Set ${index + 1} is missing its workout content`)
-  }
 
   let distance: number | null = null
   if (s.distance !== undefined && s.distance !== null && String(s.distance).trim() !== "") {
@@ -40,7 +73,6 @@ function normalizeSet(raw: unknown, index: number): NormalizedSet {
     order: index,
     title: optionalString(s.title),
     content,
-    notes: optionalString(s.notes),
     distance,
   }
 }
@@ -65,8 +97,7 @@ export function buildPracticeData(
   body: Record<string, unknown>,
   opts: { requireSets?: boolean } = {}
 ): NormalizedPractice {
-  const title = String(body.title ?? "").trim()
-  if (!title) throw new PracticeInputError("Practice title is required")
+  const title = String(body.title ?? "").trim() || "Untitled Practice"
 
   let date: Date | null = null
   const rawDate = optionalString(body.date)
@@ -77,6 +108,9 @@ export function buildPracticeData(
   }
 
   const rawSets = Array.isArray(body.sets) ? body.sets : []
+  if (rawSets.length > MAX_PRACTICE_SETS) {
+    throw new PracticeInputError(`A practice can have at most ${MAX_PRACTICE_SETS} sets`)
+  }
   const sets = rawSets.map((s, i) => normalizeSet(s, i))
   if (opts.requireSets && sets.length === 0) {
     throw new PracticeInputError("Add at least one set to the practice")
@@ -84,11 +118,23 @@ export function buildPracticeData(
 
   const published = body.published === true
 
+  const startTime = parseClockTime(optionalString(body.startTime) ?? "19:30")
+  if (!startTime) throw new PracticeInputError("Start time must be HH:MM")
+  const enteredEndTime = parseClockTime(optionalString(body.endTime) ?? "21:00")
+  if (!enteredEndTime) throw new PracticeInputError("End time must be HH:MM")
+
+  const startMinutes = clockToMinutes(startTime)
+  const endMinutes = clockToMinutes(enteredEndTime)
+  const endTime =
+    startMinutes != null && endMinutes != null && endMinutes < startMinutes
+      ? startTime
+      : enteredEndTime
+
   return {
     title,
     date,
-    startTime: optionalString(body.startTime) ?? "19:30",
-    endTime: optionalString(body.endTime) ?? "21:00",
+    startTime,
+    endTime,
     location: optionalString(body.location) ?? "CRC Comp Pool",
     focus: optionalString(body.focus),
     tags: normalizeTags(body.tags),

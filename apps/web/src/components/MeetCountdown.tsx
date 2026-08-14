@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 /** Build a local Date from a meet's UTC-midnight startDate + optional HH:mm startTime. */
 export function meetStartDateTime(
@@ -36,36 +36,98 @@ type Tone = "default" | "onDark"
 const upcomingPillClass =
   "text-[10px] uppercase font-semibold tracking-wide rounded-full bg-primary/90 text-primary-text px-2 py-0.5"
 
+function AnimatedCountdownValue({ value }: { value: string }) {
+  const targetValue = Number(value)
+  const [displayValue, setDisplayValue] = useState(0)
+  const latestTargetRef = useRef(targetValue)
+  const hasPlayedRef = useRef(false)
+  const frameRef = useRef<number | null>(null)
+
+  // This effect deliberately runs only once: it is the page-entry reveal.
+  useEffect(() => {
+    const initialTarget = latestTargetRef.current
+    if (!Number.isFinite(initialTarget)) return
+
+    const finish = () => {
+      hasPlayedRef.current = true
+      setDisplayValue(latestTargetRef.current)
+    }
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      frameRef.current = requestAnimationFrame(finish)
+      return () => {
+        if (frameRef.current != null) cancelAnimationFrame(frameRef.current)
+      }
+    }
+
+    if (initialTarget === 0) {
+      hasPlayedRef.current = true
+      return
+    }
+
+    const duration = 1400
+    const startedAt = performance.now()
+    const animate = (now: number) => {
+      const progress = Math.min((now - startedAt) / duration, 1)
+      const easedProgress = 1 - Math.pow(1 - progress, 3)
+      setDisplayValue(Math.round(initialTarget * easedProgress))
+
+      if (progress < 1) frameRef.current = requestAnimationFrame(animate)
+      else finish()
+    }
+
+    frameRef.current = requestAnimationFrame(animate)
+    return () => {
+      if (frameRef.current != null) cancelAnimationFrame(frameRef.current)
+    }
+  }, [])
+
+  // After the initial reveal, live timer changes update directly with no count-up.
+  useEffect(() => {
+    if (!Number.isFinite(targetValue)) return
+    latestTargetRef.current = targetValue
+    if (!hasPlayedRef.current) return
+
+    const frameId = requestAnimationFrame(() => setDisplayValue(targetValue))
+    return () => cancelAnimationFrame(frameId)
+  }, [targetValue])
+
+  return <span aria-hidden>{String(displayValue).padStart(value.length, "0")}</span>
+}
+
 function Unit({
   value,
   label,
   size,
   tone,
+  expand = false,
 }: {
   value: string
   label: string
   size: "sm" | "md"
   tone: Tone
+  expand?: boolean
 }) {
   const box =
     size === "md"
-      ? "min-w-[2.75rem] px-2 py-1.5 text-lg sm:min-w-[3.25rem] sm:text-xl"
-      : "min-w-[1.65rem] px-1 py-0.5 text-[11px] leading-tight"
-  const labelSize = size === "md" ? "text-[9px] mt-1" : "text-[8px] mt-0.5"
-
+      ? expand
+        ? "w-full min-h-[3.25rem] px-2 py-2 text-xl sm:text-2xl"
+        : "min-w-[3.25rem] px-2.5 py-2 text-xl sm:min-w-[3.75rem] sm:text-2xl"
+      : "min-w-[1.5rem] px-0.5 py-0.5 text-[10px] leading-tight"
+  const labelSize = size === "md" ? "text-[10px] mt-1.5" : "text-[7px] mt-0.5"
   const boxTone =
     tone === "onDark"
       ? "bg-white/12 text-white ring-1 ring-white/15"
       : "bg-background/90 text-foreground shadow-sm ring-1 ring-black/5 dark:bg-fill-secondary dark:ring-white/10"
   const labelTone =
     tone === "onDark" ? "text-white/55" : "text-foreground-tertiary"
-
   return (
-    <div className="flex flex-col items-center">
+    <div className={`flex flex-col items-center ${expand ? "min-w-0 flex-1" : ""}`}>
       <span
-        className={`inline-flex items-center justify-center rounded-md font-semibold tabular-nums tracking-tight ${box} ${boxTone}`}
+        className={`flex items-center justify-center rounded-md font-semibold tabular-nums tracking-tight ${box} ${boxTone}`}
+        aria-label={`${value} ${label}`}
       >
-        {value}
+        <AnimatedCountdownValue value={value} />
       </span>
       <span className={`uppercase tracking-[0.14em] font-medium ${labelSize} ${labelTone}`}>
         {label}
@@ -74,11 +136,23 @@ function Unit({
   )
 }
 
-function Separator({ size, tone }: { size: "sm" | "md"; tone: Tone }) {
+function Separator({
+  size,
+  tone,
+  expand = false,
+}: {
+  size: "sm" | "md"
+  tone: Tone
+  expand?: boolean
+}) {
   return (
     <span
-      className={`self-start font-semibold tabular-nums ${
-        size === "md" ? "pt-1.5 text-lg sm:text-xl" : "pt-0.5 text-[11px]"
+      className={`shrink-0 font-semibold tabular-nums ${
+        expand && size === "md"
+          ? "flex h-[3.25rem] items-center text-xl sm:text-2xl"
+          : size === "md"
+            ? "self-start pt-2 text-xl sm:text-2xl"
+            : "self-start pt-0.5 text-[10px]"
       } ${tone === "onDark" ? "text-white/40" : "text-foreground-tertiary"}`}
       aria-hidden
     >
@@ -91,18 +165,22 @@ function CountdownUnits({
   parts,
   size,
   tone = "default",
+  expand = false,
   className = "",
 }: {
   parts: Parts
   size: "sm" | "md"
   tone?: Tone
+  expand?: boolean
   className?: string
 }) {
   const showDays = parts.days > 0
-  const gap = size === "md" ? "gap-1.5 sm:gap-2" : "gap-1"
+  const gap = size === "md" ? "gap-2 sm:gap-2.5" : "gap-1"
 
   return (
-    <div className={`inline-flex items-start ${gap} ${className}`.trim()}>
+    <div
+      className={`${expand ? "flex w-full" : "inline-flex"} items-start ${gap} ${className}`.trim()}
+    >
       {showDays && (
         <>
           <Unit
@@ -110,15 +188,16 @@ function CountdownUnits({
             label={parts.days === 1 ? "day" : "days"}
             size={size}
             tone={tone}
+            expand={expand}
           />
-          <Separator size={size} tone={tone} />
+          <Separator size={size} tone={tone} expand={expand} />
         </>
       )}
-      <Unit value={pad(parts.hours)} label="hrs" size={size} tone={tone} />
-      <Separator size={size} tone={tone} />
-      <Unit value={pad(parts.minutes)} label="min" size={size} tone={tone} />
-      <Separator size={size} tone={tone} />
-      <Unit value={pad(parts.seconds)} label="sec" size={size} tone={tone} />
+      <Unit value={pad(parts.hours)} label="hrs" size={size} tone={tone} expand={expand} />
+      <Separator size={size} tone={tone} expand={expand} />
+      <Unit value={pad(parts.minutes)} label="min" size={size} tone={tone} expand={expand} />
+      <Separator size={size} tone={tone} expand={expand} />
+      <Unit value={pad(parts.seconds)} label="sec" size={size} tone={tone} expand={expand} />
     </div>
   )
 }
@@ -143,9 +222,12 @@ export default function MeetCountdown({
 
   useEffect(() => {
     if (targetMs == null) return
-    setNow(Date.now())
+    const frameId = window.requestAnimationFrame(() => setNow(Date.now()))
     const id = window.setInterval(() => setNow(Date.now()), 1000)
-    return () => window.clearInterval(id)
+    return () => {
+      window.cancelAnimationFrame(frameId)
+      window.clearInterval(id)
+    }
   }, [targetMs])
 
   const remaining = targetMs != null && now !== null ? targetMs - now : 0
@@ -157,12 +239,12 @@ export default function MeetCountdown({
     if (variant === "banner") {
       return (
         <div
-          className={`inline-flex flex-col gap-2 rounded-xl border border-border bg-fill-secondary/60 px-3 py-2.5 dark:bg-fill-secondary/40 ${className}`.trim()}
+          className={`flex w-full flex-col gap-3 rounded-2xl border border-border bg-fill-secondary/60 px-4 py-3.5 shadow-sm dark:bg-fill-secondary/40 ${className}`.trim()}
         >
-          <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
+          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
             Starts in
           </span>
-          <CountdownUnits parts={parts} size="md" />
+          <CountdownUnits parts={parts} size="md" expand />
         </div>
       )
     }
@@ -179,10 +261,10 @@ export default function MeetCountdown({
     // Compact glass chip for list / gallery overlays
     return (
       <span
-        className={`inline-flex items-center gap-1.5 rounded-lg bg-black/70 px-2 py-1 shadow-sm backdrop-blur-md ring-1 ring-white/15 ${className}`.trim()}
+        className={`inline-flex items-center gap-1 rounded-md bg-black/70 px-1.5 py-0.75 shadow-sm backdrop-blur-md ring-1 ring-white/15 ${className}`.trim()}
       >
         <span
-          className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary animate-pulse"
+          className="h-1 w-1 shrink-0 rounded-full bg-primary animate-pulse"
           aria-hidden
         />
         <CountdownUnits parts={parts} size="sm" tone="onDark" />

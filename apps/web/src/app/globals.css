@@ -45,6 +45,7 @@
   /* Colors - Border */
   --color-border: var(--brand-color-border);
   --color-border-secondary: var(--brand-color-border-secondary);
+  --color-border-subtle: var(--brand-color-border-subtle);
 }
 
 body {
@@ -59,4 +60,84 @@ button:not(:disabled) {
 
 button:disabled {
   cursor: not-allowed;
+}
+
+/* Use the SwimBuzz gold focus state instead of the browser-default blue ring. */
+:where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  textarea,
+  select
+):focus {
+  outline: none;
+  border-color: var(--brand-color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-color-primary) 34%, transparent);
+}
+
+/* The composite picker owns focus at the outer field level. Keep its editable
+   text area visually unboxed so the input does not create a second control. */
+input.sb-picker-inline-input,
+input.sb-picker-inline-input:focus,
+input.sb-picker-inline-input:-webkit-autofill,
+input.sb-picker-inline-input:-webkit-autofill:focus {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Keep pointer feedback stable across all linked and interactive UI controls. */
+a[href],
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+label[for],
+summary {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+/* Give collapsed native selects the same 24px trailing-icon geometry as the
+   date/time picker. The operating-system option menu is deliberately unchanged. */
+select:not([multiple]):not([size]),
+select[size="1"] {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238c8c8c' stroke-width='2'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E");
+  background-position: calc(100% - 12px) center;
+  background-repeat: no-repeat;
+  background-size: 1rem 1rem;
+  padding-right: 2.25rem;
+}
+
+.dark select:not([multiple]):not([size]),
+.dark select[size="1"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237e7e7e' stroke-width='2'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E");
+}
+
+
+@keyframes export-menu-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.export-menu-fade-in {
+  animation: export-menu-fade-in 150ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .export-menu-fade-in {
+    animation: none;
+  }
 }

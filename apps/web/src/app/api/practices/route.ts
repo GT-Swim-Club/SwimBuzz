@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server"
 import { notifyPracticePublished } from "@/lib/notifications"
 import { prisma } from "@/lib/prisma"
-import { buildPracticeData, PracticeInputError } from "@/lib/practice-input"
+import { buildPracticeData, PracticeInputError, practiceSetSelect } from "@/lib/practice-input"
 import { isStaffRole } from "@/lib/auth-roles"
 import { Prisma } from "@prisma/client"
 import { uniquePracticeSlug } from "@/lib/slug"
 import { getSession } from "@/lib/session"
+import { findUnmanagedPracticeTags } from "@/lib/practice-tag-catalog"
 
 export async function GET(req: Request) {
   const session = await getSession()
@@ -27,7 +28,7 @@ export async function GET(req: Request) {
       OR: [
         { title: contains },
         { focus: contains },
-        { sets: { some: { OR: [{ title: contains }, { content: contains }, { notes: contains }] } } },
+        { sets: { some: { OR: [{ title: contains }, { content: contains }] } } },
       ]})
   }
 
@@ -54,11 +55,21 @@ export async function POST(req: Request) {
   const body = await req.json()
   try {
     const data = buildPracticeData(body, { requireSets: true })
+    const unmanagedTags = await findUnmanagedPracticeTags(data.tags)
+    if (unmanagedTags.length) {
+      return NextResponse.json(
+        { error: "Use tags managed from the Practices page: " + unmanagedTags.join(", ") },
+        { status: 400 }
+      )
+    }
     const practice = await prisma.practice.create({
       data: {
         slug: await uniquePracticeSlug(data.date),
         title: data.title,
         date: data.date,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        location: data.location,
         focus: data.focus,
         tags: data.tags,
         published: data.published,
@@ -68,8 +79,9 @@ export async function POST(req: Request) {
             order: s.order,
             title: s.title,
             content: s.content,
-            notes: s.notes,
-            distance: s.distance}))}}})
+            distance: s.distance}))}},
+      include: { sets: { orderBy: { order: "asc" }, select: practiceSetSelect } },
+    })
     if (practice.published) {
       await notifyPracticePublished({
         practiceId: practice.id,

@@ -27,9 +27,13 @@ export default function AthleteGalleryCard({
   return (
     <Link
       href={athletePath(athlete.slug ?? athlete.id)}
-      className={`group block rounded-xl overflow-hidden border p-4 flex flex-col items-center text-center h-full transition-all ${isYou ? "border-primary bg-primary/5 shadow-sm hover:shadow-md" : "border-border bg-background shadow-sm hover:shadow-md hover:border-border hover:bg-fill-secondary"}`}
+      className={`group flex h-full flex-col items-center overflow-hidden rounded-xl border p-4 text-center transition-all ${
+        isYou
+          ? "border-primary bg-primary/5 shadow-sm hover:shadow-md"
+          : "border-border bg-background shadow-sm hover:border-border hover:bg-fill-secondary hover:shadow-md"
+      }`}
     >
-      <div className="h-20 w-20 rounded-full overflow-hidden border border-primary/30 bg-primary/20 mb-4">
+      <div className="mb-4 h-20 w-20 overflow-hidden rounded-full border border-primary/30 bg-primary/20">
         {athlete.user?.image ? (
           <img
             src={athlete.user.image}
@@ -38,30 +42,28 @@ export default function AthleteGalleryCard({
             referrerPolicy="no-referrer"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-xl font-semibold text-primary">
+          <div className="flex h-full w-full items-center justify-center text-xl font-semibold text-primary">
             {athlete.firstName[0]}
             {athlete.lastName[0]}
           </div>
         )}
       </div>
-      <h3 className="font-medium text-sm text-foreground">
+      <h3 className="text-base font-medium text-foreground">
         {athlete.firstName}
-        {athlete.nicknames.length > 0 && (
+        {athlete.nicknames.length > 0 ? (
           <span className="font-normal text-foreground-secondary">
-            {" "}
-            ({athlete.nicknames.join(", ")})
+            {" "}({athlete.nicknames.join(", ")})
           </span>
-        )}
-        {" "}
+        ) : null}{" "}
         {athlete.lastName}
       </h3>
-      <div className="text-xs text-foreground-secondary mt-0.5 space-y-0.5 w-full">
-        {yearAndAge && <p className="truncate">{yearAndAge}</p>}
-        {showGender && (
+      <div className="mt-1 w-full space-y-0.5 text-sm text-foreground-secondary">
+        {yearAndAge ? <p className="truncate">{yearAndAge}</p> : null}
+        {showGender ? (
           <p className="font-medium uppercase tracking-wide text-foreground-tertiary">
             {athlete.gender === "F" ? "Women" : "Men"}
           </p>
-        )}
+        ) : null}
       </div>
     </Link>
   )

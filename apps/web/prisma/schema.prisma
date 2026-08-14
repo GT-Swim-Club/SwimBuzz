@@ -3,8 +3,12 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DIRECT_URL")
+  provider  = "postgresql"
+  // Transaction-mode pooler (port 6543) for app queries — avoids session-mode
+  // EMAXCONNSESSION limits on Supabase's port 5432 pooler.
+  url       = env("DATABASE_URL")
+  // Session/direct URL for migrations and introspection only.
+  directUrl = env("DIRECT_URL")
 }
 
 enum Role {
@@ -115,11 +119,15 @@ model Meet {
   bannerUrl     String?
   packetUrl     String?
   psychSheetUrl String?
+  /// Legacy primary heat sheet URL, retained for backwards-compatible links.
   heatSheetUrl  String?
+  /// Multiple prelim heat sheet PDFs: [{ url, name? }, ...]
+  heatSheetUrls Json?
   /// Multiple finals heat sheet PDFs: [{ url, name? }, ...]
   finalsHeatSheetUrls Json?
   entriesSheetUrl String?
   resultsUrl    String?
+  swimphoneUrl String?
   liveStreamUrl String?
   rideSignUpsUrl String?
   roomsUrl       String?
@@ -128,8 +136,9 @@ model Meet {
   itinerary      String?
   eventOrder    Json?
   psychSheetSummary Json?
+  /// Merged roster-matched summary from all heatSheetUrls.
   heatSheetSummary  Json?
-  /// Merged roster-matched summary from all finalsHeatSheetUrls
+  /// Merged roster-matched summary from all finalsHeatSheetUrls.
   finalsHeatSheetSummary Json?
   entriesSheetSummary Json?
   relayResultsSummary Json?
@@ -289,6 +298,13 @@ model Practice {
   @@index([editLockExpiresAt])
 }
 
+model PracticeTag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model PracticeSet {
   id         String       @id @default(cuid())
   practiceId String
@@ -296,7 +312,6 @@ model PracticeSet {
   order      Int          @default(0)
   title      String?
   content    String
-  notes      String?
   distance   Int?
   createdAt  DateTime     @default(now())
 

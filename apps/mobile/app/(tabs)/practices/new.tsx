@@ -10,7 +10,28 @@ import {
   Title,
 } from "@swimbuzz/ui"
 import { colors, spacing } from "@swimbuzz/tokens"
+import { DateSelector, TimeSelector } from "../../../src/components/DateTimeSelector"
 import { api } from "../../../src/lib/api"
+
+function clockToMinutes(value: string): number | null {
+  const match = /^(\d{2}):(\d{2})$/.exec(value)
+  if (!match) return null
+  return Number(match[1]) * 60 + Number(match[2])
+}
+
+function endAfterStart(start: string, preferredEnd?: string): string {
+  const startMinutes = clockToMinutes(start)
+  if (startMinutes == null) return preferredEnd || "21:00"
+  const preferredMinutes = preferredEnd ? clockToMinutes(preferredEnd) : null
+  if (preferredMinutes != null && preferredMinutes > startMinutes) return preferredEnd!
+  // Snap to the 15-minute grid used by TimeSelector.
+  const next = Math.min(Math.ceil((startMinutes + 30) / 15) * 15, 23 * 60 + 45)
+  if (next <= startMinutes) {
+    const bump = Math.min(startMinutes + 15, 23 * 60 + 45)
+    return `${String(Math.floor(bump / 60)).padStart(2, "0")}:${String(bump % 60).padStart(2, "0")}`
+  }
+  return `${String(Math.floor(next / 60)).padStart(2, "0")}:${String(next % 60).padStart(2, "0")}`
+}
 
 export default function NewPracticeScreen() {
   const router = useRouter()
@@ -31,7 +52,13 @@ export default function NewPracticeScreen() {
       return
     }
     if (date.trim() && !/^\d{4}-\d{2}-\d{2}$/.test(date.trim())) {
-      Alert.alert("Invalid date", "Use YYYY-MM-DD or leave date blank.")
+      Alert.alert("Invalid date", "Select a date or leave it blank.")
+      return
+    }
+    const start = startTime.trim() || "19:30"
+    const end = endTime.trim() || "21:00"
+    if ((clockToMinutes(end) ?? 0) <= (clockToMinutes(start) ?? 0)) {
+      Alert.alert("Invalid end time", "End time must be after start time.")
       return
     }
     const content = setContent.trim()
@@ -39,20 +66,18 @@ export default function NewPracticeScreen() {
       Alert.alert("Set required", "Add at least one set’s workout content.")
       return
     }
-
     setSaving(true)
     try {
       const practice = (await api.createPractice({
         title: trimmedTitle,
         date: date.trim() || null,
-        startTime: startTime.trim() || "19:30",
-        endTime: endTime.trim() || "21:00",
+        startTime: start,
+        endTime: end,
         location: location.trim() || "CRC Comp Pool",
         focus: focus.trim() || null,
         published,
-        sets: [{ content, title: null, notes: null, distance: null }],
+        sets: [{ content, title: null, distance: null }],
       })) as { id?: string }
-
       if (practice?.id) {
         router.replace(`/practices/${practice.id}`)
       } else {
@@ -72,37 +97,42 @@ export default function NewPracticeScreen() {
     <Screen>
       <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
         <Title>New practice</Title>
-
         <TextField
           label="Title"
           value={title}
           onChangeText={setTitle}
           placeholder="Tuesday PM"
         />
-        <TextField
+        <DateSelector
           label="Date"
           value={date}
-          onChangeText={setDate}
-          placeholder="YYYY-MM-DD"
-          autoCapitalize="none"
-          autoCorrect={false}
+          onChange={setDate}
+          placeholder="Choose a date"
+          optional
         />
-        <TextField
-          label="Start time"
-          value={startTime}
-          onChangeText={setStartTime}
-          placeholder="19:30"
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-        <TextField
-          label="End time"
-          value={endTime}
-          onChangeText={setEndTime}
-          placeholder="21:00"
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
+        <View style={{ flexDirection: "row", gap: spacing.sm }}>
+          <View style={{ flex: 1 }}>
+            <TimeSelector
+              label="Start time"
+              value={startTime}
+              onChange={(value) => {
+                setStartTime(value)
+                setEndTime((current) => endAfterStart(value, current))
+              }}
+              helperText="15-minute intervals"
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <TimeSelector
+              label="End time"
+              value={endTime}
+              onChange={setEndTime}
+              helperText="Must be after start"
+              min={startTime}
+              minExclusive
+            />
+          </View>
+        </View>
         <TextField
           label="Location"
           value={location}
@@ -123,7 +153,6 @@ export default function NewPracticeScreen() {
           multiline
           style={{ minHeight: 88, textAlignVertical: "top" }}
         />
-
         <View
           style={{
             flexDirection: "row",
@@ -147,7 +176,6 @@ export default function NewPracticeScreen() {
             thumbColor={colors.light.bgContainer}
           />
         </View>
-
         <Button
           label="Create practice"
           loading={saving}

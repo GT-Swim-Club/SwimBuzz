@@ -1,6 +1,6 @@
 import type { MeetResultEntry, SheetEntry } from "@/lib/meet-sheet-summary"
 import { isRelaySignupEvent } from "@/lib/meet-signup"
-import { normalizeEventName } from "@/lib/swim-parse"
+import { canonicalizeStrokeEvent, normalizeEventName } from "@/lib/swim-parse"
 import { parseTime } from "@/lib/utils"
 
 export type StatCounter = {
@@ -131,7 +131,7 @@ export function computeMeetPrepHighlights(
   if (topEvent && topCount > 0) {
     counters.push({
       label: "Most popular",
-      value: topEvent,
+      value: canonicalizeStrokeEvent(topEvent),
       hint: `${topCount} entr${topCount === 1 ? "y" : "ies"}`,
     })
   }

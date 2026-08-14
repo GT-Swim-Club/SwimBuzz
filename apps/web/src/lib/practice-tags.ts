@@ -1,7 +1,9 @@
-// Canonical set-type tags. Coaches pick from these when building a practice so
-// the set archive stays searchable/filterable over time. Free-form tags are
-// still allowed, but these cover the common cases and drive the filter UI.
-export const SET_TAGS = [
+// Initial shared practice-tag catalog. Coaches can add and remove catalog entries
+// from the Practices page; every practice editor consumes that shared catalog.
+export const PRACTICE_TAG_NAME_MAX_LENGTH = 10
+export const PRACTICE_TAG_MAX_COUNT = 20
+
+export const DEFAULT_PRACTICE_TAGS = [
   "Warmup",
   "Prep",
   "Drill",
@@ -20,14 +22,14 @@ export const SET_TAGS = [
   "Dryland",
 ] as const
 
-export type SetTag = (typeof SET_TAGS)[number]
+export type SetTag = (typeof DEFAULT_PRACTICE_TAGS)[number]
 
 // Normalize a raw tag to Title Case and collapse whitespace so that
 // "sprint" / "SPRINT" / " Sprint " all archive under the same "Sprint".
 export function normalizeTag(raw: string): string {
   const cleaned = raw.trim().replace(/\s+/g, " ")
   if (!cleaned) return ""
-  const canonical = SET_TAGS.find((t) => t.toLowerCase() === cleaned.toLowerCase())
+  const canonical = DEFAULT_PRACTICE_TAGS.find((t) => t.toLowerCase() === cleaned.toLowerCase())
   if (canonical) return canonical
   return cleaned
     .split(" ")

@@ -1,3 +1,5 @@
+import { formatClockTime } from "@swimbuzz/shared"
+
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 // "Jun 28, 2025" — fixed format, not locale-dependent
@@ -51,18 +53,14 @@ export function formatDateRange(
 }
 
 function formatTimeOfDay(d: Date): string {
-  let hours = d.getHours()
-  const minutes = d.getMinutes().toString().padStart(2, "0")
-  const ampm = hours >= 12 ? "PM" : "AM"
-  hours = hours % 12 || 12
-  return `${hours}:${minutes} ${ampm}`
+  return formatClockTime(d)
 }
 
 function startOfLocalDay(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate())
 }
 
-// "Jun 28, 2025, 3:04 PM" — for last-synced timestamps
+// "Jun 28, 2025, 03:04 PM" — for last-synced timestamps
 export function formatDateTime(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date
   return `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}, ${formatTimeOfDay(d)}`

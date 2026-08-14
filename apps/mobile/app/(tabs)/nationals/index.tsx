@@ -1,19 +1,9 @@
 import { useCallback, useMemo, useState } from "react"
-import { ScrollView, View } from "react-native"
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
 import { useFocusEffect, useRouter } from "expo-router"
-import { athleteDisplayName, formatTime } from "@swimbuzz/shared"
-import {
-  Chip,
-  EmptyState,
-  ErrorBlock,
-  ListRow,
-  LoadingBlock,
-  Muted,
-  Screen,
-  Section,
-  Title,
-} from "@swimbuzz/ui"
-import { spacing } from "@swimbuzz/tokens"
+import { athletePreferredName, formatTime } from "@swimbuzz/shared"
+import { EmptyState, ErrorBlock, LoadingBlock, Muted, Screen } from "@swimbuzz/ui"
+import { colors, radii, spacing } from "@swimbuzz/tokens"
 import { api } from "../../../src/lib/api"
 
 type CutRow = {
@@ -41,6 +31,7 @@ type QualifierAthlete = {
 }
 
 const COURSES = ["SCY", "LCM"] as const
+const c = colors.light
 
 function genderLabel(gender: unknown) {
   if (gender === "F") return "Women"
@@ -52,6 +43,15 @@ function genderSortKey(gender: unknown) {
   if (gender === "F") return 0
   if (gender === "M") return 1
   return 2
+}
+
+function athleteInitials(athlete: QualifierAthlete) {
+  return `${athlete.firstName?.[0] ?? ""}${athlete.lastName?.[0] ?? ""}`.toUpperCase()
+}
+
+function eventTime(event: QualifierAthlete["events"][number]) {
+  const time = event.time ?? (typeof event.timeMs === "number" ? formatTime(event.timeMs) : "")
+  return `${event.event}${time ? ` · ${time}` : ""}`
 }
 
 export default function NationalsScreen() {
@@ -68,10 +68,7 @@ export default function NationalsScreen() {
     setError(null)
     setLoading(true)
     try {
-      const data = await api.getQualifiers({
-        season: activeSeason,
-        course: activeCourse,
-      })
+      const data = await api.getQualifiers({ season: activeSeason, course: activeCourse })
       const set = data.set
       const nextCuts =
         set && typeof set === "object" && Array.isArray((set as { cuts?: unknown }).cuts)
@@ -79,9 +76,7 @@ export default function NationalsScreen() {
           : []
       setCuts(nextCuts)
       setQualifiers(
-        Array.isArray(data.qualifiers)
-          ? (data.qualifiers as QualifierAthlete[])
-          : []
+        Array.isArray(data.qualifiers) ? (data.qualifiers as QualifierAthlete[]) : []
       )
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load qualifiers")
@@ -136,124 +131,200 @@ export default function NationalsScreen() {
       list.push(cut)
       groups.set(key, list)
     }
-    return [...groups.entries()].sort(
-      ([a], [b]) => genderSortKey(a) - genderSortKey(b)
-    )
+    return [...groups.entries()].sort(([a], [b]) => genderSortKey(a) - genderSortKey(b))
   }, [cuts])
 
   return (
-    <Screen style={{ paddingBottom: 0 }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
-        <Title>Nationals</Title>
-        <Muted style={{ marginBottom: spacing.md }}>
-          Qualifying standards and athletes who have made cuts this season.
-        </Muted>
+    <Screen style={styles.screen}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.intro}>
+          <Text style={styles.eyebrow}>CHAMPIONSHIP STANDARDS</Text>
+          <Text style={styles.heading}>Nationals</Text>
+          <Text style={styles.description}>
+            Track qualifying standards and athletes who have earned their place.
+          </Text>
+        </View>
 
         {error ? <ErrorBlock message={error} /> : null}
 
-        <Section title="Season">
+        <View style={styles.filtersCard}>
+          <Text style={styles.filterLabel}>SEASON</Text>
           {seasons.length === 0 && !loading ? (
             <Muted>No seasons available.</Muted>
           ) : (
-            <View
-              style={{
-                flexDirection: "row",
-                flexWrap: "wrap",
-              }}
+            <ScrollView
+              horizontal
+              contentContainerStyle={styles.seasonRow}
+              showsHorizontalScrollIndicator={false}
             >
-              {seasons.map((label) => (
-                <Chip
-                  key={label}
-                  label={label}
-                  selected={season === label}
-                  onPress={() => setSeason(label)}
-                />
-              ))}
-            </View>
+              {seasons.map((label) => {
+                const selected = season === label
+                return (
+                  <Pressable
+                    key={label}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected }}
+                    onPress={() => setSeason(label)}
+                    style={({ pressed }) => [
+                      styles.seasonPill,
+                      selected && styles.seasonPillSelected,
+                      pressed && styles.pressed,
+                    ]}
+                  >
+                    <Text style={[styles.seasonText, selected && styles.seasonTextSelected]}>
+                      {label}
+                    </Text>
+                  </Pressable>
+                )
+              })}
+            </ScrollView>
           )}
-        </Section>
 
-        <Section title="Course">
-          <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-            {COURSES.map((value) => (
-              <Chip
-                key={value}
-                label={value}
-                selected={course === value}
-                onPress={() => setCourse(value)}
-              />
-            ))}
+          <View style={styles.divider} />
+          <Text style={styles.filterLabel}>COURSE</Text>
+          <View style={styles.courseControl}>
+            {COURSES.map((value) => {
+              const selected = course === value
+              return (
+                <Pressable
+                  key={value}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  onPress={() => setCourse(value)}
+                  style={({ pressed }) => [
+                    styles.courseOption,
+                    selected && styles.courseOptionSelected,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <Text style={[styles.courseText, selected && styles.courseTextSelected]}>
+                    {value}
+                  </Text>
+                </Pressable>
+              )
+            })}
           </View>
-        </Section>
+        </View>
 
         {loading ? (
-          <Section title="Qualified athletes">
+          <View style={styles.loadingCard}>
             <LoadingBlock />
-          </Section>
+          </View>
         ) : (
           <>
-            <Section title={`Qualified athletes (${qualifiers.length})`}>
-              {qualifiers.length === 0 ? (
-                <EmptyState
-                  title="No qualifiers yet"
-                  body="No athletes have made an NQT cut for this season/course."
-                />
-              ) : (
-                qualifiers.map((athlete) => (
-                  <ListRow
-                    key={athlete.athleteId}
-                    title={athleteDisplayName({
-                      firstName: athlete.firstName,
-                      lastName: athlete.lastName,
-                      nicknames: athlete.nicknames ?? [],
-                    })}
-                    subtitle={athlete.events
-                      .map(
-                        (e) =>
-                          `${e.event} ${e.time ?? (typeof e.timeMs === "number" ? formatTime(e.timeMs) : "")}`.trim()
-                      )
-                      .join(" · ")}
-                    onPress={() =>
-                      router.push(
-                        `/roster/${athlete.athleteSlug || athlete.athleteId}`
-                      )
-                    }
-                  />
-                ))
-              )}
-            </Section>
+            <View style={styles.summaryCard}>
+              <View>
+                <Text style={styles.summaryNumber}>{qualifiers.length}</Text>
+                <Text style={styles.summaryLabel}>
+                  {qualifiers.length === 1 ? "qualified athlete" : "qualified athletes"}
+                </Text>
+              </View>
+              <View style={styles.summaryRule} />
+              <View style={styles.summaryCopy}>
+                <Text style={styles.summaryTitle}>{season ?? "Current season"}</Text>
+                <Text style={styles.summaryDetail}>{course} qualifying cuts</Text>
+              </View>
+            </View>
+
+            <View style={styles.sectionHeader}>
+              <View>
+                <Text style={styles.sectionTitle}>Qualified athletes</Text>
+                <Text style={styles.sectionCaption}>Tap an athlete to view their profile.</Text>
+              </View>
+              <View style={styles.countBadge}>
+                <Text style={styles.countBadgeText}>{qualifiers.length}</Text>
+              </View>
+            </View>
+
+            {qualifiers.length === 0 ? (
+              <EmptyState
+                title="No qualifiers yet"
+                body="No athletes have made an NQT cut for this season and course."
+              />
+            ) : (
+              <View style={styles.listCard}>
+                {qualifiers.map((athlete, index) => {
+                  const name = athletePreferredName({
+                    firstName: athlete.firstName,
+                    lastName: athlete.lastName,
+                    nicknames: athlete.nicknames ?? [],
+                  })
+                  const visibleEvents = athlete.events.slice(0, 2)
+                  const hiddenEventCount = athlete.events.length - visibleEvents.length
+                  return (
+                    <Pressable
+                      key={athlete.athleteId}
+                      accessibilityRole="button"
+                      accessibilityLabel={`View ${name}'s profile`}
+                      onPress={() => router.push(`/roster/${athlete.athleteSlug || athlete.athleteId}`)}
+                      style={({ pressed }) => [
+                        styles.athleteRow,
+                        index < qualifiers.length - 1 && styles.listDivider,
+                        pressed && styles.rowPressed,
+                      ]}
+                    >
+                      <View style={styles.avatar}>
+                        <Text style={styles.avatarText}>{athleteInitials(athlete)}</Text>
+                      </View>
+                      <View style={styles.athleteContent}>
+                        <Text numberOfLines={1} style={styles.athleteName}>{name}</Text>
+                        <View style={styles.eventLine}>
+                          {visibleEvents.map((event, eventIndex) => (
+                            <Text key={`${event.event}-${eventIndex}`} numberOfLines={1} style={styles.eventText}>
+                              {eventTime(event)}
+                            </Text>
+                          ))}
+                          {hiddenEventCount > 0 ? (
+                            <Text style={styles.moreEvents}>+{hiddenEventCount} more</Text>
+                          ) : null}
+                        </View>
+                      </View>
+                      <Text style={styles.chevron}>›</Text>
+                    </Pressable>
+                  )
+                })}
+              </View>
+            )}
+
+            <View style={styles.standardsHeader}>
+              <Text style={styles.sectionTitle}>Qualifying standards</Text>
+              <Text style={styles.sectionCaption}>
+                {cuts.length} {cuts.length === 1 ? "event" : "events"} in this course
+              </Text>
+            </View>
 
             {cuts.length === 0 ? (
-              <Section title="Cuts">
-                <EmptyState
-                  title="No standards yet"
-                  body={
-                    season
-                      ? `No ${course} cuts found for ${season}.`
-                      : "Pick a season to view cuts."
-                  }
-                />
-              </Section>
+              <EmptyState
+                title="No standards yet"
+                body={season ? `No ${course} cuts found for ${season}.` : "Pick a season to view cuts."}
+              />
             ) : (
               cutsByGender.map(([gender, rows]) => (
-                <Section
-                  key={gender || "open"}
-                  title={`${genderLabel(gender)} cuts`}
-                >
-                  {rows.map((cut, index) => (
-                    <ListRow
-                      key={cut.id ?? `${cut.event}-${cut.gender}-${index}`}
-                      title={cut.event ?? "Event"}
-                      subtitle={
-                        typeof cut.timeMs === "number"
-                          ? [formatTime(cut.timeMs), cut.note]
-                              .filter(Boolean)
-                              .join(" · ")
-                          : cut.note ?? undefined
-                      }
-                    />
-                  ))}
-                </Section>
+                <View key={gender || "open"} style={styles.standardsGroup}>
+                  <View style={styles.standardsGroupHeader}>
+                    <Text style={styles.standardsGroupTitle}>{genderLabel(gender)}</Text>
+                    <Text style={styles.standardsGroupCount}>{rows.length} events</Text>
+                  </View>
+                  <View style={styles.standardsList}>
+                    {rows.map((cut, index) => (
+                      <View
+                        key={cut.id ?? `${cut.event}-${cut.gender}-${index}`}
+                        style={[styles.standardRow, index < rows.length - 1 && styles.listDivider]}
+                      >
+                        <View style={styles.standardEvent}>
+                          <Text style={styles.standardName}>{cut.event ?? "Event"}</Text>
+                          {cut.note ? <Text style={styles.standardNote}>{cut.note}</Text> : null}
+                        </View>
+                        <Text style={styles.standardTime}>
+                          {typeof cut.timeMs === "number" ? formatTime(cut.timeMs) : "—"}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
               ))
             )}
           </>
@@ -262,3 +333,203 @@ export default function NationalsScreen() {
     </Screen>
   )
 }
+
+const styles = StyleSheet.create({
+  screen: { paddingBottom: 0 },
+  content: { paddingBottom: spacing.xl },
+  intro: { marginBottom: spacing.md },
+  eyebrow: {
+    color: c.primaryActive,
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 1,
+    marginBottom: spacing.xxs,
+  },
+  heading: {
+    color: c.text,
+    fontSize: 28,
+    fontWeight: "800",
+    letterSpacing: -0.6,
+  },
+  description: {
+    color: c.textSecondary,
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: spacing.xxs,
+    maxWidth: 330,
+  },
+  filtersCard: {
+    backgroundColor: c.bgContainer,
+    borderColor: c.border,
+    borderRadius: radii.lg,
+    borderWidth: 1,
+    marginBottom: spacing.md,
+    overflow: "hidden",
+    padding: spacing.sm,
+  },
+  filterLabel: {
+    color: c.textTertiary,
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 0.8,
+    marginBottom: spacing.xs,
+  },
+  seasonRow: { gap: spacing.xs, paddingRight: spacing.sm },
+  seasonPill: {
+    backgroundColor: c.fillSecondary,
+    borderColor: "transparent",
+    borderRadius: 999,
+    borderWidth: 1,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+  },
+  seasonPillSelected: { backgroundColor: c.primaryBg, borderColor: c.primaryActive },
+  seasonText: { color: c.textSecondary, fontSize: 14, fontWeight: "600" },
+  seasonTextSelected: { color: c.primaryText, fontWeight: "800" },
+  divider: {
+    backgroundColor: c.border,
+    height: StyleSheet.hairlineWidth,
+    marginVertical: spacing.sm,
+  },
+  courseControl: {
+    backgroundColor: c.fillSecondary,
+    borderRadius: radii.md,
+    flexDirection: "row",
+    padding: 3,
+  },
+  courseOption: {
+    alignItems: "center",
+    borderRadius: radii.sm,
+    flex: 1,
+    paddingVertical: 7,
+  },
+  courseOptionSelected: {
+    backgroundColor: c.bgContainer,
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+  },
+  courseText: { color: c.textSecondary, fontSize: 14, fontWeight: "700" },
+  courseTextSelected: { color: c.text },
+  pressed: { opacity: 0.72 },
+  loadingCard: {
+    backgroundColor: c.bgContainer,
+    borderColor: c.border,
+    borderRadius: radii.lg,
+    borderWidth: 1,
+  },
+  summaryCard: {
+    alignItems: "center",
+    backgroundColor: c.primaryBg,
+    borderColor: "#e4d4b5",
+    borderRadius: radii.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    marginBottom: spacing.lg,
+    padding: spacing.sm,
+  },
+  summaryNumber: {
+    color: c.primaryText,
+    fontSize: 27,
+    fontWeight: "800",
+    letterSpacing: -0.8,
+    lineHeight: 35,
+  },
+  summaryLabel: { color: c.primaryText, fontSize: 11, fontWeight: "600" },
+  summaryRule: { backgroundColor: "#d4bd91", height: 32, marginHorizontal: spacing.sm, width: 1 },
+  summaryCopy: { flex: 1 },
+  summaryTitle: { color: c.primaryText, fontSize: 15, fontWeight: "800" },
+  summaryDetail: { color: c.primaryActive, fontSize: 13, fontWeight: "600", marginTop: 2 },
+  sectionHeader: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: spacing.sm,
+  },
+  sectionTitle: { color: c.text, fontSize: 18, fontWeight: "800", letterSpacing: -0.2 },
+  sectionCaption: { color: c.textSecondary, fontSize: 12, marginTop: 2 },
+  countBadge: {
+    alignItems: "center",
+    backgroundColor: c.fillSecondary,
+    borderRadius: 999,
+    justifyContent: "center",
+    minWidth: 28,
+    paddingHorizontal: spacing.xs,
+    paddingVertical: 4,
+  },
+  countBadgeText: { color: c.textSecondary, fontSize: 12, fontWeight: "800" },
+  listCard: {
+    backgroundColor: c.bgContainer,
+    borderColor: c.border,
+    borderRadius: radii.lg,
+    borderWidth: 1,
+    marginBottom: spacing.lg,
+    overflow: "hidden",
+  },
+  athleteRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    minHeight: 64,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  rowPressed: { backgroundColor: c.fillSecondary },
+  listDivider: { borderBottomColor: c.border, borderBottomWidth: StyleSheet.hairlineWidth },
+  avatar: {
+    alignItems: "center",
+    backgroundColor: "#ede3d0",
+    borderRadius: 16,
+    height: 32,
+    justifyContent: "center",
+    marginRight: spacing.sm,
+    width: 32,
+  },
+  avatarText: { color: c.primaryText, fontSize: 12, fontWeight: "800" },
+  athleteContent: { flex: 1, minWidth: 0 },
+  athleteName: { color: c.text, fontSize: 16, fontWeight: "700" },
+  eventLine: { flexDirection: "row", flexWrap: "wrap", gap: 2, marginTop: 4 },
+  eventText: { color: c.textSecondary, fontSize: 12, lineHeight: 17, maxWidth: "100%" },
+  moreEvents: { color: c.primaryActive, fontSize: 12, fontWeight: "700", lineHeight: 17 },
+  chevron: {
+    color: c.textTertiary,
+    fontSize: 25,
+    fontWeight: "300",
+    marginLeft: spacing.xs,
+  },
+  standardsHeader: { marginBottom: spacing.sm },
+  standardsGroup: { marginBottom: spacing.sm },
+  standardsGroupHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: spacing.xs,
+    paddingHorizontal: spacing.xs,
+  },
+  standardsGroupTitle: { color: c.text, fontSize: 15, fontWeight: "800" },
+  standardsGroupCount: { color: c.textTertiary, fontSize: 12, fontWeight: "600" },
+  standardsList: {
+    backgroundColor: c.bgContainer,
+    borderColor: c.border,
+    borderRadius: radii.lg,
+    borderWidth: 1,
+    overflow: "hidden",
+  },
+  standardRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    minHeight: 50,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  standardEvent: { flex: 1, paddingRight: spacing.sm },
+  standardName: { color: c.text, fontSize: 15, fontWeight: "700" },
+  standardNote: { color: c.textSecondary, fontSize: 12, marginTop: 2 },
+  standardTime: {
+    color: c.primaryActive,
+    fontSize: 15,
+    fontVariant: ["tabular-nums"],
+    fontWeight: "800",
+  },
+})

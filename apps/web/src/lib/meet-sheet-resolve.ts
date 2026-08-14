@@ -2,10 +2,11 @@ import { prisma } from "@/lib/prisma"
 import type { MeetInfoDropKind } from "@/lib/meet-roster-notify"
 import {
   resolvePsychSheetSummary,
-  resolveHeatSheetSummary,
   resolveEntriesSheetSummary,
+  resolveHeatSheetSummaries,
   resolveFinalsHeatSheetSummaries,
   applyPairedSheetEntries,
+  applyPairedHeatSheetEntries,
   applyPairedFinalsHeatSheetEntries,
   collectSheetNameConfirmations,
   type CachedSheetParses,
@@ -17,9 +18,10 @@ import type { NameConfirmation, RosterPairingOption } from "@/lib/meet-import"
 import { MeetImportValidationError } from "@/lib/meet-import-validate"
 import { Prisma } from "@prisma/client"
 import {
-  finalsHeatSheetUrlList,
   normalizeFinalsHeatSheetUrls,
+  normalizeHeatSheetUrls,
   type FinalsHeatSheetLink,
+  type HeatSheetLink,
 } from "@/lib/meet-files"
 
 function rethrowImportValidation(err: unknown): never | void {
@@ -82,14 +84,10 @@ function effectiveTeamCode(
 function shouldParseSheet(
   next: string | null,
   existingUrl: string | null,
-  existingSummary: unknown,
   teamChanged: boolean
 ): boolean {
-  return (
-    next !== existingUrl ||
-    Boolean(next && !existingSummary) ||
-    (teamChanged && Boolean(next))
-  )
+  if (!next) return false
+  return next !== existingUrl || teamChanged
 }
 
 function sheetSummaryFrom(
@@ -101,11 +99,19 @@ function sheetSummaryFrom(
   return existing
 }
 
-function finalsUrlsEqual(a: unknown, b: unknown): boolean {
-  const left = finalsHeatSheetUrlList(a)
-  const right = finalsHeatSheetUrlList(b)
-  if (left.length !== right.length) return false
-  return left.every((url, i) => url === right[i])
+function effectiveHeatLinks(
+  existing: { heatSheetUrl?: string | null; heatSheetUrls?: unknown },
+  data: Record<string, unknown>
+): HeatSheetLink[] {
+  if ("heatSheetUrls" in data) {
+    return normalizeHeatSheetUrls(data.heatSheetUrls) ?? []
+  }
+  if ("heatSheetUrl" in data) {
+    const url = String(data.heatSheetUrl ?? "").trim()
+    return url ? [{ url }] : []
+  }
+  const stored = normalizeHeatSheetUrls(existing.heatSheetUrls)
+  return stored ?? (existing.heatSheetUrl ? [{ url: existing.heatSheetUrl }] : [])
 }
 
 function effectiveFinalsLinks(
@@ -118,6 +124,14 @@ function effectiveFinalsLinks(
   return normalizeFinalsHeatSheetUrls(existing.finalsHeatSheetUrls) ?? []
 }
 
+function sheetUrlsChanged(
+  existing: Array<{ url: string }>,
+  next: Array<{ url: string }>
+): boolean {
+  if (existing.length !== next.length) return true
+  return existing.some((link, index) => link.url !== next[index]?.url)
+}
+
 export async function attachSheetSummaries(
   userId: string,
   existing: {
@@ -126,6 +140,7 @@ export async function attachSheetSummaries(
     teamCode?: string | null
     psychSheetUrl: string | null
     heatSheetUrl: string | null
+    heatSheetUrls?: unknown
     finalsHeatSheetUrls?: unknown
     resultsUrl: string | null
     entriesSheetUrl: string | null
@@ -148,36 +163,36 @@ export async function attachSheetSummaries(
   const pairOnly = Boolean(matchOptions.nameMappings)
   const nameMappings = matchOptions.nameMappings ?? {}
 
+  const existingHeatLinks = effectiveHeatLinks(existing, {})
+  const nextHeatLinks = effectiveHeatLinks(existing, data)
+  const nextHeatUrls = nextHeatLinks.map((l) => l.url)
+  const shouldParseHeat =
+    sheetUrlsChanged(existingHeatLinks, nextHeatLinks) ||
+    (teamChanged && nextHeatUrls.length > 0)
+
   const existingFinalsLinks =
     normalizeFinalsHeatSheetUrls(existing.finalsHeatSheetUrls) ?? []
   const nextFinalsLinks = effectiveFinalsLinks(existing, data)
-  const finalsChanged =
-    ("finalsHeatSheetUrls" in data &&
-      !finalsUrlsEqual(data.finalsHeatSheetUrls, existing.finalsHeatSheetUrls)) ||
-    ("finalsHeatSheetUrls" in data &&
-      nextFinalsLinks.length > 0 &&
-      !existing.finalsHeatSheetSummary)
+  const nextFinalsUrls = nextFinalsLinks.map((l) => l.url)
+  const shouldParseFinals =
+    sheetUrlsChanged(existingFinalsLinks, nextFinalsLinks) ||
+    (teamChanged && nextFinalsUrls.length > 0)
+
+  const nextPsychUrl =
+    "psychSheetUrl" in data
+      ? ((data.psychSheetUrl as string | null) ?? null)
+      : existing.psychSheetUrl
+  const nextEntriesUrl =
+    "entriesSheetUrl" in data
+      ? ((data.entriesSheetUrl as string | null) ?? null)
+      : existing.entriesSheetUrl
 
   const needsRoster =
     pairOnly ||
-    teamChanged ||
-    ("psychSheetUrl" in data &&
-      ((data.psychSheetUrl as string | null) ?? null) !== existing.psychSheetUrl) ||
-    ("psychSheetUrl" in data &&
-      (data.psychSheetUrl as string | null) &&
-      !existing.psychSheetSummary) ||
-    ("heatSheetUrl" in data &&
-      ((data.heatSheetUrl as string | null) ?? null) !== existing.heatSheetUrl) ||
-    ("heatSheetUrl" in data &&
-      (data.heatSheetUrl as string | null) &&
-      !existing.heatSheetSummary) ||
-    finalsChanged ||
-    (teamChanged && existingFinalsLinks.length > 0) ||
-    ("entriesSheetUrl" in data &&
-      ((data.entriesSheetUrl as string | null) ?? null) !== existing.entriesSheetUrl) ||
-    ("entriesSheetUrl" in data &&
-      (data.entriesSheetUrl as string | null) &&
-      !existing.entriesSheetSummary)
+    shouldParseSheet(nextPsychUrl, existing.psychSheetUrl, teamChanged) ||
+    shouldParseHeat ||
+    shouldParseSheet(nextEntriesUrl, existing.entriesSheetUrl, teamChanged) ||
+    shouldParseFinals
 
   const roster = needsRoster ? await seasonRoster(existing.season) : null
   const allSheetNames: string[] = []
@@ -214,16 +229,11 @@ export async function attachSheetSummaries(
       }
     }
 
-    const heatUrl =
-      ("heatSheetUrl" in data
-        ? (data.heatSheetUrl as string | null)
-        : existing.heatSheetUrl) ?? null
-    if (heatUrl) {
+    if (nextHeatUrls.length > 0) {
       try {
-        const { summary, sheetNames } = await applyPairedSheetEntries(
+        const { summary, sheetNames, cachedParses } = await applyPairedHeatSheetEntries(
           userId,
-          heatUrl,
-          "heat",
+          nextHeatUrls,
           roster,
           teamCode,
           sheetSummaryFrom(data, existing.heatSheetSummary, "heatSheetSummary"),
@@ -233,6 +243,9 @@ export async function attachSheetSummaries(
         )
         data.heatSheetSummary = summary
         allSheetNames.push(...sheetNames)
+        if (Object.keys(cachedParses).length > 0) {
+          cachedSheetParses.heat = cachedParses
+        }
       } catch (err) {
         rethrowImportValidation(err)
         console.error("Heat sheet pair-only parse failed:", err)
@@ -295,15 +308,14 @@ export async function attachSheetSummaries(
         console.error("Entries sheet pair-only parse failed:", err)
       }
     }
-  } else if ("psychSheetUrl" in data && roster) {
+  } else if ("psychSheetUrl" in data) {
     const next = (data.psychSheetUrl as string | null) ?? null
-    const shouldParse = shouldParseSheet(
-      next,
-      existing.psychSheetUrl,
-      existing.psychSheetSummary,
-      teamChanged
-    )
-    if (shouldParse) {
+    if (!next) {
+      if (existing.psychSheetUrl) data.psychSheetSummary = null
+    } else if (
+      roster &&
+      shouldParseSheet(next, existing.psychSheetUrl, teamChanged)
+    ) {
       try {
         const { summary, sheetNames, cachedParse } = await resolvePsychSheetSummary(
           userId,
@@ -315,10 +327,8 @@ export async function attachSheetSummaries(
         data.psychSheetSummary = summary
         allSheetNames.push(...sheetNames)
         if (cachedParse) cachedSheetParses.psych = cachedParse
-        if (next) {
-          sheetImported = true
-          sheetDrops.push("psych_sheet")
-        }
+        sheetImported = true
+        sheetDrops.push("psych_sheet")
       } catch (err) {
         rethrowImportValidation(err)
         console.error("Psych sheet parse failed:", err)
@@ -346,48 +356,27 @@ export async function attachSheetSummaries(
     }
   }
 
-  if (!pairOnly && "heatSheetUrl" in data && roster) {
-    const next = (data.heatSheetUrl as string | null) ?? null
-    const shouldParse = shouldParseSheet(
-      next,
-      existing.heatSheetUrl,
-      existing.heatSheetSummary,
-      teamChanged
-    )
-    if (shouldParse) {
-      try {
-        const { summary, sheetNames, cachedParse } = await resolveHeatSheetSummary(
-          userId,
-          next,
-          roster,
-          teamCode,
-          options
-        )
-        data.heatSheetSummary = summary
-        allSheetNames.push(...sheetNames)
-        if (cachedParse) cachedSheetParses.heat = cachedParse
-        if (next) {
-          sheetImported = true
-          sheetDrops.push("heat_sheet")
-        }
-      } catch (err) {
-        rethrowImportValidation(err)
-        console.error("Heat sheet parse failed:", err)
-        data.heatSheetSummary = null
-      }
-    }
-  } else if (!pairOnly && teamChanged && existing.heatSheetUrl && roster) {
+  if (
+    !pairOnly &&
+    ("heatSheetUrls" in data || "heatSheetUrl" in data) &&
+    nextHeatUrls.length === 0
+  ) {
+    if (existingHeatLinks.length > 0) data.heatSheetSummary = null
+  } else if (!pairOnly && roster && shouldParseHeat) {
     try {
-      const { summary, sheetNames, cachedParse } = await resolveHeatSheetSummary(
+      const { summary, sheetNames, cachedParses } = await resolveHeatSheetSummaries(
         userId,
-        existing.heatSheetUrl,
+        nextHeatUrls,
         roster,
         teamCode,
-        options
+        options,
+        matchOptions.cachedSheetParses?.heat
       )
       data.heatSheetSummary = summary
       allSheetNames.push(...sheetNames)
-      if (cachedParse) cachedSheetParses.heat = cachedParse
+      if (Object.keys(cachedParses).length > 0) {
+        cachedSheetParses.heat = cachedParses
+      }
       sheetImported = true
       sheetDrops.push("heat_sheet")
     } catch (err) {
@@ -397,45 +386,41 @@ export async function attachSheetSummaries(
     }
   }
 
-  if (!pairOnly && roster && (finalsChanged || (teamChanged && existingFinalsLinks.length > 0))) {
-    const urls = nextFinalsLinks.map((l) => l.url)
-    if (urls.length === 0) {
-      data.finalsHeatSheetSummary = null
-    } else {
-      try {
-        const { summary, sheetNames, cachedParses } =
-          await resolveFinalsHeatSheetSummaries(
-            userId,
-            urls,
-            roster,
-            teamCode,
-            options,
-            matchOptions.cachedSheetParses?.finals
-          )
-        data.finalsHeatSheetSummary = summary
-        allSheetNames.push(...sheetNames)
-        if (Object.keys(cachedParses).length > 0) {
-          cachedSheetParses.finals = cachedParses
-        }
-        sheetImported = true
-        sheetDrops.push("finals_heat_sheet")
-      } catch (err) {
-        rethrowImportValidation(err)
-        console.error("Finals heat sheet parse failed:", err)
-        data.finalsHeatSheetSummary = null
+  if (!pairOnly && "finalsHeatSheetUrls" in data && nextFinalsUrls.length === 0) {
+    if (existingFinalsLinks.length > 0) data.finalsHeatSheetSummary = null
+  } else if (!pairOnly && roster && shouldParseFinals) {
+    try {
+      const { summary, sheetNames, cachedParses } =
+        await resolveFinalsHeatSheetSummaries(
+          userId,
+          nextFinalsUrls,
+          roster,
+          teamCode,
+          options,
+          matchOptions.cachedSheetParses?.finals
+        )
+      data.finalsHeatSheetSummary = summary
+      allSheetNames.push(...sheetNames)
+      if (Object.keys(cachedParses).length > 0) {
+        cachedSheetParses.finals = cachedParses
       }
+      sheetImported = true
+      sheetDrops.push("finals_heat_sheet")
+    } catch (err) {
+      rethrowImportValidation(err)
+      console.error("Finals heat sheet parse failed:", err)
+      data.finalsHeatSheetSummary = null
     }
   }
 
-  if (!pairOnly && "entriesSheetUrl" in data && roster) {
+  if (!pairOnly && "entriesSheetUrl" in data) {
     const next = (data.entriesSheetUrl as string | null) ?? null
-    const shouldParse = shouldParseSheet(
-      next,
-      existing.entriesSheetUrl,
-      existing.entriesSheetSummary,
-      teamChanged
-    )
-    if (shouldParse) {
+    if (!next) {
+      if (existing.entriesSheetUrl) data.entriesSheetSummary = null
+    } else if (
+      roster &&
+      shouldParseSheet(next, existing.entriesSheetUrl, teamChanged)
+    ) {
       try {
         const { summary, sheetNames, cachedParse } = await resolveEntriesSheetSummary(
           userId,
@@ -447,10 +432,8 @@ export async function attachSheetSummaries(
         data.entriesSheetSummary = summary
         allSheetNames.push(...sheetNames)
         if (cachedParse) cachedSheetParses.entries = cachedParse
-        if (next) {
-          sheetImported = true
-          sheetDrops.push("entries_sheet")
-        }
+        sheetImported = true
+        sheetDrops.push("entries_sheet")
       } catch (err) {
         rethrowImportValidation(err)
         console.error("Entries sheet parse failed:", err)
@@ -543,11 +526,12 @@ export async function attachSheetSummariesOnCreate(
     }
   }
 
-  if (data.heatSheetUrl) {
+  const createHeatLinks = effectiveHeatLinks({}, data)
+  if (createHeatLinks.length > 0) {
     try {
-      const { summary, sheetNames } = await resolveHeatSheetSummary(
+      const { summary, sheetNames } = await resolveHeatSheetSummaries(
         userId,
-        data.heatSheetUrl as string,
+        createHeatLinks.map((l) => l.url),
         roster,
         teamCode,
         options

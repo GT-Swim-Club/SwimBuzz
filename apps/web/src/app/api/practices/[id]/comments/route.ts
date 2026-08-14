@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { checkCommentCreationRateLimit } from "@/lib/comment-rate-limit"
 import { notifyPracticeComment } from "@/lib/notifications"
 import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/session"
@@ -44,6 +45,19 @@ export async function POST(
     }
   }
 
+  const rateLimit = await checkCommentCreationRateLimit(session.user.id)
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      {
+        error: `You're posting comments too quickly. Try again in ${rateLimit.retryAfterSeconds} seconds.`,
+      },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      }
+    )
+  }
+
   const comment = await prisma.practiceComment.create({
     data: {
       practiceId: id,
@@ -62,5 +76,8 @@ export async function POST(
     parentAuthorId,
     isReply: parentId != null})
 
-  return NextResponse.json(comment, { status: 201 })
+  return NextResponse.json(
+    { ...comment, authorImage: session.user.image ?? null },
+    { status: 201 }
+  )
 }

@@ -7,7 +7,7 @@ import { currentSeason, parseSeason, seasonEndYear } from "@/lib/season"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { useScraperUi } from "@/components/ScraperUiProvider"
 import { useImportTask } from "@/components/ImportTaskProvider"
-import { FileDropzone } from "@/components/FileDropzone"
+import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/FileDropzone"
 
 type ImportSource = "swimcloud" | "csv"
 
@@ -248,7 +248,7 @@ export default function ImportRosterButton() {
                   </span>
                 </li>
               </ul>
-              <p className="mt-3 font-medium text-foreground text-foreground">Optional columns</p>
+              <p className="mt-3 font-medium text-foreground text-foreground">Recommended columns</p>
               <ul className="mt-2 space-y-1.5 text-foreground-secondary text-foreground-secondary text-xs">
                 <li>Email, Nicknames, GTID, DOB, Year</li>
               </ul>
@@ -264,11 +264,13 @@ export default function ImportRosterButton() {
                   setError(null);
                 }}
                 accept=".csv,text/csv"
-                className="block w-full rounded-lg border border-border-secondary p-4 text-center text-sm text-foreground-secondary hover:bg-fill-secondary"
+                className={fileDropzoneSurfaceClassName(Boolean(selectedFile))}
               >
-                <p className="text-sm">
-                  {selectedFile ? selectedFile.name : "Click or drag and drop a CSV file"}
-                </p>
+                <FileDropzoneContent
+                  fileName={selectedFile?.name}
+                  emptyLabel="Click or drag and drop to upload a CSV file"
+                  onRemove={() => setSelectedFile(null)}
+                />
               </FileDropzone>
             </div>
           </div>

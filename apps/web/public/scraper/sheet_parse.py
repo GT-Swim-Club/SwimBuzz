@@ -155,7 +155,9 @@ def _use_sheet_team(team: str | None) -> _SheetTeam:
 SHEET_PSYCH = re.compile(r"Psych\s+Sheet", re.I)
 SHEET_HEAT = re.compile(r"Meet\s+Program", re.I)
 SHEET_ENTRIES = re.compile(
-    r"Team Entries|Individual Meet Entries|Entry Report by Club", re.I
+    r"Team Entries|Individual Meet Entries|Entry Report(?:\s+by\s+Club)?|"
+    r"Entries Report|Meet Entries Report",
+    re.I,
 )
 _SHEET_GENDER = r"(?:Women|Men|Mixed|Co-?ed|Girls|Boys)"
 USMS_MULTI_COL = re.compile(
@@ -214,12 +216,29 @@ COLUMN_HEADER = re.compile(
     re.I,
 )
 
+_SEED_TIME_TOKEN = r"(NT|NQT|DFS|SCR|DNS|NS|DQ|\d{1,2}:\d{2}\.\d{2}|\d{2,3}\.\d{2})"
+
 INDIVIDUAL_ROW = re.compile(
     r"^(\d+)\s+"
     r"([A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)\s+"
     r"(\d+)\s+"
     r"(\S+)\s+"
-    r"(NT|NQT|DFS|SCR|\d{1,2}:\d{2}\.\d{2}|\d{2,3}\.\d{2})",
+    rf"({_SEED_TIME_TOKEN})",
+    re.I,
+)
+
+# Any team — used to rank finals heat-sheet seeds across the whole event.
+INDIVIDUAL_SEED_ANY = re.compile(
+    r"(\d+)\s+"
+    r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)\s+"
+    r"\d+\s+"
+    r"\S+\s+"
+    rf"({_SEED_TIME_TOKEN})",
+    re.I,
+)
+
+RELAY_SEED_ANY = re.compile(
+    rf"(\d+)\s+(.+?)\s+([A-D])\s+({_SEED_TIME_TOKEN})\b",
     re.I,
 )
 
@@ -336,6 +355,7 @@ def _parse_usms_event_line(line: str) -> dict[str, Any] | None:
 
 
 def _clean_psych_name(raw: str) -> str | None:
+    raw = re.sub(r"\(cid:976\)", "f", raw)
     raw = re.sub(r"\(cid:\d+\)", "", raw).strip()
     match = re.match(
         r"([A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*),\s*(.+)",
@@ -621,7 +641,7 @@ def _parse_relay_leg(line: str, offset: int = 0) -> list[dict[str, Any]]:
 
 def _detect_sheet_type(text: str) -> str:
     detected = detect_hytek_doc_type(text)
-    if detected in {"psych", "heat", "entries", "results"}:
+    if detected in {"psych", "heat", "entries", "results", "packet"}:
         return detected
     return "unknown"
 
@@ -1261,7 +1281,7 @@ def parse_entry_report(content: bytes, team: str | None = None) -> dict[str, Any
 
     return {
         "sheetType": "entries",
-        "detectedSheetType": detected if detected != "unknown" else "entries",
+        "detectedSheetType": detected,
         "meet_name": meet_name,
         "course": course,
         "entries": entries,
@@ -1624,6 +1644,71 @@ def _extract_lines(pdf: Any, sheet_type: str) -> list[str]:
     return lines
 
 
+def _event_seed_bucket(event: dict[str, Any]) -> str:
+    kind = "R" if event.get("isRelay") else "I"
+    return f"{event.get('eventNumber', 0)}|{event.get('event', '')}|{event.get('gender', '')}|{kind}"
+
+
+def _seed_time_ms(token: str | None) -> float | None:
+    raw = (token or "").strip().upper()
+    if not raw or raw in {"NT", "NQT", "DFS", "SCR", "DNS", "NS", "DQ", "DNF"}:
+        return None
+    try:
+        if ":" in raw:
+            minutes, seconds = raw.split(":", 1)
+            return (int(minutes) * 60 + float(seconds)) * 1000
+        return float(raw) * 1000
+    except ValueError:
+        return None
+
+
+def _collect_line_seed_times(
+    line: str,
+    event: dict[str, Any],
+    buckets: dict[str, list[str]],
+) -> None:
+    key = _event_seed_bucket(event)
+    times = buckets.setdefault(key, [])
+    if event.get("isRelay"):
+        for match in RELAY_SEED_ANY.finditer(line):
+            times.append(match.group(4))
+        return
+    for match in INDIVIDUAL_SEED_ANY.finditer(line):
+        times.append(match.group(2))
+
+
+def _assign_seed_ranks_from_event_times(
+    entries: list[dict[str, Any]],
+    buckets: dict[str, list[str]],
+) -> None:
+    ranks_by_bucket: dict[str, dict[float, int]] = {}
+    for key, times in buckets.items():
+        parsed = sorted(
+            ms
+            for token in times
+            if (ms := _seed_time_ms(token)) is not None
+        )
+        ranks: dict[float, int] = {}
+        index = 0
+        while index < len(parsed):
+            ms = parsed[index]
+            rank = index + 1
+            while index < len(parsed) and parsed[index] == ms:
+                ranks[ms] = rank
+                index += 1
+        ranks_by_bucket[key] = ranks
+
+    for entry in entries:
+        if entry.get("seedRank"):
+            continue
+        ms = _seed_time_ms(entry.get("seedTime"))
+        if ms is None:
+            continue
+        rank = ranks_by_bucket.get(_event_seed_bucket(entry), {}).get(ms)
+        if rank:
+            entry["seedRank"] = rank
+
+
 def parse_sheet_pdf_bytes(
     content: bytes,
     sheet_type: str | None = None,
@@ -1634,9 +1719,21 @@ def parse_sheet_pdf_bytes(
         all_text = "\n".join(page.extract_text() or "" for page in pdf.pages)
         detected_type = _detect_sheet_type(all_text)
         meet_name = _sheet_meet_name(all_text)
+        course = detect_course(all_text)
         parse_as = sheet_type or (
             detected_type if detected_type in {"psych", "heat", "entries"} else "psych"
         )
+        known_types = {"psych", "heat", "entries", "results", "packet"}
+        wrong_type = detected_type in known_types and detected_type != parse_as
+        entries_unrecognized = parse_as == "entries" and detected_type != "entries"
+        if wrong_type or entries_unrecognized:
+            return {
+                "sheetType": parse_as if parse_as in {"psych", "heat", "entries"} else "psych",
+                "detectedSheetType": detected_type,
+                "meet_name": meet_name,
+                "course": course,
+                "entries": [],
+            }
         if parse_as == "entries":
             result = parse_entry_report(content, team=_sheet_team.code)
             result["detectedSheetType"] = detected_type
@@ -1646,7 +1743,6 @@ def parse_sheet_pdf_bytes(
         if parse_as not in {"psych", "heat"}:
             parse_as = "psych"
         usms_multicol = _is_usms_multicol(all_text)
-        course = detect_course(all_text)
 
         if usms_multicol:
             entries = _parse_usms_sheet_pages(pdf, parse_as)
@@ -1669,6 +1765,7 @@ def parse_sheet_pdf_bytes(
     pending_relay: dict[str, Any] | None = None
     event_heat_totals: dict[int, int] = {}
     event_max_heat: dict[int, int] = {}
+    event_seed_times: dict[str, list[str]] = {}
 
     for line in lines:
         detected_session = _session_round_from_line(line)
@@ -1730,6 +1827,9 @@ def parse_sheet_pdf_bytes(
 
         if not current_event:
             continue
+
+        if parse_as == "heat":
+            _collect_line_seed_times(line, current_event, event_seed_times)
 
         if current_event.get("isRelay"):
             # Use finditer to handle multiple relay entries on the same line (2-column layout)
@@ -1801,6 +1901,11 @@ def parse_sheet_pdf_bytes(
 
     if parse_as == "heat":
         _backfill_heat_totals(entries, event_heat_totals, event_max_heat)
+        for entry in entries:
+            time = entry.get("seedTime")
+            if time:
+                event_seed_times.setdefault(_event_seed_bucket(entry), []).append(str(time))
+        _assign_seed_ranks_from_event_times(entries, event_seed_times)
 
     if not entries:
         raise ValueError(f"No {_sheet_team.code} entries found in sheet")

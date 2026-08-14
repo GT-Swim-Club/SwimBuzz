@@ -1,14 +1,8 @@
-"use client"
-
-import { roomWindowStatus } from "@/lib/meet-rooms"
+import Link from "next/link"
 import { formatDateTime } from "@/lib/utils"
+import { roomWindowStatus } from "@/lib/meet-rooms"
 import type { MeetSignupQuestion } from "@/lib/meet-signup"
-import MeetRoomConfigButton from "./MeetRoomConfigButton"
-import MeetRoomPreferenceForm from "./MeetRoomPreferenceForm"
-import MeetRoomAssignmentEditor from "./MeetRoomAssignmentEditor"
 import MeetRoomAssignmentsList from "./MeetRoomAssignmentsList"
-
-type AthleteOption = { id: string; name: string; gender: "M" | "F" }
 
 type FormData = {
   id: string
@@ -20,19 +14,6 @@ type FormData = {
   customQuestions: MeetSignupQuestion[]
 }
 
-type PreferenceRow = {
-  id: string
-  athleteId: string
-  firstName: string
-  lastName: string
-  gender: "M" | "F"
-  preferredAthleteIds: string[]
-  excludedAthleteIds: string[]
-  notes: string
-  answers: Record<string, string>
-  updatedAt: string
-}
-
 type RoomRow = {
   id: string
   label: string
@@ -41,30 +22,32 @@ type RoomRow = {
   athletes: Array<{ id: string; firstName: string; lastName: string }>
 }
 
+type Preference = {
+  preferredAthleteIds: string[]
+  excludedAthleteIds: string[]
+  notes: string
+  answers: Record<string, string>
+  updatedAt: string
+}
+
 export default function MeetRoomSection({
-  meetId,
+  meetPath,
   isCoach,
   selfAthleteId,
   athletes,
   form,
   myPreference,
-  preferences,
   rooms,
   meetHasEnded,
 }: {
+  athletes: Array<{ id: string; name: string; gender: "M" | "F" }>
+  preferences: unknown[]
+  meetPath: string
   meetId: string
   isCoach: boolean
   selfAthleteId: string | null
-  athletes: AthleteOption[]
   form: FormData | null
-  myPreference: {
-    preferredAthleteIds: string[]
-    excludedAthleteIds: string[]
-    notes: string
-    answers: Record<string, string>
-    updatedAt: string
-  } | null
-  preferences: PreferenceRow[]
+  myPreference: Preference | null
   rooms: RoomRow[]
   meetHasEnded: boolean
 }) {
@@ -77,98 +60,90 @@ export default function MeetRoomSection({
 
   if (meetHasEnded) return null
 
-  return (
-    <section>
-      <div className="flex items-center flex-wrap gap-x-3 gap-y-2 mb-3">
-        <h2 className="text-sm font-medium text-foreground-secondary uppercase tracking-wide">
-          Roommates
-        </h2>
-        {isCoach && (
-          <MeetRoomConfigButton
-            meetId={meetId}
-            initial={
-              form
-                ? {
-                    instructions: form.instructions,
-                    maxPreferences: form.maxPreferences,
-                    openAt: form.openAt,
-                    closeAt: form.closeAt,
-                    customQuestions: form.customQuestions,
-                  }
-                : null
-            }
-          />
-        )}
-        {form && (
-          <span
-            className={
-              "text-xs px-2 py-0.5 rounded-full border " +
-              (window.open
-                ? "border-emerald-300 text-emerald-800 bg-emerald-50 dark:border-emerald-800 dark:text-emerald-300 dark:bg-emerald-950/40"
-                : "border-border text-foreground-tertiary")
-            }
-          >
-            {window.open ? "Open" : "Closed"}
-          </span>
-        )}
-      </div>
+  if (
+    !isCoach &&
+    (!selfAthleteId || !athletes.some((a) => a.id === selfAthleteId))
+  ) {
+    return null
+  }
 
-      {!form && isCoach && (
-        <p className="text-sm text-foreground-secondary">
-          Set up a roommate preference form so swimmers can submit who they&apos;d like to room with.
-        </p>
-      )}
-
-      {form &&
-        ((form.openAt && new Date(form.openAt) > new Date()) ||
-          (form.closeAt && new Date(form.closeAt) > new Date())) && (
-        <div className="text-sm text-foreground-secondary flex flex-col gap-y-1 mb-3">
-          {form.openAt && new Date(form.openAt) > new Date() && (
-            <span>Opens: {formatDateTime(new Date(form.openAt))}</span>
-          )}
-          {form.closeAt && new Date(form.closeAt) > new Date() && (
-            <span>Closes: {formatDateTime(new Date(form.closeAt))}</span>
+  if (isCoach) {
+    return (
+      <section>
+        <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+          <h2 className="text-sm font-medium uppercase tracking-wide text-foreground-secondary">
+            Roommates
+          </h2>
+          {form && (
+            <span
+              className={
+                "rounded-full border px-2 py-0.5 text-xs " +
+                (window.open
+                  ? "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                  : "border-border text-foreground-tertiary"
+                )
+              }
+            >
+              {window.open ? "Open" : "Closed"}
+            </span>
           )}
         </div>
-      )}
+        <Link
+          href={`${meetPath}/roommates`}
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm text-primary-text transition-colors hover:bg-primary-hover"
+        >
+          {form ? "Manage roommates" : "Set up roommates"}
+          <span aria-hidden="true">→</span>
+        </Link>
+      </section>
+    )
+  }
 
-      {form && !isCoach && (
-        <>
-          <MeetRoomPreferenceForm
-            meetId={meetId}
-            maxPreferences={form.maxPreferences}
-            instructions={form.instructions}
-            customQuestions={form.customQuestions}
-            openAt={form.openAt}
-            closeAt={form.closeAt}
-            isCoach={isCoach}
-            selfAthleteId={selfAthleteId}
-            athletes={athletes}
-            myPreference={myPreference}
-          />
+  if (!form) return null
 
-          {form.assignmentsPublishedAt && (
-            <MeetRoomAssignmentsList
-              rooms={rooms.map((r) => ({
-                athletes: r.athletes,
-              }))}
-              selfAthleteId={selfAthleteId}
-            />
-          )}
-        </>
-      )}
 
-      {form && isCoach && (
-        <MeetRoomAssignmentEditor
-          meetId={meetId}
-          athletes={athletes}
-          customQuestions={form.customQuestions}
-          preferences={preferences}
-          initialRooms={rooms.map((r) => ({
-            athleteIds: r.athleteIds,
-          }))}
-          assignmentsPublishedAt={form.assignmentsPublishedAt}
-          meetHasEnded={meetHasEnded}
+  return (
+    <section className="space-y-3">
+      <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+        <h2 className="text-sm font-medium uppercase tracking-wide text-foreground-secondary">
+          Roommates
+        </h2>
+        <span
+          className={
+            "rounded-full border px-2 py-0.5 text-xs " +
+            (window.open
+              ? "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+              : "border-border text-foreground-tertiary")
+          }
+        >
+          {window.open ? "Open" : "Closed"}
+        </span>
+      </div>
+
+      <>
+        {form.openAt && new Date(form.openAt) > new Date() && (
+          <p className="text-sm text-foreground-secondary">
+            Opens: {formatDateTime(new Date(form.openAt))}
+          </p>
+        )}
+        {form.closeAt && new Date(form.closeAt) > new Date() && (
+          <p className="text-sm text-foreground-secondary">
+            Closes: {formatDateTime(new Date(form.closeAt))}
+          </p>
+        )}
+        <Link
+          href={`${meetPath}/roommate`}
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm text-primary-text transition-colors hover:bg-primary-hover"
+        >
+          {myPreference ? "Review preferences" : "Open preferences"}
+          <span aria-hidden="true">→</span>
+        </Link>
+      </>
+
+      {form.assignmentsPublishedAt && (
+        <MeetRoomAssignmentsList
+          rooms={rooms.map((room) => ({ athletes: room.athletes }))}
+          selfAthleteId={selfAthleteId}
         />
       )}
     </section>

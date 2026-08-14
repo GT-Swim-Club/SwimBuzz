@@ -11,6 +11,7 @@ import {
 } from "react"
 import { useRouter } from "next/navigation"
 import { ViewSkeleton, type ViewSkeletonVariant } from "@/components/ViewSkeletons"
+import HoverDetail from "@/components/HoverDetail"
 
 type ViewNavContextValue = {
   isPending: boolean
@@ -53,6 +54,7 @@ export function ViewNavigationProvider({ children }: { children: ReactNode }) {
 
 const viewIconClass = "h-4 w-4 shrink-0"
 
+
 export function ViewNavLink({
   href,
   view,
@@ -74,7 +76,7 @@ export function ViewNavLink({
   return (
     <Link
       href={href}
-      title={title}
+      aria-label={title}
       aria-current={active ? "page" : undefined}
       aria-busy={loading}
       onClick={(e) => {
@@ -88,9 +90,10 @@ export function ViewNavLink({
         e.preventDefault()
         navigate(href, view)
       }}
-      className={className + (loading ? " opacity-70" : "")}
+      className={className + " group relative" + (loading ? " opacity-70" : "")}
     >
       {children}
+      {title ? <HoverDetail label={title} /> : null}
     </Link>
   )
 }
@@ -138,6 +141,7 @@ export function GalleryListViewToggle({
         href={galleryHref}
         view="gallery"
         active={activeView === "gallery"}
+        title="Gallery"
         className={galleryLinkClassName ?? galleryListLinkClass(activeView === "gallery")}
       >
         <svg
@@ -161,6 +165,7 @@ export function GalleryListViewToggle({
         href={listHref}
         view="list"
         active={activeView === "list"}
+        title="List"
         className={listLinkClassName ?? galleryListLinkClass(activeView === "list")}
       >
         <svg

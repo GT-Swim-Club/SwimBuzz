@@ -9,6 +9,7 @@ import {
   Title,
 } from "@swimbuzz/ui"
 import { spacing } from "@swimbuzz/tokens"
+import { DateSelector } from "../../../src/components/DateTimeSelector"
 import { api } from "../../../src/lib/api"
 
 const COURSES = ["SCY", "LCM"] as const
@@ -50,14 +51,17 @@ export default function NewMeetScreen() {
       return
     }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate.trim())) {
-      Alert.alert("Start date required", "Use YYYY-MM-DD for the start date.")
+      Alert.alert("Start date required", "Select a start date.")
       return
     }
     if (endDate.trim() && !/^\d{4}-\d{2}-\d{2}$/.test(endDate.trim())) {
-      Alert.alert("Invalid end date", "Use YYYY-MM-DD or leave end date blank.")
+      Alert.alert("Invalid end date", "Select an end date or leave it blank.")
       return
     }
-
+    if (endDate.trim() && endDate.trim() < startDate.trim()) {
+      Alert.alert("Invalid end date", "End date must be on or after the start date.")
+      return
+    }
     setSaving(true)
     try {
       const body: Record<string, unknown> = {
@@ -68,7 +72,6 @@ export default function NewMeetScreen() {
       }
       if (endDate.trim()) body.endDate = endDate.trim()
       if (season.trim()) body.season = season.trim()
-
       const meet = await api.createMeet(body)
       router.replace(`/meets/${meet.id}`)
     } catch (err) {
@@ -85,7 +88,6 @@ export default function NewMeetScreen() {
     <Screen>
       <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
         <Title>New meet</Title>
-
         <TextField
           label="Name"
           value={name}
@@ -99,23 +101,23 @@ export default function NewMeetScreen() {
           onChangeText={setLocation}
           placeholder="Atlanta, GA"
         />
-        <TextField
+        <DateSelector
           label="Start date"
           value={startDate}
-          onChangeText={setStartDate}
-          placeholder="YYYY-MM-DD"
-          autoCapitalize="none"
-          autoCorrect={false}
+          onChange={(value) => {
+            setStartDate(value)
+            if (endDate && value && endDate < value) setEndDate(value)
+          }}
+          placeholder="Choose a start date"
         />
-        <TextField
-          label="End date (optional)"
+        <DateSelector
+          label="End date"
           value={endDate}
-          onChangeText={setEndDate}
-          placeholder="YYYY-MM-DD"
-          autoCapitalize="none"
-          autoCorrect={false}
+          onChange={setEndDate}
+          placeholder="Choose an end date"
+          optional
+          min={startDate || undefined}
         />
-
         <View
           style={{
             flexDirection: "row",
@@ -132,7 +134,6 @@ export default function NewMeetScreen() {
             />
           ))}
         </View>
-
         <TextField
           label="Season"
           value={season}
@@ -159,7 +160,6 @@ export default function NewMeetScreen() {
             ))}
           </View>
         ) : null}
-
         <Button label="Create meet" loading={saving} onPress={() => void onCreate()} />
       </ScrollView>
     </Screen>

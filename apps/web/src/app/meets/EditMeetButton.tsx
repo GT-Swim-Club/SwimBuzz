@@ -5,6 +5,11 @@ import { useRouter } from "next/navigation"
 import MeetFields, { type MeetFormState } from "./MeetFields"
 import Modal, { ModalFooter } from "@/components/Modal"
 import ActionIcon from "@/components/ActionIcon"
+import { useUnsavedUploads } from "@/lib/unsaved-uploads"
+
+function meetImageUrls(form: Pick<MeetFormState, "iconUrl" | "bannerUrl">) {
+  return [form.iconUrl, form.bannerUrl]
+}
 
 export default function EditMeetButton({
   meetId,
@@ -20,6 +25,13 @@ export default function EditMeetButton({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState<MeetFormState>(initial)
+  const { begin, trackUpload, release } = useUnsavedUploads()
+
+  function closeWithoutSaving() {
+    if (loading) return
+    release(meetImageUrls(initial))
+    setEditing(false)
+  }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
@@ -36,6 +48,7 @@ export default function EditMeetButton({
         setError(data.error ?? "Failed to save changes")
         return
       }
+      release(meetImageUrls(form))
       setEditing(false)
       router.refresh()
     } catch {
@@ -50,6 +63,7 @@ export default function EditMeetButton({
       <button
         type="button"
         onClick={() => {
+          begin()
           setForm(initial)
           setError(null)
           setEditing(true)
@@ -62,7 +76,7 @@ export default function EditMeetButton({
 
       <Modal
         open={editing}
-        onClose={() => setEditing(false)}
+        onClose={closeWithoutSaving}
         closeDisabled={loading}
         busy={loading}
         title="Edit meet"
@@ -71,7 +85,7 @@ export default function EditMeetButton({
           <ModalFooter>
             <button
               type="button"
-              onClick={() => setEditing(false)}
+              onClick={closeWithoutSaving}
               disabled={loading}
               className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary"
             >
@@ -79,7 +93,7 @@ export default function EditMeetButton({
             </button>
             <button
               type="submit"
-              disabled={loading || !form.name.trim() || !form.startDate || !form.course || !form.season}
+              disabled={loading || !form.name.trim() || !form.startDate || !form.course || !form.season || Boolean(form.endDate && form.endDate < form.startDate)}
               className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
               {loading ? "Saving…" : "Save changes"}
@@ -87,7 +101,7 @@ export default function EditMeetButton({
           </ModalFooter>
         }
       >
-        <MeetFields form={form} setForm={setForm} initialSeasons={seasons} />
+        <MeetFields form={form} setForm={setForm} initialSeasons={seasons} onUploaded={trackUpload} />
         {error && <p className="text-sm text-error">{error}</p>}
       </Modal>
     </>

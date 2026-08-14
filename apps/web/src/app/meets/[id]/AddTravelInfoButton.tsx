@@ -6,6 +6,7 @@ import MeetResourceField from "../MeetResourceField"
 import TravelInfoIcon, { type TravelInfoKind } from "@/components/TravelInfoIcon"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { useMeetResourceUploads } from "@/lib/use-meet-resource-uploads"
+import { useUnsavedUploads } from "@/lib/unsaved-uploads"
 import RichTextField from "@/components/RichTextField"
 
 export type TravelInfoForm = {
@@ -50,9 +51,16 @@ export default function AddTravelInfoButton({
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState<TravelInfoForm>(initial)
   const { anyUploading, getFieldUploadHandler } = useMeetResourceUploads()
+  const { begin, trackUpload, release } = useUnsavedUploads()
   const blocked = loading || anyUploading
 
   const hasTravelInfo = Object.values(initial).some((v) => v.trim())
+
+  function closeWithoutSaving() {
+    if (blocked) return
+    release([initial.rideSignUpsUrl, initial.roomsUrl])
+    setOpen(false)
+  }
 
   useEffect(() => {
     if (open) {
@@ -78,6 +86,7 @@ export default function AddTravelInfoButton({
         setError(data.error ?? "Failed to save travel info")
         return
       }
+      release([form.rideSignUpsUrl, form.roomsUrl])
       setOpen(false)
       router.refresh()
     } catch {
@@ -91,7 +100,10 @@ export default function AddTravelInfoButton({
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          begin()
+          setOpen(true)
+        }}
         className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border border-border rounded-md bg-background hover:bg-fill transition-colors"
       >
         <svg
@@ -113,7 +125,7 @@ export default function AddTravelInfoButton({
 
       <Modal
         open={open}
-        onClose={() => setOpen(false)}
+        onClose={closeWithoutSaving}
         closeDisabled={blocked}
         busy={loading}
         title={hasTravelInfo ? "Edit Travel Info" : "Add Travel Info"}
@@ -123,7 +135,7 @@ export default function AddTravelInfoButton({
           <ModalFooter>
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={closeWithoutSaving}
               disabled={blocked}
               className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-fill border-border"
             >
@@ -147,6 +159,7 @@ export default function AddTravelInfoButton({
             value={form[key]}
             onChange={(url) => setForm((f) => ({ ...f, [key]: url }))}
             onUploadingChange={getFieldUploadHandler(key)}
+            onUploaded={trackUpload}
           />
         ))}
 

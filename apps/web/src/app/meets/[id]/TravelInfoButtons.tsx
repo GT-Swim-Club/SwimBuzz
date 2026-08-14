@@ -3,6 +3,7 @@
 import { useState } from "react"
 import TravelInfoIcon, { type TravelInfoKind } from "@/components/TravelInfoIcon"
 import { FormattedText } from "@/components/FormattedText"
+import { FilePreviewDialog } from "@/components/FilePreview"
 import Modal, { ModalFooter } from "@/components/Modal"
 
 const buttonClass =
@@ -26,6 +27,7 @@ export type TravelInfoItem = TravelLinkItem | TravelTextItem
 
 export default function TravelInfoButtons({ items }: { items: TravelInfoItem[] }) {
   const [openText, setOpenText] = useState<TravelTextItem | null>(null)
+  const [openPreview, setOpenPreview] = useState<TravelLinkItem | null>(null)
 
   if (items.length === 0) return null
 
@@ -34,16 +36,15 @@ export default function TravelInfoButtons({ items }: { items: TravelInfoItem[] }
       <div className="flex flex-wrap gap-2">
         {items.map((item) =>
           item.type === "link" ? (
-            <a
+            <button
               key={item.label}
-              href={item.href}
-              target="_blank"
-              rel="noopener noreferrer"
+              type="button"
+              onClick={() => setOpenPreview(item)}
               className={buttonClass}
             >
               <TravelInfoIcon kind={item.icon} />
               {item.label}
-            </a>
+            </button>
           ) : (
             <button
               key={item.label}
@@ -57,7 +58,6 @@ export default function TravelInfoButtons({ items }: { items: TravelInfoItem[] }
           )
         )}
       </div>
-
       <Modal
         open={openText !== null}
         onClose={() => setOpenText(null)}
@@ -77,6 +77,12 @@ export default function TravelInfoButtons({ items }: { items: TravelInfoItem[] }
       >
         {openText ? <FormattedText text={openText.content} /> : null}
       </Modal>
+      <FilePreviewDialog
+        open={openPreview !== null}
+        onClose={() => setOpenPreview(null)}
+        title={openPreview?.label ?? "File preview"}
+        url={openPreview?.href ?? ""}
+      />
     </>
   )
 }

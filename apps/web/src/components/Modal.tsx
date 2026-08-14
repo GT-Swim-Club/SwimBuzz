@@ -14,6 +14,7 @@ const MAX_WIDTH = {
   "3xl": "max-w-3xl",
   "4xl": "max-w-4xl",
   "5xl": "max-w-5xl",
+  "6xl": "max-w-6xl",
 } as const
 
 type ModalMaxWidth = keyof typeof MAX_WIDTH
@@ -27,7 +28,7 @@ export function ModalFooter({
 }) {
   return (
     <div
-      className={`shrink-0 flex gap-3 border-t border-border px-6 py-4 dark:border-border ${className}`}
+      className={`shrink-0 flex flex-wrap gap-2 border-t border-border px-4 py-3 dark:border-border sm:gap-3 sm:px-6 sm:py-4 ${className}`}
     >
       {children}
     </div>
@@ -49,6 +50,7 @@ export default function Modal({
   panelClassName = "",
   bodyClassName = "",
   overlayClassName = "",
+  presentation = "dialog",
   busy = false,
 }: {
   open: boolean
@@ -65,6 +67,8 @@ export default function Modal({
   panelClassName?: string
   bodyClassName?: string
   overlayClassName?: string
+  /** Render the form surface inline on a route instead of as an overlay. */
+  presentation?: "dialog" | "inline"
   /** Long save/scrape in progress — show a don't-reload notice. */
   busy?: boolean
 }) {
@@ -73,37 +77,37 @@ export default function Modal({
   useDontReloadWhileBusy(open && busy)
 
   useEffect(() => {
-    if (!open) return
+    if (!open || presentation === "inline") return
     const prev = document.body.style.overflow
     document.body.style.overflow = "hidden"
     return () => {
       document.body.style.overflow = prev
     }
-  }, [open])
+  }, [open, presentation])
 
-  if (!open || (portal && !mounted)) return null
+  if (!open || (presentation !== "inline" && portal && !mounted)) return null
 
   const hasBody = children != null && children !== false
 
   const body = hasBody ? (
-    <div className={`min-h-0 flex-1 overflow-y-auto px-6 py-4 space-y-4 ${bodyClassName}`}>
+    <div className={`min-h-0 flex-1 overflow-y-auto px-4 py-3 space-y-4 sm:px-6 sm:py-4 ${bodyClassName}`}>
       {children}
     </div>
   ) : null
 
   const busyNotice = busy ? (
-    <div className="shrink-0 px-6 pb-1">
+    <div className="shrink-0 px-4 pb-1 sm:px-6">
       <DontReloadNotice />
     </div>
   ) : null
 
   const panel = (
     <div
-      className={`relative z-10 flex w-full ${MAX_WIDTH[maxWidth]} max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-xl ${panelClassName}`}
+      className={`relative z-10 flex w-full ${MAX_WIDTH[maxWidth]} max-h-[calc(100dvh-1.5rem)] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-xl sm:max-h-[90vh] ${panelClassName}`}
       onClick={(e) => e.stopPropagation()}
     >
       {(title || description || header) && (
-        <div className={`shrink-0 px-6 pt-6 ${hasBody ? "pb-2" : "pb-4"}`}>
+        <div className={`shrink-0 px-4 pt-4 sm:px-6 sm:pt-6 ${hasBody ? "pb-2" : "pb-4"}`}>
           {title ? (
             <h2 className="text-lg font-medium text-foreground">{title}</h2>
           ) : null}
@@ -132,7 +136,7 @@ export default function Modal({
 
   const overlay = (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${overlayClassName}`}
+      className={`fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 ${overlayClassName}`}
     >
       <button
         type="button"
@@ -144,6 +148,7 @@ export default function Modal({
     </div>
   )
 
+  if (presentation === "inline") return panel
   if (portal) return createPortal(overlay, document.body)
   return overlay
 }

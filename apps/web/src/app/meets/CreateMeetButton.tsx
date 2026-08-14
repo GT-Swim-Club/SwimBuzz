@@ -5,6 +5,11 @@ import { useRouter } from "next/navigation"
 import MeetFields, { emptyMeetForm, type MeetFormState } from "./MeetFields"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { meetPath } from "@/lib/slug"
+import { useUnsavedUploads } from "@/lib/unsaved-uploads"
+
+function meetImageUrls(form: Pick<MeetFormState, "iconUrl" | "bannerUrl">) {
+  return [form.iconUrl, form.bannerUrl]
+}
 
 export default function CreateMeetButton({ seasons }: { seasons: string[] }) {
   const router = useRouter()
@@ -12,11 +17,19 @@ export default function CreateMeetButton({ seasons }: { seasons: string[] }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState<MeetFormState>(emptyMeetForm)
+  const { begin, trackUpload, release } = useUnsavedUploads()
 
   function openModal() {
+    begin()
     setForm(emptyMeetForm)
     setError(null)
     setOpen(true)
+  }
+
+  function closeWithoutSaving() {
+    if (loading) return
+    release()
+    setOpen(false)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -34,6 +47,7 @@ export default function CreateMeetButton({ seasons }: { seasons: string[] }) {
         setError(data.error ?? "Failed to create meet")
         return
       }
+      release(meetImageUrls(form))
       setOpen(false)
       router.push(meetPath(data.slug ?? data.id))
     } catch {
@@ -69,7 +83,7 @@ export default function CreateMeetButton({ seasons }: { seasons: string[] }) {
 
       <Modal
         open={open}
-        onClose={() => setOpen(false)}
+        onClose={closeWithoutSaving}
         closeDisabled={loading}
         title="Create meet"
         onSubmit={handleSubmit}
@@ -77,7 +91,7 @@ export default function CreateMeetButton({ seasons }: { seasons: string[] }) {
           <ModalFooter>
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={closeWithoutSaving}
               disabled={loading}
               className="flex-1 rounded-lg border border-border border-border px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary"
             >
@@ -85,7 +99,7 @@ export default function CreateMeetButton({ seasons }: { seasons: string[] }) {
             </button>
             <button
               type="submit"
-              disabled={loading || !form.name.trim() || !form.startDate}
+              disabled={loading || !form.name.trim() || !form.startDate || Boolean(form.endDate && form.endDate < form.startDate)}
               className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
               {loading ? "Creating…" : "Create meet"}
@@ -93,7 +107,7 @@ export default function CreateMeetButton({ seasons }: { seasons: string[] }) {
           </ModalFooter>
         }
       >
-        <MeetFields form={form} setForm={setForm} initialSeasons={seasons} />
+        <MeetFields form={form} setForm={setForm} initialSeasons={seasons} onUploaded={trackUpload} />
         {error && <p className="text-sm text-error dark:text-error">{error}</p>}
       </Modal>
     </>

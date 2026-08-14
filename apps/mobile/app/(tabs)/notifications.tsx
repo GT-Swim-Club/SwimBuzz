@@ -7,7 +7,7 @@ import {
   View,
 } from "react-native"
 import { useFocusEffect, useRouter } from "expo-router"
-import type { NotificationItem } from "@swimbuzz/shared"
+import { formatDateTime, type NotificationItem } from "@swimbuzz/shared"
 import { Button, EmptyState, ListRow, Screen, Title } from "@swimbuzz/ui"
 import { colors, spacing } from "@swimbuzz/tokens"
 import { api } from "../../src/lib/api"
@@ -95,7 +95,7 @@ export default function NotificationsScreen() {
               title={item.title}
               subtitle={[
                 item.body,
-                new Date(item.createdAt).toLocaleString(),
+                formatDateTime(item.createdAt),
                 item.readAt ? "Read" : "Unread",
               ]
                 .filter(Boolean)

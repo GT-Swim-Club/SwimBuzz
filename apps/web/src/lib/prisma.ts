@@ -1,8 +1,35 @@
-import { PrismaClient } from "@prisma/client"
+import { Prisma, PrismaClient } from "@prisma/client"
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
+const globalForPrisma = globalThis as unknown as {
+  __swimbuzzPrisma?: PrismaClient
+  __swimbuzzPrismaSchemaId?: string
+  prisma?: PrismaClient
+}
 
-export const prisma =
-  globalForPrisma.prisma ?? new PrismaClient()
+function prismaSchemaId(): string {
+  try {
+    return Prisma.dmmf.datamodel.models
+      .map((model) => `${model.name}:${model.fields.map((field) => field.name).join(",")}`)
+      .join("|")
+  } catch {
+    return "unknown"
+  }
+}
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma
+function getPrisma(): PrismaClient {
+  const schemaId = prismaSchemaId()
+  if (
+    globalForPrisma.__swimbuzzPrisma &&
+    globalForPrisma.__swimbuzzPrismaSchemaId === schemaId
+  ) {
+    return globalForPrisma.__swimbuzzPrisma
+  }
+
+  const prisma = new PrismaClient()
+  globalForPrisma.__swimbuzzPrisma = prisma
+  globalForPrisma.__swimbuzzPrismaSchemaId = schemaId
+  if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma
+  return prisma
+}
+
+export const prisma = getPrisma()

@@ -4,31 +4,19 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import type { PracticeFormState } from "../PracticeEditor"
 import type { PracticeEditLockInfo } from "@/lib/practice-edit-lock-shared"
-import { broadcastPracticeEditLockChanged } from "@/lib/practice-edit-lock-client"
 import Modal, { ModalFooter } from "@/components/Modal"
+import ActionIcon from "@/components/ActionIcon"
+import HoverDetail from "@/components/HoverDetail"
+import {
+  broadcastPracticeEditLockChanged,
+  storePracticeEditLockHandoff,
+  broadcastPracticeEditLockYield,
+} from "@/lib/practice-edit-lock-client"
 
 const iconCls = "h-3.5 w-3.5 shrink-0"
 
-function PencilIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={iconCls}
-      aria-hidden="true"
-    >
-      <path d="M12 20h9" />
-      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
-    </svg>
-  )
-}
 
-function TrashIcon() {
+function PublishIcon({ className = iconCls }: { className?: string }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -38,29 +26,7 @@ function TrashIcon() {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={iconCls}
-      aria-hidden="true"
-    >
-      <path d="M3 6h18" />
-      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-      <line x1="10" y1="11" x2="10" y2="17" />
-      <line x1="14" y1="11" x2="14" y2="17" />
-    </svg>
-  )
-}
-
-function PublishIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={iconCls}
+      className={className}
       aria-hidden="true"
     >
       <path d="M12 19V5" />
@@ -69,7 +35,7 @@ function PublishIcon() {
   )
 }
 
-function UnpublishIcon() {
+function UnpublishIcon({ className = iconCls }: { className?: string }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -79,7 +45,7 @@ function UnpublishIcon() {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={iconCls}
+      className={className}
       aria-hidden="true"
     >
       <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
@@ -104,12 +70,12 @@ export default function PracticeActions({
   title: string
   published: boolean
   editLock: PracticeEditLockInfo
-  onEdit: (lockToken: string) => void
+  onEdit: () => void
   onLockChange: (lock: PracticeEditLockInfo) => void
 }) {
   const router = useRouter()
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const [confirmTakeOver, setConfirmTakeOver] = useState(false)
+  const [editLockPending, setEditLockPending] = useState<PracticeEditLockInfo | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -117,49 +83,52 @@ export default function PracticeActions({
   const lockedElsewhere = Boolean(editLock?.locked)
   const lockedByOtherUser = Boolean(editLock?.locked && !editLock.lockedByMe)
   const lockerName = editLock?.lockedBy?.name?.trim() || "Another coach"
+  const pendingLockedByOtherUser = Boolean(
+    editLockPending?.locked && !editLockPending.lockedByMe
+  )
+  const pendingLockerName = editLockPending?.lockedBy?.name?.trim() || "Another coach"
 
-  async function acquireLock(force = false): Promise<string | null> {
+  async function acquireEditLock(force = false) {
+    let openingEditor = false
     setLoading(true)
     setError(null)
+    if (force) broadcastPracticeEditLockYield(practiceId)
     try {
-      const res = await fetch(`/api/practices/${practiceId}/lock`, {
+      const res = await fetch("/api/practices/" + practiceId + "/lock", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ force }),
       })
-      const data = await res.json().catch(() => ({}))
+      const data = (await res.json().catch(() => ({}))) as PracticeEditLockInfo & {
+        error?: string
+        lock?: PracticeEditLockInfo
+      }
       if (!res.ok) {
-        if (data.lock) onLockChange(data.lock)
+        if (data.lock) {
+          onLockChange(data.lock)
+          setEditLockPending(data.lock)
+          return
+        }
         setError(data.error ?? "Could not start editing")
-        return null
+        return
       }
-      onLockChange(data)
-      broadcastPracticeEditLockChanged(practiceId)
-      const token = typeof data.token === "string" ? data.token : null
-      if (!token) {
+      if (!data.token) {
         setError("Could not start editing")
-        return null
+        return
       }
-      return token
+      storePracticeEditLockHandoff(practiceId, data)
+      broadcastPracticeEditLockChanged(practiceId)
+      openingEditor = true
+      onEdit()
     } catch {
       setError("Something went wrong")
-      return null
     } finally {
-      setLoading(false)
+      if (!openingEditor) setLoading(false)
     }
   }
 
-  async function handleEdit() {
-    const token = await acquireLock(false)
-    if (token) onEdit(token)
-  }
-
-  async function confirmAndTakeOver() {
-    const token = await acquireLock(true)
-    if (token) {
-      setConfirmTakeOver(false)
-      onEdit(token)
-    }
+  function handleTakeover() {
+    void acquireEditLock(true)
   }
 
   async function togglePublished(next: boolean) {
@@ -208,53 +177,43 @@ export default function PracticeActions({
 
   return (
     <>
-      <div className="flex flex-col items-end gap-1">
-      <div className="flex items-center gap-2 flex-wrap">
+      <div
+        className={`relative flex shrink-0 items-start ${lockedElsewhere ? "pb-8" : ""}`}
+      >
+        <div className="flex shrink-0 items-center gap-2">
         {published ? (
           <button
             type="button"
             onClick={() => togglePublished(false)}
             disabled={loading || lockedElsewhere}
-            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border border-border-secondary rounded-lg hover:bg-fill-secondary dark:hover:bg-fill-secondary dark:bg-background-elevated transition-colors disabled:opacity-40"
+            aria-label="Unpublish practice"
+            className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-border rounded-lg bg-background hover:bg-fill transition-colors disabled:opacity-40"
           >
-            <UnpublishIcon />
-            Unpublish
+            <UnpublishIcon className="h-5 w-5" />
+            <HoverDetail label="Unpublish" />
           </button>
         ) : (
           <button
             type="button"
             onClick={() => togglePublished(true)}
             disabled={loading || lockedElsewhere}
-            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-text hover:bg-primary-hover transition-colors disabled:opacity-40"
+            aria-label="Publish practice"
+            className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-text hover:bg-primary-hover transition-colors disabled:opacity-40"
           >
-            <PublishIcon />
-            Publish
+            <PublishIcon className="h-5 w-5" />
+            <HoverDetail label="Publish" />
           </button>
         )}
-        {lockedElsewhere ? (
-          <button
-            type="button"
-            onClick={() => {
-              setError(null)
-              setConfirmTakeOver(true)
-            }}
-            disabled={loading}
-            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border border-border-secondary rounded-lg hover:bg-fill-secondary dark:hover:bg-fill-secondary dark:bg-background-elevated transition-colors disabled:opacity-40"
-          >
-            <PencilIcon />
-            Take over
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={handleEdit}
-            disabled={loading}
-            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border border-border-secondary rounded-lg hover:bg-fill-secondary dark:hover:bg-fill-secondary dark:bg-background-elevated transition-colors disabled:opacity-40"
-          >
-            <PencilIcon />
-            Edit
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={onEdit}
+          disabled={loading}
+          aria-label="Edit practice"
+          className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-border rounded-lg bg-background hover:bg-fill transition-colors disabled:opacity-40"
+        >
+          <ActionIcon kind="edit" className="h-5 w-5" />
+          <HoverDetail label="Edit" />
+        </button>
         <button
           type="button"
           onClick={() => {
@@ -262,70 +221,74 @@ export default function PracticeActions({
             setConfirmDelete(true)
           }}
           disabled={loading || lockedElsewhere}
-          className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border border-border-secondary border-red-200 text-error rounded-lg hover:bg-red-50 dark:border-red-900/50 dark:text-error dark:hover:bg-red-950/40 transition-colors disabled:opacity-40"
+          aria-label="Delete practice"
+          className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-red-200 text-error rounded-lg bg-background hover:bg-red-50 dark:border-red-900/50 dark:hover:bg-red-950/40 transition-colors disabled:opacity-40"
         >
-          <TrashIcon />
-          Delete
+          <ActionIcon kind="delete" className="h-5 w-5" />
+          <HoverDetail label="Delete" />
         </button>
       </div>
 
       {lockedElsewhere && (
-        <p className="text-xs text-amber-700 dark:text-amber-300 text-right">
+        <p
+          role="status"
+          className="absolute top-10 right-0 inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-amber-500/25 bg-amber-500/10 px-2 py-1 text-[11px] font-medium text-amber-800 shadow-sm dark:border-amber-300/20 dark:bg-amber-300/10 dark:text-amber-200"
+        >
+          <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-amber-500 dark:bg-amber-300" />
           {lockedByOtherUser
             ? `${lockerName} is editing.`
             : "You're editing in another window."}
         </p>
       )}
 
-      {error && !confirmDelete && !confirmTakeOver && (
+      {error && !confirmDelete && (
         <p className="text-xs text-red-500">{error}</p>
       )}
       </div>
 
       <Modal
-        open={confirmTakeOver}
-        onClose={() => setConfirmTakeOver(false)}
+        open={editLockPending != null}
+        onClose={() => setEditLockPending(null)}
         closeDisabled={loading}
-        title="Take over editing?"
+        title="Practice is being edited"
         maxWidth="sm"
         footer={
           <ModalFooter>
             <button
               type="button"
-              onClick={() => setConfirmTakeOver(false)}
+              onClick={() => setEditLockPending(null)}
               disabled={loading}
-              className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary dark:hover:bg-fill-secondary dark:border border-border-secondary"
+              className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary dark:hover:bg-fill-secondary"
             >
               Cancel
             </button>
             <button
               type="button"
-              onClick={confirmAndTakeOver}
+              onClick={handleTakeover}
               disabled={loading}
               className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
-              {loading ? "Taking over…" : "Take over"}
+              {loading ? "Saving changes…" : "Take over"}
             </button>
           </ModalFooter>
         }
       >
         <p className="text-sm text-foreground-secondary dark:text-foreground-secondary">
-          {lockedByOtherUser ? (
+          {pendingLockedByOtherUser ? (
             <>
-              <span className="font-medium text-foreground dark:text-zinc-200">{lockerName}</span> is
-              currently editing this practice. Taking over will kick them out of the editor and
-              discard any unsaved changes they have.
+              <span className="font-medium text-foreground">{pendingLockerName}</span> is currently editing
+              <span className="font-medium text-foreground"> {title}</span>. Taking over will save
+              their unsaved changes first.
             </>
           ) : (
             <>
-              You already have this practice open for editing in another tab. Taking over will kick
-              that tab out of the editor and discard any unsaved changes there.
+              You already have <span className="font-medium text-foreground">{title}</span> open in
+              another window. Taking over will save changes in that editor first.
             </>
           )}
         </p>
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
       </Modal>
-
       <Modal
         open={confirmDelete}
         onClose={() => setConfirmDelete(false)}

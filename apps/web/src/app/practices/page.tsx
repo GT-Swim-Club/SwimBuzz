@@ -8,8 +8,11 @@ import {
   ViewNavPanel,
   ViewNavigationProvider } from "@/components/ViewNavigation"
 import { formatDateRange, formatSwimDate } from "@/lib/utils"
-import { SET_TAGS, normalizeTag } from "@/lib/practice-tags"
+import { formatClockTimeRange } from "@swimbuzz/shared"
+import { normalizeTag } from "@/lib/practice-tags"
+import { listManagedPracticeTags } from "@/lib/practice-tag-catalog"
 import PracticeViewToggle from "./PracticeViewToggle"
+import PracticeTagManager from "./PracticeTagManager"
 import {
   DayLabel,
   PracticeCardShell,
@@ -124,6 +127,7 @@ export default async function PracticesPage({
   if (!session) redirect("/signin?callbackUrl=/practices")
 
   const isCoach = await isStaffUi(session.user.role)
+  const managedTags = await listManagedPracticeTags()
   const { q, tag, view, month, week } = await searchParams
   const query = q?.trim() ?? ""
   const activeTags = parseTags(tag)
@@ -145,7 +149,7 @@ export default async function PracticesPage({
         { focus: contains },
         {
           sets: {
-            some: { OR: [{ title: contains }, { content: contains }, { notes: contains }] }}},
+            some: { OR: [{ title: contains }, { content: contains }] }}},
       ]})
   }
   if (activeTags.length) {
@@ -220,12 +224,6 @@ export default async function PracticesPage({
     return s ? `/practices?${s}` : "/practices"
   }
 
-  function toggleTagHref(tagName: string) {
-    const next = activeTags.includes(tagName)
-      ? activeTags.filter((t) => t !== tagName)
-      : [...activeTags, tagName]
-    return buildHref({ tags: next })
-  }
 
   function practiceHref(practice: { id: string; slug: string | null }) {
     return practicePath(practice.slug ?? practice.id)
@@ -268,7 +266,7 @@ export default async function PracticesPage({
         {(() => {
           const totalDistance = practice.sets.reduce((sum, s) => sum + (s.distance ?? 0), 0)
           return totalDistance > 0 ? (
-            <p className="flex items-center gap-1 text-xs font-semibold text-foreground mt-0.5">
+            <p className="flex items-center gap-1 text-xs font-medium text-foreground mt-0.5">
               <img src="/swimming-icon.png" alt="swimming" className="w-4 h-4 dark:invert" />
               {totalDistance.toLocaleString()} yards
             </p>
@@ -327,7 +325,9 @@ export default async function PracticesPage({
             <div className="flex items-start justify-between gap-1">
               <DayLabel dayKey={key}>{dayLabel}</DayLabel>
               {isCoach && !first.published && (
-                <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-warning" />
+                <span className="mt-0.5 shrink-0 rounded-full bg-primary/20 dark:bg-primary/30 px-1 py-px text-[10px] font-semibold uppercase tracking-wide text-primary-active shadow-sm dark:text-primary-hover">
+                  Draft
+                </span>
               )}
             </div>
             <div className="mt-2" />
@@ -406,36 +406,7 @@ export default async function PracticesPage({
           <LiveSearch pathname="/practices" placeholder="Search practices and sets…" />
         </Suspense>
 
-        <div className="flex flex-wrap gap-1.5">
-          <Link
-            href={buildHref({ tags: [] })}
-            className={
-              "text-xs px-2.5 py-1 rounded-full border border-border-secondary transition-colors font-semibold " +
-              (activeTags.length === 0
-                ? "bg-primary border-primary text-primary-text"
-                : "border-border-secondary text-foreground-secondary hover:bg-fill-secondary")
-            }
-          >
-            All
-          </Link>
-          {SET_TAGS.map((t) => {
-            const selected = activeTags.includes(t)
-            return (
-              <Link
-                key={t}
-                href={toggleTagHref(t)}
-                className={
-                  "text-xs px-2.5 py-1 rounded-full border border-border-secondary transition-colors " +
-                  (selected
-                    ? "bg-primary border-primary text-primary-text"
-                    : "border-border-secondary text-foreground-secondary hover:bg-fill-secondary")
-                }
-              >
-                {t}
-              </Link>
-            )
-          })}
-        </div>
+        <PracticeTagManager initialTags={managedTags} isCoach={isCoach} />
       </div>
 
       <ViewNavPanel>
@@ -580,19 +551,19 @@ export default async function PracticesPage({
               <div className="grid grid-cols-7">
                 {monthCells.map(({ date, inMonth }) => {
                   const key = dayKey(date)
-                  const practices = inMonth ? (practicesByDay.get(key) || []) : []
+                  const practices = practicesByDay.get(key) || []
                   return (
                     <div
                       key={key}
-                      className="flex min-h-24 flex-col border-b border-r border-border-secondary p-1 last:border-r-0 sm:min-h-28 sm:p-1.5 md:min-h-36"
+                      className={"flex min-h-24 flex-col border-b border-r border-border-secondary p-1 last:border-r-0 sm:min-h-28 sm:p-1.5 md:min-h-36 " + (inMonth ? "bg-background" : "bg-fill-secondary/70")}
                     >
-                      {inMonth ? (
+                      {inMonth || practices.length > 0 ? (
                         renderPracticeCell({
                           dayKey: key,
                           dayLabel: String(date.getUTCDate()),
                           practices})
                       ) : (
-                        <div className="px-1 text-xs font-medium text-foreground-tertiary">
+                        <div className="px-1 text-xs font-medium text-foreground-tertiary/60">
                           {date.getUTCDate()}
                         </div>
                       )}
@@ -631,7 +602,7 @@ export default async function PracticesPage({
                     {p.title}
                   </p>
                   {isCoach && !p.published && (
-                    <span className="text-xs uppercase tracking-wide rounded-full bg-fill-secondary text-foreground-secondary px-2 py-0.5 shrink-0">
+                    <span className="text-xs uppercase tracking-wide rounded-full bg-primary/20 dark:bg-primary/30 px-1.5 py-px text-primary-active shadow-sm dark:text-primary-hover shrink-0">
                       Draft
                     </span>
                   )}
@@ -663,7 +634,7 @@ export default async function PracticesPage({
                 </div>
                 <div className="flex items-center justify-end gap-1.5 font-semibold">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                  {p.startTime}–{p.endTime}
+                  {formatClockTimeRange(p.startTime, p.endTime)}
                 </div>
                 <div className="flex items-center justify-end gap-1.5 font-semibold">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>

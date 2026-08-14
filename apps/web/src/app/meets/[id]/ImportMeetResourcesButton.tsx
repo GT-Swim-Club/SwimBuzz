@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Fragment, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import MeetResourceField from "../MeetResourceField"
 import MeetResourceIcon from "@/components/MeetResourceIcon"
@@ -8,15 +8,16 @@ import Modal, { ModalFooter } from "@/components/Modal"
 import { useScraperUi } from "@/components/ScraperUiProvider"
 import { useImportTask } from "@/components/ImportTaskProvider"
 import { useMeetResourceUploads } from "@/lib/use-meet-resource-uploads"
-import type { FinalsHeatSheetLink } from "@/lib/meet-files"
+import { useUnsavedUploads } from "@/lib/unsaved-uploads"
+import type { HeatSheetLink } from "@/lib/meet-files"
 
 type ResourceForm = {
   teamCode: string
   packetUrl: string
   entriesSheetUrl: string
   psychSheetUrl: string
-  heatSheetUrl: string
-  finalsHeatSheetUrls: FinalsHeatSheetLink[]
+  heatSheetUrls: HeatSheetLink[]
+  finalsHeatSheetUrls: HeatSheetLink[]
   liveStreamUrl: string
 }
 
@@ -39,7 +40,7 @@ type SaveResourcesResponse = {
   cachedSheetParses?: Record<string, unknown>
 }
 
-function finalsLinksEqual(a: FinalsHeatSheetLink[], b: FinalsHeatSheetLink[]): boolean {
+function heatSheetLinksEqual(a: HeatSheetLink[], b: HeatSheetLink[]): boolean {
   if (a.length !== b.length) return false
   return a.every(
     (link, i) =>
@@ -48,24 +49,79 @@ function finalsLinksEqual(a: FinalsHeatSheetLink[], b: FinalsHeatSheetLink[]): b
   )
 }
 
-/** Filled finals links plus one trailing empty upload slot. */
-function withTrailingEmptySlot(links: FinalsHeatSheetLink[]): FinalsHeatSheetLink[] {
-  const filled = links.filter((l) => l.url.trim())
-  const last = links[links.length - 1]
-  const trailingEmpty =
-    last && !last.url.trim()
-      ? { url: "", ...(last.name?.trim() ? { name: last.name } : {}) }
-      : { url: "" }
-  return [...filled, trailingEmpty]
+/** Filled sheet links, with one initial empty upload slot when needed. */
+function withTrailingEmptySlot(links: HeatSheetLink[]): HeatSheetLink[] {
+  const filled = links.filter((link) => link.url.trim())
+  return filled.length > 0 ? filled : [{ url: "" }]
 }
 
-function filledFinalsLinks(links: FinalsHeatSheetLink[]): FinalsHeatSheetLink[] {
+function filledHeatSheetLinks(links: HeatSheetLink[]): HeatSheetLink[] {
   return links
     .map((l) => ({
       url: l.url.trim(),
       ...(l.name?.trim() ? { name: l.name.trim() } : {}),
     }))
     .filter((l) => l.url)
+}
+
+function resourceFileUrls(form: Pick<
+  ResourceForm,
+  "packetUrl" | "entriesSheetUrl" | "psychSheetUrl" | "heatSheetUrls" | "finalsHeatSheetUrls"
+>): string[] {
+  return [
+    form.packetUrl,
+    form.entriesSheetUrl,
+    form.psychSheetUrl,
+    ...form.heatSheetUrls.map((link) => link.url),
+    ...form.finalsHeatSheetUrls.map((link) => link.url),
+  ]
+}
+
+function editorForm(source: ResourceForm): ResourceForm {
+  return {
+    ...source,
+    heatSheetUrls: withTrailingEmptySlot(source.heatSheetUrls),
+    finalsHeatSheetUrls: withTrailingEmptySlot(source.finalsHeatSheetUrls),
+  }
+}
+
+function snapshotForm(form: ResourceForm): ResourceForm {
+  return {
+    ...form,
+    heatSheetUrls: filledHeatSheetLinks(form.heatSheetUrls),
+    finalsHeatSheetUrls: filledHeatSheetLinks(form.finalsHeatSheetUrls),
+  }
+}
+
+function resourceFormsEqual(a: ResourceForm, b: ResourceForm): boolean {
+  return (
+    a.teamCode.trim() === b.teamCode.trim() &&
+    a.packetUrl.trim() === b.packetUrl.trim() &&
+    a.entriesSheetUrl.trim() === b.entriesSheetUrl.trim() &&
+    a.psychSheetUrl.trim() === b.psychSheetUrl.trim() &&
+    a.liveStreamUrl.trim() === b.liveStreamUrl.trim() &&
+    heatSheetLinksEqual(
+      filledHeatSheetLinks(a.heatSheetUrls),
+      filledHeatSheetLinks(b.heatSheetUrls)
+    ) &&
+    heatSheetLinksEqual(
+      filledHeatSheetLinks(a.finalsHeatSheetUrls),
+      filledHeatSheetLinks(b.finalsHeatSheetUrls)
+    )
+  )
+}
+
+function hasAnyResource(form: ResourceForm): boolean {
+  return (
+    Object.values({
+      packetUrl: form.packetUrl,
+      entriesSheetUrl: form.entriesSheetUrl,
+      psychSheetUrl: form.psychSheetUrl,
+      liveStreamUrl: form.liveStreamUrl,
+    }).some((v) => v.trim()) ||
+    form.heatSheetUrls.some((l) => l.url.trim()) ||
+    form.finalsHeatSheetUrls.some((l) => l.url.trim())
+  )
 }
 
 export default function ImportMeetResourcesButton({
@@ -77,13 +133,17 @@ export default function ImportMeetResourcesButton({
 }) {
   const router = useRouter()
   const { requireScraper } = useScraperUi()
-  const { startTask } = useImportTask()
+  const { startTask, tasks } = useImportTask()
+  const importing = tasks.some(
+    (t) => t.status === "running" && /resources/i.test(t.label)
+  )
   const [open, setOpen] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [confirmError, setConfirmError] = useState<string | null>(null)
   const [form, setForm] = useState<ResourceForm>(() => ({
     ...initial,
+    heatSheetUrls: withTrailingEmptySlot(initial.heatSheetUrls),
     finalsHeatSheetUrls: withTrailingEmptySlot(initial.finalsHeatSheetUrls),
   }))
   const [pendingConfirmations, setPendingConfirmations] = useState<NameConfirmation[]>([])
@@ -93,24 +153,35 @@ export default function ImportMeetResourcesButton({
     null
   )
   const { anyUploading, getFieldUploadHandler } = useMeetResourceUploads()
-
-  const hasResources =
-    Object.values({
-      packetUrl: initial.packetUrl,
-      entriesSheetUrl: initial.entriesSheetUrl,
-      psychSheetUrl: initial.psychSheetUrl,
-      heatSheetUrl: initial.heatSheetUrl,
-      liveStreamUrl: initial.liveStreamUrl,
-    }).some((v) => v.trim()) || initial.finalsHeatSheetUrls.some((l) => l.url.trim())
+  const { begin, trackUpload, release } = useUnsavedUploads()
+  const [pendingForm, setPendingForm] = useState<ResourceForm | null>(null)
+  const baseline = pendingForm ?? initial
+  const hasResources = hasAnyResource(baseline)
 
   useEffect(() => {
-    if (open) {
-      setForm({
-        ...initial,
-        finalsHeatSheetUrls: withTrailingEmptySlot(initial.finalsHeatSheetUrls),
-      })
+    if (!pendingForm) return
+    if (resourceFormsEqual(pendingForm, initial)) {
+      setPendingForm(null)
     }
-  }, [open, initial])
+  }, [initial, pendingForm])
+
+  function openResourceEditor() {
+    begin()
+    setForm(editorForm(baseline))
+    setOpen(true)
+  }
+
+  function closeWithoutSaving() {
+    if (anyUploading) return
+    release(resourceFileUrls(baseline))
+    setOpen(false)
+  }
+
+  function revertRejectedImport() {
+    setPendingForm(null)
+    setForm(editorForm(initial))
+    release(resourceFileUrls(initial))
+  }
 
   function defaultPairSelections(confirmations: NameConfirmation[]): Record<string, string> {
     const next: Record<string, string> = {}
@@ -135,74 +206,85 @@ export default function ImportMeetResourcesButton({
     router.refresh()
   }
 
-  async function saveResources(opts?: {
-    nameMappings?: Record<string, string>
-    rejectedNames?: string[]
-    cachedSheetParses?: Record<string, unknown> | null
-  }) {
-    const teamCode = form.teamCode.trim()
+  async function saveResources(
+    snapshot: ResourceForm,
+    opts?: {
+      nameMappings?: Record<string, string>
+      rejectedNames?: string[]
+      cachedSheetParses?: Record<string, unknown> | null
+    }
+  ) {
+    const teamCode = snapshot.teamCode.trim()
     if (!teamCode) throw new Error("Team code is required")
 
-    const finalsHeatSheetUrls = filledFinalsLinks(form.finalsHeatSheetUrls)
+    const heatSheetUrls = filledHeatSheetLinks(snapshot.heatSheetUrls)
+    const finalsHeatSheetUrls = filledHeatSheetLinks(snapshot.finalsHeatSheetUrls)
 
     const res = await fetch(`/api/meets/${meetId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         teamCode,
-        packetUrl: form.packetUrl,
-        entriesSheetUrl: form.entriesSheetUrl,
-        psychSheetUrl: form.psychSheetUrl,
-        heatSheetUrl: form.heatSheetUrl,
+        packetUrl: snapshot.packetUrl,
+        entriesSheetUrl: snapshot.entriesSheetUrl,
+        psychSheetUrl: snapshot.psychSheetUrl,
+        heatSheetUrls,
         finalsHeatSheetUrls,
-        liveStreamUrl: form.liveStreamUrl,
+        liveStreamUrl: snapshot.liveStreamUrl,
         nameMappings: opts?.nameMappings,
         rejectedNames: opts?.rejectedNames,
         cachedSheetParses: opts?.cachedSheetParses,
       }),
     })
     const data = await res.json()
-    if (!res.ok) throw new Error(data.error ?? "Failed to save resources")
+    if (!res.ok) {
+      if (data.rejected) revertRejectedImport()
+      throw new Error(data.error ?? "Failed to save resources")
+    }
 
+    release(resourceFileUrls(snapshot))
     handleSaveResponse(data)
     return "Imported resources successfully"
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (anyUploading || importing) return
+
+    const hasAnyChange = !resourceFormsEqual(form, baseline)
+
+    if (!hasAnyChange) {
+      closeWithoutSaving()
+      return
+    }
 
     const teamChanged =
       initial.teamCode.trim().toUpperCase() !== form.teamCode.trim().toUpperCase()
-
-    const hasAnyChange =
-      teamChanged ||
-      initial.packetUrl.trim() !== form.packetUrl.trim() ||
-      initial.entriesSheetUrl.trim() !== form.entriesSheetUrl.trim() ||
-      initial.psychSheetUrl.trim() !== form.psychSheetUrl.trim() ||
-      initial.heatSheetUrl.trim() !== form.heatSheetUrl.trim() ||
-      !finalsLinksEqual(
-        filledFinalsLinks(initial.finalsHeatSheetUrls),
-        filledFinalsLinks(form.finalsHeatSheetUrls)
-      ) ||
-      initial.liveStreamUrl.trim() !== form.liveStreamUrl.trim()
-
-    if (!hasAnyChange) {
-      setOpen(false)
-      return
-    }
 
     const scrapableKeys = [
       "packetUrl",
       "entriesSheetUrl",
       "psychSheetUrl",
-      "heatSheetUrl",
     ] as const
 
-    const initialFinals = filledFinalsLinks(initial.finalsHeatSheetUrls)
-    const nextFinals = filledFinalsLinks(form.finalsHeatSheetUrls)
-    const finalsScrapableChange =
-      !finalsLinksEqual(initialFinals, nextFinals) &&
-      (nextFinals.length > 0 || initialFinals.length > 0)
+    const initialHeatSheets = filledHeatSheetLinks(initial.heatSheetUrls)
+    const nextHeatSheets = filledHeatSheetLinks(form.heatSheetUrls)
+    const previousHeatUrls = new Set(initialHeatSheets.map((l) => l.url.trim()))
+    const heatHasNewUrl = nextHeatSheets.some(
+      (l) => l.url.trim() && !previousHeatUrls.has(l.url.trim())
+    )
+
+    const initialFinals = filledHeatSheetLinks(initial.finalsHeatSheetUrls)
+    const nextFinals = filledHeatSheetLinks(form.finalsHeatSheetUrls)
+    const prevFinalsUrls = new Set(initialFinals.map((l) => l.url.trim()))
+    const finalsHasNewUrl = nextFinals.some(
+      (l) => l.url.trim() && !prevFinalsUrls.has(l.url.trim())
+    )
+
+    const hasRemainingScrapable =
+      scrapableKeys.some((key) => form[key].trim()) ||
+      nextHeatSheets.length > 0 ||
+      nextFinals.length > 0
 
     const hasScrapableChange =
       scrapableKeys.some((key) => {
@@ -210,18 +292,19 @@ export default function ImportMeetResourcesButton({
         const prev = initial[key].trim()
         return Boolean(next) && next !== prev
       }) ||
-      finalsScrapableChange ||
-      (teamChanged &&
-        (scrapableKeys.some((key) => form[key].trim() || initial[key].trim()) ||
-          nextFinals.length > 0 ||
-          initialFinals.length > 0))
+      heatHasNewUrl ||
+      finalsHasNewUrl ||
+      (teamChanged && hasRemainingScrapable)
 
+    const snapshot = snapshotForm(form)
+    setPendingForm(snapshot)
     setOpen(false)
+    release(resourceFileUrls(snapshot))
 
     if (hasScrapableChange) {
-      requireScraper(() => void startTask("Importing resources...", saveResources()))
+      requireScraper(() => void startTask("Importing resources...", saveResources(snapshot)))
     } else {
-      void saveResources().catch((err) => {
+      void saveResources(snapshot).catch((err) => {
         startTask(
           "Saving resources...",
           Promise.reject(
@@ -266,7 +349,7 @@ export default function ImportMeetResourcesButton({
     setConfirmError(null)
 
     try {
-      await saveResources({
+      await saveResources(pendingForm ?? snapshotForm(form), {
         nameMappings,
         rejectedNames,
         cachedSheetParses,
@@ -287,7 +370,27 @@ export default function ImportMeetResourcesButton({
     Boolean((pairSelections[c.pdfName] ?? "").trim())
   ).length
 
-  function updateFinalsLink(index: number, patch: Partial<FinalsHeatSheetLink>) {
+  const canAddHeatSheet = form.heatSheetUrls.every((link) => link.url.trim())
+  const canAddFinalsHeatSheet = form.finalsHeatSheetUrls.every((link) => link.url.trim())
+
+  function updateHeatLink(index: number, patch: Partial<HeatSheetLink>) {
+    setForm((f) => {
+      const urls = f.heatSheetUrls.map((link, i) =>
+        i === index ? { ...link, ...patch } : link
+      )
+      return { ...f, heatSheetUrls: withTrailingEmptySlot(urls) }
+    })
+  }
+
+
+  function addHeatLink() {
+    setForm((f) => ({
+      ...f,
+      heatSheetUrls: [...f.heatSheetUrls, { url: "" }],
+    }))
+  }
+
+  function updateFinalsLink(index: number, patch: Partial<HeatSheetLink>) {
     setForm((f) => {
       const urls = f.finalsHeatSheetUrls.map((link, i) =>
         i === index ? { ...link, ...patch } : link
@@ -296,12 +399,10 @@ export default function ImportMeetResourcesButton({
     })
   }
 
-  function removeFinalsLink(index: number) {
+  function addFinalsLink() {
     setForm((f) => ({
       ...f,
-      finalsHeatSheetUrls: withTrailingEmptySlot(
-        f.finalsHeatSheetUrls.filter((_, i) => i !== index)
-      ),
+      finalsHeatSheetUrls: [...f.finalsHeatSheetUrls, { url: "" }],
     }))
   }
 
@@ -309,7 +410,7 @@ export default function ImportMeetResourcesButton({
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={openResourceEditor}
         className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border border-border rounded-md bg-background hover:bg-fill transition-colors"
       >
         <svg
@@ -334,7 +435,8 @@ export default function ImportMeetResourcesButton({
       <Modal
         open={open}
         maxWidth="xl"
-        onClose={() => setOpen(false)}
+        onClose={closeWithoutSaving}
+        closeDisabled={anyUploading}
         title={hasResources ? "Edit Resources" : "Add Resources"}
         description="Upload or link meet documents, or add a live stream URL."
         onSubmit={handleSubmit}
@@ -342,17 +444,18 @@ export default function ImportMeetResourcesButton({
           <ModalFooter>
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={closeWithoutSaving}
+              disabled={anyUploading}
               className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium bg-background hover:bg-fill"
             >
               Close
             </button>
             <button
               type="submit"
-              disabled={anyUploading}
+              disabled={anyUploading || importing}
               className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
-              {anyUploading ? "Uploading…" : "Save"}
+              {importing ? "Importing…" : anyUploading ? "Uploading…" : "Save"}
             </button>
           </ModalFooter>
         }
@@ -379,6 +482,7 @@ export default function ImportMeetResourcesButton({
           value={form.packetUrl}
           onChange={(url) => setForm((f) => ({ ...f, packetUrl: url }))}
           onUploadingChange={getFieldUploadHandler("packet")}
+          onUploaded={trackUpload}
         />
         <MeetResourceField
           label="Entries"
@@ -386,6 +490,7 @@ export default function ImportMeetResourcesButton({
           value={form.entriesSheetUrl}
           onChange={(url) => setForm((f) => ({ ...f, entriesSheetUrl: url }))}
           onUploadingChange={getFieldUploadHandler("entries")}
+          onUploaded={trackUpload}
         />
         <MeetResourceField
           label="Psych Sheet"
@@ -393,67 +498,103 @@ export default function ImportMeetResourcesButton({
           value={form.psychSheetUrl}
           onChange={(url) => setForm((f) => ({ ...f, psychSheetUrl: url }))}
           onUploadingChange={getFieldUploadHandler("psych")}
+          onUploaded={trackUpload}
         />
-        <MeetResourceField
-          label="Heat Sheet"
-          icon={<MeetResourceIcon kind="heat" />}
-          value={form.heatSheetUrl}
-          onChange={(url) => setForm((f) => ({ ...f, heatSheetUrl: url }))}
-          onUploadingChange={getFieldUploadHandler("heat")}
-        />
+        <div>
+          <div className="space-y-4">
+        {form.heatSheetUrls.map((link, index) => {
+          const isPlaceholder = !link.url.trim()
+          const filledBefore = form.heatSheetUrls
+            .slice(0, index)
+            .filter((l) => l.url.trim()).length
+          const sheetNumber = filledBefore + 1
+          const label =
+            form.heatSheetUrls.length > 1
+              ? "Heat Sheet " + sheetNumber
+              : "Heat Sheet"
 
-        {form.finalsHeatSheetUrls.map((link, index) => {
+          const resourceField = (
+            <MeetResourceField
+              label={label}
+              icon={<MeetResourceIcon kind="heat" />}
+              value={link.url}
+              onChange={(url) => updateHeatLink(index, { url })}
+              onUploadingChange={getFieldUploadHandler(`heat-${index}`)}
+              onUploaded={trackUpload}
+              bodyLeading={
+                isPlaceholder ? undefined : (
+                  <input
+                    type="text"
+                    value={link.name ?? ""}
+                    onChange={(e) => updateHeatLink(index, { name: e.target.value })}
+                    placeholder="Optional label"
+                    aria-label={`Optional label for heat sheet ${filledBefore + 1}`}
+                    className="h-full w-full rounded-lg border border-border px-3 py-2 text-xs bg-background text-foreground-secondary"
+                  />
+                )
+              }
+            />
+          )
+          return <Fragment key={"heat-" + index}>{resourceField}</Fragment>
+        })}
+          </div>
+        {canAddHeatSheet ? (
+          <button
+            type="button"
+            onClick={addHeatLink}
+            className="!mt-0 inline-flex self-start text-xs font-medium text-primary hover:text-primary-hover"
+          >
+            + Add another heat sheet
+          </button>
+        ) : null}
+          </div>
+
+        <div>
+          <div className="space-y-4">
+            {form.finalsHeatSheetUrls.map((link, index) => {
           const isPlaceholder = !link.url.trim()
           const filledBefore = form.finalsHeatSheetUrls
             .slice(0, index)
             .filter((l) => l.url.trim()).length
-          const label = isPlaceholder
-            ? "Finals Heat Sheet"
-            : `Finals Heat Sheet ${filledBefore + 1}`
+          const sheetNumber = filledBefore + 1
+          const label =
+            form.finalsHeatSheetUrls.length > 1
+              ? "Finals Heat Sheet " + sheetNumber
+              : "Finals Heat Sheet"
 
-          return (
-            <div key={`finals-${index}`} className="space-y-1.5">
-              <MeetResourceField
-                label={label}
-                icon={<MeetResourceIcon kind="heat" />}
-                value={link.url}
-                onChange={(url) => updateFinalsLink(index, { url })}
-                onUploadingChange={getFieldUploadHandler(`finals-${index}`)}
-              />
-              {!isPlaceholder ? (
-                <div className="flex items-center gap-2">
+          const resourceField = (
+            <MeetResourceField
+              label={label}
+              icon={<MeetResourceIcon kind="heat" />}
+              value={link.url}
+              onChange={(url) => updateFinalsLink(index, { url })}
+              bodyLeading={
+                isPlaceholder ? undefined : (
                   <input
                     type="text"
                     value={link.name ?? ""}
                     onChange={(e) => updateFinalsLink(index, { name: e.target.value })}
-                    placeholder="Optional label (e.g. Sunday Finals)"
-                    className="flex-1 rounded-lg border border-border px-3 py-1.5 text-xs bg-background text-foreground-secondary"
+                    placeholder="Optional label"
+                    aria-label={`Optional label for finals heat sheet ${filledBefore + 1}`}
+                    className="h-full w-full rounded-lg border border-border px-3 py-2 text-xs bg-background text-foreground-secondary"
                   />
-                  <button
-                    type="button"
-                    onClick={() => removeFinalsLink(index)}
-                    className="shrink-0 text-foreground-tertiary hover:text-red-500"
-                    aria-label={`Remove ${label}`}
-                  >
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              ) : null}
-            </div>
+                )
+              }
+            />
           )
+          return <Fragment key={"finals-" + index}>{resourceField}</Fragment>
         })}
+          </div>
+        {canAddFinalsHeatSheet ? (
+          <button
+            type="button"
+            onClick={addFinalsLink}
+            className="!mt-0 inline-flex self-start text-xs font-medium text-primary hover:text-primary-hover"
+          >
+            + Add another finals heat sheet
+          </button>
+        ) : null}
+          </div>
 
         <div>
           <label className="flex items-center gap-1.5 text-xs font-medium text-foreground-secondary mb-1">

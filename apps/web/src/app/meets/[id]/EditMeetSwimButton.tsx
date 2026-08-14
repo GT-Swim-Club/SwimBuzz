@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { formatTime, parseTime } from "@/lib/utils"
 import Modal, { ModalFooter } from "@/components/Modal"
+import { DatePicker } from "@/components/CustomDateTimePicker"
 import ActionIcon from "@/components/ActionIcon"
 
 const EVENTS = [
@@ -252,12 +253,12 @@ export default function EditMeetSwimButton({
             <label className="block text-xs font-medium text-foreground-secondary mb-1">
               Date <span className="text-red-500">*</span>
             </label>
-            <input
-              required
-              type="date"
+            <DatePicker
               value={form.date}
-              onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-              className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
+              onChange={(value) => setForm((form) => ({ ...form, date: value }))}
+              ariaLabel="Date"
+              required
+              clearable
             />
           </div>
         </div>

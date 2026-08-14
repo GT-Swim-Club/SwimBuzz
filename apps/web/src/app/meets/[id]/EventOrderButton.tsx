@@ -24,7 +24,7 @@ export default function EventOrderButton({ order }: { order: EventOrder }) {
       <Modal
         open={open}
         onClose={() => setOpen(false)}
-        title="Order of Events"
+        title={<span className="block text-center">Order of Events</span>}
         maxWidth="2xl"
         footer={
           <ModalFooter>

@@ -9,41 +9,41 @@ type FeatureItem = {
 const athleteFeatures: FeatureItem[] = [
   {
     title: "Browse the roster",
-    description: "See who's on the team this season and open any swimmer's profile."},
+    description: "See who's swimming this season and get to a teammate's profile quickly."},
   {
     title: "Track personal bests",
-    description: "View PB grids and full meet history for yourself and teammates."},
+    description: "Look up your best times, meet results, and teammates' swims."},
   {
     title: "Follow meets",
     description:
-      "Check meet dates, heat sheets, entries, travel info, and live stream links in one place."},
+      "Find dates, entries, heat sheets, travel info, and livestreams."},
   {
     title: "See Nationals qualifiers",
-    description: "Check who has made qualifying standards from this season’s meet results."},
+    description: "See who has qualified this season."},
   {
     title: "Read practice plans",
-    description: "Access published workouts with sets, intervals, and coach notes."},
+    description: "Read the workout, intervals, and notes before you get to the pool."},
 ]
 
 const coachFeatures: FeatureItem[] = [
   {
-    title: "Manage the roster",
-    description: "Import from SwimCloud or CSV, add athletes, sync times, and set nicknames."},
+    title: "Keep the roster up to date",
+    description: "Import a roster, update profiles, and pull in new times when you need to."},
   {
-    title: "Run meets end to end",
+    title: "Set up meets",
     description:
-      "Create meets, upload packets and heat sheets, import SwimPhone results, and edit entries."},
+      "Add meet info, share the files swimmers need, and manage entries."},
   {
     title: "Write practices",
-    description: "Build practice plans with tagged sets, then publish them for the team."},
+    description: "Write the plan once and publish it for the team."},
   {
     title: "Plan relays",
     description:
-      "Build optimal lineups on each meet from PBs, filter by signup interest, and track leadoff splits."},
+      "Try lineups using personal bests and signup interest."},
   {
-    title: "Track Nationals cuts",
+    title: "Nationals tracking",
     description:
-      "Upload qualifying-time PDFs and see who has made Nationals standards from this season’s meets."},
+      "Upload the standards and see who has made the cut."},
 ]
 
 function FeatureList({ items }: { items: FeatureItem[] }) {
@@ -69,59 +69,60 @@ export default async function HomePage() {
   if (session) redirect("/athletes")
 
   return (
-    <div className="-mx-4 -my-8">
+    <div className="relative left-1/2 w-screen -translate-x-1/2 -my-6 sm:-my-8">
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-20 top-0 h-96 w-96 rounded-full bg-primary/15 blur-3xl" />
-          <div className="absolute right-0 top-20 h-80 w-80 rounded-full bg-cyan-500/15 blur-3xl" />
-          <div className="absolute inset-x-0 bottom-0 h-32 opacity-[0.07]"
+      <section className="relative overflow-hidden border-b border-border bg-background">
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage:
+              "radial-gradient(110% 135% at 4% -25%, color-mix(in srgb, var(--brand-color-primary) 18%, transparent) 0%, color-mix(in srgb, var(--brand-color-primary) 10%, transparent) 36%, transparent 74%), radial-gradient(62% 100% at 100% 18%, color-mix(in srgb, var(--brand-color-primary) 8%, transparent) 0%, transparent 82%)",
+            maskImage: "linear-gradient(to bottom, black 0%, black 58%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 58%, transparent 100%)",
+          }}
+        >
+          <div
+            className="absolute inset-x-0 bottom-0 h-24 opacity-[0.04]"
             style={{
               backgroundImage:
-                "repeating-linear-gradient(90deg, currentColor 0, currentColor 1px, transparent 1px, transparent 48px)"}}
+                "repeating-linear-gradient(90deg, currentColor 0, currentColor 1px, transparent 1px, transparent 48px)",
+            }}
           />
         </div>
 
-        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:py-28">
+        <div className="relative mx-auto max-w-[84rem] px-4 py-12 min-[375px]:px-6 sm:px-10 sm:py-20 lg:px-12 lg:py-24 xl:max-w-none xl:px-[clamp(8rem,10vw,18rem)]">
           <p className="text-sm font-medium uppercase tracking-widest text-primary">
             Georgia Tech Swim Club
           </p>
-          <h1 className="mt-4 max-w-2xl text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            Everything your team needs between the blocks.
+          <h1 className="mt-4 max-w-2xl text-4xl font-semibold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+            Keep the team up to date.
           </h1>
-          <p className="mt-5 max-w-xl text-lg leading-relaxed text-foreground-secondary">
-            SwimBuzz is the club&apos;s home for rosters, meet prep, practice plans,
-            and relay management — built for coaches and swimmers at GTSC.
+          <p className="mt-5 max-w-xl text-base leading-relaxed text-foreground-secondary sm:text-lg">
+            Meet info, practice plans, and roster updates—without chasing messages or spreadsheets.
           </p>
-          <div className="mt-10 flex flex-wrap items-center gap-4">
+          <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <Link
               href="/signin"
-              className="inline-flex items-center rounded-xl bg-primary px-6 py-3 text-sm font-medium text-primary-text shadow-sm transition-colors hover:bg-primary-hover"
+              className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-6 py-3 sm:w-auto text-sm font-medium text-primary-text shadow-sm transition-colors hover:bg-primary-hover"
             >
-              Get Started
+              Sign in
             </Link>
             <Link
-              href="/signin?callbackUrl=/athletes"
-              className="inline-flex items-center rounded-xl border border-border px-6 py-3 text-sm font-medium text-foreground-secondary transition-colors hover:bg-fill-secondary"
+              href="/signin?callbackUrl=/meets"
+              className="inline-flex w-full items-center justify-center rounded-xl border border-border px-6 py-3 sm:w-auto text-sm font-medium text-foreground-secondary transition-colors hover:bg-fill-secondary"
             >
-              Go to roster
+              Go to meets
             </Link>
           </div>
         </div>
       </section>
 
       {/* Role-based features */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:py-20">
-        <div className="max-w-2xl">
-          <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-            Built for swimmers and coaches
-          </h2>
-        </div>
-
-        <div className="mt-10 grid gap-6 lg:grid-cols-2">
-          <div className="rounded-2xl border border-border bg-background p-6 sm:p-8">
+      <section className="mx-auto max-w-[84rem] px-4 py-8 min-[375px]:px-6 sm:px-10 sm:py-2 lg:px-12 xl:max-w-none xl:px-[clamp(8rem,10vw,18rem)]">
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          <div className="rounded-2xl border border-border bg-background p-5 shadow-sm sm:p-7">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-100 text-cyan-700">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="h-5 w-5" aria-hidden="true">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
                   <circle cx="12" cy="7" r="4" />
@@ -129,13 +130,13 @@ export default async function HomePage() {
               </div>
               <div>
                 <h3 className="text-lg font-medium text-foreground">Athletes</h3>
-                <p className="text-sm text-foreground-tertiary">View and follow the season</p>
+                <p className="text-sm text-foreground-tertiary">Your schedule, times, and meet details</p>
               </div>
             </div>
             <FeatureList items={athleteFeatures} />
           </div>
 
-          <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6 sm:p-8">
+          <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5 shadow-sm sm:p-7">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="h-5 w-5" aria-hidden="true">
@@ -145,7 +146,7 @@ export default async function HomePage() {
               </div>
               <div>
                 <h3 className="text-lg font-medium text-foreground">Coaches</h3>
-                <p className="text-sm text-foreground-tertiary">Manage and import team data</p>
+                <p className="text-sm text-foreground-tertiary">Rosters, practices, and meet info</p>
               </div>
             </div>
             <FeatureList items={coachFeatures} />

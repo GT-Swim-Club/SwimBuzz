@@ -52,14 +52,22 @@ EVENT_WITH_DISTANCE = re.compile(
 
 COURSE_HINT = re.compile(r"\b(SCY|LCM|SCM|short\s+course\s+yards?|long\s+course\s+meters?)\b", re.I)
 
-# Relay event header, e.g. "Event 1 Girls 200 Yard Medley Relay".
-# The distance is the number right before the (optional) course unit + stroke —
-# NOT the event number, which can also be 2 digits (e.g. "Event 19 ... Relay").
+# Relay event header, e.g. "Event 1 Girls 200 Yard Medley Relay" or
+# USMS/CCS "#1 Women 4x200 Yard Free Relay". Optional Nx prefix is the
+# number of legs; without it the leading distance is the total (4x50 = 200).
 RELAY_HEADER = re.compile(
-    r"\b(\d{2,4})\s+(?:yard|yd|meter|metre|m|scy|lcm|scm)?\s*"
+    r"(?:(\d+)\s*[x×]\s*)?(\d{2,4})\s+(?:yard|yd|meter|metre|m|scy|lcm|scm)?\s*"
     r"(medley|freestyle|free)\s+relay\b",
     re.I,
 )
+
+# Combined results: A/B/C finals in one column, prelims in another.
+_ROUND_PRELIM_SECTION = re.compile(
+    r"Preliminar(?:y|ies)\b|\bPrelims?\b|Prelim(?:s)?\s*Time|TeamPrelim",
+    re.I,
+)
+_ROUND_ABC_FINAL = re.compile(r"[ABC]\s*-\s*Finals?\b", re.I)
+_ROUND_BARE_FINAL = re.compile(r"^Finals?\s*$", re.I)
 
 # Leadoff swimmer of a relay, e.g. "1) Chimidkhorloo, Sarnai 18 2) Mrzyglod, Sabina 22"
 LEADOFF_NAME = re.compile(
@@ -101,15 +109,23 @@ MEET_NAME_DATE_PREFIX = re.compile(r"^\d{1,2}-\d{1,2}-\d{2,4}\s+")
 DOC_PSYCH = re.compile(r"Psych\s+Sheet", re.I)
 DOC_HEAT = re.compile(r"Meet\s+Program", re.I)
 DOC_ENTRIES = re.compile(
-    r"Team Entries|Individual Meet Entries|Entry Report by Club", re.I
+    r"Team Entries|Individual Meet Entries|Entry Report(?:\s+by\s+Club)?|"
+    r"Entries Report|Meet Entries Report",
+    re.I,
 )
 DOC_RESULTS = re.compile(r"(?m)^Results\b|\bResults\s*[-–:]", re.I)
+DOC_PACKET = re.compile(
+    r"Order of Events|Notes on the Order of Events|"
+    r"Women'?s Event(?:\s+Number)?\s+Men'?s Event|"
+    r"\bEvent List\b|\bTable of Contents\b",
+    re.I,
+)
 
 _VALID_RELAY_LETTERS = frozenset({"A", "B", "C", "D"})
 
 
 def detect_hytek_doc_type(text: str) -> str:
-    """Classify a Hy-Tek PDF from header labels: psych|heat|entries|results|unknown."""
+    """Classify a meet PDF: psych|heat|entries|results|packet|unknown."""
     sample = text[:6000] if len(text) > 6000 else text
     if DOC_ENTRIES.search(sample):
         return "entries"
@@ -122,6 +138,8 @@ def detect_hytek_doc_type(text: str) -> str:
     for line in sample.split("\n")[:15]:
         if re.match(r"^Results\b", line.strip(), re.I):
             return "results"
+    if DOC_PACKET.search(sample):
+        return "packet"
     return "unknown"
 
 
@@ -725,6 +743,10 @@ def parse_event_from_line(line: str) -> str | None:
         for word in ("free", "back", "breast", "fly", "butterfly", " medley", " im")
     ):
         return None
+    # Relay headers are owned by RELAY_HEADER ("4x200 Yard Free" would otherwise
+    # look like an individual 200 Free).
+    if "relay" in lower:
+        return None
 
     # Check for multiple event numbers on one line (e.g., "#18 Boys... #21 Girls...")
     # These are cross-column headers and should be ignored for event tracking
@@ -981,6 +1003,7 @@ def extract_parenthetical_split_tokens(line: str) -> list[str]:
 def parse_text_lines(lines: list[str], course: str) -> list[dict]:
     results: list[dict] = []
     current_event: str | None = None
+    current_round: str | None = None
     last_result_indices: list[int] = []
     in_relay_section: bool = False
     # Hy-Tek wraps long races (400+) onto multiple split-only lines; collect
@@ -1007,10 +1030,14 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
         if not stripped:
             continue
 
+        round_tag = parse_round_section(stripped)
+        if round_tag is not None:
+            current_round = round_tag
+
         # Relay-event headers: track that we're in a relay block so relay team
         # lines (e.g. "1 UNC Chapel Hill-NC A 1:42.53") are not mistakenly parsed
         # as individual-athlete results.  parse_relay_results() owns those lines.
-        if RELAY_HEADER.search(stripped):
+        if relay_header_match(stripped):
             flush_pending_splits()
             in_relay_section = True
             last_result_indices = []
@@ -1022,6 +1049,13 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
             current_event = maybe_event
             in_relay_section = False
             last_result_indices = []
+            # New event without a round header (not "Preliminaries ... (#3 ...)")
+            # — wait for A-Final / Preliminaries before tagging P/F.
+            if round_tag is None:
+                current_round = None
+            continue
+
+        if round_tag is not None and not parse_name_from_line(stripped):
             continue
 
         # Skip lines that belong to a relay section (handled by parse_relay_results).
@@ -1063,7 +1097,7 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
                 "event": current_event,
                 "time": scratch.group(0).upper(),
                 "course": course,
-                "tags": "",
+                "tags": current_round or "",
                 "place": place,
                 "team": team,
             }
@@ -1071,7 +1105,7 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
             last_result_indices = [len(results) - 1]
             continue
 
-        rounds = pick_round_times(stripped)
+        rounds = apply_section_round(pick_round_times(stripped), current_round)
         if not rounds:
             continue
 
@@ -1107,6 +1141,56 @@ def normalize_relay_event(distance: str, stroke_raw: str) -> str | None:
     if stroke in {"freestyle", "free"}:
         return f"{distance} Free Relay"
     return None
+
+
+def relay_header_match(line: str) -> re.Match[str] | None:
+    return RELAY_HEADER.search(line)
+
+
+def relay_event_from_header(line: str) -> str | None:
+    """Event name from a relay header, including USMS 4x200 → 800 Free Relay."""
+    match = relay_header_match(line)
+    if not match:
+        return None
+    legs, distance, stroke_raw = match.group(1), match.group(2), match.group(3)
+    total = str(int(legs) * int(distance)) if legs else distance
+    return normalize_relay_event(total, stroke_raw)
+
+
+def parse_round_section(line: str) -> str | None:
+    """Prelim/final section from Hy-Tek combined-results headers.
+
+    Returns "P" or "F" when the line declares a round, else None.
+    Timed-finals titles are ignored so those meets keep untagged official times.
+    """
+    stripped = line.strip()
+    if not stripped:
+        return None
+    if re.search(r"Timed\s+Finals?", stripped, re.I):
+        return None
+    if _ROUND_PRELIM_SECTION.search(stripped):
+        return "P"
+    if _ROUND_ABC_FINAL.search(stripped):
+        return "F"
+    if _ROUND_BARE_FINAL.match(stripped):
+        return "F"
+    return None
+
+
+def apply_section_round(
+    rounds: list[dict[str, str]], section_round: str | None
+) -> list[dict[str, str]]:
+    """Fill empty tags from A-Final / Preliminaries section context."""
+    if not section_round:
+        return rounds
+    out: list[dict[str, str]] = []
+    for item in rounds:
+        tags = (item.get("tags") or "").strip()
+        if tags in {"P", "F"}:
+            out.append(item)
+        else:
+            out.append({**item, "tags": section_round})
+    return out
 
 
 def relay_gender_from_header(line: str) -> str:
@@ -1220,6 +1304,7 @@ def parse_relay_results(lines: list[str], course: str) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     current_event: str | None = None
     current_gender: str = ""
+    current_round: str | None = None
     block: dict[str, Any] | None = None
 
     def flush_block() -> None:
@@ -1256,17 +1341,24 @@ def parse_relay_results(lines: list[str], course: str) -> list[dict[str, Any]]:
         if not line:
             continue
 
-        relay = RELAY_HEADER.search(line)
-        if relay:
+        round_tag = parse_round_section(line)
+        if round_tag is not None:
+            current_round = round_tag
+
+        event = relay_event_from_header(line)
+        if event:
             flush_block()
-            current_event = normalize_relay_event(relay.group(1), relay.group(2))
+            current_event = event
             current_gender = relay_gender_from_header(line)
+            if round_tag is None:
+                current_round = None
             continue
 
         if parse_event_from_line(line) and "relay" not in line.lower():
             flush_block()
             current_event = None
             current_gender = ""
+            current_round = None
             continue
 
         if not current_event:
@@ -1281,7 +1373,7 @@ def parse_relay_results(lines: list[str], course: str) -> list[dict[str, Any]]:
             if SCRATCH_MARKER.search(line):
                 continue
             place_str, team_code, letter, tail = team_match.groups()
-            rounds = pick_round_times(tail)
+            rounds = apply_section_round(pick_round_times(tail), current_round)
             if not rounds:
                 continue
             place = int(place_str) if place_str.isdigit() else None
@@ -1359,11 +1451,12 @@ def parse_relay_leadoffs(lines: list[str], course: str) -> list[dict]:
         if team_match:
             current_team = team_match.group(2).upper()
 
-        relay = RELAY_HEADER.search(line)
-        if relay:
-            total = int(relay.group(1))
+        event = relay_event_from_header(line)
+        if event:
+            total_match = re.match(r"(\d+)", event)
+            total = int(total_match.group(1)) if total_match else 0
             leg_distance = total // 4
-            stroke = "Back" if relay.group(2).lower() == "medley" else "Free"
+            stroke = "Back" if "medley" in event.lower() else "Free"
             in_relay = True
             leadoff_name = None
             current_team = None
@@ -1423,7 +1516,7 @@ def group_words_into_lines(words: list[dict], y_tol: float = 3.0) -> list[str]:
     out: list[str] = []
     for line in lines:
         row = sorted(line, key=lambda w: w["x0"])
-        out.append(" ".join(w["text"] for w in row))
+        out.append(_clean_cid_ligatures(" ".join(w["text"] for w in row)))
     return out
 
 
@@ -1480,8 +1573,14 @@ def detect_column_split(words: list[dict], page_width: float, lines: list[dict] 
     third1 = page_width / 3.0
     third2 = 2.0 * page_width / 3.0
     
-    header_words = [w for w in words if w['text'].lower() in ('event', 'heat')]
+    header_words = [
+        w
+        for w in words
+        if w["text"].lower() in ("event", "heat", "name")
+        or re.fullmatch(r"#\d+", str(w["text"]).strip())
+    ]
     
+    header_2col = False
     if len(header_words) >= 2:
         # Group header words by y-position (same row)
         header_rows = {}
@@ -1520,9 +1619,9 @@ def detect_column_split(words: list[dict], page_width: float, lines: list[dict] 
         if rows_with_3_headers >= 2:
             return [third1, third2]
         
-        # If we have 2+ rows with 2 headers, it's a 2-column layout
-        if rows_with_2_headers >= 2:
-            return [mid]
+        # Remember 2-col headers but don't return yet — word distribution may
+        # still show a 3-column prelims/finals page.
+        header_2col = rows_with_2_headers >= 2
 
     # Priority 3: Word distribution analysis
     third1 = page_width / 3.0
@@ -1560,6 +1659,9 @@ def detect_column_split(words: list[dict], page_width: float, lines: list[dict] 
     
     if left_only >= threshold_3col and middle_only >= threshold_3col and right_only >= threshold_3col:
         return [third1, third2]
+
+    if header_2col:
+        return [mid]
 
     # Fall back to 2-column detection
     mid = page_width / 2.0
@@ -1603,7 +1705,10 @@ def extract_page_lines(page: Any, forced_splits: list[float] | None = None) -> l
     except Exception:
         words = []
     if not words:
-        return (page.extract_text() or "").split("\n")
+        return [
+            _clean_cid_ligatures(line)
+            for line in (page.extract_text() or "").split("\n")
+        ]
 
     if forced_splits is not None:
         splits = forced_splits
@@ -1655,7 +1760,10 @@ def parse_meet_pdf_bytes(
             if page_index == 0:
                 # The banner/title sit above the two-column body, so the plain
                 # top-to-bottom text read gives clean header lines.
-                header_lines = (page.extract_text() or "").split("\n")
+                header_lines = [
+                    _clean_cid_ligatures(line)
+                    for line in (page.extract_text() or "").split("\n")
+                ]
                 page_width = float(page.width)
 
             # Check if this PDF has a "Points" column (indicates results PDF format)
@@ -1663,14 +1771,18 @@ def parse_meet_pdf_bytes(
             if "Points" in page_text and ("Finals Time" in page_text or "Seed Time" in page_text):
                 has_points_column = True
 
-            # Try to detect the column split from each page until we find one.
-            # Once found, reuse for all remaining pages (consistent layout assumption).
-            if pdf_splits is None and page_width is not None:
+            # Prefer the richest column layout found on any page (3-col over 2-col).
+            # Combined prelim/finals PDFs often fail detection on early relay pages.
+            if page_width is not None and (pdf_splits is None or len(pdf_splits) < 2):
                 try:
                     words = page.extract_words(use_text_flow=False)
                     if words:
-                        candidate = detect_column_split(words, page_width)
-                        if candidate:
+                        candidate = detect_column_split(
+                            words, page_width, lines=page.lines
+                        )
+                        if candidate and (
+                            pdf_splits is None or len(candidate) > len(pdf_splits)
+                        ):
                             pdf_splits = candidate
                 except Exception:
                     pass

@@ -53,8 +53,9 @@ export type CachedSheetParse = {
 }
 
 export type CachedSheetParses = Partial<
-  Record<"psych" | "heat" | "entries", CachedSheetParse>
+  Record<"psych" | "entries", CachedSheetParse>
 > & {
+  heat?: Record<string, CachedSheetParse>
   finals?: Record<string, CachedSheetParse>
 }
 
@@ -200,6 +201,10 @@ function coerceFinalsSheetEntries(entries: SheetEntry[]): SheetEntry[] {
     // "Seed Time"). Treat either as the seed for the finals row.
     if (!next.seedTime && !next.timeStatus && entry.prelimTime) {
       next.seedTime = entry.prelimTime
+    }
+    if (next.seedTime) next.finalsSheetSeedTime = next.seedTime
+    if (next.seedRank != null && next.seedRank > 0) {
+      next.finalsSheetSeedRank = next.seedRank
     }
     return next
   })
@@ -469,6 +474,128 @@ export async function resolveHeatSheetSummary(
       ...result.summary,
       entries: result.summary.entries.map(coercePrelimHeatTimedFinalsEntry),
     },
+  }
+}
+
+export type ResolveHeatSheetsResult = {
+  summary: SheetSummary | null
+  sheetNames: string[]
+  cachedParses: Record<string, CachedSheetParse>
+}
+
+/** Parse and merge multiple prelim heat sheet PDFs into one summary. */
+export async function resolveHeatSheetSummaries(
+  userId: string,
+  urls: string[],
+  roster: RosterAthlete[],
+  teamCode: string = "GTSC",
+  options?: SheetMatchOptions,
+  cachedByUrl?: Record<string, CachedSheetParse> | null
+): Promise<ResolveHeatSheetsResult> {
+  if (urls.length === 0) {
+    return { summary: null, sheetNames: [], cachedParses: {} }
+  }
+
+  let summary: SheetSummary | null = null
+  const sheetNames: string[] = []
+  const cachedParses: Record<string, CachedSheetParse> = {}
+
+  for (const url of urls) {
+    const cached = cachedByUrl?.[url]
+    const parsed = cached?.entries
+      ? {
+          sheetType: cached.sheetType === "entries" ? "heat" : cached.sheetType,
+          course: cached.course,
+          entries: cached.entries,
+          detectedSheetType: cached.detectedSheetType,
+          meet_name: cached.meet_name,
+        }
+      : await callSheetParser(userId, await fetchMeetFileBytes(url), "heat", teamCode)
+    validateParsedSheet("heat", parsed, options)
+    const allEntries = parsed.entries ?? []
+    sheetNames.push(...collectSheetNames(allEntries))
+    cachedParses[url] = toCachedSheetParse({ ...parsed, sheetType: "heat" })
+
+    const matched = matchSheetToRoster(allEntries, roster, options).map(
+      coercePrelimHeatTimedFinalsEntry
+    )
+    if (matched.length === 0) continue
+
+    const nextSummary: SheetSummary = {
+      sheetType: "heat",
+      course: parsed.course,
+      entries: matched,
+    }
+    summary = summary
+      ? appendSheetSummaryEntries(summary, matched)
+      : jsonSafeSheetSummary(nextSummary)
+  }
+
+  return {
+    summary: summary ? jsonSafeSheetSummary(summary) : null,
+    sheetNames,
+    cachedParses,
+  }
+}
+
+export async function applyPairedHeatSheetEntries(
+  userId: string,
+  urls: string[],
+  roster: RosterAthlete[],
+  teamCode: string,
+  existingSummary: unknown,
+  nameMappings: Record<string, string>,
+  cachedByUrl?: Record<string, CachedSheetParse> | null,
+  options?: SheetMatchOptions
+): Promise<ResolveHeatSheetsResult> {
+  if (!isSheetSummary(existingSummary)) {
+    return resolveHeatSheetSummaries(
+      userId,
+      urls,
+      roster,
+      teamCode,
+      { ...options, nameMappings },
+      cachedByUrl
+    )
+  }
+
+  let summary: SheetSummary = existingSummary
+  const sheetNames: string[] = []
+  const cachedParses: Record<string, CachedSheetParse> = {}
+
+  for (const url of urls) {
+    const cached = cachedByUrl?.[url]
+    const parsed = cached?.entries
+      ? {
+          sheetType: "heat" as const,
+          course: cached.course,
+          entries: cached.entries,
+          detectedSheetType: cached.detectedSheetType,
+          meet_name: cached.meet_name,
+        }
+      : await callSheetParser(
+          userId,
+          await fetchMeetFileBytes(url),
+          "heat",
+          teamCode
+        )
+    validateParsedSheet("heat", parsed, options)
+    const allEntries = parsed.entries ?? []
+    sheetNames.push(...collectSheetNames(allEntries))
+    cachedParses[url] = toCachedSheetParse({ ...parsed, sheetType: "heat" })
+
+    const filtered = filterParsedEntriesForPairedNames(allEntries, nameMappings)
+    const newEntries = matchSheetToRoster(filtered, roster, { nameMappings }).map(
+      coercePrelimHeatTimedFinalsEntry
+    )
+    if (newEntries.length === 0) continue
+    summary = appendSheetSummaryEntries(summary, newEntries)
+  }
+
+  return {
+    summary: jsonSafeSheetSummary(summary),
+    sheetNames,
+    cachedParses,
   }
 }
 

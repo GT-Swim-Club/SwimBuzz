@@ -1,6 +1,6 @@
 import { editDistance } from "@/lib/athlete-match"
 
-export type MeetDocType = "psych" | "heat" | "entries" | "results"
+export type MeetDocType = "psych" | "heat" | "entries" | "results" | "packet"
 
 export class MeetImportValidationError extends Error {
   constructor(message: string) {
@@ -14,6 +14,7 @@ const DOC_TYPE_LABELS: Record<MeetDocType, string> = {
   heat: "heat sheet / meet program",
   entries: "entries report",
   results: "results PDF",
+  packet: "meet packet",
 }
 
 const TOKEN_ALIASES: Record<string, string> = {
@@ -233,17 +234,29 @@ export function assertMeetNameMatches(
 }
 
 function isMeetDocType(value: string): value is MeetDocType {
-  return value === "psych" || value === "heat" || value === "entries" || value === "results"
+  return (
+    value === "psych" ||
+    value === "heat" ||
+    value === "entries" ||
+    value === "results" ||
+    value === "packet"
+  )
 }
 
 export function assertDocTypeMatches(
   expected: MeetDocType,
   detected: string | null | undefined
 ): void {
+  if (expected === "entries" && (!detected || detected === "unknown")) {
+    throw new MeetImportValidationError(
+      `Expected an ${DOC_TYPE_LABELS.entries}, but this PDF does not look like one.`
+    )
+  }
   if (!detected || detected === "unknown") return
   if (!isMeetDocType(detected)) return
   if (detected === expected) return
+  const expectedArticle = expected === "entries" ? "an" : "a"
   throw new MeetImportValidationError(
-    `Expected a ${DOC_TYPE_LABELS[expected]}, but the PDF looks like a ${DOC_TYPE_LABELS[detected]}.`
+    `Expected ${expectedArticle} ${DOC_TYPE_LABELS[expected]}, but the PDF looks like a ${DOC_TYPE_LABELS[detected]}.`
   )
 }

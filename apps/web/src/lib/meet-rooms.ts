@@ -1,3 +1,5 @@
+import { formatDateTime } from "@/lib/utils"
+
 export type RoomRosterAthlete = {
   id: string
   name: string
@@ -47,10 +49,10 @@ export function roomWindowStatus(opts: {
     return { open: false, reason: "Roommate preferences are not open yet." }
   }
   if (now < opts.openAt) {
-    return { open: false, reason: `Roommate preferences open ${opts.openAt.toLocaleString()}.` }
+    return { open: false, reason: `Roommate preferences open ${formatDateTime(opts.openAt)}.` }
   }
   if (opts.closeAt && now > opts.closeAt) {
-    return { open: false, reason: `Roommate preferences closed ${opts.closeAt.toLocaleString()}.` }
+    return { open: false, reason: `Roommate preferences closed ${formatDateTime(opts.closeAt)}.` }
   }
   return { open: true, reason: null }
 }

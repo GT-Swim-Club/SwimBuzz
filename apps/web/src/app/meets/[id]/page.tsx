@@ -5,6 +5,7 @@ import Link from "next/link"
 import BackLink from "@/components/BackLink"
 import PageLabelRegistrar from "@/components/PageLabelRegistrar"
 import { formatDateRange } from "@/lib/utils"
+import { formatClockTime } from "@swimbuzz/shared"
 import { Fragment } from "react"
 import ImportMeetButton from "@/app/athletes/ImportMeetButton"
 import ImportMeetResourcesButton from "./ImportMeetResourcesButton"
@@ -29,11 +30,15 @@ import {
   isResultStatusesSummary,
   collectMeetRosterAthleteIds } from "@/lib/meet-sheet-summary"
 import { isRelayResultsSummary } from "@/lib/relay-results"
-import { normalizeFinalsHeatSheetUrls } from "@/lib/meet-files"
+import {
+  normalizeFinalsHeatSheetUrls,
+  normalizeHeatSheetUrls,
+} from "@/lib/meet-files"
 import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete-view-server"
 import { isStaffRole } from "@/lib/auth-roles"
 import { Gender } from "@prisma/client"
 import MeetResourceIcon, { type MeetResourceKind } from "@/components/MeetResourceIcon"
+import FilePreviewButton from "@/components/FilePreview"
 import InfoIcon, { type InfoKind } from "@/components/InfoIcon"
 import { type TravelInfoKind } from "@/components/TravelInfoIcon"
 import TravelInfoButtons, { type TravelInfoItem } from "./TravelInfoButtons"
@@ -43,12 +48,10 @@ import MeetCountdown from "@/components/MeetCountdown"
 import {
   normalizeMeetSignupQuestions,
   normalizeSignupEntryTimes,
-  isRelaySignupEvent,
   resolveSignupEventOptions,
-  resolveEditableSignupSheetKeys } from "@/lib/meet-signup"
+  resolveEditableSignupSheetKeys,
+} from "@/lib/meet-signup"
 import { isSignupAnswers } from "@/lib/meet-signup"
-import MeetRelayBuilder from "./MeetRelayBuilder"
-import { relaySignupKey } from "@/lib/swim-parse"
 import { athletePath, isCuid, meetPath } from "@/lib/slug"
 import StatsHighlights from "@/components/StatsHighlights"
 import { getSession } from "@/lib/session"
@@ -62,21 +65,21 @@ function toDateInput(d: Date | null | undefined): string {
   return new Date(d).toISOString().slice(0, 10)
 }
 
-const RESOURCE_LINKS: { key: keyof MeetLinks; label: string; icon: MeetResourceKind }[] = [
-  { key: "packetUrl", label: "Meet Packet", icon: "packet" },
-  { key: "entriesSheetUrl", label: "Entries", icon: "entries" },
-  { key: "psychSheetUrl", label: "Psych Sheet", icon: "psych" },
-  { key: "heatSheetUrl", label: "Heat Sheet", icon: "heat" },
-  { key: "resultsUrl", label: "Results", icon: "results" },
+const RESOURCE_LINKS: { key: keyof MeetLinks; label: string; icon: MeetResourceKind; forcePdf?: boolean }[] = [
+  { key: "packetUrl", label: "Meet Packet", icon: "packet", forcePdf: true },
+  { key: "entriesSheetUrl", label: "Entries", icon: "entries", forcePdf: true },
+  { key: "psychSheetUrl", label: "Psych Sheet", icon: "psych", forcePdf: true },
+  { key: "swimphoneUrl", label: "SwimPhone Results", icon: "results" },
+  { key: "resultsUrl", label: "Results PDF", icon: "results", forcePdf: true },
   { key: "liveStreamUrl", label: "Live Stream", icon: "liveStream" },
 ]
 
 type MeetLinks = {
   packetUrl: string | null
   psychSheetUrl: string | null
-  heatSheetUrl: string | null
   entriesSheetUrl: string | null
   resultsUrl: string | null
+  swimphoneUrl: string | null
   liveStreamUrl: string | null
 }
 
@@ -133,6 +136,8 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
   if (!meet) notFound()
   if (meet.slug && param !== meet.slug) redirect(meetPath(meet.slug))
 
+  const meetPublicPath = meetPath(meet.slug ?? meet.id)
+
   const viewerAthleteId = await resolveViewerAthleteId(session.user.id, session.user.role)
 
   const results = mergeMeetResultEntries(
@@ -185,19 +190,39 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
   const today = new Date().toISOString().slice(0, 10)
   const meetStartDate = toDateInput(meet.startDate)
   const isBeforeOrToday = meetStartDate <= today
-  const isUpcomingMeet = new Date(meet.endDate ?? meet.startDate).getTime() >= Date.now()
+  const isUpcomingMeet = toDateInput(meet.endDate ?? meet.startDate) >= today
+  const courseLabel = { SCY: "Short course yards", SCM: "Short course meters", LCM: "Long course meters" }[meet.course] ?? meet.course
+  const signupStatus = !meet.signupForm
+    ? "Not set"
+    : !meet.signupForm.openAt || new Date(meet.signupForm.openAt) > new Date()
+      ? "Opens soon"
+      : meet.signupForm.closeAt && new Date(meet.signupForm.closeAt) < new Date()
+        ? "Closed"
+        : "Open"
+  const signupEntryCount = meet.signupForm?.entries.length ?? 0
 
+  const storedHeatSheetLinks = normalizeHeatSheetUrls(meet.heatSheetUrls)
+  const heatSheetLinks =
+    storedHeatSheetLinks ?? (meet.heatSheetUrl ? [{ url: meet.heatSheetUrl }] : [])
   const finalsHeatSheetLinks = normalizeFinalsHeatSheetUrls(meet.finalsHeatSheetUrls) ?? []
   const links = RESOURCE_LINKS.filter((l) => meet[l.key])
+  const resourceLinksBeforeResults = links.filter(
+    (link) => link.key !== "resultsUrl" && link.key !== "swimphoneUrl"
+  )
+  const swimphoneResultsLink = links.find((link) => link.key === "swimphoneUrl")
+  const resultsPdfLink = links.find((link) => link.key === "resultsUrl")
   const eventOrder = isEventOrder(meet.eventOrder) ? meet.eventOrder : null
   const hasResources =
-    links.length > 0 || eventOrder !== null || finalsHeatSheetLinks.length > 0
+    links.length > 0 ||
+    eventOrder !== null ||
+    heatSheetLinks.length > 0 ||
+    finalsHeatSheetLinks.length > 0
   const resourceInitial = {
     teamCode: meet.teamCode ?? "GTSC",
     packetUrl: meet.packetUrl ?? "",
     entriesSheetUrl: meet.entriesSheetUrl ?? "",
     psychSheetUrl: meet.psychSheetUrl ?? "",
-    heatSheetUrl: meet.heatSheetUrl ?? "",
+    heatSheetUrls: heatSheetLinks,
     finalsHeatSheetUrls: finalsHeatSheetLinks,
     liveStreamUrl: meet.liveStreamUrl ?? ""}
   const photosInitial = {
@@ -251,8 +276,6 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
 
   const hasSignupEntries = meet.signupForm ? meet.signupForm.entries.length > 0 : false
   const showSignupSection = !meetHasEnded || hasSignupEntries
-
-  const showRoomSection = !meetHasEnded
 
   const roomForm = meet.roomForm
     ? {
@@ -364,20 +387,10 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
           updatedAt: e.updatedAt.toISOString()}))
       : []
 
-  const signupAthleteIdsByEvent: Record<string, string[]> = {}
   const signupAthleteIds: string[] = []
   for (const entry of meet.signupForm?.entries ?? []) {
     if (!signupAthleteIds.includes(entry.athleteId)) {
       signupAthleteIds.push(entry.athleteId)
-    }
-    for (const ev of entry.events) {
-      if (!isRelaySignupEvent(ev)) continue
-      const key = relaySignupKey(ev)
-      if (!key) continue
-      if (!signupAthleteIdsByEvent[key]) signupAthleteIdsByEvent[key] = []
-      if (!signupAthleteIdsByEvent[key].includes(entry.athleteId)) {
-        signupAthleteIdsByEvent[key].push(entry.athleteId)
-      }
     }
   }
 
@@ -393,11 +406,11 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       signupAthleteIds})
   )
   const meetRosterAthletes = rosterAthletes.filter((a) => meetRosterAthleteIds.has(a.id))
+  const viewerOnMeetRoster =
+    viewerAthleteId != null && meetRosterAthleteIds.has(viewerAthleteId)
+  const showRoomSection = !meetHasEnded && (isCoach || viewerOnMeetRoster)
 
   const signupEventOptions = resolveSignupEventOptions(meet.eventOrder)
-  const relayEventOptions = signupEventOptions
-    .filter((o) => o.isRelay)
-    .map((o) => o.event)
   const individualEventOptions = signupEventOptions
     .filter((o) => !o.isRelay)
     .map((o) => o.event)
@@ -465,38 +478,41 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       <PageLabelRegistrar label={meet.name} />
       <ScrollToHash />
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-        <div className="min-w-0">
+      <div className="space-y-4">
+      <div className="min-w-0">
           <BackLink
             fallbackHref="/meets"
             fallbackLabel="Meets"
-            className="text-xs text-foreground-tertiary hover:text-foreground"
+            className="text-sm font-medium text-foreground-tertiary hover:text-foreground"
           />
-          <div className="mt-1 flex items-center gap-3">
+          <div className="mt-1 flex items-center gap-4 sm:gap-5">
             {meet.iconUrl && (
               <img
                 src={meet.iconUrl}
                 alt={`${meet.name} icon`}
-                className="h-16 w-16 rounded-lg object-cover shrink-0"
+                className="h-20 w-20 rounded-xl object-cover shadow-sm ring-1 ring-border shrink-0"
               />
             )}
-            <div className="min-w-0">
-              <h1 className="text-xl font-medium sm:text-2xl">{meet.name}</h1>
-              <div className="mt-1 space-y-1 text-sm text-foreground-secondary">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between gap-3">
+                <h1 className="min-w-0 text-3xl font-semibold text-foreground sm:text-4xl">{meet.name}</h1>
+                {isCoach && (
+                  <MeetActions
+                    meetId={meet.id}
+                    meetSlug={meet.slug}
+                    initial={initial}
+                    meetName={meet.name}
+                    hasSwims={meet.swims.length > 0 || (relayResults?.length ?? 0) > 0}
+                  />
+                )}
+              </div>
+              <div className="mt-1 text-base text-foreground-secondary sm:text-lg">
                 <div className="flex items-center gap-1.5">
                   <InfoIcon kind="calendar" />
                   {formatDateRange(meet.startDate, meet.endDate)}
-                  {meet.startTime ? ` · ${meet.startTime}` : ""}
+                  {meet.startTime ? ` · ${formatClockTime(meet.startTime)}` : ""}
                 </div>
-                {isUpcomingMeet && meet.startTime && (
-                  <MeetCountdown
-                    startDate={meet.startDate}
-                    startTime={meet.startTime}
-                    upcoming={false}
-                    variant="banner"
-                  />
-                )}
-                <div className="flex flex-wrap items-center gap-x-1.25">
+                <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
                   {meet.location && (
                     <span className="flex items-center gap-1.5">
                       <InfoIcon kind="location" />
@@ -512,24 +528,32 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
             </div>
           </div>
         </div>
-        {isCoach && (
-          <MeetActions
-            meetId={meet.id}
-            meetSlug={meet.slug}
-            initial={initial}
-            meetName={meet.name}
-            hasSwims={meet.swims.length > 0 || (relayResults?.length ?? 0) > 0}
-          />
-        )}
+      {(isUpcomingMeet && meet.startTime) || meetHighlights ? (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch sm:gap-4">
+          {isUpcomingMeet && meet.startTime ? (
+            <MeetCountdown
+              className="min-w-0 sm:flex-1"
+              startDate={meet.startDate}
+              startTime={meet.startTime}
+              upcoming={false}
+              variant="banner"
+            />
+          ) : null}
+          {meetHighlights ? (
+            <StatsHighlights
+              className={
+                isUpcomingMeet && meet.startTime
+                  ? "min-w-0 sm:flex-1"
+                  : "w-full"
+              }
+              title="Highlights"
+              counters={meetHighlights.counters}
+              spotlight={meetHighlights.spotlight}
+            />
+          ) : null}
+        </div>
+      ) : null}
       </div>
-
-      {meetHighlights && (
-        <StatsHighlights
-          title="Highlights"
-          counters={meetHighlights.counters}
-          spotlight={meetHighlights.spotlight}
-        />
-      )}
 
       {/* Resources */}
       {(hasResources || isCoach) && (
@@ -542,53 +566,100 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
               <div className="flex flex-wrap items-center gap-1.5">
                 <ImportMeetResourcesButton meetId={meet.id} initial={resourceInitial} />
                 <Suspense fallback={null}>
-                  <ImportMeetButton meetId={meet.id} season={meet.season} />
+                  <ImportMeetButton
+                    key={`results-${meet.resultsUrl ?? ""}-${meet.swimphoneUrl ?? ""}`}
+                    meetId={meet.id}
+                    season={meet.season}
+                    resultsUrl={meet.resultsUrl ?? ""}
+                    swimphoneUrl={meet.swimphoneUrl ?? ""}
+                  />
                 </Suspense>
               </div>
             )}
           </div>
-          {(hasResources || eventOrder) ? (
-            <div className="flex flex-wrap gap-2">
-              {links.map((l) => (
-                <Fragment key={l.key}>
-                  <a
-                    href={meet[l.key] as string}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill transition-colors"
-                  >
-                    <MeetResourceIcon kind={l.icon} />
-                    {l.label}
-                  </a>
-                  {l.key === "packetUrl" && eventOrder ? (
-                    <EventOrderButton order={eventOrder} />
-                  ) : null}
-                </Fragment>
-              ))}
-              {finalsHeatSheetLinks.map((link, index) => (
-                <a
-                  key={`finals-${index}-${link.url}`}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill transition-colors"
-                >
-                  <MeetResourceIcon kind="heat" />
-                  {link.name?.trim() ||
-                    (finalsHeatSheetLinks.length > 1
-                      ? `Finals Heat Sheet ${index + 1}`
-                      : "Finals Heat Sheet")}
-                </a>
-              ))}
-              {!meet.packetUrl && eventOrder ? (
+      {(hasResources || eventOrder) ? (
+        <div className="flex flex-wrap gap-2">
+          {resourceLinksBeforeResults.map((l) => (
+            <Fragment key={l.key}>
+              <FilePreviewButton
+                url={meet[l.key] as string}
+                title={l.label}
+                forcePdf={l.forcePdf}
+                className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill transition-colors"
+              >
+                <MeetResourceIcon kind={l.icon} />
+                {l.label}
+              </FilePreviewButton>
+              {l.key === "packetUrl" && eventOrder ? (
                 <EventOrderButton order={eventOrder} />
               ) : null}
-            </div>
-          ) : (
-            <p className="text-sm text-foreground-secondary">
-              No resources yet.
-            </p>
-          )}
+            </Fragment>
+          ))}
+          {!meet.packetUrl && eventOrder ? (
+            <EventOrderButton order={eventOrder} />
+          ) : null}
+          {heatSheetLinks.map((link, index) => (
+            <FilePreviewButton
+              key={`heat-${index}-${link.url}`}
+              url={link.url}
+              forcePdf
+              title={
+                link.name?.trim() ||
+                (heatSheetLinks.length > 1 ? `Heat Sheet ${index + 1}` : "Heat Sheet")
+              }
+              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill transition-colors"
+            >
+              <MeetResourceIcon kind="heat" />
+              {link.name?.trim() ||
+                (heatSheetLinks.length > 1 ? `Heat Sheet ${index + 1}` : "Heat Sheet")}
+            </FilePreviewButton>
+          ))}
+          {finalsHeatSheetLinks.map((link, index) => (
+            <FilePreviewButton
+              key={`finals-${index}-${link.url}`}
+              url={link.url}
+              forcePdf
+              title={
+                link.name?.trim() ||
+                (finalsHeatSheetLinks.length > 1
+                  ? `Finals Heat Sheet ${index + 1}`
+                  : "Finals Heat Sheet")
+              }
+              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill transition-colors"
+            >
+              <MeetResourceIcon kind="heat" />
+              {link.name?.trim() ||
+                (finalsHeatSheetLinks.length > 1
+                  ? `Finals Heat Sheet ${index + 1}`
+                  : "Finals Heat Sheet")}
+            </FilePreviewButton>
+          ))}
+          {swimphoneResultsLink ? (
+            <a
+              href={meet[swimphoneResultsLink.key] as string}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill transition-colors"
+            >
+              <MeetResourceIcon kind={swimphoneResultsLink.icon} />
+              {swimphoneResultsLink.label}
+            </a>
+          ) : null}
+          {resultsPdfLink ? (
+            <FilePreviewButton
+              url={meet[resultsPdfLink.key] as string}
+              title={resultsPdfLink.label}
+              forcePdf={resultsPdfLink.forcePdf}
+              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill transition-colors"
+            >
+              <MeetResourceIcon kind={resultsPdfLink.icon} />
+              {resultsPdfLink.label}
+            </FilePreviewButton>
+          ) : null}
+        </div>
+      ) : (
+        <p className="text-sm text-foreground-secondary">No resources yet.</p>
+      )}
         </section>
       )}
 
@@ -621,25 +692,9 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
         </section>
       )}
 
-      {showRoomSection && (
-        <MeetRoomSection
-          meetId={meet.id}
-          isCoach={isCoach}
-          selfAthleteId={viewerAthleteId}
-          athletes={meetRosterAthletes.map((a) => ({
-            id: a.id,
-            name: a.name,
-            gender: a.gender}))}
-          form={roomForm}
-          myPreference={myRoomPreference}
-          preferences={roomPreferences}
-          rooms={roomAssignments}
-          meetHasEnded={meetHasEnded}
-        />
-      )}
-
       {showSignupSection && (
         <MeetSignupSection
+          meetPath={meetPublicPath}
           meetId={meet.id}
           eventOrder={meet.eventOrder}
           course={meet.course}
@@ -657,16 +712,39 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
         />
       )}
 
-      {isCoach && !meetHasEnded && (
-        <MeetRelayBuilder
+      {showRoomSection && (
+        <MeetRoomSection
+          meetPath={meetPublicPath}
           meetId={meet.id}
-          defaultCourse={meet.course}
-          relayEvents={relayEventOptions}
-          athletes={rosterAthletes}
-          signupAthleteIds={signupAthleteIds}
-          signupAthleteIdsByEvent={signupAthleteIdsByEvent}
-          hasImportedResults={hasImportedResults}
+          isCoach={isCoach}
+          selfAthleteId={viewerAthleteId}
+          athletes={meetRosterAthletes.map((a) => ({
+            id: a.id,
+            name: a.name,
+            gender: a.gender}))}
+          form={roomForm}
+          myPreference={myRoomPreference}
+          preferences={roomPreferences}
+          rooms={roomAssignments}
+          meetHasEnded={meetHasEnded}
         />
+      )}
+
+      {isCoach && !meetHasEnded && (
+        <section>
+          <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+            <h2 className="text-sm font-medium uppercase tracking-wide text-foreground-secondary">
+              Relay builder
+            </h2>
+          </div>
+          <Link
+            href={`${meetPublicPath}/relays`}
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm text-primary-text transition-colors hover:bg-primary-hover"
+          >
+            Build relay teams
+            <span aria-hidden="true">→</span>
+          </Link>
+        </section>
       )}
 
       {/* Photos Section */}
@@ -705,6 +783,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
         meetId={meet.id}
         meetName={meet.name}
         athletes={rosterAthletes}
+        rosterAthletes={meetRosterAthletes}
         canEdit={isCoach}
         viewerAthleteId={viewerAthleteId}
         individualEventOptions={individualEventOptions}

@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation"
-import Link from "next/link"
 import { isStaffUi } from "@/lib/athlete-view-server"
 import PracticeEditor from "../PracticeEditor"
 import { getSession } from "@/lib/session"
+import { listManagedPracticeTagNames } from "@/lib/practice-tag-catalog"
 
 export default async function NewPracticePage() {
   const session = await getSession()
@@ -10,19 +10,11 @@ export default async function NewPracticePage() {
 
   const isCoach = await isStaffUi(session.user.role)
   if (!isCoach) redirect("/practices")
+  const availableTags = await listManagedPracticeTagNames()
 
   return (
-    <main className="mx-auto max-w-4xl space-y-6">
-      <div>
-        <Link
-          href="/practices"
-          className="text-xs text-foreground-tertiary dark:text-foreground-tertiary hover:text-foreground-secondary dark:hover:text-foreground-secondary"
-        >
-          ← All practices
-        </Link>
-        <h1 className="mt-1 text-xl font-medium sm:text-2xl">New practice</h1>
-      </div>
-      <PracticeEditor />
+    <main className="mx-auto max-w-4xl">
+      <PracticeEditor availableTags={availableTags} />
     </main>
   )
 }

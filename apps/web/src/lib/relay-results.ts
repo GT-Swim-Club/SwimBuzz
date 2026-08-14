@@ -254,7 +254,10 @@ export function effectiveRelayRound(entry: SheetEntry): RelayRound {
 }
 
 export function relayTeamTime(entry: SheetEntry): string | undefined {
-  return entry.resultTime ?? entry.prelimTime ?? entry.finalTime
+  const round = effectiveRelayRound(entry)
+  if (round === "F") return entry.resultTime ?? entry.finalTime
+  if (round === "P") return entry.resultTime ?? entry.prelimTime
+  return entry.resultTime ?? entry.finalTime ?? entry.prelimTime
 }
 
 export function relayTeamPlace(entry: SheetEntry): number | undefined {

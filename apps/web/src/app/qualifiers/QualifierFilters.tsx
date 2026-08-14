@@ -1,23 +1,22 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { currentSeason, parseSeason, upcomingSeason } from "@/lib/season"
+import { resolveListedSeason, upcomingSeason } from "@/lib/season"
 import Modal, { ModalFooter } from "@/components/Modal"
 
 export default function QualifierFilters({
-              qualifierCount, seasons
+              seasons
 }: {
-  qualifierCount: number, seasons: string[]
+  seasons: string[]
 }) {
   const { data: session } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
   const gender = searchParams.get("gender") ?? "all"
-  const season =
-    parseSeason(searchParams.get("season")) ?? currentSeason()
   const [fetchedSeasons, setFetchedSeasons] = useState<string[]>(seasons)
+  const season = resolveListedSeason(searchParams.get("season"), fetchedSeasons)
   
   const [addSeasonModalOpen, setAddSeasonModalOpen] = useState(false)
   const upcoming = upcomingSeason()
@@ -87,9 +86,6 @@ export default function QualifierFilters({
         ))}
         {session?.user?.role === "COACH" && !fetchedSeasons.includes(upcoming) && <option value="ADD_NEW">+ New Season</option>}
       </select>
-      <span className="text-xs text-foreground-secondary">
-        {qualifierCount} qualifier{qualifierCount === 1 ? "" : "s"}
-      </span>
 
       <Modal
         open={addSeasonModalOpen}

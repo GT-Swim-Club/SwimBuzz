@@ -133,7 +133,7 @@ export default function MeetsClientWrapper({
                   })}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 2xl:grid-cols-5 gap-4">
                   {seasonMeets.map((m: any) => {
                     const end = m.endDate ?? m.startDate
                     const upcoming = new Date(end).getTime() >= now

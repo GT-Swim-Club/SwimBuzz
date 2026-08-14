@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { Alert, Image, Linking, ScrollView, View } from "react-native"
+import { Alert, Image, ScrollView, View } from "react-native"
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router"
-import { formatMeetDateRange, formatTime } from "@swimbuzz/shared"
+import { formatClockTime, formatMeetDateRange, formatTime } from "@swimbuzz/shared"
 import {
   Body,
   Button,
@@ -25,6 +25,7 @@ import {
   RosterSummarySection,
   type RosterSummaryEntry,
 } from "../../../src/components/RosterSummarySection"
+import { FilePreviewModal } from "../../../src/components/FilePreviewModal"
 import { api } from "../../../src/lib/api"
 import { isExternalUrl } from "../../../src/lib/href"
 
@@ -156,7 +157,6 @@ function resourceLinksFromMeet(meet: Record<string, unknown>): ResourceLink[] {
   const singles: Array<[string, string]> = [
     ["Meet packet", "packetUrl"],
     ["Psych sheet", "psychSheetUrl"],
-    ["Heat sheet", "heatSheetUrl"],
     ["Entries sheet", "entriesSheetUrl"],
     ["Results", "resultsUrl"],
     ["Live stream", "liveStreamUrl"],
@@ -165,6 +165,30 @@ function resourceLinksFromMeet(meet: Record<string, unknown>): ResourceLink[] {
     const url = meet[key]
     if (typeof url === "string" && isExternalUrl(url)) {
       links.push({ label, url: url.trim() })
+    }
+  }
+
+  const heatSheets = meet.heatSheetUrls
+  if (Array.isArray(heatSheets)) {
+    heatSheets.forEach((item, index) => {
+      if (typeof item === "string" && isExternalUrl(item)) {
+        links.push({ label: `Heat sheet ${index + 1}`, url: item.trim() })
+        return
+      }
+      const row = asRecord(item)
+      if (!row) return
+      const url = typeof row.url === "string" ? row.url.trim() : ""
+      if (!isExternalUrl(url)) return
+      const name =
+        typeof row.name === "string" && row.name.trim()
+          ? row.name.trim()
+          : `Heat sheet ${index + 1}`
+      links.push({ label: name, url })
+    })
+  } else {
+    const url = meet.heatSheetUrl
+    if (typeof url === "string" && isExternalUrl(url)) {
+      links.push({ label: "Heat sheet", url: url.trim() })
     }
   }
 
@@ -190,10 +214,6 @@ function resourceLinksFromMeet(meet: Record<string, unknown>): ResourceLink[] {
   return links
 }
 
-function openHttpUrl(url: string) {
-  if (!isExternalUrl(url)) return
-  void Linking.openURL(url)
-}
 
 function roomsFromMeet(rooms: Record<string, unknown> | null): DraftRoom[] {
   const roomList = Array.isArray(rooms?.rooms)
@@ -246,6 +266,7 @@ export default function MeetDetailScreen() {
     []
   )
   const [relayLoading, setRelayLoading] = useState(false)
+  const [previewLink, setPreviewLink] = useState<ResourceLink | null>(null)
 
   const load = useCallback(async () => {
     if (!id) return
@@ -333,7 +354,7 @@ export default function MeetDetailScreen() {
   const school = meet.school ? String(meet.school) : null
   const startTime =
     typeof meet.startTime === "string" && meet.startTime.trim()
-      ? meet.startTime.trim()
+      ? formatClockTime(meet.startTime.trim())
       : null
   const iconUrl =
     typeof meet.iconUrl === "string" && isExternalUrl(meet.iconUrl)
@@ -728,7 +749,7 @@ export default function MeetDetailScreen() {
                   key={`${link.label}-${link.url}`}
                   label={link.label}
                   variant="secondary"
-                  onPress={() => openHttpUrl(link.url)}
+                  onPress={() => setPreviewLink(link)}
                 />
               ))}
             </View>
@@ -746,7 +767,7 @@ export default function MeetDetailScreen() {
                 key={`${link.label}-${link.url}`}
                 title={link.label}
                 subtitle="Open album"
-                onPress={() => openHttpUrl(link.url)}
+                onPress={() => setPreviewLink(link)}
               />
             ))}
           </Section>
@@ -782,7 +803,7 @@ export default function MeetDetailScreen() {
                     key={`${link.label}-${link.url}`}
                     label={link.label}
                     variant="secondary"
-                    onPress={() => openHttpUrl(link.url)}
+                    onPress={() => setPreviewLink(link)}
                   />
                 ))}
               </View>
@@ -808,7 +829,7 @@ export default function MeetDetailScreen() {
                     key={`${link.label}-${link.url}`}
                     label={link.label}
                     variant="secondary"
-                    onPress={() => openHttpUrl(link.url)}
+                    onPress={() => setPreviewLink(link)}
                   />
                 ))}
               </View>
@@ -1308,6 +1329,12 @@ export default function MeetDetailScreen() {
           </View>
         ) : null}
       </ScrollView>
+      <FilePreviewModal
+        open={previewLink !== null}
+        title={previewLink?.label ?? "File preview"}
+        url={previewLink?.url ?? ""}
+        onClose={() => setPreviewLink(null)}
+      />
     </Screen>
   )
 }

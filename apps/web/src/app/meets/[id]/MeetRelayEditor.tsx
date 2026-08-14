@@ -510,6 +510,8 @@ export function RelayDetailModal({
 }) {
   const [mounted, setMounted] = useState(false)
   const swimmers = [...(entry.relaySwimmers ?? [])].sort((a, b) => a.leg - b.leg)
+  const isPendingRelay = !rawTime && swimInfo?.resultPlace == null
+
 
   useEffect(() => setMounted(true), [])
 
@@ -543,11 +545,24 @@ export function RelayDetailModal({
         className="relative z-10 flex w-full max-w-md max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="shrink-0 px-6 pt-6 pb-2">
-          <h2 className="text-lg font-medium text-foreground">{title}</h2>
+        <div className="shrink-0 px-6 pt-5 pb-3">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">{title}</h2>
           {(rawTime || timeDisplay) ? (
-            <div className="mt-2 flex items-center gap-2">
+            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="text-foreground font-mono text-lg">{rawTime ?? timeDisplay}</span>
+              {isPendingRelay && swimInfo?.heat && (
+                <span className="flex items-center gap-1.5 text-sm text-foreground-secondary">
+                  <span className="text-foreground-tertiary">Heat</span>{" "}
+                  {swimInfo.heat}
+                </span>
+              )}
+              {isPendingRelay && swimInfo?.lane != null && (
+                <span className="flex items-center gap-1.5 text-sm text-foreground-secondary">
+                  <span className="text-foreground-tertiary">Lane</span>{" "}
+                  {swimInfo.lane}
+                </span>
+              )}
+
               {(() => {
                 const delta = swimInfo?.seedTime && rawTime ? formatSeedTimeDelta(swimInfo.seedTime, rawTime) : null;
                 if (!delta) return null;
@@ -569,8 +584,8 @@ export function RelayDetailModal({
               )}
             </div>
           ) : null}
-          {swimInfo && (
-            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-foreground-secondary">
+          {!isPendingRelay && swimInfo && (
+            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-foreground-secondary">
               {swimInfo.seedTime && (
                 <span className="flex items-center gap-1.5">
                   <span className="text-foreground-tertiary">Seed:</span>
@@ -587,8 +602,9 @@ export function RelayDetailModal({
           ) : null}
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
-          <ul className="divide-y divide-border border border-border rounded-lg overflow-hidden">
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-3 empty:flex-none empty:h-2 empty:p-0">
+          {(!isPendingRelay || swimmers.length > 0) && (
+            <ul className="divide-y divide-border border border-border rounded-lg overflow-hidden">
           <li className="grid grid-cols-[2rem_1fr_auto] gap-2 px-3 py-2 text-xs font-medium uppercase tracking-wide text-foreground-tertiary dark:text-foreground-tertiary dark:bg-background bg-fill-secondary/50">
             <span>#</span>
             <span>Swimmer</span>
@@ -627,14 +643,15 @@ export function RelayDetailModal({
               </li>
             )
           })}
-        </ul>
+            </ul>
+          )}
         </div>
 
-        <div className="shrink-0 border-t border-border-secondary px-6 py-4">
+        <div className="shrink-0 border-t border-border px-6 py-3">
         <button
           type="button"
           onClick={onClose}
-          className="w-full rounded-lg border border-border px-4 py-2.5 text-sm font-medium bg-background hover:bg-fill"
+          className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-fill"
         >
           Close
         </button>

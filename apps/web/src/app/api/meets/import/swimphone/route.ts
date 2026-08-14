@@ -151,7 +151,7 @@ export async function POST(req: Request) {
     if (meet?.id) {
       await prisma.meet.update({
         where: { id: meet.id },
-        data: { resultsUrl: meetUrl }})
+        data: { swimphoneUrl: meetUrl }})
       if (summary.imported > 0) {
         void notifyMeetRosterOfInfoDrops({
           meetId: meet.id,

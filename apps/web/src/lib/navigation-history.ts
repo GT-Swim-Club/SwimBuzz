@@ -35,7 +35,18 @@ export function getBackTarget(path: string): BackTarget | null {
 /** True when leaving `from` for `to` via back (browser or in-app). */
 export function isBackNavigation(from: string, to: string): boolean {
   const target = getBackTarget(from)
-  return target?.href === to
+  if (target?.href === to) return true
+  if (target && pathnameOf(target.href) === pathnameOf(to)) return true
+
+  const fromPath = pathnameOf(from)
+  const toPath = pathnameOf(to)
+
+  if (isMeetSubpagePath(fromPath)) {
+    const parent = meetBasePath(fromPath)
+    if (parent && toPath === parent) return true
+  }
+
+  return false
 }
 
 export function setBackTarget(path: string, target: BackTarget) {
@@ -46,6 +57,37 @@ export function setBackTarget(path: string, target: BackTarget) {
 
 export function isSafeInternalPath(path: string): boolean {
   return path.startsWith("/") && !path.startsWith("//")
+}
+
+const MEET_SUBPAGE_RE = /^\/meets\/[^/]+\/(signups|roommates|roommate|signup)$/
+
+export function pathnameOf(path: string): string {
+  return path.split("?")[0] ?? path
+}
+
+export function meetBasePath(path: string): string | null {
+  const match = pathnameOf(path).match(/^(\/meets\/[^/]+)/)
+  return match?.[1] ?? null
+}
+
+export function isMeetSubpagePath(path: string): boolean {
+  return MEET_SUBPAGE_RE.test(pathnameOf(path))
+}
+
+function meetSubpageKind(path: string): string | null {
+  const match = pathnameOf(path).match(/^\/meets\/[^/]+\/(signups|roommates|roommate|signup)$/)
+  return match?.[1] ?? null
+}
+
+/** Slug canonicalization for the same meet subpage (e.g. id URL → slug URL). */
+export function isSameLogicalPage(from: string, to: string): boolean {
+  const fromPath = pathnameOf(from)
+  const toPath = pathnameOf(to)
+  if (fromPath === toPath) return true
+
+  const fromKind = meetSubpageKind(fromPath)
+  const toKind = meetSubpageKind(toPath)
+  return fromKind !== null && fromKind === toKind
 }
 
 /** Human-readable label for a back-navigation target. */
