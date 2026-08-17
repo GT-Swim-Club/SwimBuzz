@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { type KeyboardEvent, useEffect, useRef, useState } from "react"
+import { type AnimationEvent, type KeyboardEvent, useEffect, useRef, useState } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { PRACTICE_TAG_MAX_COUNT, PRACTICE_TAG_NAME_MAX_LENGTH } from "@/lib/practice-tags"
 import Modal, { ModalFooter } from "@/components/Modal"
@@ -23,9 +23,11 @@ export default function PracticeTagManager({
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const draftInputRef = useRef<HTMLInputElement>(null)
+  const closingDraftRef = useRef(false)
   const [tags, setTags] = useState(initialTags)
   const [draft, setDraft] = useState("")
   const [adding, setAdding] = useState(false)
+  const [draftMounted, setDraftMounted] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [pendingRemoval, setPendingRemoval] = useState<PracticeTag | null>(null)
@@ -53,16 +55,34 @@ export default function PracticeTagManager({
 
   function beginTag() {
     if (saving) return
+    closingDraftRef.current = false
     setStatus(null)
     setDraft("")
+    setDraftMounted(true)
     setAdding(true)
+  }
+
+  function closeDraft() {
+    closingDraftRef.current = true
+    draftInputRef.current?.blur()
+    setAdding(false)
   }
 
   function cancelDraft() {
     if (saving) return
-    setDraft("")
     setStatus(null)
-    setAdding(false)
+    closeDraft()
+  }
+
+  function handleDraftAnimationEnd(event: AnimationEvent<HTMLSpanElement>) {
+    if (
+      event.currentTarget === event.target &&
+      !adding &&
+      event.animationName === "practice-tag-form-close"
+    ) {
+      setDraft("")
+      setDraftMounted(false)
+    }
   }
 
   async function saveDraft() {
@@ -80,8 +100,7 @@ export default function PracticeTagManager({
       const data = await response.json()
       if (!response.ok) throw new Error(data.error ?? "Unable to save tag")
       setTags((current) => [...current, data].sort((a, b) => a.name.localeCompare(b.name)))
-      setDraft("")
-      setAdding(false)
+      closeDraft()
       router.refresh()
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Unable to save tag")
@@ -183,10 +202,12 @@ export default function PracticeTagManager({
             </span>
           )
         })}
-        {isCoach && tags.length < PRACTICE_TAG_MAX_COUNT && (adding ? (
+        {isCoach && (tags.length < PRACTICE_TAG_MAX_COUNT || draftMounted) && (draftMounted ? (
           <span
-            className="relative inline-flex items-center"
+            className={`practice-tag-form-${adding ? "open" : "close"} relative inline-flex items-center ${adding ? "" : "pointer-events-none"}`}
+            onAnimationEnd={handleDraftAnimationEnd}
             onBlur={(event) => {
+              if (closingDraftRef.current) return
               const nextTarget = event.relatedTarget
               if (nextTarget instanceof Node && event.currentTarget.contains(nextTarget)) return
               cancelDraft()

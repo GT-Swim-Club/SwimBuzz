@@ -212,7 +212,6 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
           className="w-full"
           title={`${athleteHighlights.season} highlights`}
           counters={athleteHighlights.counters}
-          spotlight={athleteHighlights.spotlight}
         />
       )}
 

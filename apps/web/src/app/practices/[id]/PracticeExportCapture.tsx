@@ -39,7 +39,7 @@ export default function PracticeExportCapture({
   const hasFocus = Boolean(focus && !isHtmlEmpty(focus))
 
   return (
-    <div className="w-[896px] space-y-5 bg-background p-8 text-foreground">
+    <div className="w-[896px] space-y-5 bg-background p-8 text-base text-foreground">
       <div>
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="min-w-0 text-4xl font-semibold text-foreground">
@@ -70,9 +70,9 @@ export default function PracticeExportCapture({
         </div>
       </div>
       {(hasFocus || tags.length > 0) && (
-        <div className="rounded-2xl border-l-[3px] border-l-primary bg-background px-5 py-4 text-sm text-foreground">
+        <div className="rounded-2xl border-l-[3px] border-l-primary bg-background px-5 py-4 text-foreground">
           {hasFocus && focus && (
-            <FormattedText text={focus} className="text-foreground" />
+            <FormattedText text={focus} className="text-base text-foreground" />
           )}
           {tags.length > 0 && (
             <div className={hasFocus ? "mt-3 flex flex-wrap gap-2" : "flex flex-wrap gap-2"}>
@@ -103,7 +103,7 @@ export default function PracticeExportCapture({
                 )}
               </div>
               <div className="mt-1">
-                <FormattedText text={set.content} />
+                <FormattedText text={set.content} className="text-base" />
               </div>
             </section>
           ))}

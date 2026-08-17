@@ -5,6 +5,8 @@ const compression = require("compression")
 const { startSignupMonitor } = require("./signup-status-monitor")
 const { startNotificationCleanupMonitor } = require("./notification-cleanup-monitor")
 
+// Dev / optional long-lived process only. Production on Vercel uses stock
+// `next start` (see package.json `start`) plus HTTP cron routes.
 const dev = process.env.NODE_ENV !== "production"
 const hostname = process.env.HOSTNAME ?? "0.0.0.0"
 const port = parseInt(process.env.PORT ?? "3000", 10)

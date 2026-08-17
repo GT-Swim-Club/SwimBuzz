@@ -13,6 +13,7 @@ import { normalizeTag } from "@/lib/practice-tags"
 import { listManagedPracticeTags } from "@/lib/practice-tag-catalog"
 import PracticeViewToggle from "./PracticeViewToggle"
 import PracticeTagManager from "./PracticeTagManager"
+import PracticeWeekGrid from "./PracticeWeekGrid"
 import {
   DayLabel,
   PracticeCardShell,
@@ -371,8 +372,8 @@ export default async function PracticesPage({
 
   return (
     <ViewNavigationProvider>
-      <main className="space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <main className={activeView === "week" ? "flex w-full flex-col gap-6 md:h-[calc(100dvh-10.5rem)]" : "space-y-6"}>
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
           <h1 className="text-3xl font-semibold text-foreground">Practices</h1>
           <div className="flex items-center gap-2">
             {viewToggle}
@@ -401,7 +402,7 @@ export default async function PracticesPage({
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="shrink-0 space-y-3">
         <Suspense fallback={null}>
           <LiveSearch pathname="/practices" placeholder="Search practices and sets…" />
         </Suspense>
@@ -411,8 +412,8 @@ export default async function PracticesPage({
 
       <ViewNavPanel>
       {activeView === "week" ? (
-        <section className="space-y-3">
-          <div className="flex items-center justify-between gap-2 sm:gap-3">
+        <section className="flex min-h-0 flex-1 flex-col gap-3">
+          <div className="flex shrink-0 items-center justify-between gap-2 sm:gap-3">
             <div className="flex items-center gap-1.5 sm:gap-2">
               <Link
                 href={buildHref({ week: formatDayParam(addUtcDays(weekStart, -7)) })}
@@ -470,22 +471,22 @@ export default async function PracticesPage({
           </div>
 
           {/* Desktop: 7-column week grid */}
-          <div className="hidden overflow-hidden rounded-xl border border-border-secondary bg-background border-border-secondary md:block">
-            <div className="grid grid-cols-7 border-b border-border-secondary bg-fill-secondary text-center text-xs font-medium uppercase tracking-wide text-foreground-secondary">
+          <div className="hidden min-h-0 overflow-hidden rounded-xl border border-border-secondary bg-background md:flex md:flex-1 md:flex-col">
+            <div className="grid shrink-0 grid-cols-7 border-b border-border-secondary bg-fill-secondary text-center text-xs font-medium uppercase tracking-wide text-foreground-secondary">
               {WEEKDAYS.map((weekday) => (
                 <div key={weekday} className="px-2 py-2">
                   {weekday}
                 </div>
               ))}
             </div>
-            <div className="grid grid-cols-7">
+            <PracticeWeekGrid>
                 {weekDays.map((date) => {
                   const key = dayKey(date)
                   const practices = practicesByDay.get(key) || []
                   return (
                     <div
                       key={key}
-                      className="flex min-h-[18rem] flex-col border-b border-r border-border-secondary p-1.5 last:border-r-0"
+                      className="flex min-h-0 flex-col overflow-y-auto border-b border-r border-border-secondary p-1.5 last:border-r-0"
                     >
                       {renderPracticeCell({
                         dayKey: key,
@@ -495,7 +496,7 @@ export default async function PracticesPage({
                     </div>
                   )
                 })}
-            </div>
+            </PracticeWeekGrid>
           </div>
         </section>
       ) : activeView === "month" ? (

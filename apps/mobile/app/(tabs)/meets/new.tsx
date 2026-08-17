@@ -1,21 +1,23 @@
 import { useCallback, useState } from "react"
-import { Alert, ScrollView, View } from "react-native"
+import { Alert, View } from "react-native"
 import { useFocusEffect, useRouter } from "expo-router"
 import {
   Button,
   Chip,
   Screen,
+  ScrollView,
   TextField,
-  Title,
 } from "@swimbuzz/ui"
 import { spacing } from "@swimbuzz/tokens"
 import { DateSelector } from "../../../src/components/DateTimeSelector"
 import { api } from "../../../src/lib/api"
+import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 
 const COURSES = ["SCY", "LCM"] as const
 
 export default function NewMeetScreen() {
   const router = useRouter()
+  const tabBarPad = useTabBarScrollPadding()
   const [name, setName] = useState("")
   const [location, setLocation] = useState("")
   const [startDate, setStartDate] = useState("")
@@ -86,8 +88,7 @@ export default function NewMeetScreen() {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
-        <Title>New meet</Title>
+      <ScrollView contentContainerStyle={{ paddingBottom: tabBarPad }}>
         <TextField
           label="Name"
           value={name}

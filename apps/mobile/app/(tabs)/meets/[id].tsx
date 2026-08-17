@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { Alert, Image, ScrollView, View } from "react-native"
+import { Alert, Image, View } from "react-native"
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router"
-import { formatClockTime, formatMeetDateRange, formatTime } from "@swimbuzz/shared"
+import { formatClockTime, formatMeetDateRange, formatTime, isHtmlEmpty, type IconName } from "@swimbuzz/shared"
 import {
   Body,
   Button,
@@ -12,9 +12,11 @@ import {
   MetaRow,
   Muted,
   Screen,
+  ScrollView,
   Section,
   TextField,
   Title,
+  usePalette,
 } from "@swimbuzz/ui"
 import { spacing } from "@swimbuzz/tokens"
 import {
@@ -27,6 +29,9 @@ import {
 } from "../../../src/components/RosterSummarySection"
 import { FilePreviewModal } from "../../../src/components/FilePreviewModal"
 import { api } from "../../../src/lib/api"
+import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
+import { FormattedText } from "../../../src/components/FormattedText"
+import { Icon } from "../../../src/components/Icon"
 import { isExternalUrl } from "../../../src/lib/href"
 
 type ResourceLink = { label: string; url: string }
@@ -214,6 +219,27 @@ function resourceLinksFromMeet(meet: Record<string, unknown>): ResourceLink[] {
   return links
 }
 
+function resourceIconName(label: string): IconName {
+  const value = label.toLowerCase()
+  if (value.includes("packet")) return "packet"
+  if (value.includes("psych")) return "psych"
+  if (value.includes("entries")) return "entries"
+  if (value.includes("result")) return "trophy"
+  if (value.includes("live")) return "liveStream"
+  if (value.includes("heat")) return "heat"
+  if (value.includes("photo")) return "photos"
+  return "fileText"
+}
+
+function travelIconName(label: string): IconName {
+  const value = label.toLowerCase()
+  if (value.includes("hotel")) return "hotel"
+  if (value.includes("packing")) return "packingList"
+  if (value.includes("itinerary")) return "itinerary"
+  if (value.includes("room")) return "rooms"
+  if (value.includes("ride")) return "rideSignUps"
+  return "fileText"
+}
 
 function roomsFromMeet(rooms: Record<string, unknown> | null): DraftRoom[] {
   const roomList = Array.isArray(rooms?.rooms)
@@ -239,6 +265,8 @@ function roomsFromMeet(rooms: Record<string, unknown> | null): DraftRoom[] {
 export default function MeetDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
+  const c = usePalette()
+  const tabBarPad = useTabBarScrollPadding()
   const [meet, setMeet] = useState<Record<string, unknown> | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -266,10 +294,14 @@ export default function MeetDetailScreen() {
     []
   )
   const [relayLoading, setRelayLoading] = useState(false)
+  const [savingRelayKey, setSavingRelayKey] = useState<string | null>(null)
   const [previewLink, setPreviewLink] = useState<ResourceLink | null>(null)
 
   const load = useCallback(async () => {
-    if (!id) return
+    if (!id) {
+      setLoading(false)
+      return
+    }
     setError(null)
     try {
       const data = await api.getMeet(id)
@@ -340,7 +372,6 @@ export default function MeetDetailScreen() {
   if (!meet) {
     return (
       <Screen>
-        <Title>Meet</Title>
         <ErrorBlock message={error ?? "Not found"} />
       </Screen>
     )
@@ -379,7 +410,7 @@ export default function MeetDetailScreen() {
     ["Itinerary", meet.itinerary],
   ]
   const travelPresent = travelFields.filter(
-    ([, value]) => typeof value === "string" && value.trim()
+    ([, value]) => typeof value === "string" && !isHtmlEmpty(value)
   )
   const travelLinks: ResourceLink[] = []
   if (isExternalUrl(rideSignUpsUrl)) {
@@ -655,6 +686,76 @@ export default function MeetDetailScreen() {
     }
   }
 
+  async function saveSuggestedRelay(team: Record<string, unknown>, index: number) {
+    if (!id) return
+    const relayKey = String(team.letter ?? String.fromCharCode(65 + index))
+    const legs = Array.isArray(team.legs)
+      ? (team.legs as Array<Record<string, unknown>>)
+      : []
+    const relayLegs = legs
+      .map((leg, legIndex) => ({
+        leg: legIndex + 1,
+        athleteId: String(leg.athleteId ?? "").trim(),
+      }))
+      .filter((leg) => leg.athleteId)
+    if (relayLegs.length !== 4) {
+      Alert.alert("Cannot save relay", "A relay must contain four athletes.")
+      return
+    }
+    setSavingRelayKey(relayKey)
+    try {
+      const totalMs = typeof team.totalMs === "number" ? team.totalMs : null
+      await api.saveRelayTeam(id, {
+        event: relayEvent.trim(),
+        gender: relayGender,
+        relayLetter: relayKey,
+        relayRound: "",
+        ...(totalMs != null ? { seedTime: formatTime(totalMs) } : {}),
+        legs: relayLegs,
+      })
+      await load()
+      Alert.alert("Relay saved", `${relayKey} relay was added to the meet roster.`)
+    } catch (err) {
+      Alert.alert(
+        "Could not save relay",
+        err instanceof Error ? err.message : "Something went wrong"
+      )
+    } finally {
+      setSavingRelayKey(null)
+    }
+  }
+
+  async function deleteSavedRelay(entry: Record<string, unknown>, index: number) {
+    if (!id) return
+    const event = String(entry.event ?? "").trim()
+    const relayLetter = String(entry.relayLetter ?? "").trim()
+    const relayRound = String(entry.relayRound ?? "").trim()
+    const gender = String(entry.gender ?? "").trim()
+    const relayKey = `${event}:${relayLetter}:${relayRound}:${gender || index}`
+    if (!event) {
+      Alert.alert("Cannot remove relay", "The relay event is missing.")
+      return
+    }
+    setSavingRelayKey(relayKey)
+    try {
+      await api.deleteRelayTeam(id, {
+        event,
+        relayLetter,
+        relayRound,
+        gender,
+      })
+      await load()
+      Alert.alert("Relay removed", "The relay was removed from the meet roster.")
+    } catch (err) {
+      Alert.alert(
+        "Could not remove relay",
+        err instanceof Error ? err.message : "Something went wrong"
+      )
+    } finally {
+      setSavingRelayKey(null)
+    }
+  }
+
   function confirmDeleteMeet() {
     if (!id) return
     Alert.alert(
@@ -695,11 +796,15 @@ export default function MeetDetailScreen() {
   const roomList = Array.isArray(rooms?.rooms)
     ? (rooms.rooms as Array<Record<string, unknown>>)
     : []
+  const relaySummary = asRecord(meet?.relayResultsSummary)
+  const savedRelayEntries = Array.isArray(relaySummary?.entries)
+    ? (relaySummary.entries as Array<Record<string, unknown>>)
+    : []
   const showRoomsSection = Boolean(rooms?.show) || (isStaff && Boolean(roomsForm))
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: tabBarPad }}>
         <View
           style={{
             flexDirection: "row",
@@ -747,6 +852,7 @@ export default function MeetDetailScreen() {
               {resources.map((link) => (
                 <Button
                   key={`${link.label}-${link.url}`}
+                  icon={<Icon color={c.text} name={resourceIconName(link.label)} size={16} />}
                   label={link.label}
                   variant="secondary"
                   onPress={() => setPreviewLink(link)}
@@ -765,6 +871,7 @@ export default function MeetDetailScreen() {
             {photoLinks.map((link) => (
               <ListRow
                 key={`${link.label}-${link.url}`}
+                left={<Icon color={c.textTertiary} name="photos" size={16} />}
                 title={link.label}
                 subtitle="Open album"
                 onPress={() => setPreviewLink(link)}
@@ -818,8 +925,11 @@ export default function MeetDetailScreen() {
           <Section title="Travel">
             {travelPresent.map(([label, value]) => (
               <View key={label} style={{ marginBottom: spacing.sm }}>
-                <Body style={{ fontWeight: "700" }}>{label}</Body>
-                <Body>{String(value).trim()}</Body>
+                <View style={{ alignItems: "center", flexDirection: "row", gap: 6 }}>
+                  <Icon color={c.textTertiary} name={travelIconName(label)} size={16} />
+                  <Body style={{ fontWeight: "700" }}>{label}</Body>
+                </View>
+                <FormattedText html={String(value)} />
               </View>
             ))}
             {travelLinks.length > 0 ? (
@@ -1265,6 +1375,54 @@ export default function MeetDetailScreen() {
               Build optimal lineups from SwimCloud times for athletes signed up
               or on the season roster.
             </Muted>
+            {savedRelayEntries.length > 0 ? (
+              <View style={{ marginBottom: spacing.md }}>
+                <Muted style={{ marginBottom: spacing.xs }}>
+                  Saved on the meet roster
+                </Muted>
+                {savedRelayEntries.map((entry, index) => {
+                  const event = String(entry.event ?? "Relay")
+                  const relayLetter = String(
+                    entry.relayLetter ?? String.fromCharCode(65 + index)
+                  )
+                  const relayRound = String(entry.relayRound ?? "")
+                  const gender = String(entry.gender ?? "")
+                  const relayKey = `${event}:${relayLetter}:${relayRound}:${gender || index}`
+                  const swimmers = Array.isArray(entry.relaySwimmers)
+                    ? (entry.relaySwimmers as Array<Record<string, unknown>>)
+                    : []
+                  const swimmerNames = swimmers
+                    .map((swimmer) => {
+                      return String(
+                        swimmer.name ?? swimmer.athleteName ?? swimmer.athleteId ?? ""
+                      )
+                    })
+                    .filter(Boolean)
+                    .join(" · ")
+                  const seed = String(entry.seedTime ?? entry.resultTime ?? "")
+                  return (
+                    <ListRow
+                      key={relayKey}
+                      right={
+                        entry.manual ? (
+                          <Button
+                            disabled={
+                              savingRelayKey !== null && savingRelayKey !== relayKey
+                            }
+                            label="Remove"
+                            loading={savingRelayKey === relayKey}
+                            variant="danger"
+                            onPress={() => void deleteSavedRelay(entry, index)}
+                          />
+                        ) : undefined
+                      }
+                      subtitle={[seed, swimmerNames].filter(Boolean).join(" — ")}
+                      title={`${relayLetter} · ${event}`}
+                    />
+                  )
+                })}
+              </View>
+            ) : null}
             <TextField
               label="Relay event"
               value={relayEvent}
@@ -1299,20 +1457,33 @@ export default function MeetDetailScreen() {
                 : []
               const totalMs =
                 typeof team.totalMs === "number" ? team.totalMs : null
+              const relayKey = String(
+                team.letter ?? String.fromCharCode(65 + index)
+              )
               return (
-                <ListRow
-                  key={String(team.letter ?? index)}
-                  title={`${String(team.letter ?? String.fromCharCode(65 + index))} relay`}
-                  subtitle={[
-                    totalMs != null ? formatTime(totalMs) : null,
-                    legs
-                      .map((leg) => String(leg.name ?? leg.athleteId ?? ""))
+                <View key={relayKey} style={{ marginBottom: spacing.sm }}>
+                  <ListRow
+                    title={`${relayKey} relay`}
+                    subtitle={[
+                      totalMs != null ? formatTime(totalMs) : null,
+                      legs
+                        .map((leg) => String(leg.name ?? leg.athleteId ?? ""))
+                        .filter(Boolean)
+                        .join(" · "),
+                    ]
                       .filter(Boolean)
-                      .join(" · "),
-                  ]
-                    .filter(Boolean)
-                    .join(" — ")}
-                />
+                      .join(" — ")}
+                  />
+                  <Button
+                    disabled={
+                      savingRelayKey !== null && savingRelayKey !== relayKey
+                    }
+                    label={`Add ${relayKey} relay to roster`}
+                    loading={savingRelayKey === relayKey}
+                    variant="secondary"
+                    onPress={() => void saveSuggestedRelay(team, index)}
+                  />
+                </View>
               )
             })}
           </Section>

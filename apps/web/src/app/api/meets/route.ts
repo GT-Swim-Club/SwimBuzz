@@ -10,13 +10,16 @@ import {
 import { uniqueMeetSlug } from "@/lib/slug"
 import { getSession } from "@/lib/session"
 
+export const runtime = "nodejs"
+export const maxDuration = 300
+
 export async function GET() {
   const session = await getSession()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const meets = await prisma.meet.findMany({
     orderBy: { startDate: "desc" },
-    include: { _count: { select: { swims: true } } }})
+    include: { _count: { select: { swims: true } }}})
 
   return NextResponse.json(meets)
 }

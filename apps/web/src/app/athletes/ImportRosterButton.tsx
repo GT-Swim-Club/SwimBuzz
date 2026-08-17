@@ -8,6 +8,8 @@ import Modal, { ModalFooter } from "@/components/Modal"
 import { useScraperUi } from "@/components/ScraperUiProvider"
 import { useImportTask } from "@/components/ImportTaskProvider"
 import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/FileDropzone"
+import { SegmentedToggle, segmentedOptionClass } from "@/components/SegmentedToggle"
+import { runScraperEnqueuePollFinalize } from "@/lib/scraper-job-client"
 
 type ImportSource = "swimcloud" | "csv"
 
@@ -54,17 +56,29 @@ export default function ImportRosterButton() {
           startTask(
             "Importing roster (SwimCloud)…",
             (async () => {
-              const res = await fetch("/api/roster/sync", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  season: season_,
-                  year: seasonEndYear(season_),
-                  gender: gender_,
-                }),
+              const data = await runScraperEnqueuePollFinalize<{
+                linked?: number
+                updated?: number
+                unmatched?: number
+                skippedConflict?: number
+              }>({
+                enqueue: () =>
+                  fetch("/api/roster/sync", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      season: season_,
+                      year: seasonEndYear(season_),
+                      gender: gender_,
+                    }),
+                  }),
+                finalize: (jobId) =>
+                  fetch("/api/roster/sync/finalize", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ jobId }),
+                  }),
               })
-              const data = await res.json()
-              if (!res.ok) throw new Error(data.error ?? "Import failed")
               const linked = data.linked ?? data.updated ?? 0
               const parts: string[] = [`Imported SwimCloud IDs on ${linked} athlete${linked === 1 ? "" : "s"}`]
               if ((data.unmatched ?? 0) > 0)
@@ -148,7 +162,11 @@ export default function ImportRosterButton() {
         title="Import Roster"
         description={modalDescription}
         header={
-          <div className="mt-4 flex rounded-lg border border-border-secondary p-0.5 bg-background">
+          <SegmentedToggle
+            selectedIndex={source === "swimcloud" ? 1 : 0}
+            fullWidth
+            className="mt-4 rounded-lg border border-border-secondary bg-background"
+          >
             {(
               [
                 ["csv", "CSV", "icon"] as const,
@@ -162,11 +180,7 @@ export default function ImportRosterButton() {
                   setSource(value)
                   setError(null)
                 }}
-                className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                  source === value
-                    ? "bg-primary text-primary-text shadow-sm"
-                    : "text-foreground-secondary dark:text-foreground-secondary hover:text-foreground dark:hover:text-foreground"
-                }`}
+                className={segmentedOptionClass(source === value) + " text-xs"}
               >
                 {adornment === "logo" && (
                     <Image
@@ -200,7 +214,7 @@ export default function ImportRosterButton() {
                 {label}
               </button>
             ))}
-          </div>
+          </SegmentedToggle>
         }
         onSubmit={handleSubmit}
         footer={

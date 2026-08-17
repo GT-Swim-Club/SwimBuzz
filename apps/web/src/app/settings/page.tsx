@@ -13,20 +13,12 @@ import { parsePendingProfileChanges } from "@/lib/pending-profile-changes"
 import { prisma } from "@/lib/prisma"
 import { athletePath } from "@/lib/slug"
 import { getSession } from "@/lib/session"
+import { AppIcon } from "@/components/AppIcon"
 
 export const metadata = {
   title: "Settings — SwimBuzz"}
 
-const sectionIconProps = {
-  xmlns: "http://www.w3.org/2000/svg",
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 2,
-  strokeLinecap: "round" as const,
-  strokeLinejoin: "round" as const,
-  className: "h-4 w-4 shrink-0 text-foreground-tertiary",
-  "aria-hidden": true as const}
+const sectionIconClass = "h-4 w-4 shrink-0 text-foreground-tertiary"
 
 export default async function SettingsPage() {
   const session = await getSession()
@@ -67,10 +59,7 @@ export default async function SettingsPage() {
         <section className="rounded-xl border border-border-secondary">
           <div className="border-b border-border-secondary px-4 py-3">
             <h2 className="flex items-center gap-2 text-sm font-medium text-foreground">
-              <svg {...sectionIconProps}>
-                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
+              <AppIcon name="user" className={sectionIconClass} />
               Account
             </h2>
           </div>
@@ -105,13 +94,7 @@ export default async function SettingsPage() {
         <section className="rounded-xl border border-border-secondary">
           <div className="flex items-center justify-between gap-4 border-b border-border-secondary px-4 py-3">
             <h2 className="flex items-center gap-2 text-sm font-medium text-foreground">
-              <svg {...sectionIconProps}>
-                <rect width="18" height="18" x="3" y="3" rx="2" />
-                <circle cx="9" cy="9" r="2" />
-                <path d="M15 7h2" />
-                <path d="M15 11h2" />
-                <path d="M7 15h10" />
-              </svg>
+              <AppIcon name="idCard" className={sectionIconClass} />
               Profile
             </h2>
             {athlete ? (
@@ -180,10 +163,7 @@ export default async function SettingsPage() {
         <section className="rounded-xl border border-border-secondary">
           <div className="border-b border-border-secondary px-4 py-3">
             <h2 className="flex items-center gap-2 text-sm font-medium text-foreground">
-              <svg {...sectionIconProps}>
-                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-              </svg>
+              <AppIcon name="bell" className={sectionIconClass} />
               Notifications
             </h2>
             <p className="mt-0.5 text-xs text-foreground-secondary">
@@ -199,13 +179,7 @@ export default async function SettingsPage() {
         <section className="rounded-xl border border-border-secondary">
           <div className="border-b border-border-secondary px-4 py-3">
             <h2 className="flex items-center gap-2 text-sm font-medium text-foreground">
-              <svg {...sectionIconProps}>
-                <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
-                <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
-                <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" />
-                <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
-                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
-              </svg>
+              <AppIcon name="palette" className={sectionIconClass} />
               Appearance
             </h2>
           </div>

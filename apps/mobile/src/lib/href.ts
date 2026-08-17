@@ -23,7 +23,7 @@ export function resolveAppHref(href: string | null | undefined): Href | null {
   const [pathname, query = ""] = normalized.split("?")
   const qs = query ? `?${query}` : ""
 
-  if (pathname === "/" || pathname === "") return "/(tabs)"
+  if (pathname === "/" || pathname === "") return "/(tabs)/practices"
   if (pathname === "/qualifiers" || pathname.startsWith("/qualifiers/")) {
     return `/(tabs)/nationals${qs}` as Href
   }
@@ -49,10 +49,10 @@ export function resolveAppHref(href: string | null | undefined): Href | null {
     if (id) return `/(tabs)/roster/${id}${qs}` as Href
   }
   if (pathname === "/settings" || pathname.startsWith("/settings")) {
-    return "/(tabs)/settings"
+    return "/settings"
   }
   if (pathname === "/notifications" || pathname.startsWith("/notifications")) {
-    return "/(tabs)/notifications"
+    return "/notifications"
   }
 
   return null

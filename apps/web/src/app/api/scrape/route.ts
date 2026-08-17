@@ -1,29 +1,23 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { ScraperJobType } from "@prisma/client"
+import { ScraperJobStatus, ScraperJobType } from "@prisma/client"
 import { swimsFromSwimCloudTimes, type SwimCloudTime } from "@/lib/swimcloud-import"
 import { assignSwimOccurrences } from "@/lib/swim-dedup"
-import { runScraperJob } from "@/lib/scraper"
-import { LOCAL_SCRAPER_HINT } from "@/lib/scraper-proxy"
+import {
+  enqueueScraperJob,
+  getScraperJobForUser,
+  markScraperJobApplied,
+  LOCAL_SCRAPER_HINT,
+} from "@/lib/scraper"
 import { getSession } from "@/lib/session"
 
 export const runtime = "nodejs"
-export const maxDuration = 3600
+export const maxDuration = 300
 
-async function fetchSwimCloudTimes(
-  userId: string,
+type ScrapeApplyContext = {
+  kind: "athlete_scrape"
+  athleteId: string
   swimmerCloudId: number
-): Promise<SwimCloudTime[]> {
-  const scraped = await runScraperJob<{
-    swimmers: Record<string, SwimCloudTime[]>
-    failed: number[]
-  }>(userId, ScraperJobType.TIMES_BULK, { swimmer_ids: [swimmerCloudId] })
-
-  if (scraped.failed?.includes(swimmerCloudId)) {
-    throw new Error("SwimCloud scrape failed for this athlete")
-  }
-
-  return scraped.swimmers[String(swimmerCloudId)] ?? []
 }
 
 export async function POST(req: Request) {
@@ -35,12 +29,24 @@ export async function POST(req: Request) {
   const { athleteId, swimmerCloudId } = await req.json()
 
   if (!athleteId || !swimmerCloudId) {
-    return NextResponse.json({ error: "Missing athleteId or swimmerCloudId" }, { status: 400 })
+    return NextResponse.json(
+      { error: "Missing athleteId or swimmerCloudId" },
+      { status: 400 }
+    )
   }
 
-  let times: SwimCloudTime[]
   try {
-    times = await fetchSwimCloudTimes(session.user.id, swimmerCloudId)
+    const job = await enqueueScraperJob(
+      session.user.id,
+      ScraperJobType.TIMES_BULK,
+      { swimmer_ids: [swimmerCloudId] },
+      {
+        kind: "athlete_scrape",
+        athleteId,
+        swimmerCloudId: Number(swimmerCloudId),
+      } satisfies ScrapeApplyContext
+    )
+    return NextResponse.json({ jobId: job.id })
   } catch (err) {
     const message = err instanceof Error ? err.message : "Import failed"
     if (message === "LOCAL_BRIDGE_NOT_CONNECTED") {
@@ -48,17 +54,50 @@ export async function POST(req: Request) {
     }
     return NextResponse.json({ error: message }, { status: 502 })
   }
+}
 
-  const swims = assignSwimOccurrences(swimsFromSwimCloudTimes(times, athleteId))
+export async function applyAthleteScrapeJob(jobId: string, userId: string) {
+  const job = await getScraperJobForUser(jobId, userId)
+  if (!job) throw new Error("Job not found")
+  if (job.status !== ScraperJobStatus.COMPLETED) {
+    throw new Error(job.error ?? "Job is not complete")
+  }
+  if (job.appliedAt && job.applyResult) {
+    return job.applyResult as Record<string, unknown>
+  }
+
+  const ctx = job.applyContext as ScrapeApplyContext | null
+  if (!ctx || ctx.kind !== "athlete_scrape") {
+    throw new Error("Invalid job context")
+  }
+
+  const scraped = job.result as {
+    swimmers: Record<string, SwimCloudTime[]>
+    failed: number[]
+  }
+
+  if (scraped.failed?.includes(ctx.swimmerCloudId)) {
+    throw new Error("SwimCloud scrape failed for this athlete")
+  }
+
+  const times = scraped.swimmers[String(ctx.swimmerCloudId)] ?? []
+  const swims = assignSwimOccurrences(swimsFromSwimCloudTimes(times, ctx.athleteId))
 
   const result = await prisma.swim.createMany({
     data: swims,
-    skipDuplicates: true})
+    skipDuplicates: true,
+  })
 
   const syncedAt = new Date()
   await prisma.athlete.update({
-    where: { id: athleteId },
-    data: { timesSyncedAt: syncedAt }})
+    where: { id: ctx.athleteId },
+    data: { timesSyncedAt: syncedAt },
+  })
 
-  return NextResponse.json({ imported: result.count, timesSyncedAt: syncedAt.toISOString() })
+  const summary = {
+    imported: result.count,
+    timesSyncedAt: syncedAt.toISOString(),
+  }
+  await markScraperJobApplied(jobId, summary)
+  return summary
 }

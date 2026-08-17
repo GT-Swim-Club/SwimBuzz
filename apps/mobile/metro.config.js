@@ -6,7 +6,14 @@ const workspaceRoot = path.resolve(projectRoot, "../..")
 
 const config = getDefaultConfig(projectRoot)
 
-config.watchFolders = [workspaceRoot]
+// Watch only workspace packages the app imports. Watching the whole monorepo
+// (including apps/web) from iCloud Drive makes the first bundle hang in Expo Go.
+config.watchFolders = [
+  path.resolve(workspaceRoot, "packages/api"),
+  path.resolve(workspaceRoot, "packages/shared"),
+  path.resolve(workspaceRoot, "packages/tokens"),
+  path.resolve(workspaceRoot, "packages/ui"),
+]
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, "node_modules"),
   path.resolve(workspaceRoot, "node_modules"),

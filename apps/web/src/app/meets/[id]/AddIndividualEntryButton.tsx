@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { isValidSignupEntryTime } from "@/lib/meet-signup"
 import Modal, { ModalFooter } from "@/components/Modal"
+import { SegmentedToggle, segmentedOptionClass } from "@/components/SegmentedToggle"
 import { normalizeEventName } from "@/lib/swim-parse"
 
 const RELAY_EVENTS = [
@@ -163,10 +164,14 @@ export default function AddIndividualEntryButton({
           </ModalFooter>
         }
       >
-        <div className="flex gap-2 mb-4 p-1 rounded-lg border border-border">
-          <button type="button" onClick={() => setType("individual")} className={`flex-1 text-sm py-1.5 rounded-lg ${type === "individual" ? "bg-primary text-primary-text" : "hover:bg-fill"}`}>Individual</button>
-          <button type="button" onClick={() => setType("relay")} className={`flex-1 text-sm py-1.5 rounded-lg ${type === "relay" ? "bg-primary text-primary-text" : "hover:bg-fill"}`}>Relay</button>
-        </div>
+        <SegmentedToggle
+          selectedIndex={type === "relay" ? 1 : 0}
+          fullWidth
+          className="mb-4 rounded-lg border border-border bg-background"
+        >
+          <button type="button" onClick={() => setType("individual")} className={segmentedOptionClass(type === "individual")}>Individual</button>
+          <button type="button" onClick={() => setType("relay")} className={segmentedOptionClass(type === "relay")}>Relay</button>
+        </SegmentedToggle>
 
         {type === "individual" ? (
           <>

@@ -1,15 +1,16 @@
 import { useCallback, useState } from "react"
-import { Alert, ScrollView, View } from "react-native"
+import { Alert, View } from "react-native"
 import { useFocusEffect, useRouter } from "expo-router"
 import {
   Button,
   Chip,
   Screen,
+  ScrollView,
   TextField,
-  Title,
 } from "@swimbuzz/ui"
 import { spacing } from "@swimbuzz/tokens"
 import { api } from "../../../src/lib/api"
+import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 
 const GENDERS = [
   { value: "M", label: "Men" },
@@ -18,6 +19,7 @@ const GENDERS = [
 
 export default function NewAthleteScreen() {
   const router = useRouter()
+  const tabBarPad = useTabBarScrollPadding()
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("")
@@ -89,9 +91,7 @@ export default function NewAthleteScreen() {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
-        <Title>Add athlete</Title>
-
+      <ScrollView contentContainerStyle={{ paddingBottom: tabBarPad }}>
         <TextField
           label="First name"
           value={firstName}

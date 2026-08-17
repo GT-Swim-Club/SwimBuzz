@@ -34,7 +34,7 @@ export default function RunScraperButton({ compact = false }: { compact?: boolea
     <button
       type="button"
       onClick={openRunScraper}
-      aria-label={compact ? "Run Scraper" : undefined}
+      aria-label={compact ? "Scraper" : undefined}
       className={
         "group relative inline-flex h-9 items-center justify-center rounded-lg border transition-colors " +
         (compact ? "w-9" : "gap-2 px-3 text-xs") +
@@ -47,8 +47,8 @@ export default function RunScraperButton({ compact = false }: { compact?: boolea
         <ScraperIcon className="h-4 w-4" />
         <span className={`absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full ring-2 ring-background ${statusClass}`} aria-hidden="true" />
       </span>
-      {compact ? <HoverDetail label="Run Scraper" /> : null}
-      {!compact ? <span>Run Scraper</span> : null}
+      {compact ? <HoverDetail label="Scraper" /> : null}
+      {!compact ? <span>Scraper</span> : null}
     </button>
   )
 }

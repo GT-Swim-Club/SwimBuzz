@@ -75,18 +75,18 @@ export default function PersonalBestsGrid({ swims }: { swims: PbSwim[] }) {
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {courseSwims.map((swim) => {
               const { stroke } = parseEventParts(swim.event)
               return (
                 <div
                   key={`${swim.event}-${swim.course}`}
-                  className={`rounded-xl border border-border-secondary bg-background border-l-[3px] ${STROKE_ACCENT[stroke] ?? "border-l-foreground-tertiary"} px-3 py-3 sm:px-3.5 shadow-sm`}
+                  className={`rounded-xl border border-border-secondary bg-background border-l-[3px] ${STROKE_ACCENT[stroke] ?? "border-l-foreground-tertiary"} px-3 py-3 sm:px-4 sm:py-4 shadow-sm`}
                 >
                   <p className="text-sm font-medium text-foreground leading-tight mb-2">
                     {swim.event}
                   </p>
-                  <p className="text-lg sm:text-xl font-semibold font-mono tabular-nums tracking-tight text-foreground">
+                  <p className="text-lg sm:text-xl lg:text-2xl font-semibold font-mono tabular-nums tracking-tight text-foreground">
                     {formatTime(swim.timeMs)}
                   </p>
                 </div>

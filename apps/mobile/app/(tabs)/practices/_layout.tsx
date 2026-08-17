@@ -1,17 +1,16 @@
-import { Stack } from "expo-router"
-import { colors } from "@swimbuzz/tokens"
+import { TabChromeStack } from "../../../src/components/TabChromeStack"
+
+export const unstable_settings = {
+  initialRouteName: "index",
+}
 
 export default function PracticesStackLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerStyle: { backgroundColor: colors.light.primaryBg },
-        headerTintColor: colors.light.primaryText,
-      }}
-    >
-      <Stack.Screen name="index" options={{ title: "Practices" }} />
-      <Stack.Screen name="new" options={{ title: "New practice" }} />
-      <Stack.Screen name="[id]" options={{ title: "Practice" }} />
-    </Stack>
+    <TabChromeStack
+      backScreens={[
+        { name: "[id]", fallbackHref: "/practices" },
+        { name: "new", fallbackHref: "/practices" },
+      ]}
+    />
   )
 }

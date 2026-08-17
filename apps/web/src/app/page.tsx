@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
 import { getSession } from "@/lib/session"
+import { AppIcon } from "@/components/AppIcon"
 type FeatureItem = {
   title: string
   description: string
@@ -123,10 +124,7 @@ export default async function HomePage() {
           <div className="rounded-2xl border border-border bg-background p-5 shadow-sm sm:p-7">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="h-5 w-5" aria-hidden="true">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
+                <AppIcon name="userRound" className="h-5 w-5" strokeWidth={1.75} />
               </div>
               <div>
                 <h3 className="text-lg font-medium text-foreground">Athletes</h3>
@@ -139,10 +137,7 @@ export default async function HomePage() {
           <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5 shadow-sm sm:p-7">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="h-5 w-5" aria-hidden="true">
-                  <path d="M12 14l9-5-9-5-9 5 9 5z" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M12 14l6.16-3.422A12.083 12.083 0 0 1 21 13.5c0 2.485-4.03 4.5-9 4.5s-9-2.015-9-4.5c0-.943.38-1.823 1.04-2.615L12 14z" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                <AppIcon name="graduationCap" className="h-5 w-5" strokeWidth={1.75} />
               </div>
               <div>
                 <h3 className="text-lg font-medium text-foreground">Coaches</h3>

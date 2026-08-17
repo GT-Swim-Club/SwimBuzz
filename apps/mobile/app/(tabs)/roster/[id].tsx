@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react"
-import { Alert, ScrollView, View } from "react-native"
+import { Alert, View } from "react-native"
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router"
 import {
   athleteDisplayName,
@@ -16,12 +16,14 @@ import {
   MetaRow,
   Muted,
   Screen,
+  ScrollView,
   Section,
   TextField,
   Title,
 } from "@swimbuzz/ui"
 import { spacing } from "@swimbuzz/tokens"
 import { api } from "../../../src/lib/api"
+import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 import { DateSelector } from "../../../src/components/DateTimeSelector"
 import { useAuth } from "../../../src/lib/auth"
 
@@ -76,6 +78,7 @@ export default function AthleteDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
   const { user } = useAuth()
+  const tabBarPad = useTabBarScrollPadding()
   const [athlete, setAthlete] = useState<Record<string, unknown> | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -89,7 +92,10 @@ export default function AthleteDetailScreen() {
   const [addingSwim, setAddingSwim] = useState(false)
 
   const load = useCallback(async () => {
-    if (!id) return
+    if (!id) {
+      setLoading(false)
+      return
+    }
     setError(null)
     try {
       const data = await api.getAthlete(id)
@@ -155,7 +161,6 @@ export default function AthleteDetailScreen() {
   if (!athlete) {
     return (
       <Screen>
-        <Title>Athlete</Title>
         <ErrorBlock message={error ?? "Not found"} />
       </Screen>
     )
@@ -300,7 +305,7 @@ export default function AthleteDetailScreen() {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: tabBarPad }}>
         <Title>{name}</Title>
         <Muted style={{ marginBottom: spacing.md }}>
           {[genderLabel(athlete.gender), ...seasons].filter(Boolean).join(" · ")}

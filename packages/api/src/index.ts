@@ -181,6 +181,23 @@ export function createApiClient(options: ApiClientOptions = {}) {
       })
     },
 
+    listPracticeTags() {
+      return request<Array<{ id: string; name: string }>>("/api/practice-tags")
+    },
+
+    createPracticeTag(name: string) {
+      return request<{ id: string; name: string }>("/api/practice-tags", {
+        method: "POST",
+        body: JSON.stringify({ name }),
+      })
+    },
+
+    deletePracticeTag(id: string) {
+      return request<{ ok: true }>(`/api/practice-tags/${id}`, {
+        method: "DELETE",
+      })
+    },
+
     listPractices(params?: { q?: string; tag?: string }) {
       const sp = new URLSearchParams()
       if (params?.q) sp.set("q", params.q)
@@ -295,6 +312,27 @@ export function createApiClient(options: ApiClientOptions = {}) {
       })
     },
 
+    getViewPreference() {
+      return request<{
+        defaultView: "gallery" | "list"
+        defaultPracticesView: "week" | "month" | "list"
+      }>("/api/user/view-preference")
+    },
+
+    updateViewPreference(body: {
+      defaultView?: "gallery" | "list"
+      defaultPracticesView?: "week" | "month" | "list"
+    }) {
+      return request<{
+        success: true
+        defaultView: "gallery" | "list"
+        defaultPracticesView: "week" | "month" | "list"
+      }>("/api/user/view-preference", {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      })
+    },
+
     getNotificationPreferences() {
       return request<{ preferences: NotificationPreferences }>(
         "/api/notifications/preferences"
@@ -338,10 +376,38 @@ export function createApiClient(options: ApiClientOptions = {}) {
       athleteIds: string[]
       gender?: "M" | "F" | "all"
     }) {
-      return request("/api/times/sync", {
-        method: "POST",
-        body: JSON.stringify(input),
-      })
+      return (async () => {
+        const enqueued = await request<{
+          jobId?: string
+          imported?: number
+          athletesSynced?: number
+          message?: string
+          [key: string]: unknown
+        }>("/api/times/sync", {
+          method: "POST",
+          body: JSON.stringify(input),
+        })
+        if (!enqueued.jobId) return enqueued
+
+        const started = Date.now()
+        const timeoutMs = 20 * 60 * 1000
+        while (Date.now() - started < timeoutMs) {
+          const job = await request<{
+            status: string
+            error?: string | null
+          }>(`/api/scraper/jobs/${enqueued.jobId}`)
+          if (job.status === "FAILED") {
+            throw new ApiError(job.error ?? "Run scraper failed", 502, job)
+          }
+          if (job.status === "COMPLETED") break
+          await new Promise((r) => setTimeout(r, 1500))
+        }
+
+        return request("/api/times/sync/finalize", {
+          method: "POST",
+          body: JSON.stringify({ jobId: enqueued.jobId }),
+        })
+      })()
     },
 
     optimalRelays(body: {
@@ -370,9 +436,14 @@ export function createApiClient(options: ApiClientOptions = {}) {
     },
 
     deleteRelayTeam(meetId: string, body: Record<string, unknown>) {
-      return request(`/api/meets/${meetId}/relays`, {
+      const params = new URLSearchParams()
+      for (const [key, value] of Object.entries(body)) {
+        if (value != null && String(value).trim()) {
+          params.set(key, String(value))
+        }
+      }
+      return request(`/api/meets/${meetId}/relays?${params.toString()}`, {
         method: "DELETE",
-        body: JSON.stringify(body),
       })
     },
   }

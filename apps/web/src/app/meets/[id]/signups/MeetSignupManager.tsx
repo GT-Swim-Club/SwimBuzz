@@ -11,6 +11,7 @@ import {
   sortSignupEventsByOrder,
 } from "@/lib/meet-signup"
 import { formatDisplayTime } from "@/lib/utils"
+import { SegmentedToggle, segmentedOptionClass } from "@/components/SegmentedToggle"
 
 type SignupEntry = {
   id: string
@@ -132,14 +133,18 @@ export default function MeetSignupManager({
         </p>
       </header>
 
-      <div role="tablist" aria-label="Sign-up management sections" className="flex gap-1 rounded-xl border border-border bg-fill-secondary p-1">
+      <SegmentedToggle
+        selectedIndex={activeTab === "responses" ? 1 : 0}
+        fullWidth
+        className="rounded-xl border border-border bg-fill-secondary"
+      >
         <button
           type="button"
           role="tab"
           aria-selected={activeTab === "settings"}
           aria-controls="signup-settings"
           onClick={() => setActiveTab("settings")}
-          className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${activeTab === "settings" ? "bg-primary text-primary-text shadow-sm" : "text-foreground-secondary hover:text-foreground"}`}
+          className={segmentedOptionClass(activeTab === "settings") + " py-2"}
         >
           Form settings
         </button>
@@ -149,11 +154,11 @@ export default function MeetSignupManager({
           aria-selected={activeTab === "responses"}
           aria-controls="signup-responses"
           onClick={() => setActiveTab("responses")}
-          className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${activeTab === "responses" ? "bg-primary text-primary-text shadow-sm" : "text-foreground-secondary hover:text-foreground"}`}
+          className={segmentedOptionClass(activeTab === "responses") + " py-2"}
         >
           Responses ({entries.length})
         </button>
-      </div>
+      </SegmentedToggle>
 
       <div id="signup-settings" role="tabpanel" hidden={activeTab !== "settings"}>
         <MeetSignupConfigButton

@@ -1,72 +1,20 @@
 "use client"
 
-import { ViewNavLink } from "@/components/ViewNavigation"
+import { ViewNavLink, useViewNav } from "@/components/ViewNavigation"
+import { AppIcon } from "@/components/AppIcon"
+import { SegmentedToggle, segmentedIconOptionClass } from "@/components/SegmentedToggle"
+import type { IconName } from "@swimbuzz/shared"
 
 type PracticeView = "week" | "month" | "list"
-
-const viewIconProps = {
-  xmlns: "http://www.w3.org/2000/svg",
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 2,
-  strokeLinecap: "round" as const,
-  strokeLinejoin: "round" as const,
-  className: "h-4 w-4 shrink-0",
-  "aria-hidden": true as const,
-}
 
 const OPTIONS: Array<{
   view: PracticeView
   label: string
-  icon: React.ReactNode
+  icon: IconName
 }> = [
-  {
-    view: "week",
-    label: "Week",
-    icon: (
-      <svg {...viewIconProps}>
-        <rect width="18" height="18" x="3" y="4" rx="2" />
-        <path d="M16 2v4" />
-        <path d="M8 2v4" />
-        <path d="M3 10h18" />
-        <path d="M10 14h4" />
-        <path d="M10 18h4" />
-      </svg>
-    ),
-  },
-  {
-    view: "month",
-    label: "Month",
-    icon: (
-      <svg {...viewIconProps}>
-        <rect width="18" height="18" x="3" y="4" rx="2" />
-        <path d="M16 2v4" />
-        <path d="M8 2v4" />
-        <path d="M3 10h18" />
-        <path d="M8 14h.01" />
-        <path d="M12 14h.01" />
-        <path d="M16 14h.01" />
-        <path d="M8 18h.01" />
-        <path d="M12 18h.01" />
-        <path d="M16 18h.01" />
-      </svg>
-    ),
-  },
-  {
-    view: "list",
-    label: "List",
-    icon: (
-      <svg {...viewIconProps}>
-        <path d="M8 6h13" />
-        <path d="M8 12h13" />
-        <path d="M8 18h13" />
-        <path d="M3 6h.01" />
-        <path d="M3 12h.01" />
-        <path d="M3 18h.01" />
-      </svg>
-    ),
-  },
+  { view: "week", label: "Week", icon: "calendarWeek" },
+  { view: "month", label: "Month", icon: "calendarMonth" },
+  { view: "list", label: "List", icon: "list" },
 ]
 
 export default function PracticeViewToggle({
@@ -76,8 +24,17 @@ export default function PracticeViewToggle({
   activeView: PracticeView
   hrefs: Record<PracticeView, string>
 }) {
+  const { pendingView } = useViewNav()
+  const shown =
+    pendingView === "week" || pendingView === "month" || pendingView === "list"
+      ? pendingView
+      : activeView
+
   return (
-    <div className="inline-flex rounded-lg border border-border-secondary bg-background p-1 text-sm">
+    <SegmentedToggle
+      selectedIndex={Math.max(0, OPTIONS.findIndex((option) => option.view === shown))}
+      className="rounded-lg border border-border-secondary bg-background"
+    >
       {OPTIONS.map((option) => (
         <ViewNavLink
           key={option.view}
@@ -85,16 +42,11 @@ export default function PracticeViewToggle({
           view={option.view}
           active={activeView === option.view}
           title={option.label}
-          className={
-            "inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 transition-colors " +
-            (activeView === option.view
-              ? "bg-primary text-primary-text"
-              : "text-foreground-secondary hover:bg-fill-secondary")
-          }
+          className={segmentedIconOptionClass(shown === option.view)}
         >
-          {option.icon}
+          <AppIcon name={option.icon} className="h-4 w-4 shrink-0" />
         </ViewNavLink>
       ))}
-    </div>
+    </SegmentedToggle>
   )
 }

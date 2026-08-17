@@ -1,6 +1,42 @@
 "use client"
 
-import { signIn } from "next-auth/react"
+import { useState } from "react"
+import { getSession, signIn } from "next-auth/react"
+
+function openGoogleSignInWindow() {
+  const width = 500
+  const height = 700
+  const left = Math.round(window.screenX + (window.outerWidth - width) / 2)
+  const top = Math.round(window.screenY + (window.outerHeight - height) / 2)
+  return window.open(
+    "about:blank",
+    "googleSignIn",
+    `popup=yes,width=${width},height=${height},left=${left},top=${top}`
+  )
+}
+
+/** NextAuth's signIn() always redirects the current tab for OAuth providers. */
+async function getGoogleAuthorizationUrl(callbackUrl: string) {
+  const csrfRes = await fetch("/api/auth/csrf")
+  const { csrfToken } = (await csrfRes.json()) as { csrfToken?: string }
+  if (!csrfToken) throw new Error("Missing CSRF token")
+
+  const res = await fetch("/api/auth/signin/google", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "X-Auth-Request": "1",
+    },
+    body: new URLSearchParams({
+      csrfToken,
+      callbackUrl,
+      json: "true",
+    }),
+  })
+  const data = (await res.json()) as { url?: string }
+  if (!data.url) throw new Error("Google sign-in is unavailable")
+  return data.url
+}
 
 export default function SignInButton({
   callbackUrl = "/athletes",
@@ -11,13 +47,52 @@ export default function SignInButton({
   className?: string
   label?: string
 }) {
+  const [busy, setBusy] = useState(false)
+
+  async function onClick() {
+    if (busy) return
+
+    const popup = openGoogleSignInWindow()
+    if (!popup) {
+      await signIn("google", { callbackUrl })
+      return
+    }
+
+    setBusy(true)
+    try {
+      const url = await getGoogleAuthorizationUrl(callbackUrl)
+      popup.location.assign(url)
+      popup.focus()
+
+      const started = Date.now()
+      const timer = window.setInterval(async () => {
+        if (popup.closed || Date.now() - started > 5 * 60 * 1000) {
+          window.clearInterval(timer)
+          setBusy(false)
+          return
+        }
+
+        const session = await getSession()
+        if (!session) return
+
+        window.clearInterval(timer)
+        popup.close()
+        window.location.assign(callbackUrl)
+      }, 700)
+    } catch {
+      popup.close()
+      setBusy(false)
+    }
+  }
+
   return (
     <button
       type="button"
-      onClick={() => signIn("google", { callbackUrl })}
+      onClick={() => void onClick()}
+      disabled={busy}
       className={
         className ||
-        "inline-flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-background px-5 py-3 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-fill-secondary"
+        "inline-flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-background px-5 py-3 text-[15px] font-medium text-foreground shadow-sm transition-colors hover:bg-fill-secondary disabled:opacity-60"
       }
     >
       <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0" aria-hidden="true">

@@ -1,13 +1,16 @@
 import { Stack } from "expo-router"
-import { colors } from "@swimbuzz/tokens"
+import { HeaderBrand, useAppHeaderOptions } from "../../src/components/AppHeader"
+import { ScreenBackButton } from "../../src/components/ScreenBackButton"
 
 export default function AuthLayout() {
+  const appHeaderOptions = useAppHeaderOptions()
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: colors.light.primaryBg },
-        headerTintColor: colors.light.primaryText,
-        contentStyle: { backgroundColor: colors.light.bgLayout },
+        ...appHeaderOptions,
+        headerBackVisible: false,
+        headerLeft: () => <ScreenBackButton fallbackHref="/welcome" />,
+        headerTitle: () => <HeaderBrand />,
       }}
     >
       <Stack.Screen name="sign-in" options={{ title: "Sign in" }} />

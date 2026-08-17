@@ -43,6 +43,9 @@ import {
 } from "@/lib/meet-sheet-summary"
 import { isRelayResultsSummary } from "@/lib/relay-results"
 
+export const runtime = "nodejs"
+export const maxDuration = 300
+
 function toDateInput(d: Date): string {
   return d.toISOString().slice(0, 10)
 }

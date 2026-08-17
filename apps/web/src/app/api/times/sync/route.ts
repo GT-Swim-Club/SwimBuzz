@@ -1,15 +1,19 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { Gender, ScraperJobType } from "@prisma/client"
+import { Gender, ScraperJobStatus, ScraperJobType } from "@prisma/client"
 import { assignSwimOccurrences } from "@/lib/swim-dedup"
 import { swimsFromSwimCloudTimes, type SwimCloudTime } from "@/lib/swimcloud-import"
 import { parseSeason } from "@/lib/season"
-import { runScraperJob } from "@/lib/scraper"
-import { LOCAL_SCRAPER_HINT } from "@/lib/scraper-proxy"
+import {
+  enqueueScraperJob,
+  getScraperJobForUser,
+  markScraperJobApplied,
+  LOCAL_SCRAPER_HINT,
+} from "@/lib/scraper"
 import { getSession } from "@/lib/session"
 
 export const runtime = "nodejs"
-export const maxDuration = 3600
+export const maxDuration = 300
 
 export async function GET(req: Request) {
   const session = await getSession()
@@ -27,9 +31,9 @@ export async function GET(req: Request) {
   }
 
   const athletes = await prisma.athlete.findMany({
-    where: { 
-      seasons: { has: season }, 
-      ...(gender ? { gender } : {}) 
+    where: {
+      seasons: { has: season },
+      ...(gender ? { gender } : {}),
     },
     select: {
       id: true,
@@ -37,10 +41,18 @@ export async function GET(req: Request) {
       lastName: true,
       gender: true,
       swimCloudId: true,
-      timesSyncedAt: true},
-    orderBy: [{ lastName: "asc" }, { firstName: "asc" }]})
+      timesSyncedAt: true,
+    },
+    orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+  })
 
   return NextResponse.json({ athletes })
+}
+
+type TimesApplyContext = {
+  kind: "times_sync"
+  season: string
+  athleteIds: string[]
 }
 
 export async function POST(req: Request) {
@@ -64,9 +76,11 @@ export async function POST(req: Request) {
       id: { in: athleteIds },
       seasons: { has: season },
       ...(gender ? { gender } : {}),
-      swimCloudId: { not: null }},
+      swimCloudId: { not: null },
+    },
     select: { id: true, firstName: true, lastName: true, swimCloudId: true },
-    orderBy: [{ lastName: "asc" }, { firstName: "asc" }]})
+    orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+  })
 
   if (athletes.length === 0) {
     return NextResponse.json({
@@ -74,28 +88,58 @@ export async function POST(req: Request) {
       athletes: 0,
       athletesSynced: 0,
       failed: [],
-      message: "No selected athletes have a SwimCloud ID"})
+      message: "No selected athletes have a SwimCloud ID",
+    })
   }
 
   const swimmerIds = athletes.map((a) => a.swimCloudId!)
-  const athleteBySwimCloudId = new Map(
-    athletes.map((a) => [a.swimCloudId!, a])
-  )
-
-  let scraped: {
-    swimmers: Record<string, SwimCloudTime[]>
-    failed: number[]
+  const applyContext: TimesApplyContext = {
+    kind: "times_sync",
+    season,
+    athleteIds: athletes.map((a) => a.id),
   }
 
   try {
-    scraped = await runScraperJob(session.user.id, ScraperJobType.TIMES_BULK, {
-      swimmer_ids: swimmerIds})
+    const job = await enqueueScraperJob(
+      session.user.id,
+      ScraperJobType.TIMES_BULK,
+      { swimmer_ids: swimmerIds },
+      applyContext
+    )
+    return NextResponse.json({ jobId: job.id, athletes: athletes.length })
   } catch (err) {
     const message = err instanceof Error ? err.message : "Run scraper failed"
     if (message === "LOCAL_BRIDGE_NOT_CONNECTED") {
       return NextResponse.json({ error: LOCAL_SCRAPER_HINT }, { status: 503 })
     }
     return NextResponse.json({ error: message }, { status: 502 })
+  }
+}
+
+export async function applyTimesSyncJob(jobId: string, userId: string) {
+  const job = await getScraperJobForUser(jobId, userId)
+  if (!job) throw new Error("Job not found")
+  if (job.status !== ScraperJobStatus.COMPLETED) {
+    throw new Error(job.error ?? "Job is not complete")
+  }
+  if (job.appliedAt && job.applyResult) {
+    return job.applyResult as Record<string, unknown>
+  }
+
+  const ctx = job.applyContext as TimesApplyContext | null
+  if (!ctx || ctx.kind !== "times_sync") {
+    throw new Error("Invalid job context")
+  }
+
+  const athletes = await prisma.athlete.findMany({
+    where: { id: { in: ctx.athleteIds }, swimCloudId: { not: null } },
+    select: { id: true, firstName: true, lastName: true, swimCloudId: true },
+  })
+  const athleteBySwimCloudId = new Map(athletes.map((a) => [a.swimCloudId!, a]))
+
+  const scraped = job.result as {
+    swimmers: Record<string, SwimCloudTime[]>
+    failed: number[]
   }
 
   const allSwims: ReturnType<typeof swimsFromSwimCloudTimes> = []
@@ -116,7 +160,8 @@ export async function POST(req: Request) {
     const chunk = swimsToInsert.slice(i, i + chunkSize)
     const result = await prisma.swim.createMany({
       data: chunk,
-      skipDuplicates: true})
+      skipDuplicates: true,
+    })
     imported += result.count
   }
 
@@ -124,7 +169,8 @@ export async function POST(req: Request) {
   if (syncedAthleteIds.length > 0) {
     await prisma.athlete.updateMany({
       where: { id: { in: syncedAthleteIds } },
-      data: { timesSyncedAt: syncedAt }})
+      data: { timesSyncedAt: syncedAt },
+    })
   }
 
   const failed = (scraped.failed ?? []).map((id) => {
@@ -134,16 +180,16 @@ export async function POST(req: Request) {
       : `SwimCloud ID ${id}`
   })
 
-  console.log(
-    `\n--- SwimCloud sync (${season}): ${athletesSynced}/${athletes.length} athletes, ${imported} new swims ---\n`
-  )
-
-  return NextResponse.json({
+  const summary = {
     imported,
     parsed: allSwims.length,
     athletes: athletes.length,
     athletesSynced,
     syncedAthleteIds,
     timesSyncedAt: syncedAt.toISOString(),
-    failed})
+    failed,
+  }
+
+  await markScraperJobApplied(jobId, summary)
+  return summary
 }

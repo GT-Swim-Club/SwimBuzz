@@ -21,9 +21,6 @@ export default function MobileNavMenu({
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
-  useEffect(() => {
-    setOpen(false)
-  }, [pathname])
 
   useEffect(() => {
     if (!open) return
@@ -42,7 +39,7 @@ export default function MobileNavMenu({
   }, [open])
 
   return (
-    <div className="lg:hidden">
+    <div>
       <button
         type="button"
         onClick={() => setOpen(true)}

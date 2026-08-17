@@ -30,11 +30,11 @@ export function parseSeason(value: unknown): string | null {
   return null
 }
 
-/** Club season runs Aug–Jul; infer from a meet date. */
+/** Club season runs Sep–Aug; infer from a meet date (UTC). */
 export function seasonFromDate(date: Date): string {
   const month = date.getUTCMonth()
   const year = date.getUTCFullYear()
-  if (month >= 7) return `${year}-${year + 1}`
+  if (month >= 8) return `${year}-${year + 1}`
   return `${year - 1}-${year}`
 }
 
@@ -42,9 +42,9 @@ export function upcomingSeason(): string {
   const date = new Date()
   const year = date.getUTCFullYear()
   const month = date.getUTCMonth()
-  // Up to and including Aug (month 7), upcoming is this year-next.
-  if (month <= 7) return `${year}-${year + 1}`
-  // Sep or later, upcoming is next year-next+1.
+  // Up to and including Sep (month 8), upcoming is this year-next.
+  if (month <= 8) return `${year}-${year + 1}`
+  // Oct or later, upcoming is next year-next+1.
   return `${year + 1}-${year + 2}`
 }
 

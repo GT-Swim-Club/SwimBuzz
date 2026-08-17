@@ -148,6 +148,22 @@ model Meet {
   swims         Swim[]
   signupForm    MeetSignupForm?
   roomForm      MeetRoomForm?
+  signupMonitorEvents MeetSignupMonitorEvent[]
+}
+
+/// Idempotent signup-window monitor events (serverless-safe; replaces in-memory Maps).
+model MeetSignupMonitorEvent {
+  id             String   @id @default(cuid())
+  meetId         String
+  meet           Meet     @relation(fields: [meetId], references: [id], onDelete: Cascade)
+  /// "opened" | "advance"
+  kind           String
+  /// Minutes before open for kind=advance; 0 for opened.
+  advanceMinutes Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  @@unique([meetId, kind, advanceMinutes])
+  @@index([meetId])
 }
 
 model MeetSignupForm {
@@ -430,12 +446,17 @@ model ScraperJob {
   status       ScraperJobStatus   @default(PENDING)
   result       Json?
   error        String?
+  /// Server-only metadata for finalize (not sent to the desktop scraper).
+  applyContext Json?
+  appliedAt    DateTime?
+  applyResult  Json?
   createdAt    DateTime          @default(now())
   startedAt    DateTime?
   completedAt  DateTime?
 
   @@index([userId, status])
   @@index([connectionId, status])
+  @@index([completedAt])
 }
 
 // Nationals qualifying-time standards for a season + course (from NQT PDF).

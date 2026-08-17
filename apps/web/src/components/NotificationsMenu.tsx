@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { formatRelativeTime } from "@/lib/utils"
+import { AppIcon } from "@/components/AppIcon"
 
 export type NotificationItem = {
   id: string
@@ -26,8 +27,9 @@ export default function NotificationsMenu({
   const rootRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (open) return
     setNotifications(initialNotifications)
-  }, [initialNotifications])
+  }, [initialNotifications, open])
 
   const unreadCount = notifications.filter((n) => !n.readAt).length
 
@@ -38,14 +40,24 @@ export default function NotificationsMenu({
   useEffect(() => {
     if (!open) return
 
-    async function fetchNotifications() {
+    async function syncNotifications() {
+      const now = new Date().toISOString()
+      setNotifications((prev) =>
+        prev.map((n) => ({ ...n, readAt: n.readAt ?? now }))
+      )
+      await fetch("/api/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ all: true }),
+      })
       const res = await fetch("/api/notifications")
       if (res.ok) {
         const data = await res.json()
         setNotifications(data.notifications)
       }
+      router.refresh()
     }
-    fetchNotifications()
+    void syncNotifications()
 
     function onPointerDown(event: PointerEvent) {
       if (!rootRef.current?.contains(event.target as Node)) {
@@ -63,7 +75,7 @@ export default function NotificationsMenu({
       document.removeEventListener("pointerdown", onPointerDown)
       document.removeEventListener("keydown", onKeyDown)
     }
-  }, [open])
+  }, [open, router])
 
   async function markRead(id?: string) {
     const res = await fetch("/api/notifications", {
@@ -96,20 +108,7 @@ export default function NotificationsMenu({
         }
         className="relative flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground-secondary transition-colors hover:bg-fill-secondary"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-5 w-5"
-          aria-hidden
-        >
-          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-        </svg>
+        <AppIcon name="bell" className="h-5 w-5" />
         {unreadCount > 0 ? (
           <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-medium text-primary-text">
             {unreadCount > 9 ? "9+" : unreadCount}

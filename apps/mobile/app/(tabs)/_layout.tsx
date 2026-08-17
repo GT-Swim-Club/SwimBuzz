@@ -1,100 +1,60 @@
-import { Tabs } from "expo-router"
-import { Text } from "react-native"
-import { colors } from "@swimbuzz/tokens"
-
-function TabLabel({
-  label,
-  focused,
-}: {
-  label: string
-  focused: boolean
-}) {
-  return (
-    <Text
-      style={{
-        fontSize: 11,
-        fontWeight: focused ? "700" : "500",
-        color: focused ? colors.light.primaryActive : colors.light.textTertiary,
-      }}
-    >
-      {label}
-    </Text>
-  )
-}
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons"
+import { NativeTabs, Icon, Label, VectorIcon } from "expo-router/unstable-native-tabs"
+import { usePalette } from "@swimbuzz/ui"
+import { useThemePreference } from "../../src/lib/theme"
 
 export default function TabsLayout() {
+  const c = usePalette()
+  const { colorScheme } = useThemePreference()
   return (
-    <Tabs
-      screenOptions={{
-        headerStyle: { backgroundColor: colors.light.primaryBg },
-        headerTintColor: colors.light.primaryText,
-        tabBarStyle: {
-          backgroundColor: colors.light.bgContainer,
-          borderTopColor: colors.light.border,
-        },
-        tabBarActiveTintColor: colors.light.primaryActive,
-        tabBarInactiveTintColor: colors.light.textTertiary,
-      }}
+    <NativeTabs
+      tintColor={c.primary}
+      backgroundColor={c.bgContainer}
+      blurEffect={
+        colorScheme === "dark" ? "systemChromeMaterialDark" : "systemChromeMaterialLight"
+      }
+      disableTransparentOnScrollEdge
+      minimizeBehavior="automatic"
+      labelVisibilityMode="labeled"
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-          tabBarLabel: ({ focused }) => <TabLabel label="Home" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="meets"
-        options={{
-          title: "Meets",
-          headerShown: false,
-          tabBarLabel: ({ focused }) => <TabLabel label="Meets" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="practices"
-        options={{
-          title: "Practices",
-          headerShown: false,
-          tabBarLabel: ({ focused }) => (
-            <TabLabel label="Practices" focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="nationals"
-        options={{
-          title: "Nationals",
-          headerShown: false,
-          tabBarLabel: ({ focused }) => (
-            <TabLabel label="Nationals" focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="roster"
-        options={{
-          title: "Roster",
-          headerShown: false,
-          tabBarLabel: ({ focused }) => <TabLabel label="Roster" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="notifications"
-        options={{
-          title: "Alerts",
-          tabBarLabel: ({ focused }) => <TabLabel label="Alerts" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: "Settings",
-          tabBarLabel: ({ focused }) => (
-            <TabLabel label="Settings" focused={focused} />
-          ),
-        }}
-      />
-    </Tabs>
+      <NativeTabs.Trigger name="practices">
+        <Label>Practices</Label>
+        <Icon
+          sf={{ default: "doc.text", selected: "doc.text.fill" }}
+          androidSrc={
+            <VectorIcon family={MaterialCommunityIcons} name="file-document-outline" />
+          }
+        />
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="meets">
+        <Label>Meets</Label>
+        <Icon
+          sf={{ default: "calendar", selected: "calendar" }}
+          androidSrc={<VectorIcon family={MaterialCommunityIcons} name="calendar" />}
+        />
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="roster">
+        <Label>Roster</Label>
+        <Icon
+          sf={{ default: "person.2", selected: "person.2.fill" }}
+          androidSrc={<VectorIcon family={MaterialCommunityIcons} name="account-group-outline" />}
+        />
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="nationals">
+        <Label>Nationals</Label>
+        <Icon
+          sf={{ default: "trophy", selected: "trophy.fill" }}
+          androidSrc={<VectorIcon family={MaterialCommunityIcons} name="trophy-outline" />}
+        />
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="you">
+        <Label>You</Label>
+        <Icon
+          sf={{ default: "person.crop.circle", selected: "person.crop.circle.fill" }}
+          androidSrc={<VectorIcon family={MaterialCommunityIcons} name="account-circle-outline" />}
+        />
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger hidden name="index" />
+    </NativeTabs>
   )
 }

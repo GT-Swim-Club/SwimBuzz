@@ -1,21 +1,26 @@
 import { useCallback, useEffect, useState } from "react"
-import { Alert, ScrollView, Switch, View } from "react-native"
+import { Alert, Switch, View } from "react-native"
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router"
-import { formatClockTimeRange, formatDateTime, isStaffRole } from "@swimbuzz/shared"
+import { formatClockTimeRange, formatDateTime, isHtmlEmpty, isStaffRole } from "@swimbuzz/shared"
 import {
   Body,
   Button,
   ErrorBlock,
+  IconButton,
   ListRow,
   LoadingBlock,
   Muted,
   Screen,
+  ScrollView,
   Section,
   TextField,
   Title,
+  usePalette,
 } from "@swimbuzz/ui"
-import { colors, spacing } from "@swimbuzz/tokens"
+import { spacing } from "@swimbuzz/tokens"
 import { api } from "../../../src/lib/api"
+import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
+import { FormattedText } from "../../../src/components/FormattedText"
 import { useAuth } from "../../../src/lib/auth"
 
 type PracticeSet = {
@@ -47,11 +52,14 @@ export default function PracticeDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
   const { user } = useAuth()
+  const tabBarPad = useTabBarScrollPadding()
+  const c = usePalette()
   const isStaff = !!user && isStaffRole(user.role)
   const [practice, setPractice] = useState<Record<string, unknown> | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [commentBody, setCommentBody] = useState("")
+  const [replyTo, setReplyTo] = useState<PracticeComment | null>(null)
   const [posting, setPosting] = useState(false)
   const [published, setPublished] = useState(false)
   const [editSets, setEditSets] = useState<PracticeSet[]>([])
@@ -59,7 +67,10 @@ export default function PracticeDetailScreen() {
   const [deleting, setDeleting] = useState(false)
 
   const load = useCallback(async () => {
-    if (!id) return
+    if (!id) {
+      setLoading(false)
+      return
+    }
     setError(null)
     try {
       const data = await api.getPractice(id)
@@ -103,7 +114,6 @@ export default function PracticeDetailScreen() {
   if (!practice) {
     return (
       <Screen>
-        <Title>Practice</Title>
         <ErrorBlock message={error ?? "Not found"} />
       </Screen>
     )
@@ -123,8 +133,10 @@ export default function PracticeDetailScreen() {
     }
     setPosting(true)
     try {
-      await api.postPracticeComment(id, body)
+      const parentId = replyTo?.parentId ?? replyTo?.id
+      await api.postPracticeComment(id, body, parentId)
       setCommentBody("")
+      setReplyTo(null)
       await load()
     } catch (err) {
       Alert.alert(
@@ -210,20 +222,24 @@ export default function PracticeDetailScreen() {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: tabBarPad }}>
         <Title>{String(practice.title ?? "Practice")}</Title>
-        <Muted style={{ marginBottom: spacing.md }}>
+        <Muted style={{ marginBottom: spacing.sm }}>
           {[
             practice.date
               ? new Date(String(practice.date)).toLocaleDateString()
               : null,
             formatClockTimeRange(String(practice.startTime ?? ""), String(practice.endTime ?? "")),
             practice.location,
-            practice.focus,
           ]
             .filter(Boolean)
             .join(" · ")}
         </Muted>
+        {practice.focus && !isHtmlEmpty(String(practice.focus)) ? (
+          <View style={{ marginBottom: spacing.md }}>
+            <FormattedText html={String(practice.focus)} />
+          </View>
+        ) : null}
 
         {error ? <ErrorBlock message={error} /> : null}
 
@@ -246,10 +262,10 @@ export default function PracticeDetailScreen() {
                 disabled={saving}
                 onValueChange={(value) => void saveStaffEdits(value)}
                 trackColor={{
-                  false: colors.light.fill,
-                  true: colors.light.primary,
+                  false: c.switchTrack,
+                  true: c.primary,
                 }}
-                thumbColor={colors.light.bgContainer}
+                thumbColor={c.switchThumb}
               />
             </View>
             <Button
@@ -314,7 +330,7 @@ export default function PracticeDetailScreen() {
                     {set.title || `Set ${set.order + 1}`}
                     {set.distance ? ` · ${set.distance}y` : ""}
                   </Body>
-                  <Body>{set.content}</Body>
+                  <FormattedText html={set.content} />
                 </View>
               ))
           )}
@@ -327,6 +343,15 @@ export default function PracticeDetailScreen() {
             comments.map((comment) => (
               <ListRow
                 key={comment.id}
+                right={
+                  <IconButton
+                    label="Reply"
+                    onPress={() => {
+                      setReplyTo(comment)
+                      setCommentBody("")
+                    }}
+                  />
+                }
                 title={String(comment.authorName ?? "Someone")}
                 subtitle={[
                   comment.parentId ? "Reply" : null,
@@ -341,16 +366,29 @@ export default function PracticeDetailScreen() {
             ))
           )}
 
+          {replyTo ? (
+            <View
+              style={{
+                alignItems: "center",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginBottom: spacing.xs,
+              }}
+            >
+              <Muted>{`Replying to ${replyTo.authorName ?? "someone"}`}</Muted>
+              <IconButton label="Cancel" onPress={() => setReplyTo(null)} />
+            </View>
+          ) : null}
           <TextField
-            label="Add a comment"
+            label={replyTo ? "Write a reply" : "Add a comment"}
             value={commentBody}
             onChangeText={setCommentBody}
-            placeholder="Write something…"
+            placeholder={replyTo ? "Write a reply…" : "Write something…"}
             multiline
             style={{ minHeight: 88, textAlignVertical: "top" }}
           />
           <Button
-            label="Post comment"
+            label={replyTo ? "Post reply" : "Post comment"}
             loading={posting}
             onPress={() => void postComment()}
           />

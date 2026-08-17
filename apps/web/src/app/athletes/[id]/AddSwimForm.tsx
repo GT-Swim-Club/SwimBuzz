@@ -87,21 +87,38 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
         setScrapeError(null)
         setResultOpen(false)
 
-        const res = await fetch("/api/scrape", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ athleteId, swimmerCloudId: swimCloudId }),
-        })
-        const data = await res.json().catch(() => ({}))
-
-        if (res.ok) {
+        try {
+          const { runScraperEnqueuePollFinalize } = await import(
+            "@/lib/scraper-job-client"
+          )
+          const data = await runScraperEnqueuePollFinalize<{
+            imported?: number
+            timesSyncedAt?: string
+          }>({
+            enqueue: () =>
+              fetch("/api/scrape", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ athleteId, swimmerCloudId: swimCloudId }),
+              }),
+            finalize: (jobId) =>
+              fetch("/api/scrape/finalize", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ jobId }),
+              }),
+          })
           setScrapeCount(typeof data.imported === "number" ? data.imported : 0)
           setScrapeStatus("done")
           if (data.timesSyncedAt) setLastSynced(data.timesSyncedAt)
           setResultOpen(true)
           router.refresh()
-        } else {
-          setScrapeError(data.error ?? "Import failed — is the scraper running?")
+        } catch (err) {
+          setScrapeError(
+            err instanceof Error
+              ? err.message
+              : "Import failed — is the scraper running?"
+          )
           setScrapeStatus("error")
           setResultOpen(true)
         }

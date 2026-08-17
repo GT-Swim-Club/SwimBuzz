@@ -141,3 +141,45 @@ select[size="1"] {
     animation: none;
   }
 }
+
+
+@keyframes practice-tag-form-open {
+  from {
+    width: 26px;
+  }
+  to {
+    width: 128px;
+  }
+}
+
+@keyframes practice-tag-form-close {
+  from {
+    width: 128px;
+  }
+  to {
+    width: 26px;
+  }
+}
+
+.practice-tag-form-open,
+.practice-tag-form-close {
+  overflow: hidden;
+  white-space: nowrap;
+  will-change: width;
+}
+
+.practice-tag-form-open {
+  animation: practice-tag-form-open 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.practice-tag-form-close {
+  animation: practice-tag-form-close 180ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .practice-tag-form-open,
+  .practice-tag-form-close {
+    animation-duration: 1ms;
+    animation-timing-function: linear;
+  }
+}

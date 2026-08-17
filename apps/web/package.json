@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "prisma generate && node server.js",
     "build": "prisma generate && next build",
-    "start": "NODE_ENV=production node server.js",
+    "start": "NODE_ENV=production next start",
+    "start:with-monitors": "NODE_ENV=production node server.js",
     "postinstall": "prisma generate",
     "lint": "eslint",
     "backfill-slugs": "node scripts/backfill-slugs.mjs"

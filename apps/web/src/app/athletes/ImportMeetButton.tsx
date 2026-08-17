@@ -181,6 +181,18 @@ export default function ImportMeetButton({
     if (!res.ok) {
       throw new Error(data.error ?? "Import failed")
     }
+    if (data.jobId) {
+      const { pollScraperJob } = await import("@/lib/scraper-job-client")
+      await pollScraperJob(data.jobId)
+      const fin = await fetch("/api/meets/import/finalize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId: data.jobId }),
+      })
+      const finalized = await fin.json()
+      if (!fin.ok) throw new Error(finalized.error ?? "Import failed")
+      return finalized as ImportResult
+    }
     return data as ImportResult
   }
 
@@ -208,6 +220,18 @@ export default function ImportMeetButton({
     const data = await res.json()
     if (!res.ok) {
       throw new Error(data.error ?? "Import failed")
+    }
+    if (data.jobId) {
+      const { pollScraperJob } = await import("@/lib/scraper-job-client")
+      await pollScraperJob(data.jobId)
+      const fin = await fetch("/api/meets/import/swimphone/finalize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId: data.jobId }),
+      })
+      const finalized = await fin.json()
+      if (!fin.ok) throw new Error(finalized.error ?? "Import failed")
+      return finalized as ImportResult
     }
     return data as ImportResult
   }

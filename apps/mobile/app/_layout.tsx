@@ -1,23 +1,60 @@
+import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from "@react-navigation/native"
 import { Stack } from "expo-router"
 import { StatusBar } from "expo-status-bar"
+import { useMemo } from "react"
 import { AuthProvider } from "../src/lib/auth"
-import { colors } from "@swimbuzz/tokens"
+import { ThemeProvider, useThemePreference } from "../src/lib/theme"
+import { ViewPreferencesProvider } from "../src/lib/view-preferences"
+import { usePalette } from "@swimbuzz/ui"
 
-export default function RootLayout() {
+function ThemedStack() {
+  const { colorScheme } = useThemePreference()
+  const c = usePalette()
+  const navigationTheme = useMemo(
+    () => ({
+      ...(colorScheme === "dark" ? DarkTheme : DefaultTheme),
+      dark: colorScheme === "dark",
+      colors: {
+        ...(colorScheme === "dark" ? DarkTheme.colors : DefaultTheme.colors),
+        primary: c.primary,
+        background: c.bgLayout,
+        card: c.bgContainer,
+        text: c.text,
+        border: c.border,
+        notification: c.error,
+      },
+    }),
+    [c, colorScheme]
+  )
   return (
-    <AuthProvider>
-      <StatusBar style="auto" />
+    <NavigationThemeProvider value={navigationTheme}>
+      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       <Stack
         screenOptions={{
-          headerStyle: { backgroundColor: colors.light.primaryBg },
-          headerTintColor: colors.light.primaryText,
-          contentStyle: { backgroundColor: colors.light.bgLayout },
+          headerStyle: { backgroundColor: c.primaryBg },
+          headerTintColor: c.primaryText,
+          contentStyle: { backgroundColor: c.bgLayout },
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="welcome" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="notifications" options={{ headerShown: false }} />
+        <Stack.Screen name="settings" options={{ headerShown: false }} />
       </Stack>
-    </AuthProvider>
+    </NavigationThemeProvider>
+  )
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <ViewPreferencesProvider>
+          <ThemedStack />
+        </ViewPreferencesProvider>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }

@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useState } from "react"
 import {
   ActivityIndicator,
-  FlatList,
   RefreshControl,
   View,
 } from "react-native"
@@ -12,20 +11,28 @@ import {
   Button,
   Chip,
   EmptyState,
+  FlatList,
   ListRow,
   Screen,
   Section,
   TextField,
-  Title,
+  usePalette,
 } from "@swimbuzz/ui"
-import { colors, spacing } from "@swimbuzz/tokens"
+import { spacing } from "@swimbuzz/tokens"
 import { api } from "../../../src/lib/api"
 import { useAuth } from "../../../src/lib/auth"
+import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
+import { GalleryTile } from "../../../src/components/GalleryTile"
+import { useViewPreferences } from "../../../src/lib/view-preferences"
 
 export default function MeetsScreen() {
   const router = useRouter()
   const { user } = useAuth()
   const isStaff = !!user && isStaffRole(user.role)
+  const { defaultView } = useViewPreferences()
+  const c = usePalette()
+  const tabBarPad = useTabBarScrollPadding()
+  const gallery = defaultView === "gallery"
   const [meets, setMeets] = useState<MeetSummary[]>([])
   const [seasons, setSeasons] = useState<string[]>([])
   const [season, setSeason] = useState<string | null>(null)
@@ -79,7 +86,6 @@ export default function MeetsScreen() {
 
   return (
     <Screen style={{ paddingBottom: 0 }}>
-      <Title>Meets</Title>
       {isStaff ? (
         <View style={{ marginBottom: spacing.sm }}>
           <Button label="New meet" onPress={() => router.push("/meets/new")} />
@@ -115,13 +121,15 @@ export default function MeetsScreen() {
       ) : null}
       {loading && meets.length === 0 ? (
         <View style={{ paddingTop: 40 }}>
-          <ActivityIndicator color={colors.light.primaryActive} />
+          <ActivityIndicator color={c.primaryActive} />
         </View>
       ) : (
         <FlatList
+          key={gallery ? "gallery" : "list"}
           data={filtered}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingBottom: spacing.xl }}
+          numColumns={gallery ? 2 : 1}
+          contentContainerStyle={{ paddingBottom: tabBarPad }}
           refreshControl={
             <RefreshControl refreshing={loading} onRefresh={load} />
           }
@@ -137,20 +145,29 @@ export default function MeetsScreen() {
               body={error ?? undefined}
             />
           }
-          renderItem={({ item }) => (
-            <ListRow
-              title={item.name}
-              subtitle={[
-                formatMeetDateRange(item.startDate, item.endDate),
-                item.location,
-                item.course,
-                item.season,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-              onPress={() => router.push(`/meets/${item.id}`)}
-            />
-          )}
+          renderItem={({ item }) => {
+            const subtitle = [
+              formatMeetDateRange(item.startDate, item.endDate),
+              item.location,
+              item.course,
+              item.season,
+            ]
+              .filter(Boolean)
+              .join(" · ")
+            return gallery ? (
+              <GalleryTile
+                title={item.name}
+                subtitle={subtitle}
+                onPress={() => router.push(`/meets/${item.id}`)}
+              />
+            ) : (
+              <ListRow
+                title={item.name}
+                subtitle={subtitle}
+                onPress={() => router.push(`/meets/${item.id}`)}
+              />
+            )
+          }}
         />
       )}
     </Screen>

@@ -1,17 +1,19 @@
 import { useState } from "react"
-import { Alert, ScrollView, Switch, View } from "react-native"
+import { Alert, Switch, View } from "react-native"
 import { useRouter } from "expo-router"
 import {
   Body,
   Button,
   Muted,
   Screen,
+  ScrollView,
   TextField,
-  Title,
+  usePalette,
 } from "@swimbuzz/ui"
-import { colors, spacing } from "@swimbuzz/tokens"
+import { spacing } from "@swimbuzz/tokens"
 import { DateSelector, TimeSelector } from "../../../src/components/DateTimeSelector"
 import { api } from "../../../src/lib/api"
+import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 
 function clockToMinutes(value: string): number | null {
   const match = /^(\d{2}):(\d{2})$/.exec(value)
@@ -35,6 +37,8 @@ function endAfterStart(start: string, preferredEnd?: string): string {
 
 export default function NewPracticeScreen() {
   const router = useRouter()
+  const c = usePalette()
+  const tabBarPad = useTabBarScrollPadding()
   const [title, setTitle] = useState("")
   const [date, setDate] = useState("")
   const [startTime, setStartTime] = useState("19:30")
@@ -95,8 +99,7 @@ export default function NewPracticeScreen() {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
-        <Title>New practice</Title>
+      <ScrollView contentContainerStyle={{ paddingBottom: tabBarPad }}>
         <TextField
           label="Title"
           value={title}
@@ -170,10 +173,10 @@ export default function NewPracticeScreen() {
             value={published}
             onValueChange={setPublished}
             trackColor={{
-              false: colors.light.fill,
-              true: colors.light.primary,
+              false: c.switchTrack,
+              true: c.primary,
             }}
-            thumbColor={colors.light.bgContainer}
+            thumbColor={c.switchThumb}
           />
         </View>
         <Button

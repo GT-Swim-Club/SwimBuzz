@@ -1,7 +1,12 @@
-import type { MeetHighlights, StatCounter, StatSpotlight } from "@/lib/meet-stats"
+import type { MeetHighlights, StatCounter } from "@/lib/meet-stats"
 import { currentSeason, parseSeason, seasonFromDate } from "@/lib/season"
 import { canonicalizeStrokeEvent, normalizeEventName } from "@/lib/swim-parse"
 import { formatDisplayTime, formatTime } from "@/lib/utils"
+
+function formatDropPct(pct: number): string {
+  const rounded = pct >= 10 ? pct.toFixed(0) : pct.toFixed(1)
+  return `−${rounded}%`
+}
 
 export type AthleteSwimForStats = {
   id: string
@@ -81,7 +86,6 @@ export function computeAthleteHighlights(
   const { bestMs } = buildPbMaps(swims)
 
   const counters: StatCounter[] = []
-  let spotlight: StatSpotlight | null = null
 
   // Season swims / meets
   const meetKeys = new Set<string>()
@@ -94,6 +98,41 @@ export function computeAthleteHighlights(
       label: "Season swims",
       value: seasonSwims.length,
       hint: meetKeys.size > 0 ? `${meetKeys.size} meet${meetKeys.size === 1 ? "" : "s"}` : undefined,
+    })
+  }
+
+  const byEvent = new Map<string, AthleteSwimForStats[]>()
+  for (const s of swims) {
+    if (!Number.isFinite(s.timeMs) || s.timeMs <= 0) continue
+    const key = eventCourseKey(s.event, s.course)
+    const list = byEvent.get(key) ?? []
+    list.push(s)
+    byEvent.set(key, list)
+  }
+
+  // Most swam this season — most swims, tie-break faster season best
+  let mostSwam: { event: string; course: string; count: number; bestMs: number } | null =
+    null
+  for (const [key, list] of byEvent) {
+    const seasonList = list.filter((s) => swimSeason(s) === season)
+    if (seasonList.length === 0) continue
+    let seasonBest = Infinity
+    for (const s of seasonList) seasonBest = Math.min(seasonBest, s.timeMs)
+    const [event, course] = key.split("|")
+    const count = seasonList.length
+    if (
+      !mostSwam ||
+      count > mostSwam.count ||
+      (count === mostSwam.count && seasonBest < mostSwam.bestMs)
+    ) {
+      mostSwam = { event: event!, course: course!, count, bestMs: seasonBest }
+    }
+  }
+  if (mostSwam && mostSwam.count >= 2) {
+    counters.push({
+      label: "Most swam",
+      value: canonicalizeStrokeEvent(mostSwam.event),
+      hint: `${mostSwam.course} · ${mostSwam.count} swims`,
     })
   }
 
@@ -117,67 +156,46 @@ export function computeAthleteHighlights(
     counters.push({ label: "Podiums", value: podiums })
   }
 
-  // Most improved — largest absolute drop from first swim → PB (≥2 swims in event×course)
-  const byEvent = new Map<string, AthleteSwimForStats[]>()
-  for (const s of swims) {
-    if (!Number.isFinite(s.timeMs) || s.timeMs <= 0) continue
-    const key = eventCourseKey(s.event, s.course)
-    const list = byEvent.get(key) ?? []
-    list.push(s)
-    byEvent.set(key, list)
-  }
+  // Most improved this season — largest % drop vs pre-season PB (else first season swim)
   let mostImproved: {
     event: string
     course: string
+    pct: number
     dropMs: number
   } | null = null
   for (const [key, list] of byEvent) {
-    if (list.length < 2) continue
-    const sorted = [...list].sort(
-      (a, b) => toDate(a.date).getTime() - toDate(b.date).getTime()
-    )
-    const first = sorted[0]!
-    const pb = bestMs.get(key)
-    if (pb == null || first.timeMs <= pb) continue
-    const dropMs = first.timeMs - pb
-    if (!mostImproved || dropMs > mostImproved.dropMs) {
+    const seasonList = list.filter((s) => swimSeason(s) === season)
+    if (seasonList.length === 0) continue
+
+    let seasonBest = Infinity
+    for (const s of seasonList) seasonBest = Math.min(seasonBest, s.timeMs)
+
+    const prior = list.filter((s) => swimSeason(s) !== season)
+    let baseline: number | null = null
+    if (prior.length > 0) {
+      baseline = Math.min(...prior.map((s) => s.timeMs))
+    } else if (seasonList.length >= 2) {
+      const firstSeason = [...seasonList].sort(
+        (a, b) => toDate(a.date).getTime() - toDate(b.date).getTime()
+      )[0]!
+      baseline = firstSeason.timeMs
+    }
+    if (baseline == null || baseline <= 0 || seasonBest >= baseline) continue
+
+    const dropMs = baseline - seasonBest
+    const pct = (dropMs / baseline) * 100
+    if (!mostImproved || pct > mostImproved.pct) {
       const [event, course] = key.split("|")
-      mostImproved = { event: event!, course: course!, dropMs }
+      mostImproved = { event: event!, course: course!, pct, dropMs }
     }
   }
   if (mostImproved) {
     const dropStr = formatDisplayTime(formatTime(mostImproved.dropMs))
+    const pctStr = formatDropPct(mostImproved.pct)
     counters.push({
       label: "Most improved",
-      value: `−${dropStr}`,
-      hint: `${mostImproved.event} ${mostImproved.course}`,
-    })
-    spotlight = {
-      text: `Most improved: −${dropStr} in ${mostImproved.event} (${mostImproved.course})`,
-    }
-  }
-
-  // Signature event — most swims, tie-break faster PB
-  let signature: { event: string; course: string; count: number; pbMs: number } | null =
-    null
-  for (const [key, list] of byEvent) {
-    const pb = bestMs.get(key)
-    if (pb == null) continue
-    const [event, course] = key.split("|")
-    const count = list.length
-    if (
-      !signature ||
-      count > signature.count ||
-      (count === signature.count && pb < signature.pbMs)
-    ) {
-      signature = { event: event!, course: course!, count, pbMs: pb }
-    }
-  }
-  if (signature && signature.count >= 2) {
-    counters.push({
-      label: "Signature",
-      value: canonicalizeStrokeEvent(signature.event),
-      hint: `${signature.course} · ${signature.count} swims`,
+      value: canonicalizeStrokeEvent(mostImproved.event),
+      hint: `${mostImproved.course} · −${dropStr} (${pctStr.slice(1)})`,
     })
   }
 
@@ -220,5 +238,5 @@ export function computeAthleteHighlights(
   }
 
   if (counters.length === 0) return null
-  return { season, counters, spotlight }
+  return { season, counters }
 }

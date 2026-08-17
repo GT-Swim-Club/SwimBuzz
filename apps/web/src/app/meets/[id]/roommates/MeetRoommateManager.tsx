@@ -7,6 +7,7 @@ import MeetRoomAssignmentEditor from "../MeetRoomAssignmentEditor"
 import MeetRoomConfigButton, {
   type MeetRoomConfigInitial,
 } from "../MeetRoomConfigButton"
+import { SegmentedToggle, segmentedOptionClass } from "@/components/SegmentedToggle"
 
 type AthleteOption = {
   id: string
@@ -39,13 +40,7 @@ type Props = {
   meetHasEnded: boolean
 }
 
-const tabClass = (active: boolean) =>
-  [
-    "flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-    active
-      ? "bg-primary text-primary-text shadow-sm"
-      : "text-foreground-secondary hover:text-foreground",
-  ].join(" ")
+const tabClass = (active: boolean) => segmentedOptionClass(active) + " py-2"
 
 export default function MeetRoommateManager({
   meetId,
@@ -85,10 +80,10 @@ export default function MeetRoommateManager({
           Roommate preferences
         </p>
       </header>
-      <div
-        role="tablist"
-        aria-label="Roommate management sections"
-        className="flex gap-1 rounded-xl border border-border bg-fill-secondary p-1"
+      <SegmentedToggle
+        selectedIndex={activeTab === "responses" ? 1 : 0}
+        fullWidth
+        className="rounded-xl border border-border bg-fill-secondary"
       >
         <button
           type="button"
@@ -108,7 +103,7 @@ export default function MeetRoommateManager({
         >
           Responses ({preferences.length})
         </button>
-      </div>
+      </SegmentedToggle>
 
       <div
         id="roommate-settings"

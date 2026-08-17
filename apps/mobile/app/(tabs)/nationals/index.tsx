@@ -1,10 +1,13 @@
-import { useCallback, useMemo, useState } from "react"
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
+import { useCallback, useMemo, useRef, useState } from "react"
+import { Pressable, StyleSheet, Text, View } from "react-native"
 import { useFocusEffect, useRouter } from "expo-router"
 import { athletePreferredName, formatTime } from "@swimbuzz/shared"
-import { EmptyState, ErrorBlock, LoadingBlock, Muted, Screen } from "@swimbuzz/ui"
-import { colors, radii, spacing } from "@swimbuzz/tokens"
+import { EmptyState, ErrorBlock, LoadingBlock, Muted, Screen, ScrollView, usePalette } from "@swimbuzz/ui"
+import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
 import { api } from "../../../src/lib/api"
+import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
+import { GalleryTile } from "../../../src/components/GalleryTile"
+import { useViewPreferences } from "../../../src/lib/view-preferences"
 
 type CutRow = {
   id?: string
@@ -31,7 +34,6 @@ type QualifierAthlete = {
 }
 
 const COURSES = ["SCY", "LCM"] as const
-const c = colors.light
 
 function genderLabel(gender: unknown) {
   if (gender === "F") return "Women"
@@ -56,6 +58,11 @@ function eventTime(event: QualifierAthlete["events"][number]) {
 
 export default function NationalsScreen() {
   const router = useRouter()
+  const c = usePalette()
+  const tabBarPad = useTabBarScrollPadding()
+  const styles = useMemo(() => makeStyles(c), [c])
+  const { defaultView } = useViewPreferences()
+  const gallery = defaultView === "gallery"
   const [seasons, setSeasons] = useState<string[]>([])
   const [season, setSeason] = useState<string | null>(null)
   const [course, setCourse] = useState<(typeof COURSES)[number]>("SCY")
@@ -63,10 +70,13 @@ export default function NationalsScreen() {
   const [qualifiers, setQualifiers] = useState<QualifierAthlete[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const loadedKeyRef = useRef<string | null>(null)
 
   const loadCuts = useCallback(async (activeSeason: string, activeCourse: string) => {
+    const key = `${activeSeason}|${activeCourse}`
+    const silent = loadedKeyRef.current === key
     setError(null)
-    setLoading(true)
+    if (!silent) setLoading(true)
     try {
       const data = await api.getQualifiers({ season: activeSeason, course: activeCourse })
       const set = data.set
@@ -78,10 +88,12 @@ export default function NationalsScreen() {
       setQualifiers(
         Array.isArray(data.qualifiers) ? (data.qualifiers as QualifierAthlete[]) : []
       )
+      loadedKeyRef.current = key
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load qualifiers")
       setCuts([])
       setQualifiers([])
+      loadedKeyRef.current = null
     } finally {
       setLoading(false)
     }
@@ -91,8 +103,6 @@ export default function NationalsScreen() {
     useCallback(() => {
       let cancelled = false
       void (async () => {
-        setError(null)
-        setLoading(true)
         try {
           const seasonList = await api.listSeasons()
           if (cancelled) return
@@ -137,12 +147,11 @@ export default function NationalsScreen() {
   return (
     <Screen style={styles.screen}>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: tabBarPad }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.intro}>
           <Text style={styles.eyebrow}>CHAMPIONSHIP STANDARDS</Text>
-          <Text style={styles.heading}>Nationals</Text>
           <Text style={styles.description}>
             Track qualifying standards and athletes who have earned their place.
           </Text>
@@ -244,6 +253,35 @@ export default function NationalsScreen() {
                 title="No qualifiers yet"
                 body="No athletes have made an NQT cut for this season and course."
               />
+            ) : gallery ? (
+              <View style={styles.galleryGrid}>
+                {qualifiers.map((athlete) => {
+                  const name = athletePreferredName({
+                    firstName: athlete.firstName,
+                    lastName: athlete.lastName,
+                    nicknames: athlete.nicknames ?? [],
+                  })
+                  const visibleEvents = athlete.events.slice(0, 2)
+                  const hiddenEventCount = athlete.events.length - visibleEvents.length
+                  const subtitle = [
+                    ...visibleEvents.map(eventTime),
+                    hiddenEventCount > 0 ? `+${hiddenEventCount} more` : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")
+                  return (
+                    <View key={athlete.athleteId} style={styles.galleryItem}>
+                      <GalleryTile
+                        title={name}
+                        subtitle={subtitle}
+                        onPress={() =>
+                          router.push(`/roster/${athlete.athleteSlug || athlete.athleteId}`)
+                        }
+                      />
+                    </View>
+                  )
+                })}
+              </View>
             ) : (
               <View style={styles.listCard}>
                 {qualifiers.map((athlete, index) => {
@@ -334,9 +372,10 @@ export default function NationalsScreen() {
   )
 }
 
-const styles = StyleSheet.create({
+function makeStyles(c: ColorPalette) {
+  return StyleSheet.create({
   screen: { paddingBottom: 0 },
-  content: { paddingBottom: spacing.xl },
+  content: {},
   intro: { marginBottom: spacing.md },
   eyebrow: {
     color: c.primaryActive,
@@ -344,12 +383,6 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     letterSpacing: 1,
     marginBottom: spacing.xxs,
-  },
-  heading: {
-    color: c.text,
-    fontSize: 28,
-    fontWeight: "800",
-    letterSpacing: -0.6,
   },
   description: {
     color: c.textSecondary,
@@ -423,7 +456,7 @@ const styles = StyleSheet.create({
   summaryCard: {
     alignItems: "center",
     backgroundColor: c.primaryBg,
-    borderColor: "#e4d4b5",
+    borderColor: c.primaryBorder,
     borderRadius: radii.lg,
     borderWidth: 1,
     flexDirection: "row",
@@ -438,7 +471,7 @@ const styles = StyleSheet.create({
     lineHeight: 35,
   },
   summaryLabel: { color: c.primaryText, fontSize: 11, fontWeight: "600" },
-  summaryRule: { backgroundColor: "#d4bd91", height: 32, marginHorizontal: spacing.sm, width: 1 },
+  summaryRule: { backgroundColor: c.primaryBorderHover, height: 32, marginHorizontal: spacing.sm, width: 1 },
   summaryCopy: { flex: 1 },
   summaryTitle: { color: c.primaryText, fontSize: 15, fontWeight: "800" },
   summaryDetail: { color: c.primaryActive, fontSize: 13, fontWeight: "600", marginTop: 2 },
@@ -479,7 +512,7 @@ const styles = StyleSheet.create({
   listDivider: { borderBottomColor: c.border, borderBottomWidth: StyleSheet.hairlineWidth },
   avatar: {
     alignItems: "center",
-    backgroundColor: "#ede3d0",
+    backgroundColor: c.primaryBgHover,
     borderRadius: 16,
     height: 32,
     justifyContent: "center",
@@ -532,4 +565,12 @@ const styles = StyleSheet.create({
     fontVariant: ["tabular-nums"],
     fontWeight: "800",
   },
-})
+  galleryGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginHorizontal: -spacing.xxs,
+    marginBottom: spacing.lg,
+  },
+  galleryItem: { width: "50%" },
+  })
+}

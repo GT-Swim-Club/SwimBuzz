@@ -3,12 +3,12 @@ import { formatClockTime } from "@swimbuzz/shared"
 import {
   Modal,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native"
 import { colors, radii, spacing } from "@swimbuzz/tokens"
+import { ScrollView } from "@swimbuzz/ui"
 
 const c = colors.light
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]

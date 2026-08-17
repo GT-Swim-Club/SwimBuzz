@@ -62,13 +62,31 @@ export default function UploadStandardsButton({
 
     startTask(
       "Uploading standards...",
-      fetch("/api/qualifiers", { method: "POST", body: form }).then(async (res) => {
+      (async () => {
+        const res = await fetch("/api/qualifiers", { method: "POST", body: form })
         const data = await res.json().catch(() => ({}))
-        if (!res.ok) throw new Error(typeof data.error === "string" ? data.error : "Upload failed")
+        if (!res.ok) {
+          throw new Error(typeof data.error === "string" ? data.error : "Upload failed")
+        }
+        if (data.jobId) {
+          const { pollScraperJob } = await import("@/lib/scraper-job-client")
+          await pollScraperJob(data.jobId)
+          const fin = await fetch("/api/qualifiers/finalize", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ jobId: data.jobId }),
+          })
+          const finalized = await fin.json().catch(() => ({}))
+          if (!fin.ok) {
+            throw new Error(
+              typeof finalized.error === "string" ? finalized.error : "Upload failed"
+            )
+          }
+        }
         router.push(`/qualifiers?season=${encodeURIComponent(season)}&gender=all`)
         router.refresh()
         return "Standards uploaded successfully"
-      })
+      })()
     )
     resetForm()
   }

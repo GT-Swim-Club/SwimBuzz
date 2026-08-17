@@ -14,15 +14,25 @@ type AthleteOption = { id: string; name: string }
 
 function AthleteViewIcon() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 shrink-0">
-      <circle cx="9" cy="7" r="4" />
-      <path d="M2 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2" />
-      <path d="M16 11.5a3.5 3.5 0 0 1 0-7" />
-      <path d="M22 21v-2a5 5 0 0 0-3-4.58" />
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4 shrink-0"
+    >
+      <path d="M4 9.25h16" />
+      <path d="M7.5 9.25 9 4h6l1.5 5.25" />
+      <path d="M8.25 10.5v1.75a3.75 3.75 0 0 0 7.5 0V10.5" />
+      <path d="M8.25 11.75c1.05-.55 2.3-.8 3.75-.8s2.7.25 3.75.8" />
+      <path d="M4.75 21 7.25 15.5 12 19.5l4.75-4L19.25 21" />
+      <path d="M9.25 17.25 12 19.5l2.75-2.25" />
     </svg>
   )
 }
-
 export default function AthleteViewToggle({
   athletes,
   selectedAthleteId,

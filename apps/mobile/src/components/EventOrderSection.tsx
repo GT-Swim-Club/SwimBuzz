@@ -1,6 +1,6 @@
 import { View } from "react-native"
-import { Body, Muted, Section } from "@swimbuzz/ui"
-import { colors, spacing } from "@swimbuzz/tokens"
+import { Body, Muted, Section, usePalette } from "@swimbuzz/ui"
+import { spacing } from "@swimbuzz/tokens"
 
 export type EventOrderRow = {
   women: number | null
@@ -43,6 +43,7 @@ function showSessionLabel(label: string): boolean {
 }
 
 export function EventOrderSection({ order }: { order: EventOrder }) {
+  const c = usePalette()
   if (!order.sessions.length) return null
 
   return (
@@ -62,7 +63,7 @@ export function EventOrderSection({ order }: { order: EventOrder }) {
               flexDirection: "row",
               paddingVertical: spacing.xxs,
               borderBottomWidth: 1,
-              borderBottomColor: colors.light.border,
+              borderBottomColor: c.border,
               marginBottom: spacing.xxs,
             }}
           >

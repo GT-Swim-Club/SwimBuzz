@@ -1,10 +1,9 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useState, useTransition } from "react"
+import { useRef, useState } from "react"
 import {
   NOTIFICATION_PREFERENCE_META,
-  type NotificationPreferenceKey,
   type NotificationPreferences,
   type AllPreferenceKey,
 } from "@/lib/notification-preferences"
@@ -19,22 +18,25 @@ export default function NotificationPreferencesSettings({
   const router = useRouter()
   const [preferences, setPreferences] = useState(initialPreferences)
   const [error, setError] = useState<string | null>(null)
-  const [pending, startTransition] = useTransition()
   const [isSignupTimesOpen, setIsSignupTimesOpen] = useState(false)
+  const lastSaved = useRef(initialPreferences)
+  const requestGen = useRef<Partial<Record<AllPreferenceKey, number>>>({})
 
   function updatePreference(key: AllPreferenceKey, value: boolean | number | number[]) {
-    const next = { ...preferences, [key]: value }
-    setPreferences(next)
+    setPreferences((prev) => ({ ...prev, [key]: value }))
     setError(null)
+    const gen = (requestGen.current[key] ?? 0) + 1
+    requestGen.current[key] = gen
 
-    startTransition(async () => {
+    void (async () => {
       const res = await fetch("/api/notifications/preferences", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ [key]: value }),
       })
+      if (requestGen.current[key] !== gen) return
       if (!res.ok) {
-        setPreferences(preferences)
+        setPreferences((prev) => ({ ...prev, [key]: lastSaved.current[key] }))
         const data = await res.json().catch(() => null)
         setError(
           typeof data?.error === "string"
@@ -44,9 +46,13 @@ export default function NotificationPreferencesSettings({
         return
       }
       const data = (await res.json()) as { preferences: NotificationPreferences }
-      setPreferences(data.preferences)
+      if (requestGen.current[key] !== gen) return
+      lastSaved.current = {
+        ...lastSaved.current,
+        [key]: data.preferences[key],
+      }
       router.refresh()
-    })
+    })()
   }
 
   return (
@@ -114,16 +120,15 @@ export default function NotificationPreferencesSettings({
                   role="switch"
                   aria-checked={preferences[key]}
                   aria-label={label}
-                  disabled={pending}
                   onClick={() => updatePreference(key, !preferences[key])}
-                  className={`relative h-6 w-11 shrink-0 rounded-full transition-colors border-2 border-border disabled:opacity-60 ${
+                  className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
                     preferences[key] ? "bg-primary" : "bg-fill-secondary"
                   }`}
                 >
                   <span
-                    className={`absolute top-0 left-0.5 h-5 w-5 rounded-full shadow transition-transform ${
+                    className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full shadow transition-transform ${
                       preferences[key]
-                        ? "bg-background translate-x-4.5"
+                        ? "bg-background translate-x-5"
                         : "bg-primary translate-x-0"
                     }`}
                   />

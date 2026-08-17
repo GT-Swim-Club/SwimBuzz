@@ -92,21 +92,62 @@ SwimCloud / SwimPhone / PDF parsing runs on **your computer** via **Run scraper*
 
 ## Deploy
 
-### Web (Render)
+### Web (Vercel Hobby)
 
-Clone the full monorepo. Prefer **repo root** as the service root so workspace packages resolve:
+Clone the full monorepo. Create a Vercel project with **Root Directory = repository root** (`.`) so workspace packages resolve.
+
+| Setting | Value |
+|---------|-------|
+| Root directory | `.` (repository root) |
+| Install | `pnpm install --frozen-lockfile` (see [`vercel.json`](vercel.json)) |
+| Build | `pnpm --filter @swimbuzz/web run build` |
+| Framework | Next.js |
+| Node | `22` |
+| `NEXTAUTH_URL` | `https://swimbuzz.gtswimclub.com` |
+
+**Environment:** copy from [`.env.example`](.env.example). Critical for serverless:
+
+- `DATABASE_URL` — Supabase **transaction** pooler (`6543` + `pgbouncer=true`)
+- `DIRECT_URL` — migrations only
+- `CRON_SECRET` — shared secret for cron routes
+
+**Crons**
+
+1. **Notification cleanup** — registered in `vercel.json` (daily). Hobby allows once/day only.
+2. **Signup monitor** — Hobby cannot run minutely Vercel Cron. Point a free external cron (e.g. [cron-job.org](https://cron-job.org)) at:
+
+   `GET https://swimbuzz.gtswimclub.com/api/cron/signup-monitor`  
+   Header: `Authorization: Bearer <CRON_SECRET>`  
+   Schedule: every 1 minute.
+
+**Request body limit:** Vercel caps request bodies at ~4.5MB. Large PDFs must go through Supabase Storage (or URL fetch), not raw multipart past that limit.
+
+**Scraper jobs** enqueue immediately and the client polls `/api/scraper/jobs/[id]`, then calls `…/finalize`. Keep Run Scraper running on your computer during coach imports.
+
+After schema changes, run `prisma db push` (or apply SQL under `apps/web/supabase/`, including [`vercel-cutover.sql`](apps/web/supabase/vercel-cutover.sql) for signup monitor + scraper apply fields).
+
+#### Cutover checklist
+
+1. Deploy a Vercel **preview**, set env vars, run `prisma db push` against production DB.
+2. Update Google OAuth redirect URIs / `NEXTAUTH_URL` for the preview host; smoke-test sign-in.
+3. Smoke roster, practices, meets, notifications.
+4. With Run Scraper connected: sync times, roster SwimCloud import, meet PDF / SwimPhone import.
+5. Hit signup-monitor cron manually once; configure external minutely cron.
+6. Point `swimbuzz.gtswimclub.com` DNS / domain to Vercel; set production `NEXTAUTH_URL`.
+7. Disable the Render service after traffic looks healthy.
+
+### Web (Render — legacy)
+
+Prefer Vercel for production. If still on Render:
 
 | Setting | Value |
 |---------|-------|
 | Root directory | `.` (repository root) |
 | Build | `pnpm install --frozen-lockfile && pnpm --filter @swimbuzz/web run build` |
-| Start | `pnpm --filter @swimbuzz/web start` |
+| Start | `pnpm --filter @swimbuzz/web start` (stock `next start`) or `start:with-monitors` for in-process crons |
 | `NODE_VERSION` | `22` |
-| `NEXTAUTH_URL` | `https://swimbuzz.gtswimclub.com` |
 
-If the service root must stay `apps/web`, install from the monorepo root in the build command (`cd ../.. && pnpm install && pnpm --filter @swimbuzz/web run build`) and start with `pnpm start` from `apps/web`.
-
-After schema changes, run `prisma db push` (or apply [`apps/web/supabase/mobile-auth-push.sql`](apps/web/supabase/mobile-auth-push.sql)) so `MobileRefreshToken` and `DevicePushToken` exist.
+Local `pnpm dev:web` still uses [`apps/web/server.js`](apps/web/server.js) so signup/cleanup monitors run without external cron.
 
 ### Mobile (EAS)
 
@@ -114,6 +155,7 @@ After schema changes, run `prisma db push` (or apply [`apps/web/supabase/mobile-
 2. Create an EAS project and set `extra.eas.projectId` in `app.json`
 3. `eas build --platform ios` / `eas build --platform android`
 4. `eas submit` (see `eas.json`)
+5. Ensure `EXPO_PUBLIC_API_URL` points at the Vercel (or custom domain) origin
 
 ## Shared packages (edit web + mobile together)
 

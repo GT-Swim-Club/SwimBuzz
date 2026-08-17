@@ -9,6 +9,7 @@ import { formatRelativeTime, formatDateTime } from "@/lib/utils"
 import { currentSeason, parseSeason } from "@/lib/season"
 import { useScraperUi } from "@/components/ScraperUiProvider"
 import { useImportTask } from "@/components/ImportTaskProvider"
+import { runScraperEnqueuePollFinalize } from "@/lib/scraper-job-client"
 
 type RosterAthlete = {
   id: string
@@ -119,28 +120,36 @@ export default function SyncTimesButton() {
     }
 
     const promise = (async () => {
-      const res = await fetch("/api/times/sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          season,
-          gender,
-          athleteIds: toSync.map((a) => a.id),
-        }),
+      const data = await runScraperEnqueuePollFinalize<SyncResult>({
+        enqueue: () =>
+          fetch("/api/times/sync", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              season,
+              gender,
+              athleteIds: toSync.map((a) => a.id),
+            }),
+          }),
+        finalize: (jobId) =>
+          fetch("/api/times/sync/finalize", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ jobId }),
+          }),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? "Import failed")
 
       if (data.timesSyncedAt && Array.isArray(data.syncedAthleteIds)) {
-        const syncedIds = new Set<string>(data.syncedAthleteIds)
+        const syncedAt = String(data.timesSyncedAt)
+        const syncedIds = new Set<string>(data.syncedAthleteIds.map(String))
         setRoster((prev) =>
           prev.map((a) =>
-            syncedIds.has(a.id) ? { ...a, timesSyncedAt: data.timesSyncedAt } : a
+            syncedIds.has(a.id) ? { ...a, timesSyncedAt: syncedAt } : a
           )
         )
       }
       router.refresh()
-      
+
       const result = data as SyncResult
       return `Imported ${result.imported} new swim${result.imported === 1 ? "" : "s"} from ${result.athletesSynced}/${result.athletes} athlete${result.athletes === 1 ? "" : "s"}.`
     })()

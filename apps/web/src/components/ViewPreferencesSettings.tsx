@@ -2,18 +2,8 @@
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 import HoverDetail from "@/components/HoverDetail"
-
-const iconProps = {
-  xmlns: "http://www.w3.org/2000/svg",
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 2,
-  strokeLinecap: "round" as const,
-  strokeLinejoin: "round" as const,
-  className: "h-4 w-4 shrink-0",
-  "aria-hidden": true as const,
-}
+import { AppIcon } from "@/components/AppIcon"
+import { SegmentedToggle, segmentedIconOptionClass } from "@/components/SegmentedToggle"
 
 export default function ViewPreferencesSettings({ 
   defaultView,
@@ -72,38 +62,29 @@ export default function ViewPreferencesSettings({
             Gallery or List view
           </p>
         </div>
-        <div role="radiogroup" className="inline-flex shrink-0 rounded-lg border border-border p-0.5" aria-label="Default View">
+        <SegmentedToggle
+          selectedIndex={view === "list" ? 1 : 0}
+          className="shrink-0 rounded-lg border border-border bg-background"
+        >
             <button 
               onClick={() => updateView("gallery")} 
               disabled={pending} 
               aria-label="Gallery View"
-              className={`group relative inline-flex items-center justify-center rounded-md p-2 transition-colors ${view === "gallery" ? "bg-primary text-primary-text" : "text-foreground-secondary hover:text-foreground"}`}
+              className={"group relative " + segmentedIconOptionClass(view === "gallery")}
             >
-              <svg {...iconProps}>
-                <rect x="3" y="3" width="7" height="7" />
-                <rect x="14" y="3" width="7" height="7" />
-                <rect x="14" y="14" width="7" height="7" />
-                <rect x="3" y="14" width="7" height="7" />
-              </svg>
+              <AppIcon name="gallery" className="h-4 w-4 shrink-0" />
               <HoverDetail label="Gallery" />
             </button>
             <button 
               onClick={() => updateView("list")} 
               disabled={pending} 
               aria-label="List View"
-              className={`group relative inline-flex items-center justify-center rounded-md p-2 transition-colors ${view === "list" ? "bg-primary text-primary-text" : "text-foreground-secondary hover:text-foreground"}`}
+              className={"group relative " + segmentedIconOptionClass(view === "list")}
             >
-              <svg {...iconProps}>
-                <path d="M8 6h13" />
-                <path d="M8 12h13" />
-                <path d="M8 18h13" />
-                <path d="M3 6h.01" />
-                <path d="M3 12h.01" />
-                <path d="M3 18h.01" />
-              </svg>
+              <AppIcon name="list" className="h-4 w-4 shrink-0" />
               <HoverDetail label="List" />
             </button>
-        </div>
+        </SegmentedToggle>
       </div>
       
       <div className="flex items-center justify-between gap-4 px-4 py-3">
@@ -113,60 +94,40 @@ export default function ViewPreferencesSettings({
             Weekly, Monthly, or List view
           </p>
         </div>
-        <div role="radiogroup" className="inline-flex shrink-0 rounded-lg border border-border p-0.5" aria-label="Default Practices View">
+        <SegmentedToggle
+          selectedIndex={
+            practicesView === "month" ? 1 : practicesView === "list" ? 2 : 0
+          }
+          className="shrink-0 rounded-lg border border-border bg-background"
+        >
           <button 
             onClick={() => updatePracticesView("week")} 
             disabled={pending} 
             aria-label="Weekly View"
-            className={`group relative inline-flex items-center justify-center rounded-md p-2 transition-colors ${practicesView === "week" ? "bg-primary text-primary-text" : "text-foreground-secondary hover:text-foreground"}`}
+            className={"group relative " + segmentedIconOptionClass(practicesView === "week")}
           >
-            <svg {...iconProps}>
-              <rect width="18" height="18" x="3" y="4" rx="2" />
-              <path d="M16 2v4" />
-              <path d="M8 2v4" />
-              <path d="M3 10h18" />
-              <path d="M10 14h4" />
-              <path d="M10 18h4" />
-            </svg>
+            <AppIcon name="calendarWeek" className="h-4 w-4 shrink-0" />
               <HoverDetail label="Week" />
           </button>
           <button 
             onClick={() => updatePracticesView("month")} 
             disabled={pending} 
             aria-label="Monthly View"
-            className={`group relative inline-flex items-center justify-center rounded-md p-2 transition-colors ${practicesView === "month" ? "bg-primary text-primary-text" : "text-foreground-secondary hover:text-foreground"}`}
+            className={"group relative " + segmentedIconOptionClass(practicesView === "month")}
           >
-            <svg {...iconProps}>
-              <rect width="18" height="18" x="3" y="4" rx="2" />
-              <path d="M16 2v4" />
-              <path d="M8 2v4" />
-              <path d="M3 10h18" />
-              <path d="M8 14h.01" />
-              <path d="M12 14h.01" />
-              <path d="M16 14h.01" />
-              <path d="M8 18h.01" />
-              <path d="M12 18h.01" />
-              <path d="M16 18h.01" />
-            </svg>
+            <AppIcon name="calendarMonth" className="h-4 w-4 shrink-0" />
               <HoverDetail label="Month" />
           </button>
           <button 
             onClick={() => updatePracticesView("list")} 
             disabled={pending} 
             aria-label="List View"
-            className={`group relative inline-flex items-center justify-center rounded-md p-2 transition-colors ${practicesView === "list" ? "bg-primary text-primary-text" : "text-foreground-secondary hover:text-foreground"}`}
+            className={"group relative " + segmentedIconOptionClass(practicesView === "list")}
           >
-            <svg {...iconProps}>
-              <path d="M8 6h13" />
-              <path d="M8 12h13" />
-              <path d="M8 18h13" />
-              <path d="M3 6h.01" />
-              <path d="M3 12h.01" />
-              <path d="M3 18h.01" />
-            </svg>
+            <AppIcon name="list" className="h-4 w-4 shrink-0" />
               <HoverDetail label="List" />
           </button>
-        </div>
+        </SegmentedToggle>
       </div>
     </div>
   )

@@ -88,13 +88,6 @@ export default async function MeetsPage({
     return b.localeCompare(a)
   })
 
-  const meetsLinkClass = (active: boolean) =>
-    `inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 transition-colors ${
-      active
-        ? "bg-primary text-primary-text"
-        : "text-foreground-secondary hover:bg-fill"
-    }`
-
   return (
     <ViewNavigationProvider>
       <main className="space-y-6">
@@ -105,8 +98,6 @@ export default async function MeetsPage({
               activeView={activeView}
               galleryHref={buildHref({ view: "gallery" })}
               listHref={buildHref({ view: "list" })}
-              galleryLinkClassName={meetsLinkClass(activeView === "gallery")}
-              listLinkClassName={meetsLinkClass(activeView === "list")}
             />
             {isCoach && <CreateMeetButton seasons={seasons} />}
           </div>

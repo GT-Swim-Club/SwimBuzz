@@ -232,7 +232,7 @@ export default function PracticeDetail({
         </div>
       </div>
       {(focus && !isHtmlEmpty(focus) || tags.length > 0) && (
-        <div className="rounded-2xl border-l-[3px] border-l-primary bg-background px-4 py-3 text-sm text-foreground sm:px-5 sm:py-4">
+        <div className="rounded-2xl border-l-[3px] border-l-primary bg-background px-4 py-3 text-foreground sm:px-5 sm:py-4">
           {focus && !isHtmlEmpty(focus) && (
             <FormattedText text={focus} className="text-foreground" />
           )}

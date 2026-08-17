@@ -39,6 +39,8 @@
     --brand-color-bg-layout: #f5f5f5;
     --brand-color-bg-container: #ffffff;
     --brand-color-bg-elevated: #ffffff;
+    --brand-color-switch-thumb: #ffffff;
+    --brand-color-switch-track: var(--brand-color-fill);
     --brand-color-border: #eaeaea;
     --brand-color-border-secondary: #e8e8e8;
     --brand-color-border-subtle: #e4e4e7;
@@ -261,6 +263,8 @@
     --brand-color-bg-layout: #1a1a1a;
     --brand-color-bg-container: #141414;
     --brand-color-bg-elevated: #272727;
+    --brand-color-switch-thumb: #ffffff;
+    --brand-color-switch-track: var(--brand-color-fill);
     --brand-color-border: #2c2c2c;
     --brand-color-border-secondary: #252525;
     --brand-color-border-subtle: #1e1e1e;
@@ -442,3 +446,10 @@
     --brand-presets-grey-10: #000000;
   }
   
+  [role="switch"] span {
+    background-color: var(--brand-color-switch-thumb);
+  }
+
+  [role="switch"][aria-checked="false"] {
+    background-color: var(--brand-color-switch-track);
+  }

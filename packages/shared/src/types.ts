@@ -33,6 +33,7 @@ export type PracticeSummary = {
   focus?: string | null
   tags: string[]
   published: boolean
+  sets?: Array<{ distance?: number | null; title?: string | null }>
   _count?: { sets: number }
 }
 

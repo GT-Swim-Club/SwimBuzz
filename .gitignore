@@ -40,3 +40,5 @@ apps/web/package-lock.json
 
 # pnpm local store (never commit)
 .pnpm-store
+
+.cursor

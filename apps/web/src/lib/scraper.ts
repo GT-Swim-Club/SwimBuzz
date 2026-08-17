@@ -9,7 +9,10 @@ function isPrismaUniqueViolation(err: unknown) {
 const PAIRING_TTL_MS = 15 * 60 * 1000
 /** Must exceed heartbeat interval (15s) and long-poll window (~25s). */
 const CONNECTION_TTL_MS = 45 * 1000
+/** Local/dev wait only — never use on Vercel (Hobby max 300s). */
 const JOB_WAIT_MS = 20 * 60 * 1000
+/** Safe upper bound when SCRAPER_SYNC_WAIT=1 on a long-lived Node server. */
+const VERCEL_SAFE_WAIT_MS = 240_000
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -18,6 +21,8 @@ function sleep(ms: number) {
 function generatePairingCode() {
   return String(randomInt(100_000, 1_000_000))
 }
+
+export type ScraperApplyContext = Prisma.InputJsonValue
 
 export function isScraperConnectionAlive(lastSeenAt: Date) {
   return Date.now() - lastSeenAt.getTime() <= CONNECTION_TTL_MS
@@ -116,7 +121,8 @@ export async function createScraperJob(
   userId: string,
   connectionId: string,
   type: ScraperJobType,
-  payload: Prisma.InputJsonValue
+  payload: Prisma.InputJsonValue,
+  applyContext?: ScraperApplyContext | null
 ) {
   return prisma.scraperJob.create({
     data: {
@@ -125,8 +131,23 @@ export async function createScraperJob(
       type,
       payload,
       status: ScraperJobStatus.PENDING,
+      ...(applyContext != null ? { applyContext } : {}),
     },
   })
+}
+
+/** Enqueue a job for the desktop scraper; returns immediately with the job id. */
+export async function enqueueScraperJob(
+  userId: string,
+  type: ScraperJobType,
+  payload: Prisma.InputJsonValue,
+  applyContext?: ScraperApplyContext | null
+) {
+  const connection = await getActiveScraperConnection(userId)
+  if (!connection) {
+    throw new Error("LOCAL_BRIDGE_NOT_CONNECTED")
+  }
+  return createScraperJob(userId, connection.id, type, payload, applyContext)
 }
 
 export async function claimNextScraperJob(connectionId: string) {
@@ -156,6 +177,7 @@ export async function completeScraperJob(jobId: string, connectionId: string, re
     throw new Error("Job is not running")
   }
 
+  // Persist result for client poll + finalize (do not auto-delete).
   return prisma.scraperJob.update({
     where: { id: jobId },
     data: {
@@ -163,12 +185,6 @@ export async function completeScraperJob(jobId: string, connectionId: string, re
       result: result as object,
       completedAt: new Date(),
     },
-  }).then((job) => {
-    setTimeout(
-      () => prisma.scraperJob.delete({ where: { id: jobId } }).catch(() => undefined),
-      5000
-    )
-    return job
   })
 }
 
@@ -188,15 +204,32 @@ export async function failScraperJob(jobId: string, connectionId: string, error:
       error,
       completedAt: new Date(),
     },
-  }).then((job) => {
-    setTimeout(
-      () => prisma.scraperJob.delete({ where: { id: jobId } }).catch(() => undefined),
-      5000
-    )
-    return job
   })
 }
 
+export async function getScraperJobForUser(jobId: string, userId: string) {
+  return prisma.scraperJob.findFirst({
+    where: { id: jobId, userId },
+  })
+}
+
+export async function markScraperJobApplied(
+  jobId: string,
+  applyResult: Prisma.InputJsonValue
+) {
+  return prisma.scraperJob.update({
+    where: { id: jobId },
+    data: {
+      appliedAt: new Date(),
+      applyResult,
+    },
+  })
+}
+
+/**
+ * Block until the desktop scraper finishes. Only for long-lived Node (local
+ * `server.js`). On Vercel, use enqueue + client poll + finalize instead.
+ */
 export async function waitForScraperJob(jobId: string, timeoutMs = JOB_WAIT_MS) {
   const started = Date.now()
 
@@ -231,17 +264,33 @@ export async function waitForScraperJob(jobId: string, timeoutMs = JOB_WAIT_MS) 
 export const LOCAL_SCRAPER_HINT =
   "The scraper is not running. Open Run Scraper, install it on your computer if needed, and run the command."
 
+function allowSyncWait() {
+  // Explicit opt-in, or local custom server (not Vercel / serverless).
+  if (process.env.SCRAPER_SYNC_WAIT === "1") return true
+  if (process.env.SCRAPER_SYNC_WAIT === "0") return false
+  if (process.env.VERCEL) return false
+  return process.env.NODE_ENV !== "production"
+}
+
+/**
+ * Enqueue and optionally wait (local/dev only). Prefer enqueueScraperJob +
+ * client poll on Vercel.
+ */
 export async function runScraperJob<T>(
   userId: string,
   type: ScraperJobType,
   payload: Prisma.InputJsonValue
 ): Promise<T> {
-  const connection = await getActiveScraperConnection(userId)
-  if (!connection) {
-    throw new Error("LOCAL_BRIDGE_NOT_CONNECTED")
+  const job = await enqueueScraperJob(userId, type, payload)
+  if (!allowSyncWait()) {
+    throw new Error(
+      "Scraper jobs must be polled on this host. Use enqueue + GET /api/scraper/jobs/[id] + finalize."
+    )
   }
-
-  const job = await createScraperJob(userId, connection.id, type, payload)
-  const finished = await waitForScraperJob(job.id)
+  const timeoutMs =
+    process.env.VERCEL || process.env.SCRAPER_SYNC_WAIT === "1"
+      ? VERCEL_SAFE_WAIT_MS
+      : JOB_WAIT_MS
+  const finished = await waitForScraperJob(job.id, timeoutMs)
   return finished.result as T
 }

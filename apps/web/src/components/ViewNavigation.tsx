@@ -12,16 +12,19 @@ import {
 import { useRouter } from "next/navigation"
 import { ViewSkeleton, type ViewSkeletonVariant } from "@/components/ViewSkeletons"
 import HoverDetail from "@/components/HoverDetail"
+import { AppIcon } from "@/components/AppIcon"
+import { SegmentedToggle, segmentedIconOptionClass } from "@/components/SegmentedToggle"
 
 type ViewNavContextValue = {
   isPending: boolean
   pendingView: ViewSkeletonVariant | null
+  preview: (view: ViewSkeletonVariant) => void
   navigate: (href: string, view: ViewSkeletonVariant) => void
 }
 
 const ViewNavContext = createContext<ViewNavContextValue | null>(null)
 
-function useViewNav() {
+export function useViewNav() {
   const ctx = useContext(ViewNavContext)
   if (!ctx) {
     throw new Error("View navigation components must be used within ViewNavigationProvider")
@@ -38,6 +41,10 @@ export function ViewNavigationProvider({ children }: { children: ReactNode }) {
     if (!isPending) setPendingView(null)
   }, [isPending])
 
+  function preview(view: ViewSkeletonVariant) {
+    setPendingView(view)
+  }
+
   function navigate(href: string, view: ViewSkeletonVariant) {
     setPendingView(view)
     startTransition(() => {
@@ -46,7 +53,7 @@ export function ViewNavigationProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <ViewNavContext.Provider value={{ isPending, pendingView, navigate }}>
+    <ViewNavContext.Provider value={{ isPending, pendingView, preview, navigate }}>
       {children}
     </ViewNavContext.Provider>
   )
@@ -70,7 +77,7 @@ export function ViewNavLink({
   children: ReactNode
   title?: string
 }) {
-  const { navigate, isPending, pendingView } = useViewNav()
+  const { navigate, preview, isPending, pendingView } = useViewNav()
   const loading = isPending && pendingView === view
 
   return (
@@ -79,6 +86,7 @@ export function ViewNavLink({
       aria-label={title}
       aria-current={active ? "page" : undefined}
       aria-busy={loading}
+      onPointerDown={() => preview(view)}
       onClick={(e) => {
         if (active) {
           e.preventDefault()
@@ -112,16 +120,6 @@ export function ViewNavPanel({ children }: { children: ReactNode }) {
   return <>{children}</>
 }
 
-const galleryListToggleClass =
-  "inline-flex rounded-lg border border-border bg-background p-1 text-sm"
-
-const galleryListLinkClass = (active: boolean) =>
-  `inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 transition-colors ${
-    active
-      ? "bg-primary text-primary-text"
-      : "text-foreground-secondary hover:bg-fill"
-  }`
-
 export function GalleryListViewToggle({
   activeView,
   galleryHref,
@@ -135,58 +133,33 @@ export function GalleryListViewToggle({
   listLinkClassName?: string
   galleryLinkClassName?: string
 }) {
+  const { pendingView } = useViewNav()
+  const shown =
+    pendingView === "gallery" || pendingView === "list" ? pendingView : activeView
+
   return (
-    <div className={galleryListToggleClass}>
+    <SegmentedToggle
+      selectedIndex={shown === "list" ? 1 : 0}
+      className="rounded-lg border border-border bg-background"
+    >
       <ViewNavLink
         href={galleryHref}
         view="gallery"
         active={activeView === "gallery"}
         title="Gallery"
-        className={galleryLinkClassName ?? galleryListLinkClass(activeView === "gallery")}
+        className={galleryLinkClassName ?? segmentedIconOptionClass(shown === "gallery")}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className={viewIconClass}
-          aria-hidden="true"
-        >
-          <rect x="3" y="3" width="7" height="7" />
-          <rect x="14" y="3" width="7" height="7" />
-          <rect x="14" y="14" width="7" height="7" />
-          <rect x="3" y="14" width="7" height="7" />
-        </svg>
+        <AppIcon name="gallery" className={viewIconClass} />
       </ViewNavLink>
       <ViewNavLink
         href={listHref}
         view="list"
         active={activeView === "list"}
         title="List"
-        className={listLinkClassName ?? galleryListLinkClass(activeView === "list")}
+        className={listLinkClassName ?? segmentedIconOptionClass(shown === "list")}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className={viewIconClass}
-          aria-hidden="true"
-        >
-          <path d="M8 6h13" />
-          <path d="M8 12h13" />
-          <path d="M8 18h13" />
-          <path d="M3 6h.01" />
-          <path d="M3 12h.01" />
-          <path d="M3 18h.01" />
-        </svg>
+        <AppIcon name="list" className={viewIconClass} />
       </ViewNavLink>
-    </div>
+    </SegmentedToggle>
   )
 }

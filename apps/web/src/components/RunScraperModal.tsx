@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { formatClockTime } from "@swimbuzz/shared"
+import { SegmentedToggle, segmentedOptionClass } from "@/components/SegmentedToggle"
 
 type Pairing = {
   code: string
@@ -127,7 +128,11 @@ export default function RunScraperModal({
   }
 
   const platformToggle = (
-    <div className="mt-5 flex gap-1 rounded-xl border border-border bg-fill-secondary p-1">
+    <SegmentedToggle
+      selectedIndex={platform === "windows" ? 1 : 0}
+      fullWidth
+      className="mt-5 rounded-xl border border-border bg-fill-secondary"
+    >
       {(
         [
           ["mac", "Mac / Linux"],
@@ -138,16 +143,12 @@ export default function RunScraperModal({
           key={value}
           type="button"
           onClick={() => setPlatformAndSave(value)}
-          className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-            platform === value
-              ? "bg-primary text-primary-text shadow-sm"
-              : "text-foreground-secondary hover:text-foreground"
-          }`}
+          className={segmentedOptionClass(platform === value) + " py-2"}
         >
           {label}
         </button>
       ))}
-    </div>
+    </SegmentedToggle>
   )
 
   const isExpired = pairing ? new Date(pairing.expiresAt).getTime() < Date.now() : false;

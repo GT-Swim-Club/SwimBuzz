@@ -1,17 +1,42 @@
 import { NextResponse } from "next/server"
-import { Gender, ScraperJobType } from "@prisma/client"
+import { Gender, ScraperJobStatus, ScraperJobType } from "@prisma/client"
 import { parseSeason, seasonEndYear } from "@/lib/season"
-import { runScraperJob } from "@/lib/scraper"
-import { LOCAL_SCRAPER_HINT } from "@/lib/scraper-proxy"
+import {
+  enqueueScraperJob,
+  getScraperJobForUser,
+  markScraperJobApplied,
+  LOCAL_SCRAPER_HINT,
+} from "@/lib/scraper"
 import { getSession } from "@/lib/session"
 import {
   applySwimCloudRosterImport,
-  type SwimCloudRosterRow } from "@/lib/roster-import"
+  type SwimCloudRosterRow,
+} from "@/lib/roster-import"
 
 export const runtime = "nodejs"
-export const maxDuration = 3600
+export const maxDuration = 300
 
 const TEAM_ID = process.env.SWIMCLOUD_TEAM_ID ?? "10004130"
+
+type RosterSummary = {
+  linked: number
+  unmatched: number
+  skippedConflict: number
+  alreadyLinked: number
+  total: number
+}
+
+type RosterApplyContext = {
+  kind: "roster_sync"
+  season: string
+  genders: string[]
+  genderIndex: number
+  summary: RosterSummary
+}
+
+function emptySummary(): RosterSummary {
+  return { linked: 0, unmatched: 0, skippedConflict: 0, alreadyLinked: 0, total: 0 }
+}
 
 export async function POST(req: Request) {
   const session = await getSession()
@@ -26,28 +51,29 @@ export async function POST(req: Request) {
   }
 
   const swimCloudYear = seasonEndYear(season)
-  const gendersToFetch = gender === "all" ? ["M", "F"] : [gender]
-  const allSummary = { linked: 0, unmatched: 0, skippedConflict: 0, alreadyLinked: 0, total: 0 }
+  const gendersToFetch = gender === "all" ? ["M", "F"] : [gender === "F" ? "F" : "M"]
+  const g = gendersToFetch[0]
+
+  const applyContext: RosterApplyContext = {
+    kind: "roster_sync",
+    season,
+    genders: gendersToFetch,
+    genderIndex: 0,
+    summary: emptySummary(),
+  }
 
   try {
-    for (const g of gendersToFetch) {
-      const rosterRows = await runScraperJob<SwimCloudRosterRow[]>(session.user.id, ScraperJobType.ROSTER, {
+    const job = await enqueueScraperJob(
+      session.user.id,
+      ScraperJobType.ROSTER,
+      {
         team_id: parseInt(TEAM_ID, 10),
         year: swimCloudYear,
-        gender: g})
-      
-      const summary = await applySwimCloudRosterImport(
-        rosterRows,
-        season,
-        g === "F" ? Gender.F : Gender.M
-      )
-
-      allSummary.linked += summary.linked
-      allSummary.unmatched += summary.unmatched
-      allSummary.skippedConflict += summary.skippedConflict
-      allSummary.alreadyLinked += summary.alreadyLinked
-      allSummary.total += summary.total
-    }
+        gender: g,
+      },
+      applyContext
+    )
+    return NextResponse.json({ jobId: job.id })
   } catch (err) {
     const message = err instanceof Error ? err.message : "Import failed"
     if (message === "LOCAL_BRIDGE_NOT_CONNECTED") {
@@ -55,7 +81,69 @@ export async function POST(req: Request) {
     }
     return NextResponse.json({ error: message }, { status: 502 })
   }
+}
 
-  console.log("[roster swimcloud ids] summary:", allSummary)
-  return NextResponse.json(allSummary)
+export async function applyRosterSyncJob(jobId: string, userId: string) {
+  const job = await getScraperJobForUser(jobId, userId)
+  if (!job) throw new Error("Job not found")
+  if (job.status !== ScraperJobStatus.COMPLETED) {
+    throw new Error(job.error ?? "Job is not complete")
+  }
+  if (job.appliedAt && job.applyResult) {
+    return job.applyResult as Record<string, unknown>
+  }
+
+  const ctx = job.applyContext as RosterApplyContext | null
+  if (!ctx || ctx.kind !== "roster_sync") {
+    throw new Error("Invalid job context")
+  }
+
+  const g = ctx.genders[ctx.genderIndex]
+  const rosterRows = (job.result ?? []) as SwimCloudRosterRow[]
+  const summary = await applySwimCloudRosterImport(
+    rosterRows,
+    ctx.season,
+    g === "F" ? Gender.F : Gender.M
+  )
+
+  const allSummary: RosterSummary = {
+    linked: ctx.summary.linked + summary.linked,
+    unmatched: ctx.summary.unmatched + summary.unmatched,
+    skippedConflict: ctx.summary.skippedConflict + summary.skippedConflict,
+    alreadyLinked: ctx.summary.alreadyLinked + summary.alreadyLinked,
+    total: ctx.summary.total + summary.total,
+  }
+
+  const nextIndex = ctx.genderIndex + 1
+  if (nextIndex < ctx.genders.length) {
+    const nextGender = ctx.genders[nextIndex]
+    const swimCloudYear = seasonEndYear(ctx.season)
+    const nextJob = await enqueueScraperJob(
+      userId,
+      ScraperJobType.ROSTER,
+      {
+        team_id: parseInt(TEAM_ID, 10),
+        year: swimCloudYear,
+        gender: nextGender,
+      },
+      {
+        kind: "roster_sync",
+        season: ctx.season,
+        genders: ctx.genders,
+        genderIndex: nextIndex,
+        summary: allSummary,
+      } satisfies RosterApplyContext
+    )
+    // Mark this job applied so retries don't double-import; client continues on nextJobId.
+    await markScraperJobApplied(jobId, {
+      ...allSummary,
+      done: false,
+      nextJobId: nextJob.id,
+    })
+    return { ...allSummary, done: false, nextJobId: nextJob.id }
+  }
+
+  const result = { ...allSummary, done: true }
+  await markScraperJobApplied(jobId, result)
+  return result
 }

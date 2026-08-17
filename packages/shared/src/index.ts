@@ -1,3 +1,5 @@
 export * from "./roles"
 export * from "./types"
 export * from "./format"
+export * from "./icons"
+export * from "./html"

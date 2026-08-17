@@ -10,6 +10,7 @@ import {
 } from "react-native"
 import { WebView } from "react-native-webview"
 import { colors, spacing } from "@swimbuzz/tokens"
+import { Icon } from "./Icon"
 
 type FilePreviewModalProps = {
   open: boolean
@@ -66,9 +67,12 @@ export function FilePreviewModal({
               paddingVertical: spacing.xs,
             })}
           >
-            <Text style={{ color: palette.link, fontSize: 16, fontWeight: "600" }}>
-              Close
-            </Text>
+            <View style={{ alignItems: "center", flexDirection: "row", gap: 6 }}>
+              <Icon color={palette.link} name="x" size={18} />
+              <Text style={{ color: palette.link, fontSize: 16, fontWeight: "600" }}>
+                Close
+              </Text>
+            </View>
           </Pressable>
         </View>
         <View style={{ flex: 1 }}>

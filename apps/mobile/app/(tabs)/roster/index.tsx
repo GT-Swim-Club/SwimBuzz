@@ -2,7 +2,6 @@ import { useCallback, useMemo, useState } from "react"
 import {
   ActivityIndicator,
   Alert,
-  FlatList,
   RefreshControl,
   View,
 } from "react-native"
@@ -13,16 +12,20 @@ import {
   Button,
   Chip,
   EmptyState,
+  FlatList,
   ListRow,
   Muted,
   Screen,
   Section,
   TextField,
-  Title,
+  usePalette,
 } from "@swimbuzz/ui"
-import { colors, spacing } from "@swimbuzz/tokens"
+import { spacing } from "@swimbuzz/tokens"
 import { api } from "../../../src/lib/api"
 import { useAuth } from "../../../src/lib/auth"
+import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
+import { GalleryTile } from "../../../src/components/GalleryTile"
+import { useViewPreferences } from "../../../src/lib/view-preferences"
 
 type GenderFilter = "ALL" | "M" | "F"
 
@@ -30,6 +33,10 @@ export default function RosterScreen() {
   const router = useRouter()
   const { user } = useAuth()
   const isStaff = !!user && isStaffRole(user.role)
+  const { defaultView } = useViewPreferences()
+  const c = usePalette()
+  const tabBarPad = useTabBarScrollPadding()
+  const gallery = defaultView === "gallery"
   const [athletes, setAthletes] = useState<AthleteSummary[]>([])
   const [seasons, setSeasons] = useState<string[]>([])
   const [season, setSeason] = useState<string | null>(null)
@@ -123,7 +130,6 @@ export default function RosterScreen() {
 
   return (
     <Screen style={{ paddingBottom: 0 }}>
-      <Title>Roster</Title>
       {isStaff ? (
         <View style={{ marginBottom: spacing.sm, gap: spacing.sm }}>
           <Button
@@ -190,13 +196,15 @@ export default function RosterScreen() {
       ) : null}
       {loading && athletes.length === 0 ? (
         <View style={{ paddingTop: 40 }}>
-          <ActivityIndicator color={colors.light.primaryActive} />
+          <ActivityIndicator color={c.primaryActive} />
         </View>
       ) : (
         <FlatList
+          key={gallery ? "gallery" : "list"}
           data={filtered}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingBottom: spacing.xl }}
+          numColumns={gallery ? 2 : 1}
+          contentContainerStyle={{ paddingBottom: tabBarPad }}
           refreshControl={
             <RefreshControl refreshing={loading} onRefresh={load} />
           }
@@ -212,13 +220,21 @@ export default function RosterScreen() {
               body={error ?? undefined}
             />
           }
-          renderItem={({ item }) => (
-            <ListRow
-              title={athleteDisplayName(item)}
-              subtitle={[item.gender, item.seasons?.[0]].filter(Boolean).join(" · ")}
-              onPress={() => router.push(`/roster/${item.id}`)}
-            />
-          )}
+          renderItem={({ item }) =>
+            gallery ? (
+              <GalleryTile
+                title={athleteDisplayName(item)}
+                subtitle={[item.gender, item.seasons?.[0]].filter(Boolean).join(" · ")}
+                onPress={() => router.push(`/roster/${item.id}`)}
+              />
+            ) : (
+              <ListRow
+                title={athleteDisplayName(item)}
+                subtitle={[item.gender, item.seasons?.[0]].filter(Boolean).join(" · ")}
+                onPress={() => router.push(`/roster/${item.id}`)}
+              />
+            )
+          }
         />
       )}
     </Screen>

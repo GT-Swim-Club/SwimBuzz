@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { isValidSignupEntryTime } from "@/lib/meet-signup"
 import { parseTime } from "@/lib/utils"
 import Modal, { ModalFooter } from "@/components/Modal"
+import { SegmentedToggle, segmentedOptionClass } from "@/components/SegmentedToggle"
 
 const RELAY_EVENTS = [
   "200 Medley Relay",
@@ -221,11 +222,15 @@ export default function AddEntryButton({
           </ModalFooter>
         }
       >
-        <div className="flex gap-2 mb-4 p-1 rounded-lg border border-border">
-          <button type="button" onClick={() => setType("result")} className={`flex-1 text-sm py-1.5 rounded-lg ${type === "result" ? "bg-primary text-primary-text" : "hover:bg-fill"}`}>Result</button>
-          <button type="button" onClick={() => setType("individual")} className={`flex-1 text-sm py-1.5 rounded-lg ${type === "individual" ? "bg-primary text-primary-text" : "hover:bg-fill"}`}>Individual</button>
-          <button type="button" onClick={() => setType("relay")} className={`flex-1 text-sm py-1.5 rounded-lg ${type === "relay" ? "bg-primary text-primary-text" : "hover:bg-fill"}`}>Relay</button>
-        </div>
+        <SegmentedToggle
+          selectedIndex={type === "individual" ? 1 : type === "relay" ? 2 : 0}
+          fullWidth
+          className="mb-4 rounded-lg border border-border bg-background"
+        >
+          <button type="button" onClick={() => setType("result")} className={segmentedOptionClass(type === "result")}>Result</button>
+          <button type="button" onClick={() => setType("individual")} className={segmentedOptionClass(type === "individual")}>Individual</button>
+          <button type="button" onClick={() => setType("relay")} className={segmentedOptionClass(type === "relay")}>Relay</button>
+        </SegmentedToggle>
 
         {type === "result" ? (
           <>

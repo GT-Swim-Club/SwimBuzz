@@ -3,18 +3,23 @@ import { importMeetResults, resolveMeetDate } from "@/lib/meet-import"
 import { normalizeNameMappings, normalizeRejectedNames } from "@/lib/athlete-match"
 import {
   assertMeetNameMatches,
-  MeetImportValidationError } from "@/lib/meet-import-validate"
-import { runScraperJob } from "@/lib/scraper"
+  MeetImportValidationError,
+} from "@/lib/meet-import-validate"
+import {
+  enqueueScraperJob,
+  getScraperJobForUser,
+  markScraperJobApplied,
+  LOCAL_SCRAPER_HINT,
+} from "@/lib/scraper"
 import { prisma } from "@/lib/prisma"
 import { parseSeason } from "@/lib/season"
 import { coerceParsedRelayResults } from "@/lib/relay-results"
-import { ScraperJobType } from "@prisma/client"
-import { LOCAL_SCRAPER_HINT } from "@/lib/scraper-proxy"
+import { ScraperJobStatus, ScraperJobType } from "@prisma/client"
 import { notifyMeetRosterOfInfoDrops } from "@/lib/meet-roster-notify"
 import { getSession } from "@/lib/session"
 
 export const runtime = "nodejs"
-export const maxDuration = 3600
+export const maxDuration = 300
 
 type ParsedResult = {
   name: string
@@ -41,6 +46,17 @@ type ScrapedMeet = {
   incomplete_relays?: string[]
 }
 
+type SwimphoneApplyContext = {
+  kind: "swimphone_import"
+  meetUrl: string
+  season: string
+  meetId: string | null
+  team: string
+  nameMappings: ReturnType<typeof normalizeNameMappings>
+  rejectedNames: ReturnType<typeof normalizeRejectedNames>
+  expectedMeetName: string | null
+}
+
 function scraperErrorResponse(err: unknown) {
   const message = err instanceof Error ? err.message : "Failed to scrape SwimPhone meet"
   if (message === "LOCAL_BRIDGE_NOT_CONNECTED") {
@@ -63,7 +79,8 @@ export async function POST(req: Request) {
     meetId: meetIdRaw,
     team: teamRaw,
     nameMappings: nameMappingsRaw,
-    rejectedNames: rejectedNamesRaw} = body
+    rejectedNames: rejectedNamesRaw,
+  } = body
   const meetUrl = String(url ?? "").trim()
   const meetId = String(meetIdRaw ?? "").trim() || null
   const team = String(teamRaw ?? "").trim() || null
@@ -89,87 +106,105 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Season is required (e.g. 2025-2026)" }, { status: 400 })
   }
 
-  // Soft-match the title from the menu page before scraping every event.
-  if (meet?.name) {
-    let meta: Pick<ScrapedMeet, "meet_name" | "meet_date" | "course">
+  const applyContext: SwimphoneApplyContext = {
+    kind: "swimphone_import",
+    meetUrl,
+    season,
+    meetId: meet?.id ?? null,
+    team,
+    nameMappings,
+    rejectedNames,
+    expectedMeetName: meet?.name ?? null,
+  }
+
+  try {
+    const job = await enqueueScraperJob(
+      session.user.id,
+      ScraperJobType.SWIMPHONE_MEET,
+      { url: meetUrl, team },
+      applyContext
+    )
+    return NextResponse.json({ jobId: job.id })
+  } catch (err) {
+    return scraperErrorResponse(err)
+  }
+}
+
+export async function applySwimphoneImportJob(jobId: string, userId: string) {
+  const job = await getScraperJobForUser(jobId, userId)
+  if (!job) throw new Error("Job not found")
+  if (job.status !== ScraperJobStatus.COMPLETED) {
+    throw new Error(job.error ?? "Job is not complete")
+  }
+  if (job.appliedAt && job.applyResult) {
+    return job.applyResult as Record<string, unknown>
+  }
+
+  const ctx = job.applyContext as SwimphoneApplyContext | null
+  if (!ctx || ctx.kind !== "swimphone_import") {
+    throw new Error("Invalid job context")
+  }
+
+  const scraped = job.result as ScrapedMeet
+  const meet = ctx.meetId
+    ? await prisma.meet.findUnique({ where: { id: ctx.meetId } })
+    : null
+
+  if (ctx.expectedMeetName) {
     try {
-      meta = await runScraperJob(session.user.id, ScraperJobType.SWIMPHONE_MEET, {
-        url: meetUrl,
-        team,
-        metadata_only: true})
-    } catch (err) {
-      return scraperErrorResponse(err)
-    }
-    try {
-      assertMeetNameMatches(meet.name, meta.meet_name, "SwimPhone page")
+      assertMeetNameMatches(ctx.expectedMeetName, scraped.meet_name, "SwimPhone page")
     } catch (err) {
       if (err instanceof MeetImportValidationError) {
-        return NextResponse.json({ error: err.message }, { status: 400 })
+        throw err
       }
       throw err
     }
   }
 
-  let scraped: ScrapedMeet
-  try {
-    scraped = await runScraperJob<ScrapedMeet>(session.user.id, ScraperJobType.SWIMPHONE_MEET, {
-      url: meetUrl,
-      team})
-  } catch (err) {
-    return scraperErrorResponse(err)
+  const meetName = meet?.name ?? scraped.meet_name?.trim()
+  if (!meetName) {
+    throw new Error("Could not read meet name from SwimPhone page")
   }
 
-  try {
-    const meetName = meet?.name ?? scraped.meet_name?.trim()
-    if (!meetName) {
-      return NextResponse.json(
-        { error: "Could not read meet name from SwimPhone page" },
-        { status: 502 }
-      )
-    }
-
-    const meetDate = meet?.startDate ?? resolveMeetDate(scraped.meet_date)
-    if (!meetDate) {
-      return NextResponse.json(
-        { error: "Could not read meet date from SwimPhone page" },
-        { status: 502 }
-      )
-    }
-
-    const summary = await importMeetResults({
-      season,
-      meetName,
-      meetDate,
-      results: scraped.results ?? [],
-      relayResults: coerceParsedRelayResults(scraped.relay_results),
-      source: "swimphone",
-      courseDefault: scraped.course ?? "SCY",
-      meetId: meet?.id ?? null,
-      nameMappings,
-      rejectedNames})
-
-    if (meet?.id) {
-      await prisma.meet.update({
-        where: { id: meet.id },
-        data: { swimphoneUrl: meetUrl }})
-      if (summary.imported > 0) {
-        void notifyMeetRosterOfInfoDrops({
-          meetId: meet.id,
-          meetName: meet.name,
-          drops: ["results"]})
-      }
-    }
-
-    return NextResponse.json({
-      ...summary,
-      meetName,
-      meetDate: (meet?.startDate ?? meetDate).toISOString?.() ?? scraped.meet_date,
-      captchaLimited: scraped.captcha_limited ?? false,
-      incompleteRelays: scraped.incomplete_relays ?? []})
-  } catch (err) {
-    console.error("SwimPhone import failed:", err)
-    const message =
-      err instanceof Error ? err.message : "Import failed while saving results"
-    return NextResponse.json({ error: message }, { status: 500 })
+  const meetDate = meet?.startDate ?? resolveMeetDate(scraped.meet_date)
+  if (!meetDate) {
+    throw new Error("Could not read meet date from SwimPhone page")
   }
+
+  const summary = await importMeetResults({
+    season: ctx.season,
+    meetName,
+    meetDate,
+    results: scraped.results ?? [],
+    relayResults: coerceParsedRelayResults(scraped.relay_results),
+    source: "swimphone",
+    courseDefault: scraped.course ?? "SCY",
+    meetId: meet?.id ?? null,
+    nameMappings: ctx.nameMappings,
+    rejectedNames: ctx.rejectedNames,
+  })
+
+  if (meet?.id) {
+    await prisma.meet.update({
+      where: { id: meet.id },
+      data: { swimphoneUrl: ctx.meetUrl },
+    })
+    if (summary.imported > 0) {
+      void notifyMeetRosterOfInfoDrops({
+        meetId: meet.id,
+        meetName: meet.name,
+        drops: ["results"],
+      })
+    }
+  }
+
+  const result = {
+    ...summary,
+    meetName,
+    meetDate: (meet?.startDate ?? meetDate).toISOString?.() ?? scraped.meet_date,
+    captchaLimited: scraped.captcha_limited ?? false,
+    incompleteRelays: scraped.incomplete_relays ?? [],
+  }
+  await markScraperJobApplied(jobId, result)
+  return result
 }
