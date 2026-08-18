@@ -38,6 +38,8 @@ type TimePickerProps = {
   min?: string
   /** When true with `min`, the min time itself is not selectable. */
   minExclusive?: boolean
+  /** Small caption under the field naming the zone the time is being entered in, e.g. "Eastern Time (EDT)". */
+  zoneLabel?: string
 }
 
 type Period = "AM" | "PM"
@@ -656,6 +658,7 @@ export function TimePicker({
   hasError = false,
   min,
   minExclusive = false,
+  zoneLabel,
 }: TimePickerProps) {
   const initial = parseTime(value) ?? roundedNow()
   const [hour, setHour] = useState(initial.hour)
@@ -784,6 +787,9 @@ export function TimePicker({
         onFieldClick={openForInput}
         onPickerClick={togglePicker}
       />
+      {zoneLabel && (
+        <p className="mt-1 text-[11px] text-foreground-tertiary">Time zone: {zoneLabel}</p>
+      )}
       <FloatingPopover open={floating.open} panelRef={floating.panelRef} position={floating.position} width={256} scrollable={false}>
         <div className="mb-2 grid grid-cols-2 rounded-md bg-fill-secondary p-0.5">
           {(["AM", "PM"] as Period[]).map((option) => (

@@ -5,6 +5,7 @@ import {
   normalizeFinalsHeatSheetUrls,
   normalizeHeatSheetUrls,
 } from "@/lib/meet-files"
+import { DEFAULT_TIME_ZONE, isValidTimeZone } from "@swimbuzz/shared"
 
 export class MeetInputError extends Error {}
 
@@ -102,6 +103,14 @@ export function buildMeetData(body: Record<string, unknown>, opts: BuildOptions 
     } else {
       data.startTime = null
     }
+  }
+
+  if ("timeZone" in body) {
+    const raw = optionalString(body.timeZone)
+    if (raw && !isValidTimeZone(raw)) throw new MeetInputError("Time zone is invalid")
+    data.timeZone = raw ?? DEFAULT_TIME_ZONE
+  } else if (opts.requireStartDate) {
+    data.timeZone = DEFAULT_TIME_ZONE
   }
 
   if ("course" in body) data.course = parseCourse(body.course)

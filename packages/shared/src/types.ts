@@ -29,6 +29,7 @@ export type PracticeSummary = {
   date?: string | null
   startTime: string
   endTime: string
+  timeZone: string
   location: string
   focus?: string | null
   tags: string[]

@@ -119,6 +119,8 @@ model Meet {
   location      String?
   startDate     DateTime
   startTime     String?
+  /// IANA zone (e.g. "America/New_York") that startTime is a wall-clock time in.
+  timeZone      String    @default("America/New_York")
   endDate       DateTime?
   course        Course    @default(SCY)
   season        String
@@ -298,6 +300,8 @@ model Practice {
   date        DateTime?
   startTime   String        @default("19:30")
   endTime     String        @default("21:00")
+  /// IANA zone (e.g. "America/New_York") that startTime/endTime are wall-clock times in.
+  timeZone    String        @default("America/New_York")
   location    String        @default("CRC Comp Pool")
   focus       String?
   tags        String[]      @default([])

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { formatSwimDate } from "@/lib/utils"
-import { formatClockTimeRange } from "@swimbuzz/shared"
+import { ZonedClockTime } from "@/components/ZonedTime"
 import { FormattedText, isHtmlEmpty } from "@/components/FormattedText"
 import PracticeActions from "./PracticeActions"
 import ExportPracticePdfButton from "./ExportPracticePdfButton"
@@ -43,6 +43,7 @@ export default function PracticeDetail({
   dateIso,
   startTime,
   endTime,
+  timeZone,
   location,
   focus,
   tags,
@@ -62,6 +63,7 @@ export default function PracticeDetail({
   dateIso: string | null
   startTime: string
   endTime: string
+  timeZone: string
   location: string
   focus: string | null
   tags: string[]
@@ -198,7 +200,17 @@ export default function PracticeDetail({
               <div className="flex items-center gap-1.5">
                 <InfoIcon kind="calendar" />
                 {dateIso ? formatSwimDate(dateIso) : "No date"}
-                {startTime || endTime ? ` · ${formatClockTimeRange(startTime, endTime)}` : ""}
+                {startTime || endTime ? (
+                  <>
+                    {" · "}
+                    <ZonedClockTime
+                      date={dateIso ? dateIso.slice(0, 10) : null}
+                      startTime={startTime}
+                      endTime={endTime}
+                      sourceTimeZone={timeZone}
+                    />
+                  </>
+                ) : null}
               </div>
               <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
                 {location && (
@@ -313,6 +325,7 @@ export default function PracticeDetail({
           dateIso={dateIso}
           startTime={startTime}
           endTime={endTime}
+          timeZone={timeZone}
           location={location}
           focus={focus}
           tags={tags}

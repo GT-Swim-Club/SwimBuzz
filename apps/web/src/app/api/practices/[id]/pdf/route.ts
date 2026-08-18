@@ -35,6 +35,7 @@ export async function GET(
     dateIso: practice.date ? practice.date.toISOString() : null,
     startTime: practice.startTime,
     endTime: practice.endTime,
+    timeZone: practice.timeZone,
     location: practice.location,
     focus: practice.focus,
     tags: practice.tags,

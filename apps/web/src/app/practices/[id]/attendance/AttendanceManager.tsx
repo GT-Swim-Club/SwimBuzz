@@ -7,7 +7,8 @@ import HoverDetail from "@/components/HoverDetail"
 import InfoIcon from "@/components/InfoIcon"
 import { athletePath } from "@/lib/slug"
 import { formatSwimDate } from "@/lib/utils"
-import { formatClockTime, formatClockTimeRange } from "@swimbuzz/shared"
+import { ZonedClockTime, ZonedInstantTime } from "@/components/ZonedTime"
+import { formatClockTime } from "@swimbuzz/shared"
 
 type AttendanceRecord = {
   id: string
@@ -49,6 +50,7 @@ export default function AttendanceManager({
   dateIso,
   startTime,
   endTime,
+  timeZone,
   location,
   initialAttendance,
   roster,
@@ -58,6 +60,7 @@ export default function AttendanceManager({
   dateIso: string | null
   startTime: string
   endTime: string
+  timeZone: string
   location: string
   initialAttendance: AttendanceRecord[]
   roster: RosterEntry[]
@@ -260,7 +263,17 @@ export default function AttendanceManager({
             <span className="flex items-center gap-1.5">
               <InfoIcon kind="calendar" />
               {dateIso ? formatSwimDate(dateIso) : "No date"}
-              {startTime || endTime ? ` · ${formatClockTimeRange(startTime, endTime)}` : ""}
+              {startTime || endTime ? (
+                <>
+                  {" · "}
+                  <ZonedClockTime
+                    date={dateIso ? dateIso.slice(0, 10) : null}
+                    startTime={startTime}
+                    endTime={endTime}
+                    sourceTimeZone={timeZone}
+                  />
+                </>
+              ) : null}
             </span>
             {location && (
               <>
@@ -479,7 +492,9 @@ export default function AttendanceManager({
                   )}
                   <p className="text-xs text-foreground-tertiary">
                     {/* Check-in times render in the viewer's timezone. */}
-                    <span suppressHydrationWarning>{checkInTime(record.recordedAt)}</span>
+                    <ZonedInstantTime at={record.recordedAt}>
+                      <span suppressHydrationWarning>{checkInTime(record.recordedAt)}</span>
+                    </ZonedInstantTime>
                     {record.method === "MANUAL" ? " · added by name" : " · Buzzcard"}
                     {record.year ? ` · ${record.year}` : ""}
                   </p>

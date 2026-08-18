@@ -3,7 +3,8 @@ import ActionIcon from "@/components/ActionIcon"
 import InfoIcon from "@/components/InfoIcon"
 import { athletePath } from "@/lib/slug"
 import { formatSwimDate } from "@/lib/utils"
-import { formatClockTime, formatClockTimeRange } from "@swimbuzz/shared"
+import { formatClockTime } from "@swimbuzz/shared"
+import { ZonedClockTime, ZonedInstantTime } from "@/components/ZonedTime"
 
 type AttendanceRecord = {
   id: string
@@ -21,6 +22,7 @@ export default function AttendanceList({
   dateIso,
   startTime,
   endTime,
+  timeZone,
   location,
   attendance,
   viewerAthleteId,
@@ -29,6 +31,7 @@ export default function AttendanceList({
   dateIso: string | null
   startTime: string
   endTime: string
+  timeZone: string
   location: string
   attendance: AttendanceRecord[]
   viewerAthleteId: string | null
@@ -47,7 +50,17 @@ export default function AttendanceList({
             <span className="flex items-center gap-1.5">
               <InfoIcon kind="calendar" />
               {dateIso ? formatSwimDate(dateIso) : "No date"}
-              {startTime || endTime ? ` · ${formatClockTimeRange(startTime, endTime)}` : ""}
+              {startTime || endTime ? (
+                <>
+                  {" · "}
+                  <ZonedClockTime
+                    date={dateIso ? dateIso.slice(0, 10) : null}
+                    startTime={startTime}
+                    endTime={endTime}
+                    sourceTimeZone={timeZone}
+                  />
+                </>
+              ) : null}
             </span>
             {location && (
               <>
@@ -103,7 +116,9 @@ export default function AttendanceList({
                       )}
                     </div>
                     <p className="text-xs text-foreground-tertiary">
-                      <span suppressHydrationWarning>{formatClockTime(new Date(record.recordedAt))}</span>
+                      <ZonedInstantTime at={record.recordedAt}>
+                        <span suppressHydrationWarning>{formatClockTime(new Date(record.recordedAt))}</span>
+                      </ZonedInstantTime>
                       {record.year ? ` · ${record.year}` : ""}
                     </p>
                   </div>

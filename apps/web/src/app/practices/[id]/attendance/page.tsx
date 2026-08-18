@@ -31,6 +31,7 @@ export default async function PracticeAttendancePage({
       date: true,
       startTime: true,
       endTime: true,
+      timeZone: true,
       location: true,
       attendance: {
         orderBy: { recordedAt: "desc" },
@@ -70,6 +71,7 @@ export default async function PracticeAttendancePage({
           dateIso={practice.date ? practice.date.toISOString() : null}
           startTime={practice.startTime}
           endTime={practice.endTime}
+          timeZone={practice.timeZone}
           location={practice.location}
           attendance={initialAttendance}
           viewerAthleteId={viewerAthleteId}
@@ -109,6 +111,7 @@ export default async function PracticeAttendancePage({
         dateIso={practice.date ? practice.date.toISOString() : null}
         startTime={practice.startTime}
         endTime={practice.endTime}
+        timeZone={practice.timeZone}
         location={practice.location}
         initialAttendance={initialAttendance}
         roster={roster.map((a) => ({

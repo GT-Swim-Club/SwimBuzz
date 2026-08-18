@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { Alert, Switch, View } from "react-native"
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router"
-import { formatClockTimeRange, formatDateTime, isHtmlEmpty, isStaffRole } from "@swimbuzz/shared"
+import { DEFAULT_TIME_ZONE, formatClockTimeRangeInViewerZone, formatDateTime, isHtmlEmpty, isStaffRole } from "@swimbuzz/shared"
 import {
   Body,
   Button,
@@ -161,6 +161,7 @@ export default function PracticeDetailScreen() {
         date: toDateInput(practice.date),
         startTime: String(practice.startTime ?? "19:30"),
         endTime: String(practice.endTime ?? "21:00"),
+        timeZone: String(practice.timeZone ?? DEFAULT_TIME_ZONE),
         location: String(practice.location ?? "CRC Comp Pool"),
         focus:
           practice.focus == null || practice.focus === ""
@@ -229,7 +230,15 @@ export default function PracticeDetailScreen() {
             practice.date
               ? new Date(String(practice.date)).toLocaleDateString()
               : null,
-            formatClockTimeRange(String(practice.startTime ?? ""), String(practice.endTime ?? "")),
+            (() => {
+              const zoned = formatClockTimeRangeInViewerZone(
+                practice.date ? String(practice.date).slice(0, 10) : new Date().toISOString().slice(0, 10),
+                String(practice.startTime ?? ""),
+                String(practice.endTime ?? ""),
+                String(practice.timeZone ?? DEFAULT_TIME_ZONE)
+              )
+              return `${zoned.text} ${zoned.abbrev}`
+            })(),
             practice.location,
           ]
             .filter(Boolean)

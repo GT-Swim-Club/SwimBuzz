@@ -5,7 +5,7 @@ import Link from "next/link"
 import BackLink from "@/components/BackLink"
 import PageLabelRegistrar from "@/components/PageLabelRegistrar"
 import { formatDateRange } from "@/lib/utils"
-import { formatClockTime } from "@swimbuzz/shared"
+import { ZonedClockTime } from "@/components/ZonedTime"
 import { Fragment } from "react"
 import ImportMeetButton from "@/app/athletes/ImportMeetButton"
 import ImportMeetResourcesButton from "./ImportMeetResourcesButton"
@@ -164,6 +164,7 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
     location: meet.location ?? "",
     startDate: toDateInput(meet.startDate),
     startTime: meet.startTime ?? "",
+    timeZone: meet.timeZone,
     endDate: toDateInput(meet.endDate),
     course: meet.course,
     season: meet.season,
@@ -510,7 +511,16 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
                 <div className="flex items-center gap-1.5">
                   <InfoIcon kind="calendar" />
                   {formatDateRange(meet.startDate, meet.endDate)}
-                  {meet.startTime ? ` · ${formatClockTime(meet.startTime)}` : ""}
+                  {meet.startTime ? (
+                    <>
+                      {" · "}
+                      <ZonedClockTime
+                        date={meet.startDate.toISOString().slice(0, 10)}
+                        startTime={meet.startTime}
+                        sourceTimeZone={meet.timeZone}
+                      />
+                    </>
+                  ) : null}
                 </div>
                 <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
                   {meet.location && (
@@ -535,6 +545,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
               className="min-w-0 sm:flex-1"
               startDate={meet.startDate}
               startTime={meet.startTime}
+              timeZone={meet.timeZone}
               upcoming={false}
               variant="banner"
             />

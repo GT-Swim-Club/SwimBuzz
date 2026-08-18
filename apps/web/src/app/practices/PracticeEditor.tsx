@@ -4,6 +4,8 @@ import { type PointerEvent, useEffect, useLayoutEffect, useRef, useState } from 
 import { useRouter } from "next/navigation"
 import RichTextField from "@/components/RichTextField"
 import { DatePicker, TimePicker } from "@/components/CustomDateTimePicker"
+import { useViewerTimeZone } from "@/components/ZonedTime"
+import { DEFAULT_TIME_ZONE, zoneAbbreviation, zoneDisplayName } from "@swimbuzz/shared"
 import { PRACTICE_EDIT_IDLE_TIMEOUT_MS, PRACTICE_EDIT_LOCK_HEARTBEAT_MS, PRACTICE_EDIT_LOCK_TOKEN_HEADER, type PracticeEditLockInfo } from "@/lib/practice-edit-lock-shared"
 import { broadcastPracticeEditLockChanged } from "@/lib/practice-edit-lock-client"
 import { practicePath } from "@/lib/slug"
@@ -27,6 +29,7 @@ export type PracticeFormState = {
   date: string
   startTime: string
   endTime: string
+  timeZone: string
   location: string
   focus: string
   tags: string[]
@@ -59,6 +62,7 @@ export const emptyPractice: PracticeFormState = {
   date: new Date().toISOString().slice(0, 10),
   startTime: "19:30",
   endTime: "21:00",
+  timeZone: DEFAULT_TIME_ZONE,
   location: "CRC Comp Pool",
   focus: "",
   tags: [],
@@ -137,6 +141,8 @@ export default function PracticeEditor({
   availableTags?: string[]
 }) {
   const router = useRouter()
+  const viewerTimeZone = useViewerTimeZone()
+  const timeZoneLabel = `${zoneDisplayName(viewerTimeZone)} (${zoneAbbreviation(viewerTimeZone)})`
   const [error, setError] = useState<string | null>(null)
   const [setPendingDeletion, setSetPendingDeletion] = useState<{ dragId: string; title: string } | null>(null)
   const [form, setForm] = useState<PracticeFormState>(() =>
@@ -912,11 +918,13 @@ export default function PracticeEditor({
                       ...current,
                       startTime: value,
                       endTime: value ? endOnOrAfterStart(value, current.endTime) : current.endTime,
+                      timeZone: value ? viewerTimeZone : current.timeZone,
                     }))
                   }
                   ariaLabel="Practice start time"
                   hasError={missingStartTime}
                   clearable={false}
+                  zoneLabel={timeZoneLabel}
                 />
               </div>
               <span className="shrink-0 text-sm text-foreground-tertiary">to</span>
@@ -930,6 +938,7 @@ export default function PracticeEditor({
                         current.startTime && value && (clockToMinutes(value) ?? 0) < (clockToMinutes(current.startTime) ?? 0)
                           ? endOnOrAfterStart(current.startTime)
                           : value,
+                      timeZone: value ? viewerTimeZone : current.timeZone,
                     }))
                   }
                   ariaLabel="Practice end time"

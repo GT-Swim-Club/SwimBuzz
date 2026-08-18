@@ -41,6 +41,7 @@ export default async function PracticeEditPage({
     date: toDateInput(practice.date),
     startTime: practice.startTime,
     endTime: practice.endTime,
+    timeZone: practice.timeZone,
     location: practice.location,
     focus: practice.focus ?? "",
     tags: practice.tags,

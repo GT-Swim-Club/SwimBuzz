@@ -1,5 +1,5 @@
 import { jsPDF } from "jspdf"
-import { formatClockTimeRange } from "@swimbuzz/shared"
+import { formatClockTimeRange, zoneAbbreviation, zonedTimeToUtc } from "@swimbuzz/shared"
 import { formatSwimDate } from "@/lib/utils"
 import { isHtmlEmpty, normalizePracticeHtml } from "@/components/FormattedText"
 
@@ -16,6 +16,7 @@ export type PracticePdfInput = {
   dateIso: string | null
   startTime: string
   endTime: string
+  timeZone: string
   location: string
   focus: string | null
   tags: string[]
@@ -543,10 +544,22 @@ export function buildPracticePdf(input: PracticePdfInput): jsPDF {
   }
 
   y += titleSize * 0.22 + mt1 + metaSize * 0.8
+  // Static exports always show the practice's own zone rather than whoever generated it.
+  const pdfZoneAbbrev =
+    input.startTime || input.endTime
+      ? zoneAbbreviation(
+          input.timeZone,
+          zonedTimeToUtc(
+            input.dateIso ? input.dateIso.slice(0, 10) : new Date().toISOString().slice(0, 10),
+            input.startTime || input.endTime,
+            input.timeZone
+          )
+        )
+      : null
   const dateLine = [
     input.dateIso ? formatSwimDate(input.dateIso) : "No date",
     input.startTime || input.endTime
-      ? formatClockTimeRange(input.startTime, input.endTime)
+      ? `${formatClockTimeRange(input.startTime, input.endTime)}${pdfZoneAbbrev ? ` ${pdfZoneAbbrev}` : ""}`
       : null,
   ]
     .filter(Boolean)

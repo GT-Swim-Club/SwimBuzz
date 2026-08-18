@@ -14,6 +14,7 @@ import {
 } from "@/lib/meet-signup"
 import { formatDisplayTime } from "@/lib/utils"
 import { formatDateTime } from "@/lib/utils"
+import { ZonedInstantTime } from "@/components/ZonedTime"
 
 export type MeetSignupAthleteInitial = {
   events: string[]
@@ -358,13 +359,24 @@ export default function MeetSignupAthleteForm({
 
           <div className="text-sm text-foreground-secondary flex flex-col gap-y-1 mt-2">
             {formOpenAt && new Date(formOpenAt) > new Date() && (
-              <span>Opens: {formatDateTime(new Date(formOpenAt))}</span>
+              <span>
+                Opens:{" "}
+                <ZonedInstantTime at={formOpenAt}>{formatDateTime(new Date(formOpenAt))}</ZonedInstantTime>
+              </span>
             )}
             {formCloseAt && new Date(formCloseAt) > new Date() && (
-              <span>Closes: {formatDateTime(new Date(formCloseAt))}</span>
+              <span>
+                Closes:{" "}
+                <ZonedInstantTime at={formCloseAt}>{formatDateTime(new Date(formCloseAt))}</ZonedInstantTime>
+              </span>
             )}
             {formWithdrawUntil && new Date(formWithdrawUntil) > new Date() && (
-              <span>Drop until: {formatDateTime(new Date(formWithdrawUntil))}</span>
+              <span>
+                Drop until:{" "}
+                <ZonedInstantTime at={formWithdrawUntil}>
+                  {formatDateTime(new Date(formWithdrawUntil))}
+                </ZonedInstantTime>
+              </span>
             )}
           </div>
 

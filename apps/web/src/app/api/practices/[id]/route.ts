@@ -107,6 +107,7 @@ export async function PATCH(
           date: data.date,
           startTime: data.startTime,
           endTime: data.endTime,
+          timeZone: data.timeZone,
           location: data.location,
           focus: data.focus,
           tags: data.tags,

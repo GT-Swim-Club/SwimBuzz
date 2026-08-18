@@ -1,7 +1,7 @@
 "use client"
 
 import { formatSwimDate } from "@/lib/utils"
-import { formatClockTimeRange } from "@swimbuzz/shared"
+import { formatClockTimeRange, zoneAbbreviation, zonedTimeToUtc } from "@swimbuzz/shared"
 import { FormattedText, isHtmlEmpty } from "@/components/FormattedText"
 import InfoIcon from "@/components/InfoIcon"
 
@@ -19,6 +19,7 @@ export default function PracticeExportCapture({
   dateIso,
   startTime,
   endTime,
+  timeZone,
   location,
   focus,
   tags,
@@ -30,6 +31,7 @@ export default function PracticeExportCapture({
   dateIso: string | null
   startTime: string
   endTime: string
+  timeZone: string
   location: string
   focus: string | null
   tags: string[]
@@ -37,6 +39,11 @@ export default function PracticeExportCapture({
   totalDistance: number
 }) {
   const hasFocus = Boolean(focus && !isHtmlEmpty(focus))
+  // Exports are static/shareable, so they always show the practice's own zone rather
+  // than whichever viewer happens to be exporting it.
+  const zoneAbbrev = (startTime || endTime)
+    ? zoneAbbreviation(timeZone, zonedTimeToUtc(dateIso ? dateIso.slice(0, 10) : new Date().toISOString().slice(0, 10), startTime || endTime, timeZone))
+    : null
 
   return (
     <div className="w-[896px] space-y-5 bg-background p-8 text-base text-foreground">
@@ -55,7 +62,7 @@ export default function PracticeExportCapture({
           <div className="flex items-center gap-1.5">
             <InfoIcon kind="calendar" />
             {dateIso ? formatSwimDate(dateIso) : "No date"}
-            {startTime || endTime ? ` · ${formatClockTimeRange(startTime, endTime)}` : ""}
+            {startTime || endTime ? ` · ${formatClockTimeRange(startTime, endTime)}${zoneAbbrev ? ` ${zoneAbbrev}` : ""}` : ""}
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
             {location && (

@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native"
 import type { PracticeSummary } from "@swimbuzz/shared"
-import { formatClockTimeRange } from "@swimbuzz/shared"
+import { formatClockTimeRangeInViewerZone } from "@swimbuzz/shared"
 import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
 import { usePalette } from "@swimbuzz/ui"
 import { useMemo } from "react"
@@ -70,7 +70,15 @@ export function PracticeCard({
         <View style={styles.metaRow}>
           <Icon color={c.textTertiary} name="clock" size={14} />
           <Text style={styles.metaText}>
-            {formatClockTimeRange(practice.startTime, practice.endTime)}
+            {(() => {
+              const zoned = formatClockTimeRangeInViewerZone(
+                practice.date ?? new Date().toISOString().slice(0, 10),
+                practice.startTime,
+                practice.endTime,
+                practice.timeZone
+              )
+              return `${zoned.text} ${zoned.abbrev}`
+            })()}
           </Text>
         </View>
         {practice.location ? (
