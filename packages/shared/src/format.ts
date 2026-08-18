@@ -85,7 +85,7 @@ export function formatClockTime(value: string | Date): string {
   const minute = Number(match[2])
   if (hour > 23 || minute > 59) return value
   const period = hour >= 12 ? "PM" : "AM"
-  const hour12 = String(hour % 12 || 12).padStart(2, "0")
+  const hour12 = hour % 12 || 12
   return `${hour12}:${String(minute).padStart(2, "0")} ${period}`
 }
 
