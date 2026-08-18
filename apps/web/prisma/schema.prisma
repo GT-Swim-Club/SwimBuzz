@@ -28,6 +28,11 @@ enum Gender {
   F
 }
 
+enum AttendanceMethod {
+  SCAN
+  MANUAL
+}
+
 enum ScraperJobStatus {
   PENDING
   RUNNING
@@ -74,6 +79,7 @@ model User {
   athlete       Athlete?
   practices         Practice[] @relation("PracticeCreatedBy")
   practiceEditLocks Practice[] @relation("PracticeEditLocks")
+  attendanceRecorded PracticeAttendance[] @relation("PracticeAttendanceRecordedBy")
   comments          PracticeComment[]
   notifications     Notification[]
   mobileRefreshTokens MobileRefreshToken[]
@@ -101,6 +107,9 @@ model Athlete {
   meetSignups  MeetSignupEntry[]
   meetRoomPreferences MeetRoomPreference[]
   meetRoomAssignments MeetRoomAssignment[]
+  practiceAttendance  PracticeAttendance[]
+
+  @@index([gtid])
 }
 
 model Meet {
@@ -304,6 +313,7 @@ model Practice {
   editLockToken     String?
   sets        PracticeSet[]
   comments    PracticeComment[]
+  attendance  PracticeAttendance[]
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
 
@@ -332,6 +342,23 @@ model PracticeSet {
   createdAt  DateTime     @default(now())
 
   @@index([practiceId])
+}
+
+/// One check-in per athlete per practice, recorded by a coach (Buzzcard scan or manual).
+model PracticeAttendance {
+  id           String           @id @default(cuid())
+  practiceId   String
+  practice     Practice         @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+  athleteId    String
+  athlete      Athlete          @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  method       AttendanceMethod @default(SCAN)
+  recordedById String?
+  recordedBy   User?            @relation("PracticeAttendanceRecordedBy", fields: [recordedById], references: [id], onDelete: SetNull)
+  recordedAt   DateTime         @default(now())
+
+  @@unique([practiceId, athleteId])
+  @@index([practiceId])
+  @@index([athleteId])
 }
 
 model PracticeComment {

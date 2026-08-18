@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import HoverDetail from "@/components/HoverDetail"
 import ActionIcon from "@/components/ActionIcon"
+import InfoIcon from "@/components/InfoIcon"
 import { formatRelativeTime } from "@/lib/utils"
 
 export type CommentDTO = {
@@ -91,17 +92,30 @@ function buildThreads(comments: CommentDTO[]): Thread[] {
   return topLevel
 }
 
+function AttendedBadge() {
+  return (
+    <span className="group relative ml-1.5 inline-flex translate-y-[1px] items-center text-primary">
+      <InfoIcon kind="attended" />
+      <span className="sr-only">Attended this practice</span>
+      <HoverDetail label="Attended this practice" />
+    </span>
+  )
+}
+
 export default function CommentSection({
   practiceId,
   initialComments,
   currentUserId,
   isCoach,
+  attendedUserIds,
 }: {
   practiceId: string
   initialComments: CommentDTO[]
   currentUserId: string
   isCoach: boolean
+  attendedUserIds: string[]
 }) {
+  const attendedUsers = useMemo(() => new Set(attendedUserIds), [attendedUserIds])
   const [comments, setComments] = useState<CommentDTO[]>(initialComments)
   const [body, setBody] = useState("")
   const [replyTo, setReplyTo] = useState<CommentDTO | null>(null)
@@ -249,6 +263,7 @@ export default function CommentSection({
           <span className="font-medium text-foreground dark:text-foreground">
             {comment.authorName}
           </span>
+          {comment.authorId && attendedUsers.has(comment.authorId) && <AttendedBadge />}
           <span className="ml-2 text-xs text-foreground-tertiary dark:text-foreground-tertiary">
             {formatRelativeTime(comment.createdAt)}
           </span>

@@ -11,9 +11,11 @@ import ExportPracticePdfButton from "./ExportPracticePdfButton"
 import PracticeExportCapture from "./PracticeExportCapture"
 import CommentSection from "./CommentSection"
 import { type PracticeFormState } from "../PracticeEditor"
-import { practiceEditPath } from "@/lib/slug"
+import { practiceEditPath, practicePath } from "@/lib/slug"
 import { type PracticeEditLockInfo } from "@/lib/practice-edit-lock-shared"
 import InfoIcon from "@/components/InfoIcon"
+import ActionIcon from "@/components/ActionIcon"
+import HoverDetail from "@/components/HoverDetail"
 import PracticeEditSkeleton from "./PracticeEditSkeleton"
 
 type PracticeSetView = {
@@ -50,6 +52,7 @@ export default function PracticeDetail({
   isCoach,
   currentUserId,
   comments,
+  attendedUserIds,
   initialEditLock,
 }: {
   practiceId: string
@@ -68,6 +71,7 @@ export default function PracticeDetail({
   isCoach: boolean
   currentUserId: string
   comments: PracticeCommentView[]
+  attendedUserIds: string[]
   initialEditLock: PracticeEditLockInfo
 }) {
   const router = useRouter()
@@ -165,6 +169,8 @@ export default function PracticeDetail({
     }
   }, [isCoach, practiceId])
 
+  const attendanceHref = `${practicePath(practiceSlug ?? practiceId)}/attendance`
+
   return (
     <>
     {openingEditor ? (
@@ -213,12 +219,13 @@ export default function PracticeDetail({
               dateIso={dateIso}
               captureRef={exportCaptureRef}
             />
-            {isCoach && (
+            {isCoach ? (
               <PracticeActions
                 practiceId={practiceId}
                 initial={initial}
                 title={title}
                 published={published}
+                attendanceHref={attendanceHref}
                 editLock={editLock}
                 onEdit={() => {
                   openingEditorRef.current = true
@@ -227,6 +234,15 @@ export default function PracticeDetail({
                 }}
                 onLockChange={setEditLock}
               />
+            ) : (
+              <Link
+                href={attendanceHref}
+                aria-label="View attendance"
+                className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-border rounded-lg bg-background hover:bg-fill transition-colors"
+              >
+                <ActionIcon kind="attendance" className="h-5 w-5" />
+                <HoverDetail label="Attendance" />
+              </Link>
             )}
           </div>
         </div>
@@ -282,6 +298,7 @@ export default function PracticeDetail({
         currentUserId={currentUserId}
         isCoach={isCoach}
         initialComments={comments}
+        attendedUserIds={attendedUserIds}
       />
     </main>
     )}
