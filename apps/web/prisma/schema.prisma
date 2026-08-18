@@ -28,6 +28,11 @@ enum Gender {
   F
 }
 
+enum AttendanceMethod {
+  SCAN
+  MANUAL
+}
+
 enum ScraperJobStatus {
   PENDING
   RUNNING
@@ -74,6 +79,7 @@ model User {
   athlete       Athlete?
   practices         Practice[] @relation("PracticeCreatedBy")
   practiceEditLocks Practice[] @relation("PracticeEditLocks")
+  attendanceRecorded PracticeAttendance[] @relation("PracticeAttendanceRecordedBy")
   comments          PracticeComment[]
   notifications     Notification[]
   mobileRefreshTokens MobileRefreshToken[]
@@ -101,6 +107,9 @@ model Athlete {
   meetSignups  MeetSignupEntry[]
   meetRoomPreferences MeetRoomPreference[]
   meetRoomAssignments MeetRoomAssignment[]
+  practiceAttendance  PracticeAttendance[]
+
+  @@index([gtid])
 }
 
 model Meet {
@@ -110,6 +119,8 @@ model Meet {
   location      String?
   startDate     DateTime
   startTime     String?
+  /// IANA zone (e.g. "America/New_York") that startTime is a wall-clock time in.
+  timeZone      String    @default("America/New_York")
   endDate       DateTime?
   course        Course    @default(SCY)
   season        String
@@ -289,6 +300,8 @@ model Practice {
   date        DateTime?
   startTime   String        @default("19:30")
   endTime     String        @default("21:00")
+  /// IANA zone (e.g. "America/New_York") that startTime/endTime are wall-clock times in.
+  timeZone    String        @default("America/New_York")
   location    String        @default("CRC Comp Pool")
   focus       String?
   tags        String[]      @default([])
@@ -304,6 +317,7 @@ model Practice {
   editLockToken     String?
   sets        PracticeSet[]
   comments    PracticeComment[]
+  attendance  PracticeAttendance[]
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
 
@@ -332,6 +346,23 @@ model PracticeSet {
   createdAt  DateTime     @default(now())
 
   @@index([practiceId])
+}
+
+/// One check-in per athlete per practice, recorded by a coach (Buzzcard scan or manual).
+model PracticeAttendance {
+  id           String           @id @default(cuid())
+  practiceId   String
+  practice     Practice         @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+  athleteId    String
+  athlete      Athlete          @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  method       AttendanceMethod @default(SCAN)
+  recordedById String?
+  recordedBy   User?            @relation("PracticeAttendanceRecordedBy", fields: [recordedById], references: [id], onDelete: SetNull)
+  recordedAt   DateTime         @default(now())
+
+  @@unique([practiceId, athleteId])
+  @@index([practiceId])
+  @@index([athleteId])
 }
 
 model PracticeComment {

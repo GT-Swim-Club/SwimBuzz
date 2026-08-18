@@ -8,12 +8,15 @@ import Modal, { ModalFooter } from "@/components/Modal"
 import { DatePicker, TimePicker } from "@/components/CustomDateTimePicker"
 import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/FileDropzone"
 import { useSession } from "next-auth/react"
+import { useViewerTimeZone } from "@/components/ZonedTime"
+import { DEFAULT_TIME_ZONE, zoneAbbreviation, zoneDisplayName } from "@swimbuzz/shared"
 
 export type MeetFormState = {
   name: string
   location: string
   startDate: string
   startTime: string
+  timeZone: string
   endDate: string
   course: string
   season: string
@@ -31,6 +34,7 @@ export const emptyMeetForm: MeetFormState = {
   location: "",
   startDate: "",
   startTime: "",
+  timeZone: DEFAULT_TIME_ZONE,
   endDate: "",
   course: "SCY",
   season: "",
@@ -60,6 +64,8 @@ export default function MeetFields({
   onUploaded?: (url: string) => void
 }) {
   const { data: session } = useSession()
+  const viewerTimeZone = useViewerTimeZone()
+  const timeZoneLabel = `${zoneDisplayName(viewerTimeZone)} (${zoneAbbreviation(viewerTimeZone)})`
   const [iconUploading, setIconUploading] = useState(false)
   const [iconError, setIconError] = useState<string | null>(null)
   const [bannerUploading, setBannerUploading] = useState(false)
@@ -341,9 +347,16 @@ export default function MeetFields({
           </label>
           <TimePicker
             value={form.startTime}
-            onChange={(value) => set("startTime", value)}
+            onChange={(value) =>
+              setForm((f) => ({
+                ...f,
+                startTime: value,
+                timeZone: value ? viewerTimeZone : f.timeZone,
+              }))
+            }
             ariaLabel="Start time"
             placeholder="Choose a start time"
+            zoneLabel={timeZoneLabel}
           />
         </div>
       </div>

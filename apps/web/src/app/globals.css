@@ -183,3 +183,96 @@ select[size="1"] {
     animation-timing-function: linear;
   }
 }
+
+
+/* Attendance check-in list: rows slide in as Buzzcards are scanned. */
+@keyframes attendance-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes attendance-row-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+}
+
+@keyframes attendance-row-flash {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes attendance-scan-pulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.55;
+  }
+  70% {
+    transform: scale(1.55);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.55);
+    opacity: 0;
+  }
+}
+
+@keyframes attendance-feedback-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.attendance-row-in {
+  animation: attendance-row-in 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.attendance-row-out {
+  animation: attendance-row-out 180ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+/* Highlight overlay on a freshly scanned row — kept off the row element itself
+   so it cannot override the row's own entrance animation. */
+.attendance-row-flash {
+  background-color: color-mix(in srgb, var(--brand-color-primary) 18%, transparent);
+  animation: attendance-row-flash 1.4s ease-out 260ms both;
+}
+
+.attendance-scan-pulse {
+  animation: attendance-scan-pulse 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.attendance-feedback-in {
+  animation: attendance-feedback-in 180ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .attendance-row-in,
+  .attendance-row-out,
+  .attendance-row-flash,
+  .attendance-scan-pulse,
+  .attendance-feedback-in {
+    animation-duration: 1ms;
+    animation-iteration-count: 1;
+  }
+}

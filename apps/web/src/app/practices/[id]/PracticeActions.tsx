@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import type { PracticeFormState } from "../PracticeEditor"
 import type { PracticeEditLockInfo } from "@/lib/practice-edit-lock-shared"
@@ -61,6 +62,7 @@ export default function PracticeActions({
   initial,
   title,
   published,
+  attendanceHref,
   editLock,
   onEdit,
   onLockChange,
@@ -69,6 +71,7 @@ export default function PracticeActions({
   initial: PracticeFormState
   title: string
   published: boolean
+  attendanceHref: string
   editLock: PracticeEditLockInfo
   onEdit: () => void
   onLockChange: (lock: PracticeEditLockInfo) => void
@@ -181,6 +184,14 @@ export default function PracticeActions({
         className={`relative flex shrink-0 items-start ${lockedElsewhere ? "pb-8" : ""}`}
       >
         <div className="flex shrink-0 items-center gap-2">
+        <Link
+          href={attendanceHref}
+          aria-label="Take attendance"
+          className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-border rounded-lg bg-background hover:bg-fill transition-colors"
+        >
+          <ActionIcon kind="attendance" className="h-5 w-5" />
+          <HoverDetail label="Attendance" />
+        </Link>
         {published ? (
           <button
             type="button"

@@ -1,5 +1,6 @@
 import { parseMeetDate } from "@/lib/swim-parse"
 import { normalizeTags } from "@/lib/practice-tags"
+import { DEFAULT_TIME_ZONE, isValidTimeZone } from "@swimbuzz/shared"
 
 export class PracticeInputError extends Error {}
 export const MAX_PRACTICE_SETS = 10
@@ -82,6 +83,7 @@ export type NormalizedPractice = {
   date: Date | null
   startTime: string
   endTime: string
+  timeZone: string
   location: string
   focus: string | null
   tags: string[]
@@ -130,11 +132,18 @@ export function buildPracticeData(
       ? startTime
       : enteredEndTime
 
+  const rawTimeZone = optionalString(body.timeZone)
+  if (rawTimeZone && !isValidTimeZone(rawTimeZone)) {
+    throw new PracticeInputError("Time zone is invalid")
+  }
+  const timeZone = rawTimeZone ?? DEFAULT_TIME_ZONE
+
   return {
     title,
     date,
     startTime,
     endTime,
+    timeZone,
     location: optionalString(body.location) ?? "CRC Comp Pool",
     focus: optionalString(body.focus),
     tags: normalizeTags(body.tags),

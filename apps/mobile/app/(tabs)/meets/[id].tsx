@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Alert, Image, View } from "react-native"
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router"
-import { formatClockTime, formatMeetDateRange, formatTime, isHtmlEmpty, type IconName } from "@swimbuzz/shared"
+import { DEFAULT_TIME_ZONE, formatClockTimeInViewerZone, formatMeetDateRange, formatTime, isHtmlEmpty, type IconName } from "@swimbuzz/shared"
 import {
   Body,
   Button,
@@ -385,7 +385,14 @@ export default function MeetDetailScreen() {
   const school = meet.school ? String(meet.school) : null
   const startTime =
     typeof meet.startTime === "string" && meet.startTime.trim()
-      ? formatClockTime(meet.startTime.trim())
+      ? (() => {
+          const zoned = formatClockTimeInViewerZone(
+            startDate ? startDate.slice(0, 10) : new Date().toISOString().slice(0, 10),
+            meet.startTime.trim(),
+            typeof meet.timeZone === "string" && meet.timeZone ? meet.timeZone : DEFAULT_TIME_ZONE
+          )
+          return `${zoned.text} ${zoned.abbrev}`
+        })()
       : null
   const iconUrl =
     typeof meet.iconUrl === "string" && isExternalUrl(meet.iconUrl)

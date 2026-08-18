@@ -11,6 +11,7 @@ import {
   usePalette,
 } from "@swimbuzz/ui"
 import { spacing } from "@swimbuzz/tokens"
+import { getViewerTimeZone, zoneAbbreviation, zoneDisplayName } from "@swimbuzz/shared"
 import { DateSelector, TimeSelector } from "../../../src/components/DateTimeSelector"
 import { api } from "../../../src/lib/api"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
@@ -48,6 +49,8 @@ export default function NewPracticeScreen() {
   const [setContent, setSetContent] = useState("")
   const [published, setPublished] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [timeZone] = useState(() => getViewerTimeZone())
+  const timeZoneLabel = `${zoneDisplayName(timeZone)} (${zoneAbbreviation(timeZone)})`
 
   async function onCreate() {
     const trimmedTitle = title.trim()
@@ -77,6 +80,7 @@ export default function NewPracticeScreen() {
         date: date.trim() || null,
         startTime: start,
         endTime: end,
+        timeZone,
         location: location.trim() || "CRC Comp Pool",
         focus: focus.trim() || null,
         published,
@@ -122,7 +126,7 @@ export default function NewPracticeScreen() {
                 setStartTime(value)
                 setEndTime((current) => endAfterStart(value, current))
               }}
-              helperText="15-minute intervals"
+              helperText={`15-minute intervals · ${timeZoneLabel}`}
             />
           </View>
           <View style={{ flex: 1 }}>

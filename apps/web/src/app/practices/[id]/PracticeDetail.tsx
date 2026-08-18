@@ -4,16 +4,18 @@ import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { formatSwimDate } from "@/lib/utils"
-import { formatClockTimeRange } from "@swimbuzz/shared"
+import { ZonedClockTime } from "@/components/ZonedTime"
 import { FormattedText, isHtmlEmpty } from "@/components/FormattedText"
 import PracticeActions from "./PracticeActions"
 import ExportPracticePdfButton from "./ExportPracticePdfButton"
 import PracticeExportCapture from "./PracticeExportCapture"
 import CommentSection from "./CommentSection"
 import { type PracticeFormState } from "../PracticeEditor"
-import { practiceEditPath } from "@/lib/slug"
+import { practiceEditPath, practicePath } from "@/lib/slug"
 import { type PracticeEditLockInfo } from "@/lib/practice-edit-lock-shared"
 import InfoIcon from "@/components/InfoIcon"
+import ActionIcon from "@/components/ActionIcon"
+import HoverDetail from "@/components/HoverDetail"
 import PracticeEditSkeleton from "./PracticeEditSkeleton"
 
 type PracticeSetView = {
@@ -41,6 +43,7 @@ export default function PracticeDetail({
   dateIso,
   startTime,
   endTime,
+  timeZone,
   location,
   focus,
   tags,
@@ -50,6 +53,7 @@ export default function PracticeDetail({
   isCoach,
   currentUserId,
   comments,
+  attendedUserIds,
   initialEditLock,
 }: {
   practiceId: string
@@ -59,6 +63,7 @@ export default function PracticeDetail({
   dateIso: string | null
   startTime: string
   endTime: string
+  timeZone: string
   location: string
   focus: string | null
   tags: string[]
@@ -68,6 +73,7 @@ export default function PracticeDetail({
   isCoach: boolean
   currentUserId: string
   comments: PracticeCommentView[]
+  attendedUserIds: string[]
   initialEditLock: PracticeEditLockInfo
 }) {
   const router = useRouter()
@@ -165,6 +171,8 @@ export default function PracticeDetail({
     }
   }, [isCoach, practiceId])
 
+  const attendanceHref = `${practicePath(practiceSlug ?? practiceId)}/attendance`
+
   return (
     <>
     {openingEditor ? (
@@ -192,7 +200,17 @@ export default function PracticeDetail({
               <div className="flex items-center gap-1.5">
                 <InfoIcon kind="calendar" />
                 {dateIso ? formatSwimDate(dateIso) : "No date"}
-                {startTime || endTime ? ` · ${formatClockTimeRange(startTime, endTime)}` : ""}
+                {startTime || endTime ? (
+                  <>
+                    {" · "}
+                    <ZonedClockTime
+                      date={dateIso ? dateIso.slice(0, 10) : null}
+                      startTime={startTime}
+                      endTime={endTime}
+                      sourceTimeZone={timeZone}
+                    />
+                  </>
+                ) : null}
               </div>
               <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
                 {location && (
@@ -213,12 +231,13 @@ export default function PracticeDetail({
               dateIso={dateIso}
               captureRef={exportCaptureRef}
             />
-            {isCoach && (
+            {isCoach ? (
               <PracticeActions
                 practiceId={practiceId}
                 initial={initial}
                 title={title}
                 published={published}
+                attendanceHref={attendanceHref}
                 editLock={editLock}
                 onEdit={() => {
                   openingEditorRef.current = true
@@ -227,6 +246,15 @@ export default function PracticeDetail({
                 }}
                 onLockChange={setEditLock}
               />
+            ) : (
+              <Link
+                href={attendanceHref}
+                aria-label="View attendance"
+                className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-border rounded-lg bg-background hover:bg-fill transition-colors"
+              >
+                <ActionIcon kind="attendance" className="h-5 w-5" />
+                <HoverDetail label="Attendance" />
+              </Link>
             )}
           </div>
         </div>
@@ -282,6 +310,7 @@ export default function PracticeDetail({
         currentUserId={currentUserId}
         isCoach={isCoach}
         initialComments={comments}
+        attendedUserIds={attendedUserIds}
       />
     </main>
     )}
@@ -296,6 +325,7 @@ export default function PracticeDetail({
           dateIso={dateIso}
           startTime={startTime}
           endTime={endTime}
+          timeZone={timeZone}
           location={location}
           focus={focus}
           tags={tags}

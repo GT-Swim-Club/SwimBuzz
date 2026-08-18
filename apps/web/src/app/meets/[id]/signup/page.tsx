@@ -5,6 +5,7 @@ import { Gender } from "@prisma/client"
 import { notFound, redirect } from "next/navigation"
 import { getSession } from "@/lib/session"
 import { formatDateTime } from "@/lib/utils"
+import { ZonedInstantTime } from "@/components/ZonedTime"
 import { prisma } from "@/lib/prisma"
 import { isStaffRole } from "@/lib/auth-roles"
 import { resolveViewerAthleteId } from "@/lib/athlete-view-server"
@@ -103,10 +104,16 @@ export default async function MeetSignupPage({
         {(form.closeAt || form.withdrawUntil) && (
           <div className="mt-3 flex flex-col gap-y-1 text-sm text-foreground-secondary">
             {form.closeAt && (
-              <span>Sign-up closes: {formatDateTime(form.closeAt)}</span>
+              <span>
+                Sign-up closes:{" "}
+                <ZonedInstantTime at={form.closeAt}>{formatDateTime(form.closeAt)}</ZonedInstantTime>
+              </span>
             )}
             {form.withdrawUntil && (
-              <span>Drop deadline: {formatDateTime(form.withdrawUntil)}</span>
+              <span>
+                Drop deadline:{" "}
+                <ZonedInstantTime at={form.withdrawUntil}>{formatDateTime(form.withdrawUntil)}</ZonedInstantTime>
+              </span>
             )}
           </div>
         )}

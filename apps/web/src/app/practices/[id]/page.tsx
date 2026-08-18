@@ -7,6 +7,7 @@ import { serializePracticeEditLock } from "@/lib/practice-edit-lock"
 import { isCuid, practicePath } from "@/lib/slug"
 import { getSession } from "@/lib/session"
 import { practiceSetSelect } from "@/lib/practice-input"
+import { attendedUserIds } from "@/lib/practice-attendance"
 
 function toDateInput(d: Date | null | undefined): string {
   if (!d) return ""
@@ -37,6 +38,7 @@ export default async function PracticePage({
   if (practice.slug && param !== practice.slug) redirect(practicePath(practice.slug))
 
   const totalDistance = practice.sets.reduce((sum, s) => sum + (s.distance ?? 0), 0)
+  const attendedUsers = await attendedUserIds(practice.id)
   const initialEditLock = serializePracticeEditLock(practice, session.user.id)
 
   const initial: PracticeFormState = {
@@ -44,6 +46,7 @@ export default async function PracticePage({
     date: toDateInput(practice.date),
     startTime: practice.startTime,
     endTime: practice.endTime,
+    timeZone: practice.timeZone,
     location: practice.location,
     focus: practice.focus ?? "",
     tags: practice.tags,
@@ -63,6 +66,7 @@ export default async function PracticePage({
       dateIso={practice.date ? practice.date.toISOString() : null}
       startTime={practice.startTime}
       endTime={practice.endTime}
+      timeZone={practice.timeZone}
       location={practice.location}
       focus={practice.focus}
       tags={practice.tags}
@@ -75,6 +79,7 @@ export default async function PracticePage({
       initial={initial}
       isCoach={isCoach}
       currentUserId={session.user.id}
+      attendedUserIds={attendedUsers}
       comments={practice.comments.map((c) => ({
         id: c.id,
         authorName: c.authorName,

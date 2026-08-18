@@ -1,4 +1,4 @@
-export type ActionKind = "edit" | "reply" | "check" | "close" | "publish" | "delete" | "export" | "pdf" | "image"
+export type ActionKind = "edit" | "reply" | "check" | "close" | "publish" | "delete" | "export" | "pdf" | "image" | "attendance" | "scan" | "record"
 
 const svgProps = {
   xmlns: "http://www.w3.org/2000/svg",
@@ -73,12 +73,36 @@ export default function ActionIcon({ kind, className }: { kind: ActionKind, clas
           <path d="M14 13h1.5a1.5 1.5 0 0 1 0 3H14v3" />
         </svg>
       )
+    case "attendance":
+      return (
+        <svg {...svgProps} className={`${svgProps.className} ${className ?? ""}`}>
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+          <rect width="8" height="4" x="8" y="2" rx="1" />
+          <path d="m9 14 2 2 4-4" />
+        </svg>
+      )
+    case "scan":
+      return (
+        <svg {...svgProps} className={`${svgProps.className} ${className ?? ""}`}>
+          <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+          <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+          <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+          <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+          <path d="M3 12h18" />
+        </svg>
+      )
     case "image":
       return (
         <svg {...svgProps} className={`${svgProps.className} ${className ?? ""}`}>
           <rect width="18" height="18" x="3" y="3" rx="2" />
           <circle cx="9" cy="9" r="2" />
           <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+        </svg>
+      )
+    case "record":
+      return (
+        <svg {...svgProps} className={`${svgProps.className} ${className ?? ""}`}>
+          <circle cx="12" cy="12" r="8" />
         </svg>
       )
   }

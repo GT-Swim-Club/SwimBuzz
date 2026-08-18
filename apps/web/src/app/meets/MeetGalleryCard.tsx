@@ -19,6 +19,7 @@ export default function MeetGalleryCard({
     location: string | null
     startDate: Date
     startTime: string | null
+    timeZone: string
     endDate: Date | null
     school: string | null
     iconUrl: string | null
@@ -64,6 +65,7 @@ export default function MeetGalleryCard({
             <MeetCountdown
               startDate={meet.startDate}
               startTime={meet.startTime}
+              timeZone={meet.timeZone}
               upcoming
               className="backdrop-blur-sm"
             />

@@ -76,6 +76,7 @@ export default function MeetsClientWrapper({
                       location: m.location ?? "",
                       startDate: toDateInput(m.startDate),
                       startTime: m.startTime ?? "",
+                      timeZone: m.timeZone,
                       endDate: toDateInput(m.endDate),
                       course: m.course,
                       season: m.season,
@@ -106,6 +107,7 @@ export default function MeetsClientWrapper({
                                 <MeetCountdown
                                   startDate={m.startDate}
                                   startTime={m.startTime}
+                                  timeZone={m.timeZone}
                                   upcoming
                                 />
                               )}
@@ -142,6 +144,7 @@ export default function MeetsClientWrapper({
                       location: m.location ?? "",
                       startDate: toDateInput(m.startDate),
                       startTime: m.startTime ?? "",
+                      timeZone: m.timeZone,
                       endDate: toDateInput(m.endDate),
                       course: m.course,
                       season: m.season,
