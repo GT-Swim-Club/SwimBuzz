@@ -8,6 +8,7 @@ import InfoIcon from "@/components/InfoIcon"
 import { athletePath } from "@/lib/slug"
 import { formatSwimDate } from "@/lib/utils"
 import { ZonedClockTime, ZonedInstantTime } from "@/components/ZonedTime"
+import { RelativeDate } from "@/components/RelativeDate"
 import { formatClockTime } from "@swimbuzz/shared"
 
 type AttendanceRecord = {
@@ -262,7 +263,7 @@ export default function AttendanceManager({
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="flex items-center gap-1.5">
               <InfoIcon kind="calendar" />
-              {dateIso ? formatSwimDate(dateIso) : "No date"}
+              {dateIso ? <RelativeDate day={dateIso} absolute={formatSwimDate(dateIso)} /> : "No date"}
               {startTime || endTime ? (
                 <>
                   {" · "}

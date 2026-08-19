@@ -6,6 +6,8 @@ import { signOut } from "next-auth/react"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { ATHLETE_VIEW_COOKIE } from "@/lib/athlete-view"
 import { AppIcon } from "@/components/AppIcon"
+import StaffBadge from "@/components/StaffBadge"
+import type { StaffTitle } from "@swimbuzz/shared"
 
 function initialsFromName(name?: string | null, email?: string | null) {
   const parts = (name ?? "").trim().split(/\s+/).filter(Boolean)
@@ -24,6 +26,7 @@ export default function ProfileMenu({
   email,
   image,
   roleLabel,
+  staffTitle,
   rosterProfileHref,
   swimCloudProfileHref,
 }: {
@@ -31,6 +34,7 @@ export default function ProfileMenu({
   email?: string | null
   image?: string | null
   roleLabel: string
+  staffTitle?: StaffTitle | null
   rosterProfileHref: string | null
   swimCloudProfileHref: string | null
 }) {
@@ -125,6 +129,7 @@ export default function ProfileMenu({
               <div className="border-b border-border-secondary px-3 py-2.5">
                 <p className="truncate text-sm font-medium text-foreground">
                   {name || "Account"}
+                  {staffTitle && <StaffBadge title={staffTitle} />}
                 </p>
                 <p className="truncate text-xs text-foreground-secondary">
                   {email || roleLabel}

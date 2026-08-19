@@ -5,6 +5,7 @@ import Link from "next/link"
 import AthleteGalleryCard from "./AthleteGalleryCard"
 import { athletePath } from "@/lib/slug"
 import { formatAthleteYearAndAge } from "@/lib/utils"
+import StaffBadge from "@/components/StaffBadge"
 export default function AthletesClientWrapper({
   athletes,
   viewerAthleteId,
@@ -106,6 +107,9 @@ export default function AthletesClientWrapper({
                         ({viewerAthlete.nicknames.join(", ")})
                       </span>
                     )}
+                    {viewerAthlete.user?.staffTitle && (
+                      <StaffBadge title={viewerAthlete.user.staffTitle} />
+                    )}
                   </h3>
                   <div className="text-sm text-foreground-secondary space-y-0.5">
                     {viewerAthlete.user?.email && <p>{viewerAthlete.user.email}</p>}
@@ -159,6 +163,7 @@ export default function AthletesClientWrapper({
                               {" "}({a.nicknames.join(", ")})
                             </span>
                           )}
+                          {a.user?.staffTitle && <StaffBadge title={a.user.staffTitle} />}
                         </p>
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
@@ -213,6 +218,9 @@ export default function AthletesClientWrapper({
                       <span className="ml-2 font-normal text-foreground-secondary text-sm">
                         ({viewerAthlete.nicknames.join(", ")})
                       </span>
+                    )}
+                    {viewerAthlete.user?.staffTitle && (
+                      <StaffBadge title={viewerAthlete.user.staffTitle} />
                     )}
                   </h3>
                   <div className="text-sm text-foreground-secondary space-y-0.5">

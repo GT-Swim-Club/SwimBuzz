@@ -35,7 +35,13 @@ export default async function MeetSignupManagerPage({
           entries: {
             include: {
               athlete: {
-                select: { id: true, firstName: true, lastName: true, gender: true },
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  gender: true,
+                  user: { select: { staffTitle: true } },
+                },
               },
             },
             orderBy: [{ athlete: { lastName: "asc" } }, { athlete: { firstName: "asc" } }],
@@ -83,6 +89,7 @@ export default async function MeetSignupManagerPage({
           athleteId: entry.athleteId,
           name: `${entry.athlete.lastName}, ${entry.athlete.firstName}`,
           gender: entry.athlete.gender === Gender.F ? "F" : "M",
+          staffTitle: entry.athlete.user?.staffTitle ?? null,
           events: entry.events,
           entryTimes: normalizeSignupEntryTimes(entry.entryTimes),
           notes: entry.notes,

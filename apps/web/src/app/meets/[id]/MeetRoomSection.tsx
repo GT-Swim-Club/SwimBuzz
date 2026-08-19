@@ -1,6 +1,5 @@
 import Link from "next/link"
-import { formatDateTime } from "@/lib/utils"
-import { ZonedInstantTime } from "@/components/ZonedTime"
+import { RelativeInstantTime } from "@/components/RelativeDate"
 import { roomWindowStatus } from "@/lib/meet-rooms"
 import type { MeetSignupQuestion } from "@/lib/meet-signup"
 import MeetRoomAssignmentsList from "./MeetRoomAssignmentsList"
@@ -125,13 +124,13 @@ export default function MeetRoomSection({
         {form.openAt && new Date(form.openAt) > new Date() && (
           <p className="text-sm text-foreground-secondary">
             Opens:{" "}
-            <ZonedInstantTime at={form.openAt}>{formatDateTime(new Date(form.openAt))}</ZonedInstantTime>
+            <RelativeInstantTime at={form.openAt} />
           </p>
         )}
         {form.closeAt && new Date(form.closeAt) > new Date() && (
           <p className="text-sm text-foreground-secondary">
             Closes:{" "}
-            <ZonedInstantTime at={form.closeAt}>{formatDateTime(new Date(form.closeAt))}</ZonedInstantTime>
+            <RelativeInstantTime at={form.closeAt} />
           </p>
         )}
         <Link

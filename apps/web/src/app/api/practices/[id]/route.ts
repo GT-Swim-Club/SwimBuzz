@@ -23,13 +23,22 @@ export async function GET(
     where: { id },
     include: {
       sets: { orderBy: { order: "asc" }, select: practiceSetSelect },
-      comments: { orderBy: { createdAt: "asc" } }}})
+      comments: {
+        orderBy: { createdAt: "asc" },
+        include: { author: { select: { staffTitle: true } } },
+      }}})
   if (!practice) return NextResponse.json({ error: "Not found" }, { status: 404 })
   if (!practice.published && !isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Not found" }, { status: 404 })
   }
 
-  return NextResponse.json(practice)
+  return NextResponse.json({
+    ...practice,
+    comments: practice.comments.map(({ author, ...c }) => ({
+      ...c,
+      authorStaffTitle: author?.staffTitle ?? null,
+    })),
+  })
 }
 
 export async function PATCH(
@@ -37,7 +46,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -141,7 +150,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

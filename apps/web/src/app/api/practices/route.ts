@@ -48,7 +48,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

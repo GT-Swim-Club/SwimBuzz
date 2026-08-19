@@ -85,7 +85,7 @@ Edit these together with both `apps/web` and `apps/mobile` in mind — they're t
 
 ### Brand colors (enforced convention)
 
-Never hardcode `#hex`/`rgb()`/named colors in components or styles — use the `--brand-color-*` tokens (see `.cursor/rules/brand-colors.mdc`):
+Never hardcode `#hex`/`rgb()`/named colors in components or styles — use the `--brand-color-*` tokens
 
 - **Web**: defined in `apps/web/src/app/variables.css` (`:root` + `.dark`), consumed via `var(--brand-color-text)` or the mapped `--color-*` names in `globals.css`.
 - **Mobile**: defined in `apps/mobile/src/lib/variables.ts`, consumed via `variablesFor(scheme)["--brand-color-text"]` or theme helpers wrapping it.
@@ -94,6 +94,6 @@ If no existing token fits, add a new `--brand-color-<name>` in both `variables.c
 
 ## Deployment
 
-- **Production**: Vercel, root directory = repo root (workspace packages must resolve), build command `pnpm --filter @swimbuzz/web run build`. See the README's Vercel section for required env vars (`DATABASE_URL`, `DIRECT_URL`, `CRON_SECRET`, etc.), the two Vercel Cron jobs, and the external-cron requirement for the once-a-minute signup monitor (Hobby plan can't run cron more often than daily).
+- **Production**: Vercel, root directory = repo root (workspace packages must resolve), build command `pnpm --filter @swimbuzz/web run build`. See the README's Vercel section for required env vars (`DATABASE_URL`, `DIRECT_URL`, `CRON_SECRET`, etc.), the Vercel Cron jobs, and the external-cron requirement for the once-a-minute signup monitor (Hobby plan can't run cron more often than daily).
 - **Render**: legacy target, kept working but Vercel is preferred. Uses `apps/web/server.js` directly so crons run in-process.
 - **Mobile**: EAS Build/Submit (`apps/mobile/eas.json`); `EXPO_PUBLIC_API_URL` must point at the deployed API origin.

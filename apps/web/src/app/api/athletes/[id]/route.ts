@@ -29,7 +29,7 @@ export async function GET(
   const athlete = await prisma.athlete.findFirst({
     where: isCuid(param) ? { OR: [{ id: param }, { slug: param }] } : { slug: param },
     include: {
-      user: { select: { name: true, email: true, image: true } },
+      user: { select: { name: true, email: true, image: true, staffTitle: true } },
       swims: {
         orderBy: { date: "desc" },
         include: {
@@ -320,14 +320,14 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
   const { id } = await params
   const athlete = await prisma.athlete.findUnique({
     where: { id },
-    include: { user: { select: { id: true, role: true } } }})
+    include: { user: { select: { id: true, role: true, staffTitle: true } } }})
   if (!athlete) {
     return NextResponse.json({ error: "Not found" }, { status: 404 })
   }
@@ -336,7 +336,9 @@ export async function DELETE(
     await tx.swim.deleteMany({ where: { athleteId: id } })
     await tx.athlete.delete({ where: { id } })
     // Remove the auto-provisioned athlete login (cascades sessions/accounts).
-    if (athlete.user?.role === "ATHLETE") {
+    // A Social Director is role ATHLETE too, but is still a staff account —
+    // only delete a plain athlete with no staff title.
+    if (athlete.user?.role === "ATHLETE" && athlete.user.staffTitle == null) {
       await tx.user.delete({ where: { id: athlete.user.id } })
     }
   })

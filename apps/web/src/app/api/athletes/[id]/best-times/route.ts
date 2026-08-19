@@ -5,6 +5,7 @@ import { formatDisplayTime, formatTime } from "@/lib/utils"
 import { isRelayLeadoffSwimTag } from "@/lib/relay-results"
 import { canonicalizeStrokeEvent } from "@/lib/swim-parse"
 import { getSession } from "@/lib/session"
+import { isStaffRole } from "@/lib/auth-roles"
 
 function parseCourse(raw: string | null): Course | null {
   const upper = (raw ?? "").trim().toUpperCase()
@@ -41,8 +42,8 @@ export async function GET(
     return NextResponse.json({ times: {} as Record<string, string> })
   }
 
-  const isCoach = session.user.role === "COACH"
-  if (!isCoach) {
+  const isStaff = isStaffRole(session.user.role)
+  if (!isStaff) {
     const linked = await prisma.athlete.findUnique({
       where: { userId: session.user.id },
       select: { id: true }})

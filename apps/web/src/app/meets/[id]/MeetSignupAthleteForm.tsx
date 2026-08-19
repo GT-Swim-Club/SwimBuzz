@@ -13,8 +13,7 @@ import {
   sortSignupEventsByOrder,
 } from "@/lib/meet-signup"
 import { formatDisplayTime } from "@/lib/utils"
-import { formatDateTime } from "@/lib/utils"
-import { ZonedInstantTime } from "@/components/ZonedTime"
+import { RelativeInstantTime } from "@/components/RelativeDate"
 
 export type MeetSignupAthleteInitial = {
   events: string[]
@@ -361,21 +360,19 @@ export default function MeetSignupAthleteForm({
             {formOpenAt && new Date(formOpenAt) > new Date() && (
               <span>
                 Opens:{" "}
-                <ZonedInstantTime at={formOpenAt}>{formatDateTime(new Date(formOpenAt))}</ZonedInstantTime>
+                <RelativeInstantTime at={formOpenAt} />
               </span>
             )}
             {formCloseAt && new Date(formCloseAt) > new Date() && (
               <span>
                 Closes:{" "}
-                <ZonedInstantTime at={formCloseAt}>{formatDateTime(new Date(formCloseAt))}</ZonedInstantTime>
+                <RelativeInstantTime at={formCloseAt} />
               </span>
             )}
             {formWithdrawUntil && new Date(formWithdrawUntil) > new Date() && (
               <span>
                 Drop until:{" "}
-                <ZonedInstantTime at={formWithdrawUntil}>
-                  {formatDateTime(new Date(formWithdrawUntil))}
-                </ZonedInstantTime>
+                <RelativeInstantTime at={formWithdrawUntil} />
               </span>
             )}
           </div>

@@ -5,7 +5,9 @@ import {
   athleteDisplayName,
   formatTime,
   isStaffRole,
+  type StaffTitle,
 } from "@swimbuzz/shared"
+import { StaffBadge } from "../../../src/components/StaffBadge"
 import {
   Body,
   Button,
@@ -181,7 +183,6 @@ export default function AthleteDetailScreen() {
     typeof athlete.userId === "string" &&
     athlete.userId === user.id
   const isStaff = !!user && isStaffRole(user.role)
-  const isCoach = user?.role === "COACH"
   const canManage = isOwn || isStaff
   const swimCloudId =
     athlete.swimCloudId != null && athlete.swimCloudId !== ""
@@ -306,7 +307,14 @@ export default function AthleteDetailScreen() {
   return (
     <Screen>
       <ScrollView contentContainerStyle={{ paddingBottom: tabBarPad }}>
-        <Title>{name}</Title>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+          <Title>{name}</Title>
+          {(athlete.user as { staffTitle?: StaffTitle | null } | undefined)?.staffTitle ? (
+            <StaffBadge
+              title={(athlete.user as { staffTitle: StaffTitle }).staffTitle}
+            />
+          ) : null}
+        </View>
         <Muted style={{ marginBottom: spacing.md }}>
           {[genderLabel(athlete.gender), ...seasons].filter(Boolean).join(" · ")}
         </Muted>
@@ -473,7 +481,7 @@ export default function AthleteDetailScreen() {
           </Section>
         ) : null}
 
-        {isCoach ? (
+        {isStaff ? (
           <View style={{ marginTop: spacing.lg }}>
             <Button
               label="Delete athlete"

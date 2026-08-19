@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useSession } from "next-auth/react"
+import { isStaffRole } from "@/lib/auth-roles"
 import LiveSearch from "@/components/LiveSearch"
 import { resolveListedSeason, upcomingSeason } from "@/lib/season"
 import Modal, { ModalFooter } from "@/components/Modal"
@@ -96,7 +97,7 @@ export default function RosterFilters({ count, seasons }: { count: number, seaso
             {s}
           </option>
         ))}
-        {session?.user?.role === "COACH" && !fetchedSeasons.includes(upcoming) && <option value="ADD_NEW">+ New Season</option>}
+        {isStaffRole(session?.user?.role ?? "") && !fetchedSeasons.includes(upcoming) && <option value="ADD_NEW">+ New Season</option>}
       </select>
       <span className="text-xs text-foreground-secondary">
         {count} athlete{count === 1 ? "" : "s"}

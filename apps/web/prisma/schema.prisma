@@ -17,6 +17,16 @@ enum Role {
   ATHLETE
 }
 
+enum StaffTitle {
+  COACH
+  PRESIDENT
+  VICE_PRESIDENT
+  SECRETARY
+  TREASURER
+  MEET_DIRECTOR
+  SOCIAL_DIRECTOR
+}
+
 enum Course {
   SCY
   LCM
@@ -68,7 +78,11 @@ model User {
   emailVerified DateTime?
   name          String?
   image         String?
-  role          Role      @default(COACH)
+  role          Role      @default(ATHLETE)
+  /// Specific coach/exec title; null for plain athletes. Drives permissions (via role) and the UI badge.
+  staffTitle    StaffTitle?
+  /// Term the staff title was claimed in (e.g. "2026-2027", rolling over 1 May) — NOT the club season. See currentStaffTerm().
+  staffTerm     String?
   /// Per-type in-app notification toggles: { practicePublished?, meetSignupOpen?, practiceComments?, profileChanges? }
   notificationPreferences Json?
   defaultView   String    @default("gallery")

@@ -1,6 +1,8 @@
 import Link from "next/link"
+import type { StaffTitle } from "@swimbuzz/shared"
 import { athletePath } from "@/lib/slug"
 import { formatAthleteYearAndAge } from "@/lib/utils"
+import StaffBadge from "@/components/StaffBadge"
 
 export default function AthleteGalleryCard({
   athlete,
@@ -12,7 +14,7 @@ export default function AthleteGalleryCard({
     slug: string | null
     firstName: string
     lastName: string
-    user: { image: string | null; email: string | null } | null
+    user: { image: string | null; email: string | null; staffTitle?: StaffTitle | null } | null
     nicknames: string[]
     gender: string
     swimCloudId: number | null
@@ -56,6 +58,7 @@ export default function AthleteGalleryCard({
           </span>
         ) : null}{" "}
         {athlete.lastName}
+        {athlete.user?.staffTitle && <StaffBadge title={athlete.user.staffTitle} />}
       </h3>
       <div className="mt-1 w-full space-y-0.5 text-sm text-foreground-secondary">
         {yearAndAge ? <p className="truncate">{yearAndAge}</p> : null}

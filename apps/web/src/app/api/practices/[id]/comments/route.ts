@@ -77,7 +77,11 @@ export async function POST(
     isReply: parentId != null})
 
   return NextResponse.json(
-    { ...comment, authorImage: session.user.image ?? null },
+    {
+      ...comment,
+      authorImage: session.user.image ?? null,
+      authorStaffTitle: session.user.staffTitle ?? null,
+    },
     { status: 201 }
   )
 }

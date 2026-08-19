@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/notification-cleanup",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/staff-term-expiry",
+      "schedule": "0 8 * * *"
     }
   ]
 }

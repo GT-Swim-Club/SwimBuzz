@@ -6,7 +6,7 @@ import {
 } from "react-native"
 import { useFocusEffect, useRouter } from "expo-router"
 import type { MeetSummary } from "@swimbuzz/shared"
-import { formatMeetDateRange, isStaffRole } from "@swimbuzz/shared"
+import { formatMeetDateRange, isStaffRole, utcDayKey } from "@swimbuzz/shared"
 import {
   Button,
   Chip,
@@ -23,6 +23,7 @@ import { api } from "../../../src/lib/api"
 import { useAuth } from "../../../src/lib/auth"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 import { GalleryTile } from "../../../src/components/GalleryTile"
+import { RelativeDateText } from "../../../src/components/RelativeDateText"
 import { useViewPreferences } from "../../../src/lib/view-preferences"
 
 export default function MeetsScreen() {
@@ -146,24 +147,41 @@ export default function MeetsScreen() {
             />
           }
           renderItem={({ item }) => {
-            const subtitle = [
-              formatMeetDateRange(item.startDate, item.endDate),
-              item.location,
-              item.course,
-              item.season,
-            ]
-              .filter(Boolean)
-              .join(" · ")
+            const absoluteRange = formatMeetDateRange(item.startDate, item.endDate)
+            // Only a single-day meet collapses to "Today" — a multi-day range always
+            // stays absolute, since a relative label would silently drop the end date.
+            const singleDay = !item.endDate || utcDayKey(item.startDate) === utcDayKey(item.endDate)
+            const dateSegment = (style: { fontSize: number; color: string }) =>
+              singleDay ? (
+                <RelativeDateText
+                  value={item.startDate}
+                  kind="event"
+                  absolute={absoluteRange}
+                  style={style}
+                />
+              ) : (
+                absoluteRange
+              )
             return gallery ? (
               <GalleryTile
                 title={item.name}
-                subtitle={subtitle}
+                subtitleSegments={[
+                  dateSegment({ fontSize: 12, color: c.textSecondary }),
+                  item.location,
+                  item.course,
+                  item.season,
+                ]}
                 onPress={() => router.push(`/meets/${item.id}`)}
               />
             ) : (
               <ListRow
                 title={item.name}
-                subtitle={subtitle}
+                subtitleSegments={[
+                  dateSegment({ fontSize: 13, color: c.textSecondary }),
+                  item.location,
+                  item.course,
+                  item.season,
+                ]}
                 onPress={() => router.push(`/meets/${item.id}`)}
               />
             )

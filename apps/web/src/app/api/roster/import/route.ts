@@ -3,6 +3,7 @@ import { Gender } from "@prisma/client"
 import { parseSeason } from "@/lib/season"
 import { parseRosterCsv } from "@/lib/roster-csv"
 import { getSession } from "@/lib/session"
+import { isStaffRole } from "@/lib/auth-roles"
 import {
   createImportAthlete,
   findAthleteForImport,
@@ -19,7 +20,7 @@ function isUpload(value: unknown): value is Blob {
 
 export async function POST(req: Request) {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

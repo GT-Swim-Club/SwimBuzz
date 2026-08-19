@@ -185,7 +185,7 @@ export default function PracticesScreen() {
         <PracticeTagFilter
           tags={catalog}
           selected={activeTags}
-          canManage={user?.role === "COACH"}
+          canManage={isStaff}
           onChangeTags={setCatalog}
           onChangeSelected={setActiveTags}
         />

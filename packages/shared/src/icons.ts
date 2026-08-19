@@ -291,6 +291,42 @@ export const ICONS = {
   check: [
     { tag: "path", d: "M20 6 9 17l-5-5" },
   ],
+  link: [
+    { tag: "path", d: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" },
+    { tag: "path", d: "M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" },
+  ],
+  copy: [
+    { tag: "rect", x: 8, y: 8, width: 14, height: 14, rx: 2 },
+    { tag: "path", d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" },
+  ],
+  share: [
+    { tag: "path", d: "M5 12v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" },
+    { tag: "polyline", points: "7 8 12 3 17 8" },
+    { tag: "line", x1: 12, y1: 15, x2: 12, y2: 3 },
+  ],
+  image: [
+    { tag: "rect", x: 3, y: 3, width: 18, height: 18, rx: 2 },
+    { tag: "circle", cx: 9, cy: 9, r: 2 },
+    { tag: "path", d: "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" },
+  ],
+  // Staff badges — shown next to a coach/exec member's name across web and mobile.
+  coachBadge: [
+    {
+      tag: "path",
+      d: "M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z",
+    },
+    {
+      tag: "path",
+      d: "M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14",
+    },
+    { tag: "path", d: "M8 6v8" },
+  ],
+  execBadge: [
+    {
+      tag: "path",
+      d: "M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z",
+    },
+  ],
 } as const satisfies Record<string, readonly IconPrimitive[]>
 
 export type IconName = keyof typeof ICONS

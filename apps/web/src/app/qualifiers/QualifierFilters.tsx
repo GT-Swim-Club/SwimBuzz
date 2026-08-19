@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useSession } from "next-auth/react"
+import { isStaffRole } from "@/lib/auth-roles"
 import { resolveListedSeason, upcomingSeason } from "@/lib/season"
 import Modal, { ModalFooter } from "@/components/Modal"
 
@@ -84,7 +85,7 @@ export default function QualifierFilters({
             {s}
           </option>
         ))}
-        {session?.user?.role === "COACH" && !fetchedSeasons.includes(upcoming) && <option value="ADD_NEW">+ New Season</option>}
+        {isStaffRole(session?.user?.role ?? "") && !fetchedSeasons.includes(upcoming) && <option value="ADD_NEW">+ New Season</option>}
       </select>
 
       <Modal

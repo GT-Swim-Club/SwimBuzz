@@ -22,6 +22,7 @@ import { notifyMeetRosterOfInfoDrops } from "@/lib/meet-roster-notify"
 import { parseSeason } from "@/lib/season"
 import { coerceParsedRelayResults } from "@/lib/relay-results"
 import { getSession } from "@/lib/session"
+import { isStaffRole } from "@/lib/auth-roles"
 
 function isUpload(value: unknown): value is Blob {
   return value != null && typeof value !== "string" && typeof (value as Blob).arrayBuffer === "function"
@@ -149,7 +150,7 @@ async function applyParsedMeetPdf(input: {
 
 export async function POST(req: Request) {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

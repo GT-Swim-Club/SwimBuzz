@@ -64,7 +64,7 @@ async function RosterContent({ searchParams }: { searchParams: Promise<{ gender?
           seasons: { has: season },
           ...firstLastWhere},
       include: {
-        user: { select: { name: true, email: true, image: true } }},
+        user: { select: { name: true, email: true, image: true, staffTitle: true } }},
       orderBy: [{ lastName: "asc" }, { firstName: "asc" }]})
 
     // Post-filter: also match athletes whose nickname contains the query
@@ -81,7 +81,7 @@ async function RosterContent({ searchParams }: { searchParams: Promise<{ gender?
         })
       : athletes
 
-    const viewerAthleteId = await resolveViewerAthleteId(session.user.id, session.user.role)
+    const viewerAthleteId = await resolveViewerAthleteId(session.user.id)
     const sortedAthletes =
       viewerAthleteId && filteredAthletes.some((a) => a.id === viewerAthleteId)
         ? [

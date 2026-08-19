@@ -8,6 +8,7 @@ import Modal, { ModalFooter } from "@/components/Modal"
 import { DatePicker, TimePicker } from "@/components/CustomDateTimePicker"
 import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/FileDropzone"
 import { useSession } from "next-auth/react"
+import { isStaffRole } from "@/lib/auth-roles"
 import { useViewerTimeZone } from "@/components/ZonedTime"
 import { DEFAULT_TIME_ZONE, zoneAbbreviation, zoneDisplayName } from "@swimbuzz/shared"
 
@@ -419,7 +420,7 @@ export default function MeetFields({
                 {s}
               </option>
             ))}
-             {session?.user?.role === "COACH" && !fetchedSeasons.includes(upcoming) && <option value="ADD_NEW">+ New Season</option>}
+             {isStaffRole(session?.user?.role ?? "") && !fetchedSeasons.includes(upcoming) && <option value="ADD_NEW">+ New Season</option>}
           </select>
         </div>
       </div>

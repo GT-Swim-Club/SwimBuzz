@@ -18,6 +18,7 @@ const attendanceInclude = {
       lastName: true,
       gender: true,
       year: true,
+      user: { select: { staffTitle: true } },
     },
   },
 } as const

@@ -17,6 +17,7 @@ import { coerceParsedRelayResults } from "@/lib/relay-results"
 import { ScraperJobStatus, ScraperJobType } from "@prisma/client"
 import { notifyMeetRosterOfInfoDrops } from "@/lib/meet-roster-notify"
 import { getSession } from "@/lib/session"
+import { isStaffRole } from "@/lib/auth-roles"
 
 export const runtime = "nodejs"
 export const maxDuration = 300
@@ -67,7 +68,7 @@ function scraperErrorResponse(err: unknown) {
 
 export async function POST(req: Request) {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

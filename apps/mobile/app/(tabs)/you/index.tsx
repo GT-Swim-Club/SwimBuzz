@@ -1,13 +1,14 @@
 import { Redirect, useFocusEffect, useRouter } from "expo-router"
 import { useCallback, useMemo, useState } from "react"
 import { Alert, Linking, Pressable, StyleSheet, Text, View } from "react-native"
-import { formatRoleLabel, type IconName } from "@swimbuzz/shared"
+import { formatRoleLabel, STAFF_TITLE_LABELS, type IconName } from "@swimbuzz/shared"
 import { LoadingBlock, Screen, ScrollView, usePalette } from "@swimbuzz/ui"
 import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
 import { api } from "../../../src/lib/api"
 import { useAuth } from "../../../src/lib/auth"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 import { Icon } from "../../../src/components/Icon"
+import { StaffBadge } from "../../../src/components/StaffBadge"
 import { UserAvatar } from "../../../src/components/UserAvatar"
 
 type MenuItem = {
@@ -149,15 +150,18 @@ export default function YouScreen() {
           size={48}
         />
         <View style={styles.accountCopy}>
-          <Text numberOfLines={1} style={styles.accountName}>
-            {user.name || "Account"}
-          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+            <Text numberOfLines={1} style={styles.accountName}>
+              {user.name || "Account"}
+            </Text>
+            {user.staffTitle ? <StaffBadge title={user.staffTitle} /> : null}
+          </View>
           <Text numberOfLines={1} style={styles.accountMeta}>
             {user.email || formatRoleLabel(user.role)}
           </Text>
           {user.email ? (
             <Text numberOfLines={1} style={styles.accountRole}>
-              {formatRoleLabel(user.role)}
+              {user.staffTitle ? STAFF_TITLE_LABELS[user.staffTitle] : formatRoleLabel(user.role)}
             </Text>
           ) : null}
         </View>

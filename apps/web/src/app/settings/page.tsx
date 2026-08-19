@@ -8,6 +8,7 @@ import NotificationPreferencesSettings from "@/components/NotificationPreference
 import ProfilePictureSettings from "@/components/ProfilePictureSettings"
 import SetSwimCloudIdForm from "@/components/SetSwimCloudIdForm"
 import { formatRoleLabel, isStaffRole } from "@/lib/auth-roles"
+import { STAFF_TITLE_LABELS } from "@swimbuzz/shared"
 import { parseNotificationPreferences } from "@/lib/notification-preferences"
 import { parsePendingProfileChanges } from "@/lib/pending-profile-changes"
 import { prisma } from "@/lib/prisma"
@@ -85,7 +86,9 @@ export default async function SettingsPage() {
             <div className="flex items-center justify-between gap-4 px-4 py-3">
               <p className="text-sm text-foreground-secondary">Role</p>
               <p className="text-sm font-medium text-foreground">
-                {formatRoleLabel(session.user.role)}
+                {session.user.staffTitle
+                  ? STAFF_TITLE_LABELS[session.user.staffTitle]
+                  : formatRoleLabel(session.user.role)}
               </p>
             </div>
           </div>

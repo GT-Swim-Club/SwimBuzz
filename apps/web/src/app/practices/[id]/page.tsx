@@ -30,7 +30,7 @@ export default async function PracticePage({
       sets: { orderBy: { order: "asc" }, select: practiceSetSelect },
       comments: {
         orderBy: { createdAt: "asc" },
-        include: { author: { select: { image: true } } },
+        include: { author: { select: { image: true, staffTitle: true } } },
       },
       editLockedBy: { select: { id: true, name: true } }}})
 
@@ -85,6 +85,7 @@ export default async function PracticePage({
         authorName: c.authorName,
         authorId: c.authorId,
         authorImage: c.author?.image ?? null,
+        authorStaffTitle: c.author?.staffTitle ?? null,
         body: c.body,
         parentId: c.parentId,
         createdAt: c.createdAt.toISOString()}))}

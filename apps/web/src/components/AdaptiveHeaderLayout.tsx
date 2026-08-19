@@ -6,9 +6,9 @@ import AthleteViewToggle from "@/components/AthleteViewToggle"
 import HoverDetail from "@/components/HoverDetail"
 import RunScraperButton from "@/components/RunScraperButton"
 import MobileNavMenu from "@/components/MobileNavMenu"
+import type { StaffTitle } from "@swimbuzz/shared"
 
 type NavLink = { href: string; label: string; icon: ReactNode; prefetch?: boolean }
-type Athlete = { id: string; name: string }
 type HeaderMode = "full" | "staff-compact" | "links-compact" | "logo-only" | "medium" | "tight" | "menu"
 
 type Props = {
@@ -16,8 +16,10 @@ type Props = {
   compactBrand: ReactNode
   utilities: ReactNode
   links: readonly NavLink[]
-  athletes: Athlete[]
-  selectedAthleteId: string | null
+  /** The signed-in staff member's own title — drives the Athlete View toggle's label. */
+  staffTitle: StaffTitle | null
+  /** Current state of the ATHLETE_VIEW_COOKIE. */
+  athleteViewEnabled: boolean
   showAthleteView: boolean
   showScraper: boolean
 }
@@ -27,8 +29,8 @@ export default function AdaptiveHeaderLayout({
   compactBrand,
   utilities,
   links,
-  athletes,
-  selectedAthleteId,
+  staffTitle,
+  athleteViewEnabled,
   showAthleteView,
   showScraper,
 }: Props) {
@@ -83,7 +85,7 @@ export default function AdaptiveHeaderLayout({
     observer.observe(menu)
     void document.fonts?.ready.then(updateMode)
     return () => observer.disconnect()
-  }, [links, athletes, selectedAthleteId, showAthleteView, showScraper])
+  }, [links, staffTitle, athleteViewEnabled, showAthleteView, showScraper])
 
   const staffCompact = mode !== "full"
   const linksCompact = mode === "links-compact" || mode === "logo-only" || mode === "medium" || mode === "tight"
@@ -101,7 +103,7 @@ export default function AdaptiveHeaderLayout({
         </div>
       </div>
       <div className={menu ? "hidden" : "flex shrink-0 items-center " + (tight ? "gap-1" : medium ? "gap-2" : "gap-3")}>
-        <StaffControls athletes={athletes} selectedAthleteId={selectedAthleteId} showAthleteView={showAthleteView} showScraper={showScraper} compact={staffCompact} medium={medium} tight={tight} />
+        <StaffControls staffTitle={staffTitle} athleteViewEnabled={athleteViewEnabled} showAthleteView={showAthleteView} showScraper={showScraper} compact={staffCompact} medium={medium} tight={tight} />
         {utilities}
       </div>
 
@@ -111,7 +113,7 @@ export default function AdaptiveHeaderLayout({
           <div className="flex shrink-0 items-center gap-2">
             <MobileNavMenu
               links={[...links]}
-              staffTools={<StaffControls athletes={athletes} selectedAthleteId={selectedAthleteId} showAthleteView={showAthleteView} showScraper={showScraper} compact={false} />}
+              staffTools={<StaffControls staffTitle={staffTitle} athleteViewEnabled={athleteViewEnabled} showAthleteView={showAthleteView} showScraper={showScraper} compact={false} />}
             />
             {utilities}
           </div>
@@ -121,37 +123,37 @@ export default function AdaptiveHeaderLayout({
       <div ref={fullRef} aria-hidden="true" className="pointer-events-none invisible absolute -left-[10000px] top-0 flex w-max items-center gap-3 whitespace-nowrap text-[15px]">
         <div>{brand}</div>
         <PrimaryLinks links={links} compact={false} />
-        <StaffControls athletes={athletes} selectedAthleteId={selectedAthleteId} showAthleteView={showAthleteView} showScraper={showScraper} compact={false} />
+        <StaffControls staffTitle={staffTitle} athleteViewEnabled={athleteViewEnabled} showAthleteView={showAthleteView} showScraper={showScraper} compact={false} />
         <div className="flex items-center gap-3">{utilities}</div>
       </div>
       <div ref={staffCompactRef} aria-hidden="true" className="pointer-events-none invisible absolute -left-[10000px] top-0 flex w-max items-center gap-3 whitespace-nowrap text-[15px]">
         <div>{brand}</div>
         <PrimaryLinks links={links} compact={false} />
-        <StaffControls athletes={athletes} selectedAthleteId={selectedAthleteId} showAthleteView={showAthleteView} showScraper={showScraper} compact />
+        <StaffControls staffTitle={staffTitle} athleteViewEnabled={athleteViewEnabled} showAthleteView={showAthleteView} showScraper={showScraper} compact />
         <div className="flex items-center gap-3">{utilities}</div>
       </div>
       <div ref={linksCompactRef} aria-hidden="true" className="pointer-events-none invisible absolute -left-[10000px] top-0 flex w-max items-center gap-3 whitespace-nowrap">
         <div>{brand}</div>
         <PrimaryLinks links={links} compact />
-        <StaffControls athletes={athletes} selectedAthleteId={selectedAthleteId} showAthleteView={showAthleteView} showScraper={showScraper} compact />
+        <StaffControls staffTitle={staffTitle} athleteViewEnabled={athleteViewEnabled} showAthleteView={showAthleteView} showScraper={showScraper} compact />
         <div className="flex items-center gap-3">{utilities}</div>
       </div>
       <div ref={logoOnlyRef} aria-hidden="true" className="pointer-events-none invisible absolute -left-[10000px] top-0 flex w-max items-center gap-3 whitespace-nowrap">
         <div>{compactBrand}</div>
         <PrimaryLinks links={links} compact />
-        <StaffControls athletes={athletes} selectedAthleteId={selectedAthleteId} showAthleteView={showAthleteView} showScraper={showScraper} compact />
+        <StaffControls staffTitle={staffTitle} athleteViewEnabled={athleteViewEnabled} showAthleteView={showAthleteView} showScraper={showScraper} compact />
         <div className="flex items-center gap-3">{utilities}</div>
       </div>
       <div ref={mediumRef} aria-hidden="true" className="pointer-events-none invisible absolute -left-[10000px] top-0 flex w-max items-center gap-2 whitespace-nowrap">
         <div>{compactBrand}</div>
         <PrimaryLinks links={links} compact medium />
-        <StaffControls athletes={athletes} selectedAthleteId={selectedAthleteId} showAthleteView={showAthleteView} showScraper={showScraper} compact medium />
+        <StaffControls staffTitle={staffTitle} athleteViewEnabled={athleteViewEnabled} showAthleteView={showAthleteView} showScraper={showScraper} compact medium />
         <div className="flex items-center gap-2">{utilities}</div>
       </div>
       <div ref={tightRef} aria-hidden="true" className="pointer-events-none invisible absolute -left-[10000px] top-0 flex w-max items-center gap-1 whitespace-nowrap">
         <div>{compactBrand}</div>
         <PrimaryLinks links={links} compact tight />
-        <StaffControls athletes={athletes} selectedAthleteId={selectedAthleteId} showAthleteView={showAthleteView} showScraper={showScraper} compact tight />
+        <StaffControls staffTitle={staffTitle} athleteViewEnabled={athleteViewEnabled} showAthleteView={showAthleteView} showScraper={showScraper} compact tight />
         <div className="flex items-center gap-1">{utilities}</div>
       </div>
       <div ref={menuRef} aria-hidden="true" className="pointer-events-none invisible absolute -left-[10000px] top-0 flex w-max items-center gap-2 whitespace-nowrap">
@@ -187,9 +189,9 @@ function PrimaryLinks({ links, compact, medium = false, tight = false }: { links
   )
 }
 
-function StaffControls({ athletes, selectedAthleteId, showAthleteView, showScraper, compact, medium = false, tight = false }: {
-  athletes: Athlete[]
-  selectedAthleteId: string | null
+function StaffControls({ staffTitle, athleteViewEnabled, showAthleteView, showScraper, compact, medium = false, tight = false }: {
+  staffTitle: StaffTitle | null
+  athleteViewEnabled: boolean
   showAthleteView: boolean
   showScraper: boolean
   compact: boolean
@@ -199,7 +201,9 @@ function StaffControls({ athletes, selectedAthleteId, showAthleteView, showScrap
   if (!showAthleteView && !showScraper) return null
   return (
     <div className={"flex shrink-0 items-center " + (tight ? "gap-1" : medium ? "gap-2" : "gap-3")}>
-      {showAthleteView ? <AthleteViewToggle athletes={athletes} selectedAthleteId={selectedAthleteId} compact={compact} /> : null}
+      {showAthleteView && staffTitle ? (
+        <AthleteViewToggle staffTitle={staffTitle} athleteViewEnabled={athleteViewEnabled} compact={compact} />
+      ) : null}
       {showScraper ? <RunScraperButton compact={compact} /> : null}
     </div>
   )

@@ -8,13 +8,15 @@ import {
 } from "react-native"
 import { useFocusEffect, useRouter } from "expo-router"
 import { formatDateTime, type NotificationItem } from "@swimbuzz/shared"
-import { Button, EmptyState, ListRow, Screen, Title } from "@swimbuzz/ui"
+import { Button, EmptyState, ListRow, Screen, Title, usePalette } from "@swimbuzz/ui"
 import { colors, spacing } from "@swimbuzz/tokens"
 import { api } from "../../src/lib/api"
 import { isExternalUrl, resolveAppHref } from "../../src/lib/href"
+import { RelativeDateText } from "../../src/components/RelativeDateText"
 
 export default function NotificationsScreen() {
   const router = useRouter()
+  const c = usePalette()
   const [items, setItems] = useState<NotificationItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -93,13 +95,16 @@ export default function NotificationsScreen() {
           renderItem={({ item }) => (
             <ListRow
               title={item.title}
-              subtitle={[
+              subtitleSegments={[
                 item.body,
-                formatDateTime(item.createdAt),
+                <RelativeDateText
+                  value={item.createdAt}
+                  kind="instant"
+                  absolute={formatDateTime(item.createdAt)}
+                  style={{ fontSize: 13, color: c.textSecondary }}
+                />,
                 item.readAt ? "Read" : "Unread",
-              ]
-                .filter(Boolean)
-                .join(" · ")}
+              ]}
               onPress={() => void onOpen(item)}
             />
           )}

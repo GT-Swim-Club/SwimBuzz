@@ -41,21 +41,37 @@ const platformGoogleClientId =
 const googleReady = Boolean(platformGoogleClientId) && !isExpoGo
 
 export default function SignInScreen() {
-  const { user, loading, requestCode, signInWithEmail, signInWithGoogle } =
-    useAuth()
+  const {
+    user,
+    loading,
+    requestCode,
+    signInWithEmail,
+    signInWithGoogle,
+    verifyStaffCode,
+  } = useAuth()
   const router = useRouter()
   const c = usePalette()
   const { colorScheme } = useThemePreference()
   const styles = useMemo(() => makeStyles(c), [c])
   const [email, setEmail] = useState("")
   const [code, setCode] = useState("")
-  const [step, setStep] = useState<"email" | "code">("email")
+  // Athletes: email -> code (signs in directly). Coaches & Exec: email -> code -> google
+  // (code only proves the GT email; Google is what actually signs them in).
+  const [step, setStep] = useState<"email" | "code" | "google">("email")
+  const [staffLinkToken, setStaffLinkToken] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [method, setMethod] = useState<"athletes" | "staff">("athletes")
   const [emailFocused, setEmailFocused] = useState(false)
   const [codeFocused, setCodeFocused] = useState(false)
 
   if (!loading && user) return <Redirect href="/practices" />
+
+  function onSwitchMethod(next: "athletes" | "staff") {
+    setMethod(next)
+    setStep("email")
+    setCode("")
+    setStaffLinkToken(null)
+  }
 
   async function onRequestCode() {
     setBusy(true)
@@ -76,8 +92,14 @@ export default function SignInScreen() {
   async function onVerify() {
     setBusy(true)
     try {
-      await signInWithEmail(email.trim(), code.trim())
-      router.replace("/practices")
+      if (method === "staff") {
+        const token = await verifyStaffCode(email.trim(), code.trim())
+        setStaffLinkToken(token)
+        setStep("google")
+      } else {
+        await signInWithEmail(email.trim(), code.trim())
+        router.replace("/practices")
+      }
     } catch (err) {
       Alert.alert(
         "Sign-in failed",
@@ -130,7 +152,7 @@ export default function SignInScreen() {
               flex
               selected={method === "athletes"}
               accessibilityLabel="Athletes"
-              onPress={() => setMethod("athletes")}
+              onPress={() => onSwitchMethod("athletes")}
             >
               <Text
                 style={[
@@ -145,7 +167,7 @@ export default function SignInScreen() {
               flex
               selected={method === "staff"}
               accessibilityLabel="Coaches and Exec"
-              onPress={() => setMethod("staff")}
+              onPress={() => onSwitchMethod("staff")}
             >
               <Text
                 style={[
@@ -158,89 +180,97 @@ export default function SignInScreen() {
             </SegmentedOption>
           </SegmentedToggle>
 
-          {method === "athletes" ? (
-            step === "email" ? (
-              <View style={styles.form}>
-                <Text style={styles.label}>Georgia Tech Email</Text>
-                <TextInput
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  autoComplete="email"
-                  keyboardType="email-address"
-                  keyboardAppearance={colorScheme}
-                  placeholder="gburdell3@gatech.edu"
-                  placeholderTextColor={c.textTertiary}
-                  style={[styles.input, emailFocused && styles.inputFocused]}
-                  value={email}
-                  onBlur={() => setEmailFocused(false)}
-                  onChangeText={setEmail}
-                  onFocus={() => setEmailFocused(true)}
-                />
-                <Button
-                  label="Send verification code"
-                  loading={busy}
-                  disabled={!email.trim()}
-                  onPress={() => void onRequestCode()}
-                  style={styles.action}
-                />
-              </View>
-            ) : (
-              <View style={styles.form}>
-                <Text style={styles.label}>Verification code</Text>
+          {step === "email" ? (
+            <View style={styles.form}>
+              <Text style={styles.label}>Georgia Tech Email</Text>
+              {method === "staff" ? (
                 <Text style={styles.hint}>
-                  We sent a 6-digit code to{" "}
-                  <Text style={styles.hintEmphasis}>{email}</Text>
+                  Coaches and exec verify their roster email first, then sign
+                  in with their @gtswimclub.com Google account.
                 </Text>
-                <TextInput
-                  keyboardType="number-pad"
-                  keyboardAppearance={colorScheme}
-                  autoComplete="one-time-code"
-                  textContentType="oneTimeCode"
-                  placeholder="000000"
-                  placeholderTextColor={c.textTertiary}
-                  style={[
-                    styles.input,
-                    styles.codeInput,
-                    codeFocused && styles.inputFocused,
-                  ]}
-                  value={code}
-                  onBlur={() => setCodeFocused(false)}
-                  onChangeText={(value) =>
-                    setCode(value.replace(/\D/g, "").slice(0, 6))
-                  }
-                  onFocus={() => setCodeFocused(true)}
-                  maxLength={6}
-                />
-                <Button
-                  label="Verify and sign in"
-                  loading={busy}
-                  disabled={code.length !== 6}
-                  onPress={() => void onVerify()}
-                  style={styles.action}
-                />
-                <View style={styles.codeActions}>
-                  <Pressable
-                    onPress={() => {
-                      setStep("email")
-                      setCode("")
-                    }}
-                  >
-                    <Text style={styles.link}>← Use a different email</Text>
-                  </Pressable>
-                  <Pressable disabled={busy} onPress={() => void onRequestCode()}>
-                    <Text style={styles.link}>Resend code</Text>
-                  </Pressable>
-                </View>
+              ) : null}
+              <TextInput
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="email"
+                keyboardType="email-address"
+                keyboardAppearance={colorScheme}
+                placeholder="gburdell3@gatech.edu"
+                placeholderTextColor={c.textTertiary}
+                style={[styles.input, emailFocused && styles.inputFocused]}
+                value={email}
+                onBlur={() => setEmailFocused(false)}
+                onChangeText={setEmail}
+                onFocus={() => setEmailFocused(true)}
+              />
+              <Button
+                label="Send verification code"
+                loading={busy}
+                disabled={!email.trim()}
+                onPress={() => void onRequestCode()}
+                style={styles.action}
+              />
+            </View>
+          ) : step === "code" ? (
+            <View style={styles.form}>
+              <Text style={styles.label}>Verification code</Text>
+              <Text style={styles.hint}>
+                We sent a 6-digit code to{" "}
+                <Text style={styles.hintEmphasis}>{email}</Text>
+              </Text>
+              <TextInput
+                keyboardType="number-pad"
+                keyboardAppearance={colorScheme}
+                autoComplete="one-time-code"
+                textContentType="oneTimeCode"
+                placeholder="000000"
+                placeholderTextColor={c.textTertiary}
+                style={[
+                  styles.input,
+                  styles.codeInput,
+                  codeFocused && styles.inputFocused,
+                ]}
+                value={code}
+                onBlur={() => setCodeFocused(false)}
+                onChangeText={(value) =>
+                  setCode(value.replace(/\D/g, "").slice(0, 6))
+                }
+                onFocus={() => setCodeFocused(true)}
+                maxLength={6}
+              />
+              <Button
+                label={method === "staff" ? "Verify email" : "Verify and sign in"}
+                loading={busy}
+                disabled={code.length !== 6}
+                onPress={() => void onVerify()}
+                style={styles.action}
+              />
+              <View style={styles.codeActions}>
+                <Pressable
+                  onPress={() => {
+                    setStep("email")
+                    setCode("")
+                  }}
+                >
+                  <Text style={styles.link}>← Use a different email</Text>
+                </Pressable>
+                <Pressable disabled={busy} onPress={() => void onRequestCode()}>
+                  <Text style={styles.link}>Resend code</Text>
+                </Pressable>
               </View>
-            )
+            </View>
           ) : (
             <>
+              <Text style={styles.hint}>
+                Email verified as <Text style={styles.hintEmphasis}>{email}</Text>.
+                Now continue with your @gtswimclub.com Google account.
+              </Text>
               {googleReady ? (
                 <GoogleSignInButton
                   busy={busy}
                   setBusy={setBusy}
                   onSuccess={async (idToken) => {
-                    await signInWithGoogle(idToken)
+                    await signInWithGoogle(idToken, staffLinkToken ?? undefined)
                     router.replace("/practices")
                   }}
                 />
@@ -255,10 +285,19 @@ export default function SignInScreen() {
               )}
               {isExpoGo ? (
                 <Text style={styles.footnote}>
-                  Use email OTP on the Athletes tab. Google sign-in needs a
-                  development build.
+                  Google sign-in needs a development build to complete the
+                  Coaches & Exec flow.
                 </Text>
               ) : null}
+              <Pressable
+                onPress={() => {
+                  setStep("email")
+                  setCode("")
+                  setStaffLinkToken(null)
+                }}
+              >
+                <Text style={styles.link}>← Start over</Text>
+              </Pressable>
             </>
           )}
         </ScrollView>

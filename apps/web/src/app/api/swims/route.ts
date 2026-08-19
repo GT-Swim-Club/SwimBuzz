@@ -3,11 +3,12 @@ import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { normalizeSwimForInsert, nextSwimOccurrence } from "@/lib/swim-dedup"
 import { getSession } from "@/lib/session"
+import { isStaffRole } from "@/lib/auth-roles"
 
 export async function POST(req: Request) {
   try {
     const session = await getSession()
-    if (!session || session.user.role !== "COACH") {
+    if (!session || !isStaffRole(session.user.role)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 

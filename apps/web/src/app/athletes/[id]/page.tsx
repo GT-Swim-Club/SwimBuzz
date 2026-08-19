@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
 import BackLink from "@/components/BackLink"
+import StaffBadge from "@/components/StaffBadge"
 import { getSession } from "@/lib/session"
 
 function formatYear(year: string): string {
@@ -36,7 +37,7 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
     const athlete = await prisma.athlete.findFirst({
         where: isCuid(param) ? { OR: [{ id: param }, { slug: param }] } : { slug: param },
         include: {
-          user: { select: { name: true, email: true, image: true } },
+          user: { select: { name: true, email: true, image: true, staffTitle: true } },
           swims: {
             orderBy: { date: "desc" },
             include: { meetRef: { select: { slug: true, season: true, name: true } } }}}})
@@ -137,6 +138,7 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
                     {" "}({athlete.nicknames.join(", ")})
                   </span>
                 )}
+                {athlete.user?.staffTitle && <StaffBadge title={athlete.user.staffTitle} />}
               </h1>
               <p className="truncate text-sm text-foreground-secondary">{athlete.user?.email}</p>
               {athlete.year && (

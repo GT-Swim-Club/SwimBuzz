@@ -6,6 +6,7 @@ import {
   DEFAULT_NOTIFICATION_PREFERENCES,
   NOTIFICATION_PREFERENCE_META,
   formatRoleLabel,
+  STAFF_TITLE_LABELS,
   type NotificationPreferenceKey,
   type NotificationPreferences,
 } from "@swimbuzz/shared"
@@ -201,7 +202,8 @@ export default function SettingsScreen() {
           {user.name || "Signed in"}
         </Body>
         <Muted style={{ marginBottom: spacing.lg }}>
-          {user.email} · {formatRoleLabel(user.role)}
+          {user.email} ·{" "}
+          {user.staffTitle ? STAFF_TITLE_LABELS[user.staffTitle] : formatRoleLabel(user.role)}
         </Muted>
 
         {error ? <ErrorBlock message={error} /> : null}

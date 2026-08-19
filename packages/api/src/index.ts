@@ -80,10 +80,26 @@ export function createApiClient(options: ApiClientOptions = {}) {
       })
     },
 
-    mobileGoogleLogin(idToken: string) {
+    /** Step 1 of coach/exec sign-in: verify the GT-email OTP, get a short-lived staff-link token for step 2. */
+    staffVerify(email: string, code: string) {
+      return request<{ staffLinkToken: string } | { error: string }>(
+        "/api/auth/mobile/staff/verify",
+        {
+          method: "POST",
+          body: JSON.stringify({ email, code }),
+        }
+      )
+    },
+
+    /**
+     * Athlete Google login has no staffLinkToken. Coach/exec sign-in (step 2)
+     * passes the token from staffVerify(); the server links the Google
+     * account to that roster user and rejects non-@gtswimclub.com addresses.
+     */
+    mobileGoogleLogin(idToken: string, staffLinkToken?: string) {
       return request<AuthTokens>("/api/auth/mobile/google", {
         method: "POST",
-        body: JSON.stringify({ idToken }),
+        body: JSON.stringify({ idToken, staffLinkToken }),
       })
     },
 

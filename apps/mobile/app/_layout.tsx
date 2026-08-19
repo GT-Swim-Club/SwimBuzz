@@ -5,7 +5,7 @@ import { useMemo } from "react"
 import { AuthProvider } from "../src/lib/auth"
 import { ThemeProvider, useThemePreference } from "../src/lib/theme"
 import { ViewPreferencesProvider } from "../src/lib/view-preferences"
-import { usePalette } from "@swimbuzz/ui"
+import { ToastProvider, usePalette } from "@swimbuzz/ui"
 
 function ThemedStack() {
   const { colorScheme } = useThemePreference()
@@ -52,7 +52,9 @@ export default function RootLayout() {
     <ThemeProvider>
       <AuthProvider>
         <ViewPreferencesProvider>
-          <ThemedStack />
+          <ToastProvider>
+            <ThemedStack />
+          </ToastProvider>
         </ViewPreferencesProvider>
       </AuthProvider>
     </ThemeProvider>

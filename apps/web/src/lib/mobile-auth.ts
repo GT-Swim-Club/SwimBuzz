@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from "crypto"
 import { SignJWT, jwtVerify } from "jose"
 import type { Session } from "next-auth"
-import type { Role } from "@prisma/client"
+import type { Role, StaffTitle } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 
 const ACCESS_TTL_SEC = 60 * 60 // 1 hour
@@ -13,6 +13,7 @@ export type MobileAccessClaims = {
   name?: string | null
   picture?: string | null
   role: Role
+  staffTitle?: StaffTitle | null
   typ: "mobile_access"
 }
 
@@ -32,6 +33,7 @@ export async function signMobileAccessToken(user: {
   name?: string | null
   image?: string | null
   role: Role
+  staffTitle?: StaffTitle | null
 }): Promise<{ accessToken: string; expiresIn: number }> {
   const expiresIn = ACCESS_TTL_SEC
   const accessToken = await new SignJWT({
@@ -39,6 +41,7 @@ export async function signMobileAccessToken(user: {
     name: user.name,
     picture: user.image,
     role: user.role,
+    staffTitle: user.staffTitle ?? null,
     typ: "mobile_access",
   })
     .setProtectedHeader({ alg: "HS256" })
@@ -64,6 +67,7 @@ export async function verifyMobileAccessToken(
       name: (payload.name as string | null | undefined) ?? null,
       picture: (payload.picture as string | null | undefined) ?? null,
       role: payload.role as Role,
+      staffTitle: (payload.staffTitle as StaffTitle | null | undefined) ?? null,
       typ: "mobile_access",
     }
   } catch {
@@ -77,6 +81,7 @@ export async function issueMobileTokens(user: {
   name?: string | null
   image?: string | null
   role: Role
+  staffTitle?: StaffTitle | null
 }) {
   const { accessToken, expiresIn } = await signMobileAccessToken(user)
   const refreshToken = randomBytes(48).toString("base64url")
@@ -100,6 +105,7 @@ export async function issueMobileTokens(user: {
       name: user.name,
       image: user.image,
       role: user.role,
+      staffTitle: user.staffTitle ?? null,
     },
   }
 }
@@ -116,6 +122,7 @@ export async function rotateMobileRefreshToken(rawRefreshToken: string) {
           name: true,
           image: true,
           role: true,
+          staffTitle: true,
         },
       },
     },
@@ -151,6 +158,7 @@ export function sessionFromMobileClaims(
       name: claims.name,
       image: claims.picture ?? null,
       role: claims.role,
+      staffTitle: claims.staffTitle ?? null,
     },
     expires: new Date(Date.now() + ACCESS_TTL_SEC * 1000).toISOString(),
   }

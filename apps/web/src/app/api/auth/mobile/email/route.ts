@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { verifyEmailLoginCode } from "@/lib/email-login"
 import { issueMobileTokens } from "@/lib/mobile-auth"
+import { STAFF_MUST_USE_STAFF_TAB_ERROR } from "@swimbuzz/shared"
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}))
@@ -18,6 +19,16 @@ export async function POST(req: Request) {
     return NextResponse.json(
       { error: "Invalid or expired code" },
       { status: 401 }
+    )
+  }
+
+  // Coach/exec accounts must sign in through the staff two-step flow
+  // (staff/verify + google) so their session is only ever issued after the
+  // Google step — this direct-session path is athlete-only.
+  if (user.staffTitle) {
+    return NextResponse.json(
+      { error: STAFF_MUST_USE_STAFF_TAB_ERROR },
+      { status: 403 }
     )
   }
 

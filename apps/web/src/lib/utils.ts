@@ -79,6 +79,7 @@ export function formatRelativeTime(date: Date | string): string {
   const time = formatTimeOfDay(d)
   if (dayDiff === 0) return time
   if (dayDiff === 1) return `Yesterday at ${time}`
+  if (dayDiff === -1) return `Tomorrow at ${time}`
   return formatDateTime(d)
 }
 

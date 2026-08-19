@@ -7,6 +7,7 @@ import {
 import { notifyMeetSignupOpen } from "@/lib/notifications"
 import { Prisma } from "@prisma/client"
 import { getSession } from "@/lib/session"
+import { isStaffRole } from "@/lib/auth-roles"
 
 function parseOptionalDate(value: unknown): Date | null | undefined {
   if (value === null) return null
@@ -41,11 +42,12 @@ export async function GET(
                   id: true,
                   firstName: true,
                   lastName: true,
-                  gender: true}}},
+                  gender: true,
+                  user: { select: { staffTitle: true } }}}},
             orderBy: [{ updatedAt: "desc" }]}}}}})
   if (!meet) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-  const isCoach = session.user.role === "COACH"
+  const isStaff = isStaffRole(session.user.role)
   const form = meet.signupForm
   const athlete = await prisma.athlete.findUnique({
     where: { userId: session.user.id },
@@ -83,13 +85,14 @@ export async function GET(
           updatedAt: myEntry.updatedAt.toISOString()}
       : null,
     athleteId: athlete?.id ?? null,
-    entries: isCoach && form
+    entries: isStaff && form
       ? form.entries.map((e) => ({
           id: e.id,
           athleteId: e.athleteId,
           firstName: e.athlete.firstName,
           lastName: e.athlete.lastName,
           gender: e.athlete.gender,
+          staffTitle: e.athlete.user?.staffTitle ?? null,
           events: e.events,
           notes: e.notes,
           answers: e.answers,
@@ -102,7 +105,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

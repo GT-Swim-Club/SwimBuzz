@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { formatDateRange } from "@/lib/utils"
+import { RelativeDateRange } from "@/components/RelativeDate"
 import EditMeetButton from "./EditMeetButton"
 import { type MeetFormState } from "./MeetFields"
 import { meetPath } from "@/lib/slug"
@@ -88,7 +89,11 @@ export default function MeetGalleryCard({
               </h3>
             </div>
             <p className="text-xs text-foreground-secondary dark:text-foreground-secondary mt-1">
-              {formatDateRange(meet.startDate, meet.endDate)}
+              <RelativeDateRange
+                start={meet.startDate}
+                end={meet.endDate}
+                absolute={formatDateRange(meet.startDate, meet.endDate)}
+              />
             </p>
           </div>
           {isCoach && (

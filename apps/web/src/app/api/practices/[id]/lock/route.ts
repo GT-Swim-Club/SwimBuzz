@@ -10,13 +10,14 @@ import { waitForPracticeEditLockChange } from "@/lib/practice-edit-lock-watch"
 import { isPracticeEditLockYieldRequested } from "@/lib/practice-edit-lock-yield"
 import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/session"
+import { isStaffRole } from "@/lib/auth-roles"
 
 export const runtime = "nodejs"
 export const maxDuration = 30
 
 async function requireStaff() {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return null
   }
   return session

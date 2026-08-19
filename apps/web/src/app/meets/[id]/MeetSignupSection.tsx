@@ -16,6 +16,8 @@ import { isSignupAnswers } from "@/lib/meet-signup"
 import { formatDisplayTime } from "@/lib/utils"
 import Modal, { ModalFooter } from "@/components/Modal"
 import MeetSignupAthleteForm from "./MeetSignupAthleteForm"
+import StaffBadge from "@/components/StaffBadge"
+import type { StaffTitle } from "@swimbuzz/shared"
 
 type EntryRow = {
   id: string
@@ -23,6 +25,7 @@ type EntryRow = {
   firstName: string
   lastName: string
   gender: "M" | "F"
+  staffTitle: StaffTitle | null
   events: string[]
   entryTimes: Record<string, string>
   notes: string
@@ -431,6 +434,7 @@ export default function MeetSignupSection({
                         <tr key={entry.id} className="align-top">
                           <td className="px-2 py-2 whitespace-nowrap">
                             {entry.lastName}, {entry.firstName}
+                            {entry.staffTitle && <StaffBadge title={entry.staffTitle} />}
                           </td>
                           <td className="px-2 py-2">{renderEventChips(individual)}</td>
                           <td className="px-2 py-2">{renderEventChips(relay)}</td>

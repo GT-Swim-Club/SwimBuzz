@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server"
 import { createScraperPairing } from "@/lib/scraper"
 import { getSession } from "@/lib/session"
+import { isStaffRole } from "@/lib/auth-roles"
 
 export async function POST() {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

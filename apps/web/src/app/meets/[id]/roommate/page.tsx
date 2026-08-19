@@ -18,10 +18,7 @@ export default async function MeetRoommatePreferencePage({
   if (!session) {
     redirect(`/signin?callbackUrl=/meets/${encodeURIComponent(param)}/roommate`)
   }
-  const viewerAthleteId = await resolveViewerAthleteId(
-    session.user.id,
-    session.user.role
-  )
+  const viewerAthleteId = await resolveViewerAthleteId(session.user.id)
   if (!viewerAthleteId) redirect(`/meets/${encodeURIComponent(param)}`)
 
   const meet = await prisma.meet.findFirst({

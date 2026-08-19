@@ -16,6 +16,7 @@ import {
 } from "@/lib/nationals-qualifiers"
 import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/session"
+import { isStaffRole } from "@/lib/auth-roles"
 
 export const runtime = "nodejs"
 export const maxDuration = 300
@@ -101,7 +102,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -228,7 +229,7 @@ export async function applyNqtUploadJob(jobId: string, userId: string) {
 
 export async function DELETE(req: Request) {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

@@ -1,4 +1,4 @@
-export type ActionKind = "edit" | "reply" | "check" | "close" | "publish" | "delete" | "export" | "pdf" | "image" | "attendance" | "scan" | "record"
+export type ActionKind = "edit" | "reply" | "check" | "close" | "publish" | "delete" | "export" | "share" | "pdf" | "image" | "attendance" | "scan" | "record"
 
 const svgProps = {
   xmlns: "http://www.w3.org/2000/svg",
@@ -60,6 +60,14 @@ export default function ActionIcon({ kind, className }: { kind: ActionKind, clas
         <svg {...svgProps} className={`${svgProps.className} ${className ?? ""}`}>
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
           <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+      )
+    case "share":
+      return (
+        <svg {...svgProps} className={`${svgProps.className} ${className ?? ""}`}>
+          <path d="M5 12v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
+          <polyline points="7 8 12 3 17 8" />
           <line x1="12" y1="15" x2="12" y2="3" />
         </svg>
       )

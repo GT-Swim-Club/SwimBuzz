@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/session"
+import { isStaffRole } from "@/lib/auth-roles"
 
 export async function PATCH(
   req: Request,
@@ -13,9 +14,9 @@ export async function PATCH(
   const comment = await prisma.practiceComment.findUnique({ where: { id } })
   if (!comment) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-  const isCoach = session.user.role === "COACH"
+  const isStaff = isStaffRole(session.user.role)
   const isAuthor = comment.authorId === session.user.id
-  if (!isCoach && !isAuthor) {
+  if (!isStaff && !isAuthor) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -46,9 +47,9 @@ export async function DELETE(
   const comment = await prisma.practiceComment.findUnique({ where: { id } })
   if (!comment) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-  const isCoach = session.user.role === "COACH"
+  const isStaff = isStaffRole(session.user.role)
   const isAuthor = comment.authorId === session.user.id
-  if (!isCoach && !isAuthor) {
+  if (!isStaff && !isAuthor) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

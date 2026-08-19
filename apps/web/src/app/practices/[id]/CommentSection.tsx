@@ -4,13 +4,16 @@ import { useMemo, useState } from "react"
 import HoverDetail from "@/components/HoverDetail"
 import ActionIcon from "@/components/ActionIcon"
 import InfoIcon from "@/components/InfoIcon"
-import { formatRelativeTime } from "@/lib/utils"
+import StaffBadge from "@/components/StaffBadge"
+import type { StaffTitle } from "@swimbuzz/shared"
+import { formatDateTime, formatRelativeTime } from "@/lib/utils"
 
 export type CommentDTO = {
   id: string
   authorName: string
   authorId: string | null
   authorImage: string | null
+  authorStaffTitle: StaffTitle | null
   body: string
   parentId: string | null
   createdAt: string
@@ -96,8 +99,8 @@ function AttendedBadge() {
   return (
     <span className="group relative ml-1.5 inline-flex translate-y-[1px] items-center text-primary">
       <InfoIcon kind="attended" />
-      <span className="sr-only">Attended this practice</span>
-      <HoverDetail label="Attended this practice" />
+      <span className="sr-only">Attended</span>
+      <HoverDetail label="Attended" />
     </span>
   )
 }
@@ -263,9 +266,14 @@ export default function CommentSection({
           <span className="font-medium text-foreground dark:text-foreground">
             {comment.authorName}
           </span>
+          {comment.authorStaffTitle && <StaffBadge title={comment.authorStaffTitle} />}
           {comment.authorId && attendedUsers.has(comment.authorId) && <AttendedBadge />}
-          <span className="ml-2 text-xs text-foreground-tertiary dark:text-foreground-tertiary">
+          <span
+            className="group relative ml-2 inline-block text-xs text-foreground-tertiary dark:text-foreground-tertiary"
+            tabIndex={0}
+          >
             {formatRelativeTime(comment.createdAt)}
+            <HoverDetail label={formatDateTime(comment.createdAt)} />
           </span>
           {isEditing ? (
             <form onSubmit={handleEdit} className="relative mt-2.5 flex gap-2.5">

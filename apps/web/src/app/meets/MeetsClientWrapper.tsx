@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { formatDateRange } from "@/lib/utils"
+import { RelativeDateRange } from "@/components/RelativeDate"
 import { countMeetAthletes } from "@/lib/meet-sheet-summary"
 import MeetGalleryCard from "./MeetGalleryCard"
 import EditMeetButton from "./EditMeetButton"
@@ -113,7 +114,11 @@ export default function MeetsClientWrapper({
                               )}
                             </div>
                             <p className="text-xs text-foreground-secondary">
-                              {formatDateRange(m.startDate, m.endDate)}
+                              <RelativeDateRange
+                                start={m.startDate}
+                                end={m.endDate}
+                                absolute={formatDateRange(m.startDate, m.endDate)}
+                              />
                               {m.location ? ` · ${m.location}` : ""}
                               {m.school ? ` · ${m.school}` : ""}
                             </p>

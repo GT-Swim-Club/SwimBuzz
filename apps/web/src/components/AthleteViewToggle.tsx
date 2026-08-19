@@ -1,16 +1,12 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useMemo, useState, useTransition } from "react"
+import { useTransition } from "react"
 import HoverDetail from "@/components/HoverDetail"
-import {
-  ATHLETE_VIEW_COOKIE,
-  athleteViewCookieValue,
-} from "@/lib/athlete-view"
+import { ATHLETE_VIEW_COOKIE } from "@/lib/athlete-view"
+import { STAFF_TITLE_LABELS, type StaffTitle } from "@swimbuzz/shared"
 
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 30
-
-type AthleteOption = { id: string; name: string }
 
 function AthleteViewIcon() {
   return (
@@ -33,128 +29,66 @@ function AthleteViewIcon() {
     </svg>
   )
 }
+
+/**
+ * Plain self-toggle between a staff member's own staff view and their own
+ * athlete view — staff are roster athletes now, so there's no separate
+ * "preview as a specific athlete" dimension to pick from anymore.
+ */
 export default function AthleteViewToggle({
-  athletes,
-  selectedAthleteId,
+  staffTitle,
+  athleteViewEnabled,
   compact = false,
 }: {
-  athletes: AthleteOption[]
-  selectedAthleteId: string | null
+  staffTitle: StaffTitle
+  /** Current state of the ATHLETE_VIEW_COOKIE, so the toggle reflects reality rather than assuming staff view is active. */
+  athleteViewEnabled: boolean
   compact?: boolean
 }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
-  const [query, setQuery] = useState("")
-  const [open, setOpen] = useState(false)
+  const staffLabel = STAFF_TITLE_LABELS[staffTitle]
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    if (!q) return athletes
-    return athletes.filter((a) => a.name.toLowerCase().includes(q))
-  }, [athletes, query])
-
-  const selected = selectedAthleteId
-    ? athletes.find((a) => a.id === selectedAthleteId) ?? null
-    : null
-
-  function setPreviewAthlete(athleteId: string | null) {
-    document.cookie = `${ATHLETE_VIEW_COOKIE}=${athleteViewCookieValue(athleteId)}; path=/; max-age=${MAX_AGE_SECONDS}; SameSite=Lax`
-    setOpen(false)
-    setQuery("")
+  function setAthleteView(enabled: boolean) {
+    document.cookie = `${ATHLETE_VIEW_COOKIE}=${enabled ? "1" : "0"}; path=/; max-age=${MAX_AGE_SECONDS}; SameSite=Lax`
     startTransition(() => {
       router.refresh()
     })
   }
 
+  const activeClass = "bg-primary-bg text-primary"
+  const inactiveClass = "text-foreground-tertiary hover:bg-fill-secondary hover:text-foreground"
+
   return (
-    <div className="relative">
+    <div className="inline-flex h-9 items-center rounded-lg border border-border-secondary bg-background p-0.5 text-xs">
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setAthleteView(false)}
         disabled={pending}
-        aria-expanded={open}
-        aria-haspopup="listbox"
-        aria-label={compact ? "Athlete View" : undefined}
-        title={selected ? `Previewing as ${selected.name}. Click to change or exit.` : "Preview the app as a specific athlete"}
+        aria-pressed={!athleteViewEnabled}
+        title={`${staffLabel} View`}
         className={
-          "group relative inline-flex h-9 items-center justify-center rounded-lg border border-border-secondary transition-colors disabled:opacity-50 " +
-          (compact ? "w-9" : "max-w-[14rem] gap-2 px-3 text-xs") +
-          (selected
-            ? " border-primary bg-primary-bg text-primary"
-            : " bg-background text-foreground hover:bg-fill-secondary")
+          "group relative inline-flex h-full items-center justify-center gap-1.5 rounded-md px-2.5 font-medium transition-colors disabled:opacity-50 " +
+          (athleteViewEnabled ? inactiveClass : activeClass)
         }
       >
         <AthleteViewIcon />
-        {compact ? <HoverDetail label="Athlete View" /> : null}
-        {!compact ? <span className="truncate">{selected ? `As ${selected.name}` : "Athlete View"}</span> : null}
+        {compact ? <HoverDetail label={`${staffLabel} View`} /> : <span className="truncate">{staffLabel}</span>}
       </button>
-      {open ? (
-        <>
-          <button
-            type="button"
-            aria-label="Close athlete picker"
-            className="fixed inset-0 z-40 cursor-default"
-            onClick={() => {
-              setOpen(false)
-              setQuery("")
-            }}
-          />
-          <div className="absolute right-0 z-50 mt-1 w-64 rounded-xl border border-border-secondary bg-background shadow-lg overflow-hidden">
-            <div className="p-2 border-b border-border-secondary">
-              <input
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search athletes…"
-                autoFocus
-                className="w-full rounded-lg border border-border-secondary px-2.5 py-1.5 text-xs bg-background"
-              />
-            </div>
-            <ul className="max-h-64 overflow-y-auto py-1 text-sm" role="listbox">
-              <li>
-                <button
-                  type="button"
-                  role="option"
-                  aria-selected={!selectedAthleteId}
-                  onClick={() => setPreviewAthlete(null)}
-                  className={
-                    "w-full text-left px-3 py-2 text-xs hover:bg-fill-secondary " +
-                    (!selectedAthleteId
-                      ? "font-medium text-primary"
-                      : "text-foreground")
-                  }
-                >
-                  Coach View
-                </button>
-              </li>
-              {filtered.length === 0 ? (
-                <li className="px-3 py-2 text-xs text-foreground-tertiary">
-                  No matches
-                </li>
-              ) : (
-                filtered.map((athlete) => (
-                  <li key={athlete.id}>
-                    <button
-                      type="button"
-                      role="option"
-                      aria-selected={selectedAthleteId === athlete.id}
-                      onClick={() => setPreviewAthlete(athlete.id)}
-                      className={
-                        "w-full text-left px-3 py-2 text-xs hover:bg-fill-secondary " +
-                        (selectedAthleteId === athlete.id
-                          ? "font-medium text-primary"
-                          : "text-foreground")
-                      }
-                    >
-                      {athlete.name}
-                    </button>
-                  </li>
-                ))
-              )}
-            </ul>
-          </div>
-        </>
-      ) : null}
+      <button
+        type="button"
+        onClick={() => setAthleteView(true)}
+        disabled={pending}
+        aria-pressed={athleteViewEnabled}
+        aria-label="Athlete View"
+        title="Athlete View"
+        className={
+          "inline-flex h-full items-center justify-center rounded-md px-2.5 font-medium transition-colors disabled:opacity-50 " +
+          (athleteViewEnabled ? activeClass : inactiveClass)
+        }
+      >
+        {compact ? "A" : "Athlete"}
+      </button>
     </div>
   )
 }

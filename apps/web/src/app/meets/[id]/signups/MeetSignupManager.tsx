@@ -12,12 +12,15 @@ import {
 } from "@/lib/meet-signup"
 import { formatDisplayTime } from "@/lib/utils"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/SegmentedToggle"
+import StaffBadge from "@/components/StaffBadge"
+import type { StaffTitle } from "@swimbuzz/shared"
 
 type SignupEntry = {
   id: string
   athleteId: string
   name: string
   gender: "M" | "F"
+  staffTitle: StaffTitle | null
   events: string[]
   entryTimes: Record<string, string>
   notes: string
@@ -217,7 +220,10 @@ export default function MeetSignupManager({
                 <article key={entry.id} className="rounded-xl border border-border bg-background p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="font-medium text-foreground">{entry.name}</h3>
+                      <h3 className="font-medium text-foreground">
+                        {entry.name}
+                        {entry.staffTitle && <StaffBadge title={entry.staffTitle} />}
+                      </h3>
                       <p className="mt-1 text-xs text-foreground-tertiary">
                         {entry.events.length} event{entry.events.length === 1 ? "" : "s"} selected
                       </p>

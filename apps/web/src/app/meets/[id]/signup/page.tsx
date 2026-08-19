@@ -4,8 +4,7 @@ import { isEventOrder } from "@/lib/meet-event-order"
 import { Gender } from "@prisma/client"
 import { notFound, redirect } from "next/navigation"
 import { getSession } from "@/lib/session"
-import { formatDateTime } from "@/lib/utils"
-import { ZonedInstantTime } from "@/components/ZonedTime"
+import { RelativeInstantTime } from "@/components/RelativeDate"
 import { prisma } from "@/lib/prisma"
 import { isStaffRole } from "@/lib/auth-roles"
 import { resolveViewerAthleteId } from "@/lib/athlete-view-server"
@@ -31,10 +30,7 @@ export default async function MeetSignupPage({
     redirect(`/signin?callbackUrl=/meets/${encodeURIComponent(param)}/signup`)
   }
 
-  const viewerAthleteId = await resolveViewerAthleteId(
-    session.user.id,
-    session.user.role
-  )
+  const viewerAthleteId = await resolveViewerAthleteId(session.user.id)
   if (!viewerAthleteId) redirect(`/meets/${encodeURIComponent(param)}`)
 
   const [meet, athlete] = await Promise.all([
@@ -106,13 +102,13 @@ export default async function MeetSignupPage({
             {form.closeAt && (
               <span>
                 Sign-up closes:{" "}
-                <ZonedInstantTime at={form.closeAt}>{formatDateTime(form.closeAt)}</ZonedInstantTime>
+                <RelativeInstantTime at={form.closeAt} />
               </span>
             )}
             {form.withdrawUntil && (
               <span>
                 Drop deadline:{" "}
-                <ZonedInstantTime at={form.withdrawUntil}>{formatDateTime(form.withdrawUntil)}</ZonedInstantTime>
+                <RelativeInstantTime at={form.withdrawUntil} />
               </span>
             )}
           </div>

@@ -4,6 +4,7 @@ const next = require("next")
 const compression = require("compression")
 const { startSignupMonitor } = require("./signup-status-monitor")
 const { startNotificationCleanupMonitor } = require("./notification-cleanup-monitor")
+const { startStaffTermExpiryMonitor } = require("./staff-term-expiry-monitor")
 
 // Dev / optional long-lived process only. Production on Vercel uses stock
 // `next start` (see package.json `start`) plus HTTP cron routes.
@@ -52,5 +53,7 @@ app.prepare().then(() => {
     startSignupMonitor()
     // Start the notification cleanup monitor
     startNotificationCleanupMonitor()
+    // Start the staff term expiry monitor
+    startStaffTermExpiryMonitor()
   })
 })

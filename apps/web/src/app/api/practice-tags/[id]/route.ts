@@ -1,5 +1,6 @@
 import { NextResponse as ServerResponse } from "next/server"
 import { getSession } from "@/lib/session"
+import { isStaffRole } from "@/lib/auth-roles"
 import { prisma } from "@/lib/prisma"
 
 const respond = (body: unknown, status = 200) => ServerResponse.json(body, { status })
@@ -9,7 +10,7 @@ type RouteContext = { params: Promise<{ id: string }> }
 export async function DELETE(request: Request, context: RouteContext) {
   void request
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return respond({ error: "Forbidden" }, 403)
   }
 

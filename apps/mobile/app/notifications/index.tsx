@@ -12,6 +12,7 @@ import { spacing } from "@swimbuzz/tokens"
 import { api } from "../../src/lib/api"
 import { useTabBarScrollPadding } from "../../src/lib/tab-bar"
 import { isExternalUrl, resolveAppHref } from "../../src/lib/href"
+import { RelativeDateText } from "../../src/components/RelativeDateText"
 
 export default function NotificationsScreen() {
   const router = useRouter()
@@ -106,13 +107,16 @@ export default function NotificationsScreen() {
           renderItem={({ item }) => (
             <ListRow
               title={item.title}
-              subtitle={[
+              subtitleSegments={[
                 item.body,
-                formatDateTime(item.createdAt),
+                <RelativeDateText
+                  value={item.createdAt}
+                  kind="instant"
+                  absolute={formatDateTime(item.createdAt)}
+                  style={{ fontSize: 13, color: c.textSecondary }}
+                />,
                 item.readAt ? "Read" : "Unread",
-              ]
-                .filter(Boolean)
-                .join(" · ")}
+              ]}
               onPress={() => void onOpen(item)}
             />
           )}

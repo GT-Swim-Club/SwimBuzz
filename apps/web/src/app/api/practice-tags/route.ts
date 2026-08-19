@@ -1,5 +1,6 @@
 import { NextResponse as ServerResponse } from "next/server"
 import { getSession } from "@/lib/session"
+import { isStaffRole } from "@/lib/auth-roles"
 import { prisma } from "@/lib/prisma"
 import { listManagedPracticeTags } from "@/lib/practice-tag-catalog"
 import { normalizeTag, PRACTICE_TAG_MAX_COUNT, PRACTICE_TAG_NAME_MAX_LENGTH } from "@/lib/practice-tags"
@@ -14,7 +15,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return respond({ error: "Forbidden" }, 403)
   }
 

@@ -43,6 +43,7 @@ export default async function PracticeAttendancePage({
               lastName: true,
               gender: true,
               year: true,
+              user: { select: { staffTitle: true } },
             },
           },
         },
@@ -58,7 +59,7 @@ export default async function PracticeAttendancePage({
   const initialAttendance = practice.attendance.map(serializeAttendance)
 
   if (!isCoach) {
-    const viewerAthleteId = await resolveViewerAthleteId(session.user.id, session.user.role)
+    const viewerAthleteId = await resolveViewerAthleteId(session.user.id)
     return (
       <main className="mx-auto w-full max-w-4xl space-y-5">
         <BackLink

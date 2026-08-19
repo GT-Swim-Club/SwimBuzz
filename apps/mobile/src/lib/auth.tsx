@@ -20,8 +20,10 @@ type AuthState = {
   user: SessionUser | null
   loading: boolean
   signInWithEmail: (email: string, code: string) => Promise<void>
-  signInWithGoogle: (idToken: string) => Promise<void>
+  signInWithGoogle: (idToken: string, staffLinkToken?: string) => Promise<void>
   requestCode: (email: string) => Promise<void>
+  /** Step 1 of coach/exec sign-in: verify the GT-email OTP, get a staff-link token for the Google step. */
+  verifyStaffCode: (email: string, code: string) => Promise<string>
   signOut: () => Promise<void>
   refreshUser: () => Promise<void>
 }
@@ -78,10 +80,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(tokens.user)
   }, [])
 
-  const signInWithGoogle = useCallback(async (idToken: string) => {
-    const tokens = await api.mobileGoogleLogin(idToken)
-    await saveSession(tokens)
-    setUser(tokens.user)
+  const signInWithGoogle = useCallback(
+    async (idToken: string, staffLinkToken?: string) => {
+      const tokens = await api.mobileGoogleLogin(idToken, staffLinkToken)
+      await saveSession(tokens)
+      setUser(tokens.user)
+    },
+    []
+  )
+
+  const verifyStaffCode = useCallback(async (email: string, code: string) => {
+    const res = await api.staffVerify(email, code)
+    if ("error" in res && res.error) throw new Error(String(res.error))
+    if (!("staffLinkToken" in res) || !res.staffLinkToken) {
+      throw new Error("Verification failed. Try again.")
+    }
+    return res.staffLinkToken
   }, [])
 
   const refreshUser = useCallback(async () => {
@@ -96,6 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signInWithEmail,
       signInWithGoogle,
       requestCode,
+      verifyStaffCode,
       signOut,
       refreshUser,
     }),
@@ -105,6 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signInWithEmail,
       signInWithGoogle,
       requestCode,
+      verifyStaffCode,
       signOut,
       refreshUser,
     ]

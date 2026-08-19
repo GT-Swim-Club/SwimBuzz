@@ -5,6 +5,7 @@ import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
 import { usePalette } from "@swimbuzz/ui"
 import { useMemo } from "react"
 import { Icon } from "./Icon"
+import { RelativeDateText } from "./RelativeDateText"
 import {
   formatPracticeDate,
   practiceYardage,
@@ -64,7 +65,16 @@ export function PracticeCard({
         {showDate ? (
           <View style={styles.metaRow}>
             <Icon color={c.textTertiary} name="calendar" size={14} />
-            <Text style={styles.metaText}>{formatPracticeDate(practice.date)}</Text>
+            {practice.date ? (
+              <RelativeDateText
+                value={practice.date}
+                kind="event"
+                absolute={formatPracticeDate(practice.date)}
+                style={styles.metaText}
+              />
+            ) : (
+              <Text style={styles.metaText}>No date</Text>
+            )}
           </View>
         ) : null}
         <View style={styles.metaRow}>

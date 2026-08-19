@@ -25,6 +25,7 @@ import { api } from "../../../src/lib/api"
 import { useAuth } from "../../../src/lib/auth"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 import { GalleryTile } from "../../../src/components/GalleryTile"
+import { StaffBadge } from "../../../src/components/StaffBadge"
 import { useViewPreferences } from "../../../src/lib/view-preferences"
 
 type GenderFilter = "ALL" | "M" | "F"
@@ -224,12 +225,18 @@ export default function RosterScreen() {
             gallery ? (
               <GalleryTile
                 title={athleteDisplayName(item)}
+                titleAdornment={
+                  item.user?.staffTitle ? <StaffBadge title={item.user.staffTitle} /> : undefined
+                }
                 subtitle={[item.gender, item.seasons?.[0]].filter(Boolean).join(" · ")}
                 onPress={() => router.push(`/roster/${item.id}`)}
               />
             ) : (
               <ListRow
                 title={athleteDisplayName(item)}
+                titleAdornment={
+                  item.user?.staffTitle ? <StaffBadge title={item.user.staffTitle} /> : undefined
+                }
                 subtitle={[item.gender, item.seasons?.[0]].filter(Boolean).join(" · ")}
                 onPress={() => router.push(`/roster/${item.id}`)}
               />

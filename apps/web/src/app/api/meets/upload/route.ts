@@ -3,6 +3,7 @@ import { uploadMeetFile, deleteStoredMeetFile } from "@/lib/meet-storage"
 import { isStoredMeetFileUrl } from "@/lib/meet-files"
 import sharp from "sharp"
 import { getSession } from "@/lib/session"
+import { isStaffRole } from "@/lib/auth-roles"
 import { resolvedFileExt } from "@/lib/upload-file-ext"
 
 export const runtime = "nodejs"
@@ -30,7 +31,7 @@ function isUpload(value: unknown): value is File {
 
 export async function POST(req: Request) {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -94,7 +95,7 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

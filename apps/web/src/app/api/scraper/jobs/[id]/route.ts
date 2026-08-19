@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { ScraperJobStatus } from "@prisma/client"
 import { getScraperJobForUser } from "@/lib/scraper"
 import { getSession } from "@/lib/session"
+import { isStaffRole } from "@/lib/auth-roles"
 
 export const runtime = "nodejs"
 export const maxDuration = 30
@@ -11,7 +12,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

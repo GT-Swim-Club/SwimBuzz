@@ -53,6 +53,14 @@
           "icon": "./assets/icon.png",
           "color": "#DEBD88"
         }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": false,
+          "savePhotosPermission": "Allow SwimBuzz to save practice images to your photo library.",
+          "isAccessMediaLocationEnabled": false
+        }
       ]
     ],
     "experiments": {

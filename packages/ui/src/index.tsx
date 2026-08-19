@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useMemo, useState } from "react"
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import {
   ActivityIndicator,
   FlatList as RNFlatList,
+  Modal,
   Pressable,
   ScrollView as RNScrollView,
   StyleSheet,
@@ -16,6 +17,7 @@ import {
   type TextProps,
   type ViewProps,
 } from "react-native"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 import {
   paletteFor,
   radii,
@@ -115,13 +117,18 @@ export function MetaRow({
   value,
 }: {
   label: string
-  value: string
+  /** A plain string renders as the usual right-aligned Text; pass a node (e.g. RelativeDateText) to compose a pressable value. */
+  value: React.ReactNode
 }) {
   const styles = useStyles()
   return (
     <View style={styles.metaRow}>
       <Text style={styles.metaLabel}>{label}</Text>
-      <Text style={styles.metaValue}>{value}</Text>
+      {typeof value === "string" ? (
+        <Text style={styles.metaValue}>{value}</Text>
+      ) : (
+        <View style={styles.metaValueRow}>{value}</View>
+      )}
     </View>
   )
 }
@@ -253,15 +260,47 @@ export function ErrorBlock({ message }: { message: string }) {
   )
 }
 
+/**
+ * Renders a " · "-joined subtitle from mixed string/node segments as flex-row
+ * siblings, falsy entries dropped — the same rule as `titleAdornment`: a node
+ * (e.g. a pressable RelativeDateText) must never be nested inside a subtitle
+ * Text, which RN doesn't render reliably.
+ */
+export function SubtitleSegments({
+  segments,
+  textStyle,
+}: {
+  segments: React.ReactNode[]
+  textStyle: TextProps["style"]
+}) {
+  const filtered = segments.filter((segment) => segment !== null && segment !== undefined && segment !== false && segment !== "")
+  return (
+    <>
+      {filtered.map((segment, index) => (
+        <React.Fragment key={index}>
+          {index > 0 ? <Text style={textStyle}> · </Text> : null}
+          {typeof segment === "string" ? <Text style={textStyle}>{segment}</Text> : segment}
+        </React.Fragment>
+      ))}
+    </>
+  )
+}
+
 export function ListRow({
   title,
+  titleAdornment,
   subtitle,
+  subtitleSegments,
   onPress,
   left,
   right,
 }: {
   title: string
+  /** Rendered as a sibling right after the title (e.g. a staff badge icon) — never nested inside the title Text, which RN doesn't render reliably. */
+  titleAdornment?: React.ReactNode
   subtitle?: string
+  /** " · "-joined segments (string or node) — for a subtitle containing a pressable element. Takes precedence over `subtitle`. */
+  subtitleSegments?: React.ReactNode[]
   onPress?: () => void
   left?: React.ReactNode
   right?: React.ReactNode
@@ -275,8 +314,23 @@ export function ListRow({
     >
       {left}
       <View style={styles.rowText}>
-        <Text style={styles.rowTitle}>{title}</Text>
-        {subtitle ? <Text style={styles.rowSubtitle}>{subtitle}</Text> : null}
+        {titleAdornment ? (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+            <Text style={styles.rowTitle} numberOfLines={1}>
+              {title}
+            </Text>
+            {titleAdornment}
+          </View>
+        ) : (
+          <Text style={styles.rowTitle}>{title}</Text>
+        )}
+        {subtitleSegments ? (
+          <View style={styles.subtitleRow}>
+            <SubtitleSegments segments={subtitleSegments} textStyle={styles.rowSubtitle} />
+          </View>
+        ) : subtitle ? (
+          <Text style={styles.rowSubtitle}>{subtitle}</Text>
+        ) : null}
       </View>
       {right ?? (onPress ? <Text style={styles.rowChevron}>›</Text> : null)}
     </Pressable>
@@ -335,6 +389,101 @@ export function Button({
   )
 }
 
+export type ActionSheetItem = {
+  key: string
+  label: string
+  icon?: React.ReactNode
+  onPress: () => void
+  disabled?: boolean
+  busy?: boolean
+  destructive?: boolean
+}
+
+/**
+ * A grouped bottom sheet of tappable actions — e.g. a share menu. `groups` is
+ * an array of item arrays; a divider is drawn between groups. Icons/spinners
+ * are passed in as nodes (matching Button/Section's `icon?: React.ReactNode`)
+ * rather than looked up by name, since this package has no icon registry of
+ * its own.
+ */
+export function ActionSheet({
+  visible,
+  onClose,
+  onDismiss,
+  title,
+  groups,
+}: {
+  visible: boolean
+  onClose: () => void
+  /**
+   * Fires once the close animation actually finishes (iOS only — RN's
+   * Modal#onDismiss). Use this to defer presenting another native UI (a
+   * share sheet, an image/document picker) until this modal is fully gone:
+   * iOS refuses to present on top of a modal that's still mid-dismiss, and
+   * the request just hangs with no error.
+   */
+  onDismiss?: () => void
+  title?: string
+  groups: ActionSheetItem[][]
+}) {
+  const c = usePalette()
+  const styles = useStyles()
+  const insets = useSafeAreaInsets()
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+      onDismiss={onDismiss}
+      statusBarTranslucent
+    >
+      <View style={styles.actionSheetOverlay}>
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+        />
+        <View style={[styles.actionSheetPanel, { paddingBottom: insets.bottom + spacing.md }]}>
+          {title ? <Text style={styles.actionSheetTitle}>{title}</Text> : null}
+          {groups.map((group, groupIndex) => (
+            <View
+              key={groupIndex}
+              style={groupIndex > 0 ? styles.actionSheetGroupDivider : undefined}
+            >
+              {group.map((item) => (
+                <Pressable
+                  key={item.key}
+                  onPress={item.onPress}
+                  disabled={item.disabled || item.busy}
+                  style={({ pressed }) => [
+                    styles.actionSheetRow,
+                    pressed && styles.rowPressed,
+                    (item.disabled || item.busy) && styles.buttonDisabled,
+                  ]}
+                >
+                  <View style={styles.actionSheetIcon}>
+                    {item.busy ? <ActivityIndicator size="small" color={c.textSecondary} /> : item.icon}
+                  </View>
+                  <Text
+                    style={[
+                      styles.actionSheetLabel,
+                      item.destructive && styles.actionSheetLabelDestructive,
+                    ]}
+                  >
+                    {item.label}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          ))}
+        </View>
+      </View>
+    </Modal>
+  )
+}
+
 export function EmptyState({ title, body }: { title: string; body?: string }) {
   const styles = useStyles()
   return (
@@ -343,6 +492,64 @@ export function EmptyState({ title, body }: { title: string; body?: string }) {
       {body ? <Text style={styles.emptyBody}>{body}</Text> : null}
     </View>
   )
+}
+
+type ToastContextValue = { showToast: (message: string) => void }
+const ToastContext = createContext<ToastContextValue | null>(null)
+
+/**
+ * Renders a top-anchored, auto-dismissing pill toast — the touch equivalent of a
+ * hover tooltip, for revealing something (e.g. a relative date's full value) with
+ * a tap. Mount once near the app root, inside PaletteProvider (usePalette/useStyles
+ * need it) and inside a SafeAreaProvider (useSafeAreaInsets needs it).
+ */
+export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const styles = useStyles()
+  const insets = useSafeAreaInsets()
+  const [message, setMessage] = useState<string | null>(null)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const showToast = useCallback((text: string) => {
+    setMessage(text)
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    timeoutRef.current = setTimeout(() => setMessage(null), 2000)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+  }, [])
+
+  const value = useMemo(() => ({ showToast }), [showToast])
+
+  return (
+    <ToastContext.Provider value={value}>
+      {/* flex:1 gives the toast overlay a full-screen positioning bounds to
+          anchor "absolute" against — RN positions absolute children relative
+          to their nearest parent's layout box, not the whole window. */}
+      <View style={{ flex: 1 }}>
+        {children}
+        {message ? (
+          <View
+            pointerEvents="none"
+            style={[styles.toastWrap, { top: insets.top + spacing.sm }]}
+          >
+            <View style={styles.toastPill}>
+              <Text style={styles.toastText}>{message}</Text>
+            </View>
+          </View>
+        ) : null}
+      </View>
+    </ToastContext.Provider>
+  )
+}
+
+/** Call `showToast(message)` to surface a brief top-anchored pill for ~2s. */
+export function useToast(): ToastContextValue {
+  const ctx = useContext(ToastContext)
+  if (!ctx) throw new Error("useToast must be used within a ToastProvider")
+  return ctx
 }
 
 function makeStyles(c: ColorPalette) {
@@ -406,6 +613,11 @@ function makeStyles(c: ColorPalette) {
       fontWeight: "500",
       textAlign: "right",
       flex: 1,
+    },
+    metaValueRow: {
+      flex: 1,
+      flexDirection: "row",
+      justifyContent: "flex-end",
     },
     chip: {
       alignItems: "center",
@@ -522,6 +734,12 @@ function makeStyles(c: ColorPalette) {
       fontSize: 13,
       color: c.textSecondary,
     },
+    subtitleRow: {
+      marginTop: 2,
+      flexDirection: "row",
+      flexWrap: "wrap",
+      alignItems: "center",
+    },
     rowChevron: {
       color: c.textTertiary,
       fontSize: 24,
@@ -568,6 +786,51 @@ function makeStyles(c: ColorPalette) {
     buttonLabelDanger: {
       color: "#fff",
     },
+    actionSheetOverlay: {
+      flex: 1,
+      justifyContent: "flex-end",
+      backgroundColor: withAlpha("#000000", 0.45),
+    },
+    actionSheetPanel: {
+      backgroundColor: c.bgElevated,
+      borderTopLeftRadius: radii.lg,
+      borderTopRightRadius: radii.lg,
+      paddingTop: spacing.sm,
+      paddingHorizontal: spacing.xs,
+    },
+    actionSheetTitle: {
+      fontSize: 13,
+      fontWeight: "600",
+      color: c.textSecondary,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+    },
+    actionSheetGroupDivider: {
+      marginTop: spacing.xs,
+      paddingTop: spacing.xs,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: c.border,
+    },
+    actionSheetRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.sm,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm + 2,
+      borderRadius: radii.md,
+    },
+    actionSheetIcon: {
+      width: 22,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    actionSheetLabel: {
+      fontSize: 16,
+      color: c.text,
+    },
+    actionSheetLabelDestructive: {
+      color: c.error,
+    },
     empty: {
       paddingVertical: spacing.xxl,
       alignItems: "center",
@@ -582,6 +845,32 @@ function makeStyles(c: ColorPalette) {
       fontSize: 14,
       color: c.textSecondary,
       textAlign: "center",
+    },
+    toastWrap: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      alignItems: "center",
+      zIndex: 100,
+    },
+    toastPill: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.xs,
+      borderRadius: 999,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      backgroundColor: c.bgElevated,
+      shadowColor: "#000",
+      shadowOpacity: 0.15,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 2 },
+      elevation: 4,
+    },
+    toastText: {
+      fontSize: 13,
+      fontWeight: "600",
+      color: c.text,
     },
   })
 }

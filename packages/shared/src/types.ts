@@ -1,8 +1,10 @@
 import type { AppRole } from "./roles"
+import type { StaffTitle } from "./staff-roles"
 
 export type SessionUser = {
   id: string
   role: AppRole
+  staffTitle?: StaffTitle | null
   name?: string | null
   email?: string | null
   image?: string | null
@@ -50,6 +52,7 @@ export type AthleteSummary = {
     name?: string | null
     email?: string | null
     image?: string | null
+    staffTitle?: StaffTitle | null
   }
 }
 

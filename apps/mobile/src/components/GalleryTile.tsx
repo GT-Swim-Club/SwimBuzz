@@ -1,14 +1,21 @@
+import type { ReactNode } from "react"
 import { Pressable, Text, View } from "react-native"
 import { radii, spacing } from "@swimbuzz/tokens"
-import { usePalette } from "@swimbuzz/ui"
+import { SubtitleSegments, usePalette } from "@swimbuzz/ui"
 
 export function GalleryTile({
   title,
+  titleAdornment,
   subtitle,
+  subtitleSegments,
   onPress,
 }: {
   title: string
+  /** Rendered as a sibling right after the title (e.g. a staff badge icon) — never nested inside the title Text. */
+  titleAdornment?: ReactNode
   subtitle?: string
+  /** " · "-joined segments (string or node) — for a subtitle containing a pressable element. Takes precedence over `subtitle`. */
+  subtitleSegments?: ReactNode[]
   onPress?: () => void
 }) {
   const c = usePalette()
@@ -29,13 +36,32 @@ export function GalleryTile({
         opacity: pressed ? 0.85 : 1,
       })}
     >
-      <Text
-        numberOfLines={2}
-        style={{ color: c.text, fontSize: 15, fontWeight: "700" }}
-      >
-        {title}
-      </Text>
-      {subtitle ? (
+      {titleAdornment ? (
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+          <Text
+            numberOfLines={2}
+            style={{ color: c.text, fontSize: 15, fontWeight: "700", flexShrink: 1 }}
+          >
+            {title}
+          </Text>
+          {titleAdornment}
+        </View>
+      ) : (
+        <Text
+          numberOfLines={2}
+          style={{ color: c.text, fontSize: 15, fontWeight: "700" }}
+        >
+          {title}
+        </Text>
+      )}
+      {subtitleSegments ? (
+        <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", marginTop: 4 }}>
+          <SubtitleSegments
+            segments={subtitleSegments}
+            textStyle={{ color: c.textSecondary, fontSize: 12, lineHeight: 16 }}
+          />
+        </View>
+      ) : subtitle ? (
         <Text
           numberOfLines={3}
           style={{

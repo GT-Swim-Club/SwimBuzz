@@ -1,5 +1,5 @@
 import { jsPDF } from "jspdf"
-import { formatClockTimeRange, zoneAbbreviation, zonedTimeToUtc } from "@swimbuzz/shared"
+import { formatClockTimeRange, practiceShareFilename, zoneAbbreviation, zonedTimeToUtc } from "@swimbuzz/shared"
 import { formatSwimDate } from "@/lib/utils"
 import { isHtmlEmpty, normalizePracticeHtml } from "@/components/FormattedText"
 
@@ -217,16 +217,7 @@ function fontFace(style: Style): "normal" | "bold" | "italic" | "bolditalic" {
 }
 
 export function practicePdfFilename(title: string, dateIso: string | null): string {
-  const datePart = dateIso ? dateIso.slice(0, 10) : "practice"
-  const titlePart = title
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 60)
-  return `${datePart}${titlePart ? `-${titlePart}` : ""}.pdf`
+  return practiceShareFilename(title, dateIso, "pdf")
 }
 
 export function buildPracticePdf(input: PracticePdfInput): jsPDF {

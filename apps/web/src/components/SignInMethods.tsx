@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import EmailSignInForm from "@/components/EmailSignInForm"
-import SignInButton from "@/components/SignInButton"
+import StaffSignInForm from "@/components/StaffSignInForm"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/SegmentedToggle"
 
 type Method = "athletes" | "staff"
@@ -45,7 +45,7 @@ export default function SignInMethods({
         {method === "athletes" ? (
           <EmailSignInForm callbackUrl={callbackUrl} />
         ) : (
-          <SignInButton callbackUrl={callbackUrl} />
+          <StaffSignInForm callbackUrl={callbackUrl} />
         )}
       </div>
     </div>

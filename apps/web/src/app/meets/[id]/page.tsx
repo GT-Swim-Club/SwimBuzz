@@ -6,6 +6,7 @@ import BackLink from "@/components/BackLink"
 import PageLabelRegistrar from "@/components/PageLabelRegistrar"
 import { formatDateRange } from "@/lib/utils"
 import { ZonedClockTime } from "@/components/ZonedTime"
+import { RelativeDateRange } from "@/components/RelativeDate"
 import { Fragment } from "react"
 import ImportMeetButton from "@/app/athletes/ImportMeetButton"
 import ImportMeetResourcesButton from "./ImportMeetResourcesButton"
@@ -116,7 +117,12 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
           entries: {
             include: {
               athlete: {
-                select: { id: true, firstName: true, lastName: true, gender: true }}},
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  gender: true,
+                  user: { select: { staffTitle: true } }}}},
             orderBy: [{ athlete: { lastName: "asc" } }, { athlete: { firstName: "asc" } }]}}},
       roomForm: {
         include: {
@@ -138,7 +144,7 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
 
   const meetPublicPath = meetPath(meet.slug ?? meet.id)
 
-  const viewerAthleteId = await resolveViewerAthleteId(session.user.id, session.user.role)
+  const viewerAthleteId = await resolveViewerAthleteId(session.user.id)
 
   const results = mergeMeetResultEntries(
     swimsToMeetResults(
@@ -338,7 +344,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       firstName: true, 
       lastName: true, 
       gender: true,
-      user: { select: { image: true } }
+      user: { select: { image: true, staffTitle: true } }
     }})
   const rosterAthletes = seasonRoster.map((a) => ({
     id: a.id,
@@ -381,6 +387,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
           firstName: e.athlete.firstName,
           lastName: e.athlete.lastName,
           gender: e.athlete.gender === Gender.F ? ("F" as const) : ("M" as const),
+          staffTitle: e.athlete.user?.staffTitle ?? null,
           events: e.events,
           entryTimes: normalizeSignupEntryTimes(e.entryTimes),
           notes: e.notes,
@@ -510,7 +517,11 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
               <div className="mt-1 text-base text-foreground-secondary sm:text-lg">
                 <div className="flex items-center gap-1.5">
                   <InfoIcon kind="calendar" />
-                  {formatDateRange(meet.startDate, meet.endDate)}
+                  <RelativeDateRange
+                    start={meet.startDate}
+                    end={meet.endDate}
+                    absolute={formatDateRange(meet.startDate, meet.endDate)}
+                  />
                   {meet.startTime ? (
                     <>
                       {" · "}

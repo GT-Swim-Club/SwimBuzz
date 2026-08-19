@@ -1,10 +1,12 @@
 import Link from "next/link"
 import ActionIcon from "@/components/ActionIcon"
 import InfoIcon from "@/components/InfoIcon"
+import StaffBadge from "@/components/StaffBadge"
 import { athletePath } from "@/lib/slug"
 import { formatSwimDate } from "@/lib/utils"
-import { formatClockTime } from "@swimbuzz/shared"
+import { formatClockTime, type StaffTitle } from "@swimbuzz/shared"
 import { ZonedClockTime, ZonedInstantTime } from "@/components/ZonedTime"
+import { RelativeDate } from "@/components/RelativeDate"
 
 type AttendanceRecord = {
   id: string
@@ -15,6 +17,7 @@ type AttendanceRecord = {
   year: string | null
   method: "SCAN" | "MANUAL"
   recordedAt: string
+  staffTitle: StaffTitle | null
 }
 
 export default function AttendanceList({
@@ -49,7 +52,7 @@ export default function AttendanceList({
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="flex items-center gap-1.5">
               <InfoIcon kind="calendar" />
-              {dateIso ? formatSwimDate(dateIso) : "No date"}
+              {dateIso ? <RelativeDate day={dateIso} absolute={formatSwimDate(dateIso)} /> : "No date"}
               {startTime || endTime ? (
                 <>
                   {" · "}
@@ -114,6 +117,7 @@ export default function AttendanceList({
                           You
                         </span>
                       )}
+                      {record.staffTitle && <StaffBadge title={record.staffTitle} />}
                     </div>
                     <p className="text-xs text-foreground-tertiary">
                       <ZonedInstantTime at={record.recordedAt}>

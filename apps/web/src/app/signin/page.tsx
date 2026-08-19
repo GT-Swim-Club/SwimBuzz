@@ -3,6 +3,10 @@ import Image from "next/image"
 import { redirect } from "next/navigation"
 import SignInMethods from "@/components/SignInMethods"
 import { getSession } from "@/lib/session"
+import {
+  STAFF_ONLY_SIGNIN_ERROR,
+  STAFF_LINK_REQUIRED_ERROR,
+} from "@swimbuzz/shared"
 
 export const metadata = {
   title: "Sign in — SwimBuzz"}
@@ -59,8 +63,11 @@ export default async function SignInPage({
 
             {error && (
               <p className="mt-4 rounded-lg border border-error/20 bg-error/10 px-3 py-2 text-[15px] text-error-text">
-                Sign in failed. Please try again or contact a coach if the problem
-                continues.
+                {error === "StaffOnly"
+                  ? STAFF_ONLY_SIGNIN_ERROR
+                  : error === "StaffLinkRequired"
+                    ? STAFF_LINK_REQUIRED_ERROR
+                    : "Sign in failed. Please try again or contact a coach if the problem continues."}
               </p>
             )}
 

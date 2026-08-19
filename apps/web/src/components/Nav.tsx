@@ -4,10 +4,8 @@ import ProfileMenu from "@/components/ProfileMenu"
 import NotificationsMenu from "@/components/NotificationsMenu"
 import AdaptiveHeaderLayout from "@/components/AdaptiveHeaderLayout"
 import { formatRoleLabel, isStaffRole } from "@/lib/auth-roles"
-import { athletePreferredNameLastFirst } from "@swimbuzz/shared"
-import {
-  getAthleteViewAthlete,
-  isAthleteViewEnabled } from "@/lib/athlete-view-server"
+import { STAFF_TITLE_LABELS } from "@swimbuzz/shared"
+import { isAthleteViewEnabled } from "@/lib/athlete-view-server"
 import { prisma } from "@/lib/prisma"
 import { athletePath } from "@/lib/slug"
 import { getSession } from "@/lib/session"
@@ -48,13 +46,6 @@ export default async function Nav() {
   const athleteView = isStaff ? await isAthleteViewEnabled() : false
   const showStaffTools = isStaff && !athleteView
 
-  const previewAthlete = isStaff && athleteView ? await getAthleteViewAthlete() : null
-  const previewAthletes = isStaff
-    ? await prisma.athlete.findMany({
-        orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
-        select: { id: true, firstName: true, lastName: true, nicknames: true }})
-    : []
-
   const linkedAthlete = session
     ? await prisma.athlete.findUnique({
         where: { userId: session.user.id },
@@ -77,10 +68,11 @@ export default async function Nav() {
           createdAt: true}})
     : []
 
-  const roleLabel = previewAthlete
-    ? `As ${athletePreferredNameLastFirst(previewAthlete)}`
-    : athleteView
-      ? "Athlete View"
+  const staffTitle = session?.user.staffTitle ?? null
+  const roleLabel = athleteView
+    ? "Athlete View"
+    : staffTitle
+      ? STAFF_TITLE_LABELS[staffTitle]
       : formatRoleLabel(session?.user.role ?? "ATHLETE")
 
   const headerBrand = (
@@ -118,6 +110,7 @@ export default async function Nav() {
         email={session.user.email}
         image={session.user.image}
         roleLabel={roleLabel}
+        staffTitle={staffTitle}
         rosterProfileHref={linkedAthlete ? athletePath(linkedAthlete.slug ?? linkedAthlete.id) : null}
         swimCloudProfileHref={linkedAthlete?.swimCloudId ? `https://www.swimcloud.com/swimmer/${linkedAthlete.swimCloudId}/` : null}
       />
@@ -134,8 +127,8 @@ export default async function Nav() {
           compactBrand={compactHeaderBrand}
           utilities={headerUtilities}
           links={navLinks}
-          athletes={previewAthletes.map((athlete) => ({ id: athlete.id, name: athletePreferredNameLastFirst(athlete) }))}
-          selectedAthleteId={previewAthlete?.id ?? null}
+          staffTitle={staffTitle}
+          athleteViewEnabled={athleteView}
           showAthleteView={isStaff}
           showScraper={showStaffTools}
         />

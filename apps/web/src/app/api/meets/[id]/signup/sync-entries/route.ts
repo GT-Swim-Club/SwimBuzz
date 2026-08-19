@@ -12,6 +12,7 @@ import {
 import { isRelayResultsSummary } from "@/lib/relay-results"
 import { Prisma } from "@prisma/client"
 import { getSession } from "@/lib/session"
+import { isStaffRole } from "@/lib/auth-roles"
 
 export async function POST(
   _req: Request,
@@ -19,7 +20,7 @@ export async function POST(
 ) {
   const session = await getSession()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  if (session.user.role !== "COACH") {
+  if (!isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

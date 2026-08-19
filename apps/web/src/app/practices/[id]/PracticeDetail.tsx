@@ -5,9 +5,10 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { formatSwimDate } from "@/lib/utils"
 import { ZonedClockTime } from "@/components/ZonedTime"
+import { RelativeDate } from "@/components/RelativeDate"
 import { FormattedText, isHtmlEmpty } from "@/components/FormattedText"
 import PracticeActions from "./PracticeActions"
-import ExportPracticePdfButton from "./ExportPracticePdfButton"
+import SharePracticeButton from "./SharePracticeButton"
 import PracticeExportCapture from "./PracticeExportCapture"
 import CommentSection from "./CommentSection"
 import { type PracticeFormState } from "../PracticeEditor"
@@ -17,6 +18,7 @@ import InfoIcon from "@/components/InfoIcon"
 import ActionIcon from "@/components/ActionIcon"
 import HoverDetail from "@/components/HoverDetail"
 import PracticeEditSkeleton from "./PracticeEditSkeleton"
+import type { StaffTitle } from "@swimbuzz/shared"
 
 type PracticeSetView = {
   id: string
@@ -30,6 +32,7 @@ type PracticeCommentView = {
   authorName: string
   authorId: string | null
   authorImage: string | null
+  authorStaffTitle: StaffTitle | null
   body: string
   parentId: string | null
   createdAt: string
@@ -199,7 +202,7 @@ export default function PracticeDetail({
             <div className="mt-1 text-base text-foreground-secondary sm:text-lg">
               <div className="flex items-center gap-1.5">
                 <InfoIcon kind="calendar" />
-                {dateIso ? formatSwimDate(dateIso) : "No date"}
+                {dateIso ? <RelativeDate day={dateIso} absolute={formatSwimDate(dateIso)} /> : "No date"}
                 {startTime || endTime ? (
                   <>
                     {" · "}
@@ -225,10 +228,19 @@ export default function PracticeDetail({
             </div>
           </div>
           <div className="mr-2 flex shrink-0 items-center gap-2 sm:mr-3">
-            <ExportPracticePdfButton
+            <SharePracticeButton
               practiceId={practiceId}
+              practiceSlug={practiceSlug}
               title={title}
               dateIso={dateIso}
+              startTime={startTime}
+              endTime={endTime}
+              timeZone={timeZone}
+              location={location}
+              focus={focus}
+              tags={tags}
+              sets={sets}
+              totalDistance={totalDistance}
               captureRef={exportCaptureRef}
             />
             {isCoach ? (

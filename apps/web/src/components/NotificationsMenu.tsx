@@ -3,8 +3,9 @@
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { formatRelativeTime } from "@/lib/utils"
+import { formatDateTime, formatRelativeTime } from "@/lib/utils"
 import { AppIcon } from "@/components/AppIcon"
+import HoverDetail from "@/components/HoverDetail"
 
 export type NotificationItem = {
   id: string
@@ -160,7 +161,10 @@ export default function NotificationsMenu({
                         </p>
                       ) : null}
                       <p className="mt-1 text-[11px] text-foreground-quaternary">
-                        {formatRelativeTime(n.createdAt)}
+                        <span className="group relative inline-block" tabIndex={0}>
+                          {formatRelativeTime(n.createdAt)}
+                          <HoverDetail label={formatDateTime(n.createdAt)} />
+                        </span>
                       </p>
                     </>
                   )

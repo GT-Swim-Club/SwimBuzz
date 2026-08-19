@@ -116,6 +116,52 @@ export function formatDateTime(value: string | Date): string {
   })}, ${formatClockTime(date)}`
 }
 
+/** "YYYY-MM-DD" for the calendar day an instant falls on in the runtime's local zone. */
+export function localDayKey(value: Date | string): string {
+  const date = value instanceof Date ? value : new Date(value)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+  return `${year}-${month}-${day}`
+}
+
+/** "YYYY-MM-DD" for a date-only value stored at UTC midnight (Practice.date, Meet.startDate, swim dates). */
+export function utcDayKey(value: Date | string): string {
+  const date = value instanceof Date ? value : new Date(value)
+  const year = date.getUTCFullYear()
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0")
+  const day = String(date.getUTCDate()).padStart(2, "0")
+  return `${year}-${month}-${day}`
+}
+
+/**
+ * "Yesterday" | "Today" | "Tomorrow" when `dayKey` is within a day of `todayKey`,
+ * otherwise null so the caller falls back to its own absolute format. Both args are
+ * plain "YYYY-MM-DD" keys, so the diff is pure calendar math with no zone ambiguity.
+ * An empty `todayKey` (the SSR case, before the viewer's clock is known) returns null.
+ */
+export function relativeDayLabel(dayKey: string, todayKey: string): string | null {
+  if (!todayKey) return null
+  if (dayKey === todayKey) return "Today"
+  const today = new Date(`${todayKey}T00:00:00Z`)
+  const day = new Date(`${dayKey}T00:00:00Z`)
+  if (Number.isNaN(today.getTime()) || Number.isNaN(day.getTime())) return null
+  const diffDays = Math.round((day.getTime() - today.getTime()) / (24 * 60 * 60 * 1000))
+  if (diffDays === 1) return "Tomorrow"
+  if (diffDays === -1) return "Yesterday"
+  return null
+}
+
+/** Relative label for a date-only value (practice/meet date), which is stored at UTC midnight. */
+export function relativeEventDayLabel(value: Date | string, todayKey: string): string | null {
+  return relativeDayLabel(utcDayKey(value), todayKey)
+}
+
+/** Relative label for a true instant (createdAt/closeAt/recordedAt), rendered in the local zone. */
+export function relativeInstantDayLabel(value: Date | string, todayKey: string): string | null {
+  return relativeDayLabel(localDayKey(value), todayKey)
+}
+
 export function athleteDisplayName(athlete: {
   firstName: string
   lastName: string

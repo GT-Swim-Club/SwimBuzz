@@ -6,14 +6,24 @@ export function Icon({
   size = 20,
   color,
   strokeWidth = 2,
+  accessibilityLabel,
 }: {
   name: IconName
   size?: number
   color: string
   strokeWidth?: number
+  /** Exposes the icon's meaning to screen readers — there's no hover on touch to convey it otherwise. */
+  accessibilityLabel?: string
 }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      accessible={accessibilityLabel != null}
+      accessibilityLabel={accessibilityLabel}
+    >
       {ICONS[name].map((el, index) => renderPrimitive(el, index, color, strokeWidth))}
     </Svg>
   )

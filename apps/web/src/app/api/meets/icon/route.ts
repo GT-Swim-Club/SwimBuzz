@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { randomUUID } from "crypto"
 import sharp from "sharp"
 import { getSession } from "@/lib/session"
+import { isStaffRole } from "@/lib/auth-roles"
 import { resolvedFileExt } from "@/lib/upload-file-ext"
 
 export const runtime = "nodejs"
@@ -43,7 +44,7 @@ function storageHeaders(key: string, extra: Record<string, string> = {}) {
 
 export async function POST(req: Request) {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -133,7 +134,7 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

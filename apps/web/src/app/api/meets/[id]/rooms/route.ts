@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { normalizeMeetSignupQuestions } from "@/lib/meet-signup"
 import { Prisma } from "@prisma/client"
 import { getSession } from "@/lib/session"
+import { isStaffRole } from "@/lib/auth-roles"
 import {
   loadMeetRoomContext,
   parseOptionalDate,
@@ -20,7 +21,7 @@ export async function GET(
   const ctx = await loadMeetRoomContext(meetId)
   if (!ctx) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-  const isCoach = session.user.role === "COACH"
+  const isStaff = isStaffRole(session.user.role)
   const form = ctx.meet.roomForm
   const linked = await resolveLinkedAthleteId(session.user.id)
   const athleteId = "athleteId" in linked ? linked.athleteId : null
@@ -54,8 +55,8 @@ export async function GET(
 
   return NextResponse.json({
     form: serializeRoomForm(form, {
-      includePreferences: isCoach,
-      includeRooms: isCoach || !!form?.assignmentsPublishedAt}),
+      includePreferences: isStaff,
+      includeRooms: isStaff || !!form?.assignmentsPublishedAt}),
     myPreference: myPreference
       ? {
           id: myPreference.id,
@@ -65,7 +66,7 @@ export async function GET(
           answers: myPreference.answers,
           updatedAt: myPreference.updatedAt.toISOString()}
       : null,
-    myRoom: !isCoach || form?.assignmentsPublishedAt ? myRoom : null,
+    myRoom: !isStaff || form?.assignmentsPublishedAt ? myRoom : null,
     athleteId,
     meetHasEnded: ctx.ended})
 }
@@ -75,7 +76,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -96,7 +97,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

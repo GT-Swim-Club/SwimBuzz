@@ -1,8 +1,26 @@
-import { useCallback, useEffect, useState } from "react"
-import { Alert, Switch, View } from "react-native"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { Alert, Platform, Pressable, Switch, View } from "react-native"
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router"
-import { DEFAULT_TIME_ZONE, formatClockTimeRangeInViewerZone, formatDateTime, isHtmlEmpty, isStaffRole } from "@swimbuzz/shared"
+import * as Clipboard from "expo-clipboard"
+import * as MediaLibrary from "expo-media-library"
+import * as Sharing from "expo-sharing"
+import { File, Paths } from "expo-file-system"
+import { captureRef } from "react-native-view-shot"
 import {
+  DEFAULT_TIME_ZONE,
+  formatClockTimeRangeInViewerZone,
+  formatDateTime,
+  isHtmlEmpty,
+  isStaffRole,
+  practiceShareFilename,
+  practiceShareText,
+  practiceShareUrl,
+  type PracticeShareInput,
+  type PracticeShareSet,
+  type StaffTitle,
+} from "@swimbuzz/shared"
+import {
+  ActionSheet,
   Body,
   Button,
   ErrorBlock,
@@ -13,15 +31,22 @@ import {
   Screen,
   ScrollView,
   Section,
+  SubtitleSegments,
   TextField,
   Title,
   usePalette,
+  type ActionSheetItem,
 } from "@swimbuzz/ui"
 import { spacing } from "@swimbuzz/tokens"
-import { api } from "../../../src/lib/api"
+import { api, API_URL, WEB_URL, getAccessToken } from "../../../src/lib/api"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 import { FormattedText } from "../../../src/components/FormattedText"
+import { Icon } from "../../../src/components/Icon"
+import { PracticeExportCapture } from "../../../src/components/PracticeExportCapture"
+import { RelativeDateText } from "../../../src/components/RelativeDateText"
+import { StaffBadge } from "../../../src/components/StaffBadge"
 import { useAuth } from "../../../src/lib/auth"
+import { formatPracticeDate } from "../../../src/lib/practice-calendar"
 
 type PracticeSet = {
   id: string
@@ -34,6 +59,7 @@ type PracticeSet = {
 type PracticeComment = {
   id: string
   authorName?: string
+  authorStaffTitle?: StaffTitle | null
   body?: string
   createdAt?: string
   parentId?: string | null
@@ -65,6 +91,21 @@ export default function PracticeDetailScreen() {
   const [editSets, setEditSets] = useState<PracticeSet[]>([])
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
+  const [shareBusy, setShareBusy] = useState<"pdf" | "png" | "photos" | null>(null)
+  const [copied, setCopied] = useState<"link" | "text" | null>(null)
+  const [savedToastVisible, setSavedToastVisible] = useState(false)
+  const exportCaptureRef = useRef<View>(null)
+  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const savedToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const shareSheetDismissRef = useRef<(() => void) | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (copiedTimeoutRef.current) clearTimeout(copiedTimeoutRef.current)
+      if (savedToastTimeoutRef.current) clearTimeout(savedToastTimeoutRef.current)
+    }
+  }, [])
 
   const load = useCallback(async () => {
     if (!id) {
@@ -123,6 +164,160 @@ export default function PracticeDetailScreen() {
   const comments = (
     Array.isArray(practice.comments) ? practice.comments : []
   ) as PracticeComment[]
+  const shareSets: PracticeShareSet[] = sets.map((s) => ({
+    title: s.title ?? null,
+    content: s.content,
+    distance: s.distance ?? null,
+  }))
+  const totalDistance = sets.reduce((sum, s) => sum + (s.distance ?? 0), 0)
+  // Named separately from `practice` so the nested functions below (which TS
+  // treats as their own closures) keep the non-null narrowing this scope
+  // already has, instead of re-flagging `practice` as possibly null.
+  const currentPractice = practice
+
+  function shareInput(): PracticeShareInput {
+    return {
+      title: String(currentPractice.title ?? "Practice"),
+      dateIso: currentPractice.date ? String(currentPractice.date) : null,
+      startTime: String(currentPractice.startTime ?? "19:30"),
+      endTime: String(currentPractice.endTime ?? "21:00"),
+      timeZone: String(currentPractice.timeZone ?? DEFAULT_TIME_ZONE),
+      location: String(currentPractice.location ?? ""),
+      focus: currentPractice.focus ? String(currentPractice.focus) : null,
+      tags: Array.isArray(currentPractice.tags) ? (currentPractice.tags as string[]) : [],
+      sets: shareSets,
+      totalDistance,
+    }
+  }
+
+  function shareLink(): string {
+    const slug =
+      typeof currentPractice.slug === "string" && currentPractice.slug ? currentPractice.slug : id
+    return practiceShareUrl(WEB_URL, String(slug))
+  }
+
+  function flashCopied(which: "link" | "text") {
+    setCopied(which)
+    if (copiedTimeoutRef.current) clearTimeout(copiedTimeoutRef.current)
+    copiedTimeoutRef.current = setTimeout(() => setCopied(null), 2000)
+  }
+
+  /**
+   * Closes the share sheet and waits for it to actually finish dismissing
+   * before resolving. iOS refuses to present a native share/save UI on top
+   * of a modal that's still animating closed — the request just hangs with
+   * no error — so anything that opens one (Sharing.shareAsync,
+   * MediaLibrary writes) must await this first. Falls back to a short
+   * timeout in case the dismiss event doesn't fire, so this can never hang
+   * the whole flow.
+   */
+  function closeShareSheetAndWait(): Promise<void> {
+    setShareOpen(false)
+    if (Platform.OS !== "ios") return Promise.resolve()
+    return new Promise((resolve) => {
+      const finish = () => {
+        shareSheetDismissRef.current = null
+        clearTimeout(fallback)
+        resolve()
+      }
+      const fallback = setTimeout(finish, 600)
+      shareSheetDismissRef.current = finish
+    })
+  }
+
+  function handleShareSheetDismiss() {
+    shareSheetDismissRef.current?.()
+  }
+
+  /** Transient "Saved to Photos" confirmation — dismisses itself, no tap required. */
+  function showSavedToast() {
+    setSavedToastVisible(true)
+    if (savedToastTimeoutRef.current) clearTimeout(savedToastTimeoutRef.current)
+    savedToastTimeoutRef.current = setTimeout(() => setSavedToastVisible(false), 2000)
+  }
+
+  async function copyShareLink() {
+    await Clipboard.setStringAsync(shareLink())
+    flashCopied("link")
+  }
+
+  async function copyShareText() {
+    await Clipboard.setStringAsync(practiceShareText(shareInput()))
+    flashCopied("text")
+  }
+
+  /** Captures the off-screen PracticeExportCapture mirror to a temp PNG file. */
+  async function capturePracticePng(): Promise<string> {
+    if (!exportCaptureRef.current) throw new Error("Could not create image")
+    return captureRef(exportCaptureRef, { format: "png", quality: 1, result: "tmpfile" })
+  }
+
+  async function sharePdf() {
+    if (!id) return
+    setShareBusy("pdf")
+    try {
+      const token = await getAccessToken()
+      const res = await fetch(`${API_URL}/api/practices/${id}/pdf`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      })
+      if (!res.ok) throw new Error("Could not create PDF")
+      const bytes = new Uint8Array(await res.arrayBuffer())
+      const filename = practiceShareFilename(
+        String(currentPractice.title ?? "practice"),
+        currentPractice.date ? String(currentPractice.date) : null,
+        "pdf"
+      )
+      const file = new File(Paths.cache, filename)
+      if (file.exists) file.delete()
+      file.write(bytes)
+      if (!(await Sharing.isAvailableAsync())) {
+        Alert.alert("Sharing unavailable", "This device can't open the share sheet.")
+        return
+      }
+      await closeShareSheetAndWait()
+      await Sharing.shareAsync(file.uri, { mimeType: "application/pdf", UTI: "com.adobe.pdf" })
+    } catch (err) {
+      Alert.alert("Could not share PDF", err instanceof Error ? err.message : "Something went wrong")
+    } finally {
+      setShareBusy(null)
+    }
+  }
+
+  async function sharePng() {
+    setShareBusy("png")
+    try {
+      const uri = await capturePracticePng()
+      if (!(await Sharing.isAvailableAsync())) {
+        Alert.alert("Sharing unavailable", "This device can't open the share sheet.")
+        return
+      }
+      await closeShareSheetAndWait()
+      await Sharing.shareAsync(uri, { mimeType: "image/png", UTI: "public.png" })
+    } catch (err) {
+      Alert.alert("Could not share image", err instanceof Error ? err.message : "Something went wrong")
+    } finally {
+      setShareBusy(null)
+    }
+  }
+
+  async function saveToPhotos() {
+    setShareBusy("photos")
+    try {
+      const permission = await MediaLibrary.requestPermissionsAsync(true)
+      if (!permission.granted) {
+        Alert.alert("Permission needed", "Allow photo access in Settings to save practice images.")
+        return
+      }
+      const uri = await capturePracticePng()
+      await MediaLibrary.saveToLibraryAsync(uri)
+      await closeShareSheetAndWait()
+      showSavedToast()
+    } catch (err) {
+      Alert.alert("Could not save image", err instanceof Error ? err.message : "Something went wrong")
+    } finally {
+      setShareBusy(null)
+    }
+  }
 
   async function postComment() {
     if (!id) return
@@ -224,26 +419,50 @@ export default function PracticeDetailScreen() {
   return (
     <Screen>
       <ScrollView contentContainerStyle={{ paddingBottom: tabBarPad }}>
-        <Title>{String(practice.title ?? "Practice")}</Title>
-        <Muted style={{ marginBottom: spacing.sm }}>
-          {[
-            practice.date
-              ? new Date(String(practice.date)).toLocaleDateString()
-              : null,
-            (() => {
-              const zoned = formatClockTimeRangeInViewerZone(
-                practice.date ? String(practice.date).slice(0, 10) : new Date().toISOString().slice(0, 10),
-                String(practice.startTime ?? ""),
-                String(practice.endTime ?? ""),
-                String(practice.timeZone ?? DEFAULT_TIME_ZONE)
-              )
-              return `${zoned.text} ${zoned.abbrev}`
-            })(),
-            practice.location,
-          ]
-            .filter(Boolean)
-            .join(" · ")}
-        </Muted>
+        <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: spacing.sm }}>
+          <Title style={{ flex: 1 }}>{String(practice.title ?? "Practice")}</Title>
+          <Pressable
+            onPress={() => setShareOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Share practice"
+            hitSlop={8}
+            style={{ paddingVertical: spacing.xxs, paddingHorizontal: spacing.xs }}
+          >
+            <Icon name="share" size={22} color={c.text} />
+          </Pressable>
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            alignItems: "center",
+            marginBottom: spacing.sm,
+          }}
+        >
+          <SubtitleSegments
+            textStyle={{ fontSize: 14, color: c.textSecondary }}
+            segments={[
+              practice.date ? (
+                <RelativeDateText
+                  value={String(practice.date).slice(0, 10)}
+                  kind="event"
+                  absolute={formatPracticeDate(String(practice.date))}
+                  style={{ fontSize: 14, color: c.textSecondary }}
+                />
+              ) : null,
+              (() => {
+                const zoned = formatClockTimeRangeInViewerZone(
+                  practice.date ? String(practice.date).slice(0, 10) : new Date().toISOString().slice(0, 10),
+                  String(practice.startTime ?? ""),
+                  String(practice.endTime ?? ""),
+                  String(practice.timeZone ?? DEFAULT_TIME_ZONE)
+                )
+                return `${zoned.text} ${zoned.abbrev}`
+              })(),
+              practice.location ? String(practice.location) : null,
+            ]}
+          />
+        </View>
         {practice.focus && !isHtmlEmpty(String(practice.focus)) ? (
           <View style={{ marginBottom: spacing.md }}>
             <FormattedText html={String(practice.focus)} />
@@ -362,15 +581,23 @@ export default function PracticeDetailScreen() {
                   />
                 }
                 title={String(comment.authorName ?? "Someone")}
-                subtitle={[
+                titleAdornment={
+                  comment.authorStaffTitle ? (
+                    <StaffBadge title={comment.authorStaffTitle} />
+                  ) : undefined
+                }
+                subtitleSegments={[
                   comment.parentId ? "Reply" : null,
                   comment.body,
-                  comment.createdAt
-                    ? formatDateTime(String(comment.createdAt))
-                    : null,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
+                  comment.createdAt ? (
+                    <RelativeDateText
+                      value={String(comment.createdAt)}
+                      kind="instant"
+                      absolute={formatDateTime(String(comment.createdAt))}
+                      style={{ fontSize: 13, color: c.textSecondary }}
+                    />
+                  ) : null,
+                ]}
               />
             ))
           )}
@@ -403,6 +630,100 @@ export default function PracticeDetailScreen() {
           />
         </Section>
       </ScrollView>
+
+      <ActionSheet
+        visible={shareOpen}
+        onClose={() => setShareOpen(false)}
+        onDismiss={handleShareSheetDismiss}
+        title="Share practice"
+        groups={[
+          [
+            {
+              key: "link",
+              label: copied === "link" ? "Copied" : "Copy link",
+              icon: <Icon name={copied === "link" ? "check" : "link"} size={20} color={c.text} />,
+              onPress: () => void copyShareLink(),
+            },
+            {
+              key: "text",
+              label: copied === "text" ? "Copied" : "Copy as text",
+              icon: <Icon name={copied === "text" ? "check" : "copy"} size={20} color={c.text} />,
+              onPress: () => void copyShareText(),
+            },
+          ],
+          [
+            {
+              key: "pdf",
+              label: "Share PDF",
+              icon: <Icon name="fileText" size={20} color={c.text} />,
+              busy: shareBusy === "pdf",
+              disabled: Boolean(shareBusy) && shareBusy !== "pdf",
+              onPress: () => void sharePdf(),
+            },
+            {
+              key: "png",
+              label: "Share PNG",
+              icon: <Icon name="image" size={20} color={c.text} />,
+              busy: shareBusy === "png",
+              disabled: Boolean(shareBusy) && shareBusy !== "png",
+              onPress: () => void sharePng(),
+            },
+            {
+              key: "photos",
+              label: "Save to Photos",
+              icon: <Icon name="image" size={20} color={c.text} />,
+              busy: shareBusy === "photos",
+              disabled: Boolean(shareBusy) && shareBusy !== "photos",
+              onPress: () => void saveToPhotos(),
+            },
+          ] satisfies ActionSheetItem[],
+        ]}
+      />
+
+      {/* Off-screen mirror captured to PNG for Share PNG / Save to Photos — never shown in the layout. */}
+      <View pointerEvents="none" style={{ position: "absolute", top: 0, left: -10000 }}>
+        <PracticeExportCapture
+          ref={exportCaptureRef}
+          title={String(practice.title ?? "Practice")}
+          showDraft={isStaff && !published}
+          dateIso={practice.date ? String(practice.date) : null}
+          startTime={String(practice.startTime ?? "19:30")}
+          endTime={String(practice.endTime ?? "21:00")}
+          timeZone={String(practice.timeZone ?? DEFAULT_TIME_ZONE)}
+          location={String(practice.location ?? "")}
+          focus={practice.focus ? String(practice.focus) : null}
+          tags={Array.isArray(practice.tags) ? (practice.tags as string[]) : []}
+          sets={shareSets}
+          totalDistance={totalDistance}
+        />
+      </View>
+
+      {savedToastVisible ? (
+        <View
+          pointerEvents="none"
+          style={{ position: "absolute", left: 0, right: 0, bottom: tabBarPad, alignItems: "center" }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: spacing.xs,
+              borderRadius: 999,
+              paddingHorizontal: spacing.md,
+              paddingVertical: spacing.sm,
+              backgroundColor: c.bgElevated,
+              shadowColor: "#000",
+              shadowOpacity: 0.15,
+              shadowRadius: 8,
+              shadowOffset: { width: 0, height: 2 },
+              elevation: 4,
+            }}
+          >
+            <Icon name="check" size={16} color={c.primaryActive} />
+            <Body style={{ fontWeight: "600" }}>Saved to Photos</Body>
+          </View>
+        </View>
+      ) : null}
     </Screen>
   )
 }

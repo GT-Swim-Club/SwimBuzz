@@ -10,6 +10,16 @@ export const API_URL =
   process.env.EXPO_PUBLIC_API_URL?.replace(/\/$/, "") ||
   "https://swimbuzz.gtswimclub.com"
 
+/**
+ * Public web origin — distinct from API_URL, which in dev points at a LAN IP
+ * that isn't reachable outside the local network. Used to build shareable
+ * links (Copy link, Share PDF/PNG) so they always point somewhere the
+ * recipient can actually open.
+ */
+export const WEB_URL =
+  process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, "") ||
+  "https://swimbuzz.gtswimclub.com"
+
 let memoryAccess: string | null = null
 let onUnauthorized: (() => void) | null = null
 

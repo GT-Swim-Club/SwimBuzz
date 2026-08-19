@@ -6,6 +6,7 @@ import { parseSeasonList } from "@/lib/season"
 import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swimcloud-id"
 import { uniqueAthleteSlug } from "@/lib/slug"
 import { getSession } from "@/lib/session"
+import { isStaffRole } from "@/lib/auth-roles"
 
 export async function GET() {
   const session = await getSession()
@@ -13,7 +14,7 @@ export async function GET() {
 
   const athletes = await prisma.athlete.findMany({
     include: {
-      user: { select: { name: true, email: true, image: true } },
+      user: { select: { name: true, email: true, image: true, staffTitle: true } },
       swims: {
         orderBy: { timeMs: "asc" },
         take: 1}},
@@ -24,7 +25,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

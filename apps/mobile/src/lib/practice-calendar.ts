@@ -1,10 +1,6 @@
-export function pad2(value: number) {
-  return String(value).padStart(2, "0")
-}
+import { utcDayKey } from "@swimbuzz/shared"
 
-export function utcDayKey(date: Date) {
-  return `${date.getUTCFullYear()}-${pad2(date.getUTCMonth() + 1)}-${pad2(date.getUTCDate())}`
-}
+export { utcDayKey }
 
 export function todayUtcKey() {
   return utcDayKey(new Date())

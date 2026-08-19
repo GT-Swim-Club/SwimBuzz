@@ -114,7 +114,8 @@ Clone the full monorepo. Create a Vercel project with **Root Directory = reposit
 **Crons**
 
 1. **Notification cleanup** — registered in `vercel.json` (daily). Hobby allows once/day only.
-2. **Signup monitor** — Hobby cannot run minutely Vercel Cron. Point a free external cron (e.g. [cron-job.org](https://cron-job.org)) at:
+2. **Staff term expiry** — registered in `vercel.json` (daily). Demotes coach/exec accounts whose staff term (May–Apr, see `currentStaffTerm()`) has lapsed back to `ATHLETE` — see [`apps/web/src/lib/staff-term-expiry.ts`](apps/web/src/lib/staff-term-expiry.ts).
+3. **Signup monitor** — Hobby cannot run minutely Vercel Cron. Point a free external cron (e.g. [cron-job.org](https://cron-job.org)) at:
 
    `GET https://swimbuzz.gtswimclub.com/api/cron/signup-monitor`  
    Header: `Authorization: Bearer <CRON_SECRET>`  

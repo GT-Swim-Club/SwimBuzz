@@ -61,7 +61,13 @@ export default function EmailSignInForm({
         callbackUrl,
       })
       if (result?.error) {
-        setError("Invalid or expired code. Request a new one and try again.")
+        // authorize() throws a specific message for a coach/exec account
+        // (see [...nextauth]/route.ts); anything else is an invalid code.
+        setError(
+          result.error === "CredentialsSignin"
+            ? "Invalid or expired code. Request a new one and try again."
+            : result.error
+        )
         return
       }
       router.push(result?.url || callbackUrl)

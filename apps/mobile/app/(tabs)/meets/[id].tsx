@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Alert, Image, View } from "react-native"
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router"
-import { DEFAULT_TIME_ZONE, formatClockTimeInViewerZone, formatMeetDateRange, formatTime, isHtmlEmpty, type IconName } from "@swimbuzz/shared"
+import { DEFAULT_TIME_ZONE, formatClockTimeInViewerZone, formatMeetDateRange, formatTime, isHtmlEmpty, utcDayKey, type IconName } from "@swimbuzz/shared"
 import {
   Body,
   Button,
@@ -14,6 +14,7 @@ import {
   Screen,
   ScrollView,
   Section,
+  SubtitleSegments,
   TextField,
   Title,
   usePalette,
@@ -32,6 +33,7 @@ import { api } from "../../../src/lib/api"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 import { FormattedText } from "../../../src/components/FormattedText"
 import { Icon } from "../../../src/components/Icon"
+import { RelativeDateText } from "../../../src/components/RelativeDateText"
 import { isExternalUrl } from "../../../src/lib/href"
 
 type ResourceLink = { label: string; url: string }
@@ -383,6 +385,16 @@ export default function MeetDetailScreen() {
   const location = meet.location ? String(meet.location) : null
   const course = meet.course ? String(meet.course) : null
   const school = meet.school ? String(meet.school) : null
+  const dateRangeAbsolute = formatMeetDateRange(startDate, endDate)
+  // Only a single-day meet collapses to "Today" — a multi-day range always stays
+  // absolute, since a relative label would silently drop the end date.
+  const dateRangeSingleDay = !endDate || utcDayKey(startDate) === utcDayKey(endDate)
+  const dateRangeSegment = (style: { fontSize: number; color: string }) =>
+    dateRangeSingleDay ? (
+      <RelativeDateText value={startDate} kind="event" absolute={dateRangeAbsolute} style={style} />
+    ) : (
+      dateRangeAbsolute
+    )
   const startTime =
     typeof meet.startTime === "string" && meet.startTime.trim()
       ? (() => {
@@ -829,24 +841,25 @@ export default function MeetDetailScreen() {
           ) : null}
           <View style={{ flex: 1, minWidth: 0 }}>
             <Title>{name}</Title>
-            <Muted>
-              {[
-                formatMeetDateRange(startDate, endDate),
-                startTime,
-                location,
-                course,
-                school,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            </Muted>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
+              <SubtitleSegments
+                textStyle={{ fontSize: 14, color: c.textSecondary }}
+                segments={[
+                  dateRangeSegment({ fontSize: 14, color: c.textSecondary }),
+                  startTime,
+                  location,
+                  course,
+                  school,
+                ]}
+              />
+            </View>
           </View>
         </View>
 
         {error ? <ErrorBlock message={error} /> : null}
 
         <Section title="Details">
-          <MetaRow label="Dates" value={formatMeetDateRange(startDate, endDate)} />
+          <MetaRow label="Dates" value={dateRangeSegment({ fontSize: 14, color: c.text })} />
           {startTime ? <MetaRow label="Start time" value={startTime} /> : null}
           {location ? <MetaRow label="Location" value={location} /> : null}
           {course ? <MetaRow label="Course" value={course} /> : null}

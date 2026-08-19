@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { formatRoomLabel, validateRoomAssignmentsAgainstExclusions } from "@/lib/meet-rooms"
 import { loadMeetRoomContext } from "../_shared"
 import { getSession } from "@/lib/session"
+import { isStaffRole } from "@/lib/auth-roles"
 
 type RoomInput = {
   athleteIds: string[]
@@ -13,7 +14,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getSession()
-  if (!session || session.user.role !== "COACH") {
+  if (!session || !isStaffRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
