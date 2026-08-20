@@ -12,18 +12,18 @@ const athleteFeatures: FeatureItem[] = [
     title: "Browse the roster",
     description: "See who's swimming this season and get to a teammate's profile quickly."},
   {
-    title: "Track personal bests",
-    description: "Look up your best times, meet results, and teammates' swims."},
-  {
     title: "Follow meets",
     description:
       "Find dates, entries, heat sheets, travel info, and livestreams."},
   {
+    title: "Read practice plans",
+    description: "Read the workout, intervals, and notes before you get to the pool."},
+  {
     title: "See Nationals qualifiers",
     description: "See who has qualified this season."},
   {
-    title: "Read practice plans",
-    description: "Read the workout, intervals, and notes before you get to the pool."},
+    title: "Track personal bests",
+    description: "Look up your best times, meet results, and teammates' swims."},
 ]
 
 const coachFeatures: FeatureItem[] = [
@@ -38,13 +38,13 @@ const coachFeatures: FeatureItem[] = [
     title: "Write practices",
     description: "Write the plan once and publish it for the team."},
   {
-    title: "Plan relays",
-    description:
-      "Try lineups using personal bests and signup interest."},
-  {
     title: "Nationals tracking",
     description:
       "Upload the standards and see who has made the cut."},
+  {
+    title: "Plan relays",
+    description:
+      "Try lineups using personal bests and signup interest."},
 ]
 
 function FeatureList({ items }: { items: FeatureItem[] }) {
