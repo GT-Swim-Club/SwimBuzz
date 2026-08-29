@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useTransition } from "react"
 import type { PendingProfileChanges } from "@/lib/pending-profile-changes"
+import { approvePendingProfileChanges, rejectPendingProfileChanges } from "./athlete-profile.actions"
 
 export default function PendingProfileChangesReview({
   athleteId,
@@ -15,34 +15,23 @@ export default function PendingProfileChangesReview({
   currentSwimCloudId: number | null
   currentNicknames: string[]
 }) {
-  const router = useRouter()
-  const [loading, setLoading] = useState<"approve" | "reject" | null>(null)
+  const [isPending, startTransition] = useTransition()
+  const [activeAction, setActiveAction] = useState<"approve" | "reject" | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const loading = isPending ? activeAction : null
 
-  async function act(action: "approve" | "reject") {
-    setLoading(action)
+  function act(action: "approve" | "reject") {
+    setActiveAction(action)
     setError(null)
-    try {
-      const res = await fetch(`/api/athletes/${athleteId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          action === "approve"
-            ? { approvePendingProfileChanges: true }
-            : { rejectPendingProfileChanges: true }
-        ),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? `Failed to ${action}`)
-        return
+    startTransition(async () => {
+      try {
+        await (action === "approve"
+          ? approvePendingProfileChanges(athleteId)
+          : rejectPendingProfileChanges(athleteId))
+      } catch (err) {
+        setError(err instanceof Error ? err.message : `Failed to ${action}`)
       }
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(null)
-    }
+    })
   }
 
   return (
@@ -87,7 +76,7 @@ export default function PendingProfileChangesReview({
         <button
           type="button"
           disabled={loading !== null}
-          onClick={() => void act("approve")}
+          onClick={() => act("approve")}
           className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
         >
           {loading === "approve" ? "Approving…" : "Approve"}
@@ -95,7 +84,7 @@ export default function PendingProfileChangesReview({
         <button
           type="button"
           disabled={loading !== null}
-          onClick={() => void act("reject")}
+          onClick={() => act("reject")}
           className="rounded-lg border border-border bg-background px-3 py-1.5 text-sm hover:bg-fill-secondary disabled:opacity-50"
         >
           {loading === "reject" ? "Rejecting…" : "Reject"}

@@ -30,10 +30,11 @@ export function parseSeason(value: unknown): string | null {
   return null
 }
 
-/** Club season runs Sep–Aug; infer from a meet date (UTC). */
-export function seasonFromDate(date: Date): string {
-  const month = date.getUTCMonth()
-  const year = date.getUTCFullYear()
+/** Club season runs Sep–Aug; infer from a "YYYY-MM-DD" day key (zoned or UTC, caller's choice). */
+export function seasonFromDate(dayKey: string): string {
+  const [yearStr, monthStr] = dayKey.split("-")
+  const year = parseInt(yearStr ?? "", 10)
+  const month = parseInt(monthStr ?? "", 10) - 1
   if (month >= 8) return `${year}-${year + 1}`
   return `${year - 1}-${year}`
 }
@@ -49,7 +50,7 @@ export function upcomingSeason(): string {
 }
 
 export function currentSeason(): string {
-  return seasonFromDate(new Date())
+  return seasonFromDate(new Date().toISOString().slice(0, 10))
 }
 
 /**

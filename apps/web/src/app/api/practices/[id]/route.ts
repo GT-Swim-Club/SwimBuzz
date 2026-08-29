@@ -8,6 +8,7 @@ import {
   PracticeEditLockError,
   assertCanMutatePractice } from "@/lib/practice-edit-lock"
 import { uniquePracticeSlug } from "@/lib/slug"
+import { zonedDayKey } from "@swimbuzz/shared"
 import { getSession } from "@/lib/session"
 import { findUnmanagedPracticeTags } from "@/lib/practice-tag-catalog"
 
@@ -82,8 +83,10 @@ export async function PATCH(
     )
 
     // Diff sets so comments on untouched sets survive edits.
-    const dateChanged =
-      (existing.date?.getTime() ?? null) !== (data.date?.getTime() ?? null)
+    const existingDayKey = existing.startsAt
+      ? zonedDayKey(existing.startsAt, existing.timeZone)
+      : null
+    const dateChanged = existingDayKey !== zonedDayKey(data.startsAt, data.timeZone)
 
     const practice = await prisma.$transaction(async (tx) => {
       await tx.practiceSet.deleteMany({
@@ -113,15 +116,16 @@ export async function PATCH(
         where: { id },
         data: {
           title: data.title,
-          date: data.date,
-          startTime: data.startTime,
-          endTime: data.endTime,
+          startsAt: data.startsAt,
+          endsAt: data.endsAt,
           timeZone: data.timeZone,
           location: data.location,
           focus: data.focus,
           tags: data.tags,
           published: data.published,
-          ...(dateChanged ? { slug: await uniquePracticeSlug(data.date, id) } : {}),
+          ...(dateChanged
+            ? { slug: await uniquePracticeSlug(data.startsAt, data.timeZone, id) }
+            : {}),
         },
         include: { sets: { orderBy: { order: "asc" }, select: practiceSetSelect } },
       })
@@ -131,7 +135,8 @@ export async function PATCH(
       await notifyPracticePublished({
         practiceId: practice.id,
         title: practice.title,
-        date: practice.date,
+        startsAt: practice.startsAt,
+        timeZone: practice.timeZone,
         focus: practice.focus,
         excludeUserId: session.user.id})
     }

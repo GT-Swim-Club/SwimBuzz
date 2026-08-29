@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useTransition } from "react"
 import ActionIcon from "@/components/ActionIcon"
+import { removeRosterOnlyEntry } from "./RemoveRosterOnlyButton.actions"
 
 export default function RemoveRosterOnlyButton({
   meetId,
@@ -13,29 +13,18 @@ export default function RemoveRosterOnlyButton({
   athleteId: string
   athleteName: string
 }) {
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const loading = isPending
 
-  async function handleRemove() {
+  function handleRemove() {
     if (!confirm(`Remove ${athleteName } from the roster summary?`)) return
-    setLoading(true)
-    try {
-      const res = await fetch(`/api/meets/${meetId}/sheet-entry`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ athleteId, rosterOnly: true }),
-      })
-      if (!res.ok) {
-        const data = await res.json()
-        alert(data.error ?? "Failed to remove athlete")
-        return
+    startTransition(async () => {
+      try {
+        await removeRosterOnlyEntry(meetId, athleteId)
+      } catch (err) {
+        alert(err instanceof Error ? err.message : "Failed to remove athlete")
       }
-      router.refresh()
-    } catch {
-      alert("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   return (

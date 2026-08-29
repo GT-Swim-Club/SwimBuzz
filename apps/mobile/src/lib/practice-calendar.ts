@@ -1,4 +1,4 @@
-import { utcDayKey } from "@swimbuzz/shared"
+import { utcDayKey, zonedDayKey } from "@swimbuzz/shared"
 
 export { utcDayKey }
 
@@ -62,29 +62,27 @@ export function formatWeekLabel(weekStart: Date) {
   return `${months[weekStart.getUTCMonth()]} ${weekStart.getUTCDate()}, ${weekStart.getUTCFullYear()} – ${months[weekEnd.getUTCMonth()]} ${weekEnd.getUTCDate()}, ${weekEnd.getUTCFullYear()}`
 }
 
-export function formatPracticeDate(value?: string | null) {
-  const date = parseUtcDate(value)
-  if (!date) return "No date"
-  return date.toLocaleDateString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    timeZone: "UTC",
-  })
-}
-
-export function practiceDayKey(practice: { date?: string | null }) {
-  const date = parseUtcDate(practice.date)
-  return date ? utcDayKey(date) : null
+/**
+ * The calendar day a practice falls on, in the practice's OWN stored zone — not a
+ * shared UTC day. Each practice is grouped by what its zone's wall clock says, so a
+ * late-night practice in one zone can land on a different day than a same-instant
+ * practice in another.
+ */
+export function practiceDayKey(practice: { startsAt: string; timeZone: string }) {
+  return zonedDayKey(practice.startsAt, practice.timeZone)
 }
 
 export function practiceYardage(practice: {
+  totalDistance?: number | null
   sets?: Array<{ distance?: number | null }>
 }) {
+  if (practice.totalDistance != null) return practice.totalDistance
   return (practice.sets ?? []).reduce((sum, set) => sum + (set.distance ?? 0), 0)
 }
 
-export function groupPracticesByDay<T extends { date?: string | null }>(practices: T[]) {
+export function groupPracticesByDay<T extends { startsAt: string; timeZone: string }>(
+  practices: T[]
+) {
   const map = new Map<string, T[]>()
   for (const practice of practices) {
     const key = practiceDayKey(practice)

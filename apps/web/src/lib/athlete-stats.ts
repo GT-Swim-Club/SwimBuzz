@@ -2,6 +2,7 @@ import type { MeetHighlights, StatCounter } from "@/lib/meet-stats"
 import { currentSeason, parseSeason, seasonFromDate } from "@/lib/season"
 import { canonicalizeStrokeEvent, normalizeEventName } from "@/lib/swim-parse"
 import { formatDisplayTime, formatTime } from "@/lib/utils"
+import { utcDayKey } from "@swimbuzz/shared"
 
 function formatDropPct(pct: number): string {
   const rounded = pct >= 10 ? pct.toFixed(0) : pct.toFixed(1)
@@ -31,7 +32,7 @@ function swimSeason(swim: AthleteSwimForStats): string {
   if (swim.meetRef?.season) {
     return parseSeason(swim.meetRef.season) ?? swim.meetRef.season
   }
-  return seasonFromDate(toDate(swim.date))
+  return seasonFromDate(utcDayKey(swim.date))
 }
 
 function eventCourseKey(event: string, course: string): string {

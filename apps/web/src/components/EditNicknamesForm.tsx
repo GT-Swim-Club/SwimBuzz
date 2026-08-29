@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useTransition } from "react"
 import NicknameTagsInput from "@/components/NicknameTagsInput"
+import { updateNicknames } from "./athlete-profile.actions"
 
 export default function EditNicknamesForm({
   athleteId,
@@ -15,80 +15,53 @@ export default function EditNicknamesForm({
   requiresApproval?: boolean
   pendingNicknames?: string[] | null
 }) {
-  const router = useRouter()
   const [nicknames, setNicknames] = useState(
     pendingNicknames ?? initialNicknames
   )
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const loading = isPending
 
   const baseline = pendingNicknames ?? initialNicknames
   const hasChanged =
     nicknames.length !== baseline.length ||
     nicknames.some((name, i) => name !== baseline[i])
 
-  async function persist(next: string[]) {
+  function persist(next: string[]) {
     if (requiresApproval) {
       setNicknames(next)
       setMessage(null)
       return
     }
 
+    const previous = nicknames
     setNicknames(next)
-    setLoading(true)
     setError(null)
 
-    try {
-      const res = await fetch(`/api/athletes/${athleteId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nicknames: next }),
-      })
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.error ?? "Failed to save alternate names")
-        setNicknames(nicknames)
-        return
+    startTransition(async () => {
+      try {
+        await updateNicknames(athleteId, next)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to save alternate names")
+        setNicknames(previous)
       }
-
-      setNicknames(data.nicknames ?? next)
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
-      setNicknames(nicknames)
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
-  async function requestApproval() {
+  function requestApproval() {
     if (!hasChanged) return
-    setLoading(true)
     setError(null)
     setMessage(null)
 
-    try {
-      const res = await fetch(`/api/athletes/${athleteId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nicknames }),
-      })
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.error ?? "Failed to request nickname changes")
-        return
+    startTransition(async () => {
+      try {
+        await updateNicknames(athleteId, nicknames)
+        setMessage("Requested — waiting for coach approval")
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to request nickname changes")
       }
-
-      setMessage("Requested — waiting for coach approval")
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   return (
@@ -103,7 +76,7 @@ export default function EditNicknamesForm({
           requiresApproval ? (
             <button
               type="button"
-              onClick={() => void requestApproval()}
+              onClick={requestApproval}
               disabled={loading || !hasChanged}
               className="text-sm px-4 py-2 border border-border rounded-lg hover:bg-fill-secondary disabled:opacity-40 transition-colors"
             >

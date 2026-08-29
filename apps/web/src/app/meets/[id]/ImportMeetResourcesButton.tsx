@@ -1,7 +1,6 @@
 "use client"
 
 import { Fragment, useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
 import MeetResourceField from "../MeetResourceField"
 import MeetResourceIcon from "@/components/MeetResourceIcon"
 import Modal, { ModalFooter } from "@/components/Modal"
@@ -10,6 +9,7 @@ import { useImportTask } from "@/components/ImportTaskProvider"
 import { useMeetResourceUploads } from "@/lib/use-meet-resource-uploads"
 import { useUnsavedUploads } from "@/lib/unsaved-uploads"
 import type { HeatSheetLink } from "@/lib/meet-files"
+import { updateMeet } from "./meet-update.actions"
 
 type ResourceForm = {
   teamCode: string
@@ -131,7 +131,6 @@ export default function ImportMeetResourcesButton({
   meetId: string
   initial: ResourceForm
 }) {
-  const router = useRouter()
   const { requireScraper } = useScraperUi()
   const { startTask, tasks } = useImportTask()
   const importing = tasks.some(
@@ -200,10 +199,7 @@ export default function ImportMeetResourcesButton({
       setCachedSheetParses(data.cachedSheetParses ?? null)
       setConfirmError(null)
       setConfirmOpen(true)
-      router.refresh()
-      return
     }
-    router.refresh()
   }
 
   async function saveResources(
@@ -220,30 +216,29 @@ export default function ImportMeetResourcesButton({
     const heatSheetUrls = filledHeatSheetLinks(snapshot.heatSheetUrls)
     const finalsHeatSheetUrls = filledHeatSheetLinks(snapshot.finalsHeatSheetUrls)
 
-    const res = await fetch(`/api/meets/${meetId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        teamCode,
-        packetUrl: snapshot.packetUrl,
-        entriesSheetUrl: snapshot.entriesSheetUrl,
-        psychSheetUrl: snapshot.psychSheetUrl,
-        heatSheetUrls,
-        finalsHeatSheetUrls,
-        liveStreamUrl: snapshot.liveStreamUrl,
-        nameMappings: opts?.nameMappings,
-        rejectedNames: opts?.rejectedNames,
-        cachedSheetParses: opts?.cachedSheetParses,
-      }),
+    const result = await updateMeet(meetId, {
+      teamCode,
+      packetUrl: snapshot.packetUrl,
+      entriesSheetUrl: snapshot.entriesSheetUrl,
+      psychSheetUrl: snapshot.psychSheetUrl,
+      heatSheetUrls,
+      finalsHeatSheetUrls,
+      liveStreamUrl: snapshot.liveStreamUrl,
+      nameMappings: opts?.nameMappings,
+      rejectedNames: opts?.rejectedNames,
+      cachedSheetParses: opts?.cachedSheetParses,
     })
-    const data = await res.json()
-    if (!res.ok) {
-      if (data.rejected) revertRejectedImport()
-      throw new Error(data.error ?? "Failed to save resources")
+    if (!result.ok) {
+      if (result.rejected) revertRejectedImport()
+      throw new Error(result.error ?? "Failed to save resources")
     }
 
     release(resourceFileUrls(snapshot))
-    handleSaveResponse(data)
+    handleSaveResponse({
+      nameConfirmations: result.nameConfirmations as NameConfirmation[] | undefined,
+      rosterForPairing: result.rosterForPairing as RosterPairingOption[] | undefined,
+      cachedSheetParses: result.cachedSheetParses as Record<string, unknown> | undefined,
+    })
     return "Imported resources successfully"
   }
 
@@ -323,7 +318,6 @@ export default function ImportMeetResourcesButton({
     setPairSelections({})
     setCachedSheetParses(null)
     setConfirmError(null)
-    router.refresh()
   }
 
   async function handleConfirmSubmit(e: React.FormEvent) {

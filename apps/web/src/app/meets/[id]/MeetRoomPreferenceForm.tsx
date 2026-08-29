@@ -6,6 +6,7 @@ import Modal, { ModalFooter } from "@/components/Modal"
 import { MeetFormCustomQuestionFields } from "@/components/MeetFormCustomQuestions"
 import { roomWindowStatus } from "@/lib/meet-rooms"
 import { type MeetSignupQuestion } from "@/lib/meet-signup"
+import { saveRoomPreference } from "./MeetRoomPreferenceForm.actions"
 
 export type MeetRoomPreferenceInitial = {
   preferredAthleteIds: string[]
@@ -102,25 +103,15 @@ export default function MeetRoomPreferenceForm({
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(`/api/meets/${meetId}/rooms/preference`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          preferredAthleteIds: selected,
-          excludedAthleteIds: excluded,
-          notes,
-          answers,
-        }),
+      await saveRoomPreference(meetId, {
+        preferredAthleteIds: selected,
+        excludedAthleteIds: excluded,
+        notes,
+        answers,
       })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Failed to save preferences")
-        return
-      }
       if (!pageMode) setOpen(false)
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong")
     } finally {
       setLoading(false)
     }

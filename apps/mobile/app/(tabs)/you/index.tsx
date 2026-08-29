@@ -1,6 +1,7 @@
-import { Redirect, useFocusEffect, useRouter } from "expo-router"
-import { useCallback, useMemo, useState } from "react"
+import { Redirect, useRouter } from "expo-router"
+import { useMemo } from "react"
 import { Alert, Linking, Pressable, StyleSheet, Text, View } from "react-native"
+import { useQuery } from "@tanstack/react-query"
 import { formatRoleLabel, STAFF_TITLE_LABELS, type IconName } from "@swimbuzz/shared"
 import { LoadingBlock, Screen, ScrollView, usePalette } from "@swimbuzz/ui"
 import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
@@ -23,64 +24,41 @@ export default function YouScreen() {
   const c = usePalette()
   const styles = useMemo(() => makeYouStyles(c), [c])
   const tabBarPad = useTabBarScrollPadding()
-  const [athleteId, setAthleteId] = useState<string | null>(null)
-  const [swimCloudId, setSwimCloudId] = useState<number | null>(null)
-  const [loadedForEmail, setLoadedForEmail] = useState<string | null>(null)
+  const email = user?.email?.trim().toLowerCase() ?? null
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!user) return
-      if (!user.email) {
-        setAthleteId(null)
-        setSwimCloudId(null)
-        setLoadedForEmail("")
-        return
-      }
-      const email = user.email.trim().toLowerCase()
-      let active = true
-      void api
-        .listAthletes()
-        .then(async (athletes) => {
-          const match = athletes.find(
-            (athlete) => athlete.user?.email?.trim().toLowerCase() === email
-          )
-          if (!match) {
-            if (active) {
-              setAthleteId(null)
-              setSwimCloudId(null)
-              setLoadedForEmail(email)
-            }
-            return
-          }
-          const detail = await api.getAthlete(match.id)
-          if (!active) return
-          setAthleteId(match.slug ?? match.id)
-          const raw = detail.swimCloudId
-          const parsed =
-            typeof raw === "number"
-              ? raw
-              : typeof raw === "string" && raw.trim()
-                ? Number(raw)
-                : null
-          setSwimCloudId(parsed != null && Number.isFinite(parsed) ? parsed : null)
-          setLoadedForEmail(email)
-        })
-        .catch(() => {
-          if (active) {
-            setAthleteId(null)
-            setSwimCloudId(null)
-            setLoadedForEmail(email)
-          }
-        })
-      return () => {
-        active = false
-      }
-    }, [user, user?.email])
+  // Shares the ["athletes"] / ["athlete", id] cache with the roster screens —
+  // if the roster was already loaded, this resolves instantly.
+  const { data: athletes = [], isPending: athletesPending } = useQuery({
+    queryKey: ["athletes"],
+    queryFn: () => api.listAthletes(),
+    enabled: Boolean(email),
+  })
+  const match = useMemo(
+    () =>
+      email
+        ? athletes.find((athlete) => athlete.user?.email?.trim().toLowerCase() === email)
+        : undefined,
+    [athletes, email]
   )
+  const { data: athleteDetail, isPending: detailPending } = useQuery({
+    queryKey: ["athlete", match?.id],
+    queryFn: () => api.getAthlete(match!.id),
+    enabled: Boolean(match?.id),
+  })
 
-  const profileReady = Boolean(
-    user && (user.email ? loadedForEmail === user.email.trim().toLowerCase() : loadedForEmail === "")
-  )
+  const athleteId = match ? (match.slug ?? match.id) : null
+  const swimCloudId = (() => {
+    const raw = athleteDetail?.swimCloudId
+    const parsed =
+      typeof raw === "number" ? raw : typeof raw === "string" && raw.trim() ? Number(raw) : null
+    return parsed != null && Number.isFinite(parsed) ? parsed : null
+  })()
+
+  const profileReady = !user
+    ? false
+    : !email
+      ? true
+      : !athletesPending && (!match || !detailPending)
 
   async function handleSignOut() {
     Alert.alert(

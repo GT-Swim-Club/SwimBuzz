@@ -1,5 +1,4 @@
 import Link from "next/link"
-import { formatDateRange } from "@/lib/utils"
 import { RelativeDateRange } from "@/components/RelativeDate"
 import EditMeetButton from "./EditMeetButton"
 import { type MeetFormState } from "./MeetFields"
@@ -18,10 +17,10 @@ export default function MeetGalleryCard({
     slug: string | null
     name: string
     location: string | null
-    startDate: Date
-    startTime: string | null
+    startsAt: Date
+    endsAt: Date | null
+    hasStartTime: boolean
     timeZone: string
-    endDate: Date | null
     school: string | null
     iconUrl: string | null
     bannerUrl: string | null
@@ -61,12 +60,10 @@ export default function MeetGalleryCard({
             </svg>
           </div>
         )}
-        {upcoming && (
+        {upcoming && meet.hasStartTime && (
           <span className="absolute top-2 right-2">
             <MeetCountdown
-              startDate={meet.startDate}
-              startTime={meet.startTime}
-              timeZone={meet.timeZone}
+              startsAt={meet.startsAt}
               upcoming
               className="backdrop-blur-sm"
             />
@@ -90,9 +87,9 @@ export default function MeetGalleryCard({
             </div>
             <p className="text-xs text-foreground-secondary dark:text-foreground-secondary mt-1">
               <RelativeDateRange
-                start={meet.startDate}
-                end={meet.endDate}
-                absolute={formatDateRange(meet.startDate, meet.endDate)}
+                startsAt={meet.startsAt}
+                endsAt={meet.endsAt}
+                timeZone={meet.timeZone}
               />
             </p>
           </div>

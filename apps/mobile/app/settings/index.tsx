@@ -1,7 +1,8 @@
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Alert, Platform, Switch, View } from "react-native"
 import { Redirect, useRouter } from "expo-router"
 import { useFocusEffect } from "expo-router"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   DEFAULT_NOTIFICATION_PREFERENCES,
   NOTIFICATION_PREFERENCE_META,
@@ -54,10 +55,8 @@ export default function SettingsScreen() {
     setDefaultView,
     setDefaultPracticesView,
   } = useViewPreferences()
+  const queryClient = useQueryClient()
   const [pushStatus, setPushStatus] = useState<string | null>(null)
-  const [pageLoading, setPageLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [ownAthlete, setOwnAthlete] = useState<OwnAthlete | null>(null)
   const [nicknames, setNicknames] = useState("")
   const [swimCloudId, setSwimCloudId] = useState("")
   const [savingAthlete, setSavingAthlete] = useState(false)
@@ -67,58 +66,69 @@ export default function SettingsScreen() {
   const lastSaved = useRef(preferences)
   const requestGen = useRef<Partial<Record<NotificationPreferenceKey, number>>>({})
 
-  const load = useCallback(async () => {
-    if (!user) return
-    setError(null)
-    try {
-      const [athletes, prefRes] = await Promise.all([
-        api.listAthletes(),
-        api.getNotificationPreferences().catch(() => null),
-      ])
+  const email = user?.email?.trim().toLowerCase() ?? null
 
-      if (prefRes?.preferences) {
-        const next = {
-          ...DEFAULT_NOTIFICATION_PREFERENCES,
-          ...prefRes.preferences,
-        }
-        lastSaved.current = next
-        setPreferences(next)
-      }
+  // Shares the ["athletes"] / ["athlete", id] / ["notification-preferences"]
+  // cache with (tabs)/settings.tsx, the roster screens, and you/index.tsx.
+  const {
+    data: athletes = [],
+    isPending: athletesPending,
+    error: athletesError,
+  } = useQuery({
+    queryKey: ["athletes"],
+    queryFn: () => api.listAthletes(),
+    enabled: Boolean(email),
+  })
+  const match = useMemo(
+    () =>
+      email
+        ? athletes.find((a) => a.user?.email?.trim().toLowerCase() === email)
+        : undefined,
+    [athletes, email]
+  )
+  const { data: athleteDetail, isPending: athleteDetailPending } = useQuery({
+    queryKey: ["athlete", match?.id],
+    queryFn: () => api.getAthlete(match!.id),
+    enabled: Boolean(match?.id),
+  })
+  const { data: prefRes, isPending: prefsPending } = useQuery({
+    queryKey: ["notification-preferences"],
+    queryFn: () => api.getNotificationPreferences(),
+  })
 
-      const email = user.email?.trim().toLowerCase()
-      const match = email
-        ? athletes.find(
-            (a) => a.user?.email?.trim().toLowerCase() === email
-          )
-        : null
+  const pageLoading =
+    (Boolean(email) && (athletesPending || (Boolean(match) && athleteDetailPending))) ||
+    prefsPending
+  const error = athletesError instanceof Error ? athletesError.message : null
 
-      if (match) {
-        const detail = await api.getAthlete(match.id)
-        const nextNicknames = Array.isArray(detail.nicknames)
-          ? (detail.nicknames as string[])
-          : []
-        const nextSwimCloud =
-          detail.swimCloudId == null || detail.swimCloudId === ""
-            ? ""
-            : String(detail.swimCloudId)
-        setOwnAthlete({
-          id: String(detail.id ?? match.id),
-          nicknames: nextNicknames,
-          swimCloudId: nextSwimCloud,
-        })
-        setNicknames(nextNicknames.join(", "))
-        setSwimCloudId(nextSwimCloud)
-      } else {
-        setOwnAthlete(null)
-        setNicknames("")
-        setSwimCloudId("")
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load settings")
-    } finally {
-      setPageLoading(false)
+  const ownAthlete: OwnAthlete | null = useMemo(() => {
+    if (!match || !athleteDetail) return null
+    const nextNicknames = Array.isArray(athleteDetail.nicknames)
+      ? (athleteDetail.nicknames as string[])
+      : []
+    const nextSwimCloud =
+      athleteDetail.swimCloudId == null || athleteDetail.swimCloudId === ""
+        ? ""
+        : String(athleteDetail.swimCloudId)
+    return {
+      id: String(athleteDetail.id ?? match.id),
+      nicknames: nextNicknames,
+      swimCloudId: nextSwimCloud,
     }
-  }, [user])
+  }, [match, athleteDetail])
+
+  useEffect(() => {
+    setNicknames(ownAthlete?.nicknames.join(", ") ?? "")
+    setSwimCloudId(ownAthlete?.swimCloudId ?? "")
+  }, [ownAthlete])
+
+  useEffect(() => {
+    if (prefRes?.preferences) {
+      const next = { ...DEFAULT_NOTIFICATION_PREFERENCES, ...prefRes.preferences }
+      lastSaved.current = next
+      setPreferences(next)
+    }
+  }, [prefRes])
 
   useFocusEffect(
     useCallback(() => {
@@ -127,8 +137,7 @@ export default function SettingsScreen() {
         const result = await registerForPushNotifications()
         setPushStatus(result)
       })()
-      void load()
-    }, [user, load])
+    }, [user])
   )
 
   if (!loading && !user) return <Redirect href="/sign-in" />
@@ -152,7 +161,8 @@ export default function SettingsScreen() {
         "Saved",
         "Profile changes submitted. Nickname and SwimCloud updates may need coach approval."
       )
-      await load()
+      await queryClient.invalidateQueries({ queryKey: ["athlete", ownAthlete.id] })
+      await queryClient.invalidateQueries({ queryKey: ["athletes"] })
     } catch (err) {
       Alert.alert(
         "Could not save profile",
@@ -179,6 +189,7 @@ export default function SettingsScreen() {
           ...lastSaved.current,
           [key]: res.preferences[key],
         }
+        queryClient.setQueryData(["notification-preferences"], res)
       } catch (err) {
         if (requestGen.current[key] !== gen) return
         setPreferences((prev) => ({

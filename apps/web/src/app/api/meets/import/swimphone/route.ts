@@ -167,7 +167,7 @@ export async function applySwimphoneImportJob(jobId: string, userId: string) {
     throw new Error("Could not read meet name from SwimPhone page")
   }
 
-  const meetDate = meet?.startDate ?? resolveMeetDate(scraped.meet_date)
+  const meetDate = meet?.startsAt ?? resolveMeetDate(scraped.meet_date)
   if (!meetDate) {
     throw new Error("Could not read meet date from SwimPhone page")
   }
@@ -202,7 +202,7 @@ export async function applySwimphoneImportJob(jobId: string, userId: string) {
   const result = {
     ...summary,
     meetName,
-    meetDate: (meet?.startDate ?? meetDate).toISOString?.() ?? scraped.meet_date,
+    meetDate: (meet?.startsAt ?? meetDate).toISOString?.() ?? scraped.meet_date,
     captchaLimited: scraped.captcha_limited ?? false,
     incompleteRelays: scraped.incomplete_relays ?? [],
   }

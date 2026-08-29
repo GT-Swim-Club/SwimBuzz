@@ -1,3 +1,5 @@
+import { zonedDayKey } from "./timezone"
+
 export type NotificationPreferenceKey =
   | "practicePublished"
   | "meetSignupOpen"
@@ -57,21 +59,74 @@ export const NOTIFICATION_PREFERENCE_META: {
   },
 ]
 
+/**
+ * Compact date range with no redundant month/year repetition: "Sep 4-24, 2026" when
+ * both ends share a month, "Aug 31-Sep 1, 2026" when they share only a year, and the
+ * full "Dec 30, 2025 – Jan 2, 2026" only when the year actually differs.
+ */
+export function formatCompactDateRange(start: Date, end: Date, timeZone: string): string {
+  const monthDay = (d: Date) => d.toLocaleDateString(undefined, { month: "short", day: "numeric", timeZone })
+  const full = (d: Date) => d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric", timeZone })
+  const year = (d: Date) => d.toLocaleDateString(undefined, { year: "numeric", timeZone })
+  const month = (d: Date) => d.toLocaleDateString(undefined, { month: "short", timeZone })
+  const day = (d: Date) => d.toLocaleDateString(undefined, { day: "numeric", timeZone })
+
+  if (full(start) === full(end)) return full(start)
+  const sameYear = year(start) === year(end)
+  const sameMonth = sameYear && month(start) === month(end)
+  if (sameMonth) return `${month(start)} ${day(start)}-${day(end)}, ${year(start)}`
+  if (sameYear) return `${monthDay(start)}-${monthDay(end)}, ${year(start)}`
+  return `${full(start)} – ${full(end)}`
+}
+
 export function formatMeetDateRange(
   startDate: string | Date,
-  endDate?: string | Date | null
+  endDate: string | Date | null | undefined,
+  timeZone: string
 ): string {
   const start = new Date(startDate)
   const end = endDate ? new Date(endDate) : null
-  const opts: Intl.DateTimeFormatOptions = {
-    month: "short",
+  if (!end) {
+    return start.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric", timeZone })
+  }
+  return formatCompactDateRange(start, end, timeZone)
+}
+
+/**
+ * Full, unabbreviated date range for hover/tap detail — never compacted, e.g.
+ * "August 21, 2026 – August 24, 2026" (or just "August 21, 2026" for a single day).
+ * The visible page text uses the compact `formatCompactDateRange`/`formatMeetDateRange`
+ * above; hover detail should always spell out both ends in full.
+ */
+export function formatFullDateRange(start: Date, end: Date, timeZone: string): string {
+  const full = (d: Date) => d.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric", timeZone })
+  if (full(start) === full(end)) return full(start)
+  return `${full(start)} – ${full(end)}`
+}
+
+export function formatMeetDateRangeFull(
+  startDate: string | Date,
+  endDate: string | Date | null | undefined,
+  timeZone: string
+): string {
+  const start = new Date(startDate)
+  const end = endDate ? new Date(endDate) : null
+  if (!end) {
+    return start.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric", timeZone })
+  }
+  return formatFullDateRange(start, end, timeZone)
+}
+
+/** "August 17, 2026" for an instant, formatted in `timeZone`. */
+export function formatFullDate(value: string | Date, timeZone: string): string {
+  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(date.getTime())) return ""
+  return date.toLocaleDateString(undefined, {
+    month: "long",
     day: "numeric",
     year: "numeric",
-  }
-  if (!end || start.toDateString() === end.toDateString()) {
-    return start.toLocaleDateString(undefined, opts)
-  }
-  return `${start.toLocaleDateString(undefined, opts)} – ${end.toLocaleDateString(undefined, opts)}`
+    timeZone,
+  })
 }
 
 export function formatClockTime(value: string | Date): string {
@@ -152,9 +207,9 @@ export function relativeDayLabel(dayKey: string, todayKey: string): string | nul
   return null
 }
 
-/** Relative label for a date-only value (practice/meet date), which is stored at UTC midnight. */
-export function relativeEventDayLabel(value: Date | string, todayKey: string): string | null {
-  return relativeDayLabel(utcDayKey(value), todayKey)
+/** Relative label for a scheduled-event instant (Practice/Meet startsAt), evaluated in its own zone. */
+export function relativeEventDayLabel(value: Date | string, timeZone: string, todayKey: string): string | null {
+  return relativeDayLabel(zonedDayKey(value, timeZone), todayKey)
 }
 
 /** Relative label for a true instant (createdAt/closeAt/recordedAt), rendered in the local zone. */

@@ -1,11 +1,8 @@
 import { forwardRef } from "react"
 import { StyleSheet, Text, View } from "react-native"
 import {
-  formatClockTimeRange,
-  formatPracticeShareDate,
+  formatZonedInstantRange,
   isHtmlEmpty,
-  zoneAbbreviation,
-  zonedTimeToUtc,
   type PracticeShareSet,
 } from "@swimbuzz/shared"
 import { Chip, usePalette } from "@swimbuzz/ui"
@@ -27,9 +24,8 @@ export const PracticeExportCapture = forwardRef<
   {
     title: string
     showDraft: boolean
-    dateIso: string | null
-    startTime: string
-    endTime: string
+    startsAt: string
+    endsAt: string
     timeZone: string
     location: string
     focus: string | null
@@ -38,18 +34,14 @@ export const PracticeExportCapture = forwardRef<
     totalDistance: number
   }
 >(function PracticeExportCapture(
-  { title, showDraft, dateIso, startTime, endTime, timeZone, location, focus, tags, sets, totalDistance },
+  { title, showDraft, startsAt, endsAt, timeZone, location, focus, tags, sets, totalDistance },
   ref
 ) {
   const c = usePalette()
   const styles = makeStyles(c)
 
   const hasFocus = Boolean(focus && !isHtmlEmpty(focus))
-  const hasTime = Boolean(startTime || endTime)
-  const dateForZone = dateIso ? dateIso.slice(0, 10) : new Date().toISOString().slice(0, 10)
-  const zoneAbbrev = hasTime
-    ? zoneAbbreviation(timeZone, zonedTimeToUtc(dateForZone, startTime || endTime, timeZone))
-    : null
+  const range = formatZonedInstantRange(startsAt, endsAt, timeZone)
 
   return (
     <View ref={ref} style={styles.root} collapsable={false}>
@@ -65,10 +57,7 @@ export const PracticeExportCapture = forwardRef<
         <View style={styles.metaRow}>
           <Icon name="calendar" size={16} color={c.textSecondary} />
           <Text style={styles.metaText}>
-            {dateIso ? formatPracticeShareDate(dateIso) : "No date"}
-            {hasTime
-              ? ` · ${formatClockTimeRange(startTime, endTime)}${zoneAbbrev ? ` ${zoneAbbrev}` : ""}`
-              : ""}
+            {range.date} · {range.time} {range.abbrev}
           </Text>
         </View>
         {location || totalDistance > 0 ? (

@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect, useState, type ReactNode } from "react"
+import { useEffect, useState, useTransition, type ReactNode } from "react"
 import { createPortal } from "react-dom"
-import { useRouter } from "next/navigation"
 import DontReloadNotice from "@/components/DontReloadNotice"
+import { deleteRelayTeam, saveRelayTeam } from "./meet-relay.actions"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import type { SheetEntry } from "@/lib/meet-sheet-summary"
 import { normalizeEventName } from "@/lib/swim-parse"
@@ -152,9 +152,9 @@ function RelayModal({
   }
   rosterOnly?: boolean
 }) {
-  const router = useRouter()
   const [form, setForm] = useState(initial)
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const loading = isPending
   const [error, setError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
 
@@ -171,20 +171,17 @@ function RelayModal({
 
   const swimmerOptions = relayAthleteOptions(athletes, form.gender, form.legs)
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (new Set(form.legs).size !== 4) {
       setError("Pick four different swimmers")
       return
     }
 
-    setLoading(true)
     setError(null)
-    try {
-      const res = await fetch(`/api/meets/${meetId}/relays`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+    startTransition(async () => {
+      try {
+        await saveRelayTeam(meetId, {
           event: form.event,
           relayLetter: form.relayLetter || null,
           relayRound: form.relayRound,
@@ -195,48 +192,32 @@ function RelayModal({
             splitTime: form.legSplits[i]?.trim() || undefined,
           })),
           resultTime: form.resultTime || undefined,
-          resultPlace: form.resultPlace.trim() || undefined,
+          resultPlace: form.resultPlace.trim() ? Number(form.resultPlace.trim()) : undefined,
           rosterOnly,
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Failed to save relay")
-        return
+        })
+        onClose()
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to save relay")
       }
-      onClose()
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
-  async function handleDelete() {
+  function handleDelete() {
     if (!deleteParams || !confirm("Remove this relay from saved results?")) return
-    setLoading(true)
     setError(null)
-    try {
-      const q = new URLSearchParams({ event: deleteParams.event })
-      if (deleteParams.relayLetter) q.set("relayLetter", deleteParams.relayLetter)
-      if (deleteParams.relayRound) q.set("relayRound", deleteParams.relayRound)
-      if (deleteParams.gender) q.set("gender", deleteParams.gender)
-      const res = await fetch(`/api/meets/${meetId}/relays?${q}`, {
-        method: "DELETE",
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Failed to delete relay")
-        return
+    startTransition(async () => {
+      try {
+        await deleteRelayTeam(meetId, {
+          event: deleteParams.event,
+          relayLetter: deleteParams.relayLetter,
+          relayRound: deleteParams.relayRound,
+          gender: deleteParams.gender,
+        })
+        onClose()
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to delete relay")
       }
-      onClose()
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   if (!mounted) return null

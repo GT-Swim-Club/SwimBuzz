@@ -93,10 +93,11 @@ async function QualifiersContent({
   return (
     <ViewNavigationProvider>
       <div className="space-y-4">
+        <h1 className="sr-only">Nationals Qualifiers</h1>
         <section className="flex flex-wrap items-center gap-3">
-          <h1 className="text-3xl font-semibold text-foreground">
-            Nationals Qualifiers <span className="text-lg font-medium text-foreground-secondary">({qualifiers.length})</span>
-          </h1>
+          <span className="text-lg font-medium text-foreground-secondary">
+            {qualifiers.length} qualifier{qualifiers.length === 1 ? "" : "s"}
+          </span>
           <QualifierFilters seasons={seasons} />
           {set ? (
             <StandardsTableModal

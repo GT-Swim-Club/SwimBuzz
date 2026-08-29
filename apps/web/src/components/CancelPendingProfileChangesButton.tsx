@@ -1,44 +1,33 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useTransition } from "react"
+import { cancelPendingProfileChanges } from "./athlete-profile.actions"
 
 export default function CancelPendingProfileChangesButton({
   athleteId,
 }: {
   athleteId: string
 }) {
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const loading = isPending
 
-  async function cancel() {
-    setLoading(true)
+  function cancel() {
     setError(null)
-    try {
-      const res = await fetch(`/api/athletes/${athleteId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cancelPendingProfileChanges: true }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Failed to cancel request")
-        return
+    startTransition(async () => {
+      try {
+        await cancelPendingProfileChanges(athleteId)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to cancel request")
       }
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   return (
     <div>
       <button
         type="button"
-        onClick={() => void cancel()}
+        onClick={cancel}
         disabled={loading}
         className="text-sm text-foreground-secondary underline-offset-2 hover:text-foreground hover:underline disabled:opacity-50"
       >

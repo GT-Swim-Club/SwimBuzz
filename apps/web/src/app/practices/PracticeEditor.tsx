@@ -3,9 +3,9 @@
 import { type PointerEvent, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import RichTextField from "@/components/RichTextField"
-import { DatePicker, TimePicker } from "@/components/CustomDateTimePicker"
+import { DatePicker, TimePicker, TimeZonePicker } from "@/components/CustomDateTimePicker"
 import { useViewerTimeZone } from "@/components/ZonedTime"
-import { DEFAULT_TIME_ZONE, zoneAbbreviation, zoneDisplayName } from "@swimbuzz/shared"
+import { DEFAULT_TIME_ZONE, getViewerTimeZone } from "@swimbuzz/shared"
 import { PRACTICE_EDIT_IDLE_TIMEOUT_MS, PRACTICE_EDIT_LOCK_HEARTBEAT_MS, PRACTICE_EDIT_LOCK_TOKEN_HEADER, type PracticeEditLockInfo } from "@/lib/practice-edit-lock-shared"
 import { broadcastPracticeEditLockChanged } from "@/lib/practice-edit-lock-client"
 import { practicePath } from "@/lib/slug"
@@ -142,12 +142,13 @@ export default function PracticeEditor({
 }) {
   const router = useRouter()
   const viewerTimeZone = useViewerTimeZone()
-  const timeZoneLabel = `${zoneDisplayName(viewerTimeZone)} (${zoneAbbreviation(viewerTimeZone)})`
   const [error, setError] = useState<string | null>(null)
   const [setPendingDeletion, setSetPendingDeletion] = useState<{ dragId: string; title: string } | null>(null)
   const [form, setForm] = useState<PracticeFormState>(() =>
     ensureSetDragIds(normalizePracticeTimes(initial ?? emptyPractice))
   )
+  const isCreateRef = useRef(!initial)
+  const zoneSeededRef = useRef(false)
   const [isDirty, setIsDirty] = useState(false)
   const [persistedId, setPersistedId] = useState<string | null>(practiceId ?? null)
   const [lockToken, setLockToken] = useState<string | null>(editLockToken ?? null)
@@ -216,6 +217,16 @@ export default function PracticeEditor({
       setAutosaveState("idle")
     }
   }, [form])
+
+  useEffect(() => {
+    // Seed the zone picker from the browser's zone once, on create only, after hydration
+    // resolves the real viewer zone (viewerTimeZone starts at DEFAULT_TIME_ZONE to match SSR).
+    // Editing an existing practice must never touch its stored zone this way.
+    if (!isCreateRef.current || zoneSeededRef.current || viewerTimeZone === DEFAULT_TIME_ZONE) return
+    zoneSeededRef.current = true
+    updateForm((current) => ({ ...current, timeZone: viewerTimeZone }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewerTimeZone])
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -830,6 +841,10 @@ export default function PracticeEditor({
   const missingStartTime = !form.startTime.trim()
   const missingEndTime = !form.endTime.trim()
   const missingLocation = !form.location.trim()
+  const endBeforeStart =
+    !missingStartTime &&
+    !missingEndTime &&
+    (clockToMinutes(form.endTime) ?? 0) < (clockToMinutes(form.startTime) ?? 0)
   const canSave = isPracticeSaveable(form)
   const waitingForAutosave = !persistedId || isDirty || autosaveState === "saving"
   const canPublishOrDraft = canSave && !waitingForAutosave
@@ -918,13 +933,11 @@ export default function PracticeEditor({
                       ...current,
                       startTime: value,
                       endTime: value ? endOnOrAfterStart(value, current.endTime) : current.endTime,
-                      timeZone: value ? viewerTimeZone : current.timeZone,
                     }))
                   }
                   ariaLabel="Practice start time"
                   hasError={missingStartTime}
                   clearable={false}
-                  zoneLabel={timeZoneLabel}
                 />
               </div>
               <span className="shrink-0 text-sm text-foreground-tertiary">to</span>
@@ -938,17 +951,31 @@ export default function PracticeEditor({
                         current.startTime && value && (clockToMinutes(value) ?? 0) < (clockToMinutes(current.startTime) ?? 0)
                           ? endOnOrAfterStart(current.startTime)
                           : value,
-                      timeZone: value ? viewerTimeZone : current.timeZone,
                     }))
                   }
                   ariaLabel="Practice end time"
-                  hasError={missingEndTime}
+                  hasError={missingEndTime || endBeforeStart}
                   clearable={false}
                   min={form.startTime || undefined}
                 />
               </div>
             </div>
           </div>
+
+          <div className="flex min-w-0 items-center gap-1.5">
+            <InfoIcon kind="globe" />
+            <label className="sr-only" htmlFor="practice-timezone">Practice time zone</label>
+            <div id="practice-timezone" className="min-w-0 flex-1">
+              <TimeZonePicker
+                value={form.timeZone}
+                onChange={(value) => updateForm((current) => ({ ...current, timeZone: value }))}
+                ariaLabel="Practice time zone"
+              />
+            </div>
+          </div>
+          {endBeforeStart && (
+            <p className="text-xs text-red-600 dark:text-red-400">End time must be after start time.</p>
+          )}
 
           <div className="flex min-w-0 items-center gap-1.5">
             <InfoIcon kind="location" />

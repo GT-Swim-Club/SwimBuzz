@@ -1,15 +1,13 @@
 import { Pressable, StyleSheet, Text, View } from "react-native"
 import type { PracticeSummary } from "@swimbuzz/shared"
-import { formatClockTimeRangeInViewerZone } from "@swimbuzz/shared"
+import { formatFullDate } from "@swimbuzz/shared"
 import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
 import { usePalette } from "@swimbuzz/ui"
 import { useMemo } from "react"
 import { Icon } from "./Icon"
 import { RelativeDateText } from "./RelativeDateText"
-import {
-  formatPracticeDate,
-  practiceYardage,
-} from "../lib/practice-calendar"
+import { ZonedTimeText } from "./ZonedTimeText"
+import { practiceYardage } from "../lib/practice-calendar"
 
 export function PracticeCard({
   practice,
@@ -65,31 +63,23 @@ export function PracticeCard({
         {showDate ? (
           <View style={styles.metaRow}>
             <Icon color={c.textTertiary} name="calendar" size={14} />
-            {practice.date ? (
-              <RelativeDateText
-                value={practice.date}
-                kind="event"
-                absolute={formatPracticeDate(practice.date)}
-                style={styles.metaText}
-              />
-            ) : (
-              <Text style={styles.metaText}>No date</Text>
-            )}
+            <RelativeDateText
+              value={practice.startsAt}
+              kind="event"
+              timeZone={practice.timeZone}
+              absolute={formatFullDate(practice.startsAt, practice.timeZone)}
+              style={styles.metaText}
+            />
           </View>
         ) : null}
         <View style={styles.metaRow}>
           <Icon color={c.textTertiary} name="clock" size={14} />
-          <Text style={styles.metaText}>
-            {(() => {
-              const zoned = formatClockTimeRangeInViewerZone(
-                practice.date ?? new Date().toISOString().slice(0, 10),
-                practice.startTime,
-                practice.endTime,
-                practice.timeZone
-              )
-              return `${zoned.text} ${zoned.abbrev}`
-            })()}
-          </Text>
+          <ZonedTimeText
+            startsAt={practice.startsAt}
+            endsAt={practice.endsAt}
+            timeZone={practice.timeZone}
+            style={styles.metaText}
+          />
         </View>
         {practice.location ? (
           <View style={styles.metaRow}>

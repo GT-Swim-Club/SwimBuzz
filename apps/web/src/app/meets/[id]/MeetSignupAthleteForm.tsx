@@ -14,6 +14,7 @@ import {
 } from "@/lib/meet-signup"
 import { formatDisplayTime } from "@/lib/utils"
 import { RelativeInstantTime } from "@/components/RelativeDate"
+import { submitMeetSignup, withdrawMeetSignup } from "./MeetSignupAthleteForm.actions"
 
 export type MeetSignupAthleteInitial = {
   events: string[]
@@ -43,7 +44,6 @@ export default function MeetSignupAthleteForm({
   formCloseAt,
   formWithdrawUntil,
   isCoach,
-  isStaff = false,
   selfAthleteId,
   athletes,
   entriesByAthleteId,
@@ -69,8 +69,6 @@ export default function MeetSignupAthleteForm({
   formCloseAt: string | null
   formWithdrawUntil: string | null
   isCoach: boolean
-  /** Real staff role — send athleteId on API even during athlete preview. */
-  isStaff?: boolean
   selfAthleteId: string | null
   athletes: AthleteOption[]
   entriesByAthleteId: Record<string, MeetSignupAthleteInitial>
@@ -94,11 +92,10 @@ export default function MeetSignupAthleteForm({
   const [confirmWithdrawOpen, setConfirmWithdrawOpen] = useState(false)
   const [withdrawError, setWithdrawError] = useState<string | null>(null)
 
-  const canEdit = !isStaff && (isCoach || windowOpen)
+  const canEdit = isCoach || windowOpen
   const initial = athleteId ? entriesByAthleteId[athleteId] ?? null : null
   const selectedAthlete = athletes.find((a) => a.id === athleteId) ?? null
   const gender = selectedAthlete?.gender ?? null
-  const previewOnly = isStaff && !isCoach
 
   useEffect(() => {
     if (!open) return
@@ -198,10 +195,6 @@ export default function MeetSignupAthleteForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (isStaff) {
-      setError("Coaches cannot edit athlete sign-ups.")
-      return
-    }
     if (!athleteId) {
       setError(isCoach ? "Select an athlete" : "No athlete profile")
       return
@@ -218,55 +211,39 @@ export default function MeetSignupAthleteForm({
       for (const event of individual) {
         normalizedTimes[event] = normalizeSignupEntryTime(entryTimes[event] ?? "")
       }
-      const res = await fetch(`/api/meets/${meetId}/signup/entry`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          events,
-          entryTimes: normalizedTimes,
-          notes,
-          answers,
-        }),
+      await submitMeetSignup(meetId, {
+        events,
+        entryTimes: normalizedTimes,
+        notes,
+        answers,
       })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Failed to save sign-up")
-        return
-      }
       if (pageMode) {
         router.push(`/meets/${meetId}`)
       } else {
         setOpen(false)
-        router.refresh()
       }
-    } catch {
-      setError("Something went wrong")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save sign-up")
     } finally {
       setLoading(false)
     }
   }
 
   async function handleWithdraw() {
-    if (!athleteId || isStaff) return
+    if (!athleteId) return
     setLoading(true)
     setWithdrawError(null)
     setError(null)
     try {
-      const res = await fetch(`/api/meets/${meetId}/signup/entry`, { method: "DELETE" })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        setWithdrawError(data.error ?? "Failed to drop")
-        return
-      }
+      await withdrawMeetSignup(meetId)
       setConfirmWithdrawOpen(false)
       if (pageMode) {
         router.push(`/meets/${meetId}`)
       } else {
         setOpen(false)
-        router.refresh()
       }
-    } catch {
-      setWithdrawError("Something went wrong")
+    } catch (err) {
+      setWithdrawError(err instanceof Error ? err.message : "Failed to drop")
     } finally {
       setLoading(false)
     }
@@ -302,15 +279,10 @@ export default function MeetSignupAthleteForm({
 
   return (
     <div className="space-y-2">
-      {previewOnly && (
-        <p className="text-sm text-amber-700 dark:text-amber-400">
-          Athlete view preview — coaches cannot edit sign-ups.
-        </p>
-      )}
       {!pageMode && !isCoach && (
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            {canEdit ? (
+            {canEdit && (
               <button
                 type="button"
                 onClick={() => setOpen(true)}
@@ -318,16 +290,8 @@ export default function MeetSignupAthleteForm({
               >
                 {selfEntry ? "Edit Sign-Up" : "Sign Up"}
               </button>
-            ) : previewOnly && selfEntry ? (
-              <button
-                type="button"
-                onClick={() => setOpen(true)}
-                className="bg-background hover:bg-fill text-sm px-4 py-2 rounded-lg border border-border transition-colors"
-              >
-                View Sign-Up
-              </button>
-            ) : null}
-            {!canEdit && !previewOnly && canWithdraw && selfEntry && (
+            )}
+            {!canEdit && canWithdraw && selfEntry && (
               <button
                 type="button"
                 onClick={() => {
@@ -341,7 +305,7 @@ export default function MeetSignupAthleteForm({
               </button>
             )}
           </div>
-          {!previewOnly && !canEdit && (
+          {!canEdit && (
             <p className="text-sm text-amber-700 dark:text-amber-400">
               {windowReason === "Sign-ups are closed for this meet." ? null : windowReason}
               {!windowOpen &&
@@ -419,7 +383,7 @@ export default function MeetSignupAthleteForm({
         onSubmit={handleSubmit}
         footer={
           <ModalFooter className="flex-wrap">
-            {initial && !previewOnly && (isCoach || canWithdraw) && (
+            {initial && (isCoach || canWithdraw) && (
               <button
                 type="button"
                 onClick={() => {
@@ -441,17 +405,15 @@ export default function MeetSignupAthleteForm({
               disabled={loading}
               className="bg-background hover:bg-fill flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium disabled:opacity-50"
             >
-              {pageMode ? "Back to meet" : previewOnly || (!canEdit && !isCoach) ? "Close" : "Cancel"}
+              {pageMode ? "Back to meet" : !canEdit && !isCoach ? "Close" : "Cancel"}
             </button>
-            {!previewOnly && (
-              <button
-                type="submit"
-                disabled={submitDisabled || (!isCoach && !canEdit)}
-                className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
-              >
-                {loading ? "Saving…" : initial ? "Update sign-up" : "Submit sign-up"}
-              </button>
-            )}
+            <button
+              type="submit"
+              disabled={submitDisabled || (!isCoach && !canEdit)}
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
+            >
+              {loading ? "Saving…" : initial ? "Update sign-up" : "Submit sign-up"}
+            </button>
           </ModalFooter>
         }
       >

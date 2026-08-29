@@ -1,6 +1,12 @@
 import * as SecureStore from "expo-secure-store"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import { createApiClient } from "@swimbuzz/api"
 import type { AuthTokens, SessionUser } from "@swimbuzz/shared"
+import { clearPersistedQueryCache } from "./query"
+
+// Kept as a literal (not imported from view-preferences.tsx) to avoid a
+// require cycle — that module imports `api` from this file.
+const VIEW_PREFERENCES_KEY = "swimbuzz.viewPreferences"
 
 const ACCESS_KEY = "swimbuzz.accessToken"
 const REFRESH_KEY = "swimbuzz.refreshToken"
@@ -51,6 +57,11 @@ export async function clearSession() {
   await SecureStore.deleteItemAsync(ACCESS_KEY)
   await SecureStore.deleteItemAsync(REFRESH_KEY)
   await SecureStore.deleteItemAsync(USER_KEY)
+  // One user's cached data must never render for the next — wipe both the
+  // in-memory and persisted query cache, plus the locally-cached view
+  // preferences, on sign-out.
+  await clearPersistedQueryCache()
+  await AsyncStorage.removeItem(VIEW_PREFERENCES_KEY).catch(() => {})
 }
 
 export async function loadStoredUser(): Promise<SessionUser | null> {

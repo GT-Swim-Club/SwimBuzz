@@ -8,11 +8,7 @@ import { isCuid, practicePath } from "@/lib/slug"
 import { getSession } from "@/lib/session"
 import { practiceSetSelect } from "@/lib/practice-input"
 import { attendedUserIds } from "@/lib/practice-attendance"
-
-function toDateInput(d: Date | null | undefined): string {
-  if (!d) return ""
-  return new Date(d).toISOString().slice(0, 10)
-}
+import { toDateInput, toTimeInput } from "@/lib/date-input"
 
 export default async function PracticePage({
   params}: {
@@ -40,12 +36,14 @@ export default async function PracticePage({
   const totalDistance = practice.sets.reduce((sum, s) => sum + (s.distance ?? 0), 0)
   const attendedUsers = await attendedUserIds(practice.id)
   const initialEditLock = serializePracticeEditLock(practice, session.user.id)
+  const startsAt = practice.startsAt ?? practice.createdAt
+  const endsAt = practice.endsAt ?? startsAt
 
   const initial: PracticeFormState = {
     title: practice.title,
-    date: toDateInput(practice.date),
-    startTime: practice.startTime,
-    endTime: practice.endTime,
+    date: toDateInput(startsAt, practice.timeZone),
+    startTime: toTimeInput(startsAt, practice.timeZone),
+    endTime: toTimeInput(endsAt, practice.timeZone),
     timeZone: practice.timeZone,
     location: practice.location,
     focus: practice.focus ?? "",
@@ -63,9 +61,8 @@ export default async function PracticePage({
       practiceSlug={practice.slug}
       title={practice.title}
       published={practice.published}
-      dateIso={practice.date ? practice.date.toISOString() : null}
-      startTime={practice.startTime}
-      endTime={practice.endTime}
+      startsAt={startsAt.toISOString()}
+      endsAt={endsAt.toISOString()}
       timeZone={practice.timeZone}
       location={practice.location}
       focus={practice.focus}
@@ -88,7 +85,8 @@ export default async function PracticePage({
         authorStaffTitle: c.author?.staffTitle ?? null,
         body: c.body,
         parentId: c.parentId,
-        createdAt: c.createdAt.toISOString()}))}
+        createdAt: c.createdAt.toISOString(),
+        editedAt: c.editedAt ? c.editedAt.toISOString() : null}))}
       initialEditLock={initialEditLock}
     />
   )

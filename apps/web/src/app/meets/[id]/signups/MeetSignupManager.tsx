@@ -1,7 +1,6 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
 import Modal, { ModalFooter } from "@/components/Modal"
 import MeetSignupConfigButton, { type MeetSignupConfigInitial } from "../MeetSignupConfigButton"
 import type { MeetSignupEventOption, MeetSignupQuestion } from "@/lib/meet-signup"
@@ -14,6 +13,7 @@ import { formatDisplayTime } from "@/lib/utils"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/SegmentedToggle"
 import StaffBadge from "@/components/StaffBadge"
 import type { StaffTitle } from "@swimbuzz/shared"
+import { syncSignupsToRoster, withdrawAthleteSignup } from "../meet-signup-admin.actions"
 
 type SignupEntry = {
   id: string
@@ -35,6 +35,7 @@ type Props = {
   askNotes: boolean
   questions: MeetSignupQuestion[]
   configInitial: MeetSignupConfigInitial | null
+  meetTimeZone: string
   entries: SignupEntry[]
 }
 
@@ -45,9 +46,9 @@ export default function MeetSignupManager({
   askNotes,
   questions,
   configInitial,
+  meetTimeZone,
   entries,
 }: Props) {
-  const router = useRouter()
   const [query, setQuery] = useState("")
   const [activeTab, setActiveTab] = useState<"settings" | "responses">(
     configInitial ? "responses" : "settings"
@@ -69,16 +70,10 @@ export default function MeetSignupManager({
     setSyncing(true)
     setSyncError(null)
     try {
-      const res = await fetch(`/api/meets/${meetId}/signup/sync-entries`, { method: "POST" })
-      const data = (await res.json().catch(() => ({}))) as { error?: string }
-      if (!res.ok) {
-        setSyncError(data.error ?? "Could not add sign-ups to the roster summary.")
-        return
-      }
+      await syncSignupsToRoster(meetId)
       setSyncOpen(false)
-      router.refresh()
-    } catch {
-      setSyncError("Could not add sign-ups to the roster summary.")
+    } catch (err) {
+      setSyncError(err instanceof Error ? err.message : "Could not add sign-ups to the roster summary.")
     } finally {
       setSyncing(false)
     }
@@ -89,19 +84,10 @@ export default function MeetSignupManager({
     setDropping(true)
     setDropError(null)
     try {
-      const res = await fetch(
-        `/api/meets/${meetId}/signup/entry?athleteId=${encodeURIComponent(dropEntry.athleteId)}`,
-        { method: "DELETE" }
-      )
-      const data = (await res.json().catch(() => ({}))) as { error?: string }
-      if (!res.ok) {
-        setDropError(data.error ?? "Could not drop this sign-up.")
-        return
-      }
+      await withdrawAthleteSignup(meetId, dropEntry.athleteId)
       setDropEntry(null)
-      router.refresh()
-    } catch {
-      setDropError("Could not drop this sign-up.")
+    } catch (err) {
+      setDropError(err instanceof Error ? err.message : "Could not drop this sign-up.")
     } finally {
       setDropping(false)
     }
@@ -167,7 +153,20 @@ export default function MeetSignupManager({
         <MeetSignupConfigButton
           meetId={meetId}
           eventCount={eventOptions.length}
-          initial={configInitial}
+          initial={
+            configInitial ?? {
+              instructions: "",
+              minEvents: null,
+              maxEvents: null,
+              maxRelayEvents: null,
+              askNotes: true,
+              customQuestions: [],
+              openAt: null,
+              closeAt: null,
+              withdrawUntil: null,
+              timeZone: meetTimeZone,
+            }
+          }
           inline
         />
       </div>

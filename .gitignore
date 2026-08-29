@@ -1,19 +1,19 @@
-# dependencies
+# Dependencies
 node_modules
 .pnp
 .pnp.js
 
-# testing
+# Testing
 coverage
 
-# production
+# Production
 build
 dist
 .next
 .expo
 .turbo
 
-# misc
+# Misc
 .DS_Store
 .env
 .env.local
@@ -25,7 +25,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# python virtual environment
+# Python virtual environment
 test_env
 env
 venv
@@ -35,10 +35,15 @@ venv.bak
 __pycache__
 *.pyc
 
-# locks (use root pnpm-lock.yaml)
+# Locks (use root pnpm-lock.yaml)
 apps/web/package-lock.json
 
-# pnpm local store (never commit)
+# Pnpm local store (never commit)
 .pnpm-store
 
-.cursor
+# Ai agents
+.cursor/
+.claude/
+
+# Graphify
+graphify-out/

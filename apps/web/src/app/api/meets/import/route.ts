@@ -74,7 +74,7 @@ async function applyParsedMeetPdf(input: {
   }
   season: string
   courseDefault: string
-  meet: { id: string; name: string; startDate: Date; resultsUrl: string | null } | null
+  meet: { id: string; name: string; startsAt: Date | null; resultsUrl: string | null } | null
   nameMappings: ReturnType<typeof normalizeNameMappings>
   rejectedNames: ReturnType<typeof normalizeRejectedNames>
   pairOnly: boolean
@@ -91,7 +91,7 @@ async function applyParsedMeetPdf(input: {
 
   const meetName =
     meet?.name ?? ((parsed.meet_name ?? "").trim() || fileName.replace(/\.pdf$/i, ""))
-  const meetDate = meet?.startDate ?? resolveMeetDate(parsed.meet_date) ?? new Date()
+  const meetDate = meet?.startsAt ?? resolveMeetDate(parsed.meet_date) ?? new Date()
 
   const summary = await importMeetResults({
     season,

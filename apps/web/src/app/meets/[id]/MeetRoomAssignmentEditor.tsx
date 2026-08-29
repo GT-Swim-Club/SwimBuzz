@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useMemo, useState, type DragEvent } from "react"
-import { useRouter } from "next/navigation"
 import type { MeetSignupQuestion } from "@/lib/meet-signup"
 import { formatRoomLabel } from "@/lib/meet-rooms"
+import { saveRoomAssignments, toggleRoomPublish } from "./MeetRoomAssignmentEditor.actions"
 
 type AthleteOption = { id: string; name: string; gender: "M" | "F" }
 
@@ -40,7 +40,6 @@ export default function MeetRoomAssignmentEditor({
   meetHasEnded: boolean
   showPreferences?: boolean
 }) {
-  const router = useRouter()
   const [rooms, setRooms] = useState<RoomDraft[]>(initialRooms)
   const [saving, setSaving] = useState(false)
   const [suggesting, setSuggesting] = useState(false)
@@ -199,31 +198,13 @@ export default function MeetRoomAssignmentEditor({
     }
   }
 
-  async function persistAssignments(): Promise<{ ok: true } | { ok: false; error: string }> {
-    const res = await fetch(`/api/meets/${meetId}/rooms/assignments`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rooms }),
-    })
-    const data = await res.json()
-    if (!res.ok) {
-      return { ok: false, error: data.error ?? "Failed to save draft" }
-    }
-    return { ok: true }
-  }
-
   async function saveDraft() {
     setSaving(true)
     setError(null)
     try {
-      const result = await persistAssignments()
-      if (!result.ok) {
-        setError(result.error)
-        return
-      }
-      router.refresh()
-    } catch {
-      setError("Failed to save draft")
+      await saveRoomAssignments(meetId, rooms)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save draft")
     } finally {
       setSaving(false)
     }
@@ -234,27 +215,12 @@ export default function MeetRoomAssignmentEditor({
     setError(null)
     try {
       if (!published) {
-        const result = await persistAssignments()
-        if (!result.ok) {
-          setError(result.error)
-          return
-        }
+        await saveRoomAssignments(meetId, rooms)
       }
-
-      const res = await fetch(`/api/meets/${meetId}/rooms/publish`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ published: !published }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Failed to update publish status")
-        return
-      }
-      setPublished(!!data.assignmentsPublishedAt)
-      router.refresh()
-    } catch {
-      setError("Failed to update publish status")
+      const result = await toggleRoomPublish(meetId, !published)
+      setPublished(!!result.assignmentsPublishedAt)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update publish status")
     } finally {
       setPublishing(false)
     }

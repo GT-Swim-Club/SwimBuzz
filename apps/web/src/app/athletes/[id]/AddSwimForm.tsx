@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import DontReloadNotice from "@/components/DontReloadNotice"
 import Modal, { ModalFooter } from "@/components/Modal"
@@ -9,6 +9,7 @@ import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import { useScraperUi } from "@/components/ScraperUiProvider"
 import { parseTime, formatRelativeTime, formatDateTime } from "@/lib/utils"
 import SetSwimCloudIdForm from "@/components/SetSwimCloudIdForm"
+import { addAthleteSwim } from "./AddSwimForm.actions"
 
 const EVENTS = [
   "50 Free", "100 Free", "200 Free", "400 Free", "500 Free",
@@ -24,7 +25,7 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
 }) {
   const router = useRouter()
   const { requireScraper } = useScraperUi()
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [scrapeStatus, setScrapeStatus] = useState<"idle" | "loading" | "done" | "error">("idle")
   const [scrapeError, setScrapeError] = useState<string | null>(null)
@@ -41,42 +42,32 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
 
   useDontReloadWhileBusy(scrapeStatus === "loading")
 
-  async function handleSubmit() {
+  function handleSubmit() {
     if (!form.time) return
-    setLoading(true)
     setError(null)
 
     const timeMs = Math.round(parseTime(form.time))
 
     if (!Number.isFinite(timeMs) || timeMs <= 0) {
       setError("Invalid time format")
-      setLoading(false)
       return
     }
 
-    const res = await fetch("/api/swims", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        athleteId,
-        event: form.event,
-        course: form.course,
-        date: form.date,
-        meet: form.meet,
-        timeMs,
-      }),
+    startTransition(async () => {
+      try {
+        await addAthleteSwim({
+          athleteId,
+          event: form.event,
+          course: form.course,
+          date: form.date,
+          meet: form.meet,
+          timeMs,
+        })
+        setForm(f => ({ ...f, time: "" }))
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to save swim")
+      }
     })
-
-    setLoading(false)
-
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}))
-      setError(data.error ?? "Failed to save swim")
-      return
-    }
-
-    setForm(f => ({ ...f, time: "" }))
-    router.refresh()
   }
 
   async function handleScrape() {
@@ -258,10 +249,10 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
           )}
           <button
             onClick={handleSubmit}
-            disabled={loading || !form.time}
+            disabled={isPending || !form.time}
             className="w-full mt-4 py-2 text-sm border border-border-secondary rounded-lg hover:bg-fill-secondary bg-background disabled:opacity-40 transition-colors"
           >
-            {loading ? "Saving..." : "Log swim"}
+            {isPending ? "Saving..." : "Log swim"}
           </button>
         </div>
       </section>

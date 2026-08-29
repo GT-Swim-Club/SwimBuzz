@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { headers } from "next/headers"
 import { getServerSession } from "next-auth"
 import type { Session } from "next-auth"
@@ -11,8 +12,12 @@ import {
  * Resolve the current user from either:
  * - Authorization: Bearer <mobile access JWT>
  * - NextAuth cookie session (web)
+ *
+ * Wrapped in React cache() — many server components on the same request tree
+ * (layout, page, nested sections) call this independently, so this collapses
+ * repeat calls in one render into a single cookie/JWT/DB round trip.
  */
-export async function getSession(): Promise<Session | null> {
+export const getSession = cache(async (): Promise<Session | null> => {
   const h = await headers()
   const auth = h.get("authorization")
   if (auth?.toLowerCase().startsWith("bearer ")) {
@@ -22,7 +27,7 @@ export async function getSession(): Promise<Session | null> {
     return sessionFromMobileClaims(claims)
   }
   return getServerSession(authOptions)
-}
+})
 
 /** Prefer getSession() — supports cookie + Bearer. */
 export async function getSessionFromRequest(

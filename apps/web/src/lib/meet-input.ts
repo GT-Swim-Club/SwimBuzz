@@ -5,7 +5,13 @@ import {
   normalizeFinalsHeatSheetUrls,
   normalizeHeatSheetUrls,
 } from "@/lib/meet-files"
-import { DEFAULT_TIME_ZONE, isValidTimeZone } from "@swimbuzz/shared"
+import {
+  DEFAULT_TIME_ZONE,
+  isValidTimeZone,
+  utcToZonedParts,
+  zonedDayKey,
+  zonedTimeToUtc,
+} from "@swimbuzz/shared"
 
 export class MeetInputError extends Error {}
 
@@ -22,7 +28,24 @@ function optionalString(value: unknown): string | null {
   return trimmed || null
 }
 
-type BuildOptions = { requireName?: boolean; requireStartDate?: boolean }
+function pad2(n: number): string {
+  return String(n).padStart(2, "0")
+}
+
+/** Schedule fields of the meet being updated, needed to recompose startsAt/endsAt
+ * when a partial update touches only some of {startDate, startTime, endDate, timeZone}. */
+type ExistingMeetSchedule = {
+  startsAt: Date | null
+  endsAt: Date | null
+  timeZone: string
+  hasStartTime: boolean
+}
+
+type BuildOptions = {
+  requireName?: boolean
+  requireStartDate?: boolean
+  existing?: ExistingMeetSchedule
+}
 
 const MEET_JSON_KEYS = [
   "heatSheetUrls",
@@ -65,52 +88,80 @@ export function buildMeetData(body: Record<string, unknown>, opts: BuildOptions 
     data.name = name
   }
 
-  if ("startDate" in body || opts.requireStartDate) {
-    const startDate = parseMeetDate(String(body.startDate ?? ""))
-    if (!startDate) throw new MeetInputError("A valid start date is required")
-    data.startDate = startDate
-  }
+  // startDate/startTime/endDate/timeZone together compose startsAt/endsAt instants, so any one
+  // of them being touched requires resolving the full tuple (falling back to `opts.existing` for
+  // whichever pieces aren't present on `body`).
+  const touchesSchedule =
+    "startDate" in body ||
+    "startTime" in body ||
+    "endDate" in body ||
+    "timeZone" in body
 
-  if ("endDate" in body) {
-    const raw = optionalString(body.endDate)
-    if (raw) {
-      const endDate = parseMeetDate(raw)
-      if (!endDate) throw new MeetInputError("End date is invalid")
-      data.endDate = endDate
+  if (touchesSchedule || opts.requireStartDate) {
+    let timeZone: string
+    if ("timeZone" in body) {
+      const raw = optionalString(body.timeZone)
+      if (raw && !isValidTimeZone(raw)) throw new MeetInputError("Time zone is invalid")
+      timeZone = raw ?? DEFAULT_TIME_ZONE
     } else {
-      data.endDate = null
+      timeZone = opts.existing?.timeZone ?? DEFAULT_TIME_ZONE
     }
-  }
+    data.timeZone = timeZone
 
-  const startForCompare =
-    data.startDate instanceof Date
-      ? (data.startDate as Date)
-      : "startDate" in body
-        ? parseMeetDate(String(body.startDate ?? ""))
-        : null
-  const endForCompare = data.endDate instanceof Date ? (data.endDate as Date) : null
-  if (startForCompare && endForCompare && endForCompare.getTime() < startForCompare.getTime()) {
-    throw new MeetInputError("End date must be on or after the start date")
-  }
-
-  if ("startTime" in body) {
-    const raw = optionalString(body.startTime)
-    if (raw) {
-      // Accept HH:MM or HH:MM:SS from <input type="time">
-      const match = raw.match(/^(\d{2}:\d{2})(?::\d{2})?$/)
-      if (!match) throw new MeetInputError("Start time must be HH:MM")
-      data.startTime = match[1]
+    let startDayKey: string
+    if ("startDate" in body || opts.requireStartDate) {
+      const startDate = parseMeetDate(String(body.startDate ?? ""))
+      if (!startDate) throw new MeetInputError("A valid start date is required")
+      startDayKey = startDate.toISOString().slice(0, 10)
+    } else if (opts.existing?.startsAt) {
+      startDayKey = zonedDayKey(opts.existing.startsAt, timeZone)
     } else {
-      data.startTime = null
+      throw new MeetInputError("A valid start date is required")
     }
-  }
 
-  if ("timeZone" in body) {
-    const raw = optionalString(body.timeZone)
-    if (raw && !isValidTimeZone(raw)) throw new MeetInputError("Time zone is invalid")
-    data.timeZone = raw ?? DEFAULT_TIME_ZONE
-  } else if (opts.requireStartDate) {
-    data.timeZone = DEFAULT_TIME_ZONE
+    let hasStartTime: boolean
+    let startClock = "00:00"
+    if ("startTime" in body) {
+      const raw = optionalString(body.startTime)
+      if (raw) {
+        // Accept HH:MM or HH:MM:SS from <input type="time">
+        const match = raw.match(/^(\d{2}:\d{2})(?::\d{2})?$/)
+        if (!match) throw new MeetInputError("Start time must be HH:MM")
+        startClock = match[1]
+        hasStartTime = true
+      } else {
+        hasStartTime = false
+      }
+    } else if (opts.existing?.hasStartTime && opts.existing.startsAt) {
+      const parts = utcToZonedParts(opts.existing.startsAt, timeZone)
+      startClock = `${pad2(parts.hour)}:${pad2(parts.minute)}`
+      hasStartTime = true
+    } else {
+      hasStartTime = false
+    }
+
+    data.startsAt = zonedTimeToUtc(startDayKey, startClock, timeZone)
+    data.hasStartTime = hasStartTime
+
+    if ("endDate" in body) {
+      const raw = optionalString(body.endDate)
+      if (raw) {
+        const endDate = parseMeetDate(raw)
+        if (!endDate) throw new MeetInputError("End date is invalid")
+        const endDayKey = endDate.toISOString().slice(0, 10)
+        data.endsAt = zonedTimeToUtc(endDayKey, "00:00", timeZone)
+      } else {
+        data.endsAt = null
+      }
+    }
+
+    if (
+      data.startsAt instanceof Date &&
+      data.endsAt instanceof Date &&
+      (data.endsAt as Date).getTime() < (data.startsAt as Date).getTime()
+    ) {
+      throw new MeetInputError("End date must be on or after the start date")
+    }
   }
 
   if ("course" in body) data.course = parseCourse(body.course)
@@ -119,8 +170,8 @@ export function buildMeetData(body: Record<string, unknown>, opts: BuildOptions 
     const season = parseSeason(body.season)
     if (!season) throw new MeetInputError("Season must be like 2025-2026")
     data.season = season
-  } else if (opts.requireStartDate && data.startDate instanceof Date) {
-    data.season = seasonFromDate(data.startDate as Date)
+  } else if (opts.requireStartDate && data.startsAt instanceof Date) {
+    data.season = seasonFromDate(zonedDayKey(data.startsAt as Date, data.timeZone as string))
   }
 
   if ("teamCode" in body) {

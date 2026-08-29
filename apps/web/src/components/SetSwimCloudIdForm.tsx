@@ -1,12 +1,12 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useTransition } from "react"
 import {
   isValidSwimCloudIdInput,
   SWIMCLOUD_ID_ERROR,
   SWIMCLOUD_ID_MAX_LENGTH,
 } from "@/lib/swimcloud-id"
+import { updateSwimCloudId } from "./athlete-profile.actions"
 
 export default function SetSwimCloudIdForm({
   athleteId,
@@ -19,7 +19,6 @@ export default function SetSwimCloudIdForm({
   requiresApproval?: boolean
   pendingSwimCloudId?: number | null
 }) {
-  const router = useRouter()
   const [swimCloudId, setSwimCloudId] = useState(
     pendingSwimCloudId != null
       ? String(pendingSwimCloudId)
@@ -27,9 +26,10 @@ export default function SetSwimCloudIdForm({
         ? String(initialSwimCloudId)
         : ""
   )
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const loading = isPending
 
   const baseline =
     pendingSwimCloudId != null
@@ -42,37 +42,22 @@ export default function SetSwimCloudIdForm({
   const showDigitHint = swimCloudId.length > 0 && !swimCloudIdValid
   const canSubmit = !loading && hasChanged && swimCloudIdValid
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!canSubmit) return
-    setLoading(true)
     setError(null)
     setMessage(null)
 
-    try {
-      const res = await fetch(`/api/athletes/${athleteId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ swimCloudId }),
-      })
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.error ?? "Failed to save SwimCloud ID")
-        return
+    startTransition(async () => {
+      try {
+        await updateSwimCloudId(athleteId, swimCloudId)
+        if (requiresApproval) {
+          setMessage("Requested — waiting for coach approval")
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to save SwimCloud ID")
       }
-
-      if (requiresApproval) {
-        setMessage("Requested — waiting for coach approval")
-      } else if (data.swimCloudId != null) {
-        setSwimCloudId(String(data.swimCloudId))
-      }
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   return (

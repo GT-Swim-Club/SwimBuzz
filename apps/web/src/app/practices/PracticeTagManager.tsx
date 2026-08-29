@@ -1,12 +1,13 @@
 "use client"
 
 import Link from "next/link"
-import { type AnimationEvent, type KeyboardEvent, useEffect, useRef, useState } from "react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { type AnimationEvent, type KeyboardEvent, useEffect, useRef, useState, useTransition } from "react"
+import { usePathname, useSearchParams } from "next/navigation"
 import { PRACTICE_TAG_MAX_COUNT, PRACTICE_TAG_NAME_MAX_LENGTH } from "@/lib/practice-tags"
 import Modal, { ModalFooter } from "@/components/Modal"
 import ActionIcon from "@/components/ActionIcon"
 import HoverDetail from "@/components/HoverDetail"
+import { createPracticeTag, deletePracticeTag } from "./PracticeTagManager.actions"
 
 type PracticeTag = { id: string; name: string }
 
@@ -19,7 +20,6 @@ export default function PracticeTagManager({
   initialTags: PracticeTag[]
   isCoach: boolean
 }) {
-  const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const draftInputRef = useRef<HTMLInputElement>(null)
@@ -29,7 +29,8 @@ export default function PracticeTagManager({
   const [adding, setAdding] = useState(false)
   const [draftMounted, setDraftMounted] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
-  const [saving, setSaving] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const saving = isPending
   const [pendingRemoval, setPendingRemoval] = useState<PracticeTag | null>(null)
   const activeTags = searchParams.getAll("tag")
 
@@ -85,28 +86,20 @@ export default function PracticeTagManager({
     }
   }
 
-  async function saveDraft() {
+  function saveDraft() {
     const name = draft.trim()
     if (!name || saving) return
 
-    setSaving(true)
     setStatus(null)
-    try {
-      const response = await fetch("/api/practice-tags", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name }),
-      })
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.error ?? "Unable to save tag")
-      setTags((current) => [...current, data].sort((a, b) => a.name.localeCompare(b.name)))
-      closeDraft()
-      router.refresh()
-    } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Unable to save tag")
-    } finally {
-      setSaving(false)
-    }
+    startTransition(async () => {
+      try {
+        const created = await createPracticeTag(name)
+        setTags((current) => [...current, created].sort((a, b) => a.name.localeCompare(b.name)))
+        closeDraft()
+      } catch (error) {
+        setStatus(error instanceof Error ? error.message : "Unable to save tag")
+      }
+    })
   }
 
   function handleDraftKeyDown(event: KeyboardEvent<HTMLInputElement>) {
@@ -126,24 +119,20 @@ export default function PracticeTagManager({
     setPendingRemoval(tag)
   }
 
-  async function removePendingTag() {
+  function removePendingTag() {
     const tag = pendingRemoval
     if (!tag || saving) return
 
-    setSaving(true)
     setStatus(null)
-    try {
-      const response = await fetch("/api/practice-tags/" + tag.id, { method: "DELETE" })
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.error ?? "Unable to remove tag")
-      setTags((current) => current.filter((item) => item.id !== tag.id))
-      setPendingRemoval(null)
-      router.refresh()
-    } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Unable to remove tag")
-    } finally {
-      setSaving(false)
-    }
+    startTransition(async () => {
+      try {
+        await deletePracticeTag(tag.id)
+        setTags((current) => current.filter((item) => item.id !== tag.id))
+        setPendingRemoval(null)
+      } catch (error) {
+        setStatus(error instanceof Error ? error.message : "Unable to remove tag")
+      }
+    })
   }
 
   return (

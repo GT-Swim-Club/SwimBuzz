@@ -124,6 +124,7 @@ model Athlete {
   practiceAttendance  PracticeAttendance[]
 
   @@index([gtid])
+  @@index([seasons], type: Gin)
 }
 
 model Meet {
@@ -131,11 +132,14 @@ model Meet {
   slug          String?   @unique
   name          String
   location      String?
-  startDate     DateTime
-  startTime     String?
-  /// IANA zone (e.g. "America/New_York") that startTime is a wall-clock time in.
+  /// True instant the meet starts. Anchored to 00:00 in `timeZone` when hasStartTime is false.
+  startsAt      DateTime
+  /// End date of a multi-day meet, anchored to 00:00 in `timeZone`. A meet never has a real end time.
+  endsAt        DateTime?
+  /// Whether startsAt carries a real wall-clock time vs. a 00:00 date-only placeholder.
+  hasStartTime  Boolean   @default(false)
+  /// IANA zone (e.g. "America/New_York") that startsAt/endsAt are anchored in.
   timeZone      String    @default("America/New_York")
-  endDate       DateTime?
   course        Course    @default(SCY)
   season        String
   teamCode      String    @default("GTSC")
@@ -174,6 +178,9 @@ model Meet {
   signupForm    MeetSignupForm?
   roomForm      MeetRoomForm?
   signupMonitorEvents MeetSignupMonitorEvent[]
+
+  @@index([startsAt])
+  @@index([season])
 }
 
 /// Idempotent signup-window monitor events (serverless-safe; replaces in-memory Maps).
@@ -206,6 +213,8 @@ model MeetSignupForm {
   openAt          DateTime?
   closeAt         DateTime?
   withdrawUntil   DateTime?
+  /// IANA zone that openAt/closeAt/withdrawUntil are set relative to for display.
+  timeZone        String            @default("America/New_York")
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   entries         MeetSignupEntry[]
@@ -239,6 +248,8 @@ model MeetRoomForm {
   closeAt                DateTime?
   assignmentsPublishedAt DateTime?
   customQuestions        Json?
+  /// IANA zone that openAt/closeAt/assignmentsPublishedAt are set relative to for display.
+  timeZone               String               @default("America/New_York")
   createdAt              DateTime             @default(now())
   updatedAt              DateTime             @updatedAt
   preferences            MeetRoomPreference[]
@@ -305,16 +316,19 @@ model Swim {
 
   @@unique([athleteId, event, timeMs, course, date, tags, occurrence])
   @@index([meetId])
+  @@index([meetId, athleteId])
+  @@index([event, course])
 }
 
 model Practice {
   id          String        @id @default(cuid())
   slug        String?       @unique
   title       String
-  date        DateTime?
-  startTime   String        @default("19:30")
-  endTime     String        @default("21:00")
-  /// IANA zone (e.g. "America/New_York") that startTime/endTime are wall-clock times in.
+  /// True instant the practice starts.
+  startsAt    DateTime
+  /// True instant the practice ends.
+  endsAt      DateTime
+  /// IANA zone (e.g. "America/New_York") that startsAt/endsAt are anchored in.
   timeZone    String        @default("America/New_York")
   location    String        @default("CRC Comp Pool")
   focus       String?
@@ -335,7 +349,7 @@ model Practice {
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
 
-  @@index([date])
+  @@index([startsAt])
   @@index([published])
   @@index([tags])
   @@index([editLockedById])
@@ -391,6 +405,7 @@ model PracticeComment {
   parent     PracticeComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies    PracticeComment[] @relation("CommentReplies")
   createdAt  DateTime  @default(now())
+  editedAt   DateTime?
 
   @@index([practiceId])
   @@index([parentId])

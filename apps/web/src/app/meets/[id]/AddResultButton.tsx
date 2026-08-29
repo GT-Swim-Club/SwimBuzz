@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useTransition } from "react"
 import { parseTime } from "@/lib/utils"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/SegmentedToggle"
 import { DatePicker } from "@/components/CustomDateTimePicker"
 import { normalizeEventName } from "@/lib/swim-parse"
+import { addMeetSwim } from "./AddMeetSwimButton.actions"
+import { upsertRelayEntry } from "./AddEntryButton.actions"
 
 const INDIVIDUAL_EVENTS = [
   "50 Free", "100 Free", "200 Free", "400 Free", "500 Free", "1000 Free", "1650 Free",
@@ -32,10 +33,9 @@ export default function AddResultButton({
   defaultDate: string
   athletes: AthleteOption[]
 }) {
-  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [type, setType] = useState<"individual" | "relay">("individual")
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   
   const [form, setForm] = useState({
@@ -50,6 +50,7 @@ export default function AddResultButton({
       gender: "F" as "F" | "M",
     }
   })
+  const loading = isPending
 
   function openModal() {
     setForm({
@@ -68,22 +69,20 @@ export default function AddResultButton({
     setOpen(true)
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true)
     setError(null)
-    
-    try {
-      if (type === "individual") {
-        const timeMs = Math.round(parseTime(form.time))
-        if (!Number.isFinite(timeMs) || timeMs <= 0) {
-          throw new Error("Invalid time format")
-        }
 
-        const res = await fetch("/api/swims", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+    if (type === "individual") {
+      const timeMs = Math.round(parseTime(form.time))
+      if (!Number.isFinite(timeMs) || timeMs <= 0) {
+        setError("Invalid time format")
+        return
+      }
+
+      startTransition(async () => {
+        try {
+          await addMeetSwim({
             athleteId: form.athleteId,
             event: form.event,
             course: form.course,
@@ -91,22 +90,21 @@ export default function AddResultButton({
             meet: meetName,
             meetId,
             timeMs,
-            source: "manual",
-          }),
-        })
-        if (!res.ok) {
-          const data = await res.json()
-          throw new Error(data.error ?? "Failed to save swim")
+          })
+          setOpen(false)
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Failed to save swim")
         }
-      } else {
-        if (new Set(form.relayForm.legs).size !== 4) {
-          throw new Error("Pick four different swimmers")
-        }
-        
-        const res = await fetch(`/api/meets/${meetId}/relays`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+      })
+    } else {
+      if (new Set(form.relayForm.legs).size !== 4) {
+        setError("Pick four different swimmers")
+        return
+      }
+
+      startTransition(async () => {
+        try {
+          await upsertRelayEntry(meetId, {
             event: form.relayForm.event,
             relayLetter: "A",
             relayRound: "",
@@ -116,19 +114,12 @@ export default function AddResultButton({
               athleteId,
             })),
             resultTime: form.time,
-          }),
-        })
-        if (!res.ok) {
-          const data = await res.json()
-          throw new Error(data.error ?? "Failed to save relay")
+          })
+          setOpen(false)
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Failed to save relay")
         }
-      }
-      setOpen(false)
-      router.refresh()
-    } catch (err: any) {
-      setError(err.message ?? "Something went wrong")
-    } finally {
-      setLoading(false)
+      })
     }
   }
 

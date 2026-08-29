@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect, useState, useTransition } from "react"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import { useUnsavedUploads } from "@/lib/unsaved-uploads"
 import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/FileDropzone"
+import { updateMeet } from "./meet-update.actions"
 
 type Photo = { url: string; name: string }
 
@@ -21,9 +21,9 @@ export default function ManagePhotosButton({
   meetId: string
   initial: PhotosForm
 }) {
-  const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const loading = isPending
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState<PhotosForm>(initial)
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null)
@@ -140,40 +140,29 @@ export default function ManagePhotosButton({
     }
   }
 
-  async function savePhotos() {
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
     if (previewsUploading) return
-    setLoading(true)
     setError(null)
 
-    try {
-      const res = await fetch(`/api/meets/${meetId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+    startTransition(async () => {
+      try {
+        const result = await updateMeet(meetId, {
           photos: {
             links: form.photos,
             previews: form.previews,
           },
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Failed to save photos")
-        return
+        })
+        if (!result.ok) {
+          setError(result.error)
+          return
+        }
+        release(form.previews)
+        setOpen(false)
+      } catch {
+        setError("Something went wrong")
       }
-      release(form.previews)
-      setOpen(false)
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    void savePhotos()
+    })
   }
 
   return (

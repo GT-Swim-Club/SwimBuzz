@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type RefObject } from "react"
 import { toPng } from "html-to-image"
-import { practiceShareText, practiceShareUrl, type PracticeShareSet } from "@swimbuzz/shared"
+import { practiceShareText, practiceShareUrl, zonedDayKey, type PracticeShareSet } from "@swimbuzz/shared"
 import ActionIcon from "@/components/ActionIcon"
 import HoverDetail from "@/components/HoverDetail"
 import { practicePdfFilename } from "@/lib/practice-pdf"
@@ -114,15 +114,34 @@ function PngMenuIcon({ className }: { className?: string }) {
   )
 }
 
-type Copied = "link" | "text" | null
+function CopyPngMenuIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <rect x="8" y="8" width="14" height="14" rx="2" />
+      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+      <circle cx="12.5" cy="12.25" r="1.1" />
+      <path d="m10 17.5 2.75-2.75 1.75 1.75 1.25-1.25 2.3 2.3" />
+    </svg>
+  )
+}
+
+type Copied = "link" | "text" | "png" | null
 
 export default function SharePracticeButton({
   practiceId,
   practiceSlug,
   title,
-  dateIso,
-  startTime,
-  endTime,
+  startsAt,
+  endsAt,
   timeZone,
   location,
   focus,
@@ -134,9 +153,8 @@ export default function SharePracticeButton({
   practiceId: string
   practiceSlug: string | null
   title: string
-  dateIso: string | null
-  startTime: string
-  endTime: string
+  startsAt: string
+  endsAt: string
   timeZone: string
   location: string
   focus: string | null
@@ -146,7 +164,7 @@ export default function SharePracticeButton({
   captureRef: RefObject<HTMLElement | null>
 }) {
   const [open, setOpen] = useState(false)
-  const [busy, setBusy] = useState<"pdf" | "png" | null>(null)
+  const [busy, setBusy] = useState<"pdf" | "png" | "copy-png" | null>(null)
   const [copied, setCopied] = useState<Copied>(null)
   const [error, setError] = useState<string | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -180,7 +198,7 @@ export default function SharePracticeButton({
   }
 
   function shareInput() {
-    return { title, dateIso, startTime, endTime, timeZone, location, focus, tags, sets, totalDistance }
+    return { title, startsAt, endsAt, timeZone, location, focus, tags, sets, totalDistance }
   }
 
   async function copyLink() {
@@ -218,6 +236,23 @@ export default function SharePracticeButton({
     }
   }
 
+  async function capturePngBlob(node: HTMLElement): Promise<Blob> {
+    await document.fonts.ready
+    const backgroundColor =
+      getComputedStyle(document.body).backgroundColor ||
+      getComputedStyle(document.documentElement).getPropertyValue("--brand-color-bg-container").trim() ||
+      "#ffffff"
+    const dataUrl = await toPng(node, {
+      pixelRatio: 2,
+      cacheBust: true,
+      backgroundColor,
+      width: node.scrollWidth,
+      height: node.scrollHeight,
+    })
+    const res = await fetch(dataUrl)
+    return res.blob()
+  }
+
   async function exportPng() {
     const node = captureRef.current
     if (!node) {
@@ -228,20 +263,9 @@ export default function SharePracticeButton({
     setError(null)
     setOpen(false)
     try {
-      await document.fonts.ready
-      const backgroundColor =
-        getComputedStyle(document.body).backgroundColor ||
-        getComputedStyle(document.documentElement).getPropertyValue("--brand-color-bg-container").trim() ||
-        "#ffffff"
-      const dataUrl = await toPng(node, {
-        pixelRatio: 2,
-        cacheBust: true,
-        backgroundColor,
-        width: node.scrollWidth,
-        height: node.scrollHeight,
-      })
-      const res = await fetch(dataUrl)
-      downloadBlob(await res.blob(), practicePdfFilename(title, dateIso).replace(/\.pdf$/, ".png"))
+      const blob = await capturePngBlob(node)
+      const dayKey = zonedDayKey(startsAt, timeZone)
+      downloadBlob(blob, practicePdfFilename(title, dayKey).replace(/\.pdf$/, ".png"))
     } catch {
       setError("Could not export image")
     } finally {
@@ -249,7 +273,38 @@ export default function SharePracticeButton({
     }
   }
 
-  const label = busy === "pdf" ? "Exporting PDF…" : busy === "png" ? "Exporting image…" : "Share"
+  async function copyPng() {
+    const node = captureRef.current
+    if (!node) {
+      setError("Could not copy image")
+      return
+    }
+    if (typeof ClipboardItem === "undefined" || !navigator.clipboard?.write) {
+      setError("Copying images isn't supported in this browser")
+      return
+    }
+    setBusy("copy-png")
+    setError(null)
+    try {
+      // Pass the blob promise directly (instead of awaiting first) so Safari still
+      // treats this as triggered by the click's user gesture.
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": capturePngBlob(node) })])
+      flashCopied("png")
+    } catch {
+      setError("Could not copy image")
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  const label =
+    busy === "pdf"
+      ? "Exporting PDF…"
+      : busy === "png"
+        ? "Exporting image…"
+        : busy === "copy-png"
+          ? "Copying image…"
+          : "Share"
 
   return (
     <div ref={rootRef} className="relative flex shrink-0 flex-col items-end gap-1">
@@ -291,11 +346,11 @@ export default function SharePracticeButton({
           <button
             type="button"
             role="menuitem"
-            onClick={() => void exportPdf()}
+            onClick={() => void copyPng()}
             className="flex w-full items-center gap-2 whitespace-nowrap px-3 py-2 text-left text-sm text-foreground hover:bg-fill"
           >
-            <PdfMenuIcon className="h-4 w-4 shrink-0" />
-            Export PDF
+            {copied === "png" ? <CheckIcon className="h-4 w-4 shrink-0" /> : <CopyPngMenuIcon className="h-4 w-4 shrink-0" />}
+            {copied === "png" ? "Copied" : "Copy PNG"}
           </button>
           <button
             type="button"
@@ -305,6 +360,15 @@ export default function SharePracticeButton({
           >
             <PngMenuIcon className="h-4 w-4 shrink-0" />
             Export PNG
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => void exportPdf()}
+            className="flex w-full items-center gap-2 whitespace-nowrap px-3 py-2 text-left text-sm text-foreground hover:bg-fill"
+          >
+            <PdfMenuIcon className="h-4 w-4 shrink-0" />
+            Export PDF
           </button>
         </div>
       )}

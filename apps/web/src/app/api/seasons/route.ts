@@ -6,7 +6,8 @@ import { getSession } from "@/lib/session"
 export async function GET() {
   const seasons = await prisma.season.findMany({
     orderBy: { label: "desc" }})
-  return NextResponse.json(seasons.map((s) => s.label))
+  return NextResponse.json(seasons.map((s) => s.label), {
+    headers: { "Cache-Control": "private, max-age=300, stale-while-revalidate=3600" }})
 }
 
 export async function POST(req: Request) {

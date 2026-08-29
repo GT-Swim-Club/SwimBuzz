@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Alert, Platform, Pressable, Switch, View } from "react-native"
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router"
+import { useLocalSearchParams, useRouter } from "expo-router"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import * as Clipboard from "expo-clipboard"
 import * as MediaLibrary from "expo-media-library"
 import * as Sharing from "expo-sharing"
@@ -8,13 +9,15 @@ import { File, Paths } from "expo-file-system"
 import { captureRef } from "react-native-view-shot"
 import {
   DEFAULT_TIME_ZONE,
-  formatClockTimeRangeInViewerZone,
   formatDateTime,
+  formatFullDate,
   isHtmlEmpty,
   isStaffRole,
   practiceShareFilename,
   practiceShareText,
   practiceShareUrl,
+  utcToZonedParts,
+  zonedDayKey,
   type PracticeShareInput,
   type PracticeShareSet,
   type StaffTitle,
@@ -44,9 +47,9 @@ import { FormattedText } from "../../../src/components/FormattedText"
 import { Icon } from "../../../src/components/Icon"
 import { PracticeExportCapture } from "../../../src/components/PracticeExportCapture"
 import { RelativeDateText } from "../../../src/components/RelativeDateText"
+import { ZonedTimeText } from "../../../src/components/ZonedTimeText"
 import { StaffBadge } from "../../../src/components/StaffBadge"
 import { useAuth } from "../../../src/lib/auth"
-import { formatPracticeDate } from "../../../src/lib/practice-calendar"
 
 type PracticeSet = {
   id: string
@@ -58,20 +61,24 @@ type PracticeSet = {
 
 type PracticeComment = {
   id: string
+  authorId?: string | null
   authorName?: string
   authorStaffTitle?: StaffTitle | null
   body?: string
   createdAt?: string
+  editedAt?: string | null
   parentId?: string | null
 }
 
-function toDateInput(value: unknown): string | null {
+function toDateInput(value: unknown, timeZone: string): string | null {
   if (!value) return null
-  const s = String(value)
-  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10)
-  const d = new Date(s)
-  if (Number.isNaN(d.getTime())) return null
-  return d.toISOString().slice(0, 10)
+  return zonedDayKey(String(value), timeZone)
+}
+
+function toTimeInput(value: unknown, timeZone: string): string {
+  if (!value) return ""
+  const { hour, minute } = utcToZonedParts(new Date(String(value)), timeZone)
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`
 }
 
 export default function PracticeDetailScreen() {
@@ -81,11 +88,9 @@ export default function PracticeDetailScreen() {
   const tabBarPad = useTabBarScrollPadding()
   const c = usePalette()
   const isStaff = !!user && isStaffRole(user.role)
-  const [practice, setPractice] = useState<Record<string, unknown> | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [commentBody, setCommentBody] = useState("")
   const [replyTo, setReplyTo] = useState<PracticeComment | null>(null)
+  const [editingComment, setEditingComment] = useState<PracticeComment | null>(null)
   const [posting, setPosting] = useState(false)
   const [published, setPublished] = useState(false)
   const [editSets, setEditSets] = useState<PracticeSet[]>([])
@@ -107,28 +112,31 @@ export default function PracticeDetailScreen() {
     }
   }, [])
 
-  const load = useCallback(async () => {
-    if (!id) {
-      setLoading(false)
-      return
-    }
-    setError(null)
-    try {
-      const data = await api.getPractice(id)
-      setPractice(data)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load practice")
-      setPractice(null)
-    } finally {
-      setLoading(false)
-    }
-  }, [id])
+  const queryClient = useQueryClient()
+  const practiceQueryKey = ["practice", id] as const
 
-  useFocusEffect(
-    useCallback(() => {
-      void load()
-    }, [load])
-  )
+  const {
+    data: practice,
+    isPending,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: practiceQueryKey,
+    queryFn: () => api.getPractice(id as string),
+    enabled: Boolean(id),
+  })
+  const load = refetch
+
+  /** Apply an optimistic patch to the cached practice, returning a rollback. */
+  function patchPracticeOptimistically(
+    patch: (old: Record<string, unknown>) => Record<string, unknown>
+  ) {
+    const previous = queryClient.getQueryData(practiceQueryKey)
+    queryClient.setQueryData(practiceQueryKey, (old: Record<string, unknown> | undefined) =>
+      old ? patch(old) : old
+    )
+    return () => queryClient.setQueryData(practiceQueryKey, previous)
+  }
 
   useEffect(() => {
     if (!practice) return
@@ -144,7 +152,15 @@ export default function PracticeDetailScreen() {
     )
   }, [practice])
 
-  if (loading) {
+  if (!id) {
+    return (
+      <Screen>
+        <ErrorBlock message="Not found" />
+      </Screen>
+    )
+  }
+
+  if (isPending) {
     return (
       <Screen>
         <LoadingBlock />
@@ -155,7 +171,9 @@ export default function PracticeDetailScreen() {
   if (!practice) {
     return (
       <Screen>
-        <ErrorBlock message={error ?? "Not found"} />
+        <ErrorBlock
+          message={error instanceof Error ? error.message : "Failed to load practice"}
+        />
       </Screen>
     )
   }
@@ -178,9 +196,8 @@ export default function PracticeDetailScreen() {
   function shareInput(): PracticeShareInput {
     return {
       title: String(currentPractice.title ?? "Practice"),
-      dateIso: currentPractice.date ? String(currentPractice.date) : null,
-      startTime: String(currentPractice.startTime ?? "19:30"),
-      endTime: String(currentPractice.endTime ?? "21:00"),
+      startsAt: String(currentPractice.startsAt ?? new Date().toISOString()),
+      endsAt: String(currentPractice.endsAt ?? currentPractice.startsAt ?? new Date().toISOString()),
       timeZone: String(currentPractice.timeZone ?? DEFAULT_TIME_ZONE),
       location: String(currentPractice.location ?? ""),
       focus: currentPractice.focus ? String(currentPractice.focus) : null,
@@ -264,7 +281,9 @@ export default function PracticeDetailScreen() {
       const bytes = new Uint8Array(await res.arrayBuffer())
       const filename = practiceShareFilename(
         String(currentPractice.title ?? "practice"),
-        currentPractice.date ? String(currentPractice.date) : null,
+        currentPractice.startsAt
+          ? zonedDayKey(String(currentPractice.startsAt), String(currentPractice.timeZone ?? DEFAULT_TIME_ZONE))
+          : null,
         "pdf"
       )
       const file = new File(Paths.cache, filename)
@@ -319,7 +338,19 @@ export default function PracticeDetailScreen() {
     }
   }
 
-  async function postComment() {
+  function startEdit(comment: PracticeComment) {
+    setReplyTo(null)
+    setEditingComment(comment)
+    setCommentBody(comment.body ?? "")
+  }
+
+  function cancelCommentForm() {
+    setReplyTo(null)
+    setEditingComment(null)
+    setCommentBody("")
+  }
+
+  async function submitComment() {
     if (!id) return
     const body = commentBody.trim()
     if (!body) {
@@ -327,19 +358,88 @@ export default function PracticeDetailScreen() {
       return
     }
     setPosting(true)
+
+    const rollback = editingComment
+      ? patchPracticeOptimistically((old) => ({
+          ...old,
+          comments: (Array.isArray(old.comments) ? old.comments : []).map(
+            (c: PracticeComment) =>
+              c.id === editingComment.id
+                ? { ...c, body, editedAt: new Date().toISOString() }
+                : c
+          ),
+        }))
+      : patchPracticeOptimistically((old) => {
+          const optimisticComment: PracticeComment = {
+            id: `optimistic-${Date.now()}`,
+            authorId: user?.id ?? null,
+            authorName: user?.name ?? "You",
+            authorStaffTitle: user?.staffTitle ?? null,
+            body,
+            parentId: replyTo?.parentId ?? replyTo?.id ?? null,
+            createdAt: new Date().toISOString(),
+          }
+          return {
+            ...old,
+            comments: [...(Array.isArray(old.comments) ? old.comments : []), optimisticComment],
+          }
+        })
+
     try {
-      const parentId = replyTo?.parentId ?? replyTo?.id
-      await api.postPracticeComment(id, body, parentId)
+      if (editingComment) {
+        await api.editComment(editingComment.id, body)
+      } else {
+        const parentId = replyTo?.parentId ?? replyTo?.id
+        await api.postPracticeComment(id, body, parentId)
+      }
       setCommentBody("")
       setReplyTo(null)
+      setEditingComment(null)
       await load()
     } catch (err) {
+      rollback()
       Alert.alert(
-        "Could not post comment",
+        editingComment ? "Could not update comment" : "Could not post comment",
         err instanceof Error ? err.message : "Something went wrong"
       )
     } finally {
       setPosting(false)
+    }
+  }
+
+  function confirmDeleteComment(comment: PracticeComment) {
+    Alert.alert(
+      "Delete comment?",
+      "This can't be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => void deleteComment(comment),
+        },
+      ]
+    )
+  }
+
+  async function deleteComment(comment: PracticeComment) {
+    const rollback = patchPracticeOptimistically((old) => ({
+      ...old,
+      comments: (Array.isArray(old.comments) ? old.comments : []).filter(
+        (c: PracticeComment) => c.id !== comment.id
+      ),
+    }))
+    try {
+      await api.deleteComment(comment.id)
+      if (editingComment?.id === comment.id) cancelCommentForm()
+      if (replyTo?.id === comment.id || replyTo?.parentId === comment.id) setReplyTo(null)
+      await load()
+    } catch (err) {
+      rollback()
+      Alert.alert(
+        "Could not delete comment",
+        err instanceof Error ? err.message : "Something went wrong"
+      )
     }
   }
 
@@ -351,12 +451,13 @@ export default function PracticeDetailScreen() {
     }
     setSaving(true)
     try {
+      const timeZone = String(practice.timeZone ?? DEFAULT_TIME_ZONE)
       await api.updatePractice(id, {
         title: String(practice.title ?? ""),
-        date: toDateInput(practice.date),
-        startTime: String(practice.startTime ?? "19:30"),
-        endTime: String(practice.endTime ?? "21:00"),
-        timeZone: String(practice.timeZone ?? DEFAULT_TIME_ZONE),
+        date: toDateInput(practice.startsAt, timeZone),
+        startTime: toTimeInput(practice.startsAt, timeZone) || "19:30",
+        endTime: toTimeInput(practice.endsAt, timeZone) || "21:00",
+        timeZone,
         location: String(practice.location ?? "CRC Comp Pool"),
         focus:
           practice.focus == null || practice.focus === ""
@@ -442,23 +543,23 @@ export default function PracticeDetailScreen() {
           <SubtitleSegments
             textStyle={{ fontSize: 14, color: c.textSecondary }}
             segments={[
-              practice.date ? (
+              practice.startsAt ? (
                 <RelativeDateText
-                  value={String(practice.date).slice(0, 10)}
+                  value={String(practice.startsAt)}
                   kind="event"
-                  absolute={formatPracticeDate(String(practice.date))}
+                  timeZone={String(practice.timeZone ?? DEFAULT_TIME_ZONE)}
+                  absolute={formatFullDate(String(practice.startsAt), String(practice.timeZone ?? DEFAULT_TIME_ZONE))}
                   style={{ fontSize: 14, color: c.textSecondary }}
                 />
               ) : null,
-              (() => {
-                const zoned = formatClockTimeRangeInViewerZone(
-                  practice.date ? String(practice.date).slice(0, 10) : new Date().toISOString().slice(0, 10),
-                  String(practice.startTime ?? ""),
-                  String(practice.endTime ?? ""),
-                  String(practice.timeZone ?? DEFAULT_TIME_ZONE)
-                )
-                return `${zoned.text} ${zoned.abbrev}`
-              })(),
+              practice.startsAt ? (
+                <ZonedTimeText
+                  startsAt={String(practice.startsAt)}
+                  endsAt={practice.endsAt ? String(practice.endsAt) : null}
+                  timeZone={String(practice.timeZone ?? DEFAULT_TIME_ZONE)}
+                  style={{ fontSize: 14, color: c.textSecondary }}
+                />
+              ) : null,
               practice.location ? String(practice.location) : null,
             ]}
           />
@@ -469,7 +570,9 @@ export default function PracticeDetailScreen() {
           </View>
         ) : null}
 
-        {error ? <ErrorBlock message={error} /> : null}
+        {error ? (
+          <ErrorBlock message={error instanceof Error ? error.message : "Failed to load practice"} />
+        ) : null}
 
         {isStaff ? (
           <Section title="Staff">
@@ -568,41 +671,59 @@ export default function PracticeDetailScreen() {
           {comments.length === 0 ? (
             <Muted style={{ marginBottom: spacing.sm }}>No comments yet.</Muted>
           ) : (
-            comments.map((comment) => (
-              <ListRow
-                key={comment.id}
-                right={
-                  <IconButton
-                    label="Reply"
-                    onPress={() => {
-                      setReplyTo(comment)
-                      setCommentBody("")
-                    }}
-                  />
-                }
-                title={String(comment.authorName ?? "Someone")}
-                titleAdornment={
-                  comment.authorStaffTitle ? (
-                    <StaffBadge title={comment.authorStaffTitle} />
-                  ) : undefined
-                }
-                subtitleSegments={[
-                  comment.parentId ? "Reply" : null,
-                  comment.body,
-                  comment.createdAt ? (
-                    <RelativeDateText
-                      value={String(comment.createdAt)}
-                      kind="instant"
-                      absolute={formatDateTime(String(comment.createdAt))}
-                      style={{ fontSize: 13, color: c.textSecondary }}
-                    />
-                  ) : null,
-                ]}
-              />
-            ))
+            comments.map((comment) => {
+              const isOwn = !!user && comment.authorId === user.id
+              const canEdit = isOwn
+              const canDelete = isStaff || isOwn
+              return (
+                <ListRow
+                  key={comment.id}
+                  right={
+                    <View style={{ flexDirection: "row" }}>
+                      <IconButton
+                        label="Reply"
+                        onPress={() => {
+                          setEditingComment(null)
+                          setReplyTo(comment)
+                          setCommentBody("")
+                        }}
+                      />
+                      {canEdit ? (
+                        <IconButton label="Edit" onPress={() => startEdit(comment)} />
+                      ) : null}
+                      {canDelete ? (
+                        <IconButton
+                          label="Delete"
+                          onPress={() => confirmDeleteComment(comment)}
+                        />
+                      ) : null}
+                    </View>
+                  }
+                  title={String(comment.authorName ?? "Someone")}
+                  titleAdornment={
+                    comment.authorStaffTitle ? (
+                      <StaffBadge title={comment.authorStaffTitle} />
+                    ) : undefined
+                  }
+                  subtitleSegments={[
+                    comment.parentId ? "Reply" : null,
+                    comment.body,
+                    comment.createdAt ? (
+                      <RelativeDateText
+                        value={String(comment.createdAt)}
+                        kind="instant"
+                        absolute={formatDateTime(String(comment.createdAt))}
+                        style={{ fontSize: 13, color: c.textSecondary }}
+                      />
+                    ) : null,
+                    comment.editedAt ? "Edited" : null,
+                  ]}
+                />
+              )
+            })
           )}
 
-          {replyTo ? (
+          {replyTo || editingComment ? (
             <View
               style={{
                 alignItems: "center",
@@ -611,12 +732,16 @@ export default function PracticeDetailScreen() {
                 marginBottom: spacing.xs,
               }}
             >
-              <Muted>{`Replying to ${replyTo.authorName ?? "someone"}`}</Muted>
-              <IconButton label="Cancel" onPress={() => setReplyTo(null)} />
+              <Muted>
+                {editingComment
+                  ? "Editing your comment"
+                  : `Replying to ${replyTo?.authorName ?? "someone"}`}
+              </Muted>
+              <IconButton label="Cancel" onPress={cancelCommentForm} />
             </View>
           ) : null}
           <TextField
-            label={replyTo ? "Write a reply" : "Add a comment"}
+            label={editingComment ? "Edit comment" : replyTo ? "Write a reply" : "Add a comment"}
             value={commentBody}
             onChangeText={setCommentBody}
             placeholder={replyTo ? "Write a reply…" : "Write something…"}
@@ -624,9 +749,9 @@ export default function PracticeDetailScreen() {
             style={{ minHeight: 88, textAlignVertical: "top" }}
           />
           <Button
-            label={replyTo ? "Post reply" : "Post comment"}
+            label={editingComment ? "Save changes" : replyTo ? "Post reply" : "Post comment"}
             loading={posting}
-            onPress={() => void postComment()}
+            onPress={() => void submitComment()}
           />
         </Section>
       </ScrollView>
@@ -686,9 +811,8 @@ export default function PracticeDetailScreen() {
           ref={exportCaptureRef}
           title={String(practice.title ?? "Practice")}
           showDraft={isStaff && !published}
-          dateIso={practice.date ? String(practice.date) : null}
-          startTime={String(practice.startTime ?? "19:30")}
-          endTime={String(practice.endTime ?? "21:00")}
+          startsAt={String(practice.startsAt ?? new Date().toISOString())}
+          endsAt={String(practice.endsAt ?? practice.startsAt ?? new Date().toISOString())}
           timeZone={String(practice.timeZone ?? DEFAULT_TIME_ZONE)}
           location={String(practice.location ?? "")}
           focus={practice.focus ? String(practice.focus) : null}

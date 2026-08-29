@@ -1,6 +1,6 @@
 import { parseMeetDate } from "@/lib/swim-parse"
 import { normalizeTags } from "@/lib/practice-tags"
-import { DEFAULT_TIME_ZONE, isValidTimeZone } from "@swimbuzz/shared"
+import { DEFAULT_TIME_ZONE, isValidTimeZone, zonedTimeToUtc } from "@swimbuzz/shared"
 
 export class PracticeInputError extends Error {}
 export const MAX_PRACTICE_SETS = 10
@@ -80,9 +80,8 @@ function normalizeSet(raw: unknown, index: number): NormalizedSet {
 
 export type NormalizedPractice = {
   title: string
-  date: Date | null
-  startTime: string
-  endTime: string
+  startsAt: Date
+  endsAt: Date
   timeZone: string
   location: string
   focus: string | null
@@ -101,13 +100,11 @@ export function buildPracticeData(
 ): NormalizedPractice {
   const title = String(body.title ?? "").trim() || "Untitled Practice"
 
-  let date: Date | null = null
   const rawDate = optionalString(body.date)
-  if (rawDate) {
-    const parsed = parseMeetDate(rawDate)
-    if (!parsed) throw new PracticeInputError("Practice date is invalid")
-    date = parsed
-  }
+  if (!rawDate) throw new PracticeInputError("Practice date is required")
+  const parsedDate = parseMeetDate(rawDate)
+  if (!parsedDate) throw new PracticeInputError("Practice date is invalid")
+  const dayKey = parsedDate.toISOString().slice(0, 10)
 
   const rawSets = Array.isArray(body.sets) ? body.sets : []
   if (rawSets.length > MAX_PRACTICE_SETS) {
@@ -122,15 +119,14 @@ export function buildPracticeData(
 
   const startTime = parseClockTime(optionalString(body.startTime) ?? "19:30")
   if (!startTime) throw new PracticeInputError("Start time must be HH:MM")
-  const enteredEndTime = parseClockTime(optionalString(body.endTime) ?? "21:00")
-  if (!enteredEndTime) throw new PracticeInputError("End time must be HH:MM")
+  const endTime = parseClockTime(optionalString(body.endTime) ?? "21:00")
+  if (!endTime) throw new PracticeInputError("End time must be HH:MM")
 
   const startMinutes = clockToMinutes(startTime)
-  const endMinutes = clockToMinutes(enteredEndTime)
-  const endTime =
-    startMinutes != null && endMinutes != null && endMinutes < startMinutes
-      ? startTime
-      : enteredEndTime
+  const endMinutes = clockToMinutes(endTime)
+  if (startMinutes != null && endMinutes != null && endMinutes < startMinutes) {
+    throw new PracticeInputError("End time must be after start time")
+  }
 
   const rawTimeZone = optionalString(body.timeZone)
   if (rawTimeZone && !isValidTimeZone(rawTimeZone)) {
@@ -138,11 +134,13 @@ export function buildPracticeData(
   }
   const timeZone = rawTimeZone ?? DEFAULT_TIME_ZONE
 
+  const startsAt = zonedTimeToUtc(dayKey, startTime, timeZone)
+  const endsAt = zonedTimeToUtc(dayKey, endTime, timeZone)
+
   return {
     title,
-    date,
-    startTime,
-    endTime,
+    startsAt,
+    endsAt,
     timeZone,
     location: optionalString(body.location) ?? "CRC Comp Pool",
     focus: optionalString(body.focus),

@@ -3,10 +3,9 @@ import ActionIcon from "@/components/ActionIcon"
 import InfoIcon from "@/components/InfoIcon"
 import StaffBadge from "@/components/StaffBadge"
 import { athletePath } from "@/lib/slug"
-import { formatSwimDate } from "@/lib/utils"
 import { formatClockTime, type StaffTitle } from "@swimbuzz/shared"
-import { ZonedClockTime, ZonedInstantTime } from "@/components/ZonedTime"
-import { RelativeDate } from "@/components/RelativeDate"
+import { ZonedInstantTime } from "@/components/ZonedTime"
+import { RelativeDateTime } from "@/components/RelativeDate"
 
 type AttendanceRecord = {
   id: string
@@ -22,18 +21,16 @@ type AttendanceRecord = {
 
 export default function AttendanceList({
   title,
-  dateIso,
-  startTime,
-  endTime,
+  startsAt,
+  endsAt,
   timeZone,
   location,
   attendance,
   viewerAthleteId,
 }: {
   title: string
-  dateIso: string | null
-  startTime: string
-  endTime: string
+  startsAt: string
+  endsAt: string
   timeZone: string
   location: string
   attendance: AttendanceRecord[]
@@ -52,18 +49,7 @@ export default function AttendanceList({
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="flex items-center gap-1.5">
               <InfoIcon kind="calendar" />
-              {dateIso ? <RelativeDate day={dateIso} absolute={formatSwimDate(dateIso)} /> : "No date"}
-              {startTime || endTime ? (
-                <>
-                  {" · "}
-                  <ZonedClockTime
-                    date={dateIso ? dateIso.slice(0, 10) : null}
-                    startTime={startTime}
-                    endTime={endTime}
-                    sourceTimeZone={timeZone}
-                  />
-                </>
-              ) : null}
+              <RelativeDateTime startsAt={startsAt} endsAt={endsAt} timeZone={timeZone} />
             </span>
             {location && (
               <>

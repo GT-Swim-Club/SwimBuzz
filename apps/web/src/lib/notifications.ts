@@ -7,7 +7,8 @@ import {
 import type { PendingProfileChanges } from "@/lib/pending-profile-changes"
 import { collectMeetRosterAthleteIds } from "@/lib/meet-sheet-summary"
 import { prisma } from "@/lib/prisma"
-import { formatRelativeTime, formatSwimDate } from "@/lib/utils"
+import { formatRelativeTime } from "@/lib/utils"
+import { formatZonedInstant } from "@swimbuzz/shared"
 import { athleteHrefForId, meetHrefForId, practiceHrefForId } from "@/lib/slug"
 import { sendExpoPushToUsers } from "@/lib/push"
 
@@ -169,7 +170,8 @@ export async function notifyAthleteOfProfileChangeDecision(input: {
 export async function notifyPracticePublished(input: {
   practiceId: string
   title: string
-  date: Date | null
+  startsAt: Date | null
+  timeZone: string
   focus: string | null
   excludeUserId?: string | null
 }): Promise<void> {
@@ -189,7 +191,7 @@ export async function notifyPracticePublished(input: {
   if (recipients.length === 0) return
 
   const details = [
-    input.date ? formatSwimDate(input.date) : null,
+    input.startsAt ? formatZonedInstant(input.startsAt, input.timeZone).date : null,
     input.focus?.trim() || null,
   ].filter(Boolean)
   const body = details.length > 0 ? details.join(" · ") : "A new practice is available."

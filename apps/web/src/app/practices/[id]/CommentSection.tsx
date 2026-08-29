@@ -17,6 +17,7 @@ export type CommentDTO = {
   body: string
   parentId: string | null
   createdAt: string
+  editedAt: string | null
 }
 
 type Thread = CommentDTO & { replies: CommentDTO[] }
@@ -100,7 +101,7 @@ function AttendedBadge() {
     <span className="group relative ml-1.5 inline-flex translate-y-[1px] items-center text-primary">
       <InfoIcon kind="attended" />
       <span className="sr-only">Attended</span>
-      <HoverDetail label="Attended" />
+      <HoverDetail label="Attended" placement="above" />
     </span>
   )
 }
@@ -251,7 +252,9 @@ export default function CommentSection({
   const threads = buildThreads(comments)
 
   function CommentBody({ comment }: { comment: CommentDTO }) {
-    const canManage = isCoach || comment.authorId === currentUserId
+    const isOwn = comment.authorId === currentUserId
+    const canEdit = isOwn
+    const canDelete = isCoach || isOwn
     const isEditing = editingComment?.id === comment.id
 
     return (
@@ -266,15 +269,22 @@ export default function CommentSection({
           <span className="font-medium text-foreground dark:text-foreground">
             {comment.authorName}
           </span>
-          {comment.authorStaffTitle && <StaffBadge title={comment.authorStaffTitle} />}
+          {comment.authorStaffTitle && (
+            <StaffBadge title={comment.authorStaffTitle} placement="above" />
+          )}
           {comment.authorId && attendedUsers.has(comment.authorId) && <AttendedBadge />}
           <span
             className="group relative ml-2 inline-block text-xs text-foreground-tertiary dark:text-foreground-tertiary"
             tabIndex={0}
           >
             {formatRelativeTime(comment.createdAt)}
-            <HoverDetail label={formatDateTime(comment.createdAt)} />
+            <HoverDetail label={formatDateTime(comment.createdAt)} placement="above" />
           </span>
+          {comment.editedAt && (
+            <span className="ml-1.5 text-xs text-foreground-tertiary dark:text-foreground-tertiary">
+              (edited)
+            </span>
+          )}
           {isEditing ? (
             <form onSubmit={handleEdit} className="relative mt-2.5 flex gap-2.5">
               <input
@@ -352,27 +362,27 @@ export default function CommentSection({
                   <ActionIcon kind="reply" className="h-5 w-5" />
                   <HoverDetail label="Reply" />
                 </button>
-                {canManage && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => startEdit(comment)}
-                      className="group relative inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground-tertiary transition-colors hover:bg-fill-secondary hover:text-foreground-secondary"
-                      aria-label="Edit comment"
-                    >
-                      <ActionIcon kind="edit" className="h-5 w-5" />
-                      <HoverDetail label="Edit" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDeleteConfirmId(comment.id)}
-                      className="group relative inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground-tertiary transition-colors hover:bg-red-50 hover:text-error dark:hover:bg-red-950/40"
-                      aria-label="Delete comment"
-                    >
-                      <ActionIcon kind="delete" className="h-5 w-5" />
-                      <HoverDetail label="Delete" />
-                    </button>
-                  </>
+                {canEdit && (
+                  <button
+                    type="button"
+                    onClick={() => startEdit(comment)}
+                    className="group relative inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground-tertiary transition-colors hover:bg-fill-secondary hover:text-foreground-secondary"
+                    aria-label="Edit comment"
+                  >
+                    <ActionIcon kind="edit" className="h-5 w-5" />
+                    <HoverDetail label="Edit" />
+                  </button>
+                )}
+                {canDelete && (
+                  <button
+                    type="button"
+                    onClick={() => setDeleteConfirmId(comment.id)}
+                    className="group relative inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground-tertiary transition-colors hover:bg-red-50 hover:text-error dark:hover:bg-red-950/40"
+                    aria-label="Delete comment"
+                  >
+                    <ActionIcon kind="delete" className="h-5 w-5" />
+                    <HoverDetail label="Delete" />
+                  </button>
                 )}
               </>
             )}

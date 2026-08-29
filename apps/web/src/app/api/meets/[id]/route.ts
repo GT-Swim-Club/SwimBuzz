@@ -42,13 +42,10 @@ import {
   swimsToMeetResults,
 } from "@/lib/meet-sheet-summary"
 import { isRelayResultsSummary } from "@/lib/relay-results"
+import { utcDayKey } from "@swimbuzz/shared"
 
 export const runtime = "nodejs"
 export const maxDuration = 300
-
-function toDateInput(d: Date): string {
-  return d.toISOString().slice(0, 10)
-}
 
 export async function GET(
   _req: Request,
@@ -116,8 +113,8 @@ export async function GET(
   const viewerAthleteId = linked?.id ?? null
 
   const ended = meetHasEndedFn({
-    startDate: meet.startDate,
-    endDate: meet.endDate,
+    startsAt: meet.startsAt ?? meet.createdAt,
+    endsAt: meet.endsAt,
   })
 
   const seasonAthletes = await prisma.athlete.findMany({
@@ -197,7 +194,7 @@ export async function GET(
         tags: s.tags,
         place: s.place,
         course: s.course,
-        date: toDateInput(s.date),
+        date: utcDayKey(s.date),
       }))
     ),
     isResultStatusesSummary(meet.resultStatusesSummary)
@@ -338,7 +335,14 @@ export async function PATCH(
 
   let data: Record<string, unknown> | null = null
   try {
-    data = buildMeetData(body)
+    data = buildMeetData(body, {
+      existing: {
+        startsAt: existing.startsAt,
+        endsAt: existing.endsAt,
+        timeZone: existing.timeZone,
+        hasStartTime: existing.hasStartTime,
+      },
+    })
     if (Object.keys(data).length === 0) {
       return NextResponse.json({ error: "No valid fields to update" }, { status: 400 })
     }

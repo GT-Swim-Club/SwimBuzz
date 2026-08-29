@@ -171,7 +171,16 @@ function cell(row: string[], headers: Map<string, number>, key: string): string 
 
 /** Parse a roster CSV into athlete rows. */
 export function parseRosterCsv(text: string): RosterCsvParseResult {
-  const records = parseCsvRecords(text).filter((cells) => cells.some((c) => c.trim()))
+  return parseRosterRecords(parseCsvRecords(text))
+}
+
+/**
+ * Parse already-tokenized rows (e.g. a Google Sheets API `values` grid) into
+ * athlete rows — shares all header-mapping/validation logic with parseRosterCsv,
+ * which just adds the CSV-text tokenization step in front of this.
+ */
+export function parseRosterRecords(rawRecords: string[][]): RosterCsvParseResult {
+  const records = rawRecords.filter((cells) => cells.some((c) => c.trim()))
 
   if (records.length === 0) {
     return { rows: [], errors: [{ row: 1, message: "CSV is empty" }] }

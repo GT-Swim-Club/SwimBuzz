@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Alert, Image, View } from "react-native"
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router"
-import { DEFAULT_TIME_ZONE, formatClockTimeInViewerZone, formatMeetDateRange, formatTime, isHtmlEmpty, utcDayKey, type IconName } from "@swimbuzz/shared"
+import { useLocalSearchParams, useRouter } from "expo-router"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { DEFAULT_TIME_ZONE, formatFullDate, formatMeetDateRange, formatTime, isHtmlEmpty, zonedDayKey, type IconName } from "@swimbuzz/shared"
 import {
   Body,
   Button,
@@ -34,6 +35,7 @@ import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 import { FormattedText } from "../../../src/components/FormattedText"
 import { Icon } from "../../../src/components/Icon"
 import { RelativeDateText } from "../../../src/components/RelativeDateText"
+import { ZonedTimeText } from "../../../src/components/ZonedTimeText"
 import { isExternalUrl } from "../../../src/lib/href"
 
 type ResourceLink = { label: string; url: string }
@@ -269,9 +271,6 @@ export default function MeetDetailScreen() {
   const router = useRouter()
   const c = usePalette()
   const tabBarPad = useTabBarScrollPadding()
-  const [meet, setMeet] = useState<Record<string, unknown> | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [selectedEvents, setSelectedEvents] = useState<string[]>([])
   const [signupNotes, setSignupNotes] = useState("")
   const [entryTimes, setEntryTimes] = useState<Record<string, string>>({})
@@ -299,28 +298,31 @@ export default function MeetDetailScreen() {
   const [savingRelayKey, setSavingRelayKey] = useState<string | null>(null)
   const [previewLink, setPreviewLink] = useState<ResourceLink | null>(null)
 
-  const load = useCallback(async () => {
-    if (!id) {
-      setLoading(false)
-      return
-    }
-    setError(null)
-    try {
-      const data = await api.getMeet(id)
-      setMeet(data)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load meet")
-      setMeet(null)
-    } finally {
-      setLoading(false)
-    }
-  }, [id])
+  const queryClient = useQueryClient()
+  const meetQueryKey = ["meet", id] as const
 
-  useFocusEffect(
-    useCallback(() => {
-      void load()
-    }, [load])
-  )
+  const {
+    data: meet,
+    isPending,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: meetQueryKey,
+    queryFn: () => api.getMeet(id as string),
+    enabled: Boolean(id),
+  })
+  const load = refetch
+
+  /** Apply an optimistic patch to the cached meet, returning a rollback. */
+  function patchMeetOptimistically(
+    patch: (old: Record<string, unknown>) => Record<string, unknown>
+  ) {
+    const previous = queryClient.getQueryData(meetQueryKey)
+    queryClient.setQueryData(meetQueryKey, (old: Record<string, unknown> | undefined) =>
+      old ? patch(old) : old
+    )
+    return () => queryClient.setQueryData(meetQueryKey, previous)
+  }
 
   const signup = asRecord(meet?.signup)
   const signupForm = asRecord(signup?.form)
@@ -363,7 +365,15 @@ export default function MeetDetailScreen() {
     setPreferredIds(asStringArray(myPreference?.preferredAthleteIds))
   }, [myPreference?.id, myPreference?.preferredAthleteIds])
 
-  if (loading) {
+  if (!id) {
+    return (
+      <Screen>
+        <ErrorBlock message="Not found" />
+      </Screen>
+    )
+  }
+
+  if (isPending) {
     return (
       <Screen>
         <LoadingBlock />
@@ -374,38 +384,39 @@ export default function MeetDetailScreen() {
   if (!meet) {
     return (
       <Screen>
-        <ErrorBlock message={error ?? "Not found"} />
+        <ErrorBlock
+          message={error instanceof Error ? error.message : "Failed to load meet"}
+        />
       </Screen>
     )
   }
 
   const name = String(meet.name ?? "Meet")
-  const startDate = String(meet.startDate ?? "")
-  const endDate = meet.endDate ? String(meet.endDate) : null
+  const startsAt = String(meet.startsAt ?? "")
+  const endsAt = meet.endsAt ? String(meet.endsAt) : null
+  const timeZone = typeof meet.timeZone === "string" && meet.timeZone ? meet.timeZone : DEFAULT_TIME_ZONE
+  const hasStartTime = Boolean(meet.hasStartTime)
   const location = meet.location ? String(meet.location) : null
   const course = meet.course ? String(meet.course) : null
   const school = meet.school ? String(meet.school) : null
-  const dateRangeAbsolute = formatMeetDateRange(startDate, endDate)
+  const dateRangeAbsolute = formatMeetDateRange(startsAt, endsAt, timeZone)
   // Only a single-day meet collapses to "Today" — a multi-day range always stays
   // absolute, since a relative label would silently drop the end date.
-  const dateRangeSingleDay = !endDate || utcDayKey(startDate) === utcDayKey(endDate)
+  const dateRangeSingleDay = !endsAt || zonedDayKey(startsAt, timeZone) === zonedDayKey(endsAt, timeZone)
   const dateRangeSegment = (style: { fontSize: number; color: string }) =>
     dateRangeSingleDay ? (
-      <RelativeDateText value={startDate} kind="event" absolute={dateRangeAbsolute} style={style} />
+      <RelativeDateText
+        value={startsAt}
+        kind="event"
+        timeZone={timeZone}
+        absolute={formatFullDate(startsAt, timeZone)}
+        style={style}
+      />
     ) : (
       dateRangeAbsolute
     )
-  const startTime =
-    typeof meet.startTime === "string" && meet.startTime.trim()
-      ? (() => {
-          const zoned = formatClockTimeInViewerZone(
-            startDate ? startDate.slice(0, 10) : new Date().toISOString().slice(0, 10),
-            meet.startTime.trim(),
-            typeof meet.timeZone === "string" && meet.timeZone ? meet.timeZone : DEFAULT_TIME_ZONE
-          )
-          return `${zoned.text} ${zoned.abbrev}`
-        })()
-      : null
+  const startTimeSegment = (style: { fontSize: number; color: string }) =>
+    hasStartTime ? <ZonedTimeText startsAt={startsAt} timeZone={timeZone} style={style} /> : null
   const iconUrl =
     typeof meet.iconUrl === "string" && isExternalUrl(meet.iconUrl)
       ? meet.iconUrl.trim()
@@ -504,12 +515,25 @@ export default function MeetDetailScreen() {
   async function saveSignup() {
     if (!id) return
     setSavingSignup(true)
+    const times: Record<string, string> = {}
+    for (const event of selectedEvents) {
+      const time = entryTimes[event]?.trim()
+      if (time) times[event] = time
+    }
+    const rollback = patchMeetOptimistically((old) => ({
+      ...old,
+      signup: {
+        ...asRecord(old.signup),
+        myEntry: {
+          events: selectedEvents,
+          entryTimes: times,
+          notes: signupNotes,
+          answers: signupAnswers,
+          updatedAt: new Date().toISOString(),
+        },
+      },
+    }))
     try {
-      const times: Record<string, string> = {}
-      for (const event of selectedEvents) {
-        const time = entryTimes[event]?.trim()
-        if (time) times[event] = time
-      }
       await api.putSignupEntry(id, {
         events: selectedEvents,
         entryTimes: times,
@@ -519,6 +543,7 @@ export default function MeetDetailScreen() {
       await load()
       Alert.alert("Saved", "Your signup was updated.")
     } catch (err) {
+      rollback()
       Alert.alert(
         "Could not save signup",
         err instanceof Error ? err.message : "Something went wrong"
@@ -531,6 +556,10 @@ export default function MeetDetailScreen() {
   async function withdrawSignup() {
     if (!id) return
     setSavingSignup(true)
+    const rollback = patchMeetOptimistically((old) => ({
+      ...old,
+      signup: { ...asRecord(old.signup), myEntry: null },
+    }))
     try {
       await api.deleteSignupEntry(id)
       setSelectedEvents([])
@@ -540,6 +569,7 @@ export default function MeetDetailScreen() {
       await load()
       Alert.alert("Withdrawn", "Your signup entry was removed.")
     } catch (err) {
+      rollback()
       Alert.alert(
         "Could not withdraw",
         err instanceof Error ? err.message : "Something went wrong"
@@ -552,6 +582,19 @@ export default function MeetDetailScreen() {
   async function saveRoomPreference() {
     if (!id) return
     setSavingRooms(true)
+    const rollback = patchMeetOptimistically((old) => ({
+      ...old,
+      rooms: {
+        ...asRecord(old.rooms),
+        myPreference: {
+          ...asRecord(asRecord(old.rooms)?.myPreference),
+          preferredAthleteIds: preferredIds,
+          excludedAthleteIds: asStringArray(myPreference?.excludedAthleteIds),
+          notes: typeof myPreference?.notes === "string" ? myPreference.notes : "",
+          updatedAt: new Date().toISOString(),
+        },
+      },
+    }))
     try {
       await api.putRoomPreference(id, {
         preferredAthleteIds: preferredIds,
@@ -562,6 +605,7 @@ export default function MeetDetailScreen() {
       await load()
       Alert.alert("Saved", "Your roommate preferences were updated.")
     } catch (err) {
+      rollback()
       Alert.alert(
         "Could not save preferences",
         err instanceof Error ? err.message : "Something went wrong"
@@ -846,7 +890,7 @@ export default function MeetDetailScreen() {
                 textStyle={{ fontSize: 14, color: c.textSecondary }}
                 segments={[
                   dateRangeSegment({ fontSize: 14, color: c.textSecondary }),
-                  startTime,
+                  startTimeSegment({ fontSize: 14, color: c.textSecondary }),
                   location,
                   course,
                   school,
@@ -856,11 +900,18 @@ export default function MeetDetailScreen() {
           </View>
         </View>
 
-        {error ? <ErrorBlock message={error} /> : null}
+        {error ? (
+          <ErrorBlock message={error instanceof Error ? error.message : "Failed to load meet"} />
+        ) : null}
 
         <Section title="Details">
           <MetaRow label="Dates" value={dateRangeSegment({ fontSize: 14, color: c.text })} />
-          {startTime ? <MetaRow label="Start time" value={startTime} /> : null}
+          {hasStartTime ? (
+            <MetaRow
+              label="Start time"
+              value={startTimeSegment({ fontSize: 14, color: c.text })}
+            />
+          ) : null}
           {location ? <MetaRow label="Location" value={location} /> : null}
           {course ? <MetaRow label="Course" value={course} /> : null}
           {school ? <MetaRow label="School" value={school} /> : null}

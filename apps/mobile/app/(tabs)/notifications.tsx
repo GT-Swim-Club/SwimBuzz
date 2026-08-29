@@ -1,4 +1,3 @@
-import { useCallback, useState } from "react"
 import {
   ActivityIndicator,
   FlatList,
@@ -6,7 +5,8 @@ import {
   RefreshControl,
   View,
 } from "react-native"
-import { useFocusEffect, useRouter } from "expo-router"
+import { useRouter } from "expo-router"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { formatDateTime, type NotificationItem } from "@swimbuzz/shared"
 import { Button, EmptyState, ListRow, Screen, Title, usePalette } from "@swimbuzz/ui"
 import { colors, spacing } from "@swimbuzz/tokens"
@@ -17,39 +17,36 @@ import { RelativeDateText } from "../../src/components/RelativeDateText"
 export default function NotificationsScreen() {
   const router = useRouter()
   const c = usePalette()
-  const [items, setItems] = useState<NotificationItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const load = useCallback(async () => {
-    setError(null)
-    try {
-      const data = await api.listNotifications()
-      setItems(data.notifications)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load notifications")
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useFocusEffect(
-    useCallback(() => {
-      void load()
-    }, [load])
-  )
+  // Shared ["notifications"] key with notifications/index.tsx and
+  // AppHeader's unread badge — one request instead of one per consumer.
+  const {
+    data,
+    isPending,
+    isFetching,
+    error,
+    refetch,
+  } = useQuery({ queryKey: ["notifications"], queryFn: () => api.listNotifications() })
+  const items = data?.notifications ?? []
 
   async function onOpen(item: NotificationItem) {
     if (!item.readAt) {
+      const previous = queryClient.getQueryData(["notifications"])
+      queryClient.setQueryData(
+        ["notifications"],
+        (old: typeof data) =>
+          old && {
+            ...old,
+            notifications: old.notifications.map((n) =>
+              n.id === item.id ? { ...n, readAt: new Date().toISOString() } : n
+            ),
+          }
+      )
       try {
         await api.markNotificationRead(item.id)
-        setItems((prev) =>
-          prev.map((n) =>
-            n.id === item.id ? { ...n, readAt: new Date().toISOString() } : n
-          )
-        )
       } catch {
-        // ignore
+        queryClient.setQueryData(["notifications"], previous)
       }
     }
     if (!item.href) return
@@ -66,7 +63,7 @@ export default function NotificationsScreen() {
 
   async function markAll() {
     await api.markAllNotificationsRead()
-    await load()
+    await refetch()
   }
 
   return (
@@ -75,7 +72,7 @@ export default function NotificationsScreen() {
       <View style={{ marginBottom: spacing.sm }}>
         <Button label="Mark all read" variant="secondary" onPress={() => void markAll()} />
       </View>
-      {loading && items.length === 0 ? (
+      {isPending ? (
         <View style={{ paddingTop: 40 }}>
           <ActivityIndicator color={colors.light.primaryActive} />
         </View>
@@ -84,12 +81,12 @@ export default function NotificationsScreen() {
           data={items}
           keyExtractor={(item) => item.id}
           refreshControl={
-            <RefreshControl refreshing={loading} onRefresh={load} />
+            <RefreshControl refreshing={isFetching} onRefresh={refetch} />
           }
           ListEmptyComponent={
             <EmptyState
               title={error ? "Could not load notifications" : "You're all caught up"}
-              body={error ?? undefined}
+              body={error instanceof Error ? error.message : undefined}
             />
           }
           renderItem={({ item }) => (

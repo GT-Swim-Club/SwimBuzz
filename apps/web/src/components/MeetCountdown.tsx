@@ -1,24 +1,6 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { DEFAULT_TIME_ZONE, zonedTimeToUtc } from "@swimbuzz/shared"
-
-/**
- * Resolve a meet's UTC-midnight startDate + wall-clock startTime into the actual instant
- * it represents, interpreting startTime in the meet's own timeZone (not the viewer's) so the
- * countdown is correct for every viewer regardless of their device's time zone.
- */
-export function meetStartDateTime(
-  startDate: Date | string,
-  startTime: string | null | undefined,
-  timeZone: string = DEFAULT_TIME_ZONE
-): Date | null {
-  if (!startTime || !/^\d{2}:\d{2}$/.test(startTime)) return null
-  const day = new Date(startDate).toISOString().slice(0, 10)
-  const target = zonedTimeToUtc(day, startTime, timeZone)
-  if (isNaN(target.getTime())) return null
-  return target
-}
 
 type Parts = { days: number; hours: number; minutes: number; seconds: number }
 
@@ -209,23 +191,20 @@ function CountdownUnits({
 }
 
 export default function MeetCountdown({
-  startDate,
-  startTime,
-  timeZone,
+  startsAt,
   upcoming = true,
   variant = "pill",
   className = "",
 }: {
-  startDate: Date | string
-  startTime: string | null | undefined
-  /** IANA zone startTime is a wall-clock time in; defaults to the club's home zone. */
-  timeZone?: string | null
+  /** The meet's start instant (already resolved from the meet's own time zone). */
+  startsAt: Date | string
   /** When true and countdown isn't active, show the Upcoming pill (pill variant only). */
   upcoming?: boolean
   variant?: Variant
   className?: string
 }) {
-  const targetMs = meetStartDateTime(startDate, startTime, timeZone ?? undefined)?.getTime() ?? null
+  const target = new Date(startsAt)
+  const targetMs = Number.isNaN(target.getTime()) ? null : target.getTime()
   // null until mounted to avoid SSR/client clock hydration mismatches
   const [now, setNow] = useState<number | null>(null)
 

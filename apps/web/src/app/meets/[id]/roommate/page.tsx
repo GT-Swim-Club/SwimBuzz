@@ -29,8 +29,9 @@ export default async function MeetRoommatePreferencePage({
       name: true,
       location: true,
       season: true,
-      startDate: true,
-      endDate: true,
+      createdAt: true,
+      startsAt: true,
+      endsAt: true,
       psychSheetSummary: true,
       heatSheetSummary: true,
       finalsHeatSheetSummary: true,
@@ -68,7 +69,7 @@ export default async function MeetRoommatePreferencePage({
   const now = new Date()
   const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
   yesterday.setHours(0, 0, 0, 0)
-  const lastActiveDate = new Date(meet.endDate ?? meet.startDate)
+  const lastActiveDate = new Date(meet.endsAt ?? meet.startsAt ?? meet.createdAt)
   lastActiveDate.setHours(0, 0, 0, 0)
   if (lastActiveDate <= yesterday) redirect(meetPath)
 

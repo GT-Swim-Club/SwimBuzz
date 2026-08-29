@@ -3,18 +3,12 @@
 import { useSyncExternalStore, type ReactNode } from "react"
 import {
   DEFAULT_TIME_ZONE,
-  formatClockTimeInViewerZone,
-  formatClockTimeRangeInViewerZone,
+  describeZones,
+  formatZonedInstantRange,
   getViewerTimeZone,
-  zoneAbbreviation,
-  zoneDisplayName,
+  type ZoneDescription,
 } from "@swimbuzz/shared"
 import HoverDetail from "@/components/HoverDetail"
-
-function isoDate(value: string | null | undefined): string {
-  if (value && /^\d{4}-\d{2}-\d{2}$/.test(value)) return value
-  return new Date().toISOString().slice(0, 10)
-}
 
 function noopSubscribe() {
   return () => {}
@@ -29,33 +23,36 @@ export function useViewerTimeZone(): string {
   return useSyncExternalStore(noopSubscribe, getViewerTimeZone, () => DEFAULT_TIME_ZONE)
 }
 
+/** One hover-tooltip line per zone block, e.g. "August 21, 2026, 7:30 – 9:00 PM EDT". */
+export function zoneDescriptionLines(description: ZoneDescription): string[] {
+  return description.blocks.map((block) => `${block.dateTime} ${block.abbrev}`)
+}
+
 /**
- * Displays a Practice/Meet wall-clock time (or start–end range) converted from the
- * record's own `sourceTimeZone` into the viewer's current time zone, with a hover
- * tooltip naming that zone. Pass `endTime` for a range, omit it for a single time.
+ * Displays a Practice/Meet wall-clock time (or start–end range) in the record's own
+ * `timeZone` — never converted into the viewer's zone — with the zone abbreviation
+ * appended (e.g. "10:30 PM – 1:00 AM EDT") and a hover tooltip showing both the
+ * record's zone and the viewer's zone (via `describeZones`) when they differ.
  */
 export function ZonedClockTime({
-  date,
-  startTime,
-  endTime,
-  sourceTimeZone,
+  startsAt,
+  endsAt,
+  timeZone,
   className,
 }: {
-  date: string | null | undefined
-  startTime: string
-  endTime?: string | null
-  sourceTimeZone: string
+  startsAt: string | Date
+  endsAt?: string | Date | null
+  timeZone: string
   className?: string
 }) {
   const viewerTimeZone = useViewerTimeZone()
-  const effectiveDate = isoDate(date)
-  const result = endTime
-    ? formatClockTimeRangeInViewerZone(effectiveDate, startTime, endTime, sourceTimeZone, viewerTimeZone)
-    : formatClockTimeInViewerZone(effectiveDate, startTime, sourceTimeZone, viewerTimeZone)
+  const range = formatZonedInstantRange(startsAt, endsAt, timeZone)
+  const zones = describeZones(startsAt, endsAt, timeZone)
   return (
     <span className={`group relative inline-block ${className ?? ""}`.trim()} tabIndex={0}>
-      {result.text}
-      <HoverDetail label={`${result.zoneName} (${result.abbrev})`} />
+      {range.time}
+      {viewerTimeZone !== timeZone ? ` ${range.abbrev}` : ""}
+      <HoverDetail label={zoneDescriptionLines(zones)} />
     </span>
   )
 }
@@ -63,8 +60,9 @@ export function ZonedClockTime({
 /**
  * Wraps already-formatted text derived from a true instant (e.g. formatClockTime/
  * formatDateTime output for createdAt, recordedAt, openAt/closeAt) with a hover
- * tooltip naming the viewer's current time zone, since those values already render
- * in the browser's local zone natively — they just need the label.
+ * tooltip. Those values already render in the browser's local zone natively — the
+ * tooltip names that zone, plus the club's default zone when they differ, via
+ * `describeZones`.
  */
 export function ZonedInstantTime({
   children,
@@ -78,12 +76,11 @@ export function ZonedInstantTime({
   const viewerTimeZone = useViewerTimeZone()
   const instant = at ? new Date(at) : new Date()
   const validInstant = Number.isNaN(instant.getTime()) ? new Date() : instant
+  const zones = describeZones(validInstant, null, viewerTimeZone, DEFAULT_TIME_ZONE)
   return (
     <span className={`group relative inline-block ${className ?? ""}`.trim()} tabIndex={0}>
       {children}
-      <HoverDetail
-        label={`${zoneDisplayName(viewerTimeZone, validInstant)} (${zoneAbbreviation(viewerTimeZone, validInstant)})`}
-      />
+      <HoverDetail label={zoneDescriptionLines(zones)} />
     </span>
   )
 }

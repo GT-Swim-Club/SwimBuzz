@@ -2,7 +2,7 @@
 
 import { type KeyboardEvent, type ReactNode, type RefObject, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
-import { formatClockTime } from "@swimbuzz/shared"
+import { formatClockTime, US_TIME_ZONES, zoneAbbreviation, zoneDisplayName } from "@swimbuzz/shared"
 
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"]
 const HOURS = Array.from({ length: 12 }, (_, index) => index + 1)
@@ -38,8 +38,6 @@ type TimePickerProps = {
   min?: string
   /** When true with `min`, the min time itself is not selectable. */
   minExclusive?: boolean
-  /** Small caption under the field naming the zone the time is being entered in, e.g. "Eastern Time (EDT)". */
-  zoneLabel?: string
 }
 
 type Period = "AM" | "PM"
@@ -658,7 +656,6 @@ export function TimePicker({
   hasError = false,
   min,
   minExclusive = false,
-  zoneLabel,
 }: TimePickerProps) {
   const initial = parseTime(value) ?? roundedNow()
   const [hour, setHour] = useState(initial.hour)
@@ -787,9 +784,6 @@ export function TimePicker({
         onFieldClick={openForInput}
         onPickerClick={togglePicker}
       />
-      {zoneLabel && (
-        <p className="mt-1 text-[11px] text-foreground-tertiary">Time zone: {zoneLabel}</p>
-      )}
       <FloatingPopover open={floating.open} panelRef={floating.panelRef} position={floating.position} width={256} scrollable={false}>
         <div className="mb-2 grid grid-cols-2 rounded-md bg-fill-secondary p-0.5">
           {(["AM", "PM"] as Period[]).map((option) => (
@@ -887,5 +881,66 @@ export function TimePicker({
         </div>
       </FloatingPopover>
     </div>
+  )
+}
+
+type TimeZonePickerProps = {
+  value: string
+  onChange: (value: string) => void
+  ariaLabel: string
+  disabled?: boolean
+  /** Show a validation error supplied by the calling form. */
+  hasError?: boolean
+  className?: string
+}
+
+function timeZoneOptionLabel(zone: string) {
+  return `${zoneDisplayName(zone)} (${zoneAbbreviation(zone)})`
+}
+
+function useTimeZoneOptions(currentValue: string) {
+  return useMemo(() => {
+    const zones = [...US_TIME_ZONES]
+    if (currentValue && !zones.includes(currentValue)) zones.push(currentValue)
+    return zones
+  }, [currentValue])
+}
+
+/**
+ * Time zone dropdown for Practice/Meet forms — the club only operates within the US,
+ * so the options are limited to `US_TIME_ZONES`. Each option is labeled with the
+ * zone's friendly name and current abbreviation (e.g. "Eastern Daylight Time (EDT)"),
+ * evaluated as of "now" since a form has no fixed instant to resolve the abbreviation
+ * against yet.
+ */
+export function TimeZonePicker({
+  value,
+  onChange,
+  ariaLabel,
+  disabled = false,
+  hasError = false,
+  className = "",
+}: TimeZonePickerProps) {
+  const zones = useTimeZoneOptions(value)
+
+  return (
+    <select
+      aria-label={ariaLabel}
+      aria-invalid={hasError || undefined}
+      disabled={disabled}
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      className={`w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50 ${
+        hasError
+          ? "border-error focus:border-error focus:ring-error/10"
+          : "border-border focus:border-primary focus:ring-primary/10"
+      } ${className}`.trim()}
+    >
+      {zones.map((zone) => (
+        <option key={zone} value={zone}>
+          {timeZoneOptionLabel(zone)}
+        </option>
+      ))}
+    </select>
   )
 }

@@ -3,6 +3,7 @@ import { parseNotificationPreferences } from "@/lib/notification-preferences"
 import { prisma } from "@/lib/prisma"
 import { meetHrefForId } from "@/lib/slug"
 import { sendExpoPushToUsers } from "@/lib/push"
+import { DEFAULT_TIME_ZONE, formatZonedInstant } from "@swimbuzz/shared"
 
 function isSignupWindowOpen(
   openAt: Date | null,
@@ -38,7 +39,9 @@ async function claimMonitorEvent(
 async function notifyMeetSignupOpeningSoon(
   meetId: string,
   meetName: string,
-  advanceMinutes: number
+  advanceMinutes: number,
+  openAt: Date,
+  timeZone: string
 ) {
   const users = await prisma.user.findMany({
     select: { id: true, notificationPreferences: true },
@@ -58,8 +61,9 @@ async function notifyMeetSignupOpeningSoon(
   if (recipients.length === 0) return
 
   const href = await meetHrefForId(meetId)
+  const { time, abbrev } = formatZonedInstant(openAt, timeZone)
   const title = `Signup opening soon: ${meetName}`
-  const body = `Signup will open in ${advanceMinutes} minute${advanceMinutes === 1 ? "" : "s"}.`
+  const body = `Signup opens in ${advanceMinutes} minute${advanceMinutes === 1 ? "" : "s"}, at ${time} ${abbrev}.`
 
   await prisma.notification.createMany({
     data: recipients.map((userId) => ({
@@ -126,7 +130,7 @@ export async function checkSignupStatus(): Promise<{
       id: true,
       name: true,
       signupForm: {
-        select: { openAt: true, closeAt: true },
+        select: { openAt: true, closeAt: true, timeZone: true },
       },
     },
   })
@@ -169,7 +173,9 @@ export async function checkSignupStatus(): Promise<{
           await notifyMeetSignupOpeningSoon(
             meet.id,
             meet.name,
-            advanceMinutes
+            advanceMinutes,
+            meet.signupForm.openAt,
+            meet.signupForm.timeZone ?? DEFAULT_TIME_ZONE
           )
           advance += 1
         }

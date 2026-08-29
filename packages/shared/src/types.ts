@@ -15,22 +15,25 @@ export type MeetSummary = {
   slug?: string | null
   name: string
   location?: string | null
-  startDate: string
-  endDate?: string | null
+  startsAt: string
+  endsAt?: string | null
+  hasStartTime: boolean
+  timeZone: string
   course: string
   season: string
   iconUrl?: string | null
   bannerUrl?: string | null
   _count?: { swims: number }
+  /** Distinct roster athletes on this meet (sheets + signups + swims), when computed by the server. */
+  athleteCount?: number
 }
 
 export type PracticeSummary = {
   id: string
   slug?: string | null
   title: string
-  date?: string | null
-  startTime: string
-  endTime: string
+  startsAt: string
+  endsAt: string
   timeZone: string
   location: string
   focus?: string | null
@@ -38,6 +41,8 @@ export type PracticeSummary = {
   published: boolean
   sets?: Array<{ distance?: number | null; title?: string | null }>
   _count?: { sets: number }
+  /** Sum of set distances, when computed by the server instead of the `sets` array. */
+  totalDistance?: number
 }
 
 export type AthleteSummary = {

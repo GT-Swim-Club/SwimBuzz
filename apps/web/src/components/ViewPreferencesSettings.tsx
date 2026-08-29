@@ -1,9 +1,9 @@
 "use client"
-import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 import HoverDetail from "@/components/HoverDetail"
 import { AppIcon } from "@/components/AppIcon"
 import { SegmentedToggle, segmentedIconOptionClass } from "@/components/SegmentedToggle"
+import { updateViewPreference } from "./ViewPreferencesSettings.actions"
 
 export default function ViewPreferencesSettings({ 
   defaultView,
@@ -12,44 +12,35 @@ export default function ViewPreferencesSettings({
   defaultView: string
   defaultPracticesView: string
 }) {
-  const router = useRouter()
   const [view, setView] = useState(defaultView)
   const [practicesView, setPracticesView] = useState(defaultPracticesView)
   const [pending, startTransition] = useTransition()
 
   function updateView(newView: string) {
     if (newView === view) return
+    const previous = view
     setView(newView)
 
     startTransition(async () => {
-      const res = await fetch("/api/user/view-preference", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ defaultView: newView }),
-      })
-      if (!res.ok) {
-        setView(view)
-        return
+      try {
+        await updateViewPreference({ defaultView: newView })
+      } catch {
+        setView(previous)
       }
-      router.refresh()
     })
   }
-  
+
   function updatePracticesView(newView: string) {
     if (newView === practicesView) return
+    const previous = practicesView
     setPracticesView(newView)
 
     startTransition(async () => {
-      const res = await fetch("/api/user/view-preference", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ defaultPracticesView: newView }),
-      })
-      if (!res.ok) {
-        setPracticesView(practicesView)
-        return
+      try {
+        await updateViewPreference({ defaultPracticesView: newView })
+      } catch {
+        setPracticesView(previous)
       }
-      router.refresh()
     })
   }
 

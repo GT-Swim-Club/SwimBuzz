@@ -19,10 +19,11 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const meets = await prisma.meet.findMany({
-    orderBy: { startDate: "desc" },
+    orderBy: { startsAt: "desc" },
     include: { _count: { select: { swims: true } }}})
 
-  return NextResponse.json(meets)
+  return NextResponse.json(meets, {
+    headers: { "Cache-Control": "private, max-age=30, stale-while-revalidate=300" }})
 }
 
 export async function POST(req: Request) {

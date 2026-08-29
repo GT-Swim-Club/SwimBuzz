@@ -2,19 +2,13 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { formatDateRange } from "@/lib/utils"
 import { RelativeDateRange } from "@/components/RelativeDate"
-import { countMeetAthletes } from "@/lib/meet-sheet-summary"
 import MeetGalleryCard from "./MeetGalleryCard"
 import EditMeetButton from "./EditMeetButton"
 import { type MeetFormState } from "./MeetFields"
 import { meetPath } from "@/lib/slug"
 import MeetCountdown from "@/components/MeetCountdown"
-
-function toDateInput(d: Date | null | undefined): string {
-  if (!d) return ""
-  return new Date(d).toISOString().slice(0, 10)
-}
+import { toDateInput, toTimeInput } from "@/lib/date-input"
 
 export default function MeetsClientWrapper({
   meets,
@@ -61,24 +55,16 @@ export default function MeetsClientWrapper({
               {view === "list" ? (
                 <div className="divide-y divide-border-secondary border border-border border-border-secondary-secondary rounded-xl overflow-hidden bg-background">
                   {seasonMeets.map((m: any) => {
-                    const end = m.endDate ?? m.startDate
+                    const end = m.endsAt ?? m.startsAt
                     const upcoming = new Date(end).getTime() >= now
-                    const athleteCount = countMeetAthletes({
-                      psychSheetSummary: m.psychSheetSummary,
-                      heatSheetSummary: m.heatSheetSummary,
-                      finalsHeatSheetSummary: m.finalsHeatSheetSummary,
-                      entriesSheetSummary: m.entriesSheetSummary,
-                      relayResultsSummary: m.relayResultsSummary,
-                      resultStatusesSummary: m.resultStatusesSummary,
-                      swimAthleteIds: m.swims.map((s: any) => s.athleteId),
-                    })
+                    const athleteCount = m.athleteCount ?? 0
                     const initial: MeetFormState = {
                       name: m.name,
                       location: m.location ?? "",
-                      startDate: toDateInput(m.startDate),
-                      startTime: m.startTime ?? "",
+                      startDate: toDateInput(m.startsAt, m.timeZone),
+                      startTime: m.hasStartTime ? toTimeInput(m.startsAt, m.timeZone) : "",
                       timeZone: m.timeZone,
-                      endDate: toDateInput(m.endDate),
+                      endDate: toDateInput(m.endsAt, m.timeZone),
                       course: m.course,
                       season: m.season,
                       school: m.school ?? "",
@@ -104,20 +90,18 @@ export default function MeetsClientWrapper({
                               <p className="font-medium text-sm text-foreground truncate">
                                 {m.name}
                               </p>
-                              {upcoming && (
+                              {upcoming && m.hasStartTime && (
                                 <MeetCountdown
-                                  startDate={m.startDate}
-                                  startTime={m.startTime}
-                                  timeZone={m.timeZone}
+                                  startsAt={m.startsAt}
                                   upcoming
                                 />
                               )}
                             </div>
                             <p className="text-xs text-foreground-secondary">
                               <RelativeDateRange
-                                start={m.startDate}
-                                end={m.endDate}
-                                absolute={formatDateRange(m.startDate, m.endDate)}
+                                startsAt={m.startsAt}
+                                endsAt={m.endsAt}
+                                timeZone={m.timeZone}
                               />
                               {m.location ? ` · ${m.location}` : ""}
                               {m.school ? ` · ${m.school}` : ""}
@@ -142,15 +126,15 @@ export default function MeetsClientWrapper({
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 2xl:grid-cols-5 gap-4">
                   {seasonMeets.map((m: any) => {
-                    const end = m.endDate ?? m.startDate
+                    const end = m.endsAt ?? m.startsAt
                     const upcoming = new Date(end).getTime() >= now
                     const initial: MeetFormState = {
                       name: m.name,
                       location: m.location ?? "",
-                      startDate: toDateInput(m.startDate),
-                      startTime: m.startTime ?? "",
+                      startDate: toDateInput(m.startsAt, m.timeZone),
+                      startTime: m.hasStartTime ? toTimeInput(m.startsAt, m.timeZone) : "",
                       timeZone: m.timeZone,
-                      endDate: toDateInput(m.endDate),
+                      endDate: toDateInput(m.endsAt, m.timeZone),
                       course: m.course,
                       season: m.season,
                       school: m.school ?? "",

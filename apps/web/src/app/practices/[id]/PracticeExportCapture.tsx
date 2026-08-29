@@ -1,7 +1,6 @@
 "use client"
 
-import { formatSwimDate } from "@/lib/utils"
-import { formatClockTimeRange, zoneAbbreviation, zonedTimeToUtc } from "@swimbuzz/shared"
+import { formatZonedInstantRange } from "@swimbuzz/shared"
 import { FormattedText, isHtmlEmpty } from "@/components/FormattedText"
 import InfoIcon from "@/components/InfoIcon"
 
@@ -16,9 +15,8 @@ type PracticeExportSet = {
 export default function PracticeExportCapture({
   title,
   showDraft,
-  dateIso,
-  startTime,
-  endTime,
+  startsAt,
+  endsAt,
   timeZone,
   location,
   focus,
@@ -28,9 +26,8 @@ export default function PracticeExportCapture({
 }: {
   title: string
   showDraft: boolean
-  dateIso: string | null
-  startTime: string
-  endTime: string
+  startsAt: string
+  endsAt: string
   timeZone: string
   location: string
   focus: string | null
@@ -41,9 +38,7 @@ export default function PracticeExportCapture({
   const hasFocus = Boolean(focus && !isHtmlEmpty(focus))
   // Exports are static/shareable, so they always show the practice's own zone rather
   // than whichever viewer happens to be exporting it.
-  const zoneAbbrev = (startTime || endTime)
-    ? zoneAbbreviation(timeZone, zonedTimeToUtc(dateIso ? dateIso.slice(0, 10) : new Date().toISOString().slice(0, 10), startTime || endTime, timeZone))
-    : null
+  const range = formatZonedInstantRange(startsAt, endsAt, timeZone)
 
   return (
     <div className="w-[896px] space-y-5 bg-background p-8 text-base text-foreground">
@@ -61,8 +56,7 @@ export default function PracticeExportCapture({
         <div className="mt-1 text-lg text-foreground-secondary">
           <div className="flex items-center gap-1.5">
             <InfoIcon kind="calendar" />
-            {dateIso ? formatSwimDate(dateIso) : "No date"}
-            {startTime || endTime ? ` · ${formatClockTimeRange(startTime, endTime)}${zoneAbbrev ? ` ${zoneAbbrev}` : ""}` : ""}
+            {range.date} · {range.time} {range.abbrev}
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
             {location && (

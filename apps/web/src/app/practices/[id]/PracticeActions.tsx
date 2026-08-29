@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import type { PracticeFormState } from "../PracticeEditor"
@@ -13,6 +13,7 @@ import {
   storePracticeEditLockHandoff,
   broadcastPracticeEditLockYield,
 } from "@/lib/practice-edit-lock-client"
+import { deletePractice, setPracticePublished } from "./PracticeActions.actions"
 
 const iconCls = "h-3.5 w-3.5 shrink-0"
 
@@ -80,7 +81,9 @@ export default function PracticeActions({
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [editLockPending, setEditLockPending] = useState<PracticeEditLockInfo | null>(null)
   const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const busy = loading || isPending
 
   // Any active lock blocks this tab until it takes over (other user or other tab).
   const lockedElsewhere = Boolean(editLock?.locked)
@@ -134,48 +137,36 @@ export default function PracticeActions({
     void acquireEditLock(true)
   }
 
-  async function togglePublished(next: boolean) {
-    setLoading(true)
+  function togglePublished(next: boolean) {
     setError(null)
-    try {
-      const res = await fetch(`/api/practices/${practiceId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...initial, published: next }),
-      })
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        if (data.lock) onLockChange(data.lock)
-        setError(data.error ?? "Failed to update practice")
-        setLoading(false)
-        return
+    startTransition(async () => {
+      try {
+        const result = await setPracticePublished(practiceId, initial, next)
+        if (!result.ok) {
+          if (result.lock) onLockChange(result.lock)
+          setError(result.error)
+        }
+      } catch {
+        setError("Something went wrong")
       }
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
-  async function handleDelete() {
-    setLoading(true)
+  function handleDelete() {
     setError(null)
-    try {
-      const res = await fetch(`/api/practices/${practiceId}`, { method: "DELETE" })
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        if (data.lock) onLockChange(data.lock)
-        setError(data.error ?? "Failed to delete practice")
-        setLoading(false)
-        return
+    startTransition(async () => {
+      try {
+        const result = await deletePractice(practiceId)
+        if (!result.ok) {
+          if (result.lock) onLockChange(result.lock)
+          setError(result.error)
+          return
+        }
+        router.push("/practices")
+      } catch {
+        setError("Something went wrong")
       }
-      router.push("/practices")
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
-      setLoading(false)
-    }
+    })
   }
 
   return (
@@ -196,7 +187,7 @@ export default function PracticeActions({
           <button
             type="button"
             onClick={() => togglePublished(false)}
-            disabled={loading || lockedElsewhere}
+            disabled={busy || lockedElsewhere}
             aria-label="Unpublish practice"
             className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-border rounded-lg bg-background hover:bg-fill transition-colors disabled:opacity-40"
           >
@@ -207,7 +198,7 @@ export default function PracticeActions({
           <button
             type="button"
             onClick={() => togglePublished(true)}
-            disabled={loading || lockedElsewhere}
+            disabled={busy || lockedElsewhere}
             aria-label="Publish practice"
             className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-text hover:bg-primary-hover transition-colors disabled:opacity-40"
           >
@@ -218,7 +209,7 @@ export default function PracticeActions({
         <button
           type="button"
           onClick={onEdit}
-          disabled={loading}
+          disabled={busy}
           aria-label="Edit practice"
           className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-border rounded-lg bg-background hover:bg-fill transition-colors disabled:opacity-40"
         >
@@ -231,7 +222,7 @@ export default function PracticeActions({
             setError(null)
             setConfirmDelete(true)
           }}
-          disabled={loading || lockedElsewhere}
+          disabled={busy || lockedElsewhere}
           aria-label="Delete practice"
           className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-red-200 text-error rounded-lg bg-background hover:bg-red-50 dark:border-red-900/50 dark:hover:bg-red-950/40 transition-colors disabled:opacity-40"
         >
@@ -303,7 +294,7 @@ export default function PracticeActions({
       <Modal
         open={confirmDelete}
         onClose={() => setConfirmDelete(false)}
-        closeDisabled={loading}
+        closeDisabled={busy}
         title="Delete practice"
         maxWidth="sm"
         footer={
@@ -311,7 +302,7 @@ export default function PracticeActions({
             <button
               type="button"
               onClick={() => setConfirmDelete(false)}
-              disabled={loading}
+              disabled={busy}
               className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary dark:hover:bg-fill-secondary dark:border border-border-secondary"
             >
               Cancel
@@ -319,10 +310,10 @@ export default function PracticeActions({
             <button
               type="button"
               onClick={handleDelete}
-              disabled={loading}
+              disabled={busy}
               className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-red-700 disabled:opacity-50"
             >
-              {loading ? "Deleting…" : "Delete"}
+              {busy ? "Deleting…" : "Delete"}
             </button>
           </ModalFooter>
         }

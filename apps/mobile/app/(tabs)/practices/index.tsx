@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import {
   ActivityIndicator,
   Animated,
@@ -10,7 +10,8 @@ import {
   View,
 } from "react-native"
 import { GlassContainer, GlassView, isLiquidGlassAvailable } from "expo-glass-effect"
-import { useFocusEffect, useRouter } from "expo-router"
+import { useRouter } from "expo-router"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import type { PracticeSummary } from "@swimbuzz/shared"
 import { isStaffRole } from "@swimbuzz/shared"
 import {
@@ -43,6 +44,7 @@ import {
   formatWeekLabel,
   groupPracticesByDay,
   monthCells,
+  practiceDayKey,
   startOfUtcMonth,
   startOfUtcWeek,
   todayUtcKey,
@@ -63,40 +65,41 @@ export default function PracticesScreen() {
   const styles = useMemo(() => makeStyles(c), [c])
   const [view, setView] = useState<DefaultPracticesView | null>(null)
   const activeView = view ?? defaultPracticesView
-  const [practices, setPractices] = useState<PracticeSummary[]>([])
   const [query, setQuery] = useState("")
   const [activeTags, setActiveTags] = useState<string[]>([])
-  const [catalog, setCatalog] = useState<PracticeTag[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [weekStart, setWeekStart] = useState(() => startOfUtcWeek(new Date()))
   const [monthStart, setMonthStart] = useState(() => startOfUtcMonth(new Date()))
   const [selectedDay, setSelectedDay] = useState(todayUtcKey)
+  const queryClient = useQueryClient()
 
-  const load = useCallback(async () => {
-    setError(null)
-    try {
-      const [data, managed] = await Promise.all([
-        api.listPractices(),
-        api.listPracticeTags().catch(() => [] as PracticeTag[]),
-      ])
-      setPractices(data)
-      setCatalog(managed)
-      setActiveTags((prev) =>
-        prev.filter((name) => managed.some((tag) => tag.name === name))
-      )
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load practices")
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+  const {
+    data: practices = [],
+    isPending,
+    isFetching: practicesFetching,
+    error,
+    refetch: refetchPractices,
+  } = useQuery({ queryKey: ["practices"], queryFn: () => api.listPractices() })
 
-  useFocusEffect(
-    useCallback(() => {
-      void load()
-    }, [load])
-  )
+  const { data: catalog = [], refetch: refetchCatalog } = useQuery({
+    queryKey: ["practice-tags"],
+    queryFn: () => api.listPracticeTags(),
+  })
+
+  const load = () => {
+    void refetchPractices()
+    void refetchCatalog()
+  }
+
+  // Drop any selected tag that no longer exists in the catalog.
+  useEffect(() => {
+    setActiveTags((prev) =>
+      prev.filter((name) => catalog.some((tag) => tag.name === name))
+    )
+  }, [catalog])
+
+  function setCatalog(next: PracticeTag[]) {
+    queryClient.setQueryData(["practice-tags"], next)
+  }
 
   useEffect(() => {
     const prefix = utcDayKey(monthStart).slice(0, 7)
@@ -133,14 +136,14 @@ export default function PracticesScreen() {
   const monthGrid = useMemo(() => monthCells(monthStart), [monthStart])
   const monthPractices = useMemo(() => {
     const prefix = utcDayKey(monthStart).slice(0, 7)
-    return filtered.filter((practice) => practice.date?.slice(0, 7) === prefix)
+    return filtered.filter((practice) => practiceDayKey(practice).slice(0, 7) === prefix)
   }, [filtered, monthStart])
   const selectedDayPractices = byDay.get(selectedDay) ?? []
   const listPractices = useMemo(
     () =>
       [...filtered].sort((a, b) => {
-        const da = a.date ?? ""
-        const db = b.date ?? ""
+        const da = a.startsAt ?? ""
+        const db = b.startsAt ?? ""
         return db.localeCompare(da)
       }),
     [filtered]
@@ -224,9 +227,9 @@ export default function PracticesScreen() {
     : practices.length === 0
       ? "No practices yet"
       : "No matching practices"
-  const emptyBody = error ?? undefined
+  const emptyBody = error instanceof Error ? error.message : undefined
 
-  if (loading && practices.length === 0) {
+  if (isPending) {
     return (
       <Screen>
         {filters}
@@ -245,7 +248,7 @@ export default function PracticesScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingBottom: tabBarPad }}
           refreshControl={
-            <RefreshControl refreshing={loading} onRefresh={load} />
+            <RefreshControl refreshing={practicesFetching} onRefresh={load} />
           }
           ListHeaderComponent={<View style={{ marginBottom: spacing.sm }}>{filters}</View>}
           ListEmptyComponent={<EmptyState title={emptyTitle} body={emptyBody} />}
@@ -269,7 +272,7 @@ export default function PracticesScreen() {
         <ScrollView
           contentContainerStyle={{ paddingBottom: tabBarPad }}
           refreshControl={
-            <RefreshControl refreshing={loading} onRefresh={load} />
+            <RefreshControl refreshing={practicesFetching} onRefresh={load} />
           }
         >
           {filters}
@@ -289,7 +292,7 @@ export default function PracticesScreen() {
     <Screen style={{ paddingBottom: 0 }}>
       <ScrollView
         contentContainerStyle={{ paddingBottom: tabBarPad }}
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}
+        refreshControl={<RefreshControl refreshing={practicesFetching} onRefresh={load} />}
       >
         {filters}
         <View style={styles.monthGrid}>

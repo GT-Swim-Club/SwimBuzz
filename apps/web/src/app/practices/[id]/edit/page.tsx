@@ -7,11 +7,7 @@ import { listManagedPracticeTagNames } from "@/lib/practice-tag-catalog"
 import { practiceSetSelect } from "@/lib/practice-input"
 import type { PracticeFormState } from "../../PracticeEditor"
 import PracticeEditClient from "./PracticeEditClient"
-
-function toDateInput(date: Date | null | undefined): string {
-  if (!date) return ""
-  return new Date(date).toISOString().slice(0, 10)
-}
+import { toDateInput, toTimeInput } from "@/lib/date-input"
 
 export default async function PracticeEditPage({
   params,
@@ -38,9 +34,9 @@ export default async function PracticeEditPage({
 
   const initial: PracticeFormState = {
     title: practice.title,
-    date: toDateInput(practice.date),
-    startTime: practice.startTime,
-    endTime: practice.endTime,
+    date: toDateInput(practice.startsAt, practice.timeZone),
+    startTime: toTimeInput(practice.startsAt, practice.timeZone),
+    endTime: toTimeInput(practice.endsAt, practice.timeZone),
     timeZone: practice.timeZone,
     location: practice.location,
     focus: practice.focus ?? "",

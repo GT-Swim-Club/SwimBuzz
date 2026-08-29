@@ -1,5 +1,27 @@
 const { prisma } = require("./prisma-singleton")
 
+const DEFAULT_TIME_ZONE = "America/New_York"
+
+/**
+ * Format an instant as "6:00 PM EDT" in `timeZone`. Plain-JS mirror of
+ * @swimbuzz/shared's formatZonedInstant/zoneAbbreviation — this file runs directly
+ * under `node server.js` (no bundler/ts-node), and @swimbuzz/shared's package.json
+ * "main" points at a TypeScript source file that plain `require()` can't load, so we
+ * can't import it here and instead keep this small Intl-based helper in sync by hand.
+ */
+function formatZonedTimeWithAbbrev(instant, timeZone) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  }).formatToParts(instant)
+  const map = {}
+  for (const part of parts) if (part.type !== "literal") map[part.type] = part.value
+  const time = `${map.hour}:${map.minute} ${map.dayPeriod ?? ""}`.trim()
+  return { time, abbrev: map.timeZoneName ?? timeZone }
+}
+
 function isSignupWindowOpen(openAt, closeAt, now = new Date()) {
   if (openAt && now < openAt) return false
   if (closeAt && now > closeAt) return false
@@ -26,7 +48,7 @@ async function claimMonitorEvent(meetId, kind, advanceMinutes) {
   }
 }
 
-async function notifyMeetSignupOpeningSoon(meetId, meetName, advanceMinutes) {
+async function notifyMeetSignupOpeningSoon(meetId, meetName, advanceMinutes, openAt, timeZone) {
   try {
     const { NotificationType } = require("@prisma/client")
     const users = await prisma.user.findMany({
@@ -52,12 +74,13 @@ async function notifyMeetSignupOpeningSoon(meetId, meetName, advanceMinutes) {
     if (recipients.length === 0) return
 
     const href = await meetHref(meetId)
+    const { time, abbrev } = formatZonedTimeWithAbbrev(openAt, timeZone || DEFAULT_TIME_ZONE)
     await prisma.notification.createMany({
       data: recipients.map((userId) => ({
         userId,
         type: NotificationType.MEET_SIGNUP_OPEN,
         title: `Signup opening soon: ${meetName}`,
-        body: `Signup will open in ${advanceMinutes} minute${advanceMinutes === 1 ? "" : "s"}.`,
+        body: `Signup opens in ${advanceMinutes} minute${advanceMinutes === 1 ? "" : "s"}, at ${time} ${abbrev}.`,
         href,
       })),
     })
@@ -113,7 +136,7 @@ async function checkSignupStatus() {
     select: {
       id: true,
       name: true,
-      signupForm: { select: { openAt: true, closeAt: true } },
+      signupForm: { select: { openAt: true, closeAt: true, timeZone: true } },
     },
   })
 
@@ -143,7 +166,13 @@ async function checkSignupStatus() {
       if (advanceMinutes > 0 && advanceMinutes <= 60) {
         const claimed = await claimMonitorEvent(meet.id, "advance", advanceMinutes)
         if (claimed) {
-          await notifyMeetSignupOpeningSoon(meet.id, meet.name, advanceMinutes)
+          await notifyMeetSignupOpeningSoon(
+            meet.id,
+            meet.name,
+            advanceMinutes,
+            meet.signupForm.openAt,
+            meet.signupForm.timeZone
+          )
         }
       }
     }

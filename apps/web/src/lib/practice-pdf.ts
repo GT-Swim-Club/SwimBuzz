@@ -1,6 +1,5 @@
 import { jsPDF } from "jspdf"
-import { formatClockTimeRange, practiceShareFilename, zoneAbbreviation, zonedTimeToUtc } from "@swimbuzz/shared"
-import { formatSwimDate } from "@/lib/utils"
+import { formatZonedInstantRange, practiceShareFilename, zonedDayKey } from "@swimbuzz/shared"
 import { isHtmlEmpty, normalizePracticeHtml } from "@/components/FormattedText"
 
 export type PracticePdfSet = {
@@ -13,9 +12,8 @@ export type PracticePdfInput = {
   title: string
   published: boolean
   showDraft: boolean
-  dateIso: string | null
-  startTime: string
-  endTime: string
+  startsAt: string
+  endsAt: string
   timeZone: string
   location: string
   focus: string | null
@@ -216,8 +214,8 @@ function fontFace(style: Style): "normal" | "bold" | "italic" | "bolditalic" {
   return "normal"
 }
 
-export function practicePdfFilename(title: string, dateIso: string | null): string {
-  return practiceShareFilename(title, dateIso, "pdf")
+export function practicePdfFilename(title: string, dayKey: string | null): string {
+  return practiceShareFilename(title, dayKey, "pdf")
 }
 
 export function buildPracticePdf(input: PracticePdfInput): jsPDF {
@@ -536,25 +534,8 @@ export function buildPracticePdf(input: PracticePdfInput): jsPDF {
 
   y += titleSize * 0.22 + mt1 + metaSize * 0.8
   // Static exports always show the practice's own zone rather than whoever generated it.
-  const pdfZoneAbbrev =
-    input.startTime || input.endTime
-      ? zoneAbbreviation(
-          input.timeZone,
-          zonedTimeToUtc(
-            input.dateIso ? input.dateIso.slice(0, 10) : new Date().toISOString().slice(0, 10),
-            input.startTime || input.endTime,
-            input.timeZone
-          )
-        )
-      : null
-  const dateLine = [
-    input.dateIso ? formatSwimDate(input.dateIso) : "No date",
-    input.startTime || input.endTime
-      ? `${formatClockTimeRange(input.startTime, input.endTime)}${pdfZoneAbbrev ? ` ${pdfZoneAbbrev}` : ""}`
-      : null,
-  ]
-    .filter(Boolean)
-    .join("  ·  ")
+  const range = formatZonedInstantRange(input.startsAt, input.endsAt, input.timeZone)
+  const dateLine = `${range.date}  ·  ${range.time} ${range.abbrev}`
   drawMetaLine("calendar", dateLine)
 
   const placeBits = [
@@ -658,5 +639,6 @@ export function buildPracticePdf(input: PracticePdfInput): jsPDF {
 }
 
 export function downloadPracticePdf(input: PracticePdfInput) {
-  buildPracticePdf(input).save(practicePdfFilename(input.title, input.dateIso))
+  const dayKey = zonedDayKey(input.startsAt, input.timeZone)
+  buildPracticePdf(input).save(practicePdfFilename(input.title, dayKey))
 }

@@ -15,6 +15,112 @@ export type ApiClientOptions = {
   onUnauthorized?: () => void
 }
 
+/**
+ * Wire shapes below mirror what the API routes actually read off the
+ * request body (see `apps/web/src/lib/practice-input.ts` `buildPracticeData`
+ * and `apps/web/src/lib/meet-input.ts` `buildMeetData`), NOT the
+ * `PracticeSummary`/`MeetSummary` read shapes — the create/update routes
+ * still take a plain-language `date` + `startTime`/`endTime` + `timeZone`
+ * (practices) or `startDate`/`endDate` + `startTime` + `timeZone` (meets —
+ * no `endTime`; a meet never has a real end time, only an optional end date)
+ * and compose `startsAt`/`endsAt` server-side, rather than accepting an
+ * instant directly.
+ */
+
+export type PracticeSetInput = {
+  id?: string
+  title?: string | null
+  content: string
+  distance?: number | null
+}
+
+type PracticeWriteFields = {
+  title?: string
+  /** Date string, e.g. "2026-08-21". */
+  date?: string | null
+  /** "HH:MM" (24h). */
+  startTime?: string
+  /** "HH:MM" (24h). */
+  endTime?: string
+  timeZone?: string
+  location?: string
+  focus?: string | null
+  tags?: string[]
+  published?: boolean
+}
+
+/** Both POST /api/practices and PATCH /api/practices/[id] require `sets` (full replace, not a partial diff). */
+export type CreatePracticeBody = PracticeWriteFields & {
+  sets: PracticeSetInput[]
+}
+
+export type UpdatePracticeBody = PracticeWriteFields & {
+  sets: PracticeSetInput[]
+}
+
+export type HeatSheetLinkInput = {
+  url: string
+  name?: string
+}
+
+export type MeetPhotoLinkInput = {
+  url: string
+  name?: string
+}
+
+export type MeetPhotosInput =
+  | MeetPhotoLinkInput[]
+  | { links?: MeetPhotoLinkInput[]; previews?: string[] }
+  | null
+
+type MeetWriteFields = {
+  name?: string
+  /** Date string, e.g. "2026-08-21". */
+  startDate?: string
+  /** Date string, or null to clear. */
+  endDate?: string | null
+  /** "HH:MM" or "HH:MM:SS", or null to clear. */
+  startTime?: string | null
+  timeZone?: string
+  course?: "SCY" | "LCM" | "SCM"
+  /** e.g. "2025-2026". */
+  season?: string
+  teamCode?: string
+  location?: string | null
+  school?: string | null
+  iconUrl?: string | null
+  bannerUrl?: string | null
+  packetUrl?: string | null
+  psychSheetUrl?: string | null
+  heatSheetUrl?: string | null
+  heatSheetUrls?: HeatSheetLinkInput[] | null
+  finalsHeatSheetUrls?: HeatSheetLinkInput[] | null
+  entriesSheetUrl?: string | null
+  resultsUrl?: string | null
+  swimphoneUrl?: string | null
+  liveStreamUrl?: string | null
+  rideSignUpsUrl?: string | null
+  roomsUrl?: string | null
+  hotel?: string | null
+  packingList?: string | null
+  itinerary?: string | null
+  photos?: MeetPhotosInput
+}
+
+export type CreateMeetBody = MeetWriteFields & {
+  name: string
+  startDate: string
+}
+
+/** PATCH /api/meets/[id] is a true partial update — only keys present are applied. */
+export type UpdateMeetBody = MeetWriteFields & {
+  /** Coach-confirmed roster-name -> athleteId mappings from sheet/packet import review. */
+  nameMappings?: Record<string, string> | null
+  rejectedNames?: string[] | null
+  /** Opaque cached sheet-parse payload round-tripped from a prior response; shape owned by meet-sheet-resolve.ts. */
+  cachedSheetParses?: unknown
+}
+
 export class ApiError extends Error {
   status: number
   body: unknown
@@ -122,14 +228,14 @@ export function createApiClient(options: ApiClientOptions = {}) {
       return request<MeetSummary & Record<string, unknown>>(`/api/meets/${id}`)
     },
 
-    createMeet(body: Record<string, unknown>) {
+    createMeet(body: CreateMeetBody) {
       return request<MeetSummary>("/api/meets", {
         method: "POST",
         body: JSON.stringify(body),
       })
     },
 
-    updateMeet(id: string, body: Record<string, unknown>) {
+    updateMeet(id: string, body: UpdateMeetBody) {
       return request<MeetSummary & Record<string, unknown>>(`/api/meets/${id}`, {
         method: "PATCH",
         body: JSON.stringify(body),
@@ -228,15 +334,15 @@ export function createApiClient(options: ApiClientOptions = {}) {
       )
     },
 
-    createPractice(body: Record<string, unknown>) {
-      return request("/api/practices", {
+    createPractice(body: CreatePracticeBody) {
+      return request<PracticeSummary>("/api/practices", {
         method: "POST",
         body: JSON.stringify(body),
       })
     },
 
-    updatePractice(id: string, body: Record<string, unknown>) {
-      return request(`/api/practices/${id}`, {
+    updatePractice(id: string, body: UpdatePracticeBody) {
+      return request<PracticeSummary & Record<string, unknown>>(`/api/practices/${id}`, {
         method: "PATCH",
         body: JSON.stringify(body),
       })
@@ -251,6 +357,17 @@ export function createApiClient(options: ApiClientOptions = {}) {
         method: "POST",
         body: JSON.stringify({ body, parentId }),
       })
+    },
+
+    editComment(id: string, body: string) {
+      return request(`/api/comments/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ body }),
+      })
+    },
+
+    deleteComment(id: string) {
+      return request(`/api/comments/${id}`, { method: "DELETE" })
     },
 
     listAthletes() {
@@ -460,6 +577,27 @@ export function createApiClient(options: ApiClientOptions = {}) {
       }
       return request(`/api/meets/${meetId}/relays?${params.toString()}`, {
         method: "DELETE",
+      })
+    },
+
+    /** List a picked spreadsheet's tabs, so the caller can offer a tab chooser when there's more than one. */
+    listSheetTabs(input: { accessToken: string; spreadsheetId: string }) {
+      return request<{ tabs: Array<{ gid: number; title: string }> }>("/api/roster/import/sheet/tabs", {
+        method: "POST",
+        body: JSON.stringify(input),
+      })
+    },
+
+    importRosterFromSheet(input: { accessToken: string; spreadsheetId: string; gid?: number; season: string }) {
+      return request<{
+        created: number
+        updated: number
+        parsed: number
+        errors: Array<{ row: number; message: string }>
+        tab?: string
+      }>("/api/roster/import/sheet", {
+        method: "POST",
+        body: JSON.stringify(input),
       })
     },
   }

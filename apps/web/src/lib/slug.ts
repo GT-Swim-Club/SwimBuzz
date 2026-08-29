@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import { zonedDayKey } from "@swimbuzz/shared"
 
 const CUID_RE = /^c[a-z0-9]{24}$/i
 
@@ -39,9 +40,9 @@ export function meetSwimPath(meetSlug: string, swimId: string): string {
   return `${meetPath(meetSlug)}#swim-${swimId}`
 }
 
-export function practiceSlugBase(date: Date | null): string {
-  if (!date) return "undated"
-  return new Date(date).toISOString().slice(0, 10)
+export function practiceSlugBase(startsAt: Date | null, timeZone: string): string {
+  if (!startsAt) return "undated"
+  return zonedDayKey(startsAt, timeZone)
 }
 
 export function practicePath(slug: string): string {
@@ -53,10 +54,11 @@ export function practiceEditPath(slug: string): string {
 }
 
 export async function uniquePracticeSlug(
-  date: Date | null,
+  startsAt: Date | null,
+  timeZone: string,
   excludeId?: string
 ): Promise<string> {
-  const base = practiceSlugBase(date)
+  const base = practiceSlugBase(startsAt, timeZone)
   let slug = base
   let n = 2
   while (

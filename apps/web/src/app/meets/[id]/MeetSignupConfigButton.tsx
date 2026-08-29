@@ -1,37 +1,23 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
 import Modal, { ModalFooter } from "@/components/Modal"
-import { DatePicker, TimePicker } from "@/components/CustomDateTimePicker"
+import { DatePicker, TimePicker, TimeZonePicker } from "@/components/CustomDateTimePicker"
 import { MeetFormCustomQuestionsEditor } from "@/components/MeetFormCustomQuestions"
 import type { MeetSignupQuestion } from "@/lib/meet-signup"
 import {
   findIncompleteChoiceQuestion,
   normalizeMeetSignupQuestions,
 } from "@/lib/meet-signup"
+import { toDateInput, toTimeInput } from "@/lib/date-input"
+import { DEFAULT_TIME_ZONE, zonedTimeToUtc } from "@swimbuzz/shared"
+import { saveMeetSignupConfig } from "./MeetSignupConfigButton.actions"
 
-function toDatePart(iso: string | null): string {
-  if (!iso) return ""
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return ""
-  const pad = (n: number) => String(n).padStart(2, "0")
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
-}
-
-function toTimePart(iso: string | null): string {
-  if (!iso) return ""
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return ""
-  const pad = (n: number) => String(n).padStart(2, "0")
-  return `${pad(d.getHours())}:${pad(d.getMinutes())}`
-}
-
-function fromDateTimeParts(date: string, time: string): string | null {
+function fromDateTimeParts(date: string, time: string, timeZone: string): string | null {
   const datePart = date.trim()
   const timePart = time.trim()
   if (!datePart || !timePart) return null
-  const d = new Date(`${datePart}T${timePart}`)
+  const d = zonedTimeToUtc(datePart, timePart, timeZone)
   if (Number.isNaN(d.getTime())) return null
   return d.toISOString()
 }
@@ -46,6 +32,7 @@ export type MeetSignupConfigInitial = {
   openAt: string | null
   closeAt: string | null
   withdrawUntil: string | null
+  timeZone: string
 }
 
 export default function MeetSignupConfigButton({
@@ -59,10 +46,10 @@ export default function MeetSignupConfigButton({
   eventCount: number
   inline?: boolean
 }) {
-  const router = useRouter()
   const [open, setOpen] = useState(inline)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const zone = initial?.timeZone ?? DEFAULT_TIME_ZONE
   const [form, setForm] = useState({
     instructions: initial?.instructions ?? "",
     minEvents: initial?.minEvents?.toString() ?? "",
@@ -70,12 +57,13 @@ export default function MeetSignupConfigButton({
     maxRelayEvents: initial?.maxRelayEvents?.toString() ?? "",
     askNotes: initial?.askNotes ?? true,
     customQuestions: initial?.customQuestions ?? [],
-    openDate: toDatePart(initial?.openAt ?? null),
-    openTime: toTimePart(initial?.openAt ?? null),
-    closeDate: toDatePart(initial?.closeAt ?? null),
-    closeTime: toTimePart(initial?.closeAt ?? null),
-    withdrawDate: toDatePart(initial?.withdrawUntil ?? null),
-    withdrawTime: toTimePart(initial?.withdrawUntil ?? null),
+    timeZone: zone,
+    openDate: toDateInput(initial?.openAt ?? null, zone),
+    openTime: toTimeInput(initial?.openAt ?? null, zone),
+    closeDate: toDateInput(initial?.closeAt ?? null, zone),
+    closeTime: toTimeInput(initial?.closeAt ?? null, zone),
+    withdrawDate: toDateInput(initial?.withdrawUntil ?? null, zone),
+    withdrawTime: toTimeInput(initial?.withdrawUntil ?? null, zone),
   })
 
   useEffect(() => {
@@ -89,16 +77,17 @@ export default function MeetSignupConfigButton({
         maxRelayEvents: initial?.maxRelayEvents?.toString() ?? "",
         askNotes: initial?.askNotes ?? true,
         customQuestions: initial?.customQuestions ?? [],
-        openDate: toDatePart(initial?.openAt ?? null),
-        openTime: toTimePart(initial?.openAt ?? null),
-        closeDate: toDatePart(initial?.closeAt ?? null),
-        closeTime: toTimePart(initial?.closeAt ?? null),
-        withdrawDate: toDatePart(initial?.withdrawUntil ?? null),
-        withdrawTime: toTimePart(initial?.withdrawUntil ?? null),
+        timeZone: zone,
+        openDate: toDateInput(initial?.openAt ?? null, zone),
+        openTime: toTimeInput(initial?.openAt ?? null, zone),
+        closeDate: toDateInput(initial?.closeAt ?? null, zone),
+        closeTime: toTimeInput(initial?.closeAt ?? null, zone),
+        withdrawDate: toDateInput(initial?.withdrawUntil ?? null, zone),
+        withdrawTime: toTimeInput(initial?.withdrawUntil ?? null, zone),
       })
     }, 0)
     return () => window.clearTimeout(resetTimer)
-  }, [open, initial])
+  }, [open, initial, zone])
 
 
   async function handleSubmit(e: React.FormEvent) {
@@ -109,8 +98,8 @@ export default function MeetSignupConfigButton({
       return
     }
 
-    const openAt = fromDateTimeParts(form.openDate, form.openTime)
-    const closeAt = fromDateTimeParts(form.closeDate, form.closeTime)
+    const openAt = fromDateTimeParts(form.openDate, form.openTime, form.timeZone)
+    const closeAt = fromDateTimeParts(form.closeDate, form.closeTime, form.timeZone)
     if (openAt && closeAt && new Date(openAt) > new Date(closeAt)) {
       setError("Close time must be on or after the open time")
       return
@@ -124,30 +113,21 @@ export default function MeetSignupConfigButton({
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(`/api/meets/${meetId}/signup`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          instructions: form.instructions,
-          minEvents: form.minEvents.trim() === "" ? null : form.minEvents,
-          maxEvents: form.maxEvents.trim() === "" ? null : form.maxEvents,
-          maxRelayEvents: form.maxRelayEvents.trim() === "" ? null : form.maxRelayEvents,
-          askNotes: form.askNotes,
-          customQuestions: form.customQuestions,
-          openAt: fromDateTimeParts(form.openDate, form.openTime),
-          closeAt: fromDateTimeParts(form.closeDate, form.closeTime),
-          withdrawUntil: fromDateTimeParts(form.withdrawDate, form.withdrawTime),
-        }),
+      await saveMeetSignupConfig(meetId, {
+        instructions: form.instructions,
+        minEvents: form.minEvents.trim() === "" ? null : form.minEvents,
+        maxEvents: form.maxEvents.trim() === "" ? null : form.maxEvents,
+        maxRelayEvents: form.maxRelayEvents.trim() === "" ? null : form.maxRelayEvents,
+        askNotes: form.askNotes,
+        customQuestions: form.customQuestions,
+        timeZone: form.timeZone,
+        openAt: fromDateTimeParts(form.openDate, form.openTime, form.timeZone),
+        closeAt: fromDateTimeParts(form.closeDate, form.closeTime, form.timeZone),
+        withdrawUntil: fromDateTimeParts(form.withdrawDate, form.withdrawTime, form.timeZone),
       })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Failed to save sign-up form")
-        return
-      }
       if (!inline) setOpen(false)
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong")
     } finally {
       setLoading(false)
     }
@@ -225,6 +205,17 @@ export default function MeetSignupConfigButton({
               ? `Swimmers can choose from the ${eventCount} events in this meet’s order of events.`
               : "No order of events yet — import the meet packet so swimmers have events to choose from."}
           </p>
+
+          <div>
+            <label className="block text-xs font-medium text-foreground-secondary mb-1">
+              Time Zone
+            </label>
+            <TimeZonePicker
+              value={form.timeZone}
+              onChange={(value) => setForm((f) => ({ ...f, timeZone: value }))}
+              ariaLabel="Sign-up window time zone"
+            />
+          </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
             <div>

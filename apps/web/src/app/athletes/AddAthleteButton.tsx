@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useState, useTransition } from "react"
+import { useSearchParams } from "next/navigation"
 import { currentSeason, parseSeason } from "@/lib/season"
 import Modal, { ModalFooter } from "@/components/Modal"
 import NicknameTagsInput from "@/components/NicknameTagsInput"
@@ -10,9 +10,9 @@ import {
   SWIMCLOUD_ID_ERROR,
   SWIMCLOUD_ID_MAX_LENGTH,
 } from "@/lib/swimcloud-id"
+import { addAthlete } from "./AddAthleteButton.actions"
 
 export default function AddAthleteButton() {
-  const router = useRouter()
   const searchParams = useSearchParams()
 
   const gender = searchParams.get("gender") === "F" ? "F" : "M"
@@ -20,7 +20,8 @@ export default function AddAthleteButton() {
     parseSeason(searchParams.get("season") ?? searchParams.get("year")) ?? currentSeason()
 
   const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const loading = isPending
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState({
     firstName: "",
@@ -40,37 +41,24 @@ export default function AddAthleteButton() {
   const showSwimCloudHint =
     form.swimCloudId.length > 0 && !isValidSwimCloudIdInput(form.swimCloudId)
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!swimCloudIdOk) return
-    setLoading(true)
     setError(null)
 
-    try {
-      const res = await fetch("/api/athletes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+    startTransition(async () => {
+      try {
+        await addAthlete({
           ...form,
           gender,
           seasons: [season],
-        }),
-      })
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.error ?? "Failed to add athlete")
-        return
+        })
+        setForm({ firstName: "", lastName: "", email: "", swimCloudId: "", nicknames: [] })
+        setOpen(false)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to add athlete")
       }
-
-      setForm({ firstName: "", lastName: "", email: "", swimCloudId: "", nicknames: [] })
-      setOpen(false)
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   return (

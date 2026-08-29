@@ -13,7 +13,7 @@ import {
 } from "@/lib/relay-results"
 import { parseMeetDate, parseSwimTime } from "@/lib/swim-parse"
 
-type MeetLike = Pick<Meet, "id" | "name" | "course" | "startDate" | "endDate">
+type MeetLike = Pick<Meet, "id" | "name" | "course" | "startsAt" | "endsAt" | "createdAt">
 
 function leadoffSwimWhere(
   meet: MeetLike,
@@ -70,7 +70,7 @@ export async function syncRelayLeadoffSwim(
   const timeMs = parseSwimTime(sanitized)
   if (!timeMs) return null
 
-  const swimDate = date ?? meet.startDate ?? meet.endDate ?? new Date()
+  const swimDate = date ?? meet.startsAt ?? meet.endsAt ?? meet.createdAt
 
   const base = normalizeSwimForInsert({
     athleteId: leadoffAthleteId,
@@ -135,15 +135,17 @@ export async function importRelayLeadoffSwims({
         id: meetId,
         name: meetName,
         course,
-        startDate: meetDate,
-        endDate: meetDate,
+        startsAt: meetDate,
+        endsAt: meetDate,
+        createdAt: meetDate,
       })
     : {
         id: "",
         name: meetName,
         course,
-        startDate: meetDate,
-        endDate: meetDate,
+        startsAt: meetDate,
+        endsAt: meetDate,
+        createdAt: meetDate,
       }
 
   const seen = new Set<string>()

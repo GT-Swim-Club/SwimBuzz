@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useTransition } from "react"
 import { formatTime, parseTime } from "@/lib/utils"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { DatePicker } from "@/components/CustomDateTimePicker"
 import ActionIcon from "@/components/ActionIcon"
+import { deleteMeetSwim, editMeetSwim } from "./EditMeetSwimButton.actions"
 
 const EVENTS = [
   "50 Free",
@@ -52,9 +52,8 @@ export default function EditMeetSwimButton({
   timeMs,
   className,
 }: EditMeetSwimButtonProps) {
-  const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState({
     athleteId,
@@ -63,6 +62,7 @@ export default function EditMeetSwimButton({
     course,
     date,
   })
+  const loading = isPending
 
   function openModal() {
     setForm({
@@ -76,7 +76,7 @@ export default function EditMeetSwimButton({
     setOpen(true)
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!form.athleteId || !form.time) return
 
@@ -86,13 +86,10 @@ export default function EditMeetSwimButton({
       return
     }
 
-    setLoading(true)
     setError(null)
-    try {
-      const res = await fetch(`/api/swims/${swimId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+    startTransition(async () => {
+      try {
+        await editMeetSwim(swimId, {
           athleteId: form.athleteId,
           event: form.event,
           course: form.course,
@@ -100,40 +97,25 @@ export default function EditMeetSwimButton({
           meet: meetName,
           meetId,
           timeMs: nextTimeMs,
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Failed to save swim")
-        return
+        })
+        setOpen(false)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to save swim")
       }
-      setOpen(false)
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
-  async function handleDelete() {
+  function handleDelete() {
     if (!confirm("Delete this swim?")) return
-    setLoading(true)
     setError(null)
-    try {
-      const res = await fetch(`/api/swims/${swimId}`, { method: "DELETE" })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Failed to delete swim")
-        return
+    startTransition(async () => {
+      try {
+        await deleteMeetSwim(swimId)
+        setOpen(false)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to delete swim")
       }
-      setOpen(false)
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   return (

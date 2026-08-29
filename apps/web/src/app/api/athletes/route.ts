@@ -12,15 +12,15 @@ export async function GET() {
   const session = await getSession()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
+  // No `swims` relation here — it was fetched (as an N+1: Prisma can't batch
+  // a per-parent `take`) but never consumed by any client of this route.
   const athletes = await prisma.athlete.findMany({
     include: {
-      user: { select: { name: true, email: true, image: true, staffTitle: true } },
-      swims: {
-        orderBy: { timeMs: "asc" },
-        take: 1}},
+      user: { select: { name: true, email: true, image: true, staffTitle: true } }},
     orderBy: { lastName: "asc" }})
 
-  return NextResponse.json(athletes)
+  return NextResponse.json(athletes, {
+    headers: { "Cache-Control": "private, max-age=30, stale-while-revalidate=300" }})
 }
 
 export async function POST(req: Request) {

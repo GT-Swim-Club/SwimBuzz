@@ -14,9 +14,8 @@ export async function PATCH(
   const comment = await prisma.practiceComment.findUnique({ where: { id } })
   if (!comment) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-  const isStaff = isStaffRole(session.user.role)
   const isAuthor = comment.authorId === session.user.id
-  if (!isStaff && !isAuthor) {
+  if (!isAuthor) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -31,7 +30,7 @@ export async function PATCH(
 
   const updated = await prisma.practiceComment.update({
     where: { id },
-    data: { body: text },
+    data: { body: text, editedAt: new Date() },
   })
   return NextResponse.json(updated)
 }

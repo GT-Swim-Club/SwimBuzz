@@ -9,15 +9,14 @@ import {
   resolveSignupEventOptions,
   sortSignupEventsByOrder,
   signupWindowStatus,
-  signupWithdrawStatus,
   type MeetSignupQuestion,
 } from "@/lib/meet-signup"
 import { isSignupAnswers } from "@/lib/meet-signup"
 import { formatDisplayTime } from "@/lib/utils"
 import Modal, { ModalFooter } from "@/components/Modal"
-import MeetSignupAthleteForm from "./MeetSignupAthleteForm"
 import StaffBadge from "@/components/StaffBadge"
 import type { StaffTitle } from "@swimbuzz/shared"
+import { syncSignupsToRoster, withdrawAthleteSignup } from "./meet-signup-admin.actions"
 
 type EntryRow = {
   id: string
@@ -51,23 +50,15 @@ export default function MeetSignupSection({
   meetId,
   eventOrder,
   isCoach,
-  isStaff = false,
-  selfAthleteId,
-  athletes,
   form,
   myEntry,
   entries,
-  course,
   hasImportedResults = false,
 }: {
   meetPath: string
   meetId: string
   eventOrder: unknown
   isCoach: boolean
-  /** Real COACH/EXEC role — true even while previewing as an athlete. */
-  isStaff?: boolean
-  selfAthleteId: string | null
-  athletes: Array<{ id: string; name: string; gender: "M" | "F" }>
   form: FormData | null
   myEntry: {
     events: string[]
@@ -77,7 +68,6 @@ export default function MeetSignupSection({
     updatedAt: string
   } | null
   entries: EntryRow[]
-  course: string
   /** When true, hide "add sign-ups to roster summary". */
   hasImportedResults?: boolean
 }) {
@@ -90,7 +80,9 @@ export default function MeetSignupSection({
   const [syncError, setSyncError] = useState<string | null>(null)
   const router = useRouter()
 
-  // Poll signup status every 10 seconds to detect when signups open/close in real-time
+  // Poll a cheap status signal every 10 seconds to detect when signups
+  // open/close or entries change, and only refresh the page when the signal
+  // actually changed — not on every poll.
   useEffect(() => {
     // Only poll if there's a signup form configured (even if closed)
     if (!form) return
@@ -98,17 +90,21 @@ export default function MeetSignupSection({
     let initialTimeout: NodeJS.Timeout | null = null
     let pollInterval: NodeJS.Timeout | null = null
     let hasStartedPolling = false
+    let lastSignal: string | null = null
 
     const checkAndRefreshSignupStatus = async () => {
       try {
-        const response = await fetch(`/api/meets/${meetId}/signup`, {
+        const response = await fetch(`/api/meets/${meetId}/signup/status`, {
           method: "GET",
           cache: "no-store",
         })
-        if (response.ok) {
-          // If we got a successful response, refresh to update the component
+        if (!response.ok) return
+        const data = await response.json()
+        const signal = JSON.stringify(data)
+        if (lastSignal !== null && signal !== lastSignal) {
           router.refresh()
         }
+        lastSignal = signal
       } catch {
         // Silently handle errors - polling continues
       }
@@ -144,13 +140,6 @@ export default function MeetSignupSection({
         closeAt: form.closeAt ? new Date(form.closeAt) : null,
       })
     : { open: false, reason: "Sign-ups have not been set up yet." }
-  const withdraw = form
-    ? signupWithdrawStatus({
-        openAt: form.openAt ? new Date(form.openAt) : null,
-        closeAt: form.closeAt ? new Date(form.closeAt) : null,
-        withdrawUntil: form.withdrawUntil ? new Date(form.withdrawUntil) : null,
-      })
-    : { allowed: false, reason: null, deadline: null }
 
   const openAtDate = form?.openAt ? new Date(form.openAt) : null
   const closeAtDate = form?.closeAt ? new Date(form.closeAt) : null
@@ -163,45 +152,16 @@ export default function MeetSignupSection({
   )
   const showSection = isCoach || showAthleteForm || (entries && entries.length > 0)
 
-  const entriesByAthleteId: Record<
-    string,
-    {
-      events: string[]
-      entryTimes: Record<string, string>
-      notes: string
-      answers: Record<string, string>
-    }
-  > = {}
-  if (myEntry && selfAthleteId) {
-    entriesByAthleteId[selfAthleteId] = {
-      events: myEntry.events,
-      entryTimes: myEntry.entryTimes,
-      notes: myEntry.notes,
-      answers: isSignupAnswers(myEntry.answers) ? myEntry.answers : {},
-    }
-  }
-
   async function syncIndividualSignupsToRoster() {
     if (hasImportedResults || syncingRoster || entries.length === 0) return
 
     setSyncingRoster(true)
     setSyncError(null)
     try {
-      const res = await fetch(`/api/meets/${meetId}/signup/sync-entries`, {
-        method: "POST",
-      })
-      const data = (await res.json().catch(() => ({}))) as {
-        error?: string
-        synced?: number
-      }
-      if (!res.ok) {
-        setSyncError(data.error || "Failed to sync sign-ups.")
-        return
-      }
+      await syncSignupsToRoster(meetId)
       setSyncConfirmOpen(false)
-      router.refresh()
-    } catch {
-      setSyncError("Failed to sync sign-ups.")
+    } catch (err) {
+      setSyncError(err instanceof Error ? err.message : "Failed to sync sign-ups.")
     } finally {
       setSyncingRoster(false)
     }
@@ -225,19 +185,10 @@ export default function MeetSignupSection({
     setWithdrawing(true)
     setWithdrawError(null)
     try {
-      const res = await fetch(
-        `/api/meets/${meetId}/signup/entry?athleteId=${encodeURIComponent(withdrawEntry.athleteId)}`,
-        { method: "DELETE" }
-      )
-      const data = (await res.json().catch(() => ({}))) as { error?: string }
-      if (!res.ok) {
-      setWithdrawError(data.error ?? "Failed to drop sign-up")
-        return
-      }
+      await withdrawAthleteSignup(meetId, withdrawEntry.athleteId)
       setWithdrawEntry(null)
-      router.refresh()
-    } catch {
-      setWithdrawError("Failed to drop sign-up")
+    } catch (err) {
+      setWithdrawError(err instanceof Error ? err.message : "Failed to drop sign-up")
     } finally {
       setWithdrawing(false)
     }
@@ -285,34 +236,7 @@ export default function MeetSignupSection({
         </p>
       ) : null}
 
-      {form && eventOptions.length > 0 && !isCoach && isStaff ? (
-        <MeetSignupAthleteForm
-          meetId={meetId}
-          course={course}
-          eventOptions={eventOptions}
-          minEvents={form.minEvents}
-          maxEvents={form.maxEvents}
-          maxRelayEvents={form.maxRelayEvents}
-          askNotes={form.askNotes}
-          instructions={form.instructions}
-          customQuestions={questions}
-          windowOpen={window.open}
-          windowReason={window.reason}
-          canWithdraw={withdraw.allowed}
-          withdrawReason={withdraw.reason}
-          withdrawDeadline={withdraw.deadline?.toISOString() ?? null}
-          formOpenAt={form.openAt}
-          formCloseAt={form.closeAt}
-          formWithdrawUntil={form.withdrawUntil}
-          isCoach={false}
-          isStaff={isStaff}
-          selfAthleteId={selfAthleteId}
-          athletes={athletes}
-          entriesByAthleteId={entriesByAthleteId}
-        />
-      ) : null}
-
-      {form && eventOptions.length > 0 && !isCoach && !isStaff ? (
+      {form && eventOptions.length > 0 && !isCoach ? (
         <>
           {!window.open && !myEntry && window.reason && (
             <p className="mb-3 text-sm text-foreground-secondary">{window.reason}</p>

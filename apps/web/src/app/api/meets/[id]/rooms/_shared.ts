@@ -69,8 +69,9 @@ export async function loadMeetRoomContext(meetId: string) {
     select: {
       id: true,
       season: true,
-      startDate: true,
-      endDate: true,
+      createdAt: true,
+      startsAt: true,
+      endsAt: true,
       psychSheetSummary: true,
       heatSheetSummary: true,
       finalsHeatSheetSummary: true,
@@ -117,8 +118,8 @@ export async function loadMeetRoomContext(meetId: string) {
   const roster = seasonRoster.filter((a) => meetRosterIds.has(a.id))
 
   const ended = meetHasEnded({
-    startDate: meet.startDate,
-    endDate: meet.endDate,
+    startsAt: meet.startsAt ?? meet.createdAt,
+    endsAt: meet.endsAt,
   })
 
   return { meet, roster, ended }
@@ -137,6 +138,7 @@ export function serializeRoomForm(
     closeAt: form.closeAt?.toISOString() ?? null,
     assignmentsPublishedAt: form.assignmentsPublishedAt?.toISOString() ?? null,
     customQuestions: normalizeMeetSignupQuestions(form.customQuestions),
+    timeZone: form.timeZone,
     window: roomWindowStatus({ openAt: form.openAt, closeAt: form.closeAt }),
     preferences: opts.includePreferences
       ? form.preferences.map((p) => ({

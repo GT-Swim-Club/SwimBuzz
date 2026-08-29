@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import AthleteViewToggle from "@/components/AthleteViewToggle"
 import HoverDetail from "@/components/HoverDetail"
 import RunScraperButton from "@/components/RunScraperButton"
@@ -168,23 +169,32 @@ export default function AdaptiveHeaderLayout({
 }
 
 function PrimaryLinks({ links, compact, medium = false, tight = false }: { links: readonly NavLink[]; compact: boolean; medium?: boolean; tight?: boolean }) {
+  const pathname = usePathname()
   return (
     <div className={"flex shrink-0 items-center text-[15px] text-foreground-secondary " + (compact ? (tight ? "gap-1" : medium ? "gap-2" : "gap-3") : "gap-5")}>
-      {links.map((link) => (
-        <Link
-          key={link.href}
-          href={link.href}
-          prefetch={link.prefetch}
-          aria-label={link.label}
-          className={
-            "group relative inline-flex h-9 shrink-0 items-center text-foreground-secondary transition-colors hover:text-foreground " +
-            (compact ? "w-9 justify-center rounded-lg hover:bg-fill-secondary" : "gap-1.5")
-          }
-        >
-          {link.icon}
-          {compact ? <HoverDetail label={link.label} /> : <span>{link.label}</span>}
-        </Link>
-      ))}
+      {links.map((link) => {
+        const active = pathname === link.href || pathname.startsWith(`${link.href}/`)
+        return (
+          <Link
+            key={link.href}
+            href={link.href}
+            prefetch={link.prefetch}
+            aria-label={link.label}
+            aria-current={active ? "page" : undefined}
+            className={
+              "group relative inline-flex h-9 shrink-0 items-center transition-colors " +
+              (active ? "font-medium text-foreground" : "text-foreground-secondary hover:text-foreground") +
+              " " +
+              (compact
+                ? "w-9 justify-center rounded-lg " + (active ? "bg-primary-bg" : "hover:bg-fill-secondary")
+                : "gap-1.5 border-b-2 pb-4 -mb-4 " + (active ? "border-primary" : "border-transparent"))
+            }
+          >
+            {link.icon}
+            {compact ? <HoverDetail label={link.label} /> : <span>{link.label}</span>}
+          </Link>
+        )
+      })}
     </div>
   )
 }

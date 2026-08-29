@@ -30,6 +30,7 @@ export default async function MeetSignupManagerPage({
       name: true,
       course: true,
       eventOrder: true,
+      timeZone: true,
       signupForm: {
         include: {
           entries: {
@@ -69,6 +70,7 @@ export default async function MeetSignupManagerPage({
         eventOptions={resolveSignupEventOptions(meet.eventOrder)}
         askNotes={form?.askNotes ?? true}
         questions={normalizeMeetSignupQuestions(form?.customQuestions)}
+        meetTimeZone={meet.timeZone}
         configInitial={
           form
             ? {
@@ -81,6 +83,7 @@ export default async function MeetSignupManagerPage({
                 openAt: form.openAt?.toISOString() ?? null,
                 closeAt: form.closeAt?.toISOString() ?? null,
                 withdrawUntil: form.withdrawUntil?.toISOString() ?? null,
+                timeZone: form.timeZone,
               }
             : null
         }

@@ -215,7 +215,7 @@ export default function RunScraperModal({
 
         {installed === false && (
           <div className="space-y-3 rounded-xl border border-border-secondary bg-fill-secondary p-4">
-            <p className="font-medium text-foreground">One-time setup</p>
+            <p className="font-medium text-foreground">1. One-time setup</p>
             <p className="text-foreground-secondary">
               Downloads the scraper via <code className="text-xs">uv</code>.
               {platform === "windows" ? " Run in PowerShell." : " Run in Terminal."}
@@ -243,12 +243,56 @@ export default function RunScraperModal({
           </div>
         )}
 
-        <ol className="list-decimal space-y-2.5 pl-5 leading-6 text-foreground marker:font-semibold marker:text-foreground-secondary">
-          {installed === false && <li>Run the one-time install command above.</li>}
-          <li>Generate the run command below (valid for 15 minutes).</li>
-          <li>Copy it into your terminal and leave it running.</li>
-          <li>Import data, e.g. SwimCloud times, SwimPhone results, meet PDFs</li>
-        </ol>
+        {!connected && (
+          <div className="space-y-3 rounded-xl border border-border-secondary bg-fill-secondary p-4">
+            <p className="font-medium text-foreground">2. Start the scraper</p>
+            <p className="text-foreground-secondary">
+              Generate the run command below, copy it into your terminal, and leave it running.
+            </p>
+
+            {!pairing || isExpired ? (
+              <button
+                type="button"
+                onClick={() => void generateCode()}
+                disabled={pairingLoading}
+                className="w-full rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary disabled:opacity-50"
+              >
+                {pairingLoading ? "Generating…" : "Generate run command"}
+              </button>
+            ) : (
+              <>
+                <p className="text-xs text-foreground-secondary">
+                  Expires {formatClockTime(new Date(pairing.expiresAt))}
+                </p>
+                <pre className="overflow-x-auto rounded-lg border border-border-subtle bg-background px-3 py-2.5 text-xs leading-5 text-foreground whitespace-pre-wrap break-all">
+                  {runCommand}
+                </pre>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <button
+                    type="button"
+                    onClick={() => void copyText(runCommand, "run")}
+                    className="flex items-center gap-1.5 text-xs font-medium text-primary transition-colors hover:text-primary-hover"
+                  >
+                    {copied === "run" ? checkIcon : copyIcon}
+                    Copy command
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void generateCode()}
+                    disabled={pairingLoading}
+                    className="text-xs font-medium text-foreground-secondary transition-colors hover:text-foreground"
+                  >
+                    Generate new command
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        <p className="text-sm font-medium text-foreground">
+          3. Import data, e.g. SwimCloud times, SwimPhone results, meet PDFs
+        </p>
 
         {installed && (
           <button
@@ -260,44 +304,6 @@ export default function RunScraperModal({
           </button>
         )}
 
-        {!connected &&
-          (!pairing || isExpired ? (
-            <button
-              type="button"
-              onClick={() => void generateCode()}
-              disabled={pairingLoading}
-              className="w-full rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary disabled:opacity-50"
-            >
-              {pairingLoading ? "Generating…" : "Generate run command"}
-            </button>
-          ) : (
-            <div className="space-y-3 rounded-xl border border-border-secondary bg-fill-secondary p-4">
-              <p className="text-xs text-foreground-secondary">
-                Expires {formatClockTime(new Date(pairing.expiresAt))}
-              </p>
-              <pre className="overflow-x-auto rounded-lg border border-border-subtle bg-background px-3 py-2.5 text-xs leading-5 text-foreground whitespace-pre-wrap break-all">
-                {runCommand}
-              </pre>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                <button
-                  type="button"
-                  onClick={() => void copyText(runCommand, "run")}
-                  className="flex items-center gap-1.5 text-xs font-medium text-primary transition-colors hover:text-primary-hover"
-                >
-                  {copied === "run" ? checkIcon : copyIcon}
-                  Copy command
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void generateCode()}
-                  disabled={pairingLoading}
-                  className="text-xs font-medium text-foreground-secondary transition-colors hover:text-foreground"
-                >
-                  Generate new command
-                </button>
-              </div>
-            </div>
-          ))}
 
         {error ? <p className="text-sm text-error">{error}</p> : null}
       </div>

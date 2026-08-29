@@ -4,13 +4,14 @@ import {
   useCallback,
   useRef,
   useState,
+  useTransition,
   type ComponentType,
 } from "react"
-import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import EasyCropper, { type Area } from "react-easy-crop"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { FileDropzone } from "@/components/FileDropzone"
+import { removeProfileAvatar, uploadProfileAvatar } from "./ProfilePictureSettings.actions"
 
 // react-easy-crop is a class component; React 19's JSX types need this cast.
 const Cropper = EasyCropper as unknown as ComponentType<{
@@ -114,11 +115,11 @@ export default function ProfilePictureSettings({
   email?: string | null
   canEdit?: boolean
 }) {
-  const router = useRouter()
   const { update } = useSession()
   const inputRef = useRef<HTMLInputElement>(null)
   const [image, setImage] = useState(initialImage ?? null)
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const loading = isPending
   const [preparing, setPreparing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [cropSrc, setCropSrc] = useState<string | null>(null)
@@ -140,11 +141,6 @@ export default function ProfilePictureSettings({
   const onCropComplete = useCallback((_: Area, pixels: Area) => {
     setCroppedAreaPixels(pixels)
   }, [])
-
-  async function refreshSession() {
-    await update()
-    router.refresh()
-  }
 
   async function onFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -180,58 +176,37 @@ export default function ProfilePictureSettings({
     }
   }
 
-  async function saveCroppedPhoto() {
+  function saveCroppedPhoto() {
     if (!cropSrc || !croppedAreaPixels) return
 
-    setLoading(true)
     setError(null)
+    startTransition(async () => {
+      try {
+        const compressed = await cropAvatar(cropSrc, croppedAreaPixels)
+        const formData = new FormData()
+        formData.append("file", compressed, "avatar.jpg")
 
-    try {
-      const compressed = await cropAvatar(cropSrc, croppedAreaPixels)
-      const formData = new FormData()
-      formData.append("file", compressed, "avatar.jpg")
-
-      const res = await fetch("/api/profile/avatar", {
-        method: "POST",
-        body: formData,
-      })
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.error ?? "Failed to upload photo")
-        return
+        const data = await uploadProfileAvatar(formData)
+        setImage(data.image ?? null)
+        closeCropper()
+        await update()
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Something went wrong")
       }
-
-      setImage(data.image ?? null)
-      closeCropper()
-      await refreshSession()
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
-  async function removePhoto() {
-    setLoading(true)
+  function removePhoto() {
     setError(null)
-
-    try {
-      const res = await fetch("/api/profile/avatar", { method: "DELETE" })
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.error ?? "Failed to remove photo")
-        return
+    startTransition(async () => {
+      try {
+        await removeProfileAvatar()
+        setImage(null)
+        await update()
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Something went wrong")
       }
-
-      setImage(null)
-      await refreshSession()
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   const busy = loading || preparing

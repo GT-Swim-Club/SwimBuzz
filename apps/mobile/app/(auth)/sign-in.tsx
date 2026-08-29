@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import {
   Alert,
   KeyboardAvoidingView,
@@ -338,32 +338,53 @@ function GoogleSignInButton({
   setBusy: (v: boolean) => void
   onSuccess: (idToken: string) => Promise<void>
 }) {
-  const [request, , promptAsync] = Google.useIdTokenAuthRequest({
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
     iosClientId: googleClientIds.ios,
     androidClientId: googleClientIds.android,
     webClientId: googleClientIds.web,
   })
 
+  // On iOS/Android this hook runs a code flow: promptAsync()'s resolved value only
+  // carries the auth code, and expo-auth-session exchanges it for an id_token in its
+  // own effect afterward, delivered here as a re-fired `response` — not as
+  // promptAsync()'s return value. So the token has to be picked up from `response`.
+  useEffect(() => {
+    if (!response) return
+    if (response.type === "success") {
+      const idToken =
+        response.params.id_token ??
+        (response as { authentication?: { idToken?: string } }).authentication
+          ?.idToken
+      if (!idToken) return
+      void onSuccess(idToken)
+        .catch((err) => {
+          Alert.alert(
+            "Google sign-in failed",
+            err instanceof Error ? err.message : "Try again"
+          )
+        })
+        .finally(() => setBusy(false))
+      return
+    }
+    setBusy(false)
+    if (response.type === "error") {
+      Alert.alert(
+        "Google sign-in failed",
+        response.error?.message ?? "Try again"
+      )
+    }
+  }, [response])
+
   async function onGoogle() {
     setBusy(true)
     try {
-      const result = await promptAsync()
-      if (result.type !== "success") return
-      const idToken =
-        result.params.id_token ??
-        (result as { authentication?: { idToken?: string } }).authentication
-          ?.idToken
-      if (!idToken) {
-        throw new Error("Google did not return an ID token")
-      }
-      await onSuccess(idToken)
+      await promptAsync()
     } catch (err) {
+      setBusy(false)
       Alert.alert(
         "Google sign-in failed",
         err instanceof Error ? err.message : "Try again"
       )
-    } finally {
-      setBusy(false)
     }
   }
 

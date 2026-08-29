@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import ActionIcon from "@/components/ActionIcon"
 import HoverDetail from "@/components/HoverDetail"
 import { useRouter } from "next/navigation"
@@ -8,6 +8,7 @@ import MeetFields, { type MeetFormState } from "../MeetFields"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { meetPath } from "@/lib/slug"
 import { useUnsavedUploads } from "@/lib/unsaved-uploads"
+import { deleteMeetEntirely, updateMeet } from "./meet-update.actions"
 
 function meetImageUrls(form: Pick<MeetFormState, "iconUrl" | "bannerUrl">) {
   return [form.iconUrl, form.bannerUrl]
@@ -31,7 +32,8 @@ export default function MeetActions({
   const [editing, setEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleteOption, setDeleteOption] = useState<"meet" | "swims" | "both">("both")
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const loading = isPending
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState<MeetFormState>(initial)
   const { begin, trackUpload, release } = useUnsavedUploads()
@@ -42,62 +44,42 @@ export default function MeetActions({
     setEditing(false)
   }
 
-  async function handleSave(e: React.FormEvent) {
+  function handleSave(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true)
     setError(null)
-    try {
-      const res = await fetch(`/api/meets/${meetId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Failed to save changes")
-        return
+    startTransition(async () => {
+      try {
+        const result = await updateMeet(meetId, form)
+        if (!result.ok) {
+          setError(result.error)
+          return
+        }
+        release(meetImageUrls(form))
+        setEditing(false)
+        const nextSlug = result.meet.slug
+        if (nextSlug && nextSlug !== meetSlug) {
+          router.replace(meetPath(nextSlug))
+        }
+      } catch {
+        setError("Something went wrong")
       }
-      release(meetImageUrls(form))
-      setEditing(false)
-      const nextSlug = data.slug as string | null | undefined
-      if (nextSlug && nextSlug !== meetSlug) {
-        router.replace(meetPath(nextSlug))
-      } else {
-        router.refresh()
-      }
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
-  async function handleDelete(options: { deleteMeet: boolean, deleteSwims: boolean }) {
-    setLoading(true)
+  function handleDelete(options: { deleteMeet: boolean, deleteSwims: boolean }) {
     setError(null)
-    try {
-      const res = await fetch(`/api/meets/${meetId}`, { 
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(options),
-      })
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        setError(data.error ?? "Failed to delete")
-        setLoading(false)
-        return
+    startTransition(async () => {
+      try {
+        await deleteMeetEntirely(meetId, options)
+        if (options.deleteMeet) {
+          router.push("/meets")
+        } else {
+          setConfirmDelete(false)
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to delete")
       }
-      if (options.deleteMeet) {
-        router.push("/meets")
-      } else {
-        router.refresh()
-        setConfirmDelete(false)
-      }
-      setLoading(false)
-    } catch {
-      setError("Something went wrong")
-      setLoading(false)
-    }
+    })
   }
 
   return (

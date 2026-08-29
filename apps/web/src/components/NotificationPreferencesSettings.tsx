@@ -1,12 +1,12 @@
 "use client"
 
-import { useRouter } from "next/navigation"
 import { useRef, useState } from "react"
 import {
   NOTIFICATION_PREFERENCE_META,
   type NotificationPreferences,
   type AllPreferenceKey,
 } from "@/lib/notification-preferences"
+import { updateNotificationPreference } from "./NotificationPreferencesSettings.actions"
 
 export default function NotificationPreferencesSettings({
   initialPreferences,
@@ -15,7 +15,6 @@ export default function NotificationPreferencesSettings({
   initialPreferences: NotificationPreferences
   isAthlete?: boolean
 }) {
-  const router = useRouter()
   const [preferences, setPreferences] = useState(initialPreferences)
   const [error, setError] = useState<string | null>(null)
   const [isSignupTimesOpen, setIsSignupTimesOpen] = useState(false)
@@ -29,29 +28,18 @@ export default function NotificationPreferencesSettings({
     requestGen.current[key] = gen
 
     void (async () => {
-      const res = await fetch("/api/notifications/preferences", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ [key]: value }),
-      })
-      if (requestGen.current[key] !== gen) return
-      if (!res.ok) {
+      try {
+        const preferences = await updateNotificationPreference(key, value)
+        if (requestGen.current[key] !== gen) return
+        lastSaved.current = {
+          ...lastSaved.current,
+          [key]: preferences[key],
+        }
+      } catch (err) {
+        if (requestGen.current[key] !== gen) return
         setPreferences((prev) => ({ ...prev, [key]: lastSaved.current[key] }))
-        const data = await res.json().catch(() => null)
-        setError(
-          typeof data?.error === "string"
-            ? data.error
-            : "Couldn’t save notification preference"
-        )
-        return
+        setError(err instanceof Error ? err.message : "Couldn’t save notification preference")
       }
-      const data = (await res.json()) as { preferences: NotificationPreferences }
-      if (requestGen.current[key] !== gen) return
-      lastSaved.current = {
-        ...lastSaved.current,
-        [key]: data.preferences[key],
-      }
-      router.refresh()
     })()
   }
 

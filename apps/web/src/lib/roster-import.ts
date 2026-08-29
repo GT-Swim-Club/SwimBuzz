@@ -8,6 +8,7 @@ import {
   type AthleteLookup,
 } from "@/lib/athlete-match"
 import { uniqueAthleteSlug } from "@/lib/slug"
+import type { ParsedRosterCsvRow } from "@/lib/roster-csv"
 
 export type RosterImportAthlete = {
   id: string
@@ -348,6 +349,80 @@ export function registerImportAthlete(
     context.bySwimCloudId.set(athlete.swimCloudId, athlete)
   }
   context.byEmail.set(athlete.userEmail.toLowerCase(), athlete)
+}
+
+export type RosterImportRowOutcome = {
+  row: number
+  action: "created" | "updated" | "skipped"
+  name: string
+  detail?: string
+}
+
+export type RosterImportSummary = {
+  created: number
+  updated: number
+  parsed: number
+  errors: Array<{ row: number; message: string }>
+  rowOutcomes: RosterImportRowOutcome[]
+}
+
+/**
+ * Shared upsert loop for every roster-row source (CSV upload, Google Sheets, ...):
+ * matches each parsed row against the existing roster and creates or merges an
+ * athlete for it. Callers just need to get their source into ParsedRosterCsvRow[].
+ */
+export async function runRosterImport(
+  rows: ParsedRosterCsvRow[],
+  season: string,
+  parseErrors: Array<{ row: number; message: string }>
+): Promise<RosterImportSummary> {
+  let created = 0
+  let updated = 0
+  const errors: RosterImportSummary["errors"] = [...parseErrors]
+  const rowOutcomes: RosterImportRowOutcome[] = []
+
+  const context = await loadRosterImportContext()
+
+  for (const row of rows) {
+    const input: RosterImportInput = {
+      firstName: row.firstName,
+      lastName: row.lastName,
+      gender: row.gender === "F" ? Gender.F : Gender.M,
+      ...(row.email ? { email: row.email } : {}),
+      ...(row.gtid ? { gtid: row.gtid } : {}),
+      ...(row.dob ? { dob: row.dob } : {}),
+      ...(row.year ? { year: row.year } : {}),
+      ...(row.nicknames.length > 0 ? { nicknames: row.nicknames } : {}),
+    }
+
+    const existing = findAthleteForImport(input, context)
+
+    if (existing) {
+      const hadSeason = existing.seasons.includes(season)
+      const merged = await mergeImportAthlete(existing, input, season)
+      registerImportAthlete(context, merged)
+      updated++
+      rowOutcomes.push({
+        row: row.rowNumber,
+        action: "updated",
+        name: `${row.lastName}, ${row.firstName}`,
+        detail: hadSeason ? "merged with existing athlete" : `added to ${season}`,
+      })
+      continue
+    }
+
+    const athlete = await createImportAthlete(input, season, row.rowNumber)
+    registerImportAthlete(context, athlete)
+    created++
+    rowOutcomes.push({
+      row: row.rowNumber,
+      action: "created",
+      name: `${row.lastName}, ${row.firstName}`,
+      detail: row.email ?? athlete.userEmail,
+    })
+  }
+
+  return { created, updated, parsed: rows.length, errors, rowOutcomes }
 }
 
 export { parseRosterName as parseSwimCloudName } from "@/lib/athlete-match"

@@ -2,6 +2,7 @@ import { Suspense } from "react"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import LiveSearch from "@/components/LiveSearch"
+import { Skeleton } from "@/components/Skeleton"
 import {
   GalleryListViewToggle,
   ViewNavPanel,
@@ -11,28 +12,44 @@ import { isStaffUi } from "@/lib/athlete-view-server"
 import { parseSeason, seasonEndYear } from "@/lib/season"
 import MeetsClientWrapper from "./MeetsClientWrapper"
 import { getSession } from "@/lib/session"
+import { countMeetAthletes } from "@/lib/meet-sheet-summary"
 
-export default async function MeetsPage({
-  searchParams}: {
-  searchParams: Promise<{ q?: string; view?: string }>
+function MeetsListSkeleton() {
+  return (
+    <div className="space-y-8">
+      {[...Array(2)].map((_, i) => (
+        <section key={i} className="space-y-4">
+          <Skeleton className="h-6 w-32" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...Array(3)].map((_, j) => (
+              <Skeleton key={j} className="h-48 w-full" />
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  )
+}
+
+// Independent of the meets list so the create-button season dropdown doesn't
+// block (or get blocked by) the list stream — it's the canonical Season
+// table, matching how /athletes and meets/[id] source their season lists.
+async function CreateMeetButtonSection() {
+  const seasons = await prisma.season
+    .findMany({ orderBy: { label: "desc" } })
+    .then((list) => list.map((s) => s.label))
+  return <CreateMeetButton seasons={seasons} />
+}
+
+async function MeetsListSection({
+  query,
+  activeView,
+  isCoach,
+}: {
+  query: string
+  activeView: "gallery" | "list"
+  isCoach: boolean
 }) {
-  const session = await getSession()
-  if (!session) redirect("/signin")
-
-  const isCoach = await isStaffUi(session.user.role)
-  const { q, view } = await searchParams
-  const query = q?.trim() ?? ""
-  const activeView = view === "list" ? "list" : "gallery"
-  
-  function buildHref(next: { view?: "gallery" | "list" }) {
-    const params = new URLSearchParams()
-    if (query) params.set("q", query)
-    const v = next.view ?? activeView
-    if (v === "list") params.set("view", "list")
-    const s = params.toString()
-    return s ? `/meets?${s}` : "/meets"
-  }
-
   const meetsRaw = await prisma.meet.findMany({
     where: query
       ?       {
@@ -42,15 +59,16 @@ export default async function MeetsPage({
             { school: { contains: query, mode: "insensitive" } },
           ]}
       : undefined,
-    orderBy: { startDate: "desc" },
+    orderBy: { startsAt: "desc" },
     select: {
       id: true,
       slug: true,
       name: true,
       location: true,
-      startDate: true,
-      startTime: true,
-      endDate: true,
+      startsAt: true,
+      endsAt: true,
+      hasStartTime: true,
+      timeZone: true,
       course: true,
       season: true,
       school: true,
@@ -60,16 +78,51 @@ export default async function MeetsPage({
       psychSheetUrl: true,
       heatSheetUrl: true,
       resultsUrl: true,
+      // Selected only to compute athleteCount below — stripped before the
+      // meet objects are handed to the client component so this heavy JSON
+      // never travels the RSC payload (was previously serialized twice, for
+      // both `meets` and `bySeason`).
       psychSheetSummary: true,
       heatSheetSummary: true,
       finalsHeatSheetSummary: true,
       entriesSheetSummary: true,
       relayResultsSummary: true,
-      resultStatusesSummary: true,
-      swims: { select: { athleteId: true } }}})
+      resultStatusesSummary: true}})
 
-  // Normalize data for client...
-  const meets = meetsRaw.map(m => ({ ...m, startDate: m.startDate, endDate: m.endDate, swims: m.swims }))
+  const meetIds = meetsRaw.map((m) => m.id)
+  // Grouped query instead of fetching every swim row: one row per
+  // (meet, athlete) pair regardless of how many events that athlete swam.
+  const swimAthleteRows = meetIds.length
+    ? await prisma.swim.groupBy({
+        by: ["meetId", "athleteId"],
+        where: { meetId: { in: meetIds } }})
+    : []
+  const swimAthleteIdsByMeet = new Map<string, string[]>()
+  for (const row of swimAthleteRows) {
+    if (!row.meetId) continue
+    const list = swimAthleteIdsByMeet.get(row.meetId)
+    if (list) list.push(row.athleteId)
+    else swimAthleteIdsByMeet.set(row.meetId, [row.athleteId])
+  }
+
+  const meets = meetsRaw.map(({
+    psychSheetSummary,
+    heatSheetSummary,
+    finalsHeatSheetSummary,
+    entriesSheetSummary,
+    relayResultsSummary,
+    resultStatusesSummary,
+    ...meet
+  }) => ({
+    ...meet,
+    athleteCount: countMeetAthletes({
+      psychSheetSummary,
+      heatSheetSummary,
+      finalsHeatSheetSummary,
+      entriesSheetSummary,
+      relayResultsSummary,
+      resultStatusesSummary,
+      swimAthleteIds: swimAthleteIdsByMeet.get(meet.id) ?? []})}))
 
   const bySeason = new Map<string, typeof meets>()
   for (const meet of meets) {
@@ -89,17 +142,54 @@ export default async function MeetsPage({
   })
 
   return (
+    <MeetsClientWrapper
+      meets={meets}
+      bySeason={Object.fromEntries(bySeason)}
+      seasons={seasons}
+      isCoach={isCoach}
+      query={query}
+      view={activeView}
+    />
+  )
+}
+
+export default async function MeetsPage({
+  searchParams}: {
+  searchParams: Promise<{ q?: string; view?: string }>
+}) {
+  const session = await getSession()
+  if (!session) redirect("/signin")
+
+  const isCoach = await isStaffUi(session.user.role)
+  const { q, view } = await searchParams
+  const query = q?.trim() ?? ""
+  const activeView = view === "list" ? "list" : "gallery"
+
+  function buildHref(next: { view?: "gallery" | "list" }) {
+    const params = new URLSearchParams()
+    if (query) params.set("q", query)
+    const v = next.view ?? activeView
+    if (v === "list") params.set("view", "list")
+    const s = params.toString()
+    return s ? `/meets?${s}` : "/meets"
+  }
+
+  return (
     <ViewNavigationProvider>
       <main className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-semibold text-foreground">Meets</h1>
+        <h1 className="sr-only">Meets</h1>
+        <div className="flex items-center justify-end">
           <div className="flex items-center gap-3">
             <GalleryListViewToggle
               activeView={activeView}
               galleryHref={buildHref({ view: "gallery" })}
               listHref={buildHref({ view: "list" })}
             />
-            {isCoach && <CreateMeetButton seasons={seasons} />}
+            {isCoach && (
+              <Suspense fallback={<Skeleton className="h-9 w-24" />}>
+                <CreateMeetButtonSection />
+              </Suspense>
+            )}
           </div>
         </div>
 
@@ -108,14 +198,9 @@ export default async function MeetsPage({
         </Suspense>
 
         <ViewNavPanel>
-          <MeetsClientWrapper
-            meets={meets}
-            bySeason={Object.fromEntries(bySeason)}
-            seasons={seasons}
-            isCoach={isCoach}
-            query={query}
-            view={activeView}
-          />
+          <Suspense fallback={<MeetsListSkeleton />}>
+            <MeetsListSection query={query} activeView={activeView} isCoach={isCoach} />
+          </Suspense>
         </ViewNavPanel>
       </main>
     </ViewNavigationProvider>

@@ -6,7 +6,6 @@ import { notFound, redirect } from "next/navigation"
 import { getSession } from "@/lib/session"
 import { RelativeInstantTime } from "@/components/RelativeDate"
 import { prisma } from "@/lib/prisma"
-import { isStaffRole } from "@/lib/auth-roles"
 import { resolveViewerAthleteId } from "@/lib/athlete-view-server"
 import {
   isSignupAnswers,
@@ -75,7 +74,6 @@ export default async function MeetSignupPage({
   })
   const eventOptions = resolveSignupEventOptions(meet.eventOrder)
   const eventOrder = isEventOrder(meet.eventOrder) ? meet.eventOrder : null
-  const isStaff = isStaffRole(session.user.role)
   const athleteName = `${athlete.lastName}, ${athlete.firstName}`
 
   return (
@@ -154,7 +152,6 @@ export default async function MeetSignupPage({
           formCloseAt={form.closeAt?.toISOString() ?? null}
           formWithdrawUntil={form.withdrawUntil?.toISOString() ?? null}
           isCoach={false}
-          isStaff={isStaff}
           selfAthleteId={athlete.id}
           athletes={[
             {

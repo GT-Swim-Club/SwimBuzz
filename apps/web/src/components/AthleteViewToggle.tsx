@@ -1,12 +1,9 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-import { useTransition } from "react"
+import { useOptimistic, useTransition } from "react"
 import HoverDetail from "@/components/HoverDetail"
-import { ATHLETE_VIEW_COOKIE } from "@/lib/athlete-view"
 import { STAFF_TITLE_LABELS, type StaffTitle } from "@swimbuzz/shared"
-
-const MAX_AGE_SECONDS = 60 * 60 * 24 * 30
+import { setAthleteView } from "./AthleteViewToggle.actions"
 
 function AthleteViewIcon() {
   return (
@@ -45,14 +42,14 @@ export default function AthleteViewToggle({
   athleteViewEnabled: boolean
   compact?: boolean
 }) {
-  const router = useRouter()
   const [pending, startTransition] = useTransition()
+  const [optimisticEnabled, setOptimisticEnabled] = useOptimistic(athleteViewEnabled)
   const staffLabel = STAFF_TITLE_LABELS[staffTitle]
 
-  function setAthleteView(enabled: boolean) {
-    document.cookie = `${ATHLETE_VIEW_COOKIE}=${enabled ? "1" : "0"}; path=/; max-age=${MAX_AGE_SECONDS}; SameSite=Lax`
-    startTransition(() => {
-      router.refresh()
+  function handleSetAthleteView(enabled: boolean) {
+    startTransition(async () => {
+      setOptimisticEnabled(enabled)
+      await setAthleteView(enabled)
     })
   }
 
@@ -63,13 +60,13 @@ export default function AthleteViewToggle({
     <div className="inline-flex h-9 items-center rounded-lg border border-border-secondary bg-background p-0.5 text-xs">
       <button
         type="button"
-        onClick={() => setAthleteView(false)}
+        onClick={() => handleSetAthleteView(false)}
         disabled={pending}
-        aria-pressed={!athleteViewEnabled}
+        aria-pressed={!optimisticEnabled}
         title={`${staffLabel} View`}
         className={
           "group relative inline-flex h-full items-center justify-center gap-1.5 rounded-md px-2.5 font-medium transition-colors disabled:opacity-50 " +
-          (athleteViewEnabled ? inactiveClass : activeClass)
+          (optimisticEnabled ? inactiveClass : activeClass)
         }
       >
         <AthleteViewIcon />
@@ -77,14 +74,14 @@ export default function AthleteViewToggle({
       </button>
       <button
         type="button"
-        onClick={() => setAthleteView(true)}
+        onClick={() => handleSetAthleteView(true)}
         disabled={pending}
-        aria-pressed={athleteViewEnabled}
+        aria-pressed={optimisticEnabled}
         aria-label="Athlete View"
         title="Athlete View"
         className={
           "inline-flex h-full items-center justify-center rounded-md px-2.5 font-medium transition-colors disabled:opacity-50 " +
-          (athleteViewEnabled ? activeClass : inactiveClass)
+          (optimisticEnabled ? activeClass : inactiveClass)
         }
       >
         {compact ? "A" : "Athlete"}

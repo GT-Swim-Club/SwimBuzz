@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import {
   ActivityIndicator,
+  Animated,
   FlatList as RNFlatList,
   Modal,
   Pressable,
@@ -256,6 +257,61 @@ export function ErrorBlock({ message }: { message: string }) {
   return (
     <View style={styles.errorBlock}>
       <Text style={styles.errorText}>{message}</Text>
+    </View>
+  )
+}
+
+/**
+ * Animated pulse placeholder — the genuine-first-load counterpart to
+ * `LoadingBlock`'s spinner. With TanStack Query cache in place, most
+ * revalidations never show this at all; it's only for the first fetch with
+ * no cached data yet.
+ */
+export function Skeleton({ style }: { style?: ViewProps["style"] }) {
+  const c = usePalette()
+  const opacity = useRef(new Animated.Value(0.4)).current
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, { toValue: 1, duration: 700, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.4, duration: 700, useNativeDriver: true }),
+      ])
+    )
+    loop.start()
+    return () => loop.stop()
+  }, [opacity])
+
+  return (
+    <Animated.View
+      style={[
+        { backgroundColor: c.fillSecondary, borderRadius: radii.sm, opacity },
+        style,
+      ]}
+    />
+  )
+}
+
+/** Placeholder for a `ListRow` — a title-width bar and a shorter subtitle bar. */
+export function ListRowSkeleton() {
+  const styles = useStyles()
+  return (
+    <View style={styles.row}>
+      <View style={styles.rowText}>
+        <Skeleton style={{ height: 16, width: "60%", marginBottom: spacing.xxs }} />
+        <Skeleton style={{ height: 13, width: "40%" }} />
+      </View>
+    </View>
+  )
+}
+
+/** Placeholder for a gallery-style card (e.g. `GalleryTile`). */
+export function CardSkeleton() {
+  const styles = useStyles()
+  return (
+    <View style={styles.cardSkeleton}>
+      <Skeleton style={{ height: 16, width: "70%", marginBottom: spacing.xs }} />
+      <Skeleton style={{ height: 13, width: "50%" }} />
     </View>
   )
 }
@@ -706,6 +762,13 @@ function makeStyles(c: ColorPalette) {
     errorText: {
       color: c.error,
       fontSize: 14,
+    },
+    cardSkeleton: {
+      backgroundColor: c.bgContainer,
+      borderColor: c.border,
+      borderRadius: radii.lg,
+      borderWidth: 1,
+      padding: spacing.sm,
     },
     row: {
       flexDirection: "row",

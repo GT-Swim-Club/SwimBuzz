@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { formatDateTime, formatRelativeTime } from "@/lib/utils"
 import { AppIcon } from "@/components/AppIcon"
 import HoverDetail from "@/components/HoverDetail"
+import { markNotificationsRead } from "./NotificationsMenu.actions"
 
 export type NotificationItem = {
   id: string
@@ -22,7 +22,6 @@ export default function NotificationsMenu({
 }: {
   initialNotifications: NotificationItem[]
 }) {
-  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [notifications, setNotifications] = useState(initialNotifications)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -46,17 +45,12 @@ export default function NotificationsMenu({
       setNotifications((prev) =>
         prev.map((n) => ({ ...n, readAt: n.readAt ?? now }))
       )
-      await fetch("/api/notifications", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ all: true }),
-      })
+      await markNotificationsRead()
       const res = await fetch("/api/notifications")
       if (res.ok) {
         const data = await res.json()
         setNotifications(data.notifications)
       }
-      router.refresh()
     }
     void syncNotifications()
 
@@ -76,15 +70,14 @@ export default function NotificationsMenu({
       document.removeEventListener("pointerdown", onPointerDown)
       document.removeEventListener("keydown", onKeyDown)
     }
-  }, [open, router])
+  }, [open])
 
   async function markRead(id?: string) {
-    const res = await fetch("/api/notifications", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(id ? { id } : { all: true }),
-    })
-    if (!res.ok) return
+    try {
+      await markNotificationsRead(id)
+    } catch {
+      return
+    }
 
     const now = new Date().toISOString()
     setNotifications((prev) =>
@@ -92,7 +85,6 @@ export default function NotificationsMenu({
         id ? (n.id === id && !n.readAt ? { ...n, readAt: now } : n) : { ...n, readAt: n.readAt ?? now }
       )
     )
-    router.refresh()
   }
 
   return (

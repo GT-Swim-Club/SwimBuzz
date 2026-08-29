@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/session"
 import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete-view-server"
 import { isCuid, practicePath } from "@/lib/slug"
-import { currentSeason, seasonFromDate } from "@/lib/season"
+import { seasonFromDate } from "@/lib/season"
+import { zonedDayKey } from "@swimbuzz/shared"
 import { serializeAttendance } from "@/lib/practice-attendance"
 import AttendanceManager from "./AttendanceManager"
 import AttendanceList from "./AttendanceList"
@@ -28,9 +29,9 @@ export default async function PracticeAttendancePage({
       slug: true,
       title: true,
       published: true,
-      date: true,
-      startTime: true,
-      endTime: true,
+      createdAt: true,
+      startsAt: true,
+      endsAt: true,
       timeZone: true,
       location: true,
       attendance: {
@@ -57,6 +58,8 @@ export default async function PracticeAttendancePage({
   if (practice.slug && param !== practice.slug) redirect(`${detailPath}/attendance`)
 
   const initialAttendance = practice.attendance.map(serializeAttendance)
+  const startsAt = practice.startsAt ?? practice.createdAt
+  const endsAt = practice.endsAt ?? startsAt
 
   if (!isCoach) {
     const viewerAthleteId = await resolveViewerAthleteId(session.user.id)
@@ -69,9 +72,8 @@ export default async function PracticeAttendancePage({
         />
         <AttendanceList
           title={practice.title}
-          dateIso={practice.date ? practice.date.toISOString() : null}
-          startTime={practice.startTime}
-          endTime={practice.endTime}
+          startsAt={startsAt.toISOString()}
+          endsAt={endsAt.toISOString()}
           timeZone={practice.timeZone}
           location={practice.location}
           attendance={initialAttendance}
@@ -83,7 +85,7 @@ export default async function PracticeAttendancePage({
 
   // Manual check-in searches the roster for the season this practice falls in;
   // fall back to the whole roster when that season has no athletes yet.
-  const season = practice.date ? seasonFromDate(practice.date) : currentSeason()
+  const season = seasonFromDate(zonedDayKey(startsAt, practice.timeZone))
   const seasonRoster = await prisma.athlete.findMany({
     where: { seasons: { has: season } },
     select: { id: true, slug: true, firstName: true, lastName: true, nicknames: true, gender: true, year: true },
@@ -109,9 +111,8 @@ export default async function PracticeAttendancePage({
           <AttendanceManager
         practiceId={practice.id}
         title={practice.title}
-        dateIso={practice.date ? practice.date.toISOString() : null}
-        startTime={practice.startTime}
-        endTime={practice.endTime}
+        startsAt={startsAt.toISOString()}
+        endsAt={endsAt.toISOString()}
         timeZone={practice.timeZone}
         location={practice.location}
         initialAttendance={initialAttendance}

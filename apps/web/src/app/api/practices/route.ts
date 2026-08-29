@@ -38,12 +38,27 @@ export async function GET(req: Request) {
 
   const practices = await prisma.practice.findMany({
     where: and.length ? { AND: and } : undefined,
-    orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+    orderBy: [{ startsAt: "desc" }, { createdAt: "desc" }],
     include: {
-      sets: { select: { distance: true } },
       _count: { select: { sets: true } }}})
 
-  return NextResponse.json(practices)
+  const practiceIds = practices.map((p) => p.id)
+  const distanceSums = practiceIds.length
+    ? await prisma.practiceSet.groupBy({
+        by: ["practiceId"],
+        where: { practiceId: { in: practiceIds } },
+        _sum: { distance: true }})
+    : []
+  const totalDistanceByPractice = new Map(
+    distanceSums.map((row) => [row.practiceId, row._sum.distance ?? 0])
+  )
+
+  return NextResponse.json(
+    practices.map((p) => ({
+      ...p,
+      totalDistance: totalDistanceByPractice.get(p.id) ?? 0})),
+    { headers: { "Cache-Control": "private, max-age=30, stale-while-revalidate=300" } }
+  )
 }
 
 export async function POST(req: Request) {
@@ -64,11 +79,10 @@ export async function POST(req: Request) {
     }
     const practice = await prisma.practice.create({
       data: {
-        slug: await uniquePracticeSlug(data.date),
+        slug: await uniquePracticeSlug(data.startsAt, data.timeZone),
         title: data.title,
-        date: data.date,
-        startTime: data.startTime,
-        endTime: data.endTime,
+        startsAt: data.startsAt,
+        endsAt: data.endsAt,
         timeZone: data.timeZone,
         location: data.location,
         focus: data.focus,
@@ -87,7 +101,8 @@ export async function POST(req: Request) {
       await notifyPracticePublished({
         practiceId: practice.id,
         title: practice.title,
-        date: practice.date,
+        startsAt: practice.startsAt,
+        timeZone: practice.timeZone,
         focus: practice.focus,
         excludeUserId: session.user.id})
     }

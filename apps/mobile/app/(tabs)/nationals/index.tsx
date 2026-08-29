@@ -1,8 +1,9 @@
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useMemo, useState } from "react"
 import { Pressable, StyleSheet, Text, View } from "react-native"
-import { useFocusEffect, useRouter } from "expo-router"
+import { useRouter } from "expo-router"
+import { useQuery } from "@tanstack/react-query"
 import { athletePreferredName, formatTime } from "@swimbuzz/shared"
-import { EmptyState, ErrorBlock, LoadingBlock, Muted, Screen, ScrollView, usePalette } from "@swimbuzz/ui"
+import { EmptyState, ErrorBlock, LoadingBlock, Muted, Screen, ScrollView, TextField, usePalette } from "@swimbuzz/ui"
 import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
 import { api } from "../../../src/lib/api"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
@@ -63,75 +64,53 @@ export default function NationalsScreen() {
   const styles = useMemo(() => makeStyles(c), [c])
   const { defaultView } = useViewPreferences()
   const gallery = defaultView === "gallery"
-  const [seasons, setSeasons] = useState<string[]>([])
-  const [season, setSeason] = useState<string | null>(null)
+  const [seasonState, setSeasonState] = useState<string | null>(null)
   const [course, setCourse] = useState<(typeof COURSES)[number]>("SCY")
-  const [cuts, setCuts] = useState<CutRow[]>([])
-  const [qualifiers, setQualifiers] = useState<QualifierAthlete[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const loadedKeyRef = useRef<string | null>(null)
+  const [query, setQuery] = useState("")
 
-  const loadCuts = useCallback(async (activeSeason: string, activeCourse: string) => {
-    const key = `${activeSeason}|${activeCourse}`
-    const silent = loadedKeyRef.current === key
-    setError(null)
-    if (!silent) setLoading(true)
-    try {
-      const data = await api.getQualifiers({ season: activeSeason, course: activeCourse })
-      const set = data.set
-      const nextCuts =
-        set && typeof set === "object" && Array.isArray((set as { cuts?: unknown }).cuts)
-          ? ((set as { cuts: CutRow[] }).cuts ?? [])
-          : []
-      setCuts(nextCuts)
-      setQualifiers(
-        Array.isArray(data.qualifiers) ? (data.qualifiers as QualifierAthlete[]) : []
-      )
-      loadedKeyRef.current = key
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load qualifiers")
-      setCuts([])
-      setQualifiers([])
-      loadedKeyRef.current = null
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+  const { data: seasons = [] } = useQuery({
+    queryKey: ["seasons"],
+    queryFn: () => api.listSeasons(),
+  })
+  const season = seasonState ?? seasons[0] ?? null
 
-  useFocusEffect(
-    useCallback(() => {
-      let cancelled = false
-      void (async () => {
-        try {
-          const seasonList = await api.listSeasons()
-          if (cancelled) return
-          setSeasons(seasonList)
-          const activeSeason = season ?? seasonList[0] ?? null
-          if (!activeSeason) {
-            setCuts([])
-            setQualifiers([])
-            setLoading(false)
-            return
-          }
-          if (!season) {
-            setSeason(activeSeason)
-            return
-          }
-          await loadCuts(activeSeason, course)
-        } catch (err) {
-          if (cancelled) return
-          setError(err instanceof Error ? err.message : "Failed to load qualifiers")
-          setCuts([])
-          setQualifiers([])
-          setLoading(false)
-        }
-      })()
-      return () => {
-        cancelled = true
-      }
-    }, [season, course, loadCuts])
+  const {
+    data: qualifiersData,
+    isPending,
+    error,
+  } = useQuery({
+    queryKey: ["qualifiers", season, course],
+    queryFn: () => api.getQualifiers({ season: season as string, course }),
+    enabled: Boolean(season),
+  })
+  // Only a genuinely new (season, course) pair shows a spinner — TanStack
+  // Query serves cached data for a previously-visited pair instantly.
+  const loading = Boolean(season) && isPending
+
+  const cuts = useMemo<CutRow[]>(() => {
+    const set = qualifiersData?.set
+    return set && typeof set === "object" && Array.isArray((set as { cuts?: unknown }).cuts)
+      ? ((set as { cuts: CutRow[] }).cuts ?? [])
+      : []
+  }, [qualifiersData])
+
+  const qualifiers = useMemo<QualifierAthlete[]>(
+    () =>
+      Array.isArray(qualifiersData?.qualifiers)
+        ? (qualifiersData.qualifiers as QualifierAthlete[])
+        : [],
+    [qualifiersData]
   )
+
+  const filteredQualifiers = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return qualifiers
+    return qualifiers.filter((athlete) => {
+      const name = `${athlete.firstName} ${athlete.lastName}`.toLowerCase()
+      const nick = (athlete.nicknames ?? []).join(" ").toLowerCase()
+      return name.includes(q) || nick.includes(q)
+    })
+  }, [qualifiers, query])
 
   const cutsByGender = useMemo(() => {
     const groups = new Map<string, CutRow[]>()
@@ -157,7 +136,9 @@ export default function NationalsScreen() {
           </Text>
         </View>
 
-        {error ? <ErrorBlock message={error} /> : null}
+        {error ? (
+          <ErrorBlock message={error instanceof Error ? error.message : "Failed to load qualifiers"} />
+        ) : null}
 
         <View style={styles.filtersCard}>
           <Text style={styles.filterLabel}>SEASON</Text>
@@ -176,7 +157,7 @@ export default function NationalsScreen() {
                     key={label}
                     accessibilityRole="button"
                     accessibilityState={{ selected }}
-                    onPress={() => setSeason(label)}
+                    onPress={() => setSeasonState(label)}
                     style={({ pressed }) => [
                       styles.seasonPill,
                       selected && styles.seasonPillSelected,
@@ -238,24 +219,38 @@ export default function NationalsScreen() {
               </View>
             </View>
 
+            <TextField
+              label="Search"
+              placeholder="Search qualifiers by name"
+              value={query}
+              onChangeText={setQuery}
+              autoCapitalize="none"
+              autoCorrect={false}
+              clearButtonMode="while-editing"
+            />
+
             <View style={styles.sectionHeader}>
               <View>
                 <Text style={styles.sectionTitle}>Qualified athletes</Text>
                 <Text style={styles.sectionCaption}>Tap an athlete to view their profile.</Text>
               </View>
               <View style={styles.countBadge}>
-                <Text style={styles.countBadgeText}>{qualifiers.length}</Text>
+                <Text style={styles.countBadgeText}>{filteredQualifiers.length}</Text>
               </View>
             </View>
 
-            {qualifiers.length === 0 ? (
+            {filteredQualifiers.length === 0 ? (
               <EmptyState
-                title="No qualifiers yet"
-                body="No athletes have made an NQT cut for this season and course."
+                title={qualifiers.length === 0 ? "No qualifiers yet" : "No matching qualifiers"}
+                body={
+                  qualifiers.length === 0
+                    ? "No athletes have made an NQT cut for this season and course."
+                    : undefined
+                }
               />
             ) : gallery ? (
               <View style={styles.galleryGrid}>
-                {qualifiers.map((athlete) => {
+                {filteredQualifiers.map((athlete) => {
                   const name = athletePreferredName({
                     firstName: athlete.firstName,
                     lastName: athlete.lastName,
@@ -284,7 +279,7 @@ export default function NationalsScreen() {
               </View>
             ) : (
               <View style={styles.listCard}>
-                {qualifiers.map((athlete, index) => {
+                {filteredQualifiers.map((athlete, index) => {
                   const name = athletePreferredName({
                     firstName: athlete.firstName,
                     lastName: athlete.lastName,
@@ -300,7 +295,7 @@ export default function NationalsScreen() {
                       onPress={() => router.push(`/roster/${athlete.athleteSlug || athlete.athleteId}`)}
                       style={({ pressed }) => [
                         styles.athleteRow,
-                        index < qualifiers.length - 1 && styles.listDivider,
+                        index < filteredQualifiers.length - 1 && styles.listDivider,
                         pressed && styles.rowPressed,
                       ]}
                     >

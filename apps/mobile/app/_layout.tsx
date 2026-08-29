@@ -3,6 +3,7 @@ import { Stack } from "expo-router"
 import { StatusBar } from "expo-status-bar"
 import { useMemo } from "react"
 import { AuthProvider } from "../src/lib/auth"
+import { QueryProvider } from "../src/lib/query"
 import { ThemeProvider, useThemePreference } from "../src/lib/theme"
 import { ViewPreferencesProvider } from "../src/lib/view-preferences"
 import { ToastProvider, usePalette } from "@swimbuzz/ui"
@@ -51,11 +52,13 @@ export default function RootLayout() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <ViewPreferencesProvider>
-          <ToastProvider>
-            <ThemedStack />
-          </ToastProvider>
-        </ViewPreferencesProvider>
+        <QueryProvider>
+          <ViewPreferencesProvider>
+            <ToastProvider>
+              <ThemedStack />
+            </ToastProvider>
+          </ViewPreferencesProvider>
+        </QueryProvider>
       </AuthProvider>
     </ThemeProvider>
   )

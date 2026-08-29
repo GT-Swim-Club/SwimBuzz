@@ -9,6 +9,7 @@ import {
   parseOptionalDate,
   resolveLinkedAthleteId,
   serializeRoomForm } from "./_shared"
+import { DEFAULT_TIME_ZONE, isValidTimeZone } from "@swimbuzz/shared"
 
 export async function GET(
   _req: Request,
@@ -81,12 +82,12 @@ export async function POST(
   }
 
   const { id: meetId } = await params
-  const meet = await prisma.meet.findUnique({ where: { id: meetId }, select: { id: true } })
+  const meet = await prisma.meet.findUnique({ where: { id: meetId }, select: { id: true, timeZone: true } })
   if (!meet) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
   const form = await prisma.meetRoomForm.upsert({
     where: { meetId },
-    create: { meetId },
+    create: { meetId, timeZone: meet.timeZone ?? DEFAULT_TIME_ZONE },
     update: {}})
 
   return NextResponse.json({ id: form.id })
@@ -138,10 +139,19 @@ export async function PATCH(
       ? normalizeMeetSignupQuestions(body.customQuestions)
       : undefined
 
+  let timeZone: string | undefined
+  if (typeof body.timeZone === "string" && body.timeZone) {
+    if (!isValidTimeZone(body.timeZone)) {
+      return NextResponse.json({ error: "Time zone is invalid" }, { status: 400 })
+    }
+    timeZone = body.timeZone
+  }
+
   const form = await prisma.meetRoomForm.upsert({
     where: { meetId },
     create: {
       meetId,
+      timeZone: timeZone ?? DEFAULT_TIME_ZONE,
       ...(instructions !== undefined ? { instructions } : {}),
       ...(maxPreferences !== undefined ? { maxPreferences } : {}),
       ...(body.openAt !== undefined ? { openAt: openAt ?? null } : {}),
@@ -152,6 +162,7 @@ export async function PATCH(
     update: {
       ...(instructions !== undefined ? { instructions } : {}),
       ...(maxPreferences !== undefined ? { maxPreferences } : {}),
+      ...(timeZone !== undefined ? { timeZone } : {}),
       ...(body.openAt !== undefined ? { openAt: openAt ?? null } : {}),
       ...(body.closeAt !== undefined ? { closeAt: closeAt ?? null } : {}),
       ...(customQuestions !== undefined
@@ -165,5 +176,6 @@ export async function PATCH(
     openAt: form.openAt?.toISOString() ?? null,
     closeAt: form.closeAt?.toISOString() ?? null,
     assignmentsPublishedAt: form.assignmentsPublishedAt?.toISOString() ?? null,
-    customQuestions: normalizeMeetSignupQuestions(form.customQuestions)})
+    customQuestions: normalizeMeetSignupQuestions(form.customQuestions),
+    timeZone: form.timeZone})
 }

@@ -32,6 +32,7 @@ type Props = {
   meetId: string
   meetName: string
   configInitial: MeetRoomConfigInitial | null
+  meetTimeZone: string
   athletes: AthleteOption[]
   questions: MeetSignupQuestion[]
   preferences: PreferenceRow[]
@@ -46,6 +47,7 @@ export default function MeetRoommateManager({
   meetId,
   meetName,
   configInitial,
+  meetTimeZone,
   athletes,
   questions,
   preferences,
@@ -112,7 +114,16 @@ export default function MeetRoommateManager({
       >
         <MeetRoomConfigButton
           meetId={meetId}
-          initial={configInitial}
+          initial={
+            configInitial ?? {
+              instructions: "",
+              maxPreferences: 3,
+              openAt: null,
+              closeAt: null,
+              customQuestions: [],
+              timeZone: meetTimeZone,
+            }
+          }
           inline
         />
       </div>

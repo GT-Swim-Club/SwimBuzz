@@ -1,16 +1,9 @@
 import { NextResponse } from "next/server"
-import { Gender } from "@prisma/client"
 import { parseSeason } from "@/lib/season"
 import { parseRosterCsv } from "@/lib/roster-csv"
 import { getSession } from "@/lib/session"
 import { isStaffRole } from "@/lib/auth-roles"
-import {
-  createImportAthlete,
-  findAthleteForImport,
-  loadRosterImportContext,
-  mergeImportAthlete,
-  registerImportAthlete,
-  swimCloudIdConflict } from "@/lib/roster-import"
+import { runRosterImport } from "@/lib/roster-import"
 
 export const runtime = "nodejs"
 
@@ -61,67 +54,26 @@ export async function POST(req: Request) {
     )
   }
 
-  let created = 0
-  let updated = 0
-  const importErrors: Array<{ row: number; message: string }> = [...parsed.errors]
-  const rowOutcomes: Array<{ row: number; action: "created" | "updated" | "skipped"; name: string; detail?: string }> =
-    []
-
+  let summary
   try {
-    const context = await loadRosterImportContext()
-
-    for (const row of parsed.rows) {
-      const input = {
-        firstName: row.firstName,
-        lastName: row.lastName,
-        gender: row.gender === "F" ? Gender.F : Gender.M,
-        ...(row.email ? { email: row.email } : {}),
-        ...(row.gtid ? { gtid: row.gtid } : {}),
-        ...(row.dob ? { dob: row.dob } : {}),
-        ...(row.year ? { year: row.year } : {}),
-        ...(row.nicknames.length > 0 ? { nicknames: row.nicknames } : {})}
-
-      const existing = findAthleteForImport(input, context)
-      // Conflict check removed as swimCloudId is no longer in CSV input
-
-      if (existing) {
-        const hadSeason = existing.seasons.includes(season)
-        const merged = await mergeImportAthlete(existing, input, season)
-        registerImportAthlete(context, merged)
-        updated++
-        rowOutcomes.push({
-          row: row.rowNumber,
-          action: "updated",
-          name: `${row.lastName}, ${row.firstName}`,
-          detail: hadSeason ? "merged with existing athlete" : `added to ${season}`})
-        continue
-      }
-
-      const athlete = await createImportAthlete(input, season, row.rowNumber)
-      registerImportAthlete(context, athlete)
-      created++
-      rowOutcomes.push({
-        row: row.rowNumber,
-        action: "created",
-        name: `${row.lastName}, ${row.firstName}`,
-        detail: row.email ?? athlete.userEmail})
-    }
+    summary = await runRosterImport(parsed.rows, season, parsed.errors)
   } catch (err) {
     console.error("CSV roster import failed:", err)
     return NextResponse.json({ error: "Import failed while saving athletes" }, { status: 500 })
   }
 
+  const { created, updated, errors, rowOutcomes } = summary
   console.log("[roster csv import] summary:", {
     created,
     updated,
     skipped: rowOutcomes.filter((r) => r.action === "skipped").length,
     parseErrors: parsed.errors.length,
-    importErrors: importErrors.length - parsed.errors.length})
+    importErrors: errors.length - parsed.errors.length})
   console.log("[roster csv import] rows:", rowOutcomes)
-  if (importErrors.length > parsed.errors.length) {
+  if (errors.length > parsed.errors.length) {
     console.log(
       "[roster csv import] import errors:",
-      importErrors.filter((e) => !parsed.errors.some((p) => p.row === e.row && p.message === e.message))
+      errors.filter((e) => !parsed.errors.some((p) => p.row === e.row && p.message === e.message))
     )
   }
 
@@ -129,5 +81,5 @@ export async function POST(req: Request) {
     created,
     updated,
     parsed: parsed.rows.length,
-    errors: importErrors})
+    errors})
 }

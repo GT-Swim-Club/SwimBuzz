@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useTransition } from "react"
 import Modal, { ModalFooter } from "@/components/Modal"
 import ActionIcon from "@/components/ActionIcon"
+import { deleteSheetSeed, editSheetSeed } from "./EditSheetSeedButton.actions"
 
 const FALLBACK_EVENTS = [
   "50 Free",
@@ -44,12 +44,12 @@ export default function EditSheetSeedButton({
   eventOptions,
   className,
 }: EditSheetSeedButtonProps) {
-  const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const initialTime = seedTime?.trim() || (timeStatus?.toUpperCase() === "NT" ? "NT" : "")
   const [form, setForm] = useState({ event, time: initialTime || "NT" })
+  const loading = isPending
 
   const events =
     eventOptions && eventOptions.length > 0
@@ -67,59 +67,37 @@ export default function EditSheetSeedButton({
     setOpen(true)
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!form.event || !form.time.trim()) return
 
-    setLoading(true)
     setError(null)
-    try {
-      const res = await fetch(`/api/meets/${meetId}/sheet-entry`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+    startTransition(async () => {
+      try {
+        await editSheetSeed(meetId, {
           athleteId,
           event,
           newEvent: form.event,
           seedTime: form.time.trim(),
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Failed to save entry")
-        return
+        })
+        setOpen(false)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to save entry")
       }
-      setOpen(false)
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
-  async function handleDelete() {
+  function handleDelete() {
     if (!confirm(`Remove ${athleteName}'s ${event } from the roster summary?`)) return
-    setLoading(true)
     setError(null)
-    try {
-      const res = await fetch(`/api/meets/${meetId}/sheet-entry`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ athleteId, event }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Failed to delete entry")
-        return
+    startTransition(async () => {
+      try {
+        await deleteSheetSeed(meetId, athleteId, event)
+        setOpen(false)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to delete entry")
       }
-      setOpen(false)
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   return (

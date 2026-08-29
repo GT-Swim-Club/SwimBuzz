@@ -9,7 +9,9 @@ import {
   TextField,
 } from "@swimbuzz/ui"
 import { spacing } from "@swimbuzz/tokens"
-import { DateSelector } from "../../../src/components/DateTimeSelector"
+import type { CreateMeetBody } from "@swimbuzz/api"
+import { DateSelector, TimeSelector, TimeZoneSelector } from "../../../src/components/DateTimeSelector"
+import { getViewerTimeZone } from "@swimbuzz/shared"
 import { api } from "../../../src/lib/api"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 
@@ -21,7 +23,9 @@ export default function NewMeetScreen() {
   const [name, setName] = useState("")
   const [location, setLocation] = useState("")
   const [startDate, setStartDate] = useState("")
+  const [startTime, setStartTime] = useState("")
   const [endDate, setEndDate] = useState("")
+  const [timeZone, setTimeZone] = useState(() => getViewerTimeZone())
   const [course, setCourse] = useState<(typeof COURSES)[number]>("SCY")
   const [season, setSeason] = useState("")
   const [seasons, setSeasons] = useState<string[]>([])
@@ -66,12 +70,14 @@ export default function NewMeetScreen() {
     }
     setSaving(true)
     try {
-      const body: Record<string, unknown> = {
+      const body: CreateMeetBody = {
         name: trimmedName,
         location: location.trim() || null,
         startDate: startDate.trim(),
+        timeZone,
         course,
       }
+      if (startTime.trim()) body.startTime = startTime.trim()
       if (endDate.trim()) body.endDate = endDate.trim()
       if (season.trim()) body.season = season.trim()
       const meet = await api.createMeet(body)
@@ -111,6 +117,12 @@ export default function NewMeetScreen() {
           }}
           placeholder="Choose a start date"
         />
+        <TimeSelector
+          label="Start time"
+          value={startTime}
+          onChange={setStartTime}
+          helperText="Optional"
+        />
         <DateSelector
           label="End date"
           value={endDate}
@@ -119,6 +131,7 @@ export default function NewMeetScreen() {
           optional
           min={startDate || undefined}
         />
+        <TimeZoneSelector label="Time zone" value={timeZone} onChange={setTimeZone} />
         <View
           style={{
             flexDirection: "row",

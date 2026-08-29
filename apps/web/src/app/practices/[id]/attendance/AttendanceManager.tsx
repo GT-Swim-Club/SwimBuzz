@@ -6,9 +6,8 @@ import ActionIcon from "@/components/ActionIcon"
 import HoverDetail from "@/components/HoverDetail"
 import InfoIcon from "@/components/InfoIcon"
 import { athletePath } from "@/lib/slug"
-import { formatSwimDate } from "@/lib/utils"
-import { ZonedClockTime, ZonedInstantTime } from "@/components/ZonedTime"
-import { RelativeDate } from "@/components/RelativeDate"
+import { ZonedInstantTime } from "@/components/ZonedTime"
+import { RelativeDateTime } from "@/components/RelativeDate"
 import { formatClockTime } from "@swimbuzz/shared"
 
 type AttendanceRecord = {
@@ -48,9 +47,8 @@ function checkInTime(iso: string) {
 export default function AttendanceManager({
   practiceId,
   title,
-  dateIso,
-  startTime,
-  endTime,
+  startsAt,
+  endsAt,
   timeZone,
   location,
   initialAttendance,
@@ -58,9 +56,8 @@ export default function AttendanceManager({
 }: {
   practiceId: string
   title: string
-  dateIso: string | null
-  startTime: string
-  endTime: string
+  startsAt: string
+  endsAt: string
   timeZone: string
   location: string
   initialAttendance: AttendanceRecord[]
@@ -263,18 +260,7 @@ export default function AttendanceManager({
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="flex items-center gap-1.5">
               <InfoIcon kind="calendar" />
-              {dateIso ? <RelativeDate day={dateIso} absolute={formatSwimDate(dateIso)} /> : "No date"}
-              {startTime || endTime ? (
-                <>
-                  {" · "}
-                  <ZonedClockTime
-                    date={dateIso ? dateIso.slice(0, 10) : null}
-                    startTime={startTime}
-                    endTime={endTime}
-                    sourceTimeZone={timeZone}
-                  />
-                </>
-              ) : null}
+              <RelativeDateTime startsAt={startsAt} endsAt={endsAt} timeZone={timeZone} />
             </span>
             {location && (
               <>

@@ -13,6 +13,7 @@ import {
   signupWithdrawStatus } from "@/lib/meet-signup"
 import { Prisma } from "@prisma/client"
 import { getSession } from "@/lib/session"
+import { isStaffRole } from "@/lib/auth-roles"
 
 async function resolveLinkedAthleteId(
   sessionUserId: string
@@ -32,13 +33,6 @@ export async function PUT(
 ) {
   const session = await getSession()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-
-  if (session.user.role === "COACH") {
-    return NextResponse.json(
-      { error: "Coaches cannot edit athlete sign-ups." },
-      { status: 403 }
-    )
-  }
 
   const body = await req.json()
 
@@ -172,18 +166,18 @@ export async function DELETE(
   const session = await getSession()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const isCoach = session.user.role === "COACH"
   const { id: meetId } = await params
   const form = await prisma.meetSignupForm.findUnique({ where: { meetId } })
   if (!form) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
+  const athleteIdParam = new URL(req.url).searchParams.get("athleteId")?.trim() ?? ""
+
   let athleteId: string
-  if (isCoach) {
-    const athleteIdParam = new URL(req.url).searchParams.get("athleteId")?.trim() ?? ""
-    if (!athleteIdParam) {
+  if (athleteIdParam) {
+    if (!isStaffRole(session.user.role)) {
       return NextResponse.json(
-        { error: "athleteId is required to withdraw a sign-up" },
-        { status: 400 }
+        { error: "Not authorized to drop this sign-up" },
+        { status: 403 }
       )
     }
     athleteId = athleteIdParam

@@ -1,10 +1,10 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useMemo, useState, useTransition } from "react"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { athleteHasRosterSummaryEntry } from "@/lib/meet-signup"
 import type { SheetEntry } from "@/lib/meet-sheet-summary"
+import { addRosterOnlyEntry } from "./AddToRosterSummaryButton.actions"
 
 type AthleteOption = { id: string; name: string }
 
@@ -17,11 +17,11 @@ export default function AddToRosterSummaryButton({
   athletes: AthleteOption[]
   rosterSummaryEntries: SheetEntry[]
 }) {
-  const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [athleteId, setAthleteId] = useState("")
+  const loading = isPending
 
   const addableAthletes = useMemo(
     () => athletes.filter((a) => !athleteHasRosterSummaryEntry(rosterSummaryEntries, a.id)),
@@ -34,29 +34,18 @@ export default function AddToRosterSummaryButton({
     setOpen(true)
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!athleteId) return
-    setLoading(true)
     setError(null)
-    try {
-      const res = await fetch(`/api/meets/${meetId}/sheet-entry`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ athleteId, rosterOnly: true }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Failed to add athlete")
-        return
+    startTransition(async () => {
+      try {
+        await addRosterOnlyEntry(meetId, athleteId)
+        setOpen(false)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to add athlete")
       }
-      setOpen(false)
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   return (

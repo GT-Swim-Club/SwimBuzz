@@ -1,13 +1,13 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect, useState, useTransition } from "react"
 import MeetResourceField from "../MeetResourceField"
 import TravelInfoIcon, { type TravelInfoKind } from "@/components/TravelInfoIcon"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { useMeetResourceUploads } from "@/lib/use-meet-resource-uploads"
 import { useUnsavedUploads } from "@/lib/unsaved-uploads"
 import RichTextField from "@/components/RichTextField"
+import { updateMeet } from "./meet-update.actions"
 
 export type TravelInfoForm = {
   rideSignUpsUrl: string
@@ -45,9 +45,9 @@ export default function AddTravelInfoButton({
   meetId: string
   initial: TravelInfoForm
 }) {
-  const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const loading = isPending
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState<TravelInfoForm>(initial)
   const { anyUploading, getFieldUploadHandler } = useMeetResourceUploads()
@@ -69,31 +69,24 @@ export default function AddTravelInfoButton({
     }
   }, [open, initial])
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (anyUploading) return
-    setLoading(true)
     setError(null)
 
-    try {
-      const res = await fetch(`/api/meets/${meetId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Failed to save travel info")
-        return
+    startTransition(async () => {
+      try {
+        const result = await updateMeet(meetId, form)
+        if (!result.ok) {
+          setError(result.error)
+          return
+        }
+        release([form.rideSignUpsUrl, form.roomsUrl])
+        setOpen(false)
+      } catch {
+        setError("Something went wrong")
       }
-      release([form.rideSignUpsUrl, form.roomsUrl])
-      setOpen(false)
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   return (

@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useTransition } from "react"
 import { parseTime } from "@/lib/utils"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { DatePicker } from "@/components/CustomDateTimePicker"
+import { addMeetSwim } from "./AddMeetSwimButton.actions"
 
 const EVENTS = [
   "50 Free",
@@ -39,9 +39,8 @@ export default function AddMeetSwimButton({
   defaultDate: string
   athletes: AthleteOption[]
 }) {
-  const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState({
     athleteId: "",
@@ -50,6 +49,7 @@ export default function AddMeetSwimButton({
     course: defaultCourse,
     date: defaultDate,
   })
+  const loading = isPending
 
   function openModal() {
     setForm({
@@ -63,7 +63,7 @@ export default function AddMeetSwimButton({
     setOpen(true)
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!form.athleteId || !form.time) return
 
@@ -73,13 +73,10 @@ export default function AddMeetSwimButton({
       return
     }
 
-    setLoading(true)
     setError(null)
-    try {
-      const res = await fetch("/api/swims", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+    startTransition(async () => {
+      try {
+        await addMeetSwim({
           athleteId: form.athleteId,
           event: form.event,
           course: form.course,
@@ -87,21 +84,12 @@ export default function AddMeetSwimButton({
           meet: meetName,
           meetId,
           timeMs,
-          source: "manual",
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Failed to save swim")
-        return
+        })
+        setOpen(false)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to save swim")
       }
-      setOpen(false)
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   return (

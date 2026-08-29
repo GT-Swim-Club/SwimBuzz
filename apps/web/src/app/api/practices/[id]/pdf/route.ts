@@ -4,6 +4,7 @@ import { isStaffRole } from "@/lib/auth-roles"
 import { getSession } from "@/lib/session"
 import { buildPracticePdf, practicePdfFilename } from "@/lib/practice-pdf"
 import { practiceSetSelect } from "@/lib/practice-input"
+import { zonedDayKey } from "@swimbuzz/shared"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -28,13 +29,14 @@ export async function GET(
   }
 
   const totalDistance = practice.sets.reduce((sum, set) => sum + (set.distance ?? 0), 0)
+  const startsAt = practice.startsAt ?? practice.createdAt
+  const endsAt = practice.endsAt ?? startsAt
   const doc = buildPracticePdf({
     title: practice.title,
     published: practice.published,
     showDraft: staff,
-    dateIso: practice.date ? practice.date.toISOString() : null,
-    startTime: practice.startTime,
-    endTime: practice.endTime,
+    startsAt: startsAt.toISOString(),
+    endsAt: endsAt.toISOString(),
     timeZone: practice.timeZone,
     location: practice.location,
     focus: practice.focus,
@@ -48,7 +50,7 @@ export async function GET(
   })
 
   const bytes = new Uint8Array(doc.output("arraybuffer"))
-  const filename = practicePdfFilename(practice.title, practice.date?.toISOString() ?? null)
+  const filename = practicePdfFilename(practice.title, zonedDayKey(startsAt, practice.timeZone))
 
   return new NextResponse(bytes, {
     headers: {

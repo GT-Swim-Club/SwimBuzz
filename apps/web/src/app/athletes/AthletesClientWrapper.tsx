@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import Link from "next/link"
 import AthleteGalleryCard from "./AthleteGalleryCard"
 import { athletePath } from "@/lib/slug"
@@ -10,31 +10,32 @@ export default function AthletesClientWrapper({
   athletes,
   viewerAthleteId,
   showGender,
-  query,
   view,
 }: {
   athletes: any[]
   viewerAthleteId: string | null
   showGender: boolean
-  query: string
   view: "list" | "gallery"
 }) {
+  const [query, setQuery] = useState("")
 
-  if (athletes.length === 0) {
-    return (
-    <div className="border border-border-secondary rounded-xl px-4 py-12 text-center text-sm text-foreground-secondary bg-background">
-        {query
-          ? `No athletes matching “${query}”.`
-          : `No athletes found for this ${showGender ? "season" : "gender and season"}.`}
-      </div>
-    )
-  }
+  const filteredAthletes = useMemo(() => {
+    const needle = query.trim().toLowerCase()
+    if (!needle) return athletes
+    return athletes.filter((a) => {
+      const name = `${a.firstName} ${a.lastName}`.toLowerCase()
+      return (
+        name.includes(needle) ||
+        a.nicknames.some((n: string) => n.toLowerCase().includes(needle))
+      )
+    })
+  }, [athletes, query])
 
   const { groupedAthletes, viewerAthlete, others } = useMemo(() => {
-    const you = athletes.find((a) => a.id === viewerAthleteId)
-    const others = athletes.filter((a) => a.id !== viewerAthleteId)
+    const you = filteredAthletes.find((a) => a.id === viewerAthleteId)
+    const others = filteredAthletes.filter((a) => a.id !== viewerAthleteId)
 
-    const groups: Record<string, typeof athletes> = {}
+    const groups: Record<string, typeof filteredAthletes> = {}
     for (const a of others) {
       const letter = a.lastName[0]?.toUpperCase() || "#"
       if (!groups[letter]) groups[letter] = []
@@ -45,7 +46,7 @@ export default function AthletesClientWrapper({
       viewerAthlete: you,
       others,
     }
-  }, [athletes, viewerAthleteId])
+  }, [filteredAthletes, viewerAthleteId])
 
   const viewerYearAndAge = viewerAthlete
     ? formatAthleteYearAndAge(viewerAthlete.year, viewerAthlete.dob)
@@ -72,6 +73,30 @@ export default function AthletesClientWrapper({
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <label className="block flex-1">
+          <span className="sr-only">Search athletes by name</span>
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search athletes…"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
+          />
+        </label>
+        <span className="text-xs text-foreground-secondary whitespace-nowrap">
+          {filteredAthletes.length} athlete{filteredAthletes.length === 1 ? "" : "s"}
+        </span>
+      </div>
+
+      {filteredAthletes.length === 0 ? (
+        <div className="border border-border-secondary rounded-xl px-4 py-12 text-center text-sm text-foreground-secondary bg-background">
+          {query
+            ? `No athletes matching “${query}”.`
+            : `No athletes found for this ${showGender ? "season" : "gender and season"}.`}
+        </div>
+      ) : (
+      <>
       {renderNav()}
       {view === "list" ? (
         <div className="space-y-6">
@@ -157,7 +182,7 @@ export default function AthletesClientWrapper({
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm text-foreground">
-                          {a.lastName}, {a.firstName}
+                          {a.firstName} {a.lastName}
                           {a.nicknames.length > 0 && (
                             <span className="font-normal text-foreground-secondary">
                               {" "}({a.nicknames.join(", ")})
@@ -257,6 +282,8 @@ export default function AthletesClientWrapper({
             })}
           </div>
         </div>
+      )}
+      </>
       )}
     </div>
   )

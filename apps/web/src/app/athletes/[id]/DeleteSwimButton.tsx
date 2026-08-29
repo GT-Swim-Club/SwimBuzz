@@ -1,9 +1,9 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useTransition } from "react"
 import Modal, { ModalFooter } from "@/components/Modal"
 import ActionIcon from "@/components/ActionIcon"
+import { deleteAthleteSwim } from "./DeleteSwimButton.actions"
 
 type DeleteSwimButtonProps = {
   swimId: string
@@ -22,9 +22,9 @@ export default function DeleteSwimButton({
   dateLabel,
   meet,
 }: DeleteSwimButtonProps) {
-  const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const loading = isPending
 
   useEffect(() => {
     if (!open) return
@@ -35,14 +35,15 @@ export default function DeleteSwimButton({
     return () => window.removeEventListener("keydown", onKeyDown)
   }, [open, loading])
 
-  async function handleDelete() {
-    setLoading(true)
-    const res = await fetch(`/api/swims/${swimId}`, { method: "DELETE" })
-    setLoading(false)
-    if (res.ok) {
-      setOpen(false)
-      router.refresh()
-    }
+  function handleDelete() {
+    startTransition(async () => {
+      try {
+        await deleteAthleteSwim(swimId)
+        setOpen(false)
+      } catch {
+        // swallow — matches prior fetch-based behavior of leaving modal open on failure
+      }
+    })
   }
 
   return (

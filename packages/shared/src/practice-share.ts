@@ -1,6 +1,5 @@
-import { formatClockTimeRange } from "./format"
 import { htmlToPlainText, isHtmlEmpty } from "./html"
-import { zoneAbbreviation, zonedTimeToUtc } from "./timezone"
+import { formatZonedInstantRange } from "./timezone"
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
@@ -19,9 +18,8 @@ export type PracticeShareSet = {
 
 export type PracticeShareInput = {
   title: string
-  dateIso: string | null
-  startTime: string
-  endTime: string
+  startsAt: string
+  endsAt: string
   timeZone: string
   location: string
   focus: string | null
@@ -36,8 +34,8 @@ export function practiceSharePath(slugOrId: string): string {
 }
 
 /** "2026-08-18-morning-sprint.pdf" — shared by web's PDF export and mobile's PDF/PNG export. */
-export function practiceShareFilename(title: string, dateIso: string | null, ext: string): string {
-  const datePart = dateIso ? dateIso.slice(0, 10) : "practice"
+export function practiceShareFilename(title: string, dayKey: string | null, ext: string): string {
+  const datePart = dayKey || "practice"
   const titlePart = title
     .normalize("NFKD")
     .replace(/\p{Diacritic}/gu, "")
@@ -64,16 +62,10 @@ export function practiceShareUrl(origin: string, slugOrId: string): string {
 export function practiceShareText(input: PracticeShareInput): string {
   const lines: string[] = [input.title]
 
-  const dateText = input.dateIso ? formatPracticeShareDate(input.dateIso) : ""
-  const dateForZone = input.dateIso ? input.dateIso.slice(0, 10) : new Date().toISOString().slice(0, 10)
-  const hasTime = Boolean(input.startTime || input.endTime)
-  const zoneAbbrev = hasTime
-    ? zoneAbbreviation(input.timeZone, zonedTimeToUtc(dateForZone, input.startTime || input.endTime, input.timeZone))
-    : null
-  const timeText = hasTime
-    ? `${formatClockTimeRange(input.startTime, input.endTime)}${zoneAbbrev ? ` ${zoneAbbrev}` : ""}`
-    : ""
-  const dateTimeLine = [dateText, timeText].filter(Boolean).join(" · ")
+  const range = formatZonedInstantRange(input.startsAt, input.endsAt, input.timeZone)
+  const dateTimeLine = range.crossesDay
+    ? `${range.dateTime} ${range.abbrev}`
+    : `${range.date} · ${range.time} ${range.abbrev}`
   if (dateTimeLine) lines.push(dateTimeLine)
   if (input.location) lines.push(input.location)
 

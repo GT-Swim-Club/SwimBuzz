@@ -1,37 +1,23 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
 import Modal, { ModalFooter } from "@/components/Modal"
-import { DatePicker, TimePicker } from "@/components/CustomDateTimePicker"
+import { DatePicker, TimePicker, TimeZonePicker } from "@/components/CustomDateTimePicker"
 import { MeetFormCustomQuestionsEditor } from "@/components/MeetFormCustomQuestions"
 import {
   findIncompleteChoiceQuestion,
   normalizeMeetSignupQuestions,
   type MeetSignupQuestion,
 } from "@/lib/meet-signup"
+import { toDateInput, toTimeInput } from "@/lib/date-input"
+import { DEFAULT_TIME_ZONE, zonedTimeToUtc } from "@swimbuzz/shared"
+import { saveMeetRoomConfig } from "./MeetRoomConfigButton.actions"
 
-function toDatePart(iso: string | null): string {
-  if (!iso) return ""
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return ""
-  const pad = (n: number) => String(n).padStart(2, "0")
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
-}
-
-function toTimePart(iso: string | null): string {
-  if (!iso) return ""
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return ""
-  const pad = (n: number) => String(n).padStart(2, "0")
-  return `${pad(d.getHours())}:${pad(d.getMinutes())}`
-}
-
-function fromDateTimeParts(date: string, time: string): string | null {
+function fromDateTimeParts(date: string, time: string, timeZone: string): string | null {
   const datePart = date.trim()
   const timePart = time.trim()
   if (!datePart || !timePart) return null
-  const d = new Date(`${datePart}T${timePart}`)
+  const d = zonedTimeToUtc(datePart, timePart, timeZone)
   if (Number.isNaN(d.getTime())) return null
   return d.toISOString()
 }
@@ -42,6 +28,7 @@ export type MeetRoomConfigInitial = {
   openAt: string | null
   closeAt: string | null
   customQuestions: MeetSignupQuestion[]
+  timeZone: string
 }
 
 export default function MeetRoomConfigButton({
@@ -53,17 +40,18 @@ export default function MeetRoomConfigButton({
   initial: MeetRoomConfigInitial | null
   inline?: boolean
 }) {
-  const router = useRouter()
   const [open, setOpen] = useState(inline)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const zone = initial?.timeZone ?? DEFAULT_TIME_ZONE
   const [form, setForm] = useState({
     instructions: initial?.instructions ?? "",
     maxPreferences: initial?.maxPreferences?.toString() ?? "3",
-    openDate: toDatePart(initial?.openAt ?? null),
-    openTime: toTimePart(initial?.openAt ?? null),
-    closeDate: toDatePart(initial?.closeAt ?? null),
-    closeTime: toTimePart(initial?.closeAt ?? null),
+    timeZone: zone,
+    openDate: toDateInput(initial?.openAt ?? null, zone),
+    openTime: toTimeInput(initial?.openAt ?? null, zone),
+    closeDate: toDateInput(initial?.closeAt ?? null, zone),
+    closeTime: toTimeInput(initial?.closeAt ?? null, zone),
     customQuestions: initial?.customQuestions ?? [],
   })
 
@@ -73,18 +61,19 @@ export default function MeetRoomConfigButton({
     setForm({
       instructions: initial?.instructions ?? "",
       maxPreferences: initial?.maxPreferences?.toString() ?? "3",
-      openDate: toDatePart(initial?.openAt ?? null),
-      openTime: toTimePart(initial?.openAt ?? null),
-      closeDate: toDatePart(initial?.closeAt ?? null),
-      closeTime: toTimePart(initial?.closeAt ?? null),
+      timeZone: zone,
+      openDate: toDateInput(initial?.openAt ?? null, zone),
+      openTime: toTimeInput(initial?.openAt ?? null, zone),
+      closeDate: toDateInput(initial?.closeAt ?? null, zone),
+      closeTime: toTimeInput(initial?.closeAt ?? null, zone),
       customQuestions: initial?.customQuestions ?? [],
     })
-  }, [open, initial])
+  }, [open, initial, zone])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const openAt = fromDateTimeParts(form.openDate, form.openTime)
-    const closeAt = fromDateTimeParts(form.closeDate, form.closeTime)
+    const openAt = fromDateTimeParts(form.openDate, form.openTime, form.timeZone)
+    const closeAt = fromDateTimeParts(form.closeDate, form.closeTime, form.timeZone)
     if (openAt && closeAt && new Date(openAt) > new Date(closeAt)) {
       setError("Close time must be on or after the open time")
       return
@@ -105,35 +94,18 @@ export default function MeetRoomConfigButton({
     setLoading(true)
     setError(null)
     try {
-      if (!initial) {
-        const createRes = await fetch(`/api/meets/${meetId}/rooms`, { method: "POST" })
-        if (!createRes.ok) {
-          const data = await createRes.json()
-          setError(data.error ?? "Failed to create form")
-          return
-        }
-      }
-
-      const res = await fetch(`/api/meets/${meetId}/rooms`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          instructions: form.instructions,
-          maxPreferences,
-          openAt: fromDateTimeParts(form.openDate, form.openTime),
-          closeAt: fromDateTimeParts(form.closeDate, form.closeTime),
-          customQuestions: form.customQuestions,
-        }),
+      await saveMeetRoomConfig(meetId, {
+        isNew: !initial,
+        instructions: form.instructions,
+        maxPreferences,
+        timeZone: form.timeZone,
+        openAt: fromDateTimeParts(form.openDate, form.openTime, form.timeZone),
+        closeAt: fromDateTimeParts(form.closeDate, form.closeTime, form.timeZone),
+        customQuestions: form.customQuestions,
       })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Failed to save")
-        return
-      }
       if (!inline) setOpen(false)
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong")
     } finally {
       setLoading(false)
     }
@@ -196,6 +168,17 @@ export default function MeetRoomConfigButton({
         }
       >
         <form id="meet-room-config" onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label className="block text-xs font-medium text-foreground-secondary mb-1">
+              Time Zone
+            </label>
+            <TimeZonePicker
+              value={form.timeZone}
+              onChange={(value) => setForm((f) => ({ ...f, timeZone: value }))}
+              ariaLabel="Roommate preference window time zone"
+            />
+          </div>
+
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className="block text-xs font-medium text-foreground-secondary mb-1">

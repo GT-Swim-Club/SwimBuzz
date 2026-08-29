@@ -33,8 +33,10 @@ export default async function MeetRoommateManagerPage({
       slug: true,
       name: true,
       season: true,
-      startDate: true,
-      endDate: true,
+      createdAt: true,
+      startsAt: true,
+      endsAt: true,
+      timeZone: true,
       psychSheetSummary: true,
       heatSheetSummary: true,
       finalsHeatSheetSummary: true,
@@ -80,7 +82,7 @@ export default async function MeetRoommateManagerPage({
   const now = new Date()
   const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
   yesterday.setHours(0, 0, 0, 0)
-  const lastActiveDate = new Date(meet.endDate ?? meet.startDate)
+  const lastActiveDate = new Date(meet.endsAt ?? meet.startsAt ?? meet.createdAt)
   lastActiveDate.setHours(0, 0, 0, 0)
   if (lastActiveDate <= yesterday) redirect(meetPath)
 
@@ -120,6 +122,7 @@ export default async function MeetRoommateManagerPage({
       <MeetRoommateManager
         meetId={meet.id}
         meetName={meet.name}
+        meetTimeZone={meet.timeZone}
         configInitial={
           form
             ? {
@@ -130,6 +133,7 @@ export default async function MeetRoommateManagerPage({
                 customQuestions: normalizeMeetSignupQuestions(
                   form.customQuestions
                 ),
+                timeZone: form.timeZone,
               }
             : null
         }

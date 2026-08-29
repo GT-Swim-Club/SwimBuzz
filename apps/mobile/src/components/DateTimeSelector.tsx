@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react"
-import { formatClockTime } from "@swimbuzz/shared"
+import { formatClockTime, US_TIME_ZONES, zoneAbbreviation, zoneDisplayName } from "@swimbuzz/shared"
 import {
   Modal,
   Pressable,
@@ -140,7 +140,7 @@ function FieldButton({
   value: string
   placeholder: string
   helperText?: string
-  kind: "date" | "time"
+  kind: "date" | "time" | "zone"
   onPress: () => void
 }) {
   const hasValue = Boolean(value)
@@ -153,7 +153,7 @@ function FieldButton({
         onPress={onPress}
         style={({ pressed }) => [styles.fieldButton, pressed && styles.fieldButtonPressed]}
       >
-        <View style={[styles.fieldIcon, kind === "time" && styles.timeIcon]}>
+        <View style={[styles.fieldIcon, kind !== "date" && styles.timeIcon]}>
           {kind === "date" ? (
             <>
               <View style={styles.fieldIconTop} />
@@ -163,11 +163,13 @@ function FieldButton({
                 <View style={styles.fieldIconDot} />
               </View>
             </>
-          ) : (
+          ) : kind === "time" ? (
             <>
               <View style={styles.clockHandShort} />
               <View style={styles.clockHandLong} />
             </>
+          ) : (
+            <View style={styles.globeRing} />
           )}
         </View>
         <View style={styles.fieldCopy}>
@@ -494,6 +496,66 @@ export function TimeSelector({
   )
 }
 
+function timeZoneOptionLabel(zone: string) {
+  return `${zoneDisplayName(zone)} (${zoneAbbreviation(zone)})`
+}
+
+/** Time zone picker for Practice/Meet forms — options limited to `US_TIME_ZONES`. */
+export function TimeZoneSelector({
+  label,
+  value,
+  onChange,
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const zones = useMemo(
+    () => (value && !US_TIME_ZONES.includes(value) ? [...US_TIME_ZONES, value] : US_TIME_ZONES),
+    [value]
+  )
+  const close = () => setOpen(false)
+
+  return (
+    <>
+      <FieldButton
+        label={label}
+        value={value ? timeZoneOptionLabel(value) : ""}
+        placeholder="Select a time zone"
+        kind="zone"
+        onPress={() => setOpen(true)}
+      />
+      {open ? (
+        <Sheet onClose={close}>
+          <SheetHeader title={label} value={value ? timeZoneOptionLabel(value) : "Time zone"} onClose={close} />
+          <ScrollView style={styles.hoursScroller} showsVerticalScrollIndicator={false}>
+            {zones.map((zone) => {
+              const selected = zone === value
+              return (
+                <Pressable
+                  key={zone}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  onPress={() => {
+                    onChange(zone)
+                    close()
+                  }}
+                  style={[styles.zoneOption, selected && styles.optionSelected]}
+                >
+                  <Text style={[styles.optionText, selected && styles.optionTextSelected]}>
+                    {timeZoneOptionLabel(zone)}
+                  </Text>
+                </Pressable>
+              )
+            })}
+          </ScrollView>
+        </Sheet>
+      ) : null}
+    </>
+  )
+}
+
 const styles = StyleSheet.create({
   field: { marginBottom: spacing.md },
   fieldLabel: { color: c.text, fontSize: 14, fontWeight: "700", marginBottom: spacing.xs },
@@ -525,6 +587,19 @@ const styles = StyleSheet.create({
   timeIcon: { borderRadius: 999 },
   clockHandShort: { backgroundColor: c.primaryActive, borderRadius: 2, height: 8, position: "absolute", top: 6, width: 2 },
   clockHandLong: { backgroundColor: c.primaryActive, borderRadius: 2, height: 10, position: "absolute", right: 8, top: 13, transform: [{ rotate: "-45deg" }], width: 2 },
+  globeRing: { borderColor: c.primaryActive, borderRadius: 999, borderWidth: 1.5, height: 18, width: 18 },
+  zoneOption: {
+    alignItems: "center",
+    backgroundColor: c.fillSecondary,
+    borderColor: c.fillSecondary,
+    borderRadius: radii.sm,
+    borderWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: spacing.xs,
+    minHeight: 48,
+    paddingHorizontal: spacing.sm,
+  },
   fieldCopy: { flex: 1 },
   fieldValue: { color: c.text, fontSize: 16, fontWeight: "600" },
   fieldPlaceholder: { color: c.textTertiary, fontWeight: "400" },

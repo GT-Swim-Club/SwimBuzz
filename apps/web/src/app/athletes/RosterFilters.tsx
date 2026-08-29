@@ -4,7 +4,6 @@ import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { isStaffRole } from "@/lib/auth-roles"
-import LiveSearch from "@/components/LiveSearch"
 import { resolveListedSeason, upcomingSeason } from "@/lib/season"
 import Modal, { ModalFooter } from "@/components/Modal"
 
@@ -31,11 +30,7 @@ function useRosterParams(seasons: string[]) {
   return { gender, season, updateParams }
 }
 
-export function RosterSearch() {
-  return <LiveSearch pathname="/athletes" placeholder="Search athletes…" />
-}
-
-export default function RosterFilters({ count, seasons }: { count: number, seasons: string[] }) {
+export default function RosterFilters({ seasons }: { seasons: string[] }) {
   const { data: session } = useSession()
   const [fetchedSeasons, setFetchedSeasons] = useState<string[]>(seasons)
   const { gender, season, updateParams } = useRosterParams(fetchedSeasons)
@@ -99,9 +94,6 @@ export default function RosterFilters({ count, seasons }: { count: number, seaso
         ))}
         {isStaffRole(session?.user?.role ?? "") && !fetchedSeasons.includes(upcoming) && <option value="ADD_NEW">+ New Season</option>}
       </select>
-      <span className="text-xs text-foreground-secondary">
-        {count} athlete{count === 1 ? "" : "s"}
-      </span>
 
       <Modal
         open={addSeasonModalOpen}

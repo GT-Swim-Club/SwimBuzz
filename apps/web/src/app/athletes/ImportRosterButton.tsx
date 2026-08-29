@@ -10,8 +10,11 @@ import { useImportTask } from "@/components/ImportTaskProvider"
 import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/FileDropzone"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/SegmentedToggle"
 import { runScraperEnqueuePollFinalize } from "@/lib/scraper-job-client"
+import { pickSpreadsheet, type PickedSpreadsheet } from "@/lib/google-picker-client"
 
-type ImportSource = "swimcloud" | "csv"
+type ImportSource = "swimcloud" | "csv" | "sheets"
+
+type SheetTab = { gid: number; title: string }
 
 export default function ImportRosterButton() {
   const router = useRouter()
@@ -30,16 +33,54 @@ export default function ImportRosterButton() {
   const [source, setSource] = useState<ImportSource>("csv")
   const [error, setError] = useState<string | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [picked, setPicked] = useState<PickedSpreadsheet | null>(null)
+  const [tabs, setTabs] = useState<SheetTab[] | null>(null)
+  const [selectedGid, setSelectedGid] = useState<number | null>(null)
+  const [picking, setPicking] = useState(false)
 
   const modalDescription =
     source === "csv"
       ? `Adds athletes to the ${season} roster.`
-      : `Imports SwimCloud IDs to the ${rosterLabel} roster.`
+      : source === "sheets"
+        ? `Adds athletes to the ${season} roster from a Google Sheet.`
+        : `Imports SwimCloud IDs to the ${rosterLabel} roster.`
 
   function resetForm() {
     setSource("csv")
     setError(null)
     setSelectedFile(null)
+    setPicked(null)
+    setTabs(null)
+    setSelectedGid(null)
+  }
+
+  async function handleChooseSheet() {
+    setPicking(true)
+    setError(null)
+    try {
+      const result = await pickSpreadsheet()
+      if (!result) return // user cancelled the picker
+
+      setPicked(result)
+      setTabs(null)
+      setSelectedGid(null)
+
+      const res = await fetch("/api/roster/import/sheet/tabs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accessToken: result.accessToken, spreadsheetId: result.spreadsheetId }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? "Couldn't read that sheet")
+
+      const sheetTabs: SheetTab[] = data.tabs ?? []
+      setTabs(sheetTabs)
+      setSelectedGid(sheetTabs[0]?.gid ?? null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't open Google Drive picker")
+    } finally {
+      setPicking(false)
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -94,6 +135,40 @@ export default function ImportRosterButton() {
       return
     }
 
+    if (source === "sheets") {
+      if (!picked || selectedGid == null) {
+        setError("Choose a Google Sheet first")
+        return
+      }
+      const { accessToken, spreadsheetId } = picked
+      const gid = selectedGid
+      setOpen(false)
+
+      startTask(
+        "Importing roster (Google Sheets)…",
+        (async () => {
+          const res = await fetch("/api/roster/import/sheet", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ accessToken, spreadsheetId, gid, season }),
+          })
+          const data = await res.json()
+          if (!res.ok) throw new Error(data.error ?? "Import failed")
+
+          const parts: string[] = [
+            `Imported ${data.created} new athlete${data.created === 1 ? "" : "s"}`,
+          ]
+          if (data.updated > 0) parts.push(`updated ${data.updated}`)
+          if (data.parsed > 0) parts.push(`${data.parsed} rows parsed`)
+          if (data.errors?.length > 0)
+            parts.push(`${data.errors.length} row(s) skipped`)
+          router.refresh()
+          return parts.join(" · ")
+        })()
+      )
+      return
+    }
+
     if (!selectedFile) {
       setError("Choose a CSV file first")
       return
@@ -126,7 +201,12 @@ export default function ImportRosterButton() {
     )
   }
 
-  const canSubmit = source === "swimcloud" ? true : !!selectedFile
+  const canSubmit =
+    source === "swimcloud"
+      ? true
+      : source === "sheets"
+        ? !!picked && selectedGid != null
+        : !!selectedFile
 
   return (
     <>
@@ -163,7 +243,7 @@ export default function ImportRosterButton() {
         description={modalDescription}
         header={
           <SegmentedToggle
-            selectedIndex={source === "swimcloud" ? 1 : 0}
+            selectedIndex={source === "swimcloud" ? 1 : source === "sheets" ? 2 : 0}
             fullWidth
             className="mt-4 rounded-lg border border-border-secondary bg-background"
           >
@@ -171,6 +251,7 @@ export default function ImportRosterButton() {
               [
                 ["csv", "CSV", "icon"] as const,
                 ["swimcloud", "SwimCloud IDs", "logo"] as const,
+                ["sheets", "Google Sheets", "sheet"] as const,
               ] as const
             ).map(([value, label, adornment]) => (
               <button
@@ -211,6 +292,25 @@ export default function ImportRosterButton() {
                     <polyline points="10 9 9 9 8 9" />
                   </svg>
                 )}
+                {adornment === "sheet" && (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4 shrink-0"
+                    aria-hidden="true"
+                  >
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <line x1="3" y1="9" x2="21" y2="9" />
+                    <line x1="3" y1="15" x2="21" y2="15" />
+                    <line x1="9" y1="3" x2="9" y2="21" />
+                    <line x1="15" y1="3" x2="15" y2="21" />
+                  </svg>
+                )}
                 {label}
               </button>
             ))}
@@ -241,6 +341,84 @@ export default function ImportRosterButton() {
             <p>
               Imports SwimCloud IDs for athletes already on your roster. Does not add new athletes.
             </p>
+          </div>
+        ) : source === "sheets" ? (
+          <div className="space-y-4">
+            <div className="rounded-lg border border-border-secondary bg-fill-secondary px-4 py-3 text-sm">
+              <p className="font-medium text-foreground text-foreground">Required columns</p>
+              <ul className="mt-2 space-y-1.5 text-foreground-secondary text-foreground-secondary">
+                <li>
+                  <span className="font-medium text-gray-800 dark:text-zinc-200">Name</span>
+                  {" — "}
+                  <span className="text-foreground-secondary text-foreground-secondary">
+                    First Name &amp; Last Name
+                  </span>
+                </li>
+                <li>
+                  <span className="font-medium text-gray-800 dark:text-zinc-200">Gender</span>
+                  {" — "}
+                  <span className="text-foreground-secondary text-foreground-secondary">
+                    M/F, Male/Female, Men/Women, or Boy/Girl
+                  </span>
+                </li>
+              </ul>
+              <p className="mt-3 font-medium text-foreground text-foreground">Recommended columns</p>
+              <ul className="mt-2 space-y-1.5 text-foreground-secondary text-foreground-secondary text-xs">
+                <li>Email, Nicknames, GTID, DOB, Year</li>
+              </ul>
+            </div>
+
+            {!picked ? (
+              <div className="rounded-lg border border-border-secondary px-4 py-3 text-sm space-y-2">
+                <p className="text-foreground-secondary text-foreground-secondary">
+                  Choose the roster spreadsheet from your Google Drive.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => void handleChooseSheet()}
+                  disabled={picking}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-border-secondary px-3 py-1.5 text-sm font-medium hover:bg-fill-tertiary disabled:opacity-50"
+                >
+                  {picking ? "Opening Google Drive…" : "Choose from Google Drive"}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between rounded-lg border border-border-secondary px-4 py-2.5 text-sm">
+                  <span className="text-foreground-secondary text-foreground-secondary">
+                    Selected <span className="font-medium text-foreground text-foreground">{picked.fileName}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => void handleChooseSheet()}
+                    disabled={picking}
+                    className="text-xs font-medium text-foreground-secondary text-foreground-secondary hover:text-foreground hover:text-foreground disabled:opacity-50"
+                  >
+                    Change
+                  </button>
+                </div>
+                {tabs === null ? (
+                  <p className="text-sm text-foreground-secondary text-foreground-secondary">Reading sheet…</p>
+                ) : tabs.length > 1 ? (
+                  <div>
+                    <span className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+                      Tab
+                    </span>
+                    <select
+                      value={selectedGid ?? ""}
+                      onChange={(e) => setSelectedGid(Number(e.target.value))}
+                      className="w-full rounded-lg border border-border-secondary bg-background px-3 py-2 text-sm outline-none focus:border-border"
+                    >
+                      {tabs.map((tab) => (
+                        <option key={tab.gid} value={tab.gid}>
+                          {tab.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : null}
+              </div>
+            )}
           </div>
         ) : (
           <div className="space-y-4">

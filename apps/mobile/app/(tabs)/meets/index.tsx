@@ -1,18 +1,19 @@
-import { useCallback, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import {
-  ActivityIndicator,
   RefreshControl,
   View,
 } from "react-native"
-import { useFocusEffect, useRouter } from "expo-router"
-import type { MeetSummary } from "@swimbuzz/shared"
-import { formatMeetDateRange, isStaffRole, utcDayKey } from "@swimbuzz/shared"
+import { useRouter } from "expo-router"
+import { useQuery } from "@tanstack/react-query"
+import { formatFullDate, formatMeetDateRange, isStaffRole, zonedDayKey } from "@swimbuzz/shared"
 import {
   Button,
+  CardSkeleton,
   Chip,
   EmptyState,
   FlatList,
   ListRow,
+  ListRowSkeleton,
   Screen,
   Section,
   TextField,
@@ -34,47 +35,42 @@ export default function MeetsScreen() {
   const c = usePalette()
   const tabBarPad = useTabBarScrollPadding()
   const gallery = defaultView === "gallery"
-  const [meets, setMeets] = useState<MeetSummary[]>([])
-  const [seasons, setSeasons] = useState<string[]>([])
-  const [season, setSeason] = useState<string | null>(null)
+  const [seasonState, setSeasonState] = useState<string | null>(null)
   const [query, setQuery] = useState("")
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
-  const load = useCallback(async () => {
-    setError(null)
-    try {
-      const [data, seasonList] = await Promise.all([
-        api.listMeets(),
-        api.listSeasons().catch(() => [] as string[]),
-      ])
-      setMeets(data)
-      const fromMeets = Array.from(
-        new Set(data.map((m) => m.season).filter(Boolean))
-      ).sort((a, b) => b.localeCompare(a))
-      const merged =
-        seasonList.length > 0
-          ? Array.from(new Set([...seasonList, ...fromMeets])).sort((a, b) =>
-              b.localeCompare(a)
-            )
-          : fromMeets
-      setSeasons(merged)
-      setSeason((prev) => {
-        if (prev && merged.includes(prev)) return prev
-        return null
-      })
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load meets")
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+  const {
+    data: meets = [],
+    isPending,
+    isFetching: meetsFetching,
+    error,
+    refetch: refetchMeets,
+  } = useQuery({ queryKey: ["meets"], queryFn: () => api.listMeets() })
 
-  useFocusEffect(
-    useCallback(() => {
-      void load()
-    }, [load])
-  )
+  const { data: seasonList = [], refetch: refetchSeasons } = useQuery({
+    queryKey: ["seasons"],
+    queryFn: () => api.listSeasons(),
+  })
+
+  const seasons = useMemo(() => {
+    const fromMeets = Array.from(
+      new Set(meets.map((m) => m.season).filter(Boolean))
+    ).sort((a, b) => b.localeCompare(a))
+    return seasonList.length > 0
+      ? Array.from(new Set([...seasonList, ...fromMeets])).sort((a, b) =>
+          b.localeCompare(a)
+        )
+      : fromMeets
+  }, [meets, seasonList])
+
+  // Falls back to "All" once the selected season drops out of the list,
+  // instead of tracking that reset in an effect.
+  const season = seasonState && seasons.includes(seasonState) ? seasonState : null
+
+  const isFetching = meetsFetching
+  const onRefresh = () => {
+    void refetchMeets()
+    void refetchSeasons()
+  }
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -107,23 +103,35 @@ export default function MeetsScreen() {
             <Chip
               label="All"
               selected={season == null}
-              onPress={() => setSeason(null)}
+              onPress={() => setSeasonState(null)}
             />
             {seasons.map((s) => (
               <Chip
                 key={s}
                 label={s}
                 selected={season === s}
-                onPress={() => setSeason(s)}
+                onPress={() => setSeasonState(s)}
               />
             ))}
           </View>
         </Section>
       ) : null}
-      {loading && meets.length === 0 ? (
-        <View style={{ paddingTop: 40 }}>
-          <ActivityIndicator color={c.primaryActive} />
-        </View>
+      {isPending ? (
+        gallery ? (
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
+            {[...Array(6)].map((_, i) => (
+              <View key={i} style={{ width: "47%" }}>
+                <CardSkeleton />
+              </View>
+            ))}
+          </View>
+        ) : (
+          <View style={{ gap: spacing.sm }}>
+            {[...Array(6)].map((_, i) => (
+              <ListRowSkeleton key={i} />
+            ))}
+          </View>
+        )
       ) : (
         <FlatList
           key={gallery ? "gallery" : "list"}
@@ -132,7 +140,7 @@ export default function MeetsScreen() {
           numColumns={gallery ? 2 : 1}
           contentContainerStyle={{ paddingBottom: tabBarPad }}
           refreshControl={
-            <RefreshControl refreshing={loading} onRefresh={load} />
+            <RefreshControl refreshing={isFetching} onRefresh={onRefresh} />
           }
           ListEmptyComponent={
             <EmptyState
@@ -143,20 +151,22 @@ export default function MeetsScreen() {
                     ? "No meets yet"
                     : "No matching meets"
               }
-              body={error ?? undefined}
+              body={error instanceof Error ? error.message : undefined}
             />
           }
           renderItem={({ item }) => {
-            const absoluteRange = formatMeetDateRange(item.startDate, item.endDate)
+            const absoluteRange = formatMeetDateRange(item.startsAt, item.endsAt, item.timeZone)
             // Only a single-day meet collapses to "Today" — a multi-day range always
             // stays absolute, since a relative label would silently drop the end date.
-            const singleDay = !item.endDate || utcDayKey(item.startDate) === utcDayKey(item.endDate)
+            const singleDay =
+              !item.endsAt || zonedDayKey(item.startsAt, item.timeZone) === zonedDayKey(item.endsAt, item.timeZone)
             const dateSegment = (style: { fontSize: number; color: string }) =>
               singleDay ? (
                 <RelativeDateText
-                  value={item.startDate}
+                  value={item.startsAt}
                   kind="event"
-                  absolute={absoluteRange}
+                  timeZone={item.timeZone}
+                  absolute={formatFullDate(item.startsAt, item.timeZone)}
                   style={style}
                 />
               ) : (

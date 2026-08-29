@@ -58,14 +58,14 @@ export function roomWindowStatus(opts: {
 }
 
 export function meetHasEnded(opts: {
-  startDate: Date
-  endDate: Date | null
+  startsAt: Date
+  endsAt: Date | null
   now?: Date
 }): boolean {
   const now = opts.now ?? new Date()
   const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
   yesterday.setHours(0, 0, 0, 0)
-  const lastActiveDate = new Date(opts.endDate ?? opts.startDate)
+  const lastActiveDate = new Date(opts.endsAt ?? opts.startsAt)
   lastActiveDate.setHours(0, 0, 0, 0)
   return lastActiveDate <= yesterday
 }

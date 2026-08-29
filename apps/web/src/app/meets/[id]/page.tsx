@@ -4,9 +4,7 @@ import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
 import BackLink from "@/components/BackLink"
 import PageLabelRegistrar from "@/components/PageLabelRegistrar"
-import { formatDateRange } from "@/lib/utils"
-import { ZonedClockTime } from "@/components/ZonedTime"
-import { RelativeDateRange } from "@/components/RelativeDate"
+import { RelativeDateRangeTime } from "@/components/RelativeDate"
 import { Fragment } from "react"
 import ImportMeetButton from "@/app/athletes/ImportMeetButton"
 import ImportMeetResourcesButton from "./ImportMeetResourcesButton"
@@ -36,7 +34,6 @@ import {
   normalizeHeatSheetUrls,
 } from "@/lib/meet-files"
 import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete-view-server"
-import { isStaffRole } from "@/lib/auth-roles"
 import { Gender } from "@prisma/client"
 import MeetResourceIcon, { type MeetResourceKind } from "@/components/MeetResourceIcon"
 import FilePreviewButton from "@/components/FilePreview"
@@ -60,11 +57,9 @@ import {
   buildAthletePbMap,
   computeMeetPrepHighlights,
   computeMeetResultHighlights } from "@/lib/meet-stats"
-
-function toDateInput(d: Date | null | undefined): string {
-  if (!d) return ""
-  return new Date(d).toISOString().slice(0, 10)
-}
+import { toDateInput, toTimeInput } from "@/lib/date-input"
+import { utcDayKey } from "@swimbuzz/shared"
+import LoadingComponent from "./loading"
 
 const RESOURCE_LINKS: { key: keyof MeetLinks; label: string; icon: MeetResourceKind; forcePdf?: boolean }[] = [
   { key: "packetUrl", label: "Meet Packet", icon: "packet", forcePdf: true },
@@ -99,15 +94,14 @@ const TRAVEL_TEXT_SECTIONS: {
   { key: "itinerary", label: "Itinerary", icon: "itinerary" },
 ]
 
-export default async function MeetPage({ params }: { params: Promise<{ id: string }> }) {
+async function MeetPageContent({ params }: { params: Promise<{ id: string }> }) {
   const { id: param } = await params
   const session = await getSession()
   if (!session) redirect("/signin")
 
-  const isCoach = await isStaffUi(session.user.role)
-  const isStaff = isStaffRole(session.user.role)
-
-  const meet = await prisma.meet.findFirst({
+  const [isCoach, meet, viewerAthleteId] = await Promise.all([
+    isStaffUi(session.user.role),
+    prisma.meet.findFirst({
     where: isCuid(param) ? { OR: [{ id: param }, { slug: param }] } : { slug: param },
     include: {
       swims: {
@@ -137,14 +131,15 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
                 include: {
                   athlete: {
                     select: { id: true, firstName: true, lastName: true, gender: true }}}}},
-            orderBy: [{ sortOrder: "asc" }, { label: "asc" }]}}}}})
+            orderBy: [{ sortOrder: "asc" }, { label: "asc" }]}}}}}),
+    resolveViewerAthleteId(session.user.id),
+  ])
 
   if (!meet) notFound()
   if (meet.slug && param !== meet.slug) redirect(meetPath(meet.slug))
 
   const meetPublicPath = meetPath(meet.slug ?? meet.id)
-
-  const viewerAthleteId = await resolveViewerAthleteId(session.user.id)
+  const meetStartsAt = meet.startsAt ?? meet.createdAt
 
   const results = mergeMeetResultEntries(
     swimsToMeetResults(
@@ -158,7 +153,7 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
         tags: s.tags,
         place: s.place,
         course: s.course,
-        date: toDateInput(s.date)}))
+        date: utcDayKey(s.date)}))
     ),
     isResultStatusesSummary(meet.resultStatusesSummary)
       ? meet.resultStatusesSummary.entries
@@ -168,10 +163,10 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
   const initial: MeetFormState = {
     name: meet.name,
     location: meet.location ?? "",
-    startDate: toDateInput(meet.startDate),
-    startTime: meet.startTime ?? "",
+    startDate: toDateInput(meet.startsAt, meet.timeZone),
+    startTime: meet.hasStartTime ? toTimeInput(meet.startsAt, meet.timeZone) : "",
     timeZone: meet.timeZone,
-    endDate: toDateInput(meet.endDate),
+    endDate: toDateInput(meet.endsAt, meet.timeZone),
     course: meet.course,
     season: meet.season,
     school: meet.school ?? "",
@@ -195,9 +190,9 @@ export default async function MeetPage({ params }: { params: Promise<{ id: strin
   }
 
   const today = new Date().toISOString().slice(0, 10)
-  const meetStartDate = toDateInput(meet.startDate)
+  const meetStartDate = toDateInput(meet.startsAt, meet.timeZone)
   const isBeforeOrToday = meetStartDate <= today
-  const isUpcomingMeet = toDateInput(meet.endDate ?? meet.startDate) >= today
+  const isUpcomingMeet = toDateInput(meet.endsAt ?? meet.startsAt, meet.timeZone) >= today
   const courseLabel = { SCY: "Short course yards", SCM: "Short course meters", LCM: "Long course meters" }[meet.course] ?? meet.course
   const signupStatus = !meet.signupForm
     ? "Not set"
@@ -276,7 +271,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
   const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
   yesterday.setHours(0, 0, 0, 0)
 
-  const lastActiveDate = new Date(meet.endDate ?? meet.startDate)
+  const lastActiveDate = new Date(meet.endsAt ?? meetStartsAt)
   lastActiveDate.setHours(0, 0, 0, 0)
 
   const meetHasEnded = lastActiveDate <= yesterday
@@ -517,21 +512,12 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
               <div className="mt-1 text-base text-foreground-secondary sm:text-lg">
                 <div className="flex items-center gap-1.5">
                   <InfoIcon kind="calendar" />
-                  <RelativeDateRange
-                    start={meet.startDate}
-                    end={meet.endDate}
-                    absolute={formatDateRange(meet.startDate, meet.endDate)}
+                  <RelativeDateRangeTime
+                    startsAt={meetStartsAt}
+                    endsAt={meet.endsAt}
+                    timeZone={meet.timeZone}
+                    hasStartTime={meet.hasStartTime}
                   />
-                  {meet.startTime ? (
-                    <>
-                      {" · "}
-                      <ZonedClockTime
-                        date={meet.startDate.toISOString().slice(0, 10)}
-                        startTime={meet.startTime}
-                        sourceTimeZone={meet.timeZone}
-                      />
-                    </>
-                  ) : null}
                 </div>
                 <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
                   {meet.location && (
@@ -549,14 +535,12 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
             </div>
           </div>
         </div>
-      {(isUpcomingMeet && meet.startTime) || meetHighlights ? (
+      {(isUpcomingMeet && meet.hasStartTime) || meetHighlights ? (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch sm:gap-4">
-          {isUpcomingMeet && meet.startTime ? (
+          {isUpcomingMeet && meet.hasStartTime ? (
             <MeetCountdown
               className="min-w-0 sm:flex-1"
-              startDate={meet.startDate}
-              startTime={meet.startTime}
-              timeZone={meet.timeZone}
+              startsAt={meetStartsAt}
               upcoming={false}
               variant="banner"
             />
@@ -564,7 +548,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
           {meetHighlights ? (
             <StatsHighlights
               className={
-                isUpcomingMeet && meet.startTime
+                isUpcomingMeet && meet.hasStartTime
                   ? "min-w-0 sm:flex-1"
                   : "w-full"
               }
@@ -719,14 +703,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
           meetPath={meetPublicPath}
           meetId={meet.id}
           eventOrder={meet.eventOrder}
-          course={meet.course}
           isCoach={isCoach}
-          isStaff={isStaff}
-          selfAthleteId={viewerAthleteId}
-          athletes={rosterAthletes.map((a) => ({
-            id: a.id,
-            name: a.name,
-            gender: a.gender}))}
           form={signupForm}
           myEntry={mySignupEntry}
           entries={signupEntries}
@@ -825,7 +802,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
                 meetId={meet.id}
                 meetName={meet.name}
                 defaultCourse={meet.course}
-                defaultDate={toDateInput(meet.startDate)}
+                defaultDate={toDateInput(meet.startsAt, meet.timeZone)}
                 athletes={rosterAthletes}
               />
               <AddIndividualEntryButton
@@ -840,5 +817,13 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       </div>
     </main>
     </div>
+  )
+}
+
+export default function MeetPage(props: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense fallback={<LoadingComponent />}>
+      <MeetPageContent {...props} />
+    </Suspense>
   )
 }

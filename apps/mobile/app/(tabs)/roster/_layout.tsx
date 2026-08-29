@@ -10,6 +10,7 @@ export default function RosterStackLayout() {
       backScreens={[
         { name: "[id]", fallbackHref: "/roster" },
         { name: "new", fallbackHref: "/roster" },
+        { name: "import-sheet", fallbackHref: "/roster" },
       ]}
     />
   )

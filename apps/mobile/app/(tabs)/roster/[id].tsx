@@ -1,6 +1,7 @@
-import { useCallback, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { Alert, View } from "react-native"
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router"
+import { useLocalSearchParams, useRouter } from "expo-router"
+import { useQuery } from "@tanstack/react-query"
 import {
   athleteDisplayName,
   formatTime,
@@ -81,9 +82,6 @@ export default function AthleteDetailScreen() {
   const router = useRouter()
   const { user } = useAuth()
   const tabBarPad = useTabBarScrollPadding()
-  const [athlete, setAthlete] = useState<Record<string, unknown> | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [importing, setImporting] = useState(false)
   const [resolvingPending, setResolvingPending] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -93,28 +91,17 @@ export default function AthleteDetailScreen() {
   const [swimDate, setSwimDate] = useState("")
   const [addingSwim, setAddingSwim] = useState(false)
 
-  const load = useCallback(async () => {
-    if (!id) {
-      setLoading(false)
-      return
-    }
-    setError(null)
-    try {
-      const data = await api.getAthlete(id)
-      setAthlete(data)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load athlete")
-      setAthlete(null)
-    } finally {
-      setLoading(false)
-    }
-  }, [id])
-
-  useFocusEffect(
-    useCallback(() => {
-      void load()
-    }, [load])
-  )
+  const {
+    data: athlete,
+    isPending,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["athlete", id],
+    queryFn: () => api.getAthlete(id as string),
+    enabled: Boolean(id),
+  })
+  const load = refetch
 
   const swims = useMemo(() => {
     if (!athlete || !Array.isArray(athlete.swims)) return [] as SwimRow[]
@@ -152,7 +139,15 @@ export default function AthleteDetailScreen() {
     return best
   }, [personalBests])
 
-  if (loading) {
+  if (!id) {
+    return (
+      <Screen>
+        <ErrorBlock message="Not found" />
+      </Screen>
+    )
+  }
+
+  if (isPending) {
     return (
       <Screen>
         <LoadingBlock />
@@ -163,7 +158,9 @@ export default function AthleteDetailScreen() {
   if (!athlete) {
     return (
       <Screen>
-        <ErrorBlock message={error ?? "Not found"} />
+        <ErrorBlock
+          message={error instanceof Error ? error.message : "Failed to load athlete"}
+        />
       </Screen>
     )
   }
@@ -319,7 +316,9 @@ export default function AthleteDetailScreen() {
           {[genderLabel(athlete.gender), ...seasons].filter(Boolean).join(" · ")}
         </Muted>
 
-        {error ? <ErrorBlock message={error} /> : null}
+        {error ? (
+          <ErrorBlock message={error instanceof Error ? error.message : "Failed to load athlete"} />
+        ) : null}
 
         <Section title="Profile">
           {athlete.year ? (

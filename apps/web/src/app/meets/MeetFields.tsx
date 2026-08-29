@@ -5,12 +5,11 @@ import { useEffect, useState } from "react"
 import { currentSeason, seasonOptions, upcomingSeason } from "@/lib/season"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import Modal, { ModalFooter } from "@/components/Modal"
-import { DatePicker, TimePicker } from "@/components/CustomDateTimePicker"
+import { DatePicker, TimePicker, TimeZonePicker } from "@/components/CustomDateTimePicker"
 import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/FileDropzone"
 import { useSession } from "next-auth/react"
 import { isStaffRole } from "@/lib/auth-roles"
-import { useViewerTimeZone } from "@/components/ZonedTime"
-import { DEFAULT_TIME_ZONE, zoneAbbreviation, zoneDisplayName } from "@swimbuzz/shared"
+import { DEFAULT_TIME_ZONE } from "@swimbuzz/shared"
 
 export type MeetFormState = {
   name: string
@@ -65,8 +64,6 @@ export default function MeetFields({
   onUploaded?: (url: string) => void
 }) {
   const { data: session } = useSession()
-  const viewerTimeZone = useViewerTimeZone()
-  const timeZoneLabel = `${zoneDisplayName(viewerTimeZone)} (${zoneAbbreviation(viewerTimeZone)})`
   const [iconUploading, setIconUploading] = useState(false)
   const [iconError, setIconError] = useState<string | null>(null)
   const [bannerUploading, setBannerUploading] = useState(false)
@@ -348,16 +345,9 @@ export default function MeetFields({
           </label>
           <TimePicker
             value={form.startTime}
-            onChange={(value) =>
-              setForm((f) => ({
-                ...f,
-                startTime: value,
-                timeZone: value ? viewerTimeZone : f.timeZone,
-              }))
-            }
+            onChange={(value) => set("startTime", value)}
             ariaLabel="Start time"
             placeholder="Choose a start time"
-            zoneLabel={timeZoneLabel}
           />
         </div>
       </div>
@@ -377,6 +367,15 @@ export default function MeetFields({
         {form.startDate && form.endDate && form.endDate < form.startDate ? (
           <p className="mt-1 text-xs text-error">End date must be on or after the start date.</p>
         ) : null}
+      </div>
+
+      <div>
+        <label className={labelClass}>Time Zone</label>
+        <TimeZonePicker
+          value={form.timeZone}
+          onChange={(value) => set("timeZone", value)}
+          ariaLabel="Meet time zone"
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

@@ -8,6 +8,7 @@ import { notifyMeetSignupOpen } from "@/lib/notifications"
 import { Prisma } from "@prisma/client"
 import { getSession } from "@/lib/session"
 import { isStaffRole } from "@/lib/auth-roles"
+import { DEFAULT_TIME_ZONE, isValidTimeZone } from "@swimbuzz/shared"
 
 function parseOptionalDate(value: unknown): Date | null | undefined {
   if (value === null) return null
@@ -33,6 +34,7 @@ export async function GET(
     select: {
       id: true,
       eventOrder: true,
+      timeZone: true,
       signupForm: {
         include: {
           entries: {
@@ -71,6 +73,7 @@ export async function GET(
           openAt: form.openAt?.toISOString() ?? null,
           closeAt: form.closeAt?.toISOString() ?? null,
           withdrawUntil: form.withdrawUntil?.toISOString() ?? null,
+          timeZone: form.timeZone,
           eventOptions: resolveSignupEventOptions(meet.eventOrder),
           window: signupWindowStatus({
             openAt: form.openAt,
@@ -116,6 +119,7 @@ export async function PUT(
       id: true,
       name: true,
       eventOrder: true,
+      timeZone: true,
       signupForm: { select: { id: true } }}})
   if (!meet) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
@@ -204,6 +208,14 @@ export async function PUT(
 
   const customQuestions = normalizeMeetSignupQuestions(body.customQuestions)
 
+  let timeZone: string | undefined
+  if (typeof body.timeZone === "string" && body.timeZone) {
+    if (!isValidTimeZone(body.timeZone)) {
+      return NextResponse.json({ error: "Time zone is invalid" }, { status: 400 })
+    }
+    timeZone = body.timeZone
+  }
+
   const data = {
     instructions,
     // Events always come from meet event order — keep this empty.
@@ -213,13 +225,14 @@ export async function PUT(
     maxRelayEvents,
     askNotes,
     customQuestions: customQuestions as Prisma.InputJsonValue,
+    ...(timeZone !== undefined ? { timeZone } : {}),
     ...(body.openAt !== undefined ? { openAt: openAt ?? null } : {}),
     ...(body.closeAt !== undefined ? { closeAt: closeAt ?? null } : {}),
     ...(body.withdrawUntil !== undefined ? { withdrawUntil: withdrawUntil ?? null } : {})}
 
   const form = await prisma.meetSignupForm.upsert({
     where: { meetId },
-    create: { meetId, ...data },
+    create: { meetId, timeZone: timeZone ?? meet.timeZone ?? DEFAULT_TIME_ZONE, ...data },
     update: data})
 
   return NextResponse.json({
@@ -232,5 +245,6 @@ export async function PUT(
     customQuestions: normalizeMeetSignupQuestions(form.customQuestions),
     openAt: form.openAt?.toISOString() ?? null,
     closeAt: form.closeAt?.toISOString() ?? null,
-    withdrawUntil: form.withdrawUntil?.toISOString() ?? null})
+    withdrawUntil: form.withdrawUntil?.toISOString() ?? null,
+    timeZone: form.timeZone})
 }

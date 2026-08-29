@@ -11,8 +11,8 @@ import {
   usePalette,
 } from "@swimbuzz/ui"
 import { spacing } from "@swimbuzz/tokens"
-import { getViewerTimeZone, zoneAbbreviation, zoneDisplayName } from "@swimbuzz/shared"
-import { DateSelector, TimeSelector } from "../../../src/components/DateTimeSelector"
+import { getViewerTimeZone } from "@swimbuzz/shared"
+import { DateSelector, TimeSelector, TimeZoneSelector } from "../../../src/components/DateTimeSelector"
 import { api } from "../../../src/lib/api"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 
@@ -49,8 +49,7 @@ export default function NewPracticeScreen() {
   const [setContent, setSetContent] = useState("")
   const [published, setPublished] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [timeZone] = useState(() => getViewerTimeZone())
-  const timeZoneLabel = `${zoneDisplayName(timeZone)} (${zoneAbbreviation(timeZone)})`
+  const [timeZone, setTimeZone] = useState(() => getViewerTimeZone())
 
   async function onCreate() {
     const trimmedTitle = title.trim()
@@ -126,7 +125,7 @@ export default function NewPracticeScreen() {
                 setStartTime(value)
                 setEndTime((current) => endAfterStart(value, current))
               }}
-              helperText={`15-minute intervals · ${timeZoneLabel}`}
+              helperText="15-minute intervals"
             />
           </View>
           <View style={{ flex: 1 }}>
@@ -140,6 +139,7 @@ export default function NewPracticeScreen() {
             />
           </View>
         </View>
+        <TimeZoneSelector label="Time zone" value={timeZone} onChange={setTimeZone} />
         <TextField
           label="Location"
           value={location}

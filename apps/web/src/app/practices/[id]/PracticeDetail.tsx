@@ -3,9 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { formatSwimDate } from "@/lib/utils"
-import { ZonedClockTime } from "@/components/ZonedTime"
-import { RelativeDate } from "@/components/RelativeDate"
+import { RelativeDateTime } from "@/components/RelativeDate"
 import { FormattedText, isHtmlEmpty } from "@/components/FormattedText"
 import PracticeActions from "./PracticeActions"
 import SharePracticeButton from "./SharePracticeButton"
@@ -36,6 +34,7 @@ type PracticeCommentView = {
   body: string
   parentId: string | null
   createdAt: string
+  editedAt: string | null
 }
 
 export default function PracticeDetail({
@@ -43,9 +42,8 @@ export default function PracticeDetail({
   practiceSlug,
   title,
   published,
-  dateIso,
-  startTime,
-  endTime,
+  startsAt,
+  endsAt,
   timeZone,
   location,
   focus,
@@ -63,9 +61,8 @@ export default function PracticeDetail({
   practiceSlug: string | null
   title: string
   published: boolean
-  dateIso: string | null
-  startTime: string
-  endTime: string
+  startsAt: string
+  endsAt: string
   timeZone: string
   location: string
   focus: string | null
@@ -202,18 +199,7 @@ export default function PracticeDetail({
             <div className="mt-1 text-base text-foreground-secondary sm:text-lg">
               <div className="flex items-center gap-1.5">
                 <InfoIcon kind="calendar" />
-                {dateIso ? <RelativeDate day={dateIso} absolute={formatSwimDate(dateIso)} /> : "No date"}
-                {startTime || endTime ? (
-                  <>
-                    {" · "}
-                    <ZonedClockTime
-                      date={dateIso ? dateIso.slice(0, 10) : null}
-                      startTime={startTime}
-                      endTime={endTime}
-                      sourceTimeZone={timeZone}
-                    />
-                  </>
-                ) : null}
+                <RelativeDateTime startsAt={startsAt} endsAt={endsAt} timeZone={timeZone} />
               </div>
               <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
                 {location && (
@@ -232,9 +218,8 @@ export default function PracticeDetail({
               practiceId={practiceId}
               practiceSlug={practiceSlug}
               title={title}
-              dateIso={dateIso}
-              startTime={startTime}
-              endTime={endTime}
+              startsAt={startsAt}
+              endsAt={endsAt}
               timeZone={timeZone}
               location={location}
               focus={focus}
@@ -334,9 +319,8 @@ export default function PracticeDetail({
         <PracticeExportCapture
           title={title}
           showDraft={isCoach && !published}
-          dateIso={dateIso}
-          startTime={startTime}
-          endTime={endTime}
+          startsAt={startsAt}
+          endsAt={endsAt}
           timeZone={timeZone}
           location={location}
           focus={focus}

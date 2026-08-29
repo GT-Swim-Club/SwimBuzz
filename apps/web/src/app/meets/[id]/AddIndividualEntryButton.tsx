@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useTransition } from "react"
 import { isValidSignupEntryTime } from "@/lib/meet-signup"
 import Modal, { ModalFooter } from "@/components/Modal"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/SegmentedToggle"
 import { normalizeEventName } from "@/lib/swim-parse"
+import { addIndividualSheetEntry, upsertRelayEntry } from "./AddEntryButton.actions"
 
 const RELAY_EVENTS = [
   "200 Medley Relay",
@@ -24,9 +24,8 @@ export default function AddIndividualEntryButton({
   meetId: string
   athletes: AthleteOption[]
 }) {
-  const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [type, setType] = useState<"individual" | "relay">("individual")
   const [form, setForm] = useState({
@@ -39,6 +38,7 @@ export default function AddIndividualEntryButton({
       gender: "F" as "F" | "M",
     }
   })
+  const loading = isPending
 
   function openModal() {
     setForm({
@@ -55,47 +55,45 @@ export default function AddIndividualEntryButton({
     setOpen(true)
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true)
     setError(null)
 
-    try {
-      if (type === "individual") {
-        if (!form.athleteId || !form.event) {
-          setError("Athlete and Event are required")
-          return
-        }
-        if (!isValidSignupEntryTime(form.seedTime)) {
-          setError("Invalid seed time format")
-          return
-        }
+    if (type === "individual") {
+      if (!form.athleteId || !form.event) {
+        setError("Athlete and Event are required")
+        return
+      }
+      if (!isValidSignupEntryTime(form.seedTime)) {
+        setError("Invalid seed time format")
+        return
+      }
 
-        const res = await fetch(`/api/meets/${meetId}/sheet-entry`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+      startTransition(async () => {
+        try {
+          await addIndividualSheetEntry(meetId, {
             athleteId: form.athleteId,
             event: form.event,
             seedTime: form.seedTime,
-          }),
-        })
-        const data = await res.json()
-        if (!res.ok) throw new Error(data.error ?? "Failed to save entry")
-      } else {
-        if (new Set(form.relayForm.legs).size !== 4) {
-          setError("Pick four different swimmers")
-          return
+          })
+          setOpen(false)
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Failed to save entry")
         }
-        if (!isValidSignupEntryTime(form.seedTime)) {
-          setError("Invalid seed time format")
-          return
-        }
+      })
+    } else {
+      if (new Set(form.relayForm.legs).size !== 4) {
+        setError("Pick four different swimmers")
+        return
+      }
+      if (!isValidSignupEntryTime(form.seedTime)) {
+        setError("Invalid seed time format")
+        return
+      }
 
-        const res = await fetch(`/api/meets/${meetId}/relays`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+      startTransition(async () => {
+        try {
+          await upsertRelayEntry(meetId, {
             event: form.relayForm.event,
             relayLetter: "A",
             relayRound: "",
@@ -105,18 +103,12 @@ export default function AddIndividualEntryButton({
               athleteId,
             })),
             resultTime: form.seedTime === "NT" ? undefined : form.seedTime,
-          }),
-        })
-        const data = await res.json()
-        if (!res.ok) throw new Error(data.error ?? "Failed to save relay")
-      }
-
-      setOpen(false)
-      router.refresh()
-    } catch (err: any) {
-      setError(err.message ?? "Something went wrong")
-    } finally {
-      setLoading(false)
+          })
+          setOpen(false)
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Failed to save relay")
+        }
+      })
     }
   }
 

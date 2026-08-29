@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react"
 import { Image, Pressable, StyleSheet, Text, View } from "react-native"
+import { useQuery } from "@tanstack/react-query"
 import { spacing, type ColorPalette } from "@swimbuzz/tokens"
 import { usePalette } from "@swimbuzz/ui"
 import { api } from "../lib/api"
@@ -83,26 +84,17 @@ export function UnreadAlertsChrome({ children }: { children: ReactNode }) {
   const c = usePalette()
   const styles = useMemo(() => makeStyles(c), [c])
   const wrapRef = useRef<View>(null)
-  const [count, setCount] = useState(0)
   const [anchor, setAnchor] = useState<AlertAnchor | null>(null)
   const [origin, setOrigin] = useState({ x: 0, y: 0 })
 
-  useFocusEffect(
-    useCallback(() => {
-      let active = true
-      void api
-        .listNotifications()
-        .then(({ notifications }) => {
-          if (active) setCount(notifications.filter((item) => !item.readAt).length)
-        })
-        .catch(() => {
-          if (active) setCount(0)
-        })
-      return () => {
-        active = false
-      }
-    }, [])
-  )
+  // Same ["notifications"] key as both notification screens — shares one
+  // request/cache instead of this badge polling on every screen focus, and
+  // picks up mark-as-read updates those screens write into the cache.
+  const { data } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: () => api.listNotifications(),
+  })
+  const count = data?.notifications.filter((item) => !item.readAt).length ?? 0
 
   const value = useMemo(() => ({ count, setAnchor }), [count])
 

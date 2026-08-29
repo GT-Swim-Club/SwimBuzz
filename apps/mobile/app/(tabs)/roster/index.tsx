@@ -1,24 +1,24 @@
-import { useCallback, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import {
-  ActivityIndicator,
   Alert,
   RefreshControl,
   View,
 } from "react-native"
-import { useFocusEffect, useRouter } from "expo-router"
-import type { AthleteSummary } from "@swimbuzz/shared"
+import { useRouter } from "expo-router"
+import { useQuery } from "@tanstack/react-query"
 import { athleteDisplayName, isStaffRole } from "@swimbuzz/shared"
 import {
   Button,
+  CardSkeleton,
   Chip,
   EmptyState,
   FlatList,
   ListRow,
+  ListRowSkeleton,
   Muted,
   Screen,
   Section,
   TextField,
-  usePalette,
 } from "@swimbuzz/ui"
 import { spacing } from "@swimbuzz/tokens"
 import { api } from "../../../src/lib/api"
@@ -35,52 +35,40 @@ export default function RosterScreen() {
   const { user } = useAuth()
   const isStaff = !!user && isStaffRole(user.role)
   const { defaultView } = useViewPreferences()
-  const c = usePalette()
   const tabBarPad = useTabBarScrollPadding()
   const gallery = defaultView === "gallery"
-  const [athletes, setAthletes] = useState<AthleteSummary[]>([])
-  const [seasons, setSeasons] = useState<string[]>([])
-  const [season, setSeason] = useState<string | null>(null)
+  const [seasonState, setSeasonState] = useState<string | null>(null)
   const [gender, setGender] = useState<GenderFilter>("ALL")
   const [query, setQuery] = useState("")
-  const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
-  const load = useCallback(async () => {
-    setError(null)
-    try {
-      const [data, seasonList] = await Promise.all([
-        api.listAthletes(),
-        api.listSeasons().catch(() => [] as string[]),
-      ])
-      setAthletes(data)
-      const fromAthletes = Array.from(
-        new Set(data.flatMap((a) => a.seasons ?? []).filter(Boolean))
-      ).sort((a, b) => b.localeCompare(a))
-      const merged =
-        seasonList.length > 0
-          ? Array.from(new Set([...seasonList, ...fromAthletes])).sort((a, b) =>
-              b.localeCompare(a)
-            )
-          : fromAthletes
-      setSeasons(merged)
-      setSeason((prev) => {
-        if (prev && merged.includes(prev)) return prev
-        return null
-      })
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load roster")
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+  const {
+    data: athletes = [],
+    isPending,
+    isFetching: athletesFetching,
+    error,
+    refetch: refetchAthletes,
+  } = useQuery({ queryKey: ["athletes"], queryFn: () => api.listAthletes() })
 
-  useFocusEffect(
-    useCallback(() => {
-      void load()
-    }, [load])
-  )
+  const { data: seasonList = [], refetch: refetchSeasons } = useQuery({
+    queryKey: ["seasons"],
+    queryFn: () => api.listSeasons(),
+  })
+
+  const seasons = useMemo(() => {
+    const fromAthletes = Array.from(
+      new Set(athletes.flatMap((a) => a.seasons ?? []).filter(Boolean))
+    ).sort((a, b) => b.localeCompare(a))
+    return seasonList.length > 0
+      ? Array.from(new Set([...seasonList, ...fromAthletes])).sort((a, b) =>
+          b.localeCompare(a)
+        )
+      : fromAthletes
+  }, [athletes, seasonList])
+
+  const season = seasonState && seasons.includes(seasonState) ? seasonState : null
+  const isFetching = athletesFetching
+  const load = () => Promise.all([refetchAthletes(), refetchSeasons()])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -137,6 +125,11 @@ export default function RosterScreen() {
             label="Add athlete"
             onPress={() => router.push("/roster/new")}
           />
+          <Button
+            label="Import roster (Google Sheets)"
+            variant="secondary"
+            onPress={() => router.push("/roster/import-sheet")}
+          />
           {season ? (
             <Button
               label={`Sync SwimCloud times (${season})`}
@@ -182,23 +175,35 @@ export default function RosterScreen() {
             <Chip
               label="All"
               selected={season == null}
-              onPress={() => setSeason(null)}
+              onPress={() => setSeasonState(null)}
             />
             {seasons.map((s) => (
               <Chip
                 key={s}
                 label={s}
                 selected={season === s}
-                onPress={() => setSeason(s)}
+                onPress={() => setSeasonState(s)}
               />
             ))}
           </View>
         </Section>
       ) : null}
-      {loading && athletes.length === 0 ? (
-        <View style={{ paddingTop: 40 }}>
-          <ActivityIndicator color={c.primaryActive} />
-        </View>
+      {isPending ? (
+        gallery ? (
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
+            {[...Array(6)].map((_, i) => (
+              <View key={i} style={{ width: "47%" }}>
+                <CardSkeleton />
+              </View>
+            ))}
+          </View>
+        ) : (
+          <View style={{ gap: spacing.sm }}>
+            {[...Array(6)].map((_, i) => (
+              <ListRowSkeleton key={i} />
+            ))}
+          </View>
+        )
       ) : (
         <FlatList
           key={gallery ? "gallery" : "list"}
@@ -207,7 +212,7 @@ export default function RosterScreen() {
           numColumns={gallery ? 2 : 1}
           contentContainerStyle={{ paddingBottom: tabBarPad }}
           refreshControl={
-            <RefreshControl refreshing={loading} onRefresh={load} />
+            <RefreshControl refreshing={isFetching} onRefresh={load} />
           }
           ListEmptyComponent={
             <EmptyState
@@ -218,7 +223,7 @@ export default function RosterScreen() {
                     ? "No athletes"
                     : "No matching athletes"
               }
-              body={error ?? undefined}
+              body={error instanceof Error ? error.message : undefined}
             />
           }
           renderItem={({ item }) =>

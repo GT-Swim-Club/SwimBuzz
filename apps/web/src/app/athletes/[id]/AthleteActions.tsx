@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Modal, { ModalFooter } from "@/components/Modal"
 import NicknameTagsInput from "@/components/NicknameTagsInput"
@@ -10,6 +10,7 @@ import {
   SWIMCLOUD_ID_ERROR,
   SWIMCLOUD_ID_MAX_LENGTH,
 } from "@/lib/swimcloud-id"
+import { updateAthlete, deleteAthlete } from "./AthleteActions.actions"
 
 type AthleteActionsProps = {
   athleteId: string
@@ -31,7 +32,8 @@ export default function AthleteActions({
   const router = useRouter()
   const [editing, setEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const loading = isPending
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState({
     firstName,
@@ -58,54 +60,36 @@ export default function AthleteActions({
   const showSwimCloudHint =
     form.swimCloudId.length > 0 && !isValidSwimCloudIdInput(form.swimCloudId)
 
-  async function handleSave(e: React.FormEvent) {
+  function handleSave(e: React.FormEvent) {
     e.preventDefault()
     if (!swimCloudIdOk) return
-    setLoading(true)
     setError(null)
-    try {
-      const res = await fetch(`/api/athletes/${athleteId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+    startTransition(async () => {
+      try {
+        await updateAthlete(athleteId, {
           firstName: form.firstName,
           lastName: form.lastName,
           email: form.email,
           swimCloudId: form.swimCloudId === "" ? null : form.swimCloudId,
           nicknames: form.nicknames,
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? "Failed to save changes")
-        return
+        })
+        setEditing(false)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to save changes")
       }
-      setEditing(false)
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
-  async function handleDelete() {
-    setLoading(true)
+  function handleDelete() {
     setError(null)
-    try {
-      const res = await fetch(`/api/athletes/${athleteId}`, { method: "DELETE" })
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        setError(data.error ?? "Failed to delete athlete")
-        setLoading(false)
-        return
+    startTransition(async () => {
+      try {
+        await deleteAthlete(athleteId)
+        router.push("/athletes")
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to delete athlete")
       }
-      router.push("/athletes")
-      router.refresh()
-    } catch {
-      setError("Something went wrong")
-      setLoading(false)
-    }
+    })
   }
 
   return (
