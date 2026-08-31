@@ -79,6 +79,7 @@ export default function PracticeActions({
 }) {
   const router = useRouter()
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [confirmPublish, setConfirmPublish] = useState(false)
   const [editLockPending, setEditLockPending] = useState<PracticeEditLockInfo | null>(null)
   const [loading, setLoading] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -87,8 +88,6 @@ export default function PracticeActions({
 
   // Any active lock blocks this tab until it takes over (other user or other tab).
   const lockedElsewhere = Boolean(editLock?.locked)
-  const lockedByOtherUser = Boolean(editLock?.locked && !editLock.lockedByMe)
-  const lockerName = editLock?.lockedBy?.name?.trim() || "Another coach"
   const pendingLockedByOtherUser = Boolean(
     editLockPending?.locked && !editLockPending.lockedByMe
   )
@@ -145,7 +144,9 @@ export default function PracticeActions({
         if (!result.ok) {
           if (result.lock) onLockChange(result.lock)
           setError(result.error)
+          return
         }
+        setConfirmPublish(false)
       } catch {
         setError("Something went wrong")
       }
@@ -171,9 +172,7 @@ export default function PracticeActions({
 
   return (
     <>
-      <div
-        className={`relative flex shrink-0 items-start ${lockedElsewhere ? "pb-8" : ""}`}
-      >
+      <div className="flex shrink-0 items-start">
         <div className="flex shrink-0 items-center gap-2">
         <Link
           href={attendanceHref}
@@ -197,7 +196,10 @@ export default function PracticeActions({
         ) : (
           <button
             type="button"
-            onClick={() => togglePublished(true)}
+            onClick={() => {
+              setError(null)
+              setConfirmPublish(true)
+            }}
             disabled={busy || lockedElsewhere}
             aria-label="Publish practice"
             className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-text hover:bg-primary-hover transition-colors disabled:opacity-40"
@@ -224,26 +226,14 @@ export default function PracticeActions({
           }}
           disabled={busy || lockedElsewhere}
           aria-label="Delete practice"
-          className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-red-200 text-error rounded-lg bg-background hover:bg-red-50 dark:border-red-900/50 dark:hover:bg-red-950/40 transition-colors disabled:opacity-40"
+          className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-error-border text-error rounded-lg bg-background hover:bg-error-bg transition-colors disabled:opacity-40"
         >
           <ActionIcon kind="delete" className="h-5 w-5" />
           <HoverDetail label="Delete" />
         </button>
       </div>
 
-      {lockedElsewhere && (
-        <p
-          role="status"
-          className="absolute top-10 right-0 inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-amber-500/25 bg-amber-500/10 px-2 py-1 text-[11px] font-medium text-amber-800 shadow-sm dark:border-amber-300/20 dark:bg-amber-300/10 dark:text-amber-200"
-        >
-          <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-amber-500 dark:bg-amber-300" />
-          {lockedByOtherUser
-            ? `${lockerName} is editing.`
-            : "You're editing in another window."}
-        </p>
-      )}
-
-      {error && !confirmDelete && (
+      {error && !confirmDelete && !confirmPublish && (
         <p className="text-xs text-red-500">{error}</p>
       )}
       </div>
@@ -296,6 +286,12 @@ export default function PracticeActions({
         onClose={() => setConfirmDelete(false)}
         closeDisabled={busy}
         title="Delete practice"
+        description={
+          <>
+            Permanently delete <span className="font-medium text-foreground">{title}</span> and all of its sets and
+            comments? This cannot be undone.
+          </>
+        }
         maxWidth="sm"
         footer={
           <ModalFooter>
@@ -318,10 +314,36 @@ export default function PracticeActions({
           </ModalFooter>
         }
       >
-        <p className="text-sm text-foreground-secondary dark:text-foreground-secondary">
-          Permanently delete <span className="font-medium text-foreground">{title}</span> and all of its sets and
-          comments? This cannot be undone.
-        </p>
+        {error && <p className="text-sm text-red-500">{error}</p>}
+      </Modal>
+      <Modal
+        open={confirmPublish}
+        onClose={() => setConfirmPublish(false)}
+        closeDisabled={busy}
+        title={`Publish ${title}?`}
+        description="This will make it visible to all athletes."
+        maxWidth="sm"
+        footer={
+          <ModalFooter>
+            <button
+              type="button"
+              onClick={() => setConfirmPublish(false)}
+              disabled={busy}
+              className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary dark:hover:bg-fill-secondary dark:border border-border-secondary"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => togglePublished(true)}
+              disabled={busy}
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
+            >
+              {busy ? "Publishing…" : "Publish"}
+            </button>
+          </ModalFooter>
+        }
+      >
         {error && <p className="text-sm text-red-500">{error}</p>}
       </Modal>
     </>

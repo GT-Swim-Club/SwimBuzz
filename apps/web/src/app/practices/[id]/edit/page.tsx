@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation"
 import { isStaffUi } from "@/lib/athlete-view-server"
 import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/session"
-import { isCuid, practiceEditPath } from "@/lib/slug"
+import { isCuid, practiceEditPath, practicePath } from "@/lib/slug"
 import { listManagedPracticeTagNames } from "@/lib/practice-tag-catalog"
 import { practiceSetSelect } from "@/lib/practice-input"
 import type { PracticeFormState } from "../../PracticeEditor"
@@ -19,7 +19,7 @@ export default async function PracticeEditPage({
   if (!session) redirect("/signin?callbackUrl=/practices")
 
   const isCoach = await isStaffUi(session.user.role)
-  if (!isCoach) notFound()
+  if (!isCoach) redirect(practicePath(param))
 
   const practice = await prisma.practice.findFirst({
     where: isCuid(param) ? { OR: [{ id: param }, { slug: param }] } : { slug: param },

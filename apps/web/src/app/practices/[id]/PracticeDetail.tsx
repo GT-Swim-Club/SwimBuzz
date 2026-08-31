@@ -178,25 +178,25 @@ export default function PracticeDetail({
     {openingEditor ? (
       <PracticeEditSkeleton />
     ) : (
-    <main className="mx-auto max-w-4xl space-y-5">
+    <main className="space-y-5">
       <div>
         <Link
           href="/practices"
-          className="text-sm font-medium text-foreground-tertiary hover:text-foreground"
+          className="mb-1 inline-block text-sm font-medium text-foreground-tertiary hover:text-foreground md:hidden"
         >
           ← Practices
         </Link>
-        <div className="mt-1 flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="min-w-0 text-3xl font-semibold text-foreground sm:text-4xl">{title}</h1>
+              <h1 className="min-w-0 text-4xl font-semibold text-foreground">{title}</h1>
               {isCoach && !published && (
                 <span className="text-[10px] uppercase tracking-wide rounded-full bg-primary/20 dark:bg-primary/30 px-2 py-0.5 text-primary-active shadow-sm dark:text-primary-hover">
                   Draft
                 </span>
               )}
             </div>
-            <div className="mt-1 text-base text-foreground-secondary sm:text-lg">
+            <div className="mt-1 text-lg text-foreground-secondary">
               <div className="flex items-center gap-1.5">
                 <InfoIcon kind="calendar" />
                 <RelativeDateTime startsAt={startsAt} endsAt={endsAt} timeZone={timeZone} />
@@ -213,7 +213,11 @@ export default function PracticeDetail({
               </div>
             </div>
           </div>
-          <div className="mr-2 flex shrink-0 items-center gap-2 sm:mr-3">
+          <div
+            className={`relative mr-3 flex shrink-0 items-center gap-2 ${
+              isCoach && editLock?.locked ? "mb-7" : ""
+            }`}
+          >
             <SharePracticeButton
               practiceId={practiceId}
               practiceSlug={practiceSlug}
@@ -253,11 +257,22 @@ export default function PracticeDetail({
                 <HoverDetail label="Attendance" />
               </Link>
             )}
+            {isCoach && editLock?.locked && (
+              <p
+                role="status"
+                className="absolute inset-x-0 top-full mt-1.5 flex items-center justify-end gap-1.5 text-right text-[11px] font-medium text-amber-800 dark:text-amber-200"
+              >
+                <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500 dark:bg-amber-300" />
+                {editLock.lockedByMe
+                  ? "You're editing in another window."
+                  : `${editLock.lockedBy?.name?.trim() || "Another coach"} is editing.`}
+              </p>
+            )}
           </div>
         </div>
       </div>
       {(focus && !isHtmlEmpty(focus) || tags.length > 0) && (
-        <div className="rounded-2xl border-l-[3px] border-l-primary bg-background px-4 py-3 text-foreground sm:px-5 sm:py-4">
+        <div className="rounded-2xl border-l-[3px] border-l-primary bg-background px-5 py-4 text-foreground">
           {focus && !isHtmlEmpty(focus) && (
             <FormattedText text={focus} className="text-foreground" />
           )}
@@ -276,21 +291,21 @@ export default function PracticeDetail({
           )}
         </div>
       )}
-      <section className="rounded-2xl border border-border bg-background px-5 py-4 shadow-sm sm:px-6 sm:py-5">
-        <div className="space-y-2">
+      <section className="rounded-2xl border border-border-secondary bg-background px-6 pb-3 pt-4 shadow-sm">
+        <div>
           {sets.map((set) => (
             <section
               key={set.id}
-              className="py-2 first:pt-0 last:pb-0"
+              className="py-3 first:pt-0 last:pb-0"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h3 className="font-bold text-primary-active dark:text-primary-hover">
+                  <h3 className="text-[15px] font-bold text-primary-active dark:text-primary-hover">
                     {set.title || "Set"}
                   </h3>
                 </div>
                 {set.distance != null && (
-                  <span className="shrink-0 text-xs font-medium text-primary-active dark:text-primary-hover">
+                  <span className="shrink-0 text-xs font-medium tabular-nums text-primary-active dark:text-primary-hover">
                     {set.distance.toLocaleString()}
                   </span>
                 )}

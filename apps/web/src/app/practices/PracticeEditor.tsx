@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation"
 import RichTextField from "@/components/RichTextField"
 import { DatePicker, TimePicker, TimeZonePicker } from "@/components/CustomDateTimePicker"
 import { useViewerTimeZone } from "@/components/ZonedTime"
-import { DEFAULT_TIME_ZONE, getViewerTimeZone } from "@swimbuzz/shared"
+import { DEFAULT_TIME_ZONE } from "@swimbuzz/shared"
 import { PRACTICE_EDIT_IDLE_TIMEOUT_MS, PRACTICE_EDIT_LOCK_HEARTBEAT_MS, PRACTICE_EDIT_LOCK_TOKEN_HEADER, type PracticeEditLockInfo } from "@/lib/practice-edit-lock-shared"
 import { broadcastPracticeEditLockChanged } from "@/lib/practice-edit-lock-client"
+import { ATHLETE_VIEW_ENABLING_EVENT } from "@/lib/athlete-view"
 import { practicePath } from "@/lib/slug"
 import { MAX_PRACTICE_SETS } from "@/lib/practice-input"
 import InfoIcon from "@/components/InfoIcon"
@@ -150,6 +151,7 @@ export default function PracticeEditor({
   const isCreateRef = useRef(!initial)
   const zoneSeededRef = useRef(false)
   const [isDirty, setIsDirty] = useState(false)
+  const [hasEditedContent, setHasEditedContent] = useState(!isCreateRef.current)
   const [persistedId, setPersistedId] = useState<string | null>(practiceId ?? null)
   const [lockToken, setLockToken] = useState<string | null>(editLockToken ?? null)
   const [autosaveState, setAutosaveState] = useState<AutosaveState>(
@@ -173,6 +175,7 @@ export default function PracticeEditor({
   const yieldingRef = useRef(false)
   const yieldToTakeoverRef = useRef<() => void>(() => {})
   const expireIdleSessionRef = useRef<() => void>(() => {})
+  const releaseForAthleteViewRef = useRef<() => void>(() => {})
   const idleTimerRef = useRef<number | null>(null)
   const savedSnapshotRef = useRef(JSON.stringify(form))
   const formRef = useRef(form)
@@ -182,6 +185,8 @@ export default function PracticeEditor({
   const autosaveInFlightRef = useRef(false)
   const persistedIdRef = useRef<string | null>(practiceId ?? null)
   const slugRef = useRef<string | null>(practiceSlug ?? null)
+  /** True once the user has actually changed something, as opposed to the automatic timezone seed on create. */
+  const userEditedRef = useRef(false)
 
   function rememberSlug(data: { slug?: unknown; id?: unknown }): string | null {
     if (typeof data.slug === "string" && data.slug) {
@@ -224,7 +229,7 @@ export default function PracticeEditor({
     // Editing an existing practice must never touch its stored zone this way.
     if (!isCreateRef.current || zoneSeededRef.current || viewerTimeZone === DEFAULT_TIME_ZONE) return
     zoneSeededRef.current = true
-    updateForm((current) => ({ ...current, timeZone: viewerTimeZone }))
+    updateForm((current) => ({ ...current, timeZone: viewerTimeZone }), { silent: true })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewerTimeZone])
 
@@ -279,12 +284,17 @@ export default function PracticeEditor({
   }
 
   function updateForm(
-    next: PracticeFormState | ((current: PracticeFormState) => PracticeFormState)
+    next: PracticeFormState | ((current: PracticeFormState) => PracticeFormState),
+    options?: { silent?: boolean }
   ) {
     const nextForm = typeof next === "function" ? next(formRef.current) : next
     formRef.current = nextForm
     unsavedChangesRef.current = true
     setIsDirty(true)
+    if (!options?.silent) {
+      userEditedRef.current = true
+      setHasEditedContent(true)
+    }
     bumpIdleTimer()
     if (!isPracticeSaveable(nextForm) && autosaveTimerRef.current) {
       window.clearTimeout(autosaveTimerRef.current)
@@ -354,6 +364,26 @@ export default function PracticeEditor({
     }
   }
 
+  /** Removes the empty practice autosave created solely by opening the "new" form. */
+  function isUntouchedDraft() {
+    return isCreateRef.current && !userEditedRef.current && Boolean(persistedIdRef.current)
+  }
+
+  async function deleteUntouchedDraft() {
+    const id = persistedIdRef.current
+    if (!id) return
+    releasedRef.current = true
+    try {
+      await fetch(`/api/practices/${id}`, {
+        method: "DELETE",
+        keepalive: true,
+        headers: lockHeaders(),
+      })
+    } catch {
+      // best-effort; an abandoned empty draft is harmless if this fails
+    }
+  }
+
   useEffect(() => {
     if (!shouldHoldLock || !persistedId || !lockToken) return
     releasedRef.current = false
@@ -391,6 +421,10 @@ export default function PracticeEditor({
     }, PRACTICE_EDIT_LOCK_HEARTBEAT_MS)
 
     function onPageHide() {
+      if (isUntouchedDraft()) {
+        void deleteUntouchedDraft()
+        return
+      }
       void releaseLock()
     }
 
@@ -577,12 +611,33 @@ export default function PracticeEditor({
   }
   expireIdleSessionRef.current = expireIdleSession
 
+  /** Switching to Athlete View mid-edit: flush and release like a normal
+   * exit, but skip handleLockLost — the page-level redirect (isCoach flips
+   * false) unmounts this editor right after, so no takeover message is due. */
+  async function releaseForAthleteView() {
+    if (lostRef.current || releasedRef.current || yieldingRef.current) return
+    yieldingRef.current = true
+    if (autosaveTimerRef.current) {
+      window.clearTimeout(autosaveTimerRef.current)
+      autosaveTimerRef.current = null
+    }
+    await autosavePromiseRef.current?.catch(() => undefined)
+    await runAutosave()
+    await releaseLock()
+  }
+  releaseForAthleteViewRef.current = releaseForAthleteView
+
   useEffect(() => {
     if (!shouldHoldLock || !persistedId || !lockToken) return
 
     let cancelled = false
     let requestAc: AbortController | null = null
     let lockChannel: BroadcastChannel | null = null
+
+    function onAthleteViewEnabling() {
+      void releaseForAthleteViewRef.current()
+    }
+    window.addEventListener(ATHLETE_VIEW_ENABLING_EVENT, onAthleteViewEnabling)
 
     async function watchLock(rev?: string) {
       while (!cancelled) {
@@ -627,6 +682,7 @@ export default function PracticeEditor({
       cancelled = true
       requestAc?.abort()
       lockChannel?.close()
+      window.removeEventListener(ATHLETE_VIEW_ENABLING_EVENT, onAthleteViewEnabling)
     }
   }, [shouldHoldLock, persistedId, lockToken])
 
@@ -801,6 +857,13 @@ export default function PracticeEditor({
       autosaveTimerRef.current = null
     }
     await autosavePromiseRef.current?.catch(() => undefined)
+    if (isUntouchedDraft()) {
+      await deleteUntouchedDraft()
+      slugRef.current = null
+      persistedIdRef.current = null
+      leaveEditor(null)
+      return
+    }
     await releaseLock()
     leaveEditor()
   }
@@ -848,8 +911,9 @@ export default function PracticeEditor({
   const canSave = isPracticeSaveable(form)
   const waitingForAutosave = !persistedId || isDirty || autosaveState === "saving"
   const canPublishOrDraft = canSave && !waitingForAutosave
-  const autosaveMessage =
-    autosaveState === "saving"
+  const autosaveMessage = !hasEditedContent
+    ? "Make edits to save changes."
+    : autosaveState === "saving"
       ? "Saving changes…"
       : autosaveState === "error"
         ? "Autosave failed — make a change to retry."
@@ -861,6 +925,10 @@ export default function PracticeEditor({
               ? "All changes saved."
               : "Required fields needed to save changes."
 
+  // Measures the bar's actual DOM layout (real width once its content is
+  // unconstrained), which only exists after paint — genuinely requires an
+  // effect, not state derivable from props/render.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useLayoutEffect(() => {
     const bar = barRef.current
     if (!bar) return
@@ -877,6 +945,7 @@ export default function PracticeEditor({
     })
     return () => window.cancelAnimationFrame(frame)
   }, [barOverContent, autosaveMessage, error])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (exiting) {
     return <PracticeViewSkeleton />
@@ -1221,6 +1290,11 @@ export default function PracticeEditor({
         open={setPendingDeletion != null}
         onClose={() => setSetPendingDeletion(null)}
         title="Delete set"
+        description={
+          <>
+            Delete <span className="font-medium text-foreground">{setPendingDeletion?.title || "this set"}</span>? This cannot be undone.
+          </>
+        }
         maxWidth="sm"
         footer={
           <ModalFooter>
@@ -1240,11 +1314,7 @@ export default function PracticeEditor({
             </button>
           </ModalFooter>
         }
-      >
-        <p className="text-sm text-foreground-secondary">
-          Delete <span className="font-medium text-foreground">{setPendingDeletion?.title || "this set"}</span>? This cannot be undone.
-        </p>
-      </Modal>
+      />
     </form>
   )
 }

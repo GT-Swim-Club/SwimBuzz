@@ -1,8 +1,10 @@
-import { prisma } from "@/lib/prisma"
+import { Suspense } from "react"
 import { notFound, redirect } from "next/navigation"
+import { prisma } from "@/lib/prisma"
 import { isStaffUi } from "@/lib/athlete-view-server"
-import PracticeDetail from "./PracticeDetail"
-import type { PracticeFormState } from "../PracticeEditor"
+import PracticeDetail from "../../[id]/PracticeDetail"
+import PracticeViewSkeleton from "../../[id]/PracticeViewSkeleton"
+import type { PracticeFormState } from "../../PracticeEditor"
 import { serializePracticeEditLock } from "@/lib/practice-edit-lock"
 import { isCuid, practicePath } from "@/lib/slug"
 import { getSession } from "@/lib/session"
@@ -11,10 +13,25 @@ import { attendedUserIds } from "@/lib/practice-attendance"
 import { toDateInput, toTimeInput } from "@/lib/date-input"
 
 export default async function PracticePage({
-  params}: {
+  params,
+}: {
   params: Promise<{ id: string }>
 }) {
   const { id: param } = await params
+  const session = await getSession()
+  if (!session) redirect("/signin?callbackUrl=/practices")
+
+  return (
+    <Suspense fallback={<PracticeViewSkeleton />}>
+      <PracticeDetailLoader param={param} />
+    </Suspense>
+  )
+}
+
+// Kept separate from the page itself (and wrapped in Suspense above) so the
+// slow per-practice DB fetch only skeletons the detail pane, not the sidebar
+// that PracticesWorkspaceLayout already rendered.
+async function PracticeDetailLoader({ param }: { param: string }) {
   const session = await getSession()
   if (!session) redirect("/signin?callbackUrl=/practices")
 
@@ -28,7 +45,9 @@ export default async function PracticePage({
         orderBy: { createdAt: "asc" },
         include: { author: { select: { image: true, staffTitle: true } } },
       },
-      editLockedBy: { select: { id: true, name: true } }}})
+      editLockedBy: { select: { id: true, name: true } },
+    },
+  })
 
   if (!practice || (!practice.published && !isCoach)) notFound()
   if (practice.slug && param !== practice.slug) redirect(practicePath(practice.slug))
@@ -53,7 +72,9 @@ export default async function PracticePage({
       id: s.id,
       title: s.title ?? "",
       content: s.content,
-      distance: s.distance != null ? String(s.distance) : ""}))}
+      distance: s.distance != null ? String(s.distance) : "",
+    })),
+  }
 
   return (
     <PracticeDetail
@@ -71,7 +92,8 @@ export default async function PracticePage({
         id: s.id,
         title: s.title,
         content: s.content,
-        distance: s.distance}))}
+        distance: s.distance,
+      }))}
       totalDistance={totalDistance}
       initial={initial}
       isCoach={isCoach}
@@ -86,7 +108,8 @@ export default async function PracticePage({
         body: c.body,
         parentId: c.parentId,
         createdAt: c.createdAt.toISOString(),
-        editedAt: c.editedAt ? c.editedAt.toISOString() : null}))}
+        editedAt: c.editedAt ? c.editedAt.toISOString() : null,
+      }))}
       initialEditLock={initialEditLock}
     />
   )
