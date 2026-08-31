@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import {
   isValidSignupEntryTime,
+  isSignupAnswers,
   isSignupEntryTimes,
   mergeSignupIndividualsIntoEntriesSummary,
   normalizeMeetSignupQuestions,
@@ -12,6 +13,7 @@ import {
   sortSignupEventsByOrder,
   signupWindowStatus,
   signupWithdrawStatus,
+  type MeetSignupEventOption,
   type SignupEntryForSheetSync,
 } from "@/lib/meet-signup"
 import {
@@ -47,15 +49,128 @@ export async function resolveLinkedAthleteId(sessionUserId: string): Promise<str
   )
 }
 
+export type SignupEntryInput = {
+  events?: unknown
+  entryTimes?: unknown
+  notes?: unknown
+  answers?: unknown
+}
+
+type SignupFormRecordForValidation = {
+  minEvents: number | null
+  maxEvents: number | null
+  maxRelayEvents: number | null
+  askNotes: boolean
+  customQuestions: unknown
+}
+
+type ValidatedSignupEntryData = {
+  orderedEvents: string[]
+  entryTimes: Record<string, string>
+  answers: Record<string, string>
+  notes: string
+  warnings: string[]
+}
+
+/**
+ * Shared validation behind the athlete self-service path (`strict: true`,
+ * throws on the first violation) and the staff-on-behalf import path
+ * (`strict: false`, drops/normalizes the offending value and records a
+ * warning instead) — so the two can never drift apart.
+ */
+function validateSignupEntryData(
+  form: SignupFormRecordForValidation,
+  eventOptions: MeetSignupEventOption[],
+  body: SignupEntryInput,
+  opts: { strict: boolean }
+): ValidatedSignupEntryData {
+  const warnings: string[] = []
+  const warnOrFail = (message: string) => {
+    if (opts.strict) throw new SignupActionError(message, 400)
+    warnings.push(message)
+  }
+
+  const eventOptionNames = new Set(eventOptions.map((e) => e.event))
+  if (opts.strict && eventOptionNames.size === 0) {
+    throw new SignupActionError(
+      "This meet has no order of events yet. Import the meet packet first.",
+      400
+    )
+  }
+
+  const rawEvents = Array.isArray(body.events)
+    ? body.events
+        .filter((e: unknown): e is string => typeof e === "string")
+        .map((e: string) => e.trim())
+        .filter(Boolean)
+    : []
+
+  if (opts.strict && rawEvents.length === 0) {
+    throw new SignupActionError("Select at least one event", 400)
+  }
+
+  const invalid = rawEvents.filter((e) => !eventOptionNames.has(e))
+  if (invalid.length > 0) {
+    warnOrFail(`Invalid events: ${invalid.join(", ")}`)
+  }
+  const events = rawEvents.filter((e) => eventOptionNames.has(e))
+
+  const orderedEvents = sortSignupEventsByOrder(events, eventOptions)
+  const { individual, relay } = partitionSignupEvents(orderedEvents)
+  if (form.minEvents != null && individual.length < form.minEvents) {
+    warnOrFail(`Select at least ${form.minEvents} individual event${form.minEvents === 1 ? "" : "s"}`)
+  }
+  if (form.maxEvents != null && individual.length > form.maxEvents) {
+    warnOrFail(`You can enter at most ${form.maxEvents} individual event${form.maxEvents === 1 ? "" : "s"}`)
+  }
+  if (form.maxRelayEvents != null && relay.length > form.maxRelayEvents) {
+    warnOrFail(`You can enter at most ${form.maxRelayEvents} relay event${form.maxRelayEvents === 1 ? "" : "s"}`)
+  }
+
+  const rawTimes = normalizeSignupEntryTimes(body.entryTimes)
+  const entryTimes: Record<string, string> = {}
+  for (const event of individual) {
+    const time = rawTimes[event]?.trim() ?? ""
+    if (!time) {
+      if (opts.strict) throw new SignupActionError(`Enter a seed time for ${event}`, 400)
+      entryTimes[event] = "NT"
+      continue
+    }
+    if (!isValidSignupEntryTime(time)) {
+      if (opts.strict) {
+        throw new SignupActionError(
+          `Invalid time for ${event}. Use NT, or formats like 58.32 or 1:02.45`,
+          400
+        )
+      }
+      entryTimes[event] = "NT"
+      warnings.push(`Invalid seed time for ${event} — used NT`)
+      continue
+    }
+    entryTimes[event] = normalizeSignupEntryTime(time)
+  }
+
+  const questions = normalizeMeetSignupQuestions(form.customQuestions)
+  const parsedAnswers = parseCustomQuestionAnswers(questions, body.answers)
+  let answers: Record<string, string>
+  if (!parsedAnswers.ok) {
+    if (opts.strict) throw new SignupActionError(parsedAnswers.error, 400)
+    warnings.push(parsedAnswers.error)
+    answers = isSignupAnswers(body.answers) ? body.answers : {}
+  } else {
+    answers = parsedAnswers.answers
+  }
+
+  const notes =
+    form.askNotes && typeof body.notes === "string" ? body.notes.trim().slice(0, 2000) : ""
+
+  return { orderedEvents, entryTimes, answers, notes, warnings }
+}
+
 export async function saveSignupEntry(
   meetId: string,
   sessionUserId: string,
-  body: {
-    events?: unknown
-    entryTimes?: unknown
-    notes?: unknown
-    answers?: unknown
-  }
+  body: SignupEntryInput
 ) {
   const athleteId = await resolveLinkedAthleteId(sessionUserId)
 
@@ -73,90 +188,22 @@ export async function saveSignupEntry(
   }
 
   const eventOptions = resolveSignupEventOptions(meet.eventOrder)
-  const eventOptionNames = new Set(eventOptions.map((e) => e.event))
-  if (eventOptionNames.size === 0) {
-    throw new SignupActionError(
-      "This meet has no order of events yet. Import the meet packet first.",
-      400
-    )
-  }
-
-  const events = Array.isArray(body.events)
-    ? body.events
-        .filter((e: unknown): e is string => typeof e === "string")
-        .map((e: string) => e.trim())
-        .filter(Boolean)
-    : []
-
-  if (events.length === 0) {
-    throw new SignupActionError("Select at least one event", 400)
-  }
-  const invalid = events.filter((e: string) => !eventOptionNames.has(e))
-  if (invalid.length > 0) {
-    throw new SignupActionError(`Invalid events: ${invalid.join(", ")}`, 400)
-  }
-
-  const orderedEvents = sortSignupEventsByOrder(events, eventOptions)
-  const { individual, relay } = partitionSignupEvents(orderedEvents)
-  if (form.minEvents != null && individual.length < form.minEvents) {
-    throw new SignupActionError(
-      `Select at least ${form.minEvents} individual event${form.minEvents === 1 ? "" : "s"}`,
-      400
-    )
-  }
-  if (form.maxEvents != null && individual.length > form.maxEvents) {
-    throw new SignupActionError(
-      `You can enter at most ${form.maxEvents} individual event${form.maxEvents === 1 ? "" : "s"}`,
-      400
-    )
-  }
-  if (form.maxRelayEvents != null && relay.length > form.maxRelayEvents) {
-    throw new SignupActionError(
-      `You can enter at most ${form.maxRelayEvents} relay event${form.maxRelayEvents === 1 ? "" : "s"}`,
-      400
-    )
-  }
-
-  const rawTimes = normalizeSignupEntryTimes(body.entryTimes)
-  const entryTimes: Record<string, string> = {}
-  for (const event of individual) {
-    const time = rawTimes[event]?.trim() ?? ""
-    if (!time) {
-      throw new SignupActionError(`Enter a seed time for ${event}`, 400)
-    }
-    if (!isValidSignupEntryTime(time)) {
-      throw new SignupActionError(
-        `Invalid time for ${event}. Use NT, or formats like 58.32 or 1:02.45`,
-        400
-      )
-    }
-    entryTimes[event] = normalizeSignupEntryTime(time)
-  }
-
-  const questions = normalizeMeetSignupQuestions(form.customQuestions)
-  const parsedAnswers = parseCustomQuestionAnswers(questions, body.answers)
-  if (!parsedAnswers.ok) {
-    throw new SignupActionError(parsedAnswers.error, 400)
-  }
-  const answers = parsedAnswers.answers
-
-  const notes =
-    form.askNotes && typeof body.notes === "string" ? body.notes.trim().slice(0, 2000) : ""
+  const validated = validateSignupEntryData(form, eventOptions, body, { strict: true })
 
   const entry = await prisma.meetSignupEntry.upsert({
     where: { formId_athleteId: { formId: form.id, athleteId } },
     create: {
       formId: form.id,
       athleteId,
-      events: orderedEvents,
-      entryTimes: entryTimes as Prisma.InputJsonValue,
-      notes,
-      answers: answers as Prisma.InputJsonValue},
+      events: validated.orderedEvents,
+      entryTimes: validated.entryTimes as Prisma.InputJsonValue,
+      notes: validated.notes,
+      answers: validated.answers as Prisma.InputJsonValue},
     update: {
-      events: orderedEvents,
-      entryTimes: entryTimes as Prisma.InputJsonValue,
-      notes,
-      answers: answers as Prisma.InputJsonValue}})
+      events: validated.orderedEvents,
+      entryTimes: validated.entryTimes as Prisma.InputJsonValue,
+      notes: validated.notes,
+      answers: validated.answers as Prisma.InputJsonValue}})
 
   return {
     id: entry.id,
@@ -166,6 +213,71 @@ export async function saveSignupEntry(
     notes: entry.notes,
     answers: entry.answers,
     updatedAt: entry.updatedAt.toISOString()}
+}
+
+async function loadValidatedSignupEntryData(
+  formId: string,
+  data: SignupEntryInput
+): Promise<{ formId: string; validated: ValidatedSignupEntryData }> {
+  const form = await prisma.meetSignupForm.findUnique({
+    where: { id: formId },
+    select: {
+      minEvents: true,
+      maxEvents: true,
+      maxRelayEvents: true,
+      askNotes: true,
+      customQuestions: true,
+      meet: { select: { eventOrder: true } }}})
+  if (!form) throw new SignupActionError("Sign-up form not found", 404)
+
+  const eventOptions = resolveSignupEventOptions(form.meet.eventOrder)
+  const validated = validateSignupEntryData(form, eventOptions, data, { strict: false })
+  return { formId, validated }
+}
+
+/**
+ * Staff-only: preview the warnings a sign-up import row would produce
+ * without writing anything — used by the dry-run step of the Google Form
+ * response import wizard.
+ */
+export async function previewSignupEntryForAthlete(
+  formId: string,
+  data: SignupEntryInput
+): Promise<{ warnings: string[] }> {
+  const { validated } = await loadValidatedSignupEntryData(formId, data)
+  return { warnings: validated.warnings }
+}
+
+/**
+ * Staff-only: upsert a sign-up entry for an explicit athlete. Skips the
+ * open/close window and the session-athlete binding; import surfaces
+ * min/max-event violations as warnings instead of rejecting the row.
+ */
+export async function upsertSignupEntryForAthlete(
+  formId: string,
+  athleteId: string,
+  data: SignupEntryInput
+): Promise<{ entry: { id: string; updatedAt: string }; warnings: string[] }> {
+  const { validated } = await loadValidatedSignupEntryData(formId, data)
+
+  const entry = await prisma.meetSignupEntry.upsert({
+    where: { formId_athleteId: { formId, athleteId } },
+    create: {
+      formId,
+      athleteId,
+      events: validated.orderedEvents,
+      entryTimes: validated.entryTimes as Prisma.InputJsonValue,
+      notes: validated.notes,
+      answers: validated.answers as Prisma.InputJsonValue},
+    update: {
+      events: validated.orderedEvents,
+      entryTimes: validated.entryTimes as Prisma.InputJsonValue,
+      notes: validated.notes,
+      answers: validated.answers as Prisma.InputJsonValue}})
+
+  return {
+    entry: { id: entry.id, updatedAt: entry.updatedAt.toISOString() },
+    warnings: validated.warnings}
 }
 
 export async function withdrawSignupEntry(

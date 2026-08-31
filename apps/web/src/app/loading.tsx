@@ -17,9 +17,23 @@ export default function Loading() {
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:py-20 space-y-10 xl:max-w-none xl:px-[clamp(8rem,10vw,18rem)]">
         <Skeleton className="h-8 w-64" />
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Skeleton className="h-64 w-full rounded-2xl" />
-          <Skeleton className="h-64 w-full rounded-2xl" />
+        <div className="grid gap-10 lg:grid-cols-2">
+          {[...Array(2)].map((_, col) => (
+            <div key={col} className="space-y-4">
+              <Skeleton className="h-6 w-32" />
+              <div className="space-y-4">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="flex gap-3">
+                    <Skeleton className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full" />
+                    <div className="flex-1 space-y-1.5">
+                      <Skeleton className="h-4 w-1/3" />
+                      <Skeleton className="h-3.5 w-4/5" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
     </div>

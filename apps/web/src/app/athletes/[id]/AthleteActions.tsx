@@ -239,6 +239,12 @@ export default function AthleteActions({
         onClose={() => setConfirmDelete(false)}
         closeDisabled={loading}
         title="Delete athlete"
+        description={
+          <>
+            Permanently delete <span className="font-medium">{firstName} {lastName}</span> and all
+            of their swim records? This cannot be undone.
+          </>
+        }
         maxWidth="sm"
         footer={
           <ModalFooter>
@@ -261,10 +267,6 @@ export default function AthleteActions({
           </ModalFooter>
         }
       >
-        <p className="text-sm text-foreground-secondary text-foreground-secondary">
-          Permanently delete <span className="font-medium">{firstName} {lastName}</span> and all
-          of their swim records? This cannot be undone.
-        </p>
         {error && <p className="text-sm text-error dark:text-error">{error}</p>}
       </Modal>
     </>

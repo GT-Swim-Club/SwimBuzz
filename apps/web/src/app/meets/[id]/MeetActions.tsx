@@ -149,6 +149,7 @@ export default function MeetActions({
         onClose={() => setConfirmDelete(false)}
         closeDisabled={loading}
         title={`Delete ${meetName}?`}
+        description="This cannot be undone."
         maxWidth="sm"
         footer={
           <ModalFooter>
@@ -176,9 +177,6 @@ export default function MeetActions({
           </ModalFooter>
         }
       >
-   <p className="text-sm text-foreground-secondary">
-            This cannot be undone.
-          </p>
         {hasSwims ? (
           <div className="space-y-2">
             {([

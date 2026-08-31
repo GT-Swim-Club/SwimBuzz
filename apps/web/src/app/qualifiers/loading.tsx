@@ -2,22 +2,25 @@ import { Skeleton } from "@/components/Skeleton"
 
 export default function Loading() {
   return (
-    <main className="space-y-6">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3 flex-wrap">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-8 w-24" />
+    <main className="space-y-4" aria-busy="true" aria-label="Loading qualifiers">
+      <section className="flex flex-wrap items-center gap-3">
+        <Skeleton className="h-6 w-28" />
+        <Skeleton className="h-9 w-28 rounded-lg" />
+        <Skeleton className="h-9 w-20 rounded-lg" />
+        <div className="ml-auto flex items-center gap-2">
+          <Skeleton className="h-9 w-20 rounded-lg" />
+          <Skeleton className="h-9 w-28 rounded-lg" />
         </div>
-        <Skeleton className="h-9 w-32" />
-      </div>
+      </section>
 
-      <Skeleton className="h-5 w-64" />
-
-      <div className="space-y-4">
-        {[...Array(5)].map((_, i) => (
-          <Skeleton key={i} className="h-16 w-full" />
-        ))}
-      </div>
+      <section className="space-y-3">
+        <Skeleton className="h-10 w-full rounded-lg" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
+          {[...Array(8)].map((_, i) => (
+            <Skeleton key={i} className="h-48 w-full rounded-xl" />
+          ))}
+        </div>
+      </section>
     </main>
   )
 }

@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/Skeleton"
 
-export type ViewSkeletonVariant = "gallery" | "list" | "week" | "month"
+export type ViewSkeletonVariant = "gallery" | "list" | "week"
 
 export function GalleryViewSkeleton() {
   return (
@@ -57,29 +57,6 @@ export function WeekViewSkeleton() {
   )
 }
 
-export function MonthViewSkeleton() {
-  return (
-    <section className="space-y-3">
-      <div className="flex items-center justify-between gap-3">
-        <Skeleton className="h-10 w-24" />
-        <div className="space-y-1 text-center">
-          <Skeleton className="mx-auto h-6 w-32" />
-          <Skeleton className="mx-auto h-4 w-20" />
-        </div>
-        <Skeleton className="h-10 w-24" />
-      </div>
-      <div className="overflow-hidden rounded-xl border border-border-secondary">
-        <Skeleton className="h-10 w-full rounded-none" />
-        <div className="grid grid-cols-7">
-          {[...Array(35)].map((_, i) => (
-            <Skeleton key={i} className="h-24 w-full rounded-none sm:h-28 md:h-36" />
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
 export function ViewSkeleton({ variant }: { variant: ViewSkeletonVariant }) {
   switch (variant) {
     case "gallery":
@@ -88,7 +65,5 @@ export function ViewSkeleton({ variant }: { variant: ViewSkeletonVariant }) {
       return <ListViewSkeleton />
     case "week":
       return <WeekViewSkeleton />
-    case "month":
-      return <MonthViewSkeleton />
   }
 }

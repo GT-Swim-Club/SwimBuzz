@@ -8,6 +8,7 @@ import MeetRoomConfigButton, {
   type MeetRoomConfigInitial,
 } from "../MeetRoomConfigButton"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/SegmentedToggle"
+import ImportFormResponsesButton from "../ImportFormResponsesButton"
 
 type AthleteOption = {
   id: string
@@ -149,21 +150,24 @@ export default function MeetRoommateManager({
                     {preferences.length}
                   </span>
                 </div>
-                {preferences.length > 0 && (
-                  <label className="relative block sm:w-64">
-                    <span className="sr-only">Search preferences</span>
-                    <input
-                      type="search"
-                      value={query}
-                      onChange={(event) => setQuery(event.target.value)}
-                      placeholder="Search swimmers"
-                      className={
-                        "w-full rounded-lg border border-border bg-background px-3 py-2 " +
-                        "text-sm text-foreground"
-                      }
-                    />
-                  </label>
-                )}
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  {preferences.length > 0 && (
+                    <label className="relative block sm:w-64">
+                      <span className="sr-only">Search preferences</span>
+                      <input
+                        type="search"
+                        value={query}
+                        onChange={(event) => setQuery(event.target.value)}
+                        placeholder="Search swimmers"
+                        className={
+                          "w-full rounded-lg border border-border bg-background px-3 py-2 " +
+                          "text-sm text-foreground"
+                        }
+                      />
+                    </label>
+                  )}
+                  <ImportFormResponsesButton meetId={meetId} formType="rooms" />
+                </div>
               </div>
 
               {filteredPreferences.length === 0 ? (

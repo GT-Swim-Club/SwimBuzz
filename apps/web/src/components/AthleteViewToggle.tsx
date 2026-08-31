@@ -3,6 +3,7 @@
 import { useOptimistic, useTransition } from "react"
 import HoverDetail from "@/components/HoverDetail"
 import { STAFF_TITLE_LABELS, type StaffTitle } from "@swimbuzz/shared"
+import { ATHLETE_VIEW_ENABLING_EVENT } from "@/lib/athlete-view"
 import { setAthleteView } from "./AthleteViewToggle.actions"
 
 function AthleteViewIcon() {
@@ -47,6 +48,7 @@ export default function AthleteViewToggle({
   const staffLabel = STAFF_TITLE_LABELS[staffTitle]
 
   function handleSetAthleteView(enabled: boolean) {
+    if (enabled) window.dispatchEvent(new Event(ATHLETE_VIEW_ENABLING_EVENT))
     startTransition(async () => {
       setOptimisticEnabled(enabled)
       await setAthleteView(enabled)

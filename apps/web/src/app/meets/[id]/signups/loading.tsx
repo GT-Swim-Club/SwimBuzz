@@ -2,13 +2,33 @@ import { Skeleton } from "@/components/Skeleton"
 
 export default function Loading() {
   return (
-    <main className="mx-auto max-w-4xl space-y-6">
-      <Skeleton className="h-4 w-24" />
-      <Skeleton className="h-8 w-56" />
-      <div className="space-y-2">
-        {[...Array(6)].map((_, i) => (
-          <Skeleton key={i} className="h-12 w-full" />
-        ))}
+    <main
+      className="mx-auto w-full max-w-6xl flex flex-col gap-6 py-2 sm:py-4"
+      aria-busy="true"
+      aria-label="Loading sign-ups"
+    >
+      <Skeleton className="h-4 w-20" />
+      <div className="space-y-6">
+        <header className="flex flex-wrap items-center justify-between gap-3">
+          <Skeleton className="h-8 w-56" />
+          <Skeleton className="h-9 w-32 rounded-lg" />
+        </header>
+        <Skeleton className="h-14 w-full rounded-xl" />
+        <section className="rounded-2xl border border-border bg-background p-4 shadow-sm sm:p-5">
+          <Skeleton className="h-5 w-32" />
+          <div className="mt-5 grid gap-3 lg:grid-cols-2">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="rounded-xl border border-border bg-background p-4">
+                <Skeleton className="h-4 w-1/2" />
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  <Skeleton className="h-5 w-14 rounded-full" />
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                  <Skeleton className="h-5 w-12 rounded-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     </main>
   )

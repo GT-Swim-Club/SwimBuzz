@@ -14,6 +14,7 @@ import { SegmentedToggle, segmentedOptionClass } from "@/components/SegmentedTog
 import StaffBadge from "@/components/StaffBadge"
 import type { StaffTitle } from "@swimbuzz/shared"
 import { syncSignupsToRoster, withdrawAthleteSignup } from "../meet-signup-admin.actions"
+import ImportFormResponsesButton from "../ImportFormResponsesButton"
 
 type SignupEntry = {
   id: string
@@ -173,8 +174,9 @@ export default function MeetSignupManager({
 
       <div id="signup-responses" role="tabpanel" hidden={activeTab !== "responses"}>
       <section className="rounded-2xl border border-border bg-background p-4 shadow-sm sm:p-5">
-        <div>
+        <div className="flex items-center justify-between gap-3">
           <h2 className="text-base font-medium text-foreground">Responses</h2>
+          <ImportFormResponsesButton meetId={meetId} formType="signup" />
         </div>
 
         {entries.length > 0 && (

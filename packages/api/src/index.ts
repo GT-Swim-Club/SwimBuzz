@@ -600,6 +600,58 @@ export function createApiClient(options: ApiClientOptions = {}) {
         body: JSON.stringify(input),
       })
     },
+
+    /** Step 1 of the Google Form response import wizard: read a picked sheet's headers/sample rows and a suggested column mapping. */
+    previewFormImport(
+      meetId: string,
+      input: { formType: "signup" | "rooms"; accessToken: string; spreadsheetId: string; gid?: number }
+    ) {
+      return request(`/api/meets/${meetId}/form-import/preview`, {
+        method: "POST",
+        body: JSON.stringify(input),
+      })
+    },
+
+    /** Step 2: preview the outcome of importing with a confirmed column mapping, without writing anything. */
+    dryRunFormImport(
+      meetId: string,
+      input: {
+        formType: "signup" | "rooms"
+        accessToken: string
+        spreadsheetId: string
+        gid?: number
+        mapping: unknown[]
+      }
+    ) {
+      return request(`/api/meets/${meetId}/form-import/dry-run`, {
+        method: "POST",
+        body: JSON.stringify(input),
+      })
+    },
+
+    /** Step 3: commit the import — upserts a sign-up entry or roommate preference per matched row. */
+    commitFormImport(
+      meetId: string,
+      input: {
+        formType: "signup" | "rooms"
+        accessToken: string
+        spreadsheetId: string
+        gid?: number
+        mapping: unknown[]
+        overrides: Record<number, string | null>
+      }
+    ) {
+      return request<{
+        created: number
+        updated: number
+        skipped: number
+        warnings: string[]
+        errors: Array<{ row: number; message: string }>
+      }>(`/api/meets/${meetId}/form-import/commit`, {
+        method: "POST",
+        body: JSON.stringify(input),
+      })
+    },
   }
 }
 
