@@ -193,7 +193,7 @@ export async function verifyGoogleIdToken(idToken: string): Promise<{
     !data.email ||
     data.email_verified !== "true" ||
     !data.sub ||
-    (allowedAud.length > 0 && data.aud && !allowedAud.includes(data.aud))
+    (allowedAud.length > 0 && !(data.aud && allowedAud.includes(data.aud)))
   ) {
     return null
   }

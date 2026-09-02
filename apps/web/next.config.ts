@@ -21,25 +21,9 @@ const nextConfig: NextConfig = {
   transpilePackages: [
     // Prefer not pulling workspace packages into web server routes; mobile uses @swimbuzz/*.
   ],
-  async headers() {
-    return [
-      {
-        source: "/api/:path*",
-        headers: [
-          { key: "Access-Control-Allow-Credentials", value: "true" },
-          { key: "Access-Control-Allow-Origin", value: "*" },
-          {
-            key: "Access-Control-Allow-Methods",
-            value: "GET,POST,PUT,PATCH,DELETE,OPTIONS",
-          },
-          {
-            key: "Access-Control-Allow-Headers",
-            value: "Authorization, Content-Type, X-Requested-With",
-          },
-        ],
-      },
-    ];
-  },
+  // CORS for /api/* is handled in src/middleware.ts, which reflects only an
+  // allowlisted origin instead of a static "*" (invalid alongside credentials
+  // anyway, and not something route headers here could vary per-request).
 };
 
 export default nextConfig;

@@ -10,7 +10,7 @@ export const runtime = "nodejs"
 const MAX_BYTES = 5 * 1024 * 1024 // 5 MB for upload
 const ICON_MAX_EDGE = 512 // Larger than avatar (192px)
 const ICON_JPEG_QUALITY = 90 // Higher quality than avatar (82)
-const ALLOWED_EXT = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".heic", ".heif"])
+const ALLOWED_EXT = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".heic", ".heif"])
 
 const MIME: Record<string, string> = {
   ".png": "image/png",
@@ -18,7 +18,6 @@ const MIME: Record<string, string> = {
   ".jpeg": "image/jpeg",
   ".gif": "image/gif",
   ".webp": "image/webp",
-  ".svg": "image/svg+xml",
   ".heic": "image/heic",
   ".heif": "image/heif"}
 
@@ -57,7 +56,7 @@ export async function POST(req: Request) {
   const ext = resolvedFileExt(file, ALLOWED_EXT, MIME)
   if (!ext) {
     return NextResponse.json(
-      { error: "Unsupported file type — use PNG, JPG, GIF, WebP, SVG, or HEIC" },
+      { error: "Unsupported file type — use PNG, JPG, GIF, WebP, or HEIC" },
       { status: 400 }
     )
   }
@@ -69,41 +68,38 @@ export async function POST(req: Request) {
 
   try {
     let processedBytes = bytes
-    let finalExt = ext === ".svg" ? ext : ".jpg"
-    
-    // Compress image if it's not SVG
-    if (ext !== ".svg") {
-      try {
-        const image = sharp(bytes)
-        const metadata = await image.metadata()
-        
-        // Resize if larger than max edge
-        if (metadata.width && metadata.height && 
-            (metadata.width > ICON_MAX_EDGE || metadata.height > ICON_MAX_EDGE)) {
-          image.resize(ICON_MAX_EDGE, ICON_MAX_EDGE, {
-            fit: "inside",
-            withoutEnlargement: true})
-        }
-        
-        // Convert to PNG/JPEG with compression
-        if (metadata.hasAlpha) {
-            processedBytes = await image.png().toBuffer()
-            finalExt = ".png"
-        } else {
-            processedBytes = await image
-              .jpeg({ quality: ICON_JPEG_QUALITY })
-              .toBuffer()
-            finalExt = ".jpg"
-        }
-      } catch {
-        // If Sharp processing fails, use original bytes
+    let finalExt = ".jpg"
+
+    try {
+      const image = sharp(bytes)
+      const metadata = await image.metadata()
+
+      // Resize if larger than max edge
+      if (metadata.width && metadata.height &&
+          (metadata.width > ICON_MAX_EDGE || metadata.height > ICON_MAX_EDGE)) {
+        image.resize(ICON_MAX_EDGE, ICON_MAX_EDGE, {
+          fit: "inside",
+          withoutEnlargement: true})
       }
+
+      // Convert to PNG/JPEG with compression
+      if (metadata.hasAlpha) {
+          processedBytes = await image.png().toBuffer()
+          finalExt = ".png"
+      } else {
+          processedBytes = await image
+            .jpeg({ quality: ICON_JPEG_QUALITY })
+            .toBuffer()
+          finalExt = ".jpg"
+      }
+    } catch {
+      // If Sharp processing fails, use original bytes
     }
 
     const { url: baseUrl, key } = getSupabaseConfig()
     const uuid = randomUUID()
     const storagePath = `icons/${uuid}${finalExt}`
-    const contentType = finalExt === ".svg" ? (file.type || MIME[ext]) : "image/jpeg"
+    const contentType = "image/jpeg"
 
     const res = await fetch(
       `${baseUrl}/storage/v1/object/meet-icons/${storagePath}`,

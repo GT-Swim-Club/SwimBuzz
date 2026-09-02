@@ -10,14 +10,13 @@ export const runtime = "nodejs"
 const MAX_BYTES = 10 * 1024 * 1024 // 10 MB for banner upload
 const BANNER_MAX_WIDTH = 1200 
 const BANNER_JPEG_QUALITY = 85
-const ALLOWED_EXT = new Set([".png", ".jpg", ".jpeg", ".webp", ".svg", ".heic", ".heif"])
+const ALLOWED_EXT = new Set([".png", ".jpg", ".jpeg", ".webp", ".heic", ".heif"])
 
 const MIME: Record<string, string> = {
   ".png": "image/png",
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
   ".webp": "image/webp",
-  ".svg": "image/svg+xml",
   ".heic": "image/heic",
   ".heif": "image/heif"}
 
@@ -56,7 +55,7 @@ export async function POST(req: Request) {
   const ext = resolvedFileExt(file, ALLOWED_EXT, MIME)
   if (!ext) {
     return NextResponse.json(
-      { error: "Unsupported file type — use PNG, JPG, WebP, SVG, or HEIC" },
+      { error: "Unsupported file type — use PNG, JPG, WebP, or HEIC" },
       { status: 400 }
     )
   }
@@ -68,34 +67,31 @@ export async function POST(req: Request) {
 
   try {
     let processedBytes = bytes
-    
-    // Compress image if it's not SVG
-    if (ext !== ".svg") {
-      try {
-        const image = sharp(bytes)
-        const metadata = await image.metadata()
-        
-        // Resize if larger than max width
-        if (metadata.width && metadata.width > BANNER_MAX_WIDTH) {
-          image.resize(BANNER_MAX_WIDTH, null, {
-            fit: "inside",
-            withoutEnlargement: true})
-        }
-        
-        // Convert to JPEG with compression
-        processedBytes = await image
-          .jpeg({ quality: BANNER_JPEG_QUALITY })
-          .toBuffer()
-      } catch {
-        // If Sharp processing fails, use original bytes
+
+    try {
+      const image = sharp(bytes)
+      const metadata = await image.metadata()
+
+      // Resize if larger than max width
+      if (metadata.width && metadata.width > BANNER_MAX_WIDTH) {
+        image.resize(BANNER_MAX_WIDTH, null, {
+          fit: "inside",
+          withoutEnlargement: true})
       }
+
+      // Convert to JPEG with compression
+      processedBytes = await image
+        .jpeg({ quality: BANNER_JPEG_QUALITY })
+        .toBuffer()
+    } catch {
+      // If Sharp processing fails, use original bytes
     }
 
     const { url: baseUrl, key } = getSupabaseConfig()
     const uuid = randomUUID()
-    const finalExt = ext === ".svg" ? ext : ".jpg"
+    const finalExt = ".jpg"
     const storagePath = `banners/${uuid}${finalExt}`
-    const contentType = finalExt === ".svg" ? (file.type || MIME[ext]) : "image/jpeg"
+    const contentType = "image/jpeg"
 
     const res = await fetch(
       `${baseUrl}/storage/v1/object/meet-banners/${storagePath}`,

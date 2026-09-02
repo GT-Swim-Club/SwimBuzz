@@ -1,5 +1,6 @@
 import { parseMeetDate } from "@/lib/swim-parse"
 import { normalizeTags } from "@/lib/practice-tags"
+import { sanitizePracticeHtml } from "@/lib/sanitize-html"
 import { DEFAULT_TIME_ZONE, isValidTimeZone, zonedTimeToUtc } from "@swimbuzz/shared"
 
 export class PracticeInputError extends Error {}
@@ -57,7 +58,7 @@ function clockToMinutes(value: string): number | null {
 
 function normalizeSet(raw: unknown, index: number): NormalizedSet {
   const s = (raw ?? {}) as Record<string, unknown>
-  const content = String(s.content ?? "").trim()
+  const content = sanitizePracticeHtml(String(s.content ?? "").trim())
 
   let distance: number | null = null
   if (s.distance !== undefined && s.distance !== null && String(s.distance).trim() !== "") {
@@ -143,7 +144,10 @@ export function buildPracticeData(
     endsAt,
     timeZone,
     location: optionalString(body.location) ?? "CRC Comp Pool",
-    focus: optionalString(body.focus),
+    focus: (() => {
+      const focus = optionalString(body.focus)
+      return focus ? sanitizePracticeHtml(focus) || null : null
+    })(),
     tags: normalizeTags(body.tags),
     published,
     sets,
