@@ -29,10 +29,7 @@ SYNC_FILES = (
     "scraper.py",
     "swimcloud_scrape.py",
     "swimphone_parse.py",
-    "pdf_parse.py",
-    "packet_parse.py",
-    "sheet_parse.py",
-    "nqt_parse.py",
+    "swim_common.py",
 )
 
 # Set after pairing so exit handlers can clear the app's "running" status.
@@ -153,38 +150,12 @@ async def complete_job(
 
 
 async def run_job(job: dict) -> object:
-    import base64
-
     from swimcloud_scrape import scrape_bulk_times, scrape_team_roster
 
     job_type = job["type"]
     payload = job["payload"]
 
     print(f"\n--- Run scraper job: {job_type} ---")
-
-    if job_type in (
-        "PARSE_MEET_PDF",
-        "PARSE_MEET_SHEET",
-        "PARSE_MEET_PACKET",
-        "PARSE_NQT_PDF",
-    ):
-        from pdf_parse import parse_meet_pdf_bytes
-        from packet_parse import parse_packet_pdf_bytes
-        from sheet_parse import parse_sheet_pdf_bytes
-        from nqt_parse import parse_nqt_pdf_bytes
-
-        content = base64.b64decode(payload["file_b64"])
-        if job_type == "PARSE_MEET_PDF":
-            course = str(payload.get("course", "SCY")).upper()
-            team = str(payload.get("team", "")).strip() or None
-            return parse_meet_pdf_bytes(content, course, team=team)
-        if job_type == "PARSE_MEET_SHEET":
-            sheet_type = str(payload.get("sheet_type", "psych"))
-            team = str(payload.get("team", "")).strip() or None
-            return parse_sheet_pdf_bytes(content, sheet_type, team=team)
-        if job_type == "PARSE_NQT_PDF":
-            return parse_nqt_pdf_bytes(content)
-        return parse_packet_pdf_bytes(content)
 
     print(CLOUDFLARE_NOTE)
 

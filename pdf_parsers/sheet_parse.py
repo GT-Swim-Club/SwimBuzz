@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+import contextvars
 import io
 import re
 from typing import Any
 
 import pdfplumber
 
-from pdf_parse import (
+from .pdf_parse import (
     club_matches,
     detect_column_split,
     detect_course,
@@ -144,13 +145,21 @@ class _SheetTeam:
         )
 
 
-_sheet_team = _SheetTeam.parse(None)
+# Per-invocation active team filter (not a plain global — concurrent
+# serverless requests must not see each other's team code).
+_sheet_team_var: contextvars.ContextVar[_SheetTeam] = contextvars.ContextVar(
+    "_sheet_team", default=_SheetTeam.parse(None)
+)
 
 
 def _use_sheet_team(team: str | None) -> _SheetTeam:
-    global _sheet_team
-    _sheet_team = _SheetTeam.parse(team)
-    return _sheet_team
+    value = _SheetTeam.parse(team)
+    _sheet_team_var.set(value)
+    return value
+
+
+def _current_sheet_team() -> _SheetTeam:
+    return _sheet_team_var.get()
 
 SHEET_PSYCH = re.compile(r"Psych\s+Sheet", re.I)
 SHEET_HEAT = re.compile(r"Meet\s+Program", re.I)
@@ -302,7 +311,7 @@ def _gender_code(label: str) -> str:
 
 
 def _is_team(team: str) -> bool:
-    return _sheet_team.matches(team)
+    return _current_sheet_team().matches(team)
 
 
 def _event_from_stroke(distance: str, stroke_raw: str) -> str:
@@ -441,7 +450,7 @@ def _split_program_line(line: str) -> list[str]:
     if not stripped:
         return []
 
-    matches = list(_sheet_team.individual_re().finditer(stripped))
+    matches = list(_current_sheet_team().individual_re().finditer(stripped))
     if len(matches) > 1:
         parts: list[str] = []
         for i, match in enumerate(matches):
@@ -527,14 +536,14 @@ def _parse_individual(
 ) -> list[dict[str, Any]]:
     entries: list[dict[str, Any]] = []
 
-    for match in _sheet_team.individual_re().finditer(line):
+    for match in _current_sheet_team().individual_re().finditer(line):
         rank, name_raw, time_token = match.groups()
         name, age = _extract_name(name_raw)
         if not name:
             continue
         entries.append(
             _build_individual_entry(
-                rank, name, age, _sheet_team.code, time_token,
+                rank, name, age, _current_sheet_team().code, time_token,
                 sheet_type=sheet_type, event=event, heat=heat,
                 alternate=alternate,
             )
@@ -565,7 +574,7 @@ def _parse_relay_team(
     heat: dict[str, Any] | None,
     alternate: bool = False,
 ) -> dict[str, Any] | None:
-    match = _sheet_team.relay_re().match(line)
+    match = _current_sheet_team().relay_re().match(line)
     if not match:
         return None
 
@@ -683,16 +692,16 @@ def _entry_skip_line(line: str) -> bool:
     stripped = line.strip()
     if ENTRY_SKIP_STANDALONE.match(stripped):
         return True
-    if re.match(rf"^{re.escape(_sheet_team.base)}\s+[A-Za-z]", stripped, re.I):
+    if re.match(rf"^{re.escape(_current_sheet_team().base)}\s+[A-Za-z]", stripped, re.I):
         return True
     # Bare team-code rows only — not entry lines that start with the team tag.
-    if re.match(rf"^{re.escape(_sheet_team.base)}(?:-[A-Z]{{2}})?\s*$", stripped, re.I):
+    if re.match(rf"^{re.escape(_current_sheet_team().base)}(?:-[A-Z]{{2}})?\s*$", stripped, re.I):
         return True
     return False
 
 
 def _swimmer_with_team_pattern() -> re.Pattern[str]:
-    base = re.escape(_sheet_team.base)
+    base = re.escape(_current_sheet_team().base)
     return re.compile(
         rf"([A-Z][A-Za-z'\-\.]+(?:\s+[A-Z][A-Za-z'\-\.]+)+)\s+{base}(?:-[A-Z]{{2}})?\b",
         re.I,
@@ -1117,7 +1126,7 @@ def _entry_report_page_lines(page: Any, *, column_flow: bool) -> list[tuple[str,
 def _entry_report_team_only_line(line: str) -> bool:
     stripped = line.strip()
     return bool(
-        re.match(rf"^{re.escape(_sheet_team.base)}(?:-[A-Z]{{2}})?\s*$", stripped, re.I)
+        re.match(rf"^{re.escape(_current_sheet_team().base)}(?:-[A-Z]{{2}})?\s*$", stripped, re.I)
     )
 
 
@@ -1277,7 +1286,7 @@ def parse_entry_report(content: bytes, team: str | None = None) -> dict[str, Any
     relay_teams = _group_relay_leg_entries(relay_legs, relay_rosters)
     entries = individuals + relay_teams
     if not entries:
-        raise ValueError(f"No {_sheet_team.code} entries found in entry report")
+        raise ValueError(f"No {_current_sheet_team().code} entries found in entry report")
 
     return {
         "sheetType": "entries",
@@ -1611,7 +1620,7 @@ def _parse_usms_sheet_pages(pdf: Any, sheet_type: str) -> list[dict[str, Any]]:
                                 swimmers.append(leg)
                             continue
 
-                    if re.match(r"^\d+\s+[A-Z0-9]", line) and not _sheet_team.relay_re().match(line):
+                    if re.match(r"^\d+\s+[A-Z0-9]", line) and not _current_sheet_team().relay_re().match(line):
                         pending_relay = None
                     continue
 
@@ -1735,7 +1744,7 @@ def parse_sheet_pdf_bytes(
                 "entries": [],
             }
         if parse_as == "entries":
-            result = parse_entry_report(content, team=_sheet_team.code)
+            result = parse_entry_report(content, team=_current_sheet_team().code)
             result["detectedSheetType"] = detected_type
             if meet_name and not result.get("meet_name"):
                 result["meet_name"] = meet_name
@@ -1834,7 +1843,7 @@ def parse_sheet_pdf_bytes(
         if current_event.get("isRelay"):
             # Use finditer to handle multiple relay entries on the same line (2-column layout)
             found_any_relay = False
-            for match in _sheet_team.relay_re().finditer(line):
+            for match in _current_sheet_team().relay_re().finditer(line):
                 rank, team, letter, time = match.groups()
                 relay: dict[str, Any] = {
                     "entryType": "relay_team",
@@ -1880,7 +1889,7 @@ def parse_sheet_pdf_bytes(
                         swimmers.append(leg)
                     continue
 
-            if re.match(r"^\d+\s+[A-Z0-9]", line) and not _sheet_team.relay_re().match(line):
+            if re.match(r"^\d+\s+[A-Z0-9]", line) and not _current_sheet_team().relay_re().match(line):
                 pending_relay = None
             continue
 
@@ -1908,7 +1917,7 @@ def parse_sheet_pdf_bytes(
         _assign_seed_ranks_from_event_times(entries, event_seed_times)
 
     if not entries:
-        raise ValueError(f"No {_sheet_team.code} entries found in sheet")
+        raise ValueError(f"No {_current_sheet_team().code} entries found in sheet")
 
     return {
         "sheetType": parse_as,

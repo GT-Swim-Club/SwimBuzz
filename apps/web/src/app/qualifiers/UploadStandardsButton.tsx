@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Modal, { ModalFooter } from "@/components/Modal"
-import { useScraperUi } from "@/components/ScraperUiProvider"
 import { useImportTask } from "@/components/ImportTaskProvider"
 import { currentSeason } from "@/lib/season"
 import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/FileDropzone"
@@ -18,7 +17,6 @@ export default function UploadStandardsButton({
   course?: string
 }) {
   const router = useRouter()
-  const { requireScraper } = useScraperUi()
   const { startTask } = useImportTask()
 
   const [open, setOpen] = useState(false)
@@ -68,21 +66,6 @@ export default function UploadStandardsButton({
         if (!res.ok) {
           throw new Error(typeof data.error === "string" ? data.error : "Upload failed")
         }
-        if (data.jobId) {
-          const { pollScraperJob } = await import("@/lib/scraper-job-client")
-          await pollScraperJob(data.jobId)
-          const fin = await fetch("/api/qualifiers/finalize", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ jobId: data.jobId }),
-          })
-          const finalized = await fin.json().catch(() => ({}))
-          if (!fin.ok) {
-            throw new Error(
-              typeof finalized.error === "string" ? finalized.error : "Upload failed"
-            )
-          }
-        }
         router.push(`/qualifiers?season=${encodeURIComponent(season)}&gender=all`)
         router.refresh()
         return "Standards uploaded successfully"
@@ -95,12 +78,10 @@ export default function UploadStandardsButton({
     <>
       <button
         type="button"
-        onClick={() =>
-          requireScraper(() => {
-            resetForm()
-            setOpen(true)
-          })
-        }
+        onClick={() => {
+          resetForm()
+          setOpen(true)
+        }}
         className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-text hover:bg-primary-hover transition-colors"
       >
         Upload standards

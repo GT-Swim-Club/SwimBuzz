@@ -4,7 +4,6 @@ import { Fragment, useEffect, useState } from "react"
 import MeetResourceField from "../MeetResourceField"
 import MeetResourceIcon from "@/components/MeetResourceIcon"
 import Modal, { ModalFooter } from "@/components/Modal"
-import { useScraperUi } from "@/components/ScraperUiProvider"
 import { useImportTask } from "@/components/ImportTaskProvider"
 import { useMeetResourceUploads } from "@/lib/use-meet-resource-uploads"
 import { useUnsavedUploads } from "@/lib/unsaved-uploads"
@@ -131,7 +130,6 @@ export default function ImportMeetResourcesButton({
   meetId: string
   initial: ResourceForm
 }) {
-  const { requireScraper } = useScraperUi()
   const { startTask, tasks } = useImportTask()
   const importing = tasks.some(
     (t) => t.status === "running" && /resources/i.test(t.label)
@@ -297,7 +295,7 @@ export default function ImportMeetResourcesButton({
     release(resourceFileUrls(snapshot))
 
     if (hasScrapableChange) {
-      requireScraper(() => void startTask("Importing resources...", saveResources(snapshot)))
+      void startTask("Importing resources...", saveResources(snapshot))
     } else {
       void saveResources(snapshot).catch((err) => {
         startTask(

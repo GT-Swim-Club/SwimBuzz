@@ -6,15 +6,7 @@ import {
   assertMeetNameMatches,
   MeetImportValidationError,
 } from "@/lib/meet-import-validate"
-import {
-  enqueueParseMeetPdf,
-  LOCAL_SCRAPER_HINT,
-} from "@/lib/scraper-proxy"
-import {
-  getScraperJobForUser,
-  markScraperJobApplied,
-} from "@/lib/scraper"
-import { ScraperJobStatus, Prisma } from "@prisma/client"
+import { parseMeetPdf } from "@/lib/pdf-parser-client"
 import { prisma } from "@/lib/prisma"
 import { isStoredMeetFileUrl } from "@/lib/meet-files"
 import { deleteStoredMeetFile, uploadMeetFile } from "@/lib/meet-storage"
@@ -37,19 +29,7 @@ type ParsedResult = {
   place?: number
 }
 
-type MeetPdfApplyContext = {
-  kind: "meet_pdf_import"
-  season: string
-  courseDefault: string
-  team: string
-  meetId: string | null
-  expectedMeetName: string | null
-  nameMappings: ReturnType<typeof normalizeNameMappings>
-  rejectedNames: ReturnType<typeof normalizeRejectedNames>
-  pairOnly: boolean
-  resultsPdfUrl: string | null
-  fileName: string
-}
+const MAX_BYTES = 20 * 1024 * 1024
 
 function parseJsonField(raw: FormDataEntryValue | null): unknown {
   if (typeof raw !== "string" || !raw.trim()) return null
@@ -210,6 +190,10 @@ export async function POST(req: Request) {
     }
   }
 
+  if (fileBytes && fileBytes.byteLength > MAX_BYTES) {
+    return NextResponse.json({ error: "File must be 20 MB or smaller" }, { status: 400 })
+  }
+
   if (pairOnly && !cachedParse?.results) {
     return NextResponse.json(
       { error: "Cached parse data is required when pairing athletes" },
@@ -265,84 +249,41 @@ export async function POST(req: Request) {
       const { url } = await uploadMeetFile(Buffer.from(fileBytes), fileName, fileType)
       resultsPdfUrl = url
     } catch (err) {
-      console.error("Failed to upload meet PDF before scrape:", err)
+      console.error("Failed to upload meet PDF before parsing:", err)
     }
   }
 
-  const applyContext: MeetPdfApplyContext = {
-    kind: "meet_pdf_import",
-    season,
-    courseDefault,
-    team,
-    meetId: meet?.id ?? null,
-    expectedMeetName: meet?.name ?? null,
-    nameMappings,
-    rejectedNames,
-    pairOnly: false,
-    resultsPdfUrl,
-    fileName,
+  if (!resultsPdfUrl) {
+    return NextResponse.json({ error: "Could not prepare PDF for parsing" }, { status: 502 })
   }
 
   try {
-    const job = await enqueueParseMeetPdf(
-      session.user.id,
-      fileBytes!,
-      { course: courseDefault, team, fileName },
-      applyContext
-    )
-    return NextResponse.json({ jobId: job.id })
+    const parsed = await parseMeetPdf<{
+      course?: string
+      meet_name?: string | null
+      meet_date?: string | null
+      detectedSheetType?: string | null
+      results: ParsedResult[]
+      relay_results?: unknown[]
+    }>(session.user.id, resultsPdfUrl, { course: courseDefault, team, fileName })
+
+    const summary = await applyParsedMeetPdf({
+      parsed,
+      season,
+      courseDefault,
+      meet,
+      nameMappings,
+      rejectedNames,
+      pairOnly: false,
+      resultsPdfUrl,
+      fileName,
+    })
+    return NextResponse.json(summary)
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to parse PDF"
-    if (message === "LOCAL_BRIDGE_NOT_CONNECTED") {
-      return NextResponse.json({ error: LOCAL_SCRAPER_HINT }, { status: 503 })
+    if (err instanceof MeetImportValidationError) {
+      return NextResponse.json({ error: err.message }, { status: 400 })
     }
+    const message = err instanceof Error ? err.message : "Failed to parse PDF"
     return NextResponse.json({ error: message }, { status: 502 })
   }
-}
-
-export async function applyMeetPdfImportJob(jobId: string, userId: string) {
-  const job = await getScraperJobForUser(jobId, userId)
-  if (!job) throw new Error("Job not found")
-  if (job.status !== ScraperJobStatus.COMPLETED) {
-    throw new Error(job.error ?? "Job is not complete")
-  }
-  if (job.appliedAt && job.applyResult) {
-    return job.applyResult as Record<string, unknown>
-  }
-
-  const ctx = job.applyContext as MeetPdfApplyContext | null
-  if (!ctx || ctx.kind !== "meet_pdf_import") {
-    throw new Error("Invalid job context")
-  }
-
-  const parsed = job.result as {
-    course?: string
-    meet_name?: string | null
-    meet_date?: string | null
-    detectedSheetType?: string | null
-    results: ParsedResult[]
-    relay_results?: unknown[]
-  }
-
-  const meet = ctx.meetId
-    ? await prisma.meet.findUnique({ where: { id: ctx.meetId } })
-    : null
-
-  const summary = await applyParsedMeetPdf({
-    parsed,
-    season: ctx.season,
-    courseDefault: ctx.courseDefault,
-    meet,
-    nameMappings: ctx.nameMappings,
-    rejectedNames: ctx.rejectedNames,
-    pairOnly: ctx.pairOnly,
-    resultsPdfUrl: ctx.resultsPdfUrl,
-    fileName: ctx.fileName,
-  })
-
-  await markScraperJobApplied(
-    jobId,
-    JSON.parse(JSON.stringify(summary)) as Prisma.InputJsonValue
-  )
-  return summary
 }

@@ -1,37 +1,30 @@
+import contextvars
 import io
 import re
 from typing import Any
 
 import pdfplumber
 
-# Global flag to track if current PDF has Points column (results PDF format)
-_PDF_HAS_POINTS_COLUMN = False
+from .swim_common import (
+    leg_times_from_cumulative,
+    normalize_event,
+    normalize_relay_letter,
+    parse_status_token,
+    parse_time_token,
+    time_token_to_ms,
+)
+
+# Per-invocation flag (not a plain global — concurrent serverless requests
+# must not see each other's PDF's column layout) tracking whether the
+# current PDF has a Points column (results PDF format).
+_pdf_has_points_column: contextvars.ContextVar[bool] = contextvars.ContextVar(
+    "_pdf_has_points_column", default=False
+)
 
 # CID ligatures from Hy-Tek PDFs (e.g., "Butter(cid:976)ly" where 976 = 'f')
 _CID_LIGATURES = {
     "976": "f",
 }
-
-STROKE_ALIASES: dict[str, str] = {
-    "freestyle": "Free",
-    "free": "Free",
-    "fr": "Free",
-    "backstroke": "Back",
-    "back": "Back",
-    "bk": "Back",
-    "breaststroke": "Breast",
-    "breast": "Breast",
-    "br": "Breast",
-    "butterfly": "Fly",
-    "fly": "Fly",
-    "fl": "Fly",
-    "individual medley": "IM",
-    "im": "IM",
-    "medley": "IM",
-}
-
-TIME_PATTERN = re.compile(r"^\d{1,2}:\d{2}\.\d{2}$|^\d{1,3}\.\d{2}$")
-INVALID_TIMES = {"NT", "NS", "DQ", "DFS", "DNF", "SCR"}
 
 # A result carrying one of these markers (e.g. "--- Hancu, Andrei 20 GTSC-GA DQ
 # 26.12") is not an official time — Hy-Tek still prints the swum time next to the
@@ -121,9 +114,6 @@ DOC_PACKET = re.compile(
     re.I,
 )
 
-_VALID_RELAY_LETTERS = frozenset({"A", "B", "C", "D"})
-
-
 def detect_hytek_doc_type(text: str) -> str:
     """Classify a meet PDF: psych|heat|entries|results|packet|unknown."""
     sample = text[:6000] if len(text) > 6000 else text
@@ -141,14 +131,6 @@ def detect_hytek_doc_type(text: str) -> str:
     if DOC_PACKET.search(sample):
         return "packet"
     return "unknown"
-
-
-def normalize_relay_letter(letter: str | None) -> str | None:
-    """Return A–D relay letter, or None when missing / not a team letter."""
-    token = (letter or "").strip().upper()
-    if token in _VALID_RELAY_LETTERS:
-        return token
-    return None
 
 
 def _iso_date(mdy: str) -> str | None:
@@ -200,80 +182,6 @@ def parse_meet_header(lines: list[str]) -> tuple[str | None, str | None]:
     return meet_name, meet_date
 
 
-def normalize_stroke(raw: str) -> str | None:
-    key = raw.strip().lower()
-    return STROKE_ALIASES.get(key)
-
-
-def normalize_event(distance: str, stroke_raw: str) -> str | None:
-    stroke = normalize_stroke(stroke_raw)
-    if not stroke:
-        return None
-    return f"{distance} {stroke}"
-
-
-def parse_time_token(token: str) -> str | None:
-    cleaned = token.strip().upper()
-    if not cleaned or cleaned in INVALID_TIMES:
-        return None
-    # Hy-Tek exhibition prefix — "x1:52.81" — parse the time, no separate tag.
-    cleaned = re.sub(r"^[X](?=\d)", "", cleaned)
-    if TIME_PATTERN.match(cleaned):
-        return cleaned
-    return None
-
-
-def time_token_to_ms(token: str) -> int | None:
-    parsed = parse_time_token(token)
-    if not parsed:
-        return None
-    if ":" in parsed:
-        parts = parsed.split(":")
-        if len(parts) == 2:
-            minutes, seconds = parts
-            return int(minutes) * 60_000 + int(round(float(seconds) * 1000))
-        if len(parts) == 3:
-            hours, minutes, seconds = parts
-            return (
-                int(hours) * 3_600_000
-                + int(minutes) * 60_000
-                + int(round(float(seconds) * 1000))
-            )
-        return None
-    return int(round(float(parsed) * 1000))
-
-
-def ms_to_time_token(ms: int) -> str | None:
-    if ms <= 0:
-        return None
-    if ms >= 60_000:
-        minutes = ms // 60_000
-        seconds = (ms % 60_000) / 1000
-        return f"{minutes}:{seconds:05.2f}"
-    return f"{ms / 1000:.2f}"
-
-
-def leg_times_from_cumulative(cumulative_tokens: list[str]) -> dict[int, str]:
-    """Individual leg times from cumulative splits at the end of each leg."""
-    out: dict[int, str] = {}
-    prev_ms = 0
-    for leg, token in enumerate(cumulative_tokens, start=1):
-        cum_ms = time_token_to_ms(token)
-        if cum_ms is None:
-            break
-        leg_ms = cum_ms - prev_ms
-        formatted = ms_to_time_token(leg_ms)
-        if formatted:
-            out[leg] = formatted
-        prev_ms = cum_ms
-    return out
-
-
-def parse_status_token(token: str) -> str | None:
-    cleaned = token.strip().upper()
-    return cleaned if cleaned in INVALID_TIMES else None
-
-
 def _append_result_round(
     rounds: list[dict[str, str]], token: str, tags: str
 ) -> None:
@@ -301,10 +209,8 @@ def strip_points_column(line: str) -> str:
     3. If exactly 2 times (seed + final), no points value present.
     4. If 3+ times, the last numeric value is likely points, so strip it.
     """
-    global _PDF_HAS_POINTS_COLUMN
-    
     # Only consider stripping if we detected a Points column in the PDF
-    if not _PDF_HAS_POINTS_COLUMN:
+    if not _pdf_has_points_column.get():
         return line
     
     # Count times by looking for time patterns (to avoid infinite recursion with extract_times_from_line)
@@ -1792,8 +1698,7 @@ def parse_meet_pdf_bytes(
             all_text.extend(extract_page_lines(page, forced_splits=pdf_splits))
 
     # Store this flag in a context variable for use in extract_times_from_line
-    global _PDF_HAS_POINTS_COLUMN
-    _PDF_HAS_POINTS_COLUMN = has_points_column
+    _pdf_has_points_column.set(has_points_column)
 
     joined_text = "\n".join(all_text)
     header_blob = "\n".join(header_lines) if header_lines else joined_text

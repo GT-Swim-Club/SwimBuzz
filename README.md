@@ -23,10 +23,10 @@ Built as a **pnpm / Turborepo monorepo**:
 ### Coaches & exec (web + mobile)
 
 - **Roster** — Add athletes, approve profile changes, add/delete swims, sync SwimCloud times (mobile); CSV/SwimCloud import + scraper-assisted flows (web)
-- **Meets** — Create/edit meets, travel, signup, room assign/publish, optimal relays (mobile); packet/sheet uploads, import results, full relay editor (web)
+- **Meets** — Create/edit meets, travel, signup, room assign/publish, optimal relays (mobile); packet/sheet uploads, import results, full relay editor (web) — PDF imports parse server-side, no scraper needed
 - **Practices** — Create, edit sets, publish, delete (mobile); TipTap editor + edit locks (web)
-- **Qualifiers** — Nationals NQT tracking
-- **Run scraper** — Desktop Python + Playwright helper (web UI only; mobile uses the same APIs once jobs complete)
+- **Qualifiers** — Nationals NQT tracking; PDF standards upload parses server-side, no scraper needed
+- **Run scraper** — Desktop Python + Playwright helper for SwimCloud/SwimPhone browser scraping only (web UI only; mobile uses the same APIs once jobs complete)
 
 Mobile is a full client of the same `/api/*` backend — it does **not** hand off to the website for core flows. External URLs (PDFs, live streams, maps) still open outside the app.
 
@@ -49,7 +49,9 @@ SwimBuzz/
 │   ├── api/                 # typed createApiClient()
 │   ├── tokens/              # brand colors / spacing
 │   └── ui/                  # React Native primitives (Button, ListRow, Section, …)
-├── scraper/                 # Run scraper source (synced into apps/web/public/scraper)
+├── pdf_parsers/             # Meet-PDF parsers (results/sheets/packets/NQT), shared by api/parse-pdf.py
+├── api/parse-pdf.py         # Vercel Python Function — server-side PDF parsing
+├── requirements.txt         # Python deps for api/parse-pdf.py (no web framework — see CLAUDE.md)
 ├── package.json             # pnpm workspaces + turbo
 └── pnpm-workspace.yaml
 ```
@@ -58,7 +60,7 @@ SwimBuzz/
 
 - Node.js 22+
 - pnpm 9+
-- Python 3.11+ (for Run scraper)
+- Python 3.11+ (for PDF parsing in local dev, and for Run scraper's SwimCloud/SwimPhone scraping)
 - PostgreSQL (e.g. Supabase)
 - Google OAuth + Resend (email OTP)
 - Xcode / Android Studio (for native builds)
@@ -86,9 +88,9 @@ pnpm dev:mobile       # Expo (scan QR / iOS simulator)
 
 Apply SQL in `apps/web/supabase/` as needed.
 
-### Run scraper (required for imports)
+### Run scraper (required for SwimCloud/SwimPhone imports)
 
-SwimCloud / SwimPhone / PDF parsing runs on **your computer** via **Run scraper** (started from the web app). Mobile coaches can still trigger syncs and view results through the API.
+SwimCloud / SwimPhone syncing runs on **your computer** via **Run scraper** (started from the web app) — Cloudflare/rate-limit reasons require it. Mobile coaches can still trigger syncs and view results through the API. PDF imports (results, psych/heat/entries sheets, packets, NQT standards) parse server-side and need nothing installed — locally they run through a `python3 -m pdf_parsers.cli` subprocess (repo root `pip install -r requirements.txt`), in production through `api/parse-pdf.py`.
 
 ## Deploy
 
@@ -110,6 +112,8 @@ Clone the full monorepo. Create a Vercel project with **Root Directory = reposit
 - `DATABASE_URL` — Supabase **transaction** pooler (`6543` + `pgbouncer=true`)
 - `DIRECT_URL` — migrations only
 - `CRON_SECRET` — shared secret for cron routes
+- `PDF_PARSER_SECRET` — shared secret for `api/parse-pdf.py`
+- `PDF_PARSER_URL` — the deployed function URL (e.g. `https://swimbuzz.gtswimclub.com/api/parse-pdf`); PDF imports fail without it in production
 
 **Crons**
 
@@ -121,9 +125,9 @@ Clone the full monorepo. Create a Vercel project with **Root Directory = reposit
    Header: `Authorization: Bearer <CRON_SECRET>`  
    Schedule: every 1 minute.
 
-**Request body limit:** Vercel caps request bodies at ~4.5MB. Large PDFs must go through Supabase Storage (or URL fetch), not raw multipart past that limit.
+**Request body limit:** Vercel caps request bodies at ~4.5MB. Large PDFs must go through Supabase Storage (or URL fetch), not raw multipart past that limit — `api/parse-pdf.py` only ever fetches from an allowlisted Supabase Storage URL, never accepts raw bytes.
 
-**Scraper jobs** enqueue immediately and the client polls `/api/scraper/jobs/[id]`, then calls `…/finalize`. Keep Run Scraper running on your computer during coach imports.
+**Scraper jobs** (SwimCloud/SwimPhone only) enqueue immediately and the client polls `/api/scraper/jobs/[id]`, then calls `…/finalize`. Keep Run Scraper running on your computer during those imports. PDF imports return synchronously and don't touch the scraper.
 
 After schema changes, run `prisma db push` (or apply SQL under `apps/web/supabase/`, including [`vercel-cutover.sql`](apps/web/supabase/vercel-cutover.sql) for signup monitor + scraper apply fields).
 
@@ -132,7 +136,7 @@ After schema changes, run `prisma db push` (or apply SQL under `apps/web/supabas
 1. Deploy a Vercel **preview**, set env vars, run `prisma db push` against production DB.
 2. Update Google OAuth redirect URIs / `NEXTAUTH_URL` for the preview host; smoke-test sign-in.
 3. Smoke roster, practices, meets, notifications.
-4. With Run Scraper connected: sync times, roster SwimCloud import, meet PDF / SwimPhone import.
+4. With Run Scraper connected: sync times, roster SwimCloud import, SwimPhone import. Separately, verify a meet PDF import works (needs `PDF_PARSER_URL`/`PDF_PARSER_SECRET`, not the scraper).
 5. Hit signup-monitor cron manually once; configure external minutely cron.
 6. Point `swimbuzz.gtswimclub.com` DNS / domain to Vercel; set production `NEXTAUTH_URL`.
 7. Disable the Render service after traffic looks healthy.
@@ -172,4 +176,5 @@ Local `pnpm dev:web` still uses [`apps/web/server.js`](apps/web/server.js) so si
 - **Web:** Next.js 16, React 19, Tailwind 4, Prisma 5, NextAuth v4
 - **Mobile:** Expo Router, SecureStore, Expo Notifications, expo-auth-session
 - **Database / storage:** Supabase Postgres + Storage
-- **Scraping:** Run scraper (Python, Playwright)
+- **Scraping:** Run scraper (Python, Playwright) — SwimCloud/SwimPhone only
+- **PDF parsing:** `api/parse-pdf.py`, a Vercel Python Function (Python, pdfplumber)

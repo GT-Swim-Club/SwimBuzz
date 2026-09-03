@@ -1,13 +1,10 @@
 import { NextResponse } from "next/server"
-import { Course, ScraperJobStatus } from "@prisma/client"
+import { Course } from "@prisma/client"
 import { parseSeason } from "@/lib/season"
 import { fetchMeetFileBytes } from "@/lib/meet-file-fetch"
 import { isParsablePacketUrl } from "@/lib/meet-event-order"
-import { enqueueParseNqtPdf, LOCAL_SCRAPER_HINT } from "@/lib/scraper-proxy"
-import {
-  getScraperJobForUser,
-  markScraperJobApplied,
-} from "@/lib/scraper"
+import { parseNqtPdf } from "@/lib/pdf-parser-client"
+import { uploadMeetFile } from "@/lib/meet-storage"
 import {
   computeNationalsQualifiers,
   isNqtParseResult,
@@ -29,13 +26,6 @@ function isUpload(value: unknown): value is File {
     typeof value !== "string" &&
     typeof (value as File).arrayBuffer === "function"
   )
-}
-
-type NqtApplyContext = {
-  kind: "nqt_upload"
-  season: string
-  course: Course
-  sourceUrl: string | null
 }
 
 export async function GET(req: Request) {
@@ -166,65 +156,49 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "File is not a PDF" }, { status: 400 })
   }
 
+  let sourceUrlForParse: string
   try {
-    const job = await enqueueParseNqtPdf(session.user.id, fileBytes, {
-      kind: "nqt_upload",
+    const { url } = await uploadMeetFile(fileBytes, "nqt-standards.pdf", "application/pdf")
+    sourceUrlForParse = url
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to upload PDF"
+    return NextResponse.json({ error: message }, { status: 502 })
+  }
+
+  try {
+    const parsed = await parseNqtPdf<unknown>(session.user.id, sourceUrlForParse)
+    if (!isNqtParseResult(parsed) || parsed.cuts.length === 0) {
+      return NextResponse.json(
+        { error: "Could not find qualifying times in that PDF" },
+        { status: 422 }
+      )
+    }
+
+    const inferredCourse = parseNationalsCourse(parsed.course ?? null)
+    const set = await saveNationalsStandards({
       season,
-      course,
+      course: inferredCourse ?? course,
       sourceUrl: sourceUrl || null,
-    } satisfies NqtApplyContext)
-    return NextResponse.json({ jobId: job.id })
+      yearLabel: parsed.yearLabel ?? null,
+      table: parsed.table ?? null,
+      cuts: parsed.cuts,
+    })
+
+    return NextResponse.json({
+      ok: true,
+      set: {
+        id: set.id,
+        season: set.season,
+        course: set.course,
+        yearLabel: set.yearLabel,
+        sourceUrl: set.sourceUrl,
+        cutCount: set.cuts.length,
+      },
+    })
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to parse NQT PDF"
-    const status =
-      message.includes(LOCAL_SCRAPER_HINT) || /not connected/i.test(message) ? 503 : 502
-    return NextResponse.json({ error: message }, { status })
+    return NextResponse.json({ error: message }, { status: 502 })
   }
-}
-
-export async function applyNqtUploadJob(jobId: string, userId: string) {
-  const job = await getScraperJobForUser(jobId, userId)
-  if (!job) throw new Error("Job not found")
-  if (job.status !== ScraperJobStatus.COMPLETED) {
-    throw new Error(job.error ?? "Job is not complete")
-  }
-  if (job.appliedAt && job.applyResult) {
-    return job.applyResult as Record<string, unknown>
-  }
-
-  const ctx = job.applyContext as NqtApplyContext | null
-  if (!ctx || ctx.kind !== "nqt_upload") {
-    throw new Error("Invalid job context")
-  }
-
-  const parsed = job.result
-  if (!isNqtParseResult(parsed) || parsed.cuts.length === 0) {
-    throw new Error("Could not find qualifying times in that PDF")
-  }
-
-  const inferredCourse = parseNationalsCourse(parsed.course ?? null)
-  const set = await saveNationalsStandards({
-    season: ctx.season,
-    course: inferredCourse ?? ctx.course,
-    sourceUrl: ctx.sourceUrl,
-    yearLabel: parsed.yearLabel ?? null,
-    table: parsed.table ?? null,
-    cuts: parsed.cuts,
-  })
-
-  const summary = {
-    ok: true,
-    set: {
-      id: set.id,
-      season: set.season,
-      course: set.course,
-      yearLabel: set.yearLabel,
-      sourceUrl: set.sourceUrl,
-      cutCount: set.cuts.length,
-    },
-  }
-  await markScraperJobApplied(jobId, summary)
-  return summary
 }
 
 export async function DELETE(req: Request) {

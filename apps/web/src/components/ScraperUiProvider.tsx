@@ -47,8 +47,8 @@ function NeedScraperModal({
       title="Scraper required"
         description={
         <span className="mt-1 block text-base text-foreground-secondary">
-          Imports from SwimCloud, SwimPhone, meet PDFs, and Nationals standards require you to run
-          the scraper on your computer. Run the scraper, then import the data.
+          Imports from SwimCloud and SwimPhone require you to run the scraper on your computer.
+          Run the scraper, then import the data.
         </span>
       }
       maxWidth="sm"

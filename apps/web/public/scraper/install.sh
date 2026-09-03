@@ -88,7 +88,7 @@ mkdir -p "$SCRAPER_DIR" "$BIN_DIR"
 
 echo "Installing SwimBuzz scraper to $SCRAPER_DIR ..."
 
-for file in scraper.py swimcloud_scrape.py swimphone_parse.py pdf_parse.py packet_parse.py sheet_parse.py nqt_parse.py requirements.txt; do
+for file in scraper.py swimcloud_scrape.py swimphone_parse.py swim_common.py requirements.txt; do
   curl -fsSL "$APP_URL/scraper/$file" -o "$SCRAPER_DIR/$file"
 done
 

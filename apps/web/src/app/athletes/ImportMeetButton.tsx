@@ -280,16 +280,23 @@ export default function ImportMeetButton({
     setError(null)
     const importSource: ImportSource = hasSwimphone ? "swimphone" : "pdf"
     setSource(importSource)
-    const importPromise = (importSource === "swimphone"
-      ? saveResultsPdfResource()
-      : saveSwimphoneResource()
-    ).then(() =>
-      importSource === "swimphone" ? runSwimphoneImport() : runPdfImport()
-    )
-    startTask(
-      importSource === "swimphone" ? "Scraping meet…" : "Importing results…",
-      importPromise.then((data) => handleImportResponse(data))
-    )
+    function startImport() {
+      const importPromise = (importSource === "swimphone"
+        ? saveResultsPdfResource()
+        : saveSwimphoneResource()
+      ).then(() =>
+        importSource === "swimphone" ? runSwimphoneImport() : runPdfImport()
+      )
+      startTask(
+        importSource === "swimphone" ? "Scraping meet…" : "Importing results…",
+        importPromise.then((data) => handleImportResponse(data))
+      )
+    }
+    if (importSource === "swimphone") {
+      requireScraper(startImport)
+    } else {
+      startImport()
+    }
     setOpen(false)
     resetFormState()
   }
@@ -352,10 +359,8 @@ export default function ImportMeetButton({
       <button
         type="button"
         onClick={() => {
-          requireScraper(() => {
-            setOpen(true)
-            resetFormState()
-          })
+          setOpen(true)
+          resetFormState()
         }}
         className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 border border-border-secondary rounded-md bg-background hover:bg-fill transition-colors"
       >

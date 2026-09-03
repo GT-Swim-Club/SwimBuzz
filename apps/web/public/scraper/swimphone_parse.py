@@ -14,7 +14,7 @@ from urllib.parse import parse_qs, urlencode, urljoin, urlparse
 from bs4 import BeautifulSoup
 from playwright.async_api import async_playwright
 
-from pdf_parse import (
+from swim_common import (
     INVALID_TIMES,
     normalize_event,
     normalize_relay_letter,

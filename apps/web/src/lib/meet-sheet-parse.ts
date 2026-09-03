@@ -1,5 +1,4 @@
-import { fetchMeetFileBytes } from "@/lib/meet-file-fetch"
-import { parseMeetSheetPdf } from "@/lib/scraper-proxy"
+import { parseMeetSheetPdf } from "@/lib/pdf-parser-client"
 import type { SheetSummary, SheetEntry } from "@/lib/meet-sheet-summary"
 import {
   appendSheetSummaryEntries,
@@ -69,7 +68,7 @@ type ParsedSheetResult = {
 
 async function callSheetParser(
   userId: string,
-  bytes: Buffer,
+  url: string,
   sheetType: "psych" | "heat" | "entries",
   teamCode: string
 ): Promise<ParsedSheetResult> {
@@ -77,7 +76,7 @@ async function callSheetParser(
   let lastResult: Omit<ParsedSheetResult, "entries"> | null = null
 
   try {
-    const result = await parseMeetSheetPdf<ParsedSheetResult>(userId, bytes, {
+    const result = await parseMeetSheetPdf<ParsedSheetResult>(userId, url, {
       sheetType,
       team: teamCode,
     })
@@ -92,7 +91,7 @@ async function callSheetParser(
     }
   } catch (err) {
     // If team code parsing fails, try without team filter
-    const result = await parseMeetSheetPdf<ParsedSheetResult>(userId, bytes, {
+    const result = await parseMeetSheetPdf<ParsedSheetResult>(userId, url, {
       sheetType,
       team: "",
     })
@@ -380,7 +379,7 @@ export async function applyPairedSheetEntries(
       }
     : await callSheetParser(
         userId,
-        await fetchMeetFileBytes(url),
+        url,
         sheetType,
         teamCode
       )
@@ -420,8 +419,7 @@ export async function parseMeetSheetForRoster(
   teamCode: string = "GTSC",
   options?: SheetMatchOptions
 ): Promise<ParseMeetSheetResult> {
-  const bytes = await fetchMeetFileBytes(url)
-  const parsed = await callSheetParser(userId, bytes, sheetType, teamCode)
+  const parsed = await callSheetParser(userId, url, sheetType, teamCode)
   validateParsedSheet(sheetType, parsed, options)
   const sheetNames = collectSheetNames(parsed.entries ?? [])
   const entries = matchSheetToRoster(parsed.entries ?? [], roster, options)
@@ -510,7 +508,7 @@ export async function resolveHeatSheetSummaries(
           detectedSheetType: cached.detectedSheetType,
           meet_name: cached.meet_name,
         }
-      : await callSheetParser(userId, await fetchMeetFileBytes(url), "heat", teamCode)
+      : await callSheetParser(userId, url, "heat", teamCode)
     validateParsedSheet("heat", parsed, options)
     const allEntries = parsed.entries ?? []
     sheetNames.push(...collectSheetNames(allEntries))
@@ -573,12 +571,7 @@ export async function applyPairedHeatSheetEntries(
           detectedSheetType: cached.detectedSheetType,
           meet_name: cached.meet_name,
         }
-      : await callSheetParser(
-          userId,
-          await fetchMeetFileBytes(url),
-          "heat",
-          teamCode
-        )
+      : await callSheetParser(userId, url, "heat", teamCode)
     validateParsedSheet("heat", parsed, options)
     const allEntries = parsed.entries ?? []
     sheetNames.push(...collectSheetNames(allEntries))
@@ -634,8 +627,7 @@ export async function resolveFinalsHeatSheetSummaries(
         meet_name: cached.meet_name,
       }
     } else {
-      const bytes = await fetchMeetFileBytes(url)
-      parsed = await callSheetParser(userId, bytes, "heat", teamCode)
+      parsed = await callSheetParser(userId, url, "heat", teamCode)
     }
     validateParsedSheet("heat", parsed, options)
     sheetNames.push(...collectSheetNames(parsed.entries ?? []))
@@ -703,12 +695,7 @@ export async function applyPairedFinalsHeatSheetEntries(
         meet_name: cached.meet_name,
       }
     } else {
-      parsed = await callSheetParser(
-        userId,
-        await fetchMeetFileBytes(url),
-        "heat",
-        teamCode
-      )
+      parsed = await callSheetParser(userId, url, "heat", teamCode)
     }
     validateParsedSheet("heat", parsed, options)
     const allEntries = parsed.entries ?? []

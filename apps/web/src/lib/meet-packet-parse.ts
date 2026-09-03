@@ -1,7 +1,6 @@
-import { fetchMeetFileBytes } from "@/lib/meet-file-fetch"
 import type { EventOrder } from "@/lib/meet-event-order"
 import { isEventOrder, isParsablePacketUrl } from "@/lib/meet-event-order"
-import { parseMeetPacketPdfResult } from "@/lib/scraper-proxy"
+import { parseMeetPacketPdfResult } from "@/lib/pdf-parser-client"
 
 export async function parseMeetPacketPdf(
   userId: string,
@@ -9,8 +8,7 @@ export async function parseMeetPacketPdf(
 ): Promise<EventOrder | null> {
   if (!isParsablePacketUrl(packetUrl)) return null
 
-  const bytes = await fetchMeetFileBytes(packetUrl)
-  const parsed = await parseMeetPacketPdfResult<EventOrder>(userId, bytes)
+  const parsed = await parseMeetPacketPdfResult<EventOrder>(userId, packetUrl)
   if (!isEventOrder(parsed)) {
     throw new Error("Parser returned an invalid event order")
   }

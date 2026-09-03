@@ -3,6 +3,12 @@
   "framework": "nextjs",
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm --filter @swimbuzz/web run build",
+  "functions": {
+    "api/parse-pdf.py": {
+      "maxDuration": 60,
+      "excludeFiles": "apps/web/public/scraper/**"
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/notification-cleanup",
