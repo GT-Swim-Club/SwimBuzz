@@ -1,20 +1,20 @@
-import BackLink from "@/components/BackLink"
+import BackLink from "@/components/ui/BackLink"
 import { Gender } from "@prisma/client"
 import { notFound, redirect } from "next/navigation"
-import { getSession } from "@/lib/session"
+import { getSession } from "@/lib/auth/session"
 import { prisma } from "@/lib/prisma"
-import { isStaffUi } from "@/lib/athlete-view-server"
+import { isStaffUi } from "@/lib/athlete/athlete-view-server"
 import {
   isResultStatusesSummary,
   meetHasImportedResults,
-} from "@/lib/meet-sheet-summary"
-import { isRelayResultsSummary } from "@/lib/relay-results"
+} from "@/lib/meet/meet-sheet-summary"
+import { isRelayResultsSummary } from "@/lib/meet/relay-results"
 import {
   isRelaySignupEvent,
   partitionSignupEvents,
   resolveSignupEventOptions,
-} from "@/lib/meet-signup"
-import { relaySignupKey } from "@/lib/swim-parse"
+} from "@/lib/meet/meet-signup"
+import { relaySignupKey } from "@/lib/swim/swim-parse"
 import { athletePreferredName } from "@swimbuzz/shared"
 import MeetRelayBuilder from "../MeetRelayBuilder"
 

@@ -2,11 +2,11 @@
 
 import { useEffect, useState, useTransition } from "react"
 import MeetResourceField from "../MeetResourceField"
-import TravelInfoIcon, { type TravelInfoKind } from "@/components/TravelInfoIcon"
-import Modal, { ModalFooter } from "@/components/Modal"
-import { useMeetResourceUploads } from "@/lib/use-meet-resource-uploads"
-import { useUnsavedUploads } from "@/lib/unsaved-uploads"
-import RichTextField from "@/components/RichTextField"
+import TravelInfoIcon, { type TravelInfoKind } from "@/components/ui/TravelInfoIcon"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import { useMeetResourceUploads } from "@/lib/meet/use-meet-resource-uploads"
+import { useUnsavedUploads } from "@/lib/meet/unsaved-uploads"
+import RichTextField from "@/components/ui/RichTextField"
 import { updateMeet } from "./meet-update.actions"
 
 export type TravelInfoForm = {

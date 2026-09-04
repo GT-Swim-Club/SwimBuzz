@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import { verifyEmailLoginCode } from "@/lib/email-login"
-import { signStaffLinkToken } from "@/lib/staff-link"
+import { verifyEmailLoginCode } from "@/lib/auth/email-login"
+import { signStaffLinkToken } from "@/lib/auth/staff-link"
 
 /**
  * Mobile equivalent of /api/auth/staff/verify — step 1 of coach/exec sign-in.

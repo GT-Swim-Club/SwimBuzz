@@ -1,9 +1,9 @@
 import { prisma } from "@/lib/prisma"
 import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
-import BackLink from "@/components/BackLink"
-import StaffBadge from "@/components/StaffBadge"
-import { getSession } from "@/lib/session"
+import BackLink from "@/components/ui/BackLink"
+import StaffBadge from "@/components/ui/StaffBadge"
+import { getSession } from "@/lib/auth/session"
 
 function formatYear(year: string): string {
   if (year.toLowerCase().includes("phd")) return "PhD"
@@ -15,19 +15,19 @@ function formatYear(year: string): string {
   return num + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]) + " Year"
 }
 
-import { compareSwimPb } from "@/lib/swim-parse"
+import { compareSwimPb } from "@/lib/swim/swim-parse"
 import AddSwimForm from "./AddSwimForm"
 import PersonalBestsGrid from "./PersonalBestsGrid"
 import SwimHistory from "./SwimHistory"
-import RequestTimesImportButton from "@/components/RequestTimesImportButton"
+import RequestTimesImportButton from "@/components/athlete/RequestTimesImportButton"
 import AthleteActions from "./AthleteActions"
-import PendingProfileChangesReview from "@/components/PendingProfileChangesReview"
-import { isStaffUi } from "@/lib/athlete-view-server"
-import { isStaffRole } from "@/lib/auth-roles"
-import { parsePendingProfileChanges } from "@/lib/pending-profile-changes"
+import PendingProfileChangesReview from "@/components/athlete/PendingProfileChangesReview"
+import { isStaffUi } from "@/lib/athlete/athlete-view-server"
+import { isStaffRole } from "@/lib/auth/auth-roles"
+import { parsePendingProfileChanges } from "@/lib/athlete/pending-profile-changes"
 import { athletePath, isCuid } from "@/lib/slug"
-import StatsHighlights from "@/components/StatsHighlights"
-import { computeAthleteHighlights } from "@/lib/athlete-stats"
+import StatsHighlights from "@/components/ui/StatsHighlights"
+import { computeAthleteHighlights } from "@/lib/athlete/athlete-stats"
 
 export default async function AthletePage({ params }: { params: Promise<{ id: string }> }) {
     const { id: param } = await params

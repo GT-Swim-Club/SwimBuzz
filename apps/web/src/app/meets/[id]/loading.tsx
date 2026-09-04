@@ -1,4 +1,4 @@
-import { Skeleton } from "@/components/Skeleton"
+import { Skeleton } from "@/components/ui/Skeleton"
 
 const resourceChips = ["w-28", "w-24", "w-32", "w-24", "w-28"]
 

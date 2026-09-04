@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
-import { normalizeEventName } from "@/lib/swim-parse"
+import { normalizeEventName } from "@/lib/swim/swim-parse"
 import {
   isRelayResultsSummary,
   parseRelayGender,
@@ -18,14 +18,14 @@ import {
   sanitizeRelaySplitTime,
   type RelayGender,
   type RelayRound,
-  type RelayTeamInput } from "@/lib/relay-results"
+  type RelayTeamInput } from "@/lib/meet/relay-results"
 import {
   isResultStatusesSummary,
-  meetHasImportedResults } from "@/lib/meet-sheet-summary"
+  meetHasImportedResults } from "@/lib/meet/meet-sheet-summary"
 import { Gender } from "@prisma/client"
-import { syncRelayLeadoffSwim, deleteRelayLeadoffSwim } from "@/lib/relay-leadoff-sync"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { syncRelayLeadoffSwim, deleteRelayLeadoffSwim } from "@/lib/meet/relay-leadoff-sync"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 /** Shared with POST/DELETE /api/meets/[id]/relays — same logic, kept in sync
  * manually since the route can't be refactored without risking the

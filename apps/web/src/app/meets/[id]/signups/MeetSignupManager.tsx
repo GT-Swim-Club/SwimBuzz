@@ -1,17 +1,17 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import Modal, { ModalFooter } from "@/components/Modal"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
 import MeetSignupConfigButton, { type MeetSignupConfigInitial } from "../MeetSignupConfigButton"
-import type { MeetSignupEventOption, MeetSignupQuestion } from "@/lib/meet-signup"
+import type { MeetSignupEventOption, MeetSignupQuestion } from "@/lib/meet/meet-signup"
 import {
   formatSignupEventLabel,
   partitionSignupEvents,
   sortSignupEventsByOrder,
-} from "@/lib/meet-signup"
+} from "@/lib/meet/meet-signup"
 import { formatDisplayTime } from "@/lib/utils"
-import { SegmentedToggle, segmentedOptionClass } from "@/components/SegmentedToggle"
-import StaffBadge from "@/components/StaffBadge"
+import { SegmentedToggle, segmentedOptionClass } from "@/components/ui/SegmentedToggle"
+import StaffBadge from "@/components/ui/StaffBadge"
 import type { StaffTitle } from "@swimbuzz/shared"
 import { syncSignupsToRoster, withdrawAthleteSignup } from "../meet-signup-admin.actions"
 import ImportFormResponsesButton from "../ImportFormResponsesButton"

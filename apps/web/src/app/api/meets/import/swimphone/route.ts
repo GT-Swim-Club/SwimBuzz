@@ -1,23 +1,23 @@
 import { NextResponse } from "next/server"
-import { importMeetResults, resolveMeetDate } from "@/lib/meet-import"
-import { normalizeNameMappings, normalizeRejectedNames } from "@/lib/athlete-match"
+import { importMeetResults, resolveMeetDate } from "@/lib/meet/meet-import"
+import { normalizeNameMappings, normalizeRejectedNames } from "@/lib/athlete/athlete-match"
 import {
   assertMeetNameMatches,
   MeetImportValidationError,
-} from "@/lib/meet-import-validate"
+} from "@/lib/meet/meet-import-validate"
 import {
   enqueueScraperJob,
   getScraperJobForUser,
   markScraperJobApplied,
   LOCAL_SCRAPER_HINT,
-} from "@/lib/scraper"
+} from "@/lib/scraper/scraper"
 import { prisma } from "@/lib/prisma"
 import { parseSeason } from "@/lib/season"
-import { coerceParsedRelayResults } from "@/lib/relay-results"
+import { coerceParsedRelayResults } from "@/lib/meet/relay-results"
 import { ScraperJobStatus, ScraperJobType } from "@prisma/client"
-import { notifyMeetRosterOfInfoDrops } from "@/lib/meet-roster-notify"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { notifyMeetRosterOfInfoDrops } from "@/lib/meet/meet-roster-notify"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 export const runtime = "nodejs"
 export const maxDuration = 300

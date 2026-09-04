@@ -3,10 +3,10 @@
 import { revalidatePath } from "next/cache"
 import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { createRosterOnlySheetEntry } from "@/lib/meet-signup"
-import { isSheetSummary } from "@/lib/meet-sheet-summary"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { createRosterOnlySheetEntry } from "@/lib/meet/meet-signup"
+import { isSheetSummary } from "@/lib/meet/meet-sheet-summary"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 /** Same logic as the rosterOnly branch of POST /api/meets/[id]/sheet-entry. */
 export async function addRosterOnlyEntry(meetId: string, athleteId: string) {

@@ -2,14 +2,14 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import Modal, { ModalFooter } from "@/components/Modal"
-import NicknameTagsInput from "@/components/NicknameTagsInput"
-import ActionIcon from "@/components/ActionIcon"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import NicknameTagsInput from "@/components/athlete/NicknameTagsInput"
+import ActionIcon from "@/components/ui/ActionIcon"
 import {
   isValidSwimCloudIdInput,
   SWIMCLOUD_ID_ERROR,
   SWIMCLOUD_ID_MAX_LENGTH,
-} from "@/lib/swimcloud-id"
+} from "@/lib/swim/swimcloud-id"
 import { updateAthlete, deleteAthlete } from "./AthleteActions.actions"
 
 type AthleteActionsProps = {

@@ -3,12 +3,12 @@
 import { revalidatePath } from "next/cache"
 import { Gender } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { normalizeNicknames } from "@/lib/athlete-match"
+import { normalizeNicknames } from "@/lib/athlete/athlete-match"
 import { parseSeasonList } from "@/lib/season"
-import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swimcloud-id"
+import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
 import { uniqueAthleteSlug } from "@/lib/slug"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 export type AddAthleteInput = {
   firstName: string

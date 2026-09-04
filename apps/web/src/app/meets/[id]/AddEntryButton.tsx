@@ -1,10 +1,10 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { isValidSignupEntryTime } from "@/lib/meet-signup"
+import { isValidSignupEntryTime } from "@/lib/meet/meet-signup"
 import { parseTime } from "@/lib/utils"
-import Modal, { ModalFooter } from "@/components/Modal"
-import { SegmentedToggle, segmentedOptionClass } from "@/components/SegmentedToggle"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import { SegmentedToggle, segmentedOptionClass } from "@/components/ui/SegmentedToggle"
 import { addMeetSwim } from "./AddMeetSwimButton.actions"
 import { addIndividualSheetEntry, upsertRelayEntry } from "./AddEntryButton.actions"
 

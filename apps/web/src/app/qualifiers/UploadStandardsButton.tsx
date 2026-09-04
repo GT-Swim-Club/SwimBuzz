@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import Modal, { ModalFooter } from "@/components/Modal"
-import { useImportTask } from "@/components/ImportTaskProvider"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import { useImportTask } from "@/components/ui/ImportTaskProvider"
 import { currentSeason } from "@/lib/season"
-import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/FileDropzone"
+import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/ui/FileDropzone"
 
 type Source = "pdf" | "url"
 

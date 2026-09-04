@@ -6,8 +6,8 @@ import {
   SheetAccessExpiredError,
   SheetForbiddenError,
   SheetNotFoundError,
-} from "@/lib/google-sheets"
-import type { ColumnMapping } from "@/lib/form-import-columns"
+} from "@/lib/roster/google-sheets"
+import type { ColumnMapping } from "@/lib/roster/form-import-columns"
 
 export type FormType = "signup" | "rooms"
 

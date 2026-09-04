@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import TravelInfoIcon, { type TravelInfoKind } from "@/components/TravelInfoIcon"
-import { FormattedText } from "@/components/FormattedText"
-import { FilePreviewDialog } from "@/components/FilePreview"
-import Modal, { ModalFooter } from "@/components/Modal"
+import TravelInfoIcon, { type TravelInfoKind } from "@/components/ui/TravelInfoIcon"
+import { FormattedText } from "@/components/ui/FormattedText"
+import { FilePreviewDialog } from "@/components/ui/FilePreview"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
 
 const buttonClass =
   "inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill transition-colors"

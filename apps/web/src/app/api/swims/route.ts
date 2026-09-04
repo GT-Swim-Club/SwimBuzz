@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server"
 import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { normalizeSwimForInsert, nextSwimOccurrence } from "@/lib/swim-dedup"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { normalizeSwimForInsert, nextSwimOccurrence } from "@/lib/swim/swim-dedup"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 export async function POST(req: Request) {
   try {

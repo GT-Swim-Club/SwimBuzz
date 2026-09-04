@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { FilePreviewDialog } from "@/components/FilePreview"
+import { FilePreviewDialog } from "@/components/ui/FilePreview"
 
 export default function StandardsTableModal({
   yearLabel,

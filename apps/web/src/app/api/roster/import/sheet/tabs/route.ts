@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 import {
   listSheetTabs,
   SheetAccessExpiredError,
   SheetForbiddenError,
   SheetNotFoundError,
-} from "@/lib/google-sheets"
+} from "@/lib/roster/google-sheets"
 
 export const runtime = "nodejs"
 

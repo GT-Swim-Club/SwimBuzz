@@ -5,11 +5,11 @@ import {
   normalizeRoomNotes,
   roomWindowStatus,
   validateRoomExclusions,
-  validateRoomPreferences } from "@/lib/meet-rooms"
+  validateRoomPreferences } from "@/lib/meet/meet-rooms"
 import {
   normalizeMeetSignupQuestions,
-  parseCustomQuestionAnswers } from "@/lib/meet-signup"
-import { getSession } from "@/lib/session"
+  parseCustomQuestionAnswers } from "@/lib/meet/meet-signup"
+import { getSession } from "@/lib/auth/session"
 import {
   formatAthleteName,
   loadMeetRoomContext,

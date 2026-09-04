@@ -1,15 +1,15 @@
-import BackLink from "@/components/BackLink"
+import BackLink from "@/components/ui/BackLink"
 import { Gender } from "@prisma/client"
 import { athletePreferredNameLastFirst } from "@swimbuzz/shared"
 import { notFound, redirect } from "next/navigation"
-import { getSession } from "@/lib/session"
+import { getSession } from "@/lib/auth/session"
 import { prisma } from "@/lib/prisma"
-import { isStaffUi } from "@/lib/athlete-view-server"
-import { collectMeetRosterAthleteIds } from "@/lib/meet-sheet-summary"
+import { isStaffUi } from "@/lib/athlete/athlete-view-server"
+import { collectMeetRosterAthleteIds } from "@/lib/meet/meet-sheet-summary"
 import {
   isSignupAnswers,
   normalizeMeetSignupQuestions,
-} from "@/lib/meet-signup"
+} from "@/lib/meet/meet-signup"
 import MeetRoommateManager from "./MeetRoommateManager"
 
 export default async function MeetRoommateManagerPage({

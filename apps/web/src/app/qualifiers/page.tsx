@@ -3,19 +3,19 @@ import LoadingComponent from "./loading"
 import { Suspense } from "react"
 import { redirect } from "next/navigation"
 import { parseSeason, resolveListedSeason } from "@/lib/season"
-import { computeNationalsQualifiers } from "@/lib/nationals-qualifiers"
-import { isStaffUi } from "@/lib/athlete-view-server"
+import { computeNationalsQualifiers } from "@/lib/qualifiers/nationals-qualifiers"
+import { isStaffUi } from "@/lib/athlete/athlete-view-server"
 import QualifierFilters from "./QualifierFilters"
 import QualifiersList from "./QualifiersList"
-import LiveSearch from "@/components/LiveSearch"
+import LiveSearch from "@/components/ui/LiveSearch"
 import {
   GalleryListViewToggle,
   ViewNavPanel,
   ViewNavigationProvider,
-} from "@/components/ViewNavigation"
+} from "@/components/nav/ViewNavigation"
 import StandardsTableModal from "./StandardsTableModal"
 import UploadStandardsButton from "./UploadStandardsButton"
-import { getSession } from "@/lib/session"
+import { getSession } from "@/lib/auth/session"
 
 export const dynamic = "force-dynamic"
 

@@ -1,11 +1,11 @@
 import Link from "next/link"
-import ActionIcon from "@/components/ActionIcon"
-import InfoIcon from "@/components/InfoIcon"
-import StaffBadge from "@/components/StaffBadge"
+import ActionIcon from "@/components/ui/ActionIcon"
+import InfoIcon from "@/components/ui/InfoIcon"
+import StaffBadge from "@/components/ui/StaffBadge"
 import { athletePath } from "@/lib/slug"
 import { formatClockTime, type StaffTitle } from "@swimbuzz/shared"
-import { ZonedInstantTime } from "@/components/ZonedTime"
-import { RelativeDateTime } from "@/components/RelativeDate"
+import { ZonedInstantTime } from "@/components/ui/ZonedTime"
+import { RelativeDateTime } from "@/components/ui/RelativeDate"
 
 type AttendanceRecord = {
   id: string

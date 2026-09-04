@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
-import { disconnectScraper, getActiveScraperConnection } from "@/lib/scraper"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { disconnectScraper, getActiveScraperConnection } from "@/lib/scraper/scraper"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 export async function GET() {
   const session = await getSession()

@@ -1,8 +1,8 @@
 "use client"
 
 import { formatZonedInstantRange } from "@swimbuzz/shared"
-import { FormattedText, isHtmlEmpty } from "@/components/FormattedText"
-import InfoIcon from "@/components/InfoIcon"
+import { FormattedText, isHtmlEmpty } from "@/components/ui/FormattedText"
+import InfoIcon from "@/components/ui/InfoIcon"
 
 type PracticeExportSet = {
   id: string

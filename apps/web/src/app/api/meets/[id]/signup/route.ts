@@ -3,11 +3,11 @@ import { prisma } from "@/lib/prisma"
 import {
   normalizeMeetSignupQuestions,
   resolveSignupEventOptions,
-  signupWindowStatus } from "@/lib/meet-signup"
-import { notifyMeetSignupOpen } from "@/lib/notifications"
+  signupWindowStatus } from "@/lib/meet/meet-signup"
+import { notifyMeetSignupOpen } from "@/lib/notifications/notifications"
 import { Prisma } from "@prisma/client"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 import { DEFAULT_TIME_ZONE, isValidTimeZone } from "@swimbuzz/shared"
 
 function parseOptionalDate(value: unknown): Date | null | undefined {

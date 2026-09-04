@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server"
-import { uploadMeetFile, deleteStoredMeetFile } from "@/lib/meet-storage"
-import { isStoredMeetFileUrl } from "@/lib/meet-files"
+import { uploadMeetFile, deleteStoredMeetFile } from "@/lib/meet/meet-storage"
+import { isStoredMeetFileUrl } from "@/lib/meet/meet-files"
 import sharp from "sharp"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 import { resolvedFileExt } from "@/lib/upload-file-ext"
 
 export const runtime = "nodejs"

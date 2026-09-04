@@ -2,8 +2,8 @@
 
 import type { ReactNode } from "react"
 import { useEffect, useState } from "react"
-import type { SheetEntry } from "@/lib/meet-sheet-summary"
-import SummaryRowLayout from "@/components/SummaryRowLayout"
+import type { SheetEntry } from "@/lib/meet/meet-sheet-summary"
+import SummaryRowLayout from "@/components/ui/SummaryRowLayout"
 import { EditRelayButton, RelayDetailModal } from "./MeetRelayEditor"
 
 function hashMatchesId(id: string) {

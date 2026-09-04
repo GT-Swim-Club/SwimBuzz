@@ -1,9 +1,9 @@
 "use client"
 
 import { useMemo, useState, useTransition } from "react"
-import Modal, { ModalFooter } from "@/components/Modal"
-import { athleteHasRosterSummaryEntry } from "@/lib/meet-signup"
-import type { SheetEntry } from "@/lib/meet-sheet-summary"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import { athleteHasRosterSummaryEntry } from "@/lib/meet/meet-signup"
+import type { SheetEntry } from "@/lib/meet/meet-sheet-summary"
 import { addRosterOnlyEntry } from "./AddToRosterSummaryButton.actions"
 
 type AthleteOption = { id: string; name: string }

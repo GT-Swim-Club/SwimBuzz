@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
-import { isStaffUi } from "@/lib/athlete-view-server"
-import { getSession } from "@/lib/session"
+import { isStaffUi } from "@/lib/athlete/athlete-view-server"
+import { getSession } from "@/lib/auth/session"
 import { practicePath } from "@/lib/slug"
 
 // Bare /practices has no practice of its own to show, so it redirects to the

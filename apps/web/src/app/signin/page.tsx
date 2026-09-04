@@ -1,8 +1,8 @@
 import Link from "next/link"
 import Image from "next/image"
 import { redirect } from "next/navigation"
-import SignInMethods from "@/components/SignInMethods"
-import { getSession } from "@/lib/session"
+import SignInMethods from "@/components/auth/SignInMethods"
+import { getSession } from "@/lib/auth/session"
 import {
   STAFF_ONLY_SIGNIN_ERROR,
   STAFF_LINK_REQUIRED_ERROR,

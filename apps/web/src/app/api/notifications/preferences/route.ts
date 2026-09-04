@@ -4,9 +4,9 @@ import {
   mergeNotificationPreferences,
   parseNotificationPreferences,
   type NotificationPreferenceKey,
-  type NotificationPreferences } from "@/lib/notification-preferences"
+  type NotificationPreferences } from "@/lib/notifications/notification-preferences"
 import { prisma } from "@/lib/prisma"
-import { getSession } from "@/lib/session"
+import { getSession } from "@/lib/auth/session"
 
 const PATCH_KEYS: NotificationPreferenceKey[] = [
   "practicePublished",

@@ -1,4 +1,4 @@
-import { Skeleton } from "@/components/Skeleton"
+import { Skeleton } from "@/components/ui/Skeleton"
 
 const strokeAccents = [
   "border-l-sky-400 dark:border-l-sky-500",

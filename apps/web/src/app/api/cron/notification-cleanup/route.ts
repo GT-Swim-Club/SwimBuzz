@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server"
-import { requireCronSecret } from "@/lib/cron-auth"
+import { requireCronSecret } from "@/lib/auth/cron-auth"
 import {
   cleanupOldNotifications,
   cleanupOldScraperJobs,
-} from "@/lib/notification-cleanup"
+} from "@/lib/notifications/notification-cleanup"
 
 export const runtime = "nodejs"
 export const maxDuration = 60

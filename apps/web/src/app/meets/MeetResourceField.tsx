@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useRef, useState, type ReactNode } from "react"
-import { isStoredMeetFileUrl } from "@/lib/meet-files"
+import { isStoredMeetFileUrl } from "@/lib/meet/meet-files"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
-import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/FileDropzone"
+import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/ui/FileDropzone"
 
 const inputClass =
   "w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"

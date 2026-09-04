@@ -4,15 +4,15 @@ import { useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import type { PracticeFormState } from "../PracticeEditor"
-import type { PracticeEditLockInfo } from "@/lib/practice-edit-lock-shared"
-import Modal, { ModalFooter } from "@/components/Modal"
-import ActionIcon from "@/components/ActionIcon"
-import HoverDetail from "@/components/HoverDetail"
+import type { PracticeEditLockInfo } from "@/lib/practice/practice-edit-lock-shared"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import ActionIcon from "@/components/ui/ActionIcon"
+import HoverDetail from "@/components/ui/HoverDetail"
 import {
   broadcastPracticeEditLockChanged,
   storePracticeEditLockHandoff,
   broadcastPracticeEditLockYield,
-} from "@/lib/practice-edit-lock-client"
+} from "@/lib/practice/practice-edit-lock-client"
 import { deletePractice, setPracticePublished } from "./PracticeActions.actions"
 
 const iconCls = "h-3.5 w-3.5 shrink-0"

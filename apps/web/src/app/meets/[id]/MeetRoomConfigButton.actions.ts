@@ -3,9 +3,9 @@
 import { revalidatePath } from "next/cache"
 import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { normalizeMeetSignupQuestions } from "@/lib/meet-signup"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { normalizeMeetSignupQuestions } from "@/lib/meet/meet-signup"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 import { DEFAULT_TIME_ZONE, isValidTimeZone } from "@swimbuzz/shared"
 
 function parseOptionalDate(value: unknown): Date | null | undefined {

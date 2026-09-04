@@ -10,10 +10,10 @@ import {
   resolveSignupEventOptions,
   sortSignupEventsByOrder,
   signupWindowStatus,
-  signupWithdrawStatus } from "@/lib/meet-signup"
+  signupWithdrawStatus } from "@/lib/meet/meet-signup"
 import { Prisma } from "@prisma/client"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 async function resolveLinkedAthleteId(
   sessionUserId: string

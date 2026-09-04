@@ -1,7 +1,7 @@
 import Link from "next/link"
-import { RelativeInstantTime } from "@/components/RelativeDate"
-import { roomWindowStatus } from "@/lib/meet-rooms"
-import type { MeetSignupQuestion } from "@/lib/meet-signup"
+import { RelativeInstantTime } from "@/components/ui/RelativeDate"
+import { roomWindowStatus } from "@/lib/meet/meet-rooms"
+import type { MeetSignupQuestion } from "@/lib/meet/meet-signup"
 import MeetRoomAssignmentsList from "./MeetRoomAssignmentsList"
 
 type FormData = {

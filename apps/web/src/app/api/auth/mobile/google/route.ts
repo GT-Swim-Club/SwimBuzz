@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { issueMobileTokens, verifyGoogleIdToken } from "@/lib/mobile-auth"
-import { verifyStaffLinkToken } from "@/lib/staff-link"
+import { issueMobileTokens, verifyGoogleIdToken } from "@/lib/auth/mobile-auth"
+import { verifyStaffLinkToken } from "@/lib/auth/staff-link"
 import {
   currentStaffTerm,
   staffAccountForEmail,

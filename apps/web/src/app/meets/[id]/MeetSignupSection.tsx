@@ -10,11 +10,11 @@ import {
   sortSignupEventsByOrder,
   signupWindowStatus,
   type MeetSignupQuestion,
-} from "@/lib/meet-signup"
-import { isSignupAnswers } from "@/lib/meet-signup"
+} from "@/lib/meet/meet-signup"
+import { isSignupAnswers } from "@/lib/meet/meet-signup"
 import { formatDisplayTime } from "@/lib/utils"
-import Modal, { ModalFooter } from "@/components/Modal"
-import StaffBadge from "@/components/StaffBadge"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import StaffBadge from "@/components/ui/StaffBadge"
 import type { StaffTitle } from "@swimbuzz/shared"
 import { syncSignupsToRoster, withdrawAthleteSignup } from "./meet-signup-admin.actions"
 

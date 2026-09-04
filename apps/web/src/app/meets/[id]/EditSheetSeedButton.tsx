@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import Modal, { ModalFooter } from "@/components/Modal"
-import ActionIcon from "@/components/ActionIcon"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import ActionIcon from "@/components/ui/ActionIcon"
 import { deleteSheetSeed, editSheetSeed } from "./EditSheetSeedButton.actions"
 
 const FALLBACK_EVENTS = [

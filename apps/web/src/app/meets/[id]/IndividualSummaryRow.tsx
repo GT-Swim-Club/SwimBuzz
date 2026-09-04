@@ -2,8 +2,8 @@
 
 import type { ReactNode } from "react"
 import { useEffect, useState } from "react"
-import type { ResultSplit } from "@/lib/meet-sheet-summary"
-import SummaryRowLayout from "@/components/SummaryRowLayout"
+import type { ResultSplit } from "@/lib/meet/meet-sheet-summary"
+import SummaryRowLayout from "@/components/ui/SummaryRowLayout"
 import IndividualSplitsModal, {
   type ResultRoundSection,
 } from "./IndividualSplitsModal"

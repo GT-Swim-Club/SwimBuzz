@@ -8,11 +8,11 @@ import {
   normalizeSignupEntryTime,
   resolveSignupEventOptions,
   updateManualIndividualSheetEntry,
-  deleteManualIndividualSheetEntry } from "@/lib/meet-signup"
-import { isSheetSummary } from "@/lib/meet-sheet-summary"
-import { normalizeEventName } from "@/lib/swim-parse"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+  deleteManualIndividualSheetEntry } from "@/lib/meet/meet-signup"
+import { isSheetSummary } from "@/lib/meet/meet-sheet-summary"
+import { normalizeEventName } from "@/lib/swim/swim-parse"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 export type EditSheetSeedInput = {
   athleteId: string

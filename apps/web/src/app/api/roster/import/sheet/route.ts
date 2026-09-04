@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server"
 import { parseSeason } from "@/lib/season"
-import { parseRosterRecords } from "@/lib/roster-csv"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
-import { runRosterImport } from "@/lib/roster-import"
+import { parseRosterRecords } from "@/lib/roster/roster-csv"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
+import { runRosterImport } from "@/lib/roster/roster-import"
 import {
   listSheetTabs,
   readSheetValues,
@@ -11,7 +11,7 @@ import {
   SheetAccessExpiredError,
   SheetForbiddenError,
   SheetNotFoundError,
-} from "@/lib/google-sheets"
+} from "@/lib/roster/google-sheets"
 
 export const runtime = "nodejs"
 

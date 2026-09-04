@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import { registerScraperConnection } from "@/lib/scraper"
-import { checkScraperRegisterRateLimit } from "@/lib/scraper-register-rate-limit"
+import { registerScraperConnection } from "@/lib/scraper/scraper"
+import { checkScraperRegisterRateLimit } from "@/lib/scraper/scraper-register-rate-limit"
 
 export async function POST(req: Request) {
   const rateLimit = checkScraperRegisterRateLimit(req)

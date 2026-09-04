@@ -43,3 +43,11 @@ next-env.d.ts
 # uploaded meet documents
 /public/meet-files/*
 !/public/meet-files/.gitkeep
+
+# sample/test meet PDFs (not part of the scraper tool itself)
+/public/scraper/heat-sheets/
+/public/scraper/psych-sheets/
+/public/scraper/results-pdfs/
+
+# Claude
+.claude/

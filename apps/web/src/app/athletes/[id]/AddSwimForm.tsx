@@ -2,13 +2,13 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import DontReloadNotice from "@/components/DontReloadNotice"
-import Modal, { ModalFooter } from "@/components/Modal"
-import { DatePicker } from "@/components/CustomDateTimePicker"
+import DontReloadNotice from "@/components/ui/DontReloadNotice"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import { DatePicker } from "@/components/ui/CustomDateTimePicker"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
-import { useScraperUi } from "@/components/ScraperUiProvider"
+import { useScraperUi } from "@/components/scraper/ScraperUiProvider"
 import { parseTime, formatRelativeTime, formatDateTime } from "@/lib/utils"
-import SetSwimCloudIdForm from "@/components/SetSwimCloudIdForm"
+import SetSwimCloudIdForm from "@/components/athlete/SetSwimCloudIdForm"
 import { addAthleteSwim } from "./AddSwimForm.actions"
 
 const EVENTS = [
@@ -80,7 +80,7 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
 
         try {
           const { runScraperEnqueuePollFinalize } = await import(
-            "@/lib/scraper-job-client"
+            "@/lib/scraper/scraper-job-client"
           )
           const data = await runScraperEnqueuePollFinalize<{
             imported?: number

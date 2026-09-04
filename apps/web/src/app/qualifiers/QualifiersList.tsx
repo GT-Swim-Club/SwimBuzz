@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { athletePreferredInitials, athletePreferredNameLastFirst } from "@swimbuzz/shared"
-import type { QualifierAthlete } from "@/lib/nationals-qualifiers"
+import type { QualifierAthlete } from "@/lib/qualifiers/nationals-qualifiers"
 import QualifierGalleryCard from "./QualifierGalleryCard"
 import { athletePath, meetSwimPath } from "@/lib/slug"
 

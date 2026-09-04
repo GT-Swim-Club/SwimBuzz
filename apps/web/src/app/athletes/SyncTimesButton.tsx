@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
-import DontReloadNotice from "@/components/DontReloadNotice"
+import DontReloadNotice from "@/components/ui/DontReloadNotice"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import { formatRelativeTime, formatDateTime } from "@/lib/utils"
 import { currentSeason, parseSeason } from "@/lib/season"
-import { useScraperUi } from "@/components/ScraperUiProvider"
-import { useImportTask } from "@/components/ImportTaskProvider"
-import { runScraperEnqueuePollFinalize } from "@/lib/scraper-job-client"
+import { useScraperUi } from "@/components/scraper/ScraperUiProvider"
+import { useImportTask } from "@/components/ui/ImportTaskProvider"
+import { runScraperEnqueuePollFinalize } from "@/lib/scraper/scraper-job-client"
 
 type RosterAthlete = {
   id: string

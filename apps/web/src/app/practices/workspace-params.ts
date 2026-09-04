@@ -1,4 +1,4 @@
-import { normalizeTag } from "@/lib/practice-tags"
+import { normalizeTag } from "@/lib/practice/practice-tags"
 
 export const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",

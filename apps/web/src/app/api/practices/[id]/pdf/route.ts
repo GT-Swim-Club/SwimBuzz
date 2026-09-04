@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { isStaffRole } from "@/lib/auth-roles"
-import { getSession } from "@/lib/session"
-import { buildPracticePdf, practicePdfFilename } from "@/lib/practice-pdf"
-import { practiceSetSelect } from "@/lib/practice-input"
+import { isStaffRole } from "@/lib/auth/auth-roles"
+import { getSession } from "@/lib/auth/session"
+import { buildPracticePdf, practicePdfFilename } from "@/lib/practice/practice-pdf"
+import { practiceSetSelect } from "@/lib/practice/practice-input"
 import { zonedDayKey } from "@swimbuzz/shared"
 
 export const runtime = "nodejs"

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { disconnectScraperByToken } from "@/lib/scraper"
+import { disconnectScraperByToken } from "@/lib/scraper/scraper"
 
 /** Called by the local scraper on exit so the app stops showing "running". */
 export async function POST(req: Request) {

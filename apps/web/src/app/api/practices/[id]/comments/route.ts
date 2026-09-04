@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
-import { checkCommentCreationRateLimit } from "@/lib/comment-rate-limit"
-import { notifyPracticeComment } from "@/lib/notifications"
+import { checkCommentCreationRateLimit } from "@/lib/practice/comment-rate-limit"
+import { notifyPracticeComment } from "@/lib/notifications/notifications"
 import { prisma } from "@/lib/prisma"
-import { getSession } from "@/lib/session"
+import { getSession } from "@/lib/auth/session"
 
 export async function POST(
   req: Request,

@@ -1,9 +1,9 @@
 import Link from "next/link"
-import { RelativeDateRange } from "@/components/RelativeDate"
+import { RelativeDateRange } from "@/components/ui/RelativeDate"
 import EditMeetButton from "./EditMeetButton"
 import { type MeetFormState } from "./MeetFields"
 import { meetPath } from "@/lib/slug"
-import MeetCountdown from "@/components/MeetCountdown"
+import MeetCountdown from "@/components/meet/MeetCountdown"
 
 export default function MeetGalleryCard({
   meet,

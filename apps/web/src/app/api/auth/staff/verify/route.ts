@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import { verifyEmailLoginCode } from "@/lib/email-login"
-import { signStaffLinkToken, setStaffLinkCookie } from "@/lib/staff-link"
+import { verifyEmailLoginCode } from "@/lib/auth/email-login"
+import { signStaffLinkToken, setStaffLinkCookie } from "@/lib/auth/staff-link"
 
 /**
  * Step 1 of coach/exec sign-in: verify the GT-email OTP and set a short-lived

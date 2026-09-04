@@ -3,9 +3,9 @@
 import { useMemo, useState } from "react"
 import Link from "next/link"
 import { formatTime, formatSwimDate } from "@/lib/utils"
-import { compareSwimEvents, COURSE_LABELS } from "@/lib/swim-parse"
-import { displaySwimHistoryTags } from "@/lib/swim-tags"
-import { isRelayLeadoffSwimTag } from "@/lib/relay-results"
+import { compareSwimEvents, COURSE_LABELS } from "@/lib/swim/swim-parse"
+import { displaySwimHistoryTags } from "@/lib/swim/swim-tags"
+import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
 import DeleteSwimButton from "./DeleteSwimButton"
 import { meetSwimPath } from "@/lib/slug"
 

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { requestEmailLoginCode } from "@/lib/email-login"
+import { requestEmailLoginCode } from "@/lib/auth/email-login"
 
 export async function POST(req: Request) {
   let body: { email?: string }

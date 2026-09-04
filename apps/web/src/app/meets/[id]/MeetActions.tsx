@@ -1,13 +1,13 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import ActionIcon from "@/components/ActionIcon"
-import HoverDetail from "@/components/HoverDetail"
+import ActionIcon from "@/components/ui/ActionIcon"
+import HoverDetail from "@/components/ui/HoverDetail"
 import { useRouter } from "next/navigation"
 import MeetFields, { type MeetFormState } from "../MeetFields"
-import Modal, { ModalFooter } from "@/components/Modal"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { meetPath } from "@/lib/slug"
-import { useUnsavedUploads } from "@/lib/unsaved-uploads"
+import { useUnsavedUploads } from "@/lib/meet/unsaved-uploads"
 import { deleteMeetEntirely, updateMeet } from "./meet-update.actions"
 
 function meetImageUrls(form: Pick<MeetFormState, "iconUrl" | "bannerUrl">) {

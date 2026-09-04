@@ -1,4 +1,4 @@
-import { Skeleton } from "@/components/Skeleton"
+import { Skeleton } from "@/components/ui/Skeleton"
 
 const setSkeletons = [
   { title: "w-24", distance: "w-10", lines: ["w-full", "w-5/6", "w-2/3"] },

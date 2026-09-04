@@ -4,14 +4,14 @@ import type { ReactNode } from "react"
 import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import Link from "next/link"
-import type { ResultSplit } from "@/lib/meet-sheet-summary"
+import type { ResultSplit } from "@/lib/meet/meet-sheet-summary"
 import {
   formatDisplayTime,
   formatSeedTimeDelta,
   formatOrdinal,
   podiumPlaceClass,
 } from "@/lib/utils"
-import { sanitizeRelaySplitTime } from "@/lib/relay-results"
+import { sanitizeRelaySplitTime } from "@/lib/meet/relay-results"
 import { athletePath } from "@/lib/slug"
 
 export type ResultRoundSection = {

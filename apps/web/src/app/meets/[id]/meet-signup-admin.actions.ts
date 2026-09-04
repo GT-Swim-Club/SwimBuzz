@@ -7,11 +7,11 @@ import {
   isSignupEntryTimes,
   mergeSignupIndividualsIntoEntriesSummary,
   resolveSignupEventOptions,
-  type SignupEntryForSheetSync } from "@/lib/meet-signup"
-import { isResultStatusesSummary, isSheetSummary, meetHasImportedResults } from "@/lib/meet-sheet-summary"
-import { isRelayResultsSummary } from "@/lib/relay-results"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+  type SignupEntryForSheetSync } from "@/lib/meet/meet-signup"
+import { isResultStatusesSummary, isSheetSummary, meetHasImportedResults } from "@/lib/meet/meet-sheet-summary"
+import { isRelayResultsSummary } from "@/lib/meet/relay-results"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 /** Shared staff-facing sign-up admin actions, used by both MeetSignupSection
  * and signups/MeetSignupManager. Same logic as POST

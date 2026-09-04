@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import { getSession } from "@/lib/session"
-import { AppIcon } from "@/components/AppIcon"
+import { getSession } from "@/lib/auth/session"
+import { AppIcon } from "@/components/ui/AppIcon"
 type FeatureItem = {
   title: string
   description: string

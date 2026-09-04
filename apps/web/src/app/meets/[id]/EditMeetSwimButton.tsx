@@ -2,9 +2,9 @@
 
 import { useState, useTransition } from "react"
 import { formatTime, parseTime } from "@/lib/utils"
-import Modal, { ModalFooter } from "@/components/Modal"
-import { DatePicker } from "@/components/CustomDateTimePicker"
-import ActionIcon from "@/components/ActionIcon"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import { DatePicker } from "@/components/ui/CustomDateTimePicker"
+import ActionIcon from "@/components/ui/ActionIcon"
 import { deleteMeetSwim, editMeetSwim } from "./EditMeetSwimButton.actions"
 
 const EVENTS = [

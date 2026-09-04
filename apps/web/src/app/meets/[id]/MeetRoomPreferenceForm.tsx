@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import Modal, { ModalFooter } from "@/components/Modal"
-import { MeetFormCustomQuestionFields } from "@/components/MeetFormCustomQuestions"
-import { roomWindowStatus } from "@/lib/meet-rooms"
-import { type MeetSignupQuestion } from "@/lib/meet-signup"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import { MeetFormCustomQuestionFields } from "@/components/meet/MeetFormCustomQuestions"
+import { roomWindowStatus } from "@/lib/meet/meet-rooms"
+import { type MeetSignupQuestion } from "@/lib/meet/meet-signup"
 import { saveRoomPreference } from "./MeetRoomPreferenceForm.actions"
 
 export type MeetRoomPreferenceInitial = {

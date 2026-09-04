@@ -3,10 +3,10 @@
 import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { currentSeason, parseSeason } from "@/lib/season"
-import Modal, { ModalFooter } from "@/components/Modal"
-import { useScraperUi } from "@/components/ScraperUiProvider"
-import { useImportTask } from "@/components/ImportTaskProvider"
-import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/FileDropzone"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import { useScraperUi } from "@/components/scraper/ScraperUiProvider"
+import { useImportTask } from "@/components/ui/ImportTaskProvider"
+import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/ui/FileDropzone"
 
 type ImportSource = "pdf" | "swimphone"
 
@@ -182,7 +182,7 @@ export default function ImportMeetButton({
       throw new Error(data.error ?? "Import failed")
     }
     if (data.jobId) {
-      const { pollScraperJob } = await import("@/lib/scraper-job-client")
+      const { pollScraperJob } = await import("@/lib/scraper/scraper-job-client")
       await pollScraperJob(data.jobId)
       const fin = await fetch("/api/meets/import/finalize", {
         method: "POST",
@@ -222,7 +222,7 @@ export default function ImportMeetButton({
       throw new Error(data.error ?? "Import failed")
     }
     if (data.jobId) {
-      const { pollScraperJob } = await import("@/lib/scraper-job-client")
+      const { pollScraperJob } = await import("@/lib/scraper/scraper-job-client")
       await pollScraperJob(data.jobId)
       const fin = await fetch("/api/meets/import/swimphone/finalize", {
         method: "POST",

@@ -1,11 +1,11 @@
-import BackLink from "@/components/BackLink"
+import BackLink from "@/components/ui/BackLink"
 import { Gender } from "@prisma/client"
 import { notFound, redirect } from "next/navigation"
-import { getSession } from "@/lib/session"
+import { getSession } from "@/lib/auth/session"
 import { prisma } from "@/lib/prisma"
-import { resolveViewerAthleteId } from "@/lib/athlete-view-server"
-import { collectMeetRosterAthleteIds } from "@/lib/meet-sheet-summary"
-import { isSignupAnswers, normalizeMeetSignupQuestions } from "@/lib/meet-signup"
+import { resolveViewerAthleteId } from "@/lib/athlete/athlete-view-server"
+import { collectMeetRosterAthleteIds } from "@/lib/meet/meet-sheet-summary"
+import { isSignupAnswers, normalizeMeetSignupQuestions } from "@/lib/meet/meet-signup"
 import MeetRoomPreferenceForm from "../MeetRoomPreferenceForm"
 
 export default async function MeetRoommatePreferencePage({

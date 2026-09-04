@@ -3,9 +3,9 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import MeetFields, { emptyMeetForm, type MeetFormState } from "./MeetFields"
-import Modal, { ModalFooter } from "@/components/Modal"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { meetPath } from "@/lib/slug"
-import { useUnsavedUploads } from "@/lib/unsaved-uploads"
+import { useUnsavedUploads } from "@/lib/meet/unsaved-uploads"
 
 function meetImageUrls(form: Pick<MeetFormState, "iconUrl" | "bannerUrl">) {
   return [form.iconUrl, form.bannerUrl]

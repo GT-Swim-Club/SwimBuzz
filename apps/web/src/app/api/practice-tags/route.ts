@@ -1,9 +1,9 @@
 import { NextResponse as ServerResponse } from "next/server"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 import { prisma } from "@/lib/prisma"
-import { listManagedPracticeTags } from "@/lib/practice-tag-catalog"
-import { normalizeTag, PRACTICE_TAG_MAX_COUNT, PRACTICE_TAG_NAME_MAX_LENGTH } from "@/lib/practice-tags"
+import { listManagedPracticeTags } from "@/lib/practice/practice-tag-catalog"
+import { normalizeTag, PRACTICE_TAG_MAX_COUNT, PRACTICE_TAG_NAME_MAX_LENGTH } from "@/lib/practice/practice-tags"
 
 const respond = (body: unknown, status = 200) => ServerResponse.json(body, { status })
 

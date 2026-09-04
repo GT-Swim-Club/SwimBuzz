@@ -6,13 +6,13 @@ import {
   getScraperJobForUser,
   markScraperJobApplied,
   LOCAL_SCRAPER_HINT,
-} from "@/lib/scraper"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+} from "@/lib/scraper/scraper"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 import {
   applySwimCloudRosterImport,
   type SwimCloudRosterRow,
-} from "@/lib/roster-import"
+} from "@/lib/roster/roster-import"
 
 export const runtime = "nodejs"
 export const maxDuration = 300

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { normalizeEventName } from "@/lib/swim-parse"
+import { normalizeEventName } from "@/lib/swim/swim-parse"
 import {
   isRelayResultsSummary,
   parseRelayGender,
@@ -16,14 +16,14 @@ import {
   sanitizeRelaySplitTime,
   type RelayGender,
   type RelayRound,
-  type RelayTeamInput } from "@/lib/relay-results"
+  type RelayTeamInput } from "@/lib/meet/relay-results"
 import {
   isResultStatusesSummary,
-  meetHasImportedResults } from "@/lib/meet-sheet-summary"
+  meetHasImportedResults } from "@/lib/meet/meet-sheet-summary"
 import { Gender } from "@prisma/client"
-import { syncRelayLeadoffSwim, deleteRelayLeadoffSwim } from "@/lib/relay-leadoff-sync"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { syncRelayLeadoffSwim, deleteRelayLeadoffSwim } from "@/lib/meet/relay-leadoff-sync"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 export const runtime = "nodejs"
 

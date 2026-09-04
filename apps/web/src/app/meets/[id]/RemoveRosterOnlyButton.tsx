@@ -1,7 +1,7 @@
 "use client"
 
 import { useTransition } from "react"
-import ActionIcon from "@/components/ActionIcon"
+import ActionIcon from "@/components/ui/ActionIcon"
 import { removeRosterOnlyEntry } from "./RemoveRosterOnlyButton.actions"
 
 export default function RemoveRosterOnlyButton({

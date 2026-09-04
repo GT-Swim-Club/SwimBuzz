@@ -3,9 +3,9 @@
 import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { isStaffRole } from "@/lib/auth-roles"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 import { resolveListedSeason, upcomingSeason } from "@/lib/season"
-import Modal, { ModalFooter } from "@/components/Modal"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
 
 export default function QualifierFilters({
               seasons

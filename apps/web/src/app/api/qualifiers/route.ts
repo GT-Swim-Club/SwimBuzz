@@ -1,19 +1,19 @@
 import { NextResponse } from "next/server"
 import { Course } from "@prisma/client"
 import { parseSeason } from "@/lib/season"
-import { fetchMeetFileBytes } from "@/lib/meet-file-fetch"
-import { isParsablePacketUrl } from "@/lib/meet-event-order"
-import { parseNqtPdf } from "@/lib/pdf-parser-client"
-import { uploadMeetFile } from "@/lib/meet-storage"
+import { fetchMeetFileBytes } from "@/lib/meet/meet-file-fetch"
+import { isParsablePacketUrl } from "@/lib/meet/meet-event-order"
+import { parseNqtPdf } from "@/lib/meet/pdf-parser-client"
+import { uploadMeetFile } from "@/lib/meet/meet-storage"
 import {
   computeNationalsQualifiers,
   isNqtParseResult,
   parseNationalsCourse,
   saveNationalsStandards,
-} from "@/lib/nationals-qualifiers"
+} from "@/lib/qualifiers/nationals-qualifiers"
 import { prisma } from "@/lib/prisma"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 export const runtime = "nodejs"
 export const maxDuration = 300

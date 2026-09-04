@@ -3,7 +3,7 @@
 import type { ReactNode } from "react"
 import { useState, Fragment } from "react"
 import Link from "next/link"
-import type { MeetResultEntry, SheetSummary } from "@/lib/meet-sheet-summary"
+import type { MeetResultEntry, SheetSummary } from "@/lib/meet/meet-sheet-summary"
 import {
   compareIndividualEntries,
   dropSeedOnlyAfterResults,
@@ -20,13 +20,13 @@ import {
   mergeSheetSummaries,
   relayLeadoffsFromSplits,
   uniqueRelayTeams,
-} from "@/lib/meet-sheet-summary"
-import { compareRelayEvents, compareSwimEvents, normalizeEventName } from "@/lib/swim-parse"
+} from "@/lib/meet/meet-sheet-summary"
+import { compareRelayEvents, compareSwimEvents, normalizeEventName } from "@/lib/swim/swim-parse"
 import {
   eventNumberForGender,
   isRosterOnlySheetEntry,
   type MeetSignupEventOption,
-} from "@/lib/meet-signup"
+} from "@/lib/meet/meet-signup"
 import {
   displayRelayLetter,
   effectiveRelayGender,
@@ -35,16 +35,16 @@ import {
   relayTeamPlace,
   relayTeamTime,
   relayCoachIncompleteNote,
-} from "@/lib/relay-results"
-import type { SheetEntry } from "@/lib/meet-sheet-summary"
+} from "@/lib/meet/relay-results"
+import type { SheetEntry } from "@/lib/meet/meet-sheet-summary"
 import EditMeetSwimButton from "./EditMeetSwimButton"
 import EditSheetSeedButton from "./EditSheetSeedButton"
 import RemoveRosterOnlyButton from "./RemoveRosterOnlyButton"
 import IndividualSummaryRow from "./IndividualSummaryRow"
 import type { ResultRoundSection } from "./IndividualSplitsModal"
 import RelaySummaryRow from "./RelaySummaryRow"
-import SummaryRowLayout from "@/components/SummaryRowLayout"
-import { displayMeetResultTags } from "@/lib/swim-tags"
+import SummaryRowLayout from "@/components/ui/SummaryRowLayout"
+import { displayMeetResultTags } from "@/lib/swim/swim-tags"
 import { formatDisplayTime, formatSeedTimeDelta, podiumPlaceClass, parseTime } from "@/lib/utils"
 import { athletePath } from "@/lib/slug"
 

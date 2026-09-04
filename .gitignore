@@ -44,6 +44,8 @@ apps/web/package-lock.json
 # Ai agents
 .cursor/
 .claude/
+CLAUDE.md
+AGENTS.md
 
 # Graphify
 graphify-out/

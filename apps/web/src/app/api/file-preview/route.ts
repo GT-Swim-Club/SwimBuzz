@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
-import { normalizeFileUrl } from "@/lib/meet-file-fetch"
+import { normalizeFileUrl } from "@/lib/meet/meet-file-fetch"
 import { fetchPublicHttpUrl } from "@/lib/public-http-url"
-import { getSession } from "@/lib/session"
+import { getSession } from "@/lib/auth/session"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"

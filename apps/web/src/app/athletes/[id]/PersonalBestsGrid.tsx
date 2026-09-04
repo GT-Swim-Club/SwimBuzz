@@ -3,7 +3,7 @@ import {
   compareSwimPb,
   COURSE_LABELS,
   parseEventParts,
-} from "@/lib/swim-parse"
+} from "@/lib/swim/swim-parse"
 
 type PbSwim = {
   event: string

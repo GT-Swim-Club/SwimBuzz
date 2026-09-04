@@ -3,13 +3,13 @@
 import { useState, useTransition } from "react"
 import { useSearchParams } from "next/navigation"
 import { currentSeason, parseSeason } from "@/lib/season"
-import Modal, { ModalFooter } from "@/components/Modal"
-import NicknameTagsInput from "@/components/NicknameTagsInput"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import NicknameTagsInput from "@/components/athlete/NicknameTagsInput"
 import {
   isValidSwimCloudIdInput,
   SWIMCLOUD_ID_ERROR,
   SWIMCLOUD_ID_MAX_LENGTH,
-} from "@/lib/swimcloud-id"
+} from "@/lib/swim/swimcloud-id"
 import { addAthlete } from "./AddAthleteButton.actions"
 
 export default function AddAthleteButton() {

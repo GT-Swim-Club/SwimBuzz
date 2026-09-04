@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation"
-import { isStaffUi } from "@/lib/athlete-view-server"
+import { isStaffUi } from "@/lib/athlete/athlete-view-server"
 import PracticeEditor from "../PracticeEditor"
-import { getSession } from "@/lib/session"
-import { listManagedPracticeTagNames } from "@/lib/practice-tag-catalog"
+import { getSession } from "@/lib/auth/session"
+import { listManagedPracticeTagNames } from "@/lib/practice/practice-tag-catalog"
 
 export default async function NewPracticePage() {
   const session = await getSession()

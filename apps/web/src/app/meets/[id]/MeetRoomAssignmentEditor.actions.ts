@@ -1,10 +1,10 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { formatRoomLabel, validateRoomAssignmentsAgainstExclusions } from "@/lib/meet-rooms"
+import { formatRoomLabel, validateRoomAssignmentsAgainstExclusions } from "@/lib/meet/meet-rooms"
 import { prisma } from "@/lib/prisma"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 import { loadMeetRoomContext } from "@/app/api/meets/[id]/rooms/_shared"
 
 type RoomInput = { athleteIds: string[] }

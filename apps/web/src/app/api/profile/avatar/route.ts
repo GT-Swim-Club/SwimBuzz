@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server"
-import { isStaffRole } from "@/lib/auth-roles"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 import {
   AVATAR_MAX_BYTES,
   deleteStoredAvatar,
   isStoredAvatarUrl,
-  uploadAvatar } from "@/lib/avatar-storage"
+  uploadAvatar } from "@/lib/athlete/avatar-storage"
 import { prisma } from "@/lib/prisma"
-import { getSession } from "@/lib/session"
+import { getSession } from "@/lib/auth/session"
 
 export const runtime = "nodejs"
 

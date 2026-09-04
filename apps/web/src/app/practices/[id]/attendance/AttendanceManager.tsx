@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
-import ActionIcon from "@/components/ActionIcon"
-import HoverDetail from "@/components/HoverDetail"
-import InfoIcon from "@/components/InfoIcon"
+import ActionIcon from "@/components/ui/ActionIcon"
+import HoverDetail from "@/components/ui/HoverDetail"
+import InfoIcon from "@/components/ui/InfoIcon"
 import { athletePath } from "@/lib/slug"
-import { ZonedInstantTime } from "@/components/ZonedTime"
-import { RelativeDateTime } from "@/components/RelativeDate"
+import { ZonedInstantTime } from "@/components/ui/ZonedTime"
+import { RelativeDateTime } from "@/components/ui/RelativeDate"
 import { formatClockTime } from "@swimbuzz/shared"
 
 type AttendanceRecord = {

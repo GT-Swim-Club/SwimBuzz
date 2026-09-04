@@ -2,10 +2,10 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { Course } from "@prisma/client"
 import { formatDisplayTime, formatTime } from "@/lib/utils"
-import { isRelayLeadoffSwimTag } from "@/lib/relay-results"
-import { canonicalizeStrokeEvent } from "@/lib/swim-parse"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
+import { canonicalizeStrokeEvent } from "@/lib/swim/swim-parse"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 function parseCourse(raw: string | null): Course | null {
   const upper = (raw ?? "").trim().toUpperCase()

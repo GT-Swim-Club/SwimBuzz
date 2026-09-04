@@ -1,20 +1,20 @@
 import { NextResponse } from "next/server"
-import { importMeetResults, resolveMeetDate } from "@/lib/meet-import"
-import { normalizeNameMappings, normalizeRejectedNames } from "@/lib/athlete-match"
+import { importMeetResults, resolveMeetDate } from "@/lib/meet/meet-import"
+import { normalizeNameMappings, normalizeRejectedNames } from "@/lib/athlete/athlete-match"
 import {
   assertDocTypeMatches,
   assertMeetNameMatches,
   MeetImportValidationError,
-} from "@/lib/meet-import-validate"
-import { parseMeetPdf } from "@/lib/pdf-parser-client"
+} from "@/lib/meet/meet-import-validate"
+import { parseMeetPdf } from "@/lib/meet/pdf-parser-client"
 import { prisma } from "@/lib/prisma"
-import { isStoredMeetFileUrl } from "@/lib/meet-files"
-import { deleteStoredMeetFile, uploadMeetFile } from "@/lib/meet-storage"
-import { notifyMeetRosterOfInfoDrops } from "@/lib/meet-roster-notify"
+import { isStoredMeetFileUrl } from "@/lib/meet/meet-files"
+import { deleteStoredMeetFile, uploadMeetFile } from "@/lib/meet/meet-storage"
+import { notifyMeetRosterOfInfoDrops } from "@/lib/meet/meet-roster-notify"
 import { parseSeason } from "@/lib/season"
-import { coerceParsedRelayResults } from "@/lib/relay-results"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { coerceParsedRelayResults } from "@/lib/meet/relay-results"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 function isUpload(value: unknown): value is Blob {
   return value != null && typeof value !== "string" && typeof (value as Blob).arrayBuffer === "function"

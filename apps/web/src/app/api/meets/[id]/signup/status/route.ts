@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { getSession } from "@/lib/session"
-import { signupWindowStatus } from "@/lib/meet-signup"
+import { getSession } from "@/lib/auth/session"
+import { signupWindowStatus } from "@/lib/meet/meet-signup"
 
 /**
  * Cheap poll target for MeetSignupSection — a signal that changes only when

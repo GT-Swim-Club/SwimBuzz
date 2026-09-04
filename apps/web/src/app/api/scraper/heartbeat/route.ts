@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { requireScraperConnection } from "@/lib/scraper-auth"
+import { requireScraperConnection } from "@/lib/scraper/scraper-auth"
 
 export async function POST(req: Request) {
   const { connection, error } = await requireScraperConnection(req)

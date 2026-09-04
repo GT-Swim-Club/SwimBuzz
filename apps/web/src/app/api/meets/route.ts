@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { buildMeetData, MeetInputError, toPrismaMeetWriteData } from "@/lib/meet-input"
-import { resolveEventOrderForPacket } from "@/lib/meet-packet-parse"
-import { attachSheetSummariesOnCreate } from "@/lib/meet-sheet-resolve"
-import { MeetImportValidationError } from "@/lib/meet-import-validate"
+import { buildMeetData, MeetInputError, toPrismaMeetWriteData } from "@/lib/meet/meet-input"
+import { resolveEventOrderForPacket } from "@/lib/meet/meet-packet-parse"
+import { attachSheetSummariesOnCreate } from "@/lib/meet/meet-sheet-resolve"
+import { MeetImportValidationError } from "@/lib/meet/meet-import-validate"
 import {
   detectMeetResourceDrops,
-  notifyMeetRosterOfInfoDrops } from "@/lib/meet-roster-notify"
+  notifyMeetRosterOfInfoDrops } from "@/lib/meet/meet-roster-notify"
 import { uniqueMeetSlug } from "@/lib/slug"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 export const runtime = "nodejs"
 export const maxDuration = 300

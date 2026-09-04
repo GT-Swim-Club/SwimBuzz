@@ -1,10 +1,10 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import HoverDetail from "@/components/HoverDetail"
-import ActionIcon from "@/components/ActionIcon"
-import InfoIcon from "@/components/InfoIcon"
-import StaffBadge from "@/components/StaffBadge"
+import HoverDetail from "@/components/ui/HoverDetail"
+import ActionIcon from "@/components/ui/ActionIcon"
+import InfoIcon from "@/components/ui/InfoIcon"
+import StaffBadge from "@/components/ui/StaffBadge"
 import type { StaffTitle } from "@swimbuzz/shared"
 import { formatDateTime, formatRelativeTime } from "@/lib/utils"
 

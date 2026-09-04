@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server"
-import { notifyPracticePublished } from "@/lib/notifications"
+import { notifyPracticePublished } from "@/lib/notifications/notifications"
 import { prisma } from "@/lib/prisma"
-import { buildPracticeData, PracticeInputError, practiceSetSelect } from "@/lib/practice-input"
-import { isStaffRole } from "@/lib/auth-roles"
+import { buildPracticeData, PracticeInputError, practiceSetSelect } from "@/lib/practice/practice-input"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 import {
   PRACTICE_EDIT_LOCK_TOKEN_HEADER,
   PracticeEditLockError,
-  assertCanMutatePractice } from "@/lib/practice-edit-lock"
+  assertCanMutatePractice } from "@/lib/practice/practice-edit-lock"
 import { uniquePracticeSlug } from "@/lib/slug"
 import { zonedDayKey } from "@swimbuzz/shared"
-import { getSession } from "@/lib/session"
-import { findUnmanagedPracticeTags } from "@/lib/practice-tag-catalog"
+import { getSession } from "@/lib/auth/session"
+import { findUnmanagedPracticeTags } from "@/lib/practice/practice-tag-catalog"
 
 export async function GET(
   _req: Request,

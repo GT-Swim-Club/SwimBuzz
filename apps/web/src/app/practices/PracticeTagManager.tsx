@@ -1,9 +1,9 @@
 "use client"
 
 import { type AnimationEvent, type KeyboardEvent, useEffect, useRef, useState, useTransition } from "react"
-import { PRACTICE_TAG_MAX_COUNT, PRACTICE_TAG_NAME_MAX_LENGTH } from "@/lib/practice-tags"
-import Modal, { ModalFooter } from "@/components/Modal"
-import ActionIcon from "@/components/ActionIcon"
+import { PRACTICE_TAG_MAX_COUNT, PRACTICE_TAG_NAME_MAX_LENGTH } from "@/lib/practice/practice-tags"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import ActionIcon from "@/components/ui/ActionIcon"
 import { createPracticeTag, deletePracticeTag } from "./PracticeTagManager.actions"
 
 type PracticeTag = { id: string; name: string }

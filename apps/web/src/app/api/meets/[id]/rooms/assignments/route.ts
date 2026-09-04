@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { formatRoomLabel, validateRoomAssignmentsAgainstExclusions } from "@/lib/meet-rooms"
+import { formatRoomLabel, validateRoomAssignmentsAgainstExclusions } from "@/lib/meet/meet-rooms"
 import { loadMeetRoomContext } from "../_shared"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 type RoomInput = {
   athleteIds: string[]

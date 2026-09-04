@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import { requireCronSecret } from "@/lib/cron-auth"
-import { demoteLapsedStaff } from "@/lib/staff-term-expiry"
+import { requireCronSecret } from "@/lib/auth/cron-auth"
+import { demoteLapsedStaff } from "@/lib/auth/staff-term-expiry"
 
 export const runtime = "nodejs"
 export const maxDuration = 60

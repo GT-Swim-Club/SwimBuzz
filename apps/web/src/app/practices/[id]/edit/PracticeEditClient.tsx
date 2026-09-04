@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import Modal, { ModalFooter } from "@/components/Modal"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
 import PracticeEditor, { type PracticeFormState } from "../../PracticeEditor"
 import PracticeViewSkeleton from "../PracticeViewSkeleton"
 import PracticeEditSkeleton from "../PracticeEditSkeleton"
@@ -11,9 +11,9 @@ import {
   broadcastPracticeEditLockYield,
   storePracticeEditLockHandoff,
   takePracticeEditLockHandoff,
-} from "@/lib/practice-edit-lock-client"
+} from "@/lib/practice/practice-edit-lock-client"
 import { practicePath } from "@/lib/slug"
-import type { PracticeEditLockInfo } from "@/lib/practice-edit-lock-shared"
+import type { PracticeEditLockInfo } from "@/lib/practice/practice-edit-lock-shared"
 
 type EditState = "acquiring" | "editing" | "blocked" | "lost"
 

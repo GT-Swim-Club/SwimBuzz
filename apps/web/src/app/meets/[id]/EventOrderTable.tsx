@@ -1,5 +1,5 @@
-import type { EventOrder } from "@/lib/meet-event-order"
-import { cleanEventName } from "@/lib/meet-event-order"
+import type { EventOrder } from "@/lib/meet/meet-event-order"
+import { cleanEventName } from "@/lib/meet/meet-event-order"
 
 function showSessionLabel(label: string): boolean {
   return label.trim().toLowerCase() !== "order of events"

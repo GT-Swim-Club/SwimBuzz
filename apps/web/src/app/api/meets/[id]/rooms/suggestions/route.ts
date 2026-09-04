@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
-import { suggestRoomGroups } from "@/lib/meet-rooms"
+import { suggestRoomGroups } from "@/lib/meet/meet-rooms"
 import { formatAthleteName, loadMeetRoomContext, toGender } from "../_shared"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 export async function GET(
   _req: Request,

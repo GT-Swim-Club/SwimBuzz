@@ -1,18 +1,18 @@
 import { Suspense } from "react"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
-import LiveSearch from "@/components/LiveSearch"
-import { Skeleton } from "@/components/Skeleton"
+import LiveSearch from "@/components/ui/LiveSearch"
+import { Skeleton } from "@/components/ui/Skeleton"
 import {
   GalleryListViewToggle,
   ViewNavPanel,
-  ViewNavigationProvider } from "@/components/ViewNavigation"
+  ViewNavigationProvider } from "@/components/nav/ViewNavigation"
 import CreateMeetButton from "./CreateMeetButton"
-import { isStaffUi } from "@/lib/athlete-view-server"
+import { isStaffUi } from "@/lib/athlete/athlete-view-server"
 import { parseSeason, seasonEndYear } from "@/lib/season"
 import MeetsClientWrapper from "./MeetsClientWrapper"
-import { getSession } from "@/lib/session"
-import { countMeetAthletes } from "@/lib/meet-sheet-summary"
+import { getSession } from "@/lib/auth/session"
+import { countMeetAthletes } from "@/lib/meet/meet-sheet-summary"
 
 function MeetsListSkeleton() {
   return (

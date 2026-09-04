@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useRef, useState, type RefObject } from "react"
-import HoverDetail from "@/components/HoverDetail"
+import HoverDetail from "@/components/ui/HoverDetail"
 import PracticeTagManager from "./PracticeTagManager"
 import type { PracticePrefs, PracticeRailView } from "./usePracticePrefs"
 

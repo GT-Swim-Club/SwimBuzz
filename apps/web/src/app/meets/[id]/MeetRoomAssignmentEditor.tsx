@@ -1,8 +1,8 @@
 "use client"
 
 import { useEffect, useMemo, useState, type DragEvent } from "react"
-import type { MeetSignupQuestion } from "@/lib/meet-signup"
-import { formatRoomLabel } from "@/lib/meet-rooms"
+import type { MeetSignupQuestion } from "@/lib/meet/meet-signup"
+import { formatRoomLabel } from "@/lib/meet/meet-rooms"
 import { saveRoomAssignments, toggleRoomPublish } from "./MeetRoomAssignmentEditor.actions"
 
 type AthleteOption = { id: string; name: string; gender: "M" | "F" }

@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState, type RefObject } from "react"
 import { toPng } from "html-to-image"
 import { practiceShareText, practiceShareUrl, zonedDayKey, type PracticeShareSet } from "@swimbuzz/shared"
-import ActionIcon from "@/components/ActionIcon"
-import HoverDetail from "@/components/HoverDetail"
-import { practicePdfFilename } from "@/lib/practice-pdf"
+import ActionIcon from "@/components/ui/ActionIcon"
+import HoverDetail from "@/components/ui/HoverDetail"
+import { practicePdfFilename } from "@/lib/practice/practice-pdf"
 
 function filenameFromDisposition(header: string | null): string {
   const match = header?.match(/filename="([^"]+)"/)

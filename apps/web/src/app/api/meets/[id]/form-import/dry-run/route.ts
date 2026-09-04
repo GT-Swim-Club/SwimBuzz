@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
-import { isColumnMappingValid } from "@/lib/form-import-columns"
-import { loadFormImportRoster, matchImportRow } from "@/lib/form-import-match"
-import { normalizeMeetSignupQuestions, resolveSignupEventOptions } from "@/lib/meet-signup"
-import { parseSignupResponseRecords, runSignupResponseImport } from "@/lib/meet-signup-import"
-import { parseRoomResponseRecords, runRoomResponseImport } from "@/lib/meet-room-import"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isColumnMappingValid } from "@/lib/roster/form-import-columns"
+import { loadFormImportRoster, matchImportRow } from "@/lib/roster/form-import-match"
+import { normalizeMeetSignupQuestions, resolveSignupEventOptions } from "@/lib/meet/meet-signup"
+import { parseSignupResponseRecords, runSignupResponseImport } from "@/lib/meet/meet-signup-import"
+import { parseRoomResponseRecords, runRoomResponseImport } from "@/lib/meet/meet-room-import"
 import {
   loadFormImportMeetContext,
   parseFormType,

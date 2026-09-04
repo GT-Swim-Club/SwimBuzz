@@ -3,10 +3,10 @@
 import { revalidatePath } from "next/cache"
 import { Prisma, type Course } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { normalizeSwimForInsert, nextSwimOccurrence } from "@/lib/swim-dedup"
-import { isRelayLeadoffSwimTag } from "@/lib/relay-results"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { normalizeSwimForInsert, nextSwimOccurrence } from "@/lib/swim/swim-dedup"
+import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 export type EditMeetSwimInput = {
   athleteId: string

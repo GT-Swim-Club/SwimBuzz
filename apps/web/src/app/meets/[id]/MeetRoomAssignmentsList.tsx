@@ -1,4 +1,4 @@
-import { formatRoomLabel, roomAthleteSlotCount } from "@/lib/meet-rooms"
+import { formatRoomLabel, roomAthleteSlotCount } from "@/lib/meet/meet-rooms"
 
 type RoomAthlete = {
   id: string

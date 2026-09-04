@@ -2,25 +2,25 @@
 
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
-import { buildMeetData, MeetInputError, toPrismaMeetWriteData } from "@/lib/meet-input"
+import { buildMeetData, MeetInputError, toPrismaMeetWriteData } from "@/lib/meet/meet-input"
 import {
   deleteAddedMeetFiles,
   deleteAllMeetFiles,
   deleteRemovedMeetFiles,
   deleteStoredMeetFile,
   type MeetStoredFiles,
-} from "@/lib/meet-storage"
-import { resolveEventOrderForPacket } from "@/lib/meet-packet-parse"
-import { attachSheetSummaries } from "@/lib/meet-sheet-resolve"
-import { normalizeNameMappings, normalizeRejectedNames } from "@/lib/athlete-match"
-import { MeetImportValidationError } from "@/lib/meet-import-validate"
+} from "@/lib/meet/meet-storage"
+import { resolveEventOrderForPacket } from "@/lib/meet/meet-packet-parse"
+import { attachSheetSummaries } from "@/lib/meet/meet-sheet-resolve"
+import { normalizeNameMappings, normalizeRejectedNames } from "@/lib/athlete/athlete-match"
+import { MeetImportValidationError } from "@/lib/meet/meet-import-validate"
 import {
   detectMeetResourceDrops,
-  notifyMeetRosterOfInfoDrops } from "@/lib/meet-roster-notify"
-import { LOCAL_SCRAPER_HINT } from "@/lib/scraper"
+  notifyMeetRosterOfInfoDrops } from "@/lib/meet/meet-roster-notify"
+import { LOCAL_SCRAPER_HINT } from "@/lib/scraper/scraper"
 import { uniqueMeetSlug } from "@/lib/slug"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 /** Shared with PATCH/DELETE /api/meets/[id] (also called by mobile) — same
  * logic, kept in sync manually since the route can't be refactored without

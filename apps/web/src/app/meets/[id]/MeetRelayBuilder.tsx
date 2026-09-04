@@ -1,10 +1,10 @@
 "use client"
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from "react"
-import { Skeleton } from "@/components/Skeleton"
+import { Skeleton } from "@/components/ui/Skeleton"
 import { useRouter } from "next/navigation"
-import Modal, { ModalFooter } from "@/components/Modal"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { formatSwimDate, formatTime } from "@/lib/utils"
-import { canonicalizeStrokeEvent, relaySignupKey } from "@/lib/swim-parse"
+import { canonicalizeStrokeEvent, relaySignupKey } from "@/lib/swim/swim-parse"
 
 const FALLBACK_RELAY_EVENTS = [
   "200 Free Relay",

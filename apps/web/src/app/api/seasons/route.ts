@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { isStaffRole } from "@/lib/auth-roles"
-import { getSession } from "@/lib/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
+import { getSession } from "@/lib/auth/session"
 
 export async function GET() {
   const seasons = await prisma.season.findMany({

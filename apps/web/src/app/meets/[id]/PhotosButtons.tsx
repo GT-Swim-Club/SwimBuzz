@@ -1,9 +1,9 @@
 "use client"
 import { useState, useEffect } from "react"
 import { createPortal } from "react-dom"
-import Modal, { ModalFooter } from "@/components/Modal"
-import { FilePreviewDialog } from "@/components/FilePreview"
-import MeetResourceIcon from "@/components/MeetResourceIcon"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import { FilePreviewDialog } from "@/components/ui/FilePreview"
+import MeetResourceIcon from "@/components/meet/MeetResourceIcon"
 
 function PhotoLightbox({
   previews,

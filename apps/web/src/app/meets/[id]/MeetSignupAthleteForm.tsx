@@ -2,18 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import Modal, { ModalFooter } from "@/components/Modal"
-import { MeetFormCustomQuestionFields } from "@/components/MeetFormCustomQuestions"
-import type { MeetSignupEventOption, MeetSignupQuestion } from "@/lib/meet-signup"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import { MeetFormCustomQuestionFields } from "@/components/meet/MeetFormCustomQuestions"
+import type { MeetSignupEventOption, MeetSignupQuestion } from "@/lib/meet/meet-signup"
 import {
   formatSignupEventLabel,
   isValidSignupEntryTime,
   normalizeSignupEntryTime,
   partitionSignupEvents,
   sortSignupEventsByOrder,
-} from "@/lib/meet-signup"
+} from "@/lib/meet/meet-signup"
 import { formatDisplayTime } from "@/lib/utils"
-import { RelativeInstantTime } from "@/components/RelativeDate"
+import { RelativeInstantTime } from "@/components/ui/RelativeDate"
 import { submitMeetSignup, withdrawMeetSignup } from "./MeetSignupAthleteForm.actions"
 
 export type MeetSignupAthleteInitial = {

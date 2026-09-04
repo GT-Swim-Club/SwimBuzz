@@ -2,11 +2,11 @@
 
 import { useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import Modal, { ModalFooter } from "@/components/Modal"
-import { useImportTask } from "@/components/ImportTaskProvider"
-import { pickSpreadsheet, type PickedSpreadsheet } from "@/lib/google-picker-client"
-import type { ColumnMapping, ColumnTarget, ColumnTargetOption } from "@/lib/form-import-columns"
-import type { NearMatchAthlete } from "@/lib/athlete-match"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import { useImportTask } from "@/components/ui/ImportTaskProvider"
+import { pickSpreadsheet, type PickedSpreadsheet } from "@/lib/roster/google-picker-client"
+import type { ColumnMapping, ColumnTarget, ColumnTargetOption } from "@/lib/roster/form-import-columns"
+import type { NearMatchAthlete } from "@/lib/athlete/athlete-match"
 
 type FormType = "signup" | "rooms"
 

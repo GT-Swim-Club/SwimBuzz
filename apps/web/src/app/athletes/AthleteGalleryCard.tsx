@@ -2,7 +2,7 @@ import Link from "next/link"
 import type { StaffTitle } from "@swimbuzz/shared"
 import { athletePath } from "@/lib/slug"
 import { formatAthleteYearAndAge } from "@/lib/utils"
-import StaffBadge from "@/components/StaffBadge"
+import StaffBadge from "@/components/ui/StaffBadge"
 
 export default function AthleteGalleryCard({
   athlete,

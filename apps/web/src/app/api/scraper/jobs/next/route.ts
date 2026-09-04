@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import { claimNextScraperJob } from "@/lib/scraper"
-import { requireScraperConnection } from "@/lib/scraper-auth"
+import { claimNextScraperJob } from "@/lib/scraper/scraper"
+import { requireScraperConnection } from "@/lib/scraper/scraper-auth"
 import { prisma } from "@/lib/prisma"
 
 export const runtime = "nodejs"

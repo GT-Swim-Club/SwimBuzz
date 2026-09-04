@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma"
 import { Gender, Prisma } from "@prisma/client"
-import { collectMeetRosterAthleteIds } from "@/lib/meet-sheet-summary"
-import { meetHasEnded, roomWindowStatus } from "@/lib/meet-rooms"
-import { normalizeMeetSignupQuestions } from "@/lib/meet-signup"
+import { collectMeetRosterAthleteIds } from "@/lib/meet/meet-sheet-summary"
+import { meetHasEnded, roomWindowStatus } from "@/lib/meet/meet-rooms"
+import { normalizeMeetSignupQuestions } from "@/lib/meet/meet-signup"
 
 export function parseOptionalDate(value: unknown): Date | null | undefined {
   if (value === null) return null

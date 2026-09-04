@@ -13,8 +13,8 @@ import {
   resolveSignupEventOptions,
   signupWindowStatus,
   signupWithdrawStatus,
-  sortSignupEventsByOrder } from "@/lib/meet-signup"
-import { getSession } from "@/lib/session"
+  sortSignupEventsByOrder } from "@/lib/meet/meet-signup"
+import { getSession } from "@/lib/auth/session"
 
 /** Same logic as PUT/DELETE /api/meets/[id]/signup/entry (self-service path,
  * no athleteId query param) — kept in sync manually since the route can't be

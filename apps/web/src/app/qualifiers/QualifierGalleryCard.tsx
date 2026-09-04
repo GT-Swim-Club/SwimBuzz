@@ -2,9 +2,9 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import HoverDetail from "@/components/HoverDetail"
+import HoverDetail from "@/components/ui/HoverDetail"
 import { athletePreferredInitials, athletePreferredName } from "@swimbuzz/shared"
-import type { QualifierAthlete } from "@/lib/nationals-qualifiers"
+import type { QualifierAthlete } from "@/lib/qualifiers/nationals-qualifiers"
 import { athletePath, meetSwimPath } from "@/lib/slug"
 
 type QualifyingEvent = QualifierAthlete["events"][number]

@@ -2,16 +2,16 @@
 
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
-import { normalizeNicknames } from "@/lib/athlete-match"
-import { isStaffRole } from "@/lib/auth-roles"
+import { normalizeNicknames } from "@/lib/athlete/athlete-match"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 import { Prisma } from "@prisma/client"
 import {
   clearPendingFields,
-  parsePendingProfileChanges } from "@/lib/pending-profile-changes"
-import { syncProfileChangeRequestNotifications } from "@/lib/notifications"
-import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swimcloud-id"
+  parsePendingProfileChanges } from "@/lib/athlete/pending-profile-changes"
+import { syncProfileChangeRequestNotifications } from "@/lib/notifications/notifications"
+import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
 import { uniqueAthleteSlug } from "@/lib/slug"
-import { getSession } from "@/lib/session"
+import { getSession } from "@/lib/auth/session"
 
 export type UpdateAthleteInput = {
   firstName?: string

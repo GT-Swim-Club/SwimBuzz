@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import { getSession } from "@/lib/session"
-import { revokeMobileRefreshToken } from "@/lib/mobile-auth"
+import { getSession } from "@/lib/auth/session"
+import { revokeMobileRefreshToken } from "@/lib/auth/mobile-auth"
 
 export async function POST(req: Request) {
   const session = await getSession()

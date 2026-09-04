@@ -4,13 +4,13 @@ import { revalidatePath } from "next/cache"
 import { Gender } from "@prisma/client"
 import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { normalizeEventName } from "@/lib/swim-parse"
+import { normalizeEventName } from "@/lib/swim/swim-parse"
 import {
   isValidSignupEntryTime,
   normalizeSignupEntryTime,
   resolveSignupEventOptions,
-  createManualIndividualSheetEntry } from "@/lib/meet-signup"
-import { isSheetSummary, isResultStatusesSummary, meetHasImportedResults } from "@/lib/meet-sheet-summary"
+  createManualIndividualSheetEntry } from "@/lib/meet/meet-signup"
+import { isSheetSummary, isResultStatusesSummary, meetHasImportedResults } from "@/lib/meet/meet-sheet-summary"
 import {
   isRelayResultsSummary,
   parseRelayGender,
@@ -25,10 +25,10 @@ import {
   sanitizeRelaySplitTime,
   type RelayGender,
   type RelayRound,
-  type RelayTeamInput } from "@/lib/relay-results"
-import { syncRelayLeadoffSwim, deleteRelayLeadoffSwim } from "@/lib/relay-leadoff-sync"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+  type RelayTeamInput } from "@/lib/meet/relay-results"
+import { syncRelayLeadoffSwim, deleteRelayLeadoffSwim } from "@/lib/meet/relay-leadoff-sync"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 async function requireStaff() {
   const session = await getSession()

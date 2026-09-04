@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server"
-import { notifyPracticePublished } from "@/lib/notifications"
+import { notifyPracticePublished } from "@/lib/notifications/notifications"
 import { prisma } from "@/lib/prisma"
-import { buildPracticeData, PracticeInputError, practiceSetSelect } from "@/lib/practice-input"
-import { isStaffRole } from "@/lib/auth-roles"
+import { buildPracticeData, PracticeInputError, practiceSetSelect } from "@/lib/practice/practice-input"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 import { Prisma } from "@prisma/client"
 import { uniquePracticeSlug } from "@/lib/slug"
-import { getSession } from "@/lib/session"
-import { findUnmanagedPracticeTags } from "@/lib/practice-tag-catalog"
+import { getSession } from "@/lib/auth/session"
+import { findUnmanagedPracticeTags } from "@/lib/practice/practice-tag-catalog"
 
 export async function GET(req: Request) {
   const session = await getSession()

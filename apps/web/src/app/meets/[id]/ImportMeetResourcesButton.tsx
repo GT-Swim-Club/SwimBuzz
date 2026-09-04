@@ -2,12 +2,12 @@
 
 import { Fragment, useEffect, useState } from "react"
 import MeetResourceField from "../MeetResourceField"
-import MeetResourceIcon from "@/components/MeetResourceIcon"
-import Modal, { ModalFooter } from "@/components/Modal"
-import { useImportTask } from "@/components/ImportTaskProvider"
-import { useMeetResourceUploads } from "@/lib/use-meet-resource-uploads"
-import { useUnsavedUploads } from "@/lib/unsaved-uploads"
-import type { HeatSheetLink } from "@/lib/meet-files"
+import MeetResourceIcon from "@/components/meet/MeetResourceIcon"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import { useImportTask } from "@/components/ui/ImportTaskProvider"
+import { useMeetResourceUploads } from "@/lib/meet/use-meet-resource-uploads"
+import { useUnsavedUploads } from "@/lib/meet/unsaved-uploads"
+import type { HeatSheetLink } from "@/lib/meet/meet-files"
 import { updateMeet } from "./meet-update.actions"
 
 type ResourceForm = {

@@ -9,7 +9,7 @@
  */
 
 import { useState } from "react"
-import { pickSpreadsheet } from "@/lib/google-picker-client"
+import { pickSpreadsheet } from "@/lib/roster/google-picker-client"
 
 const MOBILE_DEEP_LINK = "swimbuzz://sheet-picked"
 

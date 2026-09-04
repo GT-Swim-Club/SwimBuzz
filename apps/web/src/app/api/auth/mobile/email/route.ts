@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import { verifyEmailLoginCode } from "@/lib/email-login"
-import { issueMobileTokens } from "@/lib/mobile-auth"
+import { verifyEmailLoginCode } from "@/lib/auth/email-login"
+import { issueMobileTokens } from "@/lib/auth/mobile-auth"
 import { STAFF_MUST_USE_STAFF_TAB_ERROR } from "@swimbuzz/shared"
 
 export async function POST(req: Request) {

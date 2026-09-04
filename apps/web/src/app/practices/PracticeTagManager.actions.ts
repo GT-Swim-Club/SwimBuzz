@@ -1,11 +1,11 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 import { prisma } from "@/lib/prisma"
-import { listManagedPracticeTags } from "@/lib/practice-tag-catalog"
-import { normalizeTag, PRACTICE_TAG_MAX_COUNT, PRACTICE_TAG_NAME_MAX_LENGTH } from "@/lib/practice-tags"
+import { listManagedPracticeTags } from "@/lib/practice/practice-tag-catalog"
+import { normalizeTag, PRACTICE_TAG_MAX_COUNT, PRACTICE_TAG_NAME_MAX_LENGTH } from "@/lib/practice/practice-tags"
 
 /** Same logic as POST /api/practice-tags. */
 export async function createPracticeTag(name: string) {

@@ -1,15 +1,15 @@
-import BackLink from "@/components/BackLink"
+import BackLink from "@/components/ui/BackLink"
 import { Gender } from "@prisma/client"
 import { notFound, redirect } from "next/navigation"
-import { getSession } from "@/lib/session"
+import { getSession } from "@/lib/auth/session"
 import { prisma } from "@/lib/prisma"
-import { isStaffUi } from "@/lib/athlete-view-server"
+import { isStaffUi } from "@/lib/athlete/athlete-view-server"
 import {
   isSignupAnswers,
   normalizeMeetSignupQuestions,
   normalizeSignupEntryTimes,
   resolveSignupEventOptions,
-} from "@/lib/meet-signup"
+} from "@/lib/meet/meet-signup"
 import MeetSignupManager from "./MeetSignupManager"
 
 export default async function MeetSignupManagerPage({

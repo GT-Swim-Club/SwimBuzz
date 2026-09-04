@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { Course, Gender } from "@prisma/client"
-import { canonicalizeStrokeEvent } from "@/lib/swim-parse"
-import { getSession } from "@/lib/session"
+import { canonicalizeStrokeEvent } from "@/lib/swim/swim-parse"
+import { getSession } from "@/lib/auth/session"
 import { athletePreferredName } from "@swimbuzz/shared"
 
 // medley leg → individual event name in DB

@@ -1,22 +1,22 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { normalizeNicknames } from "@/lib/athlete-match"
-import { isStaffRole } from "@/lib/auth-roles"
+import { normalizeNicknames } from "@/lib/athlete/athlete-match"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 import { Gender, Prisma } from "@prisma/client"
 import {
   clearPendingFields,
   mergePendingProfileChanges,
   nicknamesEqual,
   parsePendingProfileChanges,
-  type PendingProfileChanges } from "@/lib/pending-profile-changes"
+  type PendingProfileChanges } from "@/lib/athlete/pending-profile-changes"
 import {
   dismissProfileChangeRequestNotifications,
   notifyAthleteOfProfileChangeDecision,
   resolveProfileChangeRequestNotifications,
-  syncProfileChangeRequestNotifications } from "@/lib/notifications"
-import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swimcloud-id"
+  syncProfileChangeRequestNotifications } from "@/lib/notifications/notifications"
+import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
 import { isCuid, uniqueAthleteSlug } from "@/lib/slug"
-import { getSession } from "@/lib/session"
+import { getSession } from "@/lib/auth/session"
 
 export async function GET(
   _req: Request,

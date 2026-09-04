@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import { completeScraperJob, failScraperJob } from "@/lib/scraper"
-import { requireScraperConnection } from "@/lib/scraper-auth"
+import { completeScraperJob, failScraperJob } from "@/lib/scraper/scraper"
+import { requireScraperConnection } from "@/lib/scraper/scraper-auth"
 
 export async function POST(
   req: Request,

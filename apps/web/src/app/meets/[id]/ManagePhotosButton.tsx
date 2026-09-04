@@ -1,10 +1,10 @@
 "use client"
 
 import { useEffect, useState, useTransition } from "react"
-import Modal, { ModalFooter } from "@/components/Modal"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
-import { useUnsavedUploads } from "@/lib/unsaved-uploads"
-import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/FileDropzone"
+import { useUnsavedUploads } from "@/lib/meet/unsaved-uploads"
+import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/ui/FileDropzone"
 import { updateMeet } from "./meet-update.actions"
 
 type Photo = { url: string; name: string }

@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from "react"
 import { parseTime } from "@/lib/utils"
-import Modal, { ModalFooter } from "@/components/Modal"
-import { DatePicker } from "@/components/CustomDateTimePicker"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import { DatePicker } from "@/components/ui/CustomDateTimePicker"
 import { addMeetSwim } from "./AddMeetSwimButton.actions"
 
 const EVENTS = [

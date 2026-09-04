@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { Gender, ScraperJobStatus, ScraperJobType } from "@prisma/client"
-import { assignSwimOccurrences } from "@/lib/swim-dedup"
-import { swimsFromSwimCloudTimes, type SwimCloudTime } from "@/lib/swimcloud-import"
+import { assignSwimOccurrences } from "@/lib/swim/swim-dedup"
+import { swimsFromSwimCloudTimes, type SwimCloudTime } from "@/lib/swim/swimcloud-import"
 import { parseSeason } from "@/lib/season"
 import {
   enqueueScraperJob,
   getScraperJobForUser,
   markScraperJobApplied,
   LOCAL_SCRAPER_HINT,
-} from "@/lib/scraper"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+} from "@/lib/scraper/scraper"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 export const runtime = "nodejs"
 export const maxDuration = 300

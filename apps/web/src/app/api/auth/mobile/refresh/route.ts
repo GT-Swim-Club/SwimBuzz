@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { rotateMobileRefreshToken } from "@/lib/mobile-auth"
+import { rotateMobileRefreshToken } from "@/lib/auth/mobile-auth"
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}))

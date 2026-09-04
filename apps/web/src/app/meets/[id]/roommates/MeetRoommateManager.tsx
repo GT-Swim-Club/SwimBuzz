@@ -2,12 +2,12 @@
 
 import { useMemo, useState } from "react"
 import { athletePreferredNameLastFirst } from "@swimbuzz/shared"
-import type { MeetSignupQuestion } from "@/lib/meet-signup"
+import type { MeetSignupQuestion } from "@/lib/meet/meet-signup"
 import MeetRoomAssignmentEditor from "../MeetRoomAssignmentEditor"
 import MeetRoomConfigButton, {
   type MeetRoomConfigInitial,
 } from "../MeetRoomConfigButton"
-import { SegmentedToggle, segmentedOptionClass } from "@/components/SegmentedToggle"
+import { SegmentedToggle, segmentedOptionClass } from "@/components/ui/SegmentedToggle"
 import ImportFormResponsesButton from "../ImportFormResponsesButton"
 
 type AthleteOption = {

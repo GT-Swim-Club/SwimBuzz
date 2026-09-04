@@ -5,12 +5,12 @@ import {
   acquirePracticeEditLock,
   heartbeatPracticeEditLock,
   releasePracticeEditLock,
-  serializePracticeEditLock } from "@/lib/practice-edit-lock"
-import { waitForPracticeEditLockChange } from "@/lib/practice-edit-lock-watch"
-import { isPracticeEditLockYieldRequested } from "@/lib/practice-edit-lock-yield"
+  serializePracticeEditLock } from "@/lib/practice/practice-edit-lock"
+import { waitForPracticeEditLockChange } from "@/lib/practice/practice-edit-lock-watch"
+import { isPracticeEditLockYieldRequested } from "@/lib/practice/practice-edit-lock-yield"
 import { prisma } from "@/lib/prisma"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 export const runtime = "nodejs"
 export const maxDuration = 30

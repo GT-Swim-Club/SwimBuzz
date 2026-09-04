@@ -1,14 +1,14 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Modal, { ModalFooter } from "@/components/Modal"
-import { DatePicker, TimePicker, TimeZonePicker } from "@/components/CustomDateTimePicker"
-import { MeetFormCustomQuestionsEditor } from "@/components/MeetFormCustomQuestions"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import { DatePicker, TimePicker, TimeZonePicker } from "@/components/ui/CustomDateTimePicker"
+import { MeetFormCustomQuestionsEditor } from "@/components/meet/MeetFormCustomQuestions"
 import {
   findIncompleteChoiceQuestion,
   normalizeMeetSignupQuestions,
   type MeetSignupQuestion,
-} from "@/lib/meet-signup"
+} from "@/lib/meet/meet-signup"
 import { toDateInput, toTimeInput } from "@/lib/date-input"
 import { DEFAULT_TIME_ZONE, zonedTimeToUtc } from "@swimbuzz/shared"
 import { saveMeetRoomConfig } from "./MeetRoomConfigButton.actions"

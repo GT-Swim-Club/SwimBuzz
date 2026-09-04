@@ -4,15 +4,15 @@ import {
   isSignupEntryTimes,
   mergeSignupIndividualsIntoEntriesSummary,
   resolveSignupEventOptions,
-  type SignupEntryForSheetSync } from "@/lib/meet-signup"
+  type SignupEntryForSheetSync } from "@/lib/meet/meet-signup"
 import {
   isResultStatusesSummary,
   isSheetSummary,
-  meetHasImportedResults } from "@/lib/meet-sheet-summary"
-import { isRelayResultsSummary } from "@/lib/relay-results"
+  meetHasImportedResults } from "@/lib/meet/meet-sheet-summary"
+import { isRelayResultsSummary } from "@/lib/meet/relay-results"
 import { Prisma } from "@prisma/client"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 export async function POST(
   _req: Request,

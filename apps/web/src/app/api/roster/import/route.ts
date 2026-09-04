@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server"
 import { parseSeason } from "@/lib/season"
-import { parseRosterCsv } from "@/lib/roster-csv"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
-import { runRosterImport } from "@/lib/roster-import"
+import { parseRosterCsv } from "@/lib/roster/roster-csv"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
+import { runRosterImport } from "@/lib/roster/roster-import"
 
 export const runtime = "nodejs"
 

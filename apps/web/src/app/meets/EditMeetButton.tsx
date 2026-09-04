@@ -2,9 +2,9 @@
 
 import { useState, useTransition } from "react"
 import MeetFields, { type MeetFormState } from "./MeetFields"
-import Modal, { ModalFooter } from "@/components/Modal"
-import ActionIcon from "@/components/ActionIcon"
-import { useUnsavedUploads } from "@/lib/unsaved-uploads"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import ActionIcon from "@/components/ui/ActionIcon"
+import { useUnsavedUploads } from "@/lib/meet/unsaved-uploads"
 import { updateMeet } from "./[id]/meet-update.actions"
 
 function meetImageUrls(form: Pick<MeetFormState, "iconUrl" | "bannerUrl">) {

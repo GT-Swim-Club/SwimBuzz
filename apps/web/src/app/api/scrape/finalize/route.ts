@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { applyAthleteScrapeJob } from "../route"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 export const runtime = "nodejs"
 export const maxDuration = 300

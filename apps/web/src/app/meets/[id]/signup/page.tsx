@@ -1,12 +1,12 @@
-import BackLink from "@/components/BackLink"
-import MeetResourceIcon from "@/components/MeetResourceIcon"
-import { isEventOrder } from "@/lib/meet-event-order"
+import BackLink from "@/components/ui/BackLink"
+import MeetResourceIcon from "@/components/meet/MeetResourceIcon"
+import { isEventOrder } from "@/lib/meet/meet-event-order"
 import { Gender } from "@prisma/client"
 import { notFound, redirect } from "next/navigation"
-import { getSession } from "@/lib/session"
-import { RelativeInstantTime } from "@/components/RelativeDate"
+import { getSession } from "@/lib/auth/session"
+import { RelativeInstantTime } from "@/components/ui/RelativeDate"
 import { prisma } from "@/lib/prisma"
-import { resolveViewerAthleteId } from "@/lib/athlete-view-server"
+import { resolveViewerAthleteId } from "@/lib/athlete/athlete-view-server"
 import {
   isSignupAnswers,
   normalizeMeetSignupQuestions,
@@ -14,7 +14,7 @@ import {
   resolveSignupEventOptions,
   signupWindowStatus,
   signupWithdrawStatus,
-} from "@/lib/meet-signup"
+} from "@/lib/meet/meet-signup"
 import MeetSignupAthleteForm from "../MeetSignupAthleteForm"
 import EventOrderButton from "../EventOrderButton"
 

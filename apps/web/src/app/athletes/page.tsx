@@ -8,12 +8,12 @@ import AddAthleteButton from "./AddAthleteButton"
 import AthletesClientWrapper from "./AthletesClientWrapper"
 import RosterFilters from "./RosterFilters"
 import { parseSeason, resolveListedSeason } from "@/lib/season"
-import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete-view-server"
-import { getSession } from "@/lib/session"
+import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete/athlete-view-server"
+import { getSession } from "@/lib/auth/session"
 import {
   GalleryListViewToggle,
   ViewNavPanel,
-  ViewNavigationProvider } from "@/components/ViewNavigation"
+  ViewNavigationProvider } from "@/components/nav/ViewNavigation"
 
 export const dynamic = 'force-dynamic'
 

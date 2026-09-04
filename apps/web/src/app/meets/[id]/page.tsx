@@ -2,9 +2,9 @@ import { Suspense } from "react"
 import { prisma } from "@/lib/prisma"
 import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
-import BackLink from "@/components/BackLink"
-import PageLabelRegistrar from "@/components/PageLabelRegistrar"
-import { RelativeDateRangeTime } from "@/components/RelativeDate"
+import BackLink from "@/components/ui/BackLink"
+import PageLabelRegistrar from "@/components/nav/PageLabelRegistrar"
+import { RelativeDateRangeTime } from "@/components/ui/RelativeDate"
 import { Fragment } from "react"
 import ImportMeetButton from "@/app/athletes/ImportMeetButton"
 import ImportMeetResourcesButton from "./ImportMeetResourcesButton"
@@ -20,43 +20,43 @@ import EventOrderButton from "./EventOrderButton"
 import MeetSheetSummarySection from "./MeetSheetSummarySection"
 import ScrollToHash from "./ScrollToHash"
 import type { MeetFormState } from "../MeetFields"
-import { isEventOrder } from "@/lib/meet-event-order"
+import { isEventOrder } from "@/lib/meet/meet-event-order"
 import {
   isSheetSummary,
   meetHasImportedResults,
   mergeMeetResultEntries,
   swimsToMeetResults,
   isResultStatusesSummary,
-  collectMeetRosterAthleteIds } from "@/lib/meet-sheet-summary"
-import { isRelayResultsSummary } from "@/lib/relay-results"
+  collectMeetRosterAthleteIds } from "@/lib/meet/meet-sheet-summary"
+import { isRelayResultsSummary } from "@/lib/meet/relay-results"
 import {
   normalizeFinalsHeatSheetUrls,
   normalizeHeatSheetUrls,
-} from "@/lib/meet-files"
-import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete-view-server"
+} from "@/lib/meet/meet-files"
+import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete/athlete-view-server"
 import { Gender } from "@prisma/client"
-import MeetResourceIcon, { type MeetResourceKind } from "@/components/MeetResourceIcon"
-import FilePreviewButton from "@/components/FilePreview"
-import InfoIcon, { type InfoKind } from "@/components/InfoIcon"
-import { type TravelInfoKind } from "@/components/TravelInfoIcon"
+import MeetResourceIcon, { type MeetResourceKind } from "@/components/meet/MeetResourceIcon"
+import FilePreviewButton from "@/components/ui/FilePreview"
+import InfoIcon, { type InfoKind } from "@/components/ui/InfoIcon"
+import { type TravelInfoKind } from "@/components/ui/TravelInfoIcon"
 import TravelInfoButtons, { type TravelInfoItem } from "./TravelInfoButtons"
 import MeetSignupSection from "./MeetSignupSection"
 import MeetRoomSection from "./MeetRoomSection"
-import MeetCountdown from "@/components/MeetCountdown"
+import MeetCountdown from "@/components/meet/MeetCountdown"
 import {
   normalizeMeetSignupQuestions,
   normalizeSignupEntryTimes,
   resolveSignupEventOptions,
   resolveEditableSignupSheetKeys,
-} from "@/lib/meet-signup"
-import { isSignupAnswers } from "@/lib/meet-signup"
+} from "@/lib/meet/meet-signup"
+import { isSignupAnswers } from "@/lib/meet/meet-signup"
 import { athletePath, isCuid, meetPath } from "@/lib/slug"
-import StatsHighlights from "@/components/StatsHighlights"
-import { getSession } from "@/lib/session"
+import StatsHighlights from "@/components/ui/StatsHighlights"
+import { getSession } from "@/lib/auth/session"
 import {
   buildAthletePbMap,
   computeMeetPrepHighlights,
-  computeMeetResultHighlights } from "@/lib/meet-stats"
+  computeMeetResultHighlights } from "@/lib/meet/meet-stats"
 import { toDateInput, toTimeInput } from "@/lib/date-input"
 import { utcDayKey } from "@swimbuzz/shared"
 import LoadingComponent from "./loading"

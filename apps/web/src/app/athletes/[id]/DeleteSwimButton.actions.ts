@@ -2,9 +2,9 @@
 
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
-import { isRelayLeadoffSwimTag } from "@/lib/relay-results"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 /** Same logic as DELETE /api/swims/[id]. */
 export async function deleteAthleteSwim(swimId: string) {

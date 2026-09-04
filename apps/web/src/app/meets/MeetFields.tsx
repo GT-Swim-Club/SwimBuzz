@@ -1,14 +1,14 @@
 "use client"
 
-import BannerCropper from "@/components/BannerCropper"
+import BannerCropper from "@/components/athlete/BannerCropper"
 import { useEffect, useState } from "react"
 import { currentSeason, seasonOptions, upcomingSeason } from "@/lib/season"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
-import Modal, { ModalFooter } from "@/components/Modal"
-import { DatePicker, TimePicker, TimeZonePicker } from "@/components/CustomDateTimePicker"
-import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/FileDropzone"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import { DatePicker, TimePicker, TimeZonePicker } from "@/components/ui/CustomDateTimePicker"
+import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/ui/FileDropzone"
 import { useSession } from "next-auth/react"
-import { isStaffRole } from "@/lib/auth-roles"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 import { DEFAULT_TIME_ZONE } from "@swimbuzz/shared"
 
 export type MeetFormState = {

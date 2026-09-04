@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 import { prisma } from "@/lib/prisma"
 import {
   listSheetTabs,
@@ -9,9 +9,9 @@ import {
   SheetAccessExpiredError,
   SheetForbiddenError,
   SheetNotFoundError,
-} from "@/lib/google-sheets"
-import { normalizeMeetSignupQuestions, resolveSignupEventOptions } from "@/lib/meet-signup"
-import { buildTargetCatalog, suggestColumnMapping, type MappingContext } from "@/lib/form-import-columns"
+} from "@/lib/roster/google-sheets"
+import { normalizeMeetSignupQuestions, resolveSignupEventOptions } from "@/lib/meet/meet-signup"
+import { buildTargetCatalog, suggestColumnMapping, type MappingContext } from "@/lib/roster/form-import-columns"
 
 export const runtime = "nodejs"
 

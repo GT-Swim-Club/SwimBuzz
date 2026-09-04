@@ -5,7 +5,7 @@ import Link from "next/link"
 import AthleteGalleryCard from "./AthleteGalleryCard"
 import { athletePath } from "@/lib/slug"
 import { formatAthleteYearAndAge } from "@/lib/utils"
-import StaffBadge from "@/components/StaffBadge"
+import StaffBadge from "@/components/ui/StaffBadge"
 export default function AthletesClientWrapper({
   athletes,
   viewerAthleteId,

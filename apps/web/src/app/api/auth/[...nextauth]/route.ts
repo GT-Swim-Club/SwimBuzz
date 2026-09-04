@@ -4,8 +4,8 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 import { Role } from "@prisma/client"
-import { verifyEmailLoginCode } from "@/lib/email-login"
-import { readAndClearStaffLinkCookie } from "@/lib/staff-link"
+import { verifyEmailLoginCode } from "@/lib/auth/email-login"
+import { readAndClearStaffLinkCookie } from "@/lib/auth/staff-link"
 import {
   currentStaffTerm,
   staffAccountForEmail,

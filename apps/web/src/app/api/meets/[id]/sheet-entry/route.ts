@@ -8,12 +8,12 @@ import {
   isValidSignupEntryTime,
   normalizeSignupEntryTime,
   resolveSignupEventOptions,
-  updateManualIndividualSheetEntry } from "@/lib/meet-signup"
-import { isSheetSummary } from "@/lib/meet-sheet-summary"
-import { normalizeEventName } from "@/lib/swim-parse"
+  updateManualIndividualSheetEntry } from "@/lib/meet/meet-signup"
+import { isSheetSummary } from "@/lib/meet/meet-sheet-summary"
+import { normalizeEventName } from "@/lib/swim/swim-parse"
 import { Prisma } from "@prisma/client"
-import { getSession } from "@/lib/session"
-import { isStaffRole } from "@/lib/auth-roles"
+import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 
 export const runtime = "nodejs"
 

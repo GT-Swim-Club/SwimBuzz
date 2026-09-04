@@ -2,10 +2,10 @@
 
 import { useState, useTransition } from "react"
 import { parseTime } from "@/lib/utils"
-import Modal, { ModalFooter } from "@/components/Modal"
-import { SegmentedToggle, segmentedOptionClass } from "@/components/SegmentedToggle"
-import { DatePicker } from "@/components/CustomDateTimePicker"
-import { normalizeEventName } from "@/lib/swim-parse"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
+import { SegmentedToggle, segmentedOptionClass } from "@/components/ui/SegmentedToggle"
+import { DatePicker } from "@/components/ui/CustomDateTimePicker"
+import { normalizeEventName } from "@/lib/swim/swim-parse"
 import { addMeetSwim } from "./AddMeetSwimButton.actions"
 import { upsertRelayEntry } from "./AddEntryButton.actions"
 

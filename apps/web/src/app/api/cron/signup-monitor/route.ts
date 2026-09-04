@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import { requireCronSecret } from "@/lib/cron-auth"
-import { checkSignupStatus } from "@/lib/signup-monitor"
+import { requireCronSecret } from "@/lib/auth/cron-auth"
+import { checkSignupStatus } from "@/lib/notifications/signup-monitor"
 
 export const runtime = "nodejs"
 export const maxDuration = 60

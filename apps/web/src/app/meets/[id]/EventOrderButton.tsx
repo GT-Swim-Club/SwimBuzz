@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import type { EventOrder } from "@/lib/meet-event-order"
-import MeetResourceIcon from "@/components/MeetResourceIcon"
-import Modal, { ModalFooter } from "@/components/Modal"
+import type { EventOrder } from "@/lib/meet/meet-event-order"
+import MeetResourceIcon from "@/components/meet/MeetResourceIcon"
+import Modal, { ModalFooter } from "@/components/ui/Modal"
 import EventOrderTable from "./EventOrderTable"
 
 const buttonClass =

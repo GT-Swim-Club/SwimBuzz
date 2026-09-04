@@ -2,11 +2,11 @@
 
 import { useEffect, useState, useTransition, type ReactNode } from "react"
 import { createPortal } from "react-dom"
-import DontReloadNotice from "@/components/DontReloadNotice"
+import DontReloadNotice from "@/components/ui/DontReloadNotice"
 import { deleteRelayTeam, saveRelayTeam } from "./meet-relay.actions"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
-import type { SheetEntry } from "@/lib/meet-sheet-summary"
-import { normalizeEventName } from "@/lib/swim-parse"
+import type { SheetEntry } from "@/lib/meet/meet-sheet-summary"
+import { normalizeEventName } from "@/lib/swim/swim-parse"
 import { formatDisplayTime, formatSeedTimeDelta, formatOrdinal, podiumPlaceClass } from "@/lib/utils"
 import {
   displayRelayLetter,
@@ -19,7 +19,7 @@ import {
   sanitizeRelaySplitTime,
   type RelayGender,
   type RelayRound,
-} from "@/lib/relay-results"
+} from "@/lib/meet/relay-results"
 
 const RELAY_EVENTS = [
   "200 Medley Relay",

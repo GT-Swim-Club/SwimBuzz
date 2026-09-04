@@ -1,18 +1,18 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { notifyPracticePublished } from "@/lib/notifications"
+import { notifyPracticePublished } from "@/lib/notifications/notifications"
 import { prisma } from "@/lib/prisma"
-import { buildPracticeData, PracticeInputError, practiceSetSelect } from "@/lib/practice-input"
-import { isStaffRole } from "@/lib/auth-roles"
+import { buildPracticeData, PracticeInputError, practiceSetSelect } from "@/lib/practice/practice-input"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 import {
   PracticeEditLockError,
   assertCanMutatePractice,
-  type PracticeEditLockInfo } from "@/lib/practice-edit-lock"
+  type PracticeEditLockInfo } from "@/lib/practice/practice-edit-lock"
 import { uniquePracticeSlug } from "@/lib/slug"
 import { zonedDayKey } from "@swimbuzz/shared"
-import { getSession } from "@/lib/session"
-import { findUnmanagedPracticeTags } from "@/lib/practice-tag-catalog"
+import { getSession } from "@/lib/auth/session"
+import { findUnmanagedPracticeTags } from "@/lib/practice/practice-tag-catalog"
 import type { PracticeFormState } from "../PracticeEditor"
 
 export type PracticeMutationResult =
