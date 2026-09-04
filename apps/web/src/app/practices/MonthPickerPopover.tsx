@@ -35,7 +35,13 @@ export default function MonthPickerPopover({
   tags: string[]
   onClose: () => void
 }) {
-  const [viewedMonth, setViewedMonth] = useState(() => startOfUtcMonth(weekStart))
+  const [viewedMonth, setViewedMonth] = useState(() => {
+    if (selectedDayKey && /^\d{4}-\d{2}-\d{2}$/.test(selectedDayKey)) {
+      const [year, month, day] = selectedDayKey.split("-").map(Number)
+      return startOfUtcMonth(new Date(Date.UTC(year, month - 1, day)))
+    }
+    return startOfUtcMonth(weekStart)
+  })
   const gridStart = startOfUtcWeek(viewedMonth)
   const cells = Array.from({ length: 42 }, (_, i) => {
     const date = addUtcDays(gridStart, i)

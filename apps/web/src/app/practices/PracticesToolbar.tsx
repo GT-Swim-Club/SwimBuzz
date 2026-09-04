@@ -293,22 +293,22 @@ export default function PracticesToolbar({
         type="button"
         onClick={() => prefs.setSidebarOpen(false)}
         aria-label="Hide sidebar"
-        title="Hide sidebar"
         className={"hidden md:inline-flex " + controlClass}
       >
         <SidebarHideIcon />
+        <HoverDetail label="Hide sidebar" />
       </button>
       <button
         type="button"
         onClick={() => setSearchOpen(true)}
         aria-label="Search practices"
-        title="Search practices"
         className={controlClass}
       >
         <SearchIcon />
         {q && (
           <span aria-hidden className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
         )}
+        <HoverDetail label="Search practices" />
       </button>
 
       <div className="ml-auto flex items-center gap-2">
@@ -323,10 +323,10 @@ export default function PracticesToolbar({
           <Link
             href="/practices/new"
             aria-label="New practice"
-            title="New practice"
             className={controlClass + " border-0 bg-primary text-primary-text hover:bg-primary-hover"}
           >
             <PlusIcon />
+            <HoverDetail label="New practice" />
           </Link>
         )}
       </div>

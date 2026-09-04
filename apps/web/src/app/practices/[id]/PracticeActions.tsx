@@ -13,7 +13,8 @@ import {
   storePracticeEditLockHandoff,
   broadcastPracticeEditLockYield,
 } from "@/lib/practice/practice-edit-lock-client"
-import { deletePractice, setPracticePublished } from "./PracticeActions.actions"
+import { practicePath } from "@/lib/slug"
+import { deletePractice, duplicatePractice, setPracticePublished } from "./PracticeActions.actions"
 
 const iconCls = "h-3.5 w-3.5 shrink-0"
 
@@ -33,6 +34,25 @@ function PublishIcon({ className = iconCls }: { className?: string }) {
     >
       <path d="M12 19V5" />
       <polyline points="5 12 12 5 19 12" />
+    </svg>
+  )
+}
+
+function DuplicateIcon({ className = iconCls }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <rect x="9" y="9" width="13" height="13" rx="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
     </svg>
   )
 }
@@ -80,11 +100,13 @@ export default function PracticeActions({
   const router = useRouter()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [confirmPublish, setConfirmPublish] = useState(false)
+  const [confirmUnpublish, setConfirmUnpublish] = useState(false)
   const [editLockPending, setEditLockPending] = useState<PracticeEditLockInfo | null>(null)
   const [loading, setLoading] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const [duplicating, setDuplicating] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const busy = loading || isPending
+  const busy = loading || isPending || duplicating
 
   // Any active lock blocks this tab until it takes over (other user or other tab).
   const lockedElsewhere = Boolean(editLock?.locked)
@@ -147,10 +169,28 @@ export default function PracticeActions({
           return
         }
         setConfirmPublish(false)
+        setConfirmUnpublish(false)
       } catch {
         setError("Something went wrong")
       }
     })
+  }
+
+  async function handleDuplicate() {
+    setError(null)
+    setDuplicating(true)
+    try {
+      const result = await duplicatePractice(practiceId)
+      if (!result.ok) {
+        setError(result.error)
+        return
+      }
+      router.push(practicePath(result.slug ?? result.id))
+    } catch {
+      setError("Something went wrong")
+    } finally {
+      setDuplicating(false)
+    }
   }
 
   function handleDelete() {
@@ -185,7 +225,10 @@ export default function PracticeActions({
         {published ? (
           <button
             type="button"
-            onClick={() => togglePublished(false)}
+            onClick={() => {
+              setError(null)
+              setConfirmUnpublish(true)
+            }}
             disabled={busy || lockedElsewhere}
             aria-label="Unpublish practice"
             className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-border rounded-lg bg-background hover:bg-fill transition-colors disabled:opacity-40"
@@ -220,6 +263,16 @@ export default function PracticeActions({
         </button>
         <button
           type="button"
+          onClick={handleDuplicate}
+          disabled={busy}
+          aria-label="Duplicate practice"
+          className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-border rounded-lg bg-background hover:bg-fill transition-colors disabled:opacity-40"
+        >
+          <DuplicateIcon className="h-5 w-5" />
+          <HoverDetail label="Duplicate" />
+        </button>
+        <button
+          type="button"
           onClick={() => {
             setError(null)
             setConfirmDelete(true)
@@ -233,7 +286,7 @@ export default function PracticeActions({
         </button>
       </div>
 
-      {error && !confirmDelete && !confirmPublish && (
+      {error && !confirmDelete && !confirmPublish && !confirmUnpublish && (
         <p className="text-xs text-red-500">{error}</p>
       )}
       </div>
@@ -340,6 +393,36 @@ export default function PracticeActions({
               className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
             >
               {busy ? "Publishing…" : "Publish"}
+            </button>
+          </ModalFooter>
+        }
+      >
+        {error && <p className="text-sm text-red-500">{error}</p>}
+      </Modal>
+      <Modal
+        open={confirmUnpublish}
+        onClose={() => setConfirmUnpublish(false)}
+        closeDisabled={busy}
+        title={`Revert ${title} to draft?`}
+        description="This will hide it from athletes until it's published again."
+        maxWidth="sm"
+        footer={
+          <ModalFooter>
+            <button
+              type="button"
+              onClick={() => setConfirmUnpublish(false)}
+              disabled={busy}
+              className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary dark:hover:bg-fill-secondary dark:border border-border-secondary"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => togglePublished(false)}
+              disabled={busy}
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
+            >
+              {busy ? "Reverting…" : "Revert to Draft"}
             </button>
           </ModalFooter>
         }

@@ -16,6 +16,7 @@ import ActionIcon from "@/components/ui/ActionIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import PracticeViewSkeleton from "./[id]/PracticeViewSkeleton"
+import { getLocalDayKey } from "./PracticeCalendarLocal"
 
 export type SetFormState = {
   id?: string
@@ -60,7 +61,7 @@ function ensureSetDragIds(form: PracticeFormState): PracticeFormState {
 
 export const emptyPractice: PracticeFormState = {
   title: "",
-  date: new Date().toISOString().slice(0, 10),
+  date: getLocalDayKey(),
   startTime: "19:30",
   endTime: "21:00",
   timeZone: DEFAULT_TIME_ZONE,
@@ -163,6 +164,7 @@ export default function PracticeEditor({
   const [barOverContent, setBarOverContent] = useState(false)
   const [barMaxWidth, setBarMaxWidth] = useState("100%")
   const [exiting, setExiting] = useState(false)
+  const [confirmPublishState, setConfirmPublishState] = useState<boolean | null>(null)
   const barRef = useRef<HTMLDivElement>(null)
   const barContentEndRef = useRef<HTMLDivElement>(null)
   const setsSectionRef = useRef<HTMLElement>(null)
@@ -896,6 +898,14 @@ export default function PracticeEditor({
       router.replace(nextPath)
     })()
   }
+  function requestSave(published: boolean) {
+    const currentlyPublished = form.published === true
+    if (currentlyPublished !== published) {
+      setConfirmPublishState(published)
+      return
+    }
+    save(published)
+  }
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     save(false)
@@ -911,6 +921,7 @@ export default function PracticeEditor({
   const canSave = isPracticeSaveable(form)
   const waitingForAutosave = !persistedId || isDirty || autosaveState === "saving"
   const canPublishOrDraft = canSave && !waitingForAutosave
+  const draftButtonLabel = form.published === true ? "Revert to Draft" : "Keep As Draft"
   const autosaveMessage = !hasEditedContent
     ? "Make edits to save changes."
     : autosaveState === "saving"
@@ -978,7 +989,7 @@ export default function PracticeEditor({
 
         <div className="mt-2 space-y-2 text-foreground-secondary sm:text-base">
           <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
-            <div className="flex min-w-0 items-center gap-1.5 sm:flex-1 sm:basis-0">
+            <div className="flex min-w-0 items-center gap-1.5 sm:flex-[0.85] sm:basis-0">
               <InfoIcon kind="calendar" />
               <label className="sr-only" htmlFor="practice-date">Practice date</label>
               <div id="practice-date" className="min-w-0 flex-1">
@@ -991,8 +1002,7 @@ export default function PracticeEditor({
                 />
               </div>
             </div>
-            <span className="hidden text-foreground-tertiary sm:inline">·</span>
-            <div className="flex min-w-0 items-center gap-2 sm:flex-1 sm:basis-0">
+            <div className="flex min-w-0 items-center gap-2 sm:flex-[1.15] sm:basis-0">
               <span className="sr-only">Practice time</span>
               <div className="min-w-0 flex-1 [&>div]:w-full">
                 <TimePicker
@@ -1029,17 +1039,15 @@ export default function PracticeEditor({
                 />
               </div>
             </div>
-          </div>
-
-          <div className="flex min-w-0 items-center gap-1.5">
-            <InfoIcon kind="globe" />
-            <label className="sr-only" htmlFor="practice-timezone">Practice time zone</label>
-            <div id="practice-timezone" className="min-w-0 flex-1">
-              <TimeZonePicker
-                value={form.timeZone}
-                onChange={(value) => updateForm((current) => ({ ...current, timeZone: value }))}
-                ariaLabel="Practice time zone"
-              />
+            <div className="flex min-w-0 items-center gap-1.5 sm:flex-[1.15] sm:basis-0">
+              <label className="sr-only" htmlFor="practice-timezone">Practice time zone</label>
+              <div id="practice-timezone" className="min-w-0 flex-1">
+                <TimeZonePicker
+                  value={form.timeZone}
+                  onChange={(value) => updateForm((current) => ({ ...current, timeZone: value }))}
+                  ariaLabel="Practice time zone"
+                />
+              </div>
             </div>
           </div>
           {endBeforeStart && (
@@ -1233,9 +1241,9 @@ export default function PracticeEditor({
           >
             <button
               type="button"
-              onClick={() => save(false)}
+              onClick={() => requestSave(false)}
               disabled={!canPublishOrDraft}
-              aria-label={barOverContent ? "Keep as draft" : undefined}
+              aria-label={barOverContent ? draftButtonLabel : undefined}
               title={waitingForAutosave ? "Wait until changes are saved" : undefined}
               className={
                 barOverContent
@@ -1246,20 +1254,20 @@ export default function PracticeEditor({
               {barOverContent ? (
                 <>
                   <ActionIcon kind="check" className="h-4 w-4" />
-                  <span className="sr-only">Keep As Draft</span>
-                  <HoverDetail label="Keep As Draft" />
+                  <span className="sr-only">{draftButtonLabel}</span>
+                  <HoverDetail label={draftButtonLabel} />
                 </>
               ) : (
                 <>
                   <ActionIcon kind="check" className="h-4 w-4" />
-                  <span>Keep As Draft</span>
+                  <span>{draftButtonLabel}</span>
                 </>
               )}
 
             </button>
             <button
               type="button"
-              onClick={() => save(true)}
+              onClick={() => requestSave(true)}
               disabled={!canPublishOrDraft}
               aria-label={barOverContent ? "Publish practice" : undefined}
               title={waitingForAutosave ? "Wait until changes are saved" : undefined}
@@ -1311,6 +1319,45 @@ export default function PracticeEditor({
               className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-red-700"
             >
               Delete
+            </button>
+          </ModalFooter>
+        }
+      />
+      <Modal
+        open={confirmPublishState != null}
+        onClose={() => setConfirmPublishState(null)}
+        title={
+          confirmPublishState ? (
+            <>Publish <span className="font-medium text-foreground">{form.title.trim() || "Untitled Practice"}</span>?</>
+          ) : (
+            <>Revert <span className="font-medium text-foreground">{form.title.trim() || "Untitled Practice"}</span> to draft?</>
+          )
+        }
+        description={
+          confirmPublishState
+            ? "This will make it visible to all athletes."
+            : "This will hide it from athletes until it's published again."
+        }
+        maxWidth="sm"
+        footer={
+          <ModalFooter>
+            <button
+              type="button"
+              onClick={() => setConfirmPublishState(null)}
+              className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const next = confirmPublishState
+                setConfirmPublishState(null)
+                if (next != null) save(next)
+              }}
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover"
+            >
+              {confirmPublishState ? "Publish" : "Revert to Draft"}
             </button>
           </ModalFooter>
         }

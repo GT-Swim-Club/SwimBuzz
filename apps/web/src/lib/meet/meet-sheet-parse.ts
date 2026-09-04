@@ -90,6 +90,7 @@ async function callSheetParser(
       allEntries.push(...result.entries)
     }
   } catch (err) {
+    console.log(`[callSheetParser] team-filtered parse failed, retrying without team: ${err instanceof Error ? err.message : err}`)
     // If team code parsing fails, try without team filter
     const result = await parseMeetSheetPdf<ParsedSheetResult>(userId, url, {
       sheetType,
@@ -500,6 +501,7 @@ export async function resolveHeatSheetSummaries(
 
   for (const url of urls) {
     const cached = cachedByUrl?.[url]
+    const parseStart = Date.now()
     const parsed = cached?.entries
       ? {
           sheetType: cached.sheetType === "entries" ? "heat" : cached.sheetType,
@@ -509,14 +511,17 @@ export async function resolveHeatSheetSummaries(
           meet_name: cached.meet_name,
         }
       : await callSheetParser(userId, url, "heat", teamCode)
+    console.log(`[resolveHeatSheetSummaries] callSheetParser ${cached?.entries ? "(cached)" : ""} in ${Date.now() - parseStart}ms`)
     validateParsedSheet("heat", parsed, options)
     const allEntries = parsed.entries ?? []
     sheetNames.push(...collectSheetNames(allEntries))
     cachedParses[url] = toCachedSheetParse({ ...parsed, sheetType: "heat" })
 
+    const matchStart = Date.now()
     const matched = matchSheetToRoster(allEntries, roster, options).map(
       coercePrelimHeatTimedFinalsEntry
     )
+    console.log(`[resolveHeatSheetSummaries] matchSheetToRoster (${allEntries.length} entries x ${roster.length} roster) in ${Date.now() - matchStart}ms`)
     if (matched.length === 0) continue
 
     const nextSummary: SheetSummary = {

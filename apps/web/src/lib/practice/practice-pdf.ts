@@ -540,7 +540,7 @@ export function buildPracticePdf(input: PracticePdfInput): jsPDF {
 
   const placeBits = [
     input.location?.trim() || null,
-    input.totalDistance > 0 ? `${input.totalDistance.toLocaleString()} yards` : null,
+    input.totalDistance > 0 ? `${input.totalDistance} yards` : null,
   ].filter((bit): bit is string => Boolean(bit))
   if (placeBits.length > 0) {
     y += metaSize * 1.05 + mt05
@@ -612,7 +612,7 @@ export function buildPracticePdf(input: PracticePdfInput): jsPDF {
       y += setTitleLh
     }
     if (set.distance != null) {
-      const dist = set.distance.toLocaleString()
+      const dist = String(set.distance)
       setType(plainStyle(), distSize, PRIMARY_ACTIVE)
       const distWidth = doc.getTextWidth(dist)
       doc.text(dist, margin + contentWidth - cardPx - distWidth, titleTop)

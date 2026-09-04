@@ -1,5 +1,6 @@
 "use client"
 
+import { createPortal } from "react-dom"
 import { useEffect, useRef, useState, type ReactNode } from "react"
 
 type HoverDetailProps = {
@@ -8,71 +9,174 @@ type HoverDetailProps = {
   children?: ReactNode
   className?: string
   textClassName?: string
-  belowClassName?: string
-  aboveClassName?: string
-  revealClassName?: string
   offset?: number
   /** Pin the tooltip to one side instead of auto-picking based on viewport space — e.g. "above" for a trigger that sits directly over content the tooltip would otherwise cover. */
   placement?: "auto" | "above" | "below"
+  /** Only reveal on pointer hover at desktop widths (md+) — for triggers whose tap target overlaps a synthetic mobile "hover" that would otherwise pop the detail open on touch. Keyboard focus still reveals it everywhere. */
+  desktopOnly?: boolean
 }
+
+// Deliberate hover delay so the tooltip doesn't flash in as the pointer passes over the
+// trigger — but once one tooltip has just closed, the next one within REGROUP_WINDOW_MS
+// opens instantly, matching how OS/native tooltip groups behave when scanning nearby controls.
+const SHOW_DELAY_MS = 500
+const REGROUP_WINDOW_MS = 300
+const DESKTOP_QUERY = "(min-width: 768px)"
+// Minimum gap kept between the tooltip and the viewport edge when nudging it back into view.
+const VIEWPORT_PADDING = 8
+// Where the tooltip renders while its size/position haven't been measured yet — off-screen so
+// it never flashes at the wrong spot, but still laid out so getBoundingClientRect() works.
+const UNMEASURED_POSITION = { top: -9999, left: -9999, placement: "below" as const }
+
+let lastHiddenAt = 0
+
+type Position = { top: number; left: number; placement: "above" | "below" }
 
 export default function HoverDetail({
   label,
   children,
   className = "",
   textClassName = "text-foreground",
-  belowClassName = "top-full mt-1.5",
-  aboveClassName = "bottom-full mb-1.5",
-  revealClassName = "group-hover:visible group-hover:opacity-100 group-hover:delay-150 group-focus-visible:visible group-focus-visible:opacity-100 group-focus-visible:delay-0",
   offset = 6,
   placement: placementProp = "auto",
+  desktopOnly = false,
 }: HoverDetailProps) {
+  const anchorRef = useRef<HTMLSpanElement>(null)
   const tooltipRef = useRef<HTMLSpanElement>(null)
-  const [autoPlacement, setAutoPlacement] = useState<"above" | "below">("below")
-  const placement = placementProp === "auto" ? autoPlacement : placementProp
+  const [mounted, setMounted] = useState(false)
+  const [visible, setVisible] = useState(false)
+  const [position, setPosition] = useState<Position>(UNMEASURED_POSITION)
 
+  // The portal only exists client-side (document.body isn't available during SSR) — wait for
+  // mount so the server- and first-client-render markup match, avoiding a hydration mismatch.
+  useEffect(() => setMounted(true), [])
+
+  // Rendered in a portal (see below) so an ancestor with `overflow-hidden` — e.g. the
+  // collapsible practices sidebar — can never clip it; position is computed from
+  // viewport-relative rects, which line up with `position: fixed` with no scroll math needed.
   useEffect(() => {
-    if (placementProp !== "auto") return
-    const trigger = tooltipRef.current?.parentElement
+    const trigger = anchorRef.current?.parentElement
     if (!trigger) return
 
-    function updatePlacement() {
+    let showTimeout: ReturnType<typeof setTimeout> | null = null
+    let isShown = false
+
+    function clearShowTimeout() {
+      if (showTimeout) {
+        clearTimeout(showTimeout)
+        showTimeout = null
+      }
+    }
+
+    function computePosition(): Position | null {
       const tooltip = tooltipRef.current
-      if (!tooltip || !trigger) return
+      if (!tooltip || !trigger) return null
 
-      const availableBelow = window.innerHeight - trigger.getBoundingClientRect().bottom
-      const nextPlacement =
-        availableBelow < tooltip.getBoundingClientRect().height + offset
-          ? "above"
-          : "below"
+      const triggerRect = trigger.getBoundingClientRect()
+      const tooltipRect = tooltip.getBoundingClientRect()
 
-      setAutoPlacement((currentPlacement) =>
-        currentPlacement === nextPlacement ? currentPlacement : nextPlacement,
+      const roomBelow = window.innerHeight - triggerRect.bottom
+      const nextPlacement: "above" | "below" =
+        placementProp === "auto"
+          ? roomBelow < tooltipRect.height + offset
+            ? "above"
+            : "below"
+          : placementProp
+
+      const top =
+        nextPlacement === "below"
+          ? triggerRect.bottom + offset
+          : triggerRect.top - offset - tooltipRect.height
+
+      const naturalLeft = triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2
+      const maxLeft = Math.max(VIEWPORT_PADDING, window.innerWidth - VIEWPORT_PADDING - tooltipRect.width)
+      const left = Math.min(Math.max(naturalLeft, VIEWPORT_PADDING), maxLeft)
+
+      return { top, left, placement: nextPlacement }
+    }
+
+    function updatePosition() {
+      const next = computePosition()
+      if (!next) return
+      setPosition((current) =>
+        current.top === next.top && current.left === next.left && current.placement === next.placement
+          ? current
+          : next,
       )
     }
 
-    trigger.addEventListener("pointerenter", updatePlacement)
-    trigger.addEventListener("focusin", updatePlacement)
-    window.addEventListener("resize", updatePlacement)
-    window.addEventListener("scroll", updatePlacement, true)
+    function show(immediate: boolean) {
+      if (desktopOnly && !window.matchMedia(DESKTOP_QUERY).matches) return
+      clearShowTimeout()
+      updatePosition()
+      const delay = immediate || Date.now() - lastHiddenAt < REGROUP_WINDOW_MS ? 0 : SHOW_DELAY_MS
+      if (delay === 0) {
+        isShown = true
+        setVisible(true)
+      } else {
+        showTimeout = setTimeout(() => {
+          isShown = true
+          setVisible(true)
+        }, delay)
+      }
+    }
+
+    function hide() {
+      clearShowTimeout()
+      if (isShown) lastHiddenAt = Date.now()
+      isShown = false
+      setVisible(false)
+    }
+
+    function handlePointerEnter() {
+      show(false)
+    }
+
+    function handleFocusIn() {
+      show(true)
+    }
+
+    function handleViewportChange() {
+      if (isShown) updatePosition()
+    }
+
+    trigger.addEventListener("pointerenter", handlePointerEnter)
+    trigger.addEventListener("pointerleave", hide)
+    trigger.addEventListener("focusin", handleFocusIn)
+    trigger.addEventListener("focusout", hide)
+    window.addEventListener("resize", handleViewportChange)
+    window.addEventListener("scroll", handleViewportChange, true)
 
     return () => {
-      trigger.removeEventListener("pointerenter", updatePlacement)
-      trigger.removeEventListener("focusin", updatePlacement)
-      window.removeEventListener("resize", updatePlacement)
-      window.removeEventListener("scroll", updatePlacement, true)
+      clearShowTimeout()
+      trigger.removeEventListener("pointerenter", handlePointerEnter)
+      trigger.removeEventListener("pointerleave", hide)
+      trigger.removeEventListener("focusin", handleFocusIn)
+      trigger.removeEventListener("focusout", hide)
+      window.removeEventListener("resize", handleViewportChange)
+      window.removeEventListener("scroll", handleViewportChange, true)
     }
-  }, [offset, placementProp])
+  }, [desktopOnly, offset, placementProp])
 
   const lines = Array.isArray(label) ? label : null
 
-  return (
+  const tooltip = (
     <span
       ref={tooltipRef}
       role="tooltip"
-      className={`pointer-events-none absolute left-1/2 z-30 w-max -translate-x-1/2 invisible whitespace-pre-line text-left rounded-lg border border-border bg-background-elevated px-2.5 py-1 text-[11px] font-medium ${textClassName} shadow-md opacity-0 transition-opacity delay-0 duration-150 ${placement === "above" ? aboveClassName : belowClassName} ${revealClassName} ${className}`}
+      style={{ position: "fixed", top: position.top, left: position.left }}
+      className={`pointer-events-none z-50 w-max whitespace-pre-line text-left rounded-lg border border-border bg-background-elevated px-2.5 py-1 text-[11px] font-medium ${textClassName} shadow-md transition-opacity duration-150 ${
+        visible ? "visible opacity-100" : "invisible opacity-0"
+      } ${className}`}
     >
       {children ?? (lines ? lines.join("\n") : label)}
     </span>
+  )
+
+  return (
+    <>
+      <span ref={anchorRef} className="hidden" aria-hidden="true" />
+      {mounted ? createPortal(tooltip, document.body) : null}
+    </>
   )
 }

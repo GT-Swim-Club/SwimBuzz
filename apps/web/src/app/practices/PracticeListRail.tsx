@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useMemo } from "react"
-import { WEEKDAY_NAMES, buildWorkspaceHref, type PracticeRailItem } from "./workspace-params"
+import { MONTH_SHORT_NAMES, buildWorkspaceHref, type PracticeRailItem } from "./workspace-params"
 import { practicePath } from "@/lib/slug"
 import type { PracticeListSort } from "./usePracticePrefs"
 
@@ -29,7 +29,10 @@ function sortPractices(practices: PracticeRailItem[], sort: PracticeListSort) {
 function dayParts(dayKey: string) {
   const [y, m, d] = dayKey.split("-").map(Number)
   const date = new Date(Date.UTC(y, m - 1, d))
-  return { weekday: WEEKDAY_NAMES[date.getUTCDay()], dateNumber: date.getUTCDate() }
+  return {
+    dateNumber: date.getUTCDate(),
+    month: MONTH_SHORT_NAMES[date.getUTCMonth()],
+  }
 }
 
 export default function PracticeListRail({
@@ -59,7 +62,7 @@ export default function PracticeListRail({
     <div className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto rounded-xl border border-border-secondary bg-background p-2">
       {sorted.map((practice) => {
         const selected = Boolean(selectedSlug) && (practice.slug ?? practice.id) === selectedSlug
-        const { weekday, dateNumber } = dayParts(practice.dayKey)
+        const { dateNumber, month } = dayParts(practice.dayKey)
         return (
           <Link
             key={practice.id}
@@ -71,7 +74,7 @@ export default function PracticeListRail({
           >
             <div className="w-10 shrink-0 text-center">
               <div className="text-[11px] font-medium uppercase tracking-wide text-foreground-tertiary">
-                {weekday}
+                {month}
               </div>
               <div className="text-base font-semibold tabular-nums text-foreground">{dateNumber}</div>
             </div>
@@ -97,7 +100,7 @@ export default function PracticeListRail({
             )}
             {practice.totalDistance > 0 && (
               <span className="shrink-0 text-xs tabular-nums text-foreground-tertiary">
-                {practice.totalDistance.toLocaleString()}
+                {practice.totalDistance}
               </span>
             )}
           </Link>

@@ -41,7 +41,7 @@ export default function PracticeExportCapture({
   const range = formatZonedInstantRange(startsAt, endsAt, timeZone)
 
   return (
-    <div className="w-[896px] space-y-5 bg-background p-8 text-base text-foreground">
+    <div className="w-fit min-w-[420px] space-y-5 bg-background p-8 text-base text-foreground">
       <div>
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="min-w-0 text-4xl font-semibold text-foreground">
@@ -66,7 +66,7 @@ export default function PracticeExportCapture({
               </span>
             )}
             {location && totalDistance > 0 && <span>·</span>}
-            {totalDistance > 0 && <span>{totalDistance.toLocaleString()} yards</span>}
+            {totalDistance > 0 && <span>{totalDistance} yards</span>}
           </div>
         </div>
       </div>
@@ -90,22 +90,27 @@ export default function PracticeExportCapture({
         </div>
       )}
       <section className="rounded-2xl border border-border bg-background px-6 py-5 shadow-sm">
-        <div className="space-y-2">
+        <div>
           {sets.map((set) => (
-            <section key={set.id} className="py-2 first:pt-0 last:pb-0">
-              <div className="flex items-start justify-between gap-3">
+            <section
+              key={set.id}
+              className={`first:pt-0 last:pb-0 ${isHtmlEmpty(set.content) ? "pt-1 pb-0" : "py-2"}`}
+            >
+              <div className="flex items-center justify-between gap-3">
                 <h3 className="min-w-0 font-bold text-primary-active dark:text-primary-hover">
                   {set.title || "Set"}
                 </h3>
                 {set.distance != null && (
                   <span className="shrink-0 text-xs font-medium text-primary-active dark:text-primary-hover">
-                    {set.distance.toLocaleString()}
+                    {set.distance}
                   </span>
                 )}
               </div>
-              <div className="mt-1">
-                <FormattedText text={set.content} className="text-base" />
-              </div>
+              {!isHtmlEmpty(set.content) && (
+                <div className="mt-1">
+                  <FormattedText text={set.content} className="text-base" />
+                </div>
+              )}
             </section>
           ))}
         </div>

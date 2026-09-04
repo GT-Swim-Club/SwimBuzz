@@ -70,7 +70,7 @@ export const PracticeExportCapture = forwardRef<
             ) : null}
             {location && totalDistance > 0 ? <Text style={styles.metaText}>·</Text> : null}
             {totalDistance > 0 ? (
-              <Text style={styles.metaText}>{totalDistance.toLocaleString()} yards</Text>
+              <Text style={styles.metaText}>{totalDistance} yards</Text>
             ) : null}
           </View>
         ) : null}
@@ -95,7 +95,7 @@ export const PracticeExportCapture = forwardRef<
             <View style={styles.setHeader}>
               <Text style={styles.setTitle}>{set.title || "Set"}</Text>
               {set.distance != null ? (
-                <Text style={styles.setDistance}>{set.distance.toLocaleString()}</Text>
+                <Text style={styles.setDistance}>{set.distance}</Text>
               ) : null}
             </View>
             <View style={styles.setBody}>

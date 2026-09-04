@@ -209,7 +209,7 @@ export default function PracticeDetail({
                   </span>
                 )}
                 {location && totalDistance > 0 && <span>·</span>}
-                {totalDistance > 0 && <span>{totalDistance.toLocaleString()} yards</span>}
+                {totalDistance > 0 && <span>{totalDistance} yards</span>}
               </div>
             </div>
           </div>
@@ -291,14 +291,14 @@ export default function PracticeDetail({
           )}
         </div>
       )}
-      <section className="rounded-2xl border border-border-secondary bg-background px-6 pb-3 pt-4 shadow-sm">
+      <section className="rounded-2xl border border-border-secondary bg-background px-6 py-5 shadow-sm">
         <div>
           {sets.map((set) => (
             <section
               key={set.id}
-              className="py-3 first:pt-0 last:pb-0"
+              className={`first:pt-0 last:pb-0 ${isHtmlEmpty(set.content) ? "pt-1 pb-0" : "py-2"}`}
             >
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <h3 className="text-[15px] font-bold text-primary-active dark:text-primary-hover">
                     {set.title || "Set"}
@@ -306,13 +306,15 @@ export default function PracticeDetail({
                 </div>
                 {set.distance != null && (
                   <span className="shrink-0 text-xs font-medium tabular-nums text-primary-active dark:text-primary-hover">
-                    {set.distance.toLocaleString()}
+                    {set.distance}
                   </span>
                 )}
               </div>
-              <div className="mt-1">
-                <FormattedText text={set.content} />
-              </div>
+              {!isHtmlEmpty(set.content) && (
+                <div className="mt-1">
+                  <FormattedText text={set.content} />
+                </div>
+              )}
             </section>
           ))}
         </div>
@@ -328,9 +330,9 @@ export default function PracticeDetail({
     )}
     <div
       aria-hidden
-      className="pointer-events-none absolute left-[-10000px] top-0"
+      className="pointer-events-none absolute left-[-10000px] top-0 w-[1600px]"
     >
-      <div ref={exportCaptureRef}>
+      <div ref={exportCaptureRef} className="w-fit">
         <PracticeExportCapture
           title={title}
           showDraft={isCoach && !published}

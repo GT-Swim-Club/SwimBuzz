@@ -11,6 +11,9 @@ export function normalizePracticeHtml(html: string): string {
     .replace(/<\/(?:div|p)>/gi, "\n")
     .replace(/<(?:div|p)(?:\s+[^>]*)?>/gi, "")
     .replace(/<(?:\/)?script(?:\s+[^>]*)?>/gi, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/^\n+/, "")
+    .replace(/\n+$/, "")
 }
 
 export function FormattedText({

@@ -225,7 +225,7 @@ COLUMN_HEADER = re.compile(
     re.I,
 )
 
-_SEED_TIME_TOKEN = r"(NT|NQT|DFS|SCR|DNS|NS|DQ|\d{1,2}:\d{2}\.\d{2}|\d{2,3}\.\d{2})"
+_SEED_TIME_TOKEN = r"(?:NT|NQT|DFS|SCR|DNS|NS|DQ|\d{1,2}:\d{2}\.\d{2}|\d{2,3}\.\d{2})"
 
 INDIVIDUAL_ROW = re.compile(
     r"^(\d+)\s+"

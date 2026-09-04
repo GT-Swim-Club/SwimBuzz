@@ -134,6 +134,14 @@ function CopyPngMenuIcon({ className }: { className?: string }) {
   )
 }
 
+// Keep the exported image from turning into a tall sliver (many short sets) or a flat
+// strip (one short set) by nudging its width toward a saner width:height ratio.
+// height must never exceed 2x width, so width:height never drops below 0.5.
+const MIN_EXPORT_ASPECT_RATIO = 0.5
+const MAX_EXPORT_ASPECT_RATIO = 2.0
+const MIN_EXPORT_WIDTH = 420
+const MAX_EXPORT_WIDTH = 1600
+
 type Copied = "link" | "text" | "png" | null
 
 export default function SharePracticeButton({
@@ -242,15 +250,42 @@ export default function SharePracticeButton({
       getComputedStyle(document.body).backgroundColor ||
       getComputedStyle(document.documentElement).getPropertyValue("--brand-color-bg-container").trim() ||
       "#ffffff"
-    const dataUrl = await toPng(node, {
-      pixelRatio: 2,
-      cacheBust: true,
-      backgroundColor,
-      width: node.scrollWidth,
-      height: node.scrollHeight,
-    })
-    const res = await fetch(dataUrl)
-    return res.blob()
+
+    // `node` is an empty w-fit wrapper around PracticeExportCapture's own root div,
+    // which carries min-w-[420px] and its own w-fit. Forcing a width on `node` is a
+    // no-op — that child never grows past its own natural content width, so the
+    // element that actually needs to be widened/narrowed is the child itself.
+    const target = (node.firstElementChild as HTMLElement | null) ?? node
+
+    let width = node.scrollWidth
+    let height = node.scrollHeight
+    const ratio = width / height
+
+    try {
+      if (ratio < MIN_EXPORT_ASPECT_RATIO || ratio > MAX_EXPORT_ASPECT_RATIO) {
+        const targetRatio = ratio < MIN_EXPORT_ASPECT_RATIO ? MIN_EXPORT_ASPECT_RATIO : MAX_EXPORT_ASPECT_RATIO
+        const targetWidth = Math.round(
+          Math.min(MAX_EXPORT_WIDTH, Math.max(MIN_EXPORT_WIDTH, height * targetRatio))
+        )
+        // Forcing an explicit width overrides the target's fit-content sizing and lets
+        // its content reflow, so re-measure height after the browser relayouts.
+        target.style.width = `${targetWidth}px`
+        width = node.scrollWidth
+        height = node.scrollHeight
+      }
+
+      const dataUrl = await toPng(node, {
+        pixelRatio: 3,
+        cacheBust: true,
+        backgroundColor,
+        width,
+        height,
+      })
+      const res = await fetch(dataUrl)
+      return res.blob()
+    } finally {
+      target.style.width = ""
+    }
   }
 
   async function exportPng() {

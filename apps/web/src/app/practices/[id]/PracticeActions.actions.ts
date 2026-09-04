@@ -10,7 +10,7 @@ import {
   assertCanMutatePractice,
   type PracticeEditLockInfo } from "@/lib/practice/practice-edit-lock"
 import { uniquePracticeSlug } from "@/lib/slug"
-import { zonedDayKey } from "@swimbuzz/shared"
+import { zonedDayKey, zonedTimeToUtc, utcToZonedParts } from "@swimbuzz/shared"
 import { getSession } from "@/lib/auth/session"
 import { findUnmanagedPracticeTags } from "@/lib/practice/practice-tag-catalog"
 import type { PracticeFormState } from "../PracticeEditor"
@@ -119,6 +119,60 @@ export async function setPracticePublished(
     if (err instanceof PracticeInputError) return { ok: false, error: err.message }
     throw err
   }
+}
+
+export type PracticeDuplicateResult =
+  | { ok: true; id: string; slug: string | null }
+  | { ok: false; error: string }
+
+/** Creates a copy of a practice with today's date/time (same time-of-day and duration as
+ * the original) as an unpublished draft, so it doesn't fire a publish notification. */
+export async function duplicatePractice(practiceId: string): Promise<PracticeDuplicateResult> {
+  const session = await getSession()
+  if (!session || !isStaffRole(session.user.role)) {
+    throw new Error("Forbidden")
+  }
+
+  const existing = await prisma.practice.findUnique({
+    where: { id: practiceId },
+    include: { sets: { orderBy: { order: "asc" }, select: practiceSetSelect } },
+  })
+  if (!existing) return { ok: false, error: "Not found" }
+
+  const timeZone = existing.timeZone
+  const startParts = utcToZonedParts(existing.startsAt, timeZone)
+  const clock =
+    String(startParts.hour).padStart(2, "0") + ":" + String(startParts.minute).padStart(2, "0")
+  const startsAt = zonedTimeToUtc(zonedDayKey(new Date(), timeZone), clock, timeZone)
+  const endsAt = new Date(
+    startsAt.getTime() + (existing.endsAt.getTime() - existing.startsAt.getTime())
+  )
+
+  const practice = await prisma.practice.create({
+    data: {
+      slug: await uniquePracticeSlug(startsAt, timeZone),
+      title: existing.title,
+      startsAt,
+      endsAt,
+      timeZone,
+      location: existing.location,
+      focus: existing.focus,
+      tags: existing.tags,
+      published: false,
+      createdById: session.user.id,
+      sets: {
+        create: existing.sets.map((s) => ({
+          order: s.order,
+          title: s.title,
+          content: s.content,
+          distance: s.distance})),
+      },
+    },
+    select: { id: true, slug: true },
+  })
+
+  revalidatePath("/practices", "page")
+  return { ok: true, id: practice.id, slug: practice.slug }
 }
 
 /** Same logic as DELETE /api/practices/[id]. */

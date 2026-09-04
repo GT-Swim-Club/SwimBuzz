@@ -412,7 +412,11 @@ function PickerTrigger({
         aria-expanded={open}
         aria-haspopup="dialog"
         disabled={disabled}
-        onClick={onPickerClick}
+        onMouseDown={(event) => event.preventDefault()}
+        onClick={() => {
+          onPickerClick()
+          inputRef.current?.focus()
+        }}
         className="grid h-6 w-6 shrink-0 place-items-center rounded text-foreground-tertiary transition hover:bg-fill-secondary hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/45 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <PickerToggleIcon icon={icon} />

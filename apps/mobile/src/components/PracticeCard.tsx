@@ -48,7 +48,7 @@ export function PracticeCard({
         ) : null}
       </View>
       {yards > 0 ? (
-        <Text style={styles.yards}>{yards.toLocaleString()} yards</Text>
+        <Text style={styles.yards}>{yards} yards</Text>
       ) : null}
       {tags.length > 0 ? (
         <View style={styles.tags}>

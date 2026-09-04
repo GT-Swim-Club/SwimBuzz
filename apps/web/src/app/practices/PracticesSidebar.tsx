@@ -24,7 +24,7 @@ import {
 } from "./workspace-params"
 
 const MIN_WIDTH = 310
-const MAX_WIDTH_CAP = 480
+const MAX_WIDTH_FRACTION = 1 / 2
 
 function readTagsFromParams(searchParams: URLSearchParams): string[] {
   return parseTags(searchParams.getAll("tag"))
@@ -167,7 +167,16 @@ export default function PracticesSidebar({
     function onMove(event: PointerEvent) {
       if (!draggingRef.current || !containerRef.current) return
       const rect = containerRef.current.getBoundingClientRect()
-      const maxWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH_CAP, rect.width - 6 - 64 - 400))
+      // Non-resizable horizontal space: the 6px divider track plus the grid's
+      // own column gap on both sides of it (md:gap-5) — both eat into
+      // rect.width alongside the two resizable columns, so they have to be
+      // subtracted before splitting the remainder for an accurate 50/50 max.
+      const gap = parseFloat(getComputedStyle(containerRef.current).columnGap) || 0
+      const overhead = 6 + gap * 2
+      const maxWidth = Math.max(
+        MIN_WIDTH,
+        Math.min((rect.width - overhead) * MAX_WIDTH_FRACTION, rect.width - overhead - 400)
+      )
       const raw = event.clientX - rect.left
       setDragWidth(Math.min(maxWidth, Math.max(MIN_WIDTH, raw)))
     }

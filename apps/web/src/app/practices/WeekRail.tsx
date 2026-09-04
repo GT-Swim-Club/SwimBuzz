@@ -192,11 +192,10 @@ export default function WeekRail({
           return (
             <div key={key} data-weekday={weekday} className="practices-rail-day flex flex-1 flex-col gap-2">
               {dayPractices.length > 0 ? (
-                dayPractices.map((practice, index) => (
+                dayPractices.map((practice) => (
                   <WeekRailRow
                     key={practice.id}
                     practice={practice}
-                    showDate={index === 0}
                     weekday={WEEKDAY_NAMES[weekday]}
                     dateNumber={date.getUTCDate()}
                     isToday={isToday}
@@ -282,7 +281,6 @@ function EmptyDayRow({
 
 function WeekRailRow({
   practice,
-  showDate,
   weekday,
   dateNumber,
   isToday,
@@ -291,7 +289,6 @@ function WeekRailRow({
   sidebarWidth,
 }: {
   practice: PracticeRailItem
-  showDate: boolean
   weekday: string
   dateNumber: number
   isToday: boolean
@@ -309,11 +306,7 @@ function WeekRailRow({
           : "border-border-secondary hover:bg-fill-secondary")
       }
     >
-      {showDate ? (
-        <DateColumn weekday={weekday} dateNumber={dateNumber} isToday={isToday} dimmed={false} selected={selected} />
-      ) : (
-        <div className="w-10 shrink-0" aria-hidden />
-      )}
+      <DateColumn weekday={weekday} dateNumber={dateNumber} isToday={isToday} dimmed={false} selected={selected} />
       <div className="min-w-0 flex-1">
         <p className="min-w-0 truncate text-sm font-medium text-foreground">{practice.title}</p>
         {practice.tags.length > 0 && (
@@ -336,7 +329,7 @@ function WeekRailRow({
       )}
       {practice.totalDistance > 0 && sidebarWidth >= 300 && (
         <span className="shrink-0 text-xs tabular-nums text-foreground-tertiary">
-          {practice.totalDistance.toLocaleString()}
+          {practice.totalDistance}
         </span>
       )}
     </Link>

@@ -127,8 +127,13 @@ async function callParser<T>(
     return data as T
   }
 
+  const fetchStart = Date.now()
   const bytes = await fetchMeetFileBytes(url)
-  return runLocalParserCli<T>(kind, bytes, options)
+  console.log(`[pdf-parser-client] fetchMeetFileBytes(${kind}) ${bytes.length}b in ${Date.now() - fetchStart}ms`)
+  const parseStart = Date.now()
+  const result = await runLocalParserCli<T>(kind, bytes, options)
+  console.log(`[pdf-parser-client] runLocalParserCli(${kind}) in ${Date.now() - parseStart}ms`)
+  return result
 }
 
 export async function parseMeetPdf<T>(

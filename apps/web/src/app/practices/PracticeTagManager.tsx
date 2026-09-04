@@ -4,6 +4,7 @@ import { type AnimationEvent, type KeyboardEvent, useEffect, useRef, useState, u
 import { PRACTICE_TAG_MAX_COUNT, PRACTICE_TAG_NAME_MAX_LENGTH } from "@/lib/practice/practice-tags"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import ActionIcon from "@/components/ui/ActionIcon"
+import HoverDetail from "@/components/ui/HoverDetail"
 import { createPracticeTag, deletePracticeTag } from "./PracticeTagManager.actions"
 
 type PracticeTag = { id: string; name: string }
@@ -154,7 +155,6 @@ export default function PracticeTagManager({
           onClick={() => setOpen((v) => !v)}
           aria-haspopup="true"
           aria-label="Filter by tag"
-          title="Filter by tag"
           className={controlClass}
         >
           <TagIcon />
@@ -163,6 +163,7 @@ export default function PracticeTagManager({
               {activeTags.length}
             </span>
           )}
+          <HoverDetail label="Filter by tag" />
         </button>
         {open && (
           <div className="absolute left-0 top-full z-40 mt-1.5 max-h-[360px] w-max min-w-[180px] max-w-[280px] overflow-y-auto rounded-xl border border-border-secondary bg-background p-2 shadow-lg">

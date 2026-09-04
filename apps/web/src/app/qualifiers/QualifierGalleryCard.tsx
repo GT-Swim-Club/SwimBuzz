@@ -20,10 +20,8 @@ function SwimDetailPanel({ event }: { event: QualifyingEvent }) {
 
   return (
     <HoverDetail
-      belowClassName="top-full mt-2"
-      aboveClassName="bottom-full mb-2"
       offset={8}
-      revealClassName="md:group-hover:visible md:group-hover:opacity-100 md:group-hover:delay-300 md:group-focus-visible:visible md:group-focus-visible:opacity-100"
+      desktopOnly
       className="w-64 max-w-[calc(100vw-2rem)] whitespace-normal rounded-lg p-2.5 text-left shadow-xl"
     >
       <span className="block space-y-1.5 text-xs">

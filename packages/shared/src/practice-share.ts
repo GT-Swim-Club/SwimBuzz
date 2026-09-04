@@ -80,12 +80,12 @@ export function practiceShareText(input: PracticeShareInput): string {
   }
 
   for (const set of input.sets) {
-    const heading = set.distance != null ? `${set.title || "Set"} (${set.distance.toLocaleString()})` : set.title || "Set"
+    const heading = set.distance != null ? `${set.title || "Set"} (${set.distance})` : set.title || "Set"
     lines.push("", heading, htmlToPlainText(set.content))
   }
 
   if (input.totalDistance > 0) {
-    lines.push("", `Total: ${input.totalDistance.toLocaleString()} yards`)
+    lines.push("", `Total: ${input.totalDistance} yards`)
   }
 
   return lines.join("\n").trim()
