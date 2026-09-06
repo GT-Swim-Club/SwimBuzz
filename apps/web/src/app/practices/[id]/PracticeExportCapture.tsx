@@ -1,6 +1,6 @@
 "use client"
 
-import { formatZonedInstantRange } from "@swimbuzz/shared"
+import { formatZonedInstantRange, groupPracticeSetsIntoRows } from "@swimbuzz/shared"
 import { FormattedText, isHtmlEmpty } from "@/components/ui/FormattedText"
 import InfoIcon from "@/components/ui/InfoIcon"
 
@@ -9,6 +9,7 @@ type PracticeExportSet = {
   title: string | null
   content: string
   distance: number | null
+  startsNewRow?: boolean
 }
 
 /** Off-screen copy of the practice for PNG export. Not shown in the page layout. */
@@ -91,27 +92,38 @@ export default function PracticeExportCapture({
       )}
       <section className="rounded-2xl border border-border bg-background px-6 py-5 shadow-sm">
         <div>
-          {sets.map((set) => (
-            <section
-              key={set.id}
-              className={`first:pt-0 last:pb-0 ${isHtmlEmpty(set.content) ? "pt-1 pb-0" : "py-2"}`}
+          {groupPracticeSetsIntoRows(sets).map((row) => (
+            <div
+              key={row[0].id}
+              className={
+                "first:pt-0 last:pb-0 py-2 " + (row.length > 1 ? "grid gap-4" : "")
+              }
+              style={
+                row.length > 1
+                  ? { gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))` }
+                  : undefined
+              }
             >
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="min-w-0 font-bold text-primary-active dark:text-primary-hover">
-                  {set.title || "Set"}
-                </h3>
-                {set.distance != null && (
-                  <span className="shrink-0 text-xs font-medium text-primary-active dark:text-primary-hover">
-                    {set.distance}
-                  </span>
-                )}
-              </div>
-              {!isHtmlEmpty(set.content) && (
-                <div className="mt-1">
-                  <FormattedText text={set.content} className="text-base" />
-                </div>
-              )}
-            </section>
+              {row.map((set) => (
+                <section key={set.id}>
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="min-w-0 font-bold text-primary-active dark:text-primary-hover">
+                      {set.title || "Set"}
+                    </h3>
+                    {set.distance != null && (
+                      <span className="shrink-0 text-xs font-medium text-primary-active dark:text-primary-hover">
+                        {set.distance}
+                      </span>
+                    )}
+                  </div>
+                  {!isHtmlEmpty(set.content) && (
+                    <div className="mt-1">
+                      <FormattedText text={set.content} className="text-base" />
+                    </div>
+                  )}
+                </section>
+              ))}
+            </div>
           ))}
         </div>
       </section>

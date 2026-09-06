@@ -368,6 +368,9 @@ model PracticeSet {
   practiceId String
   practice   Practice     @relation(fields: [practiceId], references: [id], onDelete: Cascade)
   order      Int          @default(0)
+  /// True if this set starts a new row in the practice layout; false means it sits
+  /// side-by-side with the previous set (in reading order) in the same row.
+  startsNewRow Boolean    @default(true)
   title      String?
   content    String
   distance   Int?

@@ -92,6 +92,7 @@ export async function POST(req: Request) {
         sets: {
           create: data.sets.map((s) => ({
             order: s.order,
+            startsNewRow: s.startsNewRow,
             title: s.title,
             content: s.content,
             distance: s.distance}))}},

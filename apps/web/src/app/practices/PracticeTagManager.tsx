@@ -163,10 +163,10 @@ export default function PracticeTagManager({
               {activeTags.length}
             </span>
           )}
-          <HoverDetail label="Filter by tag" />
+          {!open && <HoverDetail label="Filter by tag" />}
         </button>
         {open && (
-          <div className="absolute left-0 top-full z-40 mt-1.5 max-h-[360px] w-max min-w-[180px] max-w-[280px] overflow-y-auto rounded-xl border border-border-secondary bg-background p-2 shadow-lg">
+          <div className="absolute right-0 top-full z-40 mt-1.5 max-h-[360px] w-max min-w-[180px] max-w-[280px] overflow-y-auto rounded-xl border border-border-secondary bg-background p-2 shadow-lg">
             <div className="mb-1.5 flex items-center justify-between gap-3 border-b border-border-secondary px-2 pb-2 pt-1">
               <span className="text-xs font-semibold uppercase tracking-wide text-foreground-secondary">Filter by tag</span>
               {activeTags.length > 0 && (

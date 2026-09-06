@@ -13,7 +13,7 @@ import {
   storePracticeEditLockHandoff,
   broadcastPracticeEditLockYield,
 } from "@/lib/practice/practice-edit-lock-client"
-import { practicePath } from "@/lib/slug"
+import { practiceEditPath } from "@/lib/slug"
 import { deletePractice, duplicatePractice, setPracticePublished } from "./PracticeActions.actions"
 
 const iconCls = "h-3.5 w-3.5 shrink-0"
@@ -185,7 +185,7 @@ export default function PracticeActions({
         setError(result.error)
         return
       }
-      router.push(practicePath(result.slug ?? result.id))
+      router.push(practiceEditPath(result.slug ?? result.id))
     } catch {
       setError("Something went wrong")
     } finally {

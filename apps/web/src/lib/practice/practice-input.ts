@@ -9,6 +9,7 @@ export const MAX_PRACTICE_SETS = 10
 export type NormalizedSet = {
   id?: string
   order: number
+  startsNewRow: boolean
   title: string | null
   content: string
   distance: number | null
@@ -17,6 +18,7 @@ export type NormalizedSet = {
 export const practiceSetSelect = {
   id: true,
   order: true,
+  startsNewRow: true,
   title: true,
   content: true,
   distance: true,
@@ -70,9 +72,12 @@ function normalizeSet(raw: unknown, index: number): NormalizedSet {
   }
 
   const id = optionalString(s.id)
+  // The first set trivially starts its own row regardless of what's sent.
+  const startsNewRow = index === 0 || s.startsNewRow !== false
   return {
     ...(id ? { id } : {}),
     order: index,
+    startsNewRow,
     title: optionalString(s.title),
     content,
     distance,

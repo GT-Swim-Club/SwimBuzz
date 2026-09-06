@@ -14,6 +14,27 @@ export type PracticeShareSet = {
   title: string | null
   content: string
   distance: number | null
+  /** False means this set sits side-by-side with the previous one, in the same row. */
+  startsNewRow?: boolean
+}
+
+/**
+ * Groups a practice's sets (already in reading order) into rows for display,
+ * where consecutive sets with `startsNewRow: false` are rendered side-by-side.
+ * Shared by the web and mobile read-only views and PNG export captures.
+ */
+export function groupPracticeSetsIntoRows<T extends { startsNewRow?: boolean }>(
+  sets: T[]
+): T[][] {
+  const rows: T[][] = []
+  for (const set of sets) {
+    if (set.startsNewRow === false && rows.length > 0) {
+      rows[rows.length - 1].push(set)
+    } else {
+      rows.push([set])
+    }
+  }
+  return rows
 }
 
 export type PracticeShareInput = {

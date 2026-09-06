@@ -98,6 +98,7 @@ export async function PATCH(
             where: { id: s.id },
             data: {
               order: s.order,
+              startsNewRow: s.startsNewRow,
               title: s.title,
               content: s.content,
               distance: s.distance}})
@@ -106,6 +107,7 @@ export async function PATCH(
             data: {
               practiceId: id,
               order: s.order,
+              startsNewRow: s.startsNewRow,
               title: s.title,
               content: s.content,
               distance: s.distance}})

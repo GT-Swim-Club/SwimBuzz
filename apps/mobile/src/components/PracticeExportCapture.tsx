@@ -2,6 +2,7 @@ import { forwardRef } from "react"
 import { StyleSheet, Text, View } from "react-native"
 import {
   formatZonedInstantRange,
+  groupPracticeSetsIntoRows,
   isHtmlEmpty,
   type PracticeShareSet,
 } from "@swimbuzz/shared"
@@ -90,17 +91,21 @@ export const PracticeExportCapture = forwardRef<
       ) : null}
 
       <View style={styles.setsBlock}>
-        {sets.map((set, index) => (
-          <View key={index} style={styles.setRow}>
-            <View style={styles.setHeader}>
-              <Text style={styles.setTitle}>{set.title || "Set"}</Text>
-              {set.distance != null ? (
-                <Text style={styles.setDistance}>{set.distance}</Text>
-              ) : null}
-            </View>
-            <View style={styles.setBody}>
-              <FormattedText html={set.content} />
-            </View>
+        {groupPracticeSetsIntoRows(sets).map((row, rowIndex) => (
+          <View key={rowIndex} style={row.length > 1 ? styles.setRowGroup : undefined}>
+            {row.map((set, colIndex) => (
+              <View key={colIndex} style={[styles.setRow, row.length > 1 && styles.setColumn]}>
+                <View style={styles.setHeader}>
+                  <Text style={styles.setTitle}>{set.title || "Set"}</Text>
+                  {set.distance != null ? (
+                    <Text style={styles.setDistance}>{set.distance}</Text>
+                  ) : null}
+                </View>
+                <View style={styles.setBody}>
+                  <FormattedText html={set.content} />
+                </View>
+              </View>
+            ))}
           </View>
         ))}
       </View>
@@ -179,6 +184,14 @@ function makeStyles(c: ReturnType<typeof usePalette>) {
     },
     setRow: {
       paddingVertical: spacing.xs,
+    },
+    setRowGroup: {
+      flexDirection: "row",
+      gap: spacing.md,
+    },
+    setColumn: {
+      flex: 1,
+      minWidth: 0,
     },
     setHeader: {
       flexDirection: "row",

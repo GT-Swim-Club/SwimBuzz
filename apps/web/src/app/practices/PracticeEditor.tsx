@@ -24,7 +24,11 @@ export type SetFormState = {
   content: string
   distance: string
   dragId?: string
+  /** False means this set sits side-by-side with the previous one, in the same row. */
+  startsNewRow?: boolean
 }
+
+type SetDropZone = "left" | "right" | "top" | "bottom"
 
 export type PracticeFormState = {
   title: string
@@ -161,6 +165,7 @@ export default function PracticeEditor({
   const [autosaveVersion, setAutosaveVersion] = useState(0)
   const [draggedSetKey, setDraggedSetKey] = useState<string | null>(null)
   const [dropTargetSetKey, setDropTargetSetKey] = useState<string | null>(null)
+  const [dropZone, setDropZone] = useState<SetDropZone | null>(null)
   const [barOverContent, setBarOverContent] = useState(false)
   const [barMaxWidth, setBarMaxWidth] = useState("100%")
   const [exiting, setExiting] = useState(false)
@@ -171,6 +176,10 @@ export default function PracticeEditor({
   const updateBarOverlapRef = useRef(() => {})
   const draggedSetKeyRef = useRef<string | null>(null)
   const dropTargetSetKeyRef = useRef<string | null>(null)
+  const dropZoneRef = useRef<SetDropZone | null>(null)
+  const autoScrollSpeedRef = useRef(0)
+  const autoScrollRafRef = useRef<number | null>(null)
+  const lastPointerRef = useRef({ x: 0, y: 0 })
   const setRowRefs = useRef(new Map<string, HTMLElement>())
   const releasedRef = useRef(false)
   const lostRef = useRef(false)
@@ -737,40 +746,126 @@ export default function PracticeEditor({
     if (!pendingDeletion) return
     updateForm((f) => {
       if (f.sets.length <= 1) return f
-      return {
-        ...f,
-        sets: f.sets.filter(
-          (set) => (set.dragId ?? set.id) !== pendingDeletion.dragId,
-        ),
-      }
+      return { ...f, sets: removeSetKeepingRows(f.sets, pendingDeletion.dragId).sets }
     })
     setSetPendingDeletion(null)
   }
-  function reorderSetList(sets: SetFormState[], sourceKey: string, targetKey: string) {
-    const next = [...sets]
-    const sourceIndex = next.findIndex((set) => set.dragId === sourceKey)
-    if (sourceIndex < 0 || sourceKey === targetKey) return sets
-    const targetIndex = next.findIndex((set) => set.dragId === targetKey)
-    if (targetIndex < 0) return sets
-    const [movedSet] = next.splice(sourceIndex, 1)
-    next.splice(targetIndex, 0, movedSet)
-    return next
+  /** Index 0 always starts a row; otherwise treat a missing flag as true (its own row). */
+  function normalizeRowFlags(sets: SetFormState[]): SetFormState[] {
+    return sets.map((set, index) => ({
+      ...set,
+      startsNewRow: index === 0 || set.startsNewRow !== false,
+    }))
   }
 
-  function getSetDropTarget(clientX: number, clientY: number): string | null {
-    const target = document
-      .elementFromPoint(clientX, clientY)
-      ?.closest<HTMLElement>("[data-practice-set-id]")
-    return target?.dataset.practiceSetId ?? null
+  /** Groups sets (in order) into rows, joining consecutive `startsNewRow: false` sets. */
+  function buildSetRows(sets: SetFormState[]): { set: SetFormState; index: number }[][] {
+    const rows: { set: SetFormState; index: number }[][] = []
+    sets.forEach((set, index) => {
+      if (index === 0 || set.startsNewRow !== false) rows.push([])
+      rows[rows.length - 1].push({ set, index })
+    })
+    return rows
+  }
+
+  /** Removes a set by key, promoting its immediate follower to row-leader if it was one. */
+  function removeSetKeepingRows(
+    sets: SetFormState[],
+    key: string
+  ): { sets: SetFormState[]; removed: SetFormState | null } {
+    const working = normalizeRowFlags(sets)
+    const index = working.findIndex((set) => (set.dragId ?? set.id) === key)
+    if (index < 0) return { sets, removed: null }
+    const [removed] = working.splice(index, 1)
+    if (removed.startsNewRow && index < working.length && working[index].startsNewRow === false) {
+      working[index] = { ...working[index], startsNewRow: true }
+    }
+    return { sets: normalizeRowFlags(working), removed }
+  }
+
+  /**
+   * Moves the set `sourceKey` next to `targetKey`. Dropping on the target's left/right
+   * half joins its row (as leader or follower); top/bottom relocates the whole row.
+   */
+  function moveSetTo(
+    sets: SetFormState[],
+    sourceKey: string,
+    targetKey: string,
+    zone: SetDropZone
+  ): SetFormState[] {
+    if (sourceKey === targetKey) return sets
+    const { sets: withoutSource, removed: source } = removeSetKeepingRows(sets, sourceKey)
+    if (!source) return sets
+    const targetIndex = withoutSource.findIndex((set) => (set.dragId ?? set.id) === targetKey)
+    if (targetIndex < 0) return sets
+    const working = [...withoutSource]
+
+    if (zone === "left" || zone === "right") {
+      const isTargetLeader = working[targetIndex].startsNewRow
+      if (zone === "left") {
+        if (isTargetLeader) working[targetIndex] = { ...working[targetIndex], startsNewRow: false }
+        working.splice(targetIndex, 0, { ...source, startsNewRow: isTargetLeader })
+      } else {
+        working.splice(targetIndex + 1, 0, { ...source, startsNewRow: false })
+      }
+    } else {
+      let rowStart = targetIndex
+      while (rowStart > 0 && working[rowStart].startsNewRow === false) rowStart--
+      let rowEnd = targetIndex
+      while (rowEnd + 1 < working.length && working[rowEnd + 1].startsNewRow === false) rowEnd++
+      const insertAt = zone === "top" ? rowStart : rowEnd + 1
+      working.splice(insertAt, 0, { ...source, startsNewRow: true })
+    }
+
+    return normalizeRowFlags(working)
+  }
+
+  /**
+   * Finds the set card nearest the pointer rather than the one strictly under it, so
+   * there's no dead zone in the gaps between/around cards where a drag would do nothing.
+   */
+  function getSetDropInfo(clientX: number, clientY: number): { key: string; zone: SetDropZone } | null {
+    const cards = setsSectionRef.current?.querySelectorAll<HTMLElement>("[data-practice-set-id]")
+    if (!cards || cards.length === 0) return null
+
+    const sourceKey = draggedSetKeyRef.current
+    let closestKey: string | null = null
+    let closestRect: DOMRect | null = null
+    let closestDist = Infinity
+    for (const card of cards) {
+      const key = card.dataset.practiceSetId
+      // Skip the card being dragged — it's never a valid drop target, and leaving it in
+      // the running would let it win ties in the gap around its own (ghosted) position.
+      if (!key || key === sourceKey) continue
+      const rect = card.getBoundingClientRect()
+      const dx = clientX < rect.left ? rect.left - clientX : clientX > rect.right ? clientX - rect.right : 0
+      const dy = clientY < rect.top ? rect.top - clientY : clientY > rect.bottom ? clientY - rect.bottom : 0
+      const dist = dx * dx + dy * dy
+      if (dist < closestDist) {
+        closestDist = dist
+        closestKey = key
+        closestRect = rect
+      }
+    }
+    if (!closestKey || !closestRect) return null
+
+    const xRatio = closestRect.width > 0 ? (clientX - closestRect.left) / closestRect.width : 0.5
+    if (xRatio < 0.25) return { key: closestKey, zone: "left" }
+    if (xRatio > 0.75) return { key: closestKey, zone: "right" }
+    const yRatio = closestRect.height > 0 ? (clientY - closestRect.top) / closestRect.height : 0.5
+    return { key: closestKey, zone: yRatio < 0.5 ? "top" : "bottom" }
   }
 
   function updateSetDropTarget(clientX: number, clientY: number) {
     const sourceKey = draggedSetKeyRef.current
     if (!sourceKey) return
-    const targetKey = getSetDropTarget(clientX, clientY)
-    const nextTarget = targetKey && targetKey !== sourceKey ? targetKey : null
+    const info = getSetDropInfo(clientX, clientY)
+    const nextTarget = info && info.key !== sourceKey ? info.key : null
+    const nextZone = nextTarget ? info!.zone : null
     dropTargetSetKeyRef.current = nextTarget
+    dropZoneRef.current = nextZone
     setDropTargetSetKey((current) => (current === nextTarget ? current : nextTarget))
+    setDropZone((current) => (current === nextZone ? current : nextZone))
   }
 
   function captureSetRowPositions(): Map<string, DOMRect> {
@@ -806,6 +901,54 @@ export default function PracticeEditor({
     })
   }
 
+  // Edge-scroll while dragging a set near the top/bottom of the viewport, like
+  // dragging a card in Trello/Notion/etc — the page scrolls so you can drop further
+  // up or down than what's currently visible.
+  const AUTO_SCROLL_EDGE_PX = 80
+  const AUTO_SCROLL_MAX_SPEED = 18
+
+  function computeAutoScrollSpeed(clientY: number): number {
+    const viewportHeight = window.innerHeight
+    if (clientY < AUTO_SCROLL_EDGE_PX) {
+      const intensity = (AUTO_SCROLL_EDGE_PX - clientY) / AUTO_SCROLL_EDGE_PX
+      return -Math.ceil(intensity * AUTO_SCROLL_MAX_SPEED)
+    }
+    if (clientY > viewportHeight - AUTO_SCROLL_EDGE_PX) {
+      const intensity = (clientY - (viewportHeight - AUTO_SCROLL_EDGE_PX)) / AUTO_SCROLL_EDGE_PX
+      return Math.ceil(intensity * AUTO_SCROLL_MAX_SPEED)
+    }
+    return 0
+  }
+
+  function autoScrollTick() {
+    const speed = autoScrollSpeedRef.current
+    if (speed === 0) {
+      autoScrollRafRef.current = null
+      return
+    }
+    window.scrollBy(0, speed)
+    // The page moved under a stationary cursor, so the hovered drop target needs
+    // recomputing even without a fresh pointermove event.
+    updateSetDropTarget(lastPointerRef.current.x, lastPointerRef.current.y)
+    autoScrollRafRef.current = window.requestAnimationFrame(autoScrollTick)
+  }
+
+  function updateAutoScroll(clientX: number, clientY: number) {
+    lastPointerRef.current = { x: clientX, y: clientY }
+    autoScrollSpeedRef.current = computeAutoScrollSpeed(clientY)
+    if (autoScrollSpeedRef.current !== 0 && autoScrollRafRef.current == null) {
+      autoScrollRafRef.current = window.requestAnimationFrame(autoScrollTick)
+    }
+  }
+
+  function stopAutoScroll() {
+    autoScrollSpeedRef.current = 0
+    if (autoScrollRafRef.current != null) {
+      window.cancelAnimationFrame(autoScrollRafRef.current)
+      autoScrollRafRef.current = null
+    }
+  }
+
   function handleSetPointerDown(event: PointerEvent<HTMLButtonElement>, dragId: string) {
     if (event.button !== 0) return
     event.preventDefault()
@@ -814,35 +957,46 @@ export default function PracticeEditor({
     setDraggedSetKey(dragId)
     setDropTargetSetKey(null)
     dropTargetSetKeyRef.current = null
+    setDropZone(null)
+    dropZoneRef.current = null
   }
 
   function handleSetPointerMove(event: PointerEvent<HTMLButtonElement>) {
     updateSetDropTarget(event.clientX, event.clientY)
+    updateAutoScroll(event.clientX, event.clientY)
   }
 
   function handleSetPointerUp(event: PointerEvent<HTMLButtonElement>) {
+    stopAutoScroll()
     const sourceKey = draggedSetKeyRef.current
-    const targetKey =
-      dropTargetSetKeyRef.current ?? getSetDropTarget(event.clientX, event.clientY)
-    if (sourceKey && targetKey && sourceKey !== targetKey) {
+    const info =
+      dropTargetSetKeyRef.current && dropZoneRef.current
+        ? { key: dropTargetSetKeyRef.current, zone: dropZoneRef.current }
+        : getSetDropInfo(event.clientX, event.clientY)
+    if (sourceKey && info && info.key !== sourceKey) {
       const previousPositions = captureSetRowPositions()
       updateForm((current) => ({
         ...current,
-        sets: reorderSetList(current.sets, sourceKey, targetKey),
+        sets: moveSetTo(current.sets, sourceKey, info.key, info.zone),
       }))
       animateSetReorder(previousPositions)
     }
     draggedSetKeyRef.current = null
     dropTargetSetKeyRef.current = null
+    dropZoneRef.current = null
     setDraggedSetKey(null)
     setDropTargetSetKey(null)
+    setDropZone(null)
   }
 
   function handleSetPointerCancel() {
+    stopAutoScroll()
     draggedSetKeyRef.current = null
     dropTargetSetKeyRef.current = null
+    dropZoneRef.current = null
     setDraggedSetKey(null)
     setDropTargetSetKey(null)
+    setDropZone(null)
   }
   async function handleCancel() {
     if (unsavedChangesRef.current) {
@@ -1117,88 +1271,154 @@ export default function PracticeEditor({
       </section>
       <section ref={setsSectionRef} className="rounded-2xl border border-border bg-background shadow-sm">
         <div>
-          {form.sets.map((set, index) => {
-            const dragId = set.dragId ?? set.id ?? "set-" + index
-            const isDragging = draggedSetKey === dragId
-            const isDropTarget = dropTargetSetKey === dragId && !isDragging
-            const targetFieldClass = isDropTarget
-              ? "border-primary/50 bg-primary/5 focus:ring-primary/20"
-              : ""
+          {buildSetRows(form.sets).map((row, rowIndex) => {
+            const rowKeys = row.map(
+              ({ set, index }) => set.dragId ?? set.id ?? "set-" + index
+            )
+            const rowEdge =
+              dropTargetSetKey != null && rowKeys.includes(dropTargetSetKey)
+                ? dropZone === "top" || dropZone === "bottom"
+                  ? dropZone
+                  : null
+                : null
 
             return (
-
-            <section
-              key={dragId}
-              ref={(element) => {
-                if (element) setRowRefs.current.set(dragId, element)
-                else setRowRefs.current.delete(dragId)
-              }}
-              data-practice-set-id={dragId}
+            <div
+              key={row[0].set.dragId ?? row[0].set.id ?? "row-" + rowIndex}
               className={
-                "relative px-4 py-4 first:pt-4 last:pb-1 transition-[background-color,box-shadow,opacity] sm:px-5 sm:first:pt-5 sm:last:pb-1 " +
-                (isDragging ? "opacity-40 " : "") +
-                (isDropTarget
-                  ? "rounded-xl bg-primary/10 shadow-[inset_0_0_0_1px] shadow-primary/30"
-                  : "")
+                "relative px-4 py-4 first:pt-4 last:pb-1 sm:px-5 sm:first:pt-5 sm:last:pb-1 " +
+                (row.length > 1 ? "grid gap-3" : "")
+              }
+              style={
+                row.length > 1
+                  ? { gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))` }
+                  : undefined
               }
             >
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_9rem_auto] sm:items-end">
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-primary-active dark:text-primary-hover">Set Name</label>
-                  <input
-                    placeholder="Set"
-                    value={set.title}
-                    onChange={(event) => updateSet(index, { title: event.target.value })}
-                    className={inputCls + " " + targetFieldClass}
+              {rowEdge && (
+                <>
+                  <span
+                    className={
+                      "pointer-events-none absolute inset-x-4 z-20 h-[3px] rounded-full bg-primary sm:inset-x-5 " +
+                      (rowEdge === "top" ? "-top-[7px]" : "-bottom-[7px]")
+                    }
                   />
-                </div>
-                <div>
-                  <label className={labelCls}>Distance (yards)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    step={25}
-                    value={set.distance}
-                    onChange={(event) => updateSet(index, { distance: event.target.value })}
-                    className={inputCls + " " + targetFieldClass}
-                  />
-                </div>
-                <div className="flex items-center justify-end gap-1">
-                  <button
-                    type="button"
-                    onPointerDown={(event) => handleSetPointerDown(event, dragId)}
-                    onPointerMove={handleSetPointerMove}
-                    onPointerUp={handleSetPointerUp}
-                    onPointerCancel={handleSetPointerCancel}
-                    onLostPointerCapture={handleSetPointerCancel}
-                    className="group relative grid h-9 w-8 touch-none select-none cursor-grab place-items-center rounded-lg text-foreground-tertiary transition-colors hover:bg-fill-secondary hover:text-foreground active:cursor-grabbing focus-visible:bg-fill-secondary focus-visible:outline-none"
-                    aria-label={"Drag " + (set.title || "set " + (index + 1)) + " to reorder"}
+                  <span
+                    className={
+                      "pointer-events-none absolute left-4 z-20 whitespace-nowrap rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold leading-none text-primary-text shadow-sm sm:left-5 " +
+                      (rowEdge === "top" ? "-top-[26px]" : "-bottom-[26px]")
+                    }
                   >
-                    <span aria-hidden="true" className="text-xl leading-none tracking-tighter">⠿</span>
-                    <HoverDetail label="Drag to reorder" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSetPendingDeletion({ dragId, title: set.title })}
-                    disabled={form.sets.length === 1}
-                    aria-label="Delete set"
-                    className="group relative grid h-9 w-9 place-items-center rounded-lg border border-red-200 text-red-600 transition-colors hover:bg-red-50 disabled:opacity-30 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/30"
+                    New row {rowEdge === "top" ? "above" : "below"}
+                  </span>
+                </>
+              )}
+              {row.map(({ set, index }) => {
+                const dragId = set.dragId ?? set.id ?? "set-" + index
+                const isDragging = draggedSetKey === dragId
+                const isDropTarget = dropTargetSetKey === dragId && !isDragging
+                const sideEdge =
+                  isDropTarget && (dropZone === "left" || dropZone === "right")
+                    ? dropZone
+                    : null
+                const targetFieldClass = isDropTarget
+                  ? "border-primary/50 bg-primary/5 focus:ring-primary/20"
+                  : ""
+
+                return (
+                  <section
+                    key={dragId}
+                    ref={(element) => {
+                      if (element) setRowRefs.current.set(dragId, element)
+                      else setRowRefs.current.delete(dragId)
+                    }}
+                    data-practice-set-id={dragId}
+                    className={
+                      "relative rounded-xl p-2 -m-2 transition-[background-color,box-shadow,opacity] " +
+                      (isDragging ? "opacity-40 " : "") +
+                      (isDropTarget
+                        ? "bg-primary/10 shadow-[inset_0_0_0_1px] shadow-primary/30 "
+                        : "")
+                    }
                   >
-                    <ActionIcon kind="delete" className="h-4 w-4" />
-                    <HoverDetail label="Delete" />
-                  </button>
-                </div>
-              </div>
-              <div className="mt-3">
-                <label className={labelCls}>Workout</label>
-                <RichTextField
-                  rows={4}
-                  value={set.content}
-                  onChange={(content) => updateSet(index, { content })}
-                  className={"bg-background " + targetFieldClass}
-                />
-              </div>
-            </section>
+                    {sideEdge && (
+                      <>
+                        <span
+                          className={
+                            "pointer-events-none absolute inset-y-2 z-20 w-[3px] rounded-full bg-primary " +
+                            (sideEdge === "left" ? "-left-1.5" : "-right-1.5")
+                          }
+                        />
+                        <span
+                          className={
+                            "pointer-events-none absolute -top-[26px] z-20 whitespace-nowrap rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold leading-none text-primary-text shadow-sm " +
+                            (sideEdge === "left" ? "left-1" : "right-1")
+                          }
+                        >
+                          Side-by-side
+                        </span>
+                      </>
+                    )}
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_9rem_auto] sm:items-end">
+                      <div>
+                        <label className="mb-1 block text-xs font-medium text-primary-active dark:text-primary-hover">Set Name</label>
+                        <input
+                          placeholder="Set"
+                          value={set.title}
+                          onChange={(event) => updateSet(index, { title: event.target.value })}
+                          className={inputCls + " " + targetFieldClass}
+                        />
+                      </div>
+                      <div>
+                        <label className={labelCls}>Distance (yards)</label>
+                        <input
+                          type="number"
+                          min={0}
+                          step={25}
+                          value={set.distance}
+                          onChange={(event) => updateSet(index, { distance: event.target.value })}
+                          className={inputCls + " " + targetFieldClass}
+                        />
+                      </div>
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          type="button"
+                          onPointerDown={(event) => handleSetPointerDown(event, dragId)}
+                          onPointerMove={handleSetPointerMove}
+                          onPointerUp={handleSetPointerUp}
+                          onPointerCancel={handleSetPointerCancel}
+                          onLostPointerCapture={handleSetPointerCancel}
+                          className="group relative grid h-9 w-8 touch-none select-none cursor-grab place-items-center rounded-lg text-foreground-tertiary transition-colors hover:bg-fill-secondary hover:text-foreground active:cursor-grabbing focus-visible:bg-fill-secondary focus-visible:outline-none"
+                          aria-label={"Drag " + (set.title || "set " + (index + 1)) + " to reorder, or next to another set"}
+                        >
+                          <span aria-hidden="true" className="text-xl leading-none tracking-tighter">⠿</span>
+                          {!isDragging && <HoverDetail label="Reorganize" />}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSetPendingDeletion({ dragId, title: set.title })}
+                          disabled={form.sets.length === 1}
+                          aria-label="Delete set"
+                          className="group relative grid h-9 w-9 place-items-center rounded-lg border border-red-200 text-red-600 transition-colors hover:bg-red-50 disabled:opacity-30 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/30"
+                        >
+                          <ActionIcon kind="delete" className="h-4 w-4" />
+                          <HoverDetail label="Delete" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <label className={labelCls}>Workout</label>
+                      <RichTextField
+                        rows={4}
+                        value={set.content}
+                        onChange={(content) => updateSet(index, { content })}
+                        className={"bg-background " + targetFieldClass}
+                      />
+                    </div>
+                  </section>
+                )
+              })}
+            </div>
             )
           })}
         </div>

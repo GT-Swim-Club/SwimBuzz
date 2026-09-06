@@ -16,13 +16,14 @@ import InfoIcon from "@/components/ui/InfoIcon"
 import ActionIcon from "@/components/ui/ActionIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
 import PracticeEditSkeleton from "./PracticeEditSkeleton"
-import type { StaffTitle } from "@swimbuzz/shared"
+import { groupPracticeSetsIntoRows, type StaffTitle } from "@swimbuzz/shared"
 
 type PracticeSetView = {
   id: string
   title: string | null
   content: string
   distance: number | null
+  startsNewRow?: boolean
 }
 
 type PracticeCommentView = {
@@ -293,29 +294,40 @@ export default function PracticeDetail({
       )}
       <section className="rounded-2xl border border-border-secondary bg-background px-6 py-5 shadow-sm">
         <div>
-          {sets.map((set) => (
-            <section
-              key={set.id}
-              className={`first:pt-0 last:pb-0 ${isHtmlEmpty(set.content) ? "pt-1 pb-0" : "py-2"}`}
+          {groupPracticeSetsIntoRows(sets).map((row) => (
+            <div
+              key={row[0].id}
+              className={
+                "first:pt-0 last:pb-0 py-2 " + (row.length > 1 ? "grid gap-4" : "")
+              }
+              style={
+                row.length > 1
+                  ? { gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))` }
+                  : undefined
+              }
             >
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <h3 className="text-[15px] font-bold text-primary-active dark:text-primary-hover">
-                    {set.title || "Set"}
-                  </h3>
-                </div>
-                {set.distance != null && (
-                  <span className="shrink-0 text-xs font-medium tabular-nums text-primary-active dark:text-primary-hover">
-                    {set.distance}
-                  </span>
-                )}
-              </div>
-              {!isHtmlEmpty(set.content) && (
-                <div className="mt-1">
-                  <FormattedText text={set.content} />
-                </div>
-              )}
-            </section>
+              {row.map((set) => (
+                <section key={set.id}>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <h3 className="text-[15px] font-bold text-primary-active dark:text-primary-hover">
+                        {set.title || "Set"}
+                      </h3>
+                    </div>
+                    {set.distance != null && (
+                      <span className="shrink-0 text-xs font-medium tabular-nums text-primary-active dark:text-primary-hover">
+                        {set.distance}
+                      </span>
+                    )}
+                  </div>
+                  {!isHtmlEmpty(set.content) && (
+                    <div className="mt-1">
+                      <FormattedText text={set.content} />
+                    </div>
+                  )}
+                </section>
+              ))}
+            </div>
           ))}
         </div>
       </section>

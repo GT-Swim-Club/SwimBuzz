@@ -47,6 +47,7 @@ export default async function PracticeEditPage({
       title: set.title ?? "",
       content: set.content,
       distance: set.distance != null ? String(set.distance) : "",
+      startsNewRow: set.startsNewRow,
     })),
   }
 

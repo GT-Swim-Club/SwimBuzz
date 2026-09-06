@@ -73,6 +73,7 @@ async function PracticeDetailLoader({ param }: { param: string }) {
       title: s.title ?? "",
       content: s.content,
       distance: s.distance != null ? String(s.distance) : "",
+      startsNewRow: s.startsNewRow,
     })),
   }
 
@@ -93,6 +94,7 @@ async function PracticeDetailLoader({ param }: { param: string }) {
         title: s.title,
         content: s.content,
         distance: s.distance,
+        startsNewRow: s.startsNewRow,
       }))}
       totalDistance={totalDistance}
       initial={initial}

@@ -11,6 +11,7 @@ import {
   DEFAULT_TIME_ZONE,
   formatDateTime,
   formatFullDate,
+  groupPracticeSetsIntoRows,
   isHtmlEmpty,
   isStaffRole,
   practiceShareFilename,
@@ -57,6 +58,7 @@ type PracticeSet = {
   title?: string | null
   content: string
   distance?: number | null
+  startsNewRow?: boolean
 }
 
 type PracticeComment = {
@@ -186,6 +188,7 @@ export default function PracticeDetailScreen() {
     title: s.title ?? null,
     content: s.content,
     distance: s.distance ?? null,
+    startsNewRow: s.startsNewRow,
   }))
   const totalDistance = sets.reduce((sum, s) => sum + (s.distance ?? 0), 0)
   // Named separately from `practice` so the nested functions below (which TS
@@ -465,9 +468,12 @@ export default function PracticeDetailScreen() {
             : String(practice.focus),
         tags: Array.isArray(practice.tags) ? practice.tags : [],
         published: nextPublished,
-        sets: editSets.map((s, index) => ({
+        // This screen only edits existing sets' text in place (no add/reorder/delete),
+        // so pass through the original order/row layout untouched.
+        sets: editSets.map((s) => ({
           id: s.id,
-          order: index,
+          order: s.order,
+          startsNewRow: s.startsNewRow ?? true,
           title: s.title?.trim() || null,
           content: s.content.trim(),
           distance: s.distance ?? null,
@@ -652,18 +658,31 @@ export default function PracticeDetailScreen() {
           ) : sets.length === 0 ? (
             <Muted>No sets published.</Muted>
           ) : (
-            sets
-              .slice()
-              .sort((a, b) => a.order - b.order)
-              .map((set) => (
-                <View key={set.id} style={{ marginBottom: spacing.md }}>
-                  <Body style={{ fontWeight: "700" }}>
-                    {set.title || `Set ${set.order + 1}`}
-                    {set.distance ? ` · ${set.distance}y` : ""}
-                  </Body>
-                  <FormattedText html={set.content} />
-                </View>
-              ))
+            groupPracticeSetsIntoRows(
+              sets.slice().sort((a, b) => a.order - b.order)
+            ).map((row, rowIndex) => (
+              <View
+                key={rowIndex}
+                style={
+                  row.length > 1
+                    ? { flexDirection: "row", gap: spacing.md, marginBottom: spacing.md }
+                    : undefined
+                }
+              >
+                {row.map((set) => (
+                  <View
+                    key={set.id}
+                    style={row.length > 1 ? { flex: 1, minWidth: 0 } : { marginBottom: spacing.md }}
+                  >
+                    <Body style={{ fontWeight: "700" }}>
+                      {set.title || `Set ${set.order + 1}`}
+                      {set.distance ? ` · ${set.distance}y` : ""}
+                    </Body>
+                    <FormattedText html={set.content} />
+                  </View>
+                ))}
+              </View>
+            ))
           )}
         </Section>
 
