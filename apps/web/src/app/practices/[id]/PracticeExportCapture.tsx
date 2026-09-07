@@ -96,7 +96,7 @@ export default function PracticeExportCapture({
             <div
               key={row[0].id}
               className={
-                "first:pt-0 last:pb-0 py-2 " + (row.length > 1 ? "grid gap-4" : "")
+                "first:pt-0 last:pb-0 py-2 " + (row.length > 1 ? "grid gap-10" : "")
               }
               style={
                 row.length > 1

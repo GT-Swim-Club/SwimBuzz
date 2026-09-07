@@ -15,6 +15,7 @@ import { getSession } from "@/lib/auth/session"
 const PATCH_KEYS: NotificationPreferenceKey[] = [
   "practicePublished",
   "meetRosterInfo",
+  "meetDrops",
   "practiceComments",
   "profileChanges",
 ]

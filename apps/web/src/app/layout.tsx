@@ -25,8 +25,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const session = await getSession()
 
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen overflow-x-hidden bg-background">
+    <html lang="en" className="overflow-hidden" suppressHydrationWarning>
+      <body className="flex h-dvh flex-col overflow-x-hidden overflow-y-auto bg-background">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <SessionProvider session={session}>
             <ImportTaskProvider>
@@ -35,9 +35,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <Suspense fallback={null}>
                   <NavigationTracker />
                 </Suspense>
-                <div className="mx-auto w-full min-w-0 max-w-7xl px-3 py-5 sm:px-6 sm:py-8 lg:px-8 xl:max-w-none xl:px-[clamp(8rem,10vw,18rem)]">
-                  {children}
-                </div>
+                {/* Inherit overflow so dialogs that lock body scrolling also lock this area. */}
+                <main id="page-scroll" className="min-h-0 flex-1 overflow-x-hidden [overflow-y:inherit]">
+                  <div className="mx-auto w-full min-w-0 max-w-7xl px-3 py-5 sm:px-6 sm:py-8 lg:px-8 xl:max-w-none xl:px-[clamp(8rem,10vw,18rem)]">
+                    {children}
+                  </div>
+                </main>
               </ScraperUiProvider>
               <ImportToast />
             </ImportTaskProvider>

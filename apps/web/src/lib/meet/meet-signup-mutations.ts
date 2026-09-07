@@ -1,3 +1,4 @@
+import { notifyMeetSignupDropped } from "@/lib/notifications/notifications"
 import { prisma } from "@/lib/prisma"
 import {
   isValidSignupEntryTime,
@@ -309,6 +310,13 @@ export async function withdrawSignupEntry(
     where: { formId: form.id, athleteId }})
   if (deleted.count === 0) {
     throw new SignupActionError("Sign-up not found", 404)
+  }
+
+  if (!athleteIdParam) {
+    // Notification delivery must not turn a completed withdrawal into an error.
+    await notifyMeetSignupDropped({ meetId, athleteId }).catch((error) => {
+      console.error("[meet-drop] Could not notify meet directors", error)
+    })
   }
 
   return { ok: true as const }

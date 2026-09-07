@@ -132,7 +132,7 @@ function SettingsPopover({ prefs }: { prefs: PracticePrefs }) {
         className={controlClass}
       >
         <SettingsIcon />
-        <HoverDetail label="View settings" />
+        {!open && <HoverDetail label="View settings" />}
       </button>
       {open && (
         <div className="absolute right-0 top-full z-40 mt-1.5 w-max min-w-[180px] max-w-[280px] rounded-xl border border-border-secondary bg-background p-2 shadow-lg">

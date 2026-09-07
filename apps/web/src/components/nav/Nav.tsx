@@ -120,7 +120,7 @@ export default async function Nav() {
   )
 
   return (
-    <nav className="sticky top-0 z-40 flex items-center justify-between gap-2 border-b border-zinc-200 bg-background px-6 py-4 dark:border-zinc-800">
+    <nav className="relative z-40 flex shrink-0 items-center justify-between gap-2 border-b border-zinc-200 bg-background px-6 py-4 dark:border-zinc-800">
       {session ? (
         <AdaptiveHeaderLayout
           brand={headerBrand}

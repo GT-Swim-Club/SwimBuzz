@@ -11,6 +11,7 @@ import { getSession } from "@/lib/auth/session"
 const PATCH_KEYS: NotificationPreferenceKey[] = [
   "practicePublished",
   "meetRosterInfo",
+  "meetDrops",
   "practiceComments",
   "profileChanges",
 ]
@@ -55,7 +56,7 @@ export async function PATCH(req: Request) {
 
   if (Array.isArray(body.meetSignupNotificationTimes)) {
     patch.meetSignupNotificationTimes = body.meetSignupNotificationTimes.filter(
-      (m: any): m is number => typeof m === "number" && m >= 0 && m <= 60
+      (m: unknown): m is number => typeof m === "number" && m >= 0 && m <= 60
     )
   }
 

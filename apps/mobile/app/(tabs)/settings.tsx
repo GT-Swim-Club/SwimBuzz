@@ -244,7 +244,9 @@ export default function SettingsScreen() {
 
         <Section title="Notification preferences">
           {NOTIFICATION_PREFERENCE_META.filter(
-            ({ athletesOnly }) => !athletesOnly || isAthlete
+            ({ athletesOnly, meetDirectorsOnly }) =>
+              (!athletesOnly || isAthlete) &&
+              (!meetDirectorsOnly || user.staffTitle === "MEET_DIRECTOR")
           ).map(({ key, label, description, athleteDescription }) => (
             <View
               key={key}

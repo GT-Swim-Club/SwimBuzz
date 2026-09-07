@@ -270,14 +270,14 @@ export default function PracticeEditor({
     updateBarOverlapRef.current = updateBarOverlap
 
     updateBarOverlap()
-    window.addEventListener("scroll", updateBarOverlap, { passive: true })
+    window.addEventListener("scroll", updateBarOverlap, { passive: true, capture: true })
     window.addEventListener("resize", updateBarOverlap)
     const observer = new ResizeObserver(updateBarOverlap)
     observer.observe(bar)
     observer.observe(contentEnd)
     if (setsSectionRef.current) observer.observe(setsSectionRef.current)
     return () => {
-      window.removeEventListener("scroll", updateBarOverlap)
+      window.removeEventListener("scroll", updateBarOverlap, true)
       window.removeEventListener("resize", updateBarOverlap)
       observer.disconnect()
     }
@@ -908,9 +908,10 @@ export default function PracticeEditor({
   const AUTO_SCROLL_MAX_SPEED = 18
 
   function computeAutoScrollSpeed(clientY: number): number {
+    const viewportTop = document.getElementById("page-scroll")?.getBoundingClientRect().top ?? 0
     const viewportHeight = window.innerHeight
-    if (clientY < AUTO_SCROLL_EDGE_PX) {
-      const intensity = (AUTO_SCROLL_EDGE_PX - clientY) / AUTO_SCROLL_EDGE_PX
+    if (clientY < viewportTop + AUTO_SCROLL_EDGE_PX) {
+      const intensity = Math.min(1, (viewportTop + AUTO_SCROLL_EDGE_PX - clientY) / AUTO_SCROLL_EDGE_PX)
       return -Math.ceil(intensity * AUTO_SCROLL_MAX_SPEED)
     }
     if (clientY > viewportHeight - AUTO_SCROLL_EDGE_PX) {
@@ -926,7 +927,7 @@ export default function PracticeEditor({
       autoScrollRafRef.current = null
       return
     }
-    window.scrollBy(0, speed)
+    document.getElementById("page-scroll")?.scrollBy(0, speed)
     // The page moved under a stationary cursor, so the hovered drop target needs
     // recomputing even without a fresh pointermove event.
     updateSetDropTarget(lastPointerRef.current.x, lastPointerRef.current.y)
@@ -1074,7 +1075,7 @@ export default function PracticeEditor({
     (clockToMinutes(form.endTime) ?? 0) < (clockToMinutes(form.startTime) ?? 0)
   const canSave = isPracticeSaveable(form)
   const waitingForAutosave = !persistedId || isDirty || autosaveState === "saving"
-  const canPublishOrDraft = canSave && !waitingForAutosave
+  const canPublishOrDraft = canSave && !waitingForAutosave && hasEditedContent
   const draftButtonLabel = form.published === true ? "Revert to Draft" : "Keep As Draft"
   const autosaveMessage = !hasEditedContent
     ? "Make edits to save changes."

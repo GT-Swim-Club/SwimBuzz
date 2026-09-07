@@ -176,6 +176,7 @@ export default async function SettingsPage() {
           <NotificationPreferencesSettings
             initialPreferences={notificationPreferences}
             isAthlete={!isStaffRole(session.user.role)}
+            isMeetDirector={session.user.staffTitle === "MEET_DIRECTOR"}
           />
         </section>
 

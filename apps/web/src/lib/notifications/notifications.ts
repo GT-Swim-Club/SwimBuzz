@@ -416,3 +416,48 @@ export async function notifyTimesImportRequest(input: {
   })
   void sendExpoPushToUsers(recipients, { title, body, href })
 }
+
+/** Notify meet directors after an athlete withdraws their own signup. */
+export async function notifyMeetSignupDropped(input: {
+  meetId: string
+  athleteId: string
+}): Promise<void> {
+  const directors = await prisma.user.findMany({
+    where: {
+      staffTitle: "MEET_DIRECTOR",
+      role: { in: [Role.COACH, Role.EXEC] },
+      OR: [{ emailVerified: { not: null } }, { accounts: { some: {} } }],
+    },
+    select: { id: true, notificationPreferences: true },
+  })
+  const recipients = directors
+    .filter((user) => parseNotificationPreferences(user.notificationPreferences).meetDrops)
+    .map((user) => user.id)
+  if (recipients.length === 0) return
+
+  const [athlete, meet] = await Promise.all([
+    prisma.athlete.findUnique({
+      where: { id: input.athleteId },
+      select: { firstName: true, lastName: true },
+    }),
+    prisma.meet.findUnique({
+      where: { id: input.meetId },
+      select: { name: true },
+    }),
+  ])
+  if (!athlete || !meet) return
+
+  const title = `Meet drop: ${meet.name}`
+  const body = `${athlete.firstName} ${athlete.lastName} withdrew from ${meet.name}.`
+  const href = await meetHrefForId(input.meetId)
+  await prisma.notification.createMany({
+    data: recipients.map((userId) => ({
+      userId,
+      type: NotificationType.MEET_SIGNUP_DROPPED,
+      title,
+      body,
+      href,
+    })),
+  })
+  await sendExpoPushToUsers(recipients, { title, body, href })
+}

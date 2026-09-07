@@ -60,6 +60,7 @@ export default function PracticesSidebar({
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const containerRef = useRef<HTMLDivElement>(null)
+  const sidebarRef = useRef<HTMLElement>(null)
   const [dragWidth, setDragWidth] = useState<number | null>(null)
   const draggingRef = useRef(false)
 
@@ -72,6 +73,56 @@ export default function PracticesSidebar({
   const isDesktop = useMediaQuery("(min-width: 768px)")
   const reduceMotion = useMediaQuery("(prefers-reduced-motion: reduce)")
   const asideCollapsed = isDesktop && !prefs.sidebarOpen
+
+  useEffect(() => {
+    if (!isDesktop) return
+    const sidebar = sidebarRef.current
+    const scroller = document.getElementById("page-scroll")
+    if (!sidebar || !scroller) return
+
+    const onWheel = (event: WheelEvent) => {
+      if (event.ctrlKey || !event.deltaY) return
+      event.preventDefault()
+      const unit = event.deltaMode === WheelEvent.DOM_DELTA_PAGE
+        ? scroller.clientHeight
+        : event.deltaMode === WheelEvent.DOM_DELTA_LINE
+          ? parseFloat(getComputedStyle(sidebar).lineHeight) || 16
+          : 1
+      scroller.scrollBy({ top: event.deltaY * unit, behavior: "instant" })
+    }
+    sidebar.addEventListener("wheel", onWheel, { passive: false })
+    return () => sidebar.removeEventListener("wheel", onWheel)
+  }, [isDesktop])
+
+  useEffect(() => {
+    if (!isDesktop) return
+    const container = containerRef.current
+    const parent = container?.parentElement
+    const scroller = document.getElementById("page-scroll")
+    if (!container || !parent || !scroller) return
+
+    // Account for the responsive header and the page wrapper's bottom padding.
+    const updateHeight = () => {
+      const scrollerTop = scroller.getBoundingClientRect().top
+      const top = container.getBoundingClientRect().top - scrollerTop + scroller.scrollTop
+      const bottomPadding = parseFloat(getComputedStyle(parent).paddingBottom) || 0
+      container.style.setProperty("--workspace-top", `${top}px`)
+      container.style.setProperty("--workspace-offset", `${scrollerTop + top + bottomPadding}px`)
+    }
+    updateHeight()
+    const observer = new ResizeObserver(updateHeight)
+    observer.observe(parent)
+    observer.observe(scroller)
+    const nav = document.querySelector("nav")
+    if (nav) observer.observe(nav)
+    window.addEventListener("resize", updateHeight)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener("resize", updateHeight)
+      container.style.removeProperty("--workspace-offset")
+      container.style.removeProperty("--workspace-top")
+    }
+  }, [isDesktop])
 
   const selectedSlug =
     pathname === "/practices" ? undefined : decodeURIComponent(pathname.replace(/^\/practices\//, ""))
@@ -218,11 +269,12 @@ export default function PracticesSidebar({
       style={gridStyle}
     >
       <aside
+        ref={sidebarRef}
         aria-hidden={asideCollapsed || undefined}
         inert={asideCollapsed || undefined}
         className={
           (showAsideMobile ? "flex" : "hidden") +
-          " md:flex sticky top-24 h-[calc(100dvh-7.5rem)] min-h-0 flex-col gap-3 overflow-hidden transition-opacity duration-150 motion-reduce:transition-none" +
+          " md:flex sticky top-24 h-[calc(100dvh-7.5rem)] min-h-0 flex-col gap-3 overflow-hidden transition-opacity duration-150 motion-reduce:transition-none md:top-[var(--workspace-top,6rem)] md:h-[calc(100dvh-var(--workspace-offset,9rem))] md:self-start" +
           (prefs.sidebarOpen ? "" : " md:pointer-events-none md:opacity-0")
         }
       >

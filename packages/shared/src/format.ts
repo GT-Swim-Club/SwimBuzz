@@ -4,6 +4,7 @@ export type NotificationPreferenceKey =
   | "practicePublished"
   | "meetSignupOpen"
   | "meetRosterInfo"
+  | "meetDrops"
   | "practiceComments"
   | "profileChanges"
 
@@ -15,6 +16,7 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
   practicePublished: true,
   meetSignupOpen: true,
   meetRosterInfo: true,
+  meetDrops: true,
   practiceComments: true,
   profileChanges: true,
   meetSignupNotificationTimes: [0],
@@ -25,6 +27,7 @@ export const NOTIFICATION_PREFERENCE_META: {
   label: string
   description: string
   athleteDescription?: string
+  meetDirectorsOnly?: boolean
   athletesOnly?: boolean
 }[] = [
   {
@@ -44,6 +47,12 @@ export const NOTIFICATION_PREFERENCE_META: {
     athleteDescription:
       "When psych sheets, heat sheets, results, or other meet info is posted for a meet you're on",
     athletesOnly: true,
+  },
+  {
+    key: "meetDrops",
+    label: "Meet drops",
+    description: "When an athlete withdraws from a meet",
+    meetDirectorsOnly: true,
   },
   {
     key: "practiceComments",
