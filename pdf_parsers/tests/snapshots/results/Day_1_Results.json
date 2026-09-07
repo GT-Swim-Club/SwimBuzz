@@ -1,0 +1,5932 @@
+{
+  "course": "SCY",
+  "detectedSheetType": "results",
+  "meet_date": "2024-11-16",
+  "meet_name": "2024 Raleighwood Invitational",
+  "relay_results": [
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 1,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Munger, Audrey"
+        },
+        {
+          "leg": 2,
+          "name": "Faust, Amelia"
+        },
+        {
+          "leg": 3,
+          "name": "Freund, Gabby"
+        },
+        {
+          "leg": 4,
+          "name": "Carlton, Delaney"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB-GA",
+      "time": "1:54.46"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 2,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "UNC CHAPEL HILL-NC",
+      "time": "1:56.17"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 3,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Castle, Kendall"
+        },
+        {
+          "leg": 2,
+          "name": "Miller, Rita"
+        },
+        {
+          "leg": 3,
+          "name": "Ross, Christina"
+        }
+      ],
+      "tags": "",
+      "team": "NC STATE CLUB SWIMMING-NC",
+      "time": "1:56.33"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 4,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "DUKE CLUB SWIMMING-NC",
+      "time": "1:57.11"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 5,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Crum, Josie"
+        },
+        {
+          "leg": 3,
+          "name": "Granger, Bermuda"
+        }
+      ],
+      "tags": "",
+      "team": "SWIM CLUB AT VIRGINIA TECH-VA",
+      "time": "1:58.16"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 6,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Hauser, Genny"
+        },
+        {
+          "leg": 3,
+          "name": "Kondratick, Morgan"
+        }
+      ],
+      "tags": "",
+      "team": "UNCW CLUB SWIM-NC",
+      "time": "1:58.59"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 7,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "EAST CAROLINA UNIVERSITY-NC",
+      "time": "1:59.46"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 8,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Wang, Mingqi"
+        },
+        {
+          "leg": 2,
+          "name": "Elvambuena, Ella"
+        },
+        {
+          "leg": 3,
+          "name": "Witthoff, Mia"
+        },
+        {
+          "leg": 4,
+          "name": "Hicks, Erin"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB-GA",
+      "time": "2:00.07"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 9,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Nance, Lauren"
+        },
+        {
+          "leg": 2,
+          "name": "Furches, Sarah"
+        },
+        {
+          "leg": 3,
+          "name": "Petersen, Riley"
+        },
+        {
+          "leg": 4,
+          "name": "Seitz, Lucy"
+        }
+      ],
+      "tags": "",
+      "team": "NC STATE CLUB SWIMMING-NC",
+      "time": "2:01.24"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 10,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Honaker, Olivia"
+        },
+        {
+          "leg": 2,
+          "name": "Sloan, Claire"
+        },
+        {
+          "leg": 3,
+          "name": "LaCognata, Grace"
+        },
+        {
+          "leg": 4,
+          "name": "Major, Carson"
+        }
+      ],
+      "tags": "",
+      "team": "NC STATE CLUB SWIMMING-NC",
+      "time": "2:01.42"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 11,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "UNC CHAPEL HILL-NC",
+      "time": "2:02.14"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 12,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Harbert, Jill"
+        },
+        {
+          "leg": 2,
+          "name": "Tjandra, Sammy"
+        },
+        {
+          "leg": 3,
+          "name": "Jean, Ashley"
+        },
+        {
+          "leg": 4,
+          "name": "Wieberg, Addi"
+        }
+      ],
+      "tags": "",
+      "team": "COASTAL CAROLINA UNIVERSTIY-SC",
+      "time": "2:02.62"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 15,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Grow, Ashtyn"
+        },
+        {
+          "leg": 3,
+          "name": "Pratt, Tatum"
+        }
+      ],
+      "tags": "",
+      "team": "SWIM CLUB AT VIRGINIA TECH-VA",
+      "time": "2:09.47"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 16,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "EAST CAROLINA UNIVERSITY-NC",
+      "time": "2:11.03"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 17,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Smalley, Ainsley"
+        },
+        {
+          "leg": 2,
+          "name": "White, Logan"
+        },
+        {
+          "leg": 3,
+          "name": "Nowell, Linsey"
+        },
+        {
+          "leg": 4,
+          "name": "Walker, Calla"
+        }
+      ],
+      "tags": "",
+      "team": "APPALACHIAN STATE CLUB SWIM-NC",
+      "time": "2:12.97"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 18,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Harding, Lauren"
+        },
+        {
+          "leg": 2,
+          "name": "Ayers, Olivia"
+        },
+        {
+          "leg": 3,
+          "name": "Hayes, Hanna"
+        },
+        {
+          "leg": 4,
+          "name": "Hayes, Maya"
+        }
+      ],
+      "tags": "",
+      "team": "EAST TENNESSEE STATE UNIVERSIT-NI",
+      "time": "2:14.70"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 19,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "DUKE CLUB SWIMMING-NC",
+      "time": "2:14.99"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 20,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Kennedy, Carlyle"
+        },
+        {
+          "leg": 3,
+          "name": "Linz, Meghan"
+        }
+      ],
+      "tags": "",
+      "team": "UNCW CLUB SWIM-NC",
+      "time": "2:15.95"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 21,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Cohn, Olivia"
+        },
+        {
+          "leg": 3,
+          "name": "Mower, Margaret"
+        }
+      ],
+      "tags": "",
+      "team": "COFC CLUB SWIM-SC",
+      "time": "2:17.67"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 22,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Thrush, Hannah"
+        },
+        {
+          "leg": 2,
+          "name": "Merchant, Emily"
+        },
+        {
+          "leg": 3,
+          "name": "Gamberg, Darrah"
+        },
+        {
+          "leg": 4,
+          "name": "Robbins, Claire"
+        }
+      ],
+      "tags": "",
+      "team": "COASTAL CAROLINA UNIVERSTIY-SC",
+      "time": "2:18.15"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 23,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Fibraio, Leah"
+        },
+        {
+          "leg": 2,
+          "name": "Weidner, Mia"
+        },
+        {
+          "leg": 3,
+          "name": "Beugnard, Agathe"
+        },
+        {
+          "leg": 4,
+          "name": "Cheek, Katy"
+        }
+      ],
+      "tags": "",
+      "team": "APPALACHIAN STATE CLUB SWIM-NC",
+      "time": "2:18.33"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 24,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "ELON UNIVERSITY CLUB SWIM-NC",
+      "time": "2:20.99"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 25,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "DeWalt, Kaitlyn"
+        },
+        {
+          "leg": 3,
+          "name": "McEntire, Aylene"
+        }
+      ],
+      "tags": "",
+      "team": "COFC CLUB SWIM-SC",
+      "time": "2:21.05"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 1,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Baldwin, Daniel"
+        },
+        {
+          "leg": 2,
+          "name": "Lee, Hyoseon"
+        },
+        {
+          "leg": 3,
+          "name": "Neumann, Asher"
+        },
+        {
+          "leg": 4,
+          "name": "Loughmiller, Max"
+        }
+      ],
+      "tags": "",
+      "team": "NC STATE CLUB SWIMMING-NC",
+      "time": "1:35.35"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 2,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Mei, Garlan"
+        },
+        {
+          "leg": 2,
+          "name": "Gaskey, Constantine"
+        },
+        {
+          "leg": 3,
+          "name": "Stuck, Evan"
+        },
+        {
+          "leg": 4,
+          "name": "Seliem, Hamza"
+        }
+      ],
+      "tags": "",
+      "team": "NC STATE CLUB SWIMMING-NC",
+      "time": "1:38.54"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 3,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Schwandt, Gavin"
+        },
+        {
+          "leg": 2,
+          "name": "Pianoto, Matthew"
+        },
+        {
+          "leg": 3,
+          "name": "Schnupp, Andrew"
+        },
+        {
+          "leg": 4,
+          "name": "White, Keller"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB-GA",
+      "time": "1:39.00"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 4,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "UNC CHAPEL HILL-NC",
+      "time": "1:39.20"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 5,
+      "relayLetter": null,
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Schuijt, Chaz"
+        },
+        {
+          "leg": 2,
+          "name": "Stubbs, Kierro"
+        },
+        {
+          "leg": 3,
+          "name": "Hall, Aaron"
+        },
+        {
+          "leg": 4,
+          "name": "Spade, Gage"
+        }
+      ],
+      "tags": "",
+      "team": "LIBERTY UNIVERSITY",
+      "time": "1:39.59"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 6,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "DUKE CLUB SWIMMING-NC",
+      "time": "1:40.35"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 7,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Lan, Yuanrui"
+        },
+        {
+          "leg": 3,
+          "name": "Gibbs, Thomas"
+        }
+      ],
+      "tags": "",
+      "team": "SWIM CLUB AT VIRGINIA TECH-VA",
+      "time": "1:40.49"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 8,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Mayhew, William"
+        },
+        {
+          "leg": 2,
+          "name": "McDevitt, Liam"
+        },
+        {
+          "leg": 3,
+          "name": "Armbruster, Noah"
+        },
+        {
+          "leg": 4,
+          "name": "Miller, Christopher"
+        }
+      ],
+      "tags": "",
+      "team": "NC STATE CLUB SWIMMING-NC",
+      "time": "1:41.95"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 9,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "EAST CAROLINA UNIVERSITY-NC",
+      "time": "1:43.91"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 10,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Armentrout, Owen"
+        },
+        {
+          "leg": 3,
+          "name": "Cloutier, Briggs"
+        }
+      ],
+      "tags": "",
+      "team": "UNCW CLUB SWIM-NC",
+      "time": "1:44.02"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 11,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Bao, Jason"
+        }
+      ],
+      "tags": "",
+      "team": "DUKE CLUB SWIMMING-NC",
+      "time": "1:44.26"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 12,
+      "relayLetter": null,
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Grabinski, Thomas"
+        },
+        {
+          "leg": 2,
+          "name": "Long, Byron"
+        },
+        {
+          "leg": 3,
+          "name": "Horton, Tommy"
+        },
+        {
+          "leg": 4,
+          "name": "Hill, Thomas"
+        }
+      ],
+      "tags": "",
+      "team": "LIBERTY UNIVERSITY",
+      "time": "1:44.57"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 13,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Rohovit, Hunter"
+        },
+        {
+          "leg": 2,
+          "name": "Jiang, Aaron"
+        },
+        {
+          "leg": 3,
+          "name": "Skidmore, Billy"
+        },
+        {
+          "leg": 4,
+          "name": "Rimsa, Thomas"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB-GA",
+      "time": "1:45.20"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 14,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Harris, John"
+        },
+        {
+          "leg": 2,
+          "name": "House, Nate"
+        },
+        {
+          "leg": 3,
+          "name": "Pearce, Isaiah"
+        },
+        {
+          "leg": 4,
+          "name": "Stinnett, Cole"
+        }
+      ],
+      "tags": "",
+      "team": "APPALACHIAN STATE CLUB SWIM-NC",
+      "time": "1:46.75"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 15,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "UNC CHAPEL HILL-NC",
+      "time": "1:47.76"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 16,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Harris, Jaedin"
+        },
+        {
+          "leg": 3,
+          "name": "Graham, Zach"
+        }
+      ],
+      "tags": "",
+      "team": "SWIM CLUB AT VIRGINIA TECH-VA",
+      "time": "1:50.33"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 17,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Tang, Rocky"
+        },
+        {
+          "leg": 2,
+          "name": "Sirgany, Ben"
+        },
+        {
+          "leg": 3,
+          "name": "Daves, Brandon"
+        },
+        {
+          "leg": 4,
+          "name": "Williams, Crescent"
+        }
+      ],
+      "tags": "",
+      "team": "UNC CHARLOTTE-NC",
+      "time": "1:53.20"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 18,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Marsee, Bennett"
+        },
+        {
+          "leg": 3,
+          "name": "Miley, Kian"
+        }
+      ],
+      "tags": "",
+      "team": "UNCW CLUB SWIM-NC",
+      "time": "1:53.87"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 19,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Hall, Alex"
+        },
+        {
+          "leg": 3,
+          "name": "Brandwein, Jared"
+        }
+      ],
+      "tags": "",
+      "team": "COFC CLUB SWIM-SC",
+      "time": "1:54.12"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 20,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Davidson, Devin"
+        },
+        {
+          "leg": 2,
+          "name": "McBride, Liam"
+        },
+        {
+          "leg": 3,
+          "name": "Sheffield, Chase"
+        },
+        {
+          "leg": 4,
+          "name": "Freeman, Rob"
+        }
+      ],
+      "tags": "",
+      "team": "APPALACHIAN STATE CLUB SWIM-NC",
+      "time": "1:55.86"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 21,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Cooke, Jeffery"
+        },
+        {
+          "leg": 2,
+          "name": "Han, Jason"
+        },
+        {
+          "leg": 3,
+          "name": "Heck, Andrew"
+        },
+        {
+          "leg": 4,
+          "name": "Montgomery, Alex"
+        }
+      ],
+      "tags": "",
+      "team": "COASTAL CAROLINA UNIVERSTIY-SC",
+      "time": "1:57.24"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 22,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "ELON UNIVERSITY CLUB SWIM-NC",
+      "time": "2:03.74"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 23,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Bender, Matthew"
+        },
+        {
+          "leg": 2,
+          "name": "Neace, Gwen"
+        },
+        {
+          "leg": 3,
+          "name": "Beatty, Alex"
+        },
+        {
+          "leg": 4,
+          "name": "Martin, Wes"
+        }
+      ],
+      "tags": "",
+      "team": "UNG SWIM CLUB-GA",
+      "time": "2:06.30"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 24,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Gorman, Aiden"
+        },
+        {
+          "leg": 2,
+          "name": "Durham, Will"
+        },
+        {
+          "leg": 4,
+          "name": "Piotrowski, John"
+        }
+      ],
+      "tags": "",
+      "team": "WESTERN CAROLINA SWIM CLUB-NC",
+      "time": "2:16.49"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 25,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Sallee, Jackson"
+        },
+        {
+          "leg": 2,
+          "name": "Wilkins, Joben"
+        },
+        {
+          "leg": 3,
+          "name": "Gerard, Tyler"
+        },
+        {
+          "leg": 4,
+          "name": "Young, Brodi"
+        }
+      ],
+      "tags": "",
+      "team": "EAST TENNESSEE STATE UNIVERSIT-NI",
+      "time": "2:17.83"
+    }
+  ],
+  "results": [
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "name": "Miller, Rita",
+      "place": 1,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "4:54.86"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "name": "Jewell, Brynn",
+      "place": 2,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "5:08.26"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "name": "Wang, Mingqi",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "5:15.32"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "name": "Wigglesworth, Elena",
+      "place": 4,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "5:19.51"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "name": "VanderBroek, Allie",
+      "place": 5,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "5:23.71"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "name": "Castle, Kendall",
+      "place": 6,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "5:24.90"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "name": "Yang, Amy",
+      "place": 7,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "5:39.57"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "name": "Hall, Amber",
+      "place": 8,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "5:39.77"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "name": "Altera, Ryan",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "4:21.88"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "name": "Rohovit, Hunter",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "4:30.42"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "name": "Strudgeon, Ryan",
+      "place": 3,
+      "tags": "",
+      "team": null,
+      "time": "4:31.95"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "name": "Suchyj, Tyler",
+      "place": 4,
+      "tags": "",
+      "team": null,
+      "time": "4:35.93"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "name": "Rice, Thomas",
+      "place": 5,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "4:44.01"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "name": "Specht, Sam",
+      "place": 6,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "4:51.33"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "name": "Halbach, Jake",
+      "place": 7,
+      "tags": "",
+      "team": "UNC Charlotte-NC",
+      "time": "4:51.79"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "name": "Jampole, Nolan",
+      "place": 8,
+      "tags": "",
+      "team": null,
+      "time": "4:57.56"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "name": "Mu, James",
+      "place": 9,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "5:04.24"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "name": "Reynolds, Jack",
+      "place": 10,
+      "tags": "",
+      "team": "Ung Swim Club-GA",
+      "time": "5:14.27"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "name": "Corkey, William",
+      "place": 11,
+      "tags": "",
+      "team": null,
+      "time": "5:19.18"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Carlton, Delaney",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "25.16"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Asner, Adira",
+      "place": 2,
+      "tags": "",
+      "team": null,
+      "time": "25.26"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Freund, Gabby",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "27.11"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Major, Carson",
+      "place": 4,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "27.57"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Dobie, Lauren",
+      "place": 5,
+      "tags": "",
+      "team": null,
+      "time": "27.83"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Fields, Colby",
+      "place": 6,
+      "tags": "",
+      "team": null,
+      "time": "27.93"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Kondratick, Morgan",
+      "place": 7,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "27.99"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Barrett, Sophia",
+      "place": 8,
+      "tags": "",
+      "team": null,
+      "time": "28.04"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Torres, Gaby",
+      "place": 9,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "28.07"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Aghjayan, Hannah",
+      "place": 10,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "28.18"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Baxter, Lily",
+      "place": 11,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "28.29"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Obara, Kendall",
+      "place": 12,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "28.41"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Chapman, Morgan",
+      "place": 13,
+      "tags": "",
+      "team": null,
+      "time": "28.42"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Ross, Christina",
+      "place": 14,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "28.49"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Hayes, Hanna",
+      "place": 15,
+      "tags": "",
+      "team": "East Tennessee State Universit-NI",
+      "time": "28.54"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Smith, Hanna",
+      "place": 16,
+      "tags": "",
+      "team": "Elks Duke Club Swimming-NC",
+      "time": "28.61"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Mescolote, Joao",
+      "place": 1,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "22.35"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Stuck, Evan",
+      "place": 2,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "23.42"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Loughmiller, Max",
+      "place": 3,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "23.56"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Schnupp, Andrew",
+      "place": 4,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "23.67"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Neumann, Asher",
+      "place": 4,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "23.67"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Rhodenizer, William",
+      "place": 6,
+      "tags": "",
+      "team": null,
+      "time": "23.97"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Young, Hatcher",
+      "place": 6,
+      "tags": "",
+      "team": null,
+      "time": "23.97"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Williams, Xander",
+      "place": 8,
+      "tags": "",
+      "team": null,
+      "time": "23.98"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Ruble, Grant",
+      "place": 9,
+      "tags": "",
+      "team": null,
+      "time": "24.10"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Rosenhein, Drew",
+      "place": 10,
+      "tags": "",
+      "team": null,
+      "time": "24.22"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "White, Keller",
+      "place": 11,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "24.27"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Chen, Noah",
+      "place": 12,
+      "tags": "",
+      "team": null,
+      "time": "24.29"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Rantala, Mikael",
+      "place": 13,
+      "tags": "",
+      "team": null,
+      "time": "24.35"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Casey, Jack",
+      "place": 13,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "24.35"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Blackstone, James",
+      "place": 15,
+      "tags": "",
+      "team": null,
+      "time": "24.41"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Conaton, William",
+      "place": 16,
+      "tags": "",
+      "team": null,
+      "time": "24.42"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Will, Isabel",
+      "place": 1,
+      "tags": "",
+      "team": null,
+      "time": "1:00.85"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Smith, Hanna",
+      "place": 2,
+      "tags": "",
+      "team": "Elks Duke Club Swimming-NC",
+      "time": "1:02.55"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Crum, Josie",
+      "place": 3,
+      "tags": "",
+      "team": null,
+      "time": "1:03.57"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Roberts, Lauren",
+      "place": 4,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:03.80"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Pitts, Emma",
+      "place": 5,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:04.93"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Hauser, Genny",
+      "place": 6,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "1:05.08"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Granger, Bermuda",
+      "place": 7,
+      "tags": "",
+      "team": null,
+      "time": "1:05.33"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Nance, Lauren",
+      "place": 8,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:05.49"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Kerrigan, Erin",
+      "place": 9,
+      "tags": "",
+      "team": "Coastal Carolina Universtiy-SC",
+      "time": "1:05.65"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Grotjohn, Laine",
+      "place": 9,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:05.65"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Qian, Shakira",
+      "place": 11,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:05.84"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Kovacs, Valerie",
+      "place": 12,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:06.27"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Sidler, Sophia",
+      "place": 13,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:06.59"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Blake, Maddie",
+      "place": 14,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:06.99"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Tjandra, Sammy",
+      "place": 15,
+      "tags": "",
+      "team": "UNC Charlotte-NC",
+      "time": "1:07.34"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Schneider, Jennifer",
+      "place": 16,
+      "tags": "",
+      "team": null,
+      "time": "1:07.50"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Seitz, Lucy",
+      "place": 17,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:07.57"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Compher, Addison",
+      "place": 18,
+      "tags": "",
+      "team": null,
+      "time": "1:08.32"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "McCouch, Sandra",
+      "place": 19,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:08.66"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Bergeron, Ella",
+      "place": 20,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:09.25"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Corrado, Sola",
+      "place": 21,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "1:09.38"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Haskell, Miyu",
+      "place": 22,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:09.65"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Caudle, Riley",
+      "place": 23,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:09.80"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Flores, Sophia",
+      "place": 24,
+      "tags": "",
+      "team": null,
+      "time": "1:10.89"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Zimmer, Olivia",
+      "place": 25,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:10.95"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Kalosstian, Kendall",
+      "place": 26,
+      "tags": "",
+      "team": null,
+      "time": "1:11.21"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Harding, Lauren",
+      "place": 27,
+      "tags": "",
+      "team": "East Tennessee State Universit-NI",
+      "time": "1:11.46"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Ricci, Emily",
+      "place": 28,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:11.47"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Miller, Charli",
+      "place": 29,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:11.61"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "LaCognata, Grace",
+      "place": 30,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:12.00"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Lawlor, Celia",
+      "place": 31,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "1:12.11"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Florian, Violet",
+      "place": 32,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:12.37"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Haff, Sophie",
+      "place": 33,
+      "tags": "",
+      "team": "Coastal Carolina Universtiy-SC",
+      "time": "1:12.47"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Mellor, Tatum",
+      "place": 34,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:12.90"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Parker, Brooke",
+      "place": 35,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:13.16"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Kennedy, Carlyle",
+      "place": 36,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "1:13.41"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Ellsworth, Madi",
+      "place": 37,
+      "tags": "",
+      "team": "Coastal Carolina Universtiy-SC",
+      "time": "1:14.18"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Peneva, Denitsa",
+      "place": 37,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:14.18"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Sears, Jadyn",
+      "place": 39,
+      "tags": "",
+      "team": null,
+      "time": "1:14.37"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Simerson, Kynley",
+      "place": 40,
+      "tags": "",
+      "team": "High Point Club Swimming-NC",
+      "time": "1:15.32"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Paroly, Sarah",
+      "place": 41,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:16.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Thrush, Hannah",
+      "place": 42,
+      "tags": "",
+      "team": "Coastal Carolina Universtiy-SC",
+      "time": "1:17.52"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "DeWalt, Kaitlyn",
+      "place": 43,
+      "tags": "",
+      "team": "Cofc Club Swim-SC",
+      "time": "1:17.58"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Fraley, Carson",
+      "place": 44,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:18.32"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Hussaini, Sameena",
+      "place": 45,
+      "tags": "",
+      "team": "UNC Charlotte-NC",
+      "time": "1:18.46"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Clark, Taylor",
+      "place": 46,
+      "tags": "",
+      "team": null,
+      "time": "1:20.56"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Hevener, Sarah",
+      "place": 47,
+      "tags": "",
+      "team": null,
+      "time": "1:20.83"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Christman, Grace",
+      "place": 48,
+      "tags": "",
+      "team": null,
+      "time": "1:20.97"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Kohl, Alexis",
+      "place": 49,
+      "tags": "",
+      "team": "Cofc Club Swim-SC",
+      "time": "1:23.83"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Houser, Gracie",
+      "place": 50,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "1:25.56"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Baldwin, Daniel",
+      "place": 1,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "51.36"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Morea, Michael",
+      "place": 2,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "52.16"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Lineberry, Alex",
+      "place": 3,
+      "tags": "",
+      "team": null,
+      "time": "54.11"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Schuijt, Chaz",
+      "place": 4,
+      "tags": "",
+      "team": null,
+      "time": "54.62"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Lan, Yuanrui",
+      "place": 5,
+      "tags": "",
+      "team": null,
+      "time": "54.66"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Lee, Christian",
+      "place": 6,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "54.73"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Hancu, Andrei",
+      "place": 7,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "56.86"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Bataillon, Daniel",
+      "place": 8,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "56.93"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Mungas, Will",
+      "place": 9,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "57.08"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Schwandt, Gavin",
+      "place": 10,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "57.38"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Smith, Sadler",
+      "place": 11,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "57.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Armentrout, Owen",
+      "place": 12,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "57.93"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Sweat, Matthew",
+      "place": 13,
+      "tags": "",
+      "team": null,
+      "time": "57.96"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Sleptsov, Alex",
+      "place": 14,
+      "tags": "",
+      "team": null,
+      "time": "58.09"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Horton, Tommy",
+      "place": 15,
+      "tags": "",
+      "team": null,
+      "time": "58.37"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Bizeau, Benjamin",
+      "place": 16,
+      "tags": "",
+      "team": null,
+      "time": "59.37"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Su, Justin",
+      "place": 20,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:00.09"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Giffel, Ian",
+      "place": 21,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:00.13"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Marsee, Bennett",
+      "place": 22,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "1:01.52"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Serle, Jeffrey",
+      "place": 23,
+      "tags": "",
+      "team": null,
+      "time": "1:01.59"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Sheffield, Chase",
+      "place": 24,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:01.71"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Corkey, William",
+      "place": 25,
+      "tags": "",
+      "team": null,
+      "time": "1:02.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Will, Samuel",
+      "place": 26,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:03.68"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "White, Deacon",
+      "place": 27,
+      "tags": "",
+      "team": null,
+      "time": "1:04.49"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Bell, Michael",
+      "place": 28,
+      "tags": "",
+      "team": null,
+      "time": "1:05.72"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Cotton, Jonathan",
+      "place": 29,
+      "tags": "",
+      "team": "High Point Club Swimming-NC",
+      "time": "1:07.72"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "House, Nate",
+      "place": 30,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:08.81"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Smith, Logan",
+      "place": 31,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:08.95"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Brandwein, Jared",
+      "place": 32,
+      "tags": "",
+      "team": "Cofc Club Swim-SC",
+      "time": "1:09.42"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Keatts, Caleb",
+      "place": 33,
+      "tags": "",
+      "team": null,
+      "time": "1:12.77"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Offhaus, Carter",
+      "place": 34,
+      "tags": "",
+      "team": null,
+      "time": "1:14.84"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Xu, David",
+      "place": 35,
+      "tags": "",
+      "team": "UNC Charlotte-NC",
+      "time": "1:21.11"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Kim, Catherine",
+      "place": 1,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:59.06"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Goor, Sterre",
+      "place": 2,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "2:00.79"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Munger, Audrey",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:02.91"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Faulkner, Bree",
+      "place": 4,
+      "tags": "",
+      "team": null,
+      "time": "2:04.69"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Ghim, Esther",
+      "place": 5,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "2:06.04"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Dunnigan, Caitlyn",
+      "place": 6,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "2:07.26"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Craig, Mackenzie",
+      "place": 7,
+      "tags": "",
+      "team": null,
+      "time": "2:07.97"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Reese, Mary",
+      "place": 8,
+      "tags": "",
+      "team": null,
+      "time": "2:08.55"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Hayes, Maya",
+      "place": 9,
+      "tags": "",
+      "team": "East Tennessee State Universit-NI",
+      "time": "2:09.41"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Hicks, Erin",
+      "place": 10,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:10.99"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Ratliff, Bella",
+      "place": 11,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "2:11.30"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Plantamura, Natalie",
+      "place": 12,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:12.00"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Baker, Amy",
+      "place": 13,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "2:12.90"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Kettler, Claire",
+      "place": 14,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "2:13.39"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Springer, Gabriella",
+      "place": 15,
+      "tags": "",
+      "team": null,
+      "time": "2:15.29"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Heestand, Ava",
+      "place": 16,
+      "tags": "",
+      "team": null,
+      "time": "2:15.62"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Carney, KC",
+      "place": 17,
+      "tags": "",
+      "team": null,
+      "time": "2:15.67"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Kulas, Saline",
+      "place": 18,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "2:18.21"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Kelley, Aubrey",
+      "place": 19,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "2:20.33"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Obara, Claire",
+      "place": 20,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "2:22.43"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Hall, Amber",
+      "place": 21,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "2:24.26"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Sutton, Jennifer",
+      "place": 22,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "2:24.85"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Folk, Katelyn",
+      "place": 23,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "2:25.38"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Muras, Norah",
+      "place": 24,
+      "tags": "",
+      "team": null,
+      "time": "2:31.73"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "DeWalt, Kaitlyn",
+      "place": 25,
+      "tags": "",
+      "team": "Cofc Club Swim-SC",
+      "time": "2:32.19"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Blatchford, Julia",
+      "place": 26,
+      "tags": "",
+      "team": null,
+      "time": "2:34.43"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Robbins, Claire",
+      "place": 27,
+      "tags": "",
+      "team": "Coastal Carolina Universtiy-SC",
+      "time": "2:34.61"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Wolter, Amy",
+      "place": 28,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "2:34.72"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Vasquez-Soto, Jariana",
+      "place": 29,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "2:34.75"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Lucas, Olivia",
+      "place": 30,
+      "tags": "",
+      "team": null,
+      "time": "2:39.46"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Gamberg, Darrah",
+      "place": 31,
+      "tags": "",
+      "team": "Coastal Carolina Universtiy-SC",
+      "time": "2:41.97"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Lamb, Grayce",
+      "place": 32,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "3:24.75"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Stewart, Emily",
+      "place": 33,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "3:28.10"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Long, Liam",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:39.77"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Lee-Bishop, Nikolas",
+      "place": 2,
+      "tags": "",
+      "team": null,
+      "time": "1:43.73"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Cloutier, Briggs",
+      "place": 3,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "1:46.30"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Hill, Thomas",
+      "place": 4,
+      "tags": "",
+      "team": null,
+      "time": "1:47.97"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Frank, Jack",
+      "place": 5,
+      "tags": "",
+      "team": null,
+      "time": "1:49.82"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Phillips, Maximus",
+      "place": 6,
+      "tags": "",
+      "team": null,
+      "time": "1:50.44"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Rees, Jonah",
+      "place": 7,
+      "tags": "",
+      "team": null,
+      "time": "1:50.96"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Tang, Rocky",
+      "place": 8,
+      "tags": "",
+      "team": "UNC Charlotte-NC",
+      "time": "1:51.38"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Altera, Ryan",
+      "place": 9,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:51.93"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Williams, Xander",
+      "place": 10,
+      "tags": "",
+      "team": null,
+      "time": "1:52.10"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Ivan, David",
+      "place": 11,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "1:52.22"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Smith, Ben",
+      "place": 12,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:52.51"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Mayhew, William",
+      "place": 13,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:53.62"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Bullard, Collin",
+      "place": 14,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:54.11"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Casey, Jack",
+      "place": 15,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "1:54.98"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Lynch, Ryan",
+      "place": 16,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:55.02"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Rantala, Mikael",
+      "place": 17,
+      "tags": "",
+      "team": null,
+      "time": "1:56.12"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Heck, Andrew",
+      "place": 18,
+      "tags": "",
+      "team": "Coastal Carolina Universtiy-SC",
+      "time": "1:56.51"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Martinez, Matthew",
+      "place": 19,
+      "tags": "",
+      "team": null,
+      "time": "1:56.64"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Hall, Jackson",
+      "place": 20,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:57.64"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Vlady, George",
+      "place": 21,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:59.77"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Graham, Zach",
+      "place": 22,
+      "tags": "",
+      "team": null,
+      "time": "2:00.07"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Lakeman, Michael",
+      "place": 23,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "2:00.58"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Bryson, Ford",
+      "place": 24,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "2:01.23"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Chesnut, Evan",
+      "place": 25,
+      "tags": "",
+      "team": null,
+      "time": "2:01.81"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Major, David",
+      "place": 26,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "2:01.87"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Zdilla, Noah",
+      "place": 27,
+      "tags": "",
+      "team": null,
+      "time": "2:01.96"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Nagel, Lucas",
+      "place": 28,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:03.03"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Arriaga, Gabriel",
+      "place": 29,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "2:07.07"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Wean, Drexel",
+      "place": 30,
+      "tags": "",
+      "team": "High Point Club Swimming-NC",
+      "time": "2:13.21"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Norman, Max",
+      "place": 31,
+      "tags": "",
+      "team": "UNC Charlotte-NC",
+      "time": "2:21.54"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Murray, Liam",
+      "place": 32,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "2:21.61"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Roberts, Alex",
+      "place": 33,
+      "tags": "",
+      "team": null,
+      "time": "2:29.92"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Rainey, James",
+      "place": 34,
+      "tags": "",
+      "team": "Ung Swim Club-GA",
+      "time": "2:31.96"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Nemes, Rares",
+      "place": 35,
+      "tags": "",
+      "team": "Ung Swim Club-GA",
+      "time": "2:37.81"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Piotrowski, John",
+      "place": 36,
+      "tags": "",
+      "team": "Western Carolina Swim Club-NC",
+      "time": "2:53.85"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Carlton, Delaney",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "58.91"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Will, Isabel",
+      "place": 2,
+      "tags": "",
+      "team": null,
+      "time": "1:02.69"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Kondratick, Morgan",
+      "place": 3,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "1:03.25"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Aghjayan, Hannah",
+      "place": 4,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:04.61"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Smith, Hanna",
+      "place": 5,
+      "tags": "",
+      "team": "Elks Duke Club Swimming-NC",
+      "time": "1:04.76"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Torres, Gaby",
+      "place": 6,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "1:05.05"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Obara, Kendall",
+      "place": 7,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:05.35"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Berge, Isabel",
+      "place": 8,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:05.78"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Baxter, Lily",
+      "place": 9,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "1:06.18"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Lane, Megan",
+      "place": 10,
+      "tags": "",
+      "team": null,
+      "time": "1:06.24"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Hauser, Genny",
+      "place": 11,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "1:06.25"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Wong, Tara",
+      "place": 12,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:06.26"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Roberts, Lauren",
+      "place": 13,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:06.48"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Harbert, Jill",
+      "place": 14,
+      "tags": "",
+      "team": "UNC Charlotte-NC",
+      "time": "1:06.57"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Strout, Jennifer",
+      "place": 15,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:06.65"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Pitts, Emma",
+      "place": 16,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:06.80"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Qian, Shakira",
+      "place": 17,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:07.04"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Morton, Lindsay",
+      "place": 18,
+      "tags": "",
+      "team": null,
+      "time": "1:07.05"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Potter, Laurin",
+      "place": 19,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "1:07.09"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Hayes, Adelle",
+      "place": 20,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:07.20"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Barrett, Sophia",
+      "place": 21,
+      "tags": "",
+      "team": null,
+      "time": "1:07.22"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Granger, Bermuda",
+      "place": 22,
+      "tags": "",
+      "team": null,
+      "time": "1:07.26"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Crum, Josie",
+      "place": 23,
+      "tags": "",
+      "team": null,
+      "time": "1:07.76"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Baraceros, Kamille",
+      "place": 24,
+      "tags": "",
+      "team": null,
+      "time": "1:07.87"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Walsh, Kelly",
+      "place": 25,
+      "tags": "",
+      "team": null,
+      "time": "1:07.95"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "McKinley, Tess",
+      "place": 26,
+      "tags": "",
+      "team": null,
+      "time": "1:08.07"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Sands, Kylie",
+      "place": 27,
+      "tags": "",
+      "team": "Coastal Carolina Universtiy-SC",
+      "time": "1:08.24"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Major, Carson",
+      "place": 28,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:08.43"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Hunt, Natalie",
+      "place": 29,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:08.48"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Mounts, Emery",
+      "place": 30,
+      "tags": "",
+      "team": null,
+      "time": "1:08.49"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Healy, Sierra",
+      "place": 31,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "1:08.56"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "McCouch, Sandra",
+      "place": 32,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:08.63"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Petersen, Riley",
+      "place": 33,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:08.92"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Hayes, Hanna",
+      "place": 34,
+      "tags": "",
+      "team": "East Tennessee State Universit-NI",
+      "time": "1:08.94"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Ellstrom, Evie",
+      "place": 35,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:09.34"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Corrado, Sola",
+      "place": 36,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "1:09.50"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Weems, Kylie",
+      "place": 37,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:09.54"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Seifert, Sophia",
+      "place": 38,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:09.57"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Roberts, Taylor",
+      "place": 39,
+      "tags": "",
+      "team": null,
+      "time": "1:09.86"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Huber, Caroline",
+      "place": 40,
+      "tags": "",
+      "team": null,
+      "time": "1:10.20"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "LaCognata, Grace",
+      "place": 41,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:10.31"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Hoffman, Ansley",
+      "place": 42,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:10.92"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Bergeron, Ella",
+      "place": 43,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:10.98"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Stark, Heather",
+      "place": 44,
+      "tags": "",
+      "team": null,
+      "time": "1:11.02"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Wallace, Emma",
+      "place": 45,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:11.03"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Blake, Maddie",
+      "place": 46,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:11.09"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Hickey, Regan",
+      "place": 47,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:11.17"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "McCord, Gigi",
+      "place": 48,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:11.22"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "VanderBroek, Allie",
+      "place": 49,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:11.53"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Priebe, Ally",
+      "place": 50,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "1:11.56"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Palenscar, Hayley",
+      "place": 51,
+      "tags": "",
+      "team": null,
+      "time": "1:11.68"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Duffy, Anya",
+      "place": 52,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:11.72"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Springer, Gabriella",
+      "place": 53,
+      "tags": "",
+      "team": null,
+      "time": "1:11.77"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Gaur, Tanvi",
+      "place": 54,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:11.82"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Haskell, Miyu",
+      "place": 55,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:11.89"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Pratt, Tatum",
+      "place": 56,
+      "tags": "",
+      "team": null,
+      "time": "1:11.93"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Seitz, Libby",
+      "place": 57,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "1:12.12"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Yang, Amy",
+      "place": 58,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:12.23"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Kalosstian, Kendall",
+      "place": 59,
+      "tags": "",
+      "team": null,
+      "time": "1:12.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Li, Anyee",
+      "place": 59,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:12.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Peneva, Denitsa",
+      "place": 61,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:12.48"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Compher, Addison",
+      "place": 62,
+      "tags": "",
+      "team": null,
+      "time": "1:12.49"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Sears, Jadyn",
+      "place": 63,
+      "tags": "",
+      "team": null,
+      "time": "1:12.63"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Katz, Emory",
+      "place": 64,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:12.78"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Bane, Riley",
+      "place": 65,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:13.02"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Jacobson, Rylan",
+      "place": 66,
+      "tags": "",
+      "team": "Coastal Carolina Universtiy-SC",
+      "time": "1:13.22"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Lawlor, Celia",
+      "place": 67,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "1:13.27"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Jean, Ashley",
+      "place": 68,
+      "tags": "",
+      "team": "UNC Charlotte-NC",
+      "time": "1:13.46"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Godoy, Tyler",
+      "place": 69,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:13.89"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Howard, Jule",
+      "place": 70,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "1:13.91"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Rehder, Megan",
+      "place": 71,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:14.02"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "McCall, Cara",
+      "place": 72,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:14.34"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Melton, Jacoby",
+      "place": 73,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:14.41"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Helmantel, Fleur",
+      "place": 74,
+      "tags": "",
+      "team": null,
+      "time": "1:14.42"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Merritt, Abby",
+      "place": 75,
+      "tags": "",
+      "team": "Cofc Club Swim-SC",
+      "time": "1:14.48"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Tarantino, Megan",
+      "place": 76,
+      "tags": "",
+      "team": "High Point Club Swimming-NC",
+      "time": "1:14.63"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Greene, Bebe",
+      "place": 77,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:14.82"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Asner, Adira",
+      "place": 78,
+      "tags": "",
+      "team": null,
+      "time": "1:15.55"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Mellor, Tatum",
+      "place": 79,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:15.61"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Hair, Chloe",
+      "place": 80,
+      "tags": "",
+      "team": null,
+      "time": "1:15.68"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Weidner, Mia",
+      "place": 81,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:15.73"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Petrella, Anna",
+      "place": 82,
+      "tags": "",
+      "team": null,
+      "time": "1:16.31"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Collins, Megan",
+      "place": 83,
+      "tags": "",
+      "team": null,
+      "time": "1:16.81"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Barr, Bridget",
+      "place": 84,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:16.85"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Miller, Charli",
+      "place": 85,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:17.18"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Tabberer, Avery",
+      "place": 86,
+      "tags": "",
+      "team": "UNC Charlotte-NC",
+      "time": "1:17.24"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Prokopik, Jamison",
+      "place": 87,
+      "tags": "",
+      "team": null,
+      "time": "1:17.57"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Ellsworth, Madi",
+      "place": 88,
+      "tags": "",
+      "team": "Coastal Carolina Universtiy-SC",
+      "time": "1:17.69"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Jackson, Hannah",
+      "place": 89,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:18.70"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Anderson, Rilie",
+      "place": 90,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:18.83"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Smith, Bethany",
+      "place": 91,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:19.13"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Murdock, Caroline",
+      "place": 92,
+      "tags": "",
+      "team": "Ung Swim Club-GA",
+      "time": "1:19.31"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Linz, Meghan",
+      "place": 93,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "1:20.34"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Kennedy, Savannah",
+      "place": 94,
+      "tags": "",
+      "team": "Western Carolina Swim Club-NC",
+      "time": "1:20.60"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Lewis, Abigail",
+      "place": 95,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:21.17"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Diviney, Cora",
+      "place": 96,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:22.07"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Vasquez-Soto, Jariana",
+      "place": 97,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:22.14"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Malzer, Rebecca",
+      "place": 98,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "1:22.65"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Nazemi, Natalie",
+      "place": 99,
+      "tags": "",
+      "team": null,
+      "time": "1:22.67"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "McClease, Aalysah",
+      "place": 100,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "1:22.80"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Clark, Taylor",
+      "place": 101,
+      "tags": "",
+      "team": null,
+      "time": "1:22.83"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "McMichael, Ava",
+      "place": 102,
+      "tags": "",
+      "team": null,
+      "time": "1:23.04"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Christman, Grace",
+      "place": 103,
+      "tags": "",
+      "team": null,
+      "time": "1:23.50"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Watson, Abby",
+      "place": 104,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:25.16"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Gurden, Abigail",
+      "place": 105,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "1:25.24"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Mosonyi, Ashley",
+      "place": 106,
+      "tags": "",
+      "team": "Radford Club Swim",
+      "time": "1:29.41"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Nowell, Linsey",
+      "place": 107,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:29.95"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Mcnabb, Cassie",
+      "place": 108,
+      "tags": "",
+      "team": "Coastal Carolina Universtiy-SC",
+      "time": "1:31.48"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Holtz, Katrina",
+      "place": 109,
+      "tags": "",
+      "team": null,
+      "time": "1:32.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Fibraio, Leah",
+      "place": 110,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:32.97"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Wieberg, Addi",
+      "place": 111,
+      "tags": "",
+      "team": "UNC Charlotte-NC",
+      "time": "1:37.41"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Magierski, Avery",
+      "place": 112,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "1:42.54"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Osman, Fadumina",
+      "place": 113,
+      "tags": "",
+      "team": "UNC Charlotte-NC",
+      "time": "2:42.79"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Caballero, Malachi",
+      "place": 1,
+      "tags": "",
+      "team": null,
+      "time": "52.47"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Baldwin, Daniel",
+      "place": 2,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "52.78"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Roberts, Topher",
+      "place": 3,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "53.47"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Lee, Hyoseon",
+      "place": 4,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "54.53"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Brown, Whittman",
+      "place": 5,
+      "tags": "",
+      "team": null,
+      "time": "55.29"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Stuck, Evan",
+      "place": 6,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "55.37"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Gaskey, Constantine",
+      "place": 7,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "55.60"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Yae, James",
+      "place": 8,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "55.63"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Mistretta, Dominic",
+      "place": 9,
+      "tags": "",
+      "team": null,
+      "time": "55.84"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Kolter, Trent",
+      "place": 10,
+      "tags": "",
+      "team": null,
+      "time": "56.02"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Rees, Jonah",
+      "place": 11,
+      "tags": "",
+      "team": null,
+      "time": "56.09"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Chen, Noah",
+      "place": 12,
+      "tags": "",
+      "team": null,
+      "time": "56.56"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Rohovit, Hunter",
+      "place": 13,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "56.72"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Simmons, Charlie",
+      "place": 14,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "56.86"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Keenan, Nathaniel",
+      "place": 15,
+      "tags": "",
+      "team": null,
+      "time": "56.94"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Smith, Ben",
+      "place": 16,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "56.95"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Liu, Alec",
+      "place": 16,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "56.95"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Hall, Nathan",
+      "place": 38,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:00.00"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Wilson, Lucas",
+      "place": 39,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:00.73"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Hamrick, Nat",
+      "place": 40,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:00.74"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Powell, Henry",
+      "place": 41,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:01.05"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Han, Jason",
+      "place": 42,
+      "tags": "",
+      "team": "Coastal Carolina Universtiy-SC",
+      "time": "1:01.26"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Cuerdo Agirre, Unai",
+      "place": 43,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:01.36"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Sweat, Matthew",
+      "place": 44,
+      "tags": "",
+      "team": null,
+      "time": "1:01.42"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Seliem, Hamza",
+      "place": 45,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:01.45"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Thrower, Joshua",
+      "place": 46,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:01.61"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Miller, Christopher",
+      "place": 47,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:01.75"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Zemlevskiy, Georgiy",
+      "place": 48,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "1:01.96"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Lynch, Ryan",
+      "place": 49,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:02.22"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Kharel, Avi",
+      "place": 50,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:02.75"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Beck, Anderson",
+      "place": 51,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:03.00"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Flores-Caceres, Amilcar",
+      "place": 52,
+      "tags": "",
+      "team": null,
+      "time": "1:03.03"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Sheffield, Chase",
+      "place": 53,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:03.42"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "He, Franklin",
+      "place": 54,
+      "tags": "",
+      "team": null,
+      "time": "1:03.47"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Berger, Henry",
+      "place": 55,
+      "tags": "",
+      "team": null,
+      "time": "1:03.54"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Greene, Mason",
+      "place": 56,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:03.56"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Townsend, Matthew",
+      "place": 57,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:03.58"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Gerard, Tyler",
+      "place": 58,
+      "tags": "",
+      "team": "East Tennessee State Universit-NI",
+      "time": "1:03.96"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Young, Brodi",
+      "place": 59,
+      "tags": "",
+      "team": "East Tennessee State Universit-NI",
+      "time": "1:04.09"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Kahwajy, Andy",
+      "place": 60,
+      "tags": "",
+      "team": null,
+      "time": "1:04.92"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Sallee, Jackson",
+      "place": 61,
+      "tags": "",
+      "team": "East Tennessee State Universit-NI",
+      "time": "1:05.53"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Major, David",
+      "place": 62,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:05.78"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Betts, Charlie",
+      "place": 63,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "1:06.05"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Heath, Zachary",
+      "place": 64,
+      "tags": "",
+      "team": null,
+      "time": "1:06.30"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "George, Noah",
+      "place": 65,
+      "tags": "",
+      "team": "UNC Charlotte-NC",
+      "time": "1:06.42"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Gorman, Aiden",
+      "place": 66,
+      "tags": "",
+      "team": "Western Carolina Swim Club-NC",
+      "time": "1:06.93"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Daves, Brandon",
+      "place": 67,
+      "tags": "",
+      "team": "UNC Charlotte-NC",
+      "time": "1:07.20"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Beatty, Alex",
+      "place": 68,
+      "tags": "",
+      "team": null,
+      "time": "1:07.30"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Fowler, Matthew",
+      "place": 69,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "1:07.31"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Castellino, Ethan",
+      "place": 70,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "1:07.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Stringfield, Robbie",
+      "place": 71,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:08.96"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "White, Deacon",
+      "place": 72,
+      "tags": "",
+      "team": null,
+      "time": "1:09.11"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Cotton, Jonathan",
+      "place": 73,
+      "tags": "",
+      "team": "High Point Club Swimming-NC",
+      "time": "1:09.67"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Humann, Brent",
+      "place": 74,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:09.71"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Young, Colbi",
+      "place": 75,
+      "tags": "",
+      "team": "East Tennessee State Universit-NI",
+      "time": "1:10.27"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "LaChapelle, Nick",
+      "place": 76,
+      "tags": "",
+      "team": null,
+      "time": "1:11.03"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "McGhee, Bradley",
+      "place": 77,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:11.78"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "House, Nate",
+      "place": 78,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:11.99"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Fajerman, Jason",
+      "place": 79,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:12.20"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Davidson, Devin",
+      "place": 80,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:12.45"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Montgomery, Alex",
+      "place": 81,
+      "tags": "",
+      "team": "Coastal Carolina Universtiy-SC",
+      "time": "1:12.84"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Dail, Joshua",
+      "place": 82,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:14.22"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Xu, David",
+      "place": 83,
+      "tags": "",
+      "team": "UNC Charlotte-NC",
+      "time": "1:15.43"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Mendoza, Benjiro",
+      "place": 84,
+      "tags": "",
+      "team": "High Point Club Swimming-NC",
+      "time": "1:15.59"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Durham, Will",
+      "place": 85,
+      "tags": "",
+      "team": "Western Carolina Swim Club-NC",
+      "time": "1:17.70"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Chen, Roger",
+      "place": 86,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "1:26.66"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Fly",
+      "name": "Dobie, Lauren",
+      "place": 1,
+      "tags": "",
+      "team": null,
+      "time": "2:23.10"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Fly",
+      "name": "Caudle, Riley",
+      "place": 2,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "2:23.82"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Fly",
+      "name": "Allibone, Jessica",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:26.11"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Fly",
+      "name": "Kerrigan, Erin",
+      "place": 4,
+      "tags": "",
+      "team": "Coastal Carolina Universtiy-SC",
+      "time": "2:27.03"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Fly",
+      "name": "Witthoff, Mia",
+      "place": 5,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:33.89"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Fly",
+      "name": "Castle, Kendall",
+      "place": 6,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "2:46.19"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Fly",
+      "name": "Long, Liam",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:52.15"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Fly",
+      "name": "Skidmore, Billy",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:00.92"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Fly",
+      "name": "Sleptsov, Alex",
+      "place": 3,
+      "tags": "",
+      "team": null,
+      "time": "2:01.98"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Fly",
+      "name": "Johnson, Cameron",
+      "place": 4,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "2:02.61"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Fly",
+      "name": "Strudgeon, Ryan",
+      "place": 5,
+      "tags": "",
+      "team": null,
+      "time": "2:03.36"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Fly",
+      "name": "Altera, Ryan",
+      "place": 6,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:03.43"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Fly",
+      "name": "Tang, Rocky",
+      "place": 7,
+      "tags": "",
+      "team": "UNC Charlotte-NC",
+      "time": "2:04.44"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Fly",
+      "name": "Walter, Aiden",
+      "place": 8,
+      "tags": "",
+      "team": null,
+      "time": "2:06.43"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Fly",
+      "name": "Loughmiller, Max",
+      "place": 9,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "2:06.99"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Fly",
+      "name": "Hall, Aaron",
+      "place": 10,
+      "tags": "",
+      "team": null,
+      "time": "2:07.56"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Fly",
+      "name": "Dwyer, Peter",
+      "place": 11,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "2:19.55"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Fly",
+      "name": "Keatts, Caleb",
+      "place": 12,
+      "tags": "",
+      "team": null,
+      "time": "2:48.15"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Carlton, Delaney",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "22.91"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Will, Isabel",
+      "place": 2,
+      "tags": "",
+      "team": null,
+      "time": "24.91"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Powers, Alexis",
+      "place": 3,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "25.57"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Baxter, Lily",
+      "place": 4,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "25.62"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Aghjayan, Hannah",
+      "place": 5,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "25.71"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Kondratick, Morgan",
+      "place": 6,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "25.72"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Munger, Audrey",
+      "place": 7,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "25.78"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Barrett, Sophia",
+      "place": 8,
+      "tags": "",
+      "team": null,
+      "time": "25.79"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Roberts, Lauren",
+      "place": 9,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "25.80"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Berge, Isabel",
+      "place": 10,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "25.81"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Torres, Gaby",
+      "place": 11,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "25.82"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Goor, Sterre",
+      "place": 12,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "25.86"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Major, Carson",
+      "place": 12,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "25.86"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Corrado, Sola",
+      "place": 14,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "25.96"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Wong, Tara",
+      "place": 15,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "26.06"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Everling, Corinne",
+      "place": 16,
+      "tags": "",
+      "team": "Coastal Carolina Universtiy-SC",
+      "time": "26.11"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Buff, Maddy",
+      "place": null,
+      "tags": "",
+      "team": null,
+      "time": "19.33"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "White, Keller",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "21.09"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Cloutier, Briggs",
+      "place": 2,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "21.48"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Long, Liam",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "21.52"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Lee-Bishop, Nikolas",
+      "place": 4,
+      "tags": "",
+      "team": null,
+      "time": "21.65"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Cook, Cameron",
+      "place": 5,
+      "tags": "",
+      "team": null,
+      "time": "21.88"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Morea, Michael",
+      "place": 6,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "22.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Brown, Whittman",
+      "place": 7,
+      "tags": "",
+      "team": null,
+      "time": "22.01"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Conaton, William",
+      "place": 8,
+      "tags": "",
+      "team": null,
+      "time": "22.12"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Rosenhein, Drew",
+      "place": 9,
+      "tags": "",
+      "team": null,
+      "time": "22.14"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Gaskey, Constantine",
+      "place": 10,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "22.16"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Spade, Gage",
+      "place": 11,
+      "tags": "",
+      "team": null,
+      "time": "22.21"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Armentrout, Owen",
+      "place": 12,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "22.22"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Roberts, Topher",
+      "place": 13,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "22.29"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Rimsa, Thomas",
+      "place": 14,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "22.30"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Blackstone, James",
+      "place": 15,
+      "tags": "",
+      "team": null,
+      "time": "22.31"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Young, Hatcher",
+      "place": 16,
+      "tags": "",
+      "team": null,
+      "time": "22.32"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Pyle, Ellee",
+      "place": 1,
+      "tags": "",
+      "team": null,
+      "time": "1:09.10"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Kim, Catherine",
+      "place": 2,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:11.51"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Miller, Rita",
+      "place": 3,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:12.13"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Goor, Sterre",
+      "place": 4,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:12.86"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Obara, Kendall",
+      "place": 5,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:14.21"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Morton, Lindsay",
+      "place": 6,
+      "tags": "",
+      "team": null,
+      "time": "1:14.33"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Strout, Jennifer",
+      "place": 7,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:14.55"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Brezinsky, Natalie",
+      "place": 8,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:14.97"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Wong, Tara",
+      "place": 9,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:15.06"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Elvambuena, Ella",
+      "place": 10,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:16.06"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Ghim, Esther",
+      "place": 11,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:16.09"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Pitts, Emma",
+      "place": 12,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:17.06"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Wallace, Emma",
+      "place": 13,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:17.12"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Hoffman, Ansley",
+      "place": 14,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:17.32"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Beugnard, Agathe",
+      "place": 15,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:17.45"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Qian, Shakira",
+      "place": 16,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:17.47"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Sands, Kylie",
+      "place": 17,
+      "tags": "",
+      "team": "Coastal Carolina Universtiy-SC",
+      "time": "1:17.50"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Granger, Bermuda",
+      "place": 18,
+      "tags": "",
+      "team": null,
+      "time": "1:17.57"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Carney, KC",
+      "place": 19,
+      "tags": "",
+      "team": null,
+      "time": "1:17.72"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Pimentel, Aimee",
+      "place": 20,
+      "tags": "",
+      "team": null,
+      "time": "1:17.87"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Gaur, Tanvi",
+      "place": 21,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:17.95"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Weems, Kylie",
+      "place": 22,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:17.99"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Harbert, Jill",
+      "place": 23,
+      "tags": "",
+      "team": "UNC Charlotte-NC",
+      "time": "1:18.13"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Lachowski, Amelia",
+      "place": 24,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "1:18.31"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Healy, Sierra",
+      "place": 25,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "1:18.40"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Jacobson, Rylan",
+      "place": 26,
+      "tags": "",
+      "team": "Coastal Carolina Universtiy-SC",
+      "time": "1:18.45"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Earl, Lindsey",
+      "place": 27,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:18.56"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "White, Logan",
+      "place": 28,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:19.26"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Springer, Gabriella",
+      "place": 29,
+      "tags": "",
+      "team": null,
+      "time": "1:19.36"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Faust, Amelia",
+      "place": 30,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:19.52"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Plantamura, Natalie",
+      "place": 31,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:20.36"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Furches, Sarah",
+      "place": 32,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:20.48"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Peneva, Denitsa",
+      "place": 33,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:22.41"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Weidner, Mia",
+      "place": 34,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:22.48"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Bane, Riley",
+      "place": 35,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:22.75"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Helmantel, Fleur",
+      "place": 36,
+      "tags": "",
+      "team": null,
+      "time": "1:22.86"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Gustafsson, Vendela",
+      "place": 37,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:22.92"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Klinger, Katie",
+      "place": 38,
+      "tags": "",
+      "team": null,
+      "time": "1:24.26"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Collins, Megan",
+      "place": 39,
+      "tags": "",
+      "team": null,
+      "time": "1:24.55"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Melton, Jacoby",
+      "place": 40,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:26.45"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Godoy, Tyler",
+      "place": 41,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:26.89"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Page, Carole-Ann",
+      "place": 42,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:27.72"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Musman, Chloe",
+      "place": 43,
+      "tags": "",
+      "team": null,
+      "time": "1:28.25"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "McMichael, Ava",
+      "place": 44,
+      "tags": "",
+      "team": null,
+      "time": "1:28.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Bretting, Avery",
+      "place": 45,
+      "tags": "",
+      "team": null,
+      "time": "1:29.03"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Murdock, Caroline",
+      "place": 46,
+      "tags": "",
+      "team": "Ung Swim Club-GA",
+      "time": "1:29.71"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Anderson, Rilie",
+      "place": 47,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:29.88"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Hirsch, Meghan",
+      "place": 48,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:33.64"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Clark, Taylor",
+      "place": 49,
+      "tags": "",
+      "team": null,
+      "time": "1:38.90"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Davis, Gabrielle",
+      "place": 50,
+      "tags": "",
+      "team": "Western Carolina Swim Club-NC",
+      "time": "1:39.77"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Hellenbrand, Heidi",
+      "place": 51,
+      "tags": "",
+      "team": "Cofc Club Swim-SC",
+      "time": "1:40.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Lamb, Grayce",
+      "place": 52,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:44.60"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Morea, Michael",
+      "place": 1,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "58.27"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Lee, Hyoseon",
+      "place": 2,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "59.72"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Liu, Alec",
+      "place": 3,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "1:00.04"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Cheifetz, Adam",
+      "place": 4,
+      "tags": "",
+      "team": null,
+      "time": "1:01.00"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Pianoto, Matthew",
+      "place": 5,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:01.27"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "McDevitt, Liam",
+      "place": 6,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:01.68"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Wilson, Lucas",
+      "place": 7,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:02.24"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Zamudio, Jack",
+      "place": 8,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:02.28"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Long, Carter",
+      "place": 9,
+      "tags": "",
+      "team": null,
+      "time": "1:02.62"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Long, Byron",
+      "place": 10,
+      "tags": "",
+      "team": null,
+      "time": "1:03.35"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Mistretta, Dominic",
+      "place": 11,
+      "tags": "",
+      "team": null,
+      "time": "1:03.56"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Stubbs, Kierro",
+      "place": 11,
+      "tags": "",
+      "team": null,
+      "time": "1:03.56"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Zhang, Jeffrey",
+      "place": 13,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:03.58"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Cheung, Luke",
+      "place": 14,
+      "tags": "",
+      "team": null,
+      "time": "1:03.68"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Neumann, Asher",
+      "place": 15,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:04.15"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "DiPietro, Austin",
+      "place": 16,
+      "tags": "",
+      "team": "Coastal Carolina Universtiy-SC",
+      "time": "1:04.26"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Ng, Aaron",
+      "place": 17,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "1:04.32"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Simmons, Charlie",
+      "place": 18,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "1:04.34"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Ryberg, Matthew",
+      "place": 19,
+      "tags": "",
+      "team": null,
+      "time": "1:04.82"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Liu, Joshua",
+      "place": 20,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "1:05.54"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Zagorianos, Alexander",
+      "place": 21,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:06.41"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Mu, James",
+      "place": 22,
+      "tags": "",
+      "team": "Duke Club Swimming-NC",
+      "time": "1:06.48"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Wygonik, Sam",
+      "place": 23,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:06.75"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Buenano, Sebastian",
+      "place": 24,
+      "tags": "",
+      "team": null,
+      "time": "1:07.23"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Bizeau, Benjamin",
+      "place": 24,
+      "tags": "",
+      "team": null,
+      "time": "1:07.23"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Powell, Henry",
+      "place": 26,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:07.62"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Cuerdo Agirre, Unai",
+      "place": 27,
+      "tags": "",
+      "team": "UNC Chapel Hill-NC",
+      "time": "1:07.71"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Hall, Nathan",
+      "place": 28,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:08.25"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Getter, Matthew",
+      "place": 29,
+      "tags": "",
+      "team": null,
+      "time": "1:10.00"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Jampole, Nolan",
+      "place": 30,
+      "tags": "",
+      "team": null,
+      "time": "1:10.60"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Wilz, George",
+      "place": 31,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:11.60"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Kharel, Avi",
+      "place": 32,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:11.65"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Heath, Zachary",
+      "place": 33,
+      "tags": "",
+      "team": null,
+      "time": "1:11.86"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Halbach, Jake",
+      "place": 34,
+      "tags": "",
+      "team": "UNC Charlotte-NC",
+      "time": "1:11.93"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Hoover, Forrest",
+      "place": 35,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:13.14"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Cockrum, Porter",
+      "place": 36,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:13.23"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Reason, Blake",
+      "place": 37,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:13.51"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Delacruz, Chris",
+      "place": 38,
+      "tags": "",
+      "team": "Appalachian State Club Swim-NC",
+      "time": "1:14.29"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Beatty, Alex",
+      "place": 39,
+      "tags": "",
+      "team": null,
+      "time": "1:14.33"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Keatts, Caleb",
+      "place": 40,
+      "tags": "",
+      "team": null,
+      "time": "1:14.76"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Daves, Brandon",
+      "place": 41,
+      "tags": "",
+      "team": "UNC Charlotte-NC",
+      "time": "1:15.63"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Cheung, Chris",
+      "place": 42,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:15.79"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Osterkamp, Nicholas",
+      "place": 43,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:16.04"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Betts, Charlie",
+      "place": 44,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "1:16.98"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Humann, Brent",
+      "place": 45,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:19.60"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "McGhee, Bradley",
+      "place": 46,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:19.70"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Dail, Joshua",
+      "place": 47,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:24.42"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Xu, David",
+      "place": 48,
+      "tags": "",
+      "team": "UNC Charlotte-NC",
+      "time": "1:25.06"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Deaton, Miles",
+      "place": 49,
+      "tags": "",
+      "team": "NC State Club Swimming-NC",
+      "time": "1:26.09"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Nemes, Rares",
+      "place": 50,
+      "tags": "",
+      "team": "Ung Swim Club-GA",
+      "time": "1:29.94"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Roberts, Alex",
+      "place": 51,
+      "tags": "",
+      "team": null,
+      "time": "1:31.58"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Kalinin, Daniel",
+      "place": 52,
+      "tags": "",
+      "team": "UNC Charlotte-NC",
+      "time": "1:32.69"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Rainey, James",
+      "place": 53,
+      "tags": "",
+      "team": "Ung Swim Club-GA",
+      "time": "1:47.12"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Gjerdrum, Dylan",
+      "place": 54,
+      "tags": "",
+      "team": "UNC Charlotte-NC",
+      "time": "2:20.84"
+    }
+  ]
+}

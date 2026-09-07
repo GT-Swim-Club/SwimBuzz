@@ -1,0 +1,1536 @@
+{
+  "course": "SCY",
+  "detectedSheetType": "results",
+  "meet_date": "2025-01-19",
+  "meet_name": "2025 G-Vegas Winter Classic",
+  "relay_results": [
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 1,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB-GA",
+      "time": "1:58.40"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 2,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "EAST CAROLINA UNIVERSITY-NC",
+      "time": "2:03.53"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 3,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "EAST CAROLINA UNIVERSITY-NC",
+      "time": "2:11.71"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 1,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB-GA",
+      "time": "1:44.70"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 2,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "EAST CAROLINA UNIVERSITY-NC",
+      "time": "1:46.17"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 3,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "EAST CAROLINA UNIVERSITY-NC",
+      "time": "1:59.82"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 1,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB-GA",
+      "time": "1:44.84"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 2,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "EAST CAROLINA UNIVERSITY-NC",
+      "time": "1:54.36"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 3,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "EAST CAROLINA UNIVERSITY-NC",
+      "time": "1:55.33"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 1,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB-GA",
+      "time": "1:34.27"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 2,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "EAST CAROLINA UNIVERSITY-NC",
+      "time": "1:40.13"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 3,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "EAST CAROLINA UNIVERSITY-NC",
+      "time": "1:45.95"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "100 Free Relay",
+      "gender": "X",
+      "place": 1,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB-GA",
+      "time": "1:23.09"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "100 Free Relay",
+      "gender": "X",
+      "place": 2,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "EAST CAROLINA UNIVERSITY-NC",
+      "time": "1:23.42"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "100 Free Relay",
+      "gender": "X",
+      "place": 3,
+      "relayLetter": "C",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "EAST CAROLINA UNIVERSITY-NC",
+      "time": "1:24.48"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "100 Free Relay",
+      "gender": "X",
+      "place": 4,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "King, Parker"
+        },
+        {
+          "leg": 2,
+          "name": "Mendoza, Benjiro"
+        },
+        {
+          "leg": 3,
+          "name": "Simerson, Kynley"
+        },
+        {
+          "leg": 4,
+          "name": "Wean, Drexel"
+        }
+      ],
+      "tags": "",
+      "team": "HIGH POINT CLUB SWIMMING-NC",
+      "time": "1:31.35"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "100 Free Relay",
+      "gender": "X",
+      "place": 5,
+      "relayLetter": "D",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "EAST CAROLINA UNIVERSITY-NC",
+      "time": "1:41.46"
+    }
+  ],
+  "results": [
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Carle, Juliana",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:06.50"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Allibone, Jessica",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:07.75"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Wang, Mingqi",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:10.54"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "McCall, Cara",
+      "place": 4,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:10.81"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Benway, Kayley",
+      "place": 5,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:11.24"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Weems, Kylie",
+      "place": 6,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:11.47"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Witthoff, Mia",
+      "place": 7,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:12.02"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Hewitt, Kaila",
+      "place": 8,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:13.51"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Godoy, Tyler",
+      "place": 9,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:15.71"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Miller, Charli",
+      "place": 10,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:16.99"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Folk, Katelyn",
+      "place": 11,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:17.91"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Jonas, Lindsay",
+      "place": 12,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:18.06"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Lewis, Abigail",
+      "place": 13,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:23.39"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Davis, Elizabeth",
+      "place": 14,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:25.28"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Bullard, Collin",
+      "place": 1,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "58.89"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Rimsa, Thomas",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:01.39"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Vlady, George",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:01.81"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Witham, Noah",
+      "place": 4,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:02.94"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Townsend, Matthew",
+      "place": 5,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:03.62"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Will, Samuel",
+      "place": 6,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:06.09"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Klingenberg, Brennan",
+      "place": 7,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:09.01"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "name": "Jones, William",
+      "place": 8,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:10.32"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Carlton, Delaney",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:00.54"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Munger, Audrey",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:03.55"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Ricci, Emily",
+      "place": 3,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:12.82"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Jonas, Lindsay",
+      "place": 4,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:18.30"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "name": "Rice, Thomas",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:00.93"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Spaulding, Alice",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "26.27"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Powers, Alexis",
+      "place": 2,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "26.92"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Faust, Amelia",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "26.95"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Kulas, Saline",
+      "place": 4,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "27.90"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Whittington, Veronica",
+      "place": 5,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "28.59"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Sutton, Jennifer",
+      "place": 6,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "29.23"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Anderson, Rilie",
+      "place": 7,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "29.51"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Gray, Paige",
+      "place": 8,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "29.60"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Randall, Lydia",
+      "place": 9,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "29.79"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Paroly, Sarah",
+      "place": 10,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "30.25"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Press, Savannah",
+      "place": 11,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "33.20"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Yie, Emiley",
+      "place": 12,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "40.69"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Fletcher, Abigail",
+      "place": 13,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "36.15"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Richardson, Haley",
+      "place": 14,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "37.26"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Lamb, Grayce",
+      "place": 15,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "38.08"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Compton, Keira",
+      "place": 16,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "38.43"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "White, Keller",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "21.66"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Gossmann, Christopher",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "22.66"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Skidmore, Billy",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "23.33"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Smith, Sadler",
+      "place": 4,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "23.37"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Horton, Fabian",
+      "place": 5,
+      "tags": "",
+      "team": "Western Carolina Swim Club-NC",
+      "time": "23.94"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Oglesby, Dayton",
+      "place": 6,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "24.16"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Townsend, Matthew",
+      "place": 7,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "24.56"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Witham, Noah",
+      "place": 8,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "24.93"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Hernandez, Joshua",
+      "place": 9,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "24.97"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Weitzel, Logan",
+      "place": 10,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "24.98"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Denning, Cooper",
+      "place": 11,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "25.46"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Smith, Logan",
+      "place": 12,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "26.51"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Humann, Brent",
+      "place": 13,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "26.61"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Will, Samuel",
+      "place": 14,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "26.73"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Vlady, Richard",
+      "place": 15,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "27.07"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Fernandez, Charles",
+      "place": 16,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "27.70"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Chaney, Ethan",
+      "place": 17,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "28.24"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Dail, Joshua",
+      "place": 18,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "29.17"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Vlady, George",
+      "place": 19,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "31.21"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Elvambuena, Ella",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:16.82"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Weems, Kylie",
+      "place": 2,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:18.62"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Faust, Amelia",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:24.76"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "name": "Lamb, Grayce",
+      "place": 4,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:50.65"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "name": "Carle, Juliana",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:04.35"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "name": "Gossmann, Christopher",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "55.32"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "name": "Hall, Jackson",
+      "place": 2,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:01.50"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "name": "Smith, Sadler",
+      "place": 3,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:02.15"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "name": "Horton, Fabian",
+      "place": 4,
+      "tags": "",
+      "team": "Western Carolina Swim Club-NC",
+      "time": "1:04.17"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "name": "Humann, Brent",
+      "place": null,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "DQ"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "name": "Duffy, Anya",
+      "place": 1,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "32.53"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "name": "Hewitt, Kaila",
+      "place": 2,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "35.50"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "name": "Powers, Alexis",
+      "place": 3,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "33.75"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "name": "Ricci, Emily",
+      "place": 4,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "34.13"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "name": "Miller, Charli",
+      "place": 5,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "34.30"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "name": "Lewis, Abigail",
+      "place": 6,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "35.83"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "name": "Press, Savannah",
+      "place": 7,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "43.06"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "name": "Richardson, Haley",
+      "place": 8,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "43.19"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "name": "Fletcher, Abigail",
+      "place": 9,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "43.72"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "name": "Oglesby, Dayton",
+      "place": 1,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "28.68"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "name": "Rice, Thomas",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "28.96"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "name": "Smith, Logan",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "32.56"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "name": "Vlady, Richard",
+      "place": 4,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "35.69"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "name": "Carlton, Delaney",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "5:24.72"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "name": "Wang, Mingqi",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "6:06.36"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "name": "Folk, Katelyn",
+      "place": 3,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "6:37.78"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "name": "Weitzel, Logan",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "6:07.61"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "name": "Smith, Sadler",
+      "place": 2,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "6:17.38"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "name": "Hernandez, Joshua",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "6:53.24"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "name": "Languell, Cole",
+      "place": 4,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "7:02.74"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "name": "Dail, Joshua",
+      "place": 5,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "7:14.22"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "name": "Weems, Kylie",
+      "place": 1,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "34.85"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "name": "Benway, Kayley",
+      "place": 2,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "35.58"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "name": "Elvambuena, Ella",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "36.35"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "name": "Hewitt, Kaila",
+      "place": 4,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "38.29"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "name": "Whittington, Veronica",
+      "place": 5,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "38.70"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "name": "Godoy, Tyler",
+      "place": 6,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "40.05"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "name": "Anderson, Rilie",
+      "place": 7,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "41.42"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "name": "Gray, Paige",
+      "place": 8,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "41.83"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "name": "Davis, Elizabeth",
+      "place": 9,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "44.20"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "name": "Fletcher, Abigail",
+      "place": 10,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "48.08"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "name": "Denning, Cooper",
+      "place": 1,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "30.93"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "name": "Skidmore, Billy",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "31.28"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "name": "Vlady, Richard",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "35.11"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "name": "Fernandez, Charles",
+      "place": 4,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "35.33"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Kulas, Saline",
+      "place": 1,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "2:20.76"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Townsend, Matthew",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:56.62"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "name": "Weitzel, Logan",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:14.97"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "McCall, Cara",
+      "place": 1,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "29.12"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Allibone, Jessica",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "29.20"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Faust, Amelia",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "29.65"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Elvambuena, Ella",
+      "place": 4,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "30.27"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Hicks, Erin",
+      "place": 5,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "30.64"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Duffy, Anya",
+      "place": 6,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "31.41"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Folk, Katelyn",
+      "place": 7,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "31.90"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Godoy, Tyler",
+      "place": 8,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "32.12"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Sutton, Jennifer",
+      "place": 9,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "33.14"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Miller, Charli",
+      "place": 10,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "35.05"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Davis, Elizabeth",
+      "place": 11,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "37.93"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Horton, Fabian",
+      "place": 1,
+      "tags": "",
+      "team": "Western Carolina Swim Club-NC",
+      "time": "26.28"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Rice, Thomas",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "27.19"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "name": "Languell, Cole",
+      "place": 3,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "28.51"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "name": "Munger, Audrey",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:21.85"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "name": "Spaulding, Alice",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:23.45"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "name": "Carle, Juliana",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:26.95"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "name": "Witthoff, Mia",
+      "place": 4,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:41.73"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "name": "Humann, Brent",
+      "place": 1,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "2:50.47"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "name": "Dail, Joshua",
+      "place": 2,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "2:51.94"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "name": "Carlton, Delaney",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "53.00"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "name": "Wang, Mingqi",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:00.33"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "name": "Kulas, Saline",
+      "place": 3,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:03.87"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "name": "Randall, Lydia",
+      "place": 4,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:07.34"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "name": "Paroly, Sarah",
+      "place": 5,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:07.99"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "name": "Lamb, Grayce",
+      "place": 6,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:30.51"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "name": "Compton, Keira",
+      "place": 7,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "1:31.59"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "name": "White, Keller",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "49.71"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "name": "Gossmann, Christopher",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "49.95"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "name": "Bullard, Collin",
+      "place": 3,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "50.93"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "name": "Vlady, George",
+      "place": 4,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "53.86"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "name": "Klingenberg, Brennan",
+      "place": 5,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "54.34"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "name": "Hall, Jackson",
+      "place": 6,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "54.84"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "name": "Will, Samuel",
+      "place": 7,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "56.04"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "name": "Smith, Logan",
+      "place": 8,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:02.23"
+    }
+  ]
+}

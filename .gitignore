@@ -49,3 +49,6 @@ AGENTS.md
 
 # Graphify
 graphify-out/
+
+# Local-only meet PDF fixtures (not checked in — see pdf_parsers/tests/)
+/fixtures/

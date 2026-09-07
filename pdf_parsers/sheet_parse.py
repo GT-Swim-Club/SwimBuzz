@@ -10,6 +10,7 @@ from typing import Any
 import pdfplumber
 
 from .pdf_parse import (
+    MEET_NAME_DATE_PREFIX,
     club_matches,
     detect_column_split,
     detect_course,
@@ -19,26 +20,44 @@ from .pdf_parse import (
     normalize_event,
     parse_meet_header,
 )
+from .swim_common import (
+    EXHIBITION_TIME_TOKEN_PATTERN,
+    INVALID_TIME_PATTERN,
+    INVALID_TIMES,
+    TIME_TOKEN_PATTERN,
+    expand_ligatures,
+)
 
-DEFAULT_TEAM_CODE = "GTSC"
+# Any club's short code (e.g. "GTSC-GA") or full title-case name (e.g.
+# "Georgia Tech Swim Club-GA") — used in place of one team's specific
+# pattern when no `team` filter is configured, so an unfiltered sheet parse
+# returns every team's entries instead of matching nothing.
+_ANY_TEAM_NAME = (
+    r"(?:[A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+){0,5}(?:-[A-Z]{2})?|[A-Z0-9]{2,10}(?:-[A-Z]{2})?)"
+)
 
 
 class _SheetTeam:
-    """Active team filter for the current sheet parse."""
+    """Active team filter for the current sheet parse. An empty `code` means
+    no filter — parse every team's entries rather than one specific club's."""
 
     def __init__(self, code: str) -> None:
         self.code = code
 
     @classmethod
     def parse(cls, team: str | None) -> "_SheetTeam":
-        raw = (team or DEFAULT_TEAM_CODE).strip().upper()
-        return cls(raw or DEFAULT_TEAM_CODE)
+        return cls((team or "").strip().upper())
 
     @property
     def base(self) -> str:
         return self.code.split("-")[0]
 
     def matches(self, team: str) -> bool:
+        # club_matches("<anything>", "") already returns True — an empty
+        # code means "no filter" — but spell it out here since this is the
+        # gate every entry has to pass to be included in the output.
+        if not self.code:
+            return True
         return club_matches(team.strip(), self.code.lower())
 
     def _team_name_pattern(self) -> str:
@@ -55,6 +74,8 @@ class _SheetTeam:
         The longest alternates are listed first so the regex engine greedily
         matches the most complete team name when multiple alternates could fit.
         """
+        if not self.base:
+            return _ANY_TEAM_NAME
         base = re.escape(self.base)
         # Short-code variants: GTSC or GTSC-GA
         code_pat = rf"{base}(?:-[A-Z]{{2}})?"
@@ -92,6 +113,13 @@ class _SheetTeam:
         terminated by a lookahead that asserts the next token is a relay letter
         or a time value.
         """
+        # Lookahead: next non-space must be a relay letter followed by space,
+        # or a time / status token.
+        time_look = rf"(?=\s*(?:[ABCD]\s+|(?:{INVALID_TIME_PATTERN})\b|{TIME_TOKEN_PATTERN}))"
+
+        if not self.base:
+            return _ANY_TEAM_NAME + time_look
+
         base = re.escape(self.base)
         code_pat = rf"{base}(?:-[A-Z]{{2}})?"
 
@@ -99,18 +127,11 @@ class _SheetTeam:
         for ch in self.base:
             word_parts.append(rf"[{ch.upper()}{ch.lower()}]\S*")
 
-        # Lookahead: next non-space must be a relay letter followed by space,
-        # or a time / NT token.
-        time_look = (
-            r"(?=\s*(?:[ABCD]\s+|NT\b|NQT\b|DFS\b|SCR\b"
-            r"|\d{1,2}:\d{2}\.\d{2}|\d{2,3}\.\d{2}))"
-        )
-
         full_name_alts: list[str] = []
         for length in range(len(word_parts), 1, -1):
             core = r"\s+".join(word_parts[:length])
             # Allow extra words only when they don't look like relay letters / times
-            extra = r"(?:\s+(?![ABCD]\s+|NT\b|NQT\b|DFS\b|SCR\b|\d)\S+)*"
+            extra = rf"(?:\s+(?![ABCD]\s+|(?:{INVALID_TIME_PATTERN})\b|\d)\S+)*"
             region = r"(?:-[A-Z]{2})?"
             full_name_alts.append(core + extra + region + time_look)
 
@@ -122,7 +143,7 @@ class _SheetTeam:
 
     def individual_re(self) -> re.Pattern[str]:
         team_pat = self._team_name_pattern()
-        time_pat = r"NT|NQT|DFS|SCR|\d{1,2}:\d{2}\.\d{2}|\d{2,3}\.\d{2}"
+        time_pat = rf"{INVALID_TIME_PATTERN}|{TIME_TOKEN_PATTERN}"
         # Match individual entries with optional age before team (with or without space).
         # Formats:
         #   "1 Carlton, Delaney 23 Georgia Tech 1:56.69"  (age with space)
@@ -135,7 +156,7 @@ class _SheetTeam:
 
     def relay_re(self) -> re.Pattern[str]:
         team_pat = self._relay_team_pattern()
-        time_pat = r"NT|NQT|DFS|SCR|\d{1,2}:\d{2}\.\d{2}|\d{2,3}\.\d{2}"
+        time_pat = rf"{INVALID_TIME_PATTERN}|{TIME_TOKEN_PATTERN}"
         return re.compile(
             rf"(\d+)\s+"
             rf"({team_pat})\s*"
@@ -173,25 +194,30 @@ USMS_MULTI_COL = re.compile(
     rf"#\d+\s+{_SHEET_GENDER}\s+(?:\d+x\d+|\d+)", re.I
 )
 
+_COURSE_UNIT = r"(?:Yards?|Meters?|Metres?)"
+
 EVENT_STING = re.compile(
-    rf"^Event\s+(\d+)\s+({_SHEET_GENDER}|Girls|Boys)\s+(\d+)\s+Yard\s+(.+)$",
+    rf"^Event\s+(\d+)\s+({_SHEET_GENDER}|Girls|Boys)\s+(\d+)\s+(?:{_COURSE_UNIT}\s+)?(.+)$",
     re.I,
 )
 EVENT_STING_WRAP = re.compile(
-    rf"Event\s+(\d+)\s+\.\.\.\s*\(({_SHEET_GENDER}|Girls|Boys)\s+(\d+)\s+Yard\s+([^)]+)\)",
+    rf"Event\s+(\d+)\s+\.\.\.\s*\(({_SHEET_GENDER}|Girls|Boys)\s+(\d+)\s+(?:{_COURSE_UNIT}\s+)?([^)]+)\)",
     re.I,
 )
 
 EVENT_USMS_COMPLETE = re.compile(
-    rf"^#(\d+)\s+({_SHEET_GENDER})\s+((?:\d+x\d+|\d+)\s+Yard\s+.+)$",
+    rf"^#(\d+)\s+({_SHEET_GENDER})\s+((?:\d+x\d+|\d+)\s+(?:{_COURSE_UNIT}\s+)?.+)$",
     re.I,
 )
 EVENT_USMS_WRAP = re.compile(
-    rf"#(\d+)\s+\.\.\.\s*\(({_SHEET_GENDER})\s+((?:\d+x\d+|\d+)\s+Yard\s+[^)]+)\)",
+    rf"#(\d+)\s+\.\.\.\s*\(({_SHEET_GENDER})\s+((?:\d+x\d+|\d+)\s+(?:{_COURSE_UNIT}\s+)?[^)]+)\)",
     re.I,
 )
+# Only a trailing unit word makes this a genuine "partial" line — the stroke
+# continues on the next line (STROKE_CONT) precisely because the unit word
+# was the natural line-wrap point.
 EVENT_USMS_PARTIAL = re.compile(
-    rf"^#(\d+)\s+({_SHEET_GENDER})\s+((?:\d+x\d+|\d+)\s+Yard)$",
+    rf"^#(\d+)\s+({_SHEET_GENDER})\s+((?:\d+x\d+|\d+)\s+{_COURSE_UNIT})$",
     re.I,
 )
 STROKE_CONT = re.compile(
@@ -201,17 +227,18 @@ STROKE_CONT = re.compile(
 )
 
 HEAT_WITH_EVENT = re.compile(
-    rf"Heat\s+(\d+)\s+\(#(\d+)\s+({_SHEET_GENDER})\s+((?:\d+x\d+|\d+)\s+Yard\s+[^)]+)\)",
+    rf"Heat\s+(\d+)\s+\(#(\d+)\s+({_SHEET_GENDER})\s+((?:\d+x\d+|\d+)\s+(?:{_COURSE_UNIT}\s+)?[^)]+)\)",
     re.I,
 )
 HEAT_HEADER = re.compile(
-    r"Heat\s+(\d+)\s+of\s+(\d+)\s+(Prelims|Finals|Timed\s+Finals)"
+    r"Heat\s+(\d+)\s+of\s+(\d+)\s+"
+    r"(Prelims|Finals|Timed\s+Finals|Time\s+Trials?|Semi-Finals?|Swim-?offs?)"
     r"(?:\s+Starts\s+at\s+([\d:]+\s*[AP]M))?",
     re.I,
 )
-# A/B/C finals programs: "Heat 1 C - Final", "Heat 3 A - Final"
+# A/B/C/D finals programs: "Heat 1 C - Final", "Heat 3 A - Final"
 HEAT_ABC_FINAL = re.compile(
-    r"Heat\s+(\d+)\s+([ABC])\s*-\s*Finals?",
+    r"Heat\s+(\d+)\s+([ABCD])\s*-\s*Finals?",
     re.I,
 )
 MEET_PROGRAM_SESSION = re.compile(
@@ -225,7 +252,7 @@ COLUMN_HEADER = re.compile(
     re.I,
 )
 
-_SEED_TIME_TOKEN = r"(?:NT|NQT|DFS|SCR|DNS|NS|DQ|\d{1,2}:\d{2}\.\d{2}|\d{2,3}\.\d{2})"
+_SEED_TIME_TOKEN = rf"(?:{INVALID_TIME_PATTERN}|{TIME_TOKEN_PATTERN})"
 
 INDIVIDUAL_ROW = re.compile(
     r"^(\d+)\s+"
@@ -259,10 +286,30 @@ RELAY_LEG = re.compile(
     r"(?:\s+(\d+))?",
 )
 
+# Structural Hy-Tek page-header/footer and document-type banners — not tied
+# to any one meet or host club. "Georgia Tech" / "Classic" used to be
+# hardcoded here to skip the running meet-title banner that repeats on every
+# page/column, which only worked for meets hosted by (or named after) this
+# club; see _is_meet_banner_line for the generalized replacement.
 SKIP_LINE = re.compile(
-    r"^(HY-TEK|Georgia Tech|Classic|Timed Finals|Psych Sheet|Meet Program|Page \d|USMS)",
+    r"^(HY-TEK|Timed Finals|Psych Sheet|Meet Program|Page \d|USMS)",
     re.I,
 )
+
+
+def _is_meet_banner_line(line: str, meet_name: str | None) -> bool:
+    """True if `line` is the running meet-title banner that Hy-Tek repeats on
+    every page/column — compared against this document's own parsed meet
+    name, rather than one hardcoded host-club/meet-name literal."""
+    if not meet_name:
+        return False
+    stripped = line.strip()
+    if not stripped:
+        return False
+    # The banner sometimes carries a redundant leading date the parsed meet
+    # name already had stripped off it (see MEET_NAME_DATE_PREFIX).
+    stripped = MEET_NAME_DATE_PREFIX.sub("", stripped)
+    return stripped.lower().startswith(meet_name.strip().lower())
 
 
 # PDF CID glyphs seen in Hy-Tek exports (often missing base letters).
@@ -282,20 +329,28 @@ def normalize_relay_letter(letter: str | None) -> str | None:
 
 
 def _clean_line(line: str) -> str:
-    line = re.sub(r"Butter\(cid:\d+\)ly", "Fly", line, flags=re.I)
+    line = re.sub(r"Butter\(cid:\d+\)ly", "Butterfly", line, flags=re.I)
 
     def _replace_cid(match: re.Match[str]) -> str:
-        return _CID_LIGATURES.get(match.group(1), "")
+        # An unmapped CID must never silently vanish — deleting it merges two
+        # words together. A replacement character at least preserves the
+        # word boundary instead of fabricating a different real word.
+        return _CID_LIGATURES.get(match.group(1), "�")
 
     line = re.sub(r"\(cid:(\d+)\)", _replace_cid, line)
-    line = line.replace("Butterfly", "Fly").replace("Butter fly", "Fly")
-    line = line.replace("Backstroke", "Back").replace("Breaststroke", "Breast")
-    line = line.replace("Freestyle", "Free").replace("Individual Medley", "IM")
+    line = expand_ligatures(line)
+    # Stroke-word abbreviation used to run here, over the whole line — that
+    # mangled non-stroke text sharing a word with a stroke name (a club
+    # called "Freestyle Aquatics" was mistakenly rewritten to "Free
+    # Aquatics" before team matching ever saw it). Event parsing already
+    # normalizes stroke names on just the extracted event field
+    # (normalize_event / _normalize_entry_event), so nothing downstream
+    # depends on the whole line being pre-abbreviated.
     # Strip trailing blank-fill columns that some Hy-Tek formats append for
     # hand-written results (e.g. "1:55.24 _________________ _______").
     line = re.sub(r"\s*_{4,}[\s_]*$", "", line)
     # Strip non-conforming "X" prefix from seed times (e.g. X2:03.00, XNT).
-    line = re.sub(r"\bX(NT|NQT|\d{1,2}:\d{2}\.\d{2}|\d{2,3}\.\d{2})\b", r"\1", line, flags=re.I)
+    line = re.sub(rf"\bX({INVALID_TIME_PATTERN}|{TIME_TOKEN_PATTERN})\b", r"\1", line, flags=re.I)
     return re.sub(r"\s+", " ", line).strip()
 
 
@@ -336,7 +391,9 @@ def _event_from_stroke(distance: str, stroke_raw: str) -> str:
 
 
 def _build_event(event_num: str, gender_label: str, stroke_raw: str) -> dict[str, Any] | None:
-    dist_m = re.match(r"((?:\d+x\d+|\d+))\s+Yard\s+(.+)", stroke_raw.strip(), re.I)
+    dist_m = re.match(
+        rf"((?:\d+x\d+|\d+))\s+(?:{_COURSE_UNIT}\s+)?(.+)", stroke_raw.strip(), re.I
+    )
     if not dist_m:
         return None
     distance, stroke_part = dist_m.groups()
@@ -365,7 +422,8 @@ def _parse_usms_event_line(line: str) -> dict[str, Any] | None:
 
 def _clean_psych_name(raw: str) -> str | None:
     raw = re.sub(r"\(cid:976\)", "f", raw)
-    raw = re.sub(r"\(cid:\d+\)", "", raw).strip()
+    raw = re.sub(r"\(cid:\d+\)", "�", raw)
+    raw = expand_ligatures(raw).strip()
     match = re.match(
         r"([A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*),\s*(.+)",
         raw.strip(),
@@ -504,7 +562,7 @@ def _build_individual_entry(
     if age is not None:
         entry["age"] = age
 
-    if time_token.upper() in {"NT", "NQT", "NS", "DQ", "DFS", "DNF", "SCR", "DNS"}:
+    if time_token.upper() in INVALID_TIMES:
         entry["timeStatus"] = time_token.upper()
     else:
         entry["seedTime"] = time_token
@@ -590,7 +648,7 @@ def _parse_relay_team(
         "relaySwimmers": [],
     }
 
-    if time_token.upper() in {"NT", "NQT", "NS", "DQ", "DFS", "DNF", "SCR", "DNS"}:
+    if time_token.upper() in INVALID_TIMES:
         entry["timeStatus"] = time_token.upper()
     else:
         entry["seedTime"] = time_token
@@ -600,7 +658,7 @@ def _parse_relay_team(
     # status when the primary token was not already a seed time.
     if not entry.get("seedTime"):
         status_m = re.search(
-            r"\b(NT|NQT|NS|DQ|DFS|DNF|SCR|DNS)\b",
+            rf"\b({INVALID_TIME_PATTERN})\b",
             line[match.end() :],
             re.I,
         )
@@ -648,13 +706,6 @@ def _parse_relay_leg(line: str, offset: int = 0) -> list[dict[str, Any]]:
     return legs
 
 
-def _detect_sheet_type(text: str) -> str:
-    detected = detect_hytek_doc_type(text)
-    if detected in {"psych", "heat", "entries", "results", "packet"}:
-        return detected
-    return "unknown"
-
-
 def _sheet_meet_name(text: str) -> str | None:
     meet_name, _ = parse_meet_header(text.split("\n"))
     return meet_name
@@ -662,22 +713,27 @@ def _sheet_meet_name(text: str) -> str | None:
 
 SWIMMER_HEADER = re.compile(
     r"^(\d+)\s+"
-    r"([A-Za-z'\-ϐ]+(?:\s+[A-Za-z'\-ϐ]+)*,\s*[A-Za-z'\-ϐ]+(?:\s+[A-Za-z'\-ϐ]+)?)"
+    r"([A-Za-z'\-]+(?:\s+[A-Za-z'\-]+)*,\s*[A-Za-z'\-]+(?:\s+[A-Za-z'\-]+)?)"
     r"\s+-\s+(Female|Male)\s+-",
     re.I,
 )
 ENTRY_CELL = re.compile(
-    r"#\s*(\d+)\s+(Women|Men|Mixed|Female|Male)\s+"
-    r"(.+?)\s+"
-    r"(NT|NQT|DFS|SCR|DNS|DQ|\d{1,2}:\d{2}\.\d{2}Y?|\d{2,3}\.\d{2}Y?)",
+    rf"#\s*(\d+)\s+(Women|Men|Mixed|Female|Male)\s+"
+    rf"(.+?)\s+"
+    rf"({INVALID_TIME_PATTERN}|(?:{TIME_TOKEN_PATTERN})[YyMm]?)",
     re.I,
 )
+# Structural Hy-Tek entry-report boilerplate — not tied to any one meet, host
+# club, or sponsor. This used to also hardcode meet-specific literals
+# ("Georgia Tech Swim Club Total", "CCS National", a TYR sponsor banner, a
+# GTSC-dated running title, "Liaison", and a bare "-\s" that deleted any
+# hyphen-led line entirely); those are gone in favor of the generic \bTotal\b
+# summary-row rule below and _is_meet_banner_line (compares against this
+# document's own parsed meet name instead of one hardcoded string).
 ENTRY_SKIP = re.compile(
-    r"^(HY-TEK|USMS|Total Individual|Georgia Tech Swim Club Total|"
-    r"Page \d|All Events|Team Entries|Entries Report|Licensed To|Individual Meet|"
-    r"Sanction:|Female IE|Male IE|Total IE|Total Athletes|\d{4}\s+TYR|-\s|"
-    r"\d{1,2}-\d{1,2}-\d{2,4}\s+GTSC|FEMALE|MALE|"
-    r"National Championship|CCS National|Liaison|MEET MANAGER)",
+    r"^(HY-TEK|USMS|Page \d|All Events|Team Entries|Entries Report|"
+    r"Licensed To|Individual Meet|Sanction:|Female IE|Male IE|FEMALE|MALE|MEET MANAGER)|"
+    r"\bTotal\b",
     re.I,
 )
 ENTRY_SKIP_STANDALONE = re.compile(
@@ -686,24 +742,32 @@ ENTRY_SKIP_STANDALONE = re.compile(
 )
 
 
-def _entry_skip_line(line: str) -> bool:
+def _entry_skip_line(line: str, meet_name: str | None = None) -> bool:
     if ENTRY_SKIP.search(line):
+        return True
+    if _is_meet_banner_line(line, meet_name):
         return True
     stripped = line.strip()
     if ENTRY_SKIP_STANDALONE.match(stripped):
         return True
-    if re.match(rf"^{re.escape(_current_sheet_team().base)}\s+[A-Za-z]", stripped, re.I):
+    base = _current_sheet_team().base
+    if not base:
+        # "Is this the configured team's own bare-code row" doesn't apply
+        # when no team is configured — every team's rows are wanted.
+        return False
+    if re.match(rf"^{re.escape(base)}\s+[A-Za-z]", stripped, re.I):
         return True
     # Bare team-code rows only — not entry lines that start with the team tag.
-    if re.match(rf"^{re.escape(_current_sheet_team().base)}(?:-[A-Z]{{2}})?\s*$", stripped, re.I):
+    if re.match(rf"^{re.escape(base)}(?:-[A-Z]{{2}})?\s*$", stripped, re.I):
         return True
     return False
 
 
 def _swimmer_with_team_pattern() -> re.Pattern[str]:
-    base = re.escape(_current_sheet_team().base)
+    base = _current_sheet_team().base
+    team_pat = _ANY_TEAM_NAME if not base else rf"{re.escape(base)}(?:-[A-Z]{{2}})?"
     return re.compile(
-        rf"([A-Z][A-Za-z'\-\.]+(?:\s+[A-Z][A-Za-z'\-\.]+)+)\s+{base}(?:-[A-Z]{{2}})?\b",
+        rf"([A-Z][A-Za-z'\-\.]+(?:\s+[A-Z][A-Za-z'\-\.]+)+)\s+{team_pat}\b",
         re.I,
     )
 
@@ -734,8 +798,8 @@ def _entry_cell_from_groups(
         "relayLeg": relay_leg,
         "round": round_tag,
     }
-    token = time_token.strip().rstrip("Yy")
-    if token.upper() in {"NT", "NQT", "NS", "DQ", "DFS", "DNF", "SCR", "DNS"}:
+    token = time_token.strip().rstrip("YyMm")
+    if token.upper() in INVALID_TIMES:
         row["timeStatus"] = token.upper()
     else:
         row["seedTime"] = token
@@ -1124,10 +1188,11 @@ def _entry_report_page_lines(page: Any, *, column_flow: bool) -> list[tuple[str,
 
 
 def _entry_report_team_only_line(line: str) -> bool:
+    base = _current_sheet_team().base
+    if not base:
+        return False
     stripped = line.strip()
-    return bool(
-        re.match(rf"^{re.escape(_current_sheet_team().base)}(?:-[A-Z]{{2}})?\s*$", stripped, re.I)
-    )
+    return bool(re.match(rf"^{re.escape(base)}(?:-[A-Z]{{2}})?\s*$", stripped, re.I))
 
 
 def parse_entry_report(content: bytes, team: str | None = None) -> dict[str, Any]:
@@ -1144,7 +1209,7 @@ def parse_entry_report(content: bytes, team: str | None = None) -> dict[str, Any
         all_text = "\n".join(line for line, _ in page_lines)
         course = detect_course(all_text)
         meet_name = _sheet_meet_name(all_text)
-        detected = _detect_sheet_type(all_text)
+        detected = detect_hytek_doc_type(all_text)
 
     individuals: list[dict[str, Any]] = []
     relay_legs: list[dict[str, Any]] = []
@@ -1198,7 +1263,7 @@ def parse_entry_report(content: bytes, team: str | None = None) -> dict[str, Any
                 pending_name = None
                 continue
 
-            if _entry_skip_line(line):
+            if _entry_skip_line(line, meet_name):
                 continue
 
             if ENTRY_NAME_HEADER.match(line.strip()):
@@ -1286,7 +1351,8 @@ def parse_entry_report(content: bytes, team: str | None = None) -> dict[str, Any
     relay_teams = _group_relay_leg_entries(relay_legs, relay_rosters)
     entries = individuals + relay_teams
     if not entries:
-        raise ValueError(f"No {_current_sheet_team().code} entries found in entry report")
+        team_label = _current_sheet_team().code or "any"
+        raise ValueError(f"No {team_label} entries found in entry report")
 
     return {
         "sheetType": "entries",
@@ -1317,7 +1383,7 @@ def _page_lines(page: Any, *, split_columns: bool) -> list[str]:
     # Fall back to single-column reading when no real column gap is found
     # (e.g. White & Gold format with a wide "Finals Place" column that sits beyond
     # the page midpoint but is actually part of a single-column layout).
-    splits = detect_column_split(words, float(page.width), lines=page.lines)
+    splits = detect_column_split(words, float(page.width), lines=page.lines, page_height=float(page.height))
     if not splits:
         return group_words_into_lines(words)
 
@@ -1460,7 +1526,7 @@ def _parse_heat_header(line: str) -> dict[str, Any] | None:
         return {
             "heat": int(heat_num),
             "heatTotal": int(heat_total),
-            "round": round_label.lower().replace(" ", "_"),
+            "round": round_label.lower().replace(" ", "_").replace("-", "_"),
             "startTime": start_time,
         }
     abc = HEAT_ABC_FINAL.search(line)
@@ -1512,7 +1578,9 @@ def _backfill_heat_totals(
             entry["heatTotal"] = total
 
 
-def _parse_usms_sheet_pages(pdf: Any, sheet_type: str) -> list[dict[str, Any]]:
+def _parse_usms_sheet_pages(
+    pdf: Any, sheet_type: str, meet_name: str | None = None
+) -> list[dict[str, Any]]:
     """Read columns left-to-right, top-to-bottom, with one current event (and heat).
 
     Hy-Tek multi-column psych and meet-program sheets flow an event across
@@ -1542,7 +1610,12 @@ def _parse_usms_sheet_pages(pdf: Any, sheet_type: str) -> list[dict[str, Any]]:
                 if detected_session:
                     session_round = detected_session
 
-                if SKIP_LINE.search(line) or TEAM_SUMMARY.match(line) or COLUMN_HEADER.match(line):
+                if (
+                    SKIP_LINE.search(line)
+                    or _is_meet_banner_line(line, meet_name)
+                    or TEAM_SUMMARY.match(line)
+                    or COLUMN_HEADER.match(line)
+                ):
                     continue
 
                 if ALTERNATES_HEADER.match(line):
@@ -1660,7 +1733,7 @@ def _event_seed_bucket(event: dict[str, Any]) -> str:
 
 def _seed_time_ms(token: str | None) -> float | None:
     raw = (token or "").strip().upper()
-    if not raw or raw in {"NT", "NQT", "DFS", "SCR", "DNS", "NS", "DQ", "DNF"}:
+    if not raw or raw in INVALID_TIMES:
         return None
     try:
         if ":" in raw:
@@ -1726,7 +1799,7 @@ def parse_sheet_pdf_bytes(
     _use_sheet_team(team)
     with pdfplumber.open(io.BytesIO(content)) as pdf:
         all_text = "\n".join(page.extract_text() or "" for page in pdf.pages)
-        detected_type = _detect_sheet_type(all_text)
+        detected_type = detect_hytek_doc_type(all_text)
         meet_name = _sheet_meet_name(all_text)
         course = detect_course(all_text)
         parse_as = sheet_type or (
@@ -1754,7 +1827,7 @@ def parse_sheet_pdf_bytes(
         usms_multicol = _is_usms_multicol(all_text)
 
         if usms_multicol:
-            entries = _parse_usms_sheet_pages(pdf, parse_as)
+            entries = _parse_usms_sheet_pages(pdf, parse_as, meet_name)
             if entries:
                 return {
                     "sheetType": parse_as,
@@ -1781,7 +1854,7 @@ def parse_sheet_pdf_bytes(
         if detected_session:
             session_round = detected_session
 
-        if SKIP_LINE.search(line) or TEAM_SUMMARY.match(line):
+        if SKIP_LINE.search(line) or _is_meet_banner_line(line, meet_name) or TEAM_SUMMARY.match(line):
             continue
 
         if COLUMN_HEADER.match(line):
@@ -1854,8 +1927,8 @@ def parse_sheet_pdf_bytes(
                     "gender": current_event["gender"],
                     "isRelay": True,
                     "relaySwimmers": [],
-                    "seedTime": time if time.upper() not in {"NT", "NQT", "DFS", "SCR"} else None,
-                    "timeStatus": time.upper() if time.upper() in {"NT", "NQT", "DFS", "SCR"} else None,
+                    "seedTime": time if time.upper() not in INVALID_TIMES else None,
+                    "timeStatus": time.upper() if time.upper() in INVALID_TIMES else None,
                 }
 
                 if in_alternates:
@@ -1917,7 +1990,8 @@ def parse_sheet_pdf_bytes(
         _assign_seed_ranks_from_event_times(entries, event_seed_times)
 
     if not entries:
-        raise ValueError(f"No {_current_sheet_team().code} entries found in sheet")
+        team_label = _current_sheet_team().code or "any"
+        raise ValueError(f"No {team_label} entries found in sheet")
 
     return {
         "sheetType": parse_as,

@@ -23,11 +23,14 @@ SESSION_HEADER = re.compile(
     rf"^({'|'.join(DAY_NAMES)})(\s*\([^)]+\))?\s*$",
     re.I,
 )
-
-SESSION_HEADER_ALT = re.compile(
-    r"^(women'?s?\s+)?day\s+\d+|(" + '|'.join(DAY_NAMES) + r")",
+# Non-day session labels some packets use instead of/alongside a weekday:
+# "Session 1", "Prelims", "Finals", "AM Session", "Morning Session".
+SESSION_KEYWORD = re.compile(
+    r"^(session\s+\d+|prelims?|finals?|(?:am|pm|morning|afternoon|evening)\s+session)"
+    r"\s*(\([^)]+\))?\s*$",
     re.I,
 )
+
 
 def _is_session_header(line: str) -> bool:
     line_lower = line.lower()
@@ -35,8 +38,11 @@ def _is_session_header(line: str) -> bool:
     # A session header like "Day 1 Prelims" will have "day" and "1", but is usually short.
     # Lines with deadlines are likely "Deadline: ... Saturday, November 8th ..."
     # A session header usually looks like "Day 1 Prelims" or "Saturday".
-    
+
     if SESSION_HEADER.match(line):
+        return True
+
+    if SESSION_KEYWORD.match(line.strip()):
         return True
 
     # Let's ensure it's a specific pattern
@@ -45,20 +51,34 @@ def _is_session_header(line: str) -> bool:
         # Additional constraint: if it's "Day X", it shouldn't have too many other words
         if len(line.split()) <= 4:
             return True
-            
+
     # Also permit day names if they are short (e.g. "Saturday")
     if line_lower.strip() in [d.lower() for d in DAY_NAMES]:
         return True
-        
+
     return False
 
 
-TABLE_HEADER = re.compile(r"^women\s+event\s+men$", re.I)
-# Alt header used by CCS packets: "Women's Event  Men's Event" or "Women's Event Number"
-TABLE_HEADER_ALT = re.compile(
-    r"women'?s?\s+event.*men'?s?\s+event|women'?s?\s+event\s+(number|num)\b",
-    re.I,
-)
+# Order-of-events table header tokens — tolerates Girls/Boys and W/M
+# abbreviations, 3+ runs of whitespace, and extra columns like "Event
+# Number" (a plain "^women\s+event\s+men$" match only handled one exact
+# three-word spelling of one club's own packets).
+_HEADER_GENDER_LEFT = {"women", "womens", "women's", "girls", "girl's", "w"}
+_HEADER_GENDER_RIGHT = {"men", "mens", "men's", "boys", "boy's", "m"}
+_HEADER_EVENT_TOKENS = {"event", "events"}
+
+
+def _is_table_header_line(line: str) -> bool:
+    tokens = [t.strip("'’.:").lower() for t in re.split(r"\s+", line.strip()) if t.strip()]
+    if not tokens:
+        return False
+    return (
+        any(t in _HEADER_GENDER_LEFT for t in tokens)
+        and any(t in _HEADER_GENDER_RIGHT for t in tokens)
+        and any(t in _HEADER_EVENT_TOKENS for t in tokens)
+    )
+
+
 ORDER_OF_EVENTS_TITLE = re.compile(
     r"^(order\s+of\s+events|event\s+list)\b",
     re.I,
@@ -145,11 +165,7 @@ def _parse_event_row(line: str) -> dict[str, Any] | None:
 def _page_has_event_table(text: str) -> bool:
     lines = [line.strip() for line in text.split("\n") if line.strip()]
     lower = text.lower()
-    has_header = any(
-        TABLE_HEADER.match(line.replace("  ", " ").strip())
-        or TABLE_HEADER_ALT.search(line)
-        for line in lines
-    )
+    has_header = any(_is_table_header_line(line) for line in lines)
     event_rows = sum(1 for line in lines if _parse_event_row(line))
     if has_header and event_rows >= 1:
         return True
@@ -172,7 +188,7 @@ def _parse_order_page_lines(lines: list[str]) -> list[dict[str, Any]]:
             in_table = True
             continue
 
-        if TABLE_HEADER.match(line.replace("  ", " ").strip()) or TABLE_HEADER_ALT.search(line):
+        if _is_table_header_line(line):
             in_table = True
             continue
 
@@ -214,10 +230,12 @@ def _is_table_header_row(row: list) -> bool:
     if len(row) < 3:
         return False
     header = [str(c or "").replace("\n", " ").strip().lower() for c in row]
+    left = header[0]
+    right = header[2]
     return (
-        ("women" in header[0] or "event" in header[0])
+        (any(t in left for t in _HEADER_GENDER_LEFT) or "event" in left)
         and ("event" in header[1] or "stroke" in header[1])
-        and ("men" in header[2] or "event" in header[2])
+        and (any(t in right for t in _HEADER_GENDER_RIGHT) or "event" in right)
     )
 
 
@@ -251,8 +269,9 @@ def _parse_table_fallback(pdf: Any) -> list[dict[str, Any]]:
     for text, tables in all_page_data:
         lines = text.split("\n")
 
-        # Collect ALL session headers on this page in order.
-        # e.g. page 2 of Raleighwood has both "Saturday" and "Sunday".
+        # Collect ALL session headers on this page in order — some packets
+        # print two sessions' tables on one page (e.g. Saturday and Sunday
+        # side by side), so a page can carry more than one header.
         page_session_headers: list[str] = []
         for line in lines:
             ls = line.strip()
@@ -290,15 +309,12 @@ def _parse_table_fallback(pdf: Any) -> list[dict[str, Any]]:
                 if not women_raw.isdigit() and not men_raw.isdigit():
                     continue
 
-                if women_raw.isdigit() and men_raw.isdigit():
-                    women_val = int(women_raw)
-                    men_val = int(men_raw)
-                elif women_raw.isdigit():
-                    women_val = int(women_raw)
-                    men_val = int(women_raw)
-                else:
-                    women_val = int(men_raw)
-                    men_val = int(men_raw)
+                # A blank cell means this event has no counterpart on the
+                # other side (a girls-only or boys-only event) — leave it
+                # None rather than fabricating a shared number, which would
+                # misrepresent a single-gender event as run for both.
+                women_val = int(women_raw) if women_raw.isdigit() else None
+                men_val = int(men_raw) if men_raw.isdigit() else None
 
                 if not _is_event_label(event_raw):
                     continue

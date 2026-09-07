@@ -6,6 +6,11 @@ from typing import Any
 import pdfplumber
 
 from .swim_common import (
+    EXHIBITION_TIME_TOKEN_PATTERN,
+    INVALID_TIME_PATTERN,
+    INVALID_TIMES,
+    TIME_TOKEN_PATTERN,
+    expand_ligatures,
     leg_times_from_cumulative,
     normalize_event,
     normalize_relay_letter,
@@ -29,7 +34,12 @@ _CID_LIGATURES = {
 # A result carrying one of these markers (e.g. "--- Hancu, Andrei 20 GTSC-GA DQ
 # 26.12") is not an official time — Hy-Tek still prints the swum time next to the
 # marker, so we must skip the whole row instead of picking that trailing time up.
-SCRATCH_MARKER = re.compile(r"(?<![A-Za-z])(?:DQ|DFS|DNF|DNS|SCR)(?![A-Za-z])")
+# NT/NQT are excluded — those mean "no time" in a *seed*-time context, not a
+# scratched race, and don't appear as an official-result marker.
+_SCRATCH_STATUS_TOKENS = INVALID_TIMES - {"NT", "NQT"}
+SCRATCH_MARKER = re.compile(
+    rf"(?<![A-Za-z])(?:{'|'.join(sorted(_SCRATCH_STATUS_TOKENS, key=len, reverse=True))})(?![A-Za-z])"
+)
 
 EVENT_LINE = re.compile(
     r"(?:(\d{2,4})\s*(?:yard|meter|scy|lcm|scm)?\s*)?"
@@ -59,7 +69,7 @@ _ROUND_PRELIM_SECTION = re.compile(
     r"Preliminar(?:y|ies)\b|\bPrelims?\b|Prelim(?:s)?\s*Time|TeamPrelim",
     re.I,
 )
-_ROUND_ABC_FINAL = re.compile(r"[ABC]\s*-\s*Finals?\b", re.I)
+_ROUND_ABC_FINAL = re.compile(r"[ABCD]\s*-\s*Finals?\b", re.I)
 _ROUND_BARE_FINAL = re.compile(r"^Finals?\s*$", re.I)
 
 # Leadoff swimmer of a relay, e.g. "1) Chimidkhorloo, Sarnai 18 2) Mrzyglod, Sabina 22"
@@ -74,28 +84,47 @@ RELAY_LEG = re.compile(
     r"(?:\s+(\d+))?",
 )
 
-# Relay team result line: place, team code, optional A/B/C letter, times.
-# e.g. "1 GTSC-GA A 1:52.14 50" — no swimmer name on this row (unlike individual results).
+# Relay team result line: place, team code, optional A-D letter, times.
+# e.g. "1 GTSC-GA A 1:52.14 50" — no swimmer name on this row (unlike individual
+# results). Place is normally numeric, but a scratched relay ("--- AUB-SE C
+# NS") prints the scratch marker where the place would be — accept it so the
+# scratched row is recognized (and its stale swimmer-roster block flushed)
+# instead of falling through unrecognized and letting the next team's roster
+# lines merge into whatever relay was parsed last.
 RELAY_TEAM_RESULT = re.compile(
-    r"^(\d+)\s+"
+    r"^(\d+|-{2,3})\s+"
     r"((?:[A-Z][A-Za-z]+\s+)*[A-Z][A-Za-z]+(?:-[A-Z]{2})?)\s+"
-    r"([ABC])?\s*"
-    r"(.+)$",
-    re.I,
-)
-
-# Legacy pattern kept for leadoff parsing paths that may include a name prefix.
-RELAY_RESULT_TEAM = re.compile(
-    r"^(\d+)\s+"
-    r"(?:.+?\s+)?"
-    r"([A-Z0-9]+(?:-[A-Z]{2})?)\s*"
-    r"([ABC])?\s*"
+    r"([ABCD])?\s*"
     r"(.+)$",
     re.I,
 )
 
 
-MEET_DATE = re.compile(r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b")
+_HYTEK_BANNER = re.compile(r"hy-tek|meet manager", re.I)
+
+MEET_DATE = re.compile(r"\b(\d{1,2})/(\d{1,2})/(\d{2}|\d{4})\b")
+_MONTH_NAMES: dict[str, int] = {
+    "january": 1, "jan": 1,
+    "february": 2, "feb": 2,
+    "march": 3, "mar": 3,
+    "april": 4, "apr": 4,
+    "may": 5,
+    "june": 6, "jun": 6,
+    "july": 7, "jul": 7,
+    "august": 8, "aug": 8,
+    "september": 9, "sep": 9, "sept": 9,
+    "october": 10, "oct": 10,
+    "november": 11, "nov": 11,
+    "december": 12, "dec": 12,
+}
+# Month-name dates some championship cover pages use in place of M/D/YYYY,
+# e.g. "November 8-9, 2025" or "Nov. 8, 2025".
+MEET_DATE_MONTH_NAME = re.compile(
+    r"\b(" + "|".join(sorted(_MONTH_NAMES, key=len, reverse=True)) + r")\.?\s+"
+    r"(\d{1,2})(?:st|nd|rd|th)?(?:\s*[-–]\s*\d{1,2}(?:st|nd|rd|th)?)?,?\s+"
+    r"(\d{4})\b",
+    re.I,
+)
 # A redundant date prefix some clubs put in the meet name, e.g. "9-27-25 ".
 MEET_NAME_DATE_PREFIX = re.compile(r"^\d{1,2}-\d{1,2}-\d{2,4}\s+")
 
@@ -106,7 +135,7 @@ DOC_ENTRIES = re.compile(
     r"Entries Report|Meet Entries Report",
     re.I,
 )
-DOC_RESULTS = re.compile(r"(?m)^Results\b|\bResults\s*[-–:]", re.I)
+DOC_RESULTS = re.compile(r"^Results\b|\bResults\s*[-–:]", re.I)
 DOC_PACKET = re.compile(
     r"Order of Events|Notes on the Order of Events|"
     r"Women'?s Event(?:\s+Number)?\s+Men'?s Event|"
@@ -114,31 +143,122 @@ DOC_PACKET = re.compile(
     re.I,
 )
 
+# Structural (not banner-text) signals used to break ties on doc-type score —
+# a packet's order-of-events table looks like this even when its title banner
+# is buried past the classifier's header window, and a results table has this
+# column shape even when the page never prints the word "Results".
+PACKET_TABLE_HEADER_SHAPE = re.compile(
+    r"\b(?:women[’']?s?|girls?|w)\s*[\s|]{1,4}event\s*(?:number|num)?\s*[\s|]{1,4}(?:men[’']?s?|boys?|m)\b",
+    re.I,
+)
+# A numbered order-of-events row: "<women's #> <event name with a stroke
+# keyword> <men's #>", e.g. "1 200 Freestyle Relay* 2" or "23 400 IM* 24".
+# Requires a stroke/relay keyword so results rows (which end in a time, not a
+# bare number) never match.
+PACKET_EVENT_ROW_SHAPE = re.compile(
+    r"^\s*\d{1,3}\s+.*?(?:relay|freestyle|free|backstroke|back|breaststroke|breast|"
+    r"butterfly|fly|medley|individual\s+medley|im).*?\d{1,3}\*?\s*$",
+    re.I,
+)
+RESULTS_TABLE_SHAPE_PLACE = re.compile(r"\bPlace\b", re.I)
+RESULTS_TABLE_SHAPE_FINALS = re.compile(r"Finals\s+Time", re.I)
+
+# Doc types in priority order — used both as scoring dict iteration order
+# (ties resolve to the first-listed type, preserving old first-match-wins
+# behaviour) and to name every candidate even when its score is 0.
+_DOC_TYPES = ("entries", "heat", "psych", "results", "packet")
+
+_HEADER_WINDOW_LINES = 20
+_HEADER_WEIGHT = 10
+_BODY_WEIGHT = 1
+_SHAPE_WEIGHT = 6
+
+
+def _weighted_line_hits(lines: list[str], pattern: re.Pattern[str]) -> float:
+    """Score matches of `pattern` across `lines`, weighting an early hit (a
+    page banner/title) far above the same phrase turning up later in body
+    prose — e.g. a packet's cover page mentioning "see the psych sheet for
+    seed times" shouldn't outweigh its own "Order of Events" table title."""
+    score = 0.0
+    seen_non_blank = 0
+    for line in lines:
+        if not line.strip():
+            continue
+        seen_non_blank += 1
+        hits = len(pattern.findall(line))
+        if not hits:
+            continue
+        weight = _HEADER_WEIGHT if seen_non_blank <= _HEADER_WINDOW_LINES else _BODY_WEIGHT
+        score += hits * weight
+    return score
+
+
 def detect_hytek_doc_type(text: str) -> str:
-    """Classify a meet PDF: psych|heat|entries|results|packet|unknown."""
-    sample = text[:6000] if len(text) > 6000 else text
-    if DOC_ENTRIES.search(sample):
-        return "entries"
-    if DOC_HEAT.search(sample):
-        return "heat"
-    if DOC_PSYCH.search(sample):
-        return "psych"
-    if DOC_RESULTS.search(sample):
-        return "results"
-    for line in sample.split("\n")[:15]:
-        if re.match(r"^Results\b", line.strip(), re.I):
-            return "results"
-    if DOC_PACKET.search(sample):
-        return "packet"
-    return "unknown"
+    """Classify a meet PDF: psych|heat|entries|results|packet|unknown.
+
+    Scores every doc type over the *whole* document — not just the first few
+    thousand characters — since a packet's "Order of Events" table or a
+    championship program's Hy-Tek header can start several pages in (a
+    non-Hy-Tek cover page, a long table of contents). A hit in a page
+    header/title position counts far more than the same phrase in body prose,
+    and two structural shape signals (a women/event/men table for packets, a
+    Place + Finals Time column pair for results) break ties that banner text
+    alone can't, since they rest on the document's shape rather than one
+    string that might appear anywhere.
+    """
+    lines = text.split("\n")
+
+    scores: dict[str, float] = {doc_type: 0.0 for doc_type in _DOC_TYPES}
+    scores["entries"] += _weighted_line_hits(lines, DOC_ENTRIES)
+    scores["heat"] += _weighted_line_hits(lines, DOC_HEAT)
+    scores["psych"] += _weighted_line_hits(lines, DOC_PSYCH)
+    scores["results"] += _weighted_line_hits(lines, DOC_RESULTS)
+    scores["packet"] += _weighted_line_hits(lines, DOC_PACKET)
+
+    if PACKET_TABLE_HEADER_SHAPE.search(text):
+        scores["packet"] += _SHAPE_WEIGHT
+    event_row_hits = sum(1 for line in lines if PACKET_EVENT_ROW_SHAPE.match(line.strip()))
+    if event_row_hits >= 2:
+        scores["packet"] += _SHAPE_WEIGHT
+    if RESULTS_TABLE_SHAPE_PLACE.search(text) and RESULTS_TABLE_SHAPE_FINALS.search(text):
+        scores["results"] += _SHAPE_WEIGHT
+
+    best_type = max(_DOC_TYPES, key=lambda doc_type: scores[doc_type])
+    if scores[best_type] <= 0:
+        return "unknown"
+    return best_type
 
 
-def _iso_date(mdy: str) -> str | None:
-    match = MEET_DATE.search(mdy)
-    if not match:
-        return None
-    month, day, year = match.groups()
-    return f"{year}-{int(month):02d}-{int(day):02d}"
+def _expand_2digit_year(year: int) -> int:
+    return 2000 + year if year < 70 else 1900 + year
+
+
+def _find_date(text: str) -> tuple[int, int, str] | None:
+    """Return (start, end, iso_date) for the earliest recognized date in
+    `text` — either M/D/YYYY (also M/D/YY) or a month-name date like
+    "November 8-9, 2025" — or None if neither pattern matches."""
+    best: tuple[int, int, str] | None = None
+
+    slash_match = MEET_DATE.search(text)
+    if slash_match:
+        month, day, year_s = slash_match.groups()
+        year = int(year_s) if len(year_s) == 4 else _expand_2digit_year(int(year_s))
+        iso = f"{year:04d}-{int(month):02d}-{int(day):02d}"
+        best = (slash_match.start(), slash_match.end(), iso)
+
+    month_match = MEET_DATE_MONTH_NAME.search(text)
+    if month_match and (best is None or month_match.start() < best[0]):
+        month_name, day, year = month_match.groups()
+        month = _MONTH_NAMES[month_name.lower().rstrip(".")]
+        iso = f"{int(year):04d}-{month:02d}-{int(day):02d}"
+        best = (month_match.start(), month_match.end(), iso)
+
+    return best
+
+
+def _iso_date(text: str) -> str | None:
+    found = _find_date(text)
+    return found[2] if found else None
 
 
 def parse_meet_header(lines: list[str]) -> tuple[str | None, str | None]:
@@ -160,13 +280,14 @@ def parse_meet_header(lines: list[str]) -> tuple[str | None, str | None]:
             continue
 
         # First plausible title line wins.
-        date_match = MEET_DATE.search(line)
-        if date_match:
-            name = line[: date_match.start()]
+        found = _find_date(line)
+        if found:
+            start, _end, iso = found
+            name = line[:start]
             name = re.sub(r"\s*-\s*$", "", name).strip()
             name = MEET_NAME_DATE_PREFIX.sub("", name).strip()
             meet_name = name or line.strip()
-            meet_date = _iso_date(date_match.group(0))
+            meet_date = iso
         else:
             meet_name = MEET_NAME_DATE_PREFIX.sub("", line).strip() or line.strip()
         break
@@ -214,8 +335,7 @@ def strip_points_column(line: str) -> str:
         return line
     
     # Count times by looking for time patterns (to avoid infinite recursion with extract_times_from_line)
-    time_pattern = r"[xX]?\d{1,2}:\d{2}\.\d{2}|[xX]?\d{2,3}\.\d{2}"
-    times = re.findall(time_pattern, line, re.I)
+    times = re.findall(EXHIBITION_TIME_TOKEN_PATTERN, line, re.I)
     
     # If exactly 2 times (seed and final), no points value present
     if len(times) == 2:
@@ -232,7 +352,7 @@ def strip_points_column(line: str) -> str:
 def extract_times_from_line(line: str) -> list[str]:
     # First strip potential points column
     line_no_points = strip_points_column(line)
-    tokens = re.findall(r"[xX]?\d{1,2}:\d{2}\.\d{2}|[xX]?\d{2,3}\.\d{2}", line_no_points, re.I)
+    tokens = re.findall(EXHIBITION_TIME_TOKEN_PATTERN, line_no_points, re.I)
     times: list[str] = []
     for token in tokens:
         parsed = parse_time_token(token)
@@ -539,7 +659,7 @@ def parse_team_from_line(line: str) -> str | None:
         r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
         r"(?:\s+\d{1,3})?"
         r"\s+((?:[A-Z][A-Za-z]+\s+){1,6}(?:[A-Z][A-Za-z]+)(?:-[A-Z]{2})?)"
-        r"\s+(?:NT|NQT|DQ|DFS|DNS|SCR|\d{1,2}:\d{2}\.\d{2}|\d{2,3}\.\d{2})",
+        rf"\s+(?:{INVALID_TIME_PATTERN}|{TIME_TOKEN_PATTERN})",
         line,
     )
     if full_match:
@@ -628,12 +748,15 @@ def detect_course(text: str, default: str = "SCY") -> str:
 def _clean_cid_ligatures(line: str) -> str:
     """Replace CID ligatures like (cid:976) with their actual characters (e.g., 'f')."""
     line = re.sub(r"Butter\(cid:\d+\)ly", "Butterfly", line, flags=re.I)
-    
+
     def _replace_cid(match: re.Match[str]) -> str:
-        return _CID_LIGATURES.get(match.group(1), "")
-    
+        # An unmapped CID must never silently vanish — deleting it merges two
+        # words together (e.g. "Ofﬁcial" -> "Ocial", a different real word).
+        # A replacement character at least preserves word length/boundaries.
+        return _CID_LIGATURES.get(match.group(1), "�")
+
     line = re.sub(r"\(cid:(\d+)\)", _replace_cid, line)
-    return line
+    return expand_ligatures(line)
 
 
 def parse_event_from_line(line: str) -> str | None:
@@ -1426,7 +1549,12 @@ def group_words_into_lines(words: list[dict], y_tol: float = 3.0) -> list[str]:
     return out
 
 
-def detect_column_split(words: list[dict], page_width: float, lines: list[dict] | None = None) -> list[float]:
+def detect_column_split(
+    words: list[dict],
+    page_width: float,
+    lines: list[dict] | None = None,
+    page_height: float | None = None,
+) -> list[float]:
     """Return list of column boundaries (x-coordinates) for multi-column layouts.
     
     Returns empty list for single-column, or list of split points for 2+ columns.
@@ -1439,13 +1567,18 @@ def detect_column_split(words: list[dict], page_width: float, lines: list[dict] 
     if not words:
         return []
 
+    # A vertical line's length should be compared against the page's height,
+    # not its width — those can differ a lot on a landscape or letter page,
+    # which either missed genuine column rules or accepted short noise as one.
+    height_reference = page_height if page_height is not None else page_width
+
     # Check for vertical lines that indicate column splits (e.g., Raleighwood format)
     if lines:
         vertical_lines = [
             float(line["x0"])
             for line in lines
             if abs(line["x0"] - line["x1"]) < 1  # Vertical line (x0 ≈ x1)
-            and abs(line["y1"] - line["y0"]) > page_width * 0.5  # Long line (spans most of page height)
+            and abs(line["y1"] - line["y0"]) > height_reference * 0.5  # Long line (spans most of page height)
         ]
         
         # Sort by x position
@@ -1619,7 +1752,7 @@ def extract_page_lines(page: Any, forced_splits: list[float] | None = None) -> l
     if forced_splits is not None:
         splits = forced_splits
     else:
-        splits = detect_column_split(words, float(page.width), lines=page.lines)
+        splits = detect_column_split(words, float(page.width), lines=page.lines, page_height=float(page.height))
     if not splits:
         return group_words_into_lines(words)
 
@@ -1661,16 +1794,26 @@ def parse_meet_pdf_bytes(
         # pages that happen to have long cross-column header lines or sparse content.
         pdf_splits: list[float] | None = None
         page_width: float | None = None
+        found_hytek_header = False
 
         for page_index, page in enumerate(pdf.pages):
-            if page_index == 0:
-                # The banner/title sit above the two-column body, so the plain
-                # top-to-bottom text read gives clean header lines.
-                header_lines = [
+            # Some championship programs (CCS regionals, TYR nationals) put a
+            # non-Hy-Tek cover/title page first, so the real "HY-TEK's MEET
+            # MANAGER" banner — and the meet name/date next to it — doesn't
+            # show up until page 2+. Keep scanning a bounded window of early
+            # pages until that banner is found; fall back to page 0 (the
+            # normal case) if it never turns up.
+            if not found_hytek_header and page_index < 6:
+                candidate_lines = [
                     _clean_cid_ligatures(line)
                     for line in (page.extract_text() or "").split("\n")
                 ]
-                page_width = float(page.width)
+                if page_index == 0:
+                    header_lines = candidate_lines
+                    page_width = float(page.width)
+                if _HYTEK_BANNER.search("\n".join(candidate_lines)):
+                    header_lines = candidate_lines
+                    found_hytek_header = True
 
             # Check if this PDF has a "Points" column (indicates results PDF format)
             page_text = page.extract_text() or ""
@@ -1684,7 +1827,7 @@ def parse_meet_pdf_bytes(
                     words = page.extract_words(use_text_flow=False)
                     if words:
                         candidate = detect_column_split(
-                            words, page_width, lines=page.lines
+                            words, page_width, lines=page.lines, page_height=float(page.height)
                         )
                         if candidate and (
                             pdf_splits is None or len(candidate) > len(pdf_splits)

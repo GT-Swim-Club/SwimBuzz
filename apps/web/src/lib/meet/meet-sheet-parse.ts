@@ -417,7 +417,7 @@ export async function parseMeetSheetForRoster(
   url: string,
   sheetType: "psych" | "heat" | "entries",
   roster: RosterAthlete[],
-  teamCode: string = "GTSC",
+  teamCode: string,
   options?: SheetMatchOptions
 ): Promise<ParseMeetSheetResult> {
   const parsed = await callSheetParser(userId, url, sheetType, teamCode)
@@ -443,7 +443,7 @@ export async function resolvePsychSheetSummary(
   userId: string,
   url: string | null | undefined,
   roster: RosterAthlete[],
-  teamCode: string = "GTSC",
+  teamCode: string,
   options?: SheetMatchOptions
 ): Promise<ParseMeetSheetResult> {
   if (!url) return { summary: null, sheetNames: [] }
@@ -454,7 +454,7 @@ export async function resolveHeatSheetSummary(
   userId: string,
   url: string | null | undefined,
   roster: RosterAthlete[],
-  teamCode: string = "GTSC",
+  teamCode: string,
   options?: SheetMatchOptions
 ): Promise<ParseMeetSheetResult> {
   if (!url) return { summary: null, sheetNames: [] }
@@ -487,7 +487,7 @@ export async function resolveHeatSheetSummaries(
   userId: string,
   urls: string[],
   roster: RosterAthlete[],
-  teamCode: string = "GTSC",
+  teamCode: string,
   options?: SheetMatchOptions,
   cachedByUrl?: Record<string, CachedSheetParse> | null
 ): Promise<ResolveHeatSheetsResult> {
@@ -608,7 +608,7 @@ export async function resolveFinalsHeatSheetSummaries(
   userId: string,
   urls: string[],
   roster: RosterAthlete[],
-  teamCode: string = "GTSC",
+  teamCode: string,
   options?: SheetMatchOptions,
   cachedByUrl?: Record<string, CachedSheetParse> | null
 ): Promise<ResolveFinalsHeatSheetsResult> {
@@ -726,7 +726,7 @@ export async function resolveEntriesSheetSummary(
   userId: string,
   url: string | null | undefined,
   roster: RosterAthlete[],
-  teamCode: string = "GTSC",
+  teamCode: string,
   options?: SheetMatchOptions
 ): Promise<ParseMeetSheetResult> {
   if (!url) return { summary: null, sheetNames: [] }

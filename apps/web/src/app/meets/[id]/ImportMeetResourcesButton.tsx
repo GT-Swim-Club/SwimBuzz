@@ -237,6 +237,9 @@ export default function ImportMeetResourcesButton({
       rosterForPairing: result.rosterForPairing as RosterPairingOption[] | undefined,
       cachedSheetParses: result.cachedSheetParses as Record<string, unknown> | undefined,
     })
+    if (result.packetWarning) {
+      return `Imported resources, but the meet packet could not be parsed: ${result.packetWarning}`
+    }
     return "Imported resources successfully"
   }
 

@@ -74,7 +74,10 @@ def _dispatch(kind: str, content: bytes, payload: dict) -> dict:
         team = (payload.get("team") or "").strip() or None
         return parse_meet_pdf_bytes(content, course, team=team)
     if kind == "sheet":
-        sheet_type = payload.get("sheet_type")
+        # Accept both the snake_case key this endpoint documents and the
+        # camelCase key a client might send by mistake (this is exactly how
+        # sheetType silently stopped reaching the parser in production before).
+        sheet_type = payload.get("sheet_type") or payload.get("sheetType")
         team = (payload.get("team") or "").strip() or None
         return parse_sheet_pdf_bytes(content, sheet_type, team=team)
     if kind == "packet":

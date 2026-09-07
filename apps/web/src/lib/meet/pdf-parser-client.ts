@@ -111,10 +111,20 @@ async function callParser<T>(
     const secret = process.env.PDF_PARSER_SECRET
     if (!secret) throw new Error("PDF_PARSER_SECRET is not configured")
 
+    // api/parse-pdf.py reads snake_case keys (course, team, sheet_type) —
+    // send those, not the camelCase ParserOptions shape, so a deployed sheet
+    // parse actually receives sheetType instead of silently running with
+    // sheet_type=None while local dev (which passes --sheet-type) works fine.
     const res = await fetch(parserUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-Parser-Secret": secret },
-      body: JSON.stringify({ kind, url: safeUrl, ...options }),
+      body: JSON.stringify({
+        kind,
+        url: safeUrl,
+        course: options.course,
+        team: options.team,
+        sheet_type: options.sheetType,
+      }),
     })
     const data = await res.json().catch(() => ({}))
     if (!res.ok) {

@@ -348,6 +348,7 @@ export async function PATCH(
     }
 
     let packetParsed = false
+    let packetWarning: string | null = null
     if ("packetUrl" in data) {
       const nextPacket = (data.packetUrl as string | null) ?? null
       if (nextPacket !== existing.packetUrl) {
@@ -360,6 +361,7 @@ export async function PATCH(
           } catch (err) {
             console.error("Meet packet parse failed:", err)
             data.eventOrder = null
+            packetWarning = err instanceof Error ? err.message : "Meet packet could not be parsed"
           }
         }
       }
@@ -393,7 +395,8 @@ export async function PATCH(
       ...meet,
       nameConfirmations,
       rosterForPairing,
-      cachedSheetParses: nextCachedSheetParses})
+      cachedSheetParses: nextCachedSheetParses,
+      packetWarning})
   } catch (err) {
     if (err instanceof MeetInputError) {
       return NextResponse.json({ error: err.message }, { status: 400 })

@@ -35,6 +35,7 @@ export type UpdateMeetResult =
       nameConfirmations?: unknown
       rosterForPairing?: unknown
       cachedSheetParses?: unknown
+      packetWarning?: string | null
     }
   | { ok: false; error: string; rejected?: boolean }
 
@@ -70,6 +71,7 @@ export async function updateMeet(
     }
 
     let packetParsed = false
+    let packetWarning: string | null = null
     if ("packetUrl" in data) {
       const nextPacket = (data.packetUrl as string | null) ?? null
       if (nextPacket !== existing.packetUrl) {
@@ -82,6 +84,7 @@ export async function updateMeet(
           } catch (err) {
             console.error("Meet packet parse failed:", err)
             data.eventOrder = null
+            packetWarning = err instanceof Error ? err.message : "Meet packet could not be parsed"
           }
         }
       }
@@ -124,6 +127,7 @@ export async function updateMeet(
       nameConfirmations,
       rosterForPairing,
       cachedSheetParses: nextCachedSheetParses,
+      packetWarning,
     }
   } catch (err) {
     if (err instanceof MeetInputError) {

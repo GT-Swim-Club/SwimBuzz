@@ -1,0 +1,84 @@
+{
+  "sessions": [
+    {
+      "label": "Order of Events",
+      "rows": [
+        {
+          "event": "200 Medley Relay",
+          "men": 2,
+          "women": 1
+        },
+        {
+          "event": "50 Freestyle",
+          "men": 4,
+          "women": 3
+        },
+        {
+          "event": "100 Backstroke",
+          "men": 6,
+          "women": 5
+        },
+        {
+          "event": "100 Individual Medley",
+          "men": 8,
+          "women": 7
+        },
+        {
+          "event": "200 Freestyle",
+          "men": 10,
+          "women": 9
+        },
+        {
+          "event": "50 Breastroke",
+          "men": 12,
+          "women": 11
+        },
+        {
+          "event": "100 Butterfly",
+          "men": 14,
+          "women": 13
+        },
+        {
+          "event": "200 Freestyle Relay",
+          "men": 16,
+          "women": 15
+        },
+        {
+          "event": "200 Individual Medley",
+          "men": 18,
+          "women": 17
+        },
+        {
+          "event": "50 Butterfly",
+          "men": 20,
+          "women": 19
+        },
+        {
+          "event": "100 Breaststroke",
+          "men": 22,
+          "women": 21
+        },
+        {
+          "event": "50 Backstroke",
+          "men": 24,
+          "women": 23
+        },
+        {
+          "event": "100 Freestyle",
+          "men": 26,
+          "women": 25
+        },
+        {
+          "event": "500 Freestyle",
+          "men": 28,
+          "women": 27
+        },
+        {
+          "event": "Mixed 200 Medley Relay",
+          "men": 29,
+          "women": 29
+        }
+      ]
+    }
+  ]
+}

@@ -38,6 +38,7 @@ export async function POST(req: Request) {
     const data = buildMeetData(body, { requireName: true, requireStartDate: true })
 
     let packetParsed = false
+    let packetWarning: string | null = null
     if (data.packetUrl) {
       try {
         data.eventOrder = await resolveEventOrderForPacket(session.user.id, data.packetUrl as string)
@@ -45,6 +46,7 @@ export async function POST(req: Request) {
       } catch (err) {
         console.error("Meet packet parse failed:", err)
         data.eventOrder = null
+        packetWarning = err instanceof Error ? err.message : "Meet packet could not be parsed"
       }
     }
 
@@ -75,7 +77,7 @@ export async function POST(req: Request) {
       meetId: meet.id,
       meetName: meet.name,
       drops: [...sheetDrops, ...resourceDrops]})
-    return NextResponse.json(meet, { status: 201 })
+    return NextResponse.json({ ...meet, packetWarning }, { status: 201 })
   } catch (err) {
     if (err instanceof MeetInputError) {
       return NextResponse.json({ error: err.message }, { status: 400 })

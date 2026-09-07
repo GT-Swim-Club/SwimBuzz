@@ -25,10 +25,56 @@ STROKE_ALIASES: dict[str, str] = {
     "medley": "IM",
 }
 
-TIME_PATTERN = re.compile(r"^\d{1,2}:\d{2}\.\d{2}$|^\d{1,3}\.\d{2}$")
-INVALID_TIMES = {"NT", "NS", "DQ", "DFS", "DNF", "SCR"}
+# Canonical time-token fragment (no anchors, so it splices into larger
+# regexes) — every parser used to keep its own divergent copy of this. Three
+# forms: H:MM:SS.hh (long open-water swims that run past an hour),
+# M:SS.hh, and bare SS.ss (single digit allowed — sub-10s 25y sprints).
+TIME_TOKEN_PATTERN = r"\d{1,2}:\d{2}:\d{2}\.\d{2}|\d{1,3}:\d{2}\.\d{2}|\d{1,3}\.\d{2}"
+# Same, tolerating Hy-Tek's leading exhibition-swim "x" (e.g. "x1:52.81").
+EXHIBITION_TIME_TOKEN_PATTERN = rf"[xX]?(?:{TIME_TOKEN_PATTERN})"
+TIME_PATTERN = re.compile(rf"^(?:{TIME_TOKEN_PATTERN})$")
+
+# Every status token a time/seed-time field can carry instead of a real time,
+# unioned from the five divergent per-file sets this used to be split across.
+INVALID_TIMES = {"NT", "NQT", "NS", "DNS", "DQ", "DFS", "DNF", "SCR"}
+# Regex-alternation form of INVALID_TIMES, longest-first so e.g. "DNS" wins
+# over a partial "NS" match; splice into a larger pattern as needed.
+INVALID_TIME_PATTERN = "|".join(sorted(INVALID_TIMES, key=len, reverse=True))
 
 _VALID_RELAY_LETTERS = frozenset({"A", "B", "C", "D"})
+
+# Real Unicode ligature glyphs (U+FB00-FB06) some Hy-Tek PDFs embed directly —
+# expand to their letter pairs at the text-extraction boundary so downstream
+# matching never has to know a ligature was involved.
+_LIGATURE_EXPANSIONS = str.maketrans(
+    {
+        "ﬀ": "ff",
+        "ﬁ": "fi",
+        "ﬂ": "fl",
+        "ﬃ": "ffi",
+        "ﬄ": "ffl",
+        "ﬅ": "st",
+        "ﬆ": "st",
+    }
+)
+
+
+def expand_ligatures(text: str) -> str:
+    """Expand ﬁ/ﬂ/ﬀ/ﬃ/ﬄ/ﬅ/ﬆ ligature glyphs to their plain-letter spelling."""
+    return text.translate(_LIGATURE_EXPANSIONS)
+
+
+def _letters_only_key(raw: str) -> str:
+    return re.sub(r"[^a-z]", "", expand_ligatures(raw).strip().lower())
+
+
+# Some Hy-Tek exports drop the 'fl' glyph pair entirely during extraction
+# instead of leaving a recognizable placeholder, rendering "Butterfly" as
+# "Butter ly" — one letter short of "butterfly" once whitespace is folded
+# away. Keyed here (rather than patched onto STROKE_ALIASES) since it's a
+# ligature-insensitive *key*, not a real alternate spelling.
+_STROKE_ALIAS_KEYS: dict[str, str] = {_letters_only_key(k): v for k, v in STROKE_ALIASES.items()}
+_STROKE_ALIAS_KEYS.setdefault("butterly", "Fly")
 
 
 def normalize_relay_letter(letter: str | None) -> str | None:
@@ -41,7 +87,10 @@ def normalize_relay_letter(letter: str | None) -> str | None:
 
 def normalize_stroke(raw: str) -> str | None:
     key = raw.strip().lower()
-    return STROKE_ALIASES.get(key)
+    direct = STROKE_ALIASES.get(key)
+    if direct:
+        return direct
+    return _STROKE_ALIAS_KEYS.get(_letters_only_key(raw))
 
 
 def normalize_event(distance: str, stroke_raw: str) -> str | None:

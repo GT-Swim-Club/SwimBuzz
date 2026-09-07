@@ -1,0 +1,99 @@
+{
+  "sessions": [
+    {
+      "label": "Order of Events",
+      "rows": [
+        {
+          "event": "4x50 Medley Relay",
+          "men": 2,
+          "women": 1
+        },
+        {
+          "event": "200 Free",
+          "men": 4,
+          "women": 3
+        },
+        {
+          "event": "200 IM",
+          "men": 6,
+          "women": 5
+        },
+        {
+          "event": "100 Fly",
+          "men": 8,
+          "women": 7
+        },
+        {
+          "event": "50 Free",
+          "men": 10,
+          "women": 9
+        },
+        {
+          "event": "200 Breast",
+          "men": 12,
+          "women": 11
+        },
+        {
+          "event": "100 Back",
+          "men": 14,
+          "women": 13
+        },
+        {
+          "event": "50 Breast",
+          "men": 16,
+          "women": 15
+        },
+        {
+          "event": "400 IM",
+          "men": 18,
+          "women": 17
+        },
+        {
+          "event": "500 Free",
+          "men": 20,
+          "women": 19
+        },
+        {
+          "event": "200 Back",
+          "men": 22,
+          "women": 21
+        },
+        {
+          "event": "100 Breast",
+          "men": 24,
+          "women": 23
+        },
+        {
+          "event": "50 Back",
+          "men": 26,
+          "women": 25
+        },
+        {
+          "event": "200 Fly",
+          "men": 28,
+          "women": 27
+        },
+        {
+          "event": "100 Free",
+          "men": 30,
+          "women": 29
+        },
+        {
+          "event": "50 Fly",
+          "men": 32,
+          "women": 31
+        },
+        {
+          "event": "100 IM",
+          "men": 34,
+          "women": 33
+        },
+        {
+          "event": "4x50 Free Relay",
+          "men": 36,
+          "women": 35
+        }
+      ]
+    }
+  ]
+}

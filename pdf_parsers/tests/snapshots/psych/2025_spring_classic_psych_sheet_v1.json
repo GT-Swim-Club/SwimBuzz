@@ -1,0 +1,5646 @@
+{
+  "course": "SCY",
+  "detectedSheetType": "psych",
+  "entries": [
+    {
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "eventNumber": 1,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "seedRank": 1,
+      "seedTime": "1:50.00",
+      "team": "FLORIDA STATE",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "eventNumber": 1,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": 2,
+          "leg": 1,
+          "name": "Peterson, Skylar"
+        },
+        {
+          "age": 4,
+          "leg": 3,
+          "name": "Houck, Cadence"
+        }
+      ],
+      "seedRank": 2,
+      "seedTime": "1:51.97",
+      "team": "FLORIDA",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "eventNumber": 1,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "seedRank": 3,
+      "seedTime": "1:55.24",
+      "team": "GEORGIA TECH",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "eventNumber": 1,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": 18,
+          "leg": 1,
+          "name": "Gavin, Anna"
+        },
+        {
+          "age": 18,
+          "leg": 2,
+          "name": "Roth, Alison"
+        },
+        {
+          "age": 18,
+          "leg": 3,
+          "name": "Austin, Whitney"
+        },
+        {
+          "age": 18,
+          "leg": 4,
+          "name": "Heritage, Greer"
+        }
+      ],
+      "seedRank": 5,
+      "seedTime": "2:10.00",
+      "team": "AUBURN",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "eventNumber": 1,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "age": 19,
+          "leg": 1,
+          "name": "Florit, Alexis"
+        },
+        {
+          "age": 19,
+          "leg": 2,
+          "name": "Hudson, Ruby"
+        },
+        {
+          "age": 20,
+          "leg": 3,
+          "name": "Pye, Allison"
+        },
+        {
+          "age": 19,
+          "leg": 4,
+          "name": "Moor, Grace"
+        }
+      ],
+      "seedRank": 6,
+      "seedTime": "2:15.00",
+      "team": "AUBURN",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "eventNumber": 1,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "age": 19,
+          "leg": 1,
+          "name": "Albert, Katie"
+        },
+        {
+          "age": 19,
+          "leg": 2,
+          "name": "Kimbrell, Mackenzie"
+        },
+        {
+          "age": 20,
+          "leg": 3,
+          "name": "Elder, Ashley"
+        },
+        {
+          "age": 19,
+          "leg": 4,
+          "name": "Baumhover, Aubrey"
+        }
+      ],
+      "seedRank": 7,
+      "seedTime": "2:20.00",
+      "team": "AUBURN",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "eventNumber": 1,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "seedRank": 8,
+      "seedTime": null,
+      "team": "GEORGIA TECH",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "eventNumber": 1,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "age": 2,
+          "leg": 1,
+          "name": "McCarty, Ava"
+        },
+        {
+          "age": 4,
+          "leg": 3,
+          "name": "McMullan, Nicole"
+        }
+      ],
+      "seedRank": 9,
+      "seedTime": null,
+      "team": "FLORIDA",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "eventNumber": 1,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "age": 2,
+          "leg": 1,
+          "name": "Amaral, Joana"
+        },
+        {
+          "age": 4,
+          "leg": 3,
+          "name": "Smith, Mackenzie"
+        }
+      ],
+      "seedRank": 10,
+      "seedTime": null,
+      "team": "FLORIDA",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "eventNumber": 1,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "seedRank": 11,
+      "seedTime": null,
+      "team": "FLORIDA STATE",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "eventNumber": 1,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "C",
+      "relaySwimmers": [],
+      "seedRank": 12,
+      "seedTime": null,
+      "team": "FLORIDA STATE",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "eventNumber": 2,
+      "gender": "M",
+      "isRelay": true,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "seedRank": 1,
+      "seedTime": "1:34.11",
+      "team": "GEORGIA TECH",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "eventNumber": 2,
+      "gender": "M",
+      "isRelay": true,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": 2,
+          "leg": 1,
+          "name": "Moore, Nicholas"
+        },
+        {
+          "age": 4,
+          "leg": 3,
+          "name": "Westin, Michael"
+        }
+      ],
+      "seedRank": 2,
+      "seedTime": "1:34.67",
+      "team": "FLORIDA",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "eventNumber": 2,
+      "gender": "M",
+      "isRelay": true,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "seedRank": 3,
+      "seedTime": "1:40.00",
+      "team": "FLORIDA STATE",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "eventNumber": 2,
+      "gender": "M",
+      "isRelay": true,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": 20,
+          "leg": 1,
+          "name": "Conners, Jack"
+        },
+        {
+          "age": 18,
+          "leg": 2,
+          "name": "Cresap, Brandon"
+        },
+        {
+          "age": 21,
+          "leg": 3,
+          "name": "Forkey, Carson"
+        },
+        {
+          "age": 20,
+          "leg": 4,
+          "name": "Bustard, Nate"
+        }
+      ],
+      "seedRank": 4,
+      "seedTime": "1:45.00",
+      "team": "AUBURN",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "eventNumber": 2,
+      "gender": "M",
+      "isRelay": true,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "age": 19,
+          "leg": 1,
+          "name": "May, Cooper"
+        },
+        {
+          "age": 18,
+          "leg": 2,
+          "name": "Metersky, Joshua"
+        },
+        {
+          "age": 20,
+          "leg": 3,
+          "name": "Johnson, Benny"
+        },
+        {
+          "age": 22,
+          "leg": 4,
+          "name": "Scott, Sam"
+        }
+      ],
+      "seedRank": 5,
+      "seedTime": "1:48.00",
+      "team": "AUBURN",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "eventNumber": 2,
+      "gender": "M",
+      "isRelay": true,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "age": 19,
+          "leg": 1,
+          "name": "Sanders, Maxwell"
+        },
+        {
+          "age": 20,
+          "leg": 2,
+          "name": "Schmidt, Logan"
+        },
+        {
+          "age": 19,
+          "leg": 3,
+          "name": "Burke, Aidan"
+        },
+        {
+          "age": 19,
+          "leg": 4,
+          "name": "Jeon, Peyton"
+        }
+      ],
+      "seedRank": 6,
+      "seedTime": "1:55.00",
+      "team": "AUBURN",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "eventNumber": 2,
+      "gender": "M",
+      "isRelay": true,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "seedRank": 9,
+      "seedTime": null,
+      "team": "GEORGIA TECH",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "eventNumber": 2,
+      "gender": "M",
+      "isRelay": true,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "age": 2,
+          "leg": 1,
+          "name": "McCright, David"
+        },
+        {
+          "age": 4,
+          "leg": 3,
+          "name": "Davis, Lukas"
+        }
+      ],
+      "seedRank": 10,
+      "seedTime": null,
+      "team": "FLORIDA",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "eventNumber": 2,
+      "gender": "M",
+      "isRelay": true,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "seedRank": 11,
+      "seedTime": null,
+      "team": "FLORIDA STATE",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "eventNumber": 2,
+      "gender": "M",
+      "isRelay": true,
+      "relayLetter": "C",
+      "relaySwimmers": [],
+      "seedRank": 12,
+      "seedTime": null,
+      "team": "FLORIDA STATE",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Free",
+      "eventNumber": 3,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Carlton, Delaney",
+      "seedRank": 1,
+      "seedTime": "1:56.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Free",
+      "eventNumber": 3,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Kofman, Tahlia",
+      "seedRank": 2,
+      "seedTime": "2:00.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Free",
+      "eventNumber": 3,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Munger, Audrey",
+      "seedRank": 3,
+      "seedTime": "2:03.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Free",
+      "eventNumber": 3,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Witthoff, Mia",
+      "seedRank": 5,
+      "seedTime": "2:10.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Free",
+      "eventNumber": 3,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Lamb, Grayce",
+      "seedRank": 6,
+      "seedTime": "3:20.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Free",
+      "eventNumber": 3,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Britto, Camryn",
+      "seedRank": 9,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Free",
+      "eventNumber": 3,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Kelly, Jemma",
+      "seedRank": 10,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Free",
+      "eventNumber": 3,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Lee, Morgan",
+      "seedRank": 11,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Free",
+      "eventNumber": 4,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Grossman, Oliver",
+      "seedRank": 1,
+      "seedTime": "1:43.58",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Free",
+      "eventNumber": 4,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Martin, Colton",
+      "seedRank": 2,
+      "seedTime": "1:50.17",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Free",
+      "eventNumber": 4,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Marquez, Alexandro",
+      "seedRank": 3,
+      "seedTime": "1:51.37",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Free",
+      "eventNumber": 4,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Grann, Gavin",
+      "seedRank": 4,
+      "seedTime": "1:55.90",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Free",
+      "eventNumber": 4,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Mackay, Nolan",
+      "seedRank": 5,
+      "seedTime": "1:56.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Free",
+      "eventNumber": 4,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Vlady, George",
+      "seedRank": 6,
+      "seedTime": "1:59.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Free",
+      "eventNumber": 4,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Nagel, Lucas",
+      "seedRank": 7,
+      "seedTime": "2:03.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Free",
+      "eventNumber": 4,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Weitzel, Logan",
+      "seedRank": 8,
+      "seedTime": "2:07.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Free",
+      "eventNumber": 4,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Murray, Liam",
+      "seedRank": 9,
+      "seedTime": "2:14.45",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Free",
+      "eventNumber": 4,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Bratu, Dan",
+      "seedRank": 11,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Free",
+      "eventNumber": 4,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Williams, Mayon",
+      "seedRank": 12,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Free",
+      "eventNumber": 4,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Johnson, BenjaminScott",
+      "seedRank": 14,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Free",
+      "eventNumber": 4,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Varela, Marcelo",
+      "seedRank": 15,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "200 IM",
+      "eventNumber": 5,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Li, Adeline",
+      "seedRank": 1,
+      "seedTime": "2:11.40",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 IM",
+      "eventNumber": 5,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Roth, Alison",
+      "seedRank": 2,
+      "seedTime": "2:15.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 IM",
+      "eventNumber": 5,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Pye, Allison",
+      "seedRank": 3,
+      "seedTime": "2:22.61",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 IM",
+      "eventNumber": 5,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Plantamura, Natalie",
+      "seedRank": 5,
+      "seedTime": "2:28.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 IM",
+      "eventNumber": 5,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Austin, Whitney",
+      "seedRank": 6,
+      "seedTime": "2:30.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 IM",
+      "eventNumber": 5,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Albert, Katie",
+      "seedRank": 7,
+      "seedTime": "2:30.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 IM",
+      "eventNumber": 5,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Hoang, Alexa",
+      "seedRank": 8,
+      "seedTime": "2:32.50",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 IM",
+      "eventNumber": 5,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Yang, Amy",
+      "seedRank": 9,
+      "seedTime": "2:35.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 IM",
+      "eventNumber": 5,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Mitchell, Ali",
+      "seedRank": 10,
+      "seedTime": "2:35.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 IM",
+      "eventNumber": 6,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Hall, Jonathan",
+      "seedRank": 1,
+      "seedTime": "2:00.89",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 IM",
+      "eventNumber": 6,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Rohovit, Hunter",
+      "seedRank": 2,
+      "seedTime": "2:06.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 IM",
+      "eventNumber": 6,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Liu, Alex",
+      "seedRank": 4,
+      "seedTime": "2:08.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 IM",
+      "eventNumber": 6,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Pianoto, Matthew",
+      "seedRank": 5,
+      "seedTime": "2:08.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 IM",
+      "eventNumber": 6,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Rice, Thomas",
+      "seedRank": 7,
+      "seedTime": "2:10.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 IM",
+      "eventNumber": 6,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Allen, Hunter",
+      "seedRank": 8,
+      "seedTime": "2:10.87",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 IM",
+      "eventNumber": 6,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Johnson, Lucas",
+      "seedRank": 9,
+      "seedTime": "2:13.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 IM",
+      "eventNumber": 6,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Slater, Landon",
+      "seedRank": 10,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "200 IM",
+      "eventNumber": 6,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Feller, Curtis",
+      "seedRank": 11,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "200 IM",
+      "eventNumber": 6,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Kinter, Nathan",
+      "seedRank": 12,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "200 IM",
+      "eventNumber": 6,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Mirsaderov, Nik",
+      "seedRank": 13,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Fly",
+      "eventNumber": 7,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Freund, Gabby",
+      "seedRank": 1,
+      "seedTime": "1:01.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Fly",
+      "eventNumber": 7,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Kofman, Tahlia",
+      "seedRank": 2,
+      "seedTime": "1:03.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Fly",
+      "eventNumber": 7,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Hicks, Erin",
+      "seedRank": 4,
+      "seedTime": "1:04.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Fly",
+      "eventNumber": 7,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Elder, Ashley",
+      "seedRank": 5,
+      "seedTime": "1:06.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Fly",
+      "eventNumber": 7,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Spaulding, Alice",
+      "seedRank": 6,
+      "seedTime": "1:06.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Fly",
+      "eventNumber": 7,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Greaux, Lauren",
+      "seedRank": 7,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Fly",
+      "eventNumber": 7,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Sealey, Isabelle",
+      "seedRank": 8,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Fly",
+      "eventNumber": 8,
+      "gender": "M",
+      "isRelay": false,
+      "name": "White, Aidan",
+      "seedRank": 1,
+      "seedTime": "50.85",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Fly",
+      "eventNumber": 8,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Forkey, Carson",
+      "seedRank": 4,
+      "seedTime": "55.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Fly",
+      "eventNumber": 8,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Cresap, Brandon",
+      "seedRank": 5,
+      "seedTime": "55.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Fly",
+      "eventNumber": 8,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Bataillon, Daniel",
+      "seedRank": 6,
+      "seedTime": "55.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Fly",
+      "eventNumber": 8,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Cao, Bradley",
+      "seedRank": 8,
+      "seedTime": "57.06",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Fly",
+      "eventNumber": 8,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Vlady, George",
+      "seedRank": 9,
+      "seedTime": "58.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Fly",
+      "eventNumber": 8,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Nucci, Renzo",
+      "seedRank": 10,
+      "seedTime": "58.97",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Fly",
+      "eventNumber": 8,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Rimsa, Thomas",
+      "seedRank": 11,
+      "seedTime": "59.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Fly",
+      "eventNumber": 8,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Burke, Aidan",
+      "seedRank": 12,
+      "seedTime": "1:00.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Fly",
+      "eventNumber": 8,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Kharel, Avi",
+      "seedRank": 13,
+      "seedTime": "1:03.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Fly",
+      "eventNumber": 8,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Chen, Alex",
+      "seedRank": 16,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Fly",
+      "eventNumber": 8,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Kvashchuk, Mykhailo",
+      "seedRank": 17,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Carlton, Delaney",
+      "seedRank": 1,
+      "seedTime": "23.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Roberts, Stella",
+      "seedRank": 2,
+      "seedTime": "25.35",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Munger, Audrey",
+      "seedRank": 3,
+      "seedTime": "25.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Ochoa, Iris",
+      "seedRank": 4,
+      "seedTime": "25.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Gavin, Anna",
+      "seedRank": 5,
+      "seedTime": "25.87",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Kelly, Jemma",
+      "seedRank": 7,
+      "seedTime": "25.89",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Avedisian, Michaela",
+      "seedRank": 8,
+      "seedTime": "26.28",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Mathis, Amber",
+      "seedRank": 9,
+      "seedTime": "26.50",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Kofman, Tahlia",
+      "seedRank": 10,
+      "seedTime": "26.50",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Brefeld, Peyton",
+      "seedRank": 11,
+      "seedTime": "26.56",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Fulton, Rachel",
+      "seedRank": 13,
+      "seedTime": "26.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Stewart, Caroline",
+      "seedRank": 14,
+      "seedTime": "26.80",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Newcome, Ava",
+      "seedRank": 15,
+      "seedTime": "26.86",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Hudson, Ruby",
+      "seedRank": 16,
+      "seedTime": "27.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Moor, Grace",
+      "seedRank": 17,
+      "seedTime": "27.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Lee, Morgan",
+      "seedRank": 18,
+      "seedTime": "27.21",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Kohs, Madeline",
+      "seedRank": 19,
+      "seedTime": "27.25",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Stepanian, Alique",
+      "seedRank": 21,
+      "seedTime": "27.66",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Meckley, Irelyn",
+      "seedRank": 22,
+      "seedTime": "27.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Freund, Gabby",
+      "seedRank": 23,
+      "seedTime": "27.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Bargellini, Faith",
+      "seedRank": 24,
+      "seedTime": "28.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Baker, Regan",
+      "seedRank": 25,
+      "seedTime": "28.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Florit, Alexis",
+      "seedRank": 26,
+      "seedTime": "28.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Heritage, Greer",
+      "seedRank": 29,
+      "seedTime": "28.40",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Eaton, Emily",
+      "seedRank": 32,
+      "seedTime": "28.99",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Long, Piper",
+      "seedRank": 33,
+      "seedTime": "29.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Ashley, Ella",
+      "seedRank": 36,
+      "seedTime": "29.07",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Schmid, Sarah",
+      "seedRank": 38,
+      "seedTime": "29.70",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Baumhover, Aubrey",
+      "seedRank": 39,
+      "seedTime": "30.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Kopkas, Grace",
+      "seedRank": 42,
+      "seedTime": "30.27",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Kimbrell, Mackenzie",
+      "seedRank": 43,
+      "seedTime": "30.50",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Grant, Alyssa",
+      "seedRank": 47,
+      "seedTime": "32.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Concha, Mariafe",
+      "seedRank": 48,
+      "seedTime": "32.67",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "LaGrone, Allison",
+      "seedRank": 49,
+      "seedTime": "33.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Marazas, Isabelle",
+      "seedRank": 50,
+      "seedTime": "33.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Patel, Jesal",
+      "seedRank": 51,
+      "seedTime": "33.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "O'Malley, Emily",
+      "seedRank": 52,
+      "seedTime": "34.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Evans, Ashley",
+      "seedRank": 55,
+      "seedTime": "34.09",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Lamb, Grayce",
+      "seedRank": 58,
+      "seedTime": "38.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Yie, Emiley",
+      "seedRank": 59,
+      "seedTime": "39.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Covaliu-Fuentes, Veronica",
+      "seedRank": 60,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Anderson, Katie",
+      "seedRank": 61,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Davey, Olivia",
+      "seedRank": 65,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Renter, Julia",
+      "seedRank": 66,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 9,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Houck, Madison",
+      "seedRank": 67,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "White, Keller",
+      "seedRank": 1,
+      "seedTime": "20.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Gransee, Kyle",
+      "seedRank": 2,
+      "seedTime": "21.67",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Seward, Lawson",
+      "seedRank": 3,
+      "seedTime": "21.87",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Shoemaker, Harrison",
+      "seedRank": 4,
+      "seedTime": "22.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Laurie, Aiden",
+      "seedRank": 5,
+      "seedTime": "22.11",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Scott, Sam",
+      "seedRank": 6,
+      "seedTime": "22.50",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Vlady, George",
+      "seedRank": 7,
+      "seedTime": "22.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Jones, Justin",
+      "seedRank": 8,
+      "seedTime": "22.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Witham, Noah",
+      "seedRank": 9,
+      "seedTime": "22.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Klingenberg, Brennan",
+      "seedRank": 10,
+      "seedTime": "22.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Bustard, Nate",
+      "seedRank": 11,
+      "seedTime": "22.80",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Herold, Jonathan",
+      "seedRank": 12,
+      "seedTime": "22.93",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Cresap, Brandon",
+      "seedRank": 13,
+      "seedTime": "23.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Grann, Gavin",
+      "seedRank": 14,
+      "seedTime": "23.30",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Ball, Patrick",
+      "seedRank": 15,
+      "seedTime": "23.43",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "White, Aidan",
+      "seedRank": 16,
+      "seedTime": "23.47",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Hamrick, Nat",
+      "seedRank": 17,
+      "seedTime": "23.50",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Chen, Alex",
+      "seedRank": 18,
+      "seedTime": "23.54",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Matthews, John",
+      "seedRank": 19,
+      "seedTime": "23.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Curtiss, Jacob",
+      "seedRank": 20,
+      "seedTime": "23.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Townsend, Matthew",
+      "seedRank": 21,
+      "seedTime": "23.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Balkcum, Kyle",
+      "seedRank": 24,
+      "seedTime": "24.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Conners, Jack",
+      "seedRank": 25,
+      "seedTime": "24.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Jeon, Peyton",
+      "seedRank": 26,
+      "seedTime": "24.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Cao, Bradley",
+      "seedRank": 27,
+      "seedTime": "24.18",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Guy, Jonathan",
+      "seedRank": 28,
+      "seedTime": "24.22",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Skidmore, Billy",
+      "seedRank": 29,
+      "seedTime": "24.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Hernandez, Joshua",
+      "seedRank": 30,
+      "seedTime": "24.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Stephenson, AJ",
+      "seedRank": 31,
+      "seedTime": "25.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Grutter, Maxwell",
+      "seedRank": 34,
+      "seedTime": "25.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Manley, Adam",
+      "seedRank": 35,
+      "seedTime": "25.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Vo, Brandon",
+      "seedRank": 36,
+      "seedTime": "25.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Jones, Peyton",
+      "seedRank": 37,
+      "seedTime": "25.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Cheung, Chris",
+      "seedRank": 38,
+      "seedTime": "25.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Weitzel, Logan",
+      "seedRank": 39,
+      "seedTime": "25.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Bratu, Dan",
+      "seedRank": 40,
+      "seedTime": "25.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Murray, Liam",
+      "seedRank": 41,
+      "seedTime": "26.28",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Smith, Logan",
+      "seedRank": 43,
+      "seedTime": "26.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Foran, Gavin",
+      "seedRank": 44,
+      "seedTime": "26.99",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Payne, Tristan",
+      "seedRank": 45,
+      "seedTime": "27.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Sanders, Maxwell",
+      "seedRank": 46,
+      "seedTime": "27.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Metersky, Joshua",
+      "seedRank": 49,
+      "seedTime": "28.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Pro, Sawyer",
+      "seedRank": 53,
+      "seedTime": "30.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Varela, Marcelo",
+      "seedRank": 54,
+      "seedTime": "30.22",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Vlady, Richard",
+      "seedRank": 55,
+      "seedTime": "30.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Saglam, Semih",
+      "seedRank": 59,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Hall, Jonathan",
+      "seedRank": 65,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Free",
+      "eventNumber": 10,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Johnson, BenjaminScott",
+      "seedRank": 66,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Breast",
+      "eventNumber": 11,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Wong, Tara",
+      "seedRank": 1,
+      "seedTime": "2:40.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Breast",
+      "eventNumber": 11,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Elvambuena, Ella",
+      "seedRank": 4,
+      "seedTime": "2:55.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Breast",
+      "eventNumber": 12,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Pianoto, Matthew",
+      "seedRank": 1,
+      "seedTime": "2:20.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Breast",
+      "eventNumber": 12,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Long, Liam",
+      "seedRank": 2,
+      "seedTime": "2:20.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Breast",
+      "eventNumber": 12,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Liu, Alex",
+      "seedRank": 3,
+      "seedTime": "2:30.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Back",
+      "eventNumber": 13,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Wang, Mingqi",
+      "seedRank": 1,
+      "seedTime": "1:05.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Back",
+      "eventNumber": 13,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Haskell, Miyu",
+      "seedRank": 3,
+      "seedTime": "1:07.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Back",
+      "eventNumber": 13,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Mitchell, Ali",
+      "seedRank": 4,
+      "seedTime": "1:10.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Back",
+      "eventNumber": 13,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Miller, Charli",
+      "seedRank": 6,
+      "seedTime": "1:12.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Back",
+      "eventNumber": 13,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Kimbrell, Mackenzie",
+      "seedRank": 7,
+      "seedTime": "1:14.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Back",
+      "eventNumber": 13,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Sampson, Mackenzie",
+      "seedRank": 9,
+      "seedTime": "1:17.63",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Back",
+      "eventNumber": 13,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Brefeld, Peyton",
+      "seedRank": 11,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Back",
+      "eventNumber": 13,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Catalasan, Mariann",
+      "seedRank": 12,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Back",
+      "eventNumber": 13,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Davey, Olivia",
+      "seedRank": 13,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Back",
+      "eventNumber": 13,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Kelly, Jemma",
+      "seedRank": 14,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Back",
+      "eventNumber": 13,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Sealey, Isabelle",
+      "seedRank": 15,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Back",
+      "eventNumber": 14,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Riordan, James",
+      "seedRank": 1,
+      "seedTime": "50.79",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Back",
+      "eventNumber": 14,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Marquez, Alexandro",
+      "seedRank": 2,
+      "seedTime": "52.65",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Back",
+      "eventNumber": 14,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Bataillon, Daniel",
+      "seedRank": 4,
+      "seedTime": "55.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Back",
+      "eventNumber": 14,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Johnson, Lucas",
+      "seedRank": 5,
+      "seedTime": "57.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Back",
+      "eventNumber": 14,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Conners, Jack",
+      "seedRank": 6,
+      "seedTime": "58.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Back",
+      "eventNumber": 14,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Johnson, Benny",
+      "seedRank": 7,
+      "seedTime": "1:01.22",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Back",
+      "eventNumber": 14,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Nagel, Lucas",
+      "seedRank": 8,
+      "seedTime": "1:03.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Back",
+      "eventNumber": 14,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Smith, Logan",
+      "seedRank": 9,
+      "seedTime": "1:08.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Back",
+      "eventNumber": 14,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Hamrick, Nat",
+      "seedRank": 10,
+      "seedTime": "1:10.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Back",
+      "eventNumber": 14,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Ball, Patrick",
+      "seedRank": 11,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 15,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Marim, Isabella",
+      "seedRank": 1,
+      "seedTime": "31.90",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 15,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Roth, Alison",
+      "seedRank": 2,
+      "seedTime": "32.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 15,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Stewart, Caroline",
+      "seedRank": 3,
+      "seedTime": "32.90",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 15,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Avedisian, Michaela",
+      "seedRank": 4,
+      "seedTime": "33.91",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 15,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Gavin, Anna",
+      "seedRank": 5,
+      "seedTime": "34.60",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 15,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Hudson, Ruby",
+      "seedRank": 6,
+      "seedTime": "35.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 15,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Pye, Allison",
+      "seedRank": 8,
+      "seedTime": "35.64",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 15,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Wong, Tara",
+      "seedRank": 9,
+      "seedTime": "35.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 15,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Carver, Chloe",
+      "seedRank": 10,
+      "seedTime": "35.82",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 15,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Moor, Grace",
+      "seedRank": 12,
+      "seedTime": "36.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 15,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Heritage, Greer",
+      "seedRank": 13,
+      "seedTime": "36.50",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 15,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Elvambuena, Ella",
+      "seedRank": 14,
+      "seedTime": "36.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 15,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Ashley, Ella",
+      "seedRank": 16,
+      "seedTime": "37.67",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 15,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Allibone, Jessica",
+      "seedRank": 17,
+      "seedTime": "39.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 15,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Schmid, Sarah",
+      "seedRank": 18,
+      "seedTime": "41.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 15,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Sampson, Mackenzie",
+      "seedRank": 19,
+      "seedTime": "41.11",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 15,
+      "gender": "F",
+      "isRelay": false,
+      "name": "LaGrone, Allison",
+      "seedRank": 20,
+      "seedTime": "42.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 15,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Covaliu-Fuentes, Veronica",
+      "seedRank": 26,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 15,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Bontrager, Allison",
+      "seedRank": 27,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 15,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Britto, Camryn",
+      "seedRank": 28,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 15,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Grant, Alyssa",
+      "seedRank": 29,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 16,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Balkcum, Kyle",
+      "seedRank": 1,
+      "seedTime": "26.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 16,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Rosal, Gareth",
+      "seedRank": 2,
+      "seedTime": "27.79",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 16,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Cresap, Brandon",
+      "seedRank": 3,
+      "seedTime": "28.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 16,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Ernest, Asa",
+      "seedRank": 5,
+      "seedTime": "29.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 16,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Nucci, Renzo",
+      "seedRank": 6,
+      "seedTime": "30.46",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 16,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Stephenson, AJ",
+      "seedRank": 7,
+      "seedTime": "31.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 16,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Klingenberg, Brennan",
+      "seedRank": 9,
+      "seedTime": "31.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 16,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Burke, Aidan",
+      "seedRank": 10,
+      "seedTime": "32.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 16,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Schmidt, Logan",
+      "seedRank": 11,
+      "seedTime": "32.50",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 16,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Kharel, Avi",
+      "seedRank": 12,
+      "seedTime": "32.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 16,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Zhang, Andrew",
+      "seedRank": 13,
+      "seedTime": "32.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 16,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Metersky, Joshua",
+      "seedRank": 14,
+      "seedTime": "33.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 16,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Vo, Brandon",
+      "seedRank": 15,
+      "seedTime": "33.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 16,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Payne, Tristan",
+      "seedRank": 17,
+      "seedTime": "35.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 16,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Vlady, Richard",
+      "seedRank": 20,
+      "seedTime": "40.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Breast",
+      "eventNumber": 16,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Seward, Lawson",
+      "seedRank": 25,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "400 IM",
+      "eventNumber": 17,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Plantamura, Natalie",
+      "seedRank": 1,
+      "seedTime": "5:25.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "400 IM",
+      "eventNumber": 18,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Long, Liam",
+      "seedRank": 1,
+      "seedTime": "4:15.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "400 IM",
+      "eventNumber": 18,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Altera, Ryan",
+      "seedRank": 2,
+      "seedTime": "4:20.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "400 IM",
+      "eventNumber": 18,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Hall, Jonathan",
+      "seedRank": 4,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "500 Free",
+      "eventNumber": 19,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Kopkas, Grace",
+      "seedRank": 1,
+      "seedTime": "7:14.99",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "500 Free",
+      "eventNumber": 19,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Robertson, Lucy",
+      "seedRank": 2,
+      "seedTime": "7:30.53",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "500 Free",
+      "eventNumber": 20,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Mackay, Nolan",
+      "seedRank": 1,
+      "seedTime": "5:00.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "500 Free",
+      "eventNumber": 20,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Martin, Colton",
+      "seedRank": 2,
+      "seedTime": "5:01.40",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "500 Free",
+      "eventNumber": 20,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Allen, Hunter",
+      "seedRank": 3,
+      "seedTime": "5:11.45",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "500 Free",
+      "eventNumber": 20,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Weitzel, Logan",
+      "seedRank": 4,
+      "seedTime": "5:57.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "500 Free",
+      "eventNumber": 20,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Varela, Marcelo",
+      "seedRank": 5,
+      "seedTime": "7:35.41",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Back",
+      "eventNumber": 21,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Miller, Merritt",
+      "seedRank": 1,
+      "seedTime": "2:20.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Back",
+      "eventNumber": 21,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Wang, Mingqi",
+      "seedRank": 2,
+      "seedTime": "2:21.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Back",
+      "eventNumber": 21,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Greaux, Lauren",
+      "seedRank": 3,
+      "seedTime": "2:21.02",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Back",
+      "eventNumber": 21,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Catalasan, Mariann",
+      "seedRank": 4,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Back",
+      "eventNumber": 21,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Newcome, Ava",
+      "seedRank": 5,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Back",
+      "eventNumber": 22,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Marquez, Alexandro",
+      "seedRank": 1,
+      "seedTime": "1:56.64",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Back",
+      "eventNumber": 22,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Rohovit, Hunter",
+      "seedRank": 2,
+      "seedTime": "2:06.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Back",
+      "eventNumber": 22,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Rice, Thomas",
+      "seedRank": 3,
+      "seedTime": "2:07.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Back",
+      "eventNumber": 22,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Altera, Ryan",
+      "seedRank": 4,
+      "seedTime": "2:10.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Back",
+      "eventNumber": 22,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Johnson, Lucas",
+      "seedRank": 5,
+      "seedTime": "2:10.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Breast",
+      "eventNumber": 23,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Gavin, Anna",
+      "seedRank": 1,
+      "seedTime": "1:10.37",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Breast",
+      "eventNumber": 23,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Stewart, Caroline",
+      "seedRank": 2,
+      "seedTime": "1:12.38",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Breast",
+      "eventNumber": 23,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Elvambuena, Ella",
+      "seedRank": 3,
+      "seedTime": "1:16.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Breast",
+      "eventNumber": 23,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Lee, Morgan",
+      "seedRank": 4,
+      "seedTime": "1:16.80",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Breast",
+      "eventNumber": 23,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Spaulding, Alice",
+      "seedRank": 5,
+      "seedTime": "1:17.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Breast",
+      "eventNumber": 23,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Hudson, Ruby",
+      "seedRank": 8,
+      "seedTime": "1:19.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Breast",
+      "eventNumber": 23,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Allibone, Jessica",
+      "seedRank": 9,
+      "seedTime": "1:20.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Breast",
+      "eventNumber": 23,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Kimbrell, Mackenzie",
+      "seedRank": 10,
+      "seedTime": "1:22.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Breast",
+      "eventNumber": 23,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Heritage, Greer",
+      "seedRank": 11,
+      "seedTime": "1:23.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Breast",
+      "eventNumber": 23,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Lamb, Grayce",
+      "seedRank": 13,
+      "seedTime": "1:45.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Breast",
+      "eventNumber": 24,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Rosal, Gareth",
+      "seedRank": 1,
+      "seedTime": "1:00.08",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Breast",
+      "eventNumber": 24,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Chen, Alex",
+      "seedRank": 3,
+      "seedTime": "1:07.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Breast",
+      "eventNumber": 24,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Schmidt, Logan",
+      "seedRank": 4,
+      "seedTime": "1:13.50",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Breast",
+      "eventNumber": 24,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Zhang, Andrew",
+      "seedRank": 5,
+      "seedTime": "1:14.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Breast",
+      "eventNumber": 24,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Cheung, Chris",
+      "seedRank": 6,
+      "seedTime": "1:16.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Breast",
+      "eventNumber": 24,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Murray, Liam",
+      "seedRank": 7,
+      "seedTime": "1:19.79",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Breast",
+      "eventNumber": 24,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Saglam, Semih",
+      "seedRank": 9,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Breast",
+      "eventNumber": 24,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Johnson, BenjaminScott",
+      "seedRank": 10,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Breast",
+      "eventNumber": 24,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Kinter, Nathan",
+      "seedRank": 11,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 25,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Carlton, Delaney",
+      "seedRank": 1,
+      "seedTime": "27.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 25,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Rosenkranz, Bobbie",
+      "seedRank": 2,
+      "seedTime": "28.06",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 25,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Houck, Madison",
+      "seedRank": 3,
+      "seedTime": "28.89",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 25,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Mathis, Amber",
+      "seedRank": 4,
+      "seedTime": "29.50",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 25,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Ochoa, Iris",
+      "seedRank": 5,
+      "seedTime": "29.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 25,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Fulton, Rachel",
+      "seedRank": 6,
+      "seedTime": "29.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 25,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Kelly, Jemma",
+      "seedRank": 7,
+      "seedTime": "29.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 25,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Miller, Merritt",
+      "seedRank": 8,
+      "seedTime": "30.59",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 25,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Carver, Chloe",
+      "seedRank": 9,
+      "seedTime": "30.86",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 25,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Kohs, Madeline",
+      "seedRank": 11,
+      "seedTime": "31.90",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 25,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Haskell, Miyu",
+      "seedRank": 13,
+      "seedTime": "32.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 25,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Albert, Katie",
+      "seedRank": 15,
+      "seedTime": "35.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 25,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Patel, Jesal",
+      "seedRank": 20,
+      "seedTime": "41.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 25,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Marazas, Isabelle",
+      "seedRank": 21,
+      "seedTime": "42.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 25,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Evans, Ashley",
+      "seedRank": 22,
+      "seedTime": "42.16",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 25,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Yie, Emiley",
+      "seedRank": 23,
+      "seedTime": "45.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 25,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Covaliu-Fuentes, Veronica",
+      "seedRank": 24,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 25,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Anderson, Katie",
+      "seedRank": 25,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 25,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Brefeld, Peyton",
+      "seedRank": 27,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 25,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Sampson, Mackenzie",
+      "seedRank": 28,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 25,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Sealey, Isabelle",
+      "seedRank": 29,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 26,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Riordan, James",
+      "seedRank": 1,
+      "seedTime": "23.43",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 26,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Marquez, Alexandro",
+      "seedRank": 2,
+      "seedTime": "24.30",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 26,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Skidmore, Billy",
+      "seedRank": 3,
+      "seedTime": "26.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 26,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Conners, Jack",
+      "seedRank": 4,
+      "seedTime": "27.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 26,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Johnson, Benny",
+      "seedRank": 5,
+      "seedTime": "28.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 26,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Rimsa, Thomas",
+      "seedRank": 6,
+      "seedTime": "28.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 26,
+      "gender": "M",
+      "isRelay": false,
+      "name": "May, Cooper",
+      "seedRank": 7,
+      "seedTime": "29.50",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 26,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Grutter, Maxwell",
+      "seedRank": 8,
+      "seedTime": "30.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 26,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Manley, Adam",
+      "seedRank": 9,
+      "seedTime": "30.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 26,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Jones, Peyton",
+      "seedRank": 10,
+      "seedTime": "30.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 26,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Vlady, Richard",
+      "seedRank": 14,
+      "seedTime": "35.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 26,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Feller, Curtis",
+      "seedRank": 19,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 26,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Kvashchuk, Mykhailo",
+      "seedRank": 20,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Back",
+      "eventNumber": 26,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Seward, Lawson",
+      "seedRank": 21,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Fly",
+      "eventNumber": 27,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Witthoff, Mia",
+      "seedRank": 1,
+      "seedTime": "2:30.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Fly",
+      "eventNumber": 27,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Munger, Audrey",
+      "seedRank": 2,
+      "seedTime": "2:32.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "200 Fly",
+      "eventNumber": 28,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Slater, Landon",
+      "seedRank": 1,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 29,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Hicks, Erin",
+      "seedRank": 1,
+      "seedTime": "30.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 29,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Kofman, Tahlia",
+      "seedRank": 3,
+      "seedTime": "57.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 29,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Wong, Tara",
+      "seedRank": 4,
+      "seedTime": "57.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 29,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Brefeld, Peyton",
+      "seedRank": 5,
+      "seedTime": "58.29",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 29,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Marim, Isabella",
+      "seedRank": 6,
+      "seedTime": "58.57",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 29,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Freund, Gabby",
+      "seedRank": 7,
+      "seedTime": "58.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 29,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Moor, Grace",
+      "seedRank": 9,
+      "seedTime": "59.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 29,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Heritage, Greer",
+      "seedRank": 12,
+      "seedTime": "1:00.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 29,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Meckley, Irelyn",
+      "seedRank": 15,
+      "seedTime": "1:00.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 29,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Kimbrell, Mackenzie",
+      "seedRank": 17,
+      "seedTime": "1:04.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 29,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Schmid, Sarah",
+      "seedRank": 19,
+      "seedTime": "1:07.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 29,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Grant, Alyssa",
+      "seedRank": 22,
+      "seedTime": "1:12.03",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 29,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Evans, Ashley",
+      "seedRank": 23,
+      "seedTime": "1:16.01",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 29,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Davey, Olivia",
+      "seedRank": 24,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 29,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Greaux, Lauren",
+      "seedRank": 25,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 29,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Li, Adeline",
+      "seedRank": 26,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 29,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Newcome, Ava",
+      "seedRank": 27,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 29,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Renter, Julia",
+      "seedRank": 28,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 29,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Rosenkranz, Bobbie",
+      "seedRank": 29,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "White, Keller",
+      "seedRank": 1,
+      "seedTime": "44.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Long, Liam",
+      "seedRank": 2,
+      "seedTime": "45.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Hall, Jonathan",
+      "seedRank": 3,
+      "seedTime": "47.07",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Gransee, Kyle",
+      "seedRank": 4,
+      "seedTime": "47.58",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Ball, Patrick",
+      "seedRank": 6,
+      "seedTime": "50.31",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Martin, Colton",
+      "seedRank": 7,
+      "seedTime": "50.36",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Altera, Ryan",
+      "seedRank": 8,
+      "seedTime": "50.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Vlady, George",
+      "seedRank": 9,
+      "seedTime": "50.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Herold, Jonathan",
+      "seedRank": 10,
+      "seedTime": "50.86",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Grann, Gavin",
+      "seedRank": 11,
+      "seedTime": "51.06",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Jones, Justin",
+      "seedRank": 12,
+      "seedTime": "51.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Klingenberg, Brennan",
+      "seedRank": 13,
+      "seedTime": "51.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Townsend, Matthew",
+      "seedRank": 14,
+      "seedTime": "51.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Kinter, Nathan",
+      "seedRank": 15,
+      "seedTime": "52.53",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Rimsa, Thomas",
+      "seedRank": 16,
+      "seedTime": "52.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Matthews, John",
+      "seedRank": 17,
+      "seedTime": "53.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Nagel, Lucas",
+      "seedRank": 18,
+      "seedTime": "53.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Jeon, Peyton",
+      "seedRank": 19,
+      "seedTime": "55.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Curtiss, Jacob",
+      "seedRank": 20,
+      "seedTime": "55.40",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Bratu, Dan",
+      "seedRank": 21,
+      "seedTime": "55.55",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Liu, Alex",
+      "seedRank": 23,
+      "seedTime": "55.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Johnson, Benny",
+      "seedRank": 24,
+      "seedTime": "56.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Stephenson, AJ",
+      "seedRank": 26,
+      "seedTime": "57.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Murray, Liam",
+      "seedRank": 27,
+      "seedTime": "57.30",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Kharel, Avi",
+      "seedRank": 29,
+      "seedTime": "59.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Rohovit, Hunter",
+      "seedRank": 30,
+      "seedTime": "59.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Hernandez, Joshua",
+      "seedRank": 31,
+      "seedTime": "59.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Smith, Logan",
+      "seedRank": 32,
+      "seedTime": "59.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Balkcum, Kyle",
+      "seedRank": 33,
+      "seedTime": "1:00.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Sanders, Maxwell",
+      "seedRank": 34,
+      "seedTime": "1:02.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Pro, Sawyer",
+      "seedRank": 37,
+      "seedTime": "1:05.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Varela, Marcelo",
+      "seedRank": 39,
+      "seedTime": "1:10.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Slater, Landon",
+      "seedRank": 40,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Williams, Mayon",
+      "seedRank": 41,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 Free",
+      "eventNumber": 30,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Allen, Hunter",
+      "seedRank": 43,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Li, Adeline",
+      "seedRank": 1,
+      "seedTime": "27.04",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Austin, Whitney",
+      "seedRank": 2,
+      "seedTime": "27.61",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Munger, Audrey",
+      "seedRank": 3,
+      "seedTime": "27.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Carlton, Delaney",
+      "seedRank": 4,
+      "seedTime": "27.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Freund, Gabby",
+      "seedRank": 5,
+      "seedTime": "27.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Carver, Chloe",
+      "seedRank": 6,
+      "seedTime": "28.70",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Kohs, Madeline",
+      "seedRank": 9,
+      "seedTime": "29.13",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Elder, Ashley",
+      "seedRank": 10,
+      "seedTime": "29.18",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Lee, Morgan",
+      "seedRank": 11,
+      "seedTime": "29.64",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Hicks, Erin",
+      "seedRank": 12,
+      "seedTime": "29.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Ochoa, Iris",
+      "seedRank": 13,
+      "seedTime": "29.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Pye, Allison",
+      "seedRank": 14,
+      "seedTime": "29.86",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Bargellini, Faith",
+      "seedRank": 15,
+      "seedTime": "30.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Baker, Regan",
+      "seedRank": 16,
+      "seedTime": "30.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Long, Piper",
+      "seedRank": 17,
+      "seedTime": "30.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "King, Amanda",
+      "seedRank": 18,
+      "seedTime": "30.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Hoang, Alexa",
+      "seedRank": 21,
+      "seedTime": "30.50",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Stepanian, Alique",
+      "seedRank": 22,
+      "seedTime": "30.52",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Stewart, Caroline",
+      "seedRank": 23,
+      "seedTime": "30.90",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Eaton, Emily",
+      "seedRank": 24,
+      "seedTime": "31.45",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Britto, Camryn",
+      "seedRank": 25,
+      "seedTime": "31.54",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Elvambuena, Ella",
+      "seedRank": 26,
+      "seedTime": "31.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Baumhover, Aubrey",
+      "seedRank": 30,
+      "seedTime": "35.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Concha, Mariafe",
+      "seedRank": 31,
+      "seedTime": "35.74",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Ashley, Ella",
+      "seedRank": 35,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 31,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Roberts, Stella",
+      "seedRank": 36,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Laurie, Aiden",
+      "seedRank": 1,
+      "seedTime": "23.21",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "White, Aidan",
+      "seedRank": 2,
+      "seedTime": "23.35",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Riordan, James",
+      "seedRank": 3,
+      "seedTime": "23.38",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Curtiss, Jacob",
+      "seedRank": 4,
+      "seedTime": "23.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Seward, Lawson",
+      "seedRank": 5,
+      "seedTime": "24.77",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Bustard, Nate",
+      "seedRank": 6,
+      "seedTime": "24.90",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Ernest, Asa",
+      "seedRank": 7,
+      "seedTime": "24.90",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Forkey, Carson",
+      "seedRank": 8,
+      "seedTime": "25.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Scott, Sam",
+      "seedRank": 9,
+      "seedTime": "25.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Cao, Bradley",
+      "seedRank": 10,
+      "seedTime": "25.03",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Klingenberg, Brennan",
+      "seedRank": 11,
+      "seedTime": "25.40",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "May, Cooper",
+      "seedRank": 12,
+      "seedTime": "25.40",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Matthews, John",
+      "seedRank": 13,
+      "seedTime": "25.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Nucci, Renzo",
+      "seedRank": 14,
+      "seedTime": "25.71",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Feller, Curtis",
+      "seedRank": 15,
+      "seedTime": "25.78",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Burke, Aidan",
+      "seedRank": 16,
+      "seedTime": "26.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Cresap, Brandon",
+      "seedRank": 17,
+      "seedTime": "26.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Rice, Thomas",
+      "seedRank": 19,
+      "seedTime": "26.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Vo, Brandon",
+      "seedRank": 20,
+      "seedTime": "26.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Sanders, Maxwell",
+      "seedRank": 25,
+      "seedTime": "30.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Grutter, Maxwell",
+      "seedRank": 27,
+      "seedTime": "30.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Mackay, Nolan",
+      "seedRank": 28,
+      "seedTime": "32.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Payne, Tristan",
+      "seedRank": 29,
+      "seedTime": "33.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Williams, Mayon",
+      "seedRank": 32,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Johnson, BenjaminScott",
+      "seedRank": 37,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "50 Fly",
+      "eventNumber": 32,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Mirsaderov, Nik",
+      "seedRank": 38,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 33,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Roth, Alison",
+      "seedRank": 1,
+      "seedTime": "1:04.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 33,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Wang, Mingqi",
+      "seedRank": 2,
+      "seedTime": "1:06.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 33,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Allibone, Jessica",
+      "seedRank": 3,
+      "seedTime": "1:06.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 33,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Marim, Isabella",
+      "seedRank": 5,
+      "seedTime": "1:06.96",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 33,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Roberts, Stella",
+      "seedRank": 6,
+      "seedTime": "1:07.10",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 33,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Plantamura, Natalie",
+      "seedRank": 7,
+      "seedTime": "1:07.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 33,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Pye, Allison",
+      "seedRank": 10,
+      "seedTime": "1:08.29",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 33,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Hudson, Ruby",
+      "seedRank": 11,
+      "seedTime": "1:09.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 33,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Greaux, Lauren",
+      "seedRank": 12,
+      "seedTime": "1:09.33",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 33,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Spaulding, Alice",
+      "seedRank": 14,
+      "seedTime": "1:10.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 33,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Eaton, Emily",
+      "seedRank": 15,
+      "seedTime": "1:12.36",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 33,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Yang, Amy",
+      "seedRank": 16,
+      "seedTime": "1:12.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 33,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Mitchell, Ali",
+      "seedRank": 17,
+      "seedTime": "1:12.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 33,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Haskell, Miyu",
+      "seedRank": 18,
+      "seedTime": "1:14.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 33,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Florit, Alexis",
+      "seedRank": 19,
+      "seedTime": "1:15.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 33,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Miller, Charli",
+      "seedRank": 22,
+      "seedTime": "1:16.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 33,
+      "gender": "F",
+      "isRelay": false,
+      "name": "O'Malley, Emily",
+      "seedRank": 24,
+      "seedTime": "1:25.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 33,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Bargellini, Faith",
+      "seedRank": 26,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 33,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Anderson, Katie",
+      "seedRank": 27,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 33,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Rosenkranz, Bobbie",
+      "seedRank": 29,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 33,
+      "gender": "F",
+      "isRelay": false,
+      "name": "Sealey, Isabelle",
+      "seedRank": 30,
+      "team": "",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 34,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Grossman, Oliver",
+      "seedRank": 2,
+      "seedTime": "54.88",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 34,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Bataillon, Daniel",
+      "seedRank": 3,
+      "seedTime": "57.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 34,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Rosal, Gareth",
+      "seedRank": 5,
+      "seedTime": "1:01.21",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 34,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Townsend, Matthew",
+      "seedRank": 6,
+      "seedTime": "1:02.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 34,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Johnson, Benny",
+      "seedRank": 7,
+      "seedTime": "1:03.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 34,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Witham, Noah",
+      "seedRank": 8,
+      "seedTime": "1:05.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 34,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Nagel, Lucas",
+      "seedRank": 9,
+      "seedTime": "1:05.69",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 34,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Schmidt, Logan",
+      "seedRank": 11,
+      "seedTime": "1:10.00",
+      "team": ""
+    },
+    {
+      "entryType": "individual",
+      "event": "100 IM",
+      "eventNumber": 34,
+      "gender": "M",
+      "isRelay": false,
+      "name": "Vo, Brandon",
+      "seedRank": 12,
+      "seedTime": "1:10.69",
+      "team": ""
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "eventNumber": 35,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "seedRank": 1,
+      "seedTime": "1:40.00",
+      "team": "FLORIDA STATE",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "eventNumber": 35,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": 2,
+          "leg": 1,
+          "name": "Vroon, Katelyn"
+        },
+        {
+          "age": 4,
+          "leg": 3,
+          "name": "Houck, Cadence"
+        }
+      ],
+      "seedRank": 2,
+      "seedTime": "1:40.10",
+      "team": "FLORIDA",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "eventNumber": 35,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "seedRank": 3,
+      "seedTime": "1:42.87",
+      "team": "GEORGIA TECH",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "eventNumber": 35,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": 18,
+          "leg": 1,
+          "name": "Heritage, Greer"
+        },
+        {
+          "age": 19,
+          "leg": 2,
+          "name": "Hudson, Ruby"
+        },
+        {
+          "age": 19,
+          "leg": 3,
+          "name": "Baumhover, Aubrey"
+        },
+        {
+          "age": 18,
+          "leg": 4,
+          "name": "Gavin, Anna"
+        }
+      ],
+      "seedRank": 4,
+      "seedTime": "1:55.00",
+      "team": "AUBURN",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "eventNumber": 35,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "age": 19,
+          "leg": 1,
+          "name": "Albert, Katie"
+        },
+        {
+          "age": 20,
+          "leg": 2,
+          "name": "Elder, Ashley"
+        },
+        {
+          "age": 20,
+          "leg": 3,
+          "name": "Stewart, Caroline"
+        },
+        {
+          "age": 21,
+          "leg": 4,
+          "name": "Mathis, Amber"
+        }
+      ],
+      "seedRank": 6,
+      "seedTime": "1:58.00",
+      "team": "AUBURN",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "eventNumber": 35,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "age": 20,
+          "leg": 1,
+          "name": "King, Amanda"
+        },
+        {
+          "age": 20,
+          "leg": 2,
+          "name": "Anderson, Katie"
+        },
+        {
+          "age": 19,
+          "leg": 3,
+          "name": "Kimbrell, Mackenzie"
+        },
+        {
+          "age": 19,
+          "leg": 4,
+          "name": "Moor, Grace"
+        }
+      ],
+      "seedRank": 7,
+      "seedTime": "2:02.00",
+      "team": "AUBURN",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "eventNumber": 35,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "seedRank": 8,
+      "seedTime": null,
+      "team": "GEORGIA TECH",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "eventNumber": 35,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "age": 2,
+          "leg": 1,
+          "name": "Alsobrook, Katharine"
+        },
+        {
+          "age": 4,
+          "leg": 3,
+          "name": "Butlak, Makenna"
+        }
+      ],
+      "seedRank": 9,
+      "seedTime": null,
+      "team": "FLORIDA",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "eventNumber": 35,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "age": 2,
+          "leg": 1,
+          "name": "Smith, Chelsea"
+        },
+        {
+          "age": 4,
+          "leg": 3,
+          "name": "Gaulin, Lily"
+        }
+      ],
+      "seedRank": 10,
+      "seedTime": null,
+      "team": "FLORIDA",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "eventNumber": 35,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "seedRank": 11,
+      "seedTime": null,
+      "team": "FLORIDA STATE",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "eventNumber": 35,
+      "gender": "F",
+      "isRelay": true,
+      "relayLetter": "C",
+      "relaySwimmers": [],
+      "seedRank": 12,
+      "seedTime": null,
+      "team": "FLORIDA STATE",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "eventNumber": 36,
+      "gender": "M",
+      "isRelay": true,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "seedRank": 1,
+      "seedTime": "1:24.00",
+      "team": "FLORIDA STATE",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "eventNumber": 36,
+      "gender": "M",
+      "isRelay": true,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "seedRank": 2,
+      "seedTime": "1:24.90",
+      "team": "GEORGIA TECH",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "eventNumber": 36,
+      "gender": "M",
+      "isRelay": true,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": 2,
+          "leg": 1,
+          "name": "Westin, Michael"
+        },
+        {
+          "age": 4,
+          "leg": 3,
+          "name": "McCright, David"
+        }
+      ],
+      "seedRank": 3,
+      "seedTime": "1:24.90",
+      "team": "FLORIDA",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "eventNumber": 36,
+      "gender": "M",
+      "isRelay": true,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": 18,
+          "leg": 1,
+          "name": "Cresap, Brandon"
+        },
+        {
+          "age": 21,
+          "leg": 2,
+          "name": "Forkey, Carson"
+        },
+        {
+          "age": 22,
+          "leg": 3,
+          "name": "Scott, Sam"
+        },
+        {
+          "age": 20,
+          "leg": 4,
+          "name": "Bustard, Nate"
+        }
+      ],
+      "seedRank": 4,
+      "seedTime": "1:38.00",
+      "team": "AUBURN",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "eventNumber": 36,
+      "gender": "M",
+      "isRelay": true,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "age": 19,
+          "leg": 1,
+          "name": "Burke, Aidan"
+        },
+        {
+          "age": 19,
+          "leg": 2,
+          "name": "Grann, Gavin"
+        },
+        {
+          "age": 20,
+          "leg": 3,
+          "name": "Johnson, Benny"
+        },
+        {
+          "age": 19,
+          "leg": 4,
+          "name": "Pro, Sawyer"
+        }
+      ],
+      "seedRank": 5,
+      "seedTime": "1:41.00",
+      "team": "AUBURN",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "eventNumber": 36,
+      "gender": "M",
+      "isRelay": true,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "age": 19,
+          "leg": 1,
+          "name": "Jeon, Peyton"
+        },
+        {
+          "age": 18,
+          "leg": 2,
+          "name": "Metersky, Joshua"
+        },
+        {
+          "age": 18,
+          "leg": 3,
+          "name": "Payne, Tristan"
+        },
+        {
+          "age": 19,
+          "leg": 4,
+          "name": "Sanders, Maxwell"
+        }
+      ],
+      "seedRank": 6,
+      "seedTime": "1:45.00",
+      "team": "AUBURN",
+      "timeStatus": null
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "eventNumber": 36,
+      "gender": "M",
+      "isRelay": true,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "seedRank": 9,
+      "seedTime": null,
+      "team": "GEORGIA TECH",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "eventNumber": 36,
+      "gender": "M",
+      "isRelay": true,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "age": 2,
+          "leg": 1,
+          "name": "Davis, Lukas"
+        },
+        {
+          "age": 4,
+          "leg": 3,
+          "name": "Farrar, Ted"
+        }
+      ],
+      "seedRank": 10,
+      "seedTime": null,
+      "team": "FLORIDA",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "eventNumber": 36,
+      "gender": "M",
+      "isRelay": true,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "seedRank": 11,
+      "seedTime": null,
+      "team": "FLORIDA STATE",
+      "timeStatus": "NT"
+    },
+    {
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "eventNumber": 36,
+      "gender": "M",
+      "isRelay": true,
+      "relayLetter": "C",
+      "relaySwimmers": [],
+      "seedRank": 12,
+      "seedTime": null,
+      "team": "FLORIDA STATE",
+      "timeStatus": "NT"
+    }
+  ],
+  "meet_name": "2025 Spring Classic",
+  "sheetType": "psych"
+}

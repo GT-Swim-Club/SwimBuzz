@@ -6,6 +6,7 @@ import MeetFields, { emptyMeetForm, type MeetFormState } from "./MeetFields"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { meetPath } from "@/lib/slug"
 import { useUnsavedUploads } from "@/lib/meet/unsaved-uploads"
+import { useImportTask } from "@/components/ui/ImportTaskProvider"
 
 function meetImageUrls(form: Pick<MeetFormState, "iconUrl" | "bannerUrl">) {
   return [form.iconUrl, form.bannerUrl]
@@ -18,6 +19,7 @@ export default function CreateMeetButton({ seasons }: { seasons: string[] }) {
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState<MeetFormState>(emptyMeetForm)
   const { begin, trackUpload, release } = useUnsavedUploads()
+  const { startTask } = useImportTask()
 
   function openModal() {
     begin()
@@ -49,6 +51,12 @@ export default function CreateMeetButton({ seasons }: { seasons: string[] }) {
       }
       release(meetImageUrls(form))
       setOpen(false)
+      if (data.packetWarning) {
+        startTask(
+          "Creating meet...",
+          Promise.resolve(`Meet created, but the meet packet could not be parsed: ${data.packetWarning}`)
+        )
+      }
       router.push(meetPath(data.slug ?? data.id))
     } catch {
       setError("Something went wrong")
