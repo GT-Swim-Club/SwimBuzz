@@ -1,3 +1,18 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+# Skip the auto-download of the pnpm version pinned in package.json's
+# "packageManager" field and use the locally installed pnpm instead. The
+# on-demand engine download can stall with no output and hang every pnpm
+# command (even `pnpm -v`). (`pmOnFail` replaced `managePackageManagerVersions`
+# in pnpm 11+.)
+allowBuilds:
+  '@prisma/client': true
+  '@prisma/engines': true
+  core-js: true
+  prisma: true
+  sharp: true
+  unrs-resolver: true
+
+pmOnFail: ignore
