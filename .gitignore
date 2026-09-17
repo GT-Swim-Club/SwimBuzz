@@ -44,6 +44,7 @@ apps/web/package-lock.json
 # Ai agents
 .cursor/
 .claude/
+.codex/
 CLAUDE.md
 AGENTS.md
 
