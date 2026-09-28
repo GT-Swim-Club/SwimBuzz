@@ -85,6 +85,7 @@ export async function POST(req: Request) {
         endsAt: data.endsAt,
         timeZone: data.timeZone,
         location: data.location,
+        course: data.course,
         focus: data.focus,
         tags: data.tags,
         published: data.published,

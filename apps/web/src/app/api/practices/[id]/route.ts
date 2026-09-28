@@ -1,3 +1,4 @@
+import { softDeletePractice } from "@/lib/recovery/recovery"
 import { NextResponse } from "next/server"
 import { notifyPracticePublished } from "@/lib/notifications/notifications"
 import { prisma } from "@/lib/prisma"
@@ -122,6 +123,7 @@ export async function PATCH(
           endsAt: data.endsAt,
           timeZone: data.timeZone,
           location: data.location,
+          course: data.course,
           focus: data.focus,
           tags: data.tags,
           published: data.published,
@@ -175,6 +177,6 @@ export async function DELETE(
   const existing = await prisma.practice.findUnique({ where: { id } })
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-  await prisma.practice.delete({ where: { id } })
+  await softDeletePractice(id)
   return NextResponse.json({ ok: true })
 }

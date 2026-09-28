@@ -51,6 +51,7 @@ function colorSchemeVariables(c: ColorPalette) {
     "--brand-color-border": c.border,
     "--brand-color-border-secondary": c.borderSecondary,
     "--brand-color-border-subtle": c.borderSubtle,
+    "--brand-color-accent": c.accent,
   } as const
 }
 

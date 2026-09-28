@@ -37,6 +37,7 @@ export type PracticeFormState = {
   endTime: string
   timeZone: string
   location: string
+  course: string
   focus: string
   tags: string[]
   published?: boolean
@@ -70,6 +71,7 @@ export const emptyPractice: PracticeFormState = {
   endTime: "21:00",
   timeZone: DEFAULT_TIME_ZONE,
   location: "CRC Comp Pool",
+  course: "SCY",
   focus: "",
   tags: [],
   sets: [{ ...emptySet }],
@@ -80,6 +82,8 @@ const inputCls =
 const labelCls = "mb-1 block text-xs font-medium text-foreground-secondary"
 type AutosaveState = "idle" | "saving" | "saved" | "error"
 const AUTOSAVE_DELAY_MS = 700
+const HISTORY_LIMIT = 100
+const HISTORY_COALESCE_MS = 900
 
 function clockToMinutes(value: string): number | null {
   const match = /^(\d{2}):(\d{2})/.exec(value)
@@ -198,6 +202,18 @@ export default function PracticeEditor({
   const slugRef = useRef<string | null>(practiceSlug ?? null)
   /** True once the user has actually changed something, as opposed to the automatic timezone seed on create. */
   const userEditedRef = useRef(false)
+  const historyRef = useRef<{ past: PracticeFormState[]; future: PracticeFormState[] }>({
+    past: [],
+    future: [],
+  })
+  const lastHistoryEntryRef = useRef<{ key: string; at: number } | null>(null)
+  const undoRef = useRef(() => {})
+  const redoRef = useRef(() => {})
+  const formElRef = useRef<HTMLFormElement>(null)
+  const setPendingDeletionRef = useRef<{ dragId: string; title: string } | null>(null)
+  const confirmPublishStateRef = useRef<boolean | null>(null)
+  setPendingDeletionRef.current = setPendingDeletion
+  confirmPublishStateRef.current = confirmPublishState
 
   function rememberSlug(data: { slug?: unknown; id?: unknown }): string | null {
     if (typeof data.slug === "string" && data.slug) {
@@ -255,6 +271,27 @@ export default function PracticeEditor({
   }, [])
 
   useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      const isUndo = (event.metaKey || event.ctrlKey) && !event.shiftKey && event.key.toLowerCase() === "z"
+      const isRedo =
+        (event.metaKey || event.ctrlKey) &&
+        ((event.key.toLowerCase() === "z" && event.shiftKey) || event.key.toLowerCase() === "y")
+      if (!isUndo && !isRedo) return
+      if (setPendingDeletionRef.current != null || confirmPublishStateRef.current != null) return
+      const target = event.target as Node | null
+      const formEl = formElRef.current
+      const insideForm = formEl && target ? formEl.contains(target) : false
+      const nothingFocused = target === document.body || target === document.documentElement
+      if (!insideForm && !nothingFocused) return
+      event.preventDefault()
+      if (isRedo) redoRef.current()
+      else undoRef.current()
+    }
+    window.addEventListener("keydown", handleKeyDown, true)
+    return () => window.removeEventListener("keydown", handleKeyDown, true)
+  }, [])
+
+  useEffect(() => {
     const bar = barRef.current
     const contentEnd = barContentEndRef.current
     if (!bar || !contentEnd) return
@@ -294,11 +331,31 @@ export default function PracticeEditor({
     }, PRACTICE_EDIT_IDLE_TIMEOUT_MS)
   }
 
+  /** Pushes `snapshot` (the form state *before* the change being applied) onto the
+   * undo stack, clears redo, and coalesces consecutive same-key edits (e.g. keystrokes
+   * in one field) into a single undo step. */
+  function recordHistoryEntry(snapshot: PracticeFormState, historyKey?: string) {
+    const now = Date.now()
+    const last = lastHistoryEntryRef.current
+    if (historyKey && last && last.key === historyKey && now - last.at < HISTORY_COALESCE_MS) {
+      last.at = now
+      return
+    }
+    const history = historyRef.current
+    history.past = [...history.past, snapshot].slice(-HISTORY_LIMIT)
+    history.future = []
+    lastHistoryEntryRef.current = historyKey ? { key: historyKey, at: now } : null
+  }
+
   function updateForm(
     next: PracticeFormState | ((current: PracticeFormState) => PracticeFormState),
-    options?: { silent?: boolean }
+    options?: { silent?: boolean; historyKey?: string }
   ) {
-    const nextForm = typeof next === "function" ? next(formRef.current) : next
+    const previousForm = formRef.current
+    const nextForm = typeof next === "function" ? next(previousForm) : next
+    if (!options?.silent) {
+      recordHistoryEntry(previousForm, options?.historyKey)
+    }
     formRef.current = nextForm
     unsavedChangesRef.current = true
     setIsDirty(true)
@@ -313,6 +370,50 @@ export default function PracticeEditor({
     }
     setForm(nextForm)
   }
+
+  /** Applies an undo/redo snapshot: carries over `published` and re-maps set ids from
+   * the live form, since older snapshots predate server-assigned ids and `published`
+   * is owned by publish/unpublish, not editing. */
+  function applyHistoryState(snapshot: PracticeFormState) {
+    const currentForm = formRef.current
+    const idsByDragId = new Map(currentForm.sets.map((s) => [s.dragId, s.id]))
+    const nextForm: PracticeFormState = {
+      ...snapshot,
+      published: currentForm.published,
+      sets: snapshot.sets.map((s) => ({ ...s, id: s.id ?? idsByDragId.get(s.dragId) })),
+    }
+    formRef.current = nextForm
+    unsavedChangesRef.current = true
+    setIsDirty(true)
+    userEditedRef.current = true
+    setHasEditedContent(true)
+    bumpIdleTimer()
+    setForm(nextForm)
+  }
+
+  function undo() {
+    if (exiting || lostRef.current || releasedRef.current) return
+    const history = historyRef.current
+    const snapshot = history.past[history.past.length - 1]
+    if (!snapshot) return
+    history.past = history.past.slice(0, -1)
+    history.future = [formRef.current, ...history.future].slice(0, HISTORY_LIMIT)
+    lastHistoryEntryRef.current = null
+    applyHistoryState(snapshot)
+  }
+
+  function redo() {
+    if (exiting || lostRef.current || releasedRef.current) return
+    const history = historyRef.current
+    const snapshot = history.future[0]
+    if (!snapshot) return
+    history.future = history.future.slice(1)
+    history.past = [...history.past, formRef.current].slice(-HISTORY_LIMIT)
+    lastHistoryEntryRef.current = null
+    applyHistoryState(snapshot)
+  }
+  undoRef.current = undo
+  redoRef.current = redo
   const tokenRef = useRef(lockToken)
   tokenRef.current = lockToken
   persistedIdRef.current = persistedId
@@ -718,10 +819,14 @@ export default function PracticeEditor({
 
 
   function updateSet(index: number, patch: Partial<SetFormState>) {
-    updateForm((f) => ({
-      ...f,
-      sets: f.sets.map((s, i) => (i === index ? { ...s, ...patch } : s)),
-    }))
+    const historyKey = `set:${index}:${Object.keys(patch).join(",")}`
+    updateForm(
+      (f) => ({
+        ...f,
+        sets: f.sets.map((s, i) => (i === index ? { ...s, ...patch } : s)),
+      }),
+      { historyKey }
+    )
   }
 
   function toggleTag(tag: string) {
@@ -1118,7 +1223,7 @@ export default function PracticeEditor({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 pb-6">
+    <form ref={formElRef} onSubmit={handleSubmit} className="space-y-5 pb-6">
       <header className="space-y-2">
         <button
           type="button"
@@ -1133,7 +1238,9 @@ export default function PracticeEditor({
               aria-label="Practice title"
               placeholder="Untitled Practice"
               value={form.title}
-              onChange={(e) => updateForm((form) => ({ ...form, title: e.target.value }))}
+              onChange={(e) =>
+                updateForm((form) => ({ ...form, title: e.target.value }), { historyKey: "title" })
+              }
               className="w-full min-w-0 appearance-none rounded-lg border border-border bg-transparent px-3 py-1.5 text-inherit outline-none placeholder:text-foreground-tertiary focus:border-primary focus:ring-2 focus:ring-primary/10"
             />
           </h1>
@@ -1217,14 +1324,27 @@ export default function PracticeEditor({
               required
               placeholder="Practice location"
               value={form.location}
-              onChange={(e) => updateForm((form) => ({ ...form, location: e.target.value }))}
+              onChange={(e) =>
+                updateForm((form) => ({ ...form, location: e.target.value }), { historyKey: "location" })
+              }
               aria-invalid={missingLocation || undefined}
-              className={`min-w-0 flex-1 rounded-lg border bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:ring-2 ${
+              className={`min-w-0 flex-1 basis-0 rounded-lg border bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:ring-2 ${
                 missingLocation
                   ? "border-error focus:border-error focus:ring-error/10"
                   : "border-border focus:border-primary focus:ring-primary/10"
               }`}
             />
+            <label className="sr-only" htmlFor="practice-course">Practice course</label>
+            <select
+              id="practice-course"
+              value={form.course}
+              onChange={(e) => updateForm((form) => ({ ...form, course: e.target.value }))}
+              className="min-w-0 flex-1 basis-0 rounded-lg border border-border bg-background px-2 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+            >
+              <option value="SCY">SCY</option>
+              <option value="LCM">LCM</option>
+              <option value="SCM">SCM</option>
+            </select>
           </div>
         </div>
       </header>
@@ -1237,8 +1357,9 @@ export default function PracticeEditor({
           <RichTextField
             rows={1}
             value={form.focus}
-            onChange={(focus) => updateForm((form) => ({ ...form, focus }))}
+            onChange={(focus) => updateForm((form) => ({ ...form, focus }), { historyKey: "focus" })}
             className="bg-background"
+            externalHistory
           />
         </div>
 
@@ -1371,7 +1492,7 @@ export default function PracticeEditor({
                         />
                       </div>
                       <div>
-                        <label className={labelCls}>Distance (yards)</label>
+                        <label className={labelCls}>Distance ({form.course})</label>
                         <input
                           type="number"
                           min={0}
@@ -1414,6 +1535,7 @@ export default function PracticeEditor({
                         value={set.content}
                         onChange={(content) => updateSet(index, { content })}
                         className={"bg-background " + targetFieldClass}
+                        externalHistory
                       />
                     </div>
                   </section>

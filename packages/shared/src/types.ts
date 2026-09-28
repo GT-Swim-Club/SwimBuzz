@@ -36,6 +36,7 @@ export type PracticeSummary = {
   endsAt: string
   timeZone: string
   location: string
+  course: string
   focus?: string | null
   tags: string[]
   published: boolean

@@ -11,20 +11,34 @@ import {
 } from "react"
 import { usePathname, useSearchParams } from "next/navigation"
 import { usePracticePrefs } from "./usePracticePrefs"
+import HoverDetail from "@/components/ui/HoverDetail"
 import PracticesToolbar from "./PracticesToolbar"
 import WeekRail from "./WeekRail"
 import PracticeListRail from "./PracticeListRail"
+import DeletedPracticeListRail from "./DeletedPracticeListRail"
 import {
   buildWorkspaceHref,
   formatDayParam,
   parseTags,
   parseWeekStart,
   startOfUtcWeek,
+  type DeletedPracticeRailItem,
   type PracticeRailItem,
 } from "./workspace-params"
 
 const MIN_WIDTH = 310
+// Below md, the sidebar is a slide-over drawer instead of a resizable grid
+// column, so it has its own fixed width rather than reading prefs.sidebarWidth.
+const MOBILE_DRAWER_WIDTH = 320
 const MAX_WIDTH_FRACTION = 1 / 2
+// Dragging the divider past this point previews a fully collapsed sidebar
+// (width snaps to 0) instead of shrinking below MIN_WIDTH; dragging back
+// past it before releasing snaps the preview back open at MIN_WIDTH. Only
+// releasing while past the threshold commits the collapse.
+const COLLAPSE_THRESHOLD = MIN_WIDTH / 2
+// Below this pointer travel, a divider press is treated as a click (toggle
+// open/closed) rather than a resize/collapse drag.
+const CLICK_MOVE_THRESHOLD = 4
 
 function readTagsFromParams(searchParams: URLSearchParams): string[] {
   return parseTags(searchParams.getAll("tag"))
@@ -45,15 +59,41 @@ function useMediaQuery(query: string): boolean {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 }
 
+function matchesSearch(item: { tags: string[]; searchText: string }, tags: string[], qLower: string): boolean {
+  if (tags.length && !item.tags.some((t) => tags.includes(t))) return false
+  if (qLower && !item.searchText.includes(qLower)) return false
+  return true
+}
+
+function SidebarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
+      <rect width="18" height="18" x="3" y="3" rx="2" />
+      <path d="M9 3v18" />
+    </svg>
+  )
+}
+
+function CloseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </svg>
+  )
+}
+
 export default function PracticesSidebar({
   isCoach,
   managedTags,
   practices,
+  deletedPractices,
   children,
 }: {
   isCoach: boolean
   managedTags: { id: string; name: string }[]
   practices: PracticeRailItem[]
+  deletedPractices: DeletedPracticeRailItem[]
   children: ReactNode
 }) {
   const prefs = usePracticePrefs()
@@ -63,16 +103,56 @@ export default function PracticesSidebar({
   const sidebarRef = useRef<HTMLElement>(null)
   const [dragWidth, setDragWidth] = useState<number | null>(null)
   const draggingRef = useRef(false)
+  const dragCollapsedRef = useRef(false)
+  const pointerDownXRef = useRef(0)
+  const movedRef = useRef(false)
 
   // Tracked so the collapsed sidebar can be fully removed from the a11y/tab
   // order (matches display:none semantics) without breaking the mobile
-  // layout, where the same aside is shown/hidden by a different rule
-  // (whether a practice is selected) and md: opacity/width utilities don't
-  // apply. Also drives skipping the collapse/expand transition for
-  // prefers-reduced-motion, per this codebase's existing convention.
+  // layout, where the desktop <aside> is hidden outright (the sidebar there
+  // is a separate slide-over drawer, not the same element) and md:
+  // opacity/width utilities don't apply. Also drives skipping the
+  // collapse/expand transition for prefers-reduced-motion, per this
+  // codebase's existing convention.
   const isDesktop = useMediaQuery("(min-width: 768px)")
   const reduceMotion = useMediaQuery("(prefers-reduced-motion: reduce)")
   const asideCollapsed = isDesktop && !prefs.sidebarOpen
+
+  // The sidebar below md is a slide-over drawer with its own open/closed
+  // state, independent of prefs.sidebarOpen (which only governs the desktop
+  // push/collapse layout) — toggled by a dedicated mobile button rather than
+  // persisted, since it's transient overlay state like the main mobile nav
+  // menu, not a layout preference.
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+
+  // Close the drawer on navigation (e.g. tapping a practice in the list)
+  // rather than in an effect, so it never lingers visible for a frame over
+  // the newly-loaded route. Same adjust-during-render pattern as the tags/week
+  // syncs below.
+  const [prevMobilePathname, setPrevMobilePathname] = useState(pathname)
+  if (pathname !== prevMobilePathname) {
+    setPrevMobilePathname(pathname)
+    if (mobileSidebarOpen) setMobileSidebarOpen(false)
+  }
+
+  // Resizing (or rotating) past the desktop breakpoint while the drawer is
+  // open shouldn't leave it primed to reappear if the viewport shrinks again.
+  // Adjusted during render (see the tags sync above) rather than in an effect.
+  if (isDesktop && mobileSidebarOpen) setMobileSidebarOpen(false)
+
+  useEffect(() => {
+    if (!mobileSidebarOpen) return
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setMobileSidebarOpen(false)
+    }
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    document.addEventListener("keydown", onKeyDown)
+    return () => {
+      document.body.style.overflow = prevOverflow
+      document.removeEventListener("keydown", onKeyDown)
+    }
+  }, [mobileSidebarOpen])
 
   useEffect(() => {
     if (!isDesktop) return
@@ -99,18 +179,24 @@ export default function PracticesSidebar({
     const container = containerRef.current
     const parent = container?.parentElement
     const scroller = document.getElementById("page-scroll")
-    if (!container || !parent || !scroller) return
+    const sidebar = sidebarRef.current
+    if (!container || !parent || !scroller || !sidebar) return
 
     // Account for the responsive header and the page wrapper's bottom padding.
     const updateHeight = () => {
       const scrollerTop = scroller.getBoundingClientRect().top
       const top = container.getBoundingClientRect().top - scrollerTop + scroller.scrollTop
       const bottomPadding = parseFloat(getComputedStyle(parent).paddingBottom) || 0
+      const sidebarRect = sidebar.getBoundingClientRect()
+      container.style.setProperty("--sidebar-left", `${sidebarRect.left}px`)
+      container.style.setProperty("--sidebar-width", `${sidebarRect.width}px`)
+      container.style.setProperty("--sidebar-top", `${scrollerTop + top}px`)
       container.style.setProperty("--workspace-top", `${top}px`)
       container.style.setProperty("--workspace-offset", `${scrollerTop + top + bottomPadding}px`)
     }
     updateHeight()
     const observer = new ResizeObserver(updateHeight)
+    observer.observe(sidebar)
     observer.observe(parent)
     observer.observe(scroller)
     const nav = document.querySelector("nav")
@@ -119,6 +205,9 @@ export default function PracticesSidebar({
     return () => {
       observer.disconnect()
       window.removeEventListener("resize", updateHeight)
+      container.style.removeProperty("--sidebar-left")
+      container.style.removeProperty("--sidebar-width")
+      container.style.removeProperty("--sidebar-top")
       container.style.removeProperty("--workspace-offset")
       container.style.removeProperty("--workspace-top")
     }
@@ -187,12 +276,13 @@ export default function PracticesSidebar({
 
   const filteredPractices = useMemo(() => {
     const qLower = query.trim().toLowerCase()
-    return practices.filter((p) => {
-      if (tags.length && !p.tags.some((t) => tags.includes(t))) return false
-      if (qLower && !p.searchText.includes(qLower)) return false
-      return true
-    })
+    return practices.filter((p) => matchesSearch(p, tags, qLower))
   }, [practices, query, tags])
+
+  const filteredDeletedPractices = useMemo(() => {
+    const qLower = query.trim().toLowerCase()
+    return deletedPractices.filter((p) => matchesSearch(p, tags, qLower))
+  }, [deletedPractices, query, tags])
 
   const practicesByDay = useMemo(() => {
     const map: Record<string, PracticeRailItem[]> = {}
@@ -212,11 +302,20 @@ export default function PracticesSidebar({
         ? "No practices yet. Create one to get started."
         : "No practices posted yet."
 
+  const emptyDeletedMessage =
+    query || tags.length ? "No deleted practices match your search." : "Trash is empty."
+
   const effectiveWidth = dragWidth ?? prefs.sidebarWidth
 
   useEffect(() => {
     function onMove(event: PointerEvent) {
       if (!draggingRef.current || !containerRef.current) return
+      if (Math.abs(event.clientX - pointerDownXRef.current) > CLICK_MOVE_THRESHOLD) {
+        movedRef.current = true
+      }
+      // Collapsed sidebars aren't resizable by dragging (only by clicking to
+      // reopen), so there's nothing further to compute until it's open.
+      if (!prefs.sidebarOpen) return
       const rect = containerRef.current.getBoundingClientRect()
       // Non-resizable horizontal space: the 6px divider track plus the grid's
       // own column gap on both sides of it (md:gap-5) — both eat into
@@ -229,11 +328,31 @@ export default function PracticesSidebar({
         Math.min((rect.width - overhead) * MAX_WIDTH_FRACTION, rect.width - overhead - 400)
       )
       const raw = event.clientX - rect.left
-      setDragWidth(Math.min(maxWidth, Math.max(MIN_WIDTH, raw)))
+      if (raw < COLLAPSE_THRESHOLD) {
+        dragCollapsedRef.current = true
+        setDragWidth(0)
+      } else {
+        dragCollapsedRef.current = false
+        setDragWidth(Math.min(maxWidth, Math.max(MIN_WIDTH, raw)))
+      }
     }
     function onUp() {
       if (!draggingRef.current) return
       draggingRef.current = false
+      // A press-release with negligible pointer travel is a click: toggle
+      // open/closed instead of committing a resize/collapse-preview.
+      if (!movedRef.current) {
+        dragCollapsedRef.current = false
+        setDragWidth(null)
+        prefs.setSidebarOpen(!prefs.sidebarOpen)
+        return
+      }
+      if (dragCollapsedRef.current) {
+        dragCollapsedRef.current = false
+        setDragWidth(null)
+        prefs.setSidebarOpen(false)
+        return
+      }
       setDragWidth((current) => {
         if (current != null) prefs.setSidebarWidth(current)
         return null
@@ -248,36 +367,12 @@ export default function PracticesSidebar({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const showAsideMobile = !selectedSlug
-  // Always three grid tracks (sidebar / divider / detail) so the browser can
-  // interpolate the column widths on open/close — collapsing to a single
-  // "1fr" track would change the track count and just snap instead of
-  // animating. Width changes from dragging the divider stay untransitioned
-  // (dragWidth != null) so resizing doesn't lag behind the pointer.
-  const gridStyle = {
-    gridTemplateColumns: prefs.sidebarOpen
-      ? `${effectiveWidth}px 6px minmax(0,1fr)`
-      : "0px 0px minmax(0,1fr)",
-    transition:
-      dragWidth != null || reduceMotion ? undefined : "grid-template-columns 250ms ease-in-out",
-  }
-
-  return (
-    <div
-      ref={containerRef}
-      className="flex w-full flex-1 flex-col gap-4 md:grid md:items-stretch md:gap-5"
-      style={gridStyle}
-    >
-      <aside
-        ref={sidebarRef}
-        aria-hidden={asideCollapsed || undefined}
-        inert={asideCollapsed || undefined}
-        className={
-          (showAsideMobile ? "flex" : "hidden") +
-          " md:flex sticky top-24 h-[calc(100dvh-7.5rem)] min-h-0 flex-col gap-3 overflow-hidden transition-opacity duration-150 motion-reduce:transition-none md:top-[var(--workspace-top,6rem)] md:h-[calc(100dvh-var(--workspace-offset,9rem))] md:self-start" +
-          (prefs.sidebarOpen ? "" : " md:pointer-events-none md:opacity-0")
-        }
-      >
+  // Shared between the desktop <aside> (which sizes it to the resizable
+  // column width) and the mobile slide-over drawer (which uses a fixed
+  // width) so the toolbar/rail markup isn't duplicated between the two.
+  function renderSidebarContent(width: number) {
+    return (
+      <>
         <PracticesToolbar
           isCoach={isCoach}
           managedTags={managedTags}
@@ -295,8 +390,17 @@ export default function PracticesSidebar({
             selectedDayKey={selectedDayKey}
             tags={tags}
             monThuOnly={prefs.monThuOnly}
-            sidebarWidth={effectiveWidth}
+            cardLabel={prefs.cardLabel}
+            sidebarWidth={width}
             onWeekChange={setWeek}
+          />
+        ) : prefs.view === "deleted" && isCoach ? (
+          <DeletedPracticeListRail
+            practices={filteredDeletedPractices}
+            selectedSlug={selectedSlug}
+            tags={tags}
+            sort={prefs.sort}
+            emptyMessage={emptyDeletedMessage}
           />
         ) : (
           <PracticeListRail
@@ -304,52 +408,124 @@ export default function PracticesSidebar({
             selectedSlug={selectedSlug}
             sort={prefs.sort}
             tags={tags}
+            cardLabel={prefs.cardLabel}
             emptyMessage={emptyListMessage}
           />
         )}
+      </>
+    )
+  }
+
+  // Always three grid tracks (sidebar / divider / detail) so the browser can
+  // interpolate the column widths on open/close — collapsing to a single
+  // "1fr" track would change the track count and just snap instead of
+  // animating. Width changes from dragging the divider stay untransitioned
+  // (dragWidth != null) so resizing doesn't lag behind the pointer.
+  const gridStyle = {
+    // The divider's 6px track stays even when collapsed, so it remains a
+    // clickable sliver that can reopen the sidebar (only the sidebar's own
+    // track collapses to 0).
+    gridTemplateColumns: prefs.sidebarOpen ? `${effectiveWidth}px 6px minmax(0,1fr)` : "0px 6px minmax(0,1fr)",
+    transition:
+      dragWidth != null || reduceMotion ? undefined : "grid-template-columns 250ms ease-in-out",
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      className="flex w-full flex-1 flex-col gap-4 md:grid md:items-stretch md:gap-5"
+      style={gridStyle}
+    >
+      <aside
+        ref={sidebarRef}
+        aria-hidden={asideCollapsed || undefined}
+        inert={asideCollapsed || undefined}
+        className={
+          "hidden md:flex sticky top-24 h-[calc(100dvh-7.5rem)] min-h-0 flex-col gap-3 overflow-hidden transition-opacity duration-150 motion-reduce:transition-none md:top-[var(--workspace-top,6rem)] md:h-[calc(100dvh-var(--workspace-offset,9rem))] md:self-start" +
+          (prefs.sidebarOpen ? "" : " md:pointer-events-none md:opacity-0")
+        }
+      >
+        {/* Keep the grid slot, but pin its contents independently of page bounce. */}
+        <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden md:fixed md:left-[var(--sidebar-left)] md:top-[var(--sidebar-top)] md:h-[calc(100dvh-var(--workspace-offset,9rem))] md:w-[var(--sidebar-width)]">
+          {renderSidebarContent(effectiveWidth)}
+        </div>
       </aside>
 
       <div
         role="separator"
         aria-orientation="vertical"
-        aria-label="Resize sidebar"
-        aria-hidden={asideCollapsed || undefined}
-        inert={asideCollapsed || undefined}
+        aria-label={prefs.sidebarOpen ? "Hide sidebar. Drag to resize." : "Show sidebar"}
         onPointerDown={(e) => {
-          if (!prefs.sidebarOpen) return
           e.preventDefault()
+          pointerDownXRef.current = e.clientX
+          movedRef.current = false
           draggingRef.current = true
-          setDragWidth(effectiveWidth)
+          if (prefs.sidebarOpen) setDragWidth(effectiveWidth)
         }}
-        className={
-          "hidden overflow-hidden transition-opacity duration-150 motion-reduce:transition-none md:flex md:items-stretch md:justify-center" +
-          (prefs.sidebarOpen ? " md:cursor-col-resize md:hover:bg-fill-secondary" : " md:pointer-events-none md:opacity-0")
-        }
+        className="hidden overflow-hidden transition-opacity duration-150 motion-reduce:transition-none md:flex md:items-stretch md:justify-center md:cursor-col-resize md:hover:bg-fill-secondary"
       >
         <span className="w-px bg-border-secondary" aria-hidden />
+        <HoverDetail offset={10}>
+          <div className="flex flex-col gap-0.5">
+            <span className="font-medium text-foreground">{prefs.sidebarOpen ? "Hide sidebar" : "Show sidebar"}</span>
+            {prefs.sidebarOpen && <span className="text-foreground-tertiary">Drag to resize</span>}
+          </div>
+        </HoverDetail>
       </div>
 
-      <div
-        className={
-          (selectedSlug ? "flex" : "hidden") +
-          " min-w-0 flex-1 flex-col gap-5 md:flex md:w-full"
-        }
-      >
+      <div className="flex min-w-0 flex-1 flex-col gap-5 md:w-full">
+        <button
+          type="button"
+          onClick={() => setMobileSidebarOpen(true)}
+          className="inline-flex w-fit items-center gap-1.5 rounded-lg border border-border-secondary bg-background px-3 py-2 text-[13px] font-medium text-foreground-secondary transition-colors hover:bg-fill-secondary hover:text-foreground md:hidden"
+        >
+          <SidebarIcon />
+          Practices
+        </button>
         {!prefs.sidebarOpen && (
           <button
             type="button"
             onClick={() => prefs.setSidebarOpen(true)}
             className="hidden w-fit items-center gap-1.5 rounded-lg border border-border-secondary bg-background px-3 py-2 text-[13px] font-medium text-foreground-secondary transition-colors hover:bg-fill-secondary hover:text-foreground md:inline-flex"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
-              <rect width="18" height="18" x="3" y="3" rx="2" />
-              <path d="M9 3v18" />
-            </svg>
+            <SidebarIcon />
             Show sidebar
           </button>
         )}
         {children}
       </div>
+
+      {!isDesktop && mobileSidebarOpen ? (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <button
+            type="button"
+            aria-label="Close practices"
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setMobileSidebarOpen(false)}
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Practices"
+            className="absolute inset-y-0 left-0 flex w-[min(20rem,calc(100vw-2.5rem))] flex-col gap-3 bg-background-elevated p-3 shadow-xl"
+          >
+            <div className="flex items-center justify-between px-1">
+              <p className="text-sm font-semibold text-foreground">Practices</p>
+              <button
+                type="button"
+                onClick={() => setMobileSidebarOpen(false)}
+                aria-label="Close practices"
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-secondary hover:bg-fill-secondary"
+              >
+                <CloseIcon />
+              </button>
+            </div>
+            <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden">
+              {renderSidebarContent(MOBILE_DRAWER_WIDTH)}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

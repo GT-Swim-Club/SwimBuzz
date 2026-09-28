@@ -1,3 +1,4 @@
+const { installSoftDeletePolicy } = require("./soft-delete-policy")
 const { Prisma, PrismaClient } = require("@prisma/client")
 
 /** Shared across Next.js and CJS monitors in the same Node process. */
@@ -19,6 +20,7 @@ const prisma =
     ? globalForPrisma.__swimbuzzPrisma
     : new PrismaClient()
 
+installSoftDeletePolicy(prisma)
 globalForPrisma.__swimbuzzPrisma = prisma
 globalForPrisma.__swimbuzzPrismaSchemaId = schemaId
 

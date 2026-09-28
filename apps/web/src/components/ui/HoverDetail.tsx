@@ -60,6 +60,11 @@ export default function HoverDetail({
 
     let showTimeout: ReturnType<typeof setTimeout> | null = null
     let isShown = false
+    // Set by a mouse click on the trigger and cleared when the pointer leaves, so clicking a
+    // button doesn't pop its tooltip (via the hover timer or the focus the click causes) while the
+    // cursor stays put — matching native tooltips. Touch is exempt: a tap is how touch users
+    // reveal the detail at all.
+    let suppressedByClick = false
 
     function clearShowTimeout() {
       if (showTimeout) {
@@ -106,6 +111,7 @@ export default function HoverDetail({
     }
 
     function show(immediate: boolean) {
+      if (suppressedByClick) return
       if (desktopOnly && !window.matchMedia(DESKTOP_QUERY).matches) return
       clearShowTimeout()
       updatePosition()
@@ -132,6 +138,17 @@ export default function HoverDetail({
       show(false)
     }
 
+    function handlePointerDown(event: PointerEvent) {
+      if (event.pointerType !== "mouse") return
+      suppressedByClick = true
+      hide()
+    }
+
+    function handlePointerLeave() {
+      suppressedByClick = false
+      hide()
+    }
+
     function handleFocusIn() {
       show(true)
     }
@@ -141,7 +158,8 @@ export default function HoverDetail({
     }
 
     trigger.addEventListener("pointerenter", handlePointerEnter)
-    trigger.addEventListener("pointerleave", hide)
+    trigger.addEventListener("pointerdown", handlePointerDown)
+    trigger.addEventListener("pointerleave", handlePointerLeave)
     trigger.addEventListener("focusin", handleFocusIn)
     trigger.addEventListener("focusout", hide)
     window.addEventListener("resize", handleViewportChange)
@@ -150,7 +168,8 @@ export default function HoverDetail({
     return () => {
       clearShowTimeout()
       trigger.removeEventListener("pointerenter", handlePointerEnter)
-      trigger.removeEventListener("pointerleave", hide)
+      trigger.removeEventListener("pointerdown", handlePointerDown)
+      trigger.removeEventListener("pointerleave", handlePointerLeave)
       trigger.removeEventListener("focusin", handleFocusIn)
       trigger.removeEventListener("focusout", hide)
       window.removeEventListener("resize", handleViewportChange)

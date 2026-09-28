@@ -17,6 +17,7 @@ import Modal, { ModalFooter } from "@/components/ui/Modal"
 import StaffBadge from "@/components/ui/StaffBadge"
 import type { StaffTitle } from "@swimbuzz/shared"
 import { syncSignupsToRoster, withdrawAthleteSignup } from "./meet-signup-admin.actions"
+import { LedgerCard, LedgerNote, LedgerRow, LedgerStatusPill } from "@/components/meet/Ledger"
 
 type EntryRow = {
   id: string
@@ -54,6 +55,7 @@ export default function MeetSignupSection({
   myEntry,
   entries,
   hasImportedResults = false,
+  variant = "section",
 }: {
   meetPath: string
   meetId: string
@@ -70,6 +72,8 @@ export default function MeetSignupSection({
   entries: EntryRow[]
   /** When true, hide "add sign-ups to roster summary". */
   hasImportedResults?: boolean
+  /** "ledger" renders a compact sidebar card of link rows. */
+  variant?: "section" | "ledger"
 }) {
   const [responsesOpen, setResponsesOpen] = useState(false)
   const [syncConfirmOpen, setSyncConfirmOpen] = useState(false)
@@ -195,6 +199,45 @@ export default function MeetSignupSection({
   }
 
   if (!showSection) return null
+
+  if (variant === "ledger") {
+    const needsEventOrder = Boolean(form && eventOptions.length === 0)
+    return (
+      <LedgerCard
+        title="Sign-ups"
+        aside={
+          form ? (
+            <LedgerStatusPill open={window.open} label={window.open ? "Open" : "Closed"} />
+          ) : null
+        }
+      >
+        {isCoach ? (
+          <LedgerRow
+            icon="clipboardCheck"
+            label={form ? "Manage sign-ups" : "Set up sign-ups"}
+            href={`${meetPath}/signups`}
+          />
+        ) : null}
+        {needsEventOrder ? (
+          <LedgerNote>
+            Sign-ups need an order of events.{" "}
+            {isCoach ? "Import the meet packet first." : "Ask a coach to import the meet packet."}
+          </LedgerNote>
+        ) : null}
+        {form && !needsEventOrder && !isCoach ? (
+          window.open || myEntry ? (
+            <LedgerRow
+              icon="clipboardCheck"
+              label={myEntry ? "Review sign-up" : "Open sign-up"}
+              href={`${meetPath}/signup`}
+            />
+          ) : window.reason ? (
+            <LedgerNote>{window.reason}</LedgerNote>
+          ) : null
+        ) : null}
+      </LedgerCard>
+    )
+  }
 
   return (
     <section>

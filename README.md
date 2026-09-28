@@ -11,23 +11,32 @@ Web hosts both the UI and the API; mobile is a full client of that same API, not
 
 Auth: Google OAuth or `@gatech.edu` email OTP. Roles: `ATHLETE`, `COACH`, `EXEC`. Web uses NextAuth cookie/JWT sessions; mobile uses Bearer access/refresh tokens (`/api/auth/mobile/*`) — both resolve through the same `getSession()`.
 
-## Quick start
+## Onboarding checklist
 
-```bash
-pnpm install
-cp .env.example apps/web/.env       # fill in DB, auth, etc. — see comments in the file
-pnpm db:generate
-pnpm --filter @swimbuzz/web exec prisma db push
-pnpm dev:web                        # http://localhost:3000
-```
+**Prerequisites:** Node 22.19+, pnpm 9+, PostgreSQL (Supabase recommended), Python 3.11+ (PDF parsing locally, and for Run Scraper), Xcode/Android Studio for native builds.
 
-For mobile: `cp apps/mobile/.env.example apps/mobile/.env`, set `EXPO_PUBLIC_API_URL` to your machine's LAN IP (not `localhost`), then `pnpm dev:mobile`.
+- [ ] `pnpm install` (`brew install pnpm` on macOS if needed)
+- [ ] `pip install -r requirements.txt` (pdfplumber, httpx — local PDF parsing)
+- [ ] `cp .env.example apps/web/.env` and fill in values from someone who already has them — see comments in the file for where each one comes from:
+  - [ ] `DATABASE_URL` / `DIRECT_URL` — Supabase Postgres (pooler port 6543 / direct port 5432)
+  - [ ] `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` (service_role, not anon) — Supabase → Settings → API
+  - [ ] Create Storage buckets `meet-files` and `avatars`, then run `apps/web/supabase/meet-files-storage.sql` and `avatars-storage.sql`
+  - [ ] `NEXTAUTH_SECRET` (`openssl rand -base64 32`), `NEXTAUTH_URL=http://localhost:3000`
+  - [ ] `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` for Google OAuth sign-in
+  - [ ] `RESEND_API_KEY` for `@gatech.edu` OTP email — optional locally, the OTP code just logs to the server console without one
+  - [ ] `CRON_SECRET` and `PDF_PARSER_SECRET` (`openssl rand -base64 32` each) — leave `PDF_PARSER_URL` unset locally
+  - [ ] Only if touching Google Sheets roster import: enable both the Picker API and Sheets API in Google Cloud Console, set `NEXT_PUBLIC_GOOGLE_CLIENT_ID` / `NEXT_PUBLIC_GOOGLE_PICKER_API_KEY`
+- [ ] Apply any relevant raw SQL under `apps/web/supabase/` (storage buckets, RLS, one-off migrations — things `prisma db push` can't express)
+- [ ] `pnpm db:generate`
+- [ ] `pnpm --filter @swimbuzz/web exec prisma db push`
+- [ ] `pnpm dev:web` → http://localhost:3000, sign in, confirm the dashboard loads
+- [ ] `pnpm lint` to confirm a clean baseline before making changes
 
-**Prerequisites:** Node 22+, pnpm 9+, PostgreSQL (e.g. Supabase), Python 3.11+ (PDF parsing locally, and for Run Scraper), Xcode/Android Studio for native builds.
+For mobile: `cp apps/mobile/.env.example apps/mobile/.env`, set `EXPO_PUBLIC_API_URL` and `EXPO_PUBLIC_WEB_URL` to your machine's LAN IP (`ipconfig getifaddr en0` on macOS — not `localhost`), then `pnpm dev:mobile`. Google sign-in on mobile needs separate iOS/Android/Web OAuth client IDs and only works in dev builds (blocked in Expo Go). Read `apps/mobile/AGENTS.md`/`CLAUDE.md` before writing RN code — Expo has changed significantly since older training data; check https://docs.expo.dev/versions/v57.0.0/.
 
-SwimCloud/SwimPhone syncing needs the **Run Scraper** desktop helper running on your machine (started from the web UI) — Cloudflare/rate-limit reasons require a real browser, so it can't run server-side. PDF imports (results, sheets, packets, NQT standards) parse server-side and need nothing installed; locally they shell out to `python3 -m pdf_parsers.cli` (`pip install -r requirements.txt`).
+SwimCloud/SwimPhone syncing needs the **Run Scraper** desktop helper running on your machine (started from the web UI) — Cloudflare/rate-limit reasons require a real browser, so it can't run server-side. PDF imports (results, sheets, packets, NQT standards) parse server-side and need nothing installed; locally they shell out to `python3 -m pdf_parsers.cli`.
 
-Apply any raw SQL under `apps/web/supabase/` as needed (storage buckets, RLS, one-off migrations — things `prisma db push` can't express).
+A repo-root `CLAUDE.md` with additional architecture/convention notes exists locally for Claude Code but is gitignored — ask a maintainer to share it if you're using Claude Code.
 
 ## Project structure
 
@@ -83,3 +92,18 @@ Edit these with both apps in mind — they're the contract between web and mobil
 ## Deploying
 
 See [`docs/DEPLOY.md`](docs/DEPLOY.md) — Vercel (preferred) and Render setup, required env vars, cron jobs, and the production cutover checklist.
+
+### Recently Deleted
+
+Coaches and execs can open **Settings → Recently Deleted** on web and mobile (also linked from the web practice/meet toolbars). The shared recovery period defaults to 30 days and accepts 1–365 days. Changes apply to future deletions; each item keeps the deadline assigned when deleted.
+
+- Practice deletion preserves sets, comments, attendance and publication state for recovery; edit locks are released.
+- **Delete meet only** preserves swims in athlete stats, including after permanent cleanup.
+- **Delete meet and swims** hides swims from stats until restoration, or permanently removes them with the meet at expiry.
+- **Delete swims only** remains permanent. Recovery applies to deleted practices and meets, not individual swim removals.
+
+Apply `apps/web/supabase/soft-delete-recovery.sql` (or `pnpm db:push`) before deploying this code, then generate Prisma. No existing rows need a backfill. The existing daily `/api/cron/notification-cleanup` cron also purges expired items. Recovery closes at the displayed deadline; physical cleanup happens on the next daily run (25 meets per run). Failed storage cleanup retains the meet and URLs for retry, and restoration is blocked once purge has begun. The custom server schedules the same authenticated endpoint locally; it generates a process-local cron secret if `CRON_SECRET` is absent.
+
+Active-record filtering is installed on the shared Prisma client, including nested lists and counts. Recovery and slug reservation use the narrowly scoped `withDeleted` context. Raw SQL and separate `PrismaClient` instances bypass this policy; use the shared client for application queries.
+
+Run `pnpm --filter @swimbuzz/web test:recovery` for isolated database behavior checks (SQLite fixture; no production connection or storage access). Web and mobile TypeScript checks validate the shared API contract.

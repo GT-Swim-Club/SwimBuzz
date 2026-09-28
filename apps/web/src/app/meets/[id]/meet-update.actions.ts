@@ -1,11 +1,11 @@
 "use server"
 
+import { softDeleteMeet } from "@/lib/recovery/recovery"
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { buildMeetData, MeetInputError, toPrismaMeetWriteData } from "@/lib/meet/meet-input"
 import {
   deleteAddedMeetFiles,
-  deleteAllMeetFiles,
   deleteRemovedMeetFiles,
   deleteStoredMeetFile,
   type MeetStoredFiles,
@@ -163,7 +163,7 @@ export async function deleteMeetEntirely(
 
   const { deleteMeet: shouldDeleteMeet, deleteSwims } = options
 
-  if (deleteSwims) {
+  if (deleteSwims && !shouldDeleteMeet) {
     await prisma.swim.deleteMany({ where: { meetId } })
     await prisma.meet.update({
       where: { id: meetId },
@@ -177,12 +177,7 @@ export async function deleteMeetEntirely(
   }
 
   if (shouldDeleteMeet) {
-    try {
-      await deleteAllMeetFiles(existing as MeetStoredFiles)
-    } catch (err) {
-      console.error("Failed to delete stored files for meet", meetId, err)
-    }
-    await prisma.meet.delete({ where: { id: meetId } })
+    await softDeleteMeet(meetId, Boolean(deleteSwims))
   } else if (deleteSwims) {
     try {
       await deleteStoredMeetFile(existing.resultsUrl)

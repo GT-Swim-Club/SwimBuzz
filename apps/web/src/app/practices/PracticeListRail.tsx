@@ -2,11 +2,12 @@
 
 import Link from "next/link"
 import { useMemo } from "react"
+import { formatPracticeDistance, formatZonedInstantRange } from "@swimbuzz/shared"
 import { MONTH_SHORT_NAMES, buildWorkspaceHref, type PracticeRailItem } from "./workspace-params"
 import { practicePath } from "@/lib/slug"
-import type { PracticeListSort } from "./usePracticePrefs"
+import { showCardTags, type PracticeCardLabel, type PracticeListSort } from "./usePracticePrefs"
 
-function sortPractices(practices: PracticeRailItem[], sort: PracticeListSort) {
+export function sortPractices<T extends PracticeRailItem>(practices: T[], sort: PracticeListSort): T[] {
   const sorted = [...practices]
   switch (sort) {
     case "date-asc":
@@ -40,12 +41,14 @@ export default function PracticeListRail({
   selectedSlug,
   sort,
   tags,
+  cardLabel,
   emptyMessage,
 }: {
   practices: PracticeRailItem[]
   selectedSlug?: string
   sort: PracticeListSort
   tags: string[]
+  cardLabel: PracticeCardLabel
   emptyMessage: string
 }) {
   const sorted = useMemo(() => sortPractices(practices, sort), [practices, sort])
@@ -63,6 +66,7 @@ export default function PracticeListRail({
       {sorted.map((practice) => {
         const selected = Boolean(selectedSlug) && (practice.slug ?? practice.id) === selectedSlug
         const { dateNumber, month } = dayParts(practice.dayKey)
+        const showTags = showCardTags(tags, practice.tags, cardLabel)
         return (
           <Link
             key={practice.id}
@@ -79,9 +83,9 @@ export default function PracticeListRail({
               <div className="text-base font-semibold tabular-nums text-foreground">{dateNumber}</div>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="min-w-0 truncate text-sm font-medium text-foreground">{practice.title}</p>
-              {practice.tags.length > 0 && (
-                <div className="mt-1 flex flex-wrap gap-1">
+              <p className="min-w-0 truncate text-sm font-medium leading-tight text-foreground">{practice.title}</p>
+              {showTags ? (
+                <div className="mt-0.5 flex h-[18px] flex-wrap items-center gap-1 overflow-hidden">
                   {practice.tags.map((tag) => (
                     <span
                       key={tag}
@@ -91,18 +95,26 @@ export default function PracticeListRail({
                     </span>
                   ))}
                 </div>
+              ) : (
+                <div className="mt-0.5 flex h-[18px] items-center">
+                  <p className="text-xs text-foreground-tertiary">
+                    {formatZonedInstantRange(practice.startsAt, practice.endsAt, practice.timeZone).time}
+                  </p>
+                </div>
               )}
             </div>
-            {!practice.published && (
-              <span className="shrink-0 rounded-full bg-primary/20 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-primary-active dark:bg-primary/30 dark:text-primary-hover">
-                Draft
-              </span>
-            )}
-            {practice.totalDistance > 0 && (
-              <span className="shrink-0 text-xs tabular-nums text-foreground-tertiary">
-                {practice.totalDistance}
-              </span>
-            )}
+            <div className="flex shrink-0 flex-col items-end gap-1">
+              {!practice.published && (
+                <span className="rounded-full bg-primary/20 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-primary-active dark:bg-primary/30 dark:text-primary-hover">
+                  Draft
+                </span>
+              )}
+              {practice.totalDistance > 0 && (
+                <span className="text-xs tabular-nums text-foreground-tertiary">
+                  {formatPracticeDistance(practice.totalDistance, practice.course)}
+                </span>
+              )}
+            </div>
           </Link>
         )
       })}

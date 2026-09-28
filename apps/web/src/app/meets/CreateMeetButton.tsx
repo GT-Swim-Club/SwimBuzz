@@ -2,8 +2,8 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import MeetFields, { emptyMeetForm, type MeetFormState } from "./MeetFields"
-import Modal, { ModalFooter } from "@/components/ui/Modal"
+import { emptyMeetForm, type MeetFormState } from "./MeetFields"
+import MeetFormModal from "./MeetFormModal"
 import { meetPath } from "@/lib/slug"
 import { useUnsavedUploads } from "@/lib/meet/unsaved-uploads"
 import { useImportTask } from "@/components/ui/ImportTaskProvider"
@@ -89,35 +89,20 @@ export default function CreateMeetButton({ seasons }: { seasons: string[] }) {
         New meet
       </button>
 
-      <Modal
+      <MeetFormModal
         open={open}
-        onClose={closeWithoutSaving}
-        closeDisabled={loading}
         title="Create meet"
+        form={form}
+        setForm={setForm}
+        seasons={seasons}
+        onUploaded={trackUpload}
+        onClose={closeWithoutSaving}
         onSubmit={handleSubmit}
-        footer={
-          <ModalFooter>
-            <button
-              type="button"
-              onClick={closeWithoutSaving}
-              disabled={loading}
-              className="flex-1 rounded-lg border border-border border-border px-4 py-2.5 text-sm font-medium dark:hover:bg-zinc-800 hover:dark:bg-background bg-fill-secondary"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading || !form.name.trim() || !form.startDate || Boolean(form.endDate && form.endDate < form.startDate)}
-              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
-            >
-              {loading ? "Creating…" : "Create meet"}
-            </button>
-          </ModalFooter>
-        }
-      >
-        <MeetFields form={form} setForm={setForm} initialSeasons={seasons} onUploaded={trackUpload} />
-        {error && <p className="text-sm text-error dark:text-error">{error}</p>}
-      </Modal>
+        loading={loading}
+        submitLabel="Create meet"
+        loadingLabel="Creating…"
+        error={error}
+      />
     </>
   )
 }

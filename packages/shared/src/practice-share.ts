@@ -1,5 +1,6 @@
 import { htmlToPlainText, isHtmlEmpty } from "./html"
 import { formatZonedInstantRange } from "./timezone"
+import { formatPracticeDistance } from "./course"
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
@@ -43,6 +44,7 @@ export type PracticeShareInput = {
   endsAt: string
   timeZone: string
   location: string
+  course: string
   focus: string | null
   tags: string[]
   sets: PracticeShareSet[]
@@ -106,7 +108,7 @@ export function practiceShareText(input: PracticeShareInput): string {
   }
 
   if (input.totalDistance > 0) {
-    lines.push("", `Total: ${input.totalDistance} yards`)
+    lines.push("", `Total: ${formatPracticeDistance(input.totalDistance, input.course)}`)
   }
 
   return lines.join("\n").trim()

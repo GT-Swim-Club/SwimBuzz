@@ -5,6 +5,7 @@ import TravelInfoIcon, { type TravelInfoKind } from "@/components/ui/TravelInfoI
 import { FormattedText } from "@/components/ui/FormattedText"
 import { FilePreviewDialog } from "@/components/ui/FilePreview"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
+import { LedgerRow, type LedgerIconName } from "@/components/meet/Ledger"
 
 const buttonClass =
   "inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill transition-colors"
@@ -25,7 +26,22 @@ type TravelTextItem = {
 
 export type TravelInfoItem = TravelLinkItem | TravelTextItem
 
-export default function TravelInfoButtons({ items }: { items: TravelInfoItem[] }) {
+const LEDGER_ICON: Record<TravelInfoKind, LedgerIconName> = {
+  rideSignUps: "car",
+  rooms: "rooms",
+  hotel: "hotel",
+  packingList: "suitcase",
+  itinerary: "itinerary",
+}
+
+export default function TravelInfoButtons({
+  items,
+  variant = "buttons",
+}: {
+  items: TravelInfoItem[]
+  /** "ledger" renders divided sidebar rows instead of chip buttons. */
+  variant?: "buttons" | "ledger"
+}) {
   const [openText, setOpenText] = useState<TravelTextItem | null>(null)
   const [openPreview, setOpenPreview] = useState<TravelLinkItem | null>(null)
 
@@ -33,31 +49,42 @@ export default function TravelInfoButtons({ items }: { items: TravelInfoItem[] }
 
   return (
     <>
-      <div className="flex flex-wrap gap-2">
-        {items.map((item) =>
-          item.type === "link" ? (
-            <button
-              key={item.label}
-              type="button"
-              onClick={() => setOpenPreview(item)}
-              className={buttonClass}
-            >
-              <TravelInfoIcon kind={item.icon} />
-              {item.label}
-            </button>
-          ) : (
-            <button
-              key={item.label}
-              type="button"
-              onClick={() => setOpenText(item)}
-              className={buttonClass}
-            >
-              <TravelInfoIcon kind={item.icon} />
-              {item.label}
-            </button>
-          )
-        )}
-      </div>
+      {variant === "ledger" ? (
+        items.map((item) => (
+          <LedgerRow
+            key={item.label}
+            icon={LEDGER_ICON[item.icon]}
+            label={item.label}
+            onClick={() => (item.type === "link" ? setOpenPreview(item) : setOpenText(item))}
+          />
+        ))
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {items.map((item) =>
+            item.type === "link" ? (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => setOpenPreview(item)}
+                className={buttonClass}
+              >
+                <TravelInfoIcon kind={item.icon} />
+                {item.label}
+              </button>
+            ) : (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => setOpenText(item)}
+                className={buttonClass}
+              >
+                <TravelInfoIcon kind={item.icon} />
+                {item.label}
+              </button>
+            )
+          )}
+        </div>
+      )}
       <Modal
         open={openText !== null}
         onClose={() => setOpenText(null)}

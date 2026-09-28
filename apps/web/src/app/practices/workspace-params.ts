@@ -25,10 +25,19 @@ export type PracticeRailItem = {
   totalDistance: number
   dayKey: string
   startsAt: string
+  endsAt: string
   timeZone: string
   location: string
+  course: string
   /** Lowercased title/focus/set text, precomputed server-side for client-side search filtering. */
   searchText: string
+}
+
+/** A soft-deleted practice, carrying the same searchable/filterable/sortable fields as a live PracticeRailItem. */
+export type DeletedPracticeRailItem = PracticeRailItem & {
+  deletedAt: string
+  purgeAfter: string
+  canRestore: boolean
 }
 
 export function addUtcDays(date: Date, days: number) {

@@ -1,4 +1,5 @@
-import { prisma } from "@/lib/prisma"
+// import { withDeleted } from "../../soft-delete-policy"
+// import { prisma } from "@/lib/prisma"
 import { zonedDayKey } from "@swimbuzz/shared"
 
 const CUID_RE = /^c[a-z0-9]{24}$/i
@@ -58,14 +59,16 @@ export async function uniquePracticeSlug(
   timeZone: string,
   excludeId?: string
 ): Promise<string> {
+  const { withDeleted } = await import("../../soft-delete-policy")
+  const { prisma } = await import("@/lib/prisma")
   const base = practiceSlugBase(startsAt, timeZone)
   let slug = base
   let n = 2
   while (
-    await prisma.practice.findFirst({
+    await withDeleted(() => prisma.practice.findFirst({
       where: { slug, ...(excludeId ? { id: { not: excludeId } } : {}) },
       select: { id: true },
-    })
+    }))
   ) {
     slug = `${base}-${n}`
     n++
@@ -78,6 +81,7 @@ export async function uniqueAthleteSlug(
   lastName: string,
   excludeId?: string
 ): Promise<string> {
+  const { prisma } = await import("@/lib/prisma")
   const base = athleteSlugBase(firstName, lastName)
   let slug = base
   let n = 2
@@ -94,14 +98,16 @@ export async function uniqueAthleteSlug(
 }
 
 export async function uniqueMeetSlug(name: string, excludeId?: string): Promise<string> {
+  const { withDeleted } = await import("../../soft-delete-policy")
+  const { prisma } = await import("@/lib/prisma")
   const base = meetSlugBase(name)
   let slug = base
   let n = 2
   while (
-    await prisma.meet.findFirst({
+    await withDeleted(() => prisma.meet.findFirst({
       where: { slug, ...(excludeId ? { id: { not: excludeId } } : {}) },
       select: { id: true },
-    })
+    }))
   ) {
     slug = `${base}-${n}`
     n++
@@ -110,6 +116,7 @@ export async function uniqueMeetSlug(name: string, excludeId?: string): Promise<
 }
 
 export async function athleteHrefForId(athleteId: string): Promise<string> {
+  const { prisma } = await import("@/lib/prisma")
   const athlete = await prisma.athlete.findUnique({
     where: { id: athleteId },
     select: { slug: true },
@@ -118,6 +125,7 @@ export async function athleteHrefForId(athleteId: string): Promise<string> {
 }
 
 export async function meetHrefForId(meetId: string): Promise<string> {
+  const { prisma } = await import("@/lib/prisma")
   const meet = await prisma.meet.findUnique({
     where: { id: meetId },
     select: { slug: true },
@@ -126,6 +134,7 @@ export async function meetHrefForId(meetId: string): Promise<string> {
 }
 
 export async function meetSwimHrefForId(meetId: string, swimId: string): Promise<string> {
+  const { prisma } = await import("@/lib/prisma")
   const meet = await prisma.meet.findUnique({
     where: { id: meetId },
     select: { slug: true },
@@ -134,6 +143,7 @@ export async function meetSwimHrefForId(meetId: string, swimId: string): Promise
 }
 
 export async function practiceHrefForId(practiceId: string): Promise<string> {
+  const { prisma } = await import("@/lib/prisma")
   const practice = await prisma.practice.findUnique({
     where: { id: practiceId },
     select: { slug: true },

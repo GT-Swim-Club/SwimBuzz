@@ -1,3 +1,4 @@
+const { randomBytes } = require("node:crypto")
 const { createServer } = require("node:http")
 const { parse } = require("node:url")
 const next = require("next")
@@ -23,6 +24,8 @@ const handle = app.getRequestHandler()
 const compress = compression()
 
 app.prepare().then(() => {
+  // Next has loaded .env; preserve its cron secret or generate one for this process.
+  process.env.CRON_SECRET ||= randomBytes(32).toString("hex")
   const server = createServer((req, res) => {
     compress(req, res, async () => {
       try {

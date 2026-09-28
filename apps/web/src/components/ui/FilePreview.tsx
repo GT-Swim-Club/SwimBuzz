@@ -1,8 +1,9 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import { type ReactNode, useEffect, useRef, useState } from "react"
+import { type ReactNode, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
+import HoverDetail from "./HoverDetail"
 
 // react-pdf pulls in pdfjs-dist, which touches browser-only globals (DOMMatrix) at module
 // evaluation time, so it must never be evaluated during SSR.
@@ -21,6 +22,8 @@ type FilePreviewDialogProps = {
   title: string
   url: string
   forcePdf?: boolean
+  /** Download file name (without extension); defaults to `title`. */
+  downloadName?: string
 }
 
 type PreviewKind = "pdf" | "image" | "embed"
@@ -41,11 +44,14 @@ function getPreviewKind(url: string, title: string): PreviewKind {
 
 function IconButton({
   label,
+  hoverLabel = label,
   onClick,
   disabled = false,
   children,
 }: {
   label: string
+  /** Tooltip text, when it should say more than the accessible label (e.g. a shortcut). */
+  hoverLabel?: string
   onClick: () => void
   disabled?: boolean
   children: ReactNode
@@ -59,7 +65,60 @@ function IconButton({
       className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-foreground-secondary transition-colors hover:bg-fill disabled:cursor-not-allowed disabled:opacity-35"
     >
       {children}
+      {/* The preview dialog sits at z-[60], above HoverDetail's default z-50. */}
+      <HoverDetail label={hoverLabel} className="z-[70]!" />
     </button>
+  )
+}
+
+// A number shown inline in the toolbar that can be clicked and retyped: Enter commits,
+// Escape or clicking away cancels and shows the current value again.
+function EditableNumberField({
+  label,
+  value,
+  maxDigits,
+  onCommit,
+  disabled = false,
+}: {
+  label: string
+  value: number
+  maxDigits: number
+  onCommit: (typedValue: number) => void
+  disabled?: boolean
+}) {
+  // What's typed while the field is being edited; null shows `value`.
+  const [draft, setDraft] = useState<string | null>(null)
+  const shownText = draft ?? String(value)
+
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      aria-label={label}
+      value={shownText}
+      disabled={disabled}
+      maxLength={maxDigits}
+      onFocus={(event) => {
+        setDraft(String(value))
+        event.currentTarget.select()
+      }}
+      onChange={(event) => setDraft(event.target.value.replace(/\D/g, ""))}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") {
+          const typedValue = Number.parseInt(draft ?? "", 10)
+          if (Number.isFinite(typedValue)) onCommit(typedValue)
+          event.currentTarget.blur()
+        } else if (event.key === "Escape") {
+          // Cancel the edit without also closing the preview.
+          event.stopPropagation()
+          event.currentTarget.blur()
+        }
+      }}
+      onBlur={() => setDraft(null)}
+      // Sized to its text so it sits snug against the "/ N" or "%" beside it.
+      style={{ width: `calc(${Math.max(1, shownText.length)}ch + 0.25rem)` }}
+      className="rounded bg-transparent px-0.5 py-0.5 text-center text-foreground-secondary outline-none transition-colors hover:bg-fill focus:bg-fill focus:text-foreground disabled:cursor-not-allowed"
+    />
   )
 }
 
@@ -85,6 +144,19 @@ function ZoomIcon({ direction }: { direction: "in" | "out" }) {
   )
 }
 
+function DownloadIcon() {
+  return (
+    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" />
+    </svg>
+  )
+}
+
+function getPdfDownloadName(name: string): string {
+  const base = name.replace(/[\\/:*?"<>|]+/g, "").trim() || "document"
+  return /\.pdf$/i.test(base) ? base : `${base}.pdf`
+}
+
 function CloseIcon() {
   return (
     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -93,19 +165,103 @@ function CloseIcon() {
   )
 }
 
+const MIN_ZOOM_PERCENT = 60
+const MAX_ZOOM_PERCENT = 240
+const ZOOM_STEP_PERCENT = 20
+
+// Fallback for releasing the page counter if a Previous/Next smooth scroll stalls before it lands:
+// this long with no scroll events ends the navigation.
+const PAGE_NAVIGATION_STALL_MS = 1000
+
+// The current page is whichever shows the most height in the viewport. (An intersection
+// threshold can't do this: once a zoomed page is taller than the viewport, it never crosses it.)
+// Scrolled all the way down counts as the last page, which may be too short to ever be the most
+// visible one.
+function getMostVisiblePage(container: HTMLElement, pageElements: Array<HTMLDivElement | null>) {
+  const pageCount = pageElements.filter(Boolean).length
+  if (pageCount && container.scrollTop + container.clientHeight >= container.scrollHeight - 1) {
+    return pageCount
+  }
+  const containerRect = container.getBoundingClientRect()
+  let currentPage = 0
+  let mostVisibleHeight = 0
+  pageElements.forEach((pageElement, index) => {
+    if (!pageElement) return
+    const rect = pageElement.getBoundingClientRect()
+    const visibleHeight =
+      Math.min(rect.bottom, containerRect.bottom) - Math.max(rect.top, containerRect.top)
+    if (visibleHeight > mostVisibleHeight) {
+      mostVisibleHeight = visibleHeight
+      currentPage = index + 1
+    }
+  })
+  return currentPage
+}
+
+type ZoomAnchor = {
+  pageIndex: number
+  // Position of the viewport's center within that page, as fractions of the page's size.
+  fractionX: number
+  fractionY: number
+}
+
+function getRectInScrollContainer(element: HTMLElement, container: HTMLElement) {
+  const containerRect = container.getBoundingClientRect()
+  const rect = element.getBoundingClientRect()
+  return {
+    top: rect.top - containerRect.top + container.scrollTop,
+    left: rect.left - containerRect.left + container.scrollLeft,
+    width: rect.width,
+    height: rect.height,
+  }
+}
+
+function getZoomAnchor(
+  container: HTMLElement,
+  pageElements: Array<HTMLDivElement | null>
+): ZoomAnchor | null {
+  const centerX = container.scrollLeft + container.clientWidth / 2
+  const centerY = container.scrollTop + container.clientHeight / 2
+  let anchor: ZoomAnchor | null = null
+  let closestDistance = Infinity
+  pageElements.forEach((pageElement, pageIndex) => {
+    if (!pageElement) return
+    const rect = getRectInScrollContainer(pageElement, container)
+    if (!rect.height || !rect.width) return
+    // 0 when the center is inside this page; otherwise how far it sits above/below it.
+    const distance = Math.max(rect.top - centerY, centerY - (rect.top + rect.height), 0)
+    if (distance < closestDistance) {
+      closestDistance = distance
+      anchor = {
+        pageIndex,
+        fractionX: Math.min(1, Math.max(0, (centerX - rect.left) / rect.width)),
+        fractionY: Math.min(1, Math.max(0, (centerY - rect.top) / rect.height)),
+      }
+    }
+  })
+  return anchor
+}
+
 export function FilePreviewDialog({
   open,
   onClose,
   title,
   url,
   forcePdf = false,
+  downloadName,
 }: FilePreviewDialogProps) {
   const [numPages, setNumPages] = useState<number | null>(null)
   const [pageNumber, setPageNumber] = useState(1)
   const [zoomPercent, setZoomPercent] = useState(100)
   const [pdfFailed, setPdfFailed] = useState(false)
+  const [downloading, setDownloading] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const pageRefs = useRef<Array<HTMLDivElement | null>>([])
+  const zoomAnchorRef = useRef<ZoomAnchor | null>(null)
+  const pageNavigationRef = useRef<{
+    targetScrollTop: number
+    stallTimeout: ReturnType<typeof setTimeout>
+  } | null>(null)
   const kind = forcePdf ? "pdf" : getPreviewKind(url, title)
   const showingPdf = kind === "pdf"
 
@@ -127,38 +283,145 @@ export function FilePreviewDialog({
     return () => window.removeEventListener("keydown", onKeyDown)
   }, [onClose, open])
 
+  // While a Previous/Next smooth scroll is in flight, the counter stays on the destination page
+  // instead of flipping back to the pages being scrolled past. The hold ends when the scroll lands,
+  // when the user takes over scrolling, or if the scroll stalls — and in the latter cases the
+  // counter re-syncs to whatever page is actually visible.
+  const endPageNavigation = (syncToVisiblePage: boolean) => {
+    const navigation = pageNavigationRef.current
+    if (!navigation) return
+    clearTimeout(navigation.stallTimeout)
+    pageNavigationRef.current = null
+    const container = scrollContainerRef.current
+    const currentPage = syncToVisiblePage && container ? getMostVisiblePage(container, pageRefs.current) : 0
+    if (currentPage) setPageNumber(currentPage)
+  }
+
+  const startPageNavigation = (targetScrollTop: number) => {
+    endPageNavigation(false)
+    pageNavigationRef.current = {
+      targetScrollTop,
+      stallTimeout: setTimeout(() => endPageNavigation(true), PAGE_NAVIGATION_STALL_MS),
+    }
+  }
+
+  const onPageNavigationScroll = useEffectEvent((scrollTop: number) => {
+    const navigation = pageNavigationRef.current
+    if (!navigation) return
+    if (Math.abs(scrollTop - navigation.targetScrollTop) <= 1) {
+      endPageNavigation(false)
+      return
+    }
+    startPageNavigation(navigation.targetScrollTop)
+  })
+  const cancelPageNavigation = useEffectEvent(() => endPageNavigation(true))
+
   useEffect(() => {
     if (!open || !showingPdf || !numPages) return
     const container = scrollContainerRef.current
     if (!container) return
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const currentPage = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
-        if (currentPage) {
-          const page = Number((currentPage.target as HTMLElement).dataset.page)
-          if (Number.isFinite(page)) setPageNumber(page)
-        }
-      },
-      { root: container, threshold: 0.55 }
-    )
+    let frame = 0
+    const updateCurrentPage = () => {
+      frame = 0
+      const currentPage = getMostVisiblePage(container, pageRefs.current)
+      if (currentPage) setPageNumber(currentPage)
+    }
+    const onScroll = () => {
+      if (pageNavigationRef.current) {
+        onPageNavigationScroll(container.scrollTop)
+        return
+      }
+      if (!frame) frame = requestAnimationFrame(updateCurrentPage)
+    }
+    // The user scrolling (wheel, touch, or grabbing the scrollbar) takes over from a Previous/Next
+    // navigation, so the counter should follow them again right away.
+    const onUserScrollIntent = () => cancelPageNavigation()
 
-    pageRefs.current.forEach((page) => page && observer.observe(page))
-    return () => observer.disconnect()
+    container.addEventListener("scroll", onScroll, { passive: true })
+    container.addEventListener("wheel", onUserScrollIntent, { passive: true })
+    container.addEventListener("touchstart", onUserScrollIntent, { passive: true })
+    container.addEventListener("pointerdown", onUserScrollIntent)
+    return () => {
+      container.removeEventListener("scroll", onScroll)
+      container.removeEventListener("wheel", onUserScrollIntent)
+      container.removeEventListener("touchstart", onUserScrollIntent)
+      container.removeEventListener("pointerdown", onUserScrollIntent)
+      cancelAnimationFrame(frame)
+      cancelPageNavigation()
+    }
   }, [numPages, open, showingPdf])
+
+  // After a zoom re-lays out the pages, scroll so the point that was at the viewport's center
+  // (anchored to its page) is back at the center, instead of drifting to another page.
+  useLayoutEffect(() => {
+    const anchor = zoomAnchorRef.current
+    zoomAnchorRef.current = null
+    const container = scrollContainerRef.current
+    const pageElement = anchor ? pageRefs.current[anchor.pageIndex] : null
+    if (!anchor || !container || !pageElement) return
+
+    const pageRect = getRectInScrollContainer(pageElement, container)
+    container.scrollTop = pageRect.top + anchor.fractionY * pageRect.height - container.clientHeight / 2
+    container.scrollLeft = pageRect.left + anchor.fractionX * pageRect.width - container.clientWidth / 2
+  }, [zoomPercent])
 
   if (!open || typeof document === "undefined") return null
 
   const scrollToPage = (nextPage: number) => {
     const validPage = Math.max(1, Math.min(numPages ?? 1, nextPage))
     setPageNumber(validPage)
-    pageRefs.current[validPage - 1]?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    })
+    const container = scrollContainerRef.current
+    const pageElement = pageRefs.current[validPage - 1]
+    if (!container || !pageElement) return
+
+    const scrollMarginTop = parseFloat(getComputedStyle(pageElement).scrollMarginTop) || 0
+    const maxScrollTop = container.scrollHeight - container.clientHeight
+    const targetScrollTop = Math.round(
+      Math.max(
+        0,
+        Math.min(maxScrollTop, getRectInScrollContainer(pageElement, container).top - scrollMarginTop)
+      )
+    )
+    if (Math.abs(container.scrollTop - targetScrollTop) <= 1) {
+      endPageNavigation(false)
+      return
+    }
+    startPageNavigation(targetScrollTop)
+    container.scrollTo({ top: targetScrollTop, behavior: "smooth" })
   }
+
+  const setZoom = (requestedZoomPercent: number) => {
+    const nextZoomPercent = Math.max(MIN_ZOOM_PERCENT, Math.min(MAX_ZOOM_PERCENT, requestedZoomPercent))
+    if (nextZoomPercent === zoomPercent) return
+    endPageNavigation(false)
+    const container = scrollContainerRef.current
+    zoomAnchorRef.current = container ? getZoomAnchor(container, pageRefs.current) : null
+    setZoomPercent(nextZoomPercent)
+  }
+
+  // `<a download>` is ignored for cross-origin URLs (e.g. Supabase Storage), so fetch the
+  // same-origin preview proxy as a blob and save that instead.
+  const downloadPdf = async () => {
+    setDownloading(true)
+    try {
+      const response = await fetch(getPdfPreviewUrl(url))
+      if (!response.ok) throw new Error(`Download failed (${response.status})`)
+      const objectUrl = URL.createObjectURL(await response.blob())
+      const link = document.createElement("a")
+      link.href = objectUrl
+      link.download = getPdfDownloadName(downloadName ?? title)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 0)
+    } catch {
+      window.open(url, "_blank", "noopener,noreferrer")
+    } finally {
+      setDownloading(false)
+    }
+  }
+
   return createPortal(
     <div
       className="fixed inset-0 z-[60] flex flex-col bg-background/80 text-foreground"
@@ -167,7 +430,7 @@ export function FilePreviewDialog({
       aria-label={`${title} preview`}
     >
       <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background/95 px-3 sm:px-4">
-        <IconButton label="Close preview" onClick={onClose}>
+        <IconButton label="Close preview" hoverLabel="Close (Esc)" onClick={onClose}>
           <CloseIcon />
         </IconButton>
 
@@ -183,24 +446,44 @@ export function FilePreviewDialog({
         </div>
 
         {showingPdf ? (
+          <IconButton label="Download PDF" onClick={downloadPdf} disabled={downloading}>
+            <DownloadIcon />
+          </IconButton>
+        ) : null}
+
+        {showingPdf ? (
           <nav className="hidden items-center rounded-md border border-border bg-background shadow-sm sm:flex">
             <IconButton label="Previous page" onClick={() => scrollToPage(pageNumber - 1)} disabled={pageNumber <= 1 || pdfFailed}>
               <ChevronIcon direction="left" />
             </IconButton>
-            <span className="min-w-14 border-x border-border px-2 text-center text-xs tabular-nums text-foreground-secondary">
-              {pageNumber} / {numPages ?? "—"}
+            <span className="flex min-w-14 items-center justify-center gap-0.5 border-x border-border px-2 text-xs tabular-nums text-foreground-secondary">
+              <EditableNumberField
+                label="Page number"
+                value={pageNumber}
+                maxDigits={String(numPages ?? pageNumber).length}
+                onCommit={scrollToPage}
+                disabled={!numPages || pdfFailed}
+              />
+              <span>/ {numPages ?? "—"}</span>
             </span>
             <IconButton label="Next page" onClick={() => scrollToPage(pageNumber + 1)} disabled={!numPages || pageNumber >= numPages || pdfFailed}>
               <ChevronIcon direction="right" />
             </IconButton>
             <span className="mx-1 h-5 w-px bg-border" />
-            <IconButton label="Zoom out" onClick={() => setZoomPercent((current) => Math.max(60, current - 20))} disabled={pdfFailed}>
+            <IconButton label="Zoom out" onClick={() => setZoom(zoomPercent - ZOOM_STEP_PERCENT)} disabled={pdfFailed}>
               <ZoomIcon direction="out" />
             </IconButton>
-            <span className="min-w-12 text-center text-xs tabular-nums text-foreground-secondary">
-              {zoomPercent}%
+            <span className="flex min-w-12 items-center justify-center text-xs tabular-nums text-foreground-secondary">
+              <EditableNumberField
+                label="Zoom percentage"
+                value={zoomPercent}
+                maxDigits={String(MAX_ZOOM_PERCENT).length}
+                onCommit={setZoom}
+                disabled={pdfFailed}
+              />
+              <span>%</span>
             </span>
-            <IconButton label="Zoom in" onClick={() => setZoomPercent((current) => Math.min(240, current + 20))} disabled={pdfFailed}>
+            <IconButton label="Zoom in" onClick={() => setZoom(zoomPercent + ZOOM_STEP_PERCENT)} disabled={pdfFailed}>
               <ZoomIcon direction="in" />
             </IconButton>
           </nav>
@@ -212,7 +495,7 @@ export function FilePreviewDialog({
         onClick={(event) => {
           if (event.target === event.currentTarget) onClose()
         }}
-        className="flex min-h-0 flex-1 items-start justify-center overflow-auto bg-transparent p-4 sm:p-8"
+        className="flex min-h-0 flex-1 items-start justify-center-safe overflow-auto bg-transparent p-4 sm:p-8"
       >
         {showingPdf ? (
           pdfFailed ? (
@@ -265,6 +548,7 @@ type FilePreviewButtonProps = {
   url: string
   forcePdf?: boolean
   title: string
+  downloadName?: string
   className?: string
   children: ReactNode
 }
@@ -273,6 +557,7 @@ export default function FilePreviewButton({
   url,
   forcePdf = false,
   title,
+  downloadName,
   className,
   children,
 }: FilePreviewButtonProps) {
@@ -289,6 +574,7 @@ export default function FilePreviewButton({
         title={title}
         url={url}
         forcePdf={forcePdf}
+        downloadName={downloadName}
       />
     </>
   )

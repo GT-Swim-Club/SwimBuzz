@@ -1,5 +1,6 @@
 "use client"
 
+import type { ReactNode } from "react"
 import { useState, useTransition } from "react"
 import { parseTime } from "@/lib/utils"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
@@ -26,12 +27,15 @@ export default function AddResultButton({
   defaultCourse,
   defaultDate,
   athletes,
+  trigger,
 }: {
   meetId: string
   meetName: string
   defaultCourse: string
   defaultDate: string
   athletes: AthleteOption[]
+  /** Custom trigger; receives the function that opens the dialog. */
+  trigger?: (open: () => void) => ReactNode
 }) {
   const [open, setOpen] = useState(false)
   const [type, setType] = useState<"individual" | "relay">("individual")
@@ -125,14 +129,18 @@ export default function AddResultButton({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={openModal}
-        disabled={athletes.length === 0}
-        className="text-xs px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill disabled:opacity-40 transition-colors"
-      >
-        Add swim
-      </button>
+      {trigger ? (
+        trigger(openModal)
+      ) : (
+        <button
+          type="button"
+          onClick={openModal}
+          disabled={athletes.length === 0}
+          className="text-xs px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill disabled:opacity-40 transition-colors"
+        >
+          Add swim
+        </button>
+      )}
 
       <Modal
         open={open}

@@ -129,6 +129,11 @@ model Athlete {
 }
 
 model Meet {
+  deletedAt DateTime?
+  purgeAfter DateTime?
+  purgeStartedAt DateTime?
+  deleteSwimsOnPurge Boolean @default(false)
+  @@index([deletedAt, purgeAfter])
   id            String    @id @default(cuid())
   slug          String?   @unique
   name          String
@@ -322,6 +327,10 @@ model Swim {
 }
 
 model Practice {
+  deletedAt DateTime?
+  purgeAfter DateTime?
+  purgeStartedAt DateTime?
+  @@index([deletedAt, purgeAfter])
   id          String        @id @default(cuid())
   slug        String?       @unique
   title       String
@@ -332,6 +341,7 @@ model Practice {
   /// IANA zone (e.g. "America/New_York") that startsAt/endsAt are anchored in.
   timeZone    String        @default("America/New_York")
   location    String        @default("CRC Comp Pool")
+  course      Course        @default(SCY)
   focus       String?
   tags        String[]      @default([])
   published   Boolean       @default(false)

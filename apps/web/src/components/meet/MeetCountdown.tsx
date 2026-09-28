@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { LedgerPanel, LedgerStatTile } from "./Ledger"
 
 type Parts = { days: number; hours: number; minutes: number; seconds: number }
 
@@ -18,7 +19,7 @@ function pad(n: number) {
   return String(n).padStart(2, "0")
 }
 
-type Variant = "pill" | "inline" | "banner"
+type Variant = "pill" | "inline" | "banner" | "ledger"
 type Tone = "default" | "onDark"
 
 const upcomingPillClass =
@@ -223,6 +224,28 @@ export default function MeetCountdown({
 
   if (active) {
     const parts = splitCountdown(remaining)
+
+    if (variant === "ledger") {
+      const units = [
+        { value: String(parts.days), label: parts.days === 1 ? "day" : "days" },
+        { value: pad(parts.hours), label: "hrs" },
+        { value: pad(parts.minutes), label: "min" },
+        { value: pad(parts.seconds), label: "sec" },
+      ]
+      return (
+        <LedgerPanel label="Starts in">
+          <div className="grid grid-cols-4 gap-2">
+            {units.map((u) => (
+              <LedgerStatTile
+                key={u.label}
+                label={u.label}
+                value={<AnimatedCountdownValue value={u.value} />}
+              />
+            ))}
+          </div>
+        </LedgerPanel>
+      )
+    }
 
     if (variant === "banner") {
       return (

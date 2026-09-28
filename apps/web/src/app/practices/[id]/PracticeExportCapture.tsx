@@ -1,6 +1,6 @@
 "use client"
 
-import { formatZonedInstantRange, groupPracticeSetsIntoRows } from "@swimbuzz/shared"
+import { formatPracticeDistance, formatZonedInstantRange, groupPracticeSetsIntoRows } from "@swimbuzz/shared"
 import { FormattedText, isHtmlEmpty } from "@/components/ui/FormattedText"
 import InfoIcon from "@/components/ui/InfoIcon"
 
@@ -20,6 +20,7 @@ export default function PracticeExportCapture({
   endsAt,
   timeZone,
   location,
+  course,
   focus,
   tags,
   sets,
@@ -31,6 +32,7 @@ export default function PracticeExportCapture({
   endsAt: string
   timeZone: string
   location: string
+  course: string
   focus: string | null
   tags: string[]
   sets: PracticeExportSet[]
@@ -67,7 +69,7 @@ export default function PracticeExportCapture({
               </span>
             )}
             {location && totalDistance > 0 && <span>·</span>}
-            {totalDistance > 0 && <span>{totalDistance} yards</span>}
+            {totalDistance > 0 && <span>{formatPracticeDistance(totalDistance, course)}</span>}
           </div>
         </div>
       </div>

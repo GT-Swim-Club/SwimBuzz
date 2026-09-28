@@ -1,22 +1,11 @@
-import { Suspense } from "react"
+import { Fragment, Suspense, type ReactNode } from "react"
 import { prisma } from "@/lib/prisma"
 import { notFound, redirect } from "next/navigation"
-import Link from "next/link"
 import BackLink from "@/components/ui/BackLink"
 import PageLabelRegistrar from "@/components/nav/PageLabelRegistrar"
 import { RelativeDateRangeTime } from "@/components/ui/RelativeDate"
-import { Fragment } from "react"
-import ImportMeetButton from "@/app/athletes/ImportMeetButton"
-import ImportMeetResourcesButton from "./ImportMeetResourcesButton"
-import ManagePhotosButton from "./ManagePhotosButton"
-import AddTravelInfoButton from "./AddTravelInfoButton"
 import MeetActions from "./MeetActions"
-import AddResultButton from "./AddResultButton"
-import AddIndividualEntryButton from "./AddIndividualEntryButton"
-import AddToRosterSummaryButton from "./AddToRosterSummaryButton"
-import PhotosButtons, { PreviewSlideshow } from "./PhotosButtons"
 import MeetPageBackground from "./MeetPageBackground"
-import EventOrderButton from "./EventOrderButton"
 import MeetSheetSummarySection from "./MeetSheetSummarySection"
 import ScrollToHash from "./ScrollToHash"
 import type { MeetFormState } from "../MeetFields"
@@ -35,14 +24,21 @@ import {
 } from "@/lib/meet/meet-files"
 import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete/athlete-view-server"
 import { Gender } from "@prisma/client"
-import MeetResourceIcon, { type MeetResourceKind } from "@/components/meet/MeetResourceIcon"
-import FilePreviewButton from "@/components/ui/FilePreview"
 import InfoIcon, { type InfoKind } from "@/components/ui/InfoIcon"
 import { type TravelInfoKind } from "@/components/ui/TravelInfoIcon"
-import TravelInfoButtons, { type TravelInfoItem } from "./TravelInfoButtons"
+import { type TravelInfoItem } from "./TravelInfoButtons"
 import MeetSignupSection from "./MeetSignupSection"
 import MeetRoomSection from "./MeetRoomSection"
 import MeetCountdown from "@/components/meet/MeetCountdown"
+import MeetHighlightsCarousel from "@/components/meet/MeetHighlightsCarousel"
+import MeetPreSheetsLayout from "./MeetPreSheetsLayout"
+import MeetLedgerLayout from "./MeetLedgerLayout"
+import {
+  MeetCompetitionCard,
+  MeetPhotosCard,
+  MeetTravelCard,
+  type CompetitionLink,
+} from "./MeetLedgerCards"
 import {
   normalizeMeetSignupQuestions,
   normalizeSignupEntryTimes,
@@ -51,33 +47,23 @@ import {
 } from "@/lib/meet/meet-signup"
 import { isSignupAnswers } from "@/lib/meet/meet-signup"
 import { athletePath, isCuid, meetPath } from "@/lib/slug"
-import StatsHighlights from "@/components/ui/StatsHighlights"
 import { getSession } from "@/lib/auth/session"
 import {
   buildAthletePbMap,
   computeMeetPrepHighlights,
   computeMeetResultHighlights } from "@/lib/meet/meet-stats"
 import { toDateInput, toTimeInput } from "@/lib/date-input"
-import { utcDayKey } from "@swimbuzz/shared"
+import { utcDayKey, COURSE_LABELS, type CourseCode } from "@swimbuzz/shared"
 import LoadingComponent from "./loading"
 
-const RESOURCE_LINKS: { key: keyof MeetLinks; label: string; icon: MeetResourceKind; forcePdf?: boolean }[] = [
-  { key: "packetUrl", label: "Meet Packet", icon: "packet", forcePdf: true },
-  { key: "entriesSheetUrl", label: "Entries", icon: "entries", forcePdf: true },
-  { key: "psychSheetUrl", label: "Psych Sheet", icon: "psych", forcePdf: true },
-  { key: "swimphoneUrl", label: "SwimPhone Results", icon: "results" },
-  { key: "resultsUrl", label: "Results PDF", icon: "results", forcePdf: true },
-  { key: "liveStreamUrl", label: "Live Stream", icon: "liveStream" },
-]
-
-type MeetLinks = {
-  packetUrl: string | null
-  psychSheetUrl: string | null
-  entriesSheetUrl: string | null
-  resultsUrl: string | null
-  swimphoneUrl: string | null
-  liveStreamUrl: string | null
-}
+const RESOURCE_KEYS = [
+  "packetUrl",
+  "entriesSheetUrl",
+  "psychSheetUrl",
+  "swimphoneUrl",
+  "resultsUrl",
+  "liveStreamUrl",
+] as const
 
 const TRAVEL_LINKS: { key: "rideSignUpsUrl" | "roomsUrl"; label: string; icon: TravelInfoKind }[] = [
   { key: "rideSignUpsUrl", label: "Ride Sign-Ups", icon: "rideSignUps" },
@@ -193,7 +179,7 @@ async function MeetPageContent({ params }: { params: Promise<{ id: string }> }) 
   const meetStartDate = toDateInput(meet.startsAt, meet.timeZone)
   const isBeforeOrToday = meetStartDate <= today
   const isUpcomingMeet = toDateInput(meet.endsAt ?? meet.startsAt, meet.timeZone) >= today
-  const courseLabel = { SCY: "Short course yards", SCM: "Short course meters", LCM: "Long course meters" }[meet.course] ?? meet.course
+  const courseLabel = COURSE_LABELS[meet.course as CourseCode] ?? meet.course
   const signupStatus = !meet.signupForm
     ? "Not set"
     : !meet.signupForm.openAt || new Date(meet.signupForm.openAt) > new Date()
@@ -207,15 +193,10 @@ async function MeetPageContent({ params }: { params: Promise<{ id: string }> }) 
   const heatSheetLinks =
     storedHeatSheetLinks ?? (meet.heatSheetUrl ? [{ url: meet.heatSheetUrl }] : [])
   const finalsHeatSheetLinks = normalizeFinalsHeatSheetUrls(meet.finalsHeatSheetUrls) ?? []
-  const links = RESOURCE_LINKS.filter((l) => meet[l.key])
-  const resourceLinksBeforeResults = links.filter(
-    (link) => link.key !== "resultsUrl" && link.key !== "swimphoneUrl"
-  )
-  const swimphoneResultsLink = links.find((link) => link.key === "swimphoneUrl")
-  const resultsPdfLink = links.find((link) => link.key === "resultsUrl")
+  const meetFileName = (label: string) => `${meet.name} - ${label}`
   const eventOrder = isEventOrder(meet.eventOrder) ? meet.eventOrder : null
   const hasResources =
-    links.length > 0 ||
+    RESOURCE_KEYS.some((key) => meet[key]) ||
     eventOrder !== null ||
     heatSheetLinks.length > 0 ||
     finalsHeatSheetLinks.length > 0
@@ -226,10 +207,9 @@ async function MeetPageContent({ params }: { params: Promise<{ id: string }> }) 
     psychSheetUrl: meet.psychSheetUrl ?? "",
     heatSheetUrls: heatSheetLinks,
     finalsHeatSheetUrls: finalsHeatSheetLinks,
-    liveStreamUrl: meet.liveStreamUrl ?? ""}
-  const photosInitial = {
-    photos: initialPhotos,
-    previews: initialPreviews}
+    liveStreamUrl: meet.liveStreamUrl ?? "",
+    swimphoneUrl: meet.swimphoneUrl ?? "",
+    resultsUrl: meet.resultsUrl ?? ""}
 const isHtmlEmpty = (html: string | null | undefined) =>
   !html || html.replace(/<[^>]*>?/gm, "").trim() === ""
 
@@ -468,20 +448,10 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
     )
   }
 
-  return (
-    <div className="relative">
-      {meet.bannerUrl && (
-        <MeetPageBackground
-          bannerUrl={meet.bannerUrl}
-          photoUrls={initialPreviews}
-        />
-      )}
-    <main className="relative mx-auto max-w-4xl">
-      <div className="relative z-10 space-y-8">
+  const header = (
+    <>
       <PageLabelRegistrar label={meet.name} />
       <ScrollToHash />
-      {/* Header */}
-      <div className="space-y-4">
       <div className="min-w-0">
           <BackLink
             fallbackHref="/meets"
@@ -498,7 +468,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
             )}
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-3">
-                <h1 className="min-w-0 text-3xl font-semibold text-foreground sm:text-4xl">{meet.name}</h1>
+                <h1 className="min-w-0 text-4xl font-semibold text-foreground sm:text-5xl">{meet.name}</h1>
                 {isCoach && (
                   <MeetActions
                     meetId={meet.id}
@@ -509,313 +479,242 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
                   />
                 )}
               </div>
-              <div className="mt-1 text-base text-foreground-secondary sm:text-lg">
-                <div className="flex items-center gap-1.5">
-                  <InfoIcon kind="calendar" />
+              <div className="mt-1.5 flex flex-wrap items-center gap-x-5 gap-y-1 text-lg text-foreground-secondary sm:text-xl">
+                <span className="flex items-center gap-1.5">
+                  <InfoIcon kind="calendar" className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
                   <RelativeDateRangeTime
                     startsAt={meetStartsAt}
                     endsAt={meet.endsAt}
                     timeZone={meet.timeZone}
                     hasStartTime={meet.hasStartTime}
                   />
-                </div>
-                <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-                  {meet.location && (
-                    <span className="flex items-center gap-1.5">
-                      <InfoIcon kind="location" />
-                      {meet.location}
-                    </span>
-                  )}
-                  {meet.location && meet.school && <span>·</span>}
-                  {meet.school && (
-                    <span>{meet.school}</span>
-                  )}
-                </div>
+                </span>
+                {meet.location || meet.school ? (
+                  <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    {meet.location && (
+                      <span className="flex items-center gap-1.5">
+                        <InfoIcon kind="location" className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+                        {meet.location}
+                      </span>
+                    )}
+                    {meet.location && meet.school && <span>·</span>}
+                    {meet.school && <span>{meet.school}</span>}
+                  </span>
+                ) : null}
               </div>
             </div>
           </div>
         </div>
-      {(isUpcomingMeet && meet.hasStartTime) || meetHighlights ? (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch sm:gap-4">
-          {isUpcomingMeet && meet.hasStartTime ? (
-            <MeetCountdown
-              className="min-w-0 sm:flex-1"
-              startsAt={meetStartsAt}
-              upcoming={false}
-              variant="banner"
-            />
-          ) : null}
-          {meetHighlights ? (
-            <StatsHighlights
-              className={
-                isUpcomingMeet && meet.hasStartTime
-                  ? "min-w-0 sm:flex-1"
-                  : "w-full"
-              }
-              title="Highlights"
-              counters={meetHighlights.counters}
-              spotlight={meetHighlights.spotlight}
-            />
-          ) : null}
-        </div>
-      ) : null}
-      </div>
+    </>
+  )
 
-      {/* Resources */}
-      {(hasResources || isCoach) && (
-        <section>
-          <div className="flex items-center flex-wrap gap-x-3 gap-y-2 mb-3">
-            <h2 className="text-sm font-medium text-foreground-secondary uppercase tracking-wide">
-              Resources
-            </h2>
-            {isCoach && (
-              <div className="flex flex-wrap items-center gap-1.5">
-                <ImportMeetResourcesButton meetId={meet.id} initial={resourceInitial} />
-                <Suspense fallback={null}>
-                  <ImportMeetButton
-                    key={`results-${meet.resultsUrl ?? ""}-${meet.swimphoneUrl ?? ""}`}
-                    meetId={meet.id}
-                    season={meet.season}
-                    resultsUrl={meet.resultsUrl ?? ""}
-                    swimphoneUrl={meet.swimphoneUrl ?? ""}
-                  />
-                </Suspense>
-              </div>
-            )}
-          </div>
-      {(hasResources || eventOrder) ? (
-        <div className="flex flex-wrap gap-2">
-          {resourceLinksBeforeResults.map((l) => (
-            <Fragment key={l.key}>
-              <FilePreviewButton
-                url={meet[l.key] as string}
-                title={l.label}
-                forcePdf={l.forcePdf}
-                className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill transition-colors"
-              >
-                <MeetResourceIcon kind={l.icon} />
-                {l.label}
-              </FilePreviewButton>
-              {l.key === "packetUrl" && eventOrder ? (
-                <EventOrderButton order={eventOrder} />
-              ) : null}
-            </Fragment>
-          ))}
-          {!meet.packetUrl && eventOrder ? (
-            <EventOrderButton order={eventOrder} />
-          ) : null}
-          {heatSheetLinks.map((link, index) => (
-            <FilePreviewButton
-              key={`heat-${index}-${link.url}`}
-              url={link.url}
-              forcePdf
-              title={
-                link.name?.trim() ||
-                (heatSheetLinks.length > 1 ? `Heat Sheet ${index + 1}` : "Heat Sheet")
-              }
-              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill transition-colors"
-            >
-              <MeetResourceIcon kind="heat" />
-              {link.name?.trim() ||
-                (heatSheetLinks.length > 1 ? `Heat Sheet ${index + 1}` : "Heat Sheet")}
-            </FilePreviewButton>
-          ))}
-          {finalsHeatSheetLinks.map((link, index) => (
-            <FilePreviewButton
-              key={`finals-${index}-${link.url}`}
-              url={link.url}
-              forcePdf
-              title={
-                link.name?.trim() ||
-                (finalsHeatSheetLinks.length > 1
-                  ? `Finals Heat Sheet ${index + 1}`
-                  : "Finals Heat Sheet")
-              }
-              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill transition-colors"
-            >
-              <MeetResourceIcon kind="heat" />
-              {link.name?.trim() ||
-                (finalsHeatSheetLinks.length > 1
-                  ? `Finals Heat Sheet ${index + 1}`
-                  : "Finals Heat Sheet")}
-            </FilePreviewButton>
-          ))}
-          {swimphoneResultsLink ? (
-            <a
-              href={meet[swimphoneResultsLink.key] as string}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill transition-colors"
-            >
-              <MeetResourceIcon kind={swimphoneResultsLink.icon} />
-              {swimphoneResultsLink.label}
-            </a>
-          ) : null}
-          {resultsPdfLink ? (
-            <FilePreviewButton
-              url={meet[resultsPdfLink.key] as string}
-              title={resultsPdfLink.label}
-              forcePdf={resultsPdfLink.forcePdf}
-              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill transition-colors"
-            >
-              <MeetResourceIcon kind={resultsPdfLink.icon} />
-              {resultsPdfLink.label}
-            </FilePreviewButton>
-          ) : null}
-        </div>
-      ) : (
-        <p className="text-sm text-foreground-secondary">No resources yet.</p>
-      )}
-        </section>
-      )}
+  const summarySection = (
+    <MeetSheetSummarySection
+      psychSummary={psychSummary}
+      heatSummary={heatSummary}
+      finalsHeatSummary={finalsHeatSummary}
+      entriesSummary={entriesSummary}
+      results={results}
+      relayResults={relayResults}
+      meetId={meet.id}
+      meetName={meet.name}
+      athletes={rosterAthletes}
+      rosterAthletes={meetRosterAthletes}
+      canEdit={isCoach}
+      viewerAthleteId={viewerAthleteId}
+      individualEventOptions={individualEventOptions}
+      editableSeedKeys={editableSeedKeys}
+      eventNumberOptions={signupEventOptions}
+      defaultCourse={meet.course}
+      defaultDate={toDateInput(meet.startsAt, meet.timeZone)}
+    />
+  )
 
-      {/* Travel */}
-      {(hasTravel || isCoach) && (
-        <section>
-          <div className="flex items-center flex-wrap gap-x-3 gap-y-2 mb-3">
-            <h2 className="text-sm font-medium text-foreground-secondary uppercase tracking-wide">
-              Travel
-            </h2>
-            {isCoach && (
-              <AddTravelInfoButton
-                meetId={meet.id}
-                initial={{
-                  rideSignUpsUrl: meet.rideSignUpsUrl ?? "",
-                  roomsUrl: meet.roomsUrl ?? "",
-                  hotel: meet.hotel ?? "",
-                  packingList: meet.packingList ?? "",
-                  itinerary: meet.itinerary ?? ""}}
-              />
-            )}
-          </div>
-          {hasTravel ? (
-            <TravelInfoButtons items={travelItems} />
-          ) : (
-            <p className="text-sm text-foreground-secondary">
-              No travel info yet.
-            </p>
-          )}
-        </section>
-      )}
+  const hasRosterSummaryContent =
+    [psychSummary, heatSummary, finalsHeatSummary, entriesSummary].some(
+      (summary) => (summary?.entries.length ?? 0) > 0
+    ) ||
+    results.length > 0 ||
+    (relayResults?.length ?? 0) > 0
 
-      {showSignupSection && (
-        <MeetSignupSection
-          meetPath={meetPublicPath}
-          meetId={meet.id}
-          eventOrder={meet.eventOrder}
-          isCoach={isCoach}
-          form={signupForm}
-          myEntry={mySignupEntry}
-          entries={signupEntries}
-          hasImportedResults={hasImportedResults}
-        />
-      )}
+  const heatLinkLabel = (
+    link: { name?: string | null },
+    index: number,
+    count: number,
+    base: string
+  ) => link.name?.trim() || (count > 1 ? `${base} ${index + 1}` : base)
+  const linksBeforeOrder: CompetitionLink[] = meet.packetUrl
+    ? [{ key: "packet", label: "Meet packet", url: meet.packetUrl, icon: "file", forcePdf: true, downloadName: meetFileName("Meet Packet") }]
+    : []
+  const linksAfterOrder: CompetitionLink[] = [
+    ...(meet.entriesSheetUrl
+      ? [{ key: "entries", label: "Entries", url: meet.entriesSheetUrl, icon: "fileList", forcePdf: true, downloadName: meetFileName("Entries") } as const]
+      : []),
+    ...(meet.psychSheetUrl
+      ? [{ key: "psych", label: "Psych sheet", url: meet.psychSheetUrl, icon: "chart", forcePdf: true, downloadName: meetFileName("Psych Sheet") } as const]
+      : []),
+    ...heatSheetLinks.map((link, index) => ({
+      key: `heat-${index}-${link.url}`,
+      label: heatLinkLabel(link, index, heatSheetLinks.length, "Heat sheet"),
+      url: link.url,
+      icon: "lanes" as const,
+      forcePdf: true,
+      downloadName: meetFileName(heatLinkLabel(link, index, heatSheetLinks.length, "Heat Sheet")),
+    })),
+    ...finalsHeatSheetLinks.map((link, index) => ({
+      key: `finals-${index}-${link.url}`,
+      label: heatLinkLabel(link, index, finalsHeatSheetLinks.length, "Finals heat sheet"),
+      url: link.url,
+      icon: "lanes" as const,
+      forcePdf: true,
+      downloadName: meetFileName(
+        heatLinkLabel(link, index, finalsHeatSheetLinks.length, "Finals Heat Sheet")
+      ),
+    })),
+    ...(meet.swimphoneUrl
+      ? [{ key: "swimphone", label: "SwimPhone results", url: meet.swimphoneUrl, icon: "trophy", external: true } as const]
+      : []),
+    ...(meet.resultsUrl
+      ? [{ key: "results", label: "Results PDF", url: meet.resultsUrl, icon: "trophy", forcePdf: true, downloadName: meetFileName("Results") } as const]
+      : []),
+    ...(meet.liveStreamUrl
+      ? [{ key: "live", label: "Live stream", url: meet.liveStreamUrl, icon: "broadcast" } as const]
+      : []),
+  ]
+  const relaysHref = isCoach && !meetHasEnded ? `${meetPublicPath}/relays` : undefined
+  const showPhotos =
+    isBeforeOrToday && (initialPhotos.length > 0 || initialPreviews.length > 0 || isCoach)
 
-      {showRoomSection && (
-        <MeetRoomSection
-          meetPath={meetPublicPath}
-          meetId={meet.id}
-          isCoach={isCoach}
-          selfAthleteId={viewerAthleteId}
-          athletes={meetRosterAthletes.map((a) => ({
-            id: a.id,
-            name: a.name,
-            gender: a.gender}))}
-          form={roomForm}
-          myPreference={myRoomPreference}
-          preferences={roomPreferences}
-          rooms={roomAssignments}
-          meetHasEnded={meetHasEnded}
-        />
-      )}
-
-      {isCoach && !meetHasEnded && (
-        <section>
-          <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
-            <h2 className="text-sm font-medium uppercase tracking-wide text-foreground-secondary">
-              Relay builder
-            </h2>
-          </div>
-          <Link
-            href={`${meetPublicPath}/relays`}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm text-primary-text transition-colors hover:bg-primary-hover"
-          >
-            Build relay teams
-            <span aria-hidden="true">→</span>
-          </Link>
-        </section>
-      )}
-
-      {/* Photos Section */}
-      {isBeforeOrToday && (initialPhotos.length > 0 || initialPreviews.length > 0 || isCoach) && (
-        <section className="space-y-3">
-          <div className="flex items-center flex-wrap gap-x-3 gap-y-2 mb-3">
-            <h2 className="text-sm font-medium text-foreground-secondary uppercase tracking-wide">
-              Photos
-            </h2>
-            {isCoach && (
-              <ManagePhotosButton meetId={meet.id} initial={photosInitial} />
-            )}
-            {initialPhotos.length > 0 && (
-              <PhotosButtons photos={initialPhotos} label="All Photos" />
-            )}
-          </div>
-          {initialPhotos.length > 0 || initialPreviews.length > 0 ? (
-            initialPreviews.length > 0 && (
-              <PreviewSlideshow previews={initialPreviews} />
-            )
-          ) : (
-            <p className="text-sm text-foreground-secondary">
-              No photos yet.
-            </p>
-          )}
-        </section>
-      )}
-
-      <MeetSheetSummarySection
-        psychSummary={psychSummary}
-        heatSummary={heatSummary}
-        finalsHeatSummary={finalsHeatSummary}
-        entriesSummary={entriesSummary}
-        results={results}
-        relayResults={relayResults}
+  const highlightsCard = meetHighlights ? (
+    <MeetHighlightsCarousel counters={meetHighlights.counters} />
+  ) : null
+  const countdownCard =
+    isUpcomingMeet && meet.hasStartTime ? (
+      <MeetCountdown
+        startsAt={meetStartsAt}
+        upcoming={false}
+        variant="ledger"
+      />
+    ) : null
+  const signupCard = showSignupSection ? (
+    <MeetSignupSection
+      meetPath={meetPublicPath}
+      meetId={meet.id}
+      eventOrder={meet.eventOrder}
+      isCoach={isCoach}
+      form={signupForm}
+      myEntry={mySignupEntry}
+      entries={signupEntries}
+      hasImportedResults={hasImportedResults}
+      variant="ledger"
+    />
+  ) : null
+  const renderCompetitionCard = () =>
+    hasResources || isCoach || relaysHref ? (
+      <MeetCompetitionCard
+        isCoach={isCoach}
         meetId={meet.id}
-        meetName={meet.name}
-        athletes={rosterAthletes}
-        rosterAthletes={meetRosterAthletes}
-        canEdit={isCoach}
-        viewerAthleteId={viewerAthleteId}
-        individualEventOptions={individualEventOptions}
-        editableSeedKeys={editableSeedKeys}
-        eventNumberOptions={signupEventOptions}
-        headerAction={
-          isCoach ? (
-            <div key="header-actions" className="flex flex-wrap gap-2">
-              <AddToRosterSummaryButton
-                key="add-roster-btn"
-                meetId={meet.id}
-                athletes={rosterAthletes}
-                rosterSummaryEntries={entriesSummary?.entries ?? []}
-              />
-              <AddResultButton
-                key="add-result-btn"
-                meetId={meet.id}
-                meetName={meet.name}
-                defaultCourse={meet.course}
-                defaultDate={toDateInput(meet.startsAt, meet.timeZone)}
-                athletes={rosterAthletes}
-              />
-              <AddIndividualEntryButton
-                key="add-entry-btn"
-                meetId={meet.id}
-                athletes={rosterAthletes}
-              />
-            </div>
+        season={meet.season}
+        course={meet.course}
+        resourceInitial={resourceInitial}
+        linksBeforeOrder={linksBeforeOrder}
+        linksAfterOrder={linksAfterOrder}
+        eventOrder={eventOrder}
+        relaysHref={relaysHref}
+      />
+    ) : null
+  const travelCard =
+    hasTravel || isCoach || showRoomSection ? (
+      <MeetTravelCard
+        isCoach={isCoach}
+        meetId={meet.id}
+        travelInitial={{
+          rideSignUpsUrl: meet.rideSignUpsUrl ?? "",
+          roomsUrl: meet.roomsUrl ?? "",
+          hotel: meet.hotel ?? "",
+          packingList: meet.packingList ?? "",
+          itinerary: meet.itinerary ?? ""}}
+        items={travelItems}
+        hasRoomRows={showRoomSection}
+        roomRows={
+          showRoomSection ? (
+            <MeetRoomSection
+              meetPath={meetPublicPath}
+              meetId={meet.id}
+              isCoach={isCoach}
+              selfAthleteId={viewerAthleteId}
+              athletes={meetRosterAthletes.map((a) => ({
+                id: a.id,
+                name: a.name,
+                gender: a.gender}))}
+              form={roomForm}
+              myPreference={myRoomPreference}
+              preferences={roomPreferences}
+              rooms={roomAssignments}
+              meetHasEnded={meetHasEnded}
+              variant="ledger"
+            />
           ) : null
         }
       />
-      </div>
-    </main>
+    ) : null
+  const photosCard = showPhotos ? (
+    <MeetPhotosCard
+      isCoach={isCoach}
+      meetId={meet.id}
+      photos={initialPhotos}
+      previews={initialPreviews}
+    />
+  ) : null
+
+  // Before any sheets exist: meet timing/people cards on the left, logistics on the right.
+  // If one side is empty (e.g. a past meet with no sign-ups), move a card over so the
+  // page doesn't render a blank half.
+  const preSheetsLeft: ReactNode[] = [
+    countdownCard && <Fragment key="countdown">{countdownCard}</Fragment>,
+    highlightsCard && <Fragment key="highlights">{highlightsCard}</Fragment>,
+    signupCard && <Fragment key="signup">{signupCard}</Fragment>,
+  ].filter(Boolean)
+  const preSheetsCompetition = renderCompetitionCard()
+  const preSheetsRight: ReactNode[] = [
+    preSheetsCompetition && <Fragment key="competition">{preSheetsCompetition}</Fragment>,
+    travelCard && <Fragment key="travel">{travelCard}</Fragment>,
+    photosCard && <Fragment key="photos">{photosCard}</Fragment>,
+  ].filter(Boolean)
+  if (preSheetsLeft.length === 0 && preSheetsRight.length > 1) {
+    preSheetsLeft.push(preSheetsRight.shift())
+  } else if (preSheetsRight.length === 0 && preSheetsLeft.length > 1) {
+    preSheetsRight.unshift(preSheetsLeft.pop())
+  }
+
+  return (
+    <div className="relative">
+      {meet.bannerUrl && (
+        <MeetPageBackground bannerUrl={meet.bannerUrl} photoUrls={initialPreviews} />
+      )}
+      <main className="relative mx-auto max-w-[1240px]">
+        <div className="relative z-10 flex flex-col gap-8">
+          <div className="flex flex-col gap-4">{header}</div>
+          {hasRosterSummaryContent ? (
+            <MeetLedgerLayout
+              ledger={
+                <>
+                  {highlightsCard}
+                  {countdownCard}
+                  {signupCard}
+                  {renderCompetitionCard()}
+                  {travelCard}
+                  {photosCard}
+                </>
+              }
+            >
+              {summarySection}
+            </MeetLedgerLayout>
+          ) : (
+            <MeetPreSheetsLayout left={preSheetsLeft} right={preSheetsRight} />
+          )}
+        </div>
+      </main>
     </div>
   )
 }

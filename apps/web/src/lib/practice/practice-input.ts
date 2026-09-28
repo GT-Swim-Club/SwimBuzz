@@ -1,6 +1,8 @@
+import type { Course } from "@prisma/client"
 import { parseMeetDate } from "@/lib/swim/swim-parse"
 import { normalizeTags } from "@/lib/practice/practice-tags"
 import { sanitizePracticeHtml } from "@/lib/sanitize-html"
+import { parseCourse } from "@/lib/course"
 import { DEFAULT_TIME_ZONE, isValidTimeZone, zonedTimeToUtc } from "@swimbuzz/shared"
 
 export class PracticeInputError extends Error {}
@@ -90,6 +92,7 @@ export type NormalizedPractice = {
   endsAt: Date
   timeZone: string
   location: string
+  course: Course
   focus: string | null
   tags: string[]
   published: boolean
@@ -149,6 +152,7 @@ export function buildPracticeData(
     endsAt,
     timeZone,
     location: optionalString(body.location) ?? "CRC Comp Pool",
+    course: parseCourse(body.course),
     focus: (() => {
       const focus = optionalString(body.focus)
       return focus ? sanitizePracticeHtml(focus) || null : null

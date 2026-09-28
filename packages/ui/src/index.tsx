@@ -221,16 +221,21 @@ export function IconButton({
   label,
   onPress,
   disabled,
+  accessibilityLabel,
 }: {
   label: string
   onPress?: () => void
   disabled?: boolean
+  /** Overrides the spoken label when the visible text (e.g. "Restore") needs more context for screen readers — e.g. "Restore <item name>" in a list of many identical buttons. */
+  accessibilityLabel?: string
 }) {
   const styles = useStyles()
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? label}
       style={({ pressed }) => [
         styles.iconButton,
         pressed && styles.rowPressed,

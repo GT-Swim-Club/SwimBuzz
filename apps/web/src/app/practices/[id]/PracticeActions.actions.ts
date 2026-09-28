@@ -1,5 +1,6 @@
 "use server"
 
+import { softDeletePractice } from "@/lib/recovery/recovery"
 import { revalidatePath } from "next/cache"
 import { notifyPracticePublished } from "@/lib/notifications/notifications"
 import { prisma } from "@/lib/prisma"
@@ -91,6 +92,7 @@ export async function setPracticePublished(
           endsAt: data.endsAt,
           timeZone: data.timeZone,
           location: data.location,
+          course: data.course,
           focus: data.focus,
           tags: data.tags,
           published: data.published,
@@ -156,6 +158,7 @@ export async function duplicatePractice(practiceId: string): Promise<PracticeDup
       endsAt,
       timeZone,
       location: existing.location,
+      course: existing.course,
       focus: existing.focus,
       tags: existing.tags,
       published: false,
@@ -194,7 +197,7 @@ export async function deletePractice(practiceId: string): Promise<PracticeMutati
   const existing = await prisma.practice.findUnique({ where: { id: practiceId } })
   if (!existing) return { ok: false, error: "Not found" }
 
-  await prisma.practice.delete({ where: { id: practiceId } })
+  await softDeletePractice(practiceId)
   revalidatePath("/practices", "page")
   return { ok: true }
 }

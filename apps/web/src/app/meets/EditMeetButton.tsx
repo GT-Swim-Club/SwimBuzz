@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import MeetFields, { type MeetFormState } from "./MeetFields"
-import Modal, { ModalFooter } from "@/components/ui/Modal"
+import { type MeetFormState } from "./MeetFields"
+import MeetFormModal from "./MeetFormModal"
 import ActionIcon from "@/components/ui/ActionIcon"
 import { useUnsavedUploads } from "@/lib/meet/unsaved-uploads"
 import { updateMeet } from "./[id]/meet-update.actions"
@@ -67,36 +67,21 @@ export default function EditMeetButton({
         <ActionIcon kind="edit" className="h-4 w-4" />
       </button>
 
-      <Modal
+      <MeetFormModal
         open={editing}
-        onClose={closeWithoutSaving}
-        closeDisabled={loading}
-        busy={loading}
         title="Edit meet"
+        form={form}
+        setForm={setForm}
+        seasons={seasons}
+        onUploaded={trackUpload}
+        onClose={closeWithoutSaving}
         onSubmit={handleSave}
-        footer={
-          <ModalFooter>
-            <button
-              type="button"
-              onClick={closeWithoutSaving}
-              disabled={loading}
-              className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading || !form.name.trim() || !form.startDate || !form.course || !form.season || Boolean(form.endDate && form.endDate < form.startDate)}
-              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
-            >
-              {loading ? "Saving…" : "Save changes"}
-            </button>
-          </ModalFooter>
-        }
-      >
-        <MeetFields form={form} setForm={setForm} initialSeasons={seasons} onUploaded={trackUpload} />
-        {error && <p className="text-sm text-error">{error}</p>}
-      </Modal>
+        loading={loading}
+        busy={loading}
+        submitLabel="Save changes"
+        loadingLabel="Saving…"
+        error={error}
+      />
     </>
   )
 }

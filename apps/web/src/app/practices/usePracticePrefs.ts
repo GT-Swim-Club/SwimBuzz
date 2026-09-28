@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react"
 
-export type PracticeRailView = "week" | "list"
+export type PracticeRailView = "week" | "list" | "deleted"
 export type PracticeListSort = "date-desc" | "date-asc" | "yards-desc" | "yards-asc"
+export type PracticeCardLabel = "time" | "tags"
 
 const KEYS = {
   view: "swimbuzz-detail-view",
@@ -11,6 +12,20 @@ const KEYS = {
   sidebarOpen: "swimbuzz-detail-sidebar",
   sidebarWidth: "swimbuzz-detail-sidebar-width",
   sort: "swimbuzz-list-sort",
+  cardLabel: "swimbuzz-practice-card-label",
+}
+
+// The label under a practice card's title is either its time or its tags —
+// never both, since tags right-aligned alongside the time looked cluttered.
+// A user's cardLabel choice picks between them, but an active tag filter
+// always wins: seeing which tag(s) matched is more useful than the time
+// while filtering.
+export function showCardTags(
+  activeTags: string[],
+  practiceTags: string[],
+  cardLabel: PracticeCardLabel
+): boolean {
+  return (activeTags.length > 0 || cardLabel === "tags") && practiceTags.length > 0
 }
 
 const DEFAULT_SIDEBAR_WIDTH = 324
@@ -65,6 +80,8 @@ export type PracticePrefs = {
   setSidebarWidth: (value: number) => void
   sort: PracticeListSort
   setSort: (value: PracticeListSort) => void
+  cardLabel: PracticeCardLabel
+  setCardLabel: (value: PracticeCardLabel) => void
 }
 
 export function usePracticePrefs(): PracticePrefs {
@@ -74,6 +91,7 @@ export function usePracticePrefs(): PracticePrefs {
   const [sidebarOpen, setSidebarOpenState] = useState(true)
   const [sidebarWidth, setSidebarWidthState] = useState(DEFAULT_SIDEBAR_WIDTH)
   const [sort, setSortState] = useState<PracticeListSort>("date-desc")
+  const [cardLabel, setCardLabelState] = useState<PracticeCardLabel>("time")
 
   // localStorage isn't available during SSR, so these all start at their
   // defaults (matching the server-rendered output) and swap to the persisted
@@ -85,7 +103,7 @@ export function usePracticePrefs(): PracticePrefs {
   // hook's own setters, not just read from an external source).
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
-    setViewState(readString(KEYS.view, ["week", "list"] as const, "week"))
+    setViewState(readString(KEYS.view, ["week", "list", "deleted"] as const, "week"))
     setMonThuOnlyState(readBool(KEYS.monThuOnly, false))
     setSidebarOpenState(readBool(KEYS.sidebarOpen, true))
     setSidebarWidthState(readNumber(KEYS.sidebarWidth, DEFAULT_SIDEBAR_WIDTH))
@@ -96,6 +114,7 @@ export function usePracticePrefs(): PracticePrefs {
         "date-desc"
       )
     )
+    setCardLabelState(readString(KEYS.cardLabel, ["time", "tags"] as const, "time"))
     setReady(true)
   }, [])
   /* eslint-enable react-hooks/set-state-in-effect */
@@ -126,6 +145,11 @@ export function usePracticePrefs(): PracticePrefs {
     setSort: (value) => {
       setSortState(value)
       write(KEYS.sort, value)
+    },
+    cardLabel,
+    setCardLabel: (value) => {
+      setCardLabelState(value)
+      write(KEYS.cardLabel, value)
     },
   }
 }

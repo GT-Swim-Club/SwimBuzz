@@ -3,6 +3,7 @@ import { RelativeInstantTime } from "@/components/ui/RelativeDate"
 import { roomWindowStatus } from "@/lib/meet/meet-rooms"
 import type { MeetSignupQuestion } from "@/lib/meet/meet-signup"
 import MeetRoomAssignmentsList from "./MeetRoomAssignmentsList"
+import { LedgerNote, LedgerRow } from "@/components/meet/Ledger"
 
 type FormData = {
   id: string
@@ -39,6 +40,7 @@ export default function MeetRoomSection({
   myPreference,
   rooms,
   meetHasEnded,
+  variant = "section",
 }: {
   athletes: Array<{ id: string; name: string; gender: "M" | "F" }>
   preferences: unknown[]
@@ -50,6 +52,8 @@ export default function MeetRoomSection({
   myPreference: Preference | null
   rooms: RoomRow[]
   meetHasEnded: boolean
+  /** "ledger" renders bare rows for embedding in the sidebar Travel card. */
+  variant?: "section" | "ledger"
 }) {
   const window = form
     ? roomWindowStatus({
@@ -65,6 +69,40 @@ export default function MeetRoomSection({
     (!selfAthleteId || !athletes.some((a) => a.id === selfAthleteId))
   ) {
     return null
+  }
+
+  if (variant === "ledger") {
+    if (isCoach) {
+      return (
+        <LedgerRow
+          icon="bed"
+          label={form ? "Manage roommates" : "Set up roommates"}
+          href={`${meetPath}/roommates`}
+        />
+      )
+    }
+    if (!form) return null
+    return (
+      <>
+        {window.open || myPreference ? (
+          <LedgerRow
+            icon="bed"
+            label={myPreference ? "Review roommate preferences" : "Roommate preferences"}
+            href={`${meetPath}/roommate`}
+          />
+        ) : window.reason ? (
+          <LedgerNote>{window.reason}</LedgerNote>
+        ) : null}
+        {form.assignmentsPublishedAt && rooms.length > 0 ? (
+          <div className="border-t border-border px-4 pb-4 [&>div]:mt-3">
+            <MeetRoomAssignmentsList
+              rooms={rooms.map((room) => ({ athletes: room.athletes }))}
+              selfAthleteId={selfAthleteId}
+            />
+          </div>
+        ) : null}
+      </>
+    )
   }
 
   if (isCoach) {

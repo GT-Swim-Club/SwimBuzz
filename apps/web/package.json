@@ -12,6 +12,7 @@
     "start:with-monitors": "NODE_ENV=production node server.js",
     "postinstall": "prisma generate",
     "lint": "eslint",
+    "test:recovery": "node scripts/test-recovery.cjs",
     "backfill-slugs": "node scripts/backfill-slugs.mjs",
     "backfill-staff-roles": "node scripts/backfill-staff-roles.mjs"
   },

@@ -47,6 +47,7 @@
   --color-border: var(--brand-color-border);
   --color-border-secondary: var(--brand-color-border-secondary);
   --color-border-subtle: var(--brand-color-border-subtle);
+  --color-accent: var(--brand-color-accent);
 }
 
 body {

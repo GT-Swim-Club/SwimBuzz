@@ -152,6 +152,7 @@ export default function SharePracticeButton({
   endsAt,
   timeZone,
   location,
+  course,
   focus,
   tags,
   sets,
@@ -165,6 +166,7 @@ export default function SharePracticeButton({
   endsAt: string
   timeZone: string
   location: string
+  course: string
   focus: string | null
   tags: string[]
   sets: PracticeShareSet[]
@@ -206,7 +208,7 @@ export default function SharePracticeButton({
   }
 
   function shareInput() {
-    return { title, startsAt, endsAt, timeZone, location, focus, tags, sets, totalDistance }
+    return { title, startsAt, endsAt, timeZone, location, course, focus, tags, sets, totalDistance }
   }
 
   async function copyLink() {

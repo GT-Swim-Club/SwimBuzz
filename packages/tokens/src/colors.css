@@ -44,6 +44,7 @@
   --brand-color-border: #eaeaea;
   --brand-color-border-secondary: #e8e8e8;
   --brand-color-border-subtle: #e4e4e7;
+  --brand-color-accent: #8c6b38;
 }
 
 .dark {
@@ -92,4 +93,5 @@
   --brand-color-border: #2c2c2c;
   --brand-color-border-secondary: #252525;
   --brand-color-border-subtle: #1e1e1e;
+  --brand-color-accent: #b58d4f;
 }

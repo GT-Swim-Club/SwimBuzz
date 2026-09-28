@@ -1,5 +1,6 @@
 "use client"
 
+import type { ReactNode } from "react"
 import { useMemo, useState, useTransition } from "react"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { athleteHasRosterSummaryEntry } from "@/lib/meet/meet-signup"
@@ -12,10 +13,13 @@ export default function AddToRosterSummaryButton({
   meetId,
   athletes,
   rosterSummaryEntries,
+  trigger,
 }: {
   meetId: string
   athletes: AthleteOption[]
   rosterSummaryEntries: SheetEntry[]
+  /** Custom trigger; receives the function that opens the dialog. */
+  trigger?: (open: () => void) => ReactNode
 }) {
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -50,14 +54,18 @@ export default function AddToRosterSummaryButton({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={openModal}
-        disabled={athletes.length === 0}
-        className="text-xs px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill disabled:opacity-40 transition-colors"
-      >
-        Add to roster
-      </button>
+      {trigger ? (
+        trigger(openModal)
+      ) : (
+        <button
+          type="button"
+          onClick={openModal}
+          disabled={athletes.length === 0}
+          className="text-xs px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill disabled:opacity-40 transition-colors"
+        >
+          Add to roster
+        </button>
+      )}
 
       <Modal
         open={open}

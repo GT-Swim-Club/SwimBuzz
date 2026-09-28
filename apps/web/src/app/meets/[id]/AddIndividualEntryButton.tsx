@@ -1,5 +1,6 @@
 "use client"
 
+import type { ReactNode } from "react"
 import { useState, useTransition } from "react"
 import { isValidSignupEntryTime } from "@/lib/meet/meet-signup"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
@@ -20,9 +21,12 @@ type AthleteOption = { id: string; name: string; gender?: "M" | "F" }
 export default function AddIndividualEntryButton({
   meetId,
   athletes,
+  trigger,
 }: {
   meetId: string
   athletes: AthleteOption[]
+  /** Custom trigger; receives the function that opens the dialog. */
+  trigger?: (open: () => void) => ReactNode
 }) {
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -120,14 +124,18 @@ export default function AddIndividualEntryButton({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={openModal}
-        disabled={athletes.length === 0}
-        className="text-xs px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill disabled:opacity-40 transition-colors"
-      >
-        Add entry
-      </button>
+      {trigger ? (
+        trigger(openModal)
+      ) : (
+        <button
+          type="button"
+          onClick={openModal}
+          disabled={athletes.length === 0}
+          className="text-xs px-3 py-1.5 border border-border rounded-lg bg-background hover:bg-fill disabled:opacity-40 transition-colors"
+        >
+          Add entry
+        </button>
+      )}
 
       <Modal
         open={open}

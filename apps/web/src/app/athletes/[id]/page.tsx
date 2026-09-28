@@ -66,7 +66,7 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
     timeMs: swim.timeMs,
     tags: swim.tags ?? "",
     meet: swim.meet ?? "",
-    meetId: swim.meetId ?? null,
+    meetId: swim.meetRef ? swim.meetId : null,
     meetSlug: swim.meetRef?.slug ?? null,
     date: swim.date.toISOString(),
     source: swim.source}))

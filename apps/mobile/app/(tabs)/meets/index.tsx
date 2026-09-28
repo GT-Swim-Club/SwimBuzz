@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react"
 import {
+  Pressable,
   RefreshControl,
+  Text,
   View,
 } from "react-native"
 import { useRouter } from "expo-router"
@@ -19,12 +21,14 @@ import {
   TextField,
   usePalette,
 } from "@swimbuzz/ui"
-import { spacing } from "@swimbuzz/tokens"
+import { radii, spacing } from "@swimbuzz/tokens"
 import { api } from "../../../src/lib/api"
 import { useAuth } from "../../../src/lib/auth"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 import { GalleryTile } from "../../../src/components/GalleryTile"
 import { RelativeDateText } from "../../../src/components/RelativeDateText"
+import { DeletedItemsList } from "../../../src/components/DeletedItemsList"
+import { Icon } from "../../../src/components/Icon"
 import { useViewPreferences } from "../../../src/lib/view-preferences"
 
 export default function MeetsScreen() {
@@ -37,6 +41,7 @@ export default function MeetsScreen() {
   const gallery = defaultView === "gallery"
   const [seasonState, setSeasonState] = useState<string | null>(null)
   const [query, setQuery] = useState("")
+  const [showDeleted, setShowDeleted] = useState(false)
 
   const {
     data: meets = [],
@@ -81,11 +86,50 @@ export default function MeetsScreen() {
     })
   }, [meets, query, season])
 
+  if (showDeleted && isStaff) {
+    return (
+      <Screen style={{ paddingBottom: 0 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm, marginBottom: spacing.sm }}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Back to meets"
+            onPress={() => setShowDeleted(false)}
+            hitSlop={8}
+            style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
+          >
+            <Icon name="chevronLeft" size={18} color={c.text} />
+            <Text style={{ color: c.text, fontSize: 15, fontWeight: "600" }}>Trash</Text>
+          </Pressable>
+        </View>
+        <DeletedItemsList kind="meet" tabBarPad={tabBarPad} />
+      </Screen>
+    )
+  }
+
   return (
     <Screen style={{ paddingBottom: 0 }}>
       {isStaff ? (
-        <View style={{ marginBottom: spacing.sm }}>
-          <Button label="New meet" onPress={() => router.push("/meets/new")} />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm, marginBottom: spacing.sm }}>
+          <View style={{ flex: 1 }}>
+            <Button label="New meet" onPress={() => router.push("/meets/new")} />
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Trash"
+            onPress={() => setShowDeleted(true)}
+            hitSlop={8}
+            style={{
+              alignItems: "center",
+              borderColor: c.border,
+              borderRadius: radii.lg,
+              borderWidth: 1,
+              height: 44,
+              justifyContent: "center",
+              width: 44,
+            }}
+          >
+            <Icon name="trash" size={18} color={c.textSecondary} />
+          </Pressable>
         </View>
       ) : null}
       <TextField

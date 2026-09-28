@@ -2,7 +2,6 @@
 
 import { type FormEvent, type ReactNode, useEffect, useState } from "react"
 import { createPortal } from "react-dom"
-import DontReloadNotice from "@/components/ui/DontReloadNotice"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 
 const MAX_WIDTH = {
@@ -42,6 +41,7 @@ export default function Modal({
   title,
   description,
   header,
+  top,
   children,
   footer,
   maxWidth = "lg",
@@ -59,6 +59,8 @@ export default function Modal({
   title?: ReactNode
   description?: ReactNode
   header?: ReactNode
+  /** Full-bleed content above the header and body (e.g. a banner). */
+  top?: ReactNode
   children?: ReactNode
   footer: ReactNode
   maxWidth?: ModalMaxWidth
@@ -95,17 +97,12 @@ export default function Modal({
     </div>
   ) : null
 
-  const busyNotice = busy ? (
-    <div className="shrink-0 px-4 pb-1 sm:px-6">
-      <DontReloadNotice />
-    </div>
-  ) : null
-
   const panel = (
     <div
       className={`relative z-10 flex w-full ${MAX_WIDTH[maxWidth]} max-h-[calc(100dvh-1.5rem)] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-xl sm:max-h-[90vh] ${panelClassName}`}
       onClick={(e) => e.stopPropagation()}
     >
+      {top}
       {(title || description || header) && (
         <div className={`shrink-0 px-4 pt-4 sm:px-6 sm:pt-6 ${hasBody ? "pb-2" : "pb-4"}`}>
           {title ? (
@@ -121,13 +118,11 @@ export default function Modal({
       {onSubmit ? (
         <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col">
           {body}
-          {busyNotice}
           {footer}
         </form>
       ) : (
         <div className="flex min-h-0 flex-1 flex-col">
           {body}
-          {busyNotice}
           {footer}
         </div>
       )}

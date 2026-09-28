@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
-import DontReloadNotice from "@/components/ui/DontReloadNotice"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import { formatRelativeTime, formatDateTime } from "@/lib/utils"
 import { currentSeason, parseSeason } from "@/lib/season"

@@ -39,6 +39,7 @@ export async function GET(
     endsAt: endsAt.toISOString(),
     timeZone: practice.timeZone,
     location: practice.location,
+    course: practice.course,
     focus: practice.focus,
     tags: practice.tags,
     sets: practice.sets.map((set) => ({

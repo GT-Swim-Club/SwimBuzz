@@ -1,4 +1,5 @@
-import { Course, Prisma } from "@prisma/client"
+import { Prisma } from "@prisma/client"
+import { parseCourse } from "@/lib/course"
 import { parseMeetDate } from "@/lib/swim/swim-parse"
 import { parseSeason, seasonFromDate } from "@/lib/season"
 import {
@@ -14,13 +15,6 @@ import {
 } from "@swimbuzz/shared"
 
 export class MeetInputError extends Error {}
-
-const COURSES: Course[] = [Course.SCY, Course.LCM, Course.SCM]
-
-function parseCourse(value: unknown): Course {
-  const upper = String(value ?? "").toUpperCase()
-  return COURSES.find((c) => c === upper) ?? Course.SCY
-}
 
 function optionalString(value: unknown): string | null {
   if (value === undefined || value === null) return null

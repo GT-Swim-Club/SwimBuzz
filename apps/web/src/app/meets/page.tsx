@@ -1,6 +1,9 @@
+import Link from "next/link"
 import { Suspense } from "react"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
+import { AppIcon } from "@/components/ui/AppIcon"
+import HoverDetail from "@/components/ui/HoverDetail"
 import LiveSearch from "@/components/ui/LiveSearch"
 import { Skeleton } from "@/components/ui/Skeleton"
 import {
@@ -8,6 +11,7 @@ import {
   ViewNavPanel,
   ViewNavigationProvider } from "@/components/nav/ViewNavigation"
 import CreateMeetButton from "./CreateMeetButton"
+import DeletedMeetsList from "./DeletedMeetsList"
 import { isStaffUi } from "@/lib/athlete/athlete-view-server"
 import { parseSeason, seasonEndYear } from "@/lib/season"
 import MeetsClientWrapper from "./MeetsClientWrapper"
@@ -163,13 +167,13 @@ export default async function MeetsPage({
   const isCoach = await isStaffUi(session.user.role)
   const { q, view } = await searchParams
   const query = q?.trim() ?? ""
-  const activeView = view === "list" ? "list" : "gallery"
+  const activeView = view === "list" ? "list" : view === "deleted" && isCoach ? "deleted" : "gallery"
 
-  function buildHref(next: { view?: "gallery" | "list" }) {
+  function buildHref(next: { view?: "gallery" | "list" | "deleted" }) {
     const params = new URLSearchParams()
     if (query) params.set("q", query)
     const v = next.view ?? activeView
-    if (v === "list") params.set("view", "list")
+    if (v !== "gallery") params.set("view", v)
     const s = params.toString()
     return s ? `/meets?${s}` : "/meets"
   }
@@ -181,11 +185,26 @@ export default async function MeetsPage({
         <div className="flex items-center justify-end">
           <div className="flex items-center gap-3">
             <GalleryListViewToggle
-              activeView={activeView}
+              activeView={activeView === "deleted" ? "gallery" : activeView}
               galleryHref={buildHref({ view: "gallery" })}
               listHref={buildHref({ view: "list" })}
             />
             {isCoach && (
+              <Link
+                href={buildHref({ view: "deleted" })}
+                aria-label="Trash"
+                className={
+                  "group relative inline-flex h-9 w-9 items-center justify-center rounded-lg border transition-colors " +
+                  (activeView === "deleted"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border-secondary bg-background text-foreground-secondary hover:bg-fill-secondary hover:text-foreground")
+                }
+              >
+                <AppIcon name="trash" className="h-4 w-4" />
+                <HoverDetail label="Trash" />
+              </Link>
+            )}
+            {isCoach && activeView !== "deleted" && (
               <Suspense fallback={<Skeleton className="h-9 w-24" />}>
                 <CreateMeetButtonSection />
               </Suspense>
@@ -193,15 +212,21 @@ export default async function MeetsPage({
           </div>
         </div>
 
-        <Suspense fallback={null}>
-          <LiveSearch pathname="/meets" placeholder="Search meets by name, school, or location…" />
-        </Suspense>
+        {activeView === "deleted" ? (
+          <DeletedMeetsList />
+        ) : (
+          <>
+            <Suspense fallback={null}>
+              <LiveSearch pathname="/meets" placeholder="Search meets by name, school, or location…" />
+            </Suspense>
 
-        <ViewNavPanel>
-          <Suspense fallback={<MeetsListSkeleton />}>
-            <MeetsListSection query={query} activeView={activeView} isCoach={isCoach} />
-          </Suspense>
-        </ViewNavPanel>
+            <ViewNavPanel>
+              <Suspense fallback={<MeetsListSkeleton />}>
+                <MeetsListSection query={query} activeView={activeView} isCoach={isCoach} />
+              </Suspense>
+            </ViewNavPanel>
+          </>
+        )}
       </main>
     </ViewNavigationProvider>
   )

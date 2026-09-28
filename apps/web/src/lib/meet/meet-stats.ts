@@ -101,7 +101,7 @@ export function computeMeetPrepHighlights(
   if (signupEntries.length === 0) return null
 
   const counters: StatCounter[] = [
-    { label: "Signed up", value: signupEntries.length },
+    { label: "Sign-ups", value: signupEntries.length },
   ]
 
   const eventCounts = new Map<string, number>()
@@ -116,7 +116,10 @@ export function computeMeetPrepHighlights(
   }
 
   if (individualEventSlots > 0) {
-    counters.push({ label: "Events entered", value: individualEventSlots })
+    counters.push({
+      label: "Avg events",
+      value: (individualEventSlots / signupEntries.length).toFixed(1),
+    })
   }
 
   let topEvent: string | null = null
@@ -129,11 +132,7 @@ export function computeMeetPrepHighlights(
   }
 
   if (topEvent && topCount > 0) {
-    counters.push({
-      label: "Most popular",
-      value: canonicalizeStrokeEvent(topEvent),
-      hint: `${topCount} entr${topCount === 1 ? "y" : "ies"}`,
-    })
+    counters.push({ label: "Top event", value: canonicalizeStrokeEvent(topEvent) })
   }
 
   return counters.length > 0 ? { counters } : null

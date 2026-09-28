@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native"
 import type { PracticeSummary } from "@swimbuzz/shared"
-import { formatFullDate } from "@swimbuzz/shared"
+import { formatFullDate, formatPracticeDistance } from "@swimbuzz/shared"
 import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
 import { usePalette } from "@swimbuzz/ui"
 import { useMemo } from "react"
@@ -48,7 +48,7 @@ export function PracticeCard({
         ) : null}
       </View>
       {yards > 0 ? (
-        <Text style={styles.yards}>{yards} yards</Text>
+        <Text style={styles.yards}>{formatPracticeDistance(yards, practice.course)}</Text>
       ) : null}
       {tags.length > 0 ? (
         <View style={styles.tags}>

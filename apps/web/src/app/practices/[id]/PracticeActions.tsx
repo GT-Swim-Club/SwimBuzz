@@ -278,11 +278,11 @@ export default function PracticeActions({
             setConfirmDelete(true)
           }}
           disabled={busy || lockedElsewhere}
-          aria-label="Delete practice"
+          aria-label="Move to Trash"
           className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-error-border text-error rounded-lg bg-background hover:bg-error-bg transition-colors disabled:opacity-40"
         >
           <ActionIcon kind="delete" className="h-5 w-5" />
-          <HoverDetail label="Delete" />
+          <HoverDetail label="Move to Trash" />
         </button>
       </div>
 
@@ -338,11 +338,10 @@ export default function PracticeActions({
         open={confirmDelete}
         onClose={() => setConfirmDelete(false)}
         closeDisabled={busy}
-        title="Delete practice"
+        title="Move to Trash"
         description={
           <>
-            Permanently delete <span className="font-medium text-foreground">{title}</span> and all of its sets and
-            comments? This cannot be undone.
+            Move <span className="font-medium text-foreground">{title}</span> to Trash.
           </>
         }
         maxWidth="sm"
@@ -362,7 +361,7 @@ export default function PracticeActions({
               disabled={busy}
               className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-red-700 disabled:opacity-50"
             >
-              {busy ? "Deleting…" : "Delete"}
+              {busy ? "Moving…" : "Move to Trash"}
             </button>
           </ModalFooter>
         }

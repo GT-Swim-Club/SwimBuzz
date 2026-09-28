@@ -1,6 +1,7 @@
 import { forwardRef } from "react"
 import { StyleSheet, Text, View } from "react-native"
 import {
+  formatPracticeDistance,
   formatZonedInstantRange,
   groupPracticeSetsIntoRows,
   isHtmlEmpty,
@@ -29,13 +30,14 @@ export const PracticeExportCapture = forwardRef<
     endsAt: string
     timeZone: string
     location: string
+    course: string
     focus: string | null
     tags: string[]
     sets: PracticeShareSet[]
     totalDistance: number
   }
 >(function PracticeExportCapture(
-  { title, showDraft, startsAt, endsAt, timeZone, location, focus, tags, sets, totalDistance },
+  { title, showDraft, startsAt, endsAt, timeZone, location, course, focus, tags, sets, totalDistance },
   ref
 ) {
   const c = usePalette()
@@ -71,7 +73,7 @@ export const PracticeExportCapture = forwardRef<
             ) : null}
             {location && totalDistance > 0 ? <Text style={styles.metaText}>·</Text> : null}
             {totalDistance > 0 ? (
-              <Text style={styles.metaText}>{totalDistance} yards</Text>
+              <Text style={styles.metaText}>{formatPracticeDistance(totalDistance, course)}</Text>
             ) : null}
           </View>
         ) : null}

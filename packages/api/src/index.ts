@@ -8,6 +8,19 @@ import type {
   SessionUser,
 } from "@swimbuzz/shared"
 
+export type DeletedItem = {
+  id: string
+  kind: "practice" | "meet"
+  name: string
+  startsAt: string
+  deletedAt: string
+  purgeAfter: string
+  canRestore: boolean
+  deleteSwimsOnPurge: boolean
+  timeZone: string
+}
+export type RecentlyDeletedResponse = { items: DeletedItem[] }
+
 export type ApiClientOptions = {
   /** Empty string or undefined → same-origin relative `/api/...` (web). */
   baseUrl?: string
@@ -44,6 +57,7 @@ type PracticeWriteFields = {
   endTime?: string
   timeZone?: string
   location?: string
+  course?: "SCY" | "LCM" | "SCM"
   focus?: string | null
   tags?: string[]
   published?: boolean
@@ -172,6 +186,16 @@ export function createApiClient(options: ApiClientOptions = {}) {
   return {
     request,
 
+    listRecentlyDeleted() {
+      return request<RecentlyDeletedResponse>("/api/recently-deleted")
+    },
+    restoreDeleted(kind: "practice" | "meet", id: string) {
+      return request<{ ok: true }>("/api/recently-deleted", { method: "POST", body: JSON.stringify({ kind, id }) })
+    },
+    purgeDeleted(kind: "practice" | "meet", id: string) {
+      return request<{ ok: true }>("/api/recently-deleted", { method: "DELETE", body: JSON.stringify({ kind, id }) })
+    },
+
     requestEmailCode(email: string) {
       return request<{ ok: true } | { error: string }>("/api/auth/email/request", {
         method: "POST",
@@ -242,8 +266,8 @@ export function createApiClient(options: ApiClientOptions = {}) {
       })
     },
 
-    deleteMeet(id: string) {
-      return request<{ ok: true }>(`/api/meets/${id}`, { method: "DELETE" })
+    deleteMeet(id: string, deleteSwims = false) {
+      return request<{ ok: true }>(`/api/meets/${id}`, { method: "DELETE", body: JSON.stringify({ deleteMeet: true, deleteSwims }) })
     },
 
     putSignupEntry(

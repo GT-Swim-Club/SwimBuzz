@@ -1,9 +1,8 @@
 "use client"
 
-import type { ReactNode } from "react"
-import { useState, Fragment } from "react"
+import { useEffect, useState, Fragment } from "react"
 import Link from "next/link"
-import type { MeetResultEntry, SheetSummary } from "@/lib/meet/meet-sheet-summary"
+import type { MeetResultEntry, SheetEntry, SheetSummary } from "@/lib/meet/meet-sheet-summary"
 import {
   compareIndividualEntries,
   dropSeedOnlyAfterResults,
@@ -12,7 +11,6 @@ import {
   entryDisplaySplits,
   expandIndividualResultRows,
   groupSheetByAthlete,
-  hasSwimResultData,
   inferResultHeatTotals,
   isTimedFinalsEntry,
   isTimedFinalsRound,
@@ -21,7 +19,7 @@ import {
   relayLeadoffsFromSplits,
   uniqueRelayTeams,
 } from "@/lib/meet/meet-sheet-summary"
-import { compareRelayEvents, compareSwimEvents, normalizeEventName } from "@/lib/swim/swim-parse"
+import { canonicalizeStrokeEvent, compareRelayEvents, normalizeEventName } from "@/lib/swim/swim-parse"
 import {
   eventNumberForGender,
   isRosterOnlySheetEntry,
@@ -31,22 +29,23 @@ import {
   displayRelayLetter,
   effectiveRelayGender,
   effectiveRelayRound,
-  relayGenderLabel,
   relayTeamPlace,
   relayTeamTime,
   relayCoachIncompleteNote,
+  sanitizeRelaySplitTime,
 } from "@/lib/meet/relay-results"
-import type { SheetEntry } from "@/lib/meet/meet-sheet-summary"
+import { displayMeetResultTags } from "@/lib/swim/swim-tags"
+import { formatSeedTimeDelta, parseTime } from "@/lib/utils"
+import { athletePath } from "@/lib/slug"
+import { LedgerIcon } from "@/components/meet/Ledger"
 import EditMeetSwimButton from "./EditMeetSwimButton"
 import EditSheetSeedButton from "./EditSheetSeedButton"
 import RemoveRosterOnlyButton from "./RemoveRosterOnlyButton"
-import IndividualSummaryRow from "./IndividualSummaryRow"
-import type { ResultRoundSection } from "./IndividualSplitsModal"
-import RelaySummaryRow from "./RelaySummaryRow"
-import SummaryRowLayout from "@/components/ui/SummaryRowLayout"
-import { displayMeetResultTags } from "@/lib/swim/swim-tags"
-import { formatDisplayTime, formatSeedTimeDelta, podiumPlaceClass, parseTime } from "@/lib/utils"
-import { athletePath } from "@/lib/slug"
+import { EditRelayButton } from "./MeetRelayEditor"
+import MeetAddMenu from "./MeetAddMenu"
+import { MenuDivider, MenuItem, menuPanel } from "./MeetMenu"
+import SummaryRow, { EventBadge, type RowDisplay, type RowDensity, type RowResult } from "./SummaryRow"
+import type { DetailRound, SwimDetail } from "./SwimDetailModal"
 
 function formatHeat(entry: SheetSummary["entries"][number]) {
   // Alternates are finals-only; prelim rows may still carry the flag from merge.
@@ -99,16 +98,6 @@ function relayLane(entry: SheetSummary["entries"][number]): number | undefined {
   return entry.lane ?? entry.prelimLane ?? entry.finalLane
 }
 
-function formatOrdinal(n: number): string {
-  const mod100 = n % 100
-  if (mod100 >= 11 && mod100 <= 13) return `${n}th`
-  const mod10 = n % 10
-  if (mod10 === 1) return `${n}st`
-  if (mod10 === 2) return `${n}nd`
-  if (mod10 === 3) return `${n}rd`
-  return `${n}th`
-}
-
 function finalsPodiumPlace(entry: SheetSummary["entries"][number]): number | undefined {
   if (entry.entryType === "relay_team") {
     const round = effectiveRelayRound(entry)
@@ -126,509 +115,8 @@ function finalsPodiumPlace(entry: SheetSummary["entries"][number]): number | und
   return undefined
 }
 
-function podiumRowClass(place: number): string {
-  switch (place) {
-    case 1:
-      return "bg-amber-50 dark:bg-amber-950/30"
-    case 2:
-      return "bg-slate-100 dark:bg-slate-800/50"
-    case 3:
-      return "bg-orange-50 dark:bg-orange-950/25"
-    default:
-      return ""
-  }
-}
-
-function formatRoundPlace(
-  place: number | undefined,
-  round?: "prelim" | "final"
-) {
-  if (place == null || place < 1) return null
-  const isFinalsPodium = round === "final" && place >= 1 && place <= 3
-  return (
-    <span
-      className={`text-[11px] font-sans font-normal ${
-        isFinalsPodium ? podiumPlaceClass(place) : "text-foreground-tertiary dark:text-foreground-tertiary"
-      }`}
-    >
-      {formatOrdinal(place)}
-    </span>
-  )
-}
-
-function hasResultData(entry: SheetSummary["entries"][number]) {
-  return hasSwimResultData(entry)
-}
-
-function formatSeedTime(time: string, rank?: number): ReactNode {
-  return (
-    <span className="inline-flex items-baseline gap-1">
-      <span className="text-[11px] font-sans font-normal text-foreground-tertiary dark:text-foreground-tertiary">
-        Seed
-      </span>
-      <span className="font-mono">{formatDisplayTime(time)}</span>
-      {rank != null ? (
-        <>
-          <span className="text-gray-300 dark:text-zinc-600">·</span>
-          <span className="text-[11px] font-sans font-normal text-foreground-tertiary dark:text-foreground-tertiary">
-            #{rank}
-          </span>
-        </>
-      ) : null}
-    </span>
-  )
-}
-
-function formatSeed(entry: SheetSummary["entries"][number]) {
-  // Finals result rows omit seed in details (prelims row / seed delta cover it).
-  // Finals heat-sheet rows still show the prelims time used as seed.
-  if (
-    entry.resultRound === "F" &&
-    (entry.finalTime || (entry.resultTime && !entry.prelimTime))
-  ) {
-    return null
-  }
-  const seedValue =
-    entry.resultRound === "F"
-      ? entry.finalsSheetSeedTime
-      : entry.seedTime || entry.timeStatus
-  const seedRank = displaySeedRank(entry)
-  if (seedValue && seedRank != null) {
-    return `Seed ${formatDisplayTime(seedValue)} #${seedRank}`
-  }
-  if (seedValue) return `Seed ${formatDisplayTime(seedValue)}`
-  if (seedRank != null) return `Seed #${seedRank}`
-  return null
-}
-
-function hasRelayResultData(entry: SheetSummary["entries"][number]) {
-  return Boolean(entry.resultTime || entry.finalTime || entry.prelimTime)
-}
-
-function formatRelaySeedDetail(entry: SheetSummary["entries"][number]): string | null {
-  const round = effectiveRelayRound(entry)
-  const seedValue =
-    round === "F"
-      ? entry.finalsSheetSeedTime
-      : entry.seedTime || entry.prelimTime || entry.timeStatus
-  const seedRank = displaySeedRank(entry)
-  if (seedValue && seedRank != null) {
-    return `Seed ${formatDisplayTime(seedValue)} #${seedRank}`
-  }
-  if (seedValue) return `Seed ${formatDisplayTime(seedValue)}`
-  if (seedRank != null) return `Seed #${seedRank}`
-  return null
-}
-
-function formatPlacement(entry: SheetSummary["entries"][number], skipRelayLabel = false, hasResults: boolean) {
-  const parts: string[] = []
-
-  const roundLabel =
-    entry.entryType === "relay_team"
-      ? effectiveRelayRound(entry) === "P"
-        ? "Prelims"
-        : effectiveRelayRound(entry) === "F"
-          ? "Finals"
-          : isTimedFinalsRound(entry.round)
-            ? "Timed Finals"
-            : null
-      : entry.resultRound === "P"
-        ? "Prelims"
-        : entry.resultRound === "F"
-          ? "Finals"
-          : isTimedFinalsRound(entry.round)
-            ? "Timed Finals"
-            : null
-  if (roundLabel) parts.push(roundLabel)
-
-  if (entry.entryType === "relay_team") {
-    if (!skipRelayLabel) {
-      parts.push(`Relay ${displayRelayLetter(entry.relayLetter)}`)
-    }
-    const heat = formatHeat(entry)
-    if (heat) parts.push(heat)
-    const lane = relayLane(entry)
-    if (lane != null) parts.push(`Lane ${lane}`)
-    const seed = formatRelaySeedDetail(entry)
-    if (seed) parts.push(seed)
-    return parts.join(" · ")
-  }
-
-  if (entry.isRelayLeadoff) {
-    parts.push("Relay leadoff")
-    if (entry.relayLeadoffSource) parts.push(entry.relayLeadoffSource)
-  }
-  const heat = formatHeat(entry)
-  if (heat) parts.push(heat)
-  const lane = individualLane(entry)
-  if (lane != null) parts.push(`Lane ${lane}`)
-  const seed = hasResults ? formatSeed(entry) : null
-  if (seed) parts.push(seed)
-  return parts.join(" · ")
-}
-
-function formatSeedDeltaEl(
-  seedTime: string | undefined,
-  resultTime: string
-): ReactNode {
-  if (!seedTime) return null
-  const delta = formatSeedTimeDelta(seedTime, resultTime)
-  if (!delta) return null
-  const isDrop = delta.startsWith("-")
-  return (
-    <span
-      className={`text-[11px] font-mono tabular-nums ${
-        isDrop
-          ? "text-emerald-600 dark:text-emerald-400"
-          : "text-error dark:text-error"
-      }`}
-    >
-      {delta}
-    </span>
-  )
-}
-
-function formatRoundTime(
-  label: string,
-  time: string,
-  place?: number,
-  seedTime?: string
-) {
-  const round =
-    label === "Finals" || label === "Timed Finals"
-      ? "final"
-      : label === "Prelims"
-        ? "prelim"
-        : undefined
-  const placeEl = formatRoundPlace(place, round)
-  const deltaEl = formatSeedDeltaEl(seedTime, time)
-  return (
-    <span className="inline-flex items-baseline gap-1">
-      <span className="text-[11px] font-sans font-normal text-foreground-tertiary dark:text-foreground-tertiary">
-        {label}
-      </span>
-      {deltaEl}
-      <span className="font-mono">{formatDisplayTime(time)}</span>
-      {placeEl ? (
-        <>
-          <span className="text-gray-300 dark:text-zinc-600">·</span>
-          {placeEl}
-        </>
-      ) : null}
-    </span>
-  )
-}
-
-function formatTimedResult(time: string, place?: number, seedTime?: string) {
-  return formatRoundTime("Timed Finals", time, place, seedTime)
-}
-
-function formatRoundStatus(label: string, status: string) {
-  return (
-    <span className="inline-flex items-baseline gap-1">
-      <span className="text-[11px] font-sans font-normal text-foreground-tertiary dark:text-foreground-tertiary">
-        {label}
-      </span>
-      <span className="font-mono text-amber-700 dark:text-amber-400">{status}</span>
-    </span>
-  )
-}
-
-function formatTimedStatus(status: string) {
-  return formatRoundStatus("Timed Finals", status)
-}
-
-function formatRoundResult(
-  label: string,
-  time?: string,
-  status?: string,
-  place?: number,
-  seedTime?: string
-): ReactNode | null {
-  if (time) return formatRoundTime(label, time, place, seedTime)
-  if (status) return formatRoundStatus(label, status)
-  return null
-}
-
-function formatRelayTeamTime(entry: SheetSummary["entries"][number]): ReactNode {
-  const round = effectiveRelayRound(entry)
-  const time = relayTeamTime(entry)
-  const place = relayTeamPlace(entry)
-  const seed =
-    round === "F"
-      ? entry.finalsSheetSeedTime
-      : entry.seedTime ||
-        entry.prelimTime ||
-        (entry.timeStatus === "NT" ? "NT" : undefined)
-  const seedRank = displaySeedRank(entry)
-
-  if (round === "P" && time) return formatRoundTime("Prelims", time, place, seed)
-  if (round === "F" && time) return formatRoundTime("Finals", time, place, seed)
-  if (time) {
-    return isTimedFinalsEntry(entry)
-      ? formatTimedResult(time, place, seed)
-      : formatRoundTime("Finals", time, place, seed)
-  }
-  if (round === "P") {
-    return seed ? formatSeedTime(seed, seedRank) : (
-      <span className="inline-flex items-baseline gap-1">
-        <span className="text-[11px] font-sans font-normal text-foreground-tertiary dark:text-foreground-tertiary">
-          Prelims
-        </span>
-        <span className="font-mono">—</span>
-      </span>
-    )
-  }
-  if (round === "F") {
-    return seed ? formatSeedTime(seed, seedRank) : (
-      <span className="inline-flex items-baseline gap-1">
-        <span className="text-[11px] font-sans font-normal text-foreground-tertiary dark:text-foreground-tertiary">
-          Finals
-        </span>
-        <span className="font-mono">—</span>
-      </span>
-    )
-  }
-  if (seed) return formatSeedTime(seed, seedRank)
-  if (entry.timeStatus) return entry.timeStatus
-  return "—"
-}
-
-function formatIndividualResult(
-  entry: SheetSummary["entries"][number],
-  allEntries?: SummaryEntry[]
-): ReactNode {
-  const timedOpts = allEntries ? { allEntries } : undefined
-
-  if (entry.resultRound === "P") {
-    const seed =
-      entry.seedTime || (entry.timeStatus === "NT" ? "NT" : undefined)
-    return (
-      formatRoundResult(
-        "Prelims",
-        entry.prelimTime,
-        entry.prelimStatus,
-        entry.prelimPlace,
-        seed
-      ) ??
-      (seed ? (
-        formatSeedTime(seed, displaySeedRank(entry))
-      ) : (
-        <span className="inline-flex items-baseline gap-1">
-          <span className="text-[11px] font-sans font-normal text-foreground-tertiary dark:text-foreground-tertiary">
-            Prelims
-          </span>
-          <span className="font-mono">—</span>
-        </span>
-      ))
-    )
-  }
-
-  if (entry.resultRound === "F") {
-    // Finals seed = prelims time from results or finals heat sheet, not psych seed.
-    const seed = entry.finalsSheetSeedTime
-    if (isTimedFinalsEntry(entry, timedOpts)) {
-      const time = entry.finalTime ?? entry.resultTime
-      const status =
-        entry.finalStatus === "NS" ? undefined : entry.finalStatus ?? entry.resultStatus
-      return (
-        formatRoundResult(
-          "Timed Finals",
-          time,
-          status,
-          entry.finalPlace ?? entry.resultPlace,
-          seed
-        ) ?? "—"
-      )
-    }
-    const finalStatus =
-      entry.finalStatus === "NS" ? undefined : entry.finalStatus
-    return (
-      formatRoundResult(
-        "Finals",
-        entry.finalTime,
-        finalStatus,
-        entry.finalPlace,
-        seed
-      ) ??
-      (seed ? (
-        formatSeedTime(seed, displaySeedRank(entry))
-      ) : (
-        <span className="inline-flex items-baseline gap-1">
-          <span className="text-[11px] font-sans font-normal text-foreground-tertiary dark:text-foreground-tertiary">
-            Finals
-          </span>
-          <span className="font-mono">—</span>
-        </span>
-      ))
-    )
-  }
-
-  const seed =
-    entry.seedTime ||
-    entry.prelimTime ||
-    (entry.timeStatus === "NT" ? "NT" : undefined)
-
-  const prelim = formatRoundResult(
-    "Prelims",
-    entry.prelimTime,
-    entry.prelimStatus,
-    entry.prelimPlace,
-    seed
-  )
-  // SwimPhone marks non-advancers as NS in the finals column — omit that.
-  const finalStatus =
-    entry.finalStatus === "NS" ? undefined : entry.finalStatus
-  const final = formatRoundResult(
-    "Finals",
-    entry.finalTime,
-    finalStatus,
-    entry.finalPlace,
-    seed
-  )
-  if (prelim && final) {
-    return (
-      <span className="inline-flex items-baseline gap-2">
-        {prelim}
-        <span className="text-gray-300 dark:text-zinc-600">·</span>
-        {final}
-      </span>
-    )
-  }
-  if (final) {
-    return isTimedFinalsEntry(entry, timedOpts)
-      ? formatTimedResult(entry.finalTime!, entry.finalPlace, seed)
-      : final
-  }
-  if (prelim) return prelim
-  if (entry.resultTime) {
-    return isTimedFinalsEntry(entry, timedOpts)
-      ? formatTimedResult(entry.resultTime, entry.resultPlace, seed)
-      : formatRoundTime("Finals", entry.resultTime, entry.resultPlace, seed)
-  }
-  if (entry.resultStatus) {
-    return isTimedFinalsEntry(entry, timedOpts)
-      ? formatTimedStatus(entry.resultStatus)
-      : formatRoundStatus("Finals", entry.resultStatus)
-  }
-  if (seed) return formatSeedTime(seed, displaySeedRank(entry))
-  if (entry.timeStatus) return entry.timeStatus
-  return "—"
-}
-
-function getRawTime(entry: SheetEntry): string | undefined {
-  if (entry.isRelayLeadoff && entry.relayLeadoffTime) return entry.relayLeadoffTime
-  if (entry.entryType === "relay_team") return relayTeamTime(entry) ?? undefined
-  if (entry.resultRound === "P") {
-    return entry.prelimTime ?? entry.resultTime ?? undefined
-  }
-  if (entry.resultRound === "F") {
-    return entry.finalTime ?? entry.resultTime ?? undefined
-  }
-  return entry.resultTime ?? entry.finalTime ?? entry.prelimTime ?? undefined
-}
-
 function formatHeatNumber(heat: string | null): string | undefined {
   return heat?.replace(/^Heat\s+/i, "") || undefined
-}
-
-function buildIndividualRoundSections(
-  entry: SheetEntry,
-  allEntries?: SummaryEntry[]
-): ResultRoundSection[] {
-  if (entry.entryType === "relay_team" || entry.isRelayLeadoff) return []
-
-  const timedOpts = { allEntries }
-  const sections: ResultRoundSection[] = []
-  const hasPrelim = Boolean(entry.prelimTime || entry.prelimStatus)
-  const hasFinal = Boolean(
-    entry.finalTime || (entry.finalStatus && entry.finalStatus !== "NS")
-  )
-
-  if (hasPrelim) {
-    const prelimHeat =
-      entry.prelimHeat != null && entry.prelimHeat > 0
-        ? entry.prelimHeatTotal != null
-          ? `${entry.prelimHeat} of ${entry.prelimHeatTotal}`
-          : String(entry.prelimHeat)
-        : entry.resultRound === "P"
-          ? formatHeatNumber(formatHeat(entry))
-          : undefined
-    sections.push({
-      label: "Prelims",
-      time: entry.prelimTime,
-      place: entry.prelimPlace,
-      status: entry.prelimStatus,
-      heat: prelimHeat,
-      lane:
-        entry.prelimLane ??
-        (entry.resultRound === "P" ? individualLane(entry) : undefined),
-      splits: entry.prelimSplits ?? (entry.resultRound === "P" ? entry.splits : undefined) ?? [],
-      seedTime: entry.seedTime,
-      seedRank: entry.seedRank,
-    })
-  }
-
-  if (hasFinal) {
-    const timed = isTimedFinalsEntry(entry, timedOpts)
-    const finalLabel = timed ? "Timed Finals" : "Finals"
-    const finalHeat =
-      entry.finalHeat != null && entry.finalHeat > 0
-        ? entry.finalHeatTotal != null
-          ? `${entry.finalHeat} of ${entry.finalHeatTotal}`
-          : String(entry.finalHeat)
-        : undefined
-    sections.push({
-      label: finalLabel,
-      time: entry.finalTime,
-      place: entry.finalPlace,
-      status:
-        entry.finalStatus === "NS" ? undefined : entry.finalStatus,
-      heat: finalHeat,
-      lane: entry.finalLane,
-      splits: entry.finalSplits ?? (entry.resultRound === "F" ? entry.splits : undefined) ?? [],
-      seedTime: timed ? entry.seedTime : entry.finalsSheetSeedTime,
-      seedRank: timed ? entry.seedRank : finalsSeedRank(entry),
-    })
-  }
-
-  if (
-    sections.length === 0 &&
-    (entry.resultTime || entry.resultStatus || entryDisplaySplits(entry).length > 0)
-  ) {
-    const timed = isTimedFinalsEntry(entry, timedOpts)
-    sections.push({
-      label: timed ? "Timed Finals" : "Result",
-      time: entry.resultTime,
-      place: entry.resultPlace,
-      status: entry.resultStatus,
-      heat: formatHeatNumber(formatHeat(entry)),
-      lane: individualLane(entry),
-      splits: entryDisplaySplits(entry),
-      seedTime: entry.seedTime,
-      seedRank: entry.seedRank,
-    })
-  }
-
-  return sections
-}
-
-function formatTime(
-  entry: SheetSummary["entries"][number],
-  allEntries?: SummaryEntry[]
-): ReactNode {
-  if (entry.isRelayLeadoff && entry.relayLeadoffTime) {
-    return formatRoundTime(
-      "Leadoff",
-      entry.relayLeadoffTime,
-      entry.resultPlace,
-      entry.seedTime
-    )
-  }
-  if (entry.entryType === "relay_team") {
-    return formatRelayTeamTime(entry)
-  }
-  return formatIndividualResult(entry, allEntries)
 }
 
 type SummaryEntry = SheetSummary["entries"][number]
@@ -641,19 +129,6 @@ function entryRowKey(
   const gender = effectiveRelayGender(entry, athleteGenders)
   const athleteKey = entry.entryType !== "relay_team" ? `-${entry.athleteId}` : ""
   return `${entry.event}-${entry.eventNumber}-${entry.entryType}-${gender}-${entry.relayLetter ?? ""}-${entry.relayRound ?? ""}-${entry.resultRound ?? ""}-${entry.relayLeadoffSource ?? ""}-${entry.relayLeadoffRound ?? ""}-${entry.isRelayLeadoff ? "leadoff" : ""}${athleteKey}-${i}`
-}
-
-function formatRelayEventLabel(
-  entry: SummaryEntry,
-  athleteGenders?: Map<string, "M" | "F">
-) {
-  const gender = effectiveRelayGender(entry, athleteGenders)
-  const prefix = relayGenderLabel(gender)
-  return prefix ? `${prefix} ${entry.event}` : entry.event
-}
-
-function withEventNumber(eventNumber: number | null | undefined, label: string): string {
-  return eventNumber != null && eventNumber > 0 ? `#${eventNumber} ${label}` : label
 }
 
 function resolveDisplayEventNumber(
@@ -676,9 +151,194 @@ function resolveDisplayEventNumber(
   return opt.women ?? opt.men ?? 0
 }
 
+type RoundResult = {
+  label: string | null
+  time?: string
+  status?: string
+  place?: number
+  seed?: string
+}
+
+function pendingRoundLabel(entry: SummaryEntry): string | null {
+  if (entry.entryType === "relay_team") {
+    const round = effectiveRelayRound(entry)
+    if (round === "P") return "Prelims"
+    if (round === "F") return "Finals"
+  } else {
+    if (entry.resultRound === "P") return "Prelims"
+    if (entry.resultRound === "F") return "Finals"
+  }
+  return isTimedFinalsRound(entry.round) ? "Timed Finals" : null
+}
+
+/** The single round a summary row represents: its time/status, place and the seed it's measured against. */
+function rowRoundResult(entry: SummaryEntry, allEntries?: SummaryEntry[]): RoundResult {
+  const timedOpts = allEntries ? { allEntries } : undefined
+  const nt = entry.timeStatus === "NT" ? "NT" : undefined
+
+  if (entry.isRelayLeadoff && entry.relayLeadoffTime) {
+    return {
+      label: "Leadoff",
+      time: entry.relayLeadoffTime,
+      place: entry.resultPlace,
+      seed: entry.seedTime,
+    }
+  }
+
+  if (entry.entryType === "relay_team") {
+    const round = effectiveRelayRound(entry)
+    const time = relayTeamTime(entry) ?? undefined
+    const seed =
+      round === "F" ? entry.finalsSheetSeedTime : entry.seedTime || entry.prelimTime || nt
+    const label =
+      round === "P"
+        ? "Prelims"
+        : round === "F"
+          ? "Finals"
+          : time
+            ? isTimedFinalsEntry(entry)
+              ? "Timed Finals"
+              : "Finals"
+            : pendingRoundLabel(entry)
+    return { label, time, place: time ? relayTeamPlace(entry) : undefined, seed }
+  }
+
+  if (entry.resultRound === "P") {
+    return {
+      label: "Prelims",
+      time: entry.prelimTime,
+      status: entry.prelimStatus,
+      place: entry.prelimPlace,
+      seed: entry.seedTime || nt,
+    }
+  }
+
+  const finalStatus = entry.finalStatus === "NS" ? undefined : entry.finalStatus
+
+  if (entry.resultRound === "F") {
+    // Finals seed = prelims time from results or finals heat sheet, not psych seed.
+    const seed = entry.finalsSheetSeedTime
+    if (isTimedFinalsEntry(entry, timedOpts)) {
+      return {
+        label: "Timed Finals",
+        time: entry.finalTime ?? entry.resultTime,
+        status: finalStatus ?? entry.resultStatus,
+        place: entry.finalPlace ?? entry.resultPlace,
+        seed,
+      }
+    }
+    return { label: "Finals", time: entry.finalTime, status: finalStatus, place: entry.finalPlace, seed }
+  }
+
+  const seed = entry.seedTime || entry.prelimTime || nt
+  const timed = isTimedFinalsEntry(entry, timedOpts)
+  if (entry.finalTime || finalStatus) {
+    return {
+      label: timed ? "Timed Finals" : "Finals",
+      time: entry.finalTime,
+      status: finalStatus,
+      place: entry.finalPlace,
+      seed,
+    }
+  }
+  if (entry.prelimTime || entry.prelimStatus) {
+    return {
+      label: "Prelims",
+      time: entry.prelimTime,
+      status: entry.prelimStatus,
+      place: entry.prelimPlace,
+      seed,
+    }
+  }
+  if (entry.resultTime || entry.resultStatus) {
+    return {
+      label: timed ? "Timed Finals" : "Finals",
+      time: entry.resultTime,
+      status: entry.resultStatus,
+      place: entry.resultPlace,
+      seed,
+    }
+  }
+  return { label: pendingRoundLabel(entry), seed: seed || entry.timeStatus }
+}
+
+function buildIndividualRounds(entry: SheetEntry, allEntries?: SummaryEntry[]): DetailRound[] {
+  if (entry.entryType === "relay_team" || entry.isRelayLeadoff) return []
+
+  const timedOpts = { allEntries }
+  const rounds: DetailRound[] = []
+  const hasPrelim = Boolean(entry.prelimTime || entry.prelimStatus)
+  const hasFinal = Boolean(entry.finalTime || (entry.finalStatus && entry.finalStatus !== "NS"))
+
+  if (hasPrelim) {
+    const prelimHeat =
+      entry.prelimHeat != null && entry.prelimHeat > 0
+        ? entry.prelimHeatTotal != null
+          ? `${entry.prelimHeat} of ${entry.prelimHeatTotal}`
+          : String(entry.prelimHeat)
+        : entry.resultRound === "P"
+          ? formatHeatNumber(formatHeat(entry))
+          : undefined
+    rounds.push({
+      label: "Prelims",
+      time: entry.prelimTime,
+      place: entry.prelimPlace,
+      status: entry.prelimStatus,
+      heat: prelimHeat,
+      lane: entry.prelimLane ?? (entry.resultRound === "P" ? individualLane(entry) : undefined),
+      splits: entry.prelimSplits ?? (entry.resultRound === "P" ? entry.splits : undefined) ?? [],
+      seedTime: entry.seedTime,
+      seedRank: entry.seedRank,
+    })
+  }
+
+  if (hasFinal) {
+    const timed = isTimedFinalsEntry(entry, timedOpts)
+    const finalHeat =
+      entry.finalHeat != null && entry.finalHeat > 0
+        ? entry.finalHeatTotal != null
+          ? `${entry.finalHeat} of ${entry.finalHeatTotal}`
+          : String(entry.finalHeat)
+        : undefined
+    rounds.push({
+      label: timed ? "Timed Finals" : "Finals",
+      time: entry.finalTime,
+      place: entry.finalPlace,
+      podium: true,
+      status: entry.finalStatus === "NS" ? undefined : entry.finalStatus,
+      heat: finalHeat,
+      lane: entry.finalLane,
+      splits: entry.finalSplits ?? (entry.resultRound === "F" ? entry.splits : undefined) ?? [],
+      seedTime: timed ? entry.seedTime : entry.finalsSheetSeedTime,
+      seedRank: timed ? entry.seedRank : finalsSeedRank(entry),
+    })
+  }
+
+  if (
+    rounds.length === 0 &&
+    (entry.resultTime || entry.resultStatus || entryDisplaySplits(entry).length > 0)
+  ) {
+    const timed = isTimedFinalsEntry(entry, timedOpts)
+    rounds.push({
+      label: timed ? "Timed Finals" : "Result",
+      time: entry.resultTime,
+      place: entry.resultPlace,
+      podium: true,
+      status: entry.resultStatus,
+      heat: formatHeatNumber(formatHeat(entry)),
+      lane: individualLane(entry),
+      splits: entryDisplaySplits(entry),
+      seedTime: entry.seedTime,
+      seedRank: entry.seedRank,
+    })
+  }
+
+  return rounds
+}
+
 function initialsFromName(name?: string | null) {
   if (name?.includes(",")) {
-    const [lastName, firstName] = name.split(',').map(s => s.trim())
+    const [lastName, firstName] = name.split(",").map((s) => s.trim())
     if (firstName && lastName) {
       return `${firstName[0]}${lastName[0]}`.toUpperCase()
     }
@@ -694,155 +354,237 @@ function initialsFromName(name?: string | null) {
 }
 
 function getEntryPlace(entry: SheetEntry): number | undefined {
-  return entry.resultPlace ?? entry.finalPlace ?? entry.prelimPlace;
+  return entry.resultPlace ?? entry.finalPlace ?? entry.prelimPlace
 }
 
 function compareByPlace(a: SummaryEntry, b: SummaryEntry, hasResults: boolean): number {
-  const placeA = getEntryPlace(a);
-  const placeB = getEntryPlace(b);
+  const placeA = getEntryPlace(a)
+  const placeB = getEntryPlace(b)
 
   if (hasResults) {
-    const pA = placeA ?? Infinity;
-    const pB = placeB ?? Infinity;
-    if (pA !== pB) return pA - pB;
+    const pA = placeA ?? Infinity
+    const pB = placeB ?? Infinity
+    if (pA !== pB) return pA - pB
   } else {
     // 1. Sort by seedTime fastest to slowest
-    const isNt = (time?: string) => !time || /^nt$/i.test(time.trim());
-    const isNtA = isNt(a.seedTime);
-    const isNtB = isNt(b.seedTime);
+    const isNt = (time?: string) => !time || /^nt$/i.test(time.trim())
+    const isNtA = isNt(a.seedTime)
+    const isNtB = isNt(b.seedTime)
 
-    if (isNtA && !isNtB) return 1;
-    if (!isNtA && isNtB) return -1;
+    if (isNtA && !isNtB) return 1
+    if (!isNtA && isNtB) return -1
     if (!isNtA && !isNtB) {
-      const msA = parseTime(a.seedTime!);
-      const msB = parseTime(b.seedTime!);
+      const msA = parseTime(a.seedTime!)
+      const msB = parseTime(b.seedTime!)
       if (Number.isFinite(msA) && Number.isFinite(msB) && msA !== msB) {
-        return msA - msB;
+        return msA - msB
       }
     }
 
     // 2. Fallback to seedRank if seedTime is the same
-    const rA = a.seedRank != null ? Number(a.seedRank) : Infinity;
-    const rB = b.seedRank != null ? Number(b.seedRank) : Infinity;
-    if (rA !== rB) return rA - rB;
+    const rA = a.seedRank != null ? Number(a.seedRank) : Infinity
+    const rB = b.seedRank != null ? Number(b.seedRank) : Infinity
+    if (rA !== rB) return rA - rB
   }
 
-  return compareIndividualEntries(a, b);
+  return compareIndividualEntries(a, b)
 }
 
-function AthleteAvatar({ image, name }: { image?: string | null; name: string }) {
+function AthleteAvatar({
+  image,
+  name,
+  compact = false,
+}: {
+  image?: string | null
+  name: string
+  compact?: boolean
+}) {
   return (
-    <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border-secondary bg-primary/10 text-[10px] font-medium text-primary">
+    <span
+      className={`inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-border-secondary bg-accent/10 font-medium text-accent ${
+        compact ? "h-5 w-5 text-[9px]" : "h-6 w-6 text-[10px]"
+      }`}
+    >
       {image ? (
         <img src={image} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
       ) : (
-        <span>{initialsFromName(name)}</span>
+        initialsFromName(name)
       )}
-    </div>
+    </span>
   )
+}
+
+/** Detail-modal title in one format: "Men 200 Free Relay", "Women 100 Fly", "Mixed 200 Medley Relay". */
+function detailEventTitle(event: string, gender: string | null | undefined): string {
+  const name = canonicalizeStrokeEvent(event)
+    .replace(/\b(men'?s?|women'?s?|boys'?|girls'?|mixed|co-?ed)\s+/gi, "")
+    .trim()
+  const prefix = gender === "M" ? "Men" : gender === "F" ? "Women" : gender === "X" ? "Mixed" : ""
+  return [prefix, name].filter(Boolean).join(" ")
+}
+
+type AthleteRecord = {
+  id: string
+  slug?: string | null
+  name: string
+  gender?: "M" | "F"
+  image?: string | null
 }
 
 function SummaryEntryRow({
   entry,
+  display,
   canEdit,
   meetId,
   meetName,
   athletes,
   athleteGenders,
-  eventLabel,
   allEntries,
   individualEventOptions,
   editableSeedKeys = new Set<string>(),
   eventNumberOptions,
-  showAthleteInfo = false,
-  skipRelayLabel = false,
-  forceEventNumber = false,
+  eventView = false,
 }: {
   entry: SummaryEntry
+  display: RowDisplay
   canEdit?: boolean
   meetId?: string
   meetName?: string
-  athletes?: Array<{ id: string; slug?: string | null; name: string; image?: string | null }>
+  athletes?: AthleteRecord[]
   athleteGenders?: Map<string, "M" | "F">
-  eventLabel?: string
-  showAthleteInfo?: boolean
-  skipRelayLabel?: boolean
-  forceEventNumber?: boolean
   allEntries?: SummaryEntry[]
   individualEventOptions?: string[]
   editableSeedKeys?: Set<string>
   eventNumberOptions?: MeetSignupEventOption[]
+  /** Rows sit under an event header: label by athlete / relay letter, no event badge. */
+  eventView?: boolean
 }) {
-  const hasResults = entry.entryType === "relay_team" ? hasRelayResultData(entry) : hasSwimResultData(entry)
-  const placement = formatPlacement(entry, skipRelayLabel, hasResults)
-  const details = [
-    placement,
-    entry.startTime,
-    entry.entryType !== "relay_team"
-      ? displayMeetResultTags(entry.resultTags ?? "") ?? null
-      : null,
-  ]
-    .filter(Boolean)
-    .join(" · ")
-  
+  const [relayEditOpen, setRelayEditOpen] = useState(false)
+  const isRelay = entry.entryType === "relay_team"
   const athleteRecord = athletes?.find((a) => a.id === entry.athleteId)
-  const athleteAvatar = showAthleteInfo && entry.entryType !== "relay_team" ? (
-      <AthleteAvatar image={athleteRecord?.image} name={entry.athleteName} />
-  ) : null;
+  const eventNumber = resolveDisplayEventNumber(entry, athleteGenders, eventNumberOptions)
+  const compact = display.density === "compact"
+  const res = rowRoundResult(entry, allEntries)
+  const podiumPlace = finalsPodiumPlace(entry)
+  const relayLetter = isRelay ? `Relay ${displayRelayLetter(entry.relayLetter)}` : undefined
 
-  const eventName = eventLabel ??
-      (entry.rosterOnly
-        ? "Attending"
-        : entry.entryType === "relay_team"
-          ? formatRelayEventLabel(entry, athleteGenders)
-          : entry.event);
+  const heat = formatHeat(entry)
+  const lane = isRelay ? relayLane(entry) : individualLane(entry)
+  const heatLane =
+    [heat, lane != null ? `Lane ${lane}` : null, entry.startTime].filter(Boolean).join(" · ") || null
 
-  const eventWithNum = withEventNumber(
-    (entry.entryType === "relay_team" && eventLabel && !forceEventNumber) ? null : resolveDisplayEventNumber(entry, athleteGenders, eventNumberOptions),
-    eventName
-  );
+  const tags = !isRelay ? displayMeetResultTags(entry.resultTags ?? "") : null
+  const sub = [entry.isRelayLeadoff ? "Relay leadoff" : null, tags].filter(Boolean).join(" · ")
 
-  const label = (
-    <div className="flex items-center gap-2">
-      {athleteAvatar}
-      {showAthleteInfo && entry.entryType !== "relay_team" ? (
-          <span className={`${showAthleteInfo ? "font-normal" : "font-medium"} text-foreground group-hover:text-primary transition-colors`}>{entry.athleteName}</span>
-      ) : null}
-      {(!showAthleteInfo || entry.entryType === "relay_team") && eventWithNum}
-    </div>
-  )
+  const result: RowResult = entry.rosterOnly
+    ? { kind: "none" }
+    : res.time || res.status
+      ? {
+          kind: "done",
+          time: res.time,
+          status: res.status,
+          delta:
+            res.seed && res.time && res.seed !== "NT"
+              ? formatSeedTimeDelta(res.seed, res.time)
+              : null,
+          place: res.place,
+          podium: podiumPlace != null && podiumPlace === res.place,
+        }
+      : res.seed
+        ? { kind: "seed", seed: res.seed, seedRank: displaySeedRank(entry) }
+        : { kind: "none" }
 
-  // Swim info for modal
-  const finalsSeed =
-    entry.resultRound === "F" ||
-    (entry.entryType === "relay_team" && effectiveRelayRound(entry) === "F")
-  const swimInfo = {
-    seedTime: finalsSeed
-      ? entry.finalsSheetSeedTime
-      : entry.seedTime ?? entry.timeStatus ?? undefined,
-    rank: displaySeedRank(entry),
-    resultPlace: entry.resultPlace ?? entry.finalPlace ?? entry.prelimPlace,
-    heat: formatHeat(entry)?.replace("Heat ", ""),
-    lane: entry.entryType === "relay_team" ? relayLane(entry) : individualLane(entry),
-    time: typeof formatTime(entry, allEntries) === "string" ? (formatTime(entry, allEntries) as string) : undefined,
-    rawTime: getRawTime(entry)
+  const eventName = entry.rosterOnly ? "Attending" : entry.event
+  const detailTitle = entry.rosterOnly
+    ? eventName
+    : detailEventTitle(
+        entry.event,
+        isRelay
+          ? effectiveRelayGender(entry, athleteGenders)
+          : entry.gender || athleteGenders?.get(entry.athleteId)
+      )
+  const coachNote = isRelay && canEdit ? relayCoachIncompleteNote(entry) ?? undefined : undefined
+
+  // Detail modal
+  let detail: SwimDetail
+  if (isRelay) {
+    detail = {
+      kind: "relay",
+      eventNumber: eventNumber || undefined,
+      title: detailTitle,
+      subLine: [relayLetter, res.label].filter(Boolean).join(" · "),
+      rounds: [
+        {
+          label: res.label ?? "Relay",
+          time: res.time,
+          place: res.place,
+          podium: effectiveRelayRound(entry) !== "P",
+          seedTime: res.seed && res.seed !== "NT" ? res.seed : undefined,
+          seedRank: displaySeedRank(entry),
+          heat: formatHeatNumber(heat),
+          lane,
+          splits: [],
+        },
+      ],
+      relaySwimmers: [...(entry.relaySwimmers ?? [])]
+        .sort((a, b) => a.leg - b.leg)
+        .map((s) => ({ name: s.name, split: sanitizeRelaySplitTime(s.splitTime) })),
+      coachNote,
+    }
+  } else {
+    const rounds = buildIndividualRounds(entry, allEntries)
+    const fallback: DetailRound = {
+      label: res.label ?? "Entry",
+      time: res.time,
+      status: res.status,
+      place: res.place,
+      podium: podiumPlace != null,
+      seedTime: res.seed && res.seed !== "NT" ? res.seed : undefined,
+      seedRank: displaySeedRank(entry),
+      heat: formatHeatNumber(heat),
+      lane,
+      splits: entryDisplaySplits(entry),
+    }
+    const detailRounds = rounds.length > 0 ? rounds : [fallback]
+    detail = {
+      kind: "individual",
+      eventNumber: eventNumber || undefined,
+      athleteName: entry.athleteName,
+      athleteHref: athletePath(athleteRecord?.slug ?? entry.athleteId),
+      title: detailTitle,
+      subLine: [
+        entry.isRelayLeadoff ? ["Relay leadoff", entry.relayLeadoffSource].filter(Boolean).join(" · ") : null,
+        detailRounds.length > 1 ? detailRounds.map((r) => r.label).join(" · ") : detailRounds[0].label,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+      rounds: detailRounds,
+    }
   }
 
   const editButton =
     canEdit && meetId ? (
-      isRosterOnlySheetEntry(entry) ? (
+      isRelay ? (
+        <EditRelayButton
+          meetId={meetId}
+          athletes={athletes ?? []}
+          entry={entry}
+          open={relayEditOpen}
+          onOpenChange={setRelayEditOpen}
+        />
+      ) : isRosterOnlySheetEntry(entry) ? (
         <RemoveRosterOnlyButton
           meetId={meetId}
           athleteId={entry.athleteId}
           athleteName={entry.athleteName}
         />
       ) : entry.manual &&
-      !entry.isRelayLeadoff &&
-      entry.swimId &&
-      entry.course &&
-      entry.date &&
-      entry.timeMs != null &&
-      athletes ? (
+        !entry.isRelayLeadoff &&
+        entry.swimId &&
+        entry.course &&
+        entry.date &&
+        entry.timeMs != null &&
+        athletes ? (
         <EditMeetSwimButton
           swimId={entry.swimId}
           meetId={meetId}
@@ -856,11 +598,8 @@ function SummaryEntryRow({
         />
       ) : !entry.isRelayLeadoff &&
         !entry.swimId &&
-        entry.entryType !== "relay_team" &&
         (entry.manual === true ||
-          editableSeedKeys.has(
-            `${entry.athleteId}|${normalizeEventName(entry.event)}`
-          )) ? (
+          editableSeedKeys.has(`${entry.athleteId}|${normalizeEventName(entry.event)}`)) ? (
         <EditSheetSeedButton
           meetId={meetId}
           athleteId={entry.athleteId}
@@ -873,85 +612,35 @@ function SummaryEntryRow({
       ) : null
     ) : null
 
-  if (entry.entryType === "relay_team") {
-    const round = effectiveRelayRound(entry)
-    const gender = effectiveRelayGender(entry, athleteGenders)
-    const roundSuffix =
-      round === "P"
-        ? " · Prelims"
-        : round === "F"
-          ? " · Finals"
-          : hasRelayResultData(entry)
-            ? isTimedFinalsEntry(entry)
-              ? " · Timed Finals"
-              : " · Finals"
-            : ""
-    const genderLabel = gender === "F" ? "Women's" : gender === "M" ? "Men's" : gender === "X" ? "Mixed" : "";
-    const eventNum = entry.eventNumber > 0 ? `#${entry.eventNumber} ` : ""
-    const detailTitle = `${eventNum}${genderLabel} ${entry.event} ${displayRelayLetter(entry.relayLetter)}${roundSuffix}`
-    const podium = finalsPodiumPlace(entry)
-    const coachNote = canEdit ? relayCoachIncompleteNote(entry) ?? undefined : undefined
-    const rowId = entry.swimId ? `swim-${entry.swimId}` : undefined
-
-    return (
-      <RelaySummaryRow
-        id={rowId}
-        entry={entry}
-        label={label}
-        details={details || undefined}
-        coachNote={coachNote}
-        timeDisplay={formatTime(entry, allEntries)}
-        detailTitle={detailTitle}
-        rowClassName={podium ? podiumRowClass(podium) : undefined}
-        canEdit={canEdit}
-        meetId={meetId}
-        athletes={athletes}
-        swimInfo={swimInfo}
-      />
-    )
-  }
-
-  const podiumPlace = finalsPodiumPlace(entry)
-  const splits = entryDisplaySplits(entry)
-  const roundSections = buildIndividualRoundSections(entry, allEntries)
-  const hasBothRounds = roundSections.length > 1
-  const roundSuffix =
-    hasBothRounds
-      ? ""
-      : entry.resultRound === "P"
-        ? " · Prelims"
-        : entry.resultRound === "F"
-          ? " · Finals"
-          : hasSwimResultData(entry)
-            ? isTimedFinalsEntry(entry, { allEntries })
-              ? " · Timed Finals"
-              : ""
-            : ""
-  const detailTitle = `${withEventNumber(
-    resolveDisplayEventNumber(entry, athleteGenders, eventNumberOptions),
-    eventName
-  )}${roundSuffix}`
-  const timeDisplay = entry.rosterOnly ? "—" : formatTime(entry, allEntries)
-  const rowId = entry.swimId ? `swim-${entry.swimId}` : undefined
-
   return (
-      <IndividualSummaryRow
-        id={rowId}
-        label={label}
-        athleteName={entry.athleteName}
-        athleteId={entry.athleteId}
-        athleteSlug={athleteRecord?.slug}
-        details={details || undefined}
-        timeDisplay={timeDisplay}
-        detailTitle={detailTitle}
-        rowClassName={podiumPlace ? podiumRowClass(podiumPlace) : undefined}
-        splits={splits}
-        editButton={editButton}
-        swimInfo={swimInfo}
-        rounds={roundSections.length > 0 ? roundSections : undefined}
-      />
+    <SummaryRow
+      id={entry.swimId ? `swim-${entry.swimId}` : undefined}
+      display={display}
+      eventNumber={!eventView && eventNumber > 0 ? eventNumber : undefined}
+      avatar={
+        eventView && !isRelay ? (
+          <AthleteAvatar image={athleteRecord?.image} name={entry.athleteName} compact={compact} />
+        ) : undefined
+      }
+      label={eventView ? (isRelay ? relayLetter : entry.athleteName) : eventName}
+      sub={sub || undefined}
+      team={!eventView ? relayLetter : undefined}
+      round={entry.rosterOnly || entry.isRelayLeadoff ? null : res.label}
+      heatLane={heatLane}
+      note={coachNote}
+      result={result}
+      detail={detail}
+      trailing={editButton}
+      onEditRelay={isRelay && canEdit && meetId ? () => setRelayEditOpen(true) : undefined}
+    />
   )
 }
+
+const DENSITY_KEY = "swimbuzz-summary-row-density"
+const ROWINFO_KEY = "swimbuzz-summary-row-info"
+
+const toolbarButton =
+  "inline-flex h-[38px] w-[38px] cursor-pointer items-center justify-center rounded-lg border border-border bg-background text-foreground transition-colors hover:bg-fill"
 
 export default function MeetSheetSummarySection({
   psychSummary,
@@ -960,9 +649,10 @@ export default function MeetSheetSummarySection({
   entriesSummary,
   results,
   relayResults,
-  headerAction,
   meetId,
   meetName,
+  defaultCourse,
+  defaultDate,
   athletes = [],
   rosterAthletes = [],
   canEdit = false,
@@ -977,12 +667,14 @@ export default function MeetSheetSummarySection({
   entriesSummary?: SheetSummary | null
   results?: MeetResultEntry[] | null
   relayResults?: SheetSummary["entries"] | null
-  headerAction?: ReactNode
   meetId?: string
   meetName?: string
-  athletes?: Array<{ id: string; slug?: string | null; name: string; gender?: "M" | "F"; image?: string | null }>
+  /** Defaults for the coach "Add swim" dialog. */
+  defaultCourse?: string
+  defaultDate?: string
+  athletes?: AthleteRecord[]
   /** Athletes attending this meet, including roster-only and signup entries. */
-  rosterAthletes?: Array<{ id: string; slug?: string | null; name: string; gender?: "M" | "F"; image?: string | null }>
+  rosterAthletes?: AthleteRecord[]
   canEdit?: boolean
   /** Linked roster athlete for the signed-in user — their rows pin to the top. */
   viewerAthleteId?: string | null
@@ -994,11 +686,65 @@ export default function MeetSheetSummarySection({
   eventNumberOptions?: MeetSignupEventOption[]
 }) {
   const editableSeedKeySet = new Set(editableSeedKeys)
-  const [searchQuery, setSearchQuery] = useState("");
-  const [viewByEvent, setViewByEvent] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("")
+  const [viewByEvent, setViewByEvent] = useState(false)
   const [viewMode, setViewMode] = useState<"summary" | "roster">("summary")
   const [genderFilter, setGenderFilter] = useState<"all" | "F" | "M">("all")
-  
+  const [density, setDensity] = useState<RowDensity>("cozy")
+  const [showRound, setShowRound] = useState(true)
+  const [showHeatLane, setShowHeatLane] = useState(true)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+
+  useEffect(() => {
+    let saved: { density?: RowDensity; round?: boolean; hl?: boolean } = {}
+    try {
+      const d = window.localStorage.getItem(DENSITY_KEY)
+      const info = JSON.parse(window.localStorage.getItem(ROWINFO_KEY) || "null")
+      saved = {
+        density: d === "cozy" || d === "compact" ? d : undefined,
+        round: info ? info.round !== false : undefined,
+        hl: info ? info.hl !== false : undefined,
+      }
+    } catch {}
+    const frame = requestAnimationFrame(() => {
+      if (saved.density) setDensity(saved.density)
+      if (saved.round != null) setShowRound(saved.round)
+      if (saved.hl != null) setShowHeatLane(saved.hl)
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [])
+
+  useEffect(() => {
+    if (!settingsOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSettingsOpen(false)
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [settingsOpen])
+
+  function persist(key: string, value: string) {
+    try {
+      window.localStorage.setItem(key, value)
+    } catch {}
+  }
+
+  function pickDensity(next: RowDensity) {
+    setDensity(next)
+    persist(DENSITY_KEY, next)
+    setSettingsOpen(false)
+  }
+
+  function toggleRowInfo(which: "round" | "hl") {
+    const round = which === "round" ? !showRound : showRound
+    const hl = which === "hl" ? !showHeatLane : showHeatLane
+    setShowRound(round)
+    setShowHeatLane(hl)
+    persist(ROWINFO_KEY, JSON.stringify({ round, hl }))
+  }
+
+  const display: RowDisplay = { density, showRound, showHeatLane }
+
   const athleteGenders = new Map(
     athletes
       .filter((a): a is typeof a & { gender: "M" | "F" } => a.gender === "M" || a.gender === "F")
@@ -1020,30 +766,17 @@ export default function MeetSheetSummarySection({
     finalsHeatSummary
   )
   const relays = summary ? uniqueRelayTeams(summary.entries, athleteGenders) : []
-  const womenRelays = relays.filter(
-    (e) => effectiveRelayGender(e, athleteGenders) === "F"
-  )
-  const menRelays = relays.filter(
-    (e) => effectiveRelayGender(e, athleteGenders) === "M"
-  )
-  const mixedRelays = relays.filter(
-    (e) => effectiveRelayGender(e, athleteGenders) === "X"
-  )
-  const otherRelays = relays.filter(
-    (e) => effectiveRelayGender(e, athleteGenders) === ""
-  )
   const hasImportedResults = Boolean(
     (results?.length ?? 0) > 0 ||
-      (relayResults ?? []).some(
-        (e) =>
-          Boolean(
-            e.resultTime ||
-              e.finalTime ||
-              e.prelimTime ||
-              e.resultStatus ||
-              e.prelimStatus ||
-              e.finalStatus
-          )
+      (relayResults ?? []).some((e) =>
+        Boolean(
+          e.resultTime ||
+            e.finalTime ||
+            e.prelimTime ||
+            e.resultStatus ||
+            e.prelimStatus ||
+            e.finalStatus
+        )
       )
   )
   const displayEntries = summary
@@ -1059,16 +792,13 @@ export default function MeetSheetSummarySection({
     ? displayEntries
         .filter(
           (e) =>
-            e.athleteId === viewerAthleteId &&
-            (e.entryType === "individual" || e.isRelayLeadoff)
+            e.athleteId === viewerAthleteId && (e.entryType === "individual" || e.isRelayLeadoff)
         )
         .sort(compareIndividualEntries)
     : []
   const myRelays = viewerAthleteId
     ? relays
-        .filter((e) =>
-          e.relaySwimmers?.some((s) => s.athleteId === viewerAthleteId)
-        )
+        .filter((e) => e.relaySwimmers?.some((s) => s.athleteId === viewerAthleteId))
         .sort((a, b) => compareRelayEvents(a.event, b.event))
     : []
   const myEntries = [...myIndividualEntries, ...myRelays]
@@ -1076,6 +806,7 @@ export default function MeetSheetSummarySection({
     ? grouped.filter((a) => a.entries[0]?.athleteId !== viewerAthleteId)
     : grouped
 
+  const q = searchQuery.trim().toLowerCase()
   const matchesGenderFilter = (entry: SummaryEntry) => {
     if (genderFilter === "all") return true
     if (entry.entryType === "relay_team") {
@@ -1087,18 +818,16 @@ export default function MeetSheetSummarySection({
   const filteredMyEntries = myEntries.filter(
     (entry) =>
       matchesGenderFilter(entry) &&
-      (!searchQuery ||
-        entry.athleteName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        entry.event.toLowerCase().includes(searchQuery.toLowerCase()))
+      (!q ||
+        entry.athleteName.toLowerCase().includes(q) ||
+        entry.event.toLowerCase().includes(q))
   )
   const filteredRelays = relays.filter(
     (entry) =>
       matchesGenderFilter(entry) &&
-      (!searchQuery ||
-        entry.relaySwimmers?.some((swimmer) =>
-          swimmer.name.toLowerCase().includes(searchQuery.toLowerCase())
-        ) ||
-        entry.event.toLowerCase().includes(searchQuery.toLowerCase()))
+      (!q ||
+        entry.relaySwimmers?.some((swimmer) => swimmer.name.toLowerCase().includes(q)) ||
+        entry.event.toLowerCase().includes(q))
   )
   const filteredOtherGrouped = otherGrouped
     .map((athleteGroup) => ({
@@ -1108,11 +837,9 @@ export default function MeetSheetSummarySection({
     .filter(
       (athleteGroup) =>
         athleteGroup.entries.length > 0 &&
-        (!searchQuery ||
-          athleteGroup.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          athleteGroup.entries.some((entry) =>
-            entry.event.toLowerCase().includes(searchQuery.toLowerCase())
-          ))
+        (!q ||
+          athleteGroup.name.toLowerCase().includes(q) ||
+          athleteGroup.entries.some((entry) => entry.event.toLowerCase().includes(q)))
     )
 
   // For the "by event" view: use the de-duped relay list (same as the by-athlete relay section)
@@ -1122,340 +849,398 @@ export default function MeetSheetSummarySection({
     ...relays,
   ].filter(matchesGenderFilter)
 
-  const rawGroupedEvents = deduplicatedByEventEntries
-    .reduce((acc, entry) => {
-      const gender = entry.entryType === "relay_team"
-        ? (effectiveRelayGender(entry, athleteGenders) || entry.gender || "U")
-        : (entry.gender || athleteGenders.get(entry.athleteId) || "U");
-      const eventNumber = resolveDisplayEventNumber(entry, athleteGenders, eventNumberOptions);
-      const genderLabel = gender === "F" ? "Women's" : gender === "M" ? "Men's" : gender === "X" ? "Mixed" : "";
-      
-      // Use the eventNumber, gender, and event name for unique grouping
-      const header = `${eventNumber > 0 ? `#${eventNumber} ` : ""}${genderLabel} ${entry.event}`;
-      
-      if (!acc.has(header)) {
-          acc.set(header, {
-              header,
-              eventNumber,
-              entries: []
-          });
-      }
-      acc.get(header)!.entries.push(entry);
-      return acc
-    }, new Map<string, { header: string, eventNumber: number, entries: SummaryEntry[] }>())
+  const rawGroupedEvents = deduplicatedByEventEntries.reduce((acc, entry) => {
+    const gender =
+      entry.entryType === "relay_team"
+        ? effectiveRelayGender(entry, athleteGenders) || entry.gender || "U"
+        : entry.gender || athleteGenders.get(entry.athleteId) || "U"
+    const eventNumber = resolveDisplayEventNumber(entry, athleteGenders, eventNumberOptions)
+    const genderLabel =
+      gender === "F" ? "Women's" : gender === "M" ? "Men's" : gender === "X" ? "Mixed" : ""
+    const title = `${genderLabel} ${entry.event}`.trim()
+    // Use the eventNumber, gender, and event name for unique grouping
+    const key = `${eventNumber}|${title}`
+    if (!acc.has(key)) {
+      acc.set(key, { key, title, eventNumber, entries: [] })
+    }
+    acc.get(key)!.entries.push(entry)
+    return acc
+  }, new Map<string, { key: string; title: string; eventNumber: number; entries: SummaryEntry[] }>())
 
-  const groupedEvents = new Map([...rawGroupedEvents.entries()].filter(([header, data]) => {
-      if (!searchQuery) return true;
-      const q = searchQuery.toLowerCase();
-      return header.toLowerCase().includes(q) || data.entries.some(e =>
-          (e.athleteName ?? "").toLowerCase().includes(q) ||
-          e.relaySwimmers?.some(s => s.name.toLowerCase().includes(q))
-      );
-  }))
-
-  const sortedEventHeaders = [...groupedEvents.values()].sort((a, b) => {
-    // Sort numerically by eventNumber, then alphabetically by header
-    if (a.eventNumber !== b.eventNumber) {
+  const sortedEventGroups = [...rawGroupedEvents.values()]
+    .filter((group) => {
+      if (!q) return true
+      const header = `${group.eventNumber > 0 ? `#${group.eventNumber} ` : ""}${group.title}`
+      return (
+        header.toLowerCase().includes(q) ||
+        group.entries.some(
+          (e) =>
+            (e.athleteName ?? "").toLowerCase().includes(q) ||
+            e.relaySwimmers?.some((s) => s.name.toLowerCase().includes(q))
+        )
+      )
+    })
+    .sort((a, b) => {
+      // Sort numerically by eventNumber, then alphabetically by title
+      if (a.eventNumber !== b.eventNumber) {
         if (a.eventNumber === 0) return 1
         if (b.eventNumber === 0) return -1
         return a.eventNumber - b.eventNumber
-    }
-    return a.header.localeCompare(b.header)
-  })
+      }
+      return a.title.localeCompare(b.title)
+    })
 
-  // Separate into odd/even if needed (e.g., standard meet structure)
-  // Actually, event numbers can be anything, so we just group by parity if it's generally applicable
-  // For this request, I will just order by event number.
-  
   const hasSummaryContent =
-    filteredMyEntries.length > 0 ||
-    filteredRelays.length > 0 ||
-    filteredOtherGrouped.length > 0
+    filteredMyEntries.length > 0 || filteredRelays.length > 0 || filteredOtherGrouped.length > 0
   const filteredRosterAthletes = rosterAthletes.filter(
     (athlete) =>
       (genderFilter === "all" || athlete.gender === genderFilter) &&
-      (!searchQuery ||
-        athlete.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      (!q || athlete.name.toLowerCase().includes(q))
   )
   const hasContent =
     viewMode === "roster"
       ? filteredRosterAthletes.length > 0
-      : hasSummaryContent
+      : viewByEvent
+        ? sortedEventGroups.length > 0
+        : hasSummaryContent
 
-  function renderRelayGroup(title: string, entries: SummaryEntry[], prefix: string) {
+  const eventCountByAthlete = new Map<string, number>()
+  for (const entry of displayEntries) {
+    if (entry.entryType === "relay_team" || entry.rosterOnly || entry.isRelayLeadoff) continue
+    eventCountByAthlete.set(entry.athleteId, (eventCountByAthlete.get(entry.athleteId) ?? 0) + 1)
+  }
+  for (const relay of relays) {
+    for (const swimmer of relay.relaySwimmers ?? []) {
+      if (!swimmer.athleteId) continue
+      eventCountByAthlete.set(swimmer.athleteId, (eventCountByAthlete.get(swimmer.athleteId) ?? 0) + 1)
+    }
+  }
+
+  const rowProps = {
+    display,
+    canEdit,
+    meetId,
+    meetName,
+    athletes,
+    athleteGenders,
+    allEntries: displayEntries,
+    individualEventOptions,
+    editableSeedKeys: editableSeedKeySet,
+    eventNumberOptions,
+  }
+
+  function renderRelayGroup(title: string | null, entries: SummaryEntry[], prefix: string) {
     if (entries.length === 0) return null
     return (
       <Fragment key={prefix}>
-        <li
-          key={`title-${title}`}
-          className="px-4 py-1.5 text-[11px] font-medium uppercase tracking-wide text-foreground-secondary bg-background/50"
-        >
-          {title}
-        </li>
+        {title ? (
+          <li className="border-t border-border px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.025em] text-foreground-secondary">
+            {title}
+          </li>
+        ) : null}
         {entries.map((entry, i) => (
           <SummaryEntryRow
             key={`${prefix}-${entryRowKey(entry, i, athleteGenders)}`}
             entry={entry}
-            canEdit={canEdit}
-            meetId={meetId}
-            meetName={meetName}
-            athletes={athletes}
-            athleteGenders={athleteGenders}
-            eventLabel={entry.event}
-            allEntries={displayEntries}
-            individualEventOptions={individualEventOptions}
-            editableSeedKeys={editableSeedKeySet}
-            eventNumberOptions={eventNumberOptions}
-            forceEventNumber={true}
+            {...rowProps}
           />
         ))}
       </Fragment>
     )
   }
 
+  const viewerRecord = viewerAthleteId ? athletes.find((a) => a.id === viewerAthleteId) : undefined
+  const addMenuVisible = canEdit && meetId
+
   return (
     <section>
-      <div className="flex items-center justify-between gap-3 mb-3">
-        <h2 className="text-sm font-medium text-foreground-secondary uppercase tracking-wide">
-          Roster Summary
-        </h2>
-        {headerAction}
-      </div>
-      <div className="mb-3 flex items-center gap-2 overflow-x-auto pb-1">
+      <div className="mb-3 flex items-center gap-2 pb-1">
         <input
           type="search"
+          aria-label={viewMode === "roster" ? "Search athletes" : "Search athletes or events"}
           placeholder={
-            viewMode === "roster"
-              ? "Search athletes..."
-              : "Search athletes or events..."
+            viewMode === "roster" ? "Search athletes..." : "Search athletes or events..."
           }
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="min-w-[12rem] flex-1 rounded-lg border border-border px-3 py-2 text-sm bg-background"
+          className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/35"
         />
-        <select
-          aria-label="Filter roster summary by gender"
-          value={genderFilter}
-          onChange={(e) =>
-            setGenderFilter(e.target.value as "all" | "F" | "M")
-          }
-          className="shrink-0 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
-        >
-          <option value="all">All</option>
-          <option value="F">Women</option>
-          <option value="M">Men</option>
-        </select>
-        <div className="flex shrink-0 items-center gap-3">
+
+        {addMenuVisible ? (
+          <MeetAddMenu
+            meetId={meetId}
+            meetName={meetName ?? ""}
+            defaultCourse={defaultCourse ?? "SCY"}
+            defaultDate={defaultDate ?? ""}
+            athletes={athletes}
+            rosterSummaryEntries={entriesSummary?.entries ?? []}
+            onOpen={() => setSettingsOpen(false)}
+          />
+        ) : null}
+
+        <div className="relative shrink-0">
           <button
             type="button"
-            onClick={() =>
-              setViewMode(viewMode === "roster" ? "summary" : "roster")
-            }
-            className="inline-flex h-[38px] items-center rounded-lg border border-border bg-background px-3 text-xs hover:bg-fill disabled:opacity-40 transition-colors"
+            aria-label="View settings"
+            title="View settings"
+            aria-haspopup="menu"
+            aria-expanded={settingsOpen}
+            onClick={() => {
+              setSettingsOpen(!settingsOpen)
+            }}
+            className={toolbarButton}
           >
-            {viewMode === "roster" ? "Summary View" : "Roster View"}
+            <LedgerIcon name="settings" className="h-[18px] w-[18px] shrink-0" />
           </button>
-          {viewMode === "summary" && (
-            <button
-              type="button"
-              onClick={() => setViewByEvent(!viewByEvent)}
-              className="inline-flex h-[38px] items-center rounded-lg border border-border bg-background px-3 text-xs hover:bg-fill disabled:opacity-40 transition-colors"
-            >
-              <span className="inline-flex items-center gap-1">
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="h-3.5 w-3.5"
-                >
-                  <path d="M8 4v16m0-16-3 3m3-3 3 3M16 20V4m0 16-3-3m3 3 3-3" />
-                </svg>
-                {viewByEvent ? "Athlete" : "Event"}
-              </span>
-            </button>
-          )}
+          {settingsOpen ? (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setSettingsOpen(false)} />
+              <div role="menu" className={menuPanel}>
+                <MenuItem
+                  icon="grid"
+                  label="Summary"
+                  selected={viewMode === "summary"}
+                  onClick={() => {
+                    setViewMode("summary")
+                    setSettingsOpen(false)
+                  }}
+                />
+                <MenuItem
+                  icon="list"
+                  label="Roster"
+                  selected={viewMode === "roster"}
+                  onClick={() => {
+                    setViewMode("roster")
+                    setSettingsOpen(false)
+                  }}
+                />
+                {viewMode === "summary" ? (
+                  <>
+                    <MenuDivider />
+                    <MenuItem
+                      icon="user"
+                      label="By athlete"
+                      selected={!viewByEvent}
+                      onClick={() => {
+                        setViewByEvent(false)
+                        setSettingsOpen(false)
+                      }}
+                    />
+                    <MenuItem
+                      icon="numberedList"
+                      label="By event"
+                      selected={viewByEvent}
+                      onClick={() => {
+                        setViewByEvent(true)
+                        setSettingsOpen(false)
+                      }}
+                    />
+                  </>
+                ) : null}
+                <MenuDivider />
+                {(
+                  [
+                    { value: "all", label: "All", icon: "users" },
+                    { value: "F", label: "Women", icon: "user" },
+                    { value: "M", label: "Men", icon: "user" },
+                  ] as const
+                ).map((g) => (
+                  <MenuItem
+                    key={g.value}
+                    icon={g.icon}
+                    label={g.label}
+                    selected={genderFilter === g.value}
+                    onClick={() => {
+                      setGenderFilter(g.value)
+                      setSettingsOpen(false)
+                    }}
+                  />
+                ))}
+                <MenuDivider />
+                <MenuItem
+                  icon="rowsCozy"
+                  label="Cozy rows"
+                  selected={density === "cozy"}
+                  onClick={() => pickDensity("cozy")}
+                />
+                <MenuItem
+                  icon="rowsCompact"
+                  label="Compact rows"
+                  selected={density === "compact"}
+                  onClick={() => pickDensity("compact")}
+                />
+                <MenuDivider />
+                <MenuItem
+                  role="menuitemcheckbox"
+                  icon="flag"
+                  label="Show round"
+                  selected={showRound}
+                  onClick={() => toggleRowInfo("round")}
+                />
+                <MenuItem
+                  role="menuitemcheckbox"
+                  icon="lanes"
+                  label="Show heat & lane"
+                  selected={showHeatLane}
+                  onClick={() => toggleRowInfo("hl")}
+                />
+              </div>
+            </>
+          ) : null}
         </div>
       </div>
+
       {!hasContent ? (
-        <div className="border border-border rounded-xl px-4 py-10 text-center text-sm text-foreground-secondary bg-background">
+        <div className="rounded-xl border border-border bg-background px-4 py-10 text-center text-sm text-foreground-secondary">
           {viewMode === "roster"
             ? "No athletes on the roster match these filters."
             : "No entries match these filters."}
         </div>
       ) : viewMode === "roster" ? (
         <div className="overflow-hidden rounded-xl border border-border bg-background">
-          <div className="border-b border-border px-4 py-2.5 text-sm font-medium text-foreground">
+          <div className="px-4 py-2.5 text-sm font-medium text-foreground">
             {filteredRosterAthletes.length} athlete{filteredRosterAthletes.length === 1 ? "" : "s"}
           </div>
-          <ul className="divide-y divide-border">
-            {filteredRosterAthletes.map((athlete) => (
-              <li key={athlete.id}>
-                <Link
-                  href={athletePath(athlete.slug ?? athlete.id)}
-                  className="group flex items-center justify-between gap-3 px-4 py-3 text-sm hover:bg-fill"
-                >
-                  <span className="flex min-w-0 items-center gap-2">
-                    <AthleteAvatar image={athlete.image} name={athlete.name} />
-                    <span className="truncate font-medium text-foreground transition-colors group-hover:text-primary">
-                      {athlete.name}
-                    </span>
-                  </span>
-                  <span className="text-xs text-foreground-secondary">
-                    {athlete.gender === "F" ? "Women" : "Men"}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : (
-      <div className="space-y-3">
-        {viewByEvent && (
-          <div>
-            {sortedEventHeaders.map((group) => {
+          <ul>
+            {filteredRosterAthletes.map((athlete) => {
+              const isMe = athlete.id === viewerAthleteId
+              const count = eventCountByAthlete.get(athlete.id) ?? 0
               return (
-              <div key={group.header} className="mb-4 border border-border-secondary rounded-xl overflow-hidden bg-background">
-                <div className="px-4 py-2.5 text-sm font-medium text-foreground bg-background/50 border-b border-border">
-                  {group.header}
-                </div>
-                <ul className="divide-y divide-border">
-                  {group.entries.sort((a, b) => compareByPlace(a, b, hasImportedResults)).map((entry, j) => (
-                      <SummaryEntryRow
-                          key={`event-${entryRowKey(entry, j, athleteGenders)}`}
-                          entry={entry}
-                          canEdit={canEdit}
-                          meetId={meetId}
-                          meetName={meetName}
-                          athletes={athletes}
-                          athleteGenders={athleteGenders}
-                          allEntries={displayEntries}
-                          individualEventOptions={individualEventOptions}
-                          editableSeedKeys={editableSeedKeySet}
-                          eventNumberOptions={eventNumberOptions}
-                          showAthleteInfo={true}
-                          skipRelayLabel={true}
-                          eventLabel={entry.entryType === "relay_team" ? `Relay ${displayRelayLetter(entry.relayLetter)}` : undefined}
-                      />
-                  ))}
-                </ul>
-              </div>
+                <li key={athlete.id} className="border-t border-border">
+                  <Link
+                    href={athletePath(athlete.slug ?? athlete.id)}
+                    className={`grid grid-cols-[1fr_96px_72px] items-center px-4 py-3 text-sm text-foreground transition-colors hover:bg-fill hover:text-primary ${
+                      isMe ? "bg-accent/5" : ""
+                    }`}
+                  >
+                    <span className="flex min-w-0 items-center gap-2">
+                      <AthleteAvatar image={athlete.image} name={athlete.name} />
+                      <span className={`truncate font-medium ${isMe ? "text-accent" : ""}`}>
+                        {athlete.name}
+                      </span>
+                      {isMe ? (
+                        <span className="shrink-0 rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-accent">
+                          You
+                        </span>
+                      ) : null}
+                    </span>
+                    <span className="text-right text-xs text-foreground-secondary">
+                      {count} event{count === 1 ? "" : "s"}
+                    </span>
+                    <span className="text-right text-xs text-foreground-secondary">
+                      {athlete.gender === "F" ? "Women" : athlete.gender === "M" ? "Men" : ""}
+                    </span>
+                  </Link>
+                </li>
               )
             })}
-          </div>
-        )}
-        {!viewByEvent && (
-          <>
-            {filteredMyEntries.length > 0 ? (
-              <div key="my-entries" className="rounded-xl overflow-hidden border border-primary bg-background shadow-sm">
-                <div className="flex items-center gap-2 px-4 py-2 text-sm font-medium border-b border-border text-primary-active dark:text-primary-hover">
-                  <AthleteAvatar 
-                    image={athletes.find(a => a.id === viewerAthleteId)?.image} 
-                    name={athleteNames.get(viewerAthleteId!) || "My Profile"}
-                  />
-                  <span>
-                    {athleteNames.get(viewerAthleteId!)}
-                  </span>
-                </div>
-                <ul className="divide-y divide-border">
-                  {filteredMyEntries.map((entry, i) => (
+          </ul>
+        </div>
+      ) : viewByEvent ? (
+        <div className="flex flex-col gap-4">
+          {sortedEventGroups.map((group) => (
+            <div
+              key={group.key}
+              className="overflow-hidden rounded-xl border border-border-secondary bg-background"
+            >
+              <div className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-foreground">
+                {group.eventNumber > 0 ? (
+                  <EventBadge number={group.eventNumber} compact={false} />
+                ) : null}
+                <span>{group.title}</span>
+              </div>
+              <ul className="border-t border-border-subtle">
+                {[...group.entries]
+                  .sort((a, b) => compareByPlace(a, b, hasImportedResults))
+                  .map((entry, j) => (
                     <SummaryEntryRow
-                      key={`mine-${entryRowKey(entry, i, athleteGenders)}`}
+                      key={`event-${entryRowKey(entry, j, athleteGenders)}`}
                       entry={entry}
-                      canEdit={canEdit}
-                      meetId={meetId}
-                      meetName={meetName}
-                      athletes={athletes}
-                      athleteGenders={athleteGenders}
-                      eventLabel={
-                        entry.entryType === "relay_team" ? entry.event : undefined
-                      }
-                      allEntries={displayEntries}
-                      individualEventOptions={individualEventOptions}
-                      editableSeedKeys={editableSeedKeySet}
-                      eventNumberOptions={eventNumberOptions}
+                      eventView
+                      {...rowProps}
+                    />
+                  ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {filteredMyEntries.length > 0 ? (
+            <div className="overflow-hidden rounded-xl border border-primary bg-accent/[0.04] shadow-sm">
+              <div className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-accent">
+                <AthleteAvatar
+                  image={viewerRecord?.image}
+                  name={athleteNames.get(viewerAthleteId!) || "My Profile"}
+                />
+                <span>{athleteNames.get(viewerAthleteId!)}</span>
+              </div>
+              <ul className="border-t border-border-subtle">
+                {filteredMyEntries.map((entry, i) => (
+                  <SummaryEntryRow
+                    key={`mine-${entryRowKey(entry, i, athleteGenders)}`}
+                    entry={entry}
+                    {...rowProps}
+                  />
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          {filteredRelays.length > 0 ? (
+            <div className="overflow-hidden rounded-xl border border-border bg-background">
+              <div className="px-4 py-2.5 text-sm font-medium text-foreground">Relays</div>
+              <ul>
+                {renderRelayGroup(
+                  "Women's",
+                  filteredRelays.filter((e) => effectiveRelayGender(e, athleteGenders) === "F"),
+                  "womens"
+                )}
+                {renderRelayGroup(
+                  "Men's",
+                  filteredRelays.filter((e) => effectiveRelayGender(e, athleteGenders) === "M"),
+                  "mens"
+                )}
+                {renderRelayGroup(
+                  "Mixed",
+                  filteredRelays.filter((e) => effectiveRelayGender(e, athleteGenders) === "X"),
+                  "mixed"
+                )}
+                {renderRelayGroup(
+                  null,
+                  filteredRelays.filter((e) => effectiveRelayGender(e, athleteGenders) === ""),
+                  "other"
+                )}
+              </ul>
+            </div>
+          ) : null}
+          {filteredOtherGrouped.map((athleteGroup) => {
+            const events = [...athleteGroup.entries].sort(compareIndividualEntries)
+            const athleteData = athletes.find((a) => a.id === athleteGroup.entries[0]?.athleteId)
+            return (
+              <div
+                key={athleteGroup.name}
+                className="overflow-hidden rounded-xl border border-border bg-background"
+              >
+                <Link
+                  href={athletePath(athleteData?.slug ?? athleteGroup.entries[0]?.athleteId ?? "")}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:text-primary"
+                >
+                  <AthleteAvatar image={athleteData?.image} name={athleteGroup.name} />
+                  <span>{athleteGroup.name}</span>
+                </Link>
+                <ul className="border-t border-border-subtle">
+                  {events.map((entry, i) => (
+                    <SummaryEntryRow
+                      key={`${athleteGroup.entries[0]?.athleteId}-${entryRowKey(entry, i, athleteGenders)}`}
+                      entry={entry}
+                      {...rowProps}
                     />
                   ))}
                 </ul>
               </div>
-            ) : null}
-            {filteredRelays.length > 0 ? (
-              <div key="relays" className="border border-border rounded-xl overflow-hidden bg-background">
-                <div className="px-4 py-2.5 text-sm font-medium border-b border-border text-foreground">
-                  Relays
-                </div>
-                <ul className="divide-y divide-border">
-                  {renderRelayGroup("Women's", filteredRelays.filter(
-                    (e) => effectiveRelayGender(e, athleteGenders) === "F"
-                  ), "womens")}
-                  {renderRelayGroup("Men's", filteredRelays.filter(
-                    (e) => effectiveRelayGender(e, athleteGenders) === "M"
-                  ), "mens")}
-                  {renderRelayGroup("Mixed", filteredRelays.filter(
-                    (e) => effectiveRelayGender(e, athleteGenders) === "X"
-                  ), "mixed")}
-                  {filteredRelays.filter(
-                    (e) => effectiveRelayGender(e, athleteGenders) === ""
-                  ).map((entry, i) => (
-                <SummaryEntryRow
-                  key={`other-${entryRowKey(entry, i, athleteGenders)}`}
-                  entry={entry}
-                  canEdit={canEdit}
-                  meetId={meetId}
-                  meetName={meetName}
-                  athletes={athletes}
-                  athleteGenders={athleteGenders}
-                  allEntries={displayEntries}
-                  individualEventOptions={individualEventOptions}
-                  editableSeedKeys={editableSeedKeySet}
-                  eventNumberOptions={eventNumberOptions}
-                  forceEventNumber={true}
-                />
-              ))}
-                </ul>
-              </div>
-            ) : null}
-            {filteredOtherGrouped.map((athleteGroup) => {
-              const events = [...athleteGroup.entries].sort(compareIndividualEntries)
-              const athleteData = athletes.find(a => a.id === athleteGroup.entries[0]?.athleteId);
-              return (
-                <div
-                  key={athleteGroup.name}
-                  className="border border-border rounded-xl overflow-hidden bg-background"
-                >
-                  <Link
-                    href={athletePath(athleteData?.slug ?? athleteGroup.entries[0]?.athleteId ?? "")}
-                    className="group flex items-center gap-2 block px-4 py-2 text-sm font-medium border-b border-border"
-                  >
-                    <AthleteAvatar image={athleteData?.image} name={athleteGroup.name} />
-                    <span className="group-hover:text-primary transition-colors">
-                      {athleteGroup.name}
-                    </span>
-                  </Link>
-                  <ul className="divide-y divide-border">
-                    {events.map((entry, i) => (
-                      <SummaryEntryRow
-                        key={`${athleteGroup.entries[0]?.athleteId}-${entryRowKey(entry, i, athleteGenders)}`}
-                        entry={entry}
-                        canEdit={canEdit}
-                        meetId={meetId}
-                        meetName={meetName}
-                        athletes={athletes}
-                        athleteGenders={athleteGenders}
-                        allEntries={displayEntries}
-                        individualEventOptions={individualEventOptions}
-                        editableSeedKeys={editableSeedKeySet}
-                        eventNumberOptions={eventNumberOptions}
-                      />
-                    ))}
-                  </ul>
-                </div>
-              )
-            })}
-          </>
-        )}
-      </div>
+            )
+          })}
+        </div>
       )}
     </section>
   )

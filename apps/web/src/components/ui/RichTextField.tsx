@@ -107,6 +107,7 @@ export default function RichTextField({
   mono = false,
   required = false,
   className,
+  externalHistory = false,
 }: {
   label?: string
   icon?: React.ReactNode
@@ -117,6 +118,10 @@ export default function RichTextField({
   mono?: boolean
   required?: boolean
   className?: string
+  /** When true, this field's own undo/redo (Mod-Z) is disabled so a host-level
+   * undo stack can own Mod-Z instead; the host is responsible for restoring
+   * `value` on undo, which this component syncs back into the editor. */
+  externalHistory?: boolean
 }) {
   const [isFocused, setIsFocused] = useState(false)
   const [linkModalOpen, setLinkModalOpen] = useState(false)
@@ -135,6 +140,7 @@ export default function RichTextField({
     },
     extensions: [
       StarterKit.configure({
+        ...(externalHistory ? { undoRedo: false } : {}),
         bulletList: {
           keepMarks: true,
           keepAttributes: true,
@@ -143,7 +149,7 @@ export default function RichTextField({
           keepMarks: true,
           keepAttributes: true,
         },
-        link: { 
+        link: {
           openOnClick: false,
           autolink: false, // Prevents automatic link creation on click
           HTMLAttributes: {
@@ -182,6 +188,18 @@ export default function RichTextField({
       onChange(editor.getHTML())
     },
   })
+
+  // Keeps the editor in sync when `value` changes from outside typing (e.g. a
+  // host-level undo/redo restoring a prior snapshot); a no-op during normal
+  // typing since `value` already matches the editor's HTML by the time this runs.
+  useEffect(() => {
+    if (!editor) return
+    if (value === editor.getHTML()) return
+    editor.commands.setContent(value, {
+      emitUpdate: false,
+      parseOptions: { preserveWhitespace: "full" },
+    })
+  }, [editor, value])
 
   useEffect(() => {
     if (!linkModalOpen && selectionRef.current && editor) {

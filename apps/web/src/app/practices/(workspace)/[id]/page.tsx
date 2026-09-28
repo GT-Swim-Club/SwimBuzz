@@ -11,6 +11,11 @@ import { getSession } from "@/lib/auth/session"
 import { practiceSetSelect } from "@/lib/practice/practice-input"
 import { attendedUserIds } from "@/lib/practice/practice-attendance"
 import { toDateInput, toTimeInput } from "@/lib/date-input"
+import { withDeleted } from "../../../../../soft-delete-policy"
+
+function canRestoreDeleted(purgeAfter: Date, purgeStartedAt: Date | null): boolean {
+  return !purgeStartedAt && purgeAfter.getTime() > Date.now()
+}
 
 export default async function PracticePage({
   params,
@@ -37,23 +42,48 @@ async function PracticeDetailLoader({ param }: { param: string }) {
 
   const isCoach = await isStaffUi(session.user.role)
 
-  const practice = await prisma.practice.findFirst({
-    where: isCuid(param) ? { OR: [{ id: param }, { slug: param }] } : { slug: param },
-    include: {
-      sets: { orderBy: { order: "asc" }, select: practiceSetSelect },
+  const whereParam = isCuid(param) ? { OR: [{ id: param }, { slug: param }] } : { slug: param }
+  // A fresh object per call — the soft-delete middleware mutates `include`/`select` in place
+  // to inject relation filters, so a single shared object would leak the live query's
+  // filters into the withDeleted() fallback below and silently hide its nested rows.
+  function buildInclude() {
+    return {
+      sets: { orderBy: { order: "asc" as const }, select: practiceSetSelect },
       comments: {
-        orderBy: { createdAt: "asc" },
+        orderBy: { createdAt: "asc" as const },
         include: { author: { select: { image: true, staffTitle: true } } },
       },
       editLockedBy: { select: { id: true, name: true } },
-    },
-  })
+    }
+  }
+
+  let practice = await prisma.practice.findFirst({ where: whereParam, include: buildInclude() })
+
+  // Not found in the live scope — if the viewer can manage Trash, check whether
+  // it's sitting there instead of just 404ing. Comments/attendance stay hidden
+  // (cascade-hidden alongside the practice) since neither matters for a trashed item.
+  let deletedInfo: { purgeAfter: string; canRestore: boolean } | null = null
+  if (!practice && isCoach) {
+    const deleted = await withDeleted(() =>
+      prisma.practice.findFirst({
+        where: { ...whereParam, deletedAt: { not: null } },
+        include: buildInclude(),
+      })
+    )
+    if (deleted) {
+      practice = deleted
+      deletedInfo = {
+        purgeAfter: deleted.purgeAfter!.toISOString(),
+        canRestore: canRestoreDeleted(deleted.purgeAfter!, deleted.purgeStartedAt),
+      }
+    }
+  }
 
   if (!practice || (!practice.published && !isCoach)) notFound()
   if (practice.slug && param !== practice.slug) redirect(practicePath(practice.slug))
 
   const totalDistance = practice.sets.reduce((sum, s) => sum + (s.distance ?? 0), 0)
-  const attendedUsers = await attendedUserIds(practice.id)
+  const attendedUsers = deletedInfo ? [] : await attendedUserIds(practice.id)
   const initialEditLock = serializePracticeEditLock(practice, session.user.id)
   const startsAt = practice.startsAt ?? practice.createdAt
   const endsAt = practice.endsAt ?? startsAt
@@ -65,6 +95,7 @@ async function PracticeDetailLoader({ param }: { param: string }) {
     endTime: toTimeInput(endsAt, practice.timeZone),
     timeZone: practice.timeZone,
     location: practice.location,
+    course: practice.course,
     focus: practice.focus ?? "",
     tags: practice.tags,
     published: practice.published,
@@ -87,6 +118,7 @@ async function PracticeDetailLoader({ param }: { param: string }) {
       endsAt={endsAt.toISOString()}
       timeZone={practice.timeZone}
       location={practice.location}
+      course={practice.course}
       focus={practice.focus}
       tags={practice.tags}
       sets={practice.sets.map((s) => ({
@@ -113,6 +145,7 @@ async function PracticeDetailLoader({ param }: { param: string }) {
         editedAt: c.editedAt ? c.editedAt.toISOString() : null,
       }))}
       initialEditLock={initialEditLock}
+      deletedInfo={deletedInfo}
     />
   )
 }

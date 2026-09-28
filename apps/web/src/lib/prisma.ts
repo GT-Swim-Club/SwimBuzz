@@ -1,3 +1,4 @@
+import { installSoftDeletePolicy } from "../../soft-delete-policy"
 import { Prisma, PrismaClient } from "@prisma/client"
 
 const globalForPrisma = globalThis as unknown as {
@@ -22,10 +23,10 @@ function getPrisma(): PrismaClient {
     globalForPrisma.__swimbuzzPrisma &&
     globalForPrisma.__swimbuzzPrismaSchemaId === schemaId
   ) {
-    return globalForPrisma.__swimbuzzPrisma
+    return installSoftDeletePolicy(globalForPrisma.__swimbuzzPrisma)
   }
 
-  const prisma = new PrismaClient()
+  const prisma = installSoftDeletePolicy(new PrismaClient())
   globalForPrisma.__swimbuzzPrisma = prisma
   globalForPrisma.__swimbuzzPrismaSchemaId = schemaId
   if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma

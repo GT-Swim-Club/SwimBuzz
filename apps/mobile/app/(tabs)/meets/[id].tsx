@@ -822,24 +822,30 @@ export default function MeetDetailScreen() {
   function confirmDeleteMeet() {
     if (!id) return
     Alert.alert(
-      "Delete meet?",
-      "This permanently deletes the meet and related data.",
+      "Move meet to Trash?",
+      "You can restore it from Trash later.",
       [
         { text: "Cancel", style: "cancel" },
         {
-          text: "Delete",
+          text: "Meet only (keep swims)",
           style: "destructive",
-          onPress: () => void deleteMeet(),
+          onPress: () => void deleteMeet(false),
+        },
+        {
+          text: "Meet and swims",
+          style: "destructive",
+          onPress: () => void deleteMeet(true),
         },
       ]
     )
   }
 
-  async function deleteMeet() {
+  async function deleteMeet(deleteSwims: boolean) {
     if (!id) return
     setDeleting(true)
     try {
-      await api.deleteMeet(id)
+      await api.deleteMeet(id, deleteSwims)
+      await queryClient.invalidateQueries()
       router.replace("/meets")
     } catch (err) {
       Alert.alert(
@@ -1563,7 +1569,7 @@ export default function MeetDetailScreen() {
         {isStaff ? (
           <View style={{ marginTop: spacing.lg }}>
             <Button
-              label="Delete meet"
+              label="Move to Trash"
               variant="danger"
               loading={deleting}
               onPress={confirmDeleteMeet}

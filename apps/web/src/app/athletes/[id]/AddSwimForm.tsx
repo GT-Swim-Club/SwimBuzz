@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import DontReloadNotice from "@/components/ui/DontReloadNotice"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { DatePicker } from "@/components/ui/CustomDateTimePicker"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
@@ -149,7 +148,6 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
                 Scraping SwimCloud events — typically 1–2 minutes…
               </p>
             )}
-            {scrapeStatus === "loading" && <DontReloadNotice />}
           </div>
         ) : (
           <div className="border border-border-secondary rounded-xl p-4 bg-background dark:bg-background-elevated space-y-3">

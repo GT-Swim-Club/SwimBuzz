@@ -1,48 +1,20 @@
-const { prisma } = require("./prisma-singleton")
-
-async function cleanupOldNotifications() {
+/** Custom-server scheduler. The shared route owns notification, scraper and recovery cleanup. */
+async function cleanup() {
   try {
-    const thirtyDaysAgo = new Date()
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-
-    const deleted = await prisma.notification.deleteMany({
-      where: { createdAt: { lt: thirtyDaysAgo } },
+    const port = parseInt(process.env.PORT ?? "3000", 10)
+    const response = await fetch(`http://127.0.0.1:${port}/api/cron/notification-cleanup`, {
+      headers: { authorization: `Bearer ${process.env.CRON_SECRET}` },
     })
-
-    if (deleted.count > 0) {
-      console.log(`[Notification Cleanup] Deleted ${deleted.count} old notifications.`)
-    }
+    if (!response.ok) throw new Error(`Cleanup returned ${response.status}`)
+    const result = await response.json()
+    if (!result.ok) throw new Error("Some recovery files could not be purged; will retry")
   } catch (error) {
-    console.error("[Notification Cleanup] Error cleaning up notifications:", error)
-  }
-
-  try {
-    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000)
-    const deleted = await prisma.scraperJob.deleteMany({
-      where: {
-        status: { in: ["COMPLETED", "FAILED"] },
-        completedAt: { lt: cutoff },
-      },
-    })
-    if (deleted.count > 0) {
-      console.log(`[Notification Cleanup] Deleted ${deleted.count} old scraper jobs.`)
-    }
-  } catch (error) {
-    console.error("[Notification Cleanup] Error cleaning scraper jobs:", error)
+    console.error("[Notification Cleanup] Cleanup failed:", error)
   }
 }
-
-/** Dev-only: production uses Vercel Cron → /api/cron/notification-cleanup */
 function startNotificationCleanupMonitor() {
-  console.log("[Notification Cleanup] Starting daily cleanup task (dev)")
-  cleanupOldNotifications().catch((err) => {
-    console.error("[Notification Cleanup] Initial cleanup failed:", err)
-  })
-  setInterval(() => {
-    cleanupOldNotifications().catch((err) => {
-      console.error("[Notification Cleanup] Periodic cleanup failed:", err)
-    })
-  }, 24 * 60 * 60 * 1000)
+  console.log("[Notification Cleanup] Starting daily cleanup task")
+  void cleanup()
+  setInterval(() => { void cleanup() }, 24 * 60 * 60 * 1000)
 }
-
 module.exports = { startNotificationCleanupMonitor }

@@ -93,6 +93,13 @@ EVENT_ROW = re.compile(
     r"^(\d+)\s+(.+?)\s+(\d+)\s*$",
     re.I | re.M,
 )
+# Single-gender / mixed events print only one number: "29 200 Mixed Free
+# Relay" (women's column) or "200 Fly 30" (men's column).
+EVENT_ROW_WOMEN_ONLY = re.compile(r"^(\d+)\s+(.+?)\s*$")
+EVENT_ROW_MEN_ONLY = re.compile(r"^(.+?)\s+(\d+)\s*$")
+# One-number rows are easy to confuse with prose ("10 Minute Break"), so the
+# event name must lead with a distance ("200 ...", "4x50 ...").
+EVENT_STARTS_WITH_DISTANCE = re.compile(r"^\d+\s*(x\s*\d+)?\s+[a-z]", re.I)
 
 EVENT_KEYWORDS = re.compile(
     r"("
@@ -149,16 +156,26 @@ def _parse_event_row(line: str) -> dict[str, Any] | None:
         return None
 
     match = EVENT_ROW.match(stripped)
-    if not match:
-        return None
+    if match:
+        event_raw = _clean_event_name(match.group(2).strip())
+        if not _is_event_label(event_raw):
+            return None
+        return {"women": int(match.group(1)), "event": event_raw, "men": int(match.group(3))}
 
-    event_raw = _clean_event_name(match.group(2).strip())
-    women = int(match.group(1))
-    men = int(match.group(3))
+    women: int | None = None
+    men: int | None = None
+    match = EVENT_ROW_WOMEN_ONLY.match(stripped)
+    if match and EVENT_STARTS_WITH_DISTANCE.match(match.group(2)):
+        women, event_raw = int(match.group(1)), match.group(2)
+    else:
+        match = EVENT_ROW_MEN_ONLY.match(stripped)
+        if not match or not EVENT_STARTS_WITH_DISTANCE.match(match.group(1)):
+            return None
+        event_raw, men = match.group(1), int(match.group(2))
 
+    event_raw = _clean_event_name(event_raw)
     if not _is_event_label(event_raw):
         return None
-
     return {"women": women, "event": event_raw, "men": men}
 
 

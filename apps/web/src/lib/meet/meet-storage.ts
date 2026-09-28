@@ -256,7 +256,7 @@ function allMeetStoredUrls(meet: MeetStoredFiles): string[] {
   ].filter((url): url is string => Boolean(url && url.trim()))
 }
 
-async function deleteStoredUrls(urls: Iterable<string>) {
+async function deleteStoredUrls(urls: Iterable<string>, strict = false) {
   const unique = [...new Set([...urls].map((url) => url.trim()).filter(Boolean))]
   const results = await Promise.allSettled(
     unique.map((url) =>
@@ -265,6 +265,7 @@ async function deleteStoredUrls(urls: Iterable<string>) {
   )
   for (const result of results) {
     if (result.status === "rejected") {
+      if (strict) throw result.reason
       console.error("Failed to delete stored meet file:", result.reason)
     }
   }
@@ -383,6 +384,6 @@ export async function deleteAddedMeetFiles(
   }
 }
 
-export async function deleteAllMeetFiles(meet: MeetStoredFiles) {
-  await deleteStoredUrls(allMeetStoredUrls(meet))
+export async function deleteAllMeetFiles(meet: MeetStoredFiles, options?: { strict?: boolean }) {
+  await deleteStoredUrls(allMeetStoredUrls(meet), options?.strict)
 }

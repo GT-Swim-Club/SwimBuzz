@@ -1,9 +1,9 @@
+import { softDeleteMeet } from "@/lib/recovery/recovery"
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { buildMeetData, MeetInputError, toPrismaMeetWriteData } from "@/lib/meet/meet-input"
 import {
   deleteAddedMeetFiles,
-  deleteAllMeetFiles,
   deleteRemovedMeetFiles,
   deleteStoredMeetFile,
   type MeetStoredFiles,
@@ -434,7 +434,7 @@ export async function DELETE(
     deleteMeet: true,
     deleteSwims: false}))
 
-  if (deleteSwims) {
+  if (deleteSwims && !deleteMeet) {
     await prisma.swim.deleteMany({ where: { meetId: id } })
 
     // Also clear relayResultsSummary and result fields
@@ -450,12 +450,7 @@ export async function DELETE(
   }
 
   if (deleteMeet) {
-    try {
-      await deleteAllMeetFiles(existing as MeetStoredFiles)
-    } catch (err) {
-      console.error("Failed to delete stored files for meet", id, err)
-    }
-    await prisma.meet.delete({ where: { id } })
+    await softDeleteMeet(id, Boolean(deleteSwims))
   } else if (deleteSwims) {
     try {
       await deleteStoredMeetFile(existing.resultsUrl)

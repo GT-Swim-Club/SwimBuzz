@@ -1,5 +1,5 @@
 import { jsPDF } from "jspdf"
-import { formatZonedInstantRange, practiceShareFilename, zonedDayKey } from "@swimbuzz/shared"
+import { formatPracticeDistance, formatZonedInstantRange, practiceShareFilename, zonedDayKey } from "@swimbuzz/shared"
 import { isHtmlEmpty, normalizePracticeHtml } from "@/components/ui/FormattedText"
 
 export type PracticePdfSet = {
@@ -16,6 +16,7 @@ export type PracticePdfInput = {
   endsAt: string
   timeZone: string
   location: string
+  course: string
   focus: string | null
   tags: string[]
   sets: PracticePdfSet[]
@@ -540,7 +541,7 @@ export function buildPracticePdf(input: PracticePdfInput): jsPDF {
 
   const placeBits = [
     input.location?.trim() || null,
-    input.totalDistance > 0 ? `${input.totalDistance} yards` : null,
+    input.totalDistance > 0 ? formatPracticeDistance(input.totalDistance, input.course) : null,
   ].filter((bit): bit is string => Boolean(bit))
   if (placeBits.length > 0) {
     y += metaSize * 1.05 + mt05

@@ -46,6 +46,7 @@ export const colors = {
     border: "#eaeaea",
     borderSecondary: "#e8e8e8",
     borderSubtle: "#e4e4e7",
+    accent: "#8c6b38",
   },
   dark: {
     primary: "#856939",
@@ -93,6 +94,7 @@ export const colors = {
     border: "#2c2c2c",
     borderSecondary: "#252525",
     borderSubtle: "#1e1e1e",
+    accent: "#b58d4f",
   },
 } as const
 

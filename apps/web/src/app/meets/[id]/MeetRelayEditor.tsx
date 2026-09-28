@@ -1,13 +1,11 @@
 "use client"
 
-import { useEffect, useState, useTransition, type ReactNode } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { createPortal } from "react-dom"
-import DontReloadNotice from "@/components/ui/DontReloadNotice"
 import { deleteRelayTeam, saveRelayTeam } from "./meet-relay.actions"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import type { SheetEntry } from "@/lib/meet/meet-sheet-summary"
 import { normalizeEventName } from "@/lib/swim/swim-parse"
-import { formatDisplayTime, formatSeedTimeDelta, formatOrdinal, podiumPlaceClass } from "@/lib/utils"
 import {
   displayRelayLetter,
   effectiveRelayGender,
@@ -15,7 +13,6 @@ import {
   relayEventKey,
   relayTeamPlace,
   relayTeamTime,
-  relaySwimmerFullName,
   sanitizeRelaySplitTime,
   type RelayGender,
   type RelayRound,
@@ -424,12 +421,6 @@ function RelayModal({
           )}
           </div>
 
-          {loading ? (
-            <div className="shrink-0 px-6 pb-1">
-              <DontReloadNotice />
-            </div>
-          ) : null}
-
           <div className="shrink-0 flex gap-3 border-t border-border-secondary px-6 py-4">
             {allowDelete && (
               <button
@@ -458,185 +449,6 @@ function RelayModal({
             </button>
           </div>
         </form>
-      </div>
-    </div>,
-    document.body
-  )
-}
-
-export function RelayDetailModal({
-  entry,
-  title,
-  timeDisplay,
-  coachNote,
-  onClose,
-  swimInfo,
-  rawTime,
-}: {
-  entry: SheetEntry
-  title: string
-  timeDisplay?: ReactNode
-  coachNote?: string
-  onClose: () => void
-    swimInfo?: {
-    seedTime?: string
-    rank?: number | string
-    heat?: number | string
-    lane?: number
-    resultPlace?: number
-    time?: string
-    rawTime?: string
-  }
-  rawTime?: string
-}) {
-  const [mounted, setMounted] = useState(false)
-  const swimmers = [...(entry.relaySwimmers ?? [])].sort((a, b) => a.leg - b.leg)
-  const isPendingRelay = !rawTime && swimInfo?.resultPlace == null
-
-
-  useEffect(() => setMounted(true), [])
-
-  useEffect(() => {
-    const prev = document.body.style.overflow
-    document.body.style.overflow = "hidden"
-    return () => {
-      document.body.style.overflow = prev
-    }
-  }, [])
-
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose()
-    }
-    window.addEventListener("keydown", onKeyDown)
-    return () => window.removeEventListener("keydown", onKeyDown)
-  }, [onClose])
-
-  if (!mounted) return null
-
-  return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <button
-        type="button"
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
-        aria-label="Close dialog"
-      />
-      <div
-        className="relative z-10 flex w-full max-w-md max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="shrink-0 px-6 pt-5 pb-3">
-          <h2 className="text-lg font-semibold tracking-tight text-foreground">{title}</h2>
-          {(rawTime || timeDisplay) ? (
-            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">
-              <span className="text-foreground font-mono text-lg">{rawTime ?? timeDisplay}</span>
-              {isPendingRelay && swimInfo?.heat && (
-                <span className="flex items-center gap-1.5 text-sm text-foreground-secondary">
-                  <span className="text-foreground-tertiary">Heat</span>{" "}
-                  {swimInfo.heat}
-                </span>
-              )}
-              {isPendingRelay && swimInfo?.lane != null && (
-                <span className="flex items-center gap-1.5 text-sm text-foreground-secondary">
-                  <span className="text-foreground-tertiary">Lane</span>{" "}
-                  {swimInfo.lane}
-                </span>
-              )}
-
-              {(() => {
-                const delta = swimInfo?.seedTime && rawTime ? formatSeedTimeDelta(swimInfo.seedTime, rawTime) : null;
-                if (!delta) return null;
-                const isDrop = delta.startsWith("-");
-                return (
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-mono font-medium ${
-                    isDrop 
-                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300"
-                      : "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300"
-                  }`}>
-                    {delta}
-                  </span>
-                );
-              })()}
-              {swimInfo?.resultPlace && (
-                <span className={swimInfo.resultPlace >= 1 && swimInfo.resultPlace <= 3 ? `font-medium ${podiumPlaceClass(swimInfo.resultPlace)}` : "text-foreground text-opacity-70 dark:text-foreground dark:text-opacity-70 font-medium"}>
-                  {formatOrdinal(swimInfo.resultPlace)}
-                </span>
-              )}
-            </div>
-          ) : null}
-          {!isPendingRelay && swimInfo && (
-            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-foreground-secondary">
-              {swimInfo.seedTime && (
-                <span className="flex items-center gap-1.5">
-                  <span className="text-foreground-tertiary">Seed:</span>
-                  {swimInfo.seedTime}
-                  {swimInfo.rank && ` #${swimInfo.rank}`}
-                </span>
-              )}
-              {swimInfo.heat && <span className="flex items-center gap-1.5"><span className="text-foreground-tertiary">Heat</span> {swimInfo.heat}</span>}
-              {swimInfo.lane != null && <span className="flex items-center gap-1.5"><span className="text-foreground-tertiary">Lane</span> {swimInfo.lane}</span>}
-            </div>
-          )}
-          {coachNote ? (
-            <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">{coachNote}</p>
-          ) : null}
-        </div>
-
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-3 empty:flex-none empty:h-2 empty:p-0">
-          {(!isPendingRelay || swimmers.length > 0) && (
-            <ul className="divide-y divide-border border border-border rounded-lg overflow-hidden">
-          <li className="grid grid-cols-[2rem_1fr_auto] gap-2 px-3 py-2 text-xs font-medium uppercase tracking-wide text-foreground-tertiary dark:text-foreground-tertiary dark:bg-background bg-fill-secondary/50">
-            <span>#</span>
-            <span>Swimmer</span>
-            <span className="min-w-[5.5rem] text-right">Split</span>
-          </li>
-          {swimmers.map((swimmer) => {
-            const split = sanitizeRelaySplitTime(swimmer.splitTime)
-            const nestedTimes =
-              swimmer.splits
-                ?.slice()
-                .sort((a, b) => a.distance - b.distance)
-                .map((s) => sanitizeRelaySplitTime(s.splitTime))
-                .filter((t): t is string => Boolean(t)) ?? []
-            const showNested = nestedTimes.length > 1
-            return (
-              <li
-                key={swimmer.leg}
-                className="grid grid-cols-[2rem_1fr_auto] gap-2 px-3 py-2.5 text-sm items-center"
-              >
-                <span className="text-foreground-tertiary dark:text-foreground-tertiary">
-                  {swimmer.leg}
-                </span>
-                <span className="truncate text-foreground dark:text-foreground">
-                  {relaySwimmerFullName(swimmer.name) ?? ""}
-                </span>
-                <span className="min-w-[5.5rem] text-right">
-                  <span className="block font-mono text-foreground">
-                    {split ? formatDisplayTime(split) : ""}
-                  </span>
-                  {showNested ? (
-                    <span className="block font-mono text-xs text-foreground-tertiary">
-                      {nestedTimes.map((t) => formatDisplayTime(t)).join(" · ")}
-                    </span>
-                  ) : null}
-                </span>
-              </li>
-            )
-          })}
-            </ul>
-          )}
-        </div>
-
-        <div className="shrink-0 border-t border-border px-6 py-3">
-        <button
-          type="button"
-          onClick={onClose}
-          className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-fill"
-        >
-          Close
-        </button>
-        </div>
       </div>
     </div>,
     document.body
@@ -681,13 +493,20 @@ export function EditRelayButton({
   athletes,
   entry,
   className,
+  open: openProp,
+  onOpenChange,
 }: {
   meetId: string
   athletes: AthleteOption[]
   entry: SheetEntry
   className?: string
+  /** Controlled open state, so the editor can also be opened from elsewhere (e.g. a detail modal). */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }) {
-  const [open, setOpen] = useState(false)
+  const [openState, setOpenState] = useState(false)
+  const open = openProp ?? openState
+  const setOpen = onOpenChange ?? setOpenState
   const rosterOnly = !entry.manual
   const round = effectiveRelayRound(entry)
   const athleteGenders = new Map(

@@ -190,8 +190,6 @@ export default async function SettingsPage() {
           <AppearanceSettings />
           <ViewPreferencesSettings defaultView={user?.defaultView ?? "gallery"} defaultPracticesView={user?.defaultPracticesView ?? "week"} />
         </section>
-
-
       </div>
     </div>
   )

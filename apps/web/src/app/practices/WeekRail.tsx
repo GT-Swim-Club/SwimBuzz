@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState, useSyncExternalStore } from "react"
+import { formatPracticeDistance, formatZonedInstantRange } from "@swimbuzz/shared"
 import { getLocalDayKey, getLocalWeekStartKey } from "./PracticeCalendarLocal"
 import {
   MONTH_NAMES,
@@ -16,6 +17,7 @@ import {
 } from "./workspace-params"
 import { practicePath } from "@/lib/slug"
 import MonthPickerPopover from "./MonthPickerPopover"
+import { showCardTags, type PracticeCardLabel } from "./usePracticePrefs"
 
 function noopSubscribe() {
   return () => {}
@@ -57,6 +59,7 @@ export default function WeekRail({
   selectedDayKey,
   tags,
   monThuOnly,
+  cardLabel,
   sidebarWidth,
   onWeekChange,
 }: {
@@ -66,6 +69,7 @@ export default function WeekRail({
   selectedDayKey?: string
   tags: string[]
   monThuOnly: boolean
+  cardLabel: PracticeCardLabel
   sidebarWidth: number
   onWeekChange: (weekKey: string) => void
 }) {
@@ -203,6 +207,7 @@ export default function WeekRail({
                       Boolean(selectedSlug) && (practice.slug ?? practice.id) === selectedSlug
                     }
                     tags={tags}
+                    cardLabel={cardLabel}
                     sidebarWidth={sidebarWidth}
                   />
                 ))
@@ -274,7 +279,7 @@ function EmptyDayRow({
   return (
     <div className="flex flex-1 cursor-not-allowed items-center gap-3 rounded-lg border border-border-secondary px-3 py-3 opacity-50">
       <DateColumn weekday={weekday} dateNumber={dateNumber} isToday={isToday} dimmed selected={false} />
-      <div className="min-w-0 flex-1 truncate text-sm font-normal text-foreground-tertiary">No practice</div>
+      <div className="min-w-0 flex-1 truncate text-sm font-normal text-foreground-tertiary">No practice posted</div>
     </div>
   )
 }
@@ -286,6 +291,7 @@ function WeekRailRow({
   isToday,
   selected,
   tags,
+  cardLabel,
   sidebarWidth,
 }: {
   practice: PracticeRailItem
@@ -294,8 +300,10 @@ function WeekRailRow({
   isToday: boolean
   selected: boolean
   tags: string[]
+  cardLabel: PracticeCardLabel
   sidebarWidth: number
 }) {
+  const showTags = showCardTags(tags, practice.tags, cardLabel)
   return (
     <Link
       href={buildWorkspaceHref(practicePath(practice.slug ?? practice.id), { tags })}
@@ -308,9 +316,9 @@ function WeekRailRow({
     >
       <DateColumn weekday={weekday} dateNumber={dateNumber} isToday={isToday} dimmed={false} selected={selected} />
       <div className="min-w-0 flex-1">
-        <p className="min-w-0 truncate text-sm font-medium text-foreground">{practice.title}</p>
-        {practice.tags.length > 0 && (
-          <div className="mt-1 flex flex-wrap gap-1">
+        <p className="min-w-0 truncate text-sm font-medium leading-tight text-foreground">{practice.title}</p>
+        {showTags ? (
+          <div className="mt-0.5 flex h-[18px] flex-wrap items-center gap-1 overflow-hidden">
             {practice.tags.map((tag) => (
               <span
                 key={tag}
@@ -320,18 +328,26 @@ function WeekRailRow({
               </span>
             ))}
           </div>
+        ) : (
+          <div className="mt-0.5 flex h-[18px] items-center">
+            <p className="text-xs text-foreground-tertiary">
+              {formatZonedInstantRange(practice.startsAt, practice.endsAt, practice.timeZone).time}
+            </p>
+          </div>
         )}
       </div>
-      {!practice.published && (
-        <span className="shrink-0 rounded-full bg-primary/20 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-primary-active dark:bg-primary/30 dark:text-primary-hover">
-          Draft
-        </span>
-      )}
-      {practice.totalDistance > 0 && sidebarWidth >= 300 && (
-        <span className="shrink-0 text-xs tabular-nums text-foreground-tertiary">
-          {practice.totalDistance}
-        </span>
-      )}
+      <div className="flex shrink-0 flex-col items-end gap-1">
+        {!practice.published && (
+          <span className="rounded-full bg-primary/20 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-primary-active dark:bg-primary/30 dark:text-primary-hover">
+            Draft
+          </span>
+        )}
+        {practice.totalDistance > 0 && sidebarWidth >= 300 && (
+          <span className="text-xs tabular-nums text-foreground-tertiary">
+            {formatPracticeDistance(practice.totalDistance, practice.course)}
+          </span>
+        )}
+      </div>
     </Link>
   )
 }

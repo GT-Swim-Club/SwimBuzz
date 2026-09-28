@@ -445,6 +445,7 @@ function FloatingPopover({
     <div
       ref={panelRef}
       role="dialog"
+      data-floating-popover
       className="fixed z-[70] rounded-xl border border-border bg-background-elevated p-3 shadow-2xl shadow-black/30"
       style={scrollable
         ? { left: position.left, top: position.top, width, maxHeight: position.maxHeight, overflowY: "auto" }
@@ -896,10 +897,12 @@ type TimeZonePickerProps = {
   /** Show a validation error supplied by the calling form. */
   hasError?: boolean
   className?: string
+  /** Label options with just the abbreviation (e.g. "EDT"), for narrow layouts. */
+  compact?: boolean
 }
 
-function timeZoneOptionLabel(zone: string) {
-  return `${zoneDisplayName(zone)} (${zoneAbbreviation(zone)})`
+function timeZoneOptionLabel(zone: string, compact = false) {
+  return compact ? zoneAbbreviation(zone) : `${zoneDisplayName(zone)} (${zoneAbbreviation(zone)})`
 }
 
 function useTimeZoneOptions(currentValue: string) {
@@ -924,6 +927,7 @@ export function TimeZonePicker({
   disabled = false,
   hasError = false,
   className = "",
+  compact = false,
 }: TimeZonePickerProps) {
   const zones = useTimeZoneOptions(value)
 
@@ -942,7 +946,7 @@ export function TimeZonePicker({
     >
       {zones.map((zone) => (
         <option key={zone} value={zone}>
-          {timeZoneOptionLabel(zone)}
+          {timeZoneOptionLabel(zone, compact)}
         </option>
       ))}
     </select>

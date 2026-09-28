@@ -48,9 +48,11 @@ import { FormattedText } from "../../../src/components/FormattedText"
 import { Icon } from "../../../src/components/Icon"
 import { PracticeExportCapture } from "../../../src/components/PracticeExportCapture"
 import { RelativeDateText } from "../../../src/components/RelativeDateText"
+import { UndoRedoButtons } from "../../../src/components/UndoRedoButtons"
 import { ZonedTimeText } from "../../../src/components/ZonedTimeText"
 import { StaffBadge } from "../../../src/components/StaffBadge"
 import { useAuth } from "../../../src/lib/auth"
+import { useUndoableState } from "../../../src/lib/use-undoable-state"
 
 type PracticeSet = {
   id: string
@@ -95,7 +97,15 @@ export default function PracticeDetailScreen() {
   const [editingComment, setEditingComment] = useState<PracticeComment | null>(null)
   const [posting, setPosting] = useState(false)
   const [published, setPublished] = useState(false)
-  const [editSets, setEditSets] = useState<PracticeSet[]>([])
+  const {
+    value: editSets,
+    set: setEditSets,
+    reset: resetEditSets,
+    undo: undoEditSets,
+    redo: redoEditSets,
+    canUndo: canUndoEditSets,
+    canRedo: canRedoEditSets,
+  } = useUndoableState<PracticeSet[]>([])
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
@@ -146,7 +156,7 @@ export default function PracticeDetailScreen() {
     const sets = (
       Array.isArray(practice.sets) ? practice.sets : []
     ) as PracticeSet[]
-    setEditSets(
+    resetEditSets(
       sets
         .slice()
         .sort((a, b) => a.order - b.order)
@@ -203,6 +213,7 @@ export default function PracticeDetailScreen() {
       endsAt: String(currentPractice.endsAt ?? currentPractice.startsAt ?? new Date().toISOString()),
       timeZone: String(currentPractice.timeZone ?? DEFAULT_TIME_ZONE),
       location: String(currentPractice.location ?? ""),
+      course: String(currentPractice.course ?? "SCY"),
       focus: currentPractice.focus ? String(currentPractice.focus) : null,
       tags: Array.isArray(currentPractice.tags) ? (currentPractice.tags as string[]) : [],
       sets: shareSets,
@@ -462,6 +473,8 @@ export default function PracticeDetailScreen() {
         endTime: toTimeInput(practice.endsAt, timeZone) || "21:00",
         timeZone,
         location: String(practice.location ?? "CRC Comp Pool"),
+        // Echoed back so this full-replace PATCH doesn't reset the practice's course to the default.
+        course: (practice.course as "SCY" | "LCM" | "SCM" | undefined) ?? "SCY",
         focus:
           practice.focus == null || practice.focus === ""
             ? null
@@ -495,12 +508,12 @@ export default function PracticeDetailScreen() {
   function confirmDelete() {
     if (!id) return
     Alert.alert(
-      "Delete practice?",
-      "This permanently deletes the practice and its sets.",
+      "Move practice to Trash?",
+      "You can restore it from Trash later.",
       [
         { text: "Cancel", style: "cancel" },
         {
-          text: "Delete",
+          text: "Move to Trash",
           style: "destructive",
           onPress: () => void deletePractice(),
         },
@@ -606,7 +619,7 @@ export default function PracticeDetailScreen() {
               />
             </View>
             <Button
-              label="Delete practice"
+              label="Move to Trash"
               variant="danger"
               loading={deleting}
               onPress={confirmDelete}
@@ -626,10 +639,9 @@ export default function PracticeDetailScreen() {
                       label={`Set ${index + 1} title`}
                       value={set.title ?? ""}
                       onChangeText={(text) =>
-                        setEditSets((prev) =>
-                          prev.map((s, i) =>
-                            i === index ? { ...s, title: text } : s
-                          )
+                        setEditSets(
+                          (prev) => prev.map((s, i) => (i === index ? { ...s, title: text } : s)),
+                          `set:${index}:title`
                         )
                       }
                     />
@@ -637,10 +649,9 @@ export default function PracticeDetailScreen() {
                       label="Content"
                       value={set.content}
                       onChangeText={(text) =>
-                        setEditSets((prev) =>
-                          prev.map((s, i) =>
-                            i === index ? { ...s, content: text } : s
-                          )
+                        setEditSets(
+                          (prev) => prev.map((s, i) => (i === index ? { ...s, content: text } : s)),
+                          `set:${index}:content`
                         )
                       }
                       multiline
@@ -648,6 +659,20 @@ export default function PracticeDetailScreen() {
                     />
                   </View>
                 ))}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "flex-end",
+                    marginBottom: spacing.sm,
+                  }}
+                >
+                  <UndoRedoButtons
+                    canUndo={canUndoEditSets}
+                    canRedo={canRedoEditSets}
+                    onUndo={undoEditSets}
+                    onRedo={redoEditSets}
+                  />
+                </View>
                 <Button
                   label="Save sets"
                   loading={saving}
@@ -676,7 +701,7 @@ export default function PracticeDetailScreen() {
                   >
                     <Body style={{ fontWeight: "700" }}>
                       {set.title || `Set ${set.order + 1}`}
-                      {set.distance ? ` · ${set.distance}y` : ""}
+                      {set.distance ? ` · ${set.distance}` : ""}
                     </Body>
                     <FormattedText html={set.content} />
                   </View>
@@ -834,6 +859,7 @@ export default function PracticeDetailScreen() {
           endsAt={String(practice.endsAt ?? practice.startsAt ?? new Date().toISOString())}
           timeZone={String(practice.timeZone ?? DEFAULT_TIME_ZONE)}
           location={String(practice.location ?? "")}
+          course={String(practice.course ?? "SCY")}
           focus={practice.focus ? String(practice.focus) : null}
           tags={Array.isArray(practice.tags) ? (practice.tags as string[]) : []}
           sets={shareSets}

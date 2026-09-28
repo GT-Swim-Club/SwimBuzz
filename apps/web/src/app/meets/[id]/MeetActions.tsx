@@ -4,7 +4,8 @@ import { useState, useTransition } from "react"
 import ActionIcon from "@/components/ui/ActionIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
 import { useRouter } from "next/navigation"
-import MeetFields, { type MeetFormState } from "../MeetFields"
+import { type MeetFormState } from "../MeetFields"
+import MeetFormModal from "../MeetFormModal"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { meetPath } from "@/lib/slug"
 import { useUnsavedUploads } from "@/lib/meet/unsaved-uploads"
@@ -94,9 +95,9 @@ export default function MeetActions({
             setEditing(true)
           }}
           aria-label="Edit meet"
-          className="group relative inline-flex shrink-0 items-center justify-center p-2 border border-border rounded-lg bg-background hover:bg-fill transition-colors"
+          className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-border rounded-lg bg-background hover:bg-fill transition-colors"
         >
-          <ActionIcon kind="edit" className="h-4 w-4" />
+          <ActionIcon kind="edit" className="h-5 w-5" />
           <HoverDetail label="Edit meet" />
         </button>
         <button
@@ -105,51 +106,35 @@ export default function MeetActions({
             setError(null)
             setConfirmDelete(true)
           }}
-          aria-label="Delete meet"
-          className="group relative inline-flex shrink-0 items-center justify-center p-2 border border-red-200 text-error rounded-lg bg-background hover:bg-red-50 dark:border-red-900/50 dark:hover:bg-red-950/40 transition-colors"
+          aria-label="Move meet to Trash"
+          className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-error-border text-error rounded-lg bg-background hover:bg-error-bg transition-colors"
         >
-          <ActionIcon kind="delete" className="h-4 w-4" />
-          <HoverDetail label="Delete meet" />
+          <ActionIcon kind="delete" className="h-5 w-5" />
+          <HoverDetail label="Move to Trash" />
         </button>
       </div>
 
-      <Modal
+      <MeetFormModal
         open={editing}
-        onClose={closeWithoutSaving}
-        closeDisabled={loading}
-        busy={loading}
         title="Edit meet"
+        form={form}
+        setForm={setForm}
+        onUploaded={trackUpload}
+        onClose={closeWithoutSaving}
         onSubmit={handleSave}
-        footer={
-          <ModalFooter>
-            <button
-              type="button"
-              onClick={closeWithoutSaving}
-              disabled={loading}
-              className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-fill border-border"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
-            >
-              {loading ? "Saving…" : "Save changes"}
-            </button>
-          </ModalFooter>
-        }
-      >
-        <MeetFields form={form} setForm={setForm} onUploaded={trackUpload} />
-        {error && <p className="text-sm text-error">{error}</p>}
-      </Modal>
+        loading={loading}
+        busy={loading}
+        submitLabel="Save changes"
+        loadingLabel="Saving…"
+        error={error}
+      />
 
       <Modal
         open={confirmDelete}
         onClose={() => setConfirmDelete(false)}
         closeDisabled={loading}
-        title={`Delete ${meetName}?`}
-        description="This cannot be undone."
+        title={deleteOption === "swims" ? `Delete swims from ${meetName}?` : `Move ${meetName} to Trash?`}
+        description={deleteOption === "swims" ? "Swims-only deletion is permanent and cannot be undone." : "Move this meet to Trash."}
         maxWidth="sm"
         footer={
           <ModalFooter>
@@ -172,7 +157,9 @@ export default function MeetActions({
               disabled={loading}
               className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-red-700 disabled:opacity-50"
             >
-              {loading ? "Deleting…" : "Delete"}
+              {deleteOption === "swims"
+                ? loading ? "Deleting…" : "Delete"
+                : loading ? "Moving…" : "Move to Trash"}
             </button>
           </ModalFooter>
         }
@@ -180,9 +167,9 @@ export default function MeetActions({
         {hasSwims ? (
           <div className="space-y-2">
             {([
-              { value: "meet", label: `Delete meet`, desc: "Keeps swims, disconnects from meet" },
-              { value: "swims", label: "Delete swims", desc: "Deletes associated swims, keeps meet" },
-              { value: "both", label: "Delete both", desc: "Deletes meet and associated swims" },
+              { value: "meet", label: "Move to Trash", desc: "Moves meet to Trash; keeps swims in athlete stats" },
+              { value: "swims", label: "Delete swims", desc: "Permanently deletes associated swims; keeps meet" },
+              { value: "both", label: "Move meet and swims to Trash", desc: "Moves meet and swims to Trash; hides swims from stats" },
             ] as const).map((opt) => (
               <label key={opt.value} className="flex items-center gap-3 p-3 border border-border-secondary rounded-lg cursor-pointer hover:bg-fill">
                 <input

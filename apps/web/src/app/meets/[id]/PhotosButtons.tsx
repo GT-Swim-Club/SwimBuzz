@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, type ReactNode } from "react"
 import { createPortal } from "react-dom"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { FilePreviewDialog } from "@/components/ui/FilePreview"
@@ -231,9 +231,12 @@ const photosButtonClassName =
 export default function PhotosButtons({
   photos,
   label,
+  trigger,
 }: {
   photos: { url: string; name: string }[]
   label?: string
+  /** Custom trigger; receives the function that opens the dialog. */
+  trigger?: (open: () => void) => ReactNode
 }) {
   const [open, setOpen] = useState(false)
   const [selectedPhoto, setSelectedPhoto] = useState<{
@@ -252,14 +255,18 @@ export default function PhotosButtons({
   if (photos.length === 1) {
     return (
       <>
-        <button
-          type="button"
-          onClick={() => setSelectedPhoto(photos[0])}
-          className={photosButtonClassName}
-        >
-          <MeetResourceIcon kind="photos" />
-          {buttonLabel}
-        </button>
+        {trigger ? (
+          trigger(() => setSelectedPhoto(photos[0]))
+        ) : (
+          <button
+            type="button"
+            onClick={() => setSelectedPhoto(photos[0])}
+            className={photosButtonClassName}
+          >
+            <MeetResourceIcon kind="photos" />
+            {buttonLabel}
+          </button>
+        )}
         <FilePreviewDialog
           open={selectedPhoto !== null}
           onClose={() => setSelectedPhoto(null)}
@@ -272,14 +279,18 @@ export default function PhotosButtons({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className={photosButtonClassName}
-      >
-        <MeetResourceIcon kind="photos" />
-        {buttonLabel}
-      </button>
+      {trigger ? (
+        trigger(() => setOpen(true))
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className={photosButtonClassName}
+        >
+          <MeetResourceIcon kind="photos" />
+          {buttonLabel}
+        </button>
+      )}
 
       <Modal
         open={open}

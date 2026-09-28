@@ -12,11 +12,13 @@ const svgProps = {
   "aria-hidden": true as const,
 }
 
-export default function InfoIcon({ kind }: { kind: InfoKind }) {
+/** `className` overrides the default 14px size, e.g. to match larger text. */
+export default function InfoIcon({ kind, className }: { kind: InfoKind; className?: string }) {
+  const props = className ? { ...svgProps, className: `shrink-0 ${className}` } : svgProps
   switch (kind) {
     case "calendar":
       return (
-        <svg {...svgProps}>
+        <svg {...props}>
           <path d="M8 2v4" />
           <path d="M16 2v4" />
           <rect width="18" height="18" x="3" y="4" rx="2" />
@@ -25,14 +27,14 @@ export default function InfoIcon({ kind }: { kind: InfoKind }) {
       )
     case "location":
       return (
-        <svg {...svgProps}>
+        <svg {...props}>
           <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z" />
           <circle cx="12" cy="10" r="3" />
         </svg>
       )
     case "attended":
       return (
-        <svg {...svgProps}>
+        <svg {...props}>
           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
           <circle cx="9" cy="7" r="4" />
           <path d="m16 11 2 2 4-4" />
@@ -40,14 +42,14 @@ export default function InfoIcon({ kind }: { kind: InfoKind }) {
       )
     case "school":
         return (
-          <svg {...svgProps}>
+          <svg {...props}>
             <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
             <path d="M6 12v5a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3v-5" />
           </svg>
         )
     case "globe":
       return (
-        <svg {...svgProps}>
+        <svg {...props}>
           <circle cx="12" cy="12" r="10" />
           <path d="M2 12h20" />
           <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />

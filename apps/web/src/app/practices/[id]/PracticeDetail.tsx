@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { RelativeDateTime } from "@/components/ui/RelativeDate"
 import { FormattedText, isHtmlEmpty } from "@/components/ui/FormattedText"
 import PracticeActions from "./PracticeActions"
+import DeletedPracticeActions from "./DeletedPracticeActions"
 import SharePracticeButton from "./SharePracticeButton"
 import PracticeExportCapture from "./PracticeExportCapture"
 import CommentSection from "./CommentSection"
@@ -16,7 +17,7 @@ import InfoIcon from "@/components/ui/InfoIcon"
 import ActionIcon from "@/components/ui/ActionIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
 import PracticeEditSkeleton from "./PracticeEditSkeleton"
-import { groupPracticeSetsIntoRows, type StaffTitle } from "@swimbuzz/shared"
+import { formatPracticeDistance, groupPracticeSetsIntoRows, type StaffTitle } from "@swimbuzz/shared"
 
 type PracticeSetView = {
   id: string
@@ -47,6 +48,7 @@ export default function PracticeDetail({
   endsAt,
   timeZone,
   location,
+  course,
   focus,
   tags,
   sets,
@@ -57,6 +59,7 @@ export default function PracticeDetail({
   comments,
   attendedUserIds,
   initialEditLock,
+  deletedInfo,
 }: {
   practiceId: string
   practiceSlug: string | null
@@ -66,6 +69,7 @@ export default function PracticeDetail({
   endsAt: string
   timeZone: string
   location: string
+  course: string
   focus: string | null
   tags: string[]
   sets: PracticeSetView[]
@@ -76,6 +80,8 @@ export default function PracticeDetail({
   comments: PracticeCommentView[]
   attendedUserIds: string[]
   initialEditLock: PracticeEditLockInfo
+  /** Present when this practice is soft-deleted — swaps the action bar for Restore/Delete-permanently and hides comments. */
+  deletedInfo?: { purgeAfter: string; canRestore: boolean } | null
 }) {
   const router = useRouter()
   const exportCaptureRef = useRef<HTMLDivElement>(null)
@@ -96,7 +102,7 @@ export default function PracticeDetail({
 
   // Long-poll lock status while viewing (not editing) for near-instant updates.
   useEffect(() => {
-    if (!isCoach) return
+    if (!isCoach || deletedInfo) return
 
     let cancelled = false
     let requestAc: AbortController | null = null
@@ -170,7 +176,7 @@ export default function PracticeDetail({
       lockChannel?.close()
       document.removeEventListener("visibilitychange", onVisible)
     }
-  }, [isCoach, practiceId])
+  }, [isCoach, practiceId, deletedInfo])
 
   const attendanceHref = `${practicePath(practiceSlug ?? practiceId)}/attendance`
 
@@ -181,12 +187,6 @@ export default function PracticeDetail({
     ) : (
     <main className="space-y-5">
       <div>
-        <Link
-          href="/practices"
-          className="mb-1 inline-block text-sm font-medium text-foreground-tertiary hover:text-foreground md:hidden"
-        >
-          ← Practices
-        </Link>
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -210,7 +210,7 @@ export default function PracticeDetail({
                   </span>
                 )}
                 {location && totalDistance > 0 && <span>·</span>}
-                {totalDistance > 0 && <span>{totalDistance} yards</span>}
+                {totalDistance > 0 && <span>{formatPracticeDistance(totalDistance, course)}</span>}
               </div>
             </div>
           </div>
@@ -219,55 +219,67 @@ export default function PracticeDetail({
               isCoach && editLock?.locked ? "mb-7" : ""
             }`}
           >
-            <SharePracticeButton
-              practiceId={practiceId}
-              practiceSlug={practiceSlug}
-              title={title}
-              startsAt={startsAt}
-              endsAt={endsAt}
-              timeZone={timeZone}
-              location={location}
-              focus={focus}
-              tags={tags}
-              sets={sets}
-              totalDistance={totalDistance}
-              captureRef={exportCaptureRef}
-            />
-            {isCoach ? (
-              <PracticeActions
+            {deletedInfo ? (
+              <DeletedPracticeActions
                 practiceId={practiceId}
-                initial={initial}
                 title={title}
-                published={published}
-                attendanceHref={attendanceHref}
-                editLock={editLock}
-                onEdit={() => {
-                  openingEditorRef.current = true
-                  setOpeningEditor(true)
-                  router.push(practiceEditPath(practiceSlug ?? practiceId))
-                }}
-                onLockChange={setEditLock}
+                purgeAfter={deletedInfo.purgeAfter}
+                canRestore={deletedInfo.canRestore}
               />
             ) : (
-              <Link
-                href={attendanceHref}
-                aria-label="View attendance"
-                className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-border rounded-lg bg-background hover:bg-fill transition-colors"
-              >
-                <ActionIcon kind="attendance" className="h-5 w-5" />
-                <HoverDetail label="Attendance" />
-              </Link>
-            )}
-            {isCoach && editLock?.locked && (
-              <p
-                role="status"
-                className="absolute inset-x-0 top-full mt-1.5 flex items-center justify-end gap-1.5 text-right text-[11px] font-medium text-amber-800 dark:text-amber-200"
-              >
-                <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500 dark:bg-amber-300" />
-                {editLock.lockedByMe
-                  ? "You're editing in another window."
-                  : `${editLock.lockedBy?.name?.trim() || "Another coach"} is editing.`}
-              </p>
+              <>
+                <SharePracticeButton
+                  practiceId={practiceId}
+                  practiceSlug={practiceSlug}
+                  title={title}
+                  startsAt={startsAt}
+                  endsAt={endsAt}
+                  timeZone={timeZone}
+                  location={location}
+                  course={course}
+                  focus={focus}
+                  tags={tags}
+                  sets={sets}
+                  totalDistance={totalDistance}
+                  captureRef={exportCaptureRef}
+                />
+                {isCoach ? (
+                  <PracticeActions
+                    practiceId={practiceId}
+                    initial={initial}
+                    title={title}
+                    published={published}
+                    attendanceHref={attendanceHref}
+                    editLock={editLock}
+                    onEdit={() => {
+                      openingEditorRef.current = true
+                      setOpeningEditor(true)
+                      router.push(practiceEditPath(practiceSlug ?? practiceId))
+                    }}
+                    onLockChange={setEditLock}
+                  />
+                ) : (
+                  <Link
+                    href={attendanceHref}
+                    aria-label="View attendance"
+                    className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-border rounded-lg bg-background hover:bg-fill transition-colors"
+                  >
+                    <ActionIcon kind="attendance" className="h-5 w-5" />
+                    <HoverDetail label="Attendance" />
+                  </Link>
+                )}
+                {isCoach && editLock?.locked && (
+                  <p
+                    role="status"
+                    className="absolute inset-x-0 top-full mt-1.5 flex items-center justify-end gap-1.5 text-right text-[11px] font-medium text-amber-800 dark:text-amber-200"
+                  >
+                    <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500 dark:bg-amber-300" />
+                    {editLock.lockedByMe
+                      ? "You're editing in another window."
+                      : `${editLock.lockedBy?.name?.trim() || "Another coach"} is editing.`}
+                  </p>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -331,13 +343,15 @@ export default function PracticeDetail({
           ))}
         </div>
       </section>
-      <CommentSection
-        practiceId={practiceId}
-        currentUserId={currentUserId}
-        isCoach={isCoach}
-        initialComments={comments}
-        attendedUserIds={attendedUserIds}
-      />
+      {!deletedInfo && (
+        <CommentSection
+          practiceId={practiceId}
+          currentUserId={currentUserId}
+          isCoach={isCoach}
+          initialComments={comments}
+          attendedUserIds={attendedUserIds}
+        />
+      )}
     </main>
     )}
     <div
@@ -352,6 +366,7 @@ export default function PracticeDetail({
           endsAt={endsAt}
           timeZone={timeZone}
           location={location}
+          course={course}
           focus={focus}
           tags={tags}
           sets={sets}

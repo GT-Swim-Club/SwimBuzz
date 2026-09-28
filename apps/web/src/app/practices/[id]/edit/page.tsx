@@ -39,6 +39,7 @@ export default async function PracticeEditPage({
     endTime: toTimeInput(practice.endsAt, practice.timeZone),
     timeZone: practice.timeZone,
     location: practice.location,
+    course: practice.course,
     focus: practice.focus ?? "",
     tags: practice.tags,
     published: practice.published,

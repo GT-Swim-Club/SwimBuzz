@@ -4,6 +4,7 @@ import { useRouter } from "expo-router"
 import {
   Body,
   Button,
+  Chip,
   Muted,
   Screen,
   ScrollView,
@@ -11,10 +12,40 @@ import {
   usePalette,
 } from "@swimbuzz/ui"
 import { spacing } from "@swimbuzz/tokens"
-import { getViewerTimeZone } from "@swimbuzz/shared"
+import { COURSES, getViewerTimeZone } from "@swimbuzz/shared"
 import { DateSelector, TimeSelector, TimeZoneSelector } from "../../../src/components/DateTimeSelector"
+import { UndoRedoButtons } from "../../../src/components/UndoRedoButtons"
 import { api } from "../../../src/lib/api"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
+import { useUndoableState } from "../../../src/lib/use-undoable-state"
+
+type NewPracticeForm = {
+  title: string
+  date: string
+  startTime: string
+  endTime: string
+  location: string
+  course: (typeof COURSES)[number]
+  focus: string
+  setContent: string
+  published: boolean
+  timeZone: string
+}
+
+function emptyForm(): NewPracticeForm {
+  return {
+    title: "",
+    date: "",
+    startTime: "19:30",
+    endTime: "21:00",
+    location: "CRC Comp Pool",
+    course: "SCY",
+    focus: "",
+    setContent: "",
+    published: false,
+    timeZone: getViewerTimeZone(),
+  }
+}
 
 function clockToMinutes(value: string): number | null {
   const match = /^(\d{2}):(\d{2})$/.exec(value)
@@ -40,34 +71,26 @@ export default function NewPracticeScreen() {
   const router = useRouter()
   const c = usePalette()
   const tabBarPad = useTabBarScrollPadding()
-  const [title, setTitle] = useState("")
-  const [date, setDate] = useState("")
-  const [startTime, setStartTime] = useState("19:30")
-  const [endTime, setEndTime] = useState("21:00")
-  const [location, setLocation] = useState("CRC Comp Pool")
-  const [focus, setFocus] = useState("")
-  const [setContent, setSetContent] = useState("")
-  const [published, setPublished] = useState(false)
+  const { value: form, set: setForm, undo, redo, canUndo, canRedo } = useUndoableState(emptyForm())
   const [saving, setSaving] = useState(false)
-  const [timeZone, setTimeZone] = useState(() => getViewerTimeZone())
 
   async function onCreate() {
-    const trimmedTitle = title.trim()
+    const trimmedTitle = form.title.trim()
     if (!trimmedTitle) {
       Alert.alert("Title required", "Enter a practice title.")
       return
     }
-    if (date.trim() && !/^\d{4}-\d{2}-\d{2}$/.test(date.trim())) {
+    if (form.date.trim() && !/^\d{4}-\d{2}-\d{2}$/.test(form.date.trim())) {
       Alert.alert("Invalid date", "Select a date or leave it blank.")
       return
     }
-    const start = startTime.trim() || "19:30"
-    const end = endTime.trim() || "21:00"
+    const start = form.startTime.trim() || "19:30"
+    const end = form.endTime.trim() || "21:00"
     if ((clockToMinutes(end) ?? 0) <= (clockToMinutes(start) ?? 0)) {
       Alert.alert("Invalid end time", "End time must be after start time.")
       return
     }
-    const content = setContent.trim()
+    const content = form.setContent.trim()
     if (!content) {
       Alert.alert("Set required", "Add at least one set’s workout content.")
       return
@@ -76,13 +99,14 @@ export default function NewPracticeScreen() {
     try {
       const practice = (await api.createPractice({
         title: trimmedTitle,
-        date: date.trim() || null,
+        date: form.date.trim() || null,
         startTime: start,
         endTime: end,
-        timeZone,
-        location: location.trim() || "CRC Comp Pool",
-        focus: focus.trim() || null,
-        published,
+        timeZone: form.timeZone,
+        location: form.location.trim() || "CRC Comp Pool",
+        course: form.course,
+        focus: form.focus.trim() || null,
+        published: form.published,
         sets: [{ content, title: null, distance: null }],
       })) as { id?: string }
       if (practice?.id) {
@@ -103,16 +127,19 @@ export default function NewPracticeScreen() {
   return (
     <Screen>
       <ScrollView contentContainerStyle={{ paddingBottom: tabBarPad }}>
+        <View style={{ flexDirection: "row", justifyContent: "flex-end", marginBottom: spacing.xs }}>
+          <UndoRedoButtons canUndo={canUndo} canRedo={canRedo} onUndo={undo} onRedo={redo} />
+        </View>
         <TextField
           label="Title"
-          value={title}
-          onChangeText={setTitle}
+          value={form.title}
+          onChangeText={(title) => setForm((f) => ({ ...f, title }), "title")}
           placeholder="Tuesday PM"
         />
         <DateSelector
           label="Date"
-          value={date}
-          onChange={setDate}
+          value={form.date}
+          onChange={(date) => setForm((f) => ({ ...f, date }))}
           placeholder="Choose a date"
           optional
         />
@@ -120,42 +147,61 @@ export default function NewPracticeScreen() {
           <View style={{ flex: 1 }}>
             <TimeSelector
               label="Start time"
-              value={startTime}
-              onChange={(value) => {
-                setStartTime(value)
-                setEndTime((current) => endAfterStart(value, current))
-              }}
+              value={form.startTime}
+              onChange={(value) =>
+                setForm((f) => ({ ...f, startTime: value, endTime: endAfterStart(value, f.endTime) }))
+              }
               helperText="15-minute intervals"
             />
           </View>
           <View style={{ flex: 1 }}>
             <TimeSelector
               label="End time"
-              value={endTime}
-              onChange={setEndTime}
+              value={form.endTime}
+              onChange={(endTime) => setForm((f) => ({ ...f, endTime }))}
               helperText="Must be after start"
-              min={startTime}
+              min={form.startTime}
               minExclusive
             />
           </View>
         </View>
-        <TimeZoneSelector label="Time zone" value={timeZone} onChange={setTimeZone} />
-        <TextField
-          label="Location"
-          value={location}
-          onChangeText={setLocation}
-          placeholder="CRC Comp Pool"
+        <TimeZoneSelector
+          label="Time zone"
+          value={form.timeZone}
+          onChange={(timeZone) => setForm((f) => ({ ...f, timeZone }))}
         />
         <TextField
+          label="Location"
+          value={form.location}
+          onChangeText={(location) => setForm((f) => ({ ...f, location }), "location")}
+          placeholder="CRC Comp Pool"
+        />
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            marginBottom: spacing.sm,
+          }}
+        >
+          {COURSES.map((course) => (
+            <Chip
+              key={course}
+              label={course}
+              selected={form.course === course}
+              onPress={() => setForm((f) => ({ ...f, course }))}
+            />
+          ))}
+        </View>
+        <TextField
           label="Focus"
-          value={focus}
-          onChangeText={setFocus}
+          value={form.focus}
+          onChangeText={(focus) => setForm((f) => ({ ...f, focus }), "focus")}
           placeholder="Speed / endurance…"
         />
         <TextField
           label="Set content"
-          value={setContent}
-          onChangeText={setSetContent}
+          value={form.setContent}
+          onChangeText={(setContent) => setForm((f) => ({ ...f, setContent }), "setContent")}
           placeholder="Warmup 800 free…"
           multiline
           style={{ minHeight: 88, textAlignVertical: "top" }}
@@ -174,8 +220,8 @@ export default function NewPracticeScreen() {
             <Muted>Visible to athletes when on</Muted>
           </View>
           <Switch
-            value={published}
-            onValueChange={setPublished}
+            value={form.published}
+            onValueChange={(published) => setForm((f) => ({ ...f, published }))}
             trackColor={{
               false: c.switchTrack,
               true: c.primary,

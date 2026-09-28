@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useRef, useState } from "react"
 import type { MutableRefObject } from "react"
 import { Document, Page, pdfjs } from "react-pdf"
 
@@ -19,6 +20,68 @@ type PdfDocumentViewerProps = {
   onLoadSuccess: (numPages: number) => void
   onLoadError: () => void
   onRenderError: () => void
+}
+
+type ZoomablePdfPageProps = {
+  pageNumber: number
+  scale: number
+  onRenderError: () => void
+}
+
+// react-pdf blanks a page's canvas while it re-renders at a new scale. To zoom without that flash,
+// keep showing the last fully rendered canvas (CSS-scaled to the new size) and render the new scale
+// in a hidden layer on top, swapping it in once it's painted. Layers are keyed by scale so the
+// swapped-in canvas is never re-rendered.
+function ZoomablePdfPage({ pageNumber, scale, onRenderError }: ZoomablePdfPageProps) {
+  const [baseSize, setBaseSize] = useState<{ width: number; height: number } | null>(null)
+  const [shownScale, setShownScale] = useState(scale)
+  const latestScaleRef = useRef(scale)
+
+  useEffect(() => {
+    latestScaleRef.current = scale
+  }, [scale])
+
+  const layerScales = shownScale === scale ? [scale] : [shownScale, scale]
+  const shownZoomRatio = scale / shownScale
+
+  return (
+    <div
+      className="relative"
+      style={
+        baseSize
+          ? { width: Math.floor(baseSize.width * scale), height: Math.floor(baseSize.height * scale) }
+          : undefined
+      }
+    >
+      {layerScales.map((layerScale) => {
+        const isShown = layerScale === shownScale
+        return (
+          <div
+            key={layerScale}
+            aria-hidden={isShown ? undefined : true}
+            className={isShown ? "origin-top-left" : "pointer-events-none absolute left-0 top-0 opacity-0"}
+            style={isShown && shownZoomRatio !== 1 ? { transform: `scale(${shownZoomRatio})` } : undefined}
+          >
+            <Page
+              pageNumber={pageNumber}
+              scale={layerScale}
+              renderAnnotationLayer={false}
+              renderTextLayer={true}
+              loading={null}
+              onLoadSuccess={(page) => {
+                const viewport = page.getViewport({ scale: 1 })
+                setBaseSize({ width: viewport.width, height: viewport.height })
+              }}
+              onRenderSuccess={() => {
+                if (layerScale === latestScaleRef.current) setShownScale(layerScale)
+              }}
+              onRenderError={onRenderError}
+            />
+          </div>
+        )
+      })}
+    </div>
+  )
 }
 
 export default function PdfDocumentViewer({
@@ -55,12 +118,9 @@ export default function PdfDocumentViewer({
               data-page={page}
               className="scroll-mt-5 overflow-hidden rounded-sm bg-white shadow-xl ring-1 ring-black/5"
             >
-              <Page
+              <ZoomablePdfPage
                 pageNumber={page}
                 scale={(zoomPercent / 100) * PDF_RENDER_SCALE_AT_100_PERCENT}
-                renderAnnotationLayer={false}
-                renderTextLayer={true}
-                loading={null}
                 onRenderError={onRenderError}
               />
             </div>

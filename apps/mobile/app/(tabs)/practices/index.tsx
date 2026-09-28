@@ -36,6 +36,7 @@ import {
 import { PracticeViewToggle } from "../../../src/components/PracticeViewToggle"
 import { PracticeCard } from "../../../src/components/PracticeCard"
 import { PracticeTagFilter, type PracticeTag } from "../../../src/components/PracticeTagFilter"
+import { DeletedItemsList } from "../../../src/components/DeletedItemsList"
 import { Icon } from "../../../src/components/Icon"
 import {
   addUtcDays,
@@ -70,6 +71,7 @@ export default function PracticesScreen() {
   const [weekStart, setWeekStart] = useState(() => startOfUtcWeek(new Date()))
   const [monthStart, setMonthStart] = useState(() => startOfUtcMonth(new Date()))
   const [selectedDay, setSelectedDay] = useState(todayUtcKey)
+  const [showDeleted, setShowDeleted] = useState(false)
   const queryClient = useQueryClient()
 
   const {
@@ -168,11 +170,30 @@ export default function PracticesScreen() {
   const filters = (
     <>
       {isStaff ? (
-        <View style={{ marginBottom: spacing.sm }}>
-          <Button
-            label="New practice"
-            onPress={() => router.push("/practices/new")}
-          />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm, marginBottom: spacing.sm }}>
+          <View style={{ flex: 1 }}>
+            <Button
+              label="New practice"
+              onPress={() => router.push("/practices/new")}
+            />
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Trash"
+            onPress={() => setShowDeleted(true)}
+            hitSlop={8}
+            style={{
+              alignItems: "center",
+              borderColor: c.border,
+              borderRadius: radii.lg,
+              borderWidth: 1,
+              height: 44,
+              justifyContent: "center",
+              width: 44,
+            }}
+          >
+            <Icon name="trash" size={18} color={c.textSecondary} />
+          </Pressable>
         </View>
       ) : null}
       <TextField
@@ -228,6 +249,26 @@ export default function PracticesScreen() {
       ? "No practices yet"
       : "No matching practices"
   const emptyBody = error instanceof Error ? error.message : undefined
+
+  if (showDeleted && isStaff) {
+    return (
+      <Screen style={{ paddingBottom: 0 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm, marginBottom: spacing.sm }}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Back to practices"
+            onPress={() => setShowDeleted(false)}
+            hitSlop={8}
+            style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
+          >
+            <Icon name="chevronLeft" size={18} color={c.text} />
+            <Text style={{ color: c.text, fontSize: 15, fontWeight: "600" }}>Trash</Text>
+          </Pressable>
+        </View>
+        <DeletedItemsList kind="practice" tabBarPad={tabBarPad} />
+      </Screen>
+    )
+  }
 
   if (isPending) {
     return (
