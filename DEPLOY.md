@@ -35,7 +35,7 @@ Production domain: `https://swimbuzz.gtswimclub.com`
    Because the Vercel root is the repo root, Vercel's Next.js builder looks for `.next` and `public/` there, not in `apps/web`. Two things handle this: `outputDirectory` in `vercel.json` points at `apps/web/.next`, and the root `public` is a committed symlink to `apps/web/public`. Don't delete either one. Without them, the build fails with `The Next.js output directory ".next" was not found`, or static files return 404.
 
    `[vercel.json](vercel.json)` also registers the Python Function `api/parse-pdf.py` (60s max duration) and the daily crons. Vercel installs the function's dependencies from the root `requirements.txt` automatically. Keep web frameworks such as Flask and FastAPI out of that file: if Vercel detects one, it routes every request to it instead of Next.js.
-3. Under **Settings → Environment Variables**, add the following for **Production**, and for **Preview** too if you use previews:
+3. Under **Settings → Environment Variables**, add the following for **Production**, and for **Preview** too if you use previews. [`.env.example.prod`](.env.example.prod) is a template of the same variables:
 
   | Variable                                            | Value                                                                                                                                          |
   | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -54,3 +54,6 @@ graphify-out/
 
 # Local-only meet PDF fixtures (not checked in — see pdf_parsers/tests/)
 /fixtures/
+.vercel
+.env*
+!.env.example*

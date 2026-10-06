@@ -2,41 +2,148 @@
 
 Team management app for **Georgia Tech Swim Club** — roster, practices, meets, results import, relay lineups.
 
-Web hosts both the UI and the API; mobile is a full client of that same API, not a wrapper around the website.
+## Project Overview
 
-- **`apps/web`** — Next.js 16, hosts the UI **and** the `/api/*` backend
-- **`apps/mobile`** — Expo / React Native app for athletes and coaches (iOS & Android)
-- **`packages/*`** — code shared between web and mobile (roles/DTOs, API client, design tokens, RN UI primitives)
-- **`pdf_parsers/`** + **`api/parse-pdf.py`** — server-side meet-PDF parsing (Vercel Python Function)
+The web hosts both the UI and the API. The mobile version is a full client of that same API.
 
-Auth: Google OAuth or `@gatech.edu` email OTP. Roles: `ATHLETE`, `COACH`, `EXEC`. Web uses NextAuth cookie/JWT sessions; mobile uses Bearer access/refresh tokens (`/api/auth/mobile/*`) — both resolve through the same `getSession()`.
+- `apps/web` — Next.js 16, hosts the UI **and** the `/api/`* backend
+- `apps/mobile` — Expo / React Native app (iOS & Android)
+- `packages/*` — code shared between web and mobile (roles/DTOs, API client, design tokens, RN UI primitives)
+- `pdf_parsers/` + `api/parse-pdf.py` — server-side meet-PDF parsing (Vercel Python Function)
+
+### Auth
+
+- Google OAuth or `@gatech.edu` email OTP
+- Roles: `ATHLETE`, `COACH`, `EXEC`
+- Web uses NextAuth cookie/JWT sessions
+- Mobile uses Bearer access/refresh tokens (`/api/auth/mobile/*`)
+- Both resolve through the same `getSession()`
+
+
+
+### Tech stack
+
+- **Web:** Next.js 16, React 19, Tailwind 4, Prisma 5, NextAuth v4
+- **Mobile:** Expo Router, SecureStore, Expo Notifications, expo-auth-session
+- **Database / storage:** Supabase Postgres + Storage
+- **Scraping:** Run Scraper (Python, Playwright) — SwimCloud/SwimPhone only
+- **PDF parsing:** `api/parse-pdf.py`, a Vercel Python Function (pdfplumber)
+
+
 
 ## Onboarding checklist
 
-**Prerequisites:** Node 22.19+, pnpm 9+, PostgreSQL (Supabase recommended), Python 3.11+ (PDF parsing locally, and for Run Scraper), Xcode/Android Studio for native builds.
+Run commands from repo root.
 
-- [ ] `pnpm install` (`brew install pnpm` on macOS if needed)
-- [ ] `pip install -r requirements.txt` (pdfplumber, httpx — local PDF parsing)
-- [ ] `cp .env.example apps/web/.env` and fill in values from someone who already has them — see comments in the file for where each one comes from:
-  - [ ] `DATABASE_URL` / `DIRECT_URL` — Supabase Postgres (pooler port 6543 / direct port 5432)
-  - [ ] `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` (service_role, not anon) — Supabase → Settings → API
-  - [ ] Create Storage buckets `meet-files` and `avatars`, then run `apps/web/supabase/meet-files-storage.sql` and `avatars-storage.sql`
-  - [ ] `NEXTAUTH_SECRET` (`openssl rand -base64 32`), `NEXTAUTH_URL=http://localhost:3000`
-  - [ ] `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` for Google OAuth sign-in
-  - [ ] `RESEND_API_KEY` for `@gatech.edu` OTP email — optional locally, the OTP code just logs to the server console without one
-  - [ ] `CRON_SECRET` and `PDF_PARSER_SECRET` (`openssl rand -base64 32` each) — leave `PDF_PARSER_URL` unset locally
-  - [ ] Only if touching Google Sheets roster import: enable both the Picker API and Sheets API in Google Cloud Console, set `NEXT_PUBLIC_GOOGLE_CLIENT_ID` / `NEXT_PUBLIC_GOOGLE_PICKER_API_KEY`
-- [ ] Apply any relevant raw SQL under `apps/web/supabase/` (storage buckets, RLS, one-off migrations — things `prisma db push` can't express)
-- [ ] `pnpm db:generate`
-- [ ] `pnpm --filter @swimbuzz/web exec prisma db push`
-- [ ] `pnpm dev:web` → http://localhost:3000, sign in, confirm the dashboard loads
-- [ ] `pnpm lint` to confirm a clean baseline before making changes
+### 1. Install the tools
 
-For mobile: `cp apps/mobile/.env.example apps/mobile/.env`, set `EXPO_PUBLIC_API_URL` and `EXPO_PUBLIC_WEB_URL` to your machine's LAN IP (`ipconfig getifaddr en0` on macOS — not `localhost`), then `pnpm dev:mobile`. Google sign-in on mobile needs separate iOS/Android/Web OAuth client IDs and only works in dev builds (blocked in Expo Go). Read `apps/mobile/AGENTS.md`/`CLAUDE.md` before writing RN code — Expo has changed significantly since older training data; check https://docs.expo.dev/versions/v57.0.0/.
+- [ ] **Node 22.19+**
+  ```bash
+  brew install node                      # macOS
+  winget install OpenJS.NodeJS.LTS       # Windows
 
-SwimCloud/SwimPhone syncing needs the **Run Scraper** desktop helper running on your machine (started from the web UI) — Cloudflare/rate-limit reasons require a real browser, so it can't run server-side. PDF imports (results, sheets, packets, NQT standards) parse server-side and need nothing installed; locally they shell out to `python3 -m pdf_parsers.cli`.
+  node -v                                # macOS/Windows
+  ```
+- [ ] **pnpm 9+** 
+  ```bash
+  npm install -g pnpm@9                  # Works on macO, Windows, and Linux
+  brew install pnpm                      # macOS only
+  ```
+- [ ] **Python 3.11+** 
+  ```bash
+  brew install python                    # macOS
+  winget install Python.Python.3.12      # Windows
 
-A repo-root `CLAUDE.md` with additional architecture/convention notes exists locally for Claude Code but is gitignored — ask a maintainer to share it if you're using Claude Code.
+  python3 --version                      # macOS
+  python --version                       # Windows
+  ```
+- [ ] **Xcode / Android Studio** — if you'll work on the mobile app
+
+
+
+### 2. Install dependencies
+
+- [ ] Install JS packages:
+  ```bash
+  pnpm install
+  ```
+- [ ] Install the Python PDF-parsing packages:
+  ```bash
+  pip install -r requirements.txt
+  ```
+
+
+
+### 3. Set up the web environment file
+
+- [ ] Copy the template:
+  ```bash
+  cp apps/web/.env.example apps/web/.env
+  ```
+- [ ] **Ask a maintainer for the shared dev values** and paste them in
+- [ ] Run this and paste the result into `NEXTAUTH_SECRET`:
+  ```bash
+  openssl rand -base64 32
+  ```
+  On Windows without OpenSSL, run it in Git Bash, or use 
+  ```bash
+  node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+  ```
+
+
+
+### 4. Set up the database
+
+- [ ] Generate the Prisma client:
+  ```bash
+  pnpm db:generate
+  ```
+- [ ] Push the schema to the database
+  ```bash
+  pnpm db:push
+  ```
+
+
+
+### 5. Run the web app
+
+- [ ] Start it:
+  ```bash
+  pnpm dev:web
+  ```
+- [ ] Open [http://localhost:3000](http://localhost:3000), sign in, and check that the dashboard loads.
+- [ ] Run lint once so you know the baseline is clean before you change anything:
+  ```bash
+  pnpm lint
+  ```
+
+
+
+### 6. Run the mobile app (optional)
+
+- [ ] Copy the template:
+  ```bash
+  cp apps/mobile/.env.example apps/mobile/.env
+  ```
+- [ ] Find your computer's LAN IP:
+  ```bash
+  ipconfig getifaddr en0   # macOS
+  ipconfig                 # Windows — use the "IPv4 Address" line
+  ```
+- [ ] In `apps/mobile/.env`, set `EXPO_PUBLIC_API_URL=http://<that IP>:3000`
+- [ ] Keep `pnpm dev:web` running, then in a second terminal:
+  ```bash
+  pnpm dev:mobile
+  ```
+- [ ] Open the app using one of these options:
+  - **Physical phone:** install **Expo Go** from the App Store or Google Play, make sure the phone is on the same Wi-Fi as your computer, then scan the QR code in the terminal. Use the Camera app on iOS or Expo Go's scanner on Android.
+  - **iOS Simulator (macOS only):** with Xcode installed, press `i` in the Expo terminal.
+  - **Android Emulator:** with Android Studio and an emulator running, press `a` in the Expo terminal.
+- [ ] While you work, edits save and reload automatically. Press `r` in the Expo terminal to force a reload, or `m` to open the developer menu. On a physical phone, shake it to open the menu.
+
+> Google sign-in does not work in Expo Go and needs separate iOS/Android OAuth client IDs. Use email sign-in in Expo Go.
+
+
 
 ## Project structure
 
@@ -56,8 +163,10 @@ SwimBuzz/
 │   └── ui/                    # React Native primitives
 ├── pdf_parsers/               # meet-PDF parsers, shared by api/parse-pdf.py
 ├── api/parse-pdf.py           # Vercel Python Function — server-side PDF parsing
-└── docs/DEPLOY.md             # Vercel/Render/EAS deploy details, cron setup, cutover checklist
+└── DEPLOY.md                  # Vercel/Supabase/EAS deploy steps and cron setup
 ```
+
+
 
 ## Commands
 
@@ -72,38 +181,17 @@ Filter turbo to iterate on one package: `pnpm --filter @swimbuzz/web exec prisma
 
 ## Shared packages
 
-Edit these with both apps in mind — they're the contract between web and mobile.
 
-| Package | Use |
-|---------|-----|
-| `@swimbuzz/shared` | Roles, DTOs, date/name helpers |
-| `@swimbuzz/api` | `createApiClient` — cookie (web) or Bearer (mobile) |
-| `@swimbuzz/tokens` | Brand colors and spacing |
-| `@swimbuzz/ui` | Shared RN UI primitives |
+| Package            | Use                                                 |
+| ------------------ | --------------------------------------------------- |
+| `@swimbuzz/shared` | Roles, DTOs, date/name helpers                      |
+| `@swimbuzz/api`    | `createApiClient` — cookie (web) or Bearer (mobile) |
+| `@swimbuzz/tokens` | Brand colors and spacing                            |
+| `@swimbuzz/ui`     | Shared RN UI primitives                             |
 
-## Tech stack
 
-- **Web:** Next.js 16, React 19, Tailwind 4, Prisma 5, NextAuth v4
-- **Mobile:** Expo Router, SecureStore, Expo Notifications, expo-auth-session
-- **Database / storage:** Supabase Postgres + Storage
-- **Scraping:** Run Scraper (Python, Playwright) — SwimCloud/SwimPhone only
-- **PDF parsing:** `api/parse-pdf.py`, a Vercel Python Function (pdfplumber)
+
 
 ## Deploying
 
-See [`docs/DEPLOY.md`](docs/DEPLOY.md) — Vercel (preferred) and Render setup, required env vars, cron jobs, and the production cutover checklist.
-
-### Recently Deleted
-
-Coaches and execs can open **Settings → Recently Deleted** on web and mobile (also linked from the web practice/meet toolbars). The shared recovery period defaults to 30 days and accepts 1–365 days. Changes apply to future deletions; each item keeps the deadline assigned when deleted.
-
-- Practice deletion preserves sets, comments, attendance and publication state for recovery; edit locks are released.
-- **Delete meet only** preserves swims in athlete stats, including after permanent cleanup.
-- **Delete meet and swims** hides swims from stats until restoration, or permanently removes them with the meet at expiry.
-- **Delete swims only** remains permanent. Recovery applies to deleted practices and meets, not individual swim removals.
-
-Apply `apps/web/supabase/soft-delete-recovery.sql` (or `pnpm db:push`) before deploying this code, then generate Prisma. No existing rows need a backfill. The existing daily `/api/cron/notification-cleanup` cron also purges expired items. Recovery closes at the displayed deadline; physical cleanup happens on the next daily run (25 meets per run). Failed storage cleanup retains the meet and URLs for retry, and restoration is blocked once purge has begun. The custom server schedules the same authenticated endpoint locally; it generates a process-local cron secret if `CRON_SECRET` is absent.
-
-Active-record filtering is installed on the shared Prisma client, including nested lists and counts. Recovery and slug reservation use the narrowly scoped `withDeleted` context. Raw SQL and separate `PrismaClient` instances bypass this policy; use the shared client for application queries.
-
-Run `pnpm --filter @swimbuzz/web test:recovery` for isolated database behavior checks (SQLite fixture; no production connection or storage access). Web and mobile TypeScript checks validate the shared API contract.
+See `[DEPLOY.md](DEPLOY.md)` for how to deploy.
