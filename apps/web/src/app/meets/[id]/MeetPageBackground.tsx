@@ -1,82 +1,53 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 
 type MeetPageBackgroundProps = {
   bannerUrl: string
-  photoUrls: string[]
 }
 
-export default function MeetPageBackground({
-  bannerUrl,
-  photoUrls,
-}: MeetPageBackgroundProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const cycleRef = useRef<HTMLDivElement>(null)
-  const [repeatCount, setRepeatCount] = useState(1)
+type Frame = { top: number; left: number; width: number; height: number }
 
-  const hasPhotos = photoUrls.length > 0
-  const cycleUrls = hasPhotos ? [bannerUrl, ...photoUrls] : [bannerUrl]
+/**
+ * Meet banner as a fixed page background. It's pinned to the visible `#page-scroll`
+ * area (below the nav, excluding its scrollbar), so it fills the page however short
+ * the content is and stays put while the page scrolls.
+ */
+export default function MeetPageBackground({ bannerUrl }: MeetPageBackgroundProps) {
+  const [frame, setFrame] = useState<Frame | null>(null)
 
-  const updateRepeatCount = useCallback(() => {
-    const container = containerRef.current
-    const cycle = cycleRef.current
-    if (!container || !cycle) return
+  useEffect(() => {
+    const scroller = document.getElementById("page-scroll")
+    if (!scroller) return
 
-    const cycleHeight = cycle.offsetHeight
-    const containerHeight = container.offsetHeight
-    if (cycleHeight > 0 && containerHeight > 0) {
-      setRepeatCount(Math.max(1, Math.ceil(containerHeight / cycleHeight) + 1))
+    function measure() {
+      const rect = scroller!.getBoundingClientRect()
+      setFrame({
+        top: rect.top,
+        left: rect.left,
+        width: scroller!.clientWidth,
+        height: scroller!.clientHeight,
+      })
+    }
+
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(scroller)
+    window.addEventListener("resize", measure)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener("resize", measure)
     }
   }, [])
 
-  useEffect(() => {
-    updateRepeatCount()
-
-    const container = containerRef.current
-    const cycle = cycleRef.current
-    if (!container || !cycle) return
-
-    const observer = new ResizeObserver(updateRepeatCount)
-    observer.observe(container)
-    observer.observe(cycle)
-
-    return () => observer.disconnect()
-  }, [updateRepeatCount, bannerUrl, photoUrls])
+  if (!frame) return null
 
   return (
-    <div
-      ref={containerRef}
-      className="pointer-events-none absolute -top-6 -bottom-6 left-1/2 w-screen -translate-x-1/2 overflow-hidden sm:-top-8 sm:-bottom-8"
-      aria-hidden
-    >
-      {hasPhotos ? (
-        <div className="absolute inset-0 opacity-40">
-          {Array.from({ length: repeatCount }, (_, rep) => (
-            <div key={rep} ref={rep === 0 ? cycleRef : undefined}>
-              {cycleUrls.map((url, i) => (
-                <img
-                  key={`${rep}-${url}-${i}`}
-                  src={url}
-                  alt=""
-                  className="block w-full h-auto"
-                  onLoad={updateRepeatCount}
-                />
-              ))}
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div
-          className="absolute inset-0 opacity-40"
-          style={{
-            backgroundImage: `url(${bannerUrl})`,
-            backgroundSize: "100% auto",
-            backgroundRepeat: "repeat-y",
-            backgroundPosition: "top center",
-          }}
-        />
-      )}
+    <div className="pointer-events-none fixed overflow-hidden" style={frame} aria-hidden>
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-40"
+        style={{ backgroundImage: `url(${bannerUrl})` }}
+      />
       <div className="absolute inset-0 bg-background/70 dark:bg-background/90" />
     </div>
   )

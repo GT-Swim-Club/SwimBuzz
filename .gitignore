@@ -47,6 +47,7 @@ apps/web/package-lock.json
 .codex/
 CLAUDE.md
 AGENTS.md
+/PLAN.md
 
 # Graphify
 graphify-out/

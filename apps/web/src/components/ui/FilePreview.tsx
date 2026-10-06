@@ -173,6 +173,10 @@ const ZOOM_STEP_PERCENT = 20
 // this long with no scroll events ends the navigation.
 const PAGE_NAVIGATION_STALL_MS = 1000
 
+// How long a reopened PDF waits for its pages to lay out before giving up on returning to the page
+// it was closed on.
+const PAGE_RESTORE_TIMEOUT_MS = 10000
+
 // The current page is whichever shows the most height in the viewport. (An intersection
 // threshold can't do this: once a zoomed page is taller than the viewport, it never crosses it.)
 // Scrolled all the way down counts as the last page, which may be too short to ever be the most
@@ -214,6 +218,19 @@ function getRectInScrollContainer(element: HTMLElement, container: HTMLElement) 
     width: rect.width,
     height: rect.height,
   }
+}
+
+// The scroll position that brings a page's top (less its scroll margin) to the top of the
+// viewport, clamped to how far the container can actually scroll.
+function getPageScrollTop(pageElement: HTMLElement, container: HTMLElement) {
+  const scrollMarginTop = parseFloat(getComputedStyle(pageElement).scrollMarginTop) || 0
+  const maxScrollTop = container.scrollHeight - container.clientHeight
+  return Math.round(
+    Math.max(
+      0,
+      Math.min(maxScrollTop, getRectInScrollContainer(pageElement, container).top - scrollMarginTop)
+    )
+  )
 }
 
 function getZoomAnchor(
@@ -264,6 +281,16 @@ export function FilePreviewDialog({
   } | null>(null)
   const kind = forcePdf ? "pdf" : getPreviewKind(url, title)
   const showingPdf = kind === "pdf"
+
+  // The page state survives closing so a reopened PDF can return to where it was left, but only for
+  // the same document: callers may reuse one dialog for several files (and blank the URL while
+  // it's closed), so opening a different file starts it over at page 1.
+  const [pageStateUrl, setPageStateUrl] = useState(url)
+  if (open && url !== pageStateUrl) {
+    setPageStateUrl(url)
+    setPageNumber(1)
+    setNumPages(null)
+  }
 
   useEffect(() => {
     if (!open) return
@@ -352,6 +379,54 @@ export function FilePreviewDialog({
     }
   }, [numPages, open, showingPdf])
 
+  // Returns whether there's nothing left to restore: either the page is restored, or it's page 1,
+  // where the document already opens.
+  const restoreClosedPage = useEffectEvent((): boolean => {
+    if (pageNumber <= 1) return true
+    const container = scrollContainerRef.current
+    if (!container || !numPages) return false
+    const pageElements = pageRefs.current.slice(0, numPages)
+    if (pageElements.length < numPages || !pageElements.every((page) => page && page.offsetHeight > 0)) {
+      return false
+    }
+    const targetScrollTop = getPageScrollTop(pageElements[pageNumber - 1]!, container)
+    if (Math.abs(container.scrollTop - targetScrollTop) > 1) {
+      // Hold the counter on the restored page, as Previous/Next does, in case the page landed on
+      // isn't the most visible one (e.g. a short last page).
+      startPageNavigation(targetScrollTop)
+      container.scrollTop = targetScrollTop
+    }
+    return true
+  })
+
+  // Reopening remounts the document scrolled to the top while the counter still shows the page it
+  // was closed on, so jump back to that page once every page has laid out (until then, the offsets
+  // above it are still changing). Scrolling first means the user has moved on, so don't.
+  useEffect(() => {
+    if (!open || !showingPdf) return
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    const startedAt = performance.now()
+    let frame = 0
+    const stop = () => {
+      cancelAnimationFrame(frame)
+      container.removeEventListener("wheel", stop)
+      container.removeEventListener("touchstart", stop)
+      container.removeEventListener("pointerdown", stop)
+    }
+    const tryRestore = () => {
+      if (restoreClosedPage() || performance.now() - startedAt > PAGE_RESTORE_TIMEOUT_MS) stop()
+      else frame = requestAnimationFrame(tryRestore)
+    }
+
+    container.addEventListener("wheel", stop, { passive: true })
+    container.addEventListener("touchstart", stop, { passive: true })
+    container.addEventListener("pointerdown", stop)
+    frame = requestAnimationFrame(tryRestore)
+    return stop
+  }, [open, showingPdf])
+
   // After a zoom re-lays out the pages, scroll so the point that was at the viewport's center
   // (anchored to its page) is back at the center, instead of drifting to another page.
   useLayoutEffect(() => {
@@ -375,14 +450,7 @@ export function FilePreviewDialog({
     const pageElement = pageRefs.current[validPage - 1]
     if (!container || !pageElement) return
 
-    const scrollMarginTop = parseFloat(getComputedStyle(pageElement).scrollMarginTop) || 0
-    const maxScrollTop = container.scrollHeight - container.clientHeight
-    const targetScrollTop = Math.round(
-      Math.max(
-        0,
-        Math.min(maxScrollTop, getRectInScrollContainer(pageElement, container).top - scrollMarginTop)
-      )
-    )
+    const targetScrollTop = getPageScrollTop(pageElement, container)
     if (Math.abs(container.scrollTop - targetScrollTop) <= 1) {
       endPageNavigation(false)
       return

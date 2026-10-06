@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react"
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import Link from "next/link"
 import type { ResultSplit } from "@/lib/meet/meet-sheet-summary"
@@ -30,7 +30,8 @@ export type SwimDetail = {
   subLine: string
   /** One round, or prelims + finals for a combined individual view. */
   rounds: DetailRound[]
-  relaySwimmers?: Array<{ name: string; split?: string }>
+  /** `splits` are the leg's interval 50s (distance within the leg) for legs longer than 50. */
+  relaySwimmers?: Array<{ name: string; split?: string; splits?: ResultSplit[] }>
   coachNote?: string
 }
 
@@ -108,13 +109,33 @@ type ChartSeries = {
   stroke: string
   text: string
   dashed?: boolean
-  /** Only the fastest point is filled and its label emphasised. */
-  fastest?: boolean
 }
 
-function SplitChart({ series, labels }: { series: ChartSeries[]; labels: string[] }) {
+/** A run of consecutive points (e.g. one relay leg's 50s) labelled once on the x-axis. */
+type ChartGroup = { label: string; start: number; end: number }
+
+// Base chart width in viewBox units — roughly the modal's content width in px,
+// so text renders near 1:1.
+const CHART_WIDTH = 460
+// Past this many points the value labels would overlap, so instead of
+// squeezing, points keep this spacing and the chart scrolls horizontally.
+const MAX_FITTED_POINTS = 8
+const POINT_SPACING = (CHART_WIDTH - 100) / (MAX_FITTED_POINTS - 1)
+
+function SplitChart({
+  series,
+  labels,
+  groups,
+}: {
+  series: ChartSeries[]
+  labels: string[]
+  /** When set, the x-axis shows group labels (with dividers between groups) instead of `labels`. */
+  groups?: ChartGroup[]
+}) {
   const n = labels.length
-  const xs = labels.map((_, i) => (n === 1 ? 200 : 50 + (i * 300) / (n - 1)))
+  const step = n > MAX_FITTED_POINTS ? POINT_SPACING : (CHART_WIDTH - 100) / Math.max(1, n - 1)
+  const width = n > MAX_FITTED_POINTS ? 100 + (n - 1) * step : CHART_WIDTH
+  const xs = labels.map((_, i) => (n === 1 ? CHART_WIDTH / 2 : 50 + i * step))
   const all = series.flatMap((s) => s.values).filter(Number.isFinite)
   let lo = Math.min(...all)
   let hi = Math.max(...all)
@@ -124,82 +145,201 @@ function SplitChart({ series, labels }: { series: ChartSeries[]; labels: string[
   const y = (v: number) => 26 + ((v - lo) / (hi - lo)) * 82
 
   return (
-    <svg viewBox="0 0 400 150" className="block h-auto w-full font-mono" aria-hidden>
-      <line x1={0} y1={20} x2={400} y2={20} stroke="var(--brand-color-border-subtle)" />
-      <line x1={0} y1={70} x2={400} y2={70} stroke="var(--brand-color-border-subtle)" />
-      <line x1={0} y1={128} x2={400} y2={128} stroke="var(--brand-color-border)" />
-      {series.map((s, si) => {
-        const fastestIdx = s.fastest ? s.values.indexOf(Math.min(...s.values)) : -1
-        return (
-          <g key={si}>
-            <polyline
-              points={s.values.map((v, i) => `${xs[i]},${y(v)}`).join(" ")}
-              fill="none"
-              stroke={s.stroke}
-              strokeWidth={2}
-              strokeLinejoin="round"
-              strokeDasharray={s.dashed ? "5 4" : undefined}
+    <div className="overflow-x-auto">
+      <svg
+        viewBox={`0 0 ${width} 150`}
+        // Sized relative to the container so wider charts keep the same scale and scroll.
+        style={{ width: `${(width / CHART_WIDTH) * 100}%` }}
+        className="block h-auto max-w-none font-mono"
+        aria-hidden
+      >
+        <line x1={0} y1={20} x2={width} y2={20} stroke="var(--brand-color-border-subtle)" />
+        <line x1={0} y1={70} x2={width} y2={70} stroke="var(--brand-color-border-subtle)" />
+        <line x1={0} y1={128} x2={width} y2={128} stroke="var(--brand-color-border)" />
+        {groups?.slice(1).map((g) => {
+          const x = (xs[g.start - 1] + xs[g.start]) / 2
+          return (
+            <line
+              key={g.start}
+              x1={x}
+              y1={20}
+              x2={x}
+              y2={128}
+              stroke="var(--brand-color-border-subtle)"
+              strokeDasharray="3 3"
             />
-            {s.values.map((v, i) => {
-              const solid = (!s.fastest || i === fastestIdx) && !s.dashed
-              return (
-                <circle
-                  key={i}
-                  cx={xs[i]}
-                  cy={y(v)}
-                  r={i === fastestIdx ? 4.5 : 4}
-                  fill={solid ? s.stroke : "var(--brand-color-bg-container)"}
-                  stroke={s.stroke}
-                  strokeWidth={2}
-                />
-              )
-            })}
-          </g>
-        )
-      })}
-      {labels.map((label, i) => {
-        const points = series
-          .map((s) => ({ v: s.values[i], s }))
-          .filter((p) => Number.isFinite(p.v))
-          .sort((a, b) => a.v - b.v)
-        return (
-          <g key={i}>
-            {points.map((p, k) => {
-              const isFastest = p.s.fastest && p.v === Math.min(...p.s.values)
-              const below = points.length > 1 && k === points.length - 1
-              return (
+          )
+        })}
+        {series.map((s, si) => {
+          return (
+            <g key={si}>
+              <polyline
+                points={s.values.map((v, i) => `${xs[i]},${y(v)}`).join(" ")}
+                fill="none"
+                stroke={s.stroke}
+                strokeWidth={2}
+                strokeLinejoin="round"
+                strokeDasharray={s.dashed ? "5 4" : undefined}
+              />
+              {s.values.map((v, i) => {
+                const solid = !s.dashed
+                return (
+                  <circle
+                    key={i}
+                    cx={xs[i]}
+                    cy={y(v)}
+                    r={4.5}
+                    fill={solid ? s.stroke : "var(--brand-color-bg-container)"}
+                    stroke={s.stroke}
+                    strokeWidth={2}
+                  />
+                )
+              })}
+            </g>
+          )
+        })}
+        {labels.map((label, i) => {
+          const points = series
+            .map((s) => ({ v: s.values[i], s }))
+            .filter((p) => Number.isFinite(p.v))
+            .sort((a, b) => a.v - b.v)
+          return (
+            <g key={i}>
+              {points.map((p, k) => {
+                const below = points.length > 1 && k === points.length - 1
+                return (
+                  <text
+                    key={k}
+                    x={xs[i]}
+                    y={below ? y(p.v) + 17 : y(p.v) - 10}
+                    fontSize={11}
+                    fill={p.s.text}
+                    textAnchor="middle"
+                  >
+                    {fmtSeconds(p.v)}
+                  </text>
+                )
+              })}
+              {groups ? null : (
                 <text
-                  key={k}
                   x={xs[i]}
-                  y={below ? y(p.v) + 17 : y(p.v) - 10}
+                  y={145}
                   fontSize={11}
-                  fill={isFastest ? "var(--brand-color-text)" : p.s.text}
+                  fill="var(--brand-color-text-tertiary)"
                   textAnchor="middle"
+                  className="font-sans"
                 >
-                  {fmtSeconds(p.v)}
+                  {label}
                 </text>
-              )
-            })}
-            <text
-              x={xs[i]}
-              y={145}
-              fontSize={11}
-              fill="var(--brand-color-text-tertiary)"
-              textAnchor="middle"
-              className="font-sans"
-            >
-              {label}
-            </text>
-          </g>
+              )}
+            </g>
+          )
+        })}
+        {groups?.map((g) => (
+          <text
+            key={g.start}
+            x={(xs[g.start] + xs[g.end]) / 2}
+            y={145}
+            fontSize={11}
+            fill="var(--brand-color-text-tertiary)"
+            textAnchor="middle"
+            className="font-sans"
+          >
+            {g.label}
+          </text>
+        ))}
+      </svg>
+    </div>
+  )
+}
+
+function SegmentedToggle<T extends string | number>({
+  label,
+  options,
+  value,
+  onChange,
+  mono = false,
+}: {
+  label: string
+  options: Array<{ value: T; label: string }>
+  value: T
+  onChange: (value: T) => void
+  mono?: boolean
+}) {
+  return (
+    <div role="radiogroup" aria-label={label} className="flex rounded-md border border-border p-0.5">
+      {options.map((o) => {
+        const active = o.value === value
+        return (
+          <button
+            key={o.value}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            onClick={() => onChange(o.value)}
+            className={`rounded px-2 py-0.5 text-[11px] transition-colors ${mono ? "font-mono tabular-nums" : ""} ${
+              active ? "bg-primary text-primary-text" : "text-foreground-tertiary hover:text-foreground"
+            }`}
+          >
+            {o.label}
+          </button>
         )
       })}
-    </svg>
+    </div>
   )
 }
 
 function validSeries(times: Array<string | undefined>) {
   const values = times.map((t) => seconds(t))
   return values.length >= 2 && values.every(Number.isFinite) ? values : null
+}
+
+/** An interval split: `seconds` swum over the stretch ending at `distance` (cumulative). */
+type IntervalSplit = { distance: number; seconds: number }
+
+// Chart interval choices, coarsest last. Within a tier, the first option that
+// divides the race evenly wins (e.g. 250 for a 500/1000, 200 for a 400/800;
+// 500 for a 1000, 550 for the 1650).
+const SPLIT_STEP_TIERS = [[50], [100], [250, 200], [500, 550]]
+
+function toIntervalSplits(rows: Array<{ label: string; time?: string }>, offset = 0): IntervalSplit[] {
+  return rows.map((r) => ({ distance: offset + Number(r.label), seconds: seconds(r.time) }))
+}
+
+/** Table rows (distance label + formatted time) for aggregated splits. */
+function splitRows(splits: IntervalSplit[]) {
+  return splits.map((x) => ({ label: String(x.distance), time: fmtSeconds(x.seconds) }))
+}
+
+/** Sum consecutive splits into `step`-sized stretches; null if the splits don't land on every boundary. */
+function aggregateSplits(splits: IntervalSplit[], step: number): IntervalSplit[] | null {
+  const total = splits[splits.length - 1].distance
+  const distances = new Set(splits.map((s) => s.distance))
+  for (let d = step; d < total; d += step) if (!distances.has(d)) return null
+  const out: IntervalSplit[] = []
+  let acc = 0
+  for (const [i, s] of splits.entries()) {
+    acc += s.seconds
+    if (s.distance % step === 0 || i === splits.length - 1) {
+      out.push({ distance: s.distance, seconds: acc })
+      acc = 0
+    }
+  }
+  return out.length >= 2 && out.every((s) => Number.isFinite(s.seconds)) ? out : null
+}
+
+/** Intervals the chart can be toggled between for these splits, finest first. */
+function splitStepOptions(splits: IntervalSplit[], maxStep = Infinity): number[] {
+  if (splits.length < 2) return []
+  const total = splits[splits.length - 1].distance
+  const options: number[] = []
+  for (const tier of SPLIT_STEP_TIERS) {
+    // 100 is always offered (the mile just ends on a 50); coarser tiers need an even fit.
+    const step = tier[0] === 100 ? 100 : tier.find((t) => total % t === 0)
+    if (!step || step > maxStep || step < splits[0].distance) continue
+    if (aggregateSplits(splits, step)) options.push(step)
+  }
+  return options
 }
 
 const cellLabel = "text-[11px] font-medium uppercase tracking-[0.04em] text-foreground-tertiary"
@@ -218,6 +358,7 @@ export default function SwimDetailModal({
   onEditRelay?: () => void
 }) {
   const [mounted, setMounted] = useState(false)
+  const [chosenStep, setChosenStep] = useState<number | null>(null)
   const titleRef = useRef<HTMLHeadingElement>(null)
   const combined = detail.kind === "individual" && detail.rounds.length > 1
   const last = detail.rounds[detail.rounds.length - 1]
@@ -262,14 +403,36 @@ export default function SwimDetailModal({
   // Split rows + chart
   let splitTable: React.ReactNode = null
   let chart: React.ReactNode = null
+  let stepOptions: number[] = []
+  let activeStep = 0
+  // The chosen interval sticks while it's still offered; otherwise the finest one.
+  const pickStep = (options: number[]) => {
+    stepOptions = options
+    activeStep = chosenStep != null && options.includes(chosenStep) ? chosenStep : options[0]
+    return activeStep
+  }
   if (combined) {
     const a = sortedSplits(first.splits)
     const b = sortedSplits(last.splits)
-    const n = Math.max(a.length, b.length)
-    if (n > 0) {
-      const rows = Array.from({ length: n }, (_, i) => {
-        const x = a[i]
-        const y = b[i]
+    if (a.length > 0 || b.length > 0) {
+      const ia = validSeries(a.map((x) => x.time)) ? toIntervalSplits(a) : null
+      const ib = validSeries(b.map((x) => x.time)) ? toIntervalSplits(b) : null
+      // Offer only intervals that work for every round that has a full set of splits.
+      const usable = [ia, ib].filter((sp): sp is IntervalSplit[] => sp != null)
+      const options = usable.length
+        ? splitStepOptions(usable[0]).filter((step) => usable.every((sp) => aggregateSplits(sp, step)))
+        : []
+      // No interval fits (irregular split distances) → plot the raw splits, no toggle.
+      const step = options.length ? pickStep(options) : 0
+      const aa = ia && (step ? aggregateSplits(ia, step) : ia)
+      const ab = ib && (step ? aggregateSplits(ib, step) : ib)
+
+      // The table follows the chosen interval; a round without usable splits shows dashes.
+      const ta = step ? (aa ? splitRows(aa) : []) : a
+      const tb = step ? (ab ? splitRows(ab) : []) : b
+      const rows = Array.from({ length: Math.max(ta.length, tb.length) }, (_, i) => {
+        const x = ta[i]
+        const y = tb[i]
         const d = seconds(y?.time) - seconds(x?.time)
         return { label: (x ?? y)!.label, a: x?.time, b: y?.time, d }
       })
@@ -289,9 +452,7 @@ export default function SwimDetailModal({
               className={`${grid} border-t border-border px-3 py-[9px] font-mono text-sm tabular-nums`}
             >
               <span className="text-foreground-secondary">{r.label}</span>
-              <span className="text-right text-foreground-secondary">
-                {r.a ? formatDisplayTime(r.a) : "—"}
-              </span>
+              <span className="text-right text-foreground-secondary">{r.a ? formatDisplayTime(r.a) : "—"}</span>
               <span className="text-right text-foreground">{r.b ? formatDisplayTime(r.b) : "—"}</span>
               <span className={diffClass(r.d)}>{Number.isFinite(r.d) ? fmtDiff(r.d) : "—"}</span>
             </li>
@@ -310,112 +471,182 @@ export default function SwimDetailModal({
           </li>
         </ul>
       )
+
       const series: ChartSeries[] = []
-      const va = validSeries(a.map((s) => s.time))
-      const vb = validSeries(b.map((s) => s.time))
-      if (va) {
+      if (aa) {
         series.push({
-          values: va,
+          values: aa.map((x) => x.seconds),
           stroke: "var(--brand-color-text-tertiary)",
           text: "var(--brand-color-text-tertiary)",
           dashed: true,
         })
       }
-      if (vb) {
+      if (ab) {
         series.push({
-          values: vb,
+          values: ab.map((x) => x.seconds),
           stroke: "var(--brand-color-accent)",
           text: "var(--brand-color-text)",
         })
       }
-      if (series.length) {
-        chart = <SplitChart series={series} labels={(a.length >= b.length ? a : b).map((s) => s.label)} />
+      const axis = ab ?? aa
+      if (series.length && axis) {
+        chart = <SplitChart series={series} labels={axis.map((x) => String(x.distance))} />
       }
     }
   } else if (detail.kind === "relay") {
     const swimmers = detail.relaySwimmers ?? []
     if (swimmers.length > 0) {
+      const lastNames = swimmers.map((s) => s.name.split(",")[0].trim())
+      // Plot every 50 when each leg has the same full set of interval splits;
+      // otherwise fall back to one point per leg.
+      const legSplits = swimmers.map((s) => sortedSplits(s.splits ?? []))
+      const perLeg = legSplits[0].length
+      const perFifty = perLeg > 1 && legSplits.every((l) => l.length === perLeg)
+      const legDistance = perFifty ? Number(legSplits[0][perLeg - 1].label) : 0
+      const flat = perFifty
+        ? legSplits.flatMap((l, i) => toIntervalSplits(l, i * legDistance))
+        : []
+      // Intervals stop at one leg — combining parts of two swimmers' legs isn't meaningful.
+      const options = flat.length && flat.every((x) => Number.isFinite(x.seconds))
+        ? splitStepOptions(flat, legDistance)
+        : []
+      const step = options.length ? pickStep(options) : 0
+      const stretches = step ? aggregateSplits(flat, step) : null
+      const perGroup = stretches ? legDistance / step : 0
+      // Raw leg splits are distances within the leg; shift them onto race distance.
+      const legStartDistance = (i: number) =>
+        legSplits.slice(0, i).reduce((sum, l) => sum + (Number(l[l.length - 1]?.label) || 0), 0)
+
+      // Each leg's sub-rows follow the chosen interval; at a full leg they're
+      // just the leg split again, so they're hidden.
+      const legRows = (i: number) =>
+        stretches
+          ? perGroup > 1
+            ? stretches
+                .slice(i * perGroup, (i + 1) * perGroup)
+                .map((x) => ({ label: String(x.distance), time: fmtSeconds(x.seconds) }))
+            : []
+          : legSplits[i].map((r) => ({ ...r, label: String(legStartDistance(i) + Number(r.label)) }))
+      const relayGrid = "grid grid-cols-[1fr_auto] gap-2"
       splitTable = (
         <ul className="overflow-hidden rounded-lg border border-border">
-          <li className={`grid grid-cols-[1fr_auto] gap-2 ${tableHead}`}>
+          <li className={`${relayGrid} ${tableHead}`}>
             <span>Swimmer</span>
-            <span>Split</span>
+            <span className="text-right">Split</span>
           </li>
-          {swimmers.map((s, i) => (
-            <li
-              key={`${i}-${s.name}`}
-              className="grid grid-cols-[1fr_auto] items-center gap-2 border-t border-border px-3 py-[9px] text-sm"
-            >
-              <span className="truncate text-foreground">{s.name}</span>
-              <span className="font-mono tabular-nums text-foreground">
-                {s.split ? formatDisplayTime(s.split) : ""}
-              </span>
-            </li>
-          ))}
+          {swimmers.map((s, i) => {
+            const subRows = legRows(i)
+            const hasSubRows = subRows.length > 1
+            return (
+              <Fragment key={`${i}-${s.name}`}>
+                {hasSubRows
+                  ? subRows.map((r) => (
+                      <li
+                        key={r.label}
+                        className={`${relayGrid} border-t border-border px-3 py-[9px] font-mono text-sm tabular-nums`}
+                      >
+                        <span className="text-foreground-secondary">{r.label}</span>
+                        <span className="text-right text-foreground">
+                          {r.time ? formatDisplayTime(r.time) : "—"}
+                        </span>
+                      </li>
+                    ))
+                  : null}
+                {/* The leg total follows its 50s, tinted as a subtotal when there are 50s above it. */}
+                <li
+                  className={`${relayGrid} items-center border-t border-border px-3 py-[9px] text-sm ${
+                    hasSubRows ? "bg-fill-secondary/40 font-medium" : ""
+                  }`}
+                >
+                  <span className="truncate text-foreground">{s.name}</span>
+                  <span className="text-right font-mono tabular-nums text-foreground">
+                    {s.split ? formatDisplayTime(s.split) : ""}
+                  </span>
+                </li>
+              </Fragment>
+            )
+          })}
           {last.time ? (
-            <li className={`grid grid-cols-[1fr_auto] gap-2 ${totalRow}`}>
+            <li className={`${relayGrid} ${totalRow}`}>
               <span className="font-medium text-foreground-secondary">Total</span>
-              <span className="font-mono tabular-nums">{formatDisplayTime(last.time)}</span>
+              <span className="text-right font-mono tabular-nums">{formatDisplayTime(last.time)}</span>
             </li>
           ) : null}
         </ul>
       )
-      const values = validSeries(swimmers.map((s) => s.split))
-      if (values) {
-        chart = (
-          <SplitChart
-            series={[
-              {
-                values,
-                stroke: "var(--brand-color-primary)",
-                text: "var(--brand-color-text-secondary)",
-                fastest: true,
-              },
-            ]}
-            labels={swimmers.map((s) => s.name.split(",")[0].trim())}
-          />
-        )
+
+      const lineStyle = {
+        stroke: "var(--brand-color-primary)",
+        text: "var(--brand-color-text)",
+      }
+      if (stretches) {
+        const series = [{ values: stretches.map((x) => x.seconds), ...lineStyle }]
+        // One point per leg reads better labelled by swimmer than by distance.
+        chart =
+          perGroup === 1 ? (
+            <SplitChart series={series} labels={lastNames} />
+          ) : (
+            <SplitChart
+              series={series}
+              labels={stretches.map((x) => String(x.distance))}
+              groups={lastNames.map((label, i) => ({
+                label,
+                start: i * perGroup,
+                end: i * perGroup + perGroup - 1,
+              }))}
+            />
+          )
+      } else {
+        const values = validSeries(swimmers.map((s) => s.split))
+        if (values) {
+          chart = <SplitChart series={[{ values, ...lineStyle }]} labels={lastNames} />
+        }
       }
     }
   } else {
     const rows = sortedSplits(last.splits)
     if (rows.length > 0) {
+      const splits = validSeries(rows.map((r) => r.time)) ? toIntervalSplits(rows) : null
+      const options = splits ? splitStepOptions(splits) : []
+      // No interval fits (irregular split distances) → plot the raw splits, no toggle.
+      const stretches = splits && options.length ? aggregateSplits(splits, pickStep(options)) : splits
+      // The table follows the chosen interval; with no toggle it lists the raw splits.
+      const tableRows = options.length && stretches ? splitRows(stretches) : rows
+      const grid = "grid grid-cols-[1fr_auto]"
       splitTable = (
         <ul className="overflow-hidden rounded-lg border border-border">
-          <li className={`grid grid-cols-[1fr_auto] ${tableHead}`}>
+          <li className={`${grid} ${tableHead}`}>
             <span>Distance</span>
-            <span>Split</span>
+            <span className="text-right">Split</span>
           </li>
-          {rows.map((r) => (
+          {tableRows.map((r) => (
             <li
               key={r.label}
-              className="grid grid-cols-[1fr_auto] border-t border-border px-3 py-[9px] font-mono text-sm tabular-nums"
+              className={`${grid} border-t border-border px-3 py-[9px] font-mono text-sm tabular-nums`}
             >
               <span className="text-foreground-secondary">{r.label}</span>
-              <span className="text-foreground">{r.time ? formatDisplayTime(r.time) : ""}</span>
+              <span className="text-right text-foreground">{r.time ? formatDisplayTime(r.time) : ""}</span>
             </li>
           ))}
           {last.time ? (
-            <li className={`grid grid-cols-[1fr_auto] ${totalRow} font-mono tabular-nums`}>
+            <li className={`${grid} ${totalRow} font-mono tabular-nums`}>
               <span className="font-sans font-medium text-foreground-secondary">Total</span>
-              <span>{formatDisplayTime(last.time)}</span>
+              <span className="text-right">{formatDisplayTime(last.time)}</span>
             </li>
           ) : null}
         </ul>
       )
-      const values = validSeries(rows.map((r) => r.time))
-      if (values) {
+      if (stretches) {
         chart = (
           <SplitChart
             series={[
               {
-                values,
+                values: stretches.map((x) => x.seconds),
                 stroke: "var(--brand-color-primary)",
-                text: "var(--brand-color-text-secondary)",
-                fastest: true,
+                text: "var(--brand-color-text)",
               },
             ]}
-            labels={rows.map((r) => r.label)}
+            labels={stretches.map((x) => String(x.distance))}
           />
         )
       }
@@ -441,10 +672,10 @@ export default function SwimDetailModal({
         role="dialog"
         aria-modal="true"
         aria-label={detail.title}
-        className="relative z-10 flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-border bg-background text-foreground shadow-xl"
+        className="relative z-10 flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-background text-foreground shadow-xl"
       >
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <div className="border-b border-border-subtle px-6 pb-4 pt-5">
+          <div className="px-6 pb-4 pt-5">
             <div className="flex items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-3">
                 {detail.eventNumber ? (
@@ -580,11 +811,22 @@ export default function SwimDetailModal({
 
           {splitTable ? (
             <>
-              <div className="px-6 pt-4">
+              <div className="px-6 pt-2">
                 <div className="mb-1.5 flex items-center justify-between">
-                  <span className="text-xs font-medium uppercase tracking-[0.04em] text-foreground-tertiary">
-                    Splits
-                  </span>
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xs font-medium uppercase tracking-[0.04em] text-foreground-tertiary">
+                      Splits
+                    </span>
+                    {chart && stepOptions.length > 1 ? (
+                      <SegmentedToggle
+                        label="Split interval"
+                        mono
+                        options={stepOptions.map((step) => ({ value: step, label: String(step) }))}
+                        value={activeStep}
+                        onChange={setChosenStep}
+                      />
+                    ) : null}
+                  </div>
                   {combined ? (
                     <span className="flex gap-3 text-xs text-foreground-secondary">
                       <span className="flex items-center gap-1.5">

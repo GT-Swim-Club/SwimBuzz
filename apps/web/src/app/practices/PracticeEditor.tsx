@@ -1659,7 +1659,7 @@ export default function PracticeEditor({
             <button
               type="button"
               onClick={confirmSetDeletion}
-              className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-red-700"
+              className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-error-contrast hover:bg-red-700"
             >
               Delete
             </button>

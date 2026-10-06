@@ -17,11 +17,14 @@
   /* Colors - Status */
   --color-success: var(--brand-color-success);
   --color-success-bg: var(--brand-color-success-bg);
+  --color-success-border: var(--brand-color-success-border);
   --color-warning: var(--brand-color-warning);
   --color-warning-bg: var(--brand-color-warning-bg);
   --color-error: var(--brand-color-error);
   --color-error-bg: var(--brand-color-error-bg);
   --color-error-border: var(--brand-color-error-border);
+  --color-error-hover: var(--brand-color-error-hover);
+  --color-error-contrast: var(--brand-color-error-contrast);
   --color-info: var(--brand-color-info);
   --color-info-bg: var(--brand-color-info-bg);
   

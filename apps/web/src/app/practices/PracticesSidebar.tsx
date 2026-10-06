@@ -306,6 +306,17 @@ export default function PracticesSidebar({
     query || tags.length ? "No deleted practices match your search." : "Trash is empty."
 
   const effectiveWidth = dragWidth ?? prefs.sidebarWidth
+  // While dragging, the preview width decides visibility (0 = collapsed
+  // preview), so dragging out from a collapsed sidebar reveals it live.
+  const sidebarShown = dragWidth != null ? dragWidth > 0 : prefs.sidebarOpen
+
+  // The pointer listeners below are bound once, so they read prefs through
+  // a ref — capturing `prefs` directly would freeze sidebarOpen at its
+  // first-render value.
+  const prefsRef = useRef(prefs)
+  useEffect(() => {
+    prefsRef.current = prefs
+  })
 
   useEffect(() => {
     function onMove(event: PointerEvent) {
@@ -313,9 +324,9 @@ export default function PracticesSidebar({
       if (Math.abs(event.clientX - pointerDownXRef.current) > CLICK_MOVE_THRESHOLD) {
         movedRef.current = true
       }
-      // Collapsed sidebars aren't resizable by dragging (only by clicking to
-      // reopen), so there's nothing further to compute until it's open.
-      if (!prefs.sidebarOpen) return
+      // Until the pointer actually travels, a press on a collapsed divider
+      // might still be a click, so don't start previewing it open yet.
+      if (!movedRef.current) return
       const rect = containerRef.current.getBoundingClientRect()
       // Non-resizable horizontal space: the 6px divider track plus the grid's
       // own column gap on both sides of it (md:gap-5) — both eat into
@@ -339,6 +350,7 @@ export default function PracticesSidebar({
     function onUp() {
       if (!draggingRef.current) return
       draggingRef.current = false
+      const prefs = prefsRef.current
       // A press-release with negligible pointer travel is a click: toggle
       // open/closed instead of committing a resize/collapse-preview.
       if (!movedRef.current) {
@@ -353,10 +365,13 @@ export default function PracticesSidebar({
         prefs.setSidebarOpen(false)
         return
       }
+      // Committing a drag both saves the width and opens the sidebar, which
+      // covers dragging it out from collapsed.
       setDragWidth((current) => {
         if (current != null) prefs.setSidebarWidth(current)
         return null
       })
+      prefs.setSidebarOpen(true)
     }
     window.addEventListener("pointermove", onMove)
     window.addEventListener("pointerup", onUp)
@@ -364,7 +379,6 @@ export default function PracticesSidebar({
       window.removeEventListener("pointermove", onMove)
       window.removeEventListener("pointerup", onUp)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Shared between the desktop <aside> (which sizes it to the resizable
@@ -425,7 +439,7 @@ export default function PracticesSidebar({
     // The divider's 6px track stays even when collapsed, so it remains a
     // clickable sliver that can reopen the sidebar (only the sidebar's own
     // track collapses to 0).
-    gridTemplateColumns: prefs.sidebarOpen ? `${effectiveWidth}px 6px minmax(0,1fr)` : "0px 6px minmax(0,1fr)",
+    gridTemplateColumns: sidebarShown ? `${effectiveWidth}px 6px minmax(0,1fr)` : "0px 6px minmax(0,1fr)",
     transition:
       dragWidth != null || reduceMotion ? undefined : "grid-template-columns 250ms ease-in-out",
   }
@@ -442,7 +456,7 @@ export default function PracticesSidebar({
         inert={asideCollapsed || undefined}
         className={
           "hidden md:flex sticky top-24 h-[calc(100dvh-7.5rem)] min-h-0 flex-col gap-3 overflow-hidden transition-opacity duration-150 motion-reduce:transition-none md:top-[var(--workspace-top,6rem)] md:h-[calc(100dvh-var(--workspace-offset,9rem))] md:self-start" +
-          (prefs.sidebarOpen ? "" : " md:pointer-events-none md:opacity-0")
+          (sidebarShown ? "" : " md:pointer-events-none md:opacity-0")
         }
       >
         {/* Keep the grid slot, but pin its contents independently of page bounce. */}
@@ -454,7 +468,7 @@ export default function PracticesSidebar({
       <div
         role="separator"
         aria-orientation="vertical"
-        aria-label={prefs.sidebarOpen ? "Hide sidebar. Drag to resize." : "Show sidebar"}
+        aria-label={prefs.sidebarOpen ? "Hide sidebar. Drag to resize." : "Show sidebar. Drag to open."}
         onPointerDown={(e) => {
           e.preventDefault()
           pointerDownXRef.current = e.clientX
@@ -465,10 +479,12 @@ export default function PracticesSidebar({
         className="hidden overflow-hidden transition-opacity duration-150 motion-reduce:transition-none md:flex md:items-stretch md:justify-center md:cursor-col-resize md:hover:bg-fill-secondary"
       >
         <span className="w-px bg-border-secondary" aria-hidden />
-        <HoverDetail offset={10}>
-          <div className="flex flex-col gap-0.5">
-            <span className="font-medium text-foreground">{prefs.sidebarOpen ? "Hide sidebar" : "Show sidebar"}</span>
-            {prefs.sidebarOpen && <span className="text-foreground-tertiary">Drag to resize</span>}
+        <HoverDetail offset={16} followPointer placement="right" className="rounded-xl">
+          <div className="flex flex-col gap-0.5 px-0.5 py-1">
+            <span className="text-sm font-medium text-foreground">{prefs.sidebarOpen ? "Hide sidebar" : "Show sidebar"}</span>
+            <span className="text-[13px] font-normal text-foreground-secondary">
+              {prefs.sidebarOpen ? "Drag to resize" : "Drag to open"}
+            </span>
           </div>
         </HoverDetail>
       </div>
@@ -482,16 +498,6 @@ export default function PracticesSidebar({
           <SidebarIcon />
           Practices
         </button>
-        {!prefs.sidebarOpen && (
-          <button
-            type="button"
-            onClick={() => prefs.setSidebarOpen(true)}
-            className="hidden w-fit items-center gap-1.5 rounded-lg border border-border-secondary bg-background px-3 py-2 text-[13px] font-medium text-foreground-secondary transition-colors hover:bg-fill-secondary hover:text-foreground md:inline-flex"
-          >
-            <SidebarIcon />
-            Show sidebar
-          </button>
-        )}
         {children}
       </div>
 

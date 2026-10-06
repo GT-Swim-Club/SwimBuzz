@@ -8,6 +8,7 @@ import type { PracticeFormState } from "../../PracticeEditor"
 import { serializePracticeEditLock } from "@/lib/practice/practice-edit-lock"
 import { isCuid, practicePath } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 import { practiceSetSelect } from "@/lib/practice/practice-input"
 import { attendedUserIds } from "@/lib/practice/practice-attendance"
 import { toDateInput, toTimeInput } from "@/lib/date-input"
@@ -41,6 +42,7 @@ async function PracticeDetailLoader({ param }: { param: string }) {
   if (!session) redirect("/signin?callbackUrl=/practices")
 
   const isCoach = await isStaffUi(session.user.role)
+  const isStaffUser = isStaffRole(session.user.role)
 
   const whereParam = isCuid(param) ? { OR: [{ id: param }, { slug: param }] } : { slug: param }
   // A fresh object per call — the soft-delete middleware mutates `include`/`select` in place
@@ -62,8 +64,10 @@ async function PracticeDetailLoader({ param }: { param: string }) {
   // Not found in the live scope — if the viewer can manage Trash, check whether
   // it's sitting there instead of just 404ing. Comments/attendance stay hidden
   // (cascade-hidden alongside the practice) since neither matters for a trashed item.
+  // Keyed on the real role (not Athlete View) so the redirect below can tell a
+  // trashed practice apart from one that never existed.
   let deletedInfo: { purgeAfter: string; canRestore: boolean } | null = null
-  if (!practice && isCoach) {
+  if (!practice && isStaffUser) {
     const deleted = await withDeleted(() =>
       prisma.practice.findFirst({
         where: { ...whereParam, deletedAt: { not: null } },
@@ -79,7 +83,14 @@ async function PracticeDetailLoader({ param }: { param: string }) {
     }
   }
 
-  if (!practice || (!practice.published && !isCoach)) notFound()
+  if (!practice) notFound()
+  if (!isCoach && (!practice.published || deletedInfo)) {
+    // Staff who just switched into Athlete View while on a draft/trashed
+    // practice: it exists, it's just hidden in this view — land them on the
+    // practice list rather than a 404. Real athletes still get the 404.
+    if (isStaffUser) redirect("/practices")
+    notFound()
+  }
   if (practice.slug && param !== practice.slug) redirect(practicePath(practice.slug))
 
   const totalDistance = practice.sets.reduce((sum, s) => sum + (s.distance ?? 0), 0)

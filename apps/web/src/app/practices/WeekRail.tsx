@@ -137,6 +137,10 @@ export default function WeekRail({
               practicesByDay={practicesByDay}
               selectedDayKey={selectedDayKey}
               tags={tags}
+              onPickDay={(dayKey) => {
+                const pickedWeek = parseWeekStart(dayKey)
+                if (pickedWeek) onWeekChange(formatDayParam(pickedWeek))
+              }}
               onClose={() => setMonthPopoverOpen(false)}
             />
           )}

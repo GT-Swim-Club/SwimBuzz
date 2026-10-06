@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation"
 import BackLink from "@/components/ui/BackLink"
 import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/auth/session"
+import { isStaffRole } from "@/lib/auth/auth-roles"
 import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete/athlete-view-server"
 import { isCuid, practicePath } from "@/lib/slug"
 import { seasonFromDate } from "@/lib/season"
@@ -53,7 +54,12 @@ export default async function PracticeAttendancePage({
   })
 
   // Athletes see attendance only for practices they can otherwise view.
-  if (!practice || (!practice.published && !isCoach)) notFound()
+  if (!practice) notFound()
+  if (!practice.published && !isCoach) {
+    // Staff who switched into Athlete View on a draft: send them to the list, not a 404.
+    if (isStaffRole(session.user.role)) redirect("/practices")
+    notFound()
+  }
   const detailPath = practicePath(practice.slug ?? practice.id)
   if (practice.slug && param !== practice.slug) redirect(`${detailPath}/attendance`)
 

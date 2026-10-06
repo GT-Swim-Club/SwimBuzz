@@ -27,12 +27,15 @@ export default function MonthPickerPopover({
   practicesByDay,
   selectedDayKey,
   tags,
+  onPickDay,
   onClose,
 }: {
   weekStart: Date
   practicesByDay: Record<string, PracticeRailItem[]>
   selectedDayKey?: string
   tags: string[]
+  /** Called with the picked day's key — lets the rail jump to its week even when that practice is already open (the link alone is then a no-op navigation). */
+  onPickDay: (dayKey: string) => void
   onClose: () => void
 }) {
   const [viewedMonth, setViewedMonth] = useState(() => {
@@ -124,7 +127,10 @@ export default function MonthPickerPopover({
               <Link
                 key={key}
                 href={buildWorkspaceHref(practicePath(practice.slug ?? practice.id), { tags })}
-                onClick={onClose}
+                onClick={() => {
+                  onPickDay(key)
+                  onClose()
+                }}
                 className={`${base} ${textTone} ${bgTone} hover:bg-fill-secondary`}
               >
                 {date.getUTCDate()}

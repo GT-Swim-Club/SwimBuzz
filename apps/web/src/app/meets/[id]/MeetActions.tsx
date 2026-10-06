@@ -133,8 +133,8 @@ export default function MeetActions({
         open={confirmDelete}
         onClose={() => setConfirmDelete(false)}
         closeDisabled={loading}
-        title={deleteOption === "swims" ? `Delete swims from ${meetName}?` : `Move ${meetName} to Trash?`}
-        description={deleteOption === "swims" ? "Swims-only deletion is permanent and cannot be undone." : "Move this meet to Trash."}
+        title={hasSwims ? `Remove ${meetName}?` : `Move ${meetName} to Trash?`}
+        description={hasSwims ? undefined : "You can restore it from Trash later."}
         maxWidth="sm"
         footer={
           <ModalFooter>
@@ -155,36 +155,59 @@ export default function MeetActions({
                 })
               }
               disabled={loading}
-              className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-red-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-error px-4 py-2.5 text-sm font-medium text-error-contrast hover:bg-error-hover disabled:opacity-50"
             >
               {deleteOption === "swims"
-                ? loading ? "Deleting…" : "Delete"
+                ? loading ? "Deleting…" : "Delete swims"
                 : loading ? "Moving…" : "Move to Trash"}
             </button>
           </ModalFooter>
         }
       >
         {hasSwims ? (
-          <div className="space-y-2">
+          <div role="radiogroup" aria-label="What to remove" className="space-y-2">
             {([
-              { value: "meet", label: "Move to Trash", desc: "Moves meet to Trash; keeps swims in athlete stats" },
-              { value: "swims", label: "Delete swims", desc: "Permanently deletes associated swims; keeps meet" },
-              { value: "both", label: "Move meet and swims to Trash", desc: "Moves meet and swims to Trash; hides swims from stats" },
-            ] as const).map((opt) => (
-              <label key={opt.value} className="flex items-center gap-3 p-3 border border-border-secondary rounded-lg cursor-pointer hover:bg-fill">
-                <input
-                  type="radio"
-                  name="deleteOption"
-                  checked={deleteOption === opt.value}
-                  onChange={() => setDeleteOption(opt.value)}
-                  className="accent-red-600"
-                />
-                <div>
-                  <div className="text-sm font-medium">{opt.label}</div>
-                  <div className="text-xs text-foreground-tertiary">{opt.desc}</div>
-                </div>
-              </label>
-            ))}
+              { value: "both", label: "Meet and swims", desc: "Both go to Trash." },
+              { value: "meet", label: "Meet only", desc: "Meet goes to Trash. Swims stay in athlete stats." },
+              { value: "swims", label: "Swims only", desc: "Deletes this meet's swims. The meet stays.", permanent: true },
+            ] as const).map((opt) => {
+              const selected = deleteOption === opt.value
+              return (
+                <label
+                  key={opt.value}
+                  className={`flex cursor-pointer items-start gap-3 rounded-xl border px-3.5 py-3 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-error-border ${
+                    selected ? "border-error bg-error-bg" : "border-border-secondary hover:bg-fill"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="deleteOption"
+                    checked={selected}
+                    onChange={() => setDeleteOption(opt.value)}
+                    className="sr-only"
+                  />
+                  <span
+                    aria-hidden
+                    className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-colors ${
+                      selected ? "border-error" : "border-foreground-tertiary"
+                    }`}
+                  >
+                    {selected && <span className="h-2 w-2 rounded-full bg-error" />}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                      {opt.label}
+                      {"permanent" in opt && (
+                        <span className="rounded px-1.5 py-px text-[11px] font-medium text-error ring-1 ring-error-border">
+                          Permanent
+                        </span>
+                      )}
+                    </span>
+                    <span className="mt-0.5 block text-xs text-foreground-tertiary">{opt.desc}</span>
+                  </span>
+                </label>
+              )
+            })}
           </div>
         ) : null}
         {error && <p className="text-sm text-error">{error}</p>}

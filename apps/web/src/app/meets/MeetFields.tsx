@@ -72,14 +72,14 @@ function parseIso(value: string) {
   return { y, m: m - 1, d }
 }
 
-/** "Oct 3 – 5, 2026 · 6:00 PM EDT" */
+/** "Oct 3–5, 2026 · 6:00 PM EDT" */
 function whenLabel(form: MeetFormState): string {
   if (!form.startDate) return ""
   const a = parseIso(form.startDate)
   let label = `${MONTHS[a.m]} ${a.d}`
   if (form.endDate && form.endDate !== form.startDate) {
     const b = parseIso(form.endDate)
-    label += ` – ${b.m === a.m && b.y === a.y ? b.d : `${MONTHS[b.m]} ${b.d}`}, ${b.y}`
+    label += b.m === a.m && b.y === a.y ? `–${b.d}, ${b.y}` : ` – ${MONTHS[b.m]} ${b.d}, ${b.y}`
   } else {
     label += `, ${a.y}`
   }
@@ -312,23 +312,26 @@ export function MeetImageHeader({
   form,
   setForm,
   onUploaded,
-  onClose,
-  closeDisabled = false,
   onError,
+  onUploadingChange,
 }: {
   title: string
   form: MeetFormState
   setForm: React.Dispatch<React.SetStateAction<MeetFormState>>
   onUploaded?: (url: string) => void
-  onClose: () => void
-  closeDisabled?: boolean
   onError: (message: string | null) => void
+  onUploadingChange?: (uploading: boolean) => void
 }) {
   const [iconUploading, setIconUploading] = useState(false)
   const [bannerUploading, setBannerUploading] = useState(false)
   const [bannerCroppingSrc, setBannerCroppingSrc] = useState<string | null>(null)
+  const uploading = iconUploading || bannerUploading
 
-  useDontReloadWhileBusy(iconUploading || bannerUploading)
+  useDontReloadWhileBusy(uploading)
+
+  useEffect(() => {
+    onUploadingChange?.(uploading)
+  }, [uploading, onUploadingChange])
 
   async function uploadImage(endpoint: string, file: Blob, name?: string) {
     const formData = new FormData()
@@ -391,7 +394,7 @@ export function MeetImageHeader({
         accept={BANNER_ACCEPT}
         disabled={bannerUploading}
         className={`group !absolute inset-0 overflow-hidden rounded-t-2xl bg-background ${
-          form.bannerUrl ? "" : "border border-dashed border-foreground-quaternary hover:bg-fill"
+          form.bannerUrl ? "" : "border border-dashed border-foreground-quaternary"
         }`}
       >
         {form.bannerUrl ? (
@@ -402,7 +405,7 @@ export function MeetImageHeader({
                 bannerUploading ? "opacity-100" : "opacity-0 group-hover:opacity-100"
               }`}
             >
-              <span className="rounded-lg bg-foreground px-3.5 py-1.5 text-[13px] font-medium text-background">
+              <span className="rounded-lg bg-primary px-3.5 py-1.5 text-[13px] font-medium text-primary-text transition-colors hover:bg-primary-hover">
                 {bannerUploading ? "Uploading…" : "Click or drop to replace"}
               </span>
               {!bannerUploading ? (
@@ -412,7 +415,7 @@ export function MeetImageHeader({
                     e.stopPropagation()
                     setForm((f) => ({ ...f, bannerUrl: "" }))
                   }}
-                  className="rounded-lg bg-white/15 px-3.5 py-1.5 text-[13px] font-medium text-white ring-1 ring-inset ring-white/30 transition-colors hover:bg-white/25"
+                  className="rounded-lg border border-border bg-background px-3.5 py-1.5 text-[13px] font-medium text-foreground transition-colors hover:bg-fill"
                 >
                   Remove
                 </button>
@@ -426,27 +429,17 @@ export function MeetImageHeader({
         )}
       </FileDropzone>
 
-      <button
-        type="button"
-        aria-label="Close dialog"
-        onClick={onClose}
-        disabled={closeDisabled}
-        className="absolute right-3 top-3 z-[3] flex h-7 w-7 items-center justify-center rounded-full bg-black/70 text-white ring-1 ring-inset ring-white/15 backdrop-blur-md disabled:opacity-50"
-      >
-        <AppIcon name="x" className="h-3.5 w-3.5" />
-      </button>
-
       <div className="absolute -bottom-[30px] left-6 z-[2] h-[68px] w-[68px] overflow-hidden rounded-xl border-[3px] border-background bg-fill">
         <FileDropzone
           onFilesSelected={(files) => void handleIconFiles(files)}
           accept={ICON_ACCEPT}
           disabled={iconUploading}
-          className="!absolute inset-0"
+          className="group !absolute inset-0"
         >
           {form.iconUrl ? (
             <img src={form.iconUrl} alt="Meet icon" className="absolute inset-0 h-full w-full object-cover" />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center rounded-[9px] border border-dashed border-foreground-quaternary bg-background text-xs font-medium text-primary">
+            <div className="absolute inset-0 flex items-center justify-center rounded-[9px] border border-dashed border-foreground-quaternary bg-background text-xs font-medium text-primary transition-colors group-hover:border-primary/60">
               {iconUploading ? "…" : "+ Icon"}
             </div>
           )}
@@ -457,7 +450,7 @@ export function MeetImageHeader({
             aria-label="Remove icon"
             title="Remove icon"
             onClick={() => setForm((f) => ({ ...f, iconUrl: "" }))}
-            className="absolute right-0.5 top-0.5 z-[1] flex h-[18px] w-[18px] items-center justify-center rounded-full bg-black/70 text-white"
+            className="absolute right-0.5 top-0.5 z-[1] flex h-[18px] w-[18px] items-center justify-center rounded-full border border-border bg-background text-foreground transition-colors hover:bg-fill"
           >
             <AppIcon name="x" className="h-2.5 w-2.5" strokeWidth={2.5} />
           </button>

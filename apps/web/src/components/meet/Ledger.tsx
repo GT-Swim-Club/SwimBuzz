@@ -285,6 +285,9 @@ export function LedgerIcon({
 }
 
 /** Bordered sidebar card with a title row and optional divided link rows. */
+/** Section header used by every ledger box (LedgerCard, LedgerPanel, photos). */
+export const ledgerHeaderClass = "text-xs font-semibold uppercase tracking-[0.16em] text-accent"
+
 export function LedgerCard({
   title,
   aside,
@@ -296,8 +299,8 @@ export function LedgerCard({
 }) {
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-background">
-      <div className="flex min-h-[3.25rem] flex-wrap items-center justify-between gap-2 px-4 py-3">
-        <span className="text-sm font-semibold text-foreground">{title}</span>
+      <div className="flex min-h-11 flex-wrap items-center justify-between gap-2 px-4 py-2">
+        <span className={ledgerHeaderClass}>{title}</span>
         {aside}
       </div>
       {children}
@@ -445,9 +448,7 @@ export function LedgerPanel({
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5">
-          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-            {label}
-          </span>
+          <span className={ledgerHeaderClass}>{label}</span>
           {labelExtra}
         </div>
         {aside}

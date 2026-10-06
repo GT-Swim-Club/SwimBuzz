@@ -344,7 +344,7 @@ export default function MeetSignupManager({
               type="button"
               onClick={() => void dropSignup()}
               disabled={dropping}
-              className="flex-1 rounded-lg bg-error px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-error-hover disabled:opacity-50"
+              className="flex-1 rounded-lg bg-error px-4 py-2.5 text-sm font-medium text-error-contrast hover:bg-error-hover disabled:opacity-50"
             >
               {dropping ? "Dropping…" : "Drop"}
             </button>

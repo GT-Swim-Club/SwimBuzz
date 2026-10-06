@@ -10,10 +10,12 @@ type HoverDetailProps = {
   className?: string
   textClassName?: string
   offset?: number
-  /** Pin the tooltip to one side instead of auto-picking based on viewport space — e.g. "above" for a trigger that sits directly over content the tooltip would otherwise cover. */
-  placement?: "auto" | "above" | "below"
+  /** Pin the tooltip to one side instead of auto-picking based on viewport space — e.g. "above" for a trigger that sits directly over content the tooltip would otherwise cover. "right" sits beside the trigger, vertically centered on it. */
+  placement?: "auto" | "above" | "below" | "right"
   /** Only reveal on pointer hover at desktop widths (md+) — for triggers whose tap target overlaps a synthetic mobile "hover" that would otherwise pop the detail open on touch. Keyboard focus still reveals it everywhere. */
   desktopOnly?: boolean
+  /** Anchor to the pointer instead of the trigger's box — for tall/wide triggers (e.g. a full-height divider) whose edges may be off-screen. */
+  followPointer?: boolean
 }
 
 // Deliberate hover delay so the tooltip doesn't flash in as the pointer passes over the
@@ -30,7 +32,7 @@ const UNMEASURED_POSITION = { top: -9999, left: -9999, placement: "below" as con
 
 let lastHiddenAt = 0
 
-type Position = { top: number; left: number; placement: "above" | "below" }
+type Position = { top: number; left: number; placement: "above" | "below" | "right" }
 
 export default function HoverDetail({
   label,
@@ -40,6 +42,7 @@ export default function HoverDetail({
   offset = 6,
   placement: placementProp = "auto",
   desktopOnly = false,
+  followPointer = false,
 }: HoverDetailProps) {
   const anchorRef = useRef<HTMLSpanElement>(null)
   const tooltipRef = useRef<HTMLSpanElement>(null)
@@ -65,6 +68,7 @@ export default function HoverDetail({
     // cursor stays put — matching native tooltips. Touch is exempt: a tap is how touch users
     // reveal the detail at all.
     let suppressedByClick = false
+    let pointer: { x: number; y: number } | null = null
 
     function clearShowTimeout() {
       if (showTimeout) {
@@ -77,8 +81,19 @@ export default function HoverDetail({
       const tooltip = tooltipRef.current
       if (!tooltip || !trigger) return null
 
-      const triggerRect = trigger.getBoundingClientRect()
+      const triggerRect =
+        followPointer && pointer ? new DOMRect(pointer.x, pointer.y, 0, 0) : trigger.getBoundingClientRect()
       const tooltipRect = tooltip.getBoundingClientRect()
+
+      if (placementProp === "right") {
+        const centeredTop = triggerRect.top + triggerRect.height / 2 - tooltipRect.height / 2
+        const maxTop = Math.max(VIEWPORT_PADDING, window.innerHeight - VIEWPORT_PADDING - tooltipRect.height)
+        return {
+          top: Math.min(Math.max(centeredTop, VIEWPORT_PADDING), maxTop),
+          left: triggerRect.right + offset,
+          placement: "right",
+        }
+      }
 
       const roomBelow = window.innerHeight - triggerRect.bottom
       const nextPlacement: "above" | "below" =
@@ -121,6 +136,8 @@ export default function HoverDetail({
         setVisible(true)
       } else {
         showTimeout = setTimeout(() => {
+          // The pointer may have moved during the delay.
+          if (followPointer) updatePosition()
           isShown = true
           setVisible(true)
         }, delay)
@@ -134,7 +151,14 @@ export default function HoverDetail({
       setVisible(false)
     }
 
-    function handlePointerEnter() {
+    function trackPointer(event: PointerEvent) {
+      if (!followPointer) return
+      pointer = { x: event.clientX, y: event.clientY }
+      if (isShown) updatePosition()
+    }
+
+    function handlePointerEnter(event: PointerEvent) {
+      trackPointer(event)
       show(false)
     }
 
@@ -159,6 +183,7 @@ export default function HoverDetail({
 
     trigger.addEventListener("pointerenter", handlePointerEnter)
     trigger.addEventListener("pointerdown", handlePointerDown)
+    trigger.addEventListener("pointermove", trackPointer)
     trigger.addEventListener("pointerleave", handlePointerLeave)
     trigger.addEventListener("focusin", handleFocusIn)
     trigger.addEventListener("focusout", hide)
@@ -169,13 +194,14 @@ export default function HoverDetail({
       clearShowTimeout()
       trigger.removeEventListener("pointerenter", handlePointerEnter)
       trigger.removeEventListener("pointerdown", handlePointerDown)
+      trigger.removeEventListener("pointermove", trackPointer)
       trigger.removeEventListener("pointerleave", handlePointerLeave)
       trigger.removeEventListener("focusin", handleFocusIn)
       trigger.removeEventListener("focusout", hide)
       window.removeEventListener("resize", handleViewportChange)
       window.removeEventListener("scroll", handleViewportChange, true)
     }
-  }, [desktopOnly, offset, placementProp])
+  }, [desktopOnly, followPointer, offset, placementProp])
 
   const lines = Array.isArray(label) ? label : null
 

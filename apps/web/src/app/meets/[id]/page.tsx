@@ -690,7 +690,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
   return (
     <div className="relative">
       {meet.bannerUrl && (
-        <MeetPageBackground bannerUrl={meet.bannerUrl} photoUrls={initialPreviews} />
+        <MeetPageBackground bannerUrl={meet.bannerUrl} />
       )}
       <main className="relative mx-auto max-w-[1240px]">
         <div className="relative z-10 flex flex-col gap-8">

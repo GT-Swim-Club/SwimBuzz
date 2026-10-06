@@ -45,6 +45,7 @@ export default function MeetFormModal({
   error: string | null
 }) {
   const [imageError, setImageError] = useState<string | null>(null)
+  const [imageUploading, setImageUploading] = useState(false)
 
   function handleClose() {
     setImageError(null)
@@ -63,9 +64,8 @@ export default function MeetFormModal({
           form={form}
           setForm={setForm}
           onUploaded={onUploaded}
-          onClose={handleClose}
-          closeDisabled={loading}
           onError={setImageError}
+          onUploadingChange={setImageUploading}
         />
       }
       bodyClassName="!pt-11 sm:!pb-5"
@@ -82,10 +82,10 @@ export default function MeetFormModal({
           </button>
           <button
             type="submit"
-            disabled={loading || !meetFormComplete(form)}
+            disabled={loading || imageUploading || !meetFormComplete(form)}
             className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading ? loadingLabel : submitLabel}
+            {loading ? loadingLabel : imageUploading ? "Uploading image…" : submitLabel}
           </button>
         </ModalFooter>
       }

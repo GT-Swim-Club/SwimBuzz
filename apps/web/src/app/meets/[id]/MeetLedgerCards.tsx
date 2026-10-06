@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react"
 import FilePreviewButton, { FilePreviewDialog } from "@/components/ui/FilePreview"
 import {
   LedgerCard,
+  ledgerHeaderClass,
   LedgerIcon,
   LedgerIconButton,
   LedgerNote,
@@ -201,9 +202,9 @@ export function MeetPhotosCard({
   const hasAny = photos.length > 0 || count > 0
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-border bg-background px-4 pb-4 pt-3">
+    <div className="flex flex-col gap-3 rounded-xl border border-border bg-background px-4 pb-4 pt-2">
       <div className="flex min-h-7 items-center justify-between gap-2">
-        <span className="text-sm font-semibold text-foreground">Photos</span>
+        <span className={ledgerHeaderClass}>Photos</span>
         {isCoach ? (
           <ManagePhotosButton
             meetId={meetId}

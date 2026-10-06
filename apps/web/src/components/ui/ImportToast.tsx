@@ -19,7 +19,7 @@ function CheckIcon() {
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 20 20"
       fill="currentColor"
-      className="h-4 w-4 shrink-0 text-green-500 dark:text-green-400"
+      className="h-4 w-4 shrink-0 text-success"
       aria-hidden="true"
     >
       <path
@@ -37,7 +37,7 @@ function ErrorIcon() {
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 20 20"
       fill="currentColor"
-      className="h-4 w-4 shrink-0 text-red-500 dark:text-red-400"
+      className="h-4 w-4 shrink-0 text-error"
       aria-hidden="true"
     >
       <path
@@ -65,12 +65,12 @@ export default function ImportToast() {
       {tasks.map((task) => (
         <div
           key={task.id}
-          className={`pointer-events-auto flex max-w-sm items-start gap-3 rounded-xl border border-border/60 px-4 py-3 shadow-xl transition-all duration-300 animate-in slide-in-from-right-4 ${
+          className={`pointer-events-auto flex max-w-sm items-start gap-3 rounded-xl border px-4 py-3 shadow-xl transition-all duration-300 animate-in slide-in-from-right-4 ${
             task.status === "error"
-              ? "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50"
+              ? "bg-error-bg border-error-border"
               : task.status === "done"
-                ? "bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900/50"
-                : "bg-background/95 backdrop-blur-sm"
+                ? "bg-success-bg border-success-border"
+                : "border-border/60 bg-background/95 backdrop-blur-sm"
           }`}
           role="status"
         >
@@ -101,7 +101,7 @@ export default function ImportToast() {
               </p>
             )}
             {task.status === "error" && task.error && (
-              <p className="mt-0.5 text-xs text-red-500 dark:text-red-400">
+              <p className="mt-0.5 text-xs text-error">
                 {task.error}
               </p>
             )}

@@ -335,7 +335,7 @@ export default function CommentSection({
                   onClick={() => void handleDelete(comment.id)}
                   disabled={loading}
                   aria-label="Confirm delete"
-                  className="group relative inline-flex h-9 w-9 items-center justify-center rounded-md bg-red-600 text-primary-text transition-colors hover:bg-red-700 disabled:opacity-40"
+                  className="group relative inline-flex h-9 w-9 items-center justify-center rounded-md bg-red-600 text-error-contrast transition-colors hover:bg-red-700 disabled:opacity-40"
                 >
                   <ActionIcon kind="check" className="h-5 w-5" />
                   <HoverDetail label="Confirm delete" />

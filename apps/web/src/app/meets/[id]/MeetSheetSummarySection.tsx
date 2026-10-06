@@ -151,6 +151,39 @@ function resolveDisplayEventNumber(
   return opt.women ?? opt.men ?? 0
 }
 
+/** A relay leadoff carries its parent relay's event number, not the individual event's. */
+function resolveLeadoffEventNumber(
+  entry: SummaryEntry,
+  allEntries: SummaryEntry[] | undefined,
+  athleteGenders?: Map<string, "M" | "F">,
+  eventOptions?: MeetSignupEventOption[]
+): number {
+  const source = entry.relayLeadoffSource
+  if (!source) return 0
+  const round = entry.relayLeadoffRound || ""
+  const relays = (allEntries ?? []).filter(
+    (e) => e.entryType === "relay_team" && normalizeEventName(e.event) === source
+  )
+  const involvesAthlete = (e: SummaryEntry) =>
+    e.relaySwimmers?.some((s) => s.athleteId === entry.athleteId) ?? false
+  const leadsRelay = (e: SummaryEntry) =>
+    e.relaySwimmers?.some((s) => s.leg === 1 && s.athleteId === entry.athleteId) ?? false
+  const sameRound = (e: SummaryEntry) => !round || effectiveRelayRound(e) === round
+  const relay =
+    relays.find((e) => leadsRelay(e) && sameRound(e)) ??
+    relays.find((e) => leadsRelay(e)) ??
+    relays.find((e) => involvesAthlete(e))
+  if (relay) {
+    const num = resolveDisplayEventNumber(relay, athleteGenders, eventOptions)
+    if (num > 0) return num
+  }
+  return resolveDisplayEventNumber(
+    { ...entry, event: source, eventNumber: 0 },
+    athleteGenders,
+    eventOptions
+  )
+}
+
 type RoundResult = {
   label: string | null
   time?: string
@@ -462,7 +495,9 @@ function SummaryEntryRow({
   const [relayEditOpen, setRelayEditOpen] = useState(false)
   const isRelay = entry.entryType === "relay_team"
   const athleteRecord = athletes?.find((a) => a.id === entry.athleteId)
-  const eventNumber = resolveDisplayEventNumber(entry, athleteGenders, eventNumberOptions)
+  const eventNumber = entry.isRelayLeadoff
+    ? resolveLeadoffEventNumber(entry, allEntries, athleteGenders, eventNumberOptions)
+    : resolveDisplayEventNumber(entry, athleteGenders, eventNumberOptions)
   const compact = display.density === "compact"
   const res = rowRoundResult(entry, allEntries)
   const podiumPlace = finalsPodiumPlace(entry)
@@ -474,7 +509,7 @@ function SummaryEntryRow({
     [heat, lane != null ? `Lane ${lane}` : null, entry.startTime].filter(Boolean).join(" · ") || null
 
   const tags = !isRelay ? displayMeetResultTags(entry.resultTags ?? "") : null
-  const sub = [entry.isRelayLeadoff ? "Relay leadoff" : null, tags].filter(Boolean).join(" · ")
+  const sub = tags ?? ""
 
   const result: RowResult = entry.rosterOnly
     ? { kind: "none" }
@@ -528,7 +563,7 @@ function SummaryEntryRow({
       ],
       relaySwimmers: [...(entry.relaySwimmers ?? [])]
         .sort((a, b) => a.leg - b.leg)
-        .map((s) => ({ name: s.name, split: sanitizeRelaySplitTime(s.splitTime) })),
+        .map((s) => ({ name: s.name, split: sanitizeRelaySplitTime(s.splitTime), splits: s.splits })),
       coachNote,
     }
   } else {
@@ -553,7 +588,7 @@ function SummaryEntryRow({
       athleteHref: athletePath(athleteRecord?.slug ?? entry.athleteId),
       title: detailTitle,
       subLine: [
-        entry.isRelayLeadoff ? ["Relay leadoff", entry.relayLeadoffSource].filter(Boolean).join(" · ") : null,
+        entry.isRelayLeadoff ? entry.relayLeadoffSource : null,
         detailRounds.length > 1 ? detailRounds.map((r) => r.label).join(" · ") : detailRounds[0].label,
       ]
         .filter(Boolean)
@@ -562,17 +597,22 @@ function SummaryEntryRow({
     }
   }
 
+  // Relays are edited from the detail modal's "Edit relay" button, so the row has no pencil.
+  const relayEditor =
+    isRelay && canEdit && meetId ? (
+      <EditRelayButton
+        meetId={meetId}
+        athletes={athletes ?? []}
+        entry={entry}
+        open={relayEditOpen}
+        onOpenChange={setRelayEditOpen}
+        hideTrigger
+      />
+    ) : null
+
   const editButton =
-    canEdit && meetId ? (
-      isRelay ? (
-        <EditRelayButton
-          meetId={meetId}
-          athletes={athletes ?? []}
-          entry={entry}
-          open={relayEditOpen}
-          onOpenChange={setRelayEditOpen}
-        />
-      ) : isRosterOnlySheetEntry(entry) ? (
+    canEdit && meetId && !isRelay ? (
+      isRosterOnlySheetEntry(entry) ? (
         <RemoveRosterOnlyButton
           meetId={meetId}
           athleteId={entry.athleteId}
@@ -613,26 +653,29 @@ function SummaryEntryRow({
     ) : null
 
   return (
-    <SummaryRow
-      id={entry.swimId ? `swim-${entry.swimId}` : undefined}
-      display={display}
-      eventNumber={!eventView && eventNumber > 0 ? eventNumber : undefined}
-      avatar={
-        eventView && !isRelay ? (
-          <AthleteAvatar image={athleteRecord?.image} name={entry.athleteName} compact={compact} />
-        ) : undefined
-      }
-      label={eventView ? (isRelay ? relayLetter : entry.athleteName) : eventName}
-      sub={sub || undefined}
-      team={!eventView ? relayLetter : undefined}
-      round={entry.rosterOnly || entry.isRelayLeadoff ? null : res.label}
-      heatLane={heatLane}
-      note={coachNote}
-      result={result}
-      detail={detail}
-      trailing={editButton}
-      onEditRelay={isRelay && canEdit && meetId ? () => setRelayEditOpen(true) : undefined}
-    />
+    <>
+      <SummaryRow
+        id={entry.swimId ? `swim-${entry.swimId}` : undefined}
+        display={display}
+        eventNumber={!eventView && eventNumber > 0 ? eventNumber : undefined}
+        avatar={
+          eventView && !isRelay ? (
+            <AthleteAvatar image={athleteRecord?.image} name={entry.athleteName} compact={compact} />
+          ) : undefined
+        }
+        label={eventView ? (isRelay ? relayLetter : entry.athleteName) : eventName}
+        sub={sub || undefined}
+        team={entry.isRelayLeadoff ? "Relay leadoff" : !eventView ? relayLetter : undefined}
+        round={entry.rosterOnly || entry.isRelayLeadoff ? null : res.label}
+        heatLane={heatLane}
+        note={coachNote}
+        result={result}
+        detail={detail}
+        trailing={editButton}
+        onEditRelay={relayEditor ? () => setRelayEditOpen(true) : undefined}
+      />
+      {relayEditor}
+    </>
   )
 }
 
@@ -1167,23 +1210,26 @@ export default function MeetSheetSummarySection({
       ) : (
         <div className="flex flex-col gap-3">
           {filteredMyEntries.length > 0 ? (
-            <div className="overflow-hidden rounded-xl border border-primary bg-accent/[0.04] shadow-sm">
-              <div className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-accent">
-                <AthleteAvatar
-                  image={viewerRecord?.image}
-                  name={athleteNames.get(viewerAthleteId!) || "My Profile"}
-                />
-                <span>{athleteNames.get(viewerAthleteId!)}</span>
-              </div>
-              <ul className="border-t border-border-subtle">
-                {filteredMyEntries.map((entry, i) => (
-                  <SummaryEntryRow
-                    key={`mine-${entryRowKey(entry, i, athleteGenders)}`}
-                    entry={entry}
-                    {...rowProps}
+            <div className="overflow-hidden rounded-xl border border-primary bg-background shadow-sm">
+              {/* Tint layered over the opaque base so the meet background doesn't show through. */}
+              <div className="bg-accent/[0.04]">
+                <div className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-accent">
+                  <AthleteAvatar
+                    image={viewerRecord?.image}
+                    name={athleteNames.get(viewerAthleteId!) || "My Profile"}
                   />
-                ))}
-              </ul>
+                  <span>{athleteNames.get(viewerAthleteId!)}</span>
+                </div>
+                <ul className="border-t border-border-subtle">
+                  {filteredMyEntries.map((entry, i) => (
+                    <SummaryEntryRow
+                      key={`mine-${entryRowKey(entry, i, athleteGenders)}`}
+                      entry={entry}
+                      {...rowProps}
+                    />
+                  ))}
+                </ul>
+              </div>
             </div>
           ) : null}
           {filteredRelays.length > 0 ? (

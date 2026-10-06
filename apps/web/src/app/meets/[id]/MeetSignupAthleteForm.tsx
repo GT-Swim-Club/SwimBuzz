@@ -668,7 +668,7 @@ export default function MeetSignupAthleteForm({
                 type="button"
                 onClick={() => void handleWithdraw()}
                 disabled={loading}
-                className="flex-1 rounded-lg bg-error px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-error-hover disabled:opacity-50"
+                className="flex-1 rounded-lg bg-error px-4 py-2.5 text-sm font-medium text-error-contrast hover:bg-error-hover disabled:opacity-50"
               >
               {loading ? "Dropping…" : "Drop"}
             </button>

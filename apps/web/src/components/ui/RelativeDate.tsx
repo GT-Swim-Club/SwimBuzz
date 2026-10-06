@@ -4,6 +4,7 @@ import { useSyncExternalStore, type ReactNode } from "react"
 import {
   describeMeetSchedule,
   describeZones,
+  formatCompactDateRange,
   formatDateTime,
   formatMeetDateRange,
   formatMeetDateRangeFull,
@@ -83,7 +84,10 @@ export function RelativeDateTime({
   const viewerTimeZone = useViewerTimeZone()
   const relative = relativeEventDayLabel(startsAt, timeZone, todayKey)
   const range = formatZonedInstantRange(startsAt, endsAt, timeZone)
-  const dateText = relative ?? range.date
+  // Abbreviated months ("Sep 13, 2026") keep the inline text short; the hover still spells
+  // the date out in full.
+  const dateText =
+    relative ?? formatCompactDateRange(new Date(startsAt), new Date(endsAt ?? startsAt), timeZone)
   const zones = describeZones(startsAt, endsAt, timeZone)
   return (
     <span className={`group relative inline-block ${className ?? ""}`.trim()} tabIndex={0}>

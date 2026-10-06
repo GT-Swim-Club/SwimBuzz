@@ -29,6 +29,7 @@ function colorSchemeVariables(c: ColorPalette) {
     "--brand-color-error-border": c.errorBorder,
     "--brand-color-error-hover": c.errorHover,
     "--brand-color-error-active": c.errorActive,
+    "--brand-color-error-contrast": c.errorContrast,
     "--brand-color-info": c.info,
     "--brand-color-info-bg": c.infoBg,
     "--brand-color-info-border": c.infoBorder,

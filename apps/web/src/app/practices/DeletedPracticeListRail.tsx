@@ -183,7 +183,7 @@ export default function DeletedPracticeListRail({
               type="button"
               onClick={() => confirmDelete && void purge(confirmDelete)}
               disabled={!!busy}
-              className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-red-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-error-contrast hover:bg-red-700 disabled:opacity-50"
             >
               Delete permanently
             </button>
