@@ -3,6 +3,7 @@
   "framework": "nextjs",
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm --filter @swimbuzz/web run build",
+  "outputDirectory": "apps/web/.next",
   "functions": {
     "api/parse-pdf.py": {
       "maxDuration": 60,
