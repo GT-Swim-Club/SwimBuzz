@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 import {
   AVATAR_MAX_BYTES,
   deleteStoredAvatar,

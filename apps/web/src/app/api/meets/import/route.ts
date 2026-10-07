@@ -14,7 +14,7 @@ import { notifyMeetRosterOfInfoDrops } from "@/lib/meet/meet-roster-notify"
 import { parseSeason } from "@/lib/season"
 import { coerceParsedRelayResults } from "@/lib/meet/relay-results"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 
 function isUpload(value: unknown): value is Blob {
   return value != null && typeof value !== "string" && typeof (value as Blob).arrayBuffer === "function"
@@ -206,7 +206,7 @@ export async function POST(req: Request) {
 
   const season = parseSeason(meet?.season ?? seasonRaw)
   if (!season) {
-    return NextResponse.json({ error: "Season is required (e.g. 2025-2026)" }, { status: 400 })
+    return NextResponse.json({ error: "Season is required (e.g. 2025–2026)" }, { status: 400 })
   }
 
   if (!team) {

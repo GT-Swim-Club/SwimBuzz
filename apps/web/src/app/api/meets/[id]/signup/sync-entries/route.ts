@@ -12,7 +12,7 @@ import {
 import { isRelayResultsSummary } from "@/lib/meet/relay-results"
 import { Prisma } from "@prisma/client"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 
 export async function POST(
   _req: Request,

@@ -36,7 +36,6 @@ type RGB = [number, number, number]
 
 const PRIMARY: RGB = [222, 189, 136]
 const PRIMARY_ACTIVE: RGB = [140, 107, 56]
-const PRIMARY_TEXT: RGB = [64, 43, 19]
 const INK: RGB = [31, 31, 31]
 const MUTED: RGB = [89, 89, 89]
 const BORDER: RGB = [234, 234, 234]
@@ -231,10 +230,9 @@ export function buildPracticePdf(input: PracticePdfInput): jsPDF {
   const spaceY2 = px(8)
   const py2 = px(8)
   const mt1 = px(4)
-  const mt05 = px(2)
-  const mt3 = px(12)
   const gap2 = px(8)
   const gap15 = px(6)
+  const metaGap = px(12)
   const calloutPx = px(20)
   const calloutPy = px(16)
   const cardPx = px(24)
@@ -242,18 +240,16 @@ export function buildPracticePdf(input: PracticePdfInput): jsPDF {
   const cardPyBottom = px(4)
   const cardRadius = px(16)
   const calloutRadius = px(16)
-  const titleSize = px(36)
-  const titleLh = px(45)
-  const metaSize = px(18)
+  const titleSize = px(42)
+  const titleLh = px(50)
+  const metaSize = px(19)
   const metaLh = px(28)
   const bodySize = px(14)
   const bodyLh = px(20)
   const setTitleSize = px(16)
   const setTitleLh = px(24)
   const distSize = px(12)
-  const tagSize = px(12)
-  const tagRow = px(20)
-  const iconSize = px(14)
+  const iconSize = px(17)
 
   let y = margin + titleSize * 0.85
   let inSetsCard = false
@@ -450,6 +446,73 @@ export function buildPracticePdf(input: PracticePdfInput): jsPDF {
     doc.line(cx + s * 0.35, cy, cx, cy + s * 0.48)
   }
 
+  /** Strokes a polyline given in the 24×24 Lucide icon grid, scaled into the meta icon box. */
+  function strokeIconPath(x: number, baseline: number, points: [number, number][], closed = false) {
+    const u = iconSize / 24
+    const top = baseline - iconSize + px(2)
+    const pts = closed ? [...points, points[0]] : points
+    for (let i = 1; i < pts.length; i++) {
+      doc.line(x + pts[i - 1][0] * u, top + pts[i - 1][1] * u, x + pts[i][0] * u, top + pts[i][1] * u)
+    }
+  }
+
+  function drawWavesIcon(x: number, baseline: number, color: RGB) {
+    doc.setDrawColor(...color)
+    doc.setLineWidth(0.85)
+    for (const row of [6, 12, 18]) {
+      const points: [number, number][] = []
+      for (let i = 0; i <= 20; i++) {
+        const t = i / 20
+        points.push([2 + t * 20, row + Math.sin(t * Math.PI * 4)])
+      }
+      strokeIconPath(x, baseline, points)
+    }
+  }
+
+  function drawTagIcon(x: number, baseline: number, color: RGB) {
+    doc.setDrawColor(...color)
+    doc.setLineWidth(0.85)
+    strokeIconPath(x, baseline, [[2, 2], [11.5, 2], [21.5, 12], [12, 21.5], [2, 11.5]], true)
+    const u = iconSize / 24
+    doc.circle(x + 7.5 * u, baseline - iconSize + px(2) + 7.5 * u, 1.3 * u, "S")
+  }
+
+  type MetaIcon = "calendar" | "location" | "waves" | "tag"
+
+  function drawMetaIcon(icon: MetaIcon, x: number) {
+    if (icon === "calendar") drawCalendarIcon(x, y, MUTED)
+    else if (icon === "location") drawLocationIcon(x, y, MUTED)
+    else if (icon === "waves") drawWavesIcon(x, y, MUTED)
+    else drawTagIcon(x, y, MUTED)
+  }
+
+  /** Lays icon+text items inline like the page's flex-wrap header rows, wrapping to a new line when an item won't fit. */
+  function drawMetaRow(items: { icon: MetaIcon; text: string }[]) {
+    ensureSpace(metaLh)
+    const right = margin + contentWidth
+    let x = margin
+    for (const item of items) {
+      setType(plainStyle(), metaSize, MUTED)
+      const itemWidth = iconSize + gap15 + doc.getTextWidth(item.text)
+      if (x > margin && x + itemWidth > right) {
+        y += metaLh
+        ensureSpace(metaLh)
+        x = margin
+      }
+      drawMetaIcon(item.icon, x)
+      setType(plainStyle(), metaSize, MUTED)
+      const lines = doc.splitTextToSize(item.text, right - x - iconSize - gap15) as string[]
+      for (const [index, line] of lines.entries()) {
+        if (index > 0) {
+          y += metaLh
+          ensureSpace(metaLh)
+        }
+        doc.text(line, x + iconSize + gap15, y)
+      }
+      x = lines.length > 1 ? right : x + itemWidth + metaGap
+    }
+  }
+
   function drawDraftBadge(x: number, baseline: number) {
     const label = "DRAFT"
     setType({ bold: true, italic: false, underline: false }, px(10), PRIMARY_ACTIVE)
@@ -458,54 +521,6 @@ export function buildPracticePdf(input: PracticePdfInput): jsPDF {
     doc.setFillColor(...DRAFT_BG)
     doc.roundedRect(x, baseline - px(12), w, h, h / 2, h / 2, "F")
     doc.text(label, x + px(8), baseline)
-  }
-
-  function measureTags(tags: string[], maxWidth: number): number {
-    if (tags.length === 0) return 0
-    let tx = 0
-    let rows = 1
-    for (const tag of tags) {
-      setType(plainStyle(), tagSize, PRIMARY_TEXT)
-      const w = doc.getTextWidth(tag) + px(16)
-      if (tx > 0 && tx + w > maxWidth) {
-        rows += 1
-        tx = 0
-      }
-      tx += w + gap2
-    }
-    return (rows - 1) * tagRow + px(16)
-  }
-
-  function drawTags(tags: string[], x: number, maxWidth: number) {
-    let tx = x
-    for (const tag of tags) {
-      setType(plainStyle(), tagSize, PRIMARY_TEXT)
-      const w = doc.getTextWidth(tag) + px(16)
-      if (tx > x && tx + w > x + maxWidth) {
-        y += tagRow
-        tx = x
-      }
-      doc.setFillColor(...PRIMARY)
-      doc.roundedRect(tx, y - px(11), w, px(16), px(8), px(8), "F")
-      doc.text(tag, tx + px(8), y + px(1))
-      tx += w + gap2
-    }
-    y += px(12)
-  }
-
-  function drawMetaLine(icon: "calendar" | "location", text: string) {
-    ensureSpace(metaLh)
-    if (icon === "calendar") drawCalendarIcon(margin, y, MUTED)
-    else drawLocationIcon(margin, y, MUTED)
-    setType(plainStyle(), metaSize, MUTED)
-    const lines = doc.splitTextToSize(text, contentWidth - iconSize - gap15) as string[]
-    for (const [index, line] of lines.entries()) {
-      if (index > 0) {
-        y += metaLh
-        ensureSpace(metaLh)
-      }
-      doc.text(line, margin + iconSize + gap15, y)
-    }
   }
 
   doc.setProperties({
@@ -536,44 +551,34 @@ export function buildPracticePdf(input: PracticePdfInput): jsPDF {
   y += titleSize * 0.22 + mt1 + metaSize * 0.8
   // Static exports always show the practice's own zone rather than whoever generated it.
   const range = formatZonedInstantRange(input.startsAt, input.endsAt, input.timeZone)
-  const dateLine = `${range.date}  ·  ${range.time} ${range.abbrev}`
-  drawMetaLine("calendar", dateLine)
+  // Header rows mirror the practice page: date/time + location, then distance + tags.
+  const location = input.location?.trim() ?? ""
+  drawMetaRow([
+    { icon: "calendar", text: `${range.date}  ·  ${range.time} ${range.abbrev}` },
+    ...(location ? [{ icon: "location" as const, text: location }] : []),
+  ])
 
-  const placeBits = [
-    input.location?.trim() || null,
-    input.totalDistance > 0 ? formatPracticeDistance(input.totalDistance, input.course) : null,
-  ].filter((bit): bit is string => Boolean(bit))
-  if (placeBits.length > 0) {
-    y += metaSize * 1.05 + mt05
-    if (input.location?.trim()) drawMetaLine("location", placeBits.join("  ·  "))
-    else {
-      ensureSpace(metaLh)
-      setType(plainStyle(), metaSize, MUTED)
-      doc.text(placeBits[0], margin, y)
-    }
+  const secondRow = [
+    ...(input.totalDistance > 0
+      ? [{ icon: "waves" as const, text: formatPracticeDistance(input.totalDistance, input.course) }]
+      : []),
+    ...(input.tags.length > 0 ? [{ icon: "tag" as const, text: input.tags.join(", ") }] : []),
+  ]
+  if (secondRow.length > 0) {
+    y += metaSize * 1.05 + mt1
+    drawMetaRow(secondRow)
   }
 
   y += metaSize * 0.25 + spaceY5
 
-  const hasFocus = Boolean(input.focus && !isHtmlEmpty(input.focus))
-  const hasTags = input.tags.length > 0
-  if (hasFocus || hasTags) {
+  if (input.focus && !isHtmlEmpty(input.focus)) {
     const innerWidth = contentWidth - calloutPx * 2
-    const focusHeight = hasFocus ? measureBlocks(input.focus!, bodySize, innerWidth, bodyLh) : 0
-    const tagsHeight = hasTags ? measureTags(input.tags, innerWidth) : 0
-    const boxHeight =
-      calloutPy * 2 + focusHeight + tagsHeight + (hasFocus && hasTags ? mt3 : 0)
+    const boxHeight = calloutPy * 2 + measureBlocks(input.focus, bodySize, innerWidth, bodyLh)
     ensureSpace(boxHeight + spaceY5)
     const boxTop = y
     drawFocusBox(boxTop, boxHeight)
     y = boxTop + calloutPy + bodySize * 0.8
-    if (hasFocus) {
-      drawBlocks(input.focus!, bodySize, INK, margin + calloutPx, innerWidth, bodyLh)
-    }
-    if (hasTags) {
-      if (hasFocus) y += mt3 - (bodyLh - bodySize)
-      drawTags(input.tags, margin + calloutPx, innerWidth)
-    }
+    drawBlocks(input.focus, bodySize, INK, margin + calloutPx, innerWidth, bodyLh)
     y = boxTop + boxHeight + spaceY5
   }
 

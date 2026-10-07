@@ -6,7 +6,7 @@ import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { MeetFormCustomQuestionFields } from "@/components/meet/MeetFormCustomQuestions"
 import { roomWindowStatus } from "@/lib/meet/meet-rooms"
 import { type MeetSignupQuestion } from "@/lib/meet/meet-signup"
-import { saveRoomPreference } from "./MeetRoomPreferenceForm.actions"
+import { saveRoomPreference } from "./meet-rooms.actions"
 
 export type MeetRoomPreferenceInitial = {
   preferredAthleteIds: string[]

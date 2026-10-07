@@ -13,7 +13,7 @@ import { formatDisplayTime } from "@/lib/utils"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/ui/SegmentedToggle"
 import StaffBadge from "@/components/ui/StaffBadge"
 import type { StaffTitle } from "@swimbuzz/shared"
-import { syncSignupsToRoster, withdrawAthleteSignup } from "../meet-signup-admin.actions"
+import { syncSignupsToRoster, withdrawAthleteSignup } from "../meet-signup.actions"
 import ImportFormResponsesButton from "../ImportFormResponsesButton"
 
 type SignupEntry = {

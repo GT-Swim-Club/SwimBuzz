@@ -1,4 +1,5 @@
 import { Gender } from "@prisma/client"
+import { formatSeasonLabel } from "@swimbuzz/shared"
 import { prisma } from "@/lib/prisma"
 import {
   buildAthleteLookup,
@@ -406,7 +407,7 @@ export async function runRosterImport(
         row: row.rowNumber,
         action: "updated",
         name: `${row.lastName}, ${row.firstName}`,
-        detail: hadSeason ? "merged with existing athlete" : `added to ${season}`,
+        detail: hadSeason ? "merged with existing athlete" : `added to ${formatSeasonLabel(season)}`,
       })
       continue
     }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { createScraperPairing } from "@/lib/scraper/scraper"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 
 export async function POST() {
   const session = await getSession()

@@ -1,7 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 import {
   AVATAR_MAX_BYTES,
   deleteStoredAvatar,

@@ -5,13 +5,12 @@ import { revalidatePath } from "next/cache"
 import { notifyPracticePublished } from "@/lib/notifications/notifications"
 import { prisma } from "@/lib/prisma"
 import { buildPracticeData, PracticeInputError, practiceSetSelect } from "@/lib/practice/practice-input"
-import { isStaffRole } from "@/lib/auth/auth-roles"
 import {
   PracticeEditLockError,
   assertCanMutatePractice,
   type PracticeEditLockInfo } from "@/lib/practice/practice-edit-lock"
 import { uniquePracticeSlug } from "@/lib/slug"
-import { zonedDayKey, zonedTimeToUtc, utcToZonedParts } from "@swimbuzz/shared"
+import { zonedDayKey, zonedTimeToUtc, utcToZonedParts, isStaffRole } from "@swimbuzz/shared"
 import { getSession } from "@/lib/auth/session"
 import { findUnmanagedPracticeTags } from "@/lib/practice/practice-tag-catalog"
 import type { PracticeFormState } from "../PracticeEditor"

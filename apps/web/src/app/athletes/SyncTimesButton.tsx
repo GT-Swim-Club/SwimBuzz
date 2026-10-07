@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import { formatRelativeTime, formatDateTime } from "@/lib/utils"
 import { currentSeason, parseSeason } from "@/lib/season"
+import { formatSeasonLabel } from "@swimbuzz/shared"
 import { useScraperUi } from "@/components/scraper/ScraperUiProvider"
 import { useImportTask } from "@/components/ui/ImportTaskProvider"
 import { runScraperEnqueuePollFinalize } from "@/lib/scraper/scraper-job-client"
@@ -186,7 +187,7 @@ export default function SyncTimesButton() {
                 Import times from SwimCloud
               </h2>
               <p className="mt-1 text-sm text-foreground-secondary">
-                Select from the {gender === "all" ? "" : gender === "F" ? "women's" : "men's"} {season} roster.
+                Select from the {gender === "all" ? "" : gender === "F" ? "women's" : "men's"} {formatSeasonLabel(season)} roster.
                 Takes about 2–3 minutes per athlete.
               </p>
             </div>

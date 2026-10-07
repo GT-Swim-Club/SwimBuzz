@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { normalizeSwimForInsert, nextSwimOccurrence } from "@/lib/swim/swim-dedup"
 import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 
 export async function PATCH(
   req: Request,

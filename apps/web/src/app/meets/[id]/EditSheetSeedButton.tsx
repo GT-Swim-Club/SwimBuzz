@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import ActionIcon from "@/components/ui/ActionIcon"
-import { deleteSheetSeed, editSheetSeed } from "./EditSheetSeedButton.actions"
+import { deleteSheetSeed, editSheetSeed } from "./meet-entries.actions"
 
 const FALLBACK_EVENTS = [
   "50 Free",

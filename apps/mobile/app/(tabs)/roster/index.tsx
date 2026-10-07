@@ -6,7 +6,7 @@ import {
 } from "react-native"
 import { useRouter } from "expo-router"
 import { useQuery } from "@tanstack/react-query"
-import { athleteDisplayName, isStaffRole } from "@swimbuzz/shared"
+import { athleteDisplayName, formatSeasonLabel, isStaffRole } from "@swimbuzz/shared"
 import {
   Button,
   CardSkeleton,
@@ -132,7 +132,7 @@ export default function RosterScreen() {
           />
           {season ? (
             <Button
-              label={`Sync SwimCloud times (${season})`}
+              label={`Sync SwimCloud times (${formatSeasonLabel(season)})`}
               variant="secondary"
               loading={syncing}
               onPress={() => void syncSeasonTimes()}
@@ -180,7 +180,7 @@ export default function RosterScreen() {
             {seasons.map((s) => (
               <Chip
                 key={s}
-                label={s}
+                label={formatSeasonLabel(s)}
                 selected={season === s}
                 onPress={() => setSeasonState(s)}
               />
@@ -233,7 +233,7 @@ export default function RosterScreen() {
                 titleAdornment={
                   item.user?.staffTitle ? <StaffBadge title={item.user.staffTitle} /> : undefined
                 }
-                subtitle={[item.gender, item.seasons?.[0]].filter(Boolean).join(" · ")}
+                subtitle={[item.gender, item.seasons?.[0] && formatSeasonLabel(item.seasons[0])].filter(Boolean).join(" · ")}
                 onPress={() => router.push(`/roster/${item.id}`)}
               />
             ) : (
@@ -242,7 +242,7 @@ export default function RosterScreen() {
                 titleAdornment={
                   item.user?.staffTitle ? <StaffBadge title={item.user.staffTitle} /> : undefined
                 }
-                subtitle={[item.gender, item.seasons?.[0]].filter(Boolean).join(" · ")}
+                subtitle={[item.gender, item.seasons?.[0] && formatSeasonLabel(item.seasons[0])].filter(Boolean).join(" · ")}
                 onPress={() => router.push(`/roster/${item.id}`)}
               />
             )

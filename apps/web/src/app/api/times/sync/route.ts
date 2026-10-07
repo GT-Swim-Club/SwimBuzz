@@ -11,7 +11,7 @@ import {
   LOCAL_SCRAPER_HINT,
 } from "@/lib/scraper/scraper"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 
 export const runtime = "nodejs"
 export const maxDuration = 300
@@ -28,7 +28,7 @@ export async function GET(req: Request) {
   const gender = genderRaw === "all" ? undefined : (genderRaw === "F" ? Gender.F : Gender.M)
 
   if (!season) {
-    return NextResponse.json({ error: "Season is required (e.g. 2025-2026)" }, { status: 400 })
+    return NextResponse.json({ error: "Season is required (e.g. 2025–2026)" }, { status: 400 })
   }
 
   const athletes = await prisma.athlete.findMany({
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
   const { season: seasonRaw, year, gender: genderRaw, athleteIds } = await req.json()
   const season = parseSeason(seasonRaw ?? year)
   if (!season) {
-    return NextResponse.json({ error: "Season is required (e.g. 2025-2026)" }, { status: 400 })
+    return NextResponse.json({ error: "Season is required (e.g. 2025–2026)" }, { status: 400 })
   }
   const gender = genderRaw === "all" ? undefined : (genderRaw === "F" ? Gender.F : Gender.M)
   if (!Array.isArray(athleteIds) || athleteIds.length === 0) {

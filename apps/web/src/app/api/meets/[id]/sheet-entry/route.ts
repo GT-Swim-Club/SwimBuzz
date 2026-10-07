@@ -13,7 +13,7 @@ import { isSheetSummary } from "@/lib/meet/meet-sheet-summary"
 import { normalizeEventName } from "@/lib/swim/swim-parse"
 import { Prisma } from "@prisma/client"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 
 export const runtime = "nodejs"
 

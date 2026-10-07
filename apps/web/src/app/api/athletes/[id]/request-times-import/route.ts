@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 import { notifyTimesImportRequest } from "@/lib/notifications/notifications"
 import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/auth/session"

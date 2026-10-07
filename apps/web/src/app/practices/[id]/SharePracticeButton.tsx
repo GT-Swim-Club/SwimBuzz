@@ -396,7 +396,7 @@ export default function SharePracticeButton({
             className="flex w-full items-center gap-2 whitespace-nowrap px-3 py-2 text-left text-sm text-foreground hover:bg-fill"
           >
             <PngMenuIcon className="h-4 w-4 shrink-0" />
-            Export PNG
+            Download PNG
           </button>
           <button
             type="button"
@@ -405,7 +405,7 @@ export default function SharePracticeButton({
             className="flex w-full items-center gap-2 whitespace-nowrap px-3 py-2 text-left text-sm text-foreground hover:bg-fill"
           >
             <PdfMenuIcon className="h-4 w-4 shrink-0" />
-            Export PDF
+            Download PDF
           </button>
         </div>
       )}

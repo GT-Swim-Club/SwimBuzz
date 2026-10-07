@@ -3,6 +3,8 @@ import LoadingComponent from "./loading"
 import { Suspense } from "react"
 import { redirect } from "next/navigation"
 import { parseSeason, resolveListedSeason } from "@/lib/season"
+import { listSeasons } from "@/lib/season-store"
+import { formatSeasonLabel } from "@swimbuzz/shared"
 import { computeNationalsQualifiers } from "@/lib/qualifiers/nationals-qualifiers"
 import { isStaffUi } from "@/lib/athlete/athlete-view-server"
 import QualifierFilters from "./QualifierFilters"
@@ -39,9 +41,7 @@ async function QualifiersContent({
   const defaultView = user?.defaultView === "list" ? "list" : "gallery"
   const { season: seasonParam, gender, view, q: search } = await searchParams
   const activeView = view === "list" ? "list" : view === "gallery" ? "gallery" : defaultView
-  const seasons = await prisma.season
-    .findMany({ orderBy: { label: "desc" } })
-    .then((list) => list.map((item) => item.label))
+  const seasons = await listSeasons()
   const requestedSeason = parseSeason(seasonParam)
   const season = resolveListedSeason(requestedSeason, seasons)
 
@@ -117,7 +117,7 @@ async function QualifiersContent({
 
         {!set ? (
           <p className="text-sm text-foreground-secondary">
-            No time standards have been uploaded for {season} yet.
+            No time standards have been uploaded for {formatSeasonLabel(season)} yet.
             {isCoach
               ? " Upload a Nationals qualifying-times PDF to begin tracking cuts."
               : " Ask a coach to upload the qualifying-times PDF."}

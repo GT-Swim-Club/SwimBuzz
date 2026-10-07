@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { randomUUID } from "crypto"
 import sharp from "sharp"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 import { resolvedFileExt } from "@/lib/upload-file-ext"
 
 export const runtime = "nodejs"

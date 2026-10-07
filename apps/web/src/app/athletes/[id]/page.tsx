@@ -23,7 +23,7 @@ import RequestTimesImportButton from "@/components/athlete/RequestTimesImportBut
 import AthleteActions from "./AthleteActions"
 import PendingProfileChangesReview from "@/components/athlete/PendingProfileChangesReview"
 import { isStaffUi } from "@/lib/athlete/athlete-view-server"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { formatSeasonLabel, isStaffRole } from "@swimbuzz/shared"
 import { parsePendingProfileChanges } from "@/lib/athlete/pending-profile-changes"
 import { athletePath, isCuid } from "@/lib/slug"
 import StatsHighlights from "@/components/ui/StatsHighlights"
@@ -212,7 +212,7 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
       {athleteHighlights && (
         <StatsHighlights
           className="w-full"
-          title={`${athleteHighlights.season} highlights`}
+          title={`${formatSeasonLabel(athleteHighlights.season)} highlights`}
           counters={athleteHighlights.counters}
         />
       )}

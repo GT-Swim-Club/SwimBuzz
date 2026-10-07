@@ -3,9 +3,6 @@ const { createServer } = require("node:http")
 const { parse } = require("node:url")
 const next = require("next")
 const compression = require("compression")
-const { startSignupMonitor } = require("./signup-status-monitor")
-const { startNotificationCleanupMonitor } = require("./notification-cleanup-monitor")
-const { startStaffTermExpiryMonitor } = require("./staff-term-expiry-monitor")
 
 // Dev / optional long-lived process only. Production on Vercel uses stock
 // `next start` (see package.json `start`) plus HTTP cron routes.
@@ -18,6 +15,35 @@ const REQUEST_TIMEOUT_MS = parseInt(
   process.env.HTTP_REQUEST_TIMEOUT_MS ?? String(60 * 60 * 1000),
   10
 )
+
+const MINUTE_MS = 60 * 1000
+const DAY_MS = 24 * 60 * MINUTE_MS
+
+// The same routes Vercel Cron / the external minutely cron hit in production,
+// called on a timer so this long-lived process runs them in-process.
+const CRON_JOBS = [
+  { path: "/api/cron/signup-monitor", intervalMs: MINUTE_MS },
+  { path: "/api/cron/notification-cleanup", intervalMs: DAY_MS },
+  { path: "/api/cron/staff-term-expiry", intervalMs: DAY_MS },
+]
+
+async function runCron(path) {
+  try {
+    const response = await fetch(`http://127.0.0.1:${port}${path}`, {
+      headers: { authorization: `Bearer ${process.env.CRON_SECRET}` },
+    })
+    if (!response.ok) throw new Error(`returned ${response.status}`)
+  } catch (error) {
+    console.error(`[cron] ${path} failed:`, error)
+  }
+}
+
+function startCrons() {
+  for (const { path, intervalMs } of CRON_JOBS) {
+    void runCron(path)
+    setInterval(() => void runCron(path), intervalMs)
+  }
+}
 
 const app = next({ dev, hostname, port })
 const handle = app.getRequestHandler()
@@ -52,11 +78,6 @@ app.prepare().then(() => {
       console.log("> HTTP request timeout: disabled")
     }
 
-    // Start the signup status monitor
-    startSignupMonitor()
-    // Start the notification cleanup monitor
-    startNotificationCleanupMonitor()
-    // Start the staff term expiry monitor
-    startStaffTermExpiryMonitor()
+    startCrons()
   })
 })

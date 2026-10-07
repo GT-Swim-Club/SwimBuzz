@@ -47,7 +47,7 @@ export default function PracticeExportCapture({
     <div className="w-fit min-w-[420px] space-y-5 bg-background p-8 text-base text-foreground">
       <div>
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="min-w-0 text-4xl font-semibold text-foreground">
+          <h1 className="min-w-0 text-[42px] font-semibold text-foreground">
             {title}
           </h1>
           {showDraft && (
@@ -56,40 +56,40 @@ export default function PracticeExportCapture({
             </span>
           )}
         </div>
-        <div className="mt-1 text-lg text-foreground-secondary">
-          <div className="flex items-center gap-1.5">
-            <InfoIcon kind="calendar" />
-            {range.date} · {range.time} {range.abbrev}
-          </div>
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+        <div className="mt-1.5 text-[19px] text-foreground-secondary">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="flex items-center gap-1.5">
+              <InfoIcon kind="calendar" className="h-[17px] w-[17px]" />
+              {range.date} · {range.time} {range.abbrev}
+            </span>
             {location && (
               <span className="flex items-center gap-1.5">
-                <InfoIcon kind="location" />
+                <InfoIcon kind="location" className="h-[17px] w-[17px]" />
                 {location}
               </span>
             )}
-            {location && totalDistance > 0 && <span>·</span>}
-            {totalDistance > 0 && <span>{formatPracticeDistance(totalDistance, course)}</span>}
           </div>
-        </div>
-      </div>
-      {(hasFocus || tags.length > 0) && (
-        <div className="rounded-2xl border-l-[3px] border-l-primary bg-background px-5 py-4 text-foreground">
-          {hasFocus && focus && (
-            <FormattedText text={focus} className="text-base text-foreground" />
-          )}
-          {tags.length > 0 && (
-            <div className={hasFocus ? "mt-3 flex flex-wrap gap-2" : "flex flex-wrap gap-2"}>
-              {tags.map((t) => (
-                <span
-                  key={t}
-                  className="rounded-full bg-primary/80 px-2 py-0.5 text-xs text-primary-text dark:bg-primary"
-                >
-                  {t}
+          {(tags.length > 0 || totalDistance > 0) && (
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+              {totalDistance > 0 && (
+                <span className="flex items-center gap-1.5">
+                  <InfoIcon kind="waves" className="h-[17px] w-[17px]" />
+                  {formatPracticeDistance(totalDistance, course)}
                 </span>
-              ))}
+              )}
+              {tags.length > 0 && (
+                <span className="flex items-center gap-1.5">
+                  <InfoIcon kind="tag" className="h-[17px] w-[17px]" />
+                  {tags.join(", ")}
+                </span>
+              )}
             </div>
           )}
+        </div>
+      </div>
+      {hasFocus && focus && (
+        <div className="rounded-2xl border-l-[3px] border-l-primary bg-background px-5 py-4 text-foreground">
+          <FormattedText text={focus} className="text-base text-foreground" />
         </div>
       )}
       <section className="rounded-2xl border border-border bg-background px-6 py-5 shadow-sm">

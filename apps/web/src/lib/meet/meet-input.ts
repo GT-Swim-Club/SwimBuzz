@@ -162,7 +162,7 @@ export function buildMeetData(body: Record<string, unknown>, opts: BuildOptions 
 
   if ("season" in body) {
     const season = parseSeason(body.season)
-    if (!season) throw new MeetInputError("Season must be like 2025-2026")
+    if (!season) throw new MeetInputError("Season must be like 2025–2026")
     data.season = season
   } else if (opts.requireStartDate && data.startsAt instanceof Date) {
     data.season = seasonFromDate(zonedDayKey(data.startsAt as Date, data.timeZone as string))

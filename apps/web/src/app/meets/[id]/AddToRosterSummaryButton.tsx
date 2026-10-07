@@ -5,7 +5,7 @@ import { useMemo, useState, useTransition } from "react"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { athleteHasRosterSummaryEntry } from "@/lib/meet/meet-signup"
 import type { SheetEntry } from "@/lib/meet/meet-sheet-summary"
-import { addRosterOnlyEntry } from "./AddToRosterSummaryButton.actions"
+import { addRosterOnlyEntry } from "./meet-entries.actions"
 
 type AthleteOption = { id: string; name: string }
 

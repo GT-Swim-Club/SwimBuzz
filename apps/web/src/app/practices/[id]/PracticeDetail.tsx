@@ -27,6 +27,8 @@ type PracticeSetView = {
   startsNewRow?: boolean
 }
 
+const metaIconCls = "h-4 w-4 sm:h-[17px] sm:w-[17px]"
+
 type PracticeCommentView = {
   id: string
   authorName: string
@@ -190,28 +192,42 @@ export default function PracticeDetail({
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="min-w-0 text-4xl font-semibold text-foreground">{title}</h1>
+              <h1 className="min-w-0 text-4xl font-semibold text-foreground sm:text-[42px]">{title}</h1>
               {isCoach && !published && (
                 <span className="text-[10px] uppercase tracking-wide rounded-full bg-primary/20 dark:bg-primary/30 px-2 py-0.5 text-primary-active shadow-sm dark:text-primary-hover">
                   Draft
                 </span>
               )}
             </div>
-            <div className="mt-1 text-lg text-foreground-secondary">
-              <div className="flex items-center gap-1.5">
-                <InfoIcon kind="calendar" />
-                <RelativeDateTime startsAt={startsAt} endsAt={endsAt} timeZone={timeZone} />
-              </div>
-              <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+            <div className="mt-1.5 text-lg text-foreground-secondary sm:text-[19px]">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span className="flex items-center gap-1.5">
+                  <InfoIcon kind="calendar" className={metaIconCls} />
+                  <RelativeDateTime startsAt={startsAt} endsAt={endsAt} timeZone={timeZone} />
+                </span>
                 {location && (
                   <span className="flex items-center gap-1.5">
-                    <InfoIcon kind="location" />
+                    <InfoIcon kind="location" className={metaIconCls} />
                     {location}
                   </span>
                 )}
-                {location && totalDistance > 0 && <span>·</span>}
-                {totalDistance > 0 && <span>{formatPracticeDistance(totalDistance, course)}</span>}
               </div>
+              {(tags.length > 0 || totalDistance > 0) && (
+                <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                  {totalDistance > 0 && (
+                    <span className="flex items-center gap-1.5">
+                      <InfoIcon kind="waves" className={metaIconCls} />
+                      {formatPracticeDistance(totalDistance, course)}
+                    </span>
+                  )}
+                  {tags.length > 0 && (
+                    <span className="flex min-w-0 items-center gap-1.5">
+                      <InfoIcon kind="tag" className={metaIconCls} />
+                      {tags.join(", ")}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
           <div
@@ -284,24 +300,9 @@ export default function PracticeDetail({
           </div>
         </div>
       </div>
-      {(focus && !isHtmlEmpty(focus) || tags.length > 0) && (
+      {focus && !isHtmlEmpty(focus) && (
         <div className="rounded-2xl border-l-[3px] border-l-primary bg-background px-5 py-4 text-foreground">
-          {focus && !isHtmlEmpty(focus) && (
-            <FormattedText text={focus} className="text-foreground" />
-          )}
-          {tags.length > 0 && (
-            <div className={(focus && !isHtmlEmpty(focus)) ? "mt-3 flex flex-wrap gap-2" : "flex flex-wrap gap-2"}>
-              {tags.map((t) => (
-                <Link
-                  key={t}
-                  href={`/practices?tag=${encodeURIComponent(t)}`}
-                  className="rounded-full bg-primary/80 px-2 py-0.5 text-xs text-primary-text transition-opacity hover:opacity-90 dark:bg-primary"
-                >
-                  {t}
-                </Link>
-              ))}
-            </div>
-          )}
+          <FormattedText text={focus} className="text-foreground" />
         </div>
       )}
       <section className="rounded-2xl border border-border-secondary bg-background px-6 py-5 shadow-sm">

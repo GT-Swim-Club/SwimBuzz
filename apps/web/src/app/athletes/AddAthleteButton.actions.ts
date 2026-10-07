@@ -8,7 +8,7 @@ import { parseSeasonList } from "@/lib/season"
 import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
 import { uniqueAthleteSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 
 export type AddAthleteInput = {
   firstName: string
@@ -41,7 +41,7 @@ export async function addAthlete(input: AddAthleteInput) {
     throw new Error("First name, last name, and email are required")
   }
   if (seasons.length === 0) {
-    throw new Error("Season is required (e.g. 2025-2026)")
+    throw new Error("Season is required (e.g. 2025–2026)")
   }
   if (!swimCloudIdEmpty && swimCloudId === null) {
     throw new Error(SWIMCLOUD_ID_ERROR)

@@ -1,16 +1,24 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { Gender } from "@prisma/client"
-import { Prisma } from "@prisma/client"
+import { Gender, Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { normalizeEventName } from "@/lib/swim/swim-parse"
 import {
   isValidSignupEntryTime,
   normalizeSignupEntryTime,
   resolveSignupEventOptions,
-  createManualIndividualSheetEntry } from "@/lib/meet/meet-signup"
-import { isSheetSummary, isResultStatusesSummary, meetHasImportedResults } from "@/lib/meet/meet-sheet-summary"
+  createManualIndividualSheetEntry,
+  updateManualIndividualSheetEntry,
+  deleteManualIndividualSheetEntry,
+  createRosterOnlySheetEntry,
+  deleteRosterOnlySheetEntry,
+} from "@/lib/meet/meet-signup"
+import {
+  isSheetSummary,
+  isResultStatusesSummary,
+  meetHasImportedResults,
+} from "@/lib/meet/meet-sheet-summary"
 import {
   isRelayResultsSummary,
   parseRelayGender,
@@ -25,10 +33,11 @@ import {
   sanitizeRelaySplitTime,
   type RelayGender,
   type RelayRound,
-  type RelayTeamInput } from "@/lib/meet/relay-results"
+  type RelayTeamInput,
+} from "@/lib/meet/relay-results"
 import { syncRelayLeadoffSwim, deleteRelayLeadoffSwim } from "@/lib/meet/relay-leadoff-sync"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 
 async function requireStaff() {
   const session = await getSession()
@@ -310,6 +319,167 @@ export async function removeRelayEntry(
   await prisma.meet.update({
     where: { id: meetId },
     data: { relayResultsSummary: { entries } }})
+
+  revalidatePath("/meets/[id]", "page")
+  return { ok: true }
+}
+
+export type EditSheetSeedInput = {
+  athleteId: string
+  event: string
+  newEvent: string
+  seedTime: string
+}
+
+/** Same logic as PATCH /api/meets/[id]/sheet-entry (manual individual branch). */
+export async function editSheetSeed(meetId: string, input: EditSheetSeedInput) {
+  const session = await getSession()
+  if (!session || !isStaffRole(session.user.role)) {
+    throw new Error("Forbidden")
+  }
+  if (!input.athleteId || !input.event) {
+    throw new Error("athleteId and event are required")
+  }
+
+  const meet = await prisma.meet.findUnique({
+    where: { id: meetId },
+    select: { course: true, eventOrder: true, entriesSheetSummary: true }})
+  if (!meet) throw new Error("Meet not found")
+
+  const eventOptions = resolveSignupEventOptions(meet.eventOrder)
+  const nextEvent = input.newEvent || input.event
+  const nextEventNorm = normalizeEventName(nextEvent)
+  if (
+    eventOptions.length > 0 &&
+    !eventOptions.some((o) => normalizeEventName(o.event) === nextEventNorm)
+  ) {
+    throw new Error("Invalid event")
+  }
+
+  const seedTimeRaw = input.seedTime || "NT"
+  const seedNormalized = normalizeSignupEntryTime(seedTimeRaw)
+  if (!/^nt$/i.test(seedNormalized) && !isValidSignupEntryTime(seedNormalized)) {
+    throw new Error("Enter a valid seed time (e.g. 58.32 or 1:02.15) or NT")
+  }
+
+  const athlete = await prisma.athlete.findUnique({
+    where: { id: input.athleteId },
+    select: { id: true, firstName: true, lastName: true, gender: true }})
+  if (!athlete) throw new Error("Athlete not found")
+
+  const existing = isSheetSummary(meet.entriesSheetSummary) ? meet.entriesSheetSummary : null
+  const { summary, found, conflict } = updateManualIndividualSheetEntry(existing, meet.course, {
+    athleteId: input.athleteId,
+    event: input.event,
+    newEvent: nextEvent,
+    seedTime: seedNormalized,
+    athleteName: `${athlete.lastName}, ${athlete.firstName}`,
+    gender: athlete.gender === "F" ? "F" : athlete.gender === "M" ? "M" : null,
+    eventOptions})
+
+  if (!found) {
+    throw new Error("That sign-up roster entry was not found (imported sheet rows cannot be edited).")
+  }
+  if (conflict) {
+    throw new Error("Athlete already has that event on the roster summary.")
+  }
+
+  await prisma.meet.update({
+    where: { id: meetId },
+    data: { entriesSheetSummary: summary as Prisma.InputJsonValue }})
+
+  revalidatePath("/meets/[id]", "page")
+  return { ok: true }
+}
+
+/** Same logic as DELETE /api/meets/[id]/sheet-entry (manual individual branch). */
+export async function deleteSheetSeed(meetId: string, athleteId: string, event: string) {
+  const session = await getSession()
+  if (!session || !isStaffRole(session.user.role)) {
+    throw new Error("Forbidden")
+  }
+  if (!athleteId || !event) {
+    throw new Error("athleteId and event are required")
+  }
+
+  const meet = await prisma.meet.findUnique({
+    where: { id: meetId },
+    select: { course: true, entriesSheetSummary: true }})
+  if (!meet) throw new Error("Meet not found")
+
+  const existing = isSheetSummary(meet.entriesSheetSummary) ? meet.entriesSheetSummary : null
+  const { summary, found } = deleteManualIndividualSheetEntry(existing, meet.course, {
+    athleteId,
+    event})
+
+  if (!found) {
+    throw new Error("That sign-up roster entry was not found (imported sheet rows cannot be deleted).")
+  }
+
+  await prisma.meet.update({
+    where: { id: meetId },
+    data: { entriesSheetSummary: summary as Prisma.InputJsonValue }})
+
+  revalidatePath("/meets/[id]", "page")
+  return { ok: true }
+}
+
+/** Same logic as the rosterOnly branch of POST /api/meets/[id]/sheet-entry. */
+export async function addRosterOnlyEntry(meetId: string, athleteId: string) {
+  const session = await getSession()
+  if (!session || !isStaffRole(session.user.role)) {
+    throw new Error("Forbidden")
+  }
+  if (!athleteId) throw new Error("athleteId is required")
+
+  const meet = await prisma.meet.findUnique({
+    where: { id: meetId },
+    select: { course: true, entriesSheetSummary: true, season: true }})
+  if (!meet) throw new Error("Meet not found")
+
+  const athlete = await prisma.athlete.findUnique({
+    where: { id: athleteId },
+    select: { id: true, firstName: true, lastName: true, gender: true, seasons: true }})
+  if (!athlete) throw new Error("Athlete not found")
+  if (!athlete.seasons.includes(meet.season)) {
+    throw new Error("Athlete must be on this meet's season roster")
+  }
+
+  const existing = isSheetSummary(meet.entriesSheetSummary) ? meet.entriesSheetSummary : null
+  const { summary, conflict } = createRosterOnlySheetEntry(existing, meet.course, {
+    athleteId,
+    athleteName: `${athlete.lastName}, ${athlete.firstName}`,
+    gender: athlete.gender === "F" ? "F" : athlete.gender === "M" ? "M" : null})
+  if (conflict) throw new Error("Athlete is already on the roster summary")
+
+  await prisma.meet.update({
+    where: { id: meetId },
+    data: { entriesSheetSummary: summary as Prisma.InputJsonValue }})
+
+  revalidatePath("/meets/[id]", "page")
+  return { ok: true }
+}
+
+/** Same logic as the rosterOnly branch of DELETE /api/meets/[id]/sheet-entry. */
+export async function removeRosterOnlyEntry(meetId: string, athleteId: string) {
+  const session = await getSession()
+  if (!session || !isStaffRole(session.user.role)) {
+    throw new Error("Forbidden")
+  }
+  if (!athleteId) throw new Error("athleteId is required")
+
+  const meet = await prisma.meet.findUnique({
+    where: { id: meetId },
+    select: { course: true, entriesSheetSummary: true }})
+  if (!meet) throw new Error("Meet not found")
+
+  const existing = isSheetSummary(meet.entriesSheetSummary) ? meet.entriesSheetSummary : null
+  const { summary, found } = deleteRosterOnlySheetEntry(existing, meet.course, athleteId)
+  if (!found) throw new Error("Athlete not found on roster summary")
+
+  await prisma.meet.update({
+    where: { id: meetId },
+    data: { entriesSheetSummary: summary as Prisma.InputJsonValue }})
 
   revalidatePath("/meets/[id]", "page")
   return { ok: true }

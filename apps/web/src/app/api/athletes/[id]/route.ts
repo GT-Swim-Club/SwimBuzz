@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { normalizeNicknames } from "@/lib/athlete/athlete-match"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 import { Gender, Prisma } from "@prisma/client"
 import {
   clearPendingFields,

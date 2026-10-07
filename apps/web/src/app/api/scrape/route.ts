@@ -10,7 +10,7 @@ import {
   LOCAL_SCRAPER_HINT,
 } from "@/lib/scraper/scraper"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 
 export const runtime = "nodejs"
 export const maxDuration = 300

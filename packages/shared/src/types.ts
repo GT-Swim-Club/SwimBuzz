@@ -1,5 +1,4 @@
-import type { AppRole } from "./roles"
-import type { StaffTitle } from "./staff-roles"
+import type { AppRole, StaffTitle } from "./roles"
 
 export type SessionUser = {
   id: string

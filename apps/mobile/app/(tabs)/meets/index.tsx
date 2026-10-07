@@ -7,7 +7,7 @@ import {
 } from "react-native"
 import { useRouter } from "expo-router"
 import { useQuery } from "@tanstack/react-query"
-import { formatFullDate, formatMeetDateRange, isStaffRole, zonedDayKey } from "@swimbuzz/shared"
+import { formatFullDate, formatMeetDateRange, formatSeasonLabel, isStaffRole, zonedDayKey } from "@swimbuzz/shared"
 import {
   Button,
   CardSkeleton,
@@ -152,7 +152,7 @@ export default function MeetsScreen() {
             {seasons.map((s) => (
               <Chip
                 key={s}
-                label={s}
+                label={formatSeasonLabel(s)}
                 selected={season === s}
                 onPress={() => setSeasonState(s)}
               />
@@ -223,7 +223,7 @@ export default function MeetsScreen() {
                   dateSegment({ fontSize: 12, color: c.textSecondary }),
                   item.location,
                   item.course,
-                  item.season,
+                  formatSeasonLabel(item.season),
                 ]}
                 onPress={() => router.push(`/meets/${item.id}`)}
               />
@@ -234,7 +234,7 @@ export default function MeetsScreen() {
                   dateSegment({ fontSize: 13, color: c.textSecondary }),
                   item.location,
                   item.course,
-                  item.season,
+                  formatSeasonLabel(item.season),
                 ]}
                 onPress={() => router.push(`/meets/${item.id}`)}
               />

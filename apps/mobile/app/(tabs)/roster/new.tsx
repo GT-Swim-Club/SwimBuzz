@@ -8,6 +8,7 @@ import {
   ScrollView,
   TextField,
 } from "@swimbuzz/ui"
+import { defaultSeason, formatSeasonLabel } from "@swimbuzz/shared"
 import { spacing } from "@swimbuzz/tokens"
 import { api } from "../../../src/lib/api"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
@@ -37,7 +38,7 @@ export default function NewAthleteScreen() {
           const list = await api.listSeasons()
           if (cancelled) return
           setSeasons(list)
-          setSeason((prev) => prev || list[0] || "")
+          setSeason((prev) => prev || defaultSeason(list) || "")
         } catch {
           // Season can still be typed manually.
         }
@@ -58,7 +59,7 @@ export default function NewAthleteScreen() {
       return
     }
     if (!seasonLabel) {
-      Alert.alert("Season required", "Enter a season like 2025-2026.")
+      Alert.alert("Season required", "Enter a season like 2025–2026.")
       return
     }
 
@@ -135,7 +136,7 @@ export default function NewAthleteScreen() {
           label="Season"
           value={season}
           onChangeText={setSeason}
-          placeholder="2025-2026"
+          placeholder="2025–2026"
           autoCapitalize="none"
           autoCorrect={false}
         />
@@ -150,7 +151,7 @@ export default function NewAthleteScreen() {
             {seasons.map((s) => (
               <Chip
                 key={s}
-                label={s}
+                label={formatSeasonLabel(s)}
                 selected={season === s}
                 onPress={() => setSeason(s)}
               />

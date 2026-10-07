@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { applySwimphoneImportJob } from "../route"
 import { MeetImportValidationError } from "@/lib/meet/meet-import-validate"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 
 export const runtime = "nodejs"
 export const maxDuration = 300

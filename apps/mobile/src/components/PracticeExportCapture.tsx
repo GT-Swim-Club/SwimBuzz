@@ -7,7 +7,7 @@ import {
   isHtmlEmpty,
   type PracticeShareSet,
 } from "@swimbuzz/shared"
-import { Chip, usePalette } from "@swimbuzz/ui"
+import { usePalette } from "@swimbuzz/ui"
 import { spacing, radii } from "@swimbuzz/tokens"
 import { Icon } from "./Icon"
 import { FormattedText } from "./FormattedText"
@@ -58,37 +58,40 @@ export const PracticeExportCapture = forwardRef<
           ) : null}
         </View>
         <View style={styles.metaRow}>
-          <Icon name="calendar" size={16} color={c.textSecondary} />
+          <Icon name="calendar" size={17} color={c.textSecondary} />
           <Text style={styles.metaText}>
             {range.date} · {range.time} {range.abbrev}
           </Text>
+          {location ? (
+            <>
+              <View style={styles.metaGap} />
+              <Icon name="mapPin" size={17} color={c.textSecondary} />
+              <Text style={styles.metaText}>{location}</Text>
+            </>
+          ) : null}
         </View>
-        {location || totalDistance > 0 ? (
+        {tags.length > 0 || totalDistance > 0 ? (
           <View style={styles.metaRow}>
-            {location ? (
+            {totalDistance > 0 ? (
               <>
-                <Icon name="mapPin" size={16} color={c.textSecondary} />
-                <Text style={styles.metaText}>{location}</Text>
+                <Icon name="waves" size={17} color={c.textSecondary} />
+                <Text style={styles.metaText}>{formatPracticeDistance(totalDistance, course)}</Text>
               </>
             ) : null}
-            {location && totalDistance > 0 ? <Text style={styles.metaText}>·</Text> : null}
-            {totalDistance > 0 ? (
-              <Text style={styles.metaText}>{formatPracticeDistance(totalDistance, course)}</Text>
+            {tags.length > 0 ? (
+              <>
+                {totalDistance > 0 ? <View style={styles.metaGap} /> : null}
+                <Icon name="tag" size={17} color={c.textSecondary} />
+                <Text style={styles.metaText}>{tags.join(", ")}</Text>
+              </>
             ) : null}
           </View>
         ) : null}
       </View>
 
-      {hasFocus || tags.length > 0 ? (
+      {hasFocus && focus ? (
         <View style={styles.focusBlock}>
-          {hasFocus && focus ? <FormattedText html={focus} style={styles.focusText} /> : null}
-          {tags.length > 0 ? (
-            <View style={[styles.tagRow, hasFocus && styles.tagRowSpaced]}>
-              {tags.map((tag) => (
-                <Chip key={tag} label={tag} selected />
-              ))}
-            </View>
-          ) : null}
+          <FormattedText html={focus} style={styles.focusText} />
         </View>
       ) : null}
 
@@ -130,7 +133,7 @@ function makeStyles(c: ReturnType<typeof usePalette>) {
       gap: spacing.sm,
     },
     title: {
-      fontSize: 34,
+      fontSize: 38,
       fontWeight: "700",
       color: c.text,
     },
@@ -152,8 +155,11 @@ function makeStyles(c: ReturnType<typeof usePalette>) {
       alignItems: "center",
       gap: spacing.xs,
     },
+    metaGap: {
+      width: spacing.xxs,
+    },
     metaText: {
-      fontSize: 16,
+      fontSize: 17,
       color: c.textSecondary,
     },
     focusBlock: {
@@ -166,14 +172,6 @@ function makeStyles(c: ReturnType<typeof usePalette>) {
     focusText: {
       fontSize: 16,
       color: c.text,
-    },
-    tagRow: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      gap: spacing.xs,
-    },
-    tagRowSpaced: {
-      marginTop: spacing.sm,
     },
     setsBlock: {
       borderRadius: radii.lg,

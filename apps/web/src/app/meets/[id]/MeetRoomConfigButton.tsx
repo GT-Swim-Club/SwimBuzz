@@ -11,7 +11,7 @@ import {
 } from "@/lib/meet/meet-signup"
 import { toDateInput, toTimeInput } from "@/lib/date-input"
 import { DEFAULT_TIME_ZONE, zonedTimeToUtc } from "@swimbuzz/shared"
-import { saveMeetRoomConfig } from "./MeetRoomConfigButton.actions"
+import { saveMeetRoomConfig } from "./meet-rooms.actions"
 
 function fromDateTimeParts(date: string, time: string, timeZone: string): string | null {
   const datePart = date.trim()

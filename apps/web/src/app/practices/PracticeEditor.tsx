@@ -12,6 +12,7 @@ import { ATHLETE_VIEW_ENABLING_EVENT } from "@/lib/athlete/athlete-view"
 import { practicePath } from "@/lib/slug"
 import { MAX_PRACTICE_SETS } from "@/lib/practice/practice-input"
 import InfoIcon from "@/components/ui/InfoIcon"
+import PracticeTagSelect from "./PracticeTagSelect"
 import ActionIcon from "@/components/ui/ActionIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
@@ -1346,6 +1347,11 @@ export default function PracticeEditor({
               <option value="SCM">SCM</option>
             </select>
           </div>
+
+          <div className="flex min-w-0 items-center gap-1.5">
+            <InfoIcon kind="tag" />
+            <PracticeTagSelect value={form.tags} availableTags={availableTags} onToggle={toggleTag} />
+          </div>
         </div>
       </header>
 
@@ -1361,34 +1367,6 @@ export default function PracticeEditor({
             className="bg-background"
             externalHistory
           />
-        </div>
-
-        <div aria-labelledby="practice-tags-heading" className="mt-3 space-y-2">
-          <h2 id="practice-tags-heading" className={labelCls}>Tags</h2>
-          {availableTags.length > 0 ? (
-            <div className="flex flex-wrap gap-1.5">
-              {availableTags.map((tag) => {
-                const active = form.tags.includes(tag)
-                return (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => toggleTag(tag)}
-                    className={
-                      "rounded-full border px-2.5 py-1 text-xs transition-colors " +
-                      (active
-                        ? "border-primary bg-primary text-primary-text"
-                        : "border-border-secondary text-foreground-secondary hover:bg-fill-secondary")
-                    }
-                  >
-                    {tag}
-                  </button>
-                )
-              })}
-            </div>
-          ) : (
-            <p className="text-xs text-foreground-tertiary">No shared tags have been added yet. Manage tags from the Practices page.</p>
-          )}
         </div>
       </section>
       <section ref={setsSectionRef} className="rounded-2xl border border-border bg-background shadow-sm">

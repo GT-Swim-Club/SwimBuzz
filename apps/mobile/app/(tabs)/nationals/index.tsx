@@ -2,7 +2,7 @@ import { useMemo, useState } from "react"
 import { Pressable, StyleSheet, Text, View } from "react-native"
 import { useRouter } from "expo-router"
 import { useQuery } from "@tanstack/react-query"
-import { athletePreferredName, formatTime } from "@swimbuzz/shared"
+import { athletePreferredName, defaultSeason, formatSeasonLabel, formatTime } from "@swimbuzz/shared"
 import { EmptyState, ErrorBlock, LoadingBlock, Muted, Screen, ScrollView, TextField, usePalette } from "@swimbuzz/ui"
 import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
 import { api } from "../../../src/lib/api"
@@ -72,7 +72,7 @@ export default function NationalsScreen() {
     queryKey: ["seasons"],
     queryFn: () => api.listSeasons(),
   })
-  const season = seasonState ?? seasons[0] ?? null
+  const season = seasonState ?? defaultSeason(seasons) ?? null
 
   const {
     data: qualifiersData,
@@ -165,7 +165,7 @@ export default function NationalsScreen() {
                     ]}
                   >
                     <Text style={[styles.seasonText, selected && styles.seasonTextSelected]}>
-                      {label}
+                      {formatSeasonLabel(label)}
                     </Text>
                   </Pressable>
                 )
@@ -214,7 +214,7 @@ export default function NationalsScreen() {
               </View>
               <View style={styles.summaryRule} />
               <View style={styles.summaryCopy}>
-                <Text style={styles.summaryTitle}>{season ?? "Current season"}</Text>
+                <Text style={styles.summaryTitle}>{season ? formatSeasonLabel(season) : "Current season"}</Text>
                 <Text style={styles.summaryDetail}>{course} qualifying cuts</Text>
               </View>
             </View>
@@ -332,7 +332,7 @@ export default function NationalsScreen() {
             {cuts.length === 0 ? (
               <EmptyState
                 title="No standards yet"
-                body={season ? `No ${course} cuts found for ${season}.` : "Pick a season to view cuts."}
+                body={season ? `No ${course} cuts found for ${formatSeasonLabel(season)}.` : "Pick a season to view cuts."}
               />
             ) : (
               cutsByGender.map(([gender, rows]) => (

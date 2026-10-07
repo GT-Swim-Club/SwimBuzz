@@ -25,7 +25,7 @@ import {
 import { Gender } from "@prisma/client"
 import { syncRelayLeadoffSwim, deleteRelayLeadoffSwim } from "@/lib/meet/relay-leadoff-sync"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 
 /** Shared with POST/DELETE /api/meets/[id]/relays — same logic, kept in sync
  * manually since the route can't be refactored without risking the

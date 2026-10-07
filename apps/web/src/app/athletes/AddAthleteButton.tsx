@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react"
 import { useSearchParams } from "next/navigation"
 import { currentSeason, parseSeason } from "@/lib/season"
+import { formatSeasonLabel } from "@swimbuzz/shared"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import NicknameTagsInput from "@/components/athlete/NicknameTagsInput"
 import {
@@ -90,7 +91,7 @@ export default function AddAthleteButton() {
         onClose={() => setOpen(false)}
         closeDisabled={loading}
         title="Add athlete"
-        description={`Adds to the ${gender === "F" ? "Women" : "Men"} ${season} roster.`}
+        description={`Adds to the ${gender === "F" ? "Women" : "Men"} ${formatSeasonLabel(season)} roster.`}
         maxWidth="md"
         onSubmit={handleSubmit}
         footer={

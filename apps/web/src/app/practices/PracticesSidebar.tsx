@@ -7,15 +7,18 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
+  type MouseEvent,
   type ReactNode,
 } from "react"
 import { usePathname, useSearchParams } from "next/navigation"
 import { usePracticePrefs } from "./usePracticePrefs"
 import HoverDetail from "@/components/ui/HoverDetail"
+import { ATHLETE_VIEW_ENABLING_EVENT } from "@/lib/athlete/athlete-view"
 import PracticesToolbar from "./PracticesToolbar"
 import WeekRail from "./WeekRail"
 import PracticeListRail from "./PracticeListRail"
 import DeletedPracticeListRail from "./DeletedPracticeListRail"
+import PracticeViewSkeleton from "./[id]/PracticeViewSkeleton"
 import {
   buildWorkspaceHref,
   formatDayParam,
@@ -125,6 +128,35 @@ export default function PracticesSidebar({
   // menu, not a layout preference.
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
+  // The detail page has no Suspense boundary of its own (so a cold load
+  // reveals sidebar + detail together), which means a client navigation to
+  // another practice would leave the old one on screen until the new payload
+  // lands. Track the clicked practice link and skeleton the pane meanwhile;
+  // cleared on the pathname change below.
+  const [pendingPracticePath, setPendingPracticePath] = useState<string | null>(null)
+
+  // Switching into Athlete View while a draft/trashed practice is open makes
+  // PracticeDetailLoader redirect to /practices — skeleton the pane for that
+  // navigation too, rather than leaving the hidden practice up until it lands.
+  // Cleared on the pathname change below, same as pendingPracticePath.
+  const [athleteViewRedirectPending, setAthleteViewRedirectPending] = useState(false)
+  const openSlug = /^\/practices\/[^/]+$/.test(pathname)
+    ? decodeURIComponent(pathname.replace(/^\/practices\//, ""))
+    : null
+  const openPractice = openSlug ? practices.find((p) => (p.slug ?? p.id) === openSlug) : undefined
+  const openHiddenFromAthletes =
+    openSlug != null &&
+    (openPractice
+      ? !openPractice.published
+      : deletedPractices.some((p) => (p.slug ?? p.id) === openSlug))
+
+  useEffect(() => {
+    if (!openHiddenFromAthletes) return
+    const onEnabling = () => setAthleteViewRedirectPending(true)
+    window.addEventListener(ATHLETE_VIEW_ENABLING_EVENT, onEnabling)
+    return () => window.removeEventListener(ATHLETE_VIEW_ENABLING_EVENT, onEnabling)
+  }, [openHiddenFromAthletes])
+
   // Close the drawer on navigation (e.g. tapping a practice in the list)
   // rather than in an effect, so it never lingers visible for a frame over
   // the newly-loaded route. Same adjust-during-render pattern as the tags/week
@@ -133,6 +165,8 @@ export default function PracticesSidebar({
   if (pathname !== prevMobilePathname) {
     setPrevMobilePathname(pathname)
     if (mobileSidebarOpen) setMobileSidebarOpen(false)
+    if (pendingPracticePath) setPendingPracticePath(null)
+    if (athleteViewRedirectPending) setAthleteViewRedirectPending(false)
   }
 
   // Resizing (or rotating) past the desktop breakpoint while the drawer is
@@ -213,8 +247,25 @@ export default function PracticesSidebar({
     }
   }, [isDesktop])
 
+  function handleClickCapture(event: MouseEvent<HTMLDivElement>) {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+    const anchor = (event.target as Element).closest("a")
+    if (!anchor || (anchor.target && anchor.target !== "_self")) return
+    const url = new URL(anchor.href, window.location.href)
+    if (url.origin !== window.location.origin) return
+    if (!/^\/practices\/[^/]+$/.test(url.pathname) || url.pathname === "/practices/new") return
+    if (url.pathname === pathname) return
+    setPendingPracticePath(url.pathname)
+  }
+
+  // Highlight a clicked practice right away rather than once its detail lands.
+  // Bare /practices renders the most recent practice (practices is ordered the
+  // same way as that page's query), so select it before the URL catches up.
+  const selectedPath = pendingPracticePath ?? pathname
   const selectedSlug =
-    pathname === "/practices" ? undefined : decodeURIComponent(pathname.replace(/^\/practices\//, ""))
+    selectedPath === "/practices"
+      ? practices[0] && (practices[0].slug ?? practices[0].id)
+      : decodeURIComponent(selectedPath.replace(/^\/practices\//, ""))
   const selectedDayKey = selectedSlug
     ? practices.find((p) => (p.slug ?? p.id) === selectedSlug)?.dayKey
     : undefined
@@ -447,6 +498,7 @@ export default function PracticesSidebar({
   return (
     <div
       ref={containerRef}
+      onClickCapture={handleClickCapture}
       className="flex w-full flex-1 flex-col gap-4 md:grid md:items-stretch md:gap-5"
       style={gridStyle}
     >
@@ -498,7 +550,9 @@ export default function PracticesSidebar({
           <SidebarIcon />
           Practices
         </button>
-        {children}
+        {(pendingPracticePath || athleteViewRedirectPending) && <PracticeViewSkeleton />}
+        {/* Kept mounted (just hidden) so the in-flight router transition isn't disturbed. */}
+        <div className={pendingPracticePath || athleteViewRedirectPending ? "hidden" : "contents"}>{children}</div>
       </div>
 
       {!isDesktop && mobileSidebarOpen ? (

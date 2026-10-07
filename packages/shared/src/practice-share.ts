@@ -85,30 +85,31 @@ export function practiceShareUrl(origin: string, slugOrId: string): string {
 export function practiceShareText(input: PracticeShareInput): string {
   const lines: string[] = [input.title]
 
+  // Header rows mirror the practice page: date/time + location, then distance + tags,
+  // with emoji standing in for the page's icons.
   const range = formatZonedInstantRange(input.startsAt, input.endsAt, input.timeZone)
-  const dateTimeLine = range.crossesDay
+  const dateTimeText = range.crossesDay
     ? `${range.dateTime} ${range.abbrev}`
     : `${range.date} · ${range.time} ${range.abbrev}`
-  if (dateTimeLine) lines.push(dateTimeLine)
-  if (input.location) lines.push(input.location)
+  const firstRow = [
+    dateTimeText.trim() ? `📅 ${dateTimeText}` : null,
+    input.location ? `📍 ${input.location}` : null,
+  ].filter(Boolean)
+  if (firstRow.length > 0) lines.push(firstRow.join(" "))
 
-  const hasFocus = Boolean(input.focus && !isHtmlEmpty(input.focus))
-  if (hasFocus) {
+  const secondRow = [
+    input.totalDistance > 0 ? `🌊 ${formatPracticeDistance(input.totalDistance, input.course)}` : null,
+    input.tags.length > 0 ? `🏷️ ${input.tags.join(", ")}` : null,
+  ].filter(Boolean)
+  if (secondRow.length > 0) lines.push(secondRow.join(" "))
+
+  if (input.focus && !isHtmlEmpty(input.focus)) {
     lines.push("", htmlToPlainText(input.focus))
-  }
-
-  if (input.tags.length > 0) {
-    const tagsLine = input.tags.map((tag) => `#${tag}`).join(" ")
-    lines.push(...(hasFocus ? [tagsLine] : ["", tagsLine]))
   }
 
   for (const set of input.sets) {
     const heading = set.distance != null ? `${set.title || "Set"} (${set.distance})` : set.title || "Set"
     lines.push("", heading, htmlToPlainText(set.content))
-  }
-
-  if (input.totalDistance > 0) {
-    lines.push("", `Total: ${formatPracticeDistance(input.totalDistance, input.course)}`)
   }
 
   return lines.join("\n").trim()

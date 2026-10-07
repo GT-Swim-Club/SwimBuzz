@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { parseSeason } from "@/lib/season"
 import { parseRosterRecords } from "@/lib/roster/roster-csv"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 import { runRosterImport } from "@/lib/roster/roster-import"
 import {
   listSheetTabs,
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "A picked Google Sheet is required" }, { status: 400 })
   }
   if (!season) {
-    return NextResponse.json({ error: "Season is required (e.g. 2025-2026)" }, { status: 400 })
+    return NextResponse.json({ error: "Season is required (e.g. 2025–2026)" }, { status: 400 })
   }
 
   let tabTitle: string

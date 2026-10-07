@@ -17,7 +17,7 @@ import { coerceParsedRelayResults } from "@/lib/meet/relay-results"
 import { ScraperJobStatus, ScraperJobType } from "@prisma/client"
 import { notifyMeetRosterOfInfoDrops } from "@/lib/meet/meet-roster-notify"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 
 export const runtime = "nodejs"
 export const maxDuration = 300
@@ -104,7 +104,7 @@ export async function POST(req: Request) {
 
   const season = parseSeason(meet?.season ?? seasonRaw ?? year)
   if (!season) {
-    return NextResponse.json({ error: "Season is required (e.g. 2025-2026)" }, { status: 400 })
+    return NextResponse.json({ error: "Season is required (e.g. 2025–2026)" }, { status: 400 })
   }
 
   const applyContext: SwimphoneApplyContext = {

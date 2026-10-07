@@ -8,7 +8,7 @@ import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import { useScraperUi } from "@/components/scraper/ScraperUiProvider"
 import { parseTime, formatRelativeTime, formatDateTime } from "@/lib/utils"
 import SetSwimCloudIdForm from "@/components/athlete/SetSwimCloudIdForm"
-import { addAthleteSwim } from "./AddSwimForm.actions"
+import { addAthleteSwim } from "./athlete.actions"
 
 const EVENTS = [
   "50 Free", "100 Free", "200 Free", "400 Free", "500 Free",

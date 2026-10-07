@@ -3,7 +3,7 @@ import { useState, useTransition } from "react"
 import HoverDetail from "@/components/ui/HoverDetail"
 import { AppIcon } from "@/components/ui/AppIcon"
 import { SegmentedToggle, segmentedIconOptionClass } from "@/components/ui/SegmentedToggle"
-import { updateViewPreference } from "./ViewPreferencesSettings.actions"
+import { updateViewPreference } from "./settings.actions"
 
 export default function ViewPreferencesSettings({ 
   defaultView,

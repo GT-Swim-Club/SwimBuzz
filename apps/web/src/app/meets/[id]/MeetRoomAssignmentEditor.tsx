@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type DragEvent } from "react"
 import type { MeetSignupQuestion } from "@/lib/meet/meet-signup"
 import { formatRoomLabel } from "@/lib/meet/meet-rooms"
-import { saveRoomAssignments, toggleRoomPublish } from "./MeetRoomAssignmentEditor.actions"
+import { saveRoomAssignments, toggleRoomPublish } from "./meet-rooms.actions"
 
 type AthleteOption = { id: string; name: string; gender: "M" | "F" }
 

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache"
 import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { normalizeNicknames } from "@/lib/athlete/athlete-match"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 import {
   clearPendingFields,
   mergePendingProfileChanges,

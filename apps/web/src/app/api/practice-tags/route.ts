@@ -1,6 +1,6 @@
 import { NextResponse as ServerResponse } from "next/server"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 import { prisma } from "@/lib/prisma"
 import { listManagedPracticeTags } from "@/lib/practice/practice-tag-catalog"
 import { normalizeTag, PRACTICE_TAG_MAX_COUNT, PRACTICE_TAG_NAME_MAX_LENGTH } from "@/lib/practice/practice-tags"

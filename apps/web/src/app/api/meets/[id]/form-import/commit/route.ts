@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 import { isColumnMappingValid } from "@/lib/roster/form-import-columns"
 import { loadFormImportRoster, matchImportRow, type FormImportRosterContext, type ImportRowMatch } from "@/lib/roster/form-import-match"
 import { normalizeMeetSignupQuestions, resolveSignupEventOptions } from "@/lib/meet/meet-signup"

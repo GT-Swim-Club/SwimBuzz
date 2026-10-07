@@ -1,4 +1,9 @@
-const SEASON_RE = /^(\d{4})-(\d{4})$/
+import { currentSeason, defaultSeason } from "@swimbuzz/shared"
+
+export { currentSeason, seasonFromDate } from "@swimbuzz/shared"
+
+// Accepts an en/em dash too, so a displayed "2025–2026" typed back in still parses.
+const SEASON_RE = /^(\d{4})\s*[-–—]\s*(\d{4})$/
 
 /** e.g. 2026 → "2025-2026" (legacy end-year storage). */
 export function endYearToSeason(endYear: number): string {
@@ -30,32 +35,9 @@ export function parseSeason(value: unknown): string | null {
   return null
 }
 
-/** Club season runs Sep–Aug; infer from a "YYYY-MM-DD" day key (zoned or UTC, caller's choice). */
-export function seasonFromDate(dayKey: string): string {
-  const [yearStr, monthStr] = dayKey.split("-")
-  const year = parseInt(yearStr ?? "", 10)
-  const month = parseInt(monthStr ?? "", 10) - 1
-  if (month >= 8) return `${year}-${year + 1}`
-  return `${year - 1}-${year}`
-}
-
-export function upcomingSeason(): string {
-  const date = new Date()
-  const year = date.getUTCFullYear()
-  const month = date.getUTCMonth()
-  // Up to and including Sep (month 8), upcoming is this year-next.
-  if (month <= 8) return `${year}-${year + 1}`
-  // Oct or later, upcoming is next year-next+1.
-  return `${year + 1}-${year + 2}`
-}
-
-export function currentSeason(): string {
-  return seasonFromDate(new Date().toISOString().slice(0, 10))
-}
-
 /**
  * Prefer a requested season if it exists in `seasons` (latest-first).
- * Otherwise use the latest listed season, then the calendar season.
+ * Otherwise use the running season if listed, then the latest listed, then the calendar season.
  */
 export function resolveListedSeason(
   requested: unknown,
@@ -64,7 +46,7 @@ export function resolveListedSeason(
 ): string {
   const parsed = parseSeason(requested)
   if (parsed && seasons.includes(parsed)) return parsed
-  return seasons[0] ?? fallback
+  return defaultSeason(seasons) ?? fallback
 }
 
 /** Recent seasons for dropdowns, most recent first. */

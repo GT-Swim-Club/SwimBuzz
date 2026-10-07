@@ -10,7 +10,7 @@ import {
   SWIMCLOUD_ID_ERROR,
   SWIMCLOUD_ID_MAX_LENGTH,
 } from "@/lib/swim/swimcloud-id"
-import { updateAthlete, deleteAthlete } from "./AthleteActions.actions"
+import { updateAthlete, deleteAthlete } from "./athlete.actions"
 
 type AthleteActionsProps = {
   athleteId: string

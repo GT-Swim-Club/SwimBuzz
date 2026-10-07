@@ -9,7 +9,7 @@ import {
   notifyMeetRosterOfInfoDrops } from "@/lib/meet/meet-roster-notify"
 import { uniqueMeetSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 
 export const runtime = "nodejs"
 export const maxDuration = 300

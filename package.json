@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "turbo run dev --filter=@swimbuzz/web",
     "dev:web": "turbo run dev --filter=@swimbuzz/web",
-    "dev:mobile": "turbo run start --filter=@swimbuzz/mobile",
+    "dev:mobile": "pnpm --filter @swimbuzz/mobile start",
     "build": "turbo run build",
     "build:web": "turbo run build --filter=@swimbuzz/web",
     "lint": "turbo run lint",

@@ -4,6 +4,7 @@ import type { ReactNode } from "react"
 import { useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { currentSeason, parseSeason } from "@/lib/season"
+import { formatSeasonLabel } from "@swimbuzz/shared"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { useResultsImport } from "@/components/meet/useResultsImport"
 import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/ui/FileDropzone"
@@ -141,7 +142,7 @@ export default function ImportMeetButton({
         open={open}
         onClose={() => setOpen(false)}
         title="Import SwimPhone and/or PDF Results"
-        description={`${team.trim() || "Your team code's"} results will be matched to the ${season} roster.`}
+        description={`${team.trim() || "Your team code's"} results will be matched to the ${formatSeasonLabel(season)} roster.`}
         onSubmit={handleSubmit}
         footer={
           <ModalFooter>

@@ -6,7 +6,7 @@ import { isValidSignupEntryTime } from "@/lib/meet/meet-signup"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/ui/SegmentedToggle"
 import { normalizeEventName } from "@/lib/swim/swim-parse"
-import { addIndividualSheetEntry, upsertRelayEntry } from "./AddEntryButton.actions"
+import { addIndividualSheetEntry, upsertRelayEntry } from "./meet-entries.actions"
 
 const RELAY_EVENTS = [
   "200 Medley Relay",

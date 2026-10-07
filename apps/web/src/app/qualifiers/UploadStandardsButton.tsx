@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { useImportTask } from "@/components/ui/ImportTaskProvider"
 import { currentSeason } from "@/lib/season"
+import { formatSeasonLabel } from "@swimbuzz/shared"
 import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/ui/FileDropzone"
 
 type Source = "pdf" | "url"
@@ -192,7 +193,7 @@ export default function UploadStandardsButton({
             >
               {fetchedSeasons.map((s) => (
                 <option key={s} value={s}>
-                  {s}
+                  {formatSeasonLabel(s)}
                 </option>
               ))}
             </select>

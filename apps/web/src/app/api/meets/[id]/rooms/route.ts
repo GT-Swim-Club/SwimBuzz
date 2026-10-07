@@ -3,13 +3,12 @@ import { prisma } from "@/lib/prisma"
 import { normalizeMeetSignupQuestions } from "@/lib/meet/meet-signup"
 import { Prisma } from "@prisma/client"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
 import {
   loadMeetRoomContext,
   parseOptionalDate,
   resolveLinkedAthleteId,
   serializeRoomForm } from "./_shared"
-import { DEFAULT_TIME_ZONE, isValidTimeZone } from "@swimbuzz/shared"
+import { DEFAULT_TIME_ZONE, isValidTimeZone, isStaffRole } from "@swimbuzz/shared"
 
 export async function GET(
   _req: Request,

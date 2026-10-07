@@ -5,7 +5,7 @@ import { formatDisplayTime, formatTime } from "@/lib/utils"
 import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
 import { canonicalizeStrokeEvent } from "@/lib/swim/swim-parse"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 
 function parseCourse(raw: string | null): Course | null {
   const upper = (raw ?? "").trim().toUpperCase()

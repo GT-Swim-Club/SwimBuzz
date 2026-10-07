@@ -6,7 +6,7 @@ import { parseSeasonList } from "@/lib/season"
 import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
 import { uniqueAthleteSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 
 export async function GET() {
   const session = await getSession()
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "First name, last name, and email are required" }, { status: 400 })
   }
   if (seasons.length === 0) {
-    return NextResponse.json({ error: "Season is required (e.g. 2025-2026)" }, { status: 400 })
+    return NextResponse.json({ error: "Season is required (e.g. 2025–2026)" }, { status: 400 })
   }
   if (!swimCloudIdEmpty && swimCloudId === null) {
     return NextResponse.json({ error: SWIMCLOUD_ID_ERROR }, { status: 400 })

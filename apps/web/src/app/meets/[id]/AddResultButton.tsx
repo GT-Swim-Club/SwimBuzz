@@ -7,8 +7,8 @@ import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/ui/SegmentedToggle"
 import { DatePicker } from "@/components/ui/CustomDateTimePicker"
 import { normalizeEventName } from "@/lib/swim/swim-parse"
-import { addMeetSwim } from "./AddMeetSwimButton.actions"
-import { upsertRelayEntry } from "./AddEntryButton.actions"
+import { addMeetSwim } from "./meet-swims.actions"
+import { upsertRelayEntry } from "./meet-entries.actions"
 
 const INDIVIDUAL_EVENTS = [
   "50 Free", "100 Free", "200 Free", "400 Free", "500 Free", "1000 Free", "1650 Free",

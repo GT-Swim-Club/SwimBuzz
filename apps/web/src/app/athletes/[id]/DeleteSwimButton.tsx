@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from "react"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import ActionIcon from "@/components/ui/ActionIcon"
-import { deleteAthleteSwim } from "./DeleteSwimButton.actions"
+import { deleteAthleteSwim } from "./athlete.actions"
 
 type DeleteSwimButtonProps = {
   swimId: string

@@ -3,11 +3,16 @@ import { prisma } from "@/lib/prisma"
 import { isStaffUi } from "@/lib/athlete/athlete-view-server"
 import { getSession } from "@/lib/auth/session"
 import { practicePath } from "@/lib/slug"
+import PracticeDetailLoader from "./PracticeDetailLoader"
+import ReplaceUrl from "./ReplaceUrl"
 
-// Bare /practices has no practice of its own to show, so it redirects to the
-// most recently started practice. If there truly are none, render the empty
-// state here directly — PracticesSidebar always mounts `children`, so this is
-// the only place a redirect (or fallback UI) for the bare route can live.
+// Bare /practices has no practice of its own, so it shows the most recently
+// started practice. It renders that practice in place (then swaps the URL to
+// its canonical path) rather than redirect()ing: the layout has already
+// streamed by then, so a redirect would land client-side, revealing the
+// sidebar next to an empty pane and only then loading the detail. If there
+// truly are none, render the empty state here directly — PracticesSidebar
+// always mounts `children`, so this is the only place it can live.
 export default async function PracticesIndexPage() {
   const session = await getSession()
   if (!session) redirect("/signin?callbackUrl=/practices")
@@ -20,7 +25,15 @@ export default async function PracticesIndexPage() {
     select: { slug: true, id: true },
   })
 
-  if (mostRecent) redirect(practicePath(mostRecent.slug ?? mostRecent.id))
+  if (mostRecent) {
+    const param = mostRecent.slug ?? mostRecent.id
+    return (
+      <>
+        <ReplaceUrl path={practicePath(param)} />
+        <PracticeDetailLoader param={param} />
+      </>
+    )
+  }
 
   const message = isCoach ? "No practices yet. Create one to get started." : "No practices posted yet."
   return (

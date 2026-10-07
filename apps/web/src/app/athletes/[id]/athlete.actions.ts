@@ -3,15 +3,18 @@
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { normalizeNicknames } from "@/lib/athlete/athlete-match"
-import { isStaffRole } from "@/lib/auth/auth-roles"
-import { Prisma } from "@prisma/client"
+import { isStaffRole } from "@swimbuzz/shared"
+import { Prisma, type Course } from "@prisma/client"
 import {
   clearPendingFields,
-  parsePendingProfileChanges } from "@/lib/athlete/pending-profile-changes"
+  parsePendingProfileChanges,
+} from "@/lib/athlete/pending-profile-changes"
 import { syncProfileChangeRequestNotifications } from "@/lib/notifications/notifications"
 import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
 import { uniqueAthleteSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
+import { normalizeSwimForInsert, nextSwimOccurrence } from "@/lib/swim/swim-dedup"
+import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
 
 export type UpdateAthleteInput = {
   firstName?: string
@@ -148,5 +151,77 @@ export async function deleteAthlete(athleteId: string) {
   })
 
   revalidatePath("/athletes")
+  return { ok: true }
+}
+
+export type AddAthleteSwimInput = {
+  athleteId: string
+  event: string
+  course: string
+  date: string
+  meet?: string
+  timeMs: number
+}
+
+/** Same logic as POST /api/swims (used by both web and mobile) — kept in
+ * sync manually since the route can't be refactored without risking the
+ * mobile-facing contract. */
+export async function addAthleteSwim(input: AddAthleteSwimInput) {
+  const session = await getSession()
+  if (!session || !isStaffRole(session.user.role)) {
+    throw new Error("Forbidden")
+  }
+
+  const { athleteId, event, timeMs, course, date } = input
+  if (!athleteId || !event || !Number.isFinite(timeMs) || !course || !date) {
+    throw new Error("Missing required swim fields")
+  }
+
+  const base = normalizeSwimForInsert({
+    athleteId,
+    event,
+    timeMs,
+    course: course as Course,
+    date,
+    source: "manual",
+    meet: input.meet})
+
+  let occurrence = await nextSwimOccurrence(prisma, base)
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      const created = await prisma.swim.create({ data: { ...base, occurrence } })
+      revalidatePath("/athletes/[id]", "page")
+      return created
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+        occurrence++
+        continue
+      }
+      throw err
+    }
+  }
+
+  throw new Error("Could not save swim — too many matching duplicates")
+}
+
+/** Same logic as DELETE /api/swims/[id]. */
+export async function deleteAthleteSwim(swimId: string) {
+  const session = await getSession()
+  if (!session || !isStaffRole(session.user.role)) {
+    throw new Error("Forbidden")
+  }
+
+  const swim = await prisma.swim.findUnique({ where: { id: swimId } })
+  if (!swim) throw new Error("Not found")
+  if (swim.source !== "manual") {
+    throw new Error("Only manually logged swims can be deleted")
+  }
+  if (isRelayLeadoffSwimTag(swim.tags)) {
+    throw new Error("Relay leadoff swims can only be edited through the relay")
+  }
+
+  await prisma.swim.delete({ where: { id: swimId } })
+  revalidatePath("/athletes/[id]", "page")
   return { ok: true }
 }

@@ -3,15 +3,11 @@
 import BannerCropper from "@/components/athlete/BannerCropper"
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react"
 import { createPortal } from "react-dom"
-import { upcomingSeason } from "@/lib/season"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
-import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { TimePicker, TimeZonePicker } from "@/components/ui/CustomDateTimePicker"
 import { FileDropzone } from "@/components/ui/FileDropzone"
 import { AppIcon } from "@/components/ui/AppIcon"
-import { useSession } from "next-auth/react"
-import { isStaffRole } from "@/lib/auth/auth-roles"
-import { DEFAULT_TIME_ZONE, formatClockTime, zoneAbbreviation } from "@swimbuzz/shared"
+import { DEFAULT_TIME_ZONE, defaultSeason, formatClockTime, formatSeasonLabel, zoneAbbreviation } from "@swimbuzz/shared"
 
 export type MeetFormState = {
   name: string
@@ -476,16 +472,10 @@ export default function MeetFields({
   setForm: React.Dispatch<React.SetStateAction<MeetFormState>>
   initialSeasons?: string[]
 }) {
-  const { data: session } = useSession()
   const [calendarOpen, setCalendarOpen] = useState(false)
   const whenButtonRef = useRef<HTMLButtonElement>(null)
   const closeCalendar = useCallback(() => setCalendarOpen(false), [])
   const [fetchedSeasons, setFetchedSeasons] = useState<string[]>(initialSeasons ?? [])
-
-  const [addSeasonModalOpen, setAddSeasonModalOpen] = useState(false)
-  const upcoming = upcomingSeason()
-  const [addingSeason, setAddingSeason] = useState(false)
-  const [addSeasonError, setAddSeasonError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!initialSeasons) {
@@ -503,7 +493,7 @@ export default function MeetFields({
 
   useEffect(() => {
     if (fetchedSeasons.length > 0 && !form.season) {
-      setForm((f) => ({ ...f, season: fetchedSeasons[0] }))
+      setForm((f) => ({ ...f, season: defaultSeason(fetchedSeasons) ?? "" }))
     }
   }, [fetchedSeasons, form.season, setForm])
 
@@ -511,32 +501,6 @@ export default function MeetFields({
 
   const set = <K extends keyof MeetFormState>(key: K, value: MeetFormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }))
-
-
-  async function handleAddSeason(e: React.FormEvent) {
-    e.preventDefault()
-    setAddingSeason(true)
-    setAddSeasonError(null)
-
-    try {
-      const res = await fetch("/api/seasons", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ label: upcoming }),
-      })
-
-      if (!res.ok) {
-        const data = await res.json()
-        setAddSeasonError(data.error || "Failed to add season")
-        return
-      }
-      setFetchedSeasons((prev) => [...prev, upcoming])
-      set("season", upcoming)
-      setAddSeasonModalOpen(false)
-    } finally {
-      setAddingSeason(false)
-    }
-  }
 
   const when = whenLabel(form)
 
@@ -642,23 +606,14 @@ export default function MeetFields({
             <select
               required
               value={form.season}
-              onChange={(e) => {
-                if (e.target.value === "ADD_NEW") {
-                  setAddSeasonModalOpen(true)
-                } else {
-                  set("season", e.target.value)
-                }
-              }}
+              onChange={(e) => set("season", e.target.value)}
               className={`${inputClass} appearance-none pr-9`}
             >
               {options.map((s) => (
                 <option key={s} value={s}>
-                  {s}
+                  {formatSeasonLabel(s)}
                 </option>
               ))}
-              {isStaffRole(session?.user?.role ?? "") && !fetchedSeasons.includes(upcoming) && (
-                <option value="ADD_NEW">+ New Season</option>
-              )}
             </select>
             <AppIcon
               name="chevronDown"
@@ -667,60 +622,6 @@ export default function MeetFields({
           </div>
         </div>
       </div>
-
-      <Modal
-        open={addSeasonModalOpen}
-        onClose={() => {
-          setAddSeasonModalOpen(false)
-          setAddSeasonError(null)
-        }}
-        title="Add new season"
-        maxWidth="sm"
-        onSubmit={handleAddSeason}
-        footer={
-          <ModalFooter>
-            {fetchedSeasons.includes(upcoming) ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setAddSeasonModalOpen(false)
-                  setAddSeasonError(null)
-                }}
-                className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium bg-fill-secondary"
-              >
-                Close
-              </button>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAddSeasonModalOpen(false)
-                    setAddSeasonError(null)
-                  }}
-                  className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium bg-fill-secondary"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={addingSeason}
-                  className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
-                >
-                  {addingSeason ? "Adding..." : "Confirm"}
-                </button>
-              </>
-            )}
-          </ModalFooter>
-        }
-      >
-        {fetchedSeasons.includes(upcoming) ? (
-          <p className="text-sm text-foreground">Season {upcoming} already exists. You can add another season next year.</p>
-        ) : (
-          <p className="text-sm text-foreground">Confirm you want to add the {upcoming} season?</p>
-        )}
-        {addSeasonError && <p className="text-sm text-error">{addSeasonError}</p>}
-      </Modal>
     </div>
   )
 }

@@ -3,6 +3,7 @@ import { Alert, View } from "react-native"
 import * as WebBrowser from "expo-web-browser"
 import { useFocusEffect, useRouter } from "expo-router"
 import { Button, Chip, Muted, Screen, ScrollView, TextField } from "@swimbuzz/ui"
+import { defaultSeason, formatSeasonLabel } from "@swimbuzz/shared"
 import { spacing } from "@swimbuzz/tokens"
 import { api, WEB_URL } from "../../../src/lib/api"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
@@ -38,7 +39,7 @@ export default function ImportRosterFromSheetScreen() {
           const list = await api.listSeasons()
           if (cancelled) return
           setSeasons(list)
-          setSeason((prev) => prev || list[0] || "")
+          setSeason((prev) => prev || defaultSeason(list) || "")
         } catch {
           // Season can still be typed manually.
         }
@@ -88,7 +89,7 @@ export default function ImportRosterFromSheetScreen() {
       return
     }
     if (!seasonLabel) {
-      Alert.alert("Season required", "Enter a season like 2025-2026.")
+      Alert.alert("Season required", "Enter a season like 2025–2026.")
       return
     }
 
@@ -158,14 +159,14 @@ export default function ImportRosterFromSheetScreen() {
                 label="Season"
                 value={season}
                 onChangeText={setSeason}
-                placeholder="2025-2026"
+                placeholder="2025–2026"
                 autoCapitalize="none"
                 autoCorrect={false}
               />
               {seasons.length > 0 ? (
                 <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
                   {seasons.map((s) => (
-                    <Chip key={s} label={s} selected={season === s} onPress={() => setSeason(s)} />
+                    <Chip key={s} label={formatSeasonLabel(s)} selected={season === s} onPress={() => setSeason(s)} />
                   ))}
                 </View>
               ) : null}

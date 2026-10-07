@@ -16,7 +16,7 @@ import { formatDisplayTime } from "@/lib/utils"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import StaffBadge from "@/components/ui/StaffBadge"
 import type { StaffTitle } from "@swimbuzz/shared"
-import { syncSignupsToRoster, withdrawAthleteSignup } from "./meet-signup-admin.actions"
+import { syncSignupsToRoster, withdrawAthleteSignup } from "./meet-signup.actions"
 import { LedgerCard, LedgerNote, LedgerRow, LedgerStatusPill } from "@/components/meet/Ledger"
 
 type EntryRow = {

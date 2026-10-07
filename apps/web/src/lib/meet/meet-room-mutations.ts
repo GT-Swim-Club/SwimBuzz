@@ -6,7 +6,7 @@ import { formatAthleteName, loadMeetRoomContext, toGender } from "@/app/api/meet
 
 /**
  * Staff-on-behalf write path for roommate preferences — the only existing
- * write path (MeetRoomPreferenceForm.actions.ts / the PUT route) refuses
+ * write path (saveRoomPreference in meet-rooms.actions.ts / the PUT route) refuses
  * COACH outright, since it's meant for an athlete editing their own
  * preferences. This carve-out is used by the Google Form response import.
  */

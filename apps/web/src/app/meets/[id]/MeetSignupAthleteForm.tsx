@@ -14,7 +14,7 @@ import {
 } from "@/lib/meet/meet-signup"
 import { formatDisplayTime } from "@/lib/utils"
 import { RelativeInstantTime } from "@/components/ui/RelativeDate"
-import { submitMeetSignup, withdrawMeetSignup } from "./MeetSignupAthleteForm.actions"
+import { submitMeetSignup, withdrawMeetSignup } from "./meet-signup.actions"
 
 export type MeetSignupAthleteInitial = {
   events: string[]

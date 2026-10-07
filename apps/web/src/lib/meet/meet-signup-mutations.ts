@@ -23,7 +23,7 @@ import {
   meetHasImportedResults,
 } from "@/lib/meet/meet-sheet-summary"
 import { isRelayResultsSummary } from "@/lib/meet/relay-results"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 import { Prisma } from "@prisma/client"
 
 /**

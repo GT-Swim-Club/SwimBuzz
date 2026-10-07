@@ -1,7 +1,7 @@
 import { cache } from "react"
 import { cookies } from "next/headers"
 import { prisma } from "@/lib/prisma"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 import { ATHLETE_VIEW_COOKIE, isAthleteViewCookie } from "@/lib/athlete/athlete-view"
 
 export const isAthleteViewEnabled = cache(async (): Promise<boolean> => {

@@ -1,6 +1,6 @@
 import { NextResponse as ServerResponse } from "next/server"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
+import { isStaffRole } from "@swimbuzz/shared"
 import { prisma } from "@/lib/prisma"
 
 const respond = (body: unknown, status = 200) => ServerResponse.json(body, { status })

@@ -69,8 +69,8 @@ export const NOTIFICATION_PREFERENCE_META: {
 ]
 
 /**
- * Compact date range with no redundant month/year repetition: "Sep 4-24, 2026" when
- * both ends share a month, "Aug 31-Sep 1, 2026" when they share only a year, and the
+ * Compact date range with no redundant month/year repetition: "Sep 4–24, 2026" when
+ * both ends share a month, "Aug 31–Sep 1, 2026" when they share only a year, and the
  * full "Dec 30, 2025 – Jan 2, 2026" only when the year actually differs.
  */
 export function formatCompactDateRange(start: Date, end: Date, timeZone: string): string {
@@ -83,8 +83,8 @@ export function formatCompactDateRange(start: Date, end: Date, timeZone: string)
   if (full(start) === full(end)) return full(start)
   const sameYear = year(start) === year(end)
   const sameMonth = sameYear && month(start) === month(end)
-  if (sameMonth) return `${month(start)} ${day(start)}-${day(end)}, ${year(start)}`
-  if (sameYear) return `${monthDay(start)}-${monthDay(end)}, ${year(start)}`
+  if (sameMonth) return `${month(start)} ${day(start)}–${day(end)}, ${year(start)}`
+  if (sameYear) return `${monthDay(start)}–${monthDay(end)}, ${year(start)}`
   return `${full(start)} – ${full(end)}`
 }
 
@@ -124,6 +124,14 @@ export function formatMeetDateRangeFull(
     return start.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric", timeZone })
   }
   return formatFullDateRange(start, end, timeZone)
+}
+
+/**
+ * Display form of a stored season label: "2025-2026" → "2025–2026". The hyphenated
+ * form stays the stored/URL value; only rendered text uses the en dash.
+ */
+export function formatSeasonLabel(season: string): string {
+  return season.replace(/^(\d{4})-(\d{4})$/, "$1–$2")
 }
 
 /** "August 17, 2026" for an instant, formatted in `timeZone`. */

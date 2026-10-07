@@ -11,7 +11,7 @@ import {
 import { spacing } from "@swimbuzz/tokens"
 import type { CreateMeetBody } from "@swimbuzz/api"
 import { DateSelector, TimeSelector, TimeZoneSelector } from "../../../src/components/DateTimeSelector"
-import { getViewerTimeZone } from "@swimbuzz/shared"
+import { defaultSeason, formatSeasonLabel, getViewerTimeZone } from "@swimbuzz/shared"
 import { api } from "../../../src/lib/api"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 
@@ -39,7 +39,7 @@ export default function NewMeetScreen() {
           const list = await api.listSeasons()
           if (cancelled) return
           setSeasons(list)
-          setSeason((prev) => prev || list[0] || "")
+          setSeason((prev) => prev || defaultSeason(list) || "")
         } catch {
           // Season can still be typed manually.
         }
@@ -152,7 +152,7 @@ export default function NewMeetScreen() {
           label="Season"
           value={season}
           onChangeText={setSeason}
-          placeholder="2025-2026"
+          placeholder="2025–2026"
           autoCapitalize="none"
           autoCorrect={false}
         />
@@ -167,7 +167,7 @@ export default function NewMeetScreen() {
             {seasons.map((s) => (
               <Chip
                 key={s}
-                label={s}
+                label={formatSeasonLabel(s)}
                 selected={season === s}
                 onPress={() => setSeason(s)}
               />

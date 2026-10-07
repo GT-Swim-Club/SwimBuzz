@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { formatSeasonLabel } from "@swimbuzz/shared"
 import { RelativeDateRange } from "@/components/ui/RelativeDate"
 import MeetGalleryCard from "./MeetGalleryCard"
 import EditMeetButton from "./EditMeetButton"
@@ -46,7 +47,7 @@ export default function MeetsClientWrapper({
           return (
             <section key={season} className="space-y-3">
               <h2 className="text-sm font-medium text-foreground-secondary uppercase tracking-wide">
-                {season}
+                {formatSeasonLabel(season)}
                 <span className="ml-2 font-normal normal-case tracking-normal text-foreground-tertiary">
                   {seasonMeets.length} meet{seasonMeets.length === 1 ? "" : "s"}
                 </span>

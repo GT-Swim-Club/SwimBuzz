@@ -4,6 +4,7 @@ import { useRef, useState } from "react"
 import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
 import { currentSeason, parseSeason, seasonEndYear } from "@/lib/season"
+import { formatSeasonLabel } from "@swimbuzz/shared"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { useScraperUi } from "@/components/scraper/ScraperUiProvider"
 import { useImportTask } from "@/components/ui/ImportTaskProvider"
@@ -24,7 +25,7 @@ export default function ImportRosterButton() {
   const season =
     parseSeason(searchParams.get("season") ?? searchParams.get("year")) ?? currentSeason()
   const genderLabel = gender === "F" ? "Women's" : gender === "M" ? "Men's" : ""
-  const rosterLabel = `${genderLabel} ${season}`
+  const rosterLabel = `${genderLabel} ${formatSeasonLabel(season)}`
 
   const { connected: scraperConnected, requireScraper } = useScraperUi()
   const { startTask } = useImportTask()
@@ -40,9 +41,9 @@ export default function ImportRosterButton() {
 
   const modalDescription =
     source === "csv"
-      ? `Adds athletes to the ${season} roster.`
+      ? `Adds athletes to the ${formatSeasonLabel(season)} roster.`
       : source === "sheets"
-        ? `Adds athletes to the ${season} roster from a Google Sheet.`
+        ? `Adds athletes to the ${formatSeasonLabel(season)} roster from a Google Sheet.`
         : `Imports SwimCloud IDs to the ${rosterLabel} roster.`
 
   function resetForm() {

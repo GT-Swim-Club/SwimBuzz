@@ -6,7 +6,7 @@ import {
   type NotificationPreferences,
   type AllPreferenceKey,
 } from "@/lib/notifications/notification-preferences"
-import { updateNotificationPreference } from "./NotificationPreferencesSettings.actions"
+import { updateNotificationPreference } from "./settings.actions"
 
 export default function NotificationPreferencesSettings({
   initialPreferences,

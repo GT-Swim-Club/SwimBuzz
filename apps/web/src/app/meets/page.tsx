@@ -14,6 +14,7 @@ import CreateMeetButton from "./CreateMeetButton"
 import DeletedMeetsList from "./DeletedMeetsList"
 import { isStaffUi } from "@/lib/athlete/athlete-view-server"
 import { parseSeason, seasonEndYear } from "@/lib/season"
+import { listSeasons } from "@/lib/season-store"
 import MeetsClientWrapper from "./MeetsClientWrapper"
 import { getSession } from "@/lib/auth/session"
 import { countMeetAthletes } from "@/lib/meet/meet-sheet-summary"
@@ -39,9 +40,7 @@ function MeetsListSkeleton() {
 // block (or get blocked by) the list stream — it's the canonical Season
 // table, matching how /athletes and meets/[id] source their season lists.
 async function CreateMeetButtonSection() {
-  const seasons = await prisma.season
-    .findMany({ orderBy: { label: "desc" } })
-    .then((list) => list.map((s) => s.label))
+  const seasons = await listSeasons()
   return <CreateMeetButton seasons={seasons} />
 }
 

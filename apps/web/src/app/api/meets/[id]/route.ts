@@ -18,7 +18,6 @@ import {
 import { LOCAL_SCRAPER_HINT } from "@/lib/scraper/scraper"
 import { isCuid, uniqueMeetSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@/lib/auth/auth-roles"
 import { meetHasEnded as meetHasEndedFn } from "@/lib/meet/meet-rooms"
 import {
   isSignupAnswers,
@@ -42,7 +41,7 @@ import {
   swimsToMeetResults,
 } from "@/lib/meet/meet-sheet-summary"
 import { isRelayResultsSummary } from "@/lib/meet/relay-results"
-import { utcDayKey } from "@swimbuzz/shared"
+import { utcDayKey, isStaffRole } from "@swimbuzz/shared"
 
 export const runtime = "nodejs"
 export const maxDuration = 300
