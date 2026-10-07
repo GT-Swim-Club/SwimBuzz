@@ -463,7 +463,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
               <img
                 src={meet.iconUrl}
                 alt={`${meet.name} icon`}
-                className="h-20 w-20 rounded-xl object-cover shadow-sm ring-1 ring-border shrink-0"
+                className="h-20 w-20 rounded-xl object-cover shrink-0"
               />
             )}
             <div className="min-w-0 flex-1">

@@ -9,23 +9,23 @@ import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { RelativeDateRange } from "@/components/ui/RelativeDate"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { useDeletedItems } from "@/lib/recovery/use-deleted-items"
+import MeetGalleryCard, { MeetCardRows } from "./MeetGalleryCard"
 
 const TONE_CLASS = {
-  normal: "text-foreground-secondary",
+  normal: "text-white",
   warning: "text-warning",
   expired: "text-error",
 } as const
 
-export default function DeletedMeetsList() {
+export default function DeletedMeetsList({ query }: { query: string }) {
   const { items, error, busy, restore, purge } = useDeletedItems("meet")
   const [confirmDelete, setConfirmDelete] = useState<DeletedItem | null>(null)
 
   if (items === null) {
     return (
-      <div className="space-y-2">
-        {[...Array(4)].map((_, i) => (
-          <Skeleton key={i} className="h-16 w-full rounded-xl" />
-        ))}
+      <div className="flex flex-col gap-3">
+        <Skeleton className="h-5 w-20" />
+        <Skeleton className="aspect-[32/9] w-full rounded-2xl" />
       </div>
     )
   }
@@ -36,67 +36,89 @@ export default function DeletedMeetsList() {
     )
   }
 
-  if (items.length === 0) {
+  const q = query.trim().toLowerCase()
+  const shown = q
+    ? items.filter((item) => [item.name, item.location, item.school].some((v) => v?.toLowerCase().includes(q)))
+    : items
+
+  if (shown.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-2 rounded-xl border border-border-secondary p-10 text-center">
-        <AppIcon name="trash" className="h-8 w-8 text-foreground-tertiary" />
-        <p className="font-medium text-foreground">Trash is empty</p>
-        <p className="text-sm text-foreground-secondary">Deleted meets show up here before they&apos;re permanently removed.</p>
+      <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-background px-4 py-12 text-center">
+        {q ? (
+          <p className="text-sm text-foreground-secondary">No deleted meets match your search.</p>
+        ) : (
+          <>
+            <AppIcon name="trash" className="h-8 w-8 text-foreground-tertiary" />
+            <p className="font-medium text-foreground">Trash is empty</p>
+            <p className="text-sm text-foreground-secondary">Deleted meets show up here before they&apos;re permanently removed.</p>
+          </>
+        )}
       </div>
     )
   }
 
   return (
     <>
-      <div className="divide-y divide-border rounded-xl border border-border-secondary">
-        {items.map((item) => {
-          const countdown = recoveryCountdown(item.purgeAfter)
-          return (
-            <div key={item.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
-              <AppIcon name="trophy" className="h-5 w-5 shrink-0 text-foreground-tertiary" />
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-medium text-foreground">{item.name}</p>
-                <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-xs text-foreground-secondary">
-                  <RelativeDateRange startsAt={item.startsAt} timeZone={item.timeZone} />
-                  {item.deleteSwimsOnPurge && (
+      <section className="flex flex-col gap-3">
+        <h2 className="text-sm font-medium uppercase tracking-wide text-foreground-secondary">Trash</h2>
+        <MeetCardRows
+          items={shown}
+          renderCard={(item, rowSize) => {
+            const countdown = recoveryCountdown(item.purgeAfter)
+            return (
+              <MeetGalleryCard
+                name={item.name}
+                bannerUrl={item.bannerUrl ?? null}
+                iconUrl={item.iconUrl}
+                dateLine={<RelativeDateRange startsAt={item.startsAt} endsAt={item.endsAt} timeZone={item.timeZone} />}
+                location={[item.location, item.school].filter(Boolean).join(" · ")}
+                stackMeta={rowSize >= 3}
+                badge={
+                  <div className="flex flex-wrap items-center gap-1.5">
                     <span
-                      className="group relative ml-1 inline-flex items-center rounded-full border border-border-secondary bg-fill px-2 py-0.5 text-[11px] font-medium text-foreground-secondary"
-                      tabIndex={0}
+                      className={`inline-flex items-center rounded-full bg-black/70 px-2.5 py-1 text-xs font-medium tabular-nums ring-1 ring-inset ring-white/15 backdrop-blur-md ${TONE_CLASS[countdown.tone]}`}
                     >
-                      Swims hidden
-                      <HoverDetail label="This meet's swims are hidden from stats and will come back only if the meet is restored." />
+                      {countdown.label}
                     </span>
-                  )}
-                </p>
-              </div>
-              <span className={`shrink-0 text-sm font-medium ${TONE_CLASS[countdown.tone]}`}>
-                {countdown.label}
-              </span>
-              <div className="flex shrink-0 items-center gap-2">
-                <button
-                  type="button"
-                  disabled={busy !== null || !item.canRestore}
-                  onClick={() => void restore(item)}
-                  aria-label={`Restore ${item.name}`}
-                  className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
-                >
-                  {busy === item.id ? "Restoring…" : "Restore"}
-                </button>
-                <button
-                  type="button"
-                  disabled={busy !== null}
-                  onClick={() => setConfirmDelete(item)}
-                  aria-label={`Delete ${item.name} permanently`}
-                  className="group relative rounded-lg border border-border px-3 py-2.5 text-error hover:bg-fill disabled:opacity-50"
-                >
-                  <AppIcon name="trash" className="h-4 w-4" />
-                  <HoverDetail label="Delete permanently" />
-                </button>
-              </div>
-            </div>
-          )
-        })}
-      </div>
+                    {item.deleteSwimsOnPurge && (
+                      <span
+                        className="relative inline-flex items-center rounded-full bg-black/70 px-2.5 py-1 text-xs font-medium text-white/85 ring-1 ring-inset ring-white/15 backdrop-blur-md"
+                        tabIndex={0}
+                      >
+                        Swims hidden
+                        <HoverDetail label="This meet's swims are hidden from stats and will come back only if the meet is restored." />
+                      </span>
+                    )}
+                  </div>
+                }
+                actions={
+                  <>
+                    <button
+                      type="button"
+                      disabled={busy !== null || !item.canRestore}
+                      onClick={() => void restore(item)}
+                      aria-label={`Restore ${item.name}`}
+                      className="h-[2.57em] whitespace-nowrap rounded-[0.57em] bg-primary px-[1.14em] text-[1em] font-medium text-primary-text transition-colors [text-shadow:none] hover:bg-primary-hover disabled:opacity-50"
+                    >
+                      {busy === item.id ? "Restoring…" : "Restore"}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busy !== null}
+                      onClick={() => setConfirmDelete(item)}
+                      aria-label={`Delete ${item.name} permanently`}
+                      className="relative flex h-[2.57em] w-[2.57em] items-center justify-center rounded-[0.57em] border border-white/30 text-white/85 transition-colors hover:bg-white/12 hover:text-error disabled:opacity-50"
+                    >
+                      <AppIcon name="trash" className="h-[1.15em] w-[1.15em]" />
+                      <HoverDetail label="Delete permanently" />
+                    </button>
+                  </>
+                }
+              />
+            )
+          }}
+        />
+      </section>
 
       <Modal
         open={!!confirmDelete}

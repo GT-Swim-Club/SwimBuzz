@@ -21,8 +21,11 @@ const Cropper = EasyCropper as unknown as ComponentType<{
   onCropComplete: (croppedArea: Area, croppedAreaPixels: Area) => void
 }>
 
-const BANNER_MAX_WIDTH = 800
-const BANNER_JPEG_QUALITY = 0.85
+// Banners render as full-width hero cards and the meet page background, so
+// keep the crop's native resolution up to ~retina desktop width. 2560×1280 at
+// q0.92 stays well under Vercel's ~4.5MB request body cap.
+const BANNER_MAX_WIDTH = 2560
+const BANNER_JPEG_QUALITY = 0.92
 
 /** Load image for canvas processing */
 async function loadImage(src: string): Promise<HTMLImageElement> {
@@ -34,19 +37,20 @@ async function loadImage(src: string): Promise<HTMLImageElement> {
   })
 }
 
-/** Crop to a 2/1 JPEG sized for banner storage. */
+/** Crop to a 2/1 JPEG at the crop's own resolution (capped, never upscaled). */
 async function cropBanner(imageSrc: string, pixelCrop: Area): Promise<Blob> {
   const image = await loadImage(imageSrc)
   const canvas = document.createElement("canvas")
   
   // Enforce 2/1 aspect ratio
-  const targetWidth = BANNER_MAX_WIDTH
-  const targetHeight = BANNER_MAX_WIDTH / 2                
+  const targetWidth = Math.max(1, Math.round(Math.min(pixelCrop.width, BANNER_MAX_WIDTH)))
+  const targetHeight = Math.round(targetWidth / 2)
   canvas.width = targetWidth
   canvas.height = targetHeight
-  
+
   const ctx = canvas.getContext("2d")
   if (!ctx) throw new Error("Could not process image")
+  ctx.imageSmoothingQuality = "high"
 
   ctx.drawImage(
     image,

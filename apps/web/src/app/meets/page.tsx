@@ -1,232 +1,158 @@
-import Link from "next/link"
 import { Suspense } from "react"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
-import { AppIcon } from "@/components/ui/AppIcon"
-import HoverDetail from "@/components/ui/HoverDetail"
+import { zonedDayKey } from "@swimbuzz/shared"
 import LiveSearch from "@/components/ui/LiveSearch"
 import { Skeleton } from "@/components/ui/Skeleton"
-import {
-  GalleryListViewToggle,
-  ViewNavPanel,
-  ViewNavigationProvider } from "@/components/nav/ViewNavigation"
 import CreateMeetButton from "./CreateMeetButton"
-import DeletedMeetsList from "./DeletedMeetsList"
-import { isStaffUi } from "@/lib/athlete/athlete-view-server"
-import { parseSeason, seasonEndYear } from "@/lib/season"
+import MeetsViewSwitch from "./MeetsViewSwitch"
+import MeetsToolbarSelects from "./MeetsToolbarSelects"
+import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete/athlete-view-server"
+import { parseSeason } from "@/lib/season"
 import { listSeasons } from "@/lib/season-store"
+import { signupWindowStatus } from "@/lib/meet/meet-signup"
 import MeetsClientWrapper from "./MeetsClientWrapper"
+import MeetsListSkeleton from "./MeetsListSkeleton"
 import { getSession } from "@/lib/auth/session"
-import { countMeetAthletes } from "@/lib/meet/meet-sheet-summary"
 
-function MeetsListSkeleton() {
+// Seasons come from the canonical Season table, matching how /athletes and
+// meets/[id] source their season lists — independent of the meets list stream.
+async function ToolbarControlsSection({ isCoach, showScope }: { isCoach: boolean; showScope: boolean }) {
+  const seasons = await listSeasons()
   return (
-    <div className="space-y-8">
-      {[...Array(2)].map((_, i) => (
-        <section key={i} className="space-y-4">
-          <Skeleton className="h-6 w-32" />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[...Array(3)].map((_, j) => (
-              <Skeleton key={j} className="h-48 w-full" />
-            ))}
-          </div>
-        </section>
-      ))}
+    <div className="flex shrink-0 flex-wrap items-center gap-3">
+      <MeetsToolbarSelects seasons={seasons} showTrash={isCoach} showScope={showScope}>
+        {isCoach && <CreateMeetButton seasons={seasons} />}
+      </MeetsToolbarSelects>
     </div>
   )
 }
 
-// Independent of the meets list so the create-button season dropdown doesn't
-// block (or get blocked by) the list stream — it's the canonical Season
-// table, matching how /athletes and meets/[id] source their season lists.
-async function CreateMeetButtonSection() {
-  const seasons = await listSeasons()
-  return <CreateMeetButton seasons={seasons} />
-}
-
 async function MeetsListSection({
   query,
-  activeView,
   isCoach,
+  viewerAthleteId,
 }: {
   query: string
-  activeView: "gallery" | "list"
   isCoach: boolean
+  viewerAthleteId: string | null
 }) {
-  const meetsRaw = await prisma.meet.findMany({
-    where: query
-      ?       {
-        OR: [
-            { name: { contains: query, mode: "insensitive" } },
-            { location: { contains: query, mode: "insensitive" } },
-            { school: { contains: query, mode: "insensitive" } },
-          ]}
-      : undefined,
-    orderBy: { startsAt: "desc" },
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      location: true,
-      startsAt: true,
-      endsAt: true,
-      hasStartTime: true,
-      timeZone: true,
-      course: true,
-      season: true,
-      school: true,
-      iconUrl: true,
-      bannerUrl: true,
-      packetUrl: true,
-      psychSheetUrl: true,
-      heatSheetUrl: true,
-      resultsUrl: true,
-      // Selected only to compute athleteCount below — stripped before the
-      // meet objects are handed to the client component so this heavy JSON
-      // never travels the RSC payload (was previously serialized twice, for
-      // both `meets` and `bySeason`).
-      psychSheetSummary: true,
-      heatSheetSummary: true,
-      finalsHeatSheetSummary: true,
-      entriesSheetSummary: true,
-      relayResultsSummary: true,
-      resultStatusesSummary: true}})
+  // Edit dropdowns need every canonical season, not just the ones grouping the
+  // (possibly search-filtered) list below.
+  const [meetsRaw, seasonOptions, swamMeets, signedUpMeets] = await Promise.all([
+    prisma.meet.findMany({
+      where: query
+        ? {
+            OR: [
+              { name: { contains: query, mode: "insensitive" } },
+              { location: { contains: query, mode: "insensitive" } },
+              { school: { contains: query, mode: "insensitive" } },
+            ],
+          }
+        : undefined,
+      orderBy: { startsAt: "desc" },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        location: true,
+        startsAt: true,
+        endsAt: true,
+        hasStartTime: true,
+        timeZone: true,
+        course: true,
+        season: true,
+        school: true,
+        iconUrl: true,
+        bannerUrl: true,
+        packetUrl: true,
+        psychSheetUrl: true,
+        heatSheetUrl: true,
+        resultsUrl: true,
+        signupForm: { select: { openAt: true, closeAt: true } },
+      },
+    }),
+    listSeasons(),
+    viewerAthleteId
+      ? prisma.swim.findMany({
+          where: { athleteId: viewerAthleteId, meetId: { not: null } },
+          distinct: ["meetId"],
+          select: { meetId: true },
+        })
+      : [],
+    viewerAthleteId
+      ? prisma.meetSignupEntry.findMany({
+          where: { athleteId: viewerAthleteId },
+          select: { form: { select: { meetId: true } } },
+        })
+      : [],
+  ])
 
-  const meetIds = meetsRaw.map((m) => m.id)
-  // Grouped query instead of fetching every swim row: one row per
-  // (meet, athlete) pair regardless of how many events that athlete swam.
-  const swimAthleteRows = meetIds.length
-    ? await prisma.swim.groupBy({
-        by: ["meetId", "athleteId"],
-        where: { meetId: { in: meetIds } }})
-    : []
-  const swimAthleteIdsByMeet = new Map<string, string[]>()
-  for (const row of swimAthleteRows) {
-    if (!row.meetId) continue
-    const list = swimAthleteIdsByMeet.get(row.meetId)
-    if (list) list.push(row.athleteId)
-    else swimAthleteIdsByMeet.set(row.meetId, [row.athleteId])
-  }
+  const myMeetIds = new Set<string>([
+    ...swamMeets.flatMap((s) => (s.meetId ? [s.meetId] : [])),
+    ...signedUpMeets.map((e) => e.form.meetId),
+  ])
+  const now = new Date()
 
-  const meets = meetsRaw.map(({
-    psychSheetSummary,
-    heatSheetSummary,
-    finalsHeatSheetSummary,
-    entriesSheetSummary,
-    relayResultsSummary,
-    resultStatusesSummary,
-    ...meet
-  }) => ({
+  const meets = meetsRaw.map(({ signupForm, ...meet }) => ({
     ...meet,
-    athleteCount: countMeetAthletes({
-      psychSheetSummary,
-      heatSheetSummary,
-      finalsHeatSheetSummary,
-      entriesSheetSummary,
-      relayResultsSummary,
-      resultStatusesSummary,
-      swimAthleteIds: swimAthleteIdsByMeet.get(meet.id) ?? []})}))
-
-  const bySeason = new Map<string, typeof meets>()
-  for (const meet of meets) {
-    const season = parseSeason(meet.season) ?? meet.season
-    const group = bySeason.get(season)
-    if (group) group.push(meet)
-    else bySeason.set(season, [meet])
-  }
-
-  const seasons = [...bySeason.keys()].sort((a, b) => {
-    const aParsed = parseSeason(a)
-    const bParsed = parseSeason(b)
-    if (aParsed && bParsed) return seasonEndYear(bParsed) - seasonEndYear(aParsed)
-    if (aParsed) return -1
-    if (bParsed) return 1
-    return b.localeCompare(a)
-  })
+    season: parseSeason(meet.season) ?? meet.season,
+    // A meet stays "upcoming" through its last day in its own zone, so a
+    // multi-day meet in progress isn't filed under past results yet.
+    upcoming: zonedDayKey(meet.endsAt ?? meet.startsAt, meet.timeZone) >= zonedDayKey(now, meet.timeZone),
+    signupOpen: !!signupForm && signupWindowStatus({ ...signupForm, now }).open,
+    mine: myMeetIds.has(meet.id),
+  }))
 
   return (
     <MeetsClientWrapper
       meets={meets}
-      bySeason={Object.fromEntries(bySeason)}
-      seasons={seasons}
+      seasonOptions={seasonOptions}
       isCoach={isCoach}
       query={query}
-      view={activeView}
+      canScope={!!viewerAthleteId}
     />
   )
 }
 
 export default async function MeetsPage({
-  searchParams}: {
-  searchParams: Promise<{ q?: string; view?: string }>
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>
 }) {
   const session = await getSession()
   if (!session) redirect("/signin")
 
-  const isCoach = await isStaffUi(session.user.role)
-  const { q, view } = await searchParams
-  const query = q?.trim() ?? ""
-  const activeView = view === "list" ? "list" : view === "deleted" && isCoach ? "deleted" : "gallery"
-
-  function buildHref(next: { view?: "gallery" | "list" | "deleted" }) {
-    const params = new URLSearchParams()
-    if (query) params.set("q", query)
-    const v = next.view ?? activeView
-    if (v !== "gallery") params.set("view", v)
-    const s = params.toString()
-    return s ? `/meets?${s}` : "/meets"
-  }
+  const [isCoach, viewerAthleteId] = await Promise.all([
+    isStaffUi(session.user.role),
+    resolveViewerAthleteId(session.user.id),
+  ])
+  // Only the search query is read server-side (it narrows the DB query).
+  // Season / scope / Trash are applied client-side from the URL so switching
+  // them is instant — see useMeetsFilters.
+  const query = (await searchParams).q?.trim() ?? ""
 
   return (
-    <ViewNavigationProvider>
-      <main className="space-y-6">
-        <h1 className="sr-only">Meets</h1>
-        <div className="flex items-center justify-end">
-          <div className="flex items-center gap-3">
-            <GalleryListViewToggle
-              activeView={activeView === "deleted" ? "gallery" : activeView}
-              galleryHref={buildHref({ view: "gallery" })}
-              listHref={buildHref({ view: "list" })}
-            />
-            {isCoach && (
-              <Link
-                href={buildHref({ view: "deleted" })}
-                aria-label="Trash"
-                className={
-                  "group relative inline-flex h-9 w-9 items-center justify-center rounded-lg border transition-colors " +
-                  (activeView === "deleted"
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border-secondary bg-background text-foreground-secondary hover:bg-fill-secondary hover:text-foreground")
-                }
-              >
-                <AppIcon name="trash" className="h-4 w-4" />
-                <HoverDetail label="Trash" />
-              </Link>
-            )}
-            {isCoach && activeView !== "deleted" && (
-              <Suspense fallback={<Skeleton className="h-9 w-24" />}>
-                <CreateMeetButtonSection />
-              </Suspense>
-            )}
-          </div>
-        </div>
+    <main className="flex flex-col gap-6">
+      <h1 className="sr-only">Meets</h1>
+      <div className="flex flex-wrap items-center gap-3">
+        <Suspense fallback={<Skeleton className="h-[42px] min-w-[200px] flex-1 rounded-lg" />}>
+          <LiveSearch
+            pathname="/meets"
+            placeholder="Search meets by name, school, or location…"
+            className="h-[42px] min-w-[200px] flex-1 rounded-lg border border-border bg-background px-3 text-sm text-foreground placeholder:text-foreground-tertiary"
+          />
+        </Suspense>
+        <Suspense fallback={<Skeleton className="h-[42px] w-64 rounded-lg" />}>
+          <ToolbarControlsSection isCoach={isCoach} showScope={!!viewerAthleteId} />
+        </Suspense>
+      </div>
 
-        {activeView === "deleted" ? (
-          <DeletedMeetsList />
-        ) : (
-          <>
-            <Suspense fallback={null}>
-              <LiveSearch pathname="/meets" placeholder="Search meets by name, school, or location…" />
-            </Suspense>
-
-            <ViewNavPanel>
-              <Suspense fallback={<MeetsListSkeleton />}>
-                <MeetsListSection query={query} activeView={activeView} isCoach={isCoach} />
-              </Suspense>
-            </ViewNavPanel>
-          </>
-        )}
-      </main>
-    </ViewNavigationProvider>
+      <Suspense fallback={<MeetsListSkeleton />}>
+        <MeetsViewSwitch showTrash={isCoach}>
+          <MeetsListSection query={query} isCoach={isCoach} viewerAthleteId={viewerAthleteId} />
+        </MeetsViewSwitch>
+      </Suspense>
+    </main>
   )
 }

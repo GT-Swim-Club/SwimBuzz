@@ -24,17 +24,19 @@ export async function listRecentlyDeleted() {
     const where = { deletedAt: { not: null } }
     const [practices, meets] = await Promise.all([
       prisma.practice.findMany({ where, select: { id: true, title: true, startsAt: true, deletedAt: true, purgeAfter: true, purgeStartedAt: true, timeZone: true }, orderBy: { deletedAt: "desc" } }),
-      prisma.meet.findMany({ where, select: { id: true, name: true, startsAt: true, deletedAt: true, purgeAfter: true, purgeStartedAt: true, deleteSwimsOnPurge: true, timeZone: true }, orderBy: { deletedAt: "desc" } }),
+      prisma.meet.findMany({ where, select: { id: true, name: true, startsAt: true, endsAt: true, location: true, school: true, bannerUrl: true, iconUrl: true, deletedAt: true, purgeAfter: true, purgeStartedAt: true, deleteSwimsOnPurge: true, timeZone: true }, orderBy: { deletedAt: "desc" } }),
     ])
     const now = Date.now()
     const items = [
-      ...practices.map(p => ({ ...p, kind: "practice" as const, name: p.title, deleteSwimsOnPurge: false })),
+      ...practices.map(p => ({ ...p, kind: "practice" as const, name: p.title, deleteSwimsOnPurge: false, endsAt: null, location: null, school: null, bannerUrl: null, iconUrl: null })),
       ...meets.map(m => ({ ...m, kind: "meet" as const })),
     ].map(item => ({
       id: item.id, kind: item.kind, name: item.name, startsAt: item.startsAt.toISOString(),
       deletedAt: item.deletedAt!.toISOString(), purgeAfter: item.purgeAfter!.toISOString(),
       canRestore: !item.purgeStartedAt && item.purgeAfter!.getTime() > now,
       deleteSwimsOnPurge: item.deleteSwimsOnPurge, timeZone: item.timeZone,
+      endsAt: item.endsAt?.toISOString() ?? null, location: item.location, school: item.school,
+      bannerUrl: item.bannerUrl, iconUrl: item.iconUrl,
     })).sort((a, b) => b.deletedAt.localeCompare(a.deletedAt))
     return { items }
   })

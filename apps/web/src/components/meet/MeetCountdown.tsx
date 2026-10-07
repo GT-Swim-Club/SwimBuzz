@@ -19,7 +19,7 @@ function pad(n: number) {
   return String(n).padStart(2, "0")
 }
 
-type Variant = "pill" | "inline" | "banner" | "ledger"
+type Variant = "pill" | "inline" | "banner" | "ledger" | "glass"
 type Tone = "default" | "onDark"
 
 const upcomingPillClass =
@@ -257,6 +257,22 @@ export default function MeetCountdown({
           </span>
           <CountdownUnits parts={parts} size="md" expand />
         </div>
+      )
+    }
+
+    if (variant === "glass") {
+      const compact =
+        (parts.days > 0 ? `${parts.days}d ` : "") +
+        `${pad(parts.hours)}h ${pad(parts.minutes)}m ${pad(parts.seconds)}s`
+      return (
+        <span
+          role="timer"
+          aria-label={`Starts in ${compact}`}
+          className={`inline-flex items-center gap-2.5 rounded-full bg-black/70 px-4 py-2 text-base leading-5 font-semibold tracking-tight tabular-nums text-white ring-1 ring-inset ring-white/15 backdrop-blur-md ${className}`.trim()}
+        >
+          <span className="h-2 w-2 shrink-0 rounded-full bg-primary" aria-hidden />
+          {compact}
+        </span>
       )
     }
 

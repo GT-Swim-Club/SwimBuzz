@@ -8,8 +8,10 @@ import { resolvedFileExt } from "@/lib/upload-file-ext"
 export const runtime = "nodejs"
 
 const MAX_BYTES = 10 * 1024 * 1024 // 10 MB for banner upload
-const BANNER_MAX_WIDTH = 1200 
-const BANNER_JPEG_QUALITY = 85
+// Matches the client cropper's cap (BannerCropper) — banners fill full-width
+// hero cards and the meet page background on retina screens.
+const BANNER_MAX_WIDTH = 2560
+const BANNER_JPEG_QUALITY = 90
 const ALLOWED_EXT = new Set([".png", ".jpg", ".jpeg", ".webp", ".heic", ".heif"])
 
 const MIME: Record<string, string> = {
@@ -71,18 +73,21 @@ export async function POST(req: Request) {
     try {
       const image = sharp(bytes)
       const metadata = await image.metadata()
+      const tooWide = !!metadata.width && metadata.width > BANNER_MAX_WIDTH
 
-      // Resize if larger than max width
-      if (metadata.width && metadata.width > BANNER_MAX_WIDTH) {
-        image.resize(BANNER_MAX_WIDTH, null, {
-          fit: "inside",
-          withoutEnlargement: true})
+      // The cropper already uploads a sized JPEG — re-encoding it would just
+      // compress it a second time. Only process other formats or oversize images.
+      if (metadata.format !== "jpeg" || tooWide) {
+        image.rotate()
+        if (tooWide) {
+          image.resize(BANNER_MAX_WIDTH, null, {
+            fit: "inside",
+            withoutEnlargement: true})
+        }
+        processedBytes = await image
+          .jpeg({ quality: BANNER_JPEG_QUALITY, mozjpeg: true })
+          .toBuffer()
       }
-
-      // Convert to JPEG with compression
-      processedBytes = await image
-        .jpeg({ quality: BANNER_JPEG_QUALITY })
-        .toBuffer()
     } catch {
       // If Sharp processing fails, use original bytes
     }

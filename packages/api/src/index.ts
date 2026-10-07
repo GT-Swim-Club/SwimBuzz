@@ -18,6 +18,12 @@ export type DeletedItem = {
   canRestore: boolean
   deleteSwimsOnPurge: boolean
   timeZone: string
+  /** Meet-only display fields (null for practices) — lets the meets Trash render banner cards. */
+  endsAt?: string | null
+  location?: string | null
+  school?: string | null
+  bannerUrl?: string | null
+  iconUrl?: string | null
 }
 export type RecentlyDeletedResponse = { items: DeletedItem[] }
 

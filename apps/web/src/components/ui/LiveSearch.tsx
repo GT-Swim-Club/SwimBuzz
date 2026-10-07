@@ -8,9 +8,11 @@ const DEBOUNCE_MS = 400
 export default function LiveSearch({
   pathname,
   placeholder,
+  className = "w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border",
 }: {
   pathname: string
   placeholder: string
+  className?: string
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -51,7 +53,7 @@ export default function LiveSearch({
       value={query}
       onChange={(e) => setQuery(e.target.value)}
       placeholder={placeholder}
-      className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border"
+      className={className}
     />
   )
 }

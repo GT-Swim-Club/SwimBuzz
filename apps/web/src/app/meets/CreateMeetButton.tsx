@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { emptyMeetForm, type MeetFormState } from "./MeetFields"
 import MeetFormModal from "./MeetFormModal"
+import HoverDetail from "@/components/ui/HoverDetail"
 import { meetPath } from "@/lib/slug"
 import { useUnsavedUploads } from "@/lib/meet/unsaved-uploads"
 import { useImportTask } from "@/components/ui/ImportTaskProvider"
@@ -70,7 +71,8 @@ export default function CreateMeetButton({ seasons }: { seasons: string[] }) {
       <button
         type="button"
         onClick={openModal}
-        className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-primary text-primary-text hover:bg-primary-hover transition-colors"
+        aria-label="New meet"
+        className="group relative inline-flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg bg-primary text-primary-text transition-colors hover:bg-primary-hover"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -86,7 +88,7 @@ export default function CreateMeetButton({ seasons }: { seasons: string[] }) {
           <line x1="12" y1="5" x2="12" y2="19" />
           <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
-        New meet
+        <HoverDetail label="New meet" />
       </button>
 
       <MeetFormModal

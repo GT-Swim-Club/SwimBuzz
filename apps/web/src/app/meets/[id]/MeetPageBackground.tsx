@@ -45,10 +45,10 @@ export default function MeetPageBackground({ bannerUrl }: MeetPageBackgroundProp
   return (
     <div className="pointer-events-none fixed overflow-hidden" style={frame} aria-hidden>
       <div
-        className="absolute inset-0 bg-cover bg-center opacity-40"
+        className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${bannerUrl})` }}
       />
-      <div className="absolute inset-0 bg-background/70 dark:bg-background/90" />
+      <div className="absolute inset-0 bg-background/88 dark:bg-background/90" />
     </div>
   )
 }

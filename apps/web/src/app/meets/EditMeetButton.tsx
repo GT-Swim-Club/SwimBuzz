@@ -14,11 +14,15 @@ function meetImageUrls(form: Pick<MeetFormState, "iconUrl" | "bannerUrl">) {
 export default function EditMeetButton({
   meetId,
   initial,
-  seasons
+  seasons,
+  className = "text-foreground-secondary hover:text-primary transition-colors",
+  iconClassName = "h-4 w-4",
 }: {
   meetId: string
   initial: MeetFormState
   seasons: string[]
+  className?: string
+  iconClassName?: string
 }) {
   const [editing, setEditing] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -61,10 +65,10 @@ export default function EditMeetButton({
           setError(null)
           setEditing(true)
         }}
-        className="text-foreground-secondary hover:text-primary transition-colors"
+        className={className}
         aria-label="Edit meet"
       >
-        <ActionIcon kind="edit" className="h-4 w-4" />
+        <ActionIcon kind="edit" className={iconClassName} />
       </button>
 
       <MeetFormModal
