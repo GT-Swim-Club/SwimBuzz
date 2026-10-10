@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useTransition } from "react"
+import { useState, useTransition } from "react"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import ActionIcon from "@/components/ui/ActionIcon"
 import { deleteAthleteSwim } from "./athlete.actions"
@@ -25,15 +25,6 @@ export default function DeleteSwimButton({
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const loading = isPending
-
-  useEffect(() => {
-    if (!open) return
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape" && !loading) setOpen(false)
-    }
-    window.addEventListener("keydown", onKeyDown)
-    return () => window.removeEventListener("keydown", onKeyDown)
-  }, [open, loading])
 
   function handleDelete() {
     startTransition(async () => {

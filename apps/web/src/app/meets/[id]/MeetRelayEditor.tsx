@@ -17,6 +17,7 @@ import {
   type RelayGender,
   type RelayRound,
 } from "@/lib/meet/relay-results"
+import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
 const RELAY_EVENTS = [
   "200 Medley Relay",
@@ -157,6 +158,7 @@ function RelayModal({
 
   useEffect(() => setMounted(true), [])
   useDontReloadWhileBusy(loading)
+  useEscapeToClose(true, onClose, { disabled: loading })
 
   useEffect(() => {
     const prev = document.body.style.overflow

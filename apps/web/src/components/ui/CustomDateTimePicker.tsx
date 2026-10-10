@@ -3,6 +3,7 @@
 import { type KeyboardEvent, type ReactNode, type RefObject, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { formatClockTime, US_TIME_ZONES, zoneAbbreviation, zoneDisplayName } from "@swimbuzz/shared"
+import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"]
 const HOURS = Array.from({ length: 12 }, (_, index) => index + 1)
@@ -288,6 +289,8 @@ function useFloatingPicker(width: number, estimatedHeight: number) {
     reposition()
   }, [open, reposition])
 
+  useEscapeToClose(open, close)
+
   useEffect(() => {
     if (!open) return
     function onPointerDown(event: MouseEvent) {
@@ -296,16 +299,11 @@ function useFloatingPicker(width: number, estimatedHeight: number) {
         close()
       }
     }
-    function onKeyDown(event: globalThis.KeyboardEvent) {
-      if (event.key === "Escape") close()
-    }
     document.addEventListener("mousedown", onPointerDown)
-    document.addEventListener("keydown", onKeyDown)
     window.addEventListener("resize", reposition)
     window.addEventListener("scroll", reposition, true)
     return () => {
       document.removeEventListener("mousedown", onPointerDown)
-      document.removeEventListener("keydown", onKeyDown)
       window.removeEventListener("resize", reposition)
       window.removeEventListener("scroll", reposition, true)
     }

@@ -3,6 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
 type NavLink = {
   href: string
@@ -22,19 +23,14 @@ export default function MobileNavMenu({
   const pathname = usePathname()
 
 
+  useEscapeToClose(open, () => setOpen(false))
+
   useEffect(() => {
     if (!open) return
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false)
-    }
-
     const prev = document.body.style.overflow
     document.body.style.overflow = "hidden"
-    document.addEventListener("keydown", onKeyDown)
     return () => {
       document.body.style.overflow = prev
-      document.removeEventListener("keydown", onKeyDown)
     }
   }, [open])
 

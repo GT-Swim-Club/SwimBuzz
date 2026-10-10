@@ -227,17 +227,20 @@ function subscribeResize(onChange: () => void) {
 function useMaxPerRow(): number {
   return useSyncExternalStore(
     subscribeResize,
-    () => (window.innerWidth >= 1024 ? 4 : window.innerWidth >= 768 ? 3 : window.innerWidth >= 640 ? 2 : 1),
+    () => {
+      const w = window.innerWidth
+      return w >= 1536 ? 5 : w >= 1024 ? 4 : w >= 768 ? 3 : w >= 640 ? 2 : 1
+    },
     () => 4
   )
 }
 
 /**
- * Row sizes for `n` cards with at most `max` per row (4 on desktop):
+ * Row sizes for `n` cards with at most `max` per row (4 on desktop, 5 on wide screens):
  *   up to max → one row; up to 2×max → two balanced rows, smaller first
  *   (5 → 2+3, 6 → 3+3, 7 → 3+4); beyond that, full rows of `max` stack at the
  *   bottom and the remainder above follows the same rule
- *   (9 → 2+3+4, 10 → 3+3+4, 13 → 2+3+4+4).
+ *   (9 → 2+3+4, 10 → 3+3+4, 13 → 2+3+4+4 with max 4).
  * Every row fills the full width at a fixed height — a lone card is a wide
  * 3:1 banner, shared rows are 32:9 split evenly.
  */

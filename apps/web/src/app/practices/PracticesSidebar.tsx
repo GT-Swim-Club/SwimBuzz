@@ -28,6 +28,7 @@ import {
   type DeletedPracticeRailItem,
   type PracticeRailItem,
 } from "./workspace-params"
+import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
 const MIN_WIDTH = 310
 // Below md, the sidebar is a slide-over drawer instead of a resizable grid
@@ -174,17 +175,14 @@ export default function PracticesSidebar({
   // Adjusted during render (see the tags sync above) rather than in an effect.
   if (isDesktop && mobileSidebarOpen) setMobileSidebarOpen(false)
 
+  useEscapeToClose(mobileSidebarOpen, () => setMobileSidebarOpen(false))
+
   useEffect(() => {
     if (!mobileSidebarOpen) return
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setMobileSidebarOpen(false)
-    }
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = "hidden"
-    document.addEventListener("keydown", onKeyDown)
     return () => {
       document.body.style.overflow = prevOverflow
-      document.removeEventListener("keydown", onKeyDown)
     }
   }, [mobileSidebarOpen])
 

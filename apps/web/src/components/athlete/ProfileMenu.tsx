@@ -8,6 +8,7 @@ import { ATHLETE_VIEW_COOKIE } from "@/lib/athlete/athlete-view"
 import { AppIcon } from "@/components/ui/AppIcon"
 import StaffBadge from "@/components/ui/StaffBadge"
 import type { StaffTitle } from "@swimbuzz/shared"
+import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
 function initialsFromName(name?: string | null, email?: string | null) {
   const parts = (name ?? "").trim().split(/\s+/).filter(Boolean)
@@ -75,6 +76,8 @@ export default function ProfileMenu({
 
   useEffect(() => () => clearCloseTimer(), [])
 
+  useEscapeToClose(open, closeMenu)
+
   useEffect(() => {
     if (!open) return
 
@@ -84,16 +87,8 @@ export default function ProfileMenu({
       }
     }
 
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") closeMenu()
-    }
-
     document.addEventListener("pointerdown", onPointerDown)
-    document.addEventListener("keydown", onKeyDown)
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown)
-      document.removeEventListener("keydown", onKeyDown)
-    }
+    return () => document.removeEventListener("pointerdown", onPointerDown)
   }, [open])
 
   return (

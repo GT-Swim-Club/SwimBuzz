@@ -74,22 +74,11 @@ export default function DeletedMeetsList({ query }: { query: string }) {
                 location={[item.location, item.school].filter(Boolean).join(" · ")}
                 stackMeta={rowSize >= 3}
                 badge={
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span
-                      className={`inline-flex items-center rounded-full bg-black/70 px-2.5 py-1 text-xs font-medium tabular-nums ring-1 ring-inset ring-white/15 backdrop-blur-md ${TONE_CLASS[countdown.tone]}`}
-                    >
-                      {countdown.label}
-                    </span>
-                    {item.deleteSwimsOnPurge && (
-                      <span
-                        className="relative inline-flex items-center rounded-full bg-black/70 px-2.5 py-1 text-xs font-medium text-white/85 ring-1 ring-inset ring-white/15 backdrop-blur-md"
-                        tabIndex={0}
-                      >
-                        Swims hidden
-                        <HoverDetail label="This meet's swims are hidden from stats and will come back only if the meet is restored." />
-                      </span>
-                    )}
-                  </div>
+                  <span
+                    className={`inline-flex items-center rounded-full bg-black/70 px-2.5 py-1 text-xs font-medium tabular-nums ring-1 ring-inset ring-white/15 backdrop-blur-md ${TONE_CLASS[countdown.tone]}`}
+                  >
+                    {countdown.label}
+                  </span>
                 }
                 actions={
                   <>

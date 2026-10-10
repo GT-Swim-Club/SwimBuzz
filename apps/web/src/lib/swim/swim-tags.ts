@@ -1,7 +1,7 @@
 import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
 
 /** Single-letter swim result flags (not pipe-encoded metadata). */
-const DISPLAY_TAG_LETTERS = new Set(["P", "F", "R", "B", "L"])
+const DISPLAY_TAG_LETTERS = new Set(["P", "F", "R", "B", "L", "S"])
 
 /** User-facing tag text — one-letter flags only, not storage encodings like R|200 Free Relay|P. */
 export function displaySwimTags(tags: string): string {
@@ -27,10 +27,10 @@ export function displaySwimTags(tags: string): string {
   return ""
 }
 
-/** Meet sheet — hide prelim/final-only markers (round UI covers those). */
+/** Meet sheet — hide prelim/final/swim-off markers (the row's round label covers those). */
 export function displayMeetResultTags(tags: string): string | undefined {
   const displayed = displaySwimTags(tags)
-  if (!displayed || /^[PF]+$/i.test(displayed)) return undefined
+  if (!displayed || /^[PFS]+$/i.test(displayed)) return undefined
   return displayed
 }
 

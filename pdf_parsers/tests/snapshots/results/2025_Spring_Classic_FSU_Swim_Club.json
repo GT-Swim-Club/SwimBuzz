@@ -1991,7 +1991,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
-      "name": "Marquez, Alexand",
+      "name": "Marquez, Alexandro",
       "place": 1,
       "splits": [
         {
@@ -2012,7 +2012,7 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "FSUC",
       "time": "1:49.22"
     },
     {
@@ -2181,7 +2181,7 @@
       "course": "SCY",
       "event": "200 Free",
       "name": "Williams, Mayon",
-      "place": 198,
+      "place": null,
       "splits": [
         {
           "distance": 50,
@@ -2360,7 +2360,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
-      "name": "McGahagin, Conno",
+      "name": "McGahagin, Connor",
       "place": null,
       "tags": "",
       "team": null,
@@ -2396,7 +2396,7 @@
     {
       "course": "SCY",
       "event": "200 IM",
-      "name": "Plantamura, Natal",
+      "name": "Plantamura, Natalie",
       "place": 2,
       "splits": [
         {
@@ -2417,7 +2417,7 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "GTSC",
       "time": "2:21.28"
     },
     {
@@ -3152,7 +3152,7 @@
     {
       "course": "SCY",
       "event": "100 Fly",
-      "name": "Kvashchuk, Mykha",
+      "name": "Kvashchuk, Mykhailo",
       "place": 1,
       "splits": [
         {
@@ -3165,7 +3165,7 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "FSUC",
       "time": "51.81"
     },
     {
@@ -3599,10 +3599,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
-      "name": "Avedisian, Michae",
+      "name": "Avedisian, Michaela",
       "place": 17,
       "tags": "",
-      "team": null,
+      "team": "FSUC",
       "time": "27.04"
     },
     {
@@ -3635,10 +3635,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
-      "name": "Alsobrook, KatharineFLOR",
+      "name": "Alsobrook, Katharine",
       "place": 21,
       "tags": "",
-      "team": null,
+      "team": "FLOR",
       "time": "27.52"
     },
     {
@@ -3698,19 +3698,19 @@
     {
       "course": "SCY",
       "event": "50 Free",
-      "name": "Baumhover, Aubre",
+      "name": "Baumhover, Aubrey",
       "place": 28,
       "tags": "",
-      "team": null,
+      "team": "AUB",
       "time": "28.17"
     },
     {
       "course": "SCY",
       "event": "50 Free",
-      "name": "Kimbrell, Mackenz",
+      "name": "Kimbrell, Mackenzie",
       "place": 29,
       "tags": "",
-      "team": null,
+      "team": "AUB",
       "time": "28.42"
     },
     {
@@ -3856,6 +3856,15 @@
       "tags": "",
       "team": "GTSC",
       "time": "30.53"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "name": "Covaliu-Fuentes, Veronic",
+      "place": 46,
+      "tags": "",
+      "team": "GTSC",
+      "time": "31.11"
     },
     {
       "course": "SCY",
@@ -4067,10 +4076,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
-      "name": "Shoemaker, Harri",
+      "name": "Shoemaker, Harrison",
       "place": 2,
       "tags": "",
-      "team": null,
+      "team": "AUB",
       "time": "22.10"
     },
     {
@@ -4193,10 +4202,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
-      "name": "Klingenberg, Bren",
+      "name": "Klingenberg, Brennan",
       "place": 15,
       "tags": "",
-      "team": null,
+      "team": "GTSC",
       "time": "23.60"
     },
     {
@@ -4229,10 +4238,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
-      "name": "Townsend, Matthe",
+      "name": "Townsend, Matthew",
       "place": 20,
       "tags": "",
-      "team": null,
+      "team": "GTSC",
       "time": "24.04"
     },
     {
@@ -4445,10 +4454,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
-      "name": "McGahagin, Conno",
+      "name": "McGahagin, Connor",
       "place": 44,
       "tags": "",
-      "team": null,
+      "team": "KSU",
       "time": "27.29"
     },
     {
@@ -4499,19 +4508,19 @@
     {
       "course": "SCY",
       "event": "50 Free",
-      "name": "Muralidharan, Vis",
+      "name": "Muralidharan, Vish",
       "place": 50,
       "tags": "",
-      "team": null,
+      "team": "KSU",
       "time": "28.92"
     },
     {
       "course": "SCY",
       "event": "50 Free",
-      "name": "Friginette, Brando",
+      "name": "Friginette, Brandon",
       "place": 51,
       "tags": "",
-      "team": null,
+      "team": "KSU",
       "time": "28.94"
     },
     {
@@ -5019,7 +5028,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
-      "name": "Catalasan, Marian",
+      "name": "Catalasan, Mariann",
       "place": 8,
       "splits": [
         {
@@ -5032,7 +5041,7 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "FSUC",
       "time": "1:08.62"
     },
     {
@@ -5057,7 +5066,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
-      "name": "Alsobrook, KatharineFLOR",
+      "name": "Alsobrook, Katharine",
       "place": 10,
       "splits": [
         {
@@ -5070,7 +5079,7 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "FLOR",
       "time": "1:09.59"
     },
     {
@@ -5114,7 +5123,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
-      "name": "Kimbrell, Mackenz",
+      "name": "Kimbrell, Mackenzie",
       "place": 13,
       "splits": [
         {
@@ -5127,13 +5136,13 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "AUB",
       "time": "1:13.13"
     },
     {
       "course": "SCY",
       "event": "100 Back",
-      "name": "Sampson, Macken",
+      "name": "Sampson, Mackenzie",
       "place": 14,
       "splits": [
         {
@@ -5146,7 +5155,7 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "FSUC",
       "time": "1:19.35"
     },
     {
@@ -5190,7 +5199,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
-      "name": "Marquez, Alexand",
+      "name": "Marquez, Alexandro",
       "place": 2,
       "splits": [
         {
@@ -5203,7 +5212,7 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "FSUC",
       "time": "55.35"
     },
     {
@@ -5441,10 +5450,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
-      "name": "Avedisian, Michae",
+      "name": "Avedisian, Michaela",
       "place": 10,
       "tags": "",
-      "team": null,
+      "team": "FSUC",
       "time": "35.44"
     },
     {
@@ -5585,11 +5594,20 @@
     {
       "course": "SCY",
       "event": "50 Breast",
-      "name": "Sampson, Macken",
+      "name": "Sampson, Mackenzie",
       "place": 26,
       "tags": "",
-      "team": null,
+      "team": "FSUC",
       "time": "42.58"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "name": "Covaliu-Fuentes, Veronic",
+      "place": 27,
+      "tags": "",
+      "team": "GTSC",
+      "time": "42.97"
     },
     {
       "course": "SCY",
@@ -5711,10 +5729,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
-      "name": "Klingenberg, Bren",
+      "name": "Klingenberg, Brennan",
       "place": 11,
       "tags": "",
-      "team": null,
+      "team": "GTSC",
       "time": "32.28"
     },
     {
@@ -5801,19 +5819,19 @@
     {
       "course": "SCY",
       "event": "50 Breast",
-      "name": "Muralidharan, Vis",
+      "name": "Muralidharan, Vish",
       "place": 21,
       "tags": "",
-      "team": null,
+      "team": "KSU",
       "time": "39.03"
     },
     {
       "course": "SCY",
       "event": "50 Breast",
-      "name": "Friginette, Brando",
+      "name": "Friginette, Brandon",
       "place": 22,
       "tags": "",
-      "team": null,
+      "team": "KSU",
       "time": "44.33"
     },
     {
@@ -5846,7 +5864,7 @@
     {
       "course": "SCY",
       "event": "400 IM",
-      "name": "Plantamura, Natal",
+      "name": "Plantamura, Natalie",
       "place": 1,
       "splits": [
         {
@@ -5883,7 +5901,7 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "GTSC",
       "time": "5:10.85"
     },
     {
@@ -6521,7 +6539,7 @@
     {
       "course": "SCY",
       "event": "200 Back",
-      "name": "Catalasan, Marian",
+      "name": "Catalasan, Mariann",
       "place": 4,
       "splits": [
         {
@@ -6542,7 +6560,7 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "FSUC",
       "time": "2:26.75"
     },
     {
@@ -6557,7 +6575,7 @@
     {
       "course": "SCY",
       "event": "200 Back",
-      "name": "Marquez, Alexand",
+      "name": "Marquez, Alexandro",
       "place": 1,
       "splits": [
         {
@@ -6578,7 +6596,7 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "FSUC",
       "time": "2:00.90"
     },
     {
@@ -6795,7 +6813,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
-      "name": "Kimbrell, Mackenz",
+      "name": "Kimbrell, Mackenzie",
       "place": 5,
       "splits": [
         {
@@ -6808,7 +6826,7 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "AUB",
       "time": "1:17.96"
     },
     {
@@ -7182,10 +7200,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
-      "name": "Rosenkranz, Bobb",
+      "name": "Rosenkranz, Bobbie",
       "place": 3,
       "tags": "",
-      "team": null,
+      "team": "FSUC",
       "time": "29.35"
     },
     {
@@ -7317,10 +7335,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
-      "name": "Sampson, Macken",
+      "name": "Sampson, Mackenzie",
       "place": 18,
       "tags": "",
-      "team": null,
+      "team": "FSUC",
       "time": "37.42"
     },
     {
@@ -7331,6 +7349,15 @@
       "tags": "",
       "team": "FLOR",
       "time": "38.44"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "name": "Covaliu-Fuentes, Veronic",
+      "place": 20,
+      "tags": "",
+      "team": "GTSC",
+      "time": "41.03"
     },
     {
       "course": "SCY",
@@ -7416,19 +7443,19 @@
     {
       "course": "SCY",
       "event": "50 Back",
-      "name": "Marquez, Alexand",
+      "name": "Marquez, Alexandro",
       "place": 2,
       "tags": "",
-      "team": null,
+      "team": "FSUC",
       "time": "24.84"
     },
     {
       "course": "SCY",
       "event": "50 Back",
-      "name": "Kvashchuk, Mykha",
+      "name": "Kvashchuk, Mykhailo",
       "place": 3,
       "tags": "",
-      "team": null,
+      "team": "FSUC",
       "time": "25.17"
     },
     {
@@ -7551,10 +7578,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
-      "name": "Muralidharan, Vis",
+      "name": "Muralidharan, Vish",
       "place": 17,
       "tags": "",
-      "team": null,
+      "team": "KSU",
       "time": "31.98"
     },
     {
@@ -7724,7 +7751,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
-      "name": "Rosenkranz, Bobb",
+      "name": "Rosenkranz, Bobbie",
       "place": 3,
       "splits": [
         {
@@ -7737,7 +7764,7 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "FSUC",
       "time": "56.63"
     },
     {
@@ -8028,7 +8055,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
-      "name": "Kimbrell, Mackenz",
+      "name": "Kimbrell, Mackenzie",
       "place": 19,
       "splits": [
         {
@@ -8041,7 +8068,7 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "AUB",
       "time": "1:08.36"
     },
     {
@@ -8443,7 +8470,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
-      "name": "Townsend, Matthe",
+      "name": "Townsend, Matthew",
       "place": 15,
       "splits": [
         {
@@ -8456,7 +8483,7 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "GTSC",
       "time": "53.24"
     },
     {
@@ -8766,7 +8793,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
-      "name": "McGahagin, Conno",
+      "name": "McGahagin, Connor",
       "place": 32,
       "splits": [
         {
@@ -8779,7 +8806,7 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "KSU",
       "time": "1:00.27"
     },
     {
@@ -8823,7 +8850,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
-      "name": "Muralidharan, Vis",
+      "name": "Muralidharan, Vish",
       "place": 35,
       "splits": [
         {
@@ -8836,7 +8863,7 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "KSU",
       "time": "1:01.70"
     },
     {
@@ -8888,7 +8915,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
-      "name": "Klingenberg, Bren",
+      "name": "Klingenberg, Brennan",
       "place": null,
       "tags": "",
       "team": null,
@@ -9113,10 +9140,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
-      "name": "Alsobrook, KatharineFLOR",
+      "name": "Alsobrook, Katharine",
       "place": 21,
       "tags": "",
-      "team": null,
+      "team": "FLOR",
       "time": "30.77"
     },
     {
@@ -9176,10 +9203,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
-      "name": "Baumhover, Aubre",
+      "name": "Baumhover, Aubrey",
       "place": 28,
       "tags": "",
-      "team": null,
+      "team": "AUB",
       "time": "32.44"
     },
     {
@@ -9401,10 +9428,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
-      "name": "Klingenberg, Bren",
+      "name": "Klingenberg, Brennan",
       "place": 15,
       "tags": "",
-      "team": null,
+      "team": "GTSC",
       "time": "26.13"
     },
     {
@@ -9518,10 +9545,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
-      "name": "McGahagin, Conno",
+      "name": "McGahagin, Connor",
       "place": 28,
       "tags": "",
-      "team": null,
+      "team": "KSU",
       "time": "29.72"
     },
     {
@@ -9554,10 +9581,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
-      "name": "Friginette, Brando",
+      "name": "Friginette, Brandon",
       "place": 32,
       "tags": "",
-      "team": null,
+      "team": "KSU",
       "time": "32.72"
     },
     {
@@ -9635,7 +9662,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
-      "name": "Rosenkranz, Bobb",
+      "name": "Rosenkranz, Bobbie",
       "place": 1,
       "splits": [
         {
@@ -9648,13 +9675,13 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "FSUC",
       "time": "1:05.16"
     },
     {
       "course": "SCY",
       "event": "100 IM",
-      "name": "Plantamura, Natal",
+      "name": "Plantamura, Natalie",
       "place": 2,
       "splits": [
         {
@@ -9667,7 +9694,7 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "GTSC",
       "time": "1:05.77"
     },
     {
@@ -10297,7 +10324,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
-      "name": "Townsend, Matthe",
+      "name": "Townsend, Matthew",
       "place": 7,
       "splits": [
         {
@@ -10310,7 +10337,7 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "GTSC",
       "time": "1:03.40"
     },
     {

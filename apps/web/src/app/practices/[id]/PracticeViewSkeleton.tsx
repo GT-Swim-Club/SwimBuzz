@@ -12,7 +12,7 @@ export default function PracticeViewSkeleton() {
     <div className="space-y-5" aria-busy="true" aria-label="Loading practice">
       <header>
         <Skeleton className="h-4 w-24" />
-        <div className="mt-2 flex items-start justify-between gap-4">
+        <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div className="min-w-0 flex-1 space-y-3">
             <Skeleton className="h-10 w-3/5 max-w-xl" />
             <Skeleton className="h-5 w-52" />

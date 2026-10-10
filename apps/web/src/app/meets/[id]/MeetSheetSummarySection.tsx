@@ -46,6 +46,7 @@ import MeetAddMenu from "./MeetAddMenu"
 import { MenuDivider, MenuItem, menuPanel } from "./MeetMenu"
 import SummaryRow, { EventBadge, type RowDisplay, type RowDensity, type RowResult } from "./SummaryRow"
 import type { DetailRound, SwimDetail } from "./SwimDetailModal"
+import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
 function formatHeat(entry: SheetSummary["entries"][number]) {
   // Alternates are finals-only; prelim rows may still carry the flag from merge.
@@ -105,7 +106,8 @@ function finalsPodiumPlace(entry: SheetSummary["entries"][number]): number | und
     const place = relayTeamPlace(entry)
     return place != null && place >= 1 && place <= 3 ? place : undefined
   }
-  if (entry.resultRound === "P") return undefined
+  // A swim-off only breaks a tie for a qualifying spot — its place isn't a finish.
+  if (entry.resultRound === "P" || entry.isSwimOff) return undefined
   if (entry.finalPlace != null && entry.finalPlace >= 1 && entry.finalPlace <= 3) {
     return entry.finalPlace
   }
@@ -138,8 +140,9 @@ function resolveDisplayEventNumber(
 ): number {
   if (entry.eventNumber > 0) return entry.eventNumber
   if (!eventOptions?.length) return 0
-  const key = normalizeEventName(entry.event)
-  const opt = eventOptions.find((o) => normalizeEventName(o.event) === key)
+  // Packet names spell strokes out ("50 Butterfly"); results use "50 Fly".
+  const key = canonicalizeStrokeEvent(entry.event)
+  const opt = eventOptions.find((o) => canonicalizeStrokeEvent(o.event) === key)
   if (!opt) return 0
   const gender =
     entry.entryType === "relay_team"
@@ -149,6 +152,23 @@ function resolveDisplayEventNumber(
     return eventNumberForGender(opt, gender) ?? 0
   }
   return opt.women ?? opt.men ?? 0
+}
+
+/** The relay (same event and round) this leadoff row's athlete swam leg 1 of. */
+function leadoffParentRelay(
+  entry: SummaryEntry,
+  allEntries: SummaryEntry[] | undefined
+): SummaryEntry | undefined {
+  const source = entry.relayLeadoffSource
+  if (!entry.isRelayLeadoff || !source) return undefined
+  const round = entry.relayLeadoffRound || ""
+  return (allEntries ?? []).find(
+    (e) =>
+      e.entryType === "relay_team" &&
+      normalizeEventName(e.event) === source &&
+      (!round || effectiveRelayRound(e) === round) &&
+      (e.relaySwimmers?.some((s) => s.leg === 1 && s.athleteId === entry.athleteId) ?? false)
+  )
 }
 
 /** A relay leadoff carries its parent relay's event number, not the individual event's. */
@@ -209,11 +229,16 @@ function rowRoundResult(entry: SummaryEntry, allEntries?: SummaryEntry[]): Round
   const timedOpts = allEntries ? { allEntries } : undefined
   const nt = entry.timeStatus === "NT" ? "NT" : undefined
 
+  if (entry.isSwimOff) {
+    return { label: "Swim-off", time: entry.resultTime, status: entry.resultStatus, place: entry.resultPlace }
+  }
+
   if (entry.isRelayLeadoff && entry.relayLeadoffTime) {
+    const relay = leadoffParentRelay(entry, allEntries)
     return {
       label: "Leadoff",
       time: entry.relayLeadoffTime,
-      place: entry.resultPlace,
+      place: (relay ? relayTeamPlace(relay) : undefined) ?? entry.resultPlace,
       seed: entry.seedTime,
     }
   }
@@ -297,6 +322,18 @@ function rowRoundResult(entry: SummaryEntry, allEntries?: SummaryEntry[]): Round
 
 function buildIndividualRounds(entry: SheetEntry, allEntries?: SummaryEntry[]): DetailRound[] {
   if (entry.entryType === "relay_team" || entry.isRelayLeadoff) return []
+
+  if (entry.isSwimOff) {
+    return [
+      {
+        label: "Swim-off",
+        time: entry.resultTime,
+        place: entry.resultPlace,
+        status: entry.resultStatus,
+        splits: entryDisplaySplits(entry),
+      },
+    ]
+  }
 
   const timedOpts = { allEntries }
   const rounds: DetailRound[] = []
@@ -500,13 +537,16 @@ function SummaryEntryRow({
     : resolveDisplayEventNumber(entry, athleteGenders, eventNumberOptions)
   const compact = display.density === "compact"
   const res = rowRoundResult(entry, allEntries)
-  const podiumPlace = finalsPodiumPlace(entry)
+  // A leadoff swam in its relay's heat and lane, and finished where the relay did.
+  const leadoffRelay = leadoffParentRelay(entry, allEntries)
+  const slotEntry = leadoffRelay ?? entry
+  const podiumPlace = finalsPodiumPlace(slotEntry)
   const relayLetter = isRelay ? `Relay ${displayRelayLetter(entry.relayLetter)}` : undefined
 
-  const heat = formatHeat(entry)
-  const lane = isRelay ? relayLane(entry) : individualLane(entry)
+  const heat = formatHeat(slotEntry)
+  const lane = slotEntry.entryType === "relay_team" ? relayLane(slotEntry) : individualLane(slotEntry)
   const heatLane =
-    [heat, lane != null ? `Lane ${lane}` : null, entry.startTime].filter(Boolean).join(" · ") || null
+    [heat, lane != null ? `Lane ${lane}` : null, slotEntry.startTime].filter(Boolean).join(" · ") || null
 
   const tags = !isRelay ? displayMeetResultTags(entry.resultTags ?? "") : null
   const sub = tags ?? ""
@@ -757,14 +797,7 @@ export default function MeetSheetSummarySection({
     return () => cancelAnimationFrame(frame)
   }, [])
 
-  useEffect(() => {
-    if (!settingsOpen) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setSettingsOpen(false)
-    }
-    window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
-  }, [settingsOpen])
+  useEscapeToClose(settingsOpen, () => setSettingsOpen(false))
 
   function persist(key: string, value: string) {
     try {
@@ -831,13 +864,25 @@ export default function MeetSheetSummarySection({
     : []
   const grouped = summary ? groupSheetByAthlete(displayEntries, athleteNames) : []
 
+  // Sort by the event number each row shows — a leadoff's is its relay's, which
+  // only resolves here (its own eventNumber is 0 and would sink it to the end).
+  const displayedEventNumber = (entry: SummaryEntry) =>
+    entry.isRelayLeadoff
+      ? resolveLeadoffEventNumber(entry, displayEntries, athleteGenders, eventNumberOptions)
+      : resolveDisplayEventNumber(entry, athleteGenders, eventNumberOptions)
+  const compareByDisplayedEvent = (a: SummaryEntry, b: SummaryEntry) =>
+    compareIndividualEntries(
+      { ...a, eventNumber: displayedEventNumber(a) },
+      { ...b, eventNumber: displayedEventNumber(b) }
+    )
+
   const myIndividualEntries = viewerAthleteId
     ? displayEntries
         .filter(
           (e) =>
             e.athleteId === viewerAthleteId && (e.entryType === "individual" || e.isRelayLeadoff)
         )
-        .sort(compareIndividualEntries)
+        .sort(compareByDisplayedEvent)
     : []
   const myRelays = viewerAthleteId
     ? relays
@@ -887,8 +932,9 @@ export default function MeetSheetSummarySection({
 
   // For the "by event" view: use the de-duped relay list (same as the by-athlete relay section)
   // so that seed rows from the heat sheet don't appear as duplicates alongside result rows.
+  // Leadoffs are part of their relay, not entries in the individual event.
   const deduplicatedByEventEntries: SummaryEntry[] = [
-    ...displayEntries.filter((entry) => entry.entryType !== "relay_team"),
+    ...displayEntries.filter((entry) => entry.entryType !== "relay_team" && !entry.isRelayLeadoff),
     ...relays,
   ].filter(matchesGenderFilter)
 
@@ -1260,7 +1306,7 @@ export default function MeetSheetSummarySection({
             </div>
           ) : null}
           {filteredOtherGrouped.map((athleteGroup) => {
-            const events = [...athleteGroup.entries].sort(compareIndividualEntries)
+            const events = [...athleteGroup.entries].sort(compareByDisplayedEvent)
             const athleteData = athletes.find((a) => a.id === athleteGroup.entries[0]?.athleteId)
             return (
               <div

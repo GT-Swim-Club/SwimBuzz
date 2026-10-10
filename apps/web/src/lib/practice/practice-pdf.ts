@@ -459,11 +459,24 @@ export function buildPracticePdf(input: PracticePdfInput): jsPDF {
   function drawWavesIcon(x: number, baseline: number, color: RGB) {
     doc.setDrawColor(...color)
     doc.setLineWidth(0.85)
-    for (const row of [6, 12, 18]) {
+    // Same scalloped rows as the SVG `waves` icon: arcs of radius 3.63 dipping between crests 6.67 apart.
+    const w = 20 / 3
+    const r = 3.63
+    const a = Math.asin(w / 2 / r)
+    const rows: { y: number; x0: number; arcs: number }[] = [
+      { y: 5, x0: 2 + w, arcs: 2 },
+      { y: 11, x0: 2, arcs: 3 },
+      { y: 17, x0: 2, arcs: 2 },
+    ]
+    for (const { y: crest, x0, arcs } of rows) {
+      const cy = crest - r * Math.cos(a)
       const points: [number, number][] = []
-      for (let i = 0; i <= 20; i++) {
-        const t = i / 20
-        points.push([2 + t * 20, row + Math.sin(t * Math.PI * 4)])
+      for (let k = 0; k < arcs; k++) {
+        const cx = x0 + w * (k + 0.5)
+        for (let i = k === 0 ? 0 : 1; i <= 8; i++) {
+          const theta = -a + (2 * a * i) / 8
+          points.push([cx + r * Math.sin(theta), cy + r * Math.cos(theta)])
+        }
       }
       strokeIconPath(x, baseline, points)
     }

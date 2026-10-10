@@ -32,6 +32,8 @@ export type RosterSummaryEntry = {
   prelimPlace?: number
   finalPlace?: number
   resultStatus?: string
+  /** Swim-off (tie-breaker) result row. */
+  isSwimOff?: boolean
   alternate?: boolean
   rosterOnly?: boolean
   relayLetter?: string | null
@@ -72,7 +74,7 @@ function formatTimes(entry: RosterSummaryEntry): string | null {
   if (entry.prelimTime) parts.push(`P ${entry.prelimTime}`)
   if (entry.finalTime) parts.push(`F ${entry.finalTime}`)
   if (entry.resultTime && !entry.prelimTime && !entry.finalTime) {
-    parts.push(entry.resultTime)
+    parts.push(entry.isSwimOff ? `Swim-off ${entry.resultTime}` : entry.resultTime)
   }
   if (entry.resultStatus) parts.push(entry.resultStatus)
   return parts.length ? parts.join(" · ") : null

@@ -189,8 +189,11 @@ export default function PracticeDetail({
     ) : (
     <main className="space-y-5">
       <div>
-        <div className="flex items-center justify-between gap-4">
-          <div className="min-w-0 flex-1">
+        {/* The text column is sized at min-content for line-breaking, so location/tags
+            first wrap onto their own rows beside the actions; the actions only drop to
+            their own row once even the (unbreakable) date line can't share one with them. */}
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+          <div className="w-min min-w-0 flex-[1_1_auto]">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="min-w-0 text-4xl font-semibold text-foreground sm:text-[42px]">{title}</h1>
               {isCoach && !published && (
@@ -201,7 +204,7 @@ export default function PracticeDetail({
             </div>
             <div className="mt-1.5 text-lg text-foreground-secondary sm:text-[19px]">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-1.5 whitespace-nowrap">
                   <InfoIcon kind="calendar" className={metaIconCls} />
                   <RelativeDateTime startsAt={startsAt} endsAt={endsAt} timeZone={timeZone} />
                 </span>

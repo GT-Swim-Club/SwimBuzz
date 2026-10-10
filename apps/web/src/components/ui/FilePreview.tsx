@@ -4,6 +4,7 @@ import dynamic from "next/dynamic"
 import { type ReactNode, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import HoverDetail from "./HoverDetail"
+import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
 // react-pdf pulls in pdfjs-dist, which touches browser-only globals (DOMMatrix) at module
 // evaluation time, so it must never be evaluated during SSR.
@@ -301,14 +302,7 @@ export function FilePreviewDialog({
     }
   }, [open])
 
-  useEffect(() => {
-    if (!open) return
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose()
-    }
-    window.addEventListener("keydown", onKeyDown)
-    return () => window.removeEventListener("keydown", onKeyDown)
-  }, [onClose, open])
+  useEscapeToClose(open, onClose)
 
   // While a Previous/Next smooth scroll is in flight, the counter stays on the destination page
   // instead of flipping back to the pages being scrolled past. The hold ends when the scroll lands,

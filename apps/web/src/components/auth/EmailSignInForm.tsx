@@ -1,13 +1,11 @@
 "use client"
 
 import { useState, FormEvent } from "react"
-import Image from "next/image"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import OpenOutlookButton from "@/components/auth/OpenOutlookButton"
 
 type Step = "email" | "code"
-
-const OUTLOOK_WEB_URL = "https://outlook.office.com/mail/"
 
 export default function EmailSignInForm({
   callbackUrl = "/athletes",
@@ -126,21 +124,7 @@ export default function EmailSignInForm({
           {loading ? "Signing in…" : "Verify and sign in"}
         </button>
 
-        <a
-          href={OUTLOOK_WEB_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-background px-5 py-3 text-[15px] font-medium text-foreground shadow-sm transition-colors hover:bg-fill-secondary"
-        >
-          <Image
-            src="/outlook-icon.png"
-            alt=""
-            width={20}
-            height={20}
-            className="h-5 w-5 shrink-0"
-          />
-          Open Outlook
-        </a>
+        <OpenOutlookButton />
 
         <div className="flex items-center justify-between text-[13px] text-foreground-tertiary">
           <button

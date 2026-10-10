@@ -79,6 +79,8 @@ export type SheetEntry = {
   prelimStatus?: string
   finalStatus?: string
   resultTags?: string
+  /** Swim-off (tie-breaker) result — its own row, never merged into the event's prelims/finals. */
+  isSwimOff?: boolean
   /** Coach "add to roster" seed — overridden by psych/entries/heat/results. */
   manual?: boolean
   /** Finals heat-sheet alternate (not a scored heat/lane). */
@@ -129,6 +131,7 @@ export type MeetResultEntry = {
   prelimStatus?: string
   finalStatus?: string
   resultTags?: string
+  isSwimOff?: boolean
   prelimHeat?: number
   prelimHeatTotal?: number
   prelimLane?: number
@@ -153,7 +156,13 @@ function resultGroupKey(athleteId: string, event: string, tags: string): string 
     const { relayEvent, round } = parseLeadoffTag(tags)
     return leadoffResultKey(athleteId, event, relayEvent, round)
   }
+  if (isSwimOffTag(tags)) return `${athleteId}|${event}|swimoff`
   return `${athleteId}|${event}|swim`
+}
+
+/** Swim tag "S": a swim-off from a results PDF ("#35S … Swim-off"). */
+export function isSwimOffTag(tags: string): boolean {
+  return tags.trim().toUpperCase() === "S"
 }
 
 function isPrelimTag(tags: string): boolean {
@@ -468,6 +477,7 @@ function mergeMeetResultEntry(
     prelimStatus: a.prelimStatus ?? b.prelimStatus,
     finalStatus: a.finalStatus ?? b.finalStatus,
     resultTags: a.resultTags || b.resultTags,
+    isSwimOff: a.isSwimOff || b.isSwimOff || undefined,
     prelimHeat: b.prelimHeat ?? a.prelimHeat,
     prelimLane: b.prelimLane ?? a.prelimLane,
     prelimHeatTotal: b.prelimHeatTotal ?? a.prelimHeatTotal,
@@ -494,13 +504,7 @@ export function mergeMeetResultEntries(
   const byKey = new Map<string, MeetResultEntry>()
   for (const group of groups) {
     for (const entry of group) {
-      const key = resultKey(
-        entry.athleteId,
-        entry.event,
-        entry.isRelayLeadoff,
-        entry.relayLeadoffSource,
-        entry.relayLeadoffRound
-      )
+      const key = entryResultKey(entry)
       const existing = byKey.get(key)
       byKey.set(key, existing ? mergeMeetResultEntry(existing, entry) : entry)
     }
@@ -774,6 +778,10 @@ export function swimsToMeetResults(swims: SwimResultInput[]): MeetResultEntry[] 
       existing.swimId = swim.id
       if (relayEvent) existing.relayLeadoffSource = relayEvent
       if (round) existing.relayLeadoffRound = round
+    } else if (isSwimOffTag(swim.tags)) {
+      existing.isSwimOff = true
+      existing.resultTime = time
+      existing.resultSwimId = swim.id
     } else if (isPrelimTag(swim.tags)) {
       existing.prelimTime = time
       existing.prelimSwimId = swim.id
@@ -1068,7 +1076,7 @@ export function isTimedFinalsEvent(entries: SheetEntry[], event: string): boolea
   let hasTimedFinalsRound = false
 
   for (const e of entries) {
-    if (e.isRelayLeadoff) continue
+    if (e.isRelayLeadoff || e.isSwimOff) continue
     if (normalizeEventName(e.event) !== eventKey) continue
     if (isTimedFinalsRound(e.round)) hasTimedFinalsRound = true
     if (e.entryType !== "individual") continue
@@ -1233,7 +1241,7 @@ export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] 
       )
       continue
     }
-    if (entry.isRelayLeadoff) {
+    if (entry.isRelayLeadoff || entry.isSwimOff) {
       out.push(entry)
       continue
     }
@@ -1340,6 +1348,16 @@ export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] 
             )
           )
         }
+      } else if (
+        hasPrelim &&
+        !hasFinal &&
+        !(entry.prelimTime || entry.prelimStatus) &&
+        (entry.resultTime || entry.resultStatus) &&
+        eventIsTimedFinals(entry.event)
+      ) {
+        // Prelims heat sheet placement + an untagged single-round result: the
+        // heat sheet mislabeled a timed-finals event, so don't show it as prelims.
+        out.push(asTimedFinalsRow({ ...entry, swimId: entry.resultSwimId ?? entry.swimId }))
       } else if (hasPrelim && !hasFinal) {
         out.push(
           withRoundSplits(
@@ -1391,15 +1409,18 @@ export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] 
       )
     )
 
+    // Generic heat/lane here is the prelims heat-sheet placement — only finals
+    // placements (finals sheet or results) belong on the finals row.
+    const finalPlacement = sheetHeatLaneForRound(entry, "F")
     out.push(
       withRoundSplits(
         {
           ...entry,
           resultRound: "F",
           swimId: entry.finalSwimId ?? entry.resultSwimId ?? entry.swimId,
-          heat: entry.finalHeat ?? entry.heat,
-          lane: entry.finalLane ?? entry.lane,
-          heatTotal: entry.finalHeatTotal ?? entry.heatTotal,
+          heat: finalPlacement.heat,
+          lane: finalPlacement.lane,
+          heatTotal: finalPlacement.heatTotal,
           seedTime: entry.finalsSheetSeedTime,
           seedRank: entry.finalsSheetSeedRank,
         },
@@ -2264,6 +2285,25 @@ export function resultKey(
   return `${athleteId}|${normalizeEventName(event)}|individual|`
 }
 
+/** resultKey for a whole result entry — swim-offs and leadoffs each get their own key. */
+export function entryResultKey(
+  entry: Pick<
+    MeetResultEntry,
+    "athleteId" | "event" | "isRelayLeadoff" | "relayLeadoffSource" | "relayLeadoffRound" | "isSwimOff"
+  >
+): string {
+  if (entry.isSwimOff && !entry.isRelayLeadoff) {
+    return `${entry.athleteId}|${normalizeEventName(entry.event)}|swimoff|`
+  }
+  return resultKey(
+    entry.athleteId,
+    entry.event,
+    entry.isRelayLeadoff,
+    entry.relayLeadoffSource,
+    entry.relayLeadoffRound
+  )
+}
+
 function mergeRelaySwimmers(
   a: SheetEntry["relaySwimmers"],
   b: SheetEntry["relaySwimmers"],
@@ -2586,13 +2626,7 @@ export function mergeSheetSummaries(
   fuseRelayResultRows(byKey)
 
   for (const result of results ?? []) {
-    const key = resultKey(
-      result.athleteId,
-      result.event,
-      result.isRelayLeadoff,
-      result.relayLeadoffSource,
-      result.relayLeadoffRound
-    )
+    const key = entryResultKey(result)
     const existing = byKey.get(key)
     if (existing) {
       const heatPatch = mergeResultHeatIntoSheetEntry(existing, result)
@@ -2663,6 +2697,7 @@ export function mergeSheetSummaries(
         prelimStatus: result.prelimStatus,
         finalStatus: result.finalStatus,
         resultTags: result.resultTags,
+        isSwimOff: result.isSwimOff,
         ...resultHeatFieldsFromMeetResult(result),
         seedTime: result.seedTime,
         manual: result.manual,

@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useId, useRef, useState } from "react"
+import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
 /**
  * Multi-select dropdown for a practice's tags. The closed field reads as the same
@@ -22,20 +23,15 @@ export default function PracticeTagSelect({
   // Keep tags that were removed from the catalog visible so they can still be cleared.
   const options = [...availableTags, ...value.filter((t) => !availableTags.includes(t))]
 
+  useEscapeToClose(open, () => setOpen(false))
+
   useEffect(() => {
     if (!open) return
     function onPointerDown(event: MouseEvent) {
       if (!rootRef.current?.contains(event.target as Node)) setOpen(false)
     }
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false)
-    }
     document.addEventListener("mousedown", onPointerDown)
-    document.addEventListener("keydown", onKeyDown)
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown)
-      document.removeEventListener("keydown", onKeyDown)
-    }
+    return () => document.removeEventListener("mousedown", onPointerDown)
   }, [open])
 
   if (options.length === 0) {

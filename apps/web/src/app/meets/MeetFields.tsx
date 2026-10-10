@@ -8,6 +8,7 @@ import { TimePicker, TimeZonePicker } from "@/components/ui/CustomDateTimePicker
 import { FileDropzone } from "@/components/ui/FileDropzone"
 import { AppIcon } from "@/components/ui/AppIcon"
 import { DEFAULT_TIME_ZONE, defaultSeason, formatClockTime, formatSeasonLabel, zoneAbbreviation } from "@swimbuzz/shared"
+import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
 export type MeetFormState = {
   name: string
@@ -114,6 +115,7 @@ function FloatingDateRangePanel({
 }) {
   const panelRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState<PanelPosition | null>(null)
+  useEscapeToClose(true, onClose)
 
   const reposition = useCallback(() => {
     const anchor = anchorRef.current
@@ -144,17 +146,11 @@ function FloatingDateRangePanel({
       if (target.closest?.("[data-floating-popover]")) return
       onClose()
     }
-    function onKeyDown(event: KeyboardEvent) {
-      // Let an open nested picker handle Escape first.
-      if (event.key === "Escape" && !document.querySelector("[data-floating-popover]")) onClose()
-    }
     document.addEventListener("mousedown", onPointerDown)
-    document.addEventListener("keydown", onKeyDown)
     window.addEventListener("resize", reposition)
     window.addEventListener("scroll", reposition, true)
     return () => {
       document.removeEventListener("mousedown", onPointerDown)
-      document.removeEventListener("keydown", onKeyDown)
       window.removeEventListener("resize", reposition)
       window.removeEventListener("scroll", reposition, true)
     }
@@ -383,7 +379,8 @@ export function MeetImageHeader({
   }
 
   return (
-    <div className="relative h-[136px] shrink-0 border-b border-border">
+    <div className="relative aspect-[2/1] shrink-0 border-b border-border">
+      {/* 2:1 like BannerCropper, so the preview shows the whole uploaded banner. */}
       <h2 className="sr-only">{title}</h2>
       <FileDropzone
         onFilesSelected={handleBannerFiles}

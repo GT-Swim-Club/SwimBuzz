@@ -1,5 +1,6 @@
 import type { MeetResultEntry, SheetEntry } from "@/lib/meet/meet-sheet-summary"
 import { isRelaySignupEvent } from "@/lib/meet/meet-signup"
+import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
 import { canonicalizeStrokeEvent, normalizeEventName } from "@/lib/swim/swim-parse"
 import { parseTime } from "@/lib/utils"
 
@@ -25,6 +26,16 @@ export type MeetSwimForStats = {
   id: string
   athleteId: string
   event: string
+  course: string
+  timeMs: number
+  athleteName?: string
+  gender?: string
+  tags?: string
+}
+
+export type NationalsCutForStats = {
+  event: string
+  gender: string
   course: string
   timeMs: number
 }
@@ -146,10 +157,22 @@ export function computeMeetResultHighlights(opts: {
   meetSwims: MeetSwimForStats[]
   pbMap: AthletePbMap
   athleteHrefById?: Map<string, string>
+  /** Bests from swims before this meet — used for biggest PR drop. */
+  priorPbMap?: AthletePbMap
+  /** Individual Nationals cuts for the meet's season. */
+  nationalsCuts?: NationalsCutForStats[]
   /** Relay team results — used for busiest-swimmer (each leg counts). */
   relayResults?: SheetEntry[] | null
 }): MeetHighlights | null {
-  const { results, meetSwims, pbMap, athleteHrefById, relayResults } = opts
+  const {
+    results,
+    meetSwims,
+    pbMap,
+    priorPbMap,
+    nationalsCuts,
+    athleteHrefById,
+    relayResults,
+  } = opts
 
   const timedOrPlaced = results.filter(
     (r) => !r.isRelayLeadoff && (hasTimedResult(r) || preferredPlace(r) != null)
@@ -173,27 +196,67 @@ export function computeMeetResultHighlights(opts: {
     counters.push({ label: "Swimmers", value: swimmerIds.size })
   }
 
-  // Podiums — at most one per athlete×event (prefer final place)
-  const podiumKeys = new Set<string>()
-  for (const r of results) {
-    if (r.isRelayLeadoff) continue
-    const place = preferredPlace(r)
-    if (place == null || place > 3) continue
-    podiumKeys.add(`${r.athleteId}|${normalizeEventName(r.event)}`)
+  // Wins / podiums / top 8s — at most one per athlete×event (prefer final place)
+  function countPlacedAtOrBetter(maxPlace: number): number {
+    const keys = new Set<string>()
+    for (const r of results) {
+      if (r.isRelayLeadoff) continue
+      const place = preferredPlace(r)
+      if (place == null || place > maxPlace) continue
+      keys.add(`${r.athleteId}|${normalizeEventName(r.event)}`)
+    }
+    return keys.size
   }
-  if (podiumKeys.size > 0) {
-    counters.push({ label: "Podiums", value: podiumKeys.size })
+  const winCount = countPlacedAtOrBetter(1)
+  if (winCount > 0) {
+    counters.push({ label: "Wins", value: winCount })
+  }
+  const podiumCount = countPlacedAtOrBetter(3)
+  if (podiumCount > 0) {
+    counters.push({ label: "Podiums", value: podiumCount })
+  }
+  const topEightCount = countPlacedAtOrBetter(8)
+  if (topEightCount > 0) {
+    counters.push({ label: "Top 8s", value: topEightCount })
   }
 
   // PRs set (including relay leadoffs)
   let prCount = 0
+  const prCountsByAthlete = new Map<string, { athleteName: string; count: number }>()
   for (const s of meetSwims) {
     if (!Number.isFinite(s.timeMs) || s.timeMs <= 0) continue
     const best = pbMap.get(pbKey(s.athleteId, s.event, s.course))
-    if (best != null && s.timeMs === best) prCount += 1
+    if (best == null || s.timeMs !== best) continue
+    prCount += 1
+    const prev = prCountsByAthlete.get(s.athleteId)
+    if (prev) prev.count += 1
+    else prCountsByAthlete.set(s.athleteId, { athleteName: s.athleteName ?? "", count: 1 })
   }
   if (prCount > 0) {
     counters.push({ label: "PRs set", value: prCount })
+  }
+
+  // Nationals cuts — at most one per athlete×event, relay leadoffs excluded
+  if (nationalsCuts?.length) {
+    const cutMsByKey = new Map<string, number>()
+    for (const cut of nationalsCuts) {
+      cutMsByKey.set(
+        `${cut.course}|${cut.gender}|${canonicalizeStrokeEvent(cut.event).toLowerCase()}`,
+        cut.timeMs
+      )
+    }
+    const cutKeys = new Set<string>()
+    for (const s of meetSwims) {
+      if (!s.gender || isRelayLeadoffSwimTag(s.tags ?? "")) continue
+      const event = canonicalizeStrokeEvent(s.event).toLowerCase()
+      if (!event || isRelaySignupEvent(event)) continue
+      const cutMs = cutMsByKey.get(`${s.course}|${s.gender}|${event}`)
+      if (cutMs == null || s.timeMs <= 0 || s.timeMs > cutMs) continue
+      cutKeys.add(`${s.athleteId}|${event}`)
+    }
+    if (cutKeys.size > 0) {
+      counters.push({ label: "Nationals cuts", value: cutKeys.size })
+    }
   }
 
   // Biggest drop vs seed
@@ -235,6 +298,43 @@ export function computeMeetResultHighlights(opts: {
         linkLabel: name,
       }
     }
+  }
+
+  // Biggest PR drop — vs. the athlete's best from before this meet
+  let bestPrDrop: {
+    athleteName: string
+    event: string
+    deltaMs: number
+  } | null = null
+  for (const s of meetSwims) {
+    if (!Number.isFinite(s.timeMs) || s.timeMs <= 0) continue
+    const prior = priorPbMap?.get(pbKey(s.athleteId, s.event, s.course))
+    if (prior == null) continue
+    const deltaMs = s.timeMs - prior
+    if (deltaMs >= 0) continue
+    if (!bestPrDrop || deltaMs < bestPrDrop.deltaMs) {
+      bestPrDrop = { athleteName: s.athleteName ?? "", event: s.event, deltaMs }
+    }
+  }
+  if (bestPrDrop) {
+    counters.push({
+      label: "Biggest PR drop",
+      value: formatDeltaMs(bestPrDrop.deltaMs),
+      hint: `${displayName(bestPrDrop.athleteName)} · ${canonicalizeStrokeEvent(bestPrDrop.event)}`,
+    })
+  }
+
+  // Most PRs — only worth calling out with 2+
+  let mostPrs: { athleteName: string; count: number } | null = null
+  for (const row of prCountsByAthlete.values()) {
+    if (!mostPrs || row.count > mostPrs.count) mostPrs = row
+  }
+  if (mostPrs && mostPrs.count > 1) {
+    counters.push({
+      label: "Most PRs",
+      value: displayName(mostPrs.athleteName),
+      hint: `${mostPrs.count} PRs`,
+    })
   }
 
   // Busiest swimmer — individual results + relay legs

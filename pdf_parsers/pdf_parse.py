@@ -630,13 +630,15 @@ def parse_team_from_line(line: str) -> str | None:
     Handles both short codes (e.g. 'GTSC-GA') and full club names
     (e.g. 'Georgia Tech Swim Club-GA') as printed in full-name result PDFs.
     Also handles cases where age is concatenated with team code (e.g. '18GTSC').
+    The time may carry Hy-Tek's exhibition "x" or judges'-decision "J" prefix
+    (e.g. 'J2:15.36').
     """
     # Try short code with concatenated age+team: name + age+team (no space) + time/paren
     # e.g. "Smith, Benjamin 18GTSC 1:52.91"
     concat_match = re.search(
         r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
         r"\s+\d{1,3}([A-Z0-9]{2,10}(?:-[A-Z]{2})?)"
-        r"\s+(?:\(|[\d:xX])",
+        r"\s+(?:\(|[\d:xX]|J\d)",
         line,
     )
     if concat_match:
@@ -646,8 +648,8 @@ def parse_team_from_line(line: str) -> str | None:
     match = re.search(
         r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
         r"(?:\s+\d{1,3})?"
-        r"\s+([A-Z0-9]{2,10}(?:-[A-Z]{2})?)"
-        r"\s+(?:\(|[\d:xX])",
+        r"\s+((?![0-9]+\s)[A-Z0-9]{2,10}(?:-[A-Z]{2})?)"
+        r"\s+(?:\(|[\d:xX]|J\d)",
         line,
     )
     if match:
@@ -1029,12 +1031,19 @@ def extract_parenthetical_split_tokens(line: str) -> list[str]:
     return best
 
 
+# Swim-off event headers ("#35S Women 50 Yard Fly Swim-off") and the tag their
+# rows are stored with — the app labels "S" swims as "Swim-off".
+SWIM_OFF_HEADER = re.compile(r"\bswim[\s-]?off\b", re.I)
+SWIM_OFF_TAG = "S"
+
+
 def parse_text_lines(lines: list[str], course: str) -> list[dict]:
     results: list[dict] = []
     current_event: str | None = None
     current_round: str | None = None
     last_result_indices: list[int] = []
     in_relay_section: bool = False
+    in_swim_off: bool = False
     # Hy-Tek wraps long races (400+) onto multiple split-only lines; collect
     # consecutive ones before mapping distances (same idea as relay _split_parts).
     pending_split_tokens: list[str] = []
@@ -1076,6 +1085,9 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
         if maybe_event and len(stripped) < 120:
             flush_pending_splits()
             current_event = maybe_event
+            # "#35S Women 50 Yard Fly Swim-off" — its rows are tie-breaker swims,
+            # not the event's prelims/finals.
+            in_swim_off = bool(SWIM_OFF_HEADER.search(stripped))
             in_relay_section = False
             last_result_indices = []
             # New event without a round header (not "Preliminaries ... (#3 ...)")
@@ -1126,7 +1138,7 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
                 "event": current_event,
                 "time": scratch.group(0).upper(),
                 "course": course,
-                "tags": current_round or "",
+                "tags": SWIM_OFF_TAG if in_swim_off else current_round or "",
                 "place": place,
                 "team": team,
             }
@@ -1146,7 +1158,7 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
                 "event": current_event,
                 "time": round_time.get("time") or round_time.get("status", ""),
                 "course": course,
-                "tags": round_time.get("tags", ""),
+                "tags": SWIM_OFF_TAG if in_swim_off else round_time.get("tags", ""),
                 "place": place,
                 "team": team,
             }
@@ -1529,6 +1541,19 @@ def parse_relay_leadoffs(lines: list[str], course: str) -> list[dict]:
     return results
 
 
+# A long name that runs past the age column lands after the age once words are
+# ordered by x: "Rasmussen, Isabel 18 Kather FLOR 1:00.98". Move the overflow
+# back in front of the age so the team code still follows it.
+_NAME_OVERFLOW_PAST_AGE = re.compile(
+    r"(,\s*[A-Z][A-Za-z'\-]*)\s+(\d{1,3})\s+([A-Z][a-z][A-Za-z'\-]*)"
+    r"(?=\s+(?!(?:NT|NS|DQ|SCR|DNF|DFS|NQT)\s)[A-Z0-9]{2,10}(?:-[A-Z]{2})?\s)"
+)
+
+
+def _fix_name_overflow(lines: list[str]) -> list[str]:
+    return [_NAME_OVERFLOW_PAST_AGE.sub(r"\1 \3 \2", line) for line in lines]
+
+
 def group_words_into_lines(words: list[dict], y_tol: float = 3.0) -> list[str]:
     """Reconstruct text lines from positioned words, one visual row per line."""
     if not words:
@@ -1728,7 +1753,9 @@ def detect_column_split(
     
     return []
 
-def extract_page_lines(page: Any, forced_splits: list[float] | None = None) -> list[str]:
+def extract_page_lines(
+    page: Any, forced_splits: list[float] | None = None, text_flow: bool = False
+) -> list[str]:
     """Extract lines in human reading order, handling multi-column layouts.
 
     For multi-column layouts, processes each column separately top-to-bottom,
@@ -1738,9 +1765,13 @@ def extract_page_lines(page: Any, forced_splits: list[float] | None = None) -> l
         page: A pdfplumber page object.
         forced_splits: If provided, use these column boundaries instead of auto-detecting.
             This ensures consistent multi-column treatment across all pages of the same PDF.
+        text_flow: Build words in content-stream order instead of by x position.
+            Results PDFs need this: sorting by x interleaves a name Hy-Tek printed
+            over the age column ("Plantamura, Natalie 23GTSC" -> "Natal i2e3GTSC").
+            Heat sheets don't — their stream order glues names onto team codes.
     """
     try:
-        words = page.extract_words(use_text_flow=False)
+        words = page.extract_words(use_text_flow=text_flow)
     except Exception:
         words = []
     if not words:
@@ -1754,7 +1785,8 @@ def extract_page_lines(page: Any, forced_splits: list[float] | None = None) -> l
     else:
         splits = detect_column_split(words, float(page.width), lines=page.lines, page_height=float(page.height))
     if not splits:
-        return group_words_into_lines(words)
+        lines = group_words_into_lines(words)
+        return _fix_name_overflow(lines) if text_flow else lines
 
     # Split words into columns
     columns: list[list[dict]] = []
@@ -1778,7 +1810,7 @@ def extract_page_lines(page: Any, forced_splits: list[float] | None = None) -> l
     for col_words in columns:
         result.extend(group_words_into_lines(col_words))
     
-    return result
+    return _fix_name_overflow(result) if text_flow else result
 
 
 def parse_meet_pdf_bytes(
@@ -1838,7 +1870,7 @@ def parse_meet_pdf_bytes(
 
         # Second pass: extract lines using the globally-detected split points.
         for page in pdf.pages:
-            all_text.extend(extract_page_lines(page, forced_splits=pdf_splits))
+            all_text.extend(extract_page_lines(page, forced_splits=pdf_splits, text_flow=True))
 
     # Store this flag in a context variable for use in extract_times_from_line
     _pdf_has_points_column.set(has_points_column)

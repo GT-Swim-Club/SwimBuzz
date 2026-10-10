@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, FormEvent } from "react"
+import OpenOutlookButton from "@/components/auth/OpenOutlookButton"
 import SignInButton from "@/components/auth/SignInButton"
 
 type Step = "email" | "code" | "google"
@@ -143,6 +144,8 @@ export default function StaffSignInForm({
         >
           {loading ? "Verifying…" : "Verify email"}
         </button>
+
+        <OpenOutlookButton />
 
         <div className="flex items-center justify-between text-[13px] text-foreground-tertiary">
           <button

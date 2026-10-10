@@ -11,6 +11,7 @@ import { broadcastPracticeEditLockChanged } from "@/lib/practice/practice-edit-l
 import { ATHLETE_VIEW_ENABLING_EVENT } from "@/lib/athlete/athlete-view"
 import { practicePath } from "@/lib/slug"
 import { MAX_PRACTICE_SETS } from "@/lib/practice/practice-input"
+import { sortTags } from "@/lib/practice/practice-tags"
 import InfoIcon from "@/components/ui/InfoIcon"
 import PracticeTagSelect from "./PracticeTagSelect"
 import ActionIcon from "@/components/ui/ActionIcon"
@@ -833,7 +834,7 @@ export default function PracticeEditor({
   function toggleTag(tag: string) {
     updateForm((f) => {
       const has = f.tags.includes(tag)
-      return { ...f, tags: has ? f.tags.filter((t) => t !== tag) : [...f.tags, tag] }
+      return { ...f, tags: has ? f.tags.filter((t) => t !== tag) : sortTags([...f.tags, tag]) }
     })
   }
 
@@ -1231,7 +1232,7 @@ export default function PracticeEditor({
           onClick={handleCancel}
           className="text-sm font-medium text-foreground-tertiary transition hover:text-foreground"
         >
-          {persistedId ? "← Back to practice" : "← All practices"}
+          {persistedId && hasEditedContent ? "← Back to practice" : "← All practices"}
         </button>
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="min-w-0 flex-1 text-3xl font-medium leading-tight tracking-tight sm:text-4xl">
@@ -1246,7 +1247,7 @@ export default function PracticeEditor({
             />
           </h1>
           <span className="rounded-full bg-primary/20 dark:bg-primary/30 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-active shadow-sm dark:text-primary-hover shrink-0">
-            {persistedId ? "Editing" : "New practice"}
+            {initial ? "Editing" : "New practice"}
           </span>
         </div>
 

@@ -91,7 +91,7 @@ async function MeetPageContent({ params }: { params: Promise<{ id: string }> }) 
     where: isCuid(param) ? { OR: [{ id: param }, { slug: param }] } : { slug: param },
     include: {
       swims: {
-        include: { athlete: { select: { id: true, firstName: true, lastName: true } } }},
+        include: { athlete: { select: { id: true, firstName: true, lastName: true, gender: true } } }},
       signupForm: {
         include: {
           entries: {
@@ -411,7 +411,10 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
     athleteId: s.athlete.id,
     event: s.event,
     course: s.course,
-    timeMs: s.timeMs}))
+    timeMs: s.timeMs,
+    athleteName: `${s.athlete.firstName} ${s.athlete.lastName}`,
+    gender: s.athlete.gender,
+    tags: s.tags}))
 
   let meetHighlights = null
   if (hasImportedResults || meet.swims.length > 0) {
@@ -421,16 +424,30 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
         ...results.map((r) => r.athleteId),
       ]),
     ]
-    const pbSwims =
+    const [pbSwims, nationalsCuts] = await Promise.all([
       athleteIds.length > 0
-        ? await prisma.swim.findMany({
+        ? prisma.swim.findMany({
             where: { athleteId: { in: athleteIds } },
             select: {
               athleteId: true,
               event: true,
               course: true,
-              timeMs: true}})
-        : []
+              timeMs: true,
+              date: true,
+              meetId: true}})
+        : [],
+      prisma.nationalsCut.findMany({
+        where: { isRelay: false, set: { season: meet.season } },
+        select: { event: true, gender: true, timeMs: true, set: { select: { course: true } } }}),
+    ])
+    // "Before this meet" = other meets' swims dated before this meet's first swim.
+    const firstMeetSwimMs = meet.swims.reduce(
+      (min, s) => Math.min(min, s.date.getTime()),
+      meet.startsAt.getTime()
+    )
+    const priorSwims = pbSwims.filter(
+      (s) => s.meetId !== meet.id && s.date.getTime() < firstMeetSwimMs
+    )
     const athleteHrefById = new Map(
       seasonRoster.map((a) => [a.id, athletePath(a.slug ?? a.id)])
     )
@@ -438,6 +455,12 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       results,
       meetSwims: meetSwimsForStats,
       pbMap: buildAthletePbMap(pbSwims),
+      priorPbMap: buildAthletePbMap(priorSwims),
+      nationalsCuts: nationalsCuts.map((c) => ({
+        event: c.event,
+        gender: c.gender,
+        course: c.set.course,
+        timeMs: c.timeMs})),
       athleteHrefById,
       relayResults})
   } else if (meet.signupForm && meet.signupForm.entries.length > 0) {

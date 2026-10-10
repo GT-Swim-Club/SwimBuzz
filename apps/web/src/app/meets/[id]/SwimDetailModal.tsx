@@ -6,6 +6,7 @@ import Link from "next/link"
 import type { ResultSplit } from "@/lib/meet/meet-sheet-summary"
 import { sanitizeRelaySplitTime } from "@/lib/meet/relay-results"
 import { formatDisplayTime, formatOrdinal, formatSeedTimeDelta, parseTime } from "@/lib/utils"
+import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
 export type DetailRound = {
   label: string
@@ -378,13 +379,7 @@ export default function SwimDetailModal({
     }
   }, [])
 
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose()
-    }
-    window.addEventListener("keydown", onKeyDown)
-    return () => window.removeEventListener("keydown", onKeyDown)
-  }, [onClose])
+  useEscapeToClose(true, onClose)
 
   // Shrink long event titles to fit one line.
   useLayoutEffect(() => {

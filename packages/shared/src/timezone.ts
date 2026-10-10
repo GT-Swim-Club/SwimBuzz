@@ -130,9 +130,9 @@ export function zonedDayKey(instant: Date | string, timeZone: string): string {
   return utcToZonedParts(date, timeZone).dateStr
 }
 
-function zonedDateLabel(instant: Date, timeZone: string): string {
+function zonedDateLabel(instant: Date, timeZone: string, month: "long" | "short" = "long"): string {
   return instant.toLocaleDateString("en-US", {
-    month: "long",
+    month,
     day: "numeric",
     year: "numeric",
     timeZone,
@@ -168,6 +168,8 @@ export function formatZonedInstant(instant: Date | string, timeZone: string): Zo
 }
 
 export type ZonedInstantRange = ZonedInstant & {
+  /** `date` with an abbreviated month: "Aug 21, 2026" (or "Aug 21, 2026 – Aug 22, 2026" across days). */
+  shortDate: string
   /** True when the end instant falls on a different calendar day (in `timeZone`) than the start. */
   crossesDay: boolean
 }
@@ -186,6 +188,7 @@ export function formatZonedInstantRange(
   const startParts = utcToZonedParts(startDate, timeZone)
   const startHHMM = `${String(startParts.hour).padStart(2, "0")}:${String(startParts.minute).padStart(2, "0")}`
   const startDateLabel = zonedDateLabel(startDate, timeZone)
+  const startShortDate = zonedDateLabel(startDate, timeZone, "short")
   const abbrev = zoneAbbreviation(timeZone, startDate)
   const zoneName = zoneDisplayName(timeZone, startDate)
 
@@ -194,6 +197,7 @@ export function formatZonedInstantRange(
     return {
       time,
       date: startDateLabel,
+      shortDate: startShortDate,
       dateTime: `${startDateLabel}, ${time}`,
       abbrev,
       zoneName,
@@ -215,6 +219,9 @@ export function formatZonedInstantRange(
   return {
     time: timeRange,
     date: crossesDay ? fullRange! : startDateLabel,
+    shortDate: crossesDay
+      ? `${startShortDate} – ${zonedDateLabel(endDate, timeZone, "short")}`
+      : startShortDate,
     dateTime,
     abbrev,
     zoneName,

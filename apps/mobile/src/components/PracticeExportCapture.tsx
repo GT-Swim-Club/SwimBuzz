@@ -60,7 +60,7 @@ export const PracticeExportCapture = forwardRef<
         <View style={styles.metaRow}>
           <Icon name="calendar" size={17} color={c.textSecondary} />
           <Text style={styles.metaText}>
-            {range.date} · {range.time} {range.abbrev}
+            {range.shortDate} · {range.time}
           </Text>
           {location ? (
             <>

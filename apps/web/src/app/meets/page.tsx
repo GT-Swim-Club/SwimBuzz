@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { zonedDayKey } from "@swimbuzz/shared"
 import LiveSearch from "@/components/ui/LiveSearch"
-import { Skeleton } from "@/components/ui/Skeleton"
 import CreateMeetButton from "./CreateMeetButton"
 import MeetsViewSwitch from "./MeetsViewSwitch"
 import MeetsToolbarSelects from "./MeetsToolbarSelects"
@@ -12,7 +11,7 @@ import { parseSeason } from "@/lib/season"
 import { listSeasons } from "@/lib/season-store"
 import { signupWindowStatus } from "@/lib/meet/meet-signup"
 import MeetsClientWrapper from "./MeetsClientWrapper"
-import MeetsListSkeleton from "./MeetsListSkeleton"
+import MeetsListSkeleton, { MeetsToolbarSkeleton } from "./MeetsListSkeleton"
 import { getSession } from "@/lib/auth/session"
 
 // Seasons come from the canonical Season table, matching how /athletes and
@@ -135,20 +134,26 @@ export default async function MeetsPage({
   return (
     <main className="flex flex-col gap-6">
       <h1 className="sr-only">Meets</h1>
-      <div className="flex flex-wrap items-center gap-3">
-        <Suspense fallback={<Skeleton className="h-[42px] min-w-[200px] flex-1 rounded-lg" />}>
+      {/* One boundary so the toolbar and the cards appear together. Searches
+          navigate in a transition, so they keep this content up instead of
+          falling back to the skeleton. */}
+      <Suspense
+        fallback={
+          <>
+            <MeetsToolbarSkeleton />
+            <MeetsListSkeleton />
+          </>
+        }
+      >
+        <div className="flex flex-wrap items-center gap-3">
           <LiveSearch
             pathname="/meets"
             placeholder="Search meets by name, school, or location…"
             className="h-[42px] min-w-[200px] flex-1 rounded-lg border border-border bg-background px-3 text-sm text-foreground placeholder:text-foreground-tertiary"
           />
-        </Suspense>
-        <Suspense fallback={<Skeleton className="h-[42px] w-64 rounded-lg" />}>
           <ToolbarControlsSection isCoach={isCoach} showScope={!!viewerAthleteId} />
-        </Suspense>
-      </div>
+        </div>
 
-      <Suspense fallback={<MeetsListSkeleton />}>
         <MeetsViewSwitch showTrash={isCoach}>
           <MeetsListSection query={query} isCoach={isCoach} viewerAthleteId={viewerAthleteId} />
         </MeetsViewSwitch>

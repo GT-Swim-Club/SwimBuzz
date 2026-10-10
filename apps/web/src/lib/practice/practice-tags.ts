@@ -48,5 +48,9 @@ export function normalizeTags(raw: unknown): string[] {
       out.push(norm)
     }
   }
-  return out
+  return sortTags(out)
+}
+
+export function sortTags(tags: string[]): string[] {
+  return [...tags].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }))
 }

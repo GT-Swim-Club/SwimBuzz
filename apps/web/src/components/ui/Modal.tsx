@@ -3,6 +3,7 @@
 import { type FormEvent, type ReactNode, useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
+import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
 const MAX_WIDTH = {
   sm: "max-w-sm",
@@ -77,6 +78,7 @@ export default function Modal({
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
   useDontReloadWhileBusy(open && busy)
+  useEscapeToClose(open && presentation !== "inline", onClose, { disabled: closeDisabled })
 
   useEffect(() => {
     if (!open || presentation === "inline") return

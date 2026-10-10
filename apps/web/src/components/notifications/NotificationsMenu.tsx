@@ -6,6 +6,7 @@ import { formatDateTime, formatRelativeTime } from "@/lib/utils"
 import { AppIcon } from "@/components/ui/AppIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
 import { markNotificationsRead } from "./NotificationsMenu.actions"
+import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
 export type NotificationItem = {
   id: string
@@ -37,6 +38,8 @@ export default function NotificationsMenu({
     setOpen(false)
   }
 
+  useEscapeToClose(open, closeMenu)
+
   useEffect(() => {
     if (!open) return
 
@@ -60,16 +63,8 @@ export default function NotificationsMenu({
       }
     }
 
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") closeMenu()
-    }
-
     document.addEventListener("pointerdown", onPointerDown)
-    document.addEventListener("keydown", onKeyDown)
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown)
-      document.removeEventListener("keydown", onKeyDown)
-    }
+    return () => document.removeEventListener("pointerdown", onPointerDown)
   }, [open])
 
   async function markRead(id?: string) {

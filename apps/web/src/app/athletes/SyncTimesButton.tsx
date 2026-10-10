@@ -10,6 +10,7 @@ import { formatSeasonLabel } from "@swimbuzz/shared"
 import { useScraperUi } from "@/components/scraper/ScraperUiProvider"
 import { useImportTask } from "@/components/ui/ImportTaskProvider"
 import { runScraperEnqueuePollFinalize } from "@/lib/scraper/scraper-job-client"
+import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
 type RosterAthlete = {
   id: string
@@ -54,6 +55,7 @@ export default function SyncTimesButton() {
   const [searchQuery, setSearchQuery] = useState("")
 
   useDontReloadWhileBusy(loading)
+  useEscapeToClose(open, () => setOpen(false), { disabled: loading })
 
   useEffect(() => {
     if (!open) return

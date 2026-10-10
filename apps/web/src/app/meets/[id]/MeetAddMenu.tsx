@@ -1,12 +1,13 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { LedgerIcon } from "@/components/meet/Ledger"
 import type { SheetEntry } from "@/lib/meet/meet-sheet-summary"
 import AddToRosterSummaryButton from "./AddToRosterSummaryButton"
 import AddResultButton from "./AddResultButton"
 import AddIndividualEntryButton from "./AddIndividualEntryButton"
 import { MenuItem, menuPanel } from "./MeetMenu"
+import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
 const triggerClass = {
   toolbar:
@@ -44,14 +45,7 @@ export default function MeetAddMenu({
 }) {
   const [open, setOpen] = useState(false)
 
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false)
-    }
-    window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
-  }, [open])
+  useEscapeToClose(open, () => setOpen(false))
 
   return (
     <div className="relative shrink-0">

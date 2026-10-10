@@ -60,7 +60,7 @@ export default function PracticeExportCapture({
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span className="flex items-center gap-1.5">
               <InfoIcon kind="calendar" className="h-[17px] w-[17px]" />
-              {range.date} · {range.time} {range.abbrev}
+              {range.shortDate} · {range.time}
             </span>
             {location && (
               <span className="flex items-center gap-1.5">
