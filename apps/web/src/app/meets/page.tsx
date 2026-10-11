@@ -2,28 +2,29 @@ import { Suspense } from "react"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { zonedDayKey } from "@swimbuzz/shared"
-import LiveSearch from "@/components/ui/LiveSearch"
 import CreateMeetButton from "./CreateMeetButton"
 import MeetsViewSwitch from "./MeetsViewSwitch"
 import MeetsToolbarSelects from "./MeetsToolbarSelects"
+import MeetsToolbar from "./MeetsToolbar"
 import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete/athlete-view-server"
 import { parseSeason } from "@/lib/season"
 import { listSeasons } from "@/lib/season-store"
-import { signupWindowStatus } from "@/lib/meet/meet-signup"
 import MeetsClientWrapper from "./MeetsClientWrapper"
 import MeetsListSkeleton, { MeetsToolbarSkeleton } from "./MeetsListSkeleton"
 import { getSession } from "@/lib/auth/session"
+import { isRelayResultsSummary } from "@/lib/meet/relay-results"
+import { readListLayout } from "@/lib/list-layout-server"
+import { MeetsLayoutProvider } from "./use-meets-layout"
 
 // Seasons come from the canonical Season table, matching how /athletes and
 // meets/[id] source their season lists — independent of the meets list stream.
 async function ToolbarControlsSection({ isCoach, showScope }: { isCoach: boolean; showScope: boolean }) {
   const seasons = await listSeasons()
+  // No wrapper: MeetsToolbar lays these out (and measures them) directly.
   return (
-    <div className="flex shrink-0 flex-wrap items-center gap-3">
-      <MeetsToolbarSelects seasons={seasons} showTrash={isCoach} showScope={showScope}>
-        {isCoach && <CreateMeetButton seasons={seasons} />}
-      </MeetsToolbarSelects>
-    </div>
+    <MeetsToolbarSelects seasons={seasons} showTrash={isCoach} showScope={showScope}>
+      {isCoach && <CreateMeetButton seasons={seasons} />}
+    </MeetsToolbarSelects>
   )
 }
 
@@ -38,7 +39,7 @@ async function MeetsListSection({
 }) {
   // Edit dropdowns need every canonical season, not just the ones grouping the
   // (possibly search-filtered) list below.
-  const [meetsRaw, seasonOptions, swamMeets, signedUpMeets] = await Promise.all([
+  const [meetsRaw, seasonOptions, swamMeets] = await Promise.all([
     prisma.meet.findMany({
       where: query
         ? {
@@ -68,7 +69,9 @@ async function MeetsListSection({
         psychSheetUrl: true,
         heatSheetUrl: true,
         resultsUrl: true,
-        signupForm: { select: { openAt: true, closeAt: true } },
+        // Only for `hasSwims` (the delete dialog's options), not sent to the client.
+        relayResultsSummary: true,
+        _count: { select: { swims: true } },
       },
     }),
     listSeasons(),
@@ -79,27 +82,21 @@ async function MeetsListSection({
           select: { meetId: true },
         })
       : [],
-    viewerAthleteId
-      ? prisma.meetSignupEntry.findMany({
-          where: { athleteId: viewerAthleteId },
-          select: { form: { select: { meetId: true } } },
-        })
-      : [],
   ])
 
-  const myMeetIds = new Set<string>([
-    ...swamMeets.flatMap((s) => (s.meetId ? [s.meetId] : [])),
-    ...signedUpMeets.map((e) => e.form.meetId),
-  ])
+  const myMeetIds = new Set<string>(swamMeets.flatMap((s) => (s.meetId ? [s.meetId] : [])))
   const now = new Date()
 
-  const meets = meetsRaw.map(({ signupForm, ...meet }) => ({
+  const meets = meetsRaw.map(({ relayResultsSummary, _count, ...meet }) => ({
     ...meet,
+    // Same rule as the meet page: individual swims or imported relay results.
+    hasSwims:
+      _count.swims > 0 ||
+      (isRelayResultsSummary(relayResultsSummary) && relayResultsSummary.entries.length > 0),
     season: parseSeason(meet.season) ?? meet.season,
     // A meet stays "upcoming" through its last day in its own zone, so a
     // multi-day meet in progress isn't filed under past results yet.
     upcoming: zonedDayKey(meet.endsAt ?? meet.startsAt, meet.timeZone) >= zonedDayKey(now, meet.timeZone),
-    signupOpen: !!signupForm && signupWindowStatus({ ...signupForm, now }).open,
     mine: myMeetIds.has(meet.id),
   }))
 
@@ -122,9 +119,10 @@ export default async function MeetsPage({
   const session = await getSession()
   if (!session) redirect("/signin")
 
-  const [isCoach, viewerAthleteId] = await Promise.all([
+  const [isCoach, viewerAthleteId, layout] = await Promise.all([
     isStaffUi(session.user.role),
     resolveViewerAthleteId(session.user.id),
+    readListLayout("meets"),
   ])
   // Only the search query is read server-side (it narrows the DB query).
   // Season / scope / Trash are applied client-side from the URL so switching
@@ -141,22 +139,17 @@ export default async function MeetsPage({
         fallback={
           <>
             <MeetsToolbarSkeleton />
-            <MeetsListSkeleton />
+            <MeetsListSkeleton layout={layout} />
           </>
         }
       >
-        <div className="flex flex-wrap items-center gap-3">
-          <LiveSearch
-            pathname="/meets"
-            placeholder="Search meets by name, school, or location…"
-            className="h-[42px] min-w-[200px] flex-1 rounded-lg border border-border bg-background px-3 text-sm text-foreground placeholder:text-foreground-tertiary"
-          />
-          <ToolbarControlsSection isCoach={isCoach} showScope={!!viewerAthleteId} />
-        </div>
+        <MeetsLayoutProvider initial={layout}>
+          <MeetsToolbar controls={<ToolbarControlsSection isCoach={isCoach} showScope={!!viewerAthleteId} />} />
 
-        <MeetsViewSwitch showTrash={isCoach}>
-          <MeetsListSection query={query} isCoach={isCoach} viewerAthleteId={viewerAthleteId} />
-        </MeetsViewSwitch>
+          <MeetsViewSwitch showTrash={isCoach}>
+            <MeetsListSection query={query} isCoach={isCoach} viewerAthleteId={viewerAthleteId} />
+          </MeetsViewSwitch>
+        </MeetsLayoutProvider>
       </Suspense>
     </main>
   )

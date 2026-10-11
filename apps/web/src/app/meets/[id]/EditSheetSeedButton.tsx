@@ -109,7 +109,7 @@ export default function EditSheetSeedButton({
           className ??
           "p-1 rounded text-foreground-tertiary hover:text-foreground hover:bg-fill disabled:opacity-50 transition-colors"
         }
-        aria-label="Edit sign-up entry"
+        aria-label="Edit roster entry"
       >
         <ActionIcon kind="edit" className="w-4 h-4" />
       </button>

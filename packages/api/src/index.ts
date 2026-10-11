@@ -119,6 +119,7 @@ type MeetWriteFields = {
   resultsUrl?: string | null
   swimphoneUrl?: string | null
   liveStreamUrl?: string | null
+  signupUrl?: string | null
   rideSignUpsUrl?: string | null
   roomsUrl?: string | null
   hotel?: string | null
@@ -274,63 +275,6 @@ export function createApiClient(options: ApiClientOptions = {}) {
 
     deleteMeet(id: string, deleteSwims = false) {
       return request<{ ok: true }>(`/api/meets/${id}`, { method: "DELETE", body: JSON.stringify({ deleteMeet: true, deleteSwims }) })
-    },
-
-    putSignupEntry(
-      meetId: string,
-      body: {
-        events: string[]
-        entryTimes?: Record<string, string>
-        notes?: string
-        answers?: Record<string, string>
-      }
-    ) {
-      return request(`/api/meets/${meetId}/signup/entry`, {
-        method: "PUT",
-        body: JSON.stringify(body),
-      })
-    },
-
-    deleteSignupEntry(meetId: string) {
-      return request(`/api/meets/${meetId}/signup/entry`, { method: "DELETE" })
-    },
-
-    putRoomPreference(
-      meetId: string,
-      body: {
-        preferredAthleteIds: string[]
-        excludedAthleteIds: string[]
-        notes?: string
-        answers?: Record<string, string>
-      }
-    ) {
-      return request(`/api/meets/${meetId}/rooms/preference`, {
-        method: "PUT",
-        body: JSON.stringify(body),
-      })
-    },
-
-    deleteRoomPreference(meetId: string) {
-      return request(`/api/meets/${meetId}/rooms/preference`, {
-        method: "DELETE",
-      })
-    },
-
-    publishRooms(meetId: string, published: boolean) {
-      return request(`/api/meets/${meetId}/rooms/publish`, {
-        method: "PATCH",
-        body: JSON.stringify({ published }),
-      })
-    },
-
-    putRoomAssignments(
-      meetId: string,
-      rooms: Array<{ id?: string; label: string; athleteIds: string[] }>
-    ) {
-      return request(`/api/meets/${meetId}/rooms/assignments`, {
-        method: "PUT",
-        body: JSON.stringify({ rooms }),
-      })
     },
 
     listPracticeTags() {
@@ -626,58 +570,6 @@ export function createApiClient(options: ApiClientOptions = {}) {
         errors: Array<{ row: number; message: string }>
         tab?: string
       }>("/api/roster/import/sheet", {
-        method: "POST",
-        body: JSON.stringify(input),
-      })
-    },
-
-    /** Step 1 of the Google Form response import wizard: read a picked sheet's headers/sample rows and a suggested column mapping. */
-    previewFormImport(
-      meetId: string,
-      input: { formType: "signup" | "rooms"; accessToken: string; spreadsheetId: string; gid?: number }
-    ) {
-      return request(`/api/meets/${meetId}/form-import/preview`, {
-        method: "POST",
-        body: JSON.stringify(input),
-      })
-    },
-
-    /** Step 2: preview the outcome of importing with a confirmed column mapping, without writing anything. */
-    dryRunFormImport(
-      meetId: string,
-      input: {
-        formType: "signup" | "rooms"
-        accessToken: string
-        spreadsheetId: string
-        gid?: number
-        mapping: unknown[]
-      }
-    ) {
-      return request(`/api/meets/${meetId}/form-import/dry-run`, {
-        method: "POST",
-        body: JSON.stringify(input),
-      })
-    },
-
-    /** Step 3: commit the import — upserts a sign-up entry or roommate preference per matched row. */
-    commitFormImport(
-      meetId: string,
-      input: {
-        formType: "signup" | "rooms"
-        accessToken: string
-        spreadsheetId: string
-        gid?: number
-        mapping: unknown[]
-        overrides: Record<number, string | null>
-      }
-    ) {
-      return request<{
-        created: number
-        updated: number
-        skipped: number
-        warnings: string[]
-        errors: Array<{ row: number; message: string }>
-      }>(`/api/meets/${meetId}/form-import/commit`, {
         method: "POST",
         body: JSON.stringify(input),
       })

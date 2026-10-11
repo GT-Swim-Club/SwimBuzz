@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
+import ActionIcon from "@/components/ui/ActionIcon"
+import HoverDetail from "@/components/ui/HoverDetail"
 import MeetFields, { MeetImageHeader, type MeetFormState } from "./MeetFields"
 
 export function meetFormComplete(form: MeetFormState) {
@@ -14,7 +16,11 @@ export function meetFormComplete(form: MeetFormState) {
   )
 }
 
-/** Create/edit meet dialog: banner + icon header, meet fields, Cancel / submit footer. */
+/**
+ * Create/edit meet dialog: banner + icon header, meet fields, Cancel / submit
+ * footer. Pass `onDelete` (edit only) for a small Move-to-Trash icon button at
+ * the footer's start; it should open DeleteMeetModal, which stacks on top.
+ */
 export default function MeetFormModal({
   open,
   title,
@@ -29,6 +35,7 @@ export default function MeetFormModal({
   submitLabel,
   loadingLabel,
   error,
+  onDelete,
 }: {
   open: boolean
   title: string
@@ -43,6 +50,7 @@ export default function MeetFormModal({
   submitLabel: string
   loadingLabel: string
   error: string | null
+  onDelete?: () => void
 }) {
   const [imageError, setImageError] = useState<string | null>(null)
   const [imageUploading, setImageUploading] = useState(false)
@@ -72,6 +80,18 @@ export default function MeetFormModal({
       onSubmit={onSubmit}
       footer={
         <ModalFooter>
+          {onDelete && (
+            <button
+              type="button"
+              onClick={onDelete}
+              disabled={loading}
+              aria-label="Move meet to Trash"
+              className="group relative inline-flex w-10 shrink-0 items-center justify-center self-stretch rounded-lg border border-error-border text-error transition-colors hover:bg-error-bg disabled:opacity-50"
+            >
+              <ActionIcon kind="delete" className="h-4 w-4" />
+              <HoverDetail label="Move to Trash" />
+            </button>
+          )}
           <button
             type="button"
             onClick={handleClose}

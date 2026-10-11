@@ -99,7 +99,7 @@ export default function DeletedPracticeListRail({
               href={buildWorkspaceHref(practicePath(practice.slug ?? practice.id), { tags })}
               className={
                 "flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors " +
-                (selected ? "border-primary bg-primary/5" : "border-border-secondary hover:bg-fill-secondary")
+                (selected ? "border-primary bg-primary/5" : "border-border-secondary hover:bg-background-hover")
               }
             >
               <div className="w-10 shrink-0 text-center">

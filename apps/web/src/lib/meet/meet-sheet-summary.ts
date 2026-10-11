@@ -829,7 +829,6 @@ export function collectMeetRosterAthleteIds(opts: {
   relayResultsSummary?: unknown
   resultStatusesSummary?: unknown
   swimAthleteIds?: string[]
-  signupAthleteIds?: string[]
 }): string[] {
   const ids = new Set<string>()
 
@@ -871,10 +870,6 @@ export function collectMeetRosterAthleteIds(opts: {
   }
 
   for (const id of opts.swimAthleteIds ?? []) {
-    if (id) ids.add(id)
-  }
-
-  for (const id of opts.signupAthleteIds ?? []) {
     if (id) ids.add(id)
   }
 

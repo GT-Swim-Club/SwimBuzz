@@ -57,7 +57,7 @@ const coachFeatures: FeatureItem[] = [
   },
   {
     title: "Plan relays",
-    description: "Try lineups using personal bests and signup interest.",
+    description: "Try lineups using personal bests.",
   },
   {
     title: "Nationals tracking",

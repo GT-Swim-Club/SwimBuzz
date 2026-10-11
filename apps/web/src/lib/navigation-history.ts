@@ -59,7 +59,7 @@ export function isSafeInternalPath(path: string): boolean {
   return path.startsWith("/") && !path.startsWith("//")
 }
 
-const MEET_SUBPAGE_RE = /^\/meets\/[^/]+\/(signups|roommates|roommate|signup)$/
+const MEET_SUBPAGE_RE = /^\/meets\/[^/]+\/(relays)$/
 
 export function pathnameOf(path: string): string {
   return path.split("?")[0] ?? path
@@ -75,7 +75,7 @@ export function isMeetSubpagePath(path: string): boolean {
 }
 
 function meetSubpageKind(path: string): string | null {
-  const match = pathnameOf(path).match(/^\/meets\/[^/]+\/(signups|roommates|roommate|signup)$/)
+  const match = pathnameOf(path).match(MEET_SUBPAGE_RE)
   return match?.[1] ?? null
 }
 

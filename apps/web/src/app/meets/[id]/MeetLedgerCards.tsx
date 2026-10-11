@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, type ReactNode } from "react"
+import { useEffect, useState } from "react"
 import FilePreviewButton, { FilePreviewDialog } from "@/components/ui/FilePreview"
 import {
   LedgerCard,
@@ -17,6 +17,7 @@ import type { EventOrder } from "@/lib/meet/meet-event-order"
 import ImportMeetResourcesButton from "./ImportMeetResourcesButton"
 import EventOrderButton from "./EventOrderButton"
 import AddTravelInfoButton from "./AddTravelInfoButton"
+import EditSignupLinkButton from "./EditSignupLinkButton"
 import TravelInfoButtons, { type TravelInfoItem } from "./TravelInfoButtons"
 import ManagePhotosButton from "./ManagePhotosButton"
 
@@ -137,21 +138,53 @@ export function MeetCompetitionCard({
   )
 }
 
+export function MeetSignupCard({
+  isCoach,
+  meetId,
+  signupUrl,
+}: {
+  isCoach: boolean
+  meetId: string
+  signupUrl: string
+}) {
+  return (
+    <LedgerCard
+      title="Sign-ups"
+      aside={
+        isCoach ? (
+          <EditSignupLinkButton
+            meetId={meetId}
+            initial={signupUrl}
+            trigger={(open) => (
+              <LedgerIconButton
+                icon={signupUrl ? "pencil" : "plus"}
+                label={signupUrl ? "Edit sign-up link" : "Add sign-up link"}
+                onClick={open}
+              />
+            )}
+          />
+        ) : null
+      }
+    >
+      {signupUrl ? (
+        <LedgerRow icon="clipboardCheck" label="Sign-up form" href={signupUrl} external />
+      ) : (
+        <LedgerNote>No sign-up link yet.</LedgerNote>
+      )}
+    </LedgerCard>
+  )
+}
+
 export function MeetTravelCard({
   isCoach,
   meetId,
   travelInitial,
   items,
-  roomRows,
-  hasRoomRows,
 }: {
   isCoach: boolean
   meetId: string
   travelInitial: Parameters<typeof AddTravelInfoButton>[0]["initial"]
   items: TravelInfoItem[]
-  /** Server-rendered roommate rows (MeetRoomSection ledger variant). */
-  roomRows?: ReactNode
-  hasRoomRows: boolean
 }) {
   return (
     <LedgerCard
@@ -169,8 +202,7 @@ export function MeetTravelCard({
       }
     >
       <TravelInfoButtons items={items} variant="ledger" />
-      {roomRows}
-      {items.length === 0 && !hasRoomRows ? <LedgerNote>No travel info yet.</LedgerNote> : null}
+      {items.length === 0 ? <LedgerNote>No travel info yet.</LedgerNote> : null}
     </LedgerCard>
   )
 }

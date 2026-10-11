@@ -14,6 +14,7 @@ import { ViewSkeleton, type ViewSkeletonVariant } from "@/components/nav/ViewSke
 import HoverDetail from "@/components/ui/HoverDetail"
 import { AppIcon } from "@/components/ui/AppIcon"
 import { SegmentedToggle, segmentedIconOptionClass } from "@/components/ui/SegmentedToggle"
+import { saveListLayout, type ListLayoutPage } from "@/lib/list-layout"
 
 type ViewNavContextValue = {
   isPending: boolean
@@ -69,6 +70,7 @@ export function ViewNavLink({
   className,
   children,
   title,
+  onNavigate,
 }: {
   href: string
   view: ViewSkeletonVariant
@@ -76,6 +78,8 @@ export function ViewNavLink({
   className: string
   children: ReactNode
   title?: string
+  /** Runs just before an in-app navigation (not new-tab clicks). */
+  onNavigate?: () => void
 }) {
   const { navigate, preview, isPending, pendingView } = useViewNav()
   const loading = isPending && pendingView === view
@@ -96,6 +100,7 @@ export function ViewNavLink({
           return
         }
         e.preventDefault()
+        onNavigate?.()
         navigate(href, view)
       }}
       className={className + " group relative" + (loading ? " opacity-70" : "")}
@@ -120,13 +125,20 @@ export function ViewNavPanel({ children }: { children: ReactNode }) {
   return <>{children}</>
 }
 
+/**
+ * Gallery/List links for a server-rendered page. Picking one also saves it as
+ * `page`'s layout for next time (see list-layout.ts) — the cookie is written
+ * before navigating, so the server render that follows already sees it.
+ */
 export function GalleryListViewToggle({
+  page,
   activeView,
   galleryHref,
   listHref,
   listLinkClassName,
   galleryLinkClassName,
 }: {
+  page: ListLayoutPage
   activeView: "gallery" | "list"
   galleryHref: string
   listHref: string
@@ -147,6 +159,7 @@ export function GalleryListViewToggle({
         view="gallery"
         active={activeView === "gallery"}
         title="Gallery"
+        onNavigate={() => saveListLayout(page, "gallery")}
         className={galleryLinkClassName ?? segmentedIconOptionClass(shown === "gallery")}
       >
         <AppIcon name="gallery" className={viewIconClass} />
@@ -156,6 +169,7 @@ export function GalleryListViewToggle({
         view="list"
         active={activeView === "list"}
         title="List"
+        onNavigate={() => saveListLayout(page, "list")}
         className={listLinkClassName ?? segmentedIconOptionClass(shown === "list")}
       >
         <AppIcon name="list" className={viewIconClass} />

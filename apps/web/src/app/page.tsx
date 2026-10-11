@@ -44,7 +44,7 @@ const coachFeatures: FeatureItem[] = [
   {
     title: "Plan relays",
     description:
-      "Try lineups using personal bests and signup interest."},
+      "Try lineups using personal bests."},
 ]
 
 function FeatureList({ items }: { items: FeatureItem[] }) {

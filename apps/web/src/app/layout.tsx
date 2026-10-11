@@ -37,7 +37,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 </Suspense>
                 {/* Inherit overflow so dialogs that lock body scrolling also lock this area. */}
                 <main id="page-scroll" className="min-h-0 flex-1 overflow-x-hidden [overflow-y:inherit]">
-                  <div className="mx-auto w-full min-w-0 max-w-7xl px-3 py-5 sm:px-6 sm:py-8 lg:px-8 xl:max-w-none xl:px-[clamp(8rem,10vw,18rem)]">
+                  <div className="w-full min-w-0 px-(--page-gutter-x) py-(--page-gutter-y)">
                     {children}
                   </div>
                 </main>

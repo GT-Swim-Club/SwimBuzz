@@ -16,7 +16,6 @@ import {
   Button,
   ErrorBlock,
   LoadingBlock,
-  MetaRow,
   Muted,
   Screen,
   Section,
@@ -280,14 +279,6 @@ export default function SettingsScreen() {
               />
             </View>
           ))}
-          {preferences.meetSignupNotificationTimes?.length ? (
-            <MetaRow
-              label="Signup reminders"
-              value={preferences.meetSignupNotificationTimes
-                .map((m) => (m === 0 ? "At open" : `${m}m before`))
-                .join(", ")}
-            />
-          ) : null}
         </Section>
 
         <Button

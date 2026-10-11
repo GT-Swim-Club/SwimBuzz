@@ -1,15 +1,16 @@
 "use client"
 
-import Link from "next/link"
 import { formatMeetDateRange, zonedDayKey } from "@swimbuzz/shared"
 import { RelativeDateRange, useTodayKey } from "@/components/ui/RelativeDate"
 import MeetGalleryCard, { MeetCardRows } from "./MeetGalleryCard"
+import MeetListTable, { type MeetListRow } from "./MeetListTable"
 import EditMeetButton from "./EditMeetButton"
 import { type MeetFormState } from "./MeetFields"
 import { meetPath } from "@/lib/slug"
 import MeetCountdown from "@/components/meet/MeetCountdown"
 import { toDateInput, toTimeInput } from "@/lib/date-input"
 import { useMeetsFilters } from "./use-meets-filters"
+import { useMeetsLayout } from "./use-meets-layout"
 
 export type MeetListItem = {
   id: string
@@ -31,10 +32,10 @@ export type MeetListItem = {
   resultsUrl: string | null
   /** Still upcoming or in progress (its last day hasn't passed in the meet's zone). */
   upcoming: boolean
-  /** Has a signup form whose window is currently open. */
-  signupOpen: boolean
-  /** The viewer's athlete swam in or signed up for this meet. */
+  /** The viewer's athlete swam in this meet. */
   mine: boolean
+  /** Has swims or relay results — the delete dialog then asks what to remove. */
+  hasSwims: boolean
 }
 
 function meetFormInitial(m: MeetListItem): MeetFormState {
@@ -96,6 +97,13 @@ function CardEyebrow({ meet, past }: { meet: MeetListItem; past: boolean }) {
   )
 }
 
+/** "in 10 days" for a list row's meta line — client-only, like CardEyebrow. */
+function RowCountdown({ meet }: { meet: MeetListItem }) {
+  const todayKey = useTodayKey()
+  if (!todayKey) return null
+  return <span className="text-accent">{relativeAhead(dayDiff(zonedDayKey(meet.startsAt, meet.timeZone), todayKey))}</span>
+}
+
 type CardKind = "upcoming" | "past" | "last"
 
 const sectionHeadingClass = "text-sm font-medium uppercase tracking-wide text-foreground-secondary"
@@ -119,6 +127,7 @@ export default function MeetsClientWrapper({
   canScope: boolean
 }) {
   const filters = useMeetsFilters()
+  const { layout } = useMeetsLayout()
   const season = filters.season
   const scope = canScope ? filters.scope : "all"
   const pool = scope === "mine" ? meets.filter((m) => m.mine) : meets
@@ -127,9 +136,10 @@ export default function MeetsClientWrapper({
 
   const inSeason = (m: MeetListItem) => !season || m.season === season
 
-  // With nothing upcoming, the most recent meet gets its own "Last meet"
-  // section (unless searching) and drops out of the past list below.
-  const lastMeet = !query && upcoming.length === 0 ? past[0] : undefined
+  // With nothing upcoming, the gallery gives the most recent meet its own
+  // "Last meet" section (unless searching) and drops it from the past list
+  // below. The list keeps it in place — a lone row wouldn't stand out anyway.
+  const lastMeet = layout === "gallery" && !query && upcoming.length === 0 ? past[0] : undefined
   const sections: { label: string; kind: CardKind; items: MeetListItem[] }[] = [
     { label: "Last meet", kind: "last" as const, items: lastMeet ? [lastMeet] : [] },
     { label: "Upcoming meets", kind: "upcoming" as const, items: upcoming.filter(inSeason) },
@@ -159,28 +169,35 @@ export default function MeetsClientWrapper({
         stackMeta={rowSize >= 3}
         badge={kind === "upcoming" && m.hasStartTime ? <MeetCountdown startsAt={m.startsAt} variant="glass" /> : null}
         actions={
-          <>
-            {isCoach && (
-              <EditMeetButton
-                meetId={m.id}
-                initial={meetFormInitial(m)}
-                seasons={seasonOptions}
-                className={editOnImageClass}
-                iconClassName={actionIconClass}
-              />
-            )}
-            {kind === "upcoming" && m.signupOpen && (
-              <Link
-                href={`${href}/signup`}
-                className="inline-flex h-[2.57em] items-center whitespace-nowrap rounded-[0.57em] bg-primary px-[1.14em] text-[1em] font-medium text-primary-text transition-colors [text-shadow:none] hover:bg-primary-hover"
-              >
-                Sign up
-              </Link>
-            )}
-          </>
+          isCoach && (
+            <EditMeetButton
+              meetId={m.id}
+              initial={meetFormInitial(m)}
+              seasons={seasonOptions}
+              hasSwims={m.hasSwims}
+              className={editOnImageClass}
+              iconClassName={actionIconClass}
+            />
+          )
         }
       />
     )
+  }
+
+  function listRow(m: MeetListItem): MeetListRow {
+    return {
+      id: m.id,
+      name: m.name,
+      href: meetPath(m.slug ?? m.id),
+      iconUrl: m.iconUrl,
+      bannerUrl: m.bannerUrl,
+      date: formatMeetDateRange(m.startsAt, m.endsAt, m.timeZone),
+      location: [m.location, m.school].filter(Boolean).join(" · "),
+      status: m.upcoming ? <RowCountdown meet={m} /> : undefined,
+      actions: isCoach && (
+        <EditMeetButton meetId={m.id} initial={meetFormInitial(m)} seasons={seasonOptions} hasSwims={m.hasSwims} />
+      ),
+    }
   }
 
   if (sections.length === 0) {
@@ -200,7 +217,11 @@ export default function MeetsClientWrapper({
       {sections.map((s) => (
         <section key={s.label} className="flex flex-col gap-3">
           <h2 className={sectionHeadingClass}>{s.label}</h2>
-          <MeetCardRows items={s.items} renderCard={(m, rowSize) => renderCard(m, s.kind, rowSize)} />
+          {layout === "list" ? (
+            <MeetListTable rows={s.items.map(listRow)} actions={isCoach ? "edit" : "none"} />
+          ) : (
+            <MeetCardRows items={s.items} renderCard={(m, rowSize) => renderCard(m, s.kind, rowSize)} />
+          )}
         </section>
       ))}
     </div>

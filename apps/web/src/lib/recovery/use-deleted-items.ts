@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { createApiClient, type DeletedItem } from "@swimbuzz/api"
 
 const api = createApiClient({})
@@ -10,6 +11,7 @@ export function useDeletedItems(kind: "practice" | "meet") {
   const [items, setItems] = useState<DeletedItem[] | null>(null)
   const [error, setError] = useState("")
   const [busy, setBusy] = useState<string | null>(null)
+  const router = useRouter()
 
   const load = useCallback(async () => {
     try {
@@ -29,6 +31,9 @@ export function useDeletedItems(kind: "practice" | "meet") {
     setBusy(item.id)
     try {
       await api.restoreDeleted(item.kind, item.id)
+      // The page's own list (e.g. /meets, rendered on the server) was fetched
+      // before the restore; refresh it so the item is back without a reload.
+      router.refresh()
       await load()
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong")

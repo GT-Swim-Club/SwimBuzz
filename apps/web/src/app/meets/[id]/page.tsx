@@ -27,8 +27,6 @@ import { Gender } from "@prisma/client"
 import InfoIcon, { type InfoKind } from "@/components/ui/InfoIcon"
 import { type TravelInfoKind } from "@/components/ui/TravelInfoIcon"
 import { type TravelInfoItem } from "./TravelInfoButtons"
-import MeetSignupSection from "./MeetSignupSection"
-import MeetRoomSection from "./MeetRoomSection"
 import MeetCountdown from "@/components/meet/MeetCountdown"
 import MeetHighlightsCarousel from "@/components/meet/MeetHighlightsCarousel"
 import MeetPreSheetsLayout from "./MeetPreSheetsLayout"
@@ -36,21 +34,18 @@ import MeetLedgerLayout from "./MeetLedgerLayout"
 import {
   MeetCompetitionCard,
   MeetPhotosCard,
+  MeetSignupCard,
   MeetTravelCard,
   type CompetitionLink,
 } from "./MeetLedgerCards"
 import {
-  normalizeMeetSignupQuestions,
-  normalizeSignupEntryTimes,
   resolveSignupEventOptions,
   resolveEditableSignupSheetKeys,
 } from "@/lib/meet/meet-signup"
-import { isSignupAnswers } from "@/lib/meet/meet-signup"
 import { athletePath, isCuid, meetPath } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
 import {
   buildAthletePbMap,
-  computeMeetPrepHighlights,
   computeMeetResultHighlights } from "@/lib/meet/meet-stats"
 import { toDateInput, toTimeInput } from "@/lib/date-input"
 import { utcDayKey, COURSE_LABELS, type CourseCode } from "@swimbuzz/shared"
@@ -91,33 +86,7 @@ async function MeetPageContent({ params }: { params: Promise<{ id: string }> }) 
     where: isCuid(param) ? { OR: [{ id: param }, { slug: param }] } : { slug: param },
     include: {
       swims: {
-        include: { athlete: { select: { id: true, firstName: true, lastName: true, gender: true } } }},
-      signupForm: {
-        include: {
-          entries: {
-            include: {
-              athlete: {
-                select: {
-                  id: true,
-                  firstName: true,
-                  lastName: true,
-                  gender: true,
-                  user: { select: { staffTitle: true } }}}},
-            orderBy: [{ athlete: { lastName: "asc" } }, { athlete: { firstName: "asc" } }]}}},
-      roomForm: {
-        include: {
-          preferences: {
-            include: {
-              athlete: {
-                select: { id: true, firstName: true, lastName: true, gender: true }}},
-            orderBy: [{ updatedAt: "desc" }]},
-          rooms: {
-            include: {
-              assignments: {
-                include: {
-                  athlete: {
-                    select: { id: true, firstName: true, lastName: true, gender: true }}}}},
-            orderBy: [{ sortOrder: "asc" }, { label: "asc" }]}}}}}),
+        include: { athlete: { select: { id: true, firstName: true, lastName: true, gender: true } } }}}}),
     resolveViewerAthleteId(session.user.id),
   ])
 
@@ -180,14 +149,6 @@ async function MeetPageContent({ params }: { params: Promise<{ id: string }> }) 
   const isBeforeOrToday = meetStartDate <= today
   const isUpcomingMeet = toDateInput(meet.endsAt ?? meet.startsAt, meet.timeZone) >= today
   const courseLabel = COURSE_LABELS[meet.course as CourseCode] ?? meet.course
-  const signupStatus = !meet.signupForm
-    ? "Not set"
-    : !meet.signupForm.openAt || new Date(meet.signupForm.openAt) > new Date()
-      ? "Opens soon"
-      : meet.signupForm.closeAt && new Date(meet.signupForm.closeAt) < new Date()
-        ? "Closed"
-        : "Open"
-  const signupEntryCount = meet.signupForm?.entries.length ?? 0
 
   const storedHeatSheetLinks = normalizeHeatSheetUrls(meet.heatSheetUrls)
   const heatSheetLinks =
@@ -256,59 +217,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
 
   const meetHasEnded = lastActiveDate <= yesterday
 
-  const hasSignupEntries = meet.signupForm ? meet.signupForm.entries.length > 0 : false
-  const showSignupSection = !meetHasEnded || hasSignupEntries
-
-  const roomForm = meet.roomForm
-    ? {
-        id: meet.roomForm.id,
-        instructions: meet.roomForm.instructions,
-        maxPreferences: meet.roomForm.maxPreferences,
-        openAt: meet.roomForm.openAt?.toISOString() ?? null,
-        closeAt: meet.roomForm.closeAt?.toISOString() ?? null,
-        assignmentsPublishedAt: meet.roomForm.assignmentsPublishedAt?.toISOString() ?? null,
-        customQuestions: normalizeMeetSignupQuestions(meet.roomForm.customQuestions)}
-    : null
-
-  const myRoomPreference = (() => {
-    if (!roomForm || !viewerAthleteId || !meet.roomForm) return null
-    const pref = meet.roomForm.preferences.find((p) => p.athleteId === viewerAthleteId)
-    if (!pref) return null
-    return {
-      preferredAthleteIds: pref.preferredAthleteIds,
-      excludedAthleteIds: pref.excludedAthleteIds,
-      notes: pref.notes,
-      answers: isSignupAnswers(pref.answers) ? pref.answers : {},
-      updatedAt: pref.updatedAt.toISOString()}
-  })()
-
-  const roomPreferences =
-    isCoach && meet.roomForm
-      ? meet.roomForm.preferences.map((p) => ({
-          id: p.id,
-          athleteId: p.athleteId,
-          firstName: p.athlete.firstName,
-          lastName: p.athlete.lastName,
-          gender: p.athlete.gender === Gender.F ? ("F" as const) : ("M" as const),
-          preferredAthleteIds: p.preferredAthleteIds,
-          excludedAthleteIds: p.excludedAthleteIds,
-          notes: p.notes,
-          answers: isSignupAnswers(p.answers) ? p.answers : {},
-          updatedAt: p.updatedAt.toISOString()}))
-      : []
-
-  const roomAssignments =
-    meet.roomForm && (isCoach || meet.roomForm.assignmentsPublishedAt)
-      ? meet.roomForm.rooms.map((r) => ({
-          id: r.id,
-          label: r.label,
-          sortOrder: r.sortOrder,
-          athleteIds: r.assignments.map((a) => a.athleteId),
-          athletes: r.assignments.map((a) => ({
-            id: a.athlete.id,
-            firstName: a.athlete.firstName,
-            lastName: a.athlete.lastName}))}))
-      : []
+  const showSignupCard = !meetHasEnded && (Boolean(meet.signupUrl) || isCoach)
 
   const seasonRoster = await prisma.athlete.findMany({
     where: { seasons: { has: meet.season } },
@@ -328,55 +237,6 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
     gender: a.gender === Gender.F ? ("F" as const) : ("M" as const),
     image: a.user.image}))
 
-  const signupForm = meet.signupForm
-    ? {
-        id: meet.signupForm.id,
-        instructions: meet.signupForm.instructions,
-        minEvents: meet.signupForm.minEvents,
-        maxEvents: meet.signupForm.maxEvents,
-        maxRelayEvents: meet.signupForm.maxRelayEvents,
-        askNotes: meet.signupForm.askNotes,
-        customQuestions: normalizeMeetSignupQuestions(meet.signupForm.customQuestions),
-        openAt: meet.signupForm.openAt?.toISOString() ?? null,
-        closeAt: meet.signupForm.closeAt?.toISOString() ?? null,
-        withdrawUntil: meet.signupForm.withdrawUntil?.toISOString() ?? null}
-    : null
-
-  const mySignupEntry = (() => {
-    if (!signupForm || !viewerAthleteId || !meet.signupForm) return null
-    const entry = meet.signupForm.entries.find((e) => e.athleteId === viewerAthleteId)
-    if (!entry) return null
-    return {
-      events: entry.events,
-      entryTimes: normalizeSignupEntryTimes(entry.entryTimes),
-      notes: entry.notes,
-      answers: isSignupAnswers(entry.answers) ? entry.answers : {},
-      updatedAt: entry.updatedAt.toISOString()}
-  })()
-
-  const signupEntries =
-    isCoach && meet.signupForm
-      ? meet.signupForm.entries.map((e) => ({
-          id: e.id,
-          athleteId: e.athleteId,
-          firstName: e.athlete.firstName,
-          lastName: e.athlete.lastName,
-          gender: e.athlete.gender === Gender.F ? ("F" as const) : ("M" as const),
-          staffTitle: e.athlete.user?.staffTitle ?? null,
-          events: e.events,
-          entryTimes: normalizeSignupEntryTimes(e.entryTimes),
-          notes: e.notes,
-          answers: e.answers,
-          updatedAt: e.updatedAt.toISOString()}))
-      : []
-
-  const signupAthleteIds: string[] = []
-  for (const entry of meet.signupForm?.entries ?? []) {
-    if (!signupAthleteIds.includes(entry.athleteId)) {
-      signupAthleteIds.push(entry.athleteId)
-    }
-  }
-
   const meetRosterAthleteIds = new Set(
     collectMeetRosterAthleteIds({
       psychSheetSummary: meet.psychSheetSummary,
@@ -385,13 +245,9 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       entriesSheetSummary: meet.entriesSheetSummary,
       relayResultsSummary: meet.relayResultsSummary,
       resultStatusesSummary: meet.resultStatusesSummary,
-      swimAthleteIds: meet.swims.map((s) => s.athlete.id),
-      signupAthleteIds})
+      swimAthleteIds: meet.swims.map((s) => s.athlete.id)})
   )
   const meetRosterAthletes = rosterAthletes.filter((a) => meetRosterAthleteIds.has(a.id))
-  const viewerOnMeetRoster =
-    viewerAthleteId != null && meetRosterAthleteIds.has(viewerAthleteId)
-  const showRoomSection = !meetHasEnded && (isCoach || viewerOnMeetRoster)
 
   const signupEventOptions = resolveSignupEventOptions(meet.eventOrder)
   const individualEventOptions = signupEventOptions
@@ -400,10 +256,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
   const editableSeedKeys = resolveEditableSignupSheetKeys(
     entriesSummary,
     psychSummary,
-    heatSummary,
-    (meet.signupForm?.entries ?? []).map((e) => ({
-      athleteId: e.athleteId,
-      events: e.events}))
+    heatSummary
   )
 
   const meetSwimsForStats = meet.swims.map((s) => ({
@@ -463,12 +316,6 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
         timeMs: c.timeMs})),
       athleteHrefById,
       relayResults})
-  } else if (meet.signupForm && meet.signupForm.entries.length > 0) {
-    meetHighlights = computeMeetPrepHighlights(
-      meet.signupForm.entries.map((e) => ({
-        athleteId: e.athleteId,
-        events: e.events}))
-    )
   }
 
   const header = (
@@ -619,18 +466,8 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
         variant="ledger"
       />
     ) : null
-  const signupCard = showSignupSection ? (
-    <MeetSignupSection
-      meetPath={meetPublicPath}
-      meetId={meet.id}
-      eventOrder={meet.eventOrder}
-      isCoach={isCoach}
-      form={signupForm}
-      myEntry={mySignupEntry}
-      entries={signupEntries}
-      hasImportedResults={hasImportedResults}
-      variant="ledger"
-    />
+  const signupCard = showSignupCard ? (
+    <MeetSignupCard isCoach={isCoach} meetId={meet.id} signupUrl={meet.signupUrl ?? ""} />
   ) : null
   const renderCompetitionCard = () =>
     hasResources || isCoach || relaysHref ? (
@@ -647,7 +484,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       />
     ) : null
   const travelCard =
-    hasTravel || isCoach || showRoomSection ? (
+    hasTravel || isCoach ? (
       <MeetTravelCard
         isCoach={isCoach}
         meetId={meet.id}
@@ -658,27 +495,6 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
           packingList: meet.packingList ?? "",
           itinerary: meet.itinerary ?? ""}}
         items={travelItems}
-        hasRoomRows={showRoomSection}
-        roomRows={
-          showRoomSection ? (
-            <MeetRoomSection
-              meetPath={meetPublicPath}
-              meetId={meet.id}
-              isCoach={isCoach}
-              selfAthleteId={viewerAthleteId}
-              athletes={meetRosterAthletes.map((a) => ({
-                id: a.id,
-                name: a.name,
-                gender: a.gender}))}
-              form={roomForm}
-              myPreference={myRoomPreference}
-              preferences={roomPreferences}
-              rooms={roomAssignments}
-              meetHasEnded={meetHasEnded}
-              variant="ledger"
-            />
-          ) : null
-        }
       />
     ) : null
   const photosCard = showPhotos ? (

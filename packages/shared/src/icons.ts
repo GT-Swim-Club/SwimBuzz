@@ -143,6 +143,14 @@ export const ICONS = {
     { tag: "path", d: "M5 12h14" },
     { tag: "path", d: "m12 5 7 7-7 7" },
   ],
+  arrowLeft: [
+    { tag: "path", d: "m12 19-7-7 7-7" },
+    { tag: "path", d: "M19 12H5" },
+  ],
+  search: [
+    { tag: "circle", cx: 11, cy: 11, r: 7 },
+    { tag: "path", d: "m21 21-4.3-4.3" },
+  ],
   monitor: [
     { tag: "rect", width: 20, height: 14, x: 2, y: 3, rx: 2 },
     { tag: "path", d: "M8 21h8" },

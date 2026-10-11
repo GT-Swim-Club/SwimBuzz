@@ -42,6 +42,8 @@ export const colors = {
     bgLayout: "#f5f5f5",
     bgContainer: "#ffffff",
     bgElevated: "#ffffff",
+    /** Hover wash for clickable rows/cards on a container background. */
+    bgHover: "#f7f7f7",
     switchThumb: "#ffffff",
     switchTrack: "#d9d9d9",
     border: "#eaeaea",
@@ -91,6 +93,7 @@ export const colors = {
     bgLayout: "#1a1a1a",
     bgContainer: "#141414",
     bgElevated: "#272727",
+    bgHover: "#1c1c1c",
     switchThumb: "#ffffff",
     switchTrack: "#252525",
     border: "#2c2c2c",

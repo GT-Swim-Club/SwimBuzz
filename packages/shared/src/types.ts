@@ -23,7 +23,7 @@ export type MeetSummary = {
   iconUrl?: string | null
   bannerUrl?: string | null
   _count?: { swims: number }
-  /** Distinct roster athletes on this meet (sheets + signups + swims), when computed by the server. */
+  /** Distinct roster athletes on this meet (sheets + swims), when computed by the server. */
   athleteCount?: number
 }
 

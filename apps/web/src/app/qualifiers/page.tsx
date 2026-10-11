@@ -18,6 +18,7 @@ import {
 import StandardsTableModal from "./StandardsTableModal"
 import UploadStandardsButton from "./UploadStandardsButton"
 import { getSession } from "@/lib/auth/session"
+import { readListLayout } from "@/lib/list-layout-server"
 
 export const dynamic = "force-dynamic"
 
@@ -34,11 +35,7 @@ async function QualifiersContent({
   const session = await getSession()
   if (!session) redirect("/signin")
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { defaultView: true },
-  })
-  const defaultView = user?.defaultView === "list" ? "list" : "gallery"
+  const defaultView = await readListLayout("nationals")
   const { season: seasonParam, gender, view, q: search } = await searchParams
   const activeView = view === "list" ? "list" : view === "gallery" ? "gallery" : defaultView
   const seasons = await listSeasons()
@@ -107,6 +104,7 @@ async function QualifiersContent({
           ) : null}
           <div className="ml-auto flex items-center gap-2">
             <GalleryListViewToggle
+              page="nationals"
               activeView={activeView}
               galleryHref={buildHref({ view: "gallery" })}
               listHref={buildHref({ view: "list" })}

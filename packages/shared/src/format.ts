@@ -2,24 +2,17 @@ import { zonedDayKey } from "./timezone"
 
 export type NotificationPreferenceKey =
   | "practicePublished"
-  | "meetSignupOpen"
   | "meetRosterInfo"
-  | "meetDrops"
   | "practiceComments"
   | "profileChanges"
 
-export type NotificationPreferences = Record<NotificationPreferenceKey, boolean> & {
-  meetSignupNotificationTimes?: number[]
-}
+export type NotificationPreferences = Record<NotificationPreferenceKey, boolean>
 
 export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
   practicePublished: true,
-  meetSignupOpen: true,
   meetRosterInfo: true,
-  meetDrops: true,
   practiceComments: true,
   profileChanges: true,
-  meetSignupNotificationTimes: [0],
 }
 
 export const NOTIFICATION_PREFERENCE_META: {
@@ -36,23 +29,12 @@ export const NOTIFICATION_PREFERENCE_META: {
     description: "When a coach publishes a practice",
   },
   {
-    key: "meetSignupOpen",
-    label: "Meet signups",
-    description: "When meet signups open",
-  },
-  {
     key: "meetRosterInfo",
     label: "Meet updates",
     description: "When new meet info is posted for a meet you're entered in",
     athleteDescription:
       "When psych sheets, heat sheets, results, or other meet info is posted for a meet you're on",
     athletesOnly: true,
-  },
-  {
-    key: "meetDrops",
-    label: "Meet drops",
-    description: "When an athlete withdraws from a meet",
-    meetDirectorsOnly: true,
   },
   {
     key: "practiceComments",

@@ -756,7 +756,7 @@ export default function MeetSheetSummarySection({
   defaultCourse?: string
   defaultDate?: string
   athletes?: AthleteRecord[]
-  /** Athletes attending this meet, including roster-only and signup entries. */
+  /** Athletes attending this meet, including roster-only entries. */
   rosterAthletes?: AthleteRecord[]
   canEdit?: boolean
   /** Linked roster athlete for the signed-in user — their rows pin to the top. */

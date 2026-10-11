@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import type { DeletedItem } from "@swimbuzz/api"
-import { recoveryCountdown } from "@swimbuzz/shared"
+import { formatMeetDateRange, recoveryCountdown } from "@swimbuzz/shared"
 import { AppIcon } from "@/components/ui/AppIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
@@ -10,6 +10,9 @@ import { RelativeDateRange } from "@/components/ui/RelativeDate"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { useDeletedItems } from "@/lib/recovery/use-deleted-items"
 import MeetGalleryCard, { MeetCardRows } from "./MeetGalleryCard"
+import MeetListTable from "./MeetListTable"
+import { MeetListSkeleton } from "./MeetsListSkeleton"
+import { useMeetsLayout } from "./use-meets-layout"
 
 const TONE_CLASS = {
   normal: "text-white",
@@ -17,11 +20,20 @@ const TONE_CLASS = {
   expired: "text-error",
 } as const
 
+/** Same tones on a list row's plain background, where white text would vanish. */
+const ROW_TONE_CLASS = {
+  normal: "text-foreground-secondary",
+  warning: "text-warning",
+  expired: "text-error",
+} as const
+
 export default function DeletedMeetsList({ query }: { query: string }) {
   const { items, error, busy, restore, purge } = useDeletedItems("meet")
   const [confirmDelete, setConfirmDelete] = useState<DeletedItem | null>(null)
+  const { layout } = useMeetsLayout()
 
   if (items === null) {
+    if (layout === "list") return <MeetListSkeleton heading="w-16" rows={3} actions="trash" />
     return (
       <div className="flex flex-col gap-3">
         <Skeleton className="h-5 w-20" />
@@ -61,6 +73,48 @@ export default function DeletedMeetsList({ query }: { query: string }) {
     <>
       <section className="flex flex-col gap-3">
         <h2 className="text-sm font-medium uppercase tracking-wide text-foreground-secondary">Trash</h2>
+        {layout === "list" ? (
+          <MeetListTable
+            actions="trash"
+            rows={shown.map((item) => {
+              const countdown = recoveryCountdown(item.purgeAfter)
+              return {
+                id: item.id,
+                name: item.name,
+                iconUrl: item.iconUrl ?? null,
+                bannerUrl: item.bannerUrl ?? null,
+                date: formatMeetDateRange(item.startsAt, item.endsAt, item.timeZone),
+                location: [item.location, item.school].filter(Boolean).join(" · "),
+                status: <span className={`tabular-nums ${ROW_TONE_CLASS[countdown.tone]}`}>{countdown.label}</span>,
+                actions: (
+                  <>
+                    <button
+                      type="button"
+                      disabled={busy !== null || !item.canRestore}
+                      onClick={() => void restore(item)}
+                      aria-label={`Restore ${item.name}`}
+                      className="flex h-8 items-center justify-center whitespace-nowrap rounded-lg bg-primary px-3 text-[13px] font-medium text-primary-text transition-colors hover:bg-primary-hover disabled:opacity-50 max-sm:w-8 max-sm:px-0"
+                    >
+                      {/* Icon-only on phones, where the label would squeeze the meet column. */}
+                      <AppIcon name="rotateCcw" className="h-4 w-4 sm:hidden" />
+                      <span className="max-sm:hidden">{busy === item.id ? "Restoring…" : "Restore"}</span>
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busy !== null}
+                      onClick={() => setConfirmDelete(item)}
+                      aria-label={`Delete ${item.name} permanently`}
+                      className="group relative flex h-8 w-8 items-center justify-center rounded-lg border border-border text-foreground-secondary transition-colors hover:bg-fill-secondary hover:text-error disabled:opacity-50"
+                    >
+                      <AppIcon name="trash" className="h-4 w-4" />
+                      <HoverDetail label="Delete permanently" />
+                    </button>
+                  </>
+                ),
+              }
+            })}
+          />
+        ) : (
         <MeetCardRows
           items={shown}
           renderCard={(item, rowSize) => {
@@ -107,6 +161,7 @@ export default function DeletedMeetsList({ query }: { query: string }) {
             )
           }}
         />
+        )}
       </section>
 
       <Modal

@@ -40,6 +40,8 @@
     --brand-color-bg-layout: #f5f5f5;
     --brand-color-bg-container: #ffffff;
     --brand-color-bg-elevated: #ffffff;
+    /* Hover wash for clickable rows/cards on a container background. */
+    --brand-color-bg-hover: #f7f7f7;
     --brand-color-switch-thumb: #ffffff;
     --brand-color-switch-track: var(--brand-color-fill);
     --brand-color-border: #eaeaea;
@@ -266,6 +268,7 @@
     --brand-color-bg-layout: #1a1a1a;
     --brand-color-bg-container: #141414;
     --brand-color-bg-elevated: #272727;
+    --brand-color-bg-hover: #1c1c1c;
     --brand-color-switch-thumb: #ffffff;
     --brand-color-switch-track: var(--brand-color-fill);
     --brand-color-border: #2c2c2c;

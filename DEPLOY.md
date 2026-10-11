@@ -7,7 +7,6 @@ Vercel project (repo root)
 ├── Next.js app: apps/web (web UI + /api/*)
 ├── Python Function: api/parse-pdf.py (meet PDF parsing)
 └── Vercel Cron: daily cleanup + staff-term expiry
-External cron (cron-job.org): signup monitor, every minute
 Supabase: Postgres + Storage (avatars, meet-files)
 EAS: iOS / Android builds, pointed at the Vercel origin
 ```
@@ -63,14 +62,13 @@ Production domain: `https://swimbuzz.gtswimclub.com`
 
 ## 2. Crons
 
-Three routes live under `/api/cron/*`. Each accepts `GET` or `POST` and requires `Authorization: Bearer <CRON_SECRET>`.
+Two routes live under `/api/cron/*`. Each accepts `GET` or `POST` and requires `Authorization: Bearer <CRON_SECRET>`.
 
 
 | Route                            | What it does                                                                                                                             | Schedule                       | Runs on       |
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | ------------- |
 | `/api/cron/notification-cleanup` | Deletes old notifications and scraper jobs, and permanently purges Recently Deleted practices and meets whose recovery window has passed | Daily, `0 8 * * *` (08:00 UTC) | Vercel Cron   |
 | `/api/cron/staff-term-expiry`    | Demotes coach/exec accounts whose staff term (May–Apr) has lapsed back to `ATHLETE`                                                      | Daily, `0 8 * * *`             | Vercel Cron   |
-| `/api/cron/signup-monitor`       | Sends "signup opening soon" and "signup open" notifications and pushes for meets                                                         | **Every minute**               | External cron |
 
 
 
@@ -85,39 +83,12 @@ These two jobs are already defined in `vercel.json`, so there's nothing to add.
 
 On the Hobby plan, a cron can run at most once a day, and Vercel may run it at any point within the scheduled hour. That's fine for these two jobs.
 
-### 2b. External cron (signup monitor, every minute)
-
-The Hobby plan can't run a cron every minute, so a free external scheduler calls this route instead. The route is idempotent (`MeetSignupMonitorEvent` records each notification it has sent), so retries and overlapping runs don't send duplicates.
-
-Setup with [cron-job.org](https://cron-job.org):
-
-1. Create an account and choose **Create cronjob**.
-2. **URL:** `https://swimbuzz.gtswimclub.com/api/cron/signup-monitor`
-3. **Execution schedule:** every 1 minute.
-4. **Advanced** settings:
-  - Request method: `GET`
-  - Headers: add `Authorization` with the value `Bearer <CRON_SECRET>` (the exact value set in Vercel)
-  - Timeout: 30s
-5. Save, then use **Test run**. You should get `200` and a JSON body that starts with `{"ok":true,...}`. A `401` means the header doesn't match `CRON_SECRET`; a `500` with `CRON_SECRET is not configured` means the env var is missing in Vercel.
-6. Turn on failure notifications so you hear about repeated failures by email.
-
-You can also trigger it manually from a terminal:
-
-```bash
-curl -i -H "Authorization: Bearer $CRON_SECRET" \
-  https://swimbuzz.gtswimclub.com/api/cron/signup-monitor
-```
-
-> **On Vercel Pro:** you can drop the external cron and add this entry to `crons` in `vercel.json`:
-> `{ "path": "/api/cron/signup-monitor", "schedule": "* * * * *" }`
-
-> **Rotating** `CRON_SECRET`**:** update it in Vercel, redeploy, then update the header in cron-job.org. The signup monitor returns `401` between the redeploy and the header update.
 
 
 
 ### Local dev
 
-`pnpm dev:web` runs `[apps/web/server.js](apps/web/server.js)`, which calls all three routes in-process (signup monitor every minute, the other two daily). If `CRON_SECRET` isn't set, it generates one, so local dev needs no external cron.
+`pnpm dev:web` runs `[apps/web/server.js](apps/web/server.js)`, which calls both routes in-process once a day. If `CRON_SECRET` isn't set, it generates one, so local dev needs no external cron.
 
 ## 3. Run Scraper
 
@@ -130,7 +101,7 @@ SwimCloud and SwimPhone imports need a real browser, and Vercel can't run one. A
 3. Upload an avatar and a meet file to confirm Supabase Storage works.
 4. Import a meet PDF (tests `PDF_PARSER_URL` / `PDF_PARSER_SECRET`).
 5. With Run Scraper connected, sync times and run a SwimCloud roster import and a SwimPhone import.
-6. Click **Run** on both Vercel Cron jobs and check that each returns `200`. Check that cron-job.org shows recent successful runs of the signup monitor.
+6. Click **Run** on both Vercel Cron jobs and check that each returns `200`.
 7. Sign in from the mobile app against production (next section) and confirm push notifications arrive.
 
 

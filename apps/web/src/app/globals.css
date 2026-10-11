@@ -45,12 +45,23 @@
   --color-background-layout: var(--brand-color-bg-layout);
   --color-background: var(--brand-color-bg-container);
   --color-background-elevated: var(--brand-color-bg-elevated);
+  --color-background-hover: var(--brand-color-bg-hover);
   
   /* Colors - Border */
   --color-border: var(--brand-color-border);
   --color-border-secondary: var(--brand-color-border-secondary);
   --color-border-subtle: var(--brand-color-border-subtle);
   --color-accent: var(--brand-color-accent);
+}
+
+:root {
+  /* Page margins, fluid so resizing the window shrinks them smoothly instead
+     of jumping at breakpoints. Horizontal: 12px on small phones, easing to
+     32px at 1024px wide, ramping to 128px at 1280px, then 10vw (max 18rem) —
+     each piece meets the next, so there's no step anywhere. Vertical: 20px
+     on phones up to 32px by 640px. */
+  --page-gutter-x: min(max(12px, 3.08vw + 0.44px, 37.5vw - 352px), 10vw, 18rem);
+  --page-gutter-y: clamp(20px, 4.53vw + 3px, 32px);
 }
 
 body {

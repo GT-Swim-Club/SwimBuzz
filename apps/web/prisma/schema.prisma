@@ -164,6 +164,7 @@ model Meet {
   resultsUrl    String?
   swimphoneUrl String?
   liveStreamUrl String?
+  signupUrl      String?
   rideSignUpsUrl String?
   roomsUrl       String?
   hotel          String?

@@ -2,97 +2,7 @@ import type { EventOrder } from "@/lib/meet/meet-event-order"
 import { isEventOrder } from "@/lib/meet/meet-event-order"
 import type { SheetEntry, SheetSummary } from "@/lib/meet/meet-sheet-summary"
 import { normalizeEventName } from "@/lib/swim/swim-parse"
-import { formatDateTime, formatDisplayTime } from "@/lib/utils"
-
-export const MEET_SIGNUP_INDIVIDUAL_EVENTS = [
-  "50 Free",
-  "100 Free",
-  "200 Free",
-  "400 Free",
-  "500 Free",
-  "1000 Free",
-  "1650 Free",
-  "100 Back",
-  "200 Back",
-  "100 Breast",
-  "200 Breast",
-  "100 Fly",
-  "200 Fly",
-  "200 IM",
-  "400 IM",
-] as const
-
-export const MEET_SIGNUP_RELAY_EVENTS = [
-  "200 Free Relay",
-  "400 Free Relay",
-  "800 Free Relay",
-  "200 Medley Relay",
-  "400 Medley Relay",
-] as const
-
-export const MEET_SIGNUP_DEFAULT_EVENTS = [
-  ...MEET_SIGNUP_INDIVIDUAL_EVENTS,
-  ...MEET_SIGNUP_RELAY_EVENTS,
-] as const
-
-export type MeetSignupQuestionType = "text" | "choice"
-
-export type MeetSignupQuestion = {
-  id: string
-  label: string
-  required: boolean
-  type: MeetSignupQuestionType
-  /** Answer choices when type is "choice". */
-  options: string[]
-}
-
-function isQuestionType(value: unknown): value is MeetSignupQuestionType {
-  return value === "text" || value === "choice"
-}
-
-export function isMeetSignupQuestions(value: unknown): value is MeetSignupQuestion[] {
-  if (!Array.isArray(value)) return false
-  return value.every((q) => {
-    if (!q || typeof q !== "object") return false
-    const item = q as Record<string, unknown>
-    if (typeof item.id !== "string" || typeof item.label !== "string") return false
-    if (typeof item.required !== "boolean") return false
-    if (item.type !== undefined && !isQuestionType(item.type)) return false
-    if (item.options !== undefined) {
-      if (!Array.isArray(item.options)) return false
-      if (!item.options.every((o) => typeof o === "string")) return false
-    }
-    return true
-  })
-}
-
-export function normalizeMeetSignupQuestions(value: unknown): MeetSignupQuestion[] {
-  if (!isMeetSignupQuestions(value)) return []
-  return value
-    .map((q) => {
-      const type: MeetSignupQuestionType = q.type === "choice" ? "choice" : "text"
-      const options =
-        type === "choice"
-          ? [...new Set((q.options ?? []).map((o) => o.trim()).filter(Boolean))]
-          : []
-      return {
-        id: q.id.trim(),
-        label: q.label.trim(),
-        required: Boolean(q.required),
-        type,
-        options,
-      }
-    })
-    .filter((q) => {
-      if (!q.id || !q.label) return false
-      if (q.type === "choice" && q.options.length < 2) return false
-      return true
-    })
-}
-
-export function eventsFromEventOrder(order: unknown): string[] {
-  return resolveSignupEventOptions(order).map((e) => e.event)
-}
+import { formatDisplayTime } from "@/lib/utils"
 
 export type MeetSignupEventOption = {
   event: string
@@ -122,24 +32,6 @@ export function resolveSignupEventOptions(eventOrder: unknown): MeetSignupEventO
   return events
 }
 
-/** Sort selected events to match the meet order of events. Unknown events go last. */
-export function sortSignupEventsByOrder(
-  events: string[],
-  order: MeetSignupEventOption[] | string[]
-): string[] {
-  const rank = new Map<string, number>()
-  order.forEach((item, i) => {
-    const name = typeof item === "string" ? item : item.event
-    if (!rank.has(name)) rank.set(name, i)
-  })
-  return [...events].sort((a, b) => {
-    const ai = rank.has(a) ? rank.get(a)! : Number.MAX_SAFE_INTEGER
-    const bi = rank.has(b) ? rank.get(b)! : Number.MAX_SAFE_INTEGER
-    if (ai !== bi) return ai - bi
-    return a.localeCompare(b)
-  })
-}
-
 export function eventNumberForGender(
   option: Pick<MeetSignupEventOption, "women" | "men">,
   gender: "M" | "F" | null | undefined
@@ -149,45 +41,8 @@ export function eventNumberForGender(
   return option.women ?? option.men
 }
 
-export function formatSignupEventLabel(
-  option: MeetSignupEventOption,
-  gender: "M" | "F" | null | undefined
-): string {
-  const num = eventNumberForGender(option, gender)
-  return num != null ? `#${num} ${option.event}` : option.event
-}
-
 export function isRelaySignupEvent(event: string): boolean {
   return /\brelay\b/i.test(event.trim())
-}
-
-export function partitionSignupEvents(events: string[]): {
-  individual: string[]
-  relay: string[]
-} {
-  const individual: string[] = []
-  const relay: string[] = []
-  for (const event of events) {
-    if (isRelaySignupEvent(event)) relay.push(event)
-    else individual.push(event)
-  }
-  return { individual, relay }
-}
-
-export function isSignupEntryTimes(value: unknown): value is Record<string, string> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false
-  return Object.values(value).every((v) => typeof v === "string")
-}
-
-export function normalizeSignupEntryTimes(value: unknown): Record<string, string> {
-  if (!isSignupEntryTimes(value)) return {}
-  const out: Record<string, string> = {}
-  for (const [event, time] of Object.entries(value)) {
-    const key = event.trim()
-    const trimmed = time.trim()
-    if (key && trimmed) out[key] = trimmed
-  }
-  return out
 }
 
 /** Accepts NT or swim times like 58.32 / 1:02.45 (optional hundredths). */
@@ -208,189 +63,6 @@ export function normalizeSignupEntryTime(input: string): string {
   if (/^nt$/i.test(time)) return "NT"
   if (!isValidSignupEntryTime(time)) return time
   return formatDisplayTime(time)
-}
-
-export function signupWindowStatus(opts: {
-  openAt: Date | null
-  closeAt: Date | null
-  now?: Date
-}): { open: boolean; reason: string | null } {
-  const now = opts.now ?? new Date()
-  if (!opts.openAt) {
-    return { open: false, reason: "Sign-ups are not open yet." }
-  }
-  if (now < opts.openAt) {
-    return { open: false, reason: `Sign-ups open ${formatDateTime(opts.openAt)}.` }
-  }
-  if (opts.closeAt && now > opts.closeAt) {
-    return { open: false, reason: `Sign-ups closed ${formatDateTime(opts.closeAt)}.` }
-  }
-  return { open: true, reason: null }
-}
-
-/** Drops may stay open after sign-ups close, until withdrawUntil (or closeAt if unset). */
-export function signupWithdrawStatus(opts: {
-  openAt: Date | null
-  closeAt: Date | null
-  withdrawUntil: Date | null
-  now?: Date
-}): { allowed: boolean; reason: string | null; deadline: Date | null } {
-  const now = opts.now ?? new Date()
-  const deadline = opts.withdrawUntil ?? opts.closeAt
-  if (!opts.openAt) {
-    return {
-      allowed: false,
-      reason: "Sign-ups are not open yet.",
-      deadline,
-    }
-  }
-  if (now < opts.openAt) {
-    return {
-      allowed: false,
-      reason: `Sign-ups open ${formatDateTime(opts.openAt)}.`,
-      deadline,
-    }
-  }
-  if (deadline && now > deadline) {
-    return {
-      allowed: false,
-      reason: `Drops closed ${formatDateTime(deadline)}.`,
-      deadline,
-    }
-  }
-  return { allowed: true, reason: null, deadline }
-}
-
-export function isSignupAnswers(value: unknown): value is Record<string, string> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false
-  return Object.values(value).every((v) => typeof v === "string")
-}
-
-export function parseCustomQuestionAnswers(
-  questions: MeetSignupQuestion[],
-  rawAnswers: unknown
-): { ok: true; answers: Record<string, string> } | { ok: false; error: string } {
-  const raw = isSignupAnswers(rawAnswers) ? rawAnswers : {}
-  const answers: Record<string, string> = {}
-  for (const q of questions) {
-    const value = String(raw[q.id] ?? "").trim()
-    if (q.required && !value) {
-      return { ok: false, error: `"${q.label}" is required` }
-    }
-    if (q.type === "choice" && value && !q.options.includes(value)) {
-      return { ok: false, error: `Invalid answer for "${q.label}"` }
-    }
-    if (value) answers[q.id] = value
-  }
-  return { ok: true, answers }
-}
-
-export function findIncompleteChoiceQuestion(
-  questions: MeetSignupQuestion[]
-): MeetSignupQuestion | undefined {
-  return questions.find((q) => q.type === "choice" && q.options.length < 2)
-}
-
-export type SignupEntryForSheetSync = {
-  athleteId: string
-  athleteName: string
-  gender: "M" | "F"
-  events: string[]
-  entryTimes: Record<string, string>
-}
-
-/** Build individual SheetEntry rows from sign-ups (relays omitted). */
-export function buildIndividualSheetEntriesFromSignups(
-  signups: SignupEntryForSheetSync[],
-  eventOptions: MeetSignupEventOption[]
-): SheetEntry[] {
-  const optionByEvent = new Map(eventOptions.map((o) => [o.event, o]))
-  const entries: SheetEntry[] = []
-
-  for (const signup of signups) {
-    const { individual } = partitionSignupEvents(
-      sortSignupEventsByOrder(signup.events, eventOptions)
-    )
-    for (const event of individual) {
-      const opt = optionByEvent.get(event)
-      const eventName = normalizeEventName(opt?.event ?? event)
-      if (!eventName) continue
-      const eventNumber = opt ? eventNumberForGender(opt, signup.gender) ?? 0 : 0
-      const rawTime = signup.entryTimes[event]?.trim() ?? ""
-      const normalized = rawTime ? normalizeSignupEntryTime(rawTime) : "NT"
-      const row: SheetEntry = {
-        athleteId: signup.athleteId,
-        athleteName: signup.athleteName,
-        event: eventName,
-        eventNumber,
-        entryType: "individual",
-        // Coach sync seed — overridden by psych/entries/heat/results in merge.
-        manual: true,
-      }
-      if (/^nt$/i.test(normalized)) {
-        row.timeStatus = "NT"
-      } else {
-        row.seedTime = normalized
-      }
-      entries.push(row)
-    }
-  }
-
-  return entries
-}
-
-/**
- * Add individual sign-up seeds into entriesSheetSummary.
- * Imported sheet rows (non-manual) are never replaced; matching events are skipped.
- * Relay rows and individuals for athletes without a sign-up are preserved.
- */
-export function mergeSignupIndividualsIntoEntriesSummary(
-  existing: SheetSummary | null | undefined,
-  course: string,
-  signups: SignupEntryForSheetSync[],
-  eventOptions: MeetSignupEventOption[]
-): { summary: SheetSummary; synced: number } {
-  const syncedEntries = buildIndividualSheetEntriesFromSignups(signups, eventOptions)
-  const signedUpAthletes = new Set(signups.map((s) => s.athleteId))
-  const signupEventKeys = new Set(
-    signups.flatMap((s) => {
-      const { individual } = partitionSignupEvents(s.events)
-      return individual.map((event) => sheetEntryKey(s.athleteId, event))
-    })
-  )
-
-  const kept = (existing?.entries ?? []).filter((e) => {
-    if (e.entryType === "relay_team") return true
-    if (e.entryType === "individual" || e.entryType == null) {
-      if (!signedUpAthletes.has(e.athleteId)) return true
-      // Rebuild sign-up seeds (including legacy rows missing `manual`).
-      if (isEditableSignupSheetSeed(e) && signupEventKeys.has(sheetEntryKey(e.athleteId, e.event))) {
-        return false
-      }
-      // Keep imported psych/entries/heat rows — do not let sign-up sync overwrite them.
-      if (!isEditableSignupSheetSeed(e)) return true
-      return false
-    }
-    return true
-  })
-
-  const importedKeys = new Set(
-    kept
-      .filter((e) => e.entryType !== "relay_team" && !isEditableSignupSheetSeed(e))
-      .map((e) => sheetEntryKey(e.athleteId, e.event))
-  )
-  const toAdd = syncedEntries.filter(
-    (e) => !importedKeys.has(sheetEntryKey(e.athleteId, e.event))
-  )
-
-  return {
-    summary: {
-      sheetType: existing?.sheetType ?? "psych",
-      course: existing?.course || course,
-      entries: [...kept, ...toAdd],
-    },
-    synced: toAdd.length,
-  }
 }
 
 function sheetEntryKey(athleteId: string, event: string): string {
@@ -444,13 +116,12 @@ function matchesManualIndividual(
 
 /**
  * Keys (`athleteId|event`) for roster summary individuals coaches may edit/delete.
- * Based on entriesSheetSummary seeds + sign-ups, excluding psych/heat/imported rows.
+ * Based on entriesSheetSummary seeds, excluding psych/heat/imported rows.
  */
 export function resolveEditableSignupSheetKeys(
   entriesSummary: SheetSummary | null | undefined,
   psychSummary: SheetSummary | null | undefined,
-  heatSummary: SheetSummary | null | undefined,
-  signups: Array<{ athleteId: string; events: string[] }>
+  heatSummary: SheetSummary | null | undefined
 ): string[] {
   const importedKeys = new Set<string>()
   for (const e of [
@@ -471,21 +142,6 @@ export function resolveEditableSignupSheetKeys(
     if (!isEditableSignupSheetSeed(e)) continue
     const key = sheetEntryKey(e.athleteId, e.event)
     if (!importedKeys.has(key)) editable.add(key)
-  }
-
-  const sheetKeys = new Set(
-    (entriesSummary?.entries ?? [])
-      .filter((e) => e.entryType !== "relay_team" && !e.isRelayLeadoff)
-      .map((e) => sheetEntryKey(e.athleteId, e.event))
-  )
-
-  for (const signup of signups) {
-    const { individual } = partitionSignupEvents(signup.events)
-    for (const event of individual) {
-      const key = sheetEntryKey(signup.athleteId, event)
-      if (importedKeys.has(key)) continue
-      if (sheetKeys.has(key)) editable.add(key)
-    }
   }
 
   return [...editable]

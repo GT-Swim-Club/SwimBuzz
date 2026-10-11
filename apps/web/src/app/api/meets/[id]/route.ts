@@ -18,20 +18,7 @@ import {
 import { LOCAL_SCRAPER_HINT } from "@/lib/scraper/scraper"
 import { isCuid, uniqueMeetSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
-import { meetHasEnded as meetHasEndedFn } from "@/lib/meet/meet-rooms"
-import {
-  isSignupAnswers,
-  normalizeMeetSignupQuestions,
-  normalizeSignupEntryTimes,
-  resolveSignupEventOptions,
-  signupWindowStatus,
-} from "@/lib/meet/meet-signup"
-import {
-  collectMeetRosterIdsFromMeet,
-  formatAthleteName,
-  serializeRoomForm,
-  toGender,
-} from "./rooms/_shared"
+import { meetHasEnded as meetHasEndedFn } from "@/lib/meet/meet-ended"
 import { isEventOrder } from "@/lib/meet/meet-event-order"
 import {
   isResultStatusesSummary,
@@ -57,42 +44,6 @@ export async function GET(
   const meet = await prisma.meet.findFirst({
     where: isCuid(param) ? { OR: [{ id: param }, { slug: param }] } : { slug: param },
     include: {
-      signupForm: {
-        include: {
-          entries: {
-            include: {
-              athlete: {
-                select: { id: true, firstName: true, lastName: true, gender: true },
-              },
-            },
-            orderBy: [{ updatedAt: "desc" }],
-          },
-        },
-      },
-      roomForm: {
-        include: {
-          preferences: {
-            include: {
-              athlete: {
-                select: { id: true, firstName: true, lastName: true, gender: true },
-              },
-            },
-            orderBy: [{ updatedAt: "desc" }],
-          },
-          rooms: {
-            include: {
-              assignments: {
-                include: {
-                  athlete: {
-                    select: { id: true, firstName: true, lastName: true, gender: true },
-                  },
-                },
-              },
-            },
-            orderBy: [{ sortOrder: "asc" }, { label: "asc" }],
-          },
-        },
-      },
       swims: {
         include: {
           athlete: {
@@ -114,71 +65,6 @@ export async function GET(
   const ended = meetHasEndedFn({
     startsAt: meet.startsAt ?? meet.createdAt,
     endsAt: meet.endsAt,
-  })
-
-  const seasonAthletes = await prisma.athlete.findMany({
-    where: { seasons: { has: meet.season } },
-    orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
-    select: { id: true, firstName: true, lastName: true, gender: true },
-  })
-  const signupAthletes = seasonAthletes.map((a) => ({
-    id: a.id,
-    name: formatAthleteName(a),
-    gender: toGender(a.gender),
-  }))
-
-  const meetRosterIds = collectMeetRosterIdsFromMeet(meet)
-  const roomAthletes = seasonAthletes
-    .filter((a) => meetRosterIds.has(a.id))
-    .map((a) => ({
-      id: a.id,
-      name: formatAthleteName(a),
-      gender: toGender(a.gender),
-    }))
-
-  const form = meet.signupForm
-  const myEntry =
-    form && viewerAthleteId
-      ? form.entries.find((e) => e.athleteId === viewerAthleteId) ?? null
-      : null
-  const eventOptions = resolveSignupEventOptions(meet.eventOrder)
-  const showSignup = !ended || (form?.entries.length ?? 0) > 0
-
-  const roomForm = meet.roomForm
-  const viewerOnMeetRoster =
-    viewerAthleteId != null && meetRosterIds.has(viewerAthleteId)
-  const showRooms = !ended && (isStaff || viewerOnMeetRoster)
-  const myPreference =
-    roomForm && viewerAthleteId
-      ? roomForm.preferences.find((p) => p.athleteId === viewerAthleteId) ?? null
-      : null
-
-  let myRoom: {
-    label: string
-    roommates: Array<{ id: string; firstName: string; lastName: string }>
-  } | null = null
-  if (roomForm && viewerAthleteId && roomForm.assignmentsPublishedAt) {
-    for (const room of roomForm.rooms) {
-      const inRoom = room.assignments.find((a) => a.athleteId === viewerAthleteId)
-      if (inRoom) {
-        myRoom = {
-          label: room.label,
-          roommates: room.assignments
-            .filter((a) => a.athleteId !== viewerAthleteId)
-            .map((a) => ({
-              id: a.athlete.id,
-              firstName: a.athlete.firstName,
-              lastName: a.athlete.lastName,
-            })),
-        }
-        break
-      }
-    }
-  }
-
-  const serializedRooms = serializeRoomForm(roomForm, {
-    includePreferences: isStaff,
-    includeRooms: isStaff || !!roomForm?.assignmentsPublishedAt,
   })
 
   const results = mergeMeetResultEntries(
@@ -214,12 +100,7 @@ export async function GET(
       : null
   )
 
-  const {
-    signupForm: _signupForm,
-    roomForm: _roomForm,
-    swims: _swims,
-    ...meetRow
-  } = meet
+  const { swims: _swims, ...meetRow } = meet
 
   return NextResponse.json({
     ...meetRow,
@@ -229,87 +110,6 @@ export async function GET(
     viewer: {
       athleteId: viewerAthleteId,
       isStaff,
-    },
-    signup: {
-      show: showSignup,
-      form: form
-        ? {
-            id: form.id,
-            instructions: form.instructions,
-            minEvents: form.minEvents,
-            maxEvents: form.maxEvents,
-            maxRelayEvents: form.maxRelayEvents,
-            askNotes: form.askNotes,
-            customQuestions: normalizeMeetSignupQuestions(form.customQuestions),
-            openAt: form.openAt?.toISOString() ?? null,
-            closeAt: form.closeAt?.toISOString() ?? null,
-            withdrawUntil: form.withdrawUntil?.toISOString() ?? null,
-            eventOptions,
-            window: signupWindowStatus({
-              openAt: form.openAt,
-              closeAt: form.closeAt,
-            }),
-          }
-        : null,
-      myEntry: myEntry
-        ? {
-            id: myEntry.id,
-            events: myEntry.events,
-            entryTimes: normalizeSignupEntryTimes(myEntry.entryTimes),
-            notes: myEntry.notes,
-            answers: isSignupAnswers(myEntry.answers) ? myEntry.answers : {},
-            updatedAt: myEntry.updatedAt.toISOString(),
-          }
-        : null,
-      entries: isStaff && form
-        ? form.entries.map((e) => ({
-            id: e.id,
-            athleteId: e.athleteId,
-            firstName: e.athlete.firstName,
-            lastName: e.athlete.lastName,
-            gender: toGender(e.athlete.gender),
-            events: e.events,
-            entryTimes: normalizeSignupEntryTimes(e.entryTimes),
-            notes: e.notes,
-            answers: e.answers,
-            updatedAt: e.updatedAt.toISOString(),
-          }))
-        : undefined,
-      athletes: signupAthletes,
-      eventOptions,
-    },
-    rooms: {
-      show: showRooms,
-      form:
-        showRooms && serializedRooms
-          ? {
-              id: serializedRooms.id,
-              instructions: serializedRooms.instructions,
-              maxPreferences: serializedRooms.maxPreferences,
-              openAt: serializedRooms.openAt,
-              closeAt: serializedRooms.closeAt,
-              assignmentsPublishedAt: serializedRooms.assignmentsPublishedAt,
-              customQuestions: serializedRooms.customQuestions,
-              window: serializedRooms.window,
-            }
-          : null,
-      myPreference:
-        showRooms && myPreference
-          ? {
-              id: myPreference.id,
-              preferredAthleteIds: myPreference.preferredAthleteIds,
-              excludedAthleteIds: myPreference.excludedAthleteIds,
-              notes: myPreference.notes,
-              answers: isSignupAnswers(myPreference.answers)
-                ? myPreference.answers
-                : {},
-              updatedAt: myPreference.updatedAt.toISOString(),
-            }
-          : null,
-      myRoom: showRooms && (!isStaff || roomForm?.assignmentsPublishedAt) ? myRoom : null,
-      preferences: isStaff && showRooms ? serializedRooms?.preferences : undefined,
-      rooms: showRooms ? serializedRooms?.rooms ?? [] : [],
-      athletes: showRooms ? roomAthletes : [],
     },
   })
 }

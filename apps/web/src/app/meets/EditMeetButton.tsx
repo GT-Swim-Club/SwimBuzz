@@ -1,11 +1,13 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
 import { type MeetFormState } from "./MeetFields"
 import MeetFormModal from "./MeetFormModal"
 import ActionIcon from "@/components/ui/ActionIcon"
 import { useUnsavedUploads } from "@/lib/meet/unsaved-uploads"
 import { updateMeet } from "./[id]/meet-update.actions"
+import DeleteMeetModal from "./[id]/DeleteMeetModal"
 
 function meetImageUrls(form: Pick<MeetFormState, "iconUrl" | "bannerUrl">) {
   return [form.iconUrl, form.bannerUrl]
@@ -15,16 +17,20 @@ export default function EditMeetButton({
   meetId,
   initial,
   seasons,
+  hasSwims,
   className = "text-foreground-secondary hover:text-primary transition-colors",
   iconClassName = "h-4 w-4",
 }: {
   meetId: string
   initial: MeetFormState
   seasons: string[]
+  hasSwims: boolean
   className?: string
   iconClassName?: string
 }) {
+  const router = useRouter()
   const [editing, setEditing] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [isPending, startTransition] = useTransition()
   const loading = isPending
   const [error, setError] = useState<string | null>(null)
@@ -85,6 +91,24 @@ export default function EditMeetButton({
         submitLabel="Save changes"
         loadingLabel="Saving…"
         error={error}
+        onDelete={() => setConfirmDelete(true)}
+      />
+
+      <DeleteMeetModal
+        open={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        meetId={meetId}
+        meetName={initial.name}
+        hasSwims={hasSwims}
+        onDeleted={({ meetDeleted }) => {
+          setConfirmDelete(false)
+          if (meetDeleted) {
+            // The edits are never saved: drop this session's uploads, keep the meet's saved images.
+            release(meetImageUrls(initial))
+            setEditing(false)
+          }
+          router.refresh()
+        }}
       />
     </>
   )

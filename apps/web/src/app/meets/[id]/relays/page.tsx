@@ -9,12 +9,7 @@ import {
   meetHasImportedResults,
 } from "@/lib/meet/meet-sheet-summary"
 import { isRelayResultsSummary } from "@/lib/meet/relay-results"
-import {
-  isRelaySignupEvent,
-  partitionSignupEvents,
-  resolveSignupEventOptions,
-} from "@/lib/meet/meet-signup"
-import { relaySignupKey } from "@/lib/swim/swim-parse"
+import { resolveSignupEventOptions } from "@/lib/meet/meet-signup"
 import { athletePreferredName } from "@swimbuzz/shared"
 import MeetRelayBuilder from "../MeetRelayBuilder"
 
@@ -47,7 +42,6 @@ export default async function MeetRelayBuilderPage({
       resultStatusesSummary: true,
       relayResultsSummary: true,
       swims: { select: { id: true } },
-      signupForm: { select: { entries: { select: { athleteId: true, events: true } } } },
     },
   })
   if (!meet) notFound()
@@ -68,32 +62,10 @@ export default async function MeetRelayBuilderPage({
     select: { id: true, firstName: true, lastName: true, nicknames: true, gender: true },
   })
 
-  const signupAthleteIds: string[] = []
-  const signupAthleteIdsByEvent: Record<string, string[]> = {}
-  const signupIndividualCount: Record<string, number> = {}
-  for (const entry of meet.signupForm?.entries ?? []) {
-    if (!signupAthleteIds.includes(entry.athleteId)) {
-      signupAthleteIds.push(entry.athleteId)
-    }
-    signupIndividualCount[entry.athleteId] = partitionSignupEvents(
-      entry.events
-    ).individual.length
-    for (const event of entry.events) {
-      if (!isRelaySignupEvent(event)) continue
-      const key = relaySignupKey(event)
-      if (!key) continue
-      if (!signupAthleteIdsByEvent[key]) signupAthleteIdsByEvent[key] = []
-      if (!signupAthleteIdsByEvent[key].includes(entry.athleteId)) {
-        signupAthleteIdsByEvent[key].push(entry.athleteId)
-      }
-    }
-  }
-
   const athletes = seasonRoster.map((athlete) => ({
     id: athlete.id,
     name: athletePreferredName(athlete),
     gender: athlete.gender === Gender.F ? ("F" as const) : ("M" as const),
-    signupEvents: signupIndividualCount[athlete.id] ?? 0,
   }))
 
   const relayEvents = resolveSignupEventOptions(meet.eventOrder)
@@ -129,8 +101,6 @@ export default async function MeetRelayBuilderPage({
         defaultCourse={meet.course}
         relayEvents={relayEvents}
         athletes={athletes}
-        signupAthleteIds={signupAthleteIds}
-        signupAthleteIdsByEvent={signupAthleteIdsByEvent}
         hasImportedResults={hasImportedResults}
       />
     </main>

@@ -378,7 +378,7 @@ export async function editSheetSeed(meetId: string, input: EditSheetSeedInput) {
     eventOptions})
 
   if (!found) {
-    throw new Error("That sign-up roster entry was not found (imported sheet rows cannot be edited).")
+    throw new Error("That roster entry was not found (imported sheet rows cannot be edited).")
   }
   if (conflict) {
     throw new Error("Athlete already has that event on the roster summary.")
@@ -413,7 +413,7 @@ export async function deleteSheetSeed(meetId: string, athleteId: string, event: 
     event})
 
   if (!found) {
-    throw new Error("That sign-up roster entry was not found (imported sheet rows cannot be deleted).")
+    throw new Error("That roster entry was not found (imported sheet rows cannot be deleted).")
   }
 
   await prisma.meet.update({

@@ -315,7 +315,7 @@ function WeekRailRow({
         "flex flex-1 items-center gap-3 rounded-lg border px-3 py-3 text-left transition-colors " +
         (selected
           ? "border-primary bg-primary/5"
-          : "border-border-secondary hover:bg-fill-secondary")
+          : "border-border-secondary hover:bg-background-hover")
       }
     >
       <DateColumn weekday={weekday} dateNumber={dateNumber} isToday={isToday} dimmed={false} selected={selected} />

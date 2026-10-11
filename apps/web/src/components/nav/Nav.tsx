@@ -15,8 +15,6 @@ const navIconClass = "h-4 w-4 shrink-0"
 
 export default async function Nav() {
   const session = await getSession()
-  const user = session ? await prisma.user.findUnique({ where: { id: session.user.id }, select: { defaultView: true } }) : null
-  const defaultView = user?.defaultView ?? "gallery"
 
   const navLinks = [
     {

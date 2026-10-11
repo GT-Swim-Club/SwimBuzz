@@ -1,7 +1,6 @@
 import { NotificationType, Role } from "@prisma/client"
 import {
   parseNotificationPreferences,
-  preferenceKeyForType,
   type NotificationPreferenceKey,
 } from "@/lib/notifications/notification-preferences"
 import type { PendingProfileChanges } from "@/lib/athlete/pending-profile-changes"
@@ -211,40 +210,6 @@ export async function notifyPracticePublished(input: {
   void sendExpoPushToUsers(recipients, { title, body, href: practiceHref })
 }
 
-export async function notifyMeetSignupOpen(input: {
-  meetId: string
-  meetName: string
-}): Promise<void> {
-  const athletes = await prisma.user.findMany({
-    where: {
-      role: Role.ATHLETE,
-      OR: [{ emailVerified: { not: null } }, { accounts: { some: {} } }],
-    },
-    select: { id: true, notificationPreferences: true },
-  })
-  const recipients = athletes
-    .filter((u) =>
-      parseNotificationPreferences(u.notificationPreferences).meetSignupOpen
-    )
-    .map((u) => u.id)
-  if (recipients.length === 0) return
-
-  const meetHref = await meetHrefForId(input.meetId)
-  const title = `Signup open: ${input.meetName}`
-  const body = "Event signup is now open for this meet."
-
-  await prisma.notification.createMany({
-    data: recipients.map((userId) => ({
-      userId,
-      type: NotificationType.MEET_SIGNUP_OPEN,
-      title,
-      body,
-      href: meetHref,
-    })),
-  })
-  void sendExpoPushToUsers(recipients, { title, body, href: meetHref })
-}
-
 export async function notifyMeetRosterInfoDropped(input: {
   meetId: string
   meetName: string
@@ -260,9 +225,6 @@ export async function notifyMeetRosterInfoDropped(input: {
       entriesSheetSummary: true,
       relayResultsSummary: true,
       resultStatusesSummary: true,
-      signupForm: {
-        select: { entries: { select: { athleteId: true } } },
-      },
       swims: { select: { athleteId: true }, distinct: ["athleteId"] },
     },
   })
@@ -276,7 +238,6 @@ export async function notifyMeetRosterInfoDropped(input: {
     relayResultsSummary: meet.relayResultsSummary,
     resultStatusesSummary: meet.resultStatusesSummary,
     swimAthleteIds: meet.swims.map((s) => s.athleteId),
-    signupAthleteIds: meet.signupForm?.entries.map((e) => e.athleteId) ?? [],
   })
   if (athleteIds.length === 0) return
 
@@ -331,7 +292,7 @@ export async function notifyPracticeComment(input: {
 
   const recipients = await userIdsWithPreference(
     [...candidateIds],
-    preferenceKeyForType(NotificationType.PRACTICE_COMMENT)
+    "practiceComments"
   )
   if (recipients.length === 0) return
 
@@ -415,49 +376,4 @@ export async function notifyTimesImportRequest(input: {
     })),
   })
   void sendExpoPushToUsers(recipients, { title, body, href })
-}
-
-/** Notify meet directors after an athlete withdraws their own signup. */
-export async function notifyMeetSignupDropped(input: {
-  meetId: string
-  athleteId: string
-}): Promise<void> {
-  const directors = await prisma.user.findMany({
-    where: {
-      staffTitle: "MEET_DIRECTOR",
-      role: { in: [Role.COACH, Role.EXEC] },
-      OR: [{ emailVerified: { not: null } }, { accounts: { some: {} } }],
-    },
-    select: { id: true, notificationPreferences: true },
-  })
-  const recipients = directors
-    .filter((user) => parseNotificationPreferences(user.notificationPreferences).meetDrops)
-    .map((user) => user.id)
-  if (recipients.length === 0) return
-
-  const [athlete, meet] = await Promise.all([
-    prisma.athlete.findUnique({
-      where: { id: input.athleteId },
-      select: { firstName: true, lastName: true },
-    }),
-    prisma.meet.findUnique({
-      where: { id: input.meetId },
-      select: { name: true },
-    }),
-  ])
-  if (!athlete || !meet) return
-
-  const title = `Meet drop: ${meet.name}`
-  const body = `${athlete.firstName} ${athlete.lastName} withdrew from ${meet.name}.`
-  const href = await meetHrefForId(input.meetId)
-  await prisma.notification.createMany({
-    data: recipients.map((userId) => ({
-      userId,
-      type: NotificationType.MEET_SIGNUP_DROPPED,
-      title,
-      body,
-      href,
-    })),
-  })
-  await sendExpoPushToUsers(recipients, { title, body, href })
 }

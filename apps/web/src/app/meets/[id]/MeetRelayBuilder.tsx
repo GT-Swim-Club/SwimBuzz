@@ -43,13 +43,10 @@ const TIME_WINDOWS: { label: string; days: number | null }[] = [
   { label: "Last 3 years", days: 1095 },
 ]
 
-type SignupPool = "all" | "meet" | "relay"
-
 type AthleteOption = {
   id: string
   name?: string
   gender?: "M" | "F"
-  signupEvents?: number
 }
 
 type Leg = {
@@ -334,16 +331,12 @@ export default function MeetRelayBuilder({
   defaultCourse,
   relayEvents,
   athletes = [],
-  signupAthleteIds = [],
-  signupAthleteIdsByEvent,
   hasImportedResults = false,
 }: {
   meetId: string
   defaultCourse: string
   relayEvents: string[]
   athletes?: AthleteOption[]
-  signupAthleteIds?: string[]
-  signupAthleteIdsByEvent: Record<string, string[]>
   /** When true, hide "add to roster summary" actions. */
   hasImportedResults?: boolean
 }) {
@@ -361,7 +354,6 @@ export default function MeetRelayBuilder({
   const [error, setError] = useState("")
   const [gender, setGender] = useState("M")
   const [withinDays, setWithinDays] = useState<number | null>(null)
-  const [signupPool, setSignupPool] = useState<SignupPool>("meet")
   const [relayCount, setRelayCount] = useState(1)
   const [excludedIds, setExcludedIds] = useState<string[]>([])
   const [athleteQuery, setAthleteQuery] = useState("")
@@ -378,40 +370,14 @@ export default function MeetRelayBuilder({
   const genderPeople =
     gender === "F" ? "women" : gender === "M" ? "men" : "athletes"
 
-  const athleteGender = useMemo(() => {
-    const map = new Map<string, "M" | "F">()
-    for (const a of athletes) {
-      if (a.gender === "M" || a.gender === "F") map.set(a.id, a.gender)
-    }
-    return map
-  }, [athletes])
-
-  const relaySignedUpIds = useMemo(() => {
-    const key = relaySignupKey(event)
-    const ids = signupAthleteIdsByEvent[key] ?? []
-    if (gender === "X") return ids
-    return ids.filter((id) => athleteGender.get(id) === gender)
-  }, [signupAthleteIdsByEvent, event, gender, athleteGender])
-
-  const meetSignedUpIds = useMemo(() => {
-    if (gender === "X") return signupAthleteIds
-    return signupAthleteIds.filter((id) => athleteGender.get(id) === gender)
-  }, [signupAthleteIds, gender, athleteGender])
-
-  const poolAthletes = useMemo(() => {
-    let list = athletes.filter((a) => {
-      if (gender === "X") return a.gender === "M" || a.gender === "F"
-      return a.gender === gender
-    })
-    if (signupPool === "meet") {
-      const set = new Set(meetSignedUpIds)
-      list = list.filter((a) => set.has(a.id))
-    } else if (signupPool === "relay") {
-      const set = new Set(relaySignedUpIds)
-      list = list.filter((a) => set.has(a.id))
-    }
-    return list
-  }, [athletes, gender, signupPool, meetSignedUpIds, relaySignedUpIds])
+  const poolAthletes = useMemo(
+    () =>
+      athletes.filter((a) => {
+        if (gender === "X") return a.gender === "M" || a.gender === "F"
+        return a.gender === gender
+      }),
+    [athletes, gender]
+  )
 
   const poolIdSet = useMemo(
     () => new Set(poolAthletes.map((a) => a.id)),
@@ -430,14 +396,7 @@ export default function MeetRelayBuilder({
     [includedAthletes]
   )
 
-  const poolIds =
-    signupPool === "all" && excludedInPool.length === 0 ? null : includedIds
-  const poolCount =
-    signupPool === "relay"
-      ? relaySignedUpIds.length
-      : signupPool === "meet"
-        ? meetSignedUpIds.length
-        : null
+  const poolIds = excludedInPool.length === 0 ? null : includedIds
 
   const visibleAthletes = useMemo(() => {
     const q = athleteQuery.trim().toLowerCase()
@@ -453,13 +412,7 @@ export default function MeetRelayBuilder({
       setOriginalResult(null)
 
       if (poolIds && poolIds.length === 0) {
-        setError(
-          excludedInPool.length > 0
-            ? `No ${genderPeople} left in the pool. Include at least four athletes.`
-            : signupPool === "relay"
-              ? `No ${genderPeople} signed up for this relay yet.`
-              : `No ${genderPeople} have signed up for this meet yet.`
-        )
+        setError(`No ${genderPeople} left in the pool. Include at least four athletes.`)
         setLoading(false)
         return
       }
@@ -500,9 +453,7 @@ export default function MeetRelayBuilder({
       genderPeople,
       poolIds,
       relayCount,
-      signupPool,
       withinDays,
-      excludedInPool.length,
     ]
   )
 
@@ -821,19 +772,6 @@ export default function MeetRelayBuilder({
           <div className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:gap-6">
             <p className="shrink-0 text-sm font-medium text-foreground sm:w-36">Athlete Pool</p>
             <div className="flex flex-wrap items-center gap-2">
-              <select
-                value={signupPool}
-                onChange={(e) => {
-                  setSignupPool(e.target.value as SignupPool)
-                  setResult(null)
-                }}
-                aria-label="Athlete pool"
-                className="w-full max-w-sm border border-border rounded-lg px-3 py-2 text-sm bg-background sm:w-auto"
-              >
-                <option value="meet">Signed up for meet</option>
-                <option value="relay">Signed up for relay</option>
-                <option value="all">All athletes</option>
-              </select>
               <button
                 type="button"
                 onClick={() => {
@@ -876,28 +814,9 @@ export default function MeetRelayBuilder({
           }
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <label className="block">
-                <span className="mb-1 block text-xs text-foreground-secondary">Athlete pool</span>
-                <select
-                  value={signupPool}
-                  onChange={(e) => {
-                    setSignupPool(e.target.value as SignupPool)
-                    setAthleteQuery("")
-                    setResult(null)
-                  }}
-                  aria-label="Athlete pool"
-                  className="w-auto border border-border-secondary rounded-lg px-3 py-1.5 text-sm bg-background"
-                >
-                  <option value="meet">Signed up for meet</option>
-                  <option value="relay">Signed up for relay</option>
-                  <option value="all">All athletes</option>
-                </select>
-              </label>
-              <p className="mt-2 text-xs text-foreground-secondary">
-                {includedAthletes.length} of {poolAthletes.length} included
-              </p>
-            </div>
+            <p className="text-xs text-foreground-secondary">
+              {includedAthletes.length} of {poolAthletes.length} included
+            </p>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
@@ -926,23 +845,14 @@ export default function MeetRelayBuilder({
               placeholder="Search athletes"
               className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background focus:rin          ring-primary outline-none"
             />
-            {poolCount != null && poolCount === 0 ? (
-              <p className="mt-2 text-xs text-foreground-secondary">
-                {signupPool === "relay"
-                  ? `No ${genderPeople} signed up for this relay yet.`
-                  : `No ${genderPeople} signed up for this meet yet.`}
-              </p>
-            ) : null}
           </div>
 
           {visibleAthletes.length === 0 ? (
-            poolAthletes.length === 0 && poolCount === 0 ? null : (
-              <p className="py-2 text-sm text-foreground-secondary">
-                {poolAthletes.length === 0
-                  ? `No ${genderPeople} in this pool.`
-                  : "No matching athletes."}
-              </p>
-            )
+            <p className="py-2 text-sm text-foreground-secondary">
+              {poolAthletes.length === 0
+                ? `No ${genderPeople} in this pool.`
+                : "No matching athletes."}
+            </p>
           ) : (
             <ul className="space-y-1.5">
               {visibleAthletes.map((athlete) => {
@@ -981,9 +891,6 @@ export default function MeetRelayBuilder({
                         <p className="text-xs text-foreground-secondary">
                           {included ? "Included" : "Excluded"}
                           {gender === "X" && athlete.gender ? ` · ${athlete.gender}` : ""}
-                          {(athlete.signupEvents ?? 0) > 0
-                            ? ` · ${athlete.signupEvents} ${athlete.signupEvents === 1 ? "event" : "events"}`
-                            : ""}
                         </p>
                       </div>
                     </label>

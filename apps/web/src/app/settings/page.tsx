@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import AppearanceSettings from "@/components/settings/AppearanceSettings"
-import ViewPreferencesSettings from "@/components/settings/ViewPreferencesSettings"
 import CancelPendingProfileChangesButton from "@/components/athlete/CancelPendingProfileChangesButton"
 import EditNicknamesForm from "@/components/athlete/EditNicknamesForm"
 import NotificationPreferencesSettings from "@/components/settings/NotificationPreferencesSettings"
@@ -35,7 +34,7 @@ export default async function SettingsPage() {
         pendingProfileChanges: true}}),
     prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { image: true, notificationPreferences: true, defaultView: true, defaultPracticesView: true }}),
+      select: { image: true, notificationPreferences: true }}),
   ])
 
   const requiresApproval = !isStaffRole(session.user.role)
@@ -187,7 +186,6 @@ export default async function SettingsPage() {
             </h2>
           </div>
           <AppearanceSettings />
-          <ViewPreferencesSettings defaultView={user?.defaultView ?? "gallery"} defaultPracticesView={user?.defaultPracticesView ?? "week"} />
         </section>
       </div>
     </div>

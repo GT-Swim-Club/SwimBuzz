@@ -11,6 +11,7 @@ import { parseSeason, resolveListedSeason } from "@/lib/season"
 import { listSeasons } from "@/lib/season-store"
 import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete/athlete-view-server"
 import { getSession } from "@/lib/auth/session"
+import { readListLayout } from "@/lib/list-layout-server"
 import {
   GalleryListViewToggle,
   ViewNavPanel,
@@ -41,8 +42,8 @@ async function RosterContent({ searchParams }: { searchParams: Promise<{ gender?
     const genderFilter =
       gender === "F" ? "F" : gender === "M" ? "M" : null
 
-    const [user, athletes, viewerAthleteId, isCoach] = await Promise.all([
-      prisma.user.findUnique({ where: { id: session.user.id }, select: { defaultView: true } }),
+    const [defaultView, athletes, viewerAthleteId, isCoach] = await Promise.all([
+      readListLayout("roster"),
       prisma.athlete.findMany({
         where: {
           ...(genderFilter ? { gender: genderFilter } : {}),
@@ -54,7 +55,6 @@ async function RosterContent({ searchParams }: { searchParams: Promise<{ gender?
       isStaffUi(session.user.role),
     ])
 
-    const defaultView = user?.defaultView ?? "gallery"
     const activeView = view ? (view === "list" ? "list" : "gallery") : (defaultView === "list" ? "list" : "gallery")
 
     const sortedAthletes =
@@ -86,6 +86,7 @@ async function RosterContent({ searchParams }: { searchParams: Promise<{ gender?
                     </div>
                     <div className="flex items-center gap-3 flex-wrap">
                         <GalleryListViewToggle
+                            page="roster"
                             activeView={activeView}
                             galleryHref={buildHref({ view: "gallery" })}
                             listHref={buildHref({ view: "list" })}

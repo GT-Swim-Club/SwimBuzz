@@ -226,7 +226,7 @@ export async function PATCH(
 
   if (!found) {
     return NextResponse.json(
-      { error: "That sign-up roster entry was not found (imported sheet rows cannot be edited)." },
+      { error: "That roster entry was not found (imported sheet rows cannot be edited)." },
       { status: 404 }
     )
   }
@@ -304,7 +304,7 @@ export async function DELETE(
 
   if (!found) {
     return NextResponse.json(
-      { error: "That sign-up roster entry was not found (imported sheet rows cannot be deleted)." },
+      { error: "That roster entry was not found (imported sheet rows cannot be deleted)." },
       { status: 404 }
     )
   }

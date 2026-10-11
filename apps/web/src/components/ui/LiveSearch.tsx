@@ -9,10 +9,12 @@ export default function LiveSearch({
   pathname,
   placeholder,
   className = "w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border",
+  autoFocus = false,
 }: {
   pathname: string
   placeholder: string
   className?: string
+  autoFocus?: boolean
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -53,6 +55,7 @@ export default function LiveSearch({
       value={query}
       onChange={(e) => setQuery(e.target.value)}
       placeholder={placeholder}
+      autoFocus={autoFocus}
       className={className}
     />
   )

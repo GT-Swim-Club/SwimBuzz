@@ -40,11 +40,6 @@ export type NationalsCutForStats = {
   timeMs: number
 }
 
-export type SignupEntryForStats = {
-  athleteId: string
-  events: string[]
-}
-
 /** Lifetime PB map: athleteId|normalizedEvent|course → best timeMs */
 export type AthletePbMap = Map<string, number>
 
@@ -101,52 +96,6 @@ function displayName(athleteName: string): string {
     if (first && last) return `${first} ${last}`
   }
   return athleteName
-}
-
-/**
- * Prep-meet highlights from signup entries (no results yet).
- */
-export function computeMeetPrepHighlights(
-  signupEntries: SignupEntryForStats[]
-): MeetHighlights | null {
-  if (signupEntries.length === 0) return null
-
-  const counters: StatCounter[] = [
-    { label: "Sign-ups", value: signupEntries.length },
-  ]
-
-  const eventCounts = new Map<string, number>()
-  let individualEventSlots = 0
-  for (const entry of signupEntries) {
-    for (const event of entry.events) {
-      if (isRelaySignupEvent(event)) continue
-      individualEventSlots += 1
-      const key = normalizeEventName(event)
-      eventCounts.set(key, (eventCounts.get(key) ?? 0) + 1)
-    }
-  }
-
-  if (individualEventSlots > 0) {
-    counters.push({
-      label: "Avg events",
-      value: (individualEventSlots / signupEntries.length).toFixed(1),
-    })
-  }
-
-  let topEvent: string | null = null
-  let topCount = 0
-  for (const [event, count] of eventCounts) {
-    if (count > topCount) {
-      topCount = count
-      topEvent = event
-    }
-  }
-
-  if (topEvent && topCount > 0) {
-    counters.push({ label: "Top event", value: canonicalizeStrokeEvent(topEvent) })
-  }
-
-  return counters.length > 0 ? { counters } : null
 }
 
 /**
