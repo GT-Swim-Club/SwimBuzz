@@ -14,6 +14,12 @@ import {
   resourceValueLabel,
 } from "@/components/meet/ResourceRows"
 import { useResultsImport, type ResultsImportSource } from "@/components/meet/useResultsImport"
+import {
+  useAthletePairing,
+  useBlockAthletePairing,
+  type NameConfirmation,
+  type RosterPairingOption,
+} from "@/components/meet/AthletePairingProvider"
 import { useImportTask } from "@/components/ui/ImportTaskProvider"
 import { useMeetResourceUploads } from "@/lib/meet/use-meet-resource-uploads"
 import { useUnsavedUploads } from "@/lib/meet/unsaved-uploads"
@@ -65,19 +71,6 @@ const ROWS: RowDef[] = [
     placeholder: "Or paste a link to the PDF",
   },
 ]
-
-type NameConfirmation = {
-  pdfName: string
-  athleteId?: string
-  athleteName?: string
-  occurrences: number
-}
-
-type RosterPairingOption = {
-  id: string
-  firstName: string
-  lastName: string
-}
 
 type SaveResourcesResponse = {
   nameConfirmations?: NameConfirmation[]
@@ -223,27 +216,17 @@ export default function ImportMeetResourcesButton({
   const [expanded, setExpanded] = useState<RowKey | null>(null)
   const [teamEditing, setTeamEditing] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
-  const [confirmOpen, setConfirmOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [confirmError, setConfirmError] = useState<string | null>(null)
   const [form, setForm] = useState<ResourceForm>(initial)
-  const [pendingConfirmations, setPendingConfirmations] = useState<NameConfirmation[]>([])
-  const [rosterOptions, setRosterOptions] = useState<RosterPairingOption[]>([])
-  const [pairSelections, setPairSelections] = useState<Record<string, string>>({})
-  const [cachedSheetParses, setCachedSheetParses] = useState<Record<string, unknown> | null>(
-    null
-  )
   const { anyUploading, getFieldUploadHandler } = useMeetResourceUploads()
   const { begin, trackUpload, release } = useUnsavedUploads()
   const [pendingForm, setPendingForm] = useState<ResourceForm | null>(null)
   const [pendingResult, setPendingResult] = useState<PendingResult | null>(null)
   const baseline = withPendingResult(pendingForm ?? initial, initial, pendingResult)
   const hasResources = ROWS.some((def) => rowFilled(baseline, def))
-  const { startImport, pairingModal } = useResultsImport({
-    meetId,
-    season,
-    pairingBlocked: open || confirmOpen,
-  })
+  const { startImport } = useResultsImport({ meetId, season })
+  const { requestPairing } = useAthletePairing()
+  // Pairing from an earlier import waits until the resource editor is closed.
+  useBlockAthletePairing(open)
 
   useEffect(() => {
     if (!pendingForm) return
@@ -275,24 +258,28 @@ export default function ImportMeetResourcesButton({
     release(resourceFileUrls(initial))
   }
 
-  function defaultPairSelections(confirmations: NameConfirmation[]): Record<string, string> {
-    const next: Record<string, string> = {}
-    for (const c of confirmations) {
-      next[c.pdfName] = c.athleteId ?? ""
-    }
-    return next
-  }
-
-  function handleSaveResponse(data: SaveResourcesResponse) {
+  function requestSheetPairing(snapshot: ResourceForm, data: SaveResourcesResponse) {
     const confirmations = data.nameConfirmations ?? []
-    if (confirmations.length > 0) {
-      setPendingConfirmations(confirmations)
-      setRosterOptions(data.rosterForPairing ?? [])
-      setPairSelections(defaultPairSelections(confirmations))
-      setCachedSheetParses(data.cachedSheetParses ?? null)
-      setConfirmError(null)
-      setConfirmOpen(true)
-    }
+    if (confirmations.length === 0) return
+    requestPairing({
+      confirmations,
+      roster: data.rosterForPairing ?? [],
+      description:
+        "These names were found on a psych, heat, or finals heat sheet but did not match the roster. Pair them to a roster athlete to include their entries.",
+      occurrenceNoun: ["entry", "entries"],
+      submitVerb: "Save",
+      taskLabel: "Saving paired athletes…",
+      submit: async (nameMappings, rejectedNames) => {
+        await saveResources(snapshot, {
+          nameMappings,
+          rejectedNames,
+          cachedSheetParses: data.cachedSheetParses ?? null,
+          // The results fields were already handled by the first save or the results import.
+          skip: ["swimphoneUrl", "resultsUrl"],
+        })
+        return "Saved paired athletes"
+      },
+    })
   }
 
   async function saveResources(
@@ -328,11 +315,14 @@ export default function ImportMeetResourcesButton({
     }
 
     release(resourceFileUrls(snapshot))
-    handleSaveResponse({
-      nameConfirmations: result.nameConfirmations as NameConfirmation[] | undefined,
-      rosterForPairing: result.rosterForPairing as RosterPairingOption[] | undefined,
-      cachedSheetParses: result.cachedSheetParses as Record<string, unknown> | undefined,
-    })
+    // The paired re-save resolves every name it was asked about, so only the first save pairs.
+    if (!opts?.nameMappings) {
+      requestSheetPairing(snapshot, {
+        nameConfirmations: result.nameConfirmations as NameConfirmation[] | undefined,
+        rosterForPairing: result.rosterForPairing as RosterPairingOption[] | undefined,
+        cachedSheetParses: result.cachedSheetParses as Record<string, unknown> | undefined,
+      })
+    }
     if (result.packetWarning) {
       return `Imported resources, but the meet packet could not be parsed: ${result.packetWarning}`
     }
@@ -442,63 +432,6 @@ export default function ImportMeetResourcesButton({
       })
     }
   }
-
-  function closeConfirmWithoutPairing() {
-    if (loading) return
-    setConfirmOpen(false)
-    setPendingConfirmations([])
-    setRosterOptions([])
-    setPairSelections({})
-    setCachedSheetParses(null)
-    setConfirmError(null)
-  }
-
-  async function handleConfirmSubmit(e: React.FormEvent) {
-    e.preventDefault()
-
-    const nameMappings: Record<string, string> = {}
-    const rejectedNames: string[] = []
-    for (const c of pendingConfirmations) {
-      const selected = (pairSelections[c.pdfName] ?? "").trim()
-      if (selected) {
-        nameMappings[c.pdfName] = selected
-      } else {
-        rejectedNames.push(c.pdfName)
-      }
-    }
-
-    if (Object.keys(nameMappings).length === 0) {
-      closeConfirmWithoutPairing()
-      return
-    }
-
-    setLoading(true)
-    setConfirmError(null)
-
-    try {
-      const snapshot = pendingForm ?? snapshotForm(form)
-      await saveResources(snapshot, {
-        nameMappings,
-        rejectedNames,
-        cachedSheetParses,
-        // The results fields were already handled by the first save or the results import.
-        skip: ["swimphoneUrl", "resultsUrl"],
-      })
-      setConfirmOpen(false)
-      setPendingConfirmations([])
-      setRosterOptions([])
-      setPairSelections({})
-      setCachedSheetParses(null)
-    } catch (err) {
-      setConfirmError(err instanceof Error ? err.message : "Failed to save paired athletes")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const pairedCount = pendingConfirmations.filter((c) =>
-    Boolean((pairSelections[c.pdfName] ?? "").trim())
-  ).length
 
   const addedCount = ROWS.filter((def) => rowFilled(form, def)).length
   const showTeamInput = teamEditing || !form.teamCode.trim()
@@ -749,92 +682,6 @@ export default function ImportMeetResourcesButton({
         <ResourceList>{ROWS.map(renderRow)}</ResourceList>
         {formError ? <p className="text-sm text-error">{formError}</p> : null}
       </Modal>
-
-      <Modal
-        open={confirmOpen}
-        onClose={closeConfirmWithoutPairing}
-        closeDisabled={loading}
-        busy={loading}
-        title="Pair unmatched athletes"
-        description="These names were found on a psych, heat, or finals heat sheet but did not match the roster. Pair them to a roster athlete to include their entries."
-        onSubmit={handleConfirmSubmit}
-        footer={
-          <ModalFooter>
-            <button
-              type="button"
-              onClick={closeConfirmWithoutPairing}
-              disabled={loading}
-              className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill"
-            >
-              Skip
-            </button>
-            <button
-              type="submit"
-              disabled={loading || pairedCount === 0}
-              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
-            >
-              {loading
-                ? "Saving…"
-                : pairedCount > 0
-                  ? `Save ${pairedCount} paired`
-                  : "Save paired"}
-            </button>
-          </ModalFooter>
-        }
-      >
-        <ul className="space-y-3">
-          {pendingConfirmations.map((c) => {
-            const selected = pairSelections[c.pdfName] ?? ""
-            const suggested =
-              c.athleteId && c.athleteName
-                ? { id: c.athleteId, name: c.athleteName }
-                : null
-            return (
-              <li
-                key={c.pdfName}
-                className="rounded-xl border bg-fill-secondary px-4 py-3 border-border"
-              >
-                <p className="text-sm text-foreground">
-                  <strong>{c.pdfName}</strong>
-                </p>
-                <p className="mt-0.5 text-xs text-foreground-secondary">
-                  {c.occurrences} entr{c.occurrences === 1 ? "y" : "ies"} with this spelling
-                  {suggested ? (
-                    <span>
-                      {" "}
-                      · suggested match: {suggested.name}
-                    </span>
-                  ) : null}
-                </p>
-                <label className="mt-3 block">
-                  <span className="sr-only">Roster athlete for {c.pdfName}</span>
-                  <select
-                    value={selected}
-                    onChange={(e) =>
-                      setPairSelections((prev) => ({
-                        ...prev,
-                        [c.pdfName]: e.target.value,
-                      }))
-                    }
-                    className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background"
-                  >
-                    <option value="">Leave unmatched</option>
-                    {rosterOptions.map((a) => (
-                      <option key={a.id} value={a.id}>
-                        {a.lastName}, {a.firstName}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </li>
-            )
-          })}
-        </ul>
-        {confirmError && (
-          <p className="text-sm text-error">{confirmError}</p>
-        )}
-      </Modal>
-      {pairingModal}
     </>
   )
 }

@@ -48,6 +48,22 @@ function readTagsFromParams(searchParams: URLSearchParams): string[] {
   return parseTags(searchParams.getAll("tag"))
 }
 
+// True when some scrollable element between target and boundary can still
+// scroll in the wheel's direction.
+function canScrollWithin(target: EventTarget | null, boundary: HTMLElement, deltaY: number): boolean {
+  let el = target instanceof Element ? target : null
+  while (el && el !== boundary) {
+    if (el instanceof HTMLElement && el.scrollHeight > el.clientHeight) {
+      const { overflowY } = getComputedStyle(el)
+      if (overflowY === "auto" || overflowY === "scroll") {
+        if (deltaY < 0 ? el.scrollTop > 0 : el.scrollTop + el.clientHeight < el.scrollHeight - 1) return true
+      }
+    }
+    el = el.parentElement
+  }
+  return false
+}
+
 function subscribeMediaQuery(query: string) {
   return (callback: () => void) => {
     const mql = window.matchMedia(query)
@@ -194,6 +210,9 @@ export default function PracticesSidebar({
 
     const onWheel = (event: WheelEvent) => {
       if (event.ctrlKey || !event.deltaY) return
+      // Let scrollable rails inside the sidebar (e.g. the list view) scroll
+      // natively; only forward to the page once they can't move further.
+      if (canScrollWithin(event.target, sidebar, event.deltaY)) return
       event.preventDefault()
       const unit = event.deltaMode === WheelEvent.DOM_DELTA_PAGE
         ? scroller.clientHeight

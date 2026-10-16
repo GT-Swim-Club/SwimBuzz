@@ -5,7 +5,7 @@ import { zonedDayKey } from "@swimbuzz/shared"
 import CreateMeetButton from "./CreateMeetButton"
 import MeetsViewSwitch from "./MeetsViewSwitch"
 import MeetsToolbarSelects from "./MeetsToolbarSelects"
-import MeetsToolbar from "./MeetsToolbar"
+import FluidToolbar from "@/components/ui/FluidToolbar"
 import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete/athlete-view-server"
 import { parseSeason } from "@/lib/season"
 import { listSeasons } from "@/lib/season-store"
@@ -14,13 +14,13 @@ import MeetsListSkeleton, { MeetsToolbarSkeleton } from "./MeetsListSkeleton"
 import { getSession } from "@/lib/auth/session"
 import { isRelayResultsSummary } from "@/lib/meet/relay-results"
 import { readListLayout } from "@/lib/list-layout-server"
-import { MeetsLayoutProvider } from "./use-meets-layout"
+import { ListLayoutProvider } from "@/components/ui/ListLayout"
 
 // Seasons come from the canonical Season table, matching how /athletes and
 // meets/[id] source their season lists — independent of the meets list stream.
 async function ToolbarControlsSection({ isCoach, showScope }: { isCoach: boolean; showScope: boolean }) {
   const seasons = await listSeasons()
-  // No wrapper: MeetsToolbar lays these out (and measures them) directly.
+  // No wrapper: FluidToolbar lays these out (and measures them) directly.
   return (
     <MeetsToolbarSelects seasons={seasons} showTrash={isCoach} showScope={showScope}>
       {isCoach && <CreateMeetButton seasons={seasons} />}
@@ -143,13 +143,18 @@ export default async function MeetsPage({
           </>
         }
       >
-        <MeetsLayoutProvider initial={layout}>
-          <MeetsToolbar controls={<ToolbarControlsSection isCoach={isCoach} showScope={!!viewerAthleteId} />} />
+        <ListLayoutProvider page="meets" initial={layout}>
+          <FluidToolbar
+            pathname="/meets"
+            placeholder="Search meets…"
+            searchLabel="Search meets"
+            controls={<ToolbarControlsSection isCoach={isCoach} showScope={!!viewerAthleteId} />}
+          />
 
           <MeetsViewSwitch showTrash={isCoach}>
             <MeetsListSection query={query} isCoach={isCoach} viewerAthleteId={viewerAthleteId} />
           </MeetsViewSwitch>
-        </MeetsLayoutProvider>
+        </ListLayoutProvider>
       </Suspense>
     </main>
   )

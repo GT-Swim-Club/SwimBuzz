@@ -12,7 +12,7 @@ import { useDeletedItems } from "@/lib/recovery/use-deleted-items"
 import MeetGalleryCard, { MeetCardRows } from "./MeetGalleryCard"
 import MeetListTable from "./MeetListTable"
 import { MeetListSkeleton } from "./MeetsListSkeleton"
-import { useMeetsLayout } from "./use-meets-layout"
+import { useListLayout } from "@/components/ui/ListLayout"
 
 const TONE_CLASS = {
   normal: "text-white",
@@ -30,7 +30,7 @@ const ROW_TONE_CLASS = {
 export default function DeletedMeetsList({ query }: { query: string }) {
   const { items, error, busy, restore, purge } = useDeletedItems("meet")
   const [confirmDelete, setConfirmDelete] = useState<DeletedItem | null>(null)
-  const { layout } = useMeetsLayout()
+  const { layout } = useListLayout()
 
   if (items === null) {
     if (layout === "list") return <MeetListSkeleton heading="w-16" rows={3} actions="trash" />

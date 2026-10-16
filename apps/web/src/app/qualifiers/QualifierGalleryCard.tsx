@@ -2,113 +2,75 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import HoverDetail from "@/components/ui/HoverDetail"
 import { athletePreferredInitials, athletePreferredName } from "@swimbuzz/shared"
 import type { QualifierAthlete } from "@/lib/qualifiers/nationals-qualifiers"
-import { athletePath, meetSwimPath } from "@/lib/slug"
+import { athletePath } from "@/lib/slug"
+import { QualifierSwimRow, SwimDetailPanel } from "./QualifierSwimRow"
 
-type QualifyingEvent = QualifierAthlete["events"][number]
+const VISIBLE_EVENTS = 3
 
-function SwimDetailPanel({ event }: { event: QualifyingEvent }) {
-  const details = [
-    ["Event", event.event],
-    ["Meet", event.meetName || "—"],
-    ["Date", event.date || "—"],
-    ["Time", event.time || "—"],
-    ["Standard", event.cut || "—"],
-  ]
+export const galleryCardClass =
+  "flex h-full flex-col rounded-xl border border-border p-4 shadow-sm transition-shadow hover:shadow-md"
+export const galleryRowClass = "group relative -mx-1 flex justify-between gap-3 rounded px-1 py-0.5 transition-colors"
+export const moreButtonClass = "w-full pt-1 text-center text-xs text-primary hover:underline"
 
-  return (
-    <HoverDetail
-      offset={8}
-      desktopOnly
-      className="w-64 max-w-[calc(100vw-2rem)] whitespace-normal rounded-lg p-2.5 text-left shadow-xl"
-    >
-      <span className="block space-y-1.5 text-xs">
-        {details.map(([label, value]) => (
-          <span key={label} className="flex items-start justify-between gap-3">
-            <span className="shrink-0 text-foreground-tertiary">{label}</span>
-            <span className="min-w-0 truncate text-right font-medium text-foreground">{value}</span>
-          </span>
-        ))}
-      </span>
-    </HoverDetail>
-  )
-}
-
-export default function QualifierGalleryCard({
-  athlete,
-  currentUserAthleteId,
-}: {
-  athlete: QualifierAthlete
-  currentUserAthleteId?: string | null
-}) {
+/** Qualifiers by athlete in the gallery layout: the athlete, then their cuts (first three, expandable). */
+export default function QualifierGalleryCard({ athlete, isMe }: { athlete: QualifierAthlete; isMe: boolean }) {
   const [showAll, setShowAll] = useState(false)
-  const events = showAll ? athlete.events : athlete.events.slice(0, 3)
-  const isMe = athlete.athleteId === currentUserAthleteId
+  const events = showAll ? athlete.events : athlete.events.slice(0, VISIBLE_EVENTS)
+  const cuts = `${athlete.events.length} ${athlete.events.length === 1 ? "cut" : "cuts"}`
 
   return (
     <div
-      className={`relative flex h-full flex-col overflow-visible rounded-xl border border-border bg-background p-4 text-center shadow-sm transition-all hover:shadow-md ${
-        isMe ? "bg-amber-50" : ""
+      className={`${galleryCardClass} ${
+        isMe ? "bg-[color-mix(in_srgb,var(--brand-color-primary-bg)_60%,var(--brand-color-bg-container))]" : "bg-background"
       }`}
     >
       <Link
         href={athletePath(athlete.athleteSlug ?? athlete.athleteId)}
-        className="group flex flex-col items-center"
+        className="group flex min-w-0 items-center gap-2.5 text-foreground"
       >
-        <div className="mb-3 flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-primary/30 bg-primary/20 text-lg font-semibold text-primary transition-colors">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/20 text-sm font-semibold text-primary">
           {athletePreferredInitials(athlete)}
         </div>
-        <h3 className="text-base font-medium text-foreground transition-colors group-hover:text-primary">
-          {athletePreferredName(athlete)}
-        </h3>
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-[15px] font-medium leading-5 transition-colors group-hover:text-primary">
+            {athletePreferredName(athlete)}
+          </h3>
+          <p className="mt-0.5 truncate text-xs text-foreground-secondary">
+            {athlete.gender === "F" ? "Women" : "Men"} · {cuts}
+          </p>
+        </div>
       </Link>
 
-      <div className="mt-3 w-full space-y-1 text-left">
-        {events.map((event) => {
-          const content = (
-            <>
-              <div className="flex justify-between gap-3 text-xs">
-                <span className="min-w-0 truncate text-sm font-medium text-foreground-secondary transition-colors group-hover:text-primary">
-                  {event.event}
-                </span>
-                <span className="shrink-0 font-mono text-sm font-medium tabular-nums text-foreground transition-colors group-hover:text-primary">
-                  {event.time}
-                </span>
-              </div>
-              <SwimDetailPanel event={event} />
-            </>
-          )
-          const rowClass = "group relative block rounded -mx-1 px-1 py-0.5 transition-colors hover:bg-primary-bg/70"
-          const ariaLabel = `${event.event}, ${event.time}, ${event.meetName || "qualifying swim"}, ${event.date || "date unavailable"}${event.cut ? `, standard ${event.cut}` : ""}`
-
-          if (event.meetId) {
-            return (
-              <Link
-                key={`${event.event}-${event.id}`}
-                href={event.meetSlug ? meetSwimPath(event.meetSlug, event.id) : `/meets/${event.meetId}#swim-${event.id}`}
-                aria-label={ariaLabel}
-                className={rowClass}
-              >
-                {content}
-              </Link>
-            )
-          }
-
-          return (
-            <div key={`${event.event}-${event.id}`} className={rowClass}>
-              {content}
-            </div>
-          )
-        })}
-        {athlete.events.length > 3 ? (
-          <button
-            type="button"
-            onClick={() => setShowAll(!showAll)}
-            className="w-full pt-1 text-center text-xs text-primary hover:underline"
+      <div className="mt-3 flex flex-col gap-1">
+        {events.map((event) => (
+          <QualifierSwimRow
+            key={event.id}
+            swim={event}
+            className={galleryRowClass}
+            ariaLabel={`${event.event}, ${event.time}, ${event.meetName || "qualifying swim"}, ${event.date || "date unavailable"}${event.cut ? `, standard ${event.cut}` : ""}`}
           >
-            {showAll ? "Show less" : `+${athlete.events.length - 3} more`}
+            <span className="min-w-0 truncate text-sm font-medium text-foreground-secondary transition-colors group-hover:text-primary">
+              {event.event}
+            </span>
+            <span className="shrink-0 font-mono text-sm font-medium tabular-nums text-foreground transition-colors group-hover:text-primary">
+              {event.time}
+            </span>
+            <SwimDetailPanel
+              details={[
+                ["Event", event.event],
+                ["Meet", event.meetName || "—"],
+                ["Date", event.date || "—"],
+                ["Time", event.time || "—"],
+                ["Standard", event.cut || "—"],
+              ]}
+            />
+          </QualifierSwimRow>
+        ))}
+        {athlete.events.length > VISIBLE_EVENTS ? (
+          <button type="button" onClick={() => setShowAll(!showAll)} className={moreButtonClass}>
+            {showAll ? "Show less" : `+${athlete.events.length - VISIBLE_EVENTS} more`}
           </button>
         ) : null}
       </div>

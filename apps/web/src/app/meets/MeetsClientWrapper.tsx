@@ -10,7 +10,7 @@ import { meetPath } from "@/lib/slug"
 import MeetCountdown from "@/components/meet/MeetCountdown"
 import { toDateInput, toTimeInput } from "@/lib/date-input"
 import { useMeetsFilters } from "./use-meets-filters"
-import { useMeetsLayout } from "./use-meets-layout"
+import { useListLayout } from "@/components/ui/ListLayout"
 
 export type MeetListItem = {
   id: string
@@ -65,8 +65,8 @@ function dayDiff(dayKey: string, todayKey: string) {
 }
 
 function relativeAhead(days: number) {
-  if (days <= 0) return "today"
-  if (days === 1) return "tomorrow"
+  if (days <= 0) return "Today"
+  if (days === 1) return "Tomorrow"
   if (days < 14) return `in ${days} days`
   return `in ${Math.round(days / 7)} weeks`
 }
@@ -127,7 +127,7 @@ export default function MeetsClientWrapper({
   canScope: boolean
 }) {
   const filters = useMeetsFilters()
-  const { layout } = useMeetsLayout()
+  const { layout } = useListLayout()
   const season = filters.season
   const scope = canScope ? filters.scope : "all"
   const pool = scope === "mine" ? meets.filter((m) => m.mine) : meets

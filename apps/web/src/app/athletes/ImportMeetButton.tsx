@@ -30,7 +30,7 @@ export default function ImportMeetButton({
     parseSeason(searchParams.get("season") ?? searchParams.get("year")) ??
     currentSeason()
 
-  const { startImport, pairingModal } = useResultsImport({ meetId, season })
+  const { startImport } = useResultsImport({ meetId, season })
 
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -267,8 +267,6 @@ export default function ImportMeetButton({
           Only swimmers listed under this team in the results are imported.
         </p>
       </Modal>
-
-      {pairingModal}
     </>
   )
 }

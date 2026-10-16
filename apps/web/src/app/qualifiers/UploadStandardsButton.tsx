@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
+import { AppIcon } from "@/components/ui/AppIcon"
+import HoverDetail from "@/components/ui/HoverDetail"
 import { useImportTask } from "@/components/ui/ImportTaskProvider"
 import { currentSeason } from "@/lib/season"
 import { formatSeasonLabel } from "@swimbuzz/shared"
@@ -67,7 +69,7 @@ export default function UploadStandardsButton({
         if (!res.ok) {
           throw new Error(typeof data.error === "string" ? data.error : "Upload failed")
         }
-        router.push(`/qualifiers?season=${encodeURIComponent(season)}&gender=all`)
+        router.push(`/qualifiers?season=${encodeURIComponent(season)}`)
         router.refresh()
         return "Standards uploaded successfully"
       })()
@@ -83,9 +85,11 @@ export default function UploadStandardsButton({
           resetForm()
           setOpen(true)
         }}
-        className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-text hover:bg-primary-hover transition-colors"
+        aria-label="Upload standards"
+        className="group relative inline-flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg bg-primary text-primary-text transition-colors hover:bg-primary-hover"
       >
-        Upload standards
+        <AppIcon name="upload" className="h-4 w-4 shrink-0" />
+        <HoverDetail label="Upload standards" />
       </button>
 
       <Modal

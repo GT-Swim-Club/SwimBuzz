@@ -10,11 +10,14 @@ export default function LiveSearch({
   placeholder,
   className = "w-full rounded-lg border border-border px-3 py-2 text-sm bg-background border-border",
   autoFocus = false,
+  shallow = false,
 }: {
   pathname: string
   placeholder: string
   className?: string
   autoFocus?: boolean
+  /** Update the URL in place (no server round trip) — for pages that filter client-side. */
+  shallow?: boolean
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -40,14 +43,19 @@ export default function LiveSearch({
       if (trimmed) params.set("q", trimmed)
       else params.delete("q")
       const qs = params.toString()
+      const href = qs ? `${pathname}?${qs}` : pathname
       lastPushed.current = trimmed
+      if (shallow) {
+        window.history.replaceState(null, "", href)
+        return
+      }
       startTransition(() => {
-        router.replace(qs ? `${pathname}?${qs}` : pathname)
+        router.replace(href)
       })
-    }, DEBOUNCE_MS)
+    }, shallow ? 0 : DEBOUNCE_MS)
 
     return () => window.clearTimeout(handle)
-  }, [query, pathname, paramsString, router])
+  }, [query, pathname, paramsString, router, shallow])
 
   return (
     <input

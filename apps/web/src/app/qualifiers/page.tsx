@@ -1,154 +1,86 @@
-import { prisma } from "@/lib/prisma"
-import LoadingComponent from "./loading"
 import { Suspense } from "react"
 import { redirect } from "next/navigation"
 import { parseSeason, resolveListedSeason } from "@/lib/season"
 import { listSeasons } from "@/lib/season-store"
-import { formatSeasonLabel } from "@swimbuzz/shared"
 import { computeNationalsQualifiers } from "@/lib/qualifiers/nationals-qualifiers"
-import { isStaffUi } from "@/lib/athlete/athlete-view-server"
-import QualifierFilters from "./QualifierFilters"
-import QualifiersList from "./QualifiersList"
-import LiveSearch from "@/components/ui/LiveSearch"
-import {
-  GalleryListViewToggle,
-  ViewNavPanel,
-  ViewNavigationProvider,
-} from "@/components/nav/ViewNavigation"
-import StandardsTableModal from "./StandardsTableModal"
-import UploadStandardsButton from "./UploadStandardsButton"
+import { compareSwimEvents } from "@/lib/swim/swim-parse"
+import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete/athlete-view-server"
 import { getSession } from "@/lib/auth/session"
 import { readListLayout } from "@/lib/list-layout-server"
+import { ListLayoutProvider } from "@/components/ui/ListLayout"
+import QualifiersView from "./QualifiersView"
+import QualifiersSkeleton from "./QualifiersSkeleton"
 
 export const dynamic = "force-dynamic"
 
+type SearchParams = Record<string, string | string[] | undefined>
+
 async function QualifiersContent({
-  searchParams,
+  season,
+  userId,
+  role,
 }: {
-  searchParams: Promise<{
-    season?: string
-    gender?: string
-    view?: string
-    q?: string
-  }>
+  season: string
+  userId: string
+  role: string
 }) {
-  const session = await getSession()
-  if (!session) redirect("/signin")
+  const [isCoach, currentAthleteId, { set, qualifiers }, seasons] = await Promise.all([
+    isStaffUi(role),
+    resolveViewerAthleteId(userId),
+    // Every gender: the gender filter, grouping and search apply client-side
+    // from the URL (see QualifiersView), so switching them is instant.
+    computeNationalsQualifiers({ season }),
+    listSeasons(),
+  ])
 
-  const defaultView = await readListLayout("nationals")
-  const { season: seasonParam, gender, view, q: search } = await searchParams
-  const activeView = view === "list" ? "list" : view === "gallery" ? "gallery" : defaultView
-  const seasons = await listSeasons()
-  const requestedSeason = parseSeason(seasonParam)
-  const season = resolveListedSeason(requestedSeason, seasons)
-
-  if (!seasonParam || requestedSeason !== season || !gender || view === defaultView) {
-    const params = new URLSearchParams({
-      season,
-      gender: gender ?? "all",
-    })
-    if (search) params.set("q", search)
-    if (activeView !== defaultView) params.set("view", activeView)
-    redirect(`/qualifiers?${params.toString()}`)
-  }
-
-  const genderFilter = gender === "F" ? "F" : gender === "M" ? "M" : null
-  const isCoach = await isStaffUi(session.user.role)
-  const currentUserAthlete = await prisma.athlete.findUnique({
-    where: { userId: session.user.id },
-  })
-  const currentAthleteId = currentUserAthlete?.id
-
-  const { set, qualifiers: rawQualifiers } = await computeNationalsQualifiers({
-    season,
-    gender: genderFilter,
-  })
-  const qualifiersAll = [...rawQualifiers].sort((a, b) => {
-    if (a.athleteId === currentAthleteId) return -1
-    if (b.athleteId === currentAthleteId) return 1
-    return 0
-  })
-  const normalizedSearch = (search ?? "").toLowerCase()
-  const qualifiers = qualifiersAll.filter(
-    (athlete) =>
-      athlete.firstName.toLowerCase().includes(normalizedSearch) ||
-      athlete.lastName.toLowerCase().includes(normalizedSearch) ||
-      athlete.events.some((event) => event.event.toLowerCase().includes(normalizedSearch))
-  )
-
-  function buildHref(next: { view?: "gallery" | "list" }) {
-    const params = new URLSearchParams({
-      season,
-      gender: gender ?? "all",
-    })
-    if (search) params.set("q", search)
-    const nextView = next.view ?? activeView
-    if (nextView !== defaultView) params.set("view", nextView)
-    return `/qualifiers?${params.toString()}`
-  }
+  // Rank events in swim order here — compareSwimEvents is server-only.
+  const events = [...new Set(qualifiers.flatMap((athlete) => athlete.events.map((e) => e.event)))]
+  const eventRank = Object.fromEntries(events.sort(compareSwimEvents).map((event, index) => [event, index]))
 
   return (
-    <ViewNavigationProvider>
-      <div className="space-y-4">
-        <h1 className="sr-only">Nationals Qualifiers</h1>
-        <section className="flex flex-wrap items-center gap-3">
-          <span className="text-lg font-medium text-foreground-secondary">
-            {qualifiers.length} qualifier{qualifiers.length === 1 ? "" : "s"}
-          </span>
-          <QualifierFilters seasons={seasons} />
-          {set ? (
-            <StandardsTableModal
-                yearLabel={set.yearLabel}
-                sourceUrl={set.sourceUrl}
-            />
-          ) : null}
-          <div className="ml-auto flex items-center gap-2">
-            <GalleryListViewToggle
-              page="nationals"
-              activeView={activeView}
-              galleryHref={buildHref({ view: "gallery" })}
-              listHref={buildHref({ view: "list" })}
-            />
-            {isCoach ? <UploadStandardsButton season={season} course={set?.course ?? "SCY"} /> : null}
-          </div>
-        </section>
-
-        {!set ? (
-          <p className="text-sm text-foreground-secondary">
-            No time standards have been uploaded for {formatSeasonLabel(season)} yet.
-            {isCoach
-              ? " Upload a Nationals qualifying-times PDF to begin tracking cuts."
-              : " Ask a coach to upload the qualifying-times PDF."}
-          </p>
-        ) : null}
-
-        <section className="space-y-3">
-          <LiveSearch pathname="/qualifiers" placeholder="Search athletes or events..." />
-          <ViewNavPanel>
-            <QualifiersList
-              qualifiers={qualifiers}
-              currentUserAthleteId={currentAthleteId}
-              view={activeView}
-              emptyMessage={
-                set
-                  ? "No athletes have made an individual Nationals cut from meets in this season yet."
-                  : "Upload standards to start tracking qualifiers."
-              }
-            />
-          </ViewNavPanel>
-        </section>
-      </div>
-    </ViewNavigationProvider>
+    <QualifiersView
+      season={season}
+      seasons={seasons}
+      standards={set ? { yearLabel: set.yearLabel, sourceUrl: set.sourceUrl, course: set.course } : null}
+      qualifiers={qualifiers}
+      eventRank={eventRank}
+      currentAthleteId={currentAthleteId}
+      isCoach={isCoach}
+    />
   )
 }
 
-export default async function QualifiersPage(props: {
-  searchParams: Promise<{ season?: string; gender?: string; view?: string; q?: string }>
-}) {
+export default async function QualifiersPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const session = await getSession()
+  if (!session) redirect("/signin")
+
+  const params = await searchParams
+  const seasonParam = typeof params.season === "string" ? params.season : undefined
+  const [seasons, layout] = await Promise.all([listSeasons(), readListLayout("nationals")])
+  const requestedSeason = parseSeason(seasonParam)
+  const season = resolveListedSeason(requestedSeason, seasons)
+
+  // Season is the only server-side filter; pin it in the URL so the season
+  // dropdown, sharing and refresh all agree.
+  if (!seasonParam || requestedSeason !== season) {
+    const next = new URLSearchParams()
+    for (const [key, value] of Object.entries(params)) {
+      if (typeof value === "string" && key !== "season") next.set(key, value)
+    }
+    next.set("season", season)
+    redirect(`/qualifiers?${next.toString()}`)
+  }
+
   return (
-    <main className="space-y-4">
-      <Suspense fallback={<LoadingComponent />}>
-        <QualifiersContent {...props} />
+    <main className="flex flex-col gap-4">
+      <h1 className="sr-only">Nationals Qualifiers</h1>
+      {/* One boundary so the toolbar and the list appear together. Season
+          changes navigate in a transition, so they keep this content up
+          instead of falling back to the skeleton. */}
+      <Suspense fallback={<QualifiersSkeleton layout={layout} byEvent={params.group === "event"} />}>
+        <ListLayoutProvider page="nationals" initial={layout}>
+          <QualifiersContent season={season} userId={session.user.id} role={session.user.role} />
+        </ListLayoutProvider>
       </Suspense>
     </main>
   )

@@ -15,19 +15,18 @@ const ICON_BUTTON = 42
 
 const CondensedContext = createContext(false)
 
-/** Whether the dropdowns should show as icon-only buttons (see MeetsToolbar). */
+/** Whether the dropdowns should show as icon-only buttons (see FluidToolbar). */
 export function useToolbarCondensed() {
   return useContext(CondensedContext)
 }
 
-const PLACEHOLDER = "Search meets…"
 const searchClass =
   "h-[42px] min-w-0 rounded-lg border border-border bg-background px-3 text-sm text-foreground placeholder:text-foreground-tertiary"
-const iconButtonClass =
+export const toolbarIconButtonClass =
   "group relative inline-flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg border border-border bg-background text-foreground transition-colors hover:bg-fill-secondary"
 
 /**
- * Search field + `controls` (selects, layout toggle, New meet). While the
+ * Search field + `controls` (selects, layout toggle, create button). While the
  * field fits beside the controls it stays inline; once it doesn't, it collapses
  * to a search button that swaps the row for a back button and a full-width
  * field — the same pattern as the practices toolbar. Leaving search clears it.
@@ -38,8 +37,24 @@ const iconButtonClass =
  * Fit is measured from the controls' full widths — dropdowns report theirs
  * through a hidden `[data-measure]` copy — never from the row's current
  * wrapping or which mode is showing, so neither switch can flip-flop.
+ *
+ * `shallow` keeps the search in the URL without a server round trip, for
+ * pages that filter client-side (see LiveSearch).
  */
-export default function MeetsToolbar({ controls }: { controls: ReactNode }) {
+export default function FluidToolbar({
+  pathname,
+  placeholder,
+  searchLabel,
+  shallow = false,
+  controls,
+}: {
+  pathname: string
+  placeholder: string
+  /** Accessible name of the collapsed search button. */
+  searchLabel: string
+  shallow?: boolean
+  controls: ReactNode
+}) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const query = searchParams.get("q")?.trim() ?? ""
@@ -76,7 +91,9 @@ export default function MeetsToolbar({ controls }: { controls: ReactNode }) {
     const params = new URLSearchParams(searchParams.toString())
     params.delete("q")
     const qs = params.toString()
-    startTransition(() => router.replace(qs ? `/meets?${qs}` : "/meets"))
+    const href = qs ? `${pathname}?${qs}` : pathname
+    if (shallow) window.history.replaceState(null, "", href)
+    else startTransition(() => router.replace(href))
   }
 
   const searching = compact && searchOpen
@@ -85,15 +102,26 @@ export default function MeetsToolbar({ controls }: { controls: ReactNode }) {
     <div ref={rowRef} className="relative flex flex-wrap items-center gap-3">
       {searching && (
         <>
-          <button type="button" onClick={closeSearch} aria-label="Exit search" className={iconButtonClass}>
+          <button type="button" onClick={closeSearch} aria-label="Exit search" className={toolbarIconButtonClass}>
             <AppIcon name="arrowLeft" className="h-4 w-4" />
             <HoverDetail label="Exit search" />
           </button>
-          <LiveSearch pathname="/meets" placeholder={PLACEHOLDER} autoFocus className={`flex-1 ${searchClass}`} />
+          <LiveSearch
+            pathname={pathname}
+            placeholder={placeholder}
+            shallow={shallow}
+            autoFocus
+            className={`flex-1 ${searchClass}`}
+          />
         </>
       )}
       {!compact && (
-        <LiveSearch pathname="/meets" placeholder={PLACEHOLDER} className={`min-w-[200px] flex-1 ${searchClass}`} />
+        <LiveSearch
+          pathname={pathname}
+          placeholder={placeholder}
+          shallow={shallow}
+          className={`min-w-[200px] flex-1 ${searchClass}`}
+        />
       )}
       {/* Stays mounted while searching (hidden and inert) so it can still be
           measured — widening the window must be able to bring the field back. */}
@@ -113,12 +141,12 @@ export default function MeetsToolbar({ controls }: { controls: ReactNode }) {
             type="button"
             data-search-toggle
             onClick={() => setSearchOpen(true)}
-            aria-label="Search meets"
-            className={`mr-auto ${iconButtonClass}`}
+            aria-label={searchLabel}
+            className={`mr-auto ${toolbarIconButtonClass}`}
           >
             <AppIcon name="search" className="h-4 w-4" />
             {query && <span aria-hidden className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary" />}
-            <HoverDetail label="Search meets" />
+            <HoverDetail label={searchLabel} />
           </button>
         )}
         <CondensedContext.Provider value={condensed}>{controls}</CondensedContext.Provider>

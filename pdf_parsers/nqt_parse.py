@@ -1,6 +1,7 @@
 """Parse USMS / club Nationals Qualifying Times (NQT) PDFs.
 
-Expected layout (three columns): Women time | Event | Men time
+Expected layout: three columns, Women time | Event | Men time, or any other
+order announced by a header row (e.g. CCS uses Event | Women | Men).
 
   Women                        Event                  Men
     25.99                     50 Free                 22.29
@@ -32,7 +33,11 @@ STROKE_ALIASES: dict[str, str] = {
     "individual medley": "IM",
     "im": "IM",
     "medley": "Medley",
+    "med": "Medley",
 }
+
+COLUMN_NAMES = ("women", "event", "men")
+DEFAULT_ORDER: tuple[str, ...] = COLUMN_NAMES
 
 
 def time_token_to_ms(token: str) -> int | None:
@@ -56,10 +61,19 @@ RELAY_EVENT = re.compile(
     r"^(?:"
     r"(?:(\d)\s*[xX×]\s*(\d{2,3})|(\d{2,4}))\s+"
     r"(?:Mixed\s+)?"
-    r"(Free|Freestyle|Medley)\s+Relay"
+    r"(Free|Freestyle|Medley|Med)\s+Relay"
     r")$",
     re.I,
 )
+RELAY_SHORTHAND = re.compile(r"^(?:\d\s*[xX×]\s*)?\d{2,4}\s+(?:Mixed\s+)?\S+$", re.I)
+
+
+def _expand_ref(raw: str) -> str:
+    """'4x100 FREE' / '4x50 MED' (QUAL references) -> '4x100 FREE Relay'."""
+    text = re.sub(r"\s+", " ", (raw or "").strip())
+    if RELAY_SHORTHAND.match(text) and re.search(r"\d\s*[xX×]", text):
+        return f"{text} Relay"
+    return text
 
 
 def _normalize_stroke(raw: str) -> str:
@@ -138,7 +152,7 @@ def _side_display(token: str) -> str:
         return "--"
     qual = QUAL_REF.match(cleaned)
     if qual:
-        ref_label = format_nqt_event_label(qual.group(1).strip()) or qual.group(1).strip()
+        ref_label = format_nqt_event_label(_expand_ref(qual.group(1))) or qual.group(1).strip()
         return f"QUAL for {ref_label}"
     if TIME_TOKEN.match(cleaned):
         return cleaned
@@ -152,53 +166,75 @@ def _parse_side_token(token: str) -> tuple[int | None, str | None]:
         return None, None
     qual = QUAL_REF.match(cleaned)
     if qual:
-        ref = normalize_nqt_event(qual.group(1).strip())
+        ref = normalize_nqt_event(_expand_ref(qual.group(1)))
         return None, ref
     if TIME_TOKEN.match(cleaned):
         return time_token_to_ms(cleaned), None
     return None, None
 
 
-def _split_row(line: str) -> tuple[str, str, str] | None:
-    """Split a layout line into women | event | men columns."""
+def _is_side_cell(token: str) -> bool:
+    if TIME_TOKEN.match(token) or DASH_TOKEN.match(token):
+        return True
+    qual = QUAL_REF.match(token)
+    return bool(qual and normalize_nqt_event(_expand_ref(qual.group(1))))
+
+
+def _header_order(line: str) -> tuple[str, ...] | None:
+    """Column order from a 'Women  Event  Men'-style header row."""
+    tokens = [t.lower() for t in line.split()]
+    if sorted(tokens) != sorted(COLUMN_NAMES):
+        return None
+    return tuple(tokens)
+
+
+def _split_row(line: str, order: tuple[str, ...]) -> tuple[str, str, str] | None:
+    """Split a layout line into (women, event, men) cells, honoring column order."""
     stripped = line.strip()
     if not stripped:
         return None
 
     low = stripped.lower()
-    if low in {"women", "men", "event"}:
+    if low in set(COLUMN_NAMES):
         return None
     if "qualifying times" in low and "women" not in low:
         return None
 
     tokens = stripped.split()
-    if len(tokens) < 2:
+    if len(tokens) < 3:
         return None
 
-    for left_n in range(1, len(tokens) - 1):
-        for right_n in range(1, len(tokens) - left_n):
-            left = " ".join(tokens[:left_n])
-            right = " ".join(tokens[-right_n:])
-            center = " ".join(tokens[left_n : len(tokens) - right_n])
-            if format_nqt_event_label(center):
-                left_ok = (
-                    TIME_TOKEN.match(left)
-                    or QUAL_REF.match(left)
-                    or DASH_TOKEN.match(left)
-                )
-                right_ok = (
-                    TIME_TOKEN.match(right)
-                    or QUAL_REF.match(right)
-                    or DASH_TOKEN.match(right)
-                )
-                if left_ok and right_ok:
-                    return left, center, right
+    event_slot = order.index("event")
+    # Sides, in the visual order they appear around the event column.
+    side_genders = [c for c in order if c != "event"]
 
-    m = re.match(r"^(.+?)\s{2,}(.+?)\s{2,}(.+)$", stripped)
-    if m:
-        left, center, right = m.group(1).strip(), m.group(2).strip(), m.group(3).strip()
-        if format_nqt_event_label(center):
-            return left, center, right
+    for start in range(len(tokens)):
+        # Longest event span first so '4x200 Freestyle Relay' beats a shorter match.
+        for stop in range(len(tokens), start, -1):
+            center = " ".join(tokens[start:stop])
+            if not format_nqt_event_label(center):
+                continue
+            before, after = tokens[:start], tokens[stop:]
+            if event_slot == 1:
+                candidates = [(before, after)] if before and after else []
+            else:
+                rest = before if event_slot == 2 else after
+                if (before if event_slot == 0 else after):
+                    continue
+                candidates = [(rest[:i], rest[i:]) for i in range(1, len(rest))]
+            for first, second in candidates:
+                a, b = " ".join(first), " ".join(second)
+                if _is_side_cell(a) and _is_side_cell(b):
+                    cells = dict(zip(side_genders, (a, b)))
+                    return cells["women"], center, cells["men"]
+
+    if event_slot == 1:
+        m = re.match(r"^(.+?)\s{2,}(.+?)\s{2,}(.+)$", stripped)
+        if m:
+            left, center, right = m.group(1).strip(), m.group(2).strip(), m.group(3).strip()
+            if format_nqt_event_label(center):
+                cells = dict(zip(side_genders, (left, right)))
+                return cells["women"], center, cells["men"]
 
     return None
 
@@ -209,6 +245,7 @@ def parse_nqt_text(text: str) -> dict[str, Any]:
     table: list[dict[str, str]] = []
     cuts: list[dict[str, Any]] = []
     pending_refs: list[tuple[str, str, str, str]] = []  # event, gender, ref, display
+    order = DEFAULT_ORDER
 
     for raw_line in text.splitlines():
         line = raw_line.rstrip()
@@ -221,7 +258,12 @@ def parse_nqt_text(text: str) -> dict[str, Any]:
             if cm:
                 course = cm.group(1).upper()
 
-        split = _split_row(line)
+        header = _header_order(line)
+        if header:
+            order = header
+            continue
+
+        split = _split_row(line, order)
         if not split:
             continue
         left, center, right = split

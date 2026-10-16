@@ -575,24 +575,24 @@ export default function MeetFields({
           <label className={labelClass}>
             Course <span className="text-error">*</span>
           </label>
-          <div className="flex gap-0.5 rounded-lg border border-border bg-background-layout p-[3px]" role="radiogroup" aria-label="Course">
-            {COURSES.map((course) => {
-              const active = form.course === course
-              return (
-                <button
-                  type="button"
-                  key={course}
-                  role="radio"
-                  aria-checked={active}
-                  onClick={() => set("course", course)}
-                  className={`h-7 flex-1 rounded-md text-[13px] transition-colors duration-200 ${
-                    active ? "bg-primary font-medium text-primary-text" : "text-foreground-secondary hover:text-foreground"
-                  }`}
-                >
+          <div className="relative">
+            <select
+              required
+              aria-label="Course"
+              value={form.course}
+              onChange={(e) => set("course", e.target.value)}
+              className={`${inputClass} appearance-none pr-9`}
+            >
+              {COURSES.map((course) => (
+                <option key={course} value={course}>
                   {course}
-                </button>
-              )
-            })}
+                </option>
+              ))}
+            </select>
+            <AppIcon
+              name="chevronDown"
+              className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground-tertiary"
+            />
           </div>
         </div>
         <div className="min-w-0">

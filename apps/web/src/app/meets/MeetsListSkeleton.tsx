@@ -4,7 +4,7 @@ import { MEET_LIST_COLS } from "./MeetListTable"
 
 /**
  * Mirrors the meets toolbar: search box, the Season and All/My meets selects,
- * then the Gallery/List toggle. Phones get MeetsToolbar's collapsed search
+ * then the Gallery/List toggle. Phones get FluidToolbar's collapsed search
  * button instead of the box (the real switch is measured; sm approximates it).
  */
 export function MeetsToolbarSkeleton() {

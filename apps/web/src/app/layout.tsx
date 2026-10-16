@@ -5,6 +5,7 @@ import ThemeProvider from "@/components/ui/ThemeProvider"
 import ScraperUiProvider from "@/components/scraper/ScraperUiProvider"
 import ImportTaskProvider from "@/components/ui/ImportTaskProvider"
 import ImportToast from "@/components/ui/ImportToast"
+import AthletePairingProvider from "@/components/meet/AthletePairingProvider"
 import Nav from "@/components/nav/Nav"
 import NavigationTracker from "@/components/nav/NavigationTracker"
 import "./variables.css"
@@ -30,18 +31,20 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <SessionProvider session={session}>
             <ImportTaskProvider>
-              <ScraperUiProvider>
-                <Nav />
-                <Suspense fallback={null}>
-                  <NavigationTracker />
-                </Suspense>
-                {/* Inherit overflow so dialogs that lock body scrolling also lock this area. */}
-                <main id="page-scroll" className="min-h-0 flex-1 overflow-x-hidden [overflow-y:inherit]">
-                  <div className="w-full min-w-0 px-(--page-gutter-x) py-(--page-gutter-y)">
-                    {children}
-                  </div>
-                </main>
-              </ScraperUiProvider>
+              <AthletePairingProvider>
+                <ScraperUiProvider>
+                  <Nav />
+                  <Suspense fallback={null}>
+                    <NavigationTracker />
+                  </Suspense>
+                  {/* Inherit overflow so dialogs that lock body scrolling also lock this area. */}
+                  <main id="page-scroll" className="min-h-0 flex-1 overflow-x-hidden [overflow-y:inherit]">
+                    <div className="w-full min-w-0 px-(--page-gutter-x) py-(--page-gutter-y)">
+                      {children}
+                    </div>
+                  </main>
+                </ScraperUiProvider>
+              </AthletePairingProvider>
               <ImportToast />
             </ImportTaskProvider>
           </SessionProvider>

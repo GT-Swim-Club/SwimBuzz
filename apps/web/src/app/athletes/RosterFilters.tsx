@@ -38,8 +38,8 @@ export default function RosterFilters({ seasons }: { seasons: string[] }) {
         className="text-sm border border-border-secondary rounded-lg px-3 py-1.5 bg-background"
       >
         <option value="all">All</option>
-        <option value="M">Men</option>
         <option value="F">Women</option>
+        <option value="M">Men</option>
       </select>
       <select
         value={season}

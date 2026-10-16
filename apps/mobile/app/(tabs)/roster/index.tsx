@@ -155,8 +155,8 @@ export default function RosterScreen() {
           {(
             [
               ["ALL", "All"],
-              ["M", "M"],
               ["F", "F"],
+              ["M", "M"],
             ] as const
           ).map(([value, label]) => (
             <Chip

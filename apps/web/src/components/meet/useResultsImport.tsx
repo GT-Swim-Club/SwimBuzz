@@ -1,8 +1,11 @@
 "use client"
 
-import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import Modal, { ModalFooter } from "@/components/ui/Modal"
+import {
+  useAthletePairing,
+  type NameConfirmation,
+  type RosterPairingOption,
+} from "@/components/meet/AthletePairingProvider"
 import { useScraperUi } from "@/components/scraper/ScraperUiProvider"
 import { useImportTask } from "@/components/ui/ImportTaskProvider"
 
@@ -11,19 +14,6 @@ import { useImportTask } from "@/components/ui/ImportTaskProvider"
 export type ResultsImportSource =
   | { kind: "pdf"; pdfUrl?: string; file?: File | null }
   | { kind: "swimphone"; url: string }
-
-type NameConfirmation = {
-  pdfName: string
-  athleteId?: string
-  athleteName?: string
-  occurrences: number
-}
-
-type RosterPairingOption = {
-  id: string
-  firstName: string
-  lastName: string
-}
 
 type ImportResult = {
   imported: number
@@ -45,7 +35,6 @@ type ImportRun = {
   source: ResultsImportSource
   team: string
   course: string
-  cachedParse?: unknown
 }
 
 function buildImportSummary(data: ImportResult): string {
@@ -56,33 +45,11 @@ function buildImportSummary(data: ImportResult): string {
   return summary
 }
 
-export function useResultsImport({
-  meetId,
-  season,
-  pairingBlocked = false,
-}: {
-  meetId?: string
-  season: string
-  /** Hold the pairing dialog closed while another dialog is up; it opens once this clears. */
-  pairingBlocked?: boolean
-}) {
+export function useResultsImport({ meetId, season }: { meetId?: string; season: string }) {
   const router = useRouter()
   const { requireScraper } = useScraperUi()
   const { startTask } = useImportTask()
-
-  const runRef = useRef<ImportRun | null>(null)
-  const [confirmOpen, setConfirmOpen] = useState(false)
-  const [pendingConfirmations, setPendingConfirmations] = useState<NameConfirmation[]>([])
-  const [rosterOptions, setRosterOptions] = useState<RosterPairingOption[]>([])
-  /** Empty string = leave unmatched / skip. */
-  const [pairSelections, setPairSelections] = useState<Record<string, string>>({})
-
-  function resetPairing() {
-    setConfirmOpen(false)
-    setPendingConfirmations([])
-    setRosterOptions([])
-    setPairSelections({})
-  }
+  const { requestPairing } = useAthletePairing()
 
   async function runPdfImport(
     run: ImportRun,
@@ -165,15 +132,25 @@ export function useResultsImport({
   function handleImportResponse(run: ImportRun, data: ImportResult): string {
     const confirmations = data.nameConfirmations ?? []
     if (confirmations.length > 0) {
-      run.cachedParse = data.cachedParse
-      const selections: Record<string, string> = {}
-      for (const c of confirmations) selections[c.pdfName] = c.athleteId ?? ""
-      setPendingConfirmations(confirmations)
-      setRosterOptions(data.rosterForPairing ?? [])
-      setPairSelections(selections)
-      setConfirmOpen(true)
-    } else {
-      resetPairing()
+      const cachedParse = data.cachedParse
+      requestPairing({
+        confirmations,
+        roster: data.rosterForPairing ?? [],
+        description:
+          "These names matched your team code but not the roster. Pair them to a roster athlete to import their results.",
+        occurrenceNoun: ["result", "results"],
+        submitVerb: "Import",
+        taskLabel: "Importing paired results…",
+        submit: async (nameMappings, rejectedNames) => {
+          const paired =
+            run.source.kind === "pdf"
+              ? await runPdfImport(run, { nameMappings, rejectedNames, cachedParse })
+              : await runSwimphoneImport(run, { nameMappings, rejectedNames })
+          router.refresh()
+          return buildImportSummary(paired)
+        },
+        onSkip: () => router.refresh(),
+      })
     }
     router.refresh()
     return buildImportSummary(data)
@@ -201,7 +178,6 @@ export function useResultsImport({
     }
   ) {
     const run: ImportRun = { source, team, course }
-    runRef.current = run
     const swimphone = source.kind === "swimphone"
     const go = () => {
       onStart?.()
@@ -218,112 +194,5 @@ export function useResultsImport({
     else go()
   }
 
-  function closeWithoutPairing() {
-    resetPairing()
-    router.refresh()
-  }
-
-  function handleConfirmSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    const run = runRef.current
-    if (!run) return
-
-    const nameMappings: Record<string, string> = {}
-    const rejectedNames: string[] = []
-    for (const c of pendingConfirmations) {
-      const selected = (pairSelections[c.pdfName] ?? "").trim()
-      if (selected) nameMappings[c.pdfName] = selected
-      else rejectedNames.push(c.pdfName)
-    }
-
-    if (Object.keys(nameMappings).length === 0) {
-      closeWithoutPairing()
-      return
-    }
-
-    setConfirmOpen(false)
-    const importPromise =
-      run.source.kind === "pdf"
-        ? runPdfImport(run, { nameMappings, rejectedNames, cachedParse: run.cachedParse })
-        : runSwimphoneImport(run, { nameMappings, rejectedNames })
-
-    startTask(
-      "Importing paired results…",
-      importPromise.then((data) => {
-        resetPairing()
-        router.refresh()
-        return buildImportSummary(data)
-      })
-    )
-  }
-
-  const pairedCount = pendingConfirmations.filter((c) =>
-    Boolean((pairSelections[c.pdfName] ?? "").trim())
-  ).length
-
-  const pairingModal = (
-    <Modal
-      open={confirmOpen && !pairingBlocked}
-      onClose={closeWithoutPairing}
-      title="Pair unmatched athletes"
-      description="These names matched your team code but not the roster. Pair them to a roster athlete to import their results."
-      onSubmit={handleConfirmSubmit}
-      footer={
-        <ModalFooter>
-          <button
-            type="button"
-            onClick={closeWithoutPairing}
-            className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill"
-          >
-            Skip
-          </button>
-          <button
-            type="submit"
-            disabled={pairedCount === 0}
-            className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
-          >
-            {pairedCount > 0 ? `Import ${pairedCount} paired` : "Import paired"}
-          </button>
-        </ModalFooter>
-      }
-    >
-      <ul className="space-y-3">
-        {pendingConfirmations.map((c) => {
-          const selected = pairSelections[c.pdfName] ?? ""
-          const suggested =
-            c.athleteId && c.athleteName ? { id: c.athleteId, name: c.athleteName } : null
-          return (
-            <li key={c.pdfName} className="rounded-xl border bg-fill-secondary px-4 py-3 border-border">
-              <p className="text-sm text-foreground">
-                <strong>{c.pdfName}</strong>
-              </p>
-              <p className="mt-0.5 text-xs text-foreground-secondary">
-                {c.occurrences} result{c.occurrences === 1 ? "" : "s"} with this spelling
-                {suggested ? <span> · suggested match: {suggested.name}</span> : null}
-              </p>
-              <label className="mt-3 block">
-                <span className="sr-only">Roster athlete for {c.pdfName}</span>
-                <select
-                  value={selected}
-                  onChange={(e) =>
-                    setPairSelections((prev) => ({ ...prev, [c.pdfName]: e.target.value }))
-                  }
-                  className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background"
-                >
-                  <option value="">Leave unmatched</option>
-                  {rosterOptions.map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.lastName}, {a.firstName}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </li>
-          )
-        })}
-      </ul>
-    </Modal>
-  )
-
-  return { startImport, pairingModal }
+  return { startImport }
 }

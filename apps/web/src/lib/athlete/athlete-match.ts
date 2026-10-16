@@ -371,24 +371,14 @@ export function isAutomaticallyMatched(
   return matchAthleteIdFast(pdfName, lookup, null) !== null
 }
 
-export function pairedPdfNameKeys(
-  nameMappings: Record<string, string>
-): Set<string> {
-  const keys = new Set<string>()
-  for (const raw of Object.keys(nameMappings)) {
-    const key = nameMatchKey(raw) ?? normalize(raw)
-    if (key) keys.add(key)
-  }
-  return keys
-}
-
+/**
+ * Whether the coach paired this PDF name. Uses the same lookup as the matcher, since
+ * re-parsing an already-normalized key drops multi-word last names ("Garcia Alvarez").
+ */
 export function isPairedPdfName(
   pdfName: string,
   nameMappings: Record<string, string> | null | undefined
 ): boolean {
-  if (!nameMappings) return false
-  const key = nameMatchKey(pdfName) ?? normalize(pdfName)
-  if (!key) return false
-  return pairedPdfNameKeys(nameMappings).has(key)
+  return resolveMappedAthleteId(pdfName, nameMappings) !== null
 }
 

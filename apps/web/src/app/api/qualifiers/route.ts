@@ -178,7 +178,8 @@ export async function POST(req: Request) {
     const set = await saveNationalsStandards({
       season,
       course: inferredCourse ?? course,
-      sourceUrl: sourceUrl || null,
+      // File uploads have no user URL — keep the stored copy so "View standards" works.
+      sourceUrl: sourceUrl || sourceUrlForParse,
       yearLabel: parsed.yearLabel ?? null,
       table: parsed.table ?? null,
       cuts: parsed.cuts,
