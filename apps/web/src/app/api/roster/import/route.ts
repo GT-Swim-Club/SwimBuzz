@@ -62,10 +62,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Import failed while saving athletes" }, { status: 500 })
   }
 
-  const { created, updated, errors, rowOutcomes } = summary
+  const { created, updated, removed, errors, rowOutcomes } = summary
   console.log("[roster csv import] summary:", {
     created,
     updated,
+    removed,
     skipped: rowOutcomes.filter((r) => r.action === "skipped").length,
     parseErrors: parsed.errors.length,
     importErrors: errors.length - parsed.errors.length})
@@ -80,6 +81,7 @@ export async function POST(req: Request) {
   return NextResponse.json({
     created,
     updated,
+    removed,
     parsed: parsed.rows.length,
     errors})
 }

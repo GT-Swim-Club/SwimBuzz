@@ -2,7 +2,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import AppearanceSettings from "@/components/settings/AppearanceSettings"
 import CancelPendingProfileChangesButton from "@/components/athlete/CancelPendingProfileChangesButton"
-import EditNicknamesForm from "@/components/athlete/EditNicknamesForm"
+import EditPreferredNameForm from "@/components/athlete/EditPreferredNameForm"
 import NotificationPreferencesSettings from "@/components/settings/NotificationPreferencesSettings"
 import ProfilePictureSettings from "@/components/athlete/ProfilePictureSettings"
 import SetSwimCloudIdForm from "@/components/athlete/SetSwimCloudIdForm"
@@ -29,7 +29,7 @@ export default async function SettingsPage() {
       select: {
         id: true,
         slug: true,
-        nicknames: true,
+        preferredName: true,
         swimCloudId: true,
         pendingProfileChanges: true}}),
     prisma.user.findUnique({
@@ -112,7 +112,7 @@ export default async function SettingsPage() {
               {requiresApproval && (
                 <div className="px-4 py-3">
                   <p className="text-xs text-foreground-secondary">
-                    SwimCloud ID and nickname changes need coach approval before
+                    SwimCloud ID and preferred name changes need coach approval before
                     they take effect.
                   </p>
                   {pending && (
@@ -139,18 +139,16 @@ export default async function SettingsPage() {
               </div>
               <div className="px-4 py-3 space-y-2">
                 <div>
-                  <p className="text-sm text-foreground">Nicknames</p>
+                  <p className="text-sm text-foreground">Preferred name</p>
                   <p className="text-xs text-foreground-secondary">
-                    Alternate names used to match imported results to you.
+                    Shown in place of your first name, and used to match imported results to you.
                   </p>
                 </div>
-                <EditNicknamesForm
+                <EditPreferredNameForm
                   athleteId={athlete.id}
-                  initialNicknames={athlete.nicknames}
+                  initialPreferredName={athlete.preferredName}
                   requiresApproval={requiresApproval}
-                  pendingNicknames={
-                    pending?.nicknames !== undefined ? pending.nicknames : null
-                  }
+                  pendingPreferredName={pending?.preferredName}
                 />
               </div>
             </div>

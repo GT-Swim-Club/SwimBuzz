@@ -29,7 +29,7 @@ import { registerForPushNotifications } from "../../src/lib/push"
 
 type OwnAthlete = {
   id: string
-  nicknames: string[]
+  preferredName: string
   swimCloudId: string
 }
 
@@ -38,7 +38,7 @@ export default function SettingsScreen() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const [pushStatus, setPushStatus] = useState<string | null>(null)
-  const [nicknames, setNicknames] = useState("")
+  const [preferredName, setPreferredName] = useState("")
   const [swimCloudId, setSwimCloudId] = useState("")
   const [savingAthlete, setSavingAthlete] = useState(false)
   const [preferences, setPreferences] = useState<NotificationPreferences>(
@@ -90,22 +90,21 @@ export default function SettingsScreen() {
 
   const ownAthlete: OwnAthlete | null = useMemo(() => {
     if (!match || !athleteDetail) return null
-    const nextNicknames = Array.isArray(athleteDetail.nicknames)
-      ? (athleteDetail.nicknames as string[])
-      : []
+    const nextPreferredName =
+      typeof athleteDetail.preferredName === "string" ? athleteDetail.preferredName : ""
     const nextSwimCloud =
       athleteDetail.swimCloudId == null || athleteDetail.swimCloudId === ""
         ? ""
         : String(athleteDetail.swimCloudId)
     return {
       id: String(athleteDetail.id ?? match.id),
-      nicknames: nextNicknames,
+      preferredName: nextPreferredName,
       swimCloudId: nextSwimCloud,
     }
   }, [match, athleteDetail])
 
   useEffect(() => {
-    setNicknames(ownAthlete?.nicknames.join(", ") ?? "")
+    setPreferredName(ownAthlete?.preferredName ?? "")
     setSwimCloudId(ownAthlete?.swimCloudId ?? "")
   }, [ownAthlete])
 
@@ -132,19 +131,15 @@ export default function SettingsScreen() {
     if (!ownAthlete) return
     setSavingAthlete(true)
     try {
-      const parsedNicknames = nicknames
-        .split(",")
-        .map((n) => n.trim())
-        .filter(Boolean)
       const body: Record<string, unknown> = {
-        nicknames: parsedNicknames,
+        preferredName: preferredName.trim() || null,
       }
       const trimmedId = swimCloudId.trim()
       body.swimCloudId = trimmedId === "" ? null : trimmedId
       await api.updateAthlete(ownAthlete.id, body)
       Alert.alert(
         "Saved",
-        "Profile changes submitted. Nickname and SwimCloud updates may need coach approval."
+        "Profile changes submitted. Preferred name and SwimCloud updates may need coach approval."
       )
       await queryClient.invalidateQueries({ queryKey: ["athlete", ownAthlete.id] })
       await queryClient.invalidateQueries({ queryKey: ["athletes"] })
@@ -220,10 +215,10 @@ export default function SettingsScreen() {
         {ownAthlete ? (
           <Section title="Athlete profile">
             <TextField
-              label="Nicknames"
-              value={nicknames}
-              onChangeText={setNicknames}
-              placeholder="Comma-separated"
+              label="Preferred name"
+              value={preferredName}
+              onChangeText={setPreferredName}
+              placeholder="Optional"
               autoCapitalize="words"
             />
             <TextField

@@ -48,7 +48,7 @@ export type SheetSummaryAttachResult = {
 async function seasonRoster(season: string) {
   return prisma.athlete.findMany({
     where: { seasons: { has: season } },
-    select: { id: true, firstName: true, lastName: true, nicknames: true },
+    select: { id: true, firstName: true, lastName: true, preferredName: true },
   })
 }
 

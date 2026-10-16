@@ -40,7 +40,7 @@ function parseRelayCount(raw: unknown): number {
 }
 
 function fullName(
-  athlete: { firstName: string; lastName: string; nicknames?: string[] } | undefined
+  athlete: { firstName: string; lastName: string; preferredName?: string | null } | undefined
 ): string {
   if (!athlete) return "Unknown"
   return athletePreferredName(athlete)
@@ -150,7 +150,7 @@ export async function POST(req: Request) {
       ...(gender === "X" ? {} : { gender: gender as Gender }),
       ...(signupPool ? { id: { in: signupPool } } : {}),
     },
-    select: { id: true, firstName: true, lastName: true, nicknames: true, gender: true },
+    select: { id: true, firstName: true, lastName: true, preferredName: true, gender: true },
   })
   const eligibleIds = eligibleAthletes.map((a) => a.id)
   if (eligibleIds.length === 0) {
@@ -205,7 +205,7 @@ export async function POST(req: Request) {
       ]
       const athletes = await prisma.athlete.findMany({
         where: { id: { in: allIds } },
-        select: { id: true, firstName: true, lastName: true, nicknames: true, gender: true },
+        select: { id: true, firstName: true, lastName: true, preferredName: true, gender: true },
       })
       const athleteMap = Object.fromEntries(athletes.map((a) => [a.id, a]))
 
@@ -284,7 +284,7 @@ export async function POST(req: Request) {
     const athleteIdList = bests.map((b) => b.athleteId)
     const athletes = await prisma.athlete.findMany({
       where: { id: { in: athleteIdList } },
-      select: { id: true, firstName: true, lastName: true, nicknames: true },
+      select: { id: true, firstName: true, lastName: true, preferredName: true },
     })
     const athleteMap = Object.fromEntries(athletes.map((a) => [a.id, a]))
 
@@ -362,7 +362,7 @@ export async function POST(req: Request) {
   const allAthleteIds = Object.keys(timeLookup)
   const athletes = await prisma.athlete.findMany({
     where: { id: { in: allAthleteIds } },
-    select: { id: true, firstName: true, lastName: true, nicknames: true, gender: true },
+    select: { id: true, firstName: true, lastName: true, preferredName: true, gender: true },
   })
   const athleteMap = Object.fromEntries(athletes.map((a) => [a.id, a]))
 

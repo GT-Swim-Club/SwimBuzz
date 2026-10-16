@@ -93,14 +93,14 @@ export default async function PracticeAttendancePage({
   const season = seasonFromDate(zonedDayKey(startsAt, practice.timeZone))
   const seasonRoster = await prisma.athlete.findMany({
     where: { seasons: { has: season } },
-    select: { id: true, slug: true, firstName: true, lastName: true, nicknames: true, gender: true, year: true },
+    select: { id: true, slug: true, firstName: true, lastName: true, preferredName: true, gender: true, year: true },
     orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
   })
   const roster =
     seasonRoster.length > 0
       ? seasonRoster
       : await prisma.athlete.findMany({
-          select: { id: true, slug: true, firstName: true, lastName: true, nicknames: true, gender: true, year: true },
+          select: { id: true, slug: true, firstName: true, lastName: true, preferredName: true, gender: true, year: true },
           orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
         })
 
@@ -125,7 +125,7 @@ export default async function PracticeAttendancePage({
           id: a.id,
           slug: a.slug,
           name: `${a.firstName} ${a.lastName}`.trim(),
-          nicknames: a.nicknames,
+          preferredName: a.preferredName,
           gender: a.gender === "F" ? "F" : "M",
           year: a.year,
         }))}

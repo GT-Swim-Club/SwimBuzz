@@ -8,12 +8,12 @@ export default function PendingProfileChangesReview({
   athleteId,
   pending,
   currentSwimCloudId,
-  currentNicknames,
+  currentPreferredName,
 }: {
   athleteId: string
   pending: PendingProfileChanges
   currentSwimCloudId: number | null
-  currentNicknames: string[]
+  currentPreferredName: string | null
 }) {
   const [isPending, startTransition] = useTransition()
   const [activeAction, setActiveAction] = useState<"approve" | "reject" | null>(null)
@@ -53,21 +53,13 @@ export default function PendingProfileChangesReview({
             </span>
           </li>
         )}
-        {pending.nicknames !== undefined && (
+        {pending.preferredName !== undefined && (
           <li>
-            Nicknames:{" "}
-            <span className="font-medium">
-              {pending.nicknames.length > 0
-                ? pending.nicknames.join(", ")
-                : "(none)"}
-            </span>
+            Preferred name:{" "}
+            <span className="font-medium">{pending.preferredName ?? "(none)"}</span>
             <span className="text-warning-contrast/70">
               {" "}
-              (current:{" "}
-              {currentNicknames.length > 0
-                ? currentNicknames.join(", ")
-                : "none"}
-              )
+              (current: {currentPreferredName ?? "none"})
             </span>
           </li>
         )}

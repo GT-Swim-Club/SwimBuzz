@@ -6,6 +6,7 @@ import Link from "next/link"
 import type { ResultSplit } from "@/lib/meet/meet-sheet-summary"
 import { sanitizeRelaySplitTime } from "@/lib/meet/relay-results"
 import { formatDisplayTime, formatOrdinal, formatSeedTimeDelta, parseTime } from "@/lib/utils"
+import { useCanScrollDown } from "@/lib/use-can-scroll-down"
 import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
 export type DetailRound = {
@@ -380,6 +381,7 @@ export default function SwimDetailModal({
   }, [])
 
   useEscapeToClose(true, onClose)
+  const [bodyRef, canScrollDown] = useCanScrollDown()
 
   // Shrink long event titles to fit one line.
   useLayoutEffect(() => {
@@ -453,7 +455,7 @@ export default function SwimDetailModal({
             </li>
           ))}
           <li className={`${grid} ${totalRow} font-mono tabular-nums`}>
-            <span className="font-sans font-medium text-foreground-secondary">Total</span>
+            <span className="font-sans text-foreground">Total</span>
             <span className="text-right text-foreground-secondary">
               {first.time ? formatDisplayTime(first.time) : "—"}
             </span>
@@ -563,7 +565,7 @@ export default function SwimDetailModal({
           })}
           {last.time ? (
             <li className={`${relayGrid} ${totalRow}`}>
-              <span className="font-medium text-foreground-secondary">Total</span>
+              <span className="text-foreground">Total</span>
               <span className="text-right font-mono tabular-nums">{formatDisplayTime(last.time)}</span>
             </li>
           ) : null}
@@ -625,7 +627,7 @@ export default function SwimDetailModal({
           ))}
           {last.time ? (
             <li className={`${grid} ${totalRow} font-mono tabular-nums`}>
-              <span className="font-sans font-medium text-foreground-secondary">Total</span>
+              <span className="font-sans text-foreground">Total</span>
               <span className="text-right">{formatDisplayTime(last.time)}</span>
             </li>
           ) : null}
@@ -669,7 +671,7 @@ export default function SwimDetailModal({
         aria-label={detail.title}
         className="relative z-10 flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-background text-foreground shadow-xl"
       >
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <div ref={bodyRef} className="min-h-0 flex-1 overflow-y-auto">
           <div className="px-6 pb-4 pt-5">
             <div className="flex items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-3">
@@ -841,7 +843,7 @@ export default function SwimDetailModal({
             </>
           ) : null}
         </div>
-        <div className="flex shrink-0 gap-3 border-t border-border-subtle px-6 py-3">
+        <div className={`flex shrink-0 gap-3 border-t px-6 pb-3 transition-[padding,border-color] ${canScrollDown ? "border-border-subtle pt-3" : "border-transparent pt-2"}`}>
           {onEditRelay ? (
             <button
               type="button"

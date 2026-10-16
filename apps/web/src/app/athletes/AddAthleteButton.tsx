@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation"
 import { currentSeason, parseSeason } from "@/lib/season"
 import { formatSeasonLabel } from "@swimbuzz/shared"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
-import NicknameTagsInput from "@/components/athlete/NicknameTagsInput"
 import {
   isValidSwimCloudIdInput,
   SWIMCLOUD_ID_ERROR,
@@ -29,7 +28,7 @@ export default function AddAthleteButton() {
     lastName: "",
     email: "",
     swimCloudId: "",
-    nicknames: [] as string[],
+    preferredName: "",
   })
 
   function openModal() {
@@ -54,7 +53,7 @@ export default function AddAthleteButton() {
           gender,
           seasons: [season],
         })
-        setForm({ firstName: "", lastName: "", email: "", swimCloudId: "", nicknames: [] })
+        setForm({ firstName: "", lastName: "", email: "", swimCloudId: "", preferredName: "" })
         setOpen(false)
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to add athlete")
@@ -188,17 +187,17 @@ export default function AddAthleteButton() {
 
               <div>
                   <label className="block text-xs font-medium text-foreground-secondary dark:text-foreground-secondary mb-1">
-                  Alternate names
+                  Preferred name
                 </label>
-                <NicknameTagsInput
-                  value={form.nicknames}
-                  onChange={(nicknames) => setForm((f) => ({ ...f, nicknames }))}
-                  disabled={loading}
-                  showAddButton
-                  placeholder="Add alternate name"
+                <input
+                  type="text"
+                  placeholder="Optional"
+                  value={form.preferredName}
+                  onChange={(e) => setForm((f) => ({ ...f, preferredName: e.target.value }))}
+                  className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm dark:bg-background-elevated dark:border border-border-secondary"
                 />
                 <p className="mt-1 text-xs text-foreground-tertiary dark:text-foreground-tertiary">
-                  Names used to match results to this athlete.
+                  Shown in place of their first name, and used to match results to this athlete.
                 </p>
               </div>
 

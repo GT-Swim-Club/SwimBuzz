@@ -3,12 +3,11 @@
 import { revalidatePath } from "next/cache"
 import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { normalizeNicknames } from "@/lib/athlete/athlete-match"
+import { normalizePreferredName } from "@/lib/athlete/athlete-match"
 import { isStaffRole } from "@swimbuzz/shared"
 import {
   clearPendingFields,
   mergePendingProfileChanges,
-  nicknamesEqual,
   parsePendingProfileChanges,
   type PendingProfileChanges } from "@/lib/athlete/pending-profile-changes"
 import {
@@ -62,15 +61,15 @@ export async function cancelPendingProfileChanges(athleteId: string) {
 
 /** Self-service or staff direct edit — the route decides based on session
  * role, so this mirrors both branches. */
-export async function updateNicknames(athleteId: string, nicknames: string[]) {
+export async function updatePreferredName(athleteId: string, preferredName: string | null) {
   const { athlete, staff } = await requireSelfOrForbidden(athleteId)
   const existingPending = parsePendingProfileChanges(athlete.pendingProfileChanges)
-  const nextNicknames = normalizeNicknames(nicknames)
+  const nextPreferredName = normalizePreferredName(preferredName)
 
   if (!staff) {
-    if (nicknamesEqual(nextNicknames, athlete.nicknames)) {
-      if (existingPending?.nicknames !== undefined) {
-        const cleared = clearPendingFields(existingPending, { nicknames: true })
+    if (nextPreferredName === athlete.preferredName) {
+      if (existingPending?.preferredName !== undefined) {
+        const cleared = clearPendingFields(existingPending, { preferredName: true })
         await prisma.athlete.update({
           where: { id: athleteId },
           data: { pendingProfileChanges: pendingJson(cleared) }})
@@ -84,7 +83,7 @@ export async function updateNicknames(athleteId: string, nicknames: string[]) {
       return
     }
 
-    const pending = mergePendingProfileChanges(existingPending, { nicknames: nextNicknames })
+    const pending = mergePendingProfileChanges(existingPending, { preferredName: nextPreferredName })
     await prisma.athlete.update({
       where: { id: athleteId },
       data: { pendingProfileChanges: pendingJson(pending) }})
@@ -97,10 +96,10 @@ export async function updateNicknames(athleteId: string, nicknames: string[]) {
     return
   }
 
-  const cleared = clearPendingFields(existingPending, { nicknames: true })
+  const cleared = clearPendingFields(existingPending, { preferredName: true })
   await prisma.athlete.update({
     where: { id: athleteId },
-    data: { nicknames: nextNicknames, pendingProfileChanges: pendingJson(cleared) }})
+    data: { preferredName: nextPreferredName, pendingProfileChanges: pendingJson(cleared) }})
   await syncProfileChangeRequestNotifications({
     athleteId,
     firstName: athlete.firstName,
@@ -174,8 +173,8 @@ export async function approvePendingProfileChanges(athleteId: string) {
   if (existingPending.swimCloudId !== undefined) {
     data.swimCloudId = await checkSwimCloudIdAvailable(existingPending.swimCloudId, athleteId)
   }
-  if (existingPending.nicknames !== undefined) {
-    data.nicknames = existingPending.nicknames
+  if (existingPending.preferredName !== undefined) {
+    data.preferredName = existingPending.preferredName
   }
 
   await prisma.athlete.update({ where: { id: athleteId }, data })

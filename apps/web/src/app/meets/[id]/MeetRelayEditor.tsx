@@ -17,6 +17,7 @@ import {
   type RelayGender,
   type RelayRound,
 } from "@/lib/meet/relay-results"
+import { useCanScrollDown } from "@/lib/use-can-scroll-down"
 import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
 const RELAY_EVENTS = [
@@ -159,6 +160,7 @@ function RelayModal({
   useEffect(() => setMounted(true), [])
   useDontReloadWhileBusy(loading)
   useEscapeToClose(true, onClose, { disabled: loading })
+  const [bodyRef, canScrollDown] = useCanScrollDown()
 
   useEffect(() => {
     const prev = document.body.style.overflow
@@ -243,7 +245,7 @@ function RelayModal({
         </div>
 
         <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
-          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4 space-y-4">
+          <div ref={bodyRef} className="min-h-0 flex-1 overflow-y-auto px-6 py-4 space-y-4">
           {!rosterOnly ? (
             <>
           <div className="grid grid-cols-2 gap-3">
@@ -423,7 +425,7 @@ function RelayModal({
           )}
           </div>
 
-          <div className="shrink-0 flex gap-3 border-t border-border-secondary px-6 py-4">
+          <div className={`shrink-0 flex gap-3 border-t px-6 pb-4 transition-[padding,border-color] ${canScrollDown ? "border-border-secondary pt-4" : "border-transparent pt-2"}`}>
             {allowDelete && (
               <button
                 type="button"

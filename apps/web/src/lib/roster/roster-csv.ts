@@ -1,6 +1,6 @@
-import { normalizeNicknames, parseFirstNameWithNicknames, parseRosterName } from "@/lib/athlete/athlete-match"
+import { normalizePreferredName, parseFirstNameWithPreferredName, parseRosterName } from "@/lib/athlete/athlete-match"
 import { normalizeGatechEmail } from "@/lib/auth/gatech-email"
-import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
+import { parseSwimCloudProfile } from "@/lib/swim/swimcloud-id"
 import { toTitleCase } from "@/lib/utils"
 
 export type ParsedRosterCsvRow = {
@@ -12,7 +12,8 @@ export type ParsedRosterCsvRow = {
   year?: string
   email?: string
   gender: "M" | "F"
-  nicknames: string[]
+  preferredName: string | null
+  swimCloudId?: number
 }
 
 export type RosterCsvParseResult = {
@@ -32,14 +33,21 @@ function resolveHeaderField(header: string): string | undefined {
   if (h.includes("gtid") || h.includes("student id")) return "gtid"
   if (h.includes("dob") || h.includes("date of birth") || h.includes("birthday")) return "dob"
   if (h.includes("academic year") || h.includes("class year") || (h.includes("year") && !h.includes("season"))) return "year"
-  if (h.includes("nickname") || h.includes("alternate name")) return "nicknames"
+  if (
+    h.includes("preferred name") ||
+    h.includes("preferred first") ||
+    h === "preferred" ||
+    h.includes("nickname") ||
+    h.includes("alternate name")
+  ) {
+    return "preferredName"
+  }
   if (h.includes("first name") || compact === "firstname" || h === "first") {
     return "firstName"
   }
   if (h.includes("last name") || compact === "lastname" || h === "last") {
     return "lastName"
   }
-  if (h.includes("full name") || compact === "fullname") return "name"
   // Skip boolean / list columns that mention email but are not address fields
   if (
     h.includes("email list") ||
@@ -51,24 +59,89 @@ function resolveHeaderField(header: string): string | undefined {
   }
   if (h.includes("e-mail") || h.includes("email")) return "email"
   if (h.includes("gender") || h === "sex") return "gender"
+  if (swimCloudHeaderScore(header) != null) return "swimCloudId"
+  if (nameHeaderScore(header) != null) return "name"
+
+  return undefined
+}
+
+/**
+ * Columns that mention "name" but are not the athlete. Signature/waiver
+ * columns ("by signing your full name and the current date") and emergency
+ * contacts are the usual false positives on a Google Form export.
+ */
+function isSkippedNameHeader(h: string): boolean {
+  return (
+    h.includes("emergency") ||
+    h.includes("signature") ||
+    h.includes("signing") ||
+    h.includes("waiver") ||
+    h.includes("parent") ||
+    h.includes("family member") ||
+    h.includes("contact name") ||
+    h.includes("mentor")
+  )
+}
+
+/** Higher scores win when several headers look like a full name. */
+function nameHeaderScore(header: string): number | null {
+  const h = normalizeHeader(header)
+  if (isSkippedNameHeader(h)) return null
+
+  // "Full Legal Name (First Last)" — "first" and "last" here are a format hint,
+  // not separate columns, and this label should beat a generic "Name" column.
+  if (h.includes("legal") && h.includes("name")) return 5
+  if (h.includes("full name") || h.replace(/\s/g, "") === "fullname") return 4
 
   const looksLikeName =
     h === "name" ||
     h.endsWith(" name") ||
     h.startsWith("name ") ||
     h.includes(" name ")
-  if (
-    looksLikeName &&
-    !h.includes("first") &&
-    !h.includes("last") &&
-    !h.includes("nick") &&
-    !h.includes("user") &&
-    !h.includes("team")
-  ) {
-    return "name"
+  if (!looksLikeName) return null
+
+  const mentionsFirst = /\bfirst\b/.test(h)
+  const mentionsLast = /\blast\b/.test(h)
+  if ((mentionsFirst || mentionsLast) && !(mentionsFirst && mentionsLast)) return null
+  if (h.includes("nick") || h.includes("user") || h.includes("team") || h.includes("preferred")) {
+    return null
   }
 
-  return undefined
+  return mentionsFirst && mentionsLast ? 4 : 2
+}
+
+/** Drop a trailing signature date ("Will Bolte 08/24/2026", "Name, 8/25/26"). */
+function stripTrailingSignedDate(value: string): string {
+  return value
+    .replace(/[, ]+\(?\d{1,2}[/.-]\d{1,2}[/.-]\d{2,4}\)?\s*$/, "")
+    .replace(/[, ]+$/, "")
+    .trim()
+}
+
+/**
+ * Optional SwimCloud profile column. Prefer an explicit profile/URL/ID header
+ * over a bare "SwimCloud" label, and ignore yes/no questions that merely
+ * mention the site.
+ */
+function swimCloudHeaderScore(header: string): number | null {
+  const h = normalizeHeader(header)
+  const compact = h.replace(/\s/g, "")
+  const mentionsSwimCloud = compact.includes("swimcloud") || h.includes("swim cloud")
+  const mentionsSwimmer = /\bswimmers?\b/.test(h)
+  const isLink =
+    h.includes("url") ||
+    h.includes("link") ||
+    h.includes("profile") ||
+    /\bid\b/.test(h) ||
+    compact.endsWith("id")
+
+  if (h.includes("?") && !isLink) return null
+  if (/\bname\b/.test(h) && !mentionsSwimCloud) return null
+
+  if (mentionsSwimCloud && isLink) return 5
+  if (mentionsSwimmer && isLink) return 4
+  if (mentionsSwimCloud && h.split(/\s+/).filter(Boolean).length <= 4) return 3
+  return null
 }
 
 /** Prefer GT / "email address" columns when several headers match "email". */
@@ -83,6 +156,8 @@ function emailHeaderScore(header: string): number {
 function mapHeaders(cells: string[]): Map<string, number> {
   const map = new Map<string, number>()
   const emailCandidates: Array<{ index: number; score: number }> = []
+  const nameCandidates: Array<{ index: number; score: number }> = []
+  const swimCloudCandidates: Array<{ index: number; score: number }> = []
 
   cells.forEach((cell, index) => {
     const key = resolveHeaderField(cell)
@@ -91,12 +166,32 @@ function mapHeaders(cells: string[]): Map<string, number> {
       emailCandidates.push({ index, score: emailHeaderScore(cell) })
       return
     }
+    if (key === "name") {
+      const score = nameHeaderScore(cell)
+      if (score == null) return
+      nameCandidates.push({ index, score })
+      return
+    }
+    if (key === "swimCloudId") {
+      const score = swimCloudHeaderScore(cell)
+      if (score == null) return
+      swimCloudCandidates.push({ index, score })
+      return
+    }
     if (!map.has(key)) map.set(key, index)
   })
 
   if (emailCandidates.length > 0) {
     emailCandidates.sort((a, b) => b.score - a.score || a.index - b.index)
     map.set("email", emailCandidates[0].index)
+  }
+  if (nameCandidates.length > 0) {
+    nameCandidates.sort((a, b) => b.score - a.score || a.index - b.index)
+    map.set("name", nameCandidates[0].index)
+  }
+  if (swimCloudCandidates.length > 0) {
+    swimCloudCandidates.sort((a, b) => b.score - a.score || a.index - b.index)
+    map.set("swimCloudId", swimCloudCandidates[0].index)
   }
 
   return map
@@ -166,7 +261,17 @@ function parseGender(value: string): "M" | "F" | undefined {
 function cell(row: string[], headers: Map<string, number>, key: string): string {
   const index = headers.get(key)
   if (index == null || index >= row.length) return ""
-  return row[index].trim()
+  const value = row[index]
+  if (value == null) return ""
+  return String(value).trim()
+}
+
+function parseDob(value: string): Date | undefined {
+  const trimmed = value.trim()
+  if (!trimmed) return undefined
+  const date = new Date(trimmed)
+  if (Number.isNaN(date.getTime())) return undefined
+  return date
 }
 
 /** Parse a roster CSV into athlete rows. */
@@ -223,24 +328,24 @@ export function parseRosterRecords(rawRecords: string[][]): RosterCsvParseResult
 
     const firstNameRaw = cell(cells, headers, "firstName")
     const lastNameRaw = cell(cells, headers, "lastName")
-    const nameRaw = cell(cells, headers, "name")
+    const nameRaw = stripTrailingSignedDate(cell(cells, headers, "name"))
     let firstName = ""
     let lastName = ""
-    let parsedNicknames: string[] = []
+    let parsedPreferredName: string | null = null
 
     if (nameRaw.trim()) {
       const parsed = parseRosterName(nameRaw)
       if (parsed.firstName && parsed.lastName) {
         firstName = parsed.firstName
         lastName = parsed.lastName
-        parsedNicknames = parsed.nicknames
+        parsedPreferredName = parsed.preferredName
       }
     }
 
     if (firstNameRaw.trim()) {
-      const parsed = parseFirstNameWithNicknames(firstNameRaw)
+      const parsed = parseFirstNameWithPreferredName(firstNameRaw)
       firstName = parsed.firstName || firstName
-      parsedNicknames = normalizeNicknames([...parsedNicknames, ...parsed.nicknames])
+      parsedPreferredName = parsed.preferredName ?? parsedPreferredName
     }
     if (lastNameRaw.trim()) {
       lastName = lastNameRaw.trim()
@@ -258,8 +363,7 @@ export function parseRosterRecords(rawRecords: string[][]): RosterCsvParseResult
     // Only GT emails are imported; other domains are ignored for that row.
     const email = normalizeGatechEmail(cell(cells, headers, "email")) ?? undefined
     const gtid = cell(cells, headers, "gtid") || undefined
-    const dobRaw = cell(cells, headers, "dob")
-    const dob = dobRaw ? new Date(dobRaw) : undefined
+    const dob = parseDob(cell(cells, headers, "dob"))
     const year = cell(cells, headers, "year") || undefined
 
     const genderRaw = cell(cells, headers, "gender")
@@ -273,10 +377,10 @@ export function parseRosterRecords(rawRecords: string[][]): RosterCsvParseResult
       continue
     }
 
-    const nicknames = normalizeNicknames([
-      ...parsedNicknames,
-      ...normalizeNicknames(cell(cells, headers, "nicknames")),
-    ])
+    // An explicit preferred-name column wins over a "First (Pref)" parenthetical.
+    const preferredName =
+      normalizePreferredName(cell(cells, headers, "preferredName")) ?? parsedPreferredName
+    const swimCloudId = parseSwimCloudProfile(cell(cells, headers, "swimCloudId")) ?? undefined
 
     rows.push({
       rowNumber,
@@ -287,7 +391,8 @@ export function parseRosterRecords(rawRecords: string[][]): RosterCsvParseResult
       ...(gtid ? { gtid } : {}),
       ...(dob ? { dob } : {}),
       ...(year ? { year } : {}),
-      nicknames,
+      ...(swimCloudId != null ? { swimCloudId } : {}),
+      preferredName,
     })
   }
 

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { normalizeNicknames } from "@/lib/athlete/athlete-match"
+import { normalizePreferredName } from "@/lib/athlete/athlete-match"
 import { Gender } from "@prisma/client"
 import { parseSeasonList } from "@/lib/season"
 import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
   const firstName = String(body.firstName ?? "").trim()
   const lastName = String(body.lastName ?? "").trim()
   const email = String(body.email ?? "").trim().toLowerCase()
-  const nicknames = normalizeNicknames(body.nicknames)
+  const preferredName = normalizePreferredName(body.preferredName)
   const gender = body.gender === "F" ? Gender.F : Gender.M
   const seasons = parseSeasonList(body.seasons)
   const swimCloudIdRaw = body.swimCloudId
@@ -85,7 +85,7 @@ export async function POST(req: Request) {
         slug: await uniqueAthleteSlug(firstName, lastName),
         firstName,
         lastName,
-        nicknames,
+        preferredName,
         gender,
         seasons,
         ...(swimCloudId !== null ? { swimCloudId } : {})}})

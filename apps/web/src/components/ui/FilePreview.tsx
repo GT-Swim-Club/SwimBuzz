@@ -153,6 +153,20 @@ function DownloadIcon() {
   )
 }
 
+function PrintIcon() {
+  return (
+    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2M7 14h10v6H7z" />
+    </svg>
+  )
+}
+
+function removePrintFrame(frame: HTMLIFrameElement | null) {
+  if (!frame) return
+  URL.revokeObjectURL(frame.src)
+  frame.remove()
+}
+
 function getPdfDownloadName(name: string): string {
   const base = name.replace(/[\\/:*?"<>|]+/g, "").trim() || "document"
   return /\.pdf$/i.test(base) ? base : `${base}.pdf`
@@ -273,6 +287,8 @@ export function FilePreviewDialog({
   const [zoomPercent, setZoomPercent] = useState(100)
   const [pdfFailed, setPdfFailed] = useState(false)
   const [downloading, setDownloading] = useState(false)
+  const [printing, setPrinting] = useState(false)
+  const printFrameRef = useRef<HTMLIFrameElement | null>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const pageRefs = useRef<Array<HTMLDivElement | null>>([])
   const zoomAnchorRef = useRef<ZoomAnchor | null>(null)
@@ -303,6 +319,14 @@ export function FilePreviewDialog({
   }, [open])
 
   useEscapeToClose(open, onClose)
+
+  // The print iframe has to outlive the print() call (removing it cancels the print in some
+  // browsers), so it stays until the next print or until the preview closes.
+  useEffect(() => {
+    if (open) return
+    removePrintFrame(printFrameRef.current)
+    printFrameRef.current = null
+  }, [open])
 
   // While a Previous/Next smooth scroll is in flight, the counter stays on the destination page
   // instead of flipping back to the pages being scrolled past. The hold ends when the scroll lands,
@@ -462,14 +486,18 @@ export function FilePreviewDialog({
     setZoomPercent(nextZoomPercent)
   }
 
+  const fetchPdfBlob = async () => {
+    const response = await fetch(getPdfPreviewUrl(url))
+    if (!response.ok) throw new Error(`PDF request failed (${response.status})`)
+    return response.blob()
+  }
+
   // `<a download>` is ignored for cross-origin URLs (e.g. Supabase Storage), so fetch the
   // same-origin preview proxy as a blob and save that instead.
   const downloadPdf = async () => {
     setDownloading(true)
     try {
-      const response = await fetch(getPdfPreviewUrl(url))
-      if (!response.ok) throw new Error(`Download failed (${response.status})`)
-      const objectUrl = URL.createObjectURL(await response.blob())
+      const objectUrl = URL.createObjectURL(await fetchPdfBlob())
       const link = document.createElement("a")
       link.href = objectUrl
       link.download = getPdfDownloadName(downloadName ?? title)
@@ -481,6 +509,46 @@ export function FilePreviewDialog({
       window.open(url, "_blank", "noopener,noreferrer")
     } finally {
       setDownloading(false)
+    }
+  }
+
+  // Print the original PDF (not the rendered canvases) by loading it into a hidden same-origin
+  // iframe and opening the browser's print dialog from there. If that isn't possible, open the
+  // PDF in a new tab so it can be printed from the browser's own viewer.
+  const printPdf = async () => {
+    setPrinting(true)
+    try {
+      const objectUrl = URL.createObjectURL(await fetchPdfBlob())
+      removePrintFrame(printFrameRef.current)
+      const frame = document.createElement("iframe")
+      frame.setAttribute("aria-hidden", "true")
+      frame.tabIndex = -1
+      Object.assign(frame.style, {
+        position: "fixed",
+        right: "0",
+        bottom: "0",
+        width: "0",
+        height: "0",
+        border: "0",
+        opacity: "0",
+        pointerEvents: "none",
+      })
+      frame.onload = () => {
+        try {
+          frame.contentWindow?.focus()
+          frame.contentWindow?.print()
+        } catch {
+          window.open(objectUrl, "_blank", "noopener,noreferrer")
+        } finally {
+          setPrinting(false)
+        }
+      }
+      frame.src = objectUrl
+      document.body.appendChild(frame)
+      printFrameRef.current = frame
+    } catch {
+      window.open(url, "_blank", "noopener,noreferrer")
+      setPrinting(false)
     }
   }
 
@@ -506,12 +574,6 @@ export function FilePreviewDialog({
                 : "File preview"}
           </p>
         </div>
-
-        {showingPdf ? (
-          <IconButton label="Download PDF" onClick={downloadPdf} disabled={downloading}>
-            <DownloadIcon />
-          </IconButton>
-        ) : null}
 
         {showingPdf ? (
           <nav className="hidden items-center rounded-md border border-border bg-background shadow-sm sm:flex">
@@ -549,6 +611,17 @@ export function FilePreviewDialog({
               <ZoomIcon direction="in" />
             </IconButton>
           </nav>
+        ) : null}
+
+        {showingPdf ? (
+          <>
+            <IconButton label="Download PDF" onClick={downloadPdf} disabled={downloading}>
+              <DownloadIcon />
+            </IconButton>
+            <IconButton label="Print PDF" onClick={printPdf} disabled={printing}>
+              <PrintIcon />
+            </IconButton>
+          </>
         ) : null}
       </header>
 

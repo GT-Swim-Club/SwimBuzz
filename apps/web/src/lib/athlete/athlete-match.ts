@@ -2,7 +2,7 @@ export type RosterAthlete = {
   id: string
   firstName: string
   lastName: string
-  nicknames?: string[]
+  preferredName?: string | null
 }
 
 export type AthleteLookup = {
@@ -10,72 +10,57 @@ export type AthleteLookup = {
   roster: RosterAthlete[]
 }
 
-export const MAX_NICKNAMES = 2
-
-/**
- * Clean user-supplied alternate names into a deduped list. Accepts either an
- * array of strings or a single comma-separated string, up to the allowed limit.
- */
-export function normalizeNicknames(input: unknown): string[] {
-  const raw = Array.isArray(input)
-    ? input
-    : typeof input === "string"
-      ? input.split(",")
-      : []
-
-  const seen = new Set<string>()
-  const result: string[] = []
-  for (const item of raw) {
-    const trimmed = String(item ?? "").trim()
-    if (!trimmed) continue
-    const key = trimmed.toLowerCase()
-    if (seen.has(key)) continue
-    seen.add(key)
-    result.push(trimmed)
-    if (result.length === MAX_NICKNAMES) break
-  }
-  return result
+/** Clean a user-supplied preferred name; blank input clears it (null). */
+export function normalizePreferredName(input: unknown): string | null {
+  if (typeof input !== "string") return null
+  const trimmed = input.trim().replace(/\s+/g, " ")
+  return trimmed || null
 }
 
-/** Extract a parenthetical nickname from a single first-name cell. */
-export function parseFirstNameWithNicknames(value: string): {
+/** Pull a preferred name out of a "(Jon)" or "(Jon, J)" parenthetical — first entry wins. */
+function parsePreferredNameParenthetical(value: string): string | null {
+  return normalizePreferredName(value.split(",")[0])
+}
+
+/** Extract a parenthetical preferred name from a single first-name cell. */
+export function parseFirstNameWithPreferredName(value: string): {
   firstName: string
-  nicknames: string[]
+  preferredName: string | null
 } {
   const trimmed = value.trim()
-  if (!trimmed) return { firstName: "", nicknames: [] }
+  if (!trimmed) return { firstName: "", preferredName: null }
 
   const parenMatch = trimmed.match(/^(.+?)\s*\(([^)]+)\)\s*$/)
   if (parenMatch) {
     return {
       firstName: parenMatch[1].trim(),
-      nicknames: normalizeNicknames(parenMatch[2]),
+      preferredName: parsePreferredNameParenthetical(parenMatch[2]),
     }
   }
 
-  return { firstName: trimmed, nicknames: [] }
+  return { firstName: trimmed, preferredName: null }
 }
 
-/** Parse a full or partial name, extracting parenthetical nicknames when present. */
+/** Parse a full or partial name, extracting a parenthetical preferred name when present. */
 export function parseRosterName(fullName: string): {
   firstName: string
   lastName: string
-  nicknames: string[]
+  preferredName: string | null
 } {
   const trimmed = fullName.trim()
-  if (!trimmed) return { firstName: "", lastName: "", nicknames: [] }
+  if (!trimmed) return { firstName: "", lastName: "", preferredName: null }
 
   if (trimmed.includes(",")) {
     const [lastPart, ...rest] = trimmed.split(",")
     const lastName = lastPart.trim()
     const firstPart = rest.join(",").trim()
-    if (!lastName || !firstPart) return { firstName: "", lastName: "", nicknames: [] }
+    if (!lastName || !firstPart) return { firstName: "", lastName: "", preferredName: null }
 
-    const parsedFirst = parseFirstNameWithNicknames(firstPart)
+    const parsedFirst = parseFirstNameWithPreferredName(firstPart)
     if (parsedFirst.firstName) {
-      return { firstName: parsedFirst.firstName, lastName, nicknames: parsedFirst.nicknames }
+      return { firstName: parsedFirst.firstName, lastName, preferredName: parsedFirst.preferredName }
     }
-    return { firstName: "", lastName: "", nicknames: [] }
+    return { firstName: "", lastName: "", preferredName: null }
   }
 
   const parenMatch = trimmed.match(/^(.+?)\s*\(([^)]+)\)\s+(.+)$/)
@@ -83,15 +68,20 @@ export function parseRosterName(fullName: string): {
     return {
       firstName: parenMatch[1].trim(),
       lastName: parenMatch[3].trim(),
-      nicknames: normalizeNicknames(parenMatch[2]),
+      preferredName: parsePreferredNameParenthetical(parenMatch[2]),
     }
   }
 
   const parts = trimmed.split(/\s+/).filter(Boolean)
   if (parts.length < 2) {
-    return { firstName: parts[0] ?? "", lastName: "", nicknames: [] }
+    return { firstName: parts[0] ?? "", lastName: "", preferredName: null }
   }
-  return { firstName: parts[0], lastName: parts[parts.length - 1], nicknames: [] }
+  return { firstName: parts[0], lastName: parts[parts.length - 1], preferredName: null }
+}
+
+/** The legal first name plus the preferred name, if set. */
+function rosterFirstNames(athlete: RosterAthlete): string[] {
+  return athlete.preferredName ? [athlete.firstName, athlete.preferredName] : [athlete.firstName]
 }
 
 function normalize(value: string): string {
@@ -122,20 +112,19 @@ function rosterKeys(athlete: RosterAthlete): string[] {
   const last = normalize(athlete.lastName)
   const keys: string[] = []
 
-  // The roster first name plus any alternate names / nicknames.
-  const firstNames = [athlete.firstName, ...(athlete.nicknames ?? [])]
-  for (const raw of firstNames) {
+  // The roster first name plus the preferred name.
+  for (const raw of rosterFirstNames(athlete)) {
     const value = normalize(raw)
     if (!value) continue
 
     if (value.includes(" ")) {
-      // A full alternate name like "Alex Diachenko" — match it directly and reversed.
+      // A full preferred name like "Alex Diachenko" — match it directly and reversed.
       const parts = value.split(" ")
       const altFirst = parts[0]
       const altLast = parts[parts.length - 1]
       keys.push(value, normalize(`${altLast} ${altFirst}`))
     } else {
-      // A first-name nickname — pair it with the roster last name.
+      // A first-name preferred name — pair it with the roster last name.
       keys.push(normalize(`${value} ${last}`), normalize(`${last} ${value}`))
     }
   }
@@ -170,10 +159,9 @@ function matchFuzzy(
   const matches = candidates.filter(
     (athlete) =>
       firstNamesCompatible(parsed.first, athlete.firstName) ||
-      (athlete.nicknames ?? []).some((nick) =>
-        // Nicknames may be a bare first name or a full "First Last" string.
-        firstNamesCompatible(parsed.first, nick.trim().split(/\s+/)[0] ?? nick)
-      )
+      // A preferred name may be a bare first name or a full "First Last" string.
+      (!!athlete.preferredName &&
+        firstNamesCompatible(parsed.first, athlete.preferredName.split(/\s+/)[0]))
   )
   if (matches.length === 1) return matches[0].id
   return null
@@ -210,7 +198,7 @@ function isCloseToken(a: string, b: string): boolean {
 
 function rosterFirstTokens(athlete: RosterAthlete): string[] {
   const tokens: string[] = []
-  for (const raw of [athlete.firstName, ...(athlete.nicknames ?? [])]) {
+  for (const raw of rosterFirstNames(athlete)) {
     const value = normalize(raw)
     if (!value) continue
     tokens.push(value.includes(" ") ? value.split(" ")[0]! : value)

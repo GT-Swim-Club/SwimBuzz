@@ -566,6 +566,7 @@ export function createApiClient(options: ApiClientOptions = {}) {
       return request<{
         created: number
         updated: number
+        removed: number
         parsed: number
         errors: Array<{ row: number; message: string }>
         tab?: string

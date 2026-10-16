@@ -78,12 +78,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Import failed while saving athletes" }, { status: 500 })
   }
 
-  const { created, updated, errors } = summary
-  console.log("[roster sheet import] summary:", { created, updated, errors: errors.length })
+  const { created, updated, removed, errors } = summary
+  console.log("[roster sheet import] summary:", { created, updated, removed, errors: errors.length })
 
   return NextResponse.json({
     created,
     updated,
+    removed,
     parsed: parsed.rows.length,
     errors,
     tab: tabTitle})

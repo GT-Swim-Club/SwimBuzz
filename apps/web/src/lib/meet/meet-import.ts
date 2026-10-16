@@ -151,7 +151,7 @@ export async function importMeetResults({
 }): Promise<MeetImportSummary> {
   const roster = await prisma.athlete.findMany({
     where: { seasons: { has: season } },
-    select: { id: true, firstName: true, lastName: true, nicknames: true },
+    select: { id: true, firstName: true, lastName: true, preferredName: true },
   })
 
   const lookup = buildAthleteLookup(roster)

@@ -71,8 +71,9 @@ function formatPending(pending: Record<string, unknown>): string {
   if (pending.swimCloudId !== undefined) {
     parts.push(`SwimCloud ID → ${String(pending.swimCloudId)}`)
   }
-  if (Array.isArray(pending.nicknames)) {
-    parts.push(`Nicknames → ${(pending.nicknames as string[]).join(", ") || "(none)"}`)
+  if (pending.preferredName !== undefined) {
+    const preferredName = typeof pending.preferredName === "string" ? pending.preferredName : ""
+    parts.push(`Preferred name → ${preferredName || "(none)"}`)
   }
   return parts.join(" · ") || "Pending profile changes"
 }
@@ -168,9 +169,7 @@ export default function AthleteDetailScreen() {
   const name = athleteDisplayName({
     firstName: String(athlete.firstName ?? ""),
     lastName: String(athlete.lastName ?? ""),
-    nicknames: Array.isArray(athlete.nicknames)
-      ? (athlete.nicknames as string[])
-      : [],
+    preferredName: typeof athlete.preferredName === "string" ? athlete.preferredName : null,
   })
   const seasons = Array.isArray(athlete.seasons)
     ? (athlete.seasons as string[])

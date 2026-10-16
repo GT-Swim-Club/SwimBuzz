@@ -74,7 +74,7 @@ function buildPbMaps(swims: AthleteSwimForStats[]) {
 
 /**
  * Athlete highlight stats for a season. Hide when fewer than 3 career swims.
- * Relay leadoffs count toward PRs (same as PB grid).
+ * Relay leadoffs count toward PBs (same as PB grid).
  */
 export function computeAthleteHighlights(
   swims: AthleteSwimForStats[],
@@ -137,15 +137,15 @@ export function computeAthleteHighlights(
     })
   }
 
-  // Season PRs — unique event×course where a season swim equals lifetime best
-  const seasonPrEvents = new Set<string>()
+  // Season PBs — unique event×course where a season swim equals lifetime best
+  const seasonPbEvents = new Set<string>()
   for (const s of seasonSwims) {
     if (!Number.isFinite(s.timeMs) || s.timeMs <= 0) continue
     const key = eventCourseKey(s.event, s.course)
-    if (bestMs.get(key) === s.timeMs) seasonPrEvents.add(key)
+    if (bestMs.get(key) === s.timeMs) seasonPbEvents.add(key)
   }
-  if (seasonPrEvents.size > 0) {
-    counters.push({ label: "Season PRs", value: seasonPrEvents.size })
+  if (seasonPbEvents.size > 0) {
+    counters.push({ label: "Season PBs", value: seasonPbEvents.size })
   }
 
   // Podiums this season
@@ -200,7 +200,7 @@ export function computeAthleteHighlights(
     })
   }
 
-  // PR streak — consecutive recent meets (by date) that each include ≥1 PB swim
+  // PB streak — consecutive recent meets (by date) that each include ≥1 PB swim
   const meetBuckets = new Map<
     string,
     { dateMs: number; hasPr: boolean }
@@ -232,7 +232,7 @@ export function computeAthleteHighlights(
   }
   if (streak >= 2) {
     counters.push({
-      label: "PR streak",
+      label: "PB streak",
       value: streak,
       hint: "meets in a row",
     })

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
-import { normalizeNicknames } from "@/lib/athlete/athlete-match"
+import { normalizePreferredName } from "@/lib/athlete/athlete-match"
 import { isStaffRole } from "@swimbuzz/shared"
 import { Prisma, type Course } from "@prisma/client"
 import {
@@ -21,7 +21,7 @@ export type UpdateAthleteInput = {
   lastName?: string
   email?: string
   swimCloudId?: string | null
-  nicknames?: string[]
+  preferredName?: string | null
 }
 
 async function requireStaff() {
@@ -64,11 +64,11 @@ export async function updateAthlete(athleteId: string, input: UpdateAthleteInput
   }
 
   let clearSwimCloudPending = false
-  let clearNicknamesPending = false
+  let clearPreferredNamePending = false
 
-  if (input.nicknames !== undefined) {
-    data.nicknames = normalizeNicknames(input.nicknames)
-    clearNicknamesPending = true
+  if (input.preferredName !== undefined) {
+    data.preferredName = normalizePreferredName(input.preferredName)
+    clearPreferredNamePending = true
   }
 
   if (input.swimCloudId !== undefined) {
@@ -95,10 +95,10 @@ export async function updateAthlete(athleteId: string, input: UpdateAthleteInput
     }
   }
 
-  if (clearSwimCloudPending || clearNicknamesPending) {
+  if (clearSwimCloudPending || clearPreferredNamePending) {
     const nextPending = clearPendingFields(existingPending, {
       swimCloudId: clearSwimCloudPending,
-      nicknames: clearNicknamesPending})
+      preferredName: clearPreferredNamePending})
     data.pendingProfileChanges = nextPending === null ? Prisma.DbNull : (nextPending as Prisma.InputJsonValue)
   }
 
@@ -121,7 +121,7 @@ export async function updateAthlete(athleteId: string, input: UpdateAthleteInput
     return result
   })
 
-  if (clearSwimCloudPending || clearNicknamesPending) {
+  if (clearSwimCloudPending || clearPreferredNamePending) {
     await syncProfileChangeRequestNotifications({
       athleteId,
       firstName: updated.firstName,

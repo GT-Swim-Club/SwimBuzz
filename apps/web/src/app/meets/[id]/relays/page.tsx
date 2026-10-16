@@ -59,7 +59,7 @@ export default async function MeetRelayBuilderPage({
   const seasonRoster = await prisma.athlete.findMany({
     where: { seasons: { has: meet.season } },
     orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
-    select: { id: true, firstName: true, lastName: true, nicknames: true, gender: true },
+    select: { id: true, firstName: true, lastName: true, preferredName: true, gender: true },
   })
 
   const athletes = seasonRoster.map((athlete) => ({

@@ -4,7 +4,6 @@ import { prisma } from "@/lib/prisma"
 import {
   buildAthleteLookup,
   matchAthleteIdFast,
-  normalizeNicknames,
   parseRosterName,
   type AthleteLookup,
 } from "@/lib/athlete/athlete-match"
@@ -16,7 +15,7 @@ export type RosterImportAthlete = {
   userId: string
   firstName: string
   lastName: string
-  nicknames: string[]
+  preferredName: string | null
   gender: Gender
   seasons: string[]
   swimCloudId: number | null
@@ -31,7 +30,7 @@ export type RosterImportInput = {
   lastName: string
   gender: Gender
   email?: string
-  nicknames?: string[]
+  preferredName?: string | null
   gtid?: string | null
   dob?: Date | null
   year?: string | null
@@ -43,6 +42,7 @@ export type RosterImportContext = {
   lookup: AthleteLookup
   bySwimCloudId: Map<number, RosterImportAthlete>
   byEmail: Map<string, RosterImportAthlete>
+  byGtid: Map<string, RosterImportAthlete>
 }
 
 export async function loadRosterImportContext(): Promise<RosterImportContext> {
@@ -52,7 +52,7 @@ export async function loadRosterImportContext(): Promise<RosterImportContext> {
       userId: true,
       firstName: true,
       lastName: true,
-      nicknames: true,
+      preferredName: true,
       gender: true,
       seasons: true,
       swimCloudId: true,
@@ -68,7 +68,7 @@ export async function loadRosterImportContext(): Promise<RosterImportContext> {
     userId: athlete.userId,
     firstName: athlete.firstName,
     lastName: athlete.lastName,
-    nicknames: athlete.nicknames,
+    preferredName: athlete.preferredName,
     gender: athlete.gender,
     seasons: athlete.seasons,
     swimCloudId: athlete.swimCloudId,
@@ -80,11 +80,14 @@ export async function loadRosterImportContext(): Promise<RosterImportContext> {
 
   const bySwimCloudId = new Map<number, RosterImportAthlete>()
   const byEmail = new Map<string, RosterImportAthlete>()
+  const byGtid = new Map<string, RosterImportAthlete>()
   for (const athlete of roster) {
     if (athlete.swimCloudId != null) {
       bySwimCloudId.set(athlete.swimCloudId, athlete)
     }
     byEmail.set(athlete.userEmail.toLowerCase(), athlete)
+    const gtid = athlete.gtid?.trim()
+    if (gtid && !byGtid.has(gtid)) byGtid.set(gtid, athlete)
   }
 
   return {
@@ -92,6 +95,7 @@ export async function loadRosterImportContext(): Promise<RosterImportContext> {
     lookup: buildAthleteLookup(roster),
     bySwimCloudId,
     byEmail,
+    byGtid,
   }
 }
 
@@ -102,6 +106,17 @@ export function findAthleteForImport(
   if (input.email) {
     const byMail = context.byEmail.get(input.email.toLowerCase())
     if (byMail) return byMail
+  }
+
+  const gtid = input.gtid?.trim()
+  if (gtid) {
+    const byGtid = context.byGtid.get(gtid)
+    if (byGtid) return byGtid
+  }
+
+  if (input.swimCloudId != null) {
+    const bySwimCloud = context.bySwimCloudId.get(input.swimCloudId)
+    if (bySwimCloud) return bySwimCloud
   }
 
   const athleteId = matchAthleteIdFast(`${input.firstName} ${input.lastName}`, context.lookup)
@@ -142,7 +157,7 @@ const athleteSelect = {
   userId: true,
   firstName: true,
   lastName: true,
-  nicknames: true,
+  preferredName: true,
   gender: true,
   seasons: true,
   swimCloudId: true,
@@ -157,7 +172,7 @@ function toRosterAthlete(updated: {
   userId: string
   firstName: string
   lastName: string
-  nicknames: string[]
+  preferredName: string | null
   gender: Gender
   seasons: string[]
   swimCloudId: number | null
@@ -171,7 +186,7 @@ function toRosterAthlete(updated: {
     userId: updated.userId,
     firstName: updated.firstName,
     lastName: updated.lastName,
-    nicknames: updated.nicknames,
+    preferredName: updated.preferredName,
     gender: updated.gender,
     seasons: updated.seasons,
     swimCloudId: updated.swimCloudId,
@@ -230,7 +245,6 @@ export async function mergeImportAthlete(
   const seasons = athlete.seasons.includes(season)
     ? athlete.seasons
     : [...athlete.seasons, season]
-  const nicknames = normalizeNicknames([...(input.nicknames ?? []), ...athlete.nicknames])
 
   if (input.email) {
     await applyImportEmail(athlete, input.email)
@@ -240,12 +254,24 @@ export async function mergeImportAthlete(
     where: { id: athlete.id },
     data: {
       seasons,
-      nicknames,
-  ...(input.gtid != null && athlete.gtid == null ? { gtid: input.gtid } : {}),
-      ...(input.dob != null && athlete.dob == null ? { dob: input.dob } : {}),
-      ...(input.year != null && athlete.year == null ? { year: input.year } : {}),
+      firstName: input.firstName,
+      lastName: input.lastName,
+      gender: input.gender,
+      // A filled preferred-name cell replaces whatever is stored. A blank cell
+      // leaves an existing preferred name alone.
+      ...(input.preferredName ? { preferredName: input.preferredName } : {}),
+      ...(input.gtid != null ? { gtid: input.gtid } : {}),
+      ...(input.dob != null ? { dob: input.dob } : {}),
+      ...(input.year != null ? { year: input.year } : {}),
+      ...(input.swimCloudId != null ? { swimCloudId: input.swimCloudId } : {}),
     },
     select: athleteSelect,
+  })
+
+  const nextName = `${input.firstName} ${input.lastName}`
+  await prisma.user.update({
+    where: { id: updated.userId },
+    data: { name: nextName },
   })
 
   return toRosterAthlete(updated)
@@ -257,7 +283,7 @@ export async function createImportAthlete(
   rowNumber?: number
 ): Promise<RosterImportAthlete> {
   let email = input.email ?? placeholderEmail(input.firstName, input.lastName, undefined)
-  const nicknames = normalizeNicknames(input.nicknames ?? [])
+  const preferredName = input.preferredName ?? null
 
   const existingUser = await prisma.user.findUnique({
     where: { email },
@@ -273,12 +299,13 @@ export async function createImportAthlete(
         slug,
         firstName: input.firstName,
         lastName: input.lastName,
-        nicknames,
+        preferredName,
         gender: input.gender,
         seasons: [season],
         ...(input.gtid != null ? { gtid: input.gtid } : {}),
         ...(input.dob != null ? { dob: input.dob } : {}),
         ...(input.year != null ? { year: input.year } : {}),
+        ...(input.swimCloudId != null ? { swimCloudId: input.swimCloudId } : {}),
       },
       select: athleteSelect,
     })
@@ -317,12 +344,13 @@ export async function createImportAthlete(
       slug,
       firstName: input.firstName,
       lastName: input.lastName,
-      nicknames,
+      preferredName,
       gender: input.gender,
       seasons: [season],
       ...(input.gtid != null ? { gtid: input.gtid } : {}),
       ...(input.dob != null ? { dob: input.dob } : {}),
       ...(input.year != null ? { year: input.year } : {}),
+      ...(input.swimCloudId != null ? { swimCloudId: input.swimCloudId } : {}),
     },
     select: athleteSelect,
   })
@@ -337,9 +365,17 @@ export function registerImportAthlete(
   const existing = context.roster.find((entry) => entry.id === athlete.id)
   if (existing) {
     const oldEmail = existing.userEmail.toLowerCase()
+    const oldSwimCloudId = existing.swimCloudId
     Object.assign(existing, athlete)
     if (oldEmail !== athlete.userEmail.toLowerCase()) {
       context.byEmail.delete(oldEmail)
+    }
+    if (
+      oldSwimCloudId != null &&
+      oldSwimCloudId !== athlete.swimCloudId &&
+      context.bySwimCloudId.get(oldSwimCloudId)?.id === athlete.id
+    ) {
+      context.bySwimCloudId.delete(oldSwimCloudId)
     }
   } else {
     context.roster.push(athlete)
@@ -350,6 +386,8 @@ export function registerImportAthlete(
     context.bySwimCloudId.set(athlete.swimCloudId, athlete)
   }
   context.byEmail.set(athlete.userEmail.toLowerCase(), athlete)
+  const gtid = athlete.gtid?.trim()
+  if (gtid) context.byGtid.set(gtid, athlete)
 }
 
 export type RosterImportRowOutcome = {
@@ -362,15 +400,16 @@ export type RosterImportRowOutcome = {
 export type RosterImportSummary = {
   created: number
   updated: number
+  removed: number
   parsed: number
   errors: Array<{ row: number; message: string }>
   rowOutcomes: RosterImportRowOutcome[]
 }
 
 /**
- * Shared upsert loop for every roster-row source (CSV upload, Google Sheets, ...):
- * matches each parsed row against the existing roster and creates or merges an
- * athlete for it. Callers just need to get their source into ParsedRosterCsvRow[].
+ * Replace one season's roster from parsed rows (CSV upload, Google Sheets, ...).
+ * Each row updates a matched athlete or creates one, then anyone still on that
+ * season who was not in the file is taken off it. Other seasons are left alone.
  */
 export async function runRosterImport(
   rows: ParsedRosterCsvRow[],
@@ -381,8 +420,13 @@ export async function runRosterImport(
   let updated = 0
   const errors: RosterImportSummary["errors"] = [...parseErrors]
   const rowOutcomes: RosterImportRowOutcome[] = []
+  const keptIds = new Set<string>()
 
   const context = await loadRosterImportContext()
+
+  if (rows.length === 0) {
+    return { created, updated, removed: 0, parsed: 0, errors, rowOutcomes }
+  }
 
   for (const row of rows) {
     const input: RosterImportInput = {
@@ -391,39 +435,70 @@ export async function runRosterImport(
       gender: row.gender === "F" ? Gender.F : Gender.M,
       ...(row.email ? { email: row.email } : {}),
       ...(row.gtid ? { gtid: row.gtid } : {}),
-      ...(row.dob ? { dob: row.dob } : {}),
+      ...(row.dob && !Number.isNaN(row.dob.getTime()) ? { dob: row.dob } : {}),
       ...(row.year ? { year: row.year } : {}),
-      ...(row.nicknames.length > 0 ? { nicknames: row.nicknames } : {}),
+      ...(row.preferredName ? { preferredName: row.preferredName } : {}),
+      ...(row.swimCloudId != null ? { swimCloudId: row.swimCloudId } : {}),
     }
 
     const existing = findAthleteForImport(input, context)
+    if (input.swimCloudId != null) {
+      const owner = context.bySwimCloudId.get(input.swimCloudId)
+      if (owner && owner.id !== existing?.id) {
+        delete input.swimCloudId
+      }
+    }
+    const label = `${row.lastName}, ${row.firstName}`
 
-    if (existing) {
-      const hadSeason = existing.seasons.includes(season)
-      const merged = await mergeImportAthlete(existing, input, season)
-      registerImportAthlete(context, merged)
-      updated++
+    try {
+      if (existing) {
+        // Keep them on the season even if this row's write fails.
+        keptIds.add(existing.id)
+        const hadSeason = existing.seasons.includes(season)
+        const merged = await mergeImportAthlete(existing, input, season)
+        registerImportAthlete(context, merged)
+        updated++
+        rowOutcomes.push({
+          row: row.rowNumber,
+          action: "updated",
+          name: label,
+          detail: hadSeason ? "merged with existing athlete" : `added to ${formatSeasonLabel(season)}`,
+        })
+        continue
+      }
+
+      const athlete = await createImportAthlete(input, season, row.rowNumber)
+      registerImportAthlete(context, athlete)
+      keptIds.add(athlete.id)
+      created++
       rowOutcomes.push({
         row: row.rowNumber,
-        action: "updated",
-        name: `${row.lastName}, ${row.firstName}`,
-        detail: hadSeason ? "merged with existing athlete" : `added to ${formatSeasonLabel(season)}`,
+        action: "created",
+        name: label,
+        detail: row.email ?? athlete.userEmail,
       })
-      continue
+    } catch (err) {
+      console.error(`[roster import] row ${row.rowNumber} (${label}) failed:`, err)
+      errors.push({
+        row: row.rowNumber,
+        message: err instanceof Error ? err.message : "Could not save this athlete",
+      })
     }
+  }
 
-    const athlete = await createImportAthlete(input, season, row.rowNumber)
-    registerImportAthlete(context, athlete)
-    created++
-    rowOutcomes.push({
-      row: row.rowNumber,
-      action: "created",
-      name: `${row.lastName}, ${row.firstName}`,
-      detail: row.email ?? athlete.userEmail,
+  const dropping = context.roster.filter(
+    (athlete) => !keptIds.has(athlete.id) && athlete.seasons.includes(season)
+  )
+  // One statement per athlete. A wrapping transaction cannot run on the
+  // transaction-mode pooler (DATABASE_URL, port 6543).
+  for (const athlete of dropping) {
+    await prisma.athlete.update({
+      where: { id: athlete.id },
+      data: { seasons: athlete.seasons.filter((entry) => entry !== season) },
     })
   }
 
-  return { created, updated, parsed: rows.length, errors, rowOutcomes }
+  return { created, updated, removed: dropping.length, parsed: rows.length, errors, rowOutcomes }
 }
 
 export { parseRosterName as parseSwimCloudName } from "@/lib/athlete/athlete-match"
@@ -451,6 +526,7 @@ export async function applySwimCloudRosterImport(
     lookup: buildAthleteLookup(genderRoster),
     bySwimCloudId: context.bySwimCloudId,
     byEmail: context.byEmail,
+    byGtid: context.byGtid,
   }
 
   for (const swimmer of roster) {

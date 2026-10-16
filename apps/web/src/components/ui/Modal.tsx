@@ -1,7 +1,8 @@
 "use client"
 
-import { type FormEvent, type ReactNode, useEffect, useState } from "react"
+import { Children, createContext, type FormEvent, type ReactNode, useContext, useEffect, useState } from "react"
 import { createPortal } from "react-dom"
+import { useCanScrollDown } from "@/lib/use-can-scroll-down"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
@@ -19,6 +20,9 @@ const MAX_WIDTH = {
 
 type ModalMaxWidth = keyof typeof MAX_WIDTH
 
+/** Whether the modal body has content scrolled out of view below it. */
+const ModalCanScrollDownContext = createContext(true)
+
 export function ModalFooter({
   children,
   className = "",
@@ -26,9 +30,10 @@ export function ModalFooter({
   children: ReactNode
   className?: string
 }) {
+  const canScrollDown = useContext(ModalCanScrollDownContext)
   return (
     <div
-      className={`shrink-0 flex flex-wrap gap-2 border-t border-border px-4 py-3 dark:border-border sm:gap-3 sm:px-6 sm:py-4 ${className}`}
+      className={`shrink-0 flex flex-wrap gap-2 border-t px-4 pb-3 transition-[padding,border-color] sm:gap-3 sm:px-6 sm:pb-4 ${canScrollDown ? "border-border pt-3 sm:pt-4" : "border-transparent pt-2"} ${className}`}
     >
       {children}
     </div>
@@ -77,6 +82,7 @@ export default function Modal({
 }) {
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
+  const [bodyRef, canScrollDown] = useCanScrollDown()
   useDontReloadWhileBusy(open && busy)
   useEscapeToClose(open && presentation !== "inline", onClose, { disabled: closeDisabled })
 
@@ -91,10 +97,12 @@ export default function Modal({
 
   if (!open || (presentation !== "inline" && portal && !mounted)) return null
 
-  const hasBody = children != null && children !== false
+  // Children.toArray drops null/false/undefined, so conditional-only children
+  // (e.g. `{error && …}` with no error) don't render an empty padded body.
+  const hasBody = Children.toArray(children).length > 0
 
   const body = hasBody ? (
-    <div className={`min-h-0 flex-1 overflow-y-auto px-4 py-3 space-y-4 sm:px-6 sm:py-4 ${bodyClassName}`}>
+    <div ref={bodyRef} className={`min-h-0 flex-1 overflow-y-auto px-4 py-3 space-y-4 sm:px-6 sm:py-4 ${bodyClassName}`}>
       {children}
     </div>
   ) : null
@@ -117,17 +125,19 @@ export default function Modal({
         </div>
       )}
 
-      {onSubmit ? (
-        <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col">
-          {body}
-          {footer}
-        </form>
-      ) : (
-        <div className="flex min-h-0 flex-1 flex-col">
-          {body}
-          {footer}
-        </div>
-      )}
+      <ModalCanScrollDownContext.Provider value={canScrollDown}>
+        {onSubmit ? (
+          <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col">
+            {body}
+            {footer}
+          </form>
+        ) : (
+          <div className="flex min-h-0 flex-1 flex-col">
+            {body}
+            {footer}
+          </div>
+        )}
+      </ModalCanScrollDownContext.Provider>
     </div>
   )
 

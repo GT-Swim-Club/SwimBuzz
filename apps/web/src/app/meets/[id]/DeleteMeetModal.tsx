@@ -57,7 +57,7 @@ export default function DeleteMeetModal({
       open={open}
       onClose={handleClose}
       closeDisabled={isPending}
-      title={hasSwims ? `Remove ${meetName}?` : `Move ${meetName} to Trash?`}
+      title={`Remove ${meetName}?`}
       description={hasSwims ? undefined : "You can restore it from Trash later."}
       maxWidth="sm"
       footer={

@@ -25,7 +25,7 @@ type RosterEntry = {
   id: string
   slug: string | null
   name: string
-  nicknames: string[]
+  preferredName: string | null
   gender: "M" | "F"
   year: string | null
 }
@@ -92,7 +92,7 @@ export default function AttendanceManager({
       .filter(
         (entry) =>
           entry.name.toLowerCase().includes(needle) ||
-          entry.nicknames.some((nickname) => nickname.toLowerCase().includes(needle))
+          !!entry.preferredName?.toLowerCase().includes(needle)
       )
       .slice(0, 6)
   }, [query, roster, attendedIds])

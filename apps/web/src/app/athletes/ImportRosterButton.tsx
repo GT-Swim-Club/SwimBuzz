@@ -17,6 +17,23 @@ type ImportSource = "swimcloud" | "csv" | "sheets"
 
 type SheetTab = { gid: number; title: string }
 
+function formatRosterReplaceResult(data: {
+  created?: number
+  updated?: number
+  removed?: number
+  errors?: unknown[]
+}) {
+  const created = data.created ?? 0
+  const updated = data.updated ?? 0
+  const removed = data.removed ?? 0
+  const parts = [`Replaced the roster (${created + updated})`]
+  if (created > 0) parts.push(`${created} new`)
+  if (updated > 0) parts.push(`${updated} updated`)
+  if (removed > 0) parts.push(`${removed} removed`)
+  if ((data.errors?.length ?? 0) > 0) parts.push(`${data.errors!.length} row(s) skipped`)
+  return parts.join(" · ")
+}
+
 export default function ImportRosterButton() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -41,9 +58,9 @@ export default function ImportRosterButton() {
 
   const modalDescription =
     source === "csv"
-      ? `Adds athletes to the ${formatSeasonLabel(season)} roster.`
+      ? `Replaces the ${formatSeasonLabel(season)} roster with this file.`
       : source === "sheets"
-        ? `Adds athletes to the ${formatSeasonLabel(season)} roster from a Google Sheet.`
+        ? `Replaces the ${formatSeasonLabel(season)} roster with this Google Sheet.`
         : `Imports SwimCloud IDs to the ${rosterLabel} roster.`
 
   function resetForm() {
@@ -156,15 +173,8 @@ export default function ImportRosterButton() {
           const data = await res.json()
           if (!res.ok) throw new Error(data.error ?? "Import failed")
 
-          const parts: string[] = [
-            `Imported ${data.created} new athlete${data.created === 1 ? "" : "s"}`,
-          ]
-          if (data.updated > 0) parts.push(`updated ${data.updated}`)
-          if (data.parsed > 0) parts.push(`${data.parsed} rows parsed`)
-          if (data.errors?.length > 0)
-            parts.push(`${data.errors.length} row(s) skipped`)
           router.refresh()
-          return parts.join(" · ")
+          return formatRosterReplaceResult(data)
         })()
       )
       return
@@ -189,15 +199,8 @@ export default function ImportRosterButton() {
         const data = await res.json()
         if (!res.ok) throw new Error(data.error ?? "Import failed")
 
-        const parts: string[] = [
-          `Imported ${data.created} new athlete${data.created === 1 ? "" : "s"}`,
-        ]
-        if (data.updated > 0) parts.push(`updated ${data.updated}`)
-        if (data.parsed > 0) parts.push(`${data.parsed} rows parsed`)
-        if (data.errors?.length > 0)
-          parts.push(`${data.errors.length} row(s) skipped`)
         router.refresh()
-        return parts.join(" · ")
+        return formatRosterReplaceResult(data)
       })()
     )
   }
@@ -365,8 +368,11 @@ export default function ImportRosterButton() {
               </ul>
               <p className="mt-3 font-medium text-foreground text-foreground">Recommended columns</p>
               <ul className="mt-2 space-y-1.5 text-foreground-secondary text-foreground-secondary text-xs">
-                <li>Email, Nicknames, GTID, DOB, Year</li>
+                <li>Email, Preferred name, Full legal name, GTID, DOB, Year, SwimCloud profile URL</li>
               </ul>
+              <p className="mt-3 text-xs text-foreground-secondary">
+                People in the sheet become this season's roster. Anyone not listed is removed from the season.
+              </p>
             </div>
 
             {!picked ? (
@@ -443,8 +449,11 @@ export default function ImportRosterButton() {
               </ul>
               <p className="mt-3 font-medium text-foreground text-foreground">Recommended columns</p>
               <ul className="mt-2 space-y-1.5 text-foreground-secondary text-foreground-secondary text-xs">
-                <li>Email, Nicknames, GTID, DOB, Year</li>
+                <li>Email, Preferred name, Full legal name, GTID, DOB, Year, SwimCloud profile URL</li>
               </ul>
+              <p className="mt-3 text-xs text-foreground-secondary">
+                People in the file become this season's roster. Anyone not listed is removed from the season.
+              </p>
             </div>
 
             <div>

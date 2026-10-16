@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
-import NicknameTagsInput from "@/components/athlete/NicknameTagsInput"
 import ActionIcon from "@/components/ui/ActionIcon"
 import {
   isValidSwimCloudIdInput,
@@ -18,7 +17,7 @@ type AthleteActionsProps = {
   lastName: string
   email: string
   swimCloudId: number | null
-  nicknames: string[]
+  preferredName: string | null
 }
 
 export default function AthleteActions({
@@ -27,7 +26,7 @@ export default function AthleteActions({
   lastName,
   email,
   swimCloudId,
-  nicknames,
+  preferredName,
 }: AthleteActionsProps) {
   const router = useRouter()
   const [editing, setEditing] = useState(false)
@@ -40,7 +39,7 @@ export default function AthleteActions({
     lastName,
     email,
     swimCloudId: swimCloudId?.toString() ?? "",
-    nicknames,
+    preferredName: preferredName ?? "",
   })
 
   function openEdit() {
@@ -49,7 +48,7 @@ export default function AthleteActions({
       lastName,
       email,
       swimCloudId: swimCloudId?.toString() ?? "",
-      nicknames,
+      preferredName: preferredName ?? "",
     })
     setError(null)
     setEditing(true)
@@ -71,7 +70,7 @@ export default function AthleteActions({
           lastName: form.lastName,
           email: form.email,
           swimCloudId: form.swimCloudId === "" ? null : form.swimCloudId,
-          nicknames: form.nicknames,
+          preferredName: form.preferredName,
         })
         setEditing(false)
       } catch (err) {
@@ -217,17 +216,17 @@ export default function AthleteActions({
 
         <div>
           <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
-            Alternate names
+            Preferred name
           </label>
-          <NicknameTagsInput
-            value={form.nicknames}
-            onChange={(nicknames) => setForm((f) => ({ ...f, nicknames }))}
-            disabled={loading}
-            showAddButton
-            placeholder="Add alternate name"
+          <input
+            type="text"
+            placeholder="Optional"
+            value={form.preferredName}
+            onChange={(e) => setForm((f) => ({ ...f, preferredName: e.target.value }))}
+            className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
           />
           <p className="mt-1 text-xs text-foreground-tertiary">
-            Names used to match imported results to this athlete.
+            Shown in place of their first name, and used to match imported results to this athlete.
           </p>
         </div>
 

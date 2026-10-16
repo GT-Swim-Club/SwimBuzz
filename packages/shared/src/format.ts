@@ -216,49 +216,41 @@ export function relativeInstantDayLabel(value: Date | string, todayKey: string):
   return relativeDayLabel(localDayKey(value), todayKey)
 }
 
-export function athleteDisplayName(athlete: {
+type AthleteNameParts = {
   firstName: string
   lastName: string
-  nicknames?: string[]
-}): string {
-  const nick = athlete.nicknames?.[0]
-  if (nick) return `${athlete.firstName} "${nick}" ${athlete.lastName}`
+  preferredName?: string | null
+}
+
+function preferredFirstName(athlete: AthleteNameParts): string | null {
+  return athlete.preferredName?.trim() || null
+}
+
+export function athleteDisplayName(athlete: AthleteNameParts): string {
+  const preferred = preferredFirstName(athlete)
+  if (preferred) return `${athlete.firstName} "${preferred}" ${athlete.lastName}`
   return `${athlete.firstName} ${athlete.lastName}`
 }
 
 /**
  * Format an athlete for everyday, non-roster display. When an athlete has a
- * nickname, use it in place of their legal first name; otherwise fall back to
- * the legal name. Roster and athlete-profile views should continue to use
- * athleteDisplayName so they retain legal-name visibility.
+ * preferred name, use it in place of their legal first name; otherwise fall
+ * back to the legal name. Roster and athlete-profile views should continue to
+ * use athleteDisplayName so they retain legal-name visibility.
  */
-export function athletePreferredName(athlete: {
-  firstName: string
-  lastName: string
-  nicknames?: string[]
-}): string {
-  const nickname = athlete.nicknames?.find((name) => name.trim().length > 0)?.trim()
-  return `${nickname ?? athlete.firstName} ${athlete.lastName}`.trim()
+export function athletePreferredName(athlete: AthleteNameParts): string {
+  return `${preferredFirstName(athlete) ?? athlete.firstName} ${athlete.lastName}`.trim()
 }
 
 /** Format a preferred athlete name in last-name-first order for compact lists. */
-export function athletePreferredNameLastFirst(athlete: {
-  firstName: string
-  lastName: string
-  nicknames?: string[]
-}): string {
-  const nickname = athlete.nicknames?.find((name) => name.trim().length > 0)?.trim()
-  return `${athlete.lastName}, ${nickname ?? athlete.firstName}`
+export function athletePreferredNameLastFirst(athlete: AthleteNameParts): string {
+  return `${athlete.lastName}, ${preferredFirstName(athlete) ?? athlete.firstName}`
 }
 
 /** Return initials matching the athlete's preferred display name. */
-export function athletePreferredInitials(athlete: {
-  firstName: string
-  lastName: string
-  nicknames?: string[]
-}): string {
-  const preferredName = athlete.nicknames?.find((name) => name.trim().length > 0)?.trim()
-  return `${(preferredName ?? athlete.firstName)[0] ?? ""}${athlete.lastName[0] ?? ""}`
+export function athletePreferredInitials(athlete: AthleteNameParts): string {
+  const first = preferredFirstName(athlete) ?? athlete.firstName
+  return `${first[0] ?? ""}${athlete.lastName[0] ?? ""}`
 }
 /** Convert milliseconds to "1:23.45" or "58.32". */
 export function formatTime(ms: number): string {

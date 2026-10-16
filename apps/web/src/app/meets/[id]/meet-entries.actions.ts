@@ -175,7 +175,7 @@ export async function upsertRelayEntry(meetId: string, input: UpsertRelayEntryIn
 
   const roster = await prisma.athlete.findMany({
     where: { seasons: { has: meet.season } },
-    select: { id: true, firstName: true, lastName: true, nicknames: true, gender: true }})
+    select: { id: true, firstName: true, lastName: true, preferredName: true, gender: true }})
 
   const athleteGenders = new Map<string, RelayGender>(
     roster.map((a) => [a.id, a.gender === Gender.F ? "F" : "M"])

@@ -26,7 +26,7 @@ export default function AthletesClientWrapper({
       const name = `${a.firstName} ${a.lastName}`.toLowerCase()
       return (
         name.includes(needle) ||
-        a.nicknames.some((n: string) => n.toLowerCase().includes(needle))
+        !!a.preferredName?.toLowerCase().includes(needle)
       )
     })
   }, [athletes, query])
@@ -127,9 +127,9 @@ export default function AthletesClientWrapper({
                     {viewerAthlete.firstName}
                     {" "}
                     {viewerAthlete.lastName}
-                    {viewerAthlete.nicknames.length > 0 && (
+                    {viewerAthlete.preferredName && (
                       <span className="ml-2 font-normal text-foreground-secondary text-sm">
-                        ({viewerAthlete.nicknames.join(", ")})
+                        ({viewerAthlete.preferredName})
                       </span>
                     )}
                     {viewerAthlete.user?.staffTitle && (
@@ -183,9 +183,9 @@ export default function AthletesClientWrapper({
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm text-foreground">
                           {a.firstName} {a.lastName}
-                          {a.nicknames.length > 0 && (
+                          {a.preferredName && (
                             <span className="font-normal text-foreground-secondary">
-                              {" "}({a.nicknames.join(", ")})
+                              {" "}({a.preferredName})
                             </span>
                           )}
                           {a.user?.staffTitle && <StaffBadge title={a.user.staffTitle} />}
@@ -239,9 +239,9 @@ export default function AthletesClientWrapper({
                     {viewerAthlete.firstName}
                     {" "}
                     {viewerAthlete.lastName}
-                    {viewerAthlete.nicknames.length > 0 && (
+                    {viewerAthlete.preferredName && (
                       <span className="ml-2 font-normal text-foreground-secondary text-sm">
-                        ({viewerAthlete.nicknames.join(", ")})
+                        ({viewerAthlete.preferredName})
                       </span>
                     )}
                     {viewerAthlete.user?.staffTitle && (

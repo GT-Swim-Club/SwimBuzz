@@ -133,9 +133,9 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
                     {athlete.firstName} {athlete.lastName}
                   </>
                 )}
-                {athlete.nicknames.length > 0 && (
+                {athlete.preferredName && (
                   <span className="font-normal text-foreground-secondary">
-                    {" "}({athlete.nicknames.join(", ")})
+                    {" "}({athlete.preferredName})
                   </span>
                 )}
                 {athlete.user?.staffTitle && <StaffBadge title={athlete.user.staffTitle} />}
@@ -171,7 +171,7 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
               lastName={athlete.lastName}
               email={athlete.user?.email ?? ""}
               swimCloudId={athlete.swimCloudId ?? null}
-              nicknames={athlete.nicknames}
+              preferredName={athlete.preferredName}
             />
           ) : isOwnProfile ? (
             <div className="flex flex-wrap items-center gap-2 ml-auto">
@@ -205,7 +205,7 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
           athleteId={athlete.id}
           pending={pending}
           currentSwimCloudId={athlete.swimCloudId ?? null}
-          currentNicknames={athlete.nicknames}
+          currentPreferredName={athlete.preferredName}
         />
       )}
 

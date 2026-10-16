@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { normalizeNicknames } from "@/lib/athlete/athlete-match"
+import { normalizePreferredName } from "@/lib/athlete/athlete-match"
 import { isStaffRole } from "@swimbuzz/shared"
 import { Gender, Prisma } from "@prisma/client"
 import {
   clearPendingFields,
   mergePendingProfileChanges,
-  nicknamesEqual,
   parsePendingProfileChanges,
   type PendingProfileChanges } from "@/lib/athlete/pending-profile-changes"
 import {
@@ -93,7 +92,7 @@ export async function PATCH(
   const isOwnAthlete = athlete.userId === session.user.id
   const existingPending = parsePendingProfileChanges(athlete.pendingProfileChanges)
 
-  // Athletes may request SwimCloud ID / nickname changes (coach approval required).
+  // Athletes may request SwimCloud ID / preferred name changes (coach approval required).
   if (!staff) {
     if (!isOwnAthlete) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
@@ -107,7 +106,7 @@ export async function PATCH(
       return NextResponse.json(updated)
     }
 
-    const allowedKeys = new Set(["swimCloudId", "nicknames"])
+    const allowedKeys = new Set(["swimCloudId", "preferredName"])
     const extraKeys = Object.keys(body).filter((key) => !allowedKeys.has(key))
     if (extraKeys.length > 0) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
@@ -115,12 +114,12 @@ export async function PATCH(
 
     const patch: PendingProfileChanges = {}
 
-    if ("nicknames" in body) {
-      const nextNicknames = normalizeNicknames(body.nicknames)
-      if (nicknamesEqual(nextNicknames, athlete.nicknames)) {
-        // Requesting current values clears any pending nicknames change.
-        if (existingPending?.nicknames !== undefined) {
-          const cleared = clearPendingFields(existingPending, { nicknames: true })
+    if ("preferredName" in body) {
+      const nextPreferredName = normalizePreferredName(body.preferredName)
+      if (nextPreferredName === athlete.preferredName) {
+        // Requesting the current value clears any pending preferred name change.
+        if (existingPending?.preferredName !== undefined) {
+          const cleared = clearPendingFields(existingPending, { preferredName: true })
           const updated = await prisma.athlete.update({
             where: { id },
             data: { pendingProfileChanges: pendingJson(cleared) }})
@@ -133,7 +132,7 @@ export async function PATCH(
         }
         return NextResponse.json(athlete)
       }
-      patch.nicknames = nextNicknames
+      patch.preferredName = nextPreferredName
     }
 
     if ("swimCloudId" in body) {
@@ -205,8 +204,8 @@ export async function PATCH(
       if (!parsed.ok) return parsed.response
       data.swimCloudId = parsed.swimCloudId
     }
-    if (existingPending.nicknames !== undefined) {
-      data.nicknames = existingPending.nicknames
+    if (existingPending.preferredName !== undefined) {
+      data.preferredName = existingPending.preferredName
     }
 
     const updated = await prisma.athlete.update({ where: { id }, data })
@@ -247,11 +246,11 @@ export async function PATCH(
   }
 
   let clearSwimCloudPending = false
-  let clearNicknamesPending = false
+  let clearPreferredNamePending = false
 
-  if ("nicknames" in body) {
-    data.nicknames = normalizeNicknames(body.nicknames)
-    clearNicknamesPending = true
+  if ("preferredName" in body) {
+    data.preferredName = normalizePreferredName(body.preferredName)
+    clearPreferredNamePending = true
   }
 
   if ("swimCloudId" in body) {
@@ -278,10 +277,10 @@ export async function PATCH(
     }
   }
 
-  if (clearSwimCloudPending || clearNicknamesPending) {
+  if (clearSwimCloudPending || clearPreferredNamePending) {
     const nextPending = clearPendingFields(existingPending, {
       swimCloudId: clearSwimCloudPending,
-      nicknames: clearNicknamesPending})
+      preferredName: clearPreferredNamePending})
     data.pendingProfileChanges = pendingJson(nextPending)
   }
 
@@ -304,7 +303,7 @@ export async function PATCH(
     return result
   })
 
-  if (clearSwimCloudPending || clearNicknamesPending) {
+  if (clearSwimCloudPending || clearPreferredNamePending) {
     await syncProfileChangeRequestNotifications({
       athleteId: id,
       firstName: updated.firstName,

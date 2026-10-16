@@ -54,7 +54,7 @@ export type QualifierAthlete = {
   athleteSlug: string | null
   firstName: string
   lastName: string
-  nicknames: string[]
+  preferredName: string | null
   gender: Gender
   events: QualifierRow[]
 }
@@ -264,7 +264,7 @@ export const computeNationalsQualifiers = cache(async function computeNationalsQ
       seasons: { has: opts.season },
       ...(opts.gender ? { gender: opts.gender } : {}),
     },
-    select: { id: true, slug: true, firstName: true, lastName: true, nicknames: true, gender: true },
+    select: { id: true, slug: true, firstName: true, lastName: true, preferredName: true, gender: true },
   })
   if (athletes.length === 0 || cuts.length === 0) {
     return {
@@ -377,7 +377,7 @@ export const computeNationalsQualifiers = cache(async function computeNationalsQ
         athleteSlug: athlete.slug,
         firstName: athlete.firstName,
         lastName: athlete.lastName,
-        nicknames: athlete.nicknames,
+        preferredName: athlete.preferredName,
         gender: athlete.gender,
         events: [],
       }

@@ -10,6 +10,7 @@ import { formatSeasonLabel } from "@swimbuzz/shared"
 import { useScraperUi } from "@/components/scraper/ScraperUiProvider"
 import { useImportTask } from "@/components/ui/ImportTaskProvider"
 import { runScraperEnqueuePollFinalize } from "@/lib/scraper/scraper-job-client"
+import { useCanScrollDown } from "@/lib/use-can-scroll-down"
 import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
 type RosterAthlete = {
@@ -56,6 +57,7 @@ export default function SyncTimesButton() {
 
   useDontReloadWhileBusy(loading)
   useEscapeToClose(open, () => setOpen(false), { disabled: loading })
+  const [bodyRef, canScrollDown] = useCanScrollDown()
 
   useEffect(() => {
     if (!open) return
@@ -195,7 +197,7 @@ export default function SyncTimesButton() {
             </div>
 
             <form onSubmit={handleSync} className="flex flex-col min-h-0 flex-1">
-              <div className="flex-1 overflow-y-auto px-6 min-h-0">
+              <div ref={bodyRef} className="flex-1 overflow-y-auto px-6 min-h-0">
                 {loadingRoster ? (
                   <p className="text-sm text-foreground-secondary dark:text-foreground-secondary py-3">Loading roster…</p>
                 ) : roster.length === 0 ? (
@@ -299,7 +301,7 @@ export default function SyncTimesButton() {
                 )}
               </div>
 
-              <div className="shrink-0 flex gap-3 px-6 py-4 border-t border-border">
+              <div className={`shrink-0 flex gap-3 px-6 pb-4 border-t transition-[padding,border-color] ${canScrollDown ? "border-border pt-4" : "border-transparent pt-2"}`}>
                 <button
                   type="button"
                   onClick={() => setOpen(false)}

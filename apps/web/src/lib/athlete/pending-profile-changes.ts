@@ -1,9 +1,10 @@
-import { normalizeNicknames } from "@/lib/athlete/athlete-match"
+import { normalizePreferredName } from "@/lib/athlete/athlete-match"
 import { parseSwimCloudId } from "@/lib/swim/swimcloud-id"
 
 export type PendingProfileChanges = {
   swimCloudId?: number
-  nicknames?: string[]
+  /** null requests clearing the preferred name. */
+  preferredName?: string | null
 }
 
 export function parsePendingProfileChanges(
@@ -19,22 +20,15 @@ export function parsePendingProfileChanges(
     pending.swimCloudId = id
   }
 
-  if ("nicknames" in obj) {
-    if (!Array.isArray(obj.nicknames)) return null
-    pending.nicknames = normalizeNicknames(obj.nicknames)
+  if ("preferredName" in obj) {
+    if (obj.preferredName !== null && typeof obj.preferredName !== "string") return null
+    pending.preferredName = normalizePreferredName(obj.preferredName)
   }
 
-  if (pending.swimCloudId === undefined && pending.nicknames === undefined) {
+  if (pending.swimCloudId === undefined && pending.preferredName === undefined) {
     return null
   }
   return pending
-}
-
-export function nicknamesEqual(a: string[], b: string[]): boolean {
-  if (a.length !== b.length) return false
-  const left = [...a].map((n) => n.toLowerCase()).sort()
-  const right = [...b].map((n) => n.toLowerCase()).sort()
-  return left.every((n, i) => n === right[i])
 }
 
 export function mergePendingProfileChanges(
@@ -43,19 +37,19 @@ export function mergePendingProfileChanges(
 ): PendingProfileChanges | null {
   const next: PendingProfileChanges = { ...(existing ?? {}) }
   if (patch.swimCloudId !== undefined) next.swimCloudId = patch.swimCloudId
-  if (patch.nicknames !== undefined) next.nicknames = patch.nicknames
-  if (next.swimCloudId === undefined && next.nicknames === undefined) return null
+  if (patch.preferredName !== undefined) next.preferredName = patch.preferredName
+  if (next.swimCloudId === undefined && next.preferredName === undefined) return null
   return next
 }
 
 export function clearPendingFields(
   existing: PendingProfileChanges | null,
-  fields: { swimCloudId?: boolean; nicknames?: boolean }
+  fields: { swimCloudId?: boolean; preferredName?: boolean }
 ): PendingProfileChanges | null {
   if (!existing) return null
   const next: PendingProfileChanges = { ...existing }
   if (fields.swimCloudId) delete next.swimCloudId
-  if (fields.nicknames) delete next.nicknames
-  if (next.swimCloudId === undefined && next.nicknames === undefined) return null
+  if (fields.preferredName) delete next.preferredName
+  if (next.swimCloudId === undefined && next.preferredName === undefined) return null
   return next
 }

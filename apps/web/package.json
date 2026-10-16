@@ -14,7 +14,8 @@
     "lint": "eslint",
     "test:recovery": "node scripts/test-recovery.cjs",
     "backfill-slugs": "node scripts/backfill-slugs.mjs",
-    "backfill-staff-roles": "node scripts/backfill-staff-roles.mjs"
+    "backfill-staff-roles": "node scripts/backfill-staff-roles.mjs",
+    "migrate-preferred-name": "node scripts/migrate-preferred-name.mjs"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",

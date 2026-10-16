@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { Gender } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { normalizeNicknames } from "@/lib/athlete/athlete-match"
+import { normalizePreferredName } from "@/lib/athlete/athlete-match"
 import { parseSeasonList } from "@/lib/season"
 import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
 import { uniqueAthleteSlug } from "@/lib/slug"
@@ -15,7 +15,7 @@ export type AddAthleteInput = {
   lastName: string
   email: string
   swimCloudId?: string
-  nicknames?: string[]
+  preferredName?: string
   gender: "M" | "F"
   seasons: string[]
 }
@@ -30,7 +30,7 @@ export async function addAthlete(input: AddAthleteInput) {
   const firstName = input.firstName.trim()
   const lastName = input.lastName.trim()
   const email = input.email.trim().toLowerCase()
-  const nicknames = normalizeNicknames(input.nicknames)
+  const preferredName = normalizePreferredName(input.preferredName)
   const gender = input.gender === "F" ? Gender.F : Gender.M
   const seasons = parseSeasonList(input.seasons)
   const swimCloudIdRaw = input.swimCloudId
@@ -81,7 +81,7 @@ export async function addAthlete(input: AddAthleteInput) {
         slug: await uniqueAthleteSlug(firstName, lastName),
         firstName,
         lastName,
-        nicknames,
+        preferredName,
         gender,
         seasons,
         ...(swimCloudId !== null ? { swimCloudId } : {})}})

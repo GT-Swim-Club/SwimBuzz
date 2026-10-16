@@ -50,7 +50,7 @@ export type AthleteSummary = {
   slug?: string | null
   firstName: string
   lastName: string
-  nicknames: string[]
+  preferredName: string | null
   gender: "M" | "F"
   seasons: string[]
   user: {

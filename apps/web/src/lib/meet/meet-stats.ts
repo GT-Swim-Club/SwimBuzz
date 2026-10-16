@@ -89,6 +89,10 @@ function formatDeltaMs(deltaMs: number): string {
   return `${sign}${minutes}:${seconds}`
 }
 
+function formatDropPct(pct: number): string {
+  return `-${pct >= 10 ? pct.toFixed(0) : pct.toFixed(1)}%`
+}
+
 function displayName(athleteName: string): string {
   // Stored as "Last, First" on many sheet rows
   if (athleteName.includes(",")) {
@@ -99,14 +103,14 @@ function displayName(athleteName: string): string {
 }
 
 /**
- * Post-results meet highlights. Relay leadoffs count toward PRs.
+ * Post-results meet highlights. Relay leadoffs count toward PBs.
  */
 export function computeMeetResultHighlights(opts: {
   results: MeetResultEntry[]
   meetSwims: MeetSwimForStats[]
   pbMap: AthletePbMap
   athleteHrefById?: Map<string, string>
-  /** Bests from swims before this meet — used for biggest PR drop. */
+  /** Bests from swims before this meet — used for biggest PB drop. */
   priorPbMap?: AthletePbMap
   /** Individual Nationals cuts for the meet's season. */
   nationalsCuts?: NationalsCutForStats[]
@@ -169,20 +173,20 @@ export function computeMeetResultHighlights(opts: {
     counters.push({ label: "Top 8s", value: topEightCount })
   }
 
-  // PRs set (including relay leadoffs)
-  let prCount = 0
-  const prCountsByAthlete = new Map<string, { athleteName: string; count: number }>()
+  // PBs set (including relay leadoffs)
+  let pbCount = 0
+  const pbCountsByAthlete = new Map<string, { athleteName: string; count: number }>()
   for (const s of meetSwims) {
     if (!Number.isFinite(s.timeMs) || s.timeMs <= 0) continue
     const best = pbMap.get(pbKey(s.athleteId, s.event, s.course))
     if (best == null || s.timeMs !== best) continue
-    prCount += 1
-    const prev = prCountsByAthlete.get(s.athleteId)
+    pbCount += 1
+    const prev = pbCountsByAthlete.get(s.athleteId)
     if (prev) prev.count += 1
-    else prCountsByAthlete.set(s.athleteId, { athleteName: s.athleteName ?? "", count: 1 })
+    else pbCountsByAthlete.set(s.athleteId, { athleteName: s.athleteName ?? "", count: 1 })
   }
-  if (prCount > 0) {
-    counters.push({ label: "PRs set", value: prCount })
+  if (pbCount > 0) {
+    counters.push({ label: "PBs set", value: pbCount })
   }
 
   // Nationals cuts — at most one per athlete×event, relay leadoffs excluded
@@ -249,40 +253,42 @@ export function computeMeetResultHighlights(opts: {
     }
   }
 
-  // Biggest PR drop — vs. the athlete's best from before this meet
-  let bestPrDrop: {
+  // Biggest PB drop — largest % drop vs. the athlete's best from before this meet
+  let bestPbDrop: {
     athleteName: string
     event: string
     deltaMs: number
+    pct: number
   } | null = null
   for (const s of meetSwims) {
     if (!Number.isFinite(s.timeMs) || s.timeMs <= 0) continue
     const prior = priorPbMap?.get(pbKey(s.athleteId, s.event, s.course))
-    if (prior == null) continue
+    if (prior == null || prior <= 0) continue
     const deltaMs = s.timeMs - prior
     if (deltaMs >= 0) continue
-    if (!bestPrDrop || deltaMs < bestPrDrop.deltaMs) {
-      bestPrDrop = { athleteName: s.athleteName ?? "", event: s.event, deltaMs }
+    const pct = (-deltaMs / prior) * 100
+    if (!bestPbDrop || pct > bestPbDrop.pct) {
+      bestPbDrop = { athleteName: s.athleteName ?? "", event: s.event, deltaMs, pct }
     }
   }
-  if (bestPrDrop) {
+  if (bestPbDrop) {
     counters.push({
-      label: "Biggest PR drop",
-      value: formatDeltaMs(bestPrDrop.deltaMs),
-      hint: `${displayName(bestPrDrop.athleteName)} · ${canonicalizeStrokeEvent(bestPrDrop.event)}`,
+      label: "Biggest PB drop",
+      value: formatDropPct(bestPbDrop.pct),
+      hint: `${displayName(bestPbDrop.athleteName)} · ${canonicalizeStrokeEvent(bestPbDrop.event)} · ${formatDeltaMs(bestPbDrop.deltaMs)}`,
     })
   }
 
-  // Most PRs — only worth calling out with 2+
-  let mostPrs: { athleteName: string; count: number } | null = null
-  for (const row of prCountsByAthlete.values()) {
-    if (!mostPrs || row.count > mostPrs.count) mostPrs = row
+  // Most PBs — only worth calling out with 2+
+  let mostPbs: { athleteName: string; count: number } | null = null
+  for (const row of pbCountsByAthlete.values()) {
+    if (!mostPbs || row.count > mostPbs.count) mostPbs = row
   }
-  if (mostPrs && mostPrs.count > 1) {
+  if (mostPbs && mostPbs.count > 1) {
     counters.push({
-      label: "Most PRs",
-      value: displayName(mostPrs.athleteName),
-      hint: `${mostPrs.count} PRs`,
+      label: "Most PBs",
+      value: displayName(mostPbs.athleteName),
+      hint: `${mostPbs.count} PBs`,
     })
   }
 

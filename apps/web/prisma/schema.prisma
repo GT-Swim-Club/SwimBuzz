@@ -108,7 +108,7 @@ model Athlete {
   user         User     @relation(fields: [userId], references: [id])
   firstName    String
   lastName     String
-  nicknames    String[] @default([])
+  preferredName String?
   gender       Gender
   seasons      String[]
   swimCloudId  Int?
@@ -116,7 +116,7 @@ model Athlete {
   dob          DateTime?
   year         String?
   timesSyncedAt DateTime?
-  /// Self-service edits awaiting coach approval: { swimCloudId?: number, nicknames?: string[] }
+  /// Self-service edits awaiting coach approval: { swimCloudId?: number, preferredName?: string | null }
   pendingProfileChanges Json?
   swims        Swim[]
   meetSignups  MeetSignupEntry[]

@@ -35,12 +35,8 @@ export function describePendingProfileChanges(
   if (pending.swimCloudId !== undefined) {
     parts.push(`SwimCloud ID → ${pending.swimCloudId}`)
   }
-  if (pending.nicknames !== undefined) {
-    parts.push(
-      pending.nicknames.length > 0
-        ? `Nicknames → ${pending.nicknames.join(", ")}`
-        : "Nicknames → (none)"
-    )
+  if (pending.preferredName !== undefined) {
+    parts.push(`Preferred name → ${pending.preferredName ?? "(none)"}`)
   }
   return parts.join(" · ")
 }

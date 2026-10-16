@@ -23,7 +23,7 @@ type QualifierAthlete = {
   athleteSlug?: string | null
   firstName: string
   lastName: string
-  nicknames?: string[]
+  preferredName?: string | null
   gender: string
   events: Array<{
     event: string
@@ -107,8 +107,8 @@ export default function NationalsScreen() {
     if (!q) return qualifiers
     return qualifiers.filter((athlete) => {
       const name = `${athlete.firstName} ${athlete.lastName}`.toLowerCase()
-      const nick = (athlete.nicknames ?? []).join(" ").toLowerCase()
-      return name.includes(q) || nick.includes(q)
+      const preferred = athlete.preferredName?.toLowerCase() ?? ""
+      return name.includes(q) || preferred.includes(q)
     })
   }, [qualifiers, query])
 
@@ -254,7 +254,7 @@ export default function NationalsScreen() {
                   const name = athletePreferredName({
                     firstName: athlete.firstName,
                     lastName: athlete.lastName,
-                    nicknames: athlete.nicknames ?? [],
+                    preferredName: athlete.preferredName,
                   })
                   const visibleEvents = athlete.events.slice(0, 2)
                   const hiddenEventCount = athlete.events.length - visibleEvents.length
@@ -283,7 +283,7 @@ export default function NationalsScreen() {
                   const name = athletePreferredName({
                     firstName: athlete.firstName,
                     lastName: athlete.lastName,
-                    nicknames: athlete.nicknames ?? [],
+                    preferredName: athlete.preferredName,
                   })
                   const visibleEvents = athlete.events.slice(0, 2)
                   const hiddenEventCount = athlete.events.length - visibleEvents.length

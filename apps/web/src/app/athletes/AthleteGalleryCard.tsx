@@ -15,7 +15,7 @@ export default function AthleteGalleryCard({
     firstName: string
     lastName: string
     user: { image: string | null; email: string | null; staffTitle?: StaffTitle | null } | null
-    nicknames: string[]
+    preferredName: string | null
     gender: string
     swimCloudId: number | null
     year: string | null
@@ -52,9 +52,9 @@ export default function AthleteGalleryCard({
       </div>
       <h3 className="text-base font-medium text-foreground">
         {athlete.firstName}
-        {athlete.nicknames.length > 0 ? (
+        {athlete.preferredName ? (
           <span className="font-normal text-foreground-secondary">
-            {" "}({athlete.nicknames.join(", ")})
+            {" "}({athlete.preferredName})
           </span>
         ) : null}{" "}
         {athlete.lastName}

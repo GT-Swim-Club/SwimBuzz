@@ -101,8 +101,12 @@ export default function ImportRosterFromSheetScreen() {
         gid: selectedGid,
         season: seasonLabel,
       })
-      const parts = [`Imported ${result.created} new athlete${result.created === 1 ? "" : "s"}`]
-      if (result.updated > 0) parts.push(`updated ${result.updated}`)
+      const parts = [
+        `Replaced the roster (${result.created + result.updated})`,
+      ]
+      if (result.created > 0) parts.push(`${result.created} new`)
+      if (result.updated > 0) parts.push(`${result.updated} updated`)
+      if (result.removed > 0) parts.push(`${result.removed} removed`)
       if (result.errors?.length > 0) parts.push(`${result.errors.length} row(s) skipped`)
       Alert.alert("Import finished", parts.join(" · "), [
         { text: "OK", onPress: () => router.replace("/roster") },
@@ -123,7 +127,11 @@ export default function ImportRosterFromSheetScreen() {
         <View style={{ gap: spacing.sm, marginBottom: spacing.md }}>
           {!picked ? (
             <>
-              <Muted>Choose the roster spreadsheet from your Google Drive.</Muted>
+              <Muted>
+                Choose the roster spreadsheet from your Google Drive. This replaces the season
+                roster: people in the sheet stay on it, and anyone not listed is removed from
+                that season.
+              </Muted>
               <Button
                 label="Choose from Google Drive"
                 loading={picking}

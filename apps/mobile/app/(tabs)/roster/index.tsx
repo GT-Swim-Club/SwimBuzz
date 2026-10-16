@@ -76,9 +76,8 @@ export default function RosterScreen() {
       if (gender !== "ALL" && athlete.gender !== gender) return false
       if (season && !(athlete.seasons ?? []).includes(season)) return false
       if (q) {
-        const name = athleteDisplayName(athlete).toLowerCase()
-        const nick = (athlete.nicknames ?? []).join(" ").toLowerCase()
-        if (!name.includes(q) && !nick.includes(q)) return false
+        // athleteDisplayName includes the preferred name, so this searches both.
+        if (!athleteDisplayName(athlete).toLowerCase().includes(q)) return false
       }
       return true
     })
