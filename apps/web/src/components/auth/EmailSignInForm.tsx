@@ -119,7 +119,7 @@ export default function EmailSignInForm({
         <button
           type="submit"
           disabled={loading || code.length !== 6}
-          className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-5 py-3 text-[15px] font-medium text-primary-text transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-5 py-3 text-[15px] font-medium text-primary-contrast transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? "Signing in…" : "Verify and sign in"}
         </button>
@@ -183,7 +183,7 @@ export default function EmailSignInForm({
       <button
         type="submit"
         disabled={loading || !email.trim()}
-        className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-5 py-3 text-[15px] font-medium text-primary-text transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-5 py-3 text-[15px] font-medium text-primary-contrast transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? "Sending code…" : "Send verification code"}
       </button>

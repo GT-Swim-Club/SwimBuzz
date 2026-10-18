@@ -99,7 +99,7 @@ export default function AttendanceList({
                         <span className="truncate font-medium text-foreground">{record.name}</span>
                       )}
                       {isYou && (
-                        <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-text">
+                        <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-contrast">
                           You
                         </span>
                       )}

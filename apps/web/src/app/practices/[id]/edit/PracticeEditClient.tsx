@@ -167,7 +167,7 @@ export default function PracticeEditClient({
               type="button"
               onClick={() => void acquireLock(true)}
               disabled={takingOver}
-              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast hover:bg-primary-hover disabled:opacity-50"
             >
               {takingOver ? "Saving changes…" : "Take over"}
             </button>
@@ -200,7 +200,7 @@ export default function PracticeEditClient({
             <button
               type="button"
               onClick={() => returnToPractice()}
-              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast hover:bg-primary-hover"
             >
               Return to practice
             </button>

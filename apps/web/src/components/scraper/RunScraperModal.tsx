@@ -177,7 +177,7 @@ export default function RunScraperModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text transition-colors hover:bg-primary-hover"
+            className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast transition-colors hover:bg-primary-hover"
           >
             Done
           </button>

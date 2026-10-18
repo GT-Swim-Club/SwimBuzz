@@ -14,6 +14,7 @@ function colorSchemeVariables(c: ColorPalette) {
     "--brand-color-primary-hover": c.primaryHover,
     "--brand-color-primary-active": c.primaryActive,
     "--brand-color-primary-text": c.primaryText,
+    "--brand-color-primary-contrast": c.primaryContrast,
     "--brand-color-success": c.success,
     "--brand-color-success-bg": c.successBg,
     "--brand-color-success-border": c.successBorder,

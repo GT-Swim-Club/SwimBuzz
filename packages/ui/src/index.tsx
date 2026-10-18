@@ -431,7 +431,7 @@ export function Button({
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={isPrimary ? c.primaryText : c.text} />
+        <ActivityIndicator color={isPrimary ? c.primaryContrast : c.text} />
       ) : (
         <View style={styles.buttonContent}>
           {icon}
@@ -849,7 +849,7 @@ function makeStyles(c: ColorPalette) {
       color: c.text,
     },
     buttonLabelPrimary: {
-      color: c.primaryText,
+      color: c.primaryContrast,
     },
     buttonLabelDanger: {
       color: "#fff",

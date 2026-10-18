@@ -233,7 +233,7 @@ function makeWelcomeStyles(c: ColorPalette) {
       paddingHorizontal: spacing.lg,
     },
     primaryPressed: { backgroundColor: c.primaryHover, opacity: 0.92 },
-    primaryActionText: { color: c.primaryText, fontSize: 14, fontWeight: "600" },
+    primaryActionText: { color: c.primaryContrast, fontSize: 14, fontWeight: "600" },
     secondaryAction: {
       alignItems: "center",
       borderColor: c.border,

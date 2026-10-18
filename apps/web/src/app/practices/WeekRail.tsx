@@ -254,7 +254,7 @@ function DateColumn({
         {weekday}
       </div>
       {isToday ? (
-        <span className="mt-0.5 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-primary px-1.5 text-[13px] font-semibold tabular-nums text-primary-text">
+        <span className="mt-0.5 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-primary px-1.5 text-[13px] font-semibold tabular-nums text-primary-contrast">
           {dateNumber}
         </span>
       ) : (

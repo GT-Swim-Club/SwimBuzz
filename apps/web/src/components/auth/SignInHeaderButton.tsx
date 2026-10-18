@@ -10,7 +10,7 @@ export default function SignInHeaderButton() {
   return (
     <Link
       href="/signin"
-      className="inline-flex items-center rounded-lg bg-primary px-3.5 py-2 text-sm font-medium text-primary-text transition-colors hover:bg-primary-hover"
+      className="inline-flex items-center rounded-lg bg-primary px-3.5 py-2 text-sm font-medium text-primary-contrast transition-colors hover:bg-primary-hover"
     >
       Sign in
     </Link>

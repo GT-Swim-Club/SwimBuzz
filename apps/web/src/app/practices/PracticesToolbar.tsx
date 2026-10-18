@@ -524,7 +524,7 @@ export default function PracticesToolbar({
           <Link
             href="/practices/new"
             aria-label="New practice"
-            className={controlClass + " border-0 bg-primary text-primary-text hover:bg-primary-hover"}
+            className={controlClass + " border-0 bg-primary text-primary-contrast hover:bg-primary-hover"}
           >
             <PlusIcon />
             <HoverDetail label="New practice" />

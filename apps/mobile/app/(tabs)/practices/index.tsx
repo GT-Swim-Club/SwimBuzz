@@ -728,7 +728,7 @@ function makeStyles(c: ColorPalette) {
       fontWeight: "600",
     },
     monthDayMuted: { color: c.textTertiary },
-    monthDaySelected: { color: c.primaryText },
+    monthDaySelected: { color: c.primaryContrast },
     dots: {
       flexDirection: "row",
       gap: 3,
@@ -741,7 +741,7 @@ function makeStyles(c: ColorPalette) {
       height: 5,
       width: 5,
     },
-    dotSelected: { backgroundColor: c.primaryText },
+    dotSelected: { backgroundColor: c.primaryContrast },
     selectedHeading: {
       color: c.text,
       fontSize: 16,

@@ -245,7 +245,7 @@ export default function PracticeActions({
             }}
             disabled={busy || lockedElsewhere}
             aria-label="Publish practice"
-            className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-text hover:bg-primary-hover transition-colors disabled:opacity-40"
+            className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-contrast hover:bg-primary-hover transition-colors disabled:opacity-40"
           >
             <PublishIcon className="h-5 w-5" />
             <HoverDetail label="Publish" />
@@ -311,7 +311,7 @@ export default function PracticeActions({
               type="button"
               onClick={handleTakeover}
               disabled={loading}
-              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast hover:bg-primary-hover disabled:opacity-50"
             >
               {loading ? "Saving changes…" : "Take over"}
             </button>
@@ -389,7 +389,7 @@ export default function PracticeActions({
               type="button"
               onClick={() => togglePublished(true)}
               disabled={busy}
-              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast hover:bg-primary-hover disabled:opacity-50"
             >
               {busy ? "Publishing…" : "Publish"}
             </button>
@@ -419,7 +419,7 @@ export default function PracticeActions({
               type="button"
               onClick={() => togglePublished(false)}
               disabled={busy}
-              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast hover:bg-primary-hover disabled:opacity-50"
             >
               {busy ? "Reverting…" : "Revert to Draft"}
             </button>

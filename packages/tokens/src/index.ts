@@ -5,6 +5,8 @@ export const colors = {
     primaryHover: "#bfa775",
     primaryActive: "#8c6b38",
     primaryText: "#402b13",
+    // Text and icons on a solid primary (gold) fill.
+    primaryContrast: "#e0dcd2",
     primaryBg: "#f2efe4",
     primaryBgHover: "#e6e2d8",
     primaryBorder: "#d9d5ca",
@@ -56,6 +58,7 @@ export const colors = {
     primaryHover: "#A48043",
     primaryActive: "#837453",
     primaryText: "#e0dcd2",
+    primaryContrast: "#e0dcd2",
     primaryBg: "#262119",
     primaryBgHover: "#3c3323",
     primaryBorder: "#ffffff",

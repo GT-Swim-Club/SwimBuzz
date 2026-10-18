@@ -612,7 +612,7 @@ export function DatePicker({
                   outOfRange
                     ? "cursor-not-allowed text-foreground-quaternary opacity-40"
                     : selected
-                      ? "bg-primary font-bold text-primary-text"
+                      ? "bg-primary font-bold text-primary-contrast"
                       : isToday
                         ? "bg-primary-bg font-bold text-primary-active hover:bg-primary-bg-hover"
                         : outsideMonth
@@ -800,7 +800,7 @@ export function TimePicker({
                 periodDisabled(option)
                   ? "cursor-not-allowed text-foreground-quaternary opacity-40"
                   : period === option
-                    ? "bg-primary font-bold text-primary-text"
+                    ? "bg-primary font-bold text-primary-contrast"
                     : "text-foreground-secondary hover:text-foreground"
               }`}
             >
@@ -823,7 +823,7 @@ export function TimePicker({
                   unavailable
                     ? "cursor-not-allowed bg-fill-secondary text-foreground-quaternary opacity-40"
                     : hour12 === option
-                      ? "bg-primary font-bold text-primary-text"
+                      ? "bg-primary font-bold text-primary-contrast"
                       : "bg-fill-secondary text-foreground-secondary hover:bg-primary-bg hover:text-primary-active"
                 }`}
               >
@@ -849,7 +849,7 @@ export function TimePicker({
                     unavailable
                       ? "cursor-not-allowed bg-fill-secondary text-foreground-quaternary opacity-40"
                       : minute === option
-                        ? "bg-primary font-bold text-primary-text"
+                        ? "bg-primary font-bold text-primary-contrast"
                         : "bg-fill-secondary text-foreground-secondary hover:bg-primary-bg hover:text-primary-active",
                   ].join(" ")}
                 >

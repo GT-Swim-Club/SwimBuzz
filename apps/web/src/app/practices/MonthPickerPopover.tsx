@@ -104,7 +104,7 @@ export default function MonthPickerPopover({
             const hasPractice = dayPractices.length > 0
             const base = "flex aspect-square items-center justify-center rounded-full text-xs tabular-nums transition-colors"
             const textTone = isToday
-              ? "text-primary-text font-semibold"
+              ? "text-primary-contrast font-semibold"
               : hasPractice && inMonth
                 ? "text-foreground"
                 : "text-foreground-tertiary"

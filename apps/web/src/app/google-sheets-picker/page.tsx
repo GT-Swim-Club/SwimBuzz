@@ -51,7 +51,7 @@ export default function GoogleSheetsPickerPage() {
         type="button"
         onClick={() => void handlePick()}
         disabled={picking}
-        className="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
+        className="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-contrast hover:bg-primary-hover disabled:opacity-50"
       >
         {picking ? "Opening…" : "Choose spreadsheet"}
       </button>

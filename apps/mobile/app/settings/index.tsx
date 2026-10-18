@@ -337,7 +337,7 @@ export default function SettingsScreen() {
                   onPress={() => void setPreference(value as ThemePreference)}
                 >
                   <Icon
-                    color={preference === value ? c.primaryText : c.textSecondary}
+                    color={preference === value ? c.primaryContrast : c.textSecondary}
                     name={icon}
                     size={16}
                   />
@@ -373,7 +373,7 @@ export default function SettingsScreen() {
                 }
               >
                 <Icon
-                  color={defaultView === "gallery" ? c.primaryText : c.textSecondary}
+                  color={defaultView === "gallery" ? c.primaryContrast : c.textSecondary}
                   name="gallery"
                   size={16}
                 />
@@ -391,7 +391,7 @@ export default function SettingsScreen() {
                 }
               >
                 <Icon
-                  color={defaultView === "list" ? c.primaryText : c.textSecondary}
+                  color={defaultView === "list" ? c.primaryContrast : c.textSecondary}
                   name="list"
                   size={16}
                 />
@@ -444,7 +444,7 @@ export default function SettingsScreen() {
                   <Icon
                     color={
                       defaultPracticesView === value
-                        ? c.primaryText
+                        ? c.primaryContrast
                         : c.textSecondary
                     }
                     name={icon}

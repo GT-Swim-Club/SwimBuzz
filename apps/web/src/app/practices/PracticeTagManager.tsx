@@ -212,7 +212,7 @@ export default function PracticeTagManager({
         >
           <TagIcon />
           {activeTags.length > 0 && (
-            <span aria-hidden className="absolute -right-1.5 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-[3px] text-[10px] font-semibold text-primary-text">
+            <span aria-hidden className="absolute -right-1.5 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-[3px] text-[10px] font-semibold text-primary-contrast">
               {activeTags.length}
             </span>
           )}
@@ -253,7 +253,7 @@ export default function PracticeTagManager({
                           className={
                             "flex h-4 w-4 shrink-0 items-center justify-center rounded border " +
                             (selected
-                              ? "border-primary bg-primary text-primary-text"
+                              ? "border-primary bg-primary text-primary-contrast"
                               : "border-border-secondary")
                           }
                         >
@@ -308,7 +308,7 @@ export default function PracticeTagManager({
                         onClick={() => void saveDraft()}
                         disabled={saving || !draft.trim()}
                         aria-label="Save new practice tag"
-                        className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary text-primary-text transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-40"
+                        className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary text-primary-contrast transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <ActionIcon kind="check" className="h-3 w-3" />
                       </button>

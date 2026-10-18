@@ -50,7 +50,7 @@ export default function QualifierEventList({
                     <span className={`flex items-center gap-2 ${swimLeadCellClass}`}>
                       <span className="truncate">{athletePreferredName(athlete)}</span>
                       {isMe ? (
-                        <span className="shrink-0 rounded-full bg-primary px-1.5 text-[11px] font-semibold leading-4 text-primary-text">
+                        <span className="shrink-0 rounded-full bg-primary px-1.5 text-[11px] font-semibold leading-4 text-primary-contrast">
                           You
                         </span>
                       ) : null}

@@ -12,6 +12,7 @@
   --color-primary-hover: var(--brand-color-primary-hover);
   --color-primary-active: var(--brand-color-primary-active);
   --color-primary-text: var(--brand-color-primary-text);
+  --color-primary-contrast: var(--brand-color-primary-contrast);
   --color-primary-bg: var(--brand-color-primary-bg);
 
   /* Colors - Status */

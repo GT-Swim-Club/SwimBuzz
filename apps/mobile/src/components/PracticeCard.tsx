@@ -125,7 +125,7 @@ function makeStyles(c: ColorPalette) {
       paddingVertical: 2,
     },
     draftText: {
-      color: c.primaryText,
+      color: c.primaryContrast,
       fontSize: 10,
       fontWeight: "800",
       letterSpacing: 0.4,
@@ -150,7 +150,7 @@ function makeStyles(c: ColorPalette) {
       paddingVertical: 2,
     },
     tagText: {
-      color: c.primaryText,
+      color: c.primaryContrast,
       fontSize: 11,
       fontWeight: "700",
     },

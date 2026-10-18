@@ -68,7 +68,7 @@ export default function AddAthleteButton() {
         type="button"
         onClick={openModal}
         aria-label="Add athlete"
-        className="group relative inline-flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg bg-primary text-primary-text transition-colors hover:bg-primary-hover"
+        className="group relative inline-flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg bg-primary text-primary-contrast transition-colors hover:bg-primary-hover"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -108,7 +108,7 @@ export default function AddAthleteButton() {
             <button
               type="submit"
               disabled={loading || !swimCloudIdOk}
-              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast hover:bg-primary-hover disabled:opacity-50"
             >
               {loading ? "Adding…" : "Add athlete"}
             </button>

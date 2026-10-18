@@ -227,7 +227,7 @@ export function PracticeTagFilter({
                         (!draft.trim() || saving) && styles.draftDisabled,
                       ]}
                     >
-                      <Icon color={c.primaryText} name="check" size={12} strokeWidth={2.8} />
+                      <Icon color={c.primaryContrast} name="check" size={12} strokeWidth={2.8} />
                     </Pressable>
                   </View>
                 </View>
@@ -271,7 +271,7 @@ function TagRow({
         ]}
       >
         {selected ? (
-          <Icon color={c.primaryText} name="check" size={11} strokeWidth={3} />
+          <Icon color={c.primaryContrast} name="check" size={11} strokeWidth={3} />
         ) : null}
       </View>
       <Text style={styles.rowLabel}>{label}</Text>

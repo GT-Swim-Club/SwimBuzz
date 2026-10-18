@@ -110,11 +110,11 @@ export function SegmentedToggle({
 export const segmentedOptionClass = (active: boolean) =>
   "relative z-10 flex h-full w-full items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium leading-none transition-colors duration-200 " +
   (active
-    ? "text-primary-text"
+    ? "text-primary-contrast"
     : "text-foreground-secondary hover:text-foreground")
 
 export const segmentedIconOptionClass = (active: boolean) =>
   "relative z-10 flex size-8 items-center justify-center rounded-md leading-none [&_svg]:block transition-colors duration-200 " +
   (active
-    ? "text-primary-text"
+    ? "text-primary-contrast"
     : "text-foreground-secondary hover:text-foreground")

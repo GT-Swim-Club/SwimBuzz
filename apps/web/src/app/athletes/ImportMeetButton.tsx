@@ -159,7 +159,7 @@ export default function ImportMeetButton({
                 !team.trim() ||
                 (!swimphoneUrl.trim() && !resultsPdfUrl.trim() && !selectedFile)
               }
-              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast hover:bg-primary-hover disabled:opacity-50"
             >
               Import
             </button>
@@ -188,7 +188,7 @@ export default function ImportMeetButton({
                 onClick={() => setMode("file")}
                 className={`text-xs px-2 py-1 rounded-md transition-colors ${
                   mode === "file"
-                    ? "bg-primary text-white shadow-sm"
+                    ? "bg-primary text-primary-contrast shadow-sm"
                     : "bg-fill-secondary text-foreground-secondary hover:bg-fill"
                 }`}
               >
@@ -199,7 +199,7 @@ export default function ImportMeetButton({
                 onClick={() => setMode("url")}
                 className={`text-xs px-2 py-1 rounded-md transition-colors ${
                   mode === "url"
-                    ? "bg-primary text-white shadow-sm"
+                    ? "bg-primary text-primary-contrast shadow-sm"
                     : "bg-fill-secondary text-foreground-secondary hover:bg-fill"
                 }`}
               >

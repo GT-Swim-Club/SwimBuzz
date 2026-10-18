@@ -280,7 +280,7 @@ function SegmentedToggle<T extends string | number>({
             aria-checked={active}
             onClick={() => onChange(o.value)}
             className={`rounded px-2 py-0.5 text-[11px] transition-colors ${mono ? "font-mono tabular-nums" : ""} ${
-              active ? "bg-primary text-primary-text" : "text-foreground-tertiary hover:text-foreground"
+              active ? "bg-primary text-primary-contrast" : "text-foreground-tertiary hover:text-foreground"
             }`}
           >
             {o.label}
@@ -848,7 +848,7 @@ export default function SwimDetailModal({
             <button
               type="button"
               onClick={onEditRelay}
-              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-text transition-colors hover:bg-primary-hover"
+              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-contrast transition-colors hover:bg-primary-hover"
             >
               <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden>
                 <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />

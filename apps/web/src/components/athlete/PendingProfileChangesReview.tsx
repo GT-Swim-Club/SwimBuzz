@@ -69,7 +69,7 @@ export default function PendingProfileChangesReview({
           type="button"
           disabled={loading !== null}
           onClick={() => act("approve")}
-          className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
+          className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-contrast hover:bg-primary-hover disabled:opacity-50"
         >
           {loading === "approve" ? "Approving…" : "Approve"}
         </button>

@@ -93,7 +93,7 @@ export default function PracticeTagSelect({
                 <span
                   aria-hidden
                   className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
-                    active ? "border-primary bg-primary text-primary-text" : "border-border-secondary"
+                    active ? "border-primary bg-primary text-primary-contrast" : "border-border-secondary"
                   }`}
                 >
                   {active && (

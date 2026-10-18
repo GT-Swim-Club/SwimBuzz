@@ -1064,7 +1064,7 @@ export default function MeetRelayBuilder({
                     className={
                       "rounded-md border px-3 py-1.5 text-sm transition-colors " +
                       (active
-                        ? "border-primary bg-primary text-primary-text"
+                        ? "border-primary bg-primary text-primary-contrast"
                         : "border-border bg-background text-foreground hover:bg-fill-secondary")
                     }
                   >
@@ -1129,7 +1129,7 @@ export default function MeetRelayBuilder({
                     className={
                       "rounded-md border px-3 py-1.5 text-sm transition-colors " +
                       (active
-                        ? "border-primary bg-primary text-primary-text"
+                        ? "border-primary bg-primary text-primary-contrast"
                         : canToggle
                           ? "border-border bg-background text-foreground hover:bg-fill-secondary"
                           : "cursor-not-allowed border-border bg-fill-secondary text-foreground-tertiary opacity-60")
@@ -1357,7 +1357,7 @@ export default function MeetRelayBuilder({
                       type="button"
                       onClick={() => requestAddTeam(team)}
                       disabled={savingLetter != null}
-                      className="px-4 py-2 text-sm rounded-lg bg-primary text-primary-text hover:bg-primary-hover disabled:opacity-50 transition-colors"
+                      className="px-4 py-2 text-sm rounded-lg bg-primary text-primary-contrast hover:bg-primary-hover disabled:opacity-50 transition-colors"
                     >
                       {savingLetter === team.letter
                         ? "Adding…"
@@ -1545,7 +1545,7 @@ export default function MeetRelayBuilder({
               type="button"
               onClick={() => void confirmAddToRoster()}
               disabled={confirmBusy}
-              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast hover:bg-primary-hover disabled:opacity-50"
             >
               {confirmBusy ? "Adding…" : confirmAdd === "*" ? "Add all" : "Add"}
             </button>

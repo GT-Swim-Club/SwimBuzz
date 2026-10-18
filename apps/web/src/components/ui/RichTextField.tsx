@@ -11,7 +11,7 @@ const toolbarBtn =
   "rounded-md border border-border px-2 py-1 text-xs font-medium text-foreground-secondary hover:bg-fill-secondary border-border text-foreground-secondary hover:bg-fill-secondary"
 
 const toolbarBtnActive =
-  "rounded-md border border-primary bg-primary px-2 py-1 text-xs font-medium text-primary-text"
+  "rounded-md border border-primary bg-primary px-2 py-1 text-xs font-medium text-primary-contrast"
 
 export function RichTextToolbar({ editor, onOpenLink }: { editor: any, onOpenLink: () => void }) {
   const [, setTick] = useState(0)
@@ -327,7 +327,7 @@ export default function RichTextField({
                 {linkUrl && (
                     <button type="button" onClick={handleRemoveLink} className="rounded-lg border border-border px-4 py-2 text-sm text-red-600 hover:bg-fill-secondary">Remove</button>
                 )}
-                <button type="button" onClick={handleAddLink} className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-text">Apply</button>
+                <button type="button" onClick={handleAddLink} className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-contrast">Apply</button>
             </ModalFooter>
         }
       >

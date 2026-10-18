@@ -23,7 +23,7 @@ type Variant = "pill" | "inline" | "banner" | "ledger" | "glass"
 type Tone = "default" | "onDark"
 
 const upcomingPillClass =
-  "text-[10px] uppercase font-semibold tracking-wide rounded-full bg-primary/90 text-primary-text px-2 py-0.5"
+  "text-[10px] uppercase font-semibold tracking-wide rounded-full bg-primary/90 text-primary-contrast px-2 py-0.5"
 
 function AnimatedCountdownValue({ value }: { value: string }) {
   const targetValue = Number(value)

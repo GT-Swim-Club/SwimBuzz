@@ -303,7 +303,7 @@ export default function CommentSection({
                   editBody.trim() === comment.body
                 }
                 aria-label="Save"
-                className="group relative inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-text transition-colors hover:bg-primary-hover disabled:opacity-40"
+                className="group relative inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-contrast transition-colors hover:bg-primary-hover disabled:opacity-40"
               >
                 <ActionIcon kind="check" className="h-5 w-5" />
                 <HoverDetail label="Save" />
@@ -427,7 +427,7 @@ export default function CommentSection({
                       type="submit"
                       disabled={loading || !replyBody.trim()}
                       aria-label="Reply"
-                      className="group relative inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-text transition-colors hover:bg-primary-hover disabled:opacity-40"
+                      className="group relative inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-contrast transition-colors hover:bg-primary-hover disabled:opacity-40"
                     >
                       <ActionIcon kind="reply" className="h-4 w-4" />
                       <HoverDetail label="Reply" />
@@ -463,7 +463,7 @@ export default function CommentSection({
           type="submit"
           disabled={loading || !body.trim()}
           aria-label="Post"
-          className="group relative inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-text transition-colors hover:bg-primary-hover disabled:opacity-40"
+          className="group relative inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-contrast transition-colors hover:bg-primary-hover disabled:opacity-40"
         >
           <ActionIcon kind="publish" className="h-5 w-5" />
           <HoverDetail label="Post" />

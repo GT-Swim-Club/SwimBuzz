@@ -263,7 +263,7 @@ function MeetDateRangePanel({
               })}
               className={`aspect-square rounded-md text-xs transition-colors ${
                 isEnd
-                  ? "bg-primary font-semibold text-primary-text"
+                  ? "bg-primary font-semibold text-primary-contrast"
                   : inRange
                     ? "bg-primary/20 text-foreground"
                     : "text-foreground hover:bg-fill"
@@ -398,7 +398,7 @@ export function MeetImageHeader({
                 bannerUploading ? "opacity-100" : "opacity-0 group-hover:opacity-100"
               }`}
             >
-              <span className="rounded-lg bg-primary px-3.5 py-1.5 text-[13px] font-medium text-primary-text transition-colors hover:bg-primary-hover">
+              <span className="rounded-lg bg-primary px-3.5 py-1.5 text-[13px] font-medium text-primary-contrast transition-colors hover:bg-primary-hover">
                 {bannerUploading ? "Uploading…" : "Click or drop to replace"}
               </span>
               {!bannerUploading ? (

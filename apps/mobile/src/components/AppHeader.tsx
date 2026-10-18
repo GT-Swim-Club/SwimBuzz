@@ -71,7 +71,7 @@ function makeStyles(c: ColorPalette) {
       zIndex: 20,
     },
     alertBadgeText: {
-      color: c.primaryText,
+      color: c.primaryContrast,
       fontSize: 11,
       fontWeight: "700",
       lineHeight: 13,

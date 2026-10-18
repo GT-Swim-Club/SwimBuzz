@@ -7,6 +7,8 @@
     --brand-color-primary-hover: #bfa775;
     --brand-color-primary-active: #8c6b38;
     --brand-color-primary-text: #402b13;
+    /* Text and icons on a solid primary (gold) fill. */
+    --brand-color-primary-contrast: #e0dcd2;
     --brand-color-success: #22C55E;
     --brand-color-success-bg: #f6ffed;
     --brand-color-success-border: #b6eb8f;
@@ -235,6 +237,7 @@
     --brand-color-primary-hover: #A48043;
     --brand-color-primary-active: #837453;
     --brand-color-primary-text: #e0dcd2;
+    --brand-color-primary-contrast: #e0dcd2;
     --brand-color-success: #22C55E;
     --brand-color-success-bg: #192913;
     --brand-color-success-border: #304d20;

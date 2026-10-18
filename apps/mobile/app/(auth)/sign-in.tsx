@@ -442,7 +442,7 @@ function makeStyles(c: ColorPalette) {
       fontWeight: "500",
       textAlign: "center",
     },
-    toggleLabelSelected: { color: c.primaryText, fontWeight: "600" },
+    toggleLabelSelected: { color: c.primaryContrast, fontWeight: "600" },
     form: { gap: spacing.sm },
     label: {
       color: c.textSecondary,

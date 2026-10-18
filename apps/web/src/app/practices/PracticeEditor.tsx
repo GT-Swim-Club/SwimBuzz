@@ -1406,7 +1406,7 @@ export default function PracticeEditor({
                   />
                   <span
                     className={
-                      "pointer-events-none absolute left-4 z-20 whitespace-nowrap rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold leading-none text-primary-text shadow-sm sm:left-5 " +
+                      "pointer-events-none absolute left-4 z-20 whitespace-nowrap rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold leading-none text-primary-contrast shadow-sm sm:left-5 " +
                       (rowEdge === "top" ? "-top-[26px]" : "-bottom-[26px]")
                     }
                   >
@@ -1452,7 +1452,7 @@ export default function PracticeEditor({
                         />
                         <span
                           className={
-                            "pointer-events-none absolute -top-[26px] z-20 whitespace-nowrap rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold leading-none text-primary-text shadow-sm " +
+                            "pointer-events-none absolute -top-[26px] z-20 whitespace-nowrap rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold leading-none text-primary-contrast shadow-sm " +
                             (sideEdge === "left" ? "left-1" : "right-1")
                           }
                         >
@@ -1595,8 +1595,8 @@ export default function PracticeEditor({
               title={waitingForAutosave ? "Wait until changes are saved" : undefined}
               className={
                 barOverContent
-                  ? "group relative grid h-10 w-10 place-items-center rounded-lg bg-primary text-primary-text transition-colors hover:bg-primary-hover disabled:opacity-50"
-                  : "flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
+                  ? "group relative grid h-10 w-10 place-items-center rounded-lg bg-primary text-primary-contrast transition-colors hover:bg-primary-hover disabled:opacity-50"
+                  : "flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast hover:bg-primary-hover disabled:opacity-50"
               }
             >
               {barOverContent ? (
@@ -1677,7 +1677,7 @@ export default function PracticeEditor({
                 setConfirmPublishState(null)
                 if (next != null) save(next)
               }}
-              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast hover:bg-primary-hover"
             >
               {confirmPublishState ? "Publish" : "Revert to Draft"}
             </button>

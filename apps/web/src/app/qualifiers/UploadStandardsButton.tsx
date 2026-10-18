@@ -86,7 +86,7 @@ export default function UploadStandardsButton({
           setOpen(true)
         }}
         aria-label="Upload standards"
-        className="group relative inline-flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg bg-primary text-primary-text transition-colors hover:bg-primary-hover"
+        className="group relative inline-flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg bg-primary text-primary-contrast transition-colors hover:bg-primary-hover"
       >
         <AppIcon name="upload" className="h-4 w-4 shrink-0" />
         <HoverDetail label="Upload standards" />
@@ -110,7 +110,7 @@ export default function UploadStandardsButton({
             </button>
             <button
               type="submit"
-              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast hover:bg-primary-hover disabled:opacity-50"
             >
               Save standards
             </button>
@@ -131,7 +131,7 @@ export default function UploadStandardsButton({
                 className={
                   "text-xs px-2 py-0.5 rounded-md border border-border transition-colors " +
                   (source === s
-                    ? "bg-primary text-primary-text border-primary"
+                    ? "bg-primary text-primary-contrast border-primary"
                     : "border-border text-foreground-secondary hover:bg-fill-secondary")
                 }
               >

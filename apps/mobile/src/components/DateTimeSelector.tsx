@@ -665,5 +665,5 @@ const styles = StyleSheet.create({
   textAction: { paddingHorizontal: spacing.sm, paddingVertical: spacing.sm },
   textActionLabel: { color: c.primaryActive, fontSize: 15, fontWeight: "800" },
   confirmButton: { alignItems: "center", backgroundColor: c.primary, borderRadius: radii.sm, justifyContent: "center", minHeight: 44, minWidth: 96, paddingHorizontal: spacing.md },
-  confirmButtonLabel: { color: c.primaryText, fontSize: 15, fontWeight: "800" },
+  confirmButtonLabel: { color: c.primaryContrast, fontSize: 15, fontWeight: "800" },
 })

@@ -103,7 +103,7 @@ export default function MeetFormModal({
           <button
             type="submit"
             disabled={loading || imageUploading || !meetFormComplete(form)}
-            className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? loadingLabel : imageUploading ? "Uploading image…" : submitLabel}
           </button>

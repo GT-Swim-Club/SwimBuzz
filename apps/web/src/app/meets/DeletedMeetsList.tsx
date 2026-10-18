@@ -93,7 +93,7 @@ export default function DeletedMeetsList({ query }: { query: string }) {
                       disabled={busy !== null || !item.canRestore}
                       onClick={() => void restore(item)}
                       aria-label={`Restore ${item.name}`}
-                      className="flex h-8 items-center justify-center whitespace-nowrap rounded-lg bg-primary px-3 text-[13px] font-medium text-primary-text transition-colors hover:bg-primary-hover disabled:opacity-50 max-sm:w-8 max-sm:px-0"
+                      className="flex h-8 items-center justify-center whitespace-nowrap rounded-lg bg-primary px-3 text-[13px] font-medium text-primary-contrast transition-colors hover:bg-primary-hover disabled:opacity-50 max-sm:w-8 max-sm:px-0"
                     >
                       {/* Icon-only on phones, where the label would squeeze the meet column. */}
                       <AppIcon name="rotateCcw" className="h-4 w-4 sm:hidden" />
@@ -141,7 +141,7 @@ export default function DeletedMeetsList({ query }: { query: string }) {
                       disabled={busy !== null || !item.canRestore}
                       onClick={() => void restore(item)}
                       aria-label={`Restore ${item.name}`}
-                      className="h-[2.57em] whitespace-nowrap rounded-[0.57em] bg-primary px-[1.14em] text-[1em] font-medium text-primary-text transition-colors [text-shadow:none] hover:bg-primary-hover disabled:opacity-50"
+                      className="h-[2.57em] whitespace-nowrap rounded-[0.57em] bg-primary px-[1.14em] text-[1em] font-medium text-primary-contrast transition-colors [text-shadow:none] hover:bg-primary-hover disabled:opacity-50"
                     >
                       {busy === item.id ? "Restoring…" : "Restore"}
                     </button>

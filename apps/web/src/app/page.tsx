@@ -104,7 +104,7 @@ export default async function HomePage() {
           <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <Link
               href="/signin"
-              className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-6 py-3 sm:w-auto text-sm font-medium text-primary-text shadow-sm transition-colors hover:bg-primary-hover"
+              className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-6 py-3 sm:w-auto text-sm font-medium text-primary-contrast shadow-sm transition-colors hover:bg-primary-hover"
             >
               Sign in
             </Link>

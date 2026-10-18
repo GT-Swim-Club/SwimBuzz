@@ -37,7 +37,7 @@ export function PracticeViewToggle({
             <Icon
               name={option.icon}
               size={18}
-              color={selected ? c.primaryText : c.textSecondary}
+              color={selected ? c.primaryContrast : c.textSecondary}
             />
           </SegmentedOption>
         )

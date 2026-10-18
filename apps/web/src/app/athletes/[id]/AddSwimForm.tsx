@@ -176,7 +176,7 @@ export default function AddSwimForm({ athleteId, swimCloudId, timesSyncedAt }: {
             <button
               type="button"
               onClick={closeResultModal}
-              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text hover:bg-primary-hover"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast hover:bg-primary-hover"
             >
               Done
             </button>

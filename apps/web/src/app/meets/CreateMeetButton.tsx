@@ -72,7 +72,7 @@ export default function CreateMeetButton({ seasons }: { seasons: string[] }) {
         type="button"
         onClick={openModal}
         aria-label="New meet"
-        className="group relative inline-flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg bg-primary text-primary-text transition-colors hover:bg-primary-hover"
+        className="group relative inline-flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg bg-primary text-primary-contrast transition-colors hover:bg-primary-hover"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

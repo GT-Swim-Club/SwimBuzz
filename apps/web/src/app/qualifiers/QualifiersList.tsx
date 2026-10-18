@@ -72,7 +72,7 @@ export default function QualifiersList({
                 <Link
                   href={athleteHref}
                   aria-label={`View ${name}`}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-bg text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-text"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-bg text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-contrast"
                 >
                   {athletePreferredInitials(athlete)}
                 </Link>
@@ -85,7 +85,7 @@ export default function QualifiersList({
                       {name}
                     </Link>
                     {isMe ? (
-                      <span className="shrink-0 rounded-full bg-primary px-1.5 text-[11px] font-semibold leading-4 text-primary-text">
+                      <span className="shrink-0 rounded-full bg-primary px-1.5 text-[11px] font-semibold leading-4 text-primary-contrast">
                         You
                       </span>
                     ) : null}

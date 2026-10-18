@@ -340,7 +340,7 @@ export default function AttendanceManager({
             <button
               type="button"
               onClick={startRecording}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-text transition-colors hover:bg-primary-hover"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast transition-colors hover:bg-primary-hover"
             >
               <ActionIcon kind="scan" className="h-4 w-4" />
               Start recording
