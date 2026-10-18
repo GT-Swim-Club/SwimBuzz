@@ -119,7 +119,6 @@ type MeetWriteFields = {
   resultsUrl?: string | null
   swimphoneUrl?: string | null
   liveStreamUrl?: string | null
-  signupUrl?: string | null
   rideSignUpsUrl?: string | null
   roomsUrl?: string | null
   hotel?: string | null
@@ -518,6 +517,7 @@ export function createApiClient(options: ApiClientOptions = {}) {
     },
 
     optimalRelays(body: {
+      meetId?: string
       relayEvent: string
       course?: string
       gender?: string

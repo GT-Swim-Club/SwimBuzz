@@ -1,7 +1,7 @@
 {
   "sessions": [
     {
-      "label": "Order of Events",
+      "label": "Day 1 Prelims",
       "rows": [
         {
           "event": "200 Butterfly",
@@ -42,7 +42,12 @@
           "event": "1000 Freestyle",
           "men": 18,
           "women": 17
-        },
+        }
+      ]
+    },
+    {
+      "label": "Day 1 Finals",
+      "rows": [
         {
           "event": "4x50 Medley Relay",
           "men": 2,
@@ -82,7 +87,12 @@
           "event": "4x100 Freestyle Relay",
           "men": 20,
           "women": 19
-        },
+        }
+      ]
+    },
+    {
+      "label": "Day 2 Prelims",
+      "rows": [
         {
           "event": "400 Individual Medley",
           "men": 24,
@@ -127,7 +137,12 @@
           "event": "500 Freestyle",
           "men": 40,
           "women": 39
-        },
+        }
+      ]
+    },
+    {
+      "label": "Day 2 Finals",
+      "rows": [
         {
           "event": "4x50 Freestyle Relay",
           "men": 22,

@@ -17,10 +17,16 @@ type PdfDocumentViewerProps = {
   zoomPercent: number
   numPages: number | null
   pageRefs: MutableRefObject<Array<HTMLDivElement | null>>
-  onLoadSuccess: (numPages: number) => void
+  // `pageWidthAt100Percent` is the first page's width at 100% zoom, in CSS pixels, so the viewer can
+  // fit it to the window.
+  onLoadSuccess: (document: { numPages: number; pageWidthAt100Percent: number }) => void
   onLoadError: () => void
   onRenderError: () => void
 }
+
+// While the zoom keeps changing (e.g. mid-pinch), the shown canvas is only CSS-scaled; the page
+// re-renders at the new scale once the zoom has held still this long.
+const RENDER_SETTLE_MS = 150
 
 type ZoomablePdfPageProps = {
   pageNumber: number
@@ -35,13 +41,20 @@ type ZoomablePdfPageProps = {
 function ZoomablePdfPage({ pageNumber, scale, onRenderError }: ZoomablePdfPageProps) {
   const [baseSize, setBaseSize] = useState<{ width: number; height: number } | null>(null)
   const [shownScale, setShownScale] = useState(scale)
-  const latestScaleRef = useRef(scale)
+  const [renderScale, setRenderScale] = useState(scale)
+  const latestRenderScaleRef = useRef(scale)
 
   useEffect(() => {
-    latestScaleRef.current = scale
-  }, [scale])
+    if (scale === renderScale) return
+    const timeout = setTimeout(() => setRenderScale(scale), RENDER_SETTLE_MS)
+    return () => clearTimeout(timeout)
+  }, [scale, renderScale])
 
-  const layerScales = shownScale === scale ? [scale] : [shownScale, scale]
+  useEffect(() => {
+    latestRenderScaleRef.current = renderScale
+  }, [renderScale])
+
+  const layerScales = shownScale === renderScale ? [shownScale] : [shownScale, renderScale]
   const shownZoomRatio = scale / shownScale
 
   return (
@@ -73,7 +86,7 @@ function ZoomablePdfPage({ pageNumber, scale, onRenderError }: ZoomablePdfPagePr
                 setBaseSize({ width: viewport.width, height: viewport.height })
               }}
               onRenderSuccess={() => {
-                if (layerScale === latestScaleRef.current) setShownScale(layerScale)
+                if (layerScale === latestRenderScaleRef.current) setShownScale(layerScale)
               }}
               onRenderError={onRenderError}
             />
@@ -103,7 +116,15 @@ export default function PdfDocumentViewer({
         </div>
       }
       error={null}
-      onLoadSuccess={({ numPages: loadedPageCount }) => onLoadSuccess(loadedPageCount)}
+      onLoadSuccess={(pdf) => {
+        pdf.getPage(1).then((firstPage) => {
+          onLoadSuccess({
+            numPages: pdf.numPages,
+            pageWidthAt100Percent:
+              firstPage.getViewport({ scale: 1 }).width * PDF_RENDER_SCALE_AT_100_PERCENT,
+          })
+        }, onLoadError)
+      }}
       onLoadError={onLoadError}
     >
       <div className="flex flex-col items-center gap-5 pb-8">

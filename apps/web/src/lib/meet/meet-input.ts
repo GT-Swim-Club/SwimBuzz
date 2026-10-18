@@ -194,7 +194,6 @@ export function buildMeetData(body: Record<string, unknown>, opts: BuildOptions 
   if ("resultsUrl" in body) data.resultsUrl = optionalString(body.resultsUrl)
   if ("swimphoneUrl" in body) data.swimphoneUrl = optionalString(body.swimphoneUrl)
   if ("liveStreamUrl" in body) data.liveStreamUrl = optionalString(body.liveStreamUrl)
-  if ("signupUrl" in body) data.signupUrl = optionalString(body.signupUrl)
   if ("rideSignUpsUrl" in body) data.rideSignUpsUrl = optionalString(body.rideSignUpsUrl)
   if ("roomsUrl" in body) data.roomsUrl = optionalString(body.roomsUrl)
   if ("hotel" in body) data.hotel = optionalString(body.hotel)

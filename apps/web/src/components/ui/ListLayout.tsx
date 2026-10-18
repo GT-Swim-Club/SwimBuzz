@@ -9,7 +9,7 @@ import { saveListLayout, type ListLayout, type ListLayoutPage } from "@/lib/list
 const ListLayoutContext = createContext<{ layout: ListLayout; setLayout: (layout: ListLayout) => void } | null>(null)
 
 /**
- * Gallery/List layout for a page, shared by its toolbar toggle and the lists
+ * List/Gallery layout for a page, shared by its toolbar toggle and the lists
  * below it. Switching is client-side (every list already has its data); the
  * choice is saved to `page`'s cookie so the next visit opens in it.
  */
@@ -36,15 +36,15 @@ export function useListLayout() {
   return ctx
 }
 
-/** Gallery/List switch for a toolbar inside ListLayoutProvider. */
+/** List/Gallery switch for a toolbar inside ListLayoutProvider. */
 export function ListLayoutToggle() {
   const { layout, setLayout } = useListLayout()
   return (
     <SegmentedToggle
-      selectedIndex={layout === "list" ? 1 : 0}
+      selectedIndex={layout === "list" ? 0 : 1}
       className="h-[42px] shrink-0 rounded-lg border border-border bg-background"
     >
-      {(["gallery", "list"] as const).map((value) => (
+      {(["list", "gallery"] as const).map((value) => (
         <button
           key={value}
           type="button"

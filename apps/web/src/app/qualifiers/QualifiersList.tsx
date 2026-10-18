@@ -4,12 +4,15 @@ import type { QualifierAthlete } from "@/lib/qualifiers/nationals-qualifiers"
 import { athletePath } from "@/lib/slug"
 import { QualifierSwimRow } from "./QualifierSwimRow"
 
-/** Athlete · Event · Meet · Date · Time · Standard (md+; phones stack). */
+/**
+ * Athlete · Event · Meet · Date · Time · Standard (md+; phones stack). Meet
+ * stops growing at a readable width so wide windows widen the athlete column.
+ */
 export const QUALIFIER_LIST_COLS =
-  "md:grid-cols-[minmax(10rem,15rem)_minmax(7rem,10rem)_minmax(5rem,1fr)_minmax(5.5rem,6.5rem)_5.5rem_6rem]"
-/** The by-event list: Event · Athlete · Meet · Date · Time · Standard. */
+  "md:grid-cols-[minmax(10rem,1fr)_minmax(7rem,10rem)_minmax(5rem,18rem)_minmax(7rem,7.5rem)_5.5rem_6rem]"
+/** The by-event list: Event · Athlete · Meet · Date · Time · Standard, sized like the athlete list. */
 export const EVENT_LIST_COLS =
-  "md:grid-cols-[minmax(7rem,10rem)_minmax(10rem,15rem)_minmax(5rem,1fr)_minmax(5.5rem,6.5rem)_5.5rem_6rem]"
+  "md:grid-cols-[minmax(10rem,1fr)_minmax(10rem,15rem)_minmax(5rem,18rem)_minmax(7rem,7.5rem)_5.5rem_6rem]"
 
 /**
  * Each swim row sits on its parent's columns through subgrid, so every cell
@@ -18,13 +21,13 @@ export const EVENT_LIST_COLS =
  */
 export const swimRowClass =
   "group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 rounded-md px-2.5 py-1 transition-colors md:col-span-full md:grid-cols-subgrid md:gap-x-2 md:px-0"
-const swimCellClass = "min-w-0 truncate text-sm transition-colors group-hover:text-primary md:pl-2.5"
-export const swimLeadCellClass = `${swimCellClass} font-semibold text-foreground`
-export const swimMetaCellClass = `${swimCellClass} font-medium text-foreground-secondary max-md:row-start-2 max-md:text-xs`
+const swimCellClass = "min-w-0 truncate text-[15px] transition-colors group-hover:text-primary md:pl-2.5"
+export const swimLeadCellClass = `${swimCellClass} font-medium text-foreground`
+export const swimMetaCellClass = `${swimCellClass} font-medium text-foreground-secondary max-md:row-start-2 max-md:text-[13px]`
 export const swimTimeCellClass =
-  "font-mono text-sm font-medium tabular-nums transition-colors group-hover:text-primary max-md:col-start-2 max-md:row-start-1 text-right"
+  "font-mono text-[15px] font-medium tabular-nums transition-colors group-hover:text-primary max-md:col-start-2 max-md:row-start-1 text-right"
 export const swimCutCellClass =
-  "min-w-0 truncate pr-2.5 text-right font-mono text-sm font-medium tabular-nums text-foreground-secondary transition-colors group-hover:text-primary max-md:hidden"
+  "min-w-0 truncate pr-2.5 text-right font-mono text-[15px] font-medium tabular-nums text-foreground-secondary transition-colors group-hover:text-primary max-md:hidden"
 
 export function QualifierListHeader({ cols, first, second }: { cols: string; first: string; second: string }) {
   return (
@@ -77,7 +80,7 @@ export default function QualifiersList({
                   <div className="flex min-w-0 items-center gap-1.5">
                     <Link
                       href={athleteHref}
-                      className="truncate text-sm font-semibold text-foreground transition-colors hover:text-primary hover:underline"
+                      className="truncate text-base font-semibold text-foreground transition-colors hover:text-primary hover:underline"
                     >
                       {name}
                     </Link>
@@ -87,7 +90,7 @@ export default function QualifiersList({
                       </span>
                     ) : null}
                   </div>
-                  <p className="mt-0.5 whitespace-nowrap text-xs text-foreground-secondary">
+                  <p className="mt-0.5 whitespace-nowrap text-[13px] text-foreground-secondary">
                     {athlete.gender === "F" ? "Women" : "Men"} · {cuts}
                   </p>
                 </div>

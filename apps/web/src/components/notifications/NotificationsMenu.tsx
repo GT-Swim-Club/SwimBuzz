@@ -5,7 +5,6 @@ import Link from "next/link"
 import { formatDateTime, formatRelativeTime } from "@/lib/utils"
 import { AppIcon } from "@/components/ui/AppIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
-import { markNotificationsRead } from "./NotificationsMenu.actions"
 import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
 export type NotificationItem = {
@@ -25,12 +24,19 @@ export default function NotificationsMenu({
 }) {
   const [open, setOpen] = useState(false)
   const [notifications, setNotifications] = useState(initialNotifications)
+  // Spinner only until the first fetch finishes; later opens show the list
+  // immediately and refresh it in the background.
+  const [loaded, setLoaded] = useState(false)
+  const [prevInitial, setPrevInitial] = useState(initialNotifications)
   const rootRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (open) return
+  // Only resync when the server actually sends a new list; marking read is
+  // local + API-only, so re-applying the original prop on close would bring
+  // back stale unread badges.
+  if (initialNotifications !== prevInitial) {
+    setPrevInitial(initialNotifications)
     setNotifications(initialNotifications)
-  }, [initialNotifications, open])
+  }
 
   const unreadCount = notifications.filter((n) => !n.readAt).length
 
@@ -43,19 +49,35 @@ export default function NotificationsMenu({
   useEffect(() => {
     if (!open) return
 
+    let cancelled = false
+
     async function syncNotifications() {
       const now = new Date().toISOString()
+      try {
+        const [res] = await Promise.all([
+          fetch("/api/notifications"),
+          patchNotificationsRead(),
+        ])
+        if (cancelled) return
+        if (res.ok) {
+          const data: { notifications: NotificationItem[] } = await res.json()
+          if (cancelled) return
+          setNotifications(
+            data.notifications.map((n) => ({ ...n, readAt: n.readAt ?? now }))
+          )
+          return
+        }
+      } catch {
+        // Fall through to the list we already have.
+      }
+      if (cancelled) return
       setNotifications((prev) =>
         prev.map((n) => ({ ...n, readAt: n.readAt ?? now }))
       )
-      await markNotificationsRead()
-      const res = await fetch("/api/notifications")
-      if (res.ok) {
-        const data = await res.json()
-        setNotifications(data.notifications)
-      }
     }
-    void syncNotifications()
+    void syncNotifications().finally(() => {
+      if (!cancelled) setLoaded(true)
+    })
 
     function onPointerDown(event: PointerEvent) {
       if (!rootRef.current?.contains(event.target as Node)) {
@@ -64,12 +86,16 @@ export default function NotificationsMenu({
     }
 
     document.addEventListener("pointerdown", onPointerDown)
-    return () => document.removeEventListener("pointerdown", onPointerDown)
+    return () => {
+      cancelled = true
+      document.removeEventListener("pointerdown", onPointerDown)
+    }
   }, [open])
 
   async function markRead(id?: string) {
     try {
-      await markNotificationsRead(id)
+      const res = await patchNotificationsRead(id)
+      if (!res.ok) return
     } catch {
       return
     }
@@ -114,7 +140,7 @@ export default function NotificationsMenu({
               <p className="text-sm font-medium text-foreground">
                 Notifications
               </p>
-              {unreadCount > 0 ? (
+              {loaded && unreadCount > 0 ? (
                 <button
                   type="button"
                   onClick={() => void markRead()}
@@ -124,7 +150,15 @@ export default function NotificationsMenu({
                 </button>
               ) : null}
             </div>
-            {notifications.length === 0 ? (
+            {!loaded ? (
+              <div
+                role="status"
+                aria-label="Loading notifications"
+                className="flex justify-center px-3 py-6"
+              >
+                <span className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              </div>
+            ) : notifications.length === 0 ? (
               <p className="px-3 py-6 text-center text-sm text-foreground-secondary">
                 No notifications yet
               </p>
@@ -197,4 +231,12 @@ export default function NotificationsMenu({
       ) : null}
     </div>
   )
+}
+
+function patchNotificationsRead(id?: string) {
+  return fetch("/api/notifications", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(id ? { id } : { all: true }),
+  })
 }

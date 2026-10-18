@@ -42,6 +42,7 @@ import {
   resolveSignupEventOptions,
   resolveEditableSignupSheetKeys,
 } from "@/lib/meet/meet-signup"
+import { isSignupRelayPreferences } from "@/lib/meet/meet-signup-import"
 import { athletePath, isCuid, meetPath } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
 import {
@@ -217,7 +218,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
 
   const meetHasEnded = lastActiveDate <= yesterday
 
-  const showSignupCard = !meetHasEnded && (Boolean(meet.signupUrl) || isCoach)
+  const showSignupCard = !meetHasEnded && isCoach
 
   const seasonRoster = await prisma.athlete.findMany({
     where: { seasons: { has: meet.season } },
@@ -467,7 +468,14 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       />
     ) : null
   const signupCard = showSignupCard ? (
-    <MeetSignupCard isCoach={isCoach} meetId={meet.id} signupUrl={meet.signupUrl ?? ""} />
+    <MeetSignupCard
+      meetId={meet.id}
+      importedSignups={
+        isSignupRelayPreferences(meet.signupRelayPreferences)
+          ? meet.signupRelayPreferences.athletes.length
+          : null
+      }
+    />
   ) : null
   const renderCompetitionCard = () =>
     hasResources || isCoach || relaysHref ? (

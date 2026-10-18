@@ -4,7 +4,7 @@ import { MEET_LIST_COLS } from "./MeetListTable"
 
 /**
  * Mirrors the meets toolbar: search box, the Season and All/My meets selects,
- * then the Gallery/List toggle. Phones get FluidToolbar's collapsed search
+ * then the List/Gallery toggle. Phones get FluidToolbar's collapsed search
  * button instead of the box (the real switch is measured; sm approximates it).
  */
 export function MeetsToolbarSkeleton() {
@@ -154,7 +154,7 @@ export function MeetListSkeleton({
  * "Upcoming meets" row of two, then a full "Past meets" row. List: the same
  * two sections as tables.
  */
-export default function MeetsListSkeleton({ layout = "gallery" }: { layout?: ListLayout }) {
+export default function MeetsListSkeleton({ layout = "list" }: { layout?: ListLayout }) {
   if (layout === "list") {
     return (
       <div className="flex flex-col gap-8">

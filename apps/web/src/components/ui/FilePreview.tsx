@@ -180,17 +180,25 @@ function CloseIcon() {
   )
 }
 
-const MIN_ZOOM_PERCENT = 60
+const MIN_ZOOM_PERCENT = 25
 const MAX_ZOOM_PERCENT = 240
 const ZOOM_STEP_PERCENT = 20
+
+// How much one pixel of ctrl+wheel delta (a trackpad pinch, or Ctrl + mouse wheel) zooms, and the
+// most a single event may count for so one mouse-wheel notch doesn't jump too far.
+const WHEEL_ZOOM_SPEED = 0.01
+const MAX_WHEEL_ZOOM_DELTA = 25
+
+function clampZoomPercent(zoomPercent: number) {
+  return Math.max(MIN_ZOOM_PERCENT, Math.min(MAX_ZOOM_PERCENT, zoomPercent))
+}
+
+// Safari reports trackpad pinches as its own (non-standard) gesture events rather than ctrl+wheel.
+type SafariGestureEvent = UIEvent & { scale: number; clientX: number; clientY: number }
 
 // Fallback for releasing the page counter if a Previous/Next smooth scroll stalls before it lands:
 // this long with no scroll events ends the navigation.
 const PAGE_NAVIGATION_STALL_MS = 1000
-
-// How long a reopened PDF waits for its pages to lay out before giving up on returning to the page
-// it was closed on.
-const PAGE_RESTORE_TIMEOUT_MS = 10000
 
 // The current page is whichever shows the most height in the viewport. (An intersection
 // threshold can't do this: once a zoomed page is taller than the viewport, it never crosses it.)
@@ -219,7 +227,10 @@ function getMostVisiblePage(container: HTMLElement, pageElements: Array<HTMLDivE
 
 type ZoomAnchor = {
   pageIndex: number
-  // Position of the viewport's center within that page, as fractions of the page's size.
+  // Where the zoom is centered (the pointer, or the viewport's center), relative to the viewport.
+  viewportX: number
+  viewportY: number
+  // Position of that point within the page, as fractions of the page's size.
   fractionX: number
   fractionY: number
 }
@@ -250,10 +261,18 @@ function getPageScrollTop(pageElement: HTMLElement, container: HTMLElement) {
 
 function getZoomAnchor(
   container: HTMLElement,
-  pageElements: Array<HTMLDivElement | null>
+  pageElements: Array<HTMLDivElement | null>,
+  clientPoint?: { x: number; y: number }
 ): ZoomAnchor | null {
-  const centerX = container.scrollLeft + container.clientWidth / 2
-  const centerY = container.scrollTop + container.clientHeight / 2
+  const containerRect = container.getBoundingClientRect()
+  const viewportX = clientPoint
+    ? Math.min(container.clientWidth, Math.max(0, clientPoint.x - containerRect.left))
+    : container.clientWidth / 2
+  const viewportY = clientPoint
+    ? Math.min(container.clientHeight, Math.max(0, clientPoint.y - containerRect.top))
+    : container.clientHeight / 2
+  const centerX = container.scrollLeft + viewportX
+  const centerY = container.scrollTop + viewportY
   let anchor: ZoomAnchor | null = null
   let closestDistance = Infinity
   pageElements.forEach((pageElement, pageIndex) => {
@@ -266,6 +285,8 @@ function getZoomAnchor(
       closestDistance = distance
       anchor = {
         pageIndex,
+        viewportX,
+        viewportY,
         fractionX: Math.min(1, Math.max(0, (centerX - rect.left) / rect.width)),
         fractionY: Math.min(1, Math.max(0, (centerY - rect.top) / rect.height)),
       }
@@ -284,11 +305,15 @@ export function FilePreviewDialog({
 }: FilePreviewDialogProps) {
   const [numPages, setNumPages] = useState<number | null>(null)
   const [pageNumber, setPageNumber] = useState(1)
-  const [zoomPercent, setZoomPercent] = useState(100)
+  // null until the user zooms: the page then fits the window's width, up to 100%.
+  const [manualZoomPercent, setManualZoomPercent] = useState<number | null>(null)
+  const [pageWidthAt100Percent, setPageWidthAt100Percent] = useState<number | null>(null)
+  const [availableWidth, setAvailableWidth] = useState<number | null>(null)
   const [pdfFailed, setPdfFailed] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const [printing, setPrinting] = useState(false)
   const printFrameRef = useRef<HTMLIFrameElement | null>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const pageRefs = useRef<Array<HTMLDivElement | null>>([])
   const zoomAnchorRef = useRef<ZoomAnchor | null>(null)
@@ -299,14 +324,25 @@ export function FilePreviewDialog({
   const kind = forcePdf ? "pdf" : getPreviewKind(url, title)
   const showingPdf = kind === "pdf"
 
-  // The page state survives closing so a reopened PDF can return to where it was left, but only for
-  // the same document: callers may reuse one dialog for several files (and blank the URL while
-  // it's closed), so opening a different file starts it over at page 1.
-  const [pageStateUrl, setPageStateUrl] = useState(url)
-  if (open && url !== pageStateUrl) {
-    setPageStateUrl(url)
-    setPageNumber(1)
-    setNumPages(null)
+  const fitZoomPercent =
+    pageWidthAt100Percent && availableWidth
+      ? clampZoomPercent(Math.min(100, Math.floor((availableWidth / pageWidthAt100Percent) * 100)))
+      : 100
+  const zoomPercent = manualZoomPercent ?? fitZoomPercent
+
+  // Every open starts fresh at page 1, fitted to the window. Callers may reuse one dialog for
+  // several files, so a different file opened in place starts over too.
+  const openedUrl = open ? url : null
+  const [shownUrl, setShownUrl] = useState(openedUrl)
+  if (openedUrl !== shownUrl) {
+    setShownUrl(openedUrl)
+    if (openedUrl !== null) {
+      setPageNumber(1)
+      setNumPages(null)
+      setPageWidthAt100Percent(null)
+      setManualZoomPercent(null)
+      setPdfFailed(false)
+    }
   }
 
   useEffect(() => {
@@ -397,56 +433,26 @@ export function FilePreviewDialog({
     }
   }, [numPages, open, showingPdf])
 
-  // Returns whether there's nothing left to restore: either the page is restored, or it's page 1,
-  // where the document already opens.
-  const restoreClosedPage = useEffectEvent((): boolean => {
-    if (pageNumber <= 1) return true
-    const container = scrollContainerRef.current
-    if (!container || !numPages) return false
-    const pageElements = pageRefs.current.slice(0, numPages)
-    if (pageElements.length < numPages || !pageElements.every((page) => page && page.offsetHeight > 0)) {
-      return false
-    }
-    const targetScrollTop = getPageScrollTop(pageElements[pageNumber - 1]!, container)
-    if (Math.abs(container.scrollTop - targetScrollTop) > 1) {
-      // Hold the counter on the restored page, as Previous/Next does, in case the page landed on
-      // isn't the most visible one (e.g. a short last page).
-      startPageNavigation(targetScrollTop)
-      container.scrollTop = targetScrollTop
-    }
-    return true
-  })
-
-  // Reopening remounts the document scrolled to the top while the counter still shows the page it
-  // was closed on, so jump back to that page once every page has laid out (until then, the offsets
-  // above it are still changing). Scrolling first means the user has moved on, so don't.
-  useEffect(() => {
+  // Track the width the pages have to fit in. (The PDF view keeps its scrollbar gutter, so a
+  // scrollbar appearing doesn't change this and refit the page.)
+  useLayoutEffect(() => {
     if (!open || !showingPdf) return
     const container = scrollContainerRef.current
     if (!container) return
-
-    const startedAt = performance.now()
-    let frame = 0
-    const stop = () => {
-      cancelAnimationFrame(frame)
-      container.removeEventListener("wheel", stop)
-      container.removeEventListener("touchstart", stop)
-      container.removeEventListener("pointerdown", stop)
+    const measure = () => {
+      const style = getComputedStyle(container)
+      setAvailableWidth(
+        container.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
+      )
     }
-    const tryRestore = () => {
-      if (restoreClosedPage() || performance.now() - startedAt > PAGE_RESTORE_TIMEOUT_MS) stop()
-      else frame = requestAnimationFrame(tryRestore)
-    }
-
-    container.addEventListener("wheel", stop, { passive: true })
-    container.addEventListener("touchstart", stop, { passive: true })
-    container.addEventListener("pointerdown", stop)
-    frame = requestAnimationFrame(tryRestore)
-    return stop
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(container)
+    return () => observer.disconnect()
   }, [open, showingPdf])
 
-  // After a zoom re-lays out the pages, scroll so the point that was at the viewport's center
-  // (anchored to its page) is back at the center, instead of drifting to another page.
+  // After a zoom re-lays out the pages, scroll so the point the zoom centered on (anchored to its
+  // page) is back where it was in the viewport, instead of drifting to another page.
   useLayoutEffect(() => {
     const anchor = zoomAnchorRef.current
     zoomAnchorRef.current = null
@@ -455,9 +461,118 @@ export function FilePreviewDialog({
     if (!anchor || !container || !pageElement) return
 
     const pageRect = getRectInScrollContainer(pageElement, container)
-    container.scrollTop = pageRect.top + anchor.fractionY * pageRect.height - container.clientHeight / 2
-    container.scrollLeft = pageRect.left + anchor.fractionX * pageRect.width - container.clientWidth / 2
+    container.scrollTop = pageRect.top + anchor.fractionY * pageRect.height - anchor.viewportY
+    container.scrollLeft = pageRect.left + anchor.fractionX * pageRect.width - anchor.viewportX
   }, [zoomPercent])
+
+  // null goes back to fitting the window's width. `clientPoint` is where the zoom centers (e.g. the
+  // pointer during a pinch); the viewport's center by default.
+  const zoomTo = (requestedZoomPercent: number | null, clientPoint?: { x: number; y: number }) => {
+    const nextManualZoomPercent =
+      requestedZoomPercent === null ? null : clampZoomPercent(requestedZoomPercent)
+    if ((nextManualZoomPercent ?? fitZoomPercent) !== zoomPercent) {
+      endPageNavigation(false)
+      const container = scrollContainerRef.current
+      zoomAnchorRef.current = container
+        ? getZoomAnchor(container, pageRefs.current, clientPoint)
+        : null
+    }
+    setManualZoomPercent(nextManualZoomPercent)
+  }
+
+  // The buttons and shortcuts step to the next multiple of the step, so a fitted zoom like 47%
+  // lands back on round numbers.
+  const stepZoom = (direction: 1 | -1) => {
+    const steps = zoomPercent / ZOOM_STEP_PERCENT
+    zoomTo(
+      direction > 0
+        ? (Math.floor(steps + 1e-6) + 1) * ZOOM_STEP_PERCENT
+        : (Math.ceil(steps - 1e-6) - 1) * ZOOM_STEP_PERCENT
+    )
+  }
+
+  const onPinchZoom = useEffectEvent((factor: number, clientPoint: { x: number; y: number }) => {
+    zoomTo(zoomPercent * factor, clientPoint)
+  })
+
+  // Pinching the trackpad zooms the document around the pointer instead of zooming the whole
+  // page. Chrome, Edge and Firefox report a pinch as a ctrl+wheel event (as is Ctrl + mouse wheel);
+  // Safari sends gesture events instead. Updates are batched to one per frame.
+  useEffect(() => {
+    if (!open || !showingPdf) return
+    const dialog = dialogRef.current
+    if (!dialog) return
+
+    let frame = 0
+    let pendingFactor = 1
+    let pendingPoint = { x: 0, y: 0 }
+    let safariGestureScale: number | null = null
+    const queueZoom = (factor: number, clientX: number, clientY: number) => {
+      pendingFactor *= factor
+      pendingPoint = { x: clientX, y: clientY }
+      if (frame) return
+      frame = requestAnimationFrame(() => {
+        frame = 0
+        const factorToApply = pendingFactor
+        pendingFactor = 1
+        onPinchZoom(factorToApply, pendingPoint)
+      })
+    }
+
+    const onWheel = (event: WheelEvent) => {
+      if (!event.ctrlKey) return
+      event.preventDefault()
+      if (safariGestureScale !== null) return
+      const delta = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? event.deltaY * 16 : event.deltaY
+      const clampedDelta = Math.max(-MAX_WHEEL_ZOOM_DELTA, Math.min(MAX_WHEEL_ZOOM_DELTA, delta))
+      queueZoom(Math.exp(-clampedDelta * WHEEL_ZOOM_SPEED), event.clientX, event.clientY)
+    }
+    const onGestureStart = (event: Event) => {
+      event.preventDefault()
+      safariGestureScale = 1
+    }
+    // A gesture's scale is relative to where it started, so apply only the change since the last one.
+    const onGestureChange = (event: Event) => {
+      event.preventDefault()
+      const gesture = event as SafariGestureEvent
+      const previousScale = safariGestureScale ?? 1
+      safariGestureScale = gesture.scale
+      queueZoom(gesture.scale / previousScale, gesture.clientX, gesture.clientY)
+    }
+    const onGestureEnd = (event: Event) => {
+      event.preventDefault()
+      safariGestureScale = null
+    }
+
+    dialog.addEventListener("wheel", onWheel, { passive: false })
+    dialog.addEventListener("gesturestart", onGestureStart)
+    dialog.addEventListener("gesturechange", onGestureChange)
+    dialog.addEventListener("gestureend", onGestureEnd)
+    return () => {
+      dialog.removeEventListener("wheel", onWheel)
+      dialog.removeEventListener("gesturestart", onGestureStart)
+      dialog.removeEventListener("gesturechange", onGestureChange)
+      dialog.removeEventListener("gestureend", onGestureEnd)
+      cancelAnimationFrame(frame)
+    }
+  }, [open, showingPdf])
+
+  // Cmd/Ctrl + plus/minus zoom the document rather than the page; Cmd/Ctrl + 0 fits it back to
+  // the window.
+  const onZoomShortcut = useEffectEvent((event: KeyboardEvent) => {
+    if (!(event.metaKey || event.ctrlKey) || event.altKey || pdfFailed) return
+    if (event.key === "=" || event.key === "+") stepZoom(1)
+    else if (event.key === "-" || event.key === "_") stepZoom(-1)
+    else if (event.key === "0") zoomTo(null)
+    else return
+    event.preventDefault()
+  })
+
+  useEffect(() => {
+    if (!open || !showingPdf) return
+    window.addEventListener("keydown", onZoomShortcut)
+    return () => window.removeEventListener("keydown", onZoomShortcut)
+  }, [open, showingPdf])
 
   if (!open || typeof document === "undefined") return null
 
@@ -475,15 +590,6 @@ export function FilePreviewDialog({
     }
     startPageNavigation(targetScrollTop)
     container.scrollTo({ top: targetScrollTop, behavior: "smooth" })
-  }
-
-  const setZoom = (requestedZoomPercent: number) => {
-    const nextZoomPercent = Math.max(MIN_ZOOM_PERCENT, Math.min(MAX_ZOOM_PERCENT, requestedZoomPercent))
-    if (nextZoomPercent === zoomPercent) return
-    endPageNavigation(false)
-    const container = scrollContainerRef.current
-    zoomAnchorRef.current = container ? getZoomAnchor(container, pageRefs.current) : null
-    setZoomPercent(nextZoomPercent)
   }
 
   const fetchPdfBlob = async () => {
@@ -554,6 +660,7 @@ export function FilePreviewDialog({
 
   return createPortal(
     <div
+      ref={dialogRef}
       className="fixed inset-0 z-[60] flex flex-col bg-background/80 text-foreground"
       role="dialog"
       aria-modal="true"
@@ -576,38 +683,41 @@ export function FilePreviewDialog({
         </div>
 
         {showingPdf ? (
-          <nav className="hidden items-center rounded-md border border-border bg-background shadow-sm sm:flex">
-            <IconButton label="Previous page" onClick={() => scrollToPage(pageNumber - 1)} disabled={pageNumber <= 1 || pdfFailed}>
-              <ChevronIcon direction="left" />
-            </IconButton>
-            <span className="flex min-w-14 items-center justify-center gap-0.5 border-x border-border px-2 text-xs tabular-nums text-foreground-secondary">
-              <EditableNumberField
-                label="Page number"
-                value={pageNumber}
-                maxDigits={String(numPages ?? pageNumber).length}
-                onCommit={scrollToPage}
-                disabled={!numPages || pdfFailed}
-              />
-              <span>/ {numPages ?? "—"}</span>
-            </span>
-            <IconButton label="Next page" onClick={() => scrollToPage(pageNumber + 1)} disabled={!numPages || pageNumber >= numPages || pdfFailed}>
-              <ChevronIcon direction="right" />
-            </IconButton>
-            <span className="mx-1 h-5 w-px bg-border" />
-            <IconButton label="Zoom out" onClick={() => setZoom(zoomPercent - ZOOM_STEP_PERCENT)} disabled={pdfFailed}>
+          <nav className="flex shrink-0 items-center rounded-md border border-border bg-background shadow-sm">
+            {/* Page navigation needs more room than a phone-width header has; zoom always shows. */}
+            <div className="hidden items-center sm:flex">
+              <IconButton label="Previous page" onClick={() => scrollToPage(pageNumber - 1)} disabled={pageNumber <= 1 || pdfFailed}>
+                <ChevronIcon direction="left" />
+              </IconButton>
+              <span className="flex min-w-14 items-center justify-center gap-0.5 border-x border-border px-2 text-xs tabular-nums text-foreground-secondary">
+                <EditableNumberField
+                  label="Page number"
+                  value={pageNumber}
+                  maxDigits={String(numPages ?? pageNumber).length}
+                  onCommit={scrollToPage}
+                  disabled={!numPages || pdfFailed}
+                />
+                <span>/ {numPages ?? "—"}</span>
+              </span>
+              <IconButton label="Next page" onClick={() => scrollToPage(pageNumber + 1)} disabled={!numPages || pageNumber >= numPages || pdfFailed}>
+                <ChevronIcon direction="right" />
+              </IconButton>
+              <span className="mx-1 h-5 w-px bg-border" />
+            </div>
+            <IconButton label="Zoom out" onClick={() => stepZoom(-1)} disabled={pdfFailed || zoomPercent <= MIN_ZOOM_PERCENT}>
               <ZoomIcon direction="out" />
             </IconButton>
             <span className="flex min-w-12 items-center justify-center text-xs tabular-nums text-foreground-secondary">
               <EditableNumberField
                 label="Zoom percentage"
-                value={zoomPercent}
+                value={Math.round(zoomPercent)}
                 maxDigits={String(MAX_ZOOM_PERCENT).length}
-                onCommit={setZoom}
+                onCommit={zoomTo}
                 disabled={pdfFailed}
               />
               <span>%</span>
             </span>
-            <IconButton label="Zoom in" onClick={() => setZoom(zoomPercent + ZOOM_STEP_PERCENT)} disabled={pdfFailed}>
+            <IconButton label="Zoom in" onClick={() => stepZoom(1)} disabled={pdfFailed || zoomPercent >= MAX_ZOOM_PERCENT}>
               <ZoomIcon direction="in" />
             </IconButton>
           </nav>
@@ -630,7 +740,9 @@ export function FilePreviewDialog({
         onClick={(event) => {
           if (event.target === event.currentTarget) onClose()
         }}
-        className="flex min-h-0 flex-1 items-start justify-center-safe overflow-auto bg-transparent p-4 sm:p-8"
+        className={`flex min-h-0 flex-1 items-start justify-center-safe overflow-auto bg-transparent p-4 sm:p-8 ${
+          showingPdf ? "[scrollbar-gutter:stable]" : ""
+        }`}
       >
         {showingPdf ? (
           pdfFailed ? (
@@ -653,9 +765,9 @@ export function FilePreviewDialog({
               zoomPercent={zoomPercent}
               numPages={numPages}
               pageRefs={pageRefs}
-              onLoadSuccess={(loadedPageCount) => {
+              onLoadSuccess={({ numPages: loadedPageCount, pageWidthAt100Percent: loadedPageWidth }) => {
                 setNumPages(loadedPageCount)
-                setPageNumber((current) => Math.min(current, loadedPageCount))
+                setPageWidthAt100Percent(loadedPageWidth)
               }}
               onLoadError={() => setPdfFailed(true)}
               onRenderError={() => setPdfFailed(true)}

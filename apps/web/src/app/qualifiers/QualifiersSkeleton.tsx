@@ -10,7 +10,7 @@ const LINE_COUNTS = [2, 4, 1, 3, 1, 2, 3, 1]
 
 /**
  * Mirrors the Nationals toolbar: search box, View standards, the Gender,
- * Season and Group by selects, then the Gallery/List toggle. Phones get
+ * Season and Group by selects, then the List/Gallery toggle. Phones get
  * FluidToolbar's collapsed search button instead of the box (the real switch
  * is measured; sm approximates it).
  */
@@ -46,11 +46,11 @@ function ToolbarSkeleton() {
 function SwimLineSkeleton({ lead }: { lead: string }) {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 px-2.5 py-1.5 md:col-span-full md:grid-cols-subgrid md:gap-x-2 md:px-0">
-      <Skeleton className={`h-3.5 max-w-full md:ml-2.5 ${lead}`} />
-      <Skeleton className="h-3.5 w-40 max-w-full max-md:row-start-2 md:ml-2.5" />
-      <Skeleton className="h-3.5 w-20 max-md:row-start-2 max-md:justify-self-end md:ml-2.5" />
-      <Skeleton className="h-3.5 w-14 justify-self-end max-md:col-start-2 max-md:row-start-1" />
-      <Skeleton className="mr-2.5 h-3.5 w-14 justify-self-end max-md:hidden" />
+      <Skeleton className={`h-4 max-w-full md:ml-2.5 ${lead}`} />
+      <Skeleton className="h-4 w-40 max-w-full max-md:row-start-2 md:ml-2.5" />
+      <Skeleton className="h-4 w-20 max-md:row-start-2 max-md:justify-self-end md:ml-2.5" />
+      <Skeleton className="h-4 w-14 justify-self-end max-md:col-start-2 max-md:row-start-1" />
+      <Skeleton className="mr-2.5 h-4 w-14 justify-self-end max-md:hidden" />
     </div>
   )
 }
@@ -69,14 +69,14 @@ function ListSkeleton({ byEvent }: { byEvent: boolean }) {
           <div key={i} className={`grid gap-2 px-3 py-2 sm:px-5 ${cols}`}>
             {byEvent ? (
               <div className="flex flex-col gap-1.5 pt-1 max-md:px-2.5">
-                <Skeleton className="h-3.5 w-28" />
+                <Skeleton className="h-4 w-28" />
                 <Skeleton className="h-3 w-24" />
               </div>
             ) : (
               <div className="flex items-center gap-2.5 self-start max-md:px-2.5">
                 <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
                 <div className="flex flex-col gap-1.5">
-                  <Skeleton className={`h-3.5 ${name}`} />
+                  <Skeleton className={`h-4 ${name}`} />
                   <Skeleton className="h-3 w-20" />
                 </div>
               </div>

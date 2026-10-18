@@ -22,6 +22,9 @@ export function useToolbarCondensed() {
 
 const searchClass =
   "h-[42px] min-w-0 rounded-lg border border-border bg-background px-3 text-sm text-foreground placeholder:text-foreground-tertiary"
+/** A labeled (icon + text) toolbar button. */
+export const toolbarButtonClass =
+  "inline-flex h-[42px] shrink-0 items-center gap-1.5 rounded-lg border border-border bg-background px-3 text-sm font-medium text-foreground transition-colors hover:bg-fill-secondary"
 export const toolbarIconButtonClass =
   "group relative inline-flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg border border-border bg-background text-foreground transition-colors hover:bg-fill-secondary"
 

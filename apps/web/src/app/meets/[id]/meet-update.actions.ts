@@ -8,6 +8,7 @@ import {
   deleteAddedMeetFiles,
   deleteRemovedMeetFiles,
   deleteStoredMeetFile,
+  nameMeetImages,
   type MeetStoredFiles,
 } from "@/lib/meet/meet-storage"
 import { resolveEventOrderForPacket } from "@/lib/meet/meet-packet-parse"
@@ -107,10 +108,17 @@ export async function updateMeet(
 
     const resourceDrops = detectMeetResourceDrops(existing, data, { packetParsed })
 
-    const meet = await prisma.meet.update({
-      where: { id: meetId },
-      data: toPrismaMeetWriteData(data),
-    })
+    const images = await nameMeetImages(data, existing)
+    const meet = await prisma.meet
+      .update({
+        where: { id: meetId },
+        data: toPrismaMeetWriteData(data),
+      })
+      .catch(async (err) => {
+        await images.rollback()
+        throw err
+      })
+    await images.commit()
     await deleteRemovedMeetFiles(existing as MeetStoredFiles, data)
 
     void notifyMeetRosterOfInfoDrops({

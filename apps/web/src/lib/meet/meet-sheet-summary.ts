@@ -87,6 +87,8 @@ export type SheetEntry = {
   alternate?: boolean
   /** Athlete on meet roster without entering an event. */
   rosterOnly?: boolean
+  /** Seed created by a sign-up sheet import — replaced wholesale on re-import. */
+  signupImport?: boolean
   /** Swim row id when this entry is a single manual swim. */
   swimId?: string
   prelimSwimId?: string

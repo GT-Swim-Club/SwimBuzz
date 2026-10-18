@@ -17,7 +17,7 @@ import type { EventOrder } from "@/lib/meet/meet-event-order"
 import ImportMeetResourcesButton from "./ImportMeetResourcesButton"
 import EventOrderButton from "./EventOrderButton"
 import AddTravelInfoButton from "./AddTravelInfoButton"
-import EditSignupLinkButton from "./EditSignupLinkButton"
+import ImportSignupsButton from "./ImportSignupsButton"
 import TravelInfoButtons, { type TravelInfoItem } from "./TravelInfoButtons"
 import ManagePhotosButton from "./ManagePhotosButton"
 
@@ -139,38 +139,32 @@ export function MeetCompetitionCard({
 }
 
 export function MeetSignupCard({
-  isCoach,
   meetId,
-  signupUrl,
+  importedSignups,
 }: {
-  isCoach: boolean
   meetId: string
-  signupUrl: string
+  /** Responses in the last sign-up import, or null if none yet. */
+  importedSignups: number | null
 }) {
   return (
-    <LedgerCard
-      title="Sign-ups"
-      aside={
-        isCoach ? (
-          <EditSignupLinkButton
-            meetId={meetId}
-            initial={signupUrl}
-            trigger={(open) => (
-              <LedgerIconButton
-                icon={signupUrl ? "pencil" : "plus"}
-                label={signupUrl ? "Edit sign-up link" : "Add sign-up link"}
-                onClick={open}
-              />
-            )}
+    <LedgerCard title="Sign-ups">
+      <ImportSignupsButton
+        meetId={meetId}
+        trigger={(open) => (
+          <LedgerRow
+            icon="download"
+            label="Import sign-ups"
+            onClick={open}
+            trailing={
+              importedSignups != null ? (
+                <span className="shrink-0 text-xs text-foreground-secondary">
+                  {importedSignups} imported
+                </span>
+              ) : undefined
+            }
           />
-        ) : null
-      }
-    >
-      {signupUrl ? (
-        <LedgerRow icon="clipboardCheck" label="Sign-up form" href={signupUrl} external />
-      ) : (
-        <LedgerNote>No sign-up link yet.</LedgerNote>
-      )}
+        )}
+      />
     </LedgerCard>
   )
 }

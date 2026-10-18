@@ -1,10 +1,10 @@
 "use client"
-import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from "react"
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type DragEvent } from "react"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { useRouter } from "next/navigation"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { formatSwimDate, formatTime } from "@/lib/utils"
-import { canonicalizeStrokeEvent, relaySignupKey } from "@/lib/swim/swim-parse"
+import { canonicalizeStrokeEvent, parseSwimTime, relaySignupKey } from "@/lib/swim/swim-parse"
 
 const FALLBACK_RELAY_EVENTS = [
   "200 Free Relay",
@@ -49,19 +49,32 @@ type AthleteOption = {
   gender?: "M" | "F"
 }
 
+type SignupPool = "all" | "meet" | "relay"
+
+/** Whether a sign-up relay preference ("200 Freestyle Mixed Relay") covers this builder relay. */
+function relayPreferenceMatches(pref: string, event: string, gender: string): boolean {
+  if (relaySignupKey(pref) !== relaySignupKey(event)) return false
+  return /\bmixed\b/i.test(pref) === (gender === "X")
+}
+
 type Leg = {
   leg?: string
   name: string
   event: string
-  timeMs: number
+  /** null = no time on record (NT) until the coach enters one. */
+  timeMs: number | null
   athleteId: string
   gender?: "M" | "F"
   sourceDate?: string | null
+  outsideWindow?: boolean
+  /** Coach-entered time rather than a swim on record. */
+  custom?: boolean
 }
 
 type RelayTeam = {
   letter: string
-  totalMs: number
+  /** null while any leg is NT. */
+  totalMs: number | null
   legs: Leg[]
 }
 
@@ -69,6 +82,8 @@ type StrokeTime = {
   timeMs: number
   event: string
   sourceDate?: string | null
+  outsideWindow?: boolean
+  custom?: boolean
 }
 
 type StrokeTimes = Record<
@@ -94,6 +109,21 @@ function slotStroke(index: number): string {
   return MEDLEY_SLOT_STROKES[index] ?? "free"
 }
 
+/** strokeTimes key for a relay slot: the medley stroke, or "free". */
+function legStroke(relay: string, index: number): string {
+  return isMedleyRelay(relay) ? slotStroke(index) : "free"
+}
+
+/** Individual event swum on a relay leg: "200 Medley Relay" leg 2 → "50 Breast". */
+function legEventName(relay: string, index: number): string {
+  const stroke = legStroke(relay, index)
+  return `${parseInt(relay, 10) / 4} ${stroke.charAt(0).toUpperCase()}${stroke.slice(1)}`
+}
+
+function formatLegTime(timeMs: number | null): string {
+  return timeMs == null ? "NT" : formatTime(timeMs)
+}
+
 function applyStroke(person: Pick<Leg, "athleteId" | "name" | "gender">, stroke: string, strokeTimes: StrokeTimes): Leg | null {
   const data = strokeTimes[person.athleteId]
   const time = data?.times[stroke]
@@ -105,6 +135,8 @@ function applyStroke(person: Pick<Leg, "athleteId" | "name" | "gender">, stroke:
     event: time.event,
     timeMs: time.timeMs,
     sourceDate: time.sourceDate ?? null,
+    outsideWindow: time.outsideWindow ?? false,
+    custom: time.custom ?? false,
     leg: stroke,
   }
 }
@@ -123,6 +155,8 @@ function rebuildMedleyAlternates(strokeTimes: StrokeTimes, usedIds: Set<string>,
           gender: data.gender,
           timeMs: time.timeMs,
           sourceDate: time.sourceDate ?? null,
+          outsideWindow: time.outsideWindow ?? false,
+          custom: time.custom ?? false,
           leg: stroke,
         }
       })
@@ -162,6 +196,25 @@ function normalizeResult(data: {
   }
 }
 
+/** Swim date under a time; red when it falls outside the preferred range. */
+function SourceDate({ leg }: { leg: Leg }) {
+  if (leg.custom) {
+    return <span className="mt-0.5 text-[11px] text-foreground-secondary">Custom time</span>
+  }
+  if (!leg.sourceDate) return null
+  return (
+    <span
+      className={
+        "mt-0.5 text-[11px] " +
+        (leg.outsideWindow ? "text-error" : "text-foreground-secondary")
+      }
+      title={leg.outsideWindow ? "Outside the preferred date range" : undefined}
+    >
+      {formatSwimDate(leg.sourceDate)}
+    </span>
+  )
+}
+
 function athleteName(athlete: AthleteOption): string {
   return athlete.name?.trim() || "Unknown"
 }
@@ -186,16 +239,20 @@ function cloneRelayResult(result: RelayResult): RelayResult {
 
 function lineupFingerprint(result: RelayResult): string {
   const teams = result.teams.map((team) =>
-    team.legs.map((leg) => `${leg.athleteId}:${leg.event}`).join(",")
+    team.legs.map((leg) => `${leg.athleteId}:${leg.event}:${leg.timeMs}`).join(",")
   )
-  const alts = (result.alternates ?? []).map((leg) => `${leg.athleteId}:${leg.event}`)
+  const alts = (result.alternates ?? []).map(
+    (leg) => `${leg.athleteId}:${leg.event}:${leg.timeMs}`
+  )
   return JSON.stringify({ teams, alts })
 }
 
 function retotalTeams(teams: RelayTeam[]): RelayTeam[] {
   return teams.map((team) => ({
     ...team,
-    totalMs: team.legs.reduce((sum, leg) => sum + leg.timeMs, 0),
+    totalMs: team.legs.every((leg) => leg.timeMs != null)
+      ? team.legs.reduce((sum, leg) => sum + (leg.timeMs ?? 0), 0)
+      : null,
   }))
 }
 
@@ -214,7 +271,7 @@ function rankAlternates(alts: Leg[]): Leg[] {
   return [...alts].sort((a, b) => {
     const strokeDiff = strokeIndex(a) - strokeIndex(b)
     if (strokeDiff !== 0) return strokeDiff
-    return a.timeMs - b.timeMs
+    return (a.timeMs ?? Infinity) - (b.timeMs ?? Infinity) || 0
   })
 }
 
@@ -253,7 +310,8 @@ function preservesMixedComposition(result: RelayResult, from: RowLoc, to: RowLoc
 }
 
 function canDropOnSlot(result: RelayResult, from: RowLoc, to: RowLoc, mixed = false): boolean {
-  if (to.list === "alt") return false
+  // Dropping a relay swimmer on an alternate is the same swap as the reverse drag.
+  if (to.list === "alt") return from.list === "team" && canDropOnSlot(result, to, from, mixed)
   if (sameLoc(from, to)) return false
   if (mixed && !preservesMixedComposition(result, from, to)) return false
   if (!isMedleyRelay(result.relay) || !result.strokeTimes) return true
@@ -271,7 +329,7 @@ function canDropOnSlot(result: RelayResult, from: RowLoc, to: RowLoc, mixed = fa
 function moveRelayRow(result: RelayResult, from: RowLoc, to: RowLoc, mixed = false): RelayResult {
   if (sameLoc(from, to)) return result
   if (from.list === "alt" && to.list === "alt") return result
-  if (to.list === "alt") return result
+  if (to.list === "alt") return moveRelayRow(result, to, from, mixed)
   if (mixed && !preservesMixedComposition(result, from, to)) return result
 
   const teams = result.teams.map((team) => ({ ...team, legs: [...team.legs] }))
@@ -326,17 +384,263 @@ function moveRelayRow(result: RelayResult, from: RowLoc, to: RowLoc, mixed = fal
   }
 }
 
+type LegAthlete = Pick<Leg, "athleteId" | "name" | "gender">
+
+/** A leg for this athlete in this slot, using their time on record (or custom time), else NT. */
+function legFor(result: RelayResult, person: LegAthlete, index: number): Leg {
+  const stroke = legStroke(result.relay, index)
+  const data = result.strokeTimes?.[person.athleteId]
+  const time = data?.times[stroke]
+  return {
+    athleteId: person.athleteId,
+    name: person.name || data?.name || "Unknown",
+    gender: person.gender ?? data?.gender,
+    event: time?.event ?? legEventName(result.relay, index),
+    timeMs: time?.timeMs ?? null,
+    sourceDate: time?.sourceDate ?? null,
+    outsideWindow: time?.outsideWindow ?? false,
+    custom: time?.custom ?? false,
+    ...(isMedleyRelay(result.relay) ? { leg: stroke } : {}),
+  }
+}
+
+/**
+ * Puts `person` on a relay leg. If they already swim another leg the two swap;
+ * otherwise the swimmer being replaced moves to the alternates.
+ */
+function replaceLeg(result: RelayResult, letter: string, index: number, person: LegAthlete): RelayResult {
+  const teams = result.teams.map((team) => ({ ...team, legs: [...team.legs] }))
+  const team = teams.find((t) => t.letter === letter)
+  const outgoing = team?.legs[index]
+  if (!team || !outgoing || outgoing.athleteId === person.athleteId) return result
+
+  let swapFrom: { legs: Leg[]; index: number } | null = null
+  for (const t of teams) {
+    const i = t.legs.findIndex((leg) => leg.athleteId === person.athleteId)
+    if (i >= 0) swapFrom = { legs: t.legs, index: i }
+  }
+
+  team.legs[index] = legFor(result, person, index)
+  let alternates = result.alternates ?? []
+  if (swapFrom) {
+    swapFrom.legs[swapFrom.index] = legFor(result, outgoing, swapFrom.index)
+  } else {
+    alternates = rankAlternates([
+      ...alternates.filter((alt) => alt.athleteId !== person.athleteId),
+      outgoing,
+    ])
+  }
+  return { ...result, teams: retotalTeams(teams), alternates }
+}
+
+/** Sets a coach-entered time on a relay leg; remembered for this athlete and stroke. */
+function setLegTime(result: RelayResult, letter: string, index: number, timeMs: number): RelayResult {
+  const teams = result.teams.map((team) => ({ ...team, legs: [...team.legs] }))
+  const team = teams.find((t) => t.letter === letter)
+  const leg = team?.legs[index]
+  if (!team || !leg) return result
+
+  const stroke = legStroke(result.relay, index)
+  team.legs[index] = { ...leg, timeMs, sourceDate: null, outsideWindow: false, custom: true }
+  const prior = result.strokeTimes?.[leg.athleteId]
+  return {
+    ...result,
+    teams: retotalTeams(teams),
+    strokeTimes: {
+      ...result.strokeTimes,
+      [leg.athleteId]: {
+        name: prior?.name ?? leg.name,
+        gender: prior?.gender ?? leg.gender,
+        times: {
+          ...prior?.times,
+          [stroke]: { timeMs, event: leg.event, sourceDate: null, outsideWindow: false, custom: true },
+        },
+      },
+    },
+  }
+}
+
+type LegCandidate = {
+  athlete: AthleteOption
+  timeMs: number | null
+  /** Where they are now: "B · Leg 2", "Alternate", or null. */
+  place: string | null
+}
+
+/** Inline roster autocomplete that replaces a relay leg's name while editing. */
+function LegNameEditor({
+  initialName,
+  candidates,
+  onPick,
+  onCancel,
+}: {
+  initialName: string
+  candidates: LegCandidate[]
+  onPick: (athlete: AthleteOption) => void
+  onCancel: () => void
+}) {
+  const [query, setQuery] = useState("")
+  const [active, setActive] = useState(0)
+  const listId = useId()
+  const matches = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    return q
+      ? candidates.filter((c) => athleteName(c.athlete).toLowerCase().includes(q))
+      : candidates
+  }, [candidates, query])
+  const highlighted = Math.min(active, Math.max(0, matches.length - 1))
+
+  return (
+    <div className="relative w-56 max-w-full">
+      <input
+        autoFocus
+        type="text"
+        role="combobox"
+        aria-expanded={matches.length > 0}
+        aria-controls={listId}
+        aria-activedescendant={matches[highlighted] ? `${listId}-${highlighted}` : undefined}
+        aria-label="Swimmer"
+        value={query}
+        placeholder={initialName}
+        onChange={(e) => {
+          setQuery(e.target.value)
+          setActive(0)
+        }}
+        onBlur={onCancel}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowDown") {
+            e.preventDefault()
+            setActive(Math.min(highlighted + 1, matches.length - 1))
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault()
+            setActive(Math.max(highlighted - 1, 0))
+          } else if (e.key === "Enter") {
+            e.preventDefault()
+            if (matches[highlighted]) onPick(matches[highlighted].athlete)
+          } else if (e.key === "Escape") {
+            e.preventDefault()
+            e.stopPropagation()
+            onCancel()
+          }
+        }}
+        className="w-full rounded-md border border-primary bg-background px-2 py-1 text-sm font-medium outline-none"
+      />
+      <ul
+        id={listId}
+        role="listbox"
+        // Keep focus in the input so blur doesn't cancel before a pick or scroll.
+        onMouseDown={(e) => e.preventDefault()}
+        className="absolute left-0 top-full z-20 mt-1 max-h-64 w-72 max-w-[80vw] overflow-auto rounded-lg border border-border bg-background-elevated py-1 shadow-lg"
+      >
+        {matches.length === 0 ? (
+          <li className="px-3 py-2 text-sm text-foreground-secondary">No matching athletes</li>
+        ) : (
+          matches.map((c, i) => (
+            <li
+              key={c.athlete.id}
+              id={`${listId}-${i}`}
+              role="option"
+              aria-selected={i === highlighted}
+              onMouseEnter={() => setActive(i)}
+              onClick={() => onPick(c.athlete)}
+              className={
+                "flex cursor-pointer items-center justify-between gap-3 px-3 py-1.5 text-sm " +
+                (i === highlighted ? "bg-background-hover" : "")
+              }
+            >
+              <span className="min-w-0">
+                <span className="block truncate">{athleteName(c.athlete)}</span>
+                {c.place ? (
+                  <span className="block text-xs text-foreground-secondary">{c.place}</span>
+                ) : null}
+              </span>
+              <span className="shrink-0 font-mono text-xs text-foreground-secondary">
+                {formatLegTime(c.timeMs)}
+              </span>
+            </li>
+          ))
+        )}
+      </ul>
+    </div>
+  )
+}
+
+/** Inline custom-time input for a relay leg. */
+function LegTimeEditor({
+  timeMs,
+  onSave,
+  onCancel,
+}: {
+  timeMs: number | null
+  onSave: (timeMs: number) => void
+  onCancel: () => void
+}) {
+  const [value, setValue] = useState(timeMs == null ? "" : formatTime(timeMs))
+  const [invalid, setInvalid] = useState(false)
+
+  function parsed(): number | null {
+    const ms = parseSwimTime(value)
+    return ms != null && Number.isFinite(ms) && ms > 0 ? ms : null
+  }
+
+  function commit(fromBlur: boolean) {
+    const ms = parsed()
+    if (ms == null) {
+      if (fromBlur || !value.trim()) onCancel()
+      else setInvalid(true)
+      return
+    }
+    if (ms === timeMs) onCancel()
+    else onSave(ms)
+  }
+
+  return (
+    <input
+      autoFocus
+      type="text"
+      inputMode="decimal"
+      aria-label="Custom time"
+      aria-invalid={invalid}
+      value={value}
+      placeholder="24.31"
+      onFocus={(e) => e.currentTarget.select()}
+      onChange={(e) => {
+        setValue(e.target.value)
+        setInvalid(false)
+      }}
+      onBlur={() => commit(true)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault()
+          commit(false)
+        } else if (e.key === "Escape") {
+          e.preventDefault()
+          e.stopPropagation()
+          onCancel()
+        }
+      }}
+      className={
+        "w-20 rounded-md border bg-background px-2 py-0.5 text-right font-mono text-sm outline-none " +
+        (invalid ? "border-error" : "border-primary")
+      }
+    />
+  )
+}
+
 export default function MeetRelayBuilder({
   meetId,
   defaultCourse,
   relayEvents,
   athletes = [],
+  signupRelayPrefs = null,
   hasImportedResults = false,
 }: {
   meetId: string
   defaultCourse: string
   relayEvents: string[]
   athletes?: AthleteOption[]
+  /** Relay preferences by athlete id from the last sign-up import; null when none. */
+  signupRelayPrefs?: Record<string, string[]> | null
   /** When true, hide "add to roster summary" actions. */
   hasImportedResults?: boolean
 }) {
@@ -354,6 +658,8 @@ export default function MeetRelayBuilder({
   const [error, setError] = useState("")
   const [gender, setGender] = useState("M")
   const [withinDays, setWithinDays] = useState<number | null>(null)
+  const hasSignups = signupRelayPrefs != null && Object.keys(signupRelayPrefs).length > 0
+  const [signupPool, setSignupPool] = useState<SignupPool>(hasSignups ? "relay" : "all")
   const [relayCount, setRelayCount] = useState(1)
   const [excludedIds, setExcludedIds] = useState<string[]>([])
   const [athleteQuery, setAthleteQuery] = useState("")
@@ -363,6 +669,8 @@ export default function MeetRelayBuilder({
   const [confirmError, setConfirmError] = useState<string | null>(null)
   const [dragFrom, setDragFrom] = useState<RowLoc | null>(null)
   const [dropTarget, setDropTarget] = useState<string | null>(null)
+  /** Relay leg whose name or time is being edited inline. */
+  const [editing, setEditing] = useState<{ key: string; field: "name" | "time" } | null>(null)
   const relayRowRefs = useRef(new Map<string, HTMLDivElement>())
 
   const genderLabel =
@@ -373,10 +681,16 @@ export default function MeetRelayBuilder({
   const poolAthletes = useMemo(
     () =>
       athletes.filter((a) => {
-        if (gender === "X") return a.gender === "M" || a.gender === "F"
-        return a.gender === gender
+        if (gender === "X" ? a.gender !== "M" && a.gender !== "F" : a.gender !== gender) {
+          return false
+        }
+        if (signupPool === "all" || !signupRelayPrefs) return true
+        const prefs = signupRelayPrefs[a.id]
+        if (!prefs) return false
+        if (signupPool === "meet") return true
+        return prefs.some((pref) => relayPreferenceMatches(pref, event, gender))
       }),
-    [athletes, gender]
+    [athletes, gender, signupPool, signupRelayPrefs, event]
   )
 
   const poolIdSet = useMemo(
@@ -396,7 +710,8 @@ export default function MeetRelayBuilder({
     [includedAthletes]
   )
 
-  const poolIds = excludedInPool.length === 0 ? null : includedIds
+  const poolIds =
+    signupPool === "all" && excludedInPool.length === 0 ? null : includedIds
 
   const visibleAthletes = useMemo(() => {
     const q = athleteQuery.trim().toLowerCase()
@@ -412,7 +727,13 @@ export default function MeetRelayBuilder({
       setOriginalResult(null)
 
       if (poolIds && poolIds.length === 0) {
-        setError(`No ${genderPeople} left in the pool. Include at least four athletes.`)
+        setError(
+          excludedInPool.length > 0
+            ? `No ${genderPeople} left in the pool. Include at least four athletes.`
+            : signupPool === "relay"
+              ? `No ${genderPeople} signed up for this relay.`
+              : `No ${genderPeople} signed up for this meet.`
+        )
         setLoading(false)
         return
       }
@@ -423,6 +744,7 @@ export default function MeetRelayBuilder({
           headers: { "Content-Type": "application/json" },
           signal,
           body: JSON.stringify({
+            meetId,
             relayEvent: event,
             course,
             gender,
@@ -451,9 +773,12 @@ export default function MeetRelayBuilder({
       event,
       gender,
       genderPeople,
+      meetId,
       poolIds,
       relayCount,
+      signupPool,
       withinDays,
+      excludedInPool.length,
     ]
   )
 
@@ -496,10 +821,59 @@ export default function MeetRelayBuilder({
       setError(`Built ${team.letter} relay is missing four athletes.`)
       return
     }
+    if (team.totalMs == null) {
+      setError(`Enter a time for every leg of the ${team.letter} relay first.`)
+      return
+    }
+    setError("")
     setConfirmError(null)
     setConfirmAdd(team.letter)
   }
 
+
+  /** Pool athletes who could take this leg, fastest first, with where they are now. */
+  function legCandidates(letter: string, index: number): LegCandidate[] {
+    if (!result) return []
+    const outgoing = result.teams.find((team) => team.letter === letter)?.legs[index]
+    if (!outgoing) return []
+    const places = new Map<string, string>()
+    for (const alt of result.alternates ?? []) places.set(alt.athleteId, "Alternate")
+    for (const team of result.teams) {
+      team.legs.forEach((leg, i) => {
+        places.set(leg.athleteId, result.teams.length > 1 ? `${team.letter} · Leg ${i + 1}` : `Leg ${i + 1}`)
+      })
+    }
+    const stroke = legStroke(result.relay, index)
+    return includedAthletes
+      // Mixed relays swap like-for-like so the lineup stays two men and two women.
+      .filter((a) => a.id !== outgoing.athleteId && (gender !== "X" || a.gender === outgoing.gender))
+      .map((athlete) => ({
+        athlete,
+        timeMs: result.strokeTimes?.[athlete.id]?.times[stroke]?.timeMs ?? null,
+        place: places.get(athlete.id) ?? null,
+      }))
+      .sort((a, b) => (a.timeMs ?? Infinity) - (b.timeMs ?? Infinity) || 0)
+  }
+
+  function pickLegAthlete(letter: string, index: number, athlete: AthleteOption) {
+    setEditing(null)
+    const previousPositions = captureRelayRowPositions()
+    setResult((current) =>
+      current
+        ? replaceLeg(current, letter, index, {
+            athleteId: athlete.id,
+            name: athleteName(athlete),
+            gender: athlete.gender,
+          })
+        : current
+    )
+    animateRelayRowSwap(previousPositions)
+  }
+
+  function saveLegTime(letter: string, index: number, timeMs: number) {
+    setEditing(null)
+    setResult((current) => (current ? setLegTime(current, letter, index, timeMs) : current))
+  }
 
   function revertLineup() {
     if (!originalResult || savingLetter) return
@@ -556,7 +930,6 @@ export default function MeetRelayBuilder({
   }
 
   function handleRowDragOver(event: DragEvent<HTMLElement>, loc: RowLoc) {
-    if (loc.list === "alt") return
     if (result && dragFrom && !canDropOnSlot(result, dragFrom, loc, gender === "X")) {
       event.dataTransfer.dropEffect = "none"
       setDropTarget(null)
@@ -574,10 +947,6 @@ export default function MeetRelayBuilder({
 
   function handleRowDrop(event: DragEvent<HTMLElement>, to: RowLoc) {
     event.preventDefault()
-    if (to.list === "alt") {
-      endDrag()
-      return
-    }
     if (dragFrom && result && canDropOnSlot(result, dragFrom, to, gender === "X")) {
       const previousPositions = captureRelayRowPositions()
       setResult((current) =>
@@ -609,6 +978,10 @@ export default function MeetRelayBuilder({
           setConfirmError(`Built ${team.letter} relay is missing four athletes.`)
           return
         }
+        if (team.totalMs == null) {
+          setConfirmError(`Enter a time for every leg of the ${team.letter} relay first.`)
+          return
+        }
         const res = await fetch(`/api/meets/${meetId}/relays`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -617,7 +990,7 @@ export default function MeetRelayBuilder({
             gender,
             relayLetter: team.letter,
             relayRound: "",
-            seedTime: formatTime(team.totalMs),
+            seedTime: formatLegTime(team.totalMs),
             legs: team.legs.map((leg, i) => ({
               leg: i + 1,
               athleteId: leg.athleteId,
@@ -661,7 +1034,7 @@ export default function MeetRelayBuilder({
     confirmAdd === "*" && result
       ? `Add ${result.teams.length} ${genderLabel} ${result.relay} relay${result.teams.length === 1 ? "" : "s"} (${result.teams.map((t) => t.letter).join(", ")}) as roster seeds.`
       : confirmTeam && result
-        ? `Add this ${genderLabel} ${result.relay} ${confirmTeam.letter} as a roster seed (${formatTime(confirmTeam.totalMs)}).`
+        ? `Add this ${genderLabel} ${result.relay} ${confirmTeam.letter} as a roster seed (${formatLegTime(confirmTeam.totalMs)}).`
         : undefined
 
   const eventChoices = events
@@ -719,7 +1092,7 @@ export default function MeetRelayBuilder({
           </label>
 
           <label className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:gap-6">
-            <span className="shrink-0 text-sm font-medium text-foreground sm:w-36">Times From</span>
+            <span className="shrink-0 text-sm font-medium text-foreground sm:w-36">Prefer Times From</span>
             <select
               value={withinDays ?? ""}
               onChange={(e) =>
@@ -772,6 +1145,21 @@ export default function MeetRelayBuilder({
           <div className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:gap-6">
             <p className="shrink-0 text-sm font-medium text-foreground sm:w-36">Athlete Pool</p>
             <div className="flex flex-wrap items-center gap-2">
+              {hasSignups ? (
+                <select
+                  value={signupPool}
+                  onChange={(e) => {
+                    setSignupPool(e.target.value as SignupPool)
+                    setResult(null)
+                  }}
+                  aria-label="Athlete pool"
+                  className="w-full max-w-sm border border-border rounded-lg px-3 py-2 text-sm bg-background sm:w-auto"
+                >
+                  <option value="relay">Signed up for relay</option>
+                  <option value="meet">Signed up for meet</option>
+                  <option value="all">All athletes</option>
+                </select>
+              ) : null}
               <button
                 type="button"
                 onClick={() => {
@@ -940,7 +1328,7 @@ export default function MeetRelayBuilder({
           <div className="space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-xs text-foreground-secondary">
-                Drag swimmers to change order, move between relays, or swap in an alternate.
+                Drag to move swimmers around. Click a name or time to change it.
               </p>
               <div className="flex flex-wrap items-center gap-2">
                 <button
@@ -954,14 +1342,14 @@ export default function MeetRelayBuilder({
               </div>
             </div>
             {result.teams.map((team) => (
-              <div key={team.letter} className="overflow-hidden rounded-lg border border-border bg-background">
+              <div key={team.letter} className="rounded-lg border border-border bg-background">
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-2.5">
                   <div className="flex items-center gap-2">
                     <span className="text-base font-medium text-foreground">
                       {`${gender === "F" ? "Women's" : gender === "M" ? "Men's" : "Mixed"} ${result.relay} - ${team.letter}`}
                     </span>
                     <span className="font-mono text-sm font-medium">
-                      {formatTime(team.totalMs)}
+                      {formatLegTime(team.totalMs)}
                     </span>
                   </div>
                   {!hasImportedResults && (
@@ -984,6 +1372,7 @@ export default function MeetRelayBuilder({
                     const key = locKey(loc)
                     const isDragging = dragFrom != null && locKey(dragFrom) === key
                     const isDropTarget = dropTarget === key && !isDragging
+                    const editingField = editing?.key === key ? editing.field : null
                     return (
                       <div
                         key={leg.athleteId || key}
@@ -991,15 +1380,17 @@ export default function MeetRelayBuilder({
                           if (element) relayRowRefs.current.set(leg.athleteId, element)
                           else relayRowRefs.current.delete(leg.athleteId)
                         }}
-                        draggable={savingLetter == null}
+                        draggable={savingLetter == null && editingField == null}
                         onDragStart={(event) => handleRowDragStart(event, loc)}
                         onDragOver={(event) => handleRowDragOver(event, loc)}
                         onDragLeave={(event) => handleRowDragLeave(event, loc)}
                         onDrop={(event) => handleRowDrop(event, loc)}
                         onDragEnd={endDrag}
                         className={
-                          "flex items-center justify-between px-4 py-2.5 " +
-                          (savingLetter == null ? "cursor-grab active:cursor-grabbing " : "") +
+                          "flex items-center justify-between gap-3 px-4 py-2.5 last:rounded-b-lg " +
+                          (savingLetter == null && editingField == null
+                            ? "cursor-grab active:cursor-grabbing "
+                            : "") +
                           (isDragging ? "opacity-40 " : "") +
                           (isDropTarget ? "bg-primary/10 " : "")
                         }
@@ -1008,23 +1399,57 @@ export default function MeetRelayBuilder({
                           <span className="flex h-6 w-6 items-center justify-center rounded-sm border border-primary/30 bg-primary/20 text-xs font-medium text-primary dark:bg-primary/20 dark:text-primary">
                             {i + 1}
                           </span>
-                          <div>
-                            <p className="flex items-center gap-1.5 text-sm font-medium">
-                              <span>{leg.name}</span>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 text-sm font-medium">
+                              {editingField === "name" ? (
+                                <LegNameEditor
+                                  initialName={leg.name}
+                                  candidates={legCandidates(team.letter, i)}
+                                  onPick={(athlete) => pickLegAthlete(team.letter, i, athlete)}
+                                  onCancel={() => setEditing(null)}
+                                />
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => setEditing({ key, field: "name" })}
+                                  disabled={savingLetter != null}
+                                  title="Change swimmer"
+                                  className="-mx-1 rounded px-1 text-left transition-colors hover:bg-background-hover"
+                                >
+                                  {leg.name}
+                                </button>
+                              )}
                               {gender === "X" && leg.gender ? (
                                 <span className="rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
                                   {leg.gender}
                                 </span>
                               ) : null}
-                            </p>
+                            </div>
                             <p className="text-xs text-foreground-secondary">{leg.event}</p>
                           </div>
                         </div>
-                        <div className="flex flex-col items-end text-right leading-tight">
-                          <span className="font-mono text-sm">{formatTime(leg.timeMs)}</span>
-                          {leg.sourceDate ? (
-                            <span className="mt-0.5 text-[11px] text-foreground-secondary">{formatSwimDate(leg.sourceDate)}</span>
-                          ) : null}
+                        <div className="flex shrink-0 flex-col items-end text-right leading-tight">
+                          {editingField === "time" ? (
+                            <LegTimeEditor
+                              timeMs={leg.timeMs}
+                              onSave={(timeMs) => saveLegTime(team.letter, i, timeMs)}
+                              onCancel={() => setEditing(null)}
+                            />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setEditing({ key, field: "time" })}
+                              disabled={savingLetter != null}
+                              title="Enter a custom time"
+                              className={
+                                "-mx-1 rounded px-1 font-mono text-sm transition-colors hover:bg-background-hover " +
+                                (leg.timeMs == null ? "text-error" : "")
+                              }
+                            >
+                              {formatLegTime(leg.timeMs)}
+                            </button>
+                          )}
+                          <SourceDate leg={leg} />
                         </div>
                       </div>
                     )
@@ -1043,6 +1468,7 @@ export default function MeetRelayBuilder({
                     const loc: RowLoc = { list: "alt", index: i }
                     const key = locKey(loc)
                     const isDragging = dragFrom != null && locKey(dragFrom) === key
+                    const isDropTarget = dropTarget === key && !isDragging
                     return (
                       <div
                         key={`${alt.athleteId}-${alt.event}-${i}`}
@@ -1052,11 +1478,15 @@ export default function MeetRelayBuilder({
                         }}
                         draggable={savingLetter == null}
                         onDragStart={(event) => handleRowDragStart(event, loc)}
+                        onDragOver={(event) => handleRowDragOver(event, loc)}
+                        onDragLeave={(event) => handleRowDragLeave(event, loc)}
+                        onDrop={(event) => handleRowDrop(event, loc)}
                         onDragEnd={endDrag}
                         className={
                           "flex items-center justify-between py-2.5 text-sm " +
                           (savingLetter == null ? "cursor-grab active:cursor-grabbing " : "") +
-                          (isDragging ? "opacity-40 " : "")
+                          (isDragging ? "opacity-40 " : "") +
+                          (isDropTarget ? "bg-primary/10 " : "")
                         }
                       >
                         <div>
@@ -1072,11 +1502,9 @@ export default function MeetRelayBuilder({
                         </div>
                         <div className="flex flex-col items-end leading-tight">
                           <span className="font-mono tabular-nums text-foreground-secondary">
-                            {formatTime(alt.timeMs)}
+                            {formatLegTime(alt.timeMs)}
                           </span>
-                          {alt.sourceDate ? (
-                            <span className="mt-0.5 text-[11px] text-foreground-secondary">{formatSwimDate(alt.sourceDate)}</span>
-                          ) : null}
+                          <SourceDate leg={alt} />
                         </div>
                       </div>
                     )

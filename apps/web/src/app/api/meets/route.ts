@@ -8,6 +8,7 @@ import {
   detectMeetResourceDrops,
   notifyMeetRosterOfInfoDrops } from "@/lib/meet/meet-roster-notify"
 import { uniqueMeetSlug } from "@/lib/slug"
+import { nameMeetImages } from "@/lib/meet/meet-storage"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
 
@@ -68,10 +69,18 @@ export async function POST(req: Request) {
       { packetParsed }
     )
 
-    const meet = await prisma.meet.create({
-      data: {
-        ...(toPrismaMeetWriteData(data) as Parameters<typeof prisma.meet.create>[0]["data"]),
-        slug: await uniqueMeetSlug(data.name as string)}})
+    const slug = await uniqueMeetSlug(data.name as string)
+    const images = await nameMeetImages(data)
+    const meet = await prisma.meet
+      .create({
+        data: {
+          ...(toPrismaMeetWriteData(data) as Parameters<typeof prisma.meet.create>[0]["data"]),
+          slug}})
+      .catch(async (err) => {
+        await images.rollback()
+        throw err
+      })
+    await images.commit()
 
     void notifyMeetRosterOfInfoDrops({
       meetId: meet.id,

@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { Course, Gender } from "@prisma/client"
+import { Course, Gender, Prisma } from "@prisma/client"
 import { canonicalizeStrokeEvent } from "@/lib/swim/swim-parse"
 import { getSession } from "@/lib/auth/session"
 import { athletePreferredName } from "@swimbuzz/shared"
+import { currentSeason } from "@/lib/season"
 
 // medley leg → individual event name in DB
 const MEDLEY_LEG_EVENTS: Record<string, string[]> = {
@@ -54,9 +55,23 @@ type BuiltLeg = {
   event: string
   timeMs: number
   sourceDate?: Date | null
+  /** The source swim falls outside the preferred date range (fallback time). */
+  outsideWindow?: boolean
   gender?: Gender
   leg?: string
 }
+
+type StrokeTimes = Record<
+  string,
+  {
+    name: string
+    gender?: Gender
+    times: Record<
+      string,
+      { timeMs: number; event: string; sourceDate: Date | null; outsideWindow: boolean }
+    >
+  }
+>
 
 type BuiltTeam = {
   letter: string
@@ -75,6 +90,7 @@ export async function POST(req: Request) {
     gender = "M",
     withinDays = null,
     athleteIds = null,
+    meetId = null,
   } = body
   const relayCount = parseRelayCount(body.relayCount ?? body.count ?? 1)
 
@@ -104,7 +120,33 @@ export async function POST(req: Request) {
     Number.isFinite(days) && days > 0
       ? new Date(Date.now() - days * 24 * 60 * 60 * 1000)
       : null
-  const dateFilter = sinceDate ? { date: { gte: sinceDate } } : {}
+
+  // Each athlete's best per event, preferring swims inside the window and
+  // falling back to their best from any date when they have none there.
+  const preferredBests = async (event: string | string[], ids: string[]): Promise<BestRow[]> => {
+    const where: Prisma.SwimWhereInput = {
+      event: Array.isArray(event) ? { in: event } : event,
+      course: courseEnum,
+      athleteId: { in: ids },
+    }
+    const [anyDate, inWindow] = await Promise.all([
+      prisma.swim.groupBy({ by: ["athleteId"], where, _min: { timeMs: true } }),
+      sinceDate
+        ? prisma.swim.groupBy({
+            by: ["athleteId"],
+            where: { ...where, date: { gte: sinceDate } },
+            _min: { timeMs: true },
+          })
+        : Promise.resolve([]),
+    ])
+    const best = new Map<string, number>()
+    for (const row of [...anyDate, ...inWindow]) {
+      if (row._min.timeMs != null) best.set(row.athleteId, row._min.timeMs)
+    }
+    return [...best]
+      .map(([athleteId, timeMs]) => ({ athleteId, timeMs }))
+      .sort((a, b) => a.timeMs - b.timeMs)
+  }
 
   const sourceKey = (row: Pick<BuiltLeg, "athleteId" | "event" | "timeMs">) =>
     `${row.athleteId}|${row.event}|${row.timeMs}`
@@ -113,7 +155,6 @@ export async function POST(req: Request) {
     const sourceSwims = await prisma.swim.findMany({
       where: {
         course: courseEnum,
-        ...dateFilter,
         OR: legs.map((leg) => ({
           athleteId: leg.athleteId,
           event: leg.event,
@@ -128,10 +169,14 @@ export async function POST(req: Request) {
       const key = sourceKey(swim)
       if (!sourceDates.has(key)) sourceDates.set(key, swim.date)
     }
-    return legs.map((leg) => ({
-      ...leg,
-      sourceDate: sourceDates.get(sourceKey(leg)) ?? null,
-    }))
+    return legs.map((leg) => {
+      const sourceDate = sourceDates.get(sourceKey(leg)) ?? null
+      return {
+        ...leg,
+        sourceDate,
+        outsideWindow: sinceDate != null && (sourceDate == null || sourceDate < sinceDate),
+      }
+    })
   }
 
   const signupPool =
@@ -145,20 +190,62 @@ export async function POST(req: Request) {
     )
   }
 
+  // Only the season roster is eligible: the meet's season, else the current one.
+  let season = currentSeason()
+  if (typeof meetId === "string" && meetId) {
+    const meet = await prisma.meet.findFirst({
+      where: { OR: [{ id: meetId }, { slug: meetId }] },
+      select: { season: true },
+    })
+    if (!meet) return NextResponse.json({ error: "Meet not found" }, { status: 404 })
+    season = meet.season
+  }
+
   const eligibleAthletes = await prisma.athlete.findMany({
     where: {
+      seasons: { has: season },
       ...(gender === "X" ? {} : { gender: gender as Gender }),
       ...(signupPool ? { id: { in: signupPool } } : {}),
     },
     select: { id: true, firstName: true, lastName: true, preferredName: true, gender: true },
   })
   const eligibleIds = eligibleAthletes.map((a) => a.id)
+  const athleteMap = Object.fromEntries(eligibleAthletes.map((a) => [a.id, a]))
   if (eligibleIds.length === 0) {
     return NextResponse.json(
       { error: "No matching athletes found for this relay" },
       { status: 400 }
     )
   }
+
+  // Every pool athlete's time per leg stroke, so the builder can swap anyone in.
+  const buildStrokeTimes = async (rows: BuiltLeg[]): Promise<StrokeTimes> => {
+    const strokeTimes: StrokeTimes = {}
+    for (const row of await attachSourceDates(rows)) {
+      if (!row.leg) continue
+      if (!strokeTimes[row.athleteId]) {
+        strokeTimes[row.athleteId] = { name: row.name, gender: row.gender, times: {} }
+      }
+      strokeTimes[row.athleteId].times[row.leg] = {
+        timeMs: row.timeMs,
+        event: row.event,
+        sourceDate: row.sourceDate ?? null,
+        outsideWindow: row.outsideWindow ?? false,
+      }
+    }
+    return strokeTimes
+  }
+  const freeStrokeTimes = (bests: BestRow[], eventName: string) =>
+    buildStrokeTimes(
+      bests.map((b) => ({
+        athleteId: b.athleteId,
+        name: fullName(athleteMap[b.athleteId]),
+        gender: athleteMap[b.athleteId]?.gender,
+        event: eventName,
+        timeMs: b.timeMs,
+        leg: "free",
+      }))
+    )
 
   if (!isMedley) {
     const eventName = `${legDist} Free`
@@ -174,49 +261,11 @@ export async function POST(req: Request) {
         )
       }
 
-      const menBests = await prisma.swim.groupBy({
-        by: ["athleteId"],
-        where: {
-          event: eventName,
-          course: courseEnum,
-          athleteId: { in: menIds },
-          ...dateFilter,
-        },
-        _min: { timeMs: true },
-        orderBy: { _min: { timeMs: "asc" } },
-        take: relayCount * 2 + 8,
-      })
-      const womenBests = await prisma.swim.groupBy({
-        by: ["athleteId"],
-        where: {
-          event: eventName,
-          course: courseEnum,
-          athleteId: { in: womenIds },
-          ...dateFilter,
-        },
-        _min: { timeMs: true },
-        orderBy: { _min: { timeMs: "asc" } },
-        take: relayCount * 2 + 8,
-      })
-
-      const allIds = [
-        ...menBests.map((b) => b.athleteId),
-        ...womenBests.map((b) => b.athleteId),
-      ]
-      const athletes = await prisma.athlete.findMany({
-        where: { id: { in: allIds } },
-        select: { id: true, firstName: true, lastName: true, preferredName: true, gender: true },
-      })
-      const athleteMap = Object.fromEntries(athletes.map((a) => [a.id, a]))
-
-      const menPool: BestRow[] = menBests.map((b) => ({
-        athleteId: b.athleteId,
-        timeMs: b._min.timeMs!,
-      }))
-      const womenPool: BestRow[] = womenBests.map((b) => ({
-        athleteId: b.athleteId,
-        timeMs: b._min.timeMs!,
-      }))
+      const [menPool, womenPool] = await Promise.all([
+        preferredBests(eventName, menIds),
+        preferredBests(eventName, womenIds),
+      ])
+      const strokeTimes = await freeStrokeTimes([...menPool, ...womenPool], eventName)
 
       const teams: BuiltTeam[] = []
       for (let t = 0; t < relayCount; t++) {
@@ -265,28 +314,12 @@ export async function POST(req: Request) {
         totalMs: teams[0].totalMs,
         legs: teams[0].legs,
         alternates,
+        strokeTimes,
       })
     }
 
-    const bests = await prisma.swim.groupBy({
-      by: ["athleteId"],
-      where: {
-        event: eventName,
-        course: courseEnum,
-        athleteId: { in: eligibleIds },
-        ...dateFilter,
-      },
-      _min: { timeMs: true },
-      orderBy: { _min: { timeMs: "asc" } },
-      take: Math.max(20, relayCount * 4 + 8),
-    })
-
-    const athleteIdList = bests.map((b) => b.athleteId)
-    const athletes = await prisma.athlete.findMany({
-      where: { id: { in: athleteIdList } },
-      select: { id: true, firstName: true, lastName: true, preferredName: true },
-    })
-    const athleteMap = Object.fromEntries(athletes.map((a) => [a.id, a]))
+    const bests = await preferredBests(eventName, eligibleIds)
+    const strokeTimes = await freeStrokeTimes(bests, eventName)
 
     const remaining = [...bests]
     const teams: BuiltTeam[] = []
@@ -302,7 +335,7 @@ export async function POST(req: Request) {
           athleteId: b.athleteId,
           name: fullName(athleteMap[b.athleteId]),
           event: eventName,
-          timeMs: b._min.timeMs!,
+          timeMs: b.timeMs,
         }))
       )
       teams.push({
@@ -324,7 +357,7 @@ export async function POST(req: Request) {
         athleteId: b.athleteId,
         name: fullName(athleteMap[b.athleteId]),
         event: eventName,
-        timeMs: b._min.timeMs!,
+        timeMs: b.timeMs,
       }))
     )
     return NextResponse.json({
@@ -334,6 +367,7 @@ export async function POST(req: Request) {
       totalMs: teams[0].totalMs,
       legs: teams[0].legs,
       alternates,
+      strokeTimes,
     })
   }
 
@@ -341,30 +375,11 @@ export async function POST(req: Request) {
   const timeLookup: Record<string, Record<string, number>> = {}
   for (const leg of MEDLEY_LEGS) {
     const eventNames = MEDLEY_LEG_EVENTS[leg].filter((e) => e.startsWith(`${legDist}`))
-    const bests = await prisma.swim.groupBy({
-      by: ["athleteId"],
-      where: {
-        event: { in: eventNames },
-        course: courseEnum,
-        athleteId: { in: eligibleIds },
-        ...dateFilter,
-      },
-      _min: { timeMs: true },
-      orderBy: { _min: { timeMs: "asc" } },
-    })
-    for (const c of bests) {
-      if (c._min.timeMs == null) continue
+    for (const c of await preferredBests(eventNames, eligibleIds)) {
       if (!timeLookup[c.athleteId]) timeLookup[c.athleteId] = {}
-      timeLookup[c.athleteId][leg] = c._min.timeMs
+      timeLookup[c.athleteId][leg] = c.timeMs
     }
   }
-
-  const allAthleteIds = Object.keys(timeLookup)
-  const athletes = await prisma.athlete.findMany({
-    where: { id: { in: allAthleteIds } },
-    select: { id: true, firstName: true, lastName: true, preferredName: true, gender: true },
-  })
-  const athleteMap = Object.fromEntries(athletes.map((a) => [a.id, a]))
 
   function bestMedleyFromPool(available: Set<string>, isMixed: boolean) {
     const optimizerIds = new Set<string>()
@@ -503,26 +518,7 @@ export async function POST(req: Request) {
       })
     }
   }
-  const strokeTimeDated = await attachSourceDates(strokeTimeRows)
-  const strokeTimes: Record<
-    string,
-    {
-      name: string
-      gender?: Gender
-      times: Record<string, { timeMs: number; event: string; sourceDate: Date | null }>
-    }
-  > = {}
-  for (const row of strokeTimeDated) {
-    if (!row.leg) continue
-    if (!strokeTimes[row.athleteId]) {
-      strokeTimes[row.athleteId] = { name: row.name, gender: row.gender, times: {} }
-    }
-    strokeTimes[row.athleteId].times[row.leg] = {
-      timeMs: row.timeMs,
-      event: row.event,
-      sourceDate: row.sourceDate ?? null,
-    }
-  }
+  const strokeTimes = await buildStrokeTimes(strokeTimeRows)
 
   return NextResponse.json({
     relay: normalizedRelay,

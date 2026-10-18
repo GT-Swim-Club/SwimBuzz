@@ -294,8 +294,6 @@ export default function MeetDetailScreen() {
   const rideSignUpsUrl =
     typeof meet.rideSignUpsUrl === "string" ? meet.rideSignUpsUrl.trim() : ""
   const roomsUrl = typeof meet.roomsUrl === "string" ? meet.roomsUrl.trim() : ""
-  const signupUrl = typeof meet.signupUrl === "string" ? meet.signupUrl.trim() : ""
-  const showSignup = isExternalUrl(signupUrl) && !meet.meetHasEnded
 
   const travelFields: Array<[string, unknown]> = [
     ["Hotel", meet.hotel],
@@ -340,6 +338,7 @@ export default function MeetDetailScreen() {
     setRelayLoading(true)
     try {
       const data = await api.optimalRelays({
+        meetId: id,
         relayEvent,
         course: String(meet.course ?? "SCY"),
         gender: relayGender === "X" ? "M" : relayGender,
@@ -527,17 +526,6 @@ export default function MeetDetailScreen() {
           {course ? <MetaRow label="Course" value={course} /> : null}
           {school ? <MetaRow label="School" value={school} /> : null}
         </Section>
-
-        {showSignup ? (
-          <Section title="Sign-ups">
-            <Button
-              icon={<Icon color={c.text} name="externalLink" size={16} />}
-              label="Sign-up form"
-              variant="secondary"
-              onPress={() => setPreviewLink({ label: "Sign-up form", url: signupUrl })}
-            />
-          </Section>
-        ) : null}
 
         {resources.length > 0 ? (
           <Section title="Resources">

@@ -1,19 +1,19 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useState } from "react"
 import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
-import { currentSeason, parseSeason, seasonEndYear } from "@/lib/season"
+import { currentSeason, parseSeason } from "@/lib/season"
 import { formatSeasonLabel } from "@swimbuzz/shared"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
-import { useScraperUi } from "@/components/scraper/ScraperUiProvider"
+import { toolbarButtonClass } from "@/components/ui/FluidToolbar"
+import ImportIcon from "./ImportIcon"
 import { useImportTask } from "@/components/ui/ImportTaskProvider"
 import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/ui/FileDropzone"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/ui/SegmentedToggle"
-import { runScraperEnqueuePollFinalize } from "@/lib/scraper/scraper-job-client"
 import { pickSpreadsheet, type PickedSpreadsheet } from "@/lib/roster/google-picker-client"
 
-type ImportSource = "swimcloud" | "csv" | "sheets"
+type ImportSource = "csv" | "sheets"
 
 type SheetTab = { gid: number; title: string }
 
@@ -38,17 +38,13 @@ export default function ImportRosterButton() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const gender = searchParams.get("gender") ?? "all"
   const season =
     parseSeason(searchParams.get("season") ?? searchParams.get("year")) ?? currentSeason()
-  const genderLabel = gender === "F" ? "Women's" : gender === "M" ? "Men's" : ""
-  const rosterLabel = `${genderLabel} ${formatSeasonLabel(season)}`
 
-  const { connected: scraperConnected, requireScraper } = useScraperUi()
   const { startTask } = useImportTask()
 
   const [open, setOpen] = useState(false)
-  const [source, setSource] = useState<ImportSource>("csv")
+  const [source, setSource] = useState<ImportSource>("sheets")
   const [error, setError] = useState<string | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [picked, setPicked] = useState<PickedSpreadsheet | null>(null)
@@ -59,12 +55,10 @@ export default function ImportRosterButton() {
   const modalDescription =
     source === "csv"
       ? `Replaces the ${formatSeasonLabel(season)} roster with this file.`
-      : source === "sheets"
-        ? `Replaces the ${formatSeasonLabel(season)} roster with this Google Sheet.`
-        : `Imports SwimCloud IDs to the ${rosterLabel} roster.`
+      : `Replaces the ${formatSeasonLabel(season)} roster with this Google Sheet.`
 
   function resetForm() {
-    setSource("csv")
+    setSource("sheets")
     setError(null)
     setSelectedFile(null)
     setPicked(null)
@@ -103,55 +97,6 @@ export default function ImportRosterButton() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-
-    if (source === "swimcloud") {
-      requireScraper(() => {
-        void (async () => {
-          setOpen(false)
-
-          const season_ = season
-          const gender_ = gender
-
-          startTask(
-            "Importing roster (SwimCloud)…",
-            (async () => {
-              const data = await runScraperEnqueuePollFinalize<{
-                linked?: number
-                updated?: number
-                unmatched?: number
-                skippedConflict?: number
-              }>({
-                enqueue: () =>
-                  fetch("/api/roster/sync", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      season: season_,
-                      year: seasonEndYear(season_),
-                      gender: gender_,
-                    }),
-                  }),
-                finalize: (jobId) =>
-                  fetch("/api/roster/sync/finalize", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ jobId }),
-                  }),
-              })
-              const linked = data.linked ?? data.updated ?? 0
-              const parts: string[] = [`Imported SwimCloud IDs on ${linked} athlete${linked === 1 ? "" : "s"}`]
-              if ((data.unmatched ?? 0) > 0)
-                parts.push(`${data.unmatched} unmatched`)
-              if ((data.skippedConflict ?? 0) > 0)
-                parts.push(`${data.skippedConflict} skipped (conflict)`)
-              router.refresh()
-              return parts.join(" · ")
-            })()
-          )
-        })()
-      })
-      return
-    }
 
     if (source === "sheets") {
       if (!picked || selectedGid == null) {
@@ -205,12 +150,7 @@ export default function ImportRosterButton() {
     )
   }
 
-  const canSubmit =
-    source === "swimcloud"
-      ? true
-      : source === "sheets"
-        ? !!picked && selectedGid != null
-        : !!selectedFile
+  const canSubmit = source === "sheets" ? !!picked && selectedGid != null : !!selectedFile
 
   return (
     <>
@@ -220,42 +160,29 @@ export default function ImportRosterButton() {
           resetForm()
           setOpen(true)
         }}
-        className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border-secondary rounded-lg hover:border-border hover:bg-fill-tertiary bg-background dark:hover:bg-fill-tertiary dark:bg-background transition-colors"
+        aria-label="Import roster"
+        className={toolbarButtonClass}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-3.5 w-3.5 shrink-0"
-          aria-hidden="true"
-        >
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="7 10 12 15 17 10" />
-          <line x1="12" y1="15" x2="12" y2="3" />
-        </svg>
-        Import Roster
+        <ImportIcon />
+        Roster
       </button>
 
       <Modal
         open={open}
         onClose={() => setOpen(false)}
         title="Import Roster"
+        maxWidth="xl"
         description={modalDescription}
         header={
           <SegmentedToggle
-            selectedIndex={source === "swimcloud" ? 1 : source === "sheets" ? 2 : 0}
+            selectedIndex={source === "csv" ? 1 : 0}
             fullWidth
             className="mt-4 rounded-lg border border-border-secondary bg-background"
           >
             {(
               [
-                ["csv", "CSV", "icon"] as const,
-                ["swimcloud", "SwimCloud IDs", "logo"] as const,
                 ["sheets", "Google Sheets", "sheet"] as const,
+                ["csv", "CSV", "icon"] as const,
               ] as const
             ).map(([value, label, adornment]) => (
               <button
@@ -267,16 +194,6 @@ export default function ImportRosterButton() {
                 }}
                 className={segmentedOptionClass(source === value) + " text-xs"}
               >
-                {adornment === "logo" && (
-                    <Image
-                    src="/swimcloud.webp"
-                    alt=""
-                    width={20}
-                    height={20}
-                    className="shrink-0"
-                    style={{ width: "auto" }}
-                  />
-                )}
                 {adornment === "icon" && (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -297,23 +214,7 @@ export default function ImportRosterButton() {
                   </svg>
                 )}
                 {adornment === "sheet" && (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4 shrink-0"
-                    aria-hidden="true"
-                  >
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <line x1="3" y1="9" x2="21" y2="9" />
-                    <line x1="3" y1="15" x2="21" y2="15" />
-                    <line x1="9" y1="3" x2="9" y2="21" />
-                    <line x1="15" y1="3" x2="15" y2="21" />
-                  </svg>
+                  <Image src="/google-sheets.png" alt="" width={16} height={16} className="shrink-0" />
                 )}
                 {label}
               </button>
@@ -340,55 +241,20 @@ export default function ImportRosterButton() {
           </ModalFooter>
         }
       >
-        {source === "swimcloud" ? (
-          <div className="space-y-2 text-md text-foreground-secondary text-foreground-secondary">
-            <p>
-              Imports SwimCloud IDs for athletes already on your roster. Does not add new athletes.
-            </p>
-          </div>
-        ) : source === "sheets" ? (
+        {source === "sheets" ? (
           <div className="space-y-4">
-            <div className="rounded-lg border border-border-secondary bg-fill-secondary px-4 py-3 text-sm">
-              <p className="font-medium text-foreground text-foreground">Required columns</p>
-              <ul className="mt-2 space-y-1.5 text-foreground-secondary text-foreground-secondary">
-                <li>
-                  <span className="font-medium text-gray-800 dark:text-zinc-200">Name</span>
-                  {" — "}
-                  <span className="text-foreground-secondary text-foreground-secondary">
-                    First Name &amp; Last Name
-                  </span>
-                </li>
-                <li>
-                  <span className="font-medium text-gray-800 dark:text-zinc-200">Gender</span>
-                  {" — "}
-                  <span className="text-foreground-secondary text-foreground-secondary">
-                    M/F, Male/Female, Men/Women, or Boy/Girl
-                  </span>
-                </li>
-              </ul>
-              <p className="mt-3 font-medium text-foreground text-foreground">Recommended columns</p>
-              <ul className="mt-2 space-y-1.5 text-foreground-secondary text-foreground-secondary text-xs">
-                <li>Email, Preferred name, Full legal name, GTID, DOB, Year, SwimCloud profile URL</li>
-              </ul>
-              <p className="mt-3 text-xs text-foreground-secondary">
-                People in the sheet become this season's roster. Anyone not listed is removed from the season.
-              </p>
-            </div>
+            <RosterColumnsHint />
 
             {!picked ? (
-              <div className="rounded-lg border border-border-secondary px-4 py-3 text-sm space-y-2">
-                <p className="text-foreground-secondary text-foreground-secondary">
-                  Choose the roster spreadsheet from your Google Drive.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => void handleChooseSheet()}
-                  disabled={picking}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-border-secondary px-3 py-1.5 text-sm font-medium hover:bg-fill-tertiary disabled:opacity-50"
-                >
-                  {picking ? "Opening Google Drive…" : "Choose from Google Drive"}
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => void handleChooseSheet()}
+                disabled={picking}
+                className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium transition-colors hover:bg-background-hover disabled:opacity-50"
+              >
+                <Image src="/google-sheets.png" alt="" width={18} height={18} className="shrink-0" />
+                {picking ? "Opening Google Drive…" : "Choose from Google Sheets"}
+              </button>
             ) : (
               <div className="space-y-3">
                 <div className="flex items-center justify-between rounded-lg border border-border-secondary px-4 py-2.5 text-sm">
@@ -407,14 +273,12 @@ export default function ImportRosterButton() {
                 {tabs === null ? (
                   <p className="text-sm text-foreground-secondary text-foreground-secondary">Reading sheet…</p>
                 ) : tabs.length > 1 ? (
-                  <div>
-                    <span className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
-                      Tab
-                    </span>
+                  <label className="flex items-center gap-3">
+                    <span className="shrink-0 text-sm font-medium text-foreground-secondary">Tab</span>
                     <select
                       value={selectedGid ?? ""}
                       onChange={(e) => setSelectedGid(Number(e.target.value))}
-                      className="w-full rounded-lg border border-border-secondary bg-background px-3 py-2 text-sm outline-none focus:border-border"
+                      className="min-w-0 flex-1 rounded-lg border border-border-secondary bg-background px-3 py-2 text-sm outline-none focus:border-border"
                     >
                       {tabs.map((tab) => (
                         <option key={tab.gid} value={tab.gid}>
@@ -422,39 +286,14 @@ export default function ImportRosterButton() {
                         </option>
                       ))}
                     </select>
-                  </div>
+                  </label>
                 ) : null}
               </div>
             )}
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="rounded-lg border border-border-secondary bg-fill-secondary px-4 py-3 text-sm">
-              <p className="font-medium text-foreground text-foreground">Required columns</p>
-              <ul className="mt-2 space-y-1.5 text-foreground-secondary text-foreground-secondary">
-                <li>
-                  <span className="font-medium text-gray-800 dark:text-zinc-200">Name</span>
-                  {" — "}
-                  <span className="text-foreground-secondary text-foreground-secondary">
-                    First Name &amp; Last Name
-                  </span>
-                </li>
-                <li>
-                  <span className="font-medium text-gray-800 dark:text-zinc-200">Gender</span>
-                  {" — "}
-                  <span className="text-foreground-secondary text-foreground-secondary">
-                    M/F, Male/Female, Men/Women, or Boy/Girl
-                  </span>
-                </li>
-              </ul>
-              <p className="mt-3 font-medium text-foreground text-foreground">Recommended columns</p>
-              <ul className="mt-2 space-y-1.5 text-foreground-secondary text-foreground-secondary text-xs">
-                <li>Email, Preferred name, Full legal name, GTID, DOB, Year, SwimCloud profile URL</li>
-              </ul>
-              <p className="mt-3 text-xs text-foreground-secondary">
-                People in the file become this season's roster. Anyone not listed is removed from the season.
-              </p>
-            </div>
+            <RosterColumnsHint />
 
             <div>
               <span className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
@@ -481,5 +320,19 @@ export default function ImportRosterButton() {
         {error && <p className="text-sm text-error">{error}</p>}
       </Modal>
     </>
+  )
+}
+
+/** Which columns the roster CSV / Google Sheet import reads (see lib/roster/roster-csv.ts). */
+function RosterColumnsHint() {
+  return (
+    <div className="rounded-lg border border-border-secondary bg-fill-secondary px-4 py-3 text-sm">
+      <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5">
+        <dt className="font-medium text-foreground">Required</dt>
+        <dd className="text-foreground-secondary">Full Name (First &amp; Last Name), Gender, Email</dd>
+        <dt className="font-medium text-foreground">Recommended</dt>
+        <dd className="text-foreground-secondary">Preferred Name, GTID, DOB, Year, SwimCloud URL</dd>
+      </dl>
+    </div>
   )
 }

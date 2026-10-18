@@ -110,16 +110,13 @@ export default function DeletedPracticeListRail({
               </div>
               <div className="min-w-0 flex-1">
                 <p className="min-w-0 truncate text-sm font-medium leading-tight text-foreground">{practice.title}</p>
-                <div className="mt-0.5 flex flex-wrap items-center gap-1">
-                  {practice.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full bg-primary/80 px-1.5 py-px text-[10px] text-primary-text dark:bg-primary"
-                    >
-                      {tag}
+                <div className="mt-0.5 flex min-w-0 items-center gap-1.5">
+                  {practice.tags.length > 0 && (
+                    <span className="min-w-0 truncate text-xs text-foreground-tertiary">
+                      {practice.tags.join(", ")}
                     </span>
-                  ))}
-                  <span className={`text-[11px] font-medium ${TONE_CLASS[countdown.tone]}`}>
+                  )}
+                  <span className={`shrink-0 text-[11px] font-medium ${TONE_CLASS[countdown.tone]}`}>
                     {countdown.label}
                   </span>
                 </div>

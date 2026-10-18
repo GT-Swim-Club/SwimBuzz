@@ -1,7 +1,7 @@
 export type ListLayout = "gallery" | "list"
 
 /**
- * Pages with a Gallery/List toggle. Each remembers the layout the user last
+ * Pages with a List/Gallery toggle. Each remembers the layout the user last
  * switched to in its own cookie — read server-side (list-layout-server.ts) so
  * the page and its loading skeleton render in that layout with no flash.
  */
@@ -20,7 +20,7 @@ export function listLayoutCookie(page: ListLayoutPage) {
 }
 
 export function parseListLayout(value: string | null | undefined): ListLayout {
-  return value === "list" ? "list" : "gallery"
+  return value === "gallery" ? "gallery" : "list"
 }
 
 /** Client-only: remember `layout` as this page's default for next time. */

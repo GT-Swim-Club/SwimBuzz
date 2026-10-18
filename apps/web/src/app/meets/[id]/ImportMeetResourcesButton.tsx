@@ -265,7 +265,7 @@ export default function ImportMeetResourcesButton({
       confirmations,
       roster: data.rosterForPairing ?? [],
       description:
-        "These names were found on a psych, heat, or finals heat sheet but did not match the roster. Pair them to a roster athlete to include their entries.",
+        "These names were found on a meet PDF but did not match the roster. Pair them to a roster athlete.",
       occurrenceNoun: ["entry", "entries"],
       submitVerb: "Save",
       taskLabel: "Saving paired athletes…",

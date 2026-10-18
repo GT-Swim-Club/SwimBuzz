@@ -10,6 +10,7 @@ import {
 } from "@/lib/meet/meet-sheet-summary"
 import { isRelayResultsSummary } from "@/lib/meet/relay-results"
 import { resolveSignupEventOptions } from "@/lib/meet/meet-signup"
+import { isSignupRelayPreferences } from "@/lib/meet/meet-signup-import"
 import { athletePreferredName } from "@swimbuzz/shared"
 import MeetRelayBuilder from "../MeetRelayBuilder"
 
@@ -41,6 +42,7 @@ export default async function MeetRelayBuilderPage({
       eventOrder: true,
       resultStatusesSummary: true,
       relayResultsSummary: true,
+      signupRelayPreferences: true,
       swims: { select: { id: true } },
     },
   })
@@ -67,6 +69,10 @@ export default async function MeetRelayBuilderPage({
     name: athletePreferredName(athlete),
     gender: athlete.gender === Gender.F ? ("F" as const) : ("M" as const),
   }))
+
+  const signupRelayPrefs = isSignupRelayPreferences(meet.signupRelayPreferences)
+    ? Object.fromEntries(meet.signupRelayPreferences.athletes.map((a) => [a.athleteId, a.relays]))
+    : null
 
   const relayEvents = resolveSignupEventOptions(meet.eventOrder)
     .filter((option) => option.isRelay)
@@ -101,6 +107,7 @@ export default async function MeetRelayBuilderPage({
         defaultCourse={meet.course}
         relayEvents={relayEvents}
         athletes={athletes}
+        signupRelayPrefs={signupRelayPrefs}
         hasImportedResults={hasImportedResults}
       />
     </main>

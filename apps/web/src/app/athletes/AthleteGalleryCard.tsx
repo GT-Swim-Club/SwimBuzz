@@ -1,72 +1,34 @@
 import Link from "next/link"
-import type { StaffTitle } from "@swimbuzz/shared"
 import { athletePath } from "@/lib/slug"
-import { formatAthleteYearAndAge } from "@/lib/utils"
-import StaffBadge from "@/components/ui/StaffBadge"
+import { AthleteAvatar, AthleteName, athleteMeta, type RosterAthlete } from "./roster-athlete"
 
+/** Compact horizontal roster card: avatar, name, then "Year · Age · Gender". */
 export default function AthleteGalleryCard({
   athlete,
   showGender,
   isYou,
+  anchor,
 }: {
-  athlete: {
-    id: string
-    slug: string | null
-    firstName: string
-    lastName: string
-    user: { image: string | null; email: string | null; staffTitle?: StaffTitle | null } | null
-    preferredName: string | null
-    gender: string
-    swimCloudId: number | null
-    year: string | null
-    dob: string | Date | null
-  }
+  athlete: RosterAthlete
   showGender: boolean
-  isYou?: boolean
+  isYou: boolean
+  /** Last-name initial when this is the first card of its letter (A–Z rail target). */
+  anchor?: string
 }) {
-  const yearAndAge = formatAthleteYearAndAge(athlete.year, athlete.dob)
+  const meta = athleteMeta(athlete, showGender)
 
   return (
     <Link
+      id={anchor}
       href={athletePath(athlete.slug ?? athlete.id)}
-      className={`group flex h-full flex-col items-center overflow-hidden rounded-xl border p-4 text-center transition-all ${
-        isYou
-          ? "border-primary bg-primary/5 shadow-sm hover:shadow-md"
-          : "border-border bg-background shadow-sm hover:border-border hover:bg-fill-secondary hover:shadow-md"
+      className={`flex min-w-0 scroll-mt-32 items-center gap-3 rounded-xl border px-4 py-3 shadow-sm transition-[background-color,box-shadow] hover:bg-background-hover hover:shadow-md ${
+        isYou ? "border-primary bg-primary/5" : "border-border bg-background"
       }`}
     >
-      <div className="mb-4 h-20 w-20 overflow-hidden rounded-full border border-primary/30 bg-primary/20">
-        {athlete.user?.image ? (
-          <img
-            src={athlete.user.image}
-            alt={`${athlete.firstName} ${athlete.lastName}`}
-            className="h-full w-full object-cover"
-            referrerPolicy="no-referrer"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-xl font-semibold text-primary">
-            {athlete.firstName[0]}
-            {athlete.lastName[0]}
-          </div>
-        )}
-      </div>
-      <h3 className="text-base font-medium text-foreground">
-        {athlete.firstName}
-        {athlete.preferredName ? (
-          <span className="font-normal text-foreground-secondary">
-            {" "}({athlete.preferredName})
-          </span>
-        ) : null}{" "}
-        {athlete.lastName}
-        {athlete.user?.staffTitle && <StaffBadge title={athlete.user.staffTitle} />}
-      </h3>
-      <div className="mt-1 w-full space-y-0.5 text-sm text-foreground-secondary">
-        {yearAndAge ? <p className="truncate">{yearAndAge}</p> : null}
-        {showGender ? (
-          <p className="font-medium uppercase tracking-wide text-foreground-tertiary">
-            {athlete.gender === "F" ? "Women" : "Men"}
-          </p>
-        ) : null}
+      <AthleteAvatar athlete={athlete} className="h-11 w-11 text-[15px]" />
+      <div className="flex min-w-0 flex-col">
+        <AthleteName athlete={athlete} className="text-[15px] leading-[22px]" />
+        {meta && <p className="truncate text-[13px] leading-[18px] tabular-nums text-foreground-secondary">{meta}</p>}
       </div>
     </Link>
   )

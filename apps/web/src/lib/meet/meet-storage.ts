@@ -9,6 +9,7 @@ import {
   heatSheetUrlList,
   isStoredMeetFileUrl,
 } from "@/lib/meet/meet-files"
+import { meetSlugBase } from "@/lib/slug"
 
 function getSupabaseConfig() {
   const url = process.env.SUPABASE_URL?.replace(/\/$/, "")
@@ -62,10 +63,11 @@ function formatStorageError(message: string) {
 async function fileExists(
   url: string,
   key: string,
-  storagePath: string
+  storagePath: string,
+  bucket: string = MEET_FILE_BUCKET
 ): Promise<boolean> {
   const res = await fetch(
-    `${url}/storage/v1/object/${MEET_FILE_BUCKET}/${storagePath}`,
+    `${url}/storage/v1/object/${bucket}/${storagePath}`,
     {
       method: "HEAD",
       headers: storageHeaders(key),
@@ -386,4 +388,94 @@ export async function deleteAddedMeetFiles(
 
 export async function deleteAllMeetFiles(meet: MeetStoredFiles, options?: { strict?: boolean }) {
   await deleteStoredUrls(allMeetStoredUrls(meet), options?.strict)
+}
+
+const MEET_IMAGES = [
+  { key: "iconUrl", bucket: "meet-icons", folder: "icons", label: "icon" },
+  { key: "bannerUrl", bucket: "meet-banners", folder: "banners", label: "banner" },
+] as const
+
+export type MeetImageNaming = {
+  /** Delete the originals once the meet row points at the copies. */
+  commit: () => Promise<void>
+  /** Delete the copies when the meet save fails. */
+  rollback: () => Promise<void>
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
+
+async function copyStoredObject(
+  url: string,
+  key: string,
+  bucket: string,
+  sourceKey: string,
+  destinationKey: string
+) {
+  const res = await fetch(`${url}/storage/v1/object/copy`, {
+    method: "POST",
+    headers: storageHeaders(key, { "Content-Type": "application/json" }),
+    body: JSON.stringify({ bucketId: bucket, sourceKey, destinationKey }),
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    const message =
+      (body as { message?: string; error?: string }).message ??
+      (body as { error?: string }).error ??
+      res.statusText
+    throw new Error(formatStorageError(message))
+  }
+}
+
+/**
+ * Point `data.iconUrl` / `data.bannerUrl` at copies named after the meet
+ * (`icons/fall-invite-icon.png`, `banners/fall-invite-banner.jpg`). Covers
+ * fresh uploads and, when the meet is renamed, its existing images. Naming is
+ * cosmetic: a failed copy keeps the original URL.
+ */
+export async function nameMeetImages(
+  data: Record<string, unknown>,
+  existing?: { name: string; iconUrl: string | null; bannerUrl: string | null }
+): Promise<MeetImageNaming> {
+  const sources: string[] = []
+  const copies: string[] = []
+  const done = {
+    commit: () => deleteStoredUrls(sources),
+    rollback: () => deleteStoredUrls(copies),
+  }
+
+  const name = typeof data.name === "string" ? data.name : existing?.name
+  if (!name) return done
+  const renamed = !!existing && name !== existing.name
+
+  for (const image of MEET_IMAGES) {
+    const url = image.key in data ? data[image.key] : renamed ? existing[image.key] : null
+    if (typeof url !== "string" || !url.trim()) continue
+    const parsed = parsePublicStorageUrl(url)
+    if (!parsed || parsed.bucket !== image.bucket) continue
+
+    const ext = path.extname(parsed.path).toLowerCase()
+    const base = `${meetSlugBase(name)}-${image.label}`
+    const named = new RegExp(`^${image.folder}/${escapeRegExp(base)}(-\\d+)?${escapeRegExp(ext)}$`)
+    if (named.test(parsed.path)) continue
+
+    try {
+      const { url: baseUrl, key } = getSupabaseConfig()
+      let destination = `${image.folder}/${base}${ext}`
+      for (let n = 2; await fileExists(baseUrl, key, destination, image.bucket); n++) {
+        destination = `${image.folder}/${base}-${n}${ext}`
+      }
+      await copyStoredObject(baseUrl, key, image.bucket, parsed.path, destination)
+      // Names get reused after a replace, so version the URL past browser/CDN caches.
+      const copyUrl = `${baseUrl}/storage/v1/object/public/${image.bucket}/${destination}?v=${Date.now().toString(36)}`
+      data[image.key] = copyUrl
+      sources.push(url)
+      copies.push(copyUrl)
+    } catch (err) {
+      console.error(`Failed to rename meet ${image.label}:`, err)
+    }
+  }
+
+  return done
 }

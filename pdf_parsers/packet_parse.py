@@ -33,6 +33,10 @@ SESSION_KEYWORD = re.compile(
 
 
 def _is_session_header(line: str) -> bool:
+    # CCS regional packets print the session as the table's own header row —
+    # "Women’s Day 1 Prelims Men’s" — so judge the label between the gender
+    # columns, not the whole line (which is too long for the "Day X" check).
+    line = _clean_session_label(line)
     line_lower = line.lower()
     # Check for "day" + number
     # A session header like "Day 1 Prelims" will have "day" and "1", but is usually short.
@@ -133,8 +137,8 @@ def _restore_spaces_in_event(name: str) -> str:
 def _clean_session_label(label: str) -> str:
     """Clean 'Women’s Day X [Prelims/Finals] Men’s' to 'Day X [Prelims/Finals]'."""
     cleaned = re.sub(r"^women['’]?s?\s+(.*?)\s+men['’]?s?$", r"\1", label, flags=re.IGNORECASE)
-    cleaned = re.sub(r"^(women'?s?|men'?s?)\s+", "", cleaned, flags=re.IGNORECASE)
-    cleaned = re.sub(r"\s+(women'?s?|men'?s?)$", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"^(women['’]?s?|men['’]?s?)\s+", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\s+(women['’]?s?|men['’]?s?)$", "", cleaned, flags=re.IGNORECASE)
     return cleaned.strip()
 
 

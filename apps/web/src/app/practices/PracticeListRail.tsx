@@ -84,24 +84,13 @@ export default function PracticeListRail({
             </div>
             <div className="min-w-0 flex-1">
               <p className="min-w-0 truncate text-sm font-medium leading-tight text-foreground">{practice.title}</p>
-              {showTags ? (
-                <div className="mt-0.5 flex h-[18px] flex-wrap items-center gap-1 overflow-hidden">
-                  {practice.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full bg-primary/80 px-1.5 py-px text-[10px] text-primary-text dark:bg-primary"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <div className="mt-0.5 flex h-[18px] items-center">
-                  <p className="text-xs text-foreground-tertiary">
-                    {formatZonedInstantRange(practice.startsAt, practice.endsAt, practice.timeZone).time}
-                  </p>
-                </div>
-              )}
+              <div className="mt-0.5 flex h-[18px] items-center">
+                <p className="min-w-0 truncate text-xs text-foreground-tertiary">
+                  {showTags
+                    ? practice.tags.join(", ")
+                    : formatZonedInstantRange(practice.startsAt, practice.endsAt, practice.timeZone).time}
+                </p>
+              </div>
             </div>
             <div className="flex shrink-0 flex-col items-end gap-1">
               {!practice.published && (

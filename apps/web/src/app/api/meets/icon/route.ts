@@ -162,7 +162,7 @@ export async function DELETE(req: Request) {
     if (idx === -1) {
       return NextResponse.json({ error: "Invalid icon URL" }, { status: 400 })
     }
-    const storagePath = url.slice(idx + marker.length)
+    const storagePath = url.slice(idx + marker.length).split(/[?#]/)[0]
 
     const res = await fetch(
       `${baseUrl}/storage/v1/object/meet-icons/${storagePath}`,

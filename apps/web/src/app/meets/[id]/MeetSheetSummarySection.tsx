@@ -876,20 +876,27 @@ export default function MeetSheetSummarySection({
       { ...b, eventNumber: displayedEventNumber(b) }
     )
 
+  // Relays interleave with individual events in meet order rather than trailing them.
+  const compareMyEntries = (a: SummaryEntry, b: SummaryEntry) => {
+    if (a.entryType !== "relay_team" || b.entryType !== "relay_team") {
+      return compareByDisplayedEvent(a, b)
+    }
+    const an = displayedEventNumber(a)
+    const bn = displayedEventNumber(b)
+    if (an !== bn) return an === 0 ? 1 : bn === 0 ? -1 : an - bn
+    return compareRelayEvents(a.event, b.event)
+  }
+
   const myIndividualEntries = viewerAthleteId
-    ? displayEntries
-        .filter(
-          (e) =>
-            e.athleteId === viewerAthleteId && (e.entryType === "individual" || e.isRelayLeadoff)
-        )
-        .sort(compareByDisplayedEvent)
+    ? displayEntries.filter(
+        (e) =>
+          e.athleteId === viewerAthleteId && (e.entryType === "individual" || e.isRelayLeadoff)
+      )
     : []
   const myRelays = viewerAthleteId
-    ? relays
-        .filter((e) => e.relaySwimmers?.some((s) => s.athleteId === viewerAthleteId))
-        .sort((a, b) => compareRelayEvents(a.event, b.event))
+    ? relays.filter((e) => e.relaySwimmers?.some((s) => s.athleteId === viewerAthleteId))
     : []
-  const myEntries = [...myIndividualEntries, ...myRelays]
+  const myEntries = [...myIndividualEntries, ...myRelays].sort(compareMyEntries)
   const otherGrouped = viewerAthleteId
     ? grouped.filter((a) => a.entries[0]?.athleteId !== viewerAthleteId)
     : grouped

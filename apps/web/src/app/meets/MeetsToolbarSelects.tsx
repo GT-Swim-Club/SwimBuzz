@@ -10,7 +10,7 @@ const TRASH = "__trash"
 /**
  * Season (with Trash for staff) and All/My meets selects. Filters live in the
  * URL but update it in place (see useMeetsFilters), so switching is instant.
- * Then the Gallery/List toggle; `children` (the New meet button) is hidden
+ * Then the List/Gallery toggle; `children` (the New meet button) is hidden
  * while viewing Trash.
  */
 export default function MeetsToolbarSelects({

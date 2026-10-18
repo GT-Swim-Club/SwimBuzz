@@ -198,7 +198,7 @@ function mapHeaders(cells: string[]): Map<string, number> {
 }
 
 /** Parse CSV text into rows, respecting quoted fields and embedded newlines. */
-function parseCsvRecords(text: string): string[][] {
+export function parseCsvRecords(text: string): string[][] {
   const normalized = text.replace(/^\uFEFF/, "")
   const rows: string[][] = []
   let row: string[] = []

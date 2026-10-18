@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation"
 import { currentSeason, parseSeason } from "@/lib/season"
 import { formatSeasonLabel } from "@swimbuzz/shared"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
+import HoverDetail from "@/components/ui/HoverDetail"
 import {
   isValidSwimCloudIdInput,
   SWIMCLOUD_ID_ERROR,
@@ -66,7 +67,8 @@ export default function AddAthleteButton() {
       <button
         type="button"
         onClick={openModal}
-        className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-primary text-primary-text hover:bg-primary-hover transition-colors"
+        aria-label="Add athlete"
+        className="group relative inline-flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg bg-primary text-primary-text transition-colors hover:bg-primary-hover"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -82,7 +84,7 @@ export default function AddAthleteButton() {
           <line x1="12" y1="5" x2="12" y2="19" />
           <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
-        Add athlete
+        <HoverDetail label="Add athlete" />
       </button>
 
       <Modal

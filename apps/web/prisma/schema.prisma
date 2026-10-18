@@ -164,7 +164,9 @@ model Meet {
   resultsUrl    String?
   swimphoneUrl String?
   liveStreamUrl String?
-  signupUrl      String?
+  /// Last imported sign-up sheet: { importedAt, athletes: [{ athleteId, relays: string[] }] }.
+  /// Kept outside entriesSheetSummary so it survives psych/heat imports (relay builder pool).
+  signupRelayPreferences Json?
   rideSignUpsUrl String?
   roomsUrl       String?
   hotel          String?

@@ -36,8 +36,8 @@ export default function QualifierEventList({
         {groups.map((group) => (
           <article key={group.key} className={`grid gap-2 px-3 py-2.5 sm:px-5 ${EVENT_LIST_COLS}`}>
             <div className="min-w-0 pt-0.5 max-md:px-2.5">
-              <p className="text-sm font-semibold text-foreground">{eventGroupTitle(group, splitGender)}</p>
-              <p className="mt-0.5 text-xs text-foreground-secondary">
+              <p className="text-base font-semibold text-foreground">{eventGroupTitle(group, splitGender)}</p>
+              <p className="mt-0.5 text-[13px] text-foreground-secondary">
                 {group.cut} · {qualifierCountLabel(group.swims.length)}
               </p>
             </div>

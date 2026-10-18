@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import { formatRelativeTime, formatDateTime } from "@/lib/utils"
@@ -12,6 +11,8 @@ import { useImportTask } from "@/components/ui/ImportTaskProvider"
 import { runScraperEnqueuePollFinalize } from "@/lib/scraper/scraper-job-client"
 import { useCanScrollDown } from "@/lib/use-can-scroll-down"
 import { useEscapeToClose } from "@/lib/use-escape-to-close"
+import { toolbarButtonClass } from "@/components/ui/FluidToolbar"
+import ImportIcon from "./ImportIcon"
 
 type RosterAthlete = {
   id: string
@@ -41,7 +42,7 @@ export default function SyncTimesButton() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const rawGender = searchParams.get("gender")
-  const gender = rawGender === "all" ? "all" : rawGender === "F" ? "F" : "M"
+  const gender = rawGender === "F" ? "F" : rawGender === "M" ? "M" : "all"
   const season =
     parseSeason(searchParams.get("season") ?? searchParams.get("year")) ?? currentSeason()
 
@@ -167,10 +168,11 @@ export default function SyncTimesButton() {
       <button
         type="button"
         onClick={() => requireScraper(() => setOpen(true))}
-        className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border-secondary rounded-lg hover:border-border hover:bg-fill-tertiary bg-background dark:hover:bg-fill-tertiary dark:bg-background transition-colors"
+        aria-label="Import times"
+        className={toolbarButtonClass}
       >
-        <Image src="/swimcloud.webp" alt="" width={28} height={28} className="shrink-0" style={{ width: "auto" }} />
-        Import Times
+        <ImportIcon />
+        Times
       </button>
 
       {open && (
