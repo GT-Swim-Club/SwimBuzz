@@ -1,7 +1,7 @@
 import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
 
-/** Single-letter swim result flags (not pipe-encoded metadata). */
-const DISPLAY_TAG_LETTERS = new Set(["P", "F", "R", "B", "L", "S"])
+/** Single-letter swim result flags (not pipe-encoded metadata). X/U are SwimCloud's extracted/user-inputted flags. */
+const DISPLAY_TAG_LETTERS = new Set(["P", "F", "R", "B", "L", "S", "X", "U"])
 
 /** User-facing tag text — one-letter flags only, not storage encodings like R|200 Free Relay|P. */
 export function displaySwimTags(tags: string): string {

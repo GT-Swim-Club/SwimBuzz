@@ -16,6 +16,7 @@ import {
 import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
 import { isCuid, uniqueAthleteSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
+import { redactAthleteForViewer } from "@/lib/athlete/athlete-privacy"
 
 export async function GET(
   _req: Request,
@@ -39,7 +40,7 @@ export async function GET(
   })
   if (!athlete) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-  return NextResponse.json(athlete)
+  return NextResponse.json(redactAthleteForViewer(athlete, session))
 }
 
 async function parseSwimCloudIdForSet(

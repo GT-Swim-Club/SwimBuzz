@@ -1,359 +1,276 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import Link from "next/link"
-import { formatTime, formatSwimDate } from "@/lib/utils"
-import { compareSwimEvents, COURSE_LABELS } from "@/lib/swim/swim-parse"
-import { displaySwimHistoryTags } from "@/lib/swim/swim-tags"
-import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
+import HoverDetail from "@/components/ui/HoverDetail"
+import { formatDateRange, formatSwimDate, formatTime } from "@/lib/utils"
+import { AppIcon } from "@/components/ui/AppIcon"
+import {
+  compareSwimsNewestFirst,
+  groupSwimsByMeet,
+  isDeletableSwim,
+  pageButtons,
+  paginateMeetGroups,
+  swimMeetHref,
+  swimRoundLabel,
+  type AthleteSwim,
+  type SwimMarks,
+} from "@/lib/athlete/swim-history"
+import { MeetListThumb } from "@/app/meets/MeetListMeta"
 import DeleteSwimButton from "./DeleteSwimButton"
-import { meetSwimPath } from "@/lib/slug"
+import { DeltaPill, PbBadge } from "./SwimMarks"
 
-const INITIAL_COUNT = 10
-const ALL = "all"
-const TIMES_ALL = "all"
-const TIMES_BEST = "best"
+const COLS_COACH =
+  "grid-cols-[minmax(0,1fr)_152px_44px_112px_28px] max-[600px]:grid-cols-[minmax(0,1fr)_140px_36px_28px]"
+const COLS_ATHLETE =
+  "grid-cols-[minmax(0,1fr)_152px_44px_112px] max-[600px]:grid-cols-[minmax(0,1fr)_140px_36px]"
 
-export type SwimHistoryRow = {
-  id: string
-  event: string
-  course: string
-  timeMs: number
-  tags: string
-  meet: string
-  meetId: string | null
-  meetSlug: string | null
-  date: string
-  source: string
+const DEFAULT_BUDGET_PX = 640
+const MIN_BUDGET_PX = 360
+
+/**
+ * Vertical room the history card has before the bottom of the page's first screen,
+ * so a page of meets fits without scrolling.
+ */
+function useHistoryBudget() {
+  const cardRef = useRef<HTMLDivElement>(null)
+  const [budget, setBudget] = useState(DEFAULT_BUDGET_PX)
+
+  useEffect(() => {
+    const scrollEl = document.getElementById("page-scroll")
+    if (!scrollEl) return
+    const measure = () => {
+      const el = cardRef.current
+      if (!el) return
+      const top = el.getBoundingClientRect().top - scrollEl.getBoundingClientRect().top + scrollEl.scrollTop
+      const belowTop = scrollEl.clientHeight - top - 24
+      // Stacked under the sidebar the card starts past the first screen: fit a screenful instead.
+      const room = belowTop >= MIN_BUDGET_PX ? belowTop : scrollEl.clientHeight - 80
+      const next = Math.max(MIN_BUDGET_PX, Math.round(room))
+      setBudget((prev) => (Math.abs(next - prev) > 8 ? next : prev))
+    }
+    const ro = new ResizeObserver(measure)
+    ro.observe(scrollEl)
+    if (scrollEl.firstElementChild) ro.observe(scrollEl.firstElementChild)
+    measure()
+    return () => ro.disconnect()
+  }, [])
+
+  return { cardRef, budget }
 }
 
 export default function SwimHistory({
   swims,
+  marks,
   isCoach,
+  onOpenEvent,
+  page,
+  onPageChange,
+  actions,
 }: {
-  swims: SwimHistoryRow[]
+  swims: AthleteSwim[]
+  marks: SwimMarks
   isCoach: boolean
+  onOpenEvent: (event: string, course: string) => void
+  /** 1-based; kept by the parent so returning from an event drill-down keeps the page. */
+  page: number
+  onPageChange: (page: number) => void
+  /** Icon buttons beside the pager (import, log a swim, …). */
+  actions?: ReactNode
 }) {
-  const [expanded, setExpanded] = useState(false)
-  const [timesFilter, setTimesFilter] = useState<string>(TIMES_ALL)
-  const [eventFilter, setEventFilter] = useState<string>(ALL)
-  const [courseFilter, setCourseFilter] = useState<string>(ALL)
+  const { cardRef, budget } = useHistoryBudget()
 
-  const bestSwimIds = useMemo(() => {
-    const pbMap = new Map<string, string>()
-    for (const swim of [...swims].sort((a, b) => a.timeMs - b.timeMs)) {
-      const key = `${swim.event}-${swim.course}`
-      if (!pbMap.has(key)) pbMap.set(key, swim.id)
-    }
-    return new Set(pbMap.values())
-  }, [swims])
-
-  const timesFiltered = useMemo(
-    () =>
-      timesFilter === TIMES_BEST
-        ? swims.filter((s) => bestSwimIds.has(s.id))
-        : swims,
-    [swims, timesFilter, bestSwimIds]
-  )
-
-  const eventOptions = useMemo(
-    () => Array.from(new Set(timesFiltered.map((s) => s.event))).sort(compareSwimEvents),
-    [timesFiltered]
-  )
-  const courseOptions = useMemo(() => {
-    const present = new Set(timesFiltered.map((s) => s.course))
-    return COURSE_LABELS.filter((c) => present.has(c))
-  }, [timesFiltered])
-
-  const filtered = useMemo(
-    () =>
-      timesFiltered.filter(
-        (s) =>
-          (eventFilter === ALL || s.event === eventFilter) &&
-          (courseFilter === ALL || s.course === courseFilter)
-      ),
-    [timesFiltered, eventFilter, courseFilter]
-  )
-
-  const hasMore = filtered.length > INITIAL_COUNT
-  const visible = expanded ? filtered : filtered.slice(0, INITIAL_COUNT)
-
-  if (swims.length === 0) {
-    return (
-      <section>
-        <h2 className="text-sm font-medium text-foreground-secondary uppercase tracking-wide mb-3">
-          History
-        </h2>
-        <div className="rounded-xl border border-border-secondary border-dashed border-border-secondary px-4 py-8 text-center">
-          <p className="text-sm text-foreground-tertiary">No swims logged yet.</p>
-        </div>
-      </section>
-    )
-  }
-
-  const selectClass =
-    "rounded-lg border border-border-secondary px-3 py-1.5 text-sm bg-background"
-
-  const desktopGrid = isCoach
-    ? "grid-cols-[75px_20px_90px_20px_minmax(0,1fr)_80px_auto]"
-    : "grid-cols-[75px_20px_90px_20px_minmax(0,1fr)_100px]"
-
-  const hasActiveFilters =
-    timesFilter !== TIMES_ALL || eventFilter !== ALL || courseFilter !== ALL
+  const groups = useMemo(() => groupSwimsByMeet([...swims].sort(compareSwimsNewestFirst)), [swims])
+  const pages = useMemo(() => paginateMeetGroups(groups, budget), [groups, budget])
+  const totalPages = Math.max(1, pages.length)
+  const current = Math.min(Math.max(1, page), totalPages)
+  const [first, last] = pages[current - 1] ?? [0, -1]
+  const visible = groups.slice(first, last + 1)
+  // The delete column only earns its space when a swim on this page can be deleted.
+  const showDelete = isCoach && visible.some((group) => group.swims.some(isDeletableSwim))
+  const cols = showDelete ? COLS_COACH : COLS_ATHLETE
 
   return (
-    <section className="space-y-3">
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-        <h2 className="text-sm font-medium text-foreground-secondary uppercase tracking-wide">
-          History
-        </h2>
-
-        <div className="flex flex-wrap items-center gap-3">
-          {hasActiveFilters && (
-            <>
-              <span className="text-xs text-foreground-secondary">
-                {filtered.length} swim{filtered.length === 1 ? "" : "s"}
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  setTimesFilter(TIMES_ALL)
-                  setEventFilter(ALL)
-                  setCourseFilter(ALL)
-                  setExpanded(false)
-                }}
-                className="text-xs font-medium text-primary hover:text-primary-hover"
+    <section className="flex flex-col gap-1.5">
+      <div className="flex min-h-[34px] items-center justify-between gap-3">
+        <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-accent">History</h2>
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          {totalPages > 1 && (
+            <nav aria-label="History pages" className="flex items-center gap-0.5">
+              <PagerButton
+                onClick={() => onPageChange(current - 1)}
+                disabled={current <= 1}
+                ariaLabel="Previous page"
+                iconOnly
               >
-                Clear
-              </button>
-            </>
+                <AppIcon name="chevronLeft" className="h-4 w-4" />
+              </PagerButton>
+              {pageButtons(current, totalPages).map((n, i) =>
+                n === "gap" ? (
+                  <span
+                    key={`gap-${i}`}
+                    aria-hidden
+                    className="inline-flex min-w-5 justify-center text-foreground-tertiary"
+                  >
+                    …
+                  </span>
+                ) : (
+                  <PagerButton
+                    key={n}
+                    onClick={() => onPageChange(n)}
+                    active={n === current}
+                    ariaLabel={`Page ${n}`}
+                  >
+                    {n}
+                  </PagerButton>
+                )
+              )}
+              <PagerButton
+                onClick={() => onPageChange(current + 1)}
+                disabled={current >= totalPages}
+                ariaLabel="Next page"
+                iconOnly
+              >
+                <AppIcon name="chevronRight" className="h-4 w-4" />
+              </PagerButton>
+            </nav>
           )}
-
-          <select
-            value={timesFilter}
-            onChange={(e) => {
-              setTimesFilter(e.target.value)
-              setExpanded(false)
-            }}
-            className={selectClass}
-            aria-label="Filter by times"
-          >
-            <option value={TIMES_ALL}>All times</option>
-            <option value={TIMES_BEST}>Best times</option>
-          </select>
-
-          <select
-            value={eventFilter}
-            onChange={(e) => {
-              setEventFilter(e.target.value)
-              setExpanded(false)
-            }}
-            className={selectClass}
-            aria-label="Filter by event"
-          >
-            <option value={ALL}>All events</option>
-            {eventOptions.map((ev) => (
-              <option key={ev} value={ev}>
-                {ev}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={courseFilter}
-            onChange={(e) => {
-              setCourseFilter(e.target.value)
-              setExpanded(false)
-            }}
-            className={selectClass}
-            aria-label="Filter by course"
-          >
-            <option value={ALL}>All courses</option>
-            {courseOptions.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
+          {actions}
         </div>
       </div>
 
-      {filtered.length === 0 ? (
-      <div className="rounded-xl border border-border-secondary border-dashed border-border-secondary px-4 py-8 text-center">
-        <p className="text-sm text-foreground-tertiary">
-          No swims match these filters.
-        </p>
-      </div>
+      {swims.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border-secondary px-4 py-8 text-center">
+          <p className="text-sm text-foreground-tertiary">No swims logged yet.</p>
+        </div>
       ) : (
-        <>
-          {/* Mobile: stacked cards */}
-          <div className="divide-y border border-border-secondary rounded-xl overflow-hidden md:hidden">
-            {visible.map((swim) => {
-              const tags = displaySwimHistoryTags(swim.tags)
-              const canDelete =
-                isCoach && swim.source === "manual" && !isRelayLeadoffSwimTag(swim.tags)
-              const isLinked = swim.meetId !== null
-
-              const cardContent = (
-                <>
-                  <div className="min-w-0 flex-1 space-y-0.5">
-                    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                      <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">
+        <div ref={cardRef} className="overflow-hidden rounded-xl border border-border-secondary bg-background">
+          {visible.map((group, gi) => (
+            <div key={`${group.key}-${group.start}`} className={gi > 0 ? "border-t border-border-secondary" : ""}>
+              <div
+                className={`relative flex items-center gap-3 px-4 pb-2.5 pt-3.5 ${
+                  group.href ? "transition-colors hover:bg-background-hover" : ""
+                }`}
+              >
+                {group.iconUrl && <MeetListThumb iconUrl={group.iconUrl} bannerUrl={null} />}
+                <div className="min-w-0">
+                  <p className="truncate text-base font-semibold leading-[22px] text-foreground">
+                    {group.href ? (
+                      // Stretched over the whole header, dates included.
+                      <Link href={group.href} className="after:absolute after:inset-0">
+                        {group.meet}
+                      </Link>
+                    ) : (
+                      group.meet
+                    )}
+                  </p>
+                  <p className="mt-0.5 text-xs text-foreground-tertiary">
+                    {formatDateRange(group.start, group.end)}
+                  </p>
+                </div>
+              </div>
+              {group.swims.map((swim) => {
+                const href = swimMeetHref(swim)
+                const round = swimRoundLabel(swim.tags)
+                const isCurrentPb = marks.currentPb.has(swim.id)
+                const wasPb = marks.pbAtTime.has(swim.id)
+                const time = formatTime(swim.timeMs)
+                return (
+                  <div
+                    key={swim.id}
+                    className={`group relative grid ${cols} items-center gap-3 border-t border-border-secondary px-4 py-3 text-[15px] leading-[22px] max-[600px]:gap-2 ${
+                      href ? "transition-colors hover:bg-background-hover" : ""
+                    }`}
+                  >
+                    <span className="flex min-w-0 items-baseline gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => onOpenEvent(swim.event, swim.course)}
+                        className="relative z-[1] truncate text-left font-semibold text-foreground transition-colors hover:text-primary"
+                      >
                         {swim.event}
-                      </span>
-                      <span className="text-xs text-foreground-secondary group-hover:text-primary transition-colors">
-                        {swim.course}
-                      </span>
-                      {tags ? (
-                        <span className="font-mono text-xs text-foreground-secondary group-hover:text-primary transition-colors">
-                          {tags}
-                        </span>
-                      ) : null}
-                    </div>
-                    <p className="text-xs text-foreground-secondary truncate group-hover:text-primary transition-colors">
-                      {swim.meet || "—"}
-                    </p>
-                    <p className="text-xs text-foreground-tertiary group-hover:text-primary transition-colors">
-                      {formatSwimDate(swim.date)}
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 flex-col items-end gap-1.5">
-                    <span className="font-mono text-sm font-medium tabular-nums text-foreground group-hover:text-primary transition-colors">
-                      {formatTime(swim.timeMs)}
+                      </button>
+                      <span className="shrink-0 text-foreground-secondary">{swim.course}</span>
+                      {round && <span className="truncate text-foreground-secondary">{round}</span>}
                     </span>
-                    {canDelete ? (
-                      <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                        <DeleteSwimButton
-                          swimId={swim.id}
-                          event={swim.event}
-                          course={swim.course}
-                          timeLabel={formatTime(swim.timeMs)}
-                          dateLabel={formatSwimDate(swim.date)}
-                          meet={swim.meet || null}
-                        />
-                      </div>
-                    ) : null}
+                    <span className="flex items-center justify-end gap-2.5 font-mono font-medium tabular-nums text-foreground">
+                      <DeltaPill delta={marks.improvement.get(swim.id) ?? null} />
+                      <span className="w-20 shrink-0 text-right">
+                        {href ? (
+                          // Stretched over the whole row; the event name, badges and delete sit above it.
+                          <Link
+                            href={href}
+                            className="after:absolute after:inset-0"
+                          >
+                            {time}
+                          </Link>
+                        ) : (
+                          time
+                        )}
+                      </span>
+                    </span>
+                    <span className="flex justify-center">
+                      {(isCurrentPb || wasPb) && <PbBadge current={isCurrentPb} />}
+                    </span>
+                    <span className="whitespace-nowrap text-left text-sm text-foreground-secondary max-[600px]:hidden">
+                      {formatSwimDate(swim.date)}
+                    </span>
+                    {showDelete && (
+                      <span className="flex justify-end">
+                        {isDeletableSwim(swim) && (
+                          <DeleteSwimButton
+                            swimId={swim.id}
+                            event={swim.event}
+                            course={swim.course}
+                            timeLabel={time}
+                            dateLabel={formatSwimDate(swim.date)}
+                            meet={swim.meet || null}
+                          />
+                        )}
+                      </span>
+                    )}
                   </div>
-                </>
-              )
-
-              if (isLinked) {
-                return (
-                  <Link
-                    key={swim.id}
-                    href={swim.meetSlug ? meetSwimPath(swim.meetSlug, swim.id) : swim.meetId ? `/meets/${swim.meetId}#swim-${swim.id}` : "#"}
-                    className="group flex items-start border-border justify-between gap-3 bg-background px-4 py-3 hover:bg-fill-secondary transition-colors"
-                  >
-                    {cardContent}
-                  </Link>
                 )
-              }
-
-              return (
-                <div
-                  key={swim.id}
-                  className="flex items-start border-border justify-between gap-3 bg-background px-4 py-3"
-                >
-                  {cardContent}
-                </div>
-              )
-            })}
-          </div>
-
-          {/* Desktop: table grid */}
-          <div className="hidden divide-y border border-border-secondary rounded-xl overflow-hidden md:block">
-            <div
-              className={`grid ${desktopGrid} px-4 py-2 gap-4 border-b border-border-secondary bg-fill-tertiary`}
-            >
-              <span className="text-xs font-medium text-foreground-tertiary uppercase tracking-wide">
-                Event
-              </span>
-              <span className="text-xs font-medium text-foreground-tertiary uppercase tracking-wide">
-                Course
-              </span>
-              <span className="text-xs font-medium text-foreground-tertiary uppercase tracking-wide text-right">
-                Time
-              </span>
-              <span className="text-xs font-medium text-foreground-tertiary uppercase tracking-wide" />
-              <span className="text-xs font-medium text-foreground-tertiary uppercase tracking-wide">
-                Meet
-              </span>
-              <span className="text-xs font-medium text-foreground-tertiary uppercase tracking-wide">
-                Date
-              </span>
-              {isCoach && <span />}
+              })}
             </div>
-
-            {visible.map((swim) => {
-              const isLinked = swim.meetId !== null
-
-              const rowContent = (
-                <>
-                  <span className="font-medium text-foreground group-hover:text-primary transition-colors">{swim.event}</span>
-                  <span className="text-foreground-secondary text-xs group-hover:text-primary transition-colors">{swim.course}</span>
-                  <span className="font-mono text-right text-foreground group-hover:text-primary transition-colors">
-                    {formatTime(swim.timeMs)}
-                  </span>
-                  <span className="font-mono text-foreground group-hover:text-primary transition-colors">
-                    {displaySwimHistoryTags(swim.tags)}
-                  </span>
-                  <span className="text-foreground-secondary truncate text-xs group-hover:text-primary transition-colors">
-                    {swim.meet || "—"}
-                  </span>
-                  <span className="text-foreground-secondary text-xs group-hover:text-primary transition-colors">
-                    {formatSwimDate(swim.date)}
-                  </span>
-                  {isCoach && swim.source === "manual" && !isRelayLeadoffSwimTag(swim.tags) && (
-                    <div className="flex justify-end" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                      <DeleteSwimButton
-                        swimId={swim.id}
-                        event={swim.event}
-                        course={swim.course}
-                        timeLabel={formatTime(swim.timeMs)}
-                        dateLabel={formatSwimDate(swim.date)}
-                        meet={swim.meet || null}
-                      />
-                    </div>
-                  )}
-                </>
-              )
-
-              if (isLinked) {
-                return (
-                  <Link
-                    key={swim.id}
-                    href={swim.meetSlug ? meetSwimPath(swim.meetSlug, swim.id) : swim.meetId ? `/meets/${swim.meetId}#swim-${swim.id}` : "#"}
-                    className={`group grid ${desktopGrid} items-center border-border px-4 py-2 bg-background text-sm gap-4 hover:bg-fill-secondary transition-colors`}
-                  >
-                    {rowContent}
-                  </Link>
-                )
-              }
-
-              return (
-                <div
-                  key={swim.id}
-                  className={`grid ${desktopGrid} items-center border-border px-4 py-2 bg-background text-sm gap-4`}
-                >
-                  {rowContent}
-                </div>
-              )
-            })}
-          </div>
-        </>
-      )}
-
-      {hasMore && (
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          className="w-full py-2.5 text-sm font-medium text-primary hover:text-primary-hover border border-border-secondary rounded-xl hover:bg-fill-secondary transition-colors"
-        >
-          {expanded
-            ? "Show less"
-            : `Show all ${filtered.length} swims (${filtered.length - INITIAL_COUNT} more)`}
-        </button>
+          ))}
+        </div>
       )}
     </section>
+  )
+}
+
+function PagerButton({
+  onClick,
+  disabled = false,
+  active = false,
+  ariaLabel,
+  iconOnly = false,
+  children,
+}: {
+  onClick: () => void
+  disabled?: boolean
+  active?: boolean
+  ariaLabel: string
+  /** Prev/next chevrons get a hover label; page numbers already say what they are. */
+  iconOnly?: boolean
+  children: ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      aria-current={active ? "page" : undefined}
+      className={`inline-flex h-7 min-w-7 items-center justify-center rounded-md px-1.5 font-mono text-xs tabular-nums transition-colors disabled:opacity-40 ${
+        active
+          ? "bg-primary-bg font-semibold text-accent"
+          : "text-foreground-secondary enabled:hover:bg-fill-secondary enabled:hover:text-foreground"
+      }`}
+    >
+      {children}
+      {iconOnly && <HoverDetail label={ariaLabel} />}
+    </button>
   )
 }

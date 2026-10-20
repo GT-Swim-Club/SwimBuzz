@@ -1,4 +1,5 @@
 import { Fragment, Suspense, type ReactNode } from "react"
+import FitHeading from "@/components/ui/FitHeading"
 import { prisma } from "@/lib/prisma"
 import { notFound, redirect } from "next/navigation"
 import BackLink from "@/components/ui/BackLink"
@@ -43,6 +44,7 @@ import {
   resolveEditableSignupSheetKeys,
 } from "@/lib/meet/meet-signup"
 import { isSignupRelayPreferences } from "@/lib/meet/meet-signup-import"
+import { isMeetFinalRoster } from "@/lib/meet/meet-roster-import"
 import { athletePath, isCuid, meetPath } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
 import {
@@ -339,7 +341,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
             )}
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-3">
-                <h1 className="min-w-0 text-4xl font-semibold text-foreground sm:text-5xl">{meet.name}</h1>
+                <FitHeading className="min-w-0 flex-1 text-4xl font-semibold text-foreground sm:text-5xl">{meet.name}</FitHeading>
                 {isCoach && (
                   <MeetActions
                     meetId={meet.id}
@@ -442,11 +444,11 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
         heatLinkLabel(link, index, finalsHeatSheetLinks.length, "Finals Heat Sheet")
       ),
     })),
-    ...(meet.swimphoneUrl
-      ? [{ key: "swimphone", label: "SwimPhone results", url: meet.swimphoneUrl, icon: "trophy", external: true } as const]
-      : []),
     ...(meet.resultsUrl
-      ? [{ key: "results", label: "Results PDF", url: meet.resultsUrl, icon: "trophy", forcePdf: true, downloadName: meetFileName("Results") } as const]
+      ? [{ key: "results", label: "Results", url: meet.resultsUrl, icon: "trophy", forcePdf: true, downloadName: meetFileName("Results") } as const]
+      : []),
+    ...(meet.swimphoneUrl
+      ? [{ key: "swimphone", label: "SwimPhone", url: meet.swimphoneUrl, icon: "trophy", external: true } as const]
       : []),
     ...(meet.liveStreamUrl
       ? [{ key: "live", label: "Live stream", url: meet.liveStreamUrl, icon: "broadcast" } as const]
@@ -475,6 +477,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
           ? meet.signupRelayPreferences.athletes.length
           : null
       }
+      rosterCount={isMeetFinalRoster(meet.finalRoster) ? meet.finalRoster.athleteIds.length : null}
     />
   ) : null
   const renderCompetitionCard = () =>

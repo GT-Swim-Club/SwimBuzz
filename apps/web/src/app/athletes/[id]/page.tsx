@@ -15,19 +15,23 @@ function formatYear(year: string): string {
   return num + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]) + " Year"
 }
 
-import { compareSwimPb } from "@/lib/swim/swim-parse"
-import AddSwimForm from "./AddSwimForm"
-import PersonalBestsGrid from "./PersonalBestsGrid"
-import SwimHistory from "./SwimHistory"
-import RequestTimesImportButton from "@/components/athlete/RequestTimesImportButton"
+import ActionIcon from "@/components/ui/ActionIcon"
+import HoverDetail from "@/components/ui/HoverDetail"
+import type { AthleteSwim } from "@/lib/athlete/swim-history"
+import { meetDayRange } from "@/lib/swim/swim-dedup"
 import AthleteActions from "./AthleteActions"
+import AthleteSwimsWorkspace from "./AthleteSwimsWorkspace"
+import { ICON_BUTTON, SwimCloudProfileLink } from "./AthleteIconButton"
 import PendingProfileChangesReview from "@/components/athlete/PendingProfileChangesReview"
 import { isStaffUi } from "@/lib/athlete/athlete-view-server"
-import { formatSeasonLabel, isStaffRole } from "@swimbuzz/shared"
+import { DEFAULT_TIME_ZONE, formatSeasonLabel, zonedDayKey } from "@swimbuzz/shared"
 import { parsePendingProfileChanges } from "@/lib/athlete/pending-profile-changes"
 import { athletePath, isCuid } from "@/lib/slug"
 import StatsHighlights from "@/components/ui/StatsHighlights"
 import { computeAthleteHighlights } from "@/lib/athlete/athlete-stats"
+
+/** Season highlights card above the personal bests — hidden for now, coming back later. */
+const SHOW_SEASON_HIGHLIGHTS: boolean = false
 
 export default async function AthletePage({ params }: { params: Promise<{ id: string }> }) {
     const { id: param } = await params
@@ -40,38 +44,35 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
           user: { select: { name: true, email: true, image: true, staffTitle: true } },
           swims: {
             orderBy: { date: "desc" },
-            include: { meetRef: { select: { slug: true, season: true, name: true } } }}}})
+            include: {
+              meetRef: {
+                select: { slug: true, season: true, name: true, startsAt: true, endsAt: true, timeZone: true, iconUrl: true },
+              },
+            }}}})
 
     if (!athlete) notFound()
     if (athlete.slug && param !== athlete.slug) redirect(athletePath(athlete.slug))
 
   const isCoach = await isStaffUi(session.user.role)
   const isOwnProfile = athlete.userId === session.user.id
-  const isStaff = isStaffRole(session.user.role)
   const pending = parsePendingProfileChanges(athlete.pendingProfileChanges)
 
-  // group PBs by event
-  const pbMap = new Map<string, typeof athlete.swims[0]>()
-  for (const swim of [...athlete.swims].sort((a, b) => a.timeMs - b.timeMs)) {
-    const key = `${swim.event}-${swim.course}`
-    if (!pbMap.has(key)) pbMap.set(key, swim)
-  }
-
-  const personalBests = [...pbMap.values()].sort(compareSwimPb)
-
-  const historySwims = athlete.swims.map((swim) => ({
+  const swims: AthleteSwim[] = athlete.swims.map((swim) => ({
     id: swim.id,
     event: swim.event,
     course: swim.course,
     timeMs: swim.timeMs,
     tags: swim.tags ?? "",
-    meet: swim.meet ?? "",
+    // The linked meet's current name — the swim's own copy is frozen at import and goes stale on rename.
+    meet: swim.meetRef?.name ?? swim.meet ?? "",
     meetId: swim.meetRef ? swim.meetId : null,
     meetSlug: swim.meetRef?.slug ?? null,
+    meetIconUrl: swim.meetRef?.iconUrl ?? null,
+    meetDays: swim.meetRef ? meetDayRange(swim.meetRef) : null,
     date: swim.date.toISOString(),
     source: swim.source}))
 
-  const athleteHighlights = computeAthleteHighlights(
+  const athleteHighlights = SHOW_SEASON_HIGHLIGHTS && computeAthleteHighlights(
     athlete.swims.map((swim) => ({
       id: swim.id,
       event: swim.event,
@@ -90,17 +91,19 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
   )
 
   const rosterHref = "/athletes?gender=all"
+  // Other athletes' emails stay private; staff (outside Athlete view) and the athlete themselves see it.
+  const meta = [athlete.year && formatYear(athlete.year), (isCoach || isOwnProfile) && athlete.user?.email].filter(Boolean)
 
   return (
-    <main className="mx-auto max-w-4xl space-y-8">
+    <main className="flex flex-col gap-6">
       <div>
         <BackLink
           fallbackHref={rosterHref}
           fallbackLabel="Roster"
-          className="text-xs text-foreground-tertiary hover:text-foreground"
+          className="text-sm font-medium text-foreground-tertiary transition-colors hover:text-foreground"
         />
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+        <div className="mt-1 flex flex-wrap items-center justify-between gap-4">
+          <div className="flex min-w-0 flex-[1_1_360px] items-center gap-5">
             <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-primary/10 font-medium text-primary">
               {athlete.user?.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -118,21 +121,8 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <h1 className="text-3xl font-semibold">
-                {athlete.swimCloudId ? (
-                  <a
-                    href={`https://www.swimcloud.com/swimmer/${athlete.swimCloudId}/`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-primary transition-colors"
-                  >
-                    {athlete.firstName} {athlete.lastName}
-                  </a>
-                ) : (
-                  <>
-                    {athlete.firstName} {athlete.lastName}
-                  </>
-                )}
+              <h1 className="text-[30px] font-semibold leading-[1.2] tracking-[-0.01em] text-foreground sm:text-[32px]">
+                {athlete.firstName} {athlete.lastName}
                 {athlete.preferredName && (
                   <span className="font-normal text-foreground-secondary">
                     {" "}({athlete.preferredName})
@@ -140,30 +130,14 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
                 )}
                 {athlete.user?.staffTitle && <StaffBadge title={athlete.user.staffTitle} />}
               </h1>
-              <p className="truncate text-sm text-foreground-secondary">{athlete.user?.email}</p>
-              {athlete.year && (
-                <p className="mt-0.5 text-xs text-foreground-tertiary">
-                  {formatYear(athlete.year)}
-                </p>
-              )}
-              {(isStaff || isOwnProfile) && athlete.gtid && (
-                <p className="mt-0.5 text-xs text-foreground-tertiary">
-                  GTID: {athlete.gtid}
-                </p>
-              )}
-              {(isStaff || isOwnProfile) && athlete.dob && (
-                <p className="mt-0.5 text-xs text-foreground-tertiary">
-                  DOB: {athlete.dob.toLocaleDateString()}
-                </p>
-              )}
-              {(isStaff || isOwnProfile) && athlete.swimCloudId && (
-                <p className="mt-0.5 text-xs text-foreground-tertiary">
-                  SwimCloud ID: {athlete.swimCloudId}
+              {meta.length > 0 && (
+                <p className="mt-1 truncate text-[15px] leading-[22px] text-foreground-secondary sm:text-base">
+                  {meta.join(" · ")}
                 </p>
               )}
             </div>
           </div>
-          
+
           {isCoach ? (
             <AthleteActions
               athleteId={athlete.id}
@@ -172,31 +146,26 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
               email={athlete.user?.email ?? ""}
               swimCloudId={athlete.swimCloudId ?? null}
               preferredName={athlete.preferredName}
+              gtid={athlete.gtid}
+              dob={athlete.dob ? zonedDayKey(athlete.dob, DEFAULT_TIME_ZONE) : null}
             />
-          ) : isOwnProfile ? (
-            <div className="flex flex-wrap items-center gap-2 ml-auto">
-              <Link
-                href="/settings"
-                className="inline-flex border-border items-center gap-1.5 text-xs px-3 py-2 border rounded-lg hover:bg-fill-secondary transition-colors sm:py-1.5"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-3.5 w-3.5 shrink-0"
-                  aria-hidden="true"
-                >
-                  <path d="M12 20h9" />
-                  <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
-                </svg>
-                Edit profile
-              </Link>
-            </div>
-          ) : null}
+          ) : (
+            (athlete.swimCloudId != null || isOwnProfile) && (
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                {athlete.swimCloudId != null && <SwimCloudProfileLink swimCloudId={athlete.swimCloudId} />}
+                {isOwnProfile && (
+                  <Link
+                    href="/settings"
+                    aria-label="Edit profile"
+                    className={`${ICON_BUTTON} h-9 w-9`}
+                  >
+                    <ActionIcon kind="edit" className="h-5 w-5" />
+                    <HoverDetail label="Edit profile" />
+                  </Link>
+                )}
+              </div>
+            )
+          )}
         </div>
       </div>
 
@@ -209,45 +178,23 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
         />
       )}
 
-      {athleteHighlights && (
-        <StatsHighlights
-          className="w-full"
-          title={`${formatSeasonLabel(athleteHighlights.season)} highlights`}
-          counters={athleteHighlights.counters}
-        />
-      )}
-
-      {/* PB grid */}
-      <section>
-        <h2 className="text-sm font-medium text-foreground-secondary uppercase tracking-wide mb-4">
-          Personal bests
-        </h2>
-        <PersonalBestsGrid swims={personalBests} />
-      </section>
-
-      {/* Swim history */}
-      <SwimHistory swims={historySwims} isCoach={isCoach} />
-      
-      {isCoach && (
-        <AddSwimForm
-          athleteId={athlete.id}
-          swimCloudId={athlete.swimCloudId ?? null}
-          timesSyncedAt={athlete.timesSyncedAt?.toISOString() ?? null}
-        />
-      )}
-
-      {!isCoach && isOwnProfile && (
-        <section>
-          <h2 className="text-sm font-medium text-foreground-secondary uppercase tracking-wide mb-3">
-            Import from SwimCloud
-          </h2>
-          <RequestTimesImportButton
-            athleteId={athlete.id}
-            hasSwimCloudId={athlete.swimCloudId != null}
-            timesSyncedAt={athlete.timesSyncedAt?.toISOString() ?? null}
-          />
-        </section>
-      )}
+      <AthleteSwimsWorkspace
+        swims={swims}
+        isCoach={isCoach}
+        isOwnProfile={isOwnProfile}
+        athleteId={athlete.id}
+        swimCloudId={athlete.swimCloudId ?? null}
+        timesSyncedAt={athlete.timesSyncedAt?.toISOString() ?? null}
+        highlights={
+          athleteHighlights && (
+            <StatsHighlights
+              key="highlights"
+              title={`${formatSeasonLabel(athleteHighlights.season)} highlights`}
+              counters={athleteHighlights.counters}
+            />
+          )
+        }
+      />
     </main>
   )
 }

@@ -54,22 +54,22 @@ const ROWS: RowDef[] = [
   { key: "psychSheetUrl", kind: "single", label: "Psych sheet", icon: <MeetResourceIcon kind="psych" /> },
   { key: "heatSheetUrls", kind: "multi", label: "Heat sheets", icon: <MeetResourceIcon kind="heat" /> },
   { key: "finalsHeatSheetUrls", kind: "multi", label: "Finals heat sheets", icon: <MeetResourceIcon kind="heat" /> },
-  { key: "liveStreamUrl", kind: "link", label: "Live stream", icon: <MeetResourceIcon kind="liveStream" />, placeholder: "https://…" },
-  {
-    key: "swimphoneUrl",
-    kind: "link",
-    label: "SwimPhone results",
-    icon: <AppIcon name="link" />,
-    placeholder: "https://www.swimphone.com/meets/...",
-  },
   {
     key: "resultsUrl",
     kind: "single",
-    label: "Results PDF",
+    label: "Results",
     icon: <AppIcon name="fileText" />,
     accept: ".pdf,application/pdf",
     placeholder: "Or paste a link to the PDF",
   },
+  {
+    key: "swimphoneUrl",
+    kind: "link",
+    label: "SwimPhone",
+    icon: <AppIcon name="link" />,
+    placeholder: "https://www.swimphone.com/meets/...",
+  },
+  { key: "liveStreamUrl", kind: "link", label: "Live stream", icon: <MeetResourceIcon kind="liveStream" />, placeholder: "https://…" },
 ]
 
 type SaveResourcesResponse = {

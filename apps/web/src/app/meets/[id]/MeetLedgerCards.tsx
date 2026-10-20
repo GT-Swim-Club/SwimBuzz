@@ -18,6 +18,7 @@ import ImportMeetResourcesButton from "./ImportMeetResourcesButton"
 import EventOrderButton from "./EventOrderButton"
 import AddTravelInfoButton from "./AddTravelInfoButton"
 import ImportSignupsButton from "./ImportSignupsButton"
+import ImportMeetRosterButton from "./ImportMeetRosterButton"
 import TravelInfoButtons, { type TravelInfoItem } from "./TravelInfoButtons"
 import ManagePhotosButton from "./ManagePhotosButton"
 
@@ -141,13 +142,16 @@ export function MeetCompetitionCard({
 export function MeetSignupCard({
   meetId,
   importedSignups,
+  rosterCount,
 }: {
   meetId: string
   /** Responses in the last sign-up import, or null if none yet. */
   importedSignups: number | null
+  /** Athletes on the imported final roster, or null if none yet. */
+  rosterCount: number | null
 }) {
   return (
-    <LedgerCard title="Sign-ups">
+    <LedgerCard title="Sign-ups & Roster">
       <ImportSignupsButton
         meetId={meetId}
         trigger={(open) => (
@@ -159,6 +163,24 @@ export function MeetSignupCard({
               importedSignups != null ? (
                 <span className="shrink-0 text-xs text-foreground-secondary">
                   {importedSignups} imported
+                </span>
+              ) : undefined
+            }
+          />
+        )}
+      />
+      <ImportMeetRosterButton
+        meetId={meetId}
+        rosterCount={rosterCount}
+        trigger={(open) => (
+          <LedgerRow
+            icon="download"
+            label="Import roster"
+            onClick={open}
+            trailing={
+              rosterCount != null ? (
+                <span className="shrink-0 text-xs text-foreground-secondary">
+                  {rosterCount} on roster
                 </span>
               ) : undefined
             }

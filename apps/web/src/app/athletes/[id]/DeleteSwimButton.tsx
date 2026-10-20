@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import ActionIcon from "@/components/ui/ActionIcon"
+import HoverDetail from "@/components/ui/HoverDetail"
 import { deleteAthleteSwim } from "./athlete.actions"
 
 type DeleteSwimButtonProps = {
@@ -43,10 +44,11 @@ export default function DeleteSwimButton({
         type="button"
         onClick={() => setOpen(true)}
         disabled={loading}
-        className="p-1 rounded text-foreground-tertiary hover:text-error hover:bg-fill-secondary dark:hover:text-error dark:hover:bg-red-950/40 disabled:opacity-50 transition-colors"
+        className="relative z-[1] flex rounded p-1 text-foreground-tertiary transition-colors hover:bg-error-bg hover:text-error disabled:opacity-50"
         aria-label="Delete swim"
       >
         <ActionIcon kind="delete" className="w-4 h-4" />
+        <HoverDetail label="Delete swim" />
       </button>
 
       <Modal

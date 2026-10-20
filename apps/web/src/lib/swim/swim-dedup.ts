@@ -1,4 +1,5 @@
 import type { Course, Prisma, PrismaClient } from "@prisma/client"
+import { utcDayKey, zonedDayKey } from "@swimbuzz/shared"
 import { normalizeEventName, parseMeetDate } from "@/lib/swim/swim-parse"
 
 export type SwimInsert = {
@@ -100,4 +101,83 @@ export function assignSwimOccurrences(swims: SwimInsert[]): SwimInsertWithOccurr
     nextOccurrence.set(key, occurrence + 1)
     return { ...normalized, occurrence }
   })
+}
+
+/** Inclusive "YYYY-MM-DD" days a meet spans, in the meet's own time zone. */
+export type SwimDayRange = { start: string; end: string }
+
+export function meetDayRange(meet: {
+  startsAt: Date
+  endsAt: Date | null
+  timeZone: string
+}): SwimDayRange {
+  const start = zonedDayKey(meet.startsAt, meet.timeZone)
+  const end = meet.endsAt ? zonedDayKey(meet.endsAt, meet.timeZone) : start
+  return { start, end: end < start ? start : end }
+}
+
+export type CrossSourceSwim = {
+  athleteId: string
+  event: string
+  timeMs: number
+  course: string
+  date: Date
+  /** Days of the meet this swim belongs to, when known. */
+  meetDays?: SwimDayRange | null
+}
+
+function crossSourceKey(swim: CrossSourceSwim): string {
+  return [swim.athleteId, swim.event, swim.timeMs, swim.course].join("\0")
+}
+
+function withinMeetDays(range: SwimDayRange | null | undefined, day: string): boolean {
+  return !!range && range.start <= day && day <= range.end
+}
+
+/**
+ * Pair swims that are the same race recorded by different sources (SwimCloud
+ * sync vs. meet results upload). Tags are ignored — SwimCloud flags (U, X, R)
+ * and upload round markers (P, F, R|200 Free Relay|F) never agree — and dates
+ * match exactly or by falling inside either swim's meet, since uploads may date
+ * every swim to the meet's first day.
+ *
+ * Pairing is one-to-one, so identical prelim and final times each need their
+ * own counterpart: a source with both swims leaves one unmatched when the
+ * other source only recorded one.
+ */
+export function pairSameSwims<A extends CrossSourceSwim, B extends CrossSourceSwim>(
+  incoming: A[],
+  existing: B[]
+): { unmatched: A[]; pairs: [A, B][] } {
+  const pool = new Map<string, { swim: B; day: string; used: boolean }[]>()
+  for (const swim of existing) {
+    const key = crossSourceKey(swim)
+    const bucket = pool.get(key) ?? []
+    bucket.push({ swim, day: utcDayKey(swim.date), used: false })
+    pool.set(key, bucket)
+  }
+
+  const pairs: [A, B][] = []
+  const pending = incoming.map((swim) => ({ swim, day: utcDayKey(swim.date), paired: false }))
+
+  // Exact-day pairs first so a window match can't take a swim's same-day twin.
+  const passes = [
+    (a: (typeof pending)[number], b: { swim: B; day: string }) => a.day === b.day,
+    (a: (typeof pending)[number], b: { swim: B; day: string }) =>
+      withinMeetDays(b.swim.meetDays, a.day) || withinMeetDays(a.swim.meetDays, b.day),
+  ]
+  for (const matches of passes) {
+    for (const entry of pending) {
+      if (entry.paired) continue
+      const candidate = pool
+        .get(crossSourceKey(entry.swim))
+        ?.find((b) => !b.used && matches(entry, b))
+      if (!candidate) continue
+      candidate.used = true
+      entry.paired = true
+      pairs.push([entry.swim, candidate.swim])
+    }
+  }
+
+  return { unmatched: pending.filter((e) => !e.paired).map((e) => e.swim), pairs }
 }

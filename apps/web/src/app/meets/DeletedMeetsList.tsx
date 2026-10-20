@@ -150,7 +150,7 @@ export default function DeletedMeetsList({ query }: { query: string }) {
                       disabled={busy !== null}
                       onClick={() => setConfirmDelete(item)}
                       aria-label={`Delete ${item.name} permanently`}
-                      className="relative flex h-[2.57em] w-[2.57em] items-center justify-center rounded-[0.57em] border border-white/30 text-white/85 transition-colors hover:bg-white/12 hover:text-error disabled:opacity-50"
+                      className="relative flex h-[2.57em] w-[2.57em] items-center justify-center rounded-[0.57em] border border-white/30 bg-linear-to-b from-transparent to-transparent text-white/85 transition-colors hover:from-white/12 hover:to-white/12 hover:text-error disabled:opacity-50"
                     >
                       <AppIcon name="trash" className="h-[1.15em] w-[1.15em]" />
                       <HoverDetail label="Delete permanently" />

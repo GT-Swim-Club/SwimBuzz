@@ -2,7 +2,11 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { Gender, ScraperJobStatus, ScraperJobType } from "@prisma/client"
 import { assignSwimOccurrences } from "@/lib/swim/swim-dedup"
-import { swimsFromSwimCloudTimes, type SwimCloudTime } from "@/lib/swim/swimcloud-import"
+import {
+  swimsFromSwimCloudTimes,
+  withoutRecordedSwims,
+  type SwimCloudTime,
+} from "@/lib/swim/swimcloud-import"
 import { parseSeason } from "@/lib/season"
 import {
   enqueueScraperJob,
@@ -154,7 +158,7 @@ export async function applyTimesSyncJob(jobId: string, userId: string) {
   }
   const athletesSynced = syncedAthleteIds.length
 
-  const swimsToInsert = assignSwimOccurrences(allSwims)
+  const swimsToInsert = await withoutRecordedSwims(assignSwimOccurrences(allSwims))
   let imported = 0
   const chunkSize = 500
   for (let i = 0; i < swimsToInsert.length; i += chunkSize) {

@@ -10,6 +10,7 @@ import {
   type RosterAthlete,
 } from "@/lib/athlete/athlete-match"
 import { assignSwimOccurrences } from "@/lib/swim/swim-dedup"
+import { removeSwimCloudCopiesOfMeet } from "@/lib/swim/swimcloud-import"
 import { parseCourse, parseMeetDate, parseSwimStatus, parseSwimTime, normalizeEventName } from "@/lib/swim/swim-parse"
 import {
   matchRelayResultsToRoster,
@@ -604,6 +605,9 @@ export async function importMeetResults({
     })
   }
 
+  // Uploaded results replace any SwimCloud-synced copies of the same swims.
+  const swimCloudCopiesRemoved = meetId ? await removeSwimCloudCopiesOfMeet(meetId) : 0
+
   console.log(
     `\n--- Meet import (${source}): ${meetName} (${matched.length} matched, ${unmatched.length} unmatched) ---`
   )
@@ -618,7 +622,7 @@ export async function importMeetResults({
     )
   }
   console.log(
-    `--- Imported ${result.count} new swims (${swims.length - result.count} duplicates skipped) ---\n`
+    `--- Imported ${result.count} new swims (${swims.length - result.count} duplicates skipped, ${swimCloudCopiesRemoved} SwimCloud copies replaced) ---\n`
   )
 
   return {

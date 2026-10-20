@@ -76,7 +76,7 @@ export default function ImportRosterFromSheetScreen() {
       setTabs(sheetTabs)
       setSelectedGid(sheetTabs[0]?.gid ?? null)
     } catch (err) {
-      Alert.alert("Couldn't open Google Drive", err instanceof Error ? err.message : "Something went wrong")
+      Alert.alert("Couldn't open Google Sheets", err instanceof Error ? err.message : "Something went wrong")
     } finally {
       setPicking(false)
     }
@@ -85,7 +85,7 @@ export default function ImportRosterFromSheetScreen() {
   async function onImport() {
     const seasonLabel = season.trim()
     if (!picked || selectedGid == null) {
-      Alert.alert("Choose a sheet", "Pick a spreadsheet from Google Drive first.")
+      Alert.alert("Choose a sheet", "Pick a spreadsheet from Google Sheets first.")
       return
     }
     if (!seasonLabel) {
@@ -133,7 +133,7 @@ export default function ImportRosterFromSheetScreen() {
                 that season.
               </Muted>
               <Button
-                label="Choose from Google Drive"
+                label="Choose from Google Sheets"
                 loading={picking}
                 onPress={() => void onChoosePicker()}
               />

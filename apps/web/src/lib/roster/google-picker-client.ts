@@ -14,6 +14,11 @@ type GoogleTokenResponse = {
   error_description?: string
 }
 
+type GoogleTokenClientError = {
+  type: "popup_failed_to_open" | "popup_closed" | "unknown"
+  message?: string
+}
+
 type GoogleTokenClient = {
   requestAccessToken(): void
 }
@@ -37,6 +42,7 @@ declare global {
             client_id: string
             scope: string
             callback: (response: GoogleTokenResponse) => void
+            error_callback?: (error: GoogleTokenClientError) => void
           }): GoogleTokenClient
         }
       }
@@ -113,7 +119,9 @@ export async function pickSpreadsheet(): Promise<PickedSpreadsheet | null> {
 
   const google = window.google!
 
-  const accessToken = await new Promise<string>((resolve, reject) => {
+  // Resolves null when the user closes the consent popup — without
+  // error_callback, GIS never calls back and the caller waits forever.
+  const accessToken = await new Promise<string | null>((resolve, reject) => {
     const tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: clientId,
       scope: SCOPES,
@@ -124,9 +132,17 @@ export async function pickSpreadsheet(): Promise<PickedSpreadsheet | null> {
         }
         resolve(response.access_token)
       },
+      error_callback: (error) => {
+        if (error.type === "popup_closed") {
+          resolve(null)
+          return
+        }
+        reject(new Error(error.message || "Couldn't open Google sign-in"))
+      },
     })
     tokenClient.requestAccessToken()
   })
+  if (!accessToken) return null
 
   return new Promise<PickedSpreadsheet | null>((resolve) => {
     const picker = new google.picker.PickerBuilder()

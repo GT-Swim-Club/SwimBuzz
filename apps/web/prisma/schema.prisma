@@ -167,6 +167,9 @@ model Meet {
   /// Last imported sign-up sheet: { importedAt, athletes: [{ athleteId, relays: string[] }] }.
   /// Kept outside entriesSheetSummary so it survives psych/heat imports (relay builder pool).
   signupRelayPreferences Json?
+  /// Last imported final meet roster: { importedAt, athleteIds: string[] }. Seeds for anyone
+  /// else are dropped from entriesSheetSummary; also limits the relay builder pool.
+  finalRoster Json?
   rideSignUpsUrl String?
   roomsUrl       String?
   hotel          String?

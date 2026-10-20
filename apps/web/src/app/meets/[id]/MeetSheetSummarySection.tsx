@@ -570,6 +570,10 @@ function SummaryEntryRow({
         : { kind: "none" }
 
   const eventName = entry.rosterOnly ? "Attending" : entry.event
+  // Rows split per round carry that round's swimId; timed-finals rows only have the result
+  // ids. Used for the `#swim-<id>` anchor that athlete-profile links scroll to and open.
+  const anchorSwimId =
+    entry.swimId ?? entry.resultSwimId ?? entry.finalSwimId ?? entry.prelimSwimId
   const detailTitle = entry.rosterOnly
     ? eventName
     : detailEventTitle(
@@ -604,7 +608,6 @@ function SummaryEntryRow({
       relaySwimmers: [...(entry.relaySwimmers ?? [])]
         .sort((a, b) => a.leg - b.leg)
         .map((s) => ({ name: s.name, split: sanitizeRelaySplitTime(s.splitTime), splits: s.splits })),
-      coachNote,
     }
   } else {
     const rounds = buildIndividualRounds(entry, allEntries)
@@ -695,7 +698,7 @@ function SummaryEntryRow({
   return (
     <>
       <SummaryRow
-        id={entry.swimId ? `swim-${entry.swimId}` : undefined}
+        id={anchorSwimId ? `swim-${anchorSwimId}` : undefined}
         display={display}
         eventNumber={!eventView && eventNumber > 0 ? eventNumber : undefined}
         avatar={
@@ -963,6 +966,22 @@ export default function MeetSheetSummarySection({
     return acc
   }, new Map<string, { key: string; title: string; eventNumber: number; entries: SummaryEntry[] }>())
 
+  // Placeholder counts follow the gender filter but not the search query.
+  const plural = (n: number, noun: string) => `${n} ${noun}${n === 1 ? "" : "s"}`
+  const searchPlaceholder =
+    viewMode === "roster"
+      ? `Search ${plural(
+          rosterAthletes.filter((a) => genderFilter === "all" || a.gender === genderFilter).length,
+          "athlete"
+        )}…`
+      : `Search ${plural(
+          grouped.filter((g) => g.entries.some(matchesGenderFilter)).length,
+          "athlete"
+        )} and ${plural(
+          [...rawGroupedEvents.values()].filter((g) => g.entries.some((e) => !e.rosterOnly)).length,
+          "event"
+        )}…`
+
   const sortedEventGroups = [...rawGroupedEvents.values()]
     .filter((group) => {
       if (!q) return true
@@ -1054,9 +1073,7 @@ export default function MeetSheetSummarySection({
         <input
           type="search"
           aria-label={viewMode === "roster" ? "Search athletes" : "Search athletes or events"}
-          placeholder={
-            viewMode === "roster" ? "Search athletes..." : "Search athletes or events..."
-          }
+          placeholder={searchPlaceholder}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/35"

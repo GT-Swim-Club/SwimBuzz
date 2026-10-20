@@ -107,8 +107,12 @@ function RowCountdown({ meet }: { meet: MeetListItem }) {
 type CardKind = "upcoming" | "past" | "last"
 
 const sectionHeadingClass = "text-sm font-medium uppercase tracking-wide text-foreground-secondary"
+/**
+ * The hover wash is a gradient layer, not a background color, so it lands on
+ * top of the glass fill a card gives its actions when it pins them top right.
+ */
 const editOnImageClass =
-  "flex h-[2.57em] w-[2.57em] items-center justify-center rounded-[0.57em] border border-white/30 text-white transition-colors hover:bg-white/12"
+  "flex h-[2.57em] w-[2.57em] items-center justify-center rounded-[0.57em] border border-white/30 bg-linear-to-b from-transparent to-transparent text-white transition-colors hover:from-white/12 hover:to-white/12"
 /** Action icons are sized in `em` off the card's scaling action font size. */
 const actionIconClass = "h-[1.15em] w-[1.15em]"
 

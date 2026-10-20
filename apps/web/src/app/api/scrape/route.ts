@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { ScraperJobStatus, ScraperJobType } from "@prisma/client"
-import { swimsFromSwimCloudTimes, type SwimCloudTime } from "@/lib/swim/swimcloud-import"
+import {
+  swimsFromSwimCloudTimes,
+  withoutRecordedSwims,
+  type SwimCloudTime,
+} from "@/lib/swim/swimcloud-import"
 import { assignSwimOccurrences } from "@/lib/swim/swim-dedup"
 import {
   enqueueScraperJob,
@@ -82,7 +86,9 @@ export async function applyAthleteScrapeJob(jobId: string, userId: string) {
   }
 
   const times = scraped.swimmers[String(ctx.swimmerCloudId)] ?? []
-  const swims = assignSwimOccurrences(swimsFromSwimCloudTimes(times, ctx.athleteId))
+  const swims = await withoutRecordedSwims(
+    assignSwimOccurrences(swimsFromSwimCloudTimes(times, ctx.athleteId))
+  )
 
   const result = await prisma.swim.createMany({
     data: swims,

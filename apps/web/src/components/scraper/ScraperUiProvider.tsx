@@ -9,7 +9,6 @@ import {
   useState,
   type ReactNode,
 } from "react"
-import Modal, { ModalFooter } from "@/components/ui/Modal"
 import RunScraperModal from "@/components/scraper/RunScraperModal"
 import { useScraperStatus } from "@/lib/scraper/use-scraper-status"
 
@@ -31,58 +30,13 @@ export function useScraperUi() {
   return ctx
 }
 
-function NeedScraperModal({
-  open,
-  onClose,
-  onOpenRunScraper,
-}: {
-  open: boolean
-  onClose: () => void
-  onOpenRunScraper: () => void
-}) {
-  return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title="Scraper required"
-        description={
-        <span className="mt-1 block text-base text-foreground-secondary">
-          Imports from SwimCloud and SwimPhone require you to run the scraper on your computer.
-          Run the scraper, then import the data.
-        </span>
-      }
-      maxWidth="sm"
-      footer={
-        <ModalFooter>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={onOpenRunScraper}
-            className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast hover:bg-primary-hover"
-          >
-            Run Scraper 
-          </button>
-        </ModalFooter>
-      }
-    />
-  )
-}
-
 export default function ScraperUiProvider({ children }: { children: ReactNode }) {
   const { connected, loading, refresh } = useScraperStatus()
   const [runOpen, setRunOpen] = useState(false)
-  const [needOpen, setNeedOpen] = useState(false)
   const pendingRef = useRef<(() => void) | null>(null)
   const wasRunOpen = useRef(false)
 
   const openRunScraper = useCallback(() => {
-    setNeedOpen(false)
     setRunOpen(true)
   }, [])
 
@@ -96,17 +50,17 @@ export default function ScraperUiProvider({ children }: { children: ReactNode })
           return
         }
         pendingRef.current = proceed
-        setNeedOpen(true)
+        setRunOpen(true)
       })()
     },
     [connected, loading, refresh]
   )
 
   useEffect(() => {
-    if (wasRunOpen.current && !runOpen && connected && pendingRef.current) {
+    if (wasRunOpen.current && !runOpen && pendingRef.current) {
       const proceed = pendingRef.current
       pendingRef.current = null
-      proceed()
+      if (connected) proceed()
     }
     wasRunOpen.current = runOpen
   }, [runOpen, connected])
@@ -116,14 +70,6 @@ export default function ScraperUiProvider({ children }: { children: ReactNode })
       value={{ connected, loading, refresh, openRunScraper, requireScraper }}
     >
       {children}
-      <NeedScraperModal
-        open={needOpen}
-        onClose={() => {
-          pendingRef.current = null
-          setNeedOpen(false)
-        }}
-        onOpenRunScraper={openRunScraper}
-      />
       <RunScraperModal
         open={runOpen}
         onClose={() => setRunOpen(false)}

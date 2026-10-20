@@ -34,7 +34,6 @@ export type SwimDetail = {
   rounds: DetailRound[]
   /** `splits` are the leg's interval 50s (distance within the leg) for legs longer than 50. */
   relaySwimmers?: Array<{ name: string; split?: string; splits?: ResultSplit[] }>
-  coachNote?: string
 }
 
 const PODIUM_TEXT: Record<number, string> = {
@@ -801,9 +800,6 @@ export default function SwimDetailModal({
                 </div>
               </div>
             )}
-            {detail.coachNote ? (
-              <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">{detail.coachNote}</p>
-            ) : null}
           </div>
 
           {splitTable ? (

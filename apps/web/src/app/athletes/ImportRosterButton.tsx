@@ -89,7 +89,7 @@ export default function ImportRosterButton() {
       setTabs(sheetTabs)
       setSelectedGid(sheetTabs[0]?.gid ?? null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't open Google Drive picker")
+      setError(err instanceof Error ? err.message : "Couldn't open Google Sheets picker")
     } finally {
       setPicking(false)
     }
@@ -250,10 +250,10 @@ export default function ImportRosterButton() {
                 type="button"
                 onClick={() => void handleChooseSheet()}
                 disabled={picking}
-                className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium transition-colors hover:bg-background-hover disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-border-secondary px-4 py-3.5 text-sm font-medium transition-colors hover:bg-background-hover disabled:opacity-50"
               >
                 <Image src="/google-sheets.png" alt="" width={18} height={18} className="shrink-0" />
-                {picking ? "Opening Google Drive…" : "Choose from Google Sheets"}
+                {picking ? "Opening Google Sheets…" : "Choose from Google Sheets"}
               </button>
             ) : (
               <div className="space-y-3">
@@ -296,9 +296,6 @@ export default function ImportRosterButton() {
             <RosterColumnsHint />
 
             <div>
-              <span className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
-                Roster CSV
-              </span>
               <FileDropzone
                 onFilesSelected={(files) => {
                   setSelectedFile(files[0] ?? null);

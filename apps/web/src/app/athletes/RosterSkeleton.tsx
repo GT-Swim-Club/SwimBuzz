@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/Skeleton"
 import type { ListLayout } from "@/lib/list-layout"
+import { GALLERY_CARD_AVATAR, GALLERY_CARD_BODY } from "./AthleteGalleryCard"
 
 /** Name bar widths, varied per row so the list doesn't look stamped. */
 const NAME_WIDTHS = ["w-40", "w-32", "w-44", "w-28", "w-36", "w-48", "w-32", "w-40", "w-36", "w-28", "w-44", "w-32"]
@@ -67,16 +68,15 @@ export default function RosterSkeleton({ layout }: { layout: ListLayout }) {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(max(240px,calc((100%_-_2.25rem)/4)),1fr))] gap-3">
               {NAME_WIDTHS.map((w, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-3 rounded-xl border border-border bg-background px-4 py-3 shadow-sm"
-                >
-                  <Skeleton className="h-11 w-11 shrink-0 rounded-full" />
-                  <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                    <Skeleton className={`h-4 max-w-full ${w}`} />
-                    <Skeleton className="h-3 w-28 max-w-full" />
+                <div key={i} className="@container rounded-xl border border-border bg-background shadow-sm">
+                  <div className={GALLERY_CARD_BODY}>
+                    <Skeleton className={`shrink-0 rounded-full ${GALLERY_CARD_AVATAR}`} />
+                    <div className="flex min-w-0 flex-1 flex-col gap-1.5 xl:@[290px]:gap-2">
+                      <Skeleton className={`h-4 max-w-full xl:@[290px]:h-5 ${w}`} />
+                      <Skeleton className="h-3 w-28 max-w-full xl:@[290px]:h-3.5 xl:@[290px]:w-32" />
+                    </div>
                   </div>
                 </div>
               ))}

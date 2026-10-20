@@ -11,6 +11,7 @@ import {
 import { isRelayResultsSummary } from "@/lib/meet/relay-results"
 import { resolveSignupEventOptions } from "@/lib/meet/meet-signup"
 import { isSignupRelayPreferences } from "@/lib/meet/meet-signup-import"
+import { isMeetFinalRoster } from "@/lib/meet/meet-roster-import"
 import { athletePreferredName } from "@swimbuzz/shared"
 import MeetRelayBuilder from "../MeetRelayBuilder"
 
@@ -43,6 +44,7 @@ export default async function MeetRelayBuilderPage({
       resultStatusesSummary: true,
       relayResultsSummary: true,
       signupRelayPreferences: true,
+      finalRoster: true,
       swims: { select: { id: true } },
     },
   })
@@ -58,8 +60,10 @@ export default async function MeetRelayBuilderPage({
   lastActiveDate.setHours(0, 0, 0, 0)
   if (lastActiveDate <= yesterday) redirect(meetPath)
 
+  // Once the final meet roster is imported, only those athletes can swim relays.
+  const finalRoster = isMeetFinalRoster(meet.finalRoster) ? meet.finalRoster.athleteIds : null
   const seasonRoster = await prisma.athlete.findMany({
-    where: { seasons: { has: meet.season } },
+    where: { seasons: { has: meet.season }, ...(finalRoster ? { id: { in: finalRoster } } : {}) },
     orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
     select: { id: true, firstName: true, lastName: true, preferredName: true, gender: true },
   })

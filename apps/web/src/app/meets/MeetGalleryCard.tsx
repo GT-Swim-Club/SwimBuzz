@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react"
+import { useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode, type RefObject } from "react"
 import { AppIcon } from "@/components/ui/AppIcon"
 
 /**
@@ -121,6 +121,41 @@ function CardIcon({ src, textEl }: { src: string; textEl: HTMLDivElement | null 
 }
 
 /**
+ * True when the actions wouldn't fit beside the text block and would wrap onto
+ * their own line under it — the card then pins them to its top right instead.
+ * Mirrors the flex-wrap rule (text block's min width + gap + actions width vs.
+ * the row's content width) rather than detecting the wrap, since moving the
+ * actions out of the row would undo the wrap and flip it straight back.
+ */
+function useActionsOnTop(
+  rowRef: RefObject<HTMLDivElement | null>,
+  textBlockRef: RefObject<HTMLDivElement | null>,
+  actionsRef: RefObject<HTMLDivElement | null>
+): boolean {
+  const [onTop, setOnTop] = useState(false)
+
+  useLayoutEffect(() => {
+    const row = rowRef.current
+    const text = textBlockRef.current
+    const actions = actionsRef.current
+    if (!row || !text || !actions) return
+    const check = () => {
+      const rowStyle = getComputedStyle(row)
+      const content = row.clientWidth - parseFloat(rowStyle.paddingLeft) - parseFloat(rowStyle.paddingRight)
+      const needed = parseFloat(getComputedStyle(text).minWidth) + parseFloat(rowStyle.columnGap) + actions.offsetWidth
+      setOnTop(needed > content + 0.5)
+    }
+    check()
+    const observer = new ResizeObserver(check)
+    observer.observe(row)
+    observer.observe(actions)
+    return () => observer.disconnect()
+  }, [rowRef, textBlockRef, actionsRef])
+
+  return onTop
+}
+
+/**
  * Full-bleed banner card with the meet details on a dark scrim. The whole card
  * links to the meet through a stretched overlay link; `actions` and `badge` sit
  * above it so their buttons stay independently clickable.
@@ -153,6 +188,10 @@ export default function MeetGalleryCard({
   actions?: ReactNode
 }) {
   const [textEl, setTextEl] = useState<HTMLDivElement | null>(null)
+  const rowRef = useRef<HTMLDivElement>(null)
+  const textBlockRef = useRef<HTMLDivElement>(null)
+  const actionsRef = useRef<HTMLDivElement>(null)
+  const actionsOnTop = useActionsOnTop(rowRef, textBlockRef, actionsRef)
   const metaStyle = { fontSize: TYPE.meta }
   const dateMeta = (
     <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap">
@@ -168,15 +207,15 @@ export default function MeetGalleryCard({
   ) : null
 
   return (
-    <div data-meet-card className="@container group relative flex h-full min-h-0 flex-col justify-end overflow-hidden rounded-2xl border border-border bg-fill-secondary shadow-sm transition-[box-shadow,border-color] duration-200 hover:border-primary hover:shadow-md has-[a[data-card-link]:focus-visible]:border-primary max-sm:aspect-video dark:bg-fill">
+    <div data-meet-card className="@container group relative isolate flex h-full min-h-0 flex-col justify-end overflow-hidden rounded-2xl border border-border bg-fill-secondary shadow-sm transition-[box-shadow,border-color] duration-200 hover:border-primary hover:shadow-md has-[a[data-card-link]:focus-visible]:border-primary max-sm:aspect-video dark:bg-fill">
       {bannerUrl ? (
         <img
           src={bannerUrl}
           alt=""
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
+          className="absolute inset-0 -z-10 h-full w-full object-cover transition-transform duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
         />
       ) : (
-        <div className="absolute inset-0 flex items-center justify-center pb-16 text-foreground-tertiary">
+        <div className="absolute inset-0 -z-10 flex items-center justify-center pb-16 text-foreground-tertiary">
           <AppIcon name="image" className="h-12 w-12" />
         </div>
       )}
@@ -189,8 +228,10 @@ export default function MeetGalleryCard({
         <div className="absolute left-[clamp(12px,1.3cqw,16px)] top-[clamp(12px,1.3cqw,16px)] z-[2]">{badge}</div>
       )}
 
-      <div className="relative flex flex-wrap items-center gap-4 bg-gradient-to-t from-black/90 via-black/78 via-55% to-transparent px-[clamp(16px,2.2cqw,28px)] pb-[clamp(16px,1.9cqw,24px)] pt-16 text-white [text-shadow:0_1px_2px_rgb(0_0_0/0.5)]">
-        <div className="flex min-w-[220px] flex-1 items-center gap-[clamp(10px,1.1cqw,16px)]">
+      {/* Not positioned, so actions moved to the top right anchor to the card
+          (the card's `isolate` + the banner's negative z keep this row above it). */}
+      <div ref={rowRef} className="flex flex-wrap items-center gap-4 bg-gradient-to-t from-black/90 via-black/78 via-55% to-transparent px-[clamp(16px,2.2cqw,28px)] pb-[clamp(16px,1.9cqw,24px)] pt-16 text-white [text-shadow:0_1px_2px_rgb(0_0_0/0.5)]">
+        <div ref={textBlockRef} className="flex min-w-[220px] flex-1 items-center gap-[clamp(10px,1.1cqw,16px)]">
           {iconUrl && <CardIcon src={iconUrl} textEl={textEl} />}
           <div ref={setTextEl} className="flex min-w-0 flex-1 flex-col gap-1">
             {eyebrow}
@@ -207,7 +248,15 @@ export default function MeetGalleryCard({
           </div>
         </div>
         {actions && (
-          <div className="relative z-[2] flex shrink-0 items-center gap-[0.86em]" style={{ fontSize: TYPE.action }}>
+          <div
+            ref={actionsRef}
+            className={`z-[2] flex shrink-0 items-center gap-[0.86em] ${
+              actionsOnTop
+                ? "absolute right-[clamp(12px,1.3cqw,16px)] top-[clamp(12px,1.3cqw,16px)] *:bg-black/70 *:backdrop-blur-md"
+                : "relative"
+            }`}
+            style={{ fontSize: TYPE.action }}
+          >
             {actions}
           </div>
         )}

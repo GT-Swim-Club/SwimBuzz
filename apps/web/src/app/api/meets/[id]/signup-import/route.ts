@@ -4,15 +4,7 @@ import { Gender, Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
-import { parseCsvRecords } from "@/lib/roster/roster-csv"
-import {
-  listSheetTabs,
-  readSheetValues,
-  resolveTab,
-  SheetAccessExpiredError,
-  SheetForbiddenError,
-  SheetNotFoundError,
-} from "@/lib/roster/google-sheets"
+import { readSheetImportSource } from "@/lib/meet/sheet-import-source"
 import {
   buildAthleteLookup,
   normalizeNameMappings,
@@ -27,6 +19,7 @@ import {
   resolveSignupImport,
   type SignupRosterAthlete,
 } from "@/lib/meet/meet-signup-import"
+import { applyMeetRosterToEntriesSummary, isMeetFinalRoster } from "@/lib/meet/meet-roster-import"
 import {
   isResultStatusesSummary,
   isSheetSummary,
@@ -35,67 +28,6 @@ import {
 import { isRelayResultsSummary } from "@/lib/meet/relay-results"
 
 export const runtime = "nodejs"
-
-function isUpload(value: unknown): value is Blob {
-  return value != null && typeof value !== "string" && typeof (value as Blob).arrayBuffer === "function"
-}
-
-function parseJsonField(value: FormDataEntryValue | null): unknown {
-  if (typeof value !== "string" || !value) return undefined
-  try {
-    return JSON.parse(value)
-  } catch {
-    return undefined
-  }
-}
-
-type SourceInput = { values: string[][] } | { error: string; status: number }
-
-/** Read the response grid from a CSV upload (multipart) or a picked Google Sheet (JSON). */
-async function readSource(req: Request): Promise<
-  SourceInput & { nameMappings?: unknown; rejectedNames?: unknown }
-> {
-  if ((req.headers.get("content-type") ?? "").includes("multipart/form-data")) {
-    const form = await req.formData()
-    const file = form.get("file")
-    if (!isUpload(file)) return { error: "CSV file is required", status: 400 }
-    const name = file instanceof File && file.name ? file.name : "signups.csv"
-    if (!name.toLowerCase().endsWith(".csv")) return { error: "File must be a .csv", status: 400 }
-    return {
-      values: parseCsvRecords(new TextDecoder().decode(await file.arrayBuffer())),
-      nameMappings: parseJsonField(form.get("nameMappings")),
-      rejectedNames: parseJsonField(form.get("rejectedNames")),
-    }
-  }
-
-  const body = await req.json().catch(() => ({}))
-  const accessToken = typeof body.accessToken === "string" ? body.accessToken : ""
-  const spreadsheetId = typeof body.spreadsheetId === "string" ? body.spreadsheetId : ""
-  const gid = typeof body.gid === "number" ? body.gid : undefined
-  if (!accessToken || !spreadsheetId) {
-    return { error: "A picked Google Sheet is required", status: 400 }
-  }
-  try {
-    const tab = resolveTab(await listSheetTabs(accessToken, spreadsheetId), gid)
-    return {
-      values: await readSheetValues(accessToken, spreadsheetId, tab.title),
-      nameMappings: body.nameMappings,
-      rejectedNames: body.rejectedNames,
-    }
-  } catch (err) {
-    if (err instanceof SheetAccessExpiredError) {
-      return { error: "Google access expired — choose the sheet again.", status: 400 }
-    }
-    if (err instanceof SheetForbiddenError) {
-      return { error: "Your Google account can't open that sheet.", status: 400 }
-    }
-    if (err instanceof SheetNotFoundError) {
-      return { error: "Couldn't find that Google Sheet or tab.", status: 400 }
-    }
-    console.error("Google Sheets sign-up import fetch failed:", err)
-    return { error: "Failed to read that Google Sheet.", status: 502 }
-  }
-}
 
 /**
  * Import meet sign-ups (form responses) into the roster summary. Replaces the
@@ -116,6 +48,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       season: true,
       eventOrder: true,
       entriesSheetSummary: true,
+      finalRoster: true,
       relayResultsSummary: true,
       resultStatusesSummary: true,
       _count: { select: { swims: true } },
@@ -148,7 +81,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     )
   }
 
-  const source = await readSource(req)
+  const source = await readSheetImportSource(req)
   if ("error" in source) {
     return NextResponse.json({ error: source.error }, { status: source.status })
   }
@@ -180,12 +113,25 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const rejectedNames = normalizeRejectedNames(source.rejectedNames)
   const resolved = resolveSignupImport(parsed.rows, roster, eventOptions, nameMappings, rejectedNames)
 
+  // With a final roster imported, only roster athletes' sign-ups reach the summary.
+  // Relay preferences keep every sign-up; the relay builder filters by roster itself.
+  const finalRoster = isMeetFinalRoster(meet.finalRoster) ? new Set(meet.finalRoster.athleteIds) : null
+  const rosterSignups = finalRoster
+    ? resolved.signups.filter((s) => finalRoster.has(s.athleteId))
+    : resolved.signups
+
   const existing = isSheetSummary(meet.entriesSheetSummary) ? meet.entriesSheetSummary : null
-  const { summary, entries, attendingOnly } = applySignupImportToEntriesSummary(
-    existing,
-    meet.course,
-    resolved.signups
-  )
+  const applied = applySignupImportToEntriesSummary(existing, meet.course, rosterSignups)
+  const { entries, attendingOnly } = applied
+  const summary = finalRoster
+    ? applyMeetRosterToEntriesSummary(
+        applied.summary,
+        meet.course,
+        roster
+          .filter((a) => finalRoster.has(a.id))
+          .map((a) => ({ athleteId: a.id, athleteName: `${a.lastName}, ${a.firstName}`, gender: a.gender }))
+      ).summary
+    : applied.summary
 
   await prisma.meet.update({
     where: { id: meetId },
@@ -216,6 +162,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     entries,
     attendingOnly,
     skipped: resolved.unmatchedNames.length + resolved.rejected,
+    notOnRoster: resolved.signups.length - rosterSignups.length,
     warnings: resolved.warnings,
     nameConfirmations,
     rosterForPairing,

@@ -5,6 +5,7 @@ import { canonicalizeStrokeEvent } from "@/lib/swim/swim-parse"
 import { getSession } from "@/lib/auth/session"
 import { athletePreferredName } from "@swimbuzz/shared"
 import { currentSeason } from "@/lib/season"
+import { isMeetFinalRoster } from "@/lib/meet/meet-roster-import"
 
 // medley leg → individual event name in DB
 const MEDLEY_LEG_EVENTS: Record<string, string[]> = {
@@ -190,22 +191,28 @@ export async function POST(req: Request) {
     )
   }
 
-  // Only the season roster is eligible: the meet's season, else the current one.
+  // Only the season roster is eligible: the meet's season, else the current one —
+  // narrowed to the meet's final roster once one is imported.
   let season = currentSeason()
+  let finalRoster: string[] | null = null
   if (typeof meetId === "string" && meetId) {
     const meet = await prisma.meet.findFirst({
       where: { OR: [{ id: meetId }, { slug: meetId }] },
-      select: { season: true },
+      select: { season: true, finalRoster: true },
     })
     if (!meet) return NextResponse.json({ error: "Meet not found" }, { status: 404 })
     season = meet.season
+    if (isMeetFinalRoster(meet.finalRoster)) finalRoster = meet.finalRoster.athleteIds
   }
 
   const eligibleAthletes = await prisma.athlete.findMany({
     where: {
       seasons: { has: season },
       ...(gender === "X" ? {} : { gender: gender as Gender }),
-      ...(signupPool ? { id: { in: signupPool } } : {}),
+      AND: [
+        ...(signupPool ? [{ id: { in: signupPool } }] : []),
+        ...(finalRoster ? [{ id: { in: finalRoster } }] : []),
+      ],
     },
     select: { id: true, firstName: true, lastName: true, preferredName: true, gender: true },
   })

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { normalizePreferredName } from "@/lib/athlete/athlete-match"
-import { isStaffRole } from "@swimbuzz/shared"
+import { DEFAULT_TIME_ZONE, isStaffRole, zonedDayKey, zonedTimeToUtc } from "@swimbuzz/shared"
 import { Prisma, type Course } from "@prisma/client"
 import {
   clearPendingFields,
@@ -22,7 +22,13 @@ export type UpdateAthleteInput = {
   email?: string
   swimCloudId?: string | null
   preferredName?: string | null
+  gtid?: string | null
+  /** "YYYY-MM-DD". */
+  dob?: string | null
 }
+
+/** GT ids are 9 digits starting with 90 (same shape the attendance Buzzcard scanner expects). */
+const GTID_RE = /^90\d{7}$/
 
 async function requireStaff() {
   const session = await getSession()
@@ -83,6 +89,33 @@ export async function updateAthlete(athleteId: string, input: UpdateAthleteInput
       data.swimCloudId = swimCloudId
     }
     clearSwimCloudPending = true
+  }
+
+  if (input.gtid !== undefined) {
+    const gtid = input.gtid?.trim() || null
+    if (gtid !== null) {
+      if (!GTID_RE.test(gtid)) throw new Error("GTID must be 9 digits starting with 90")
+      // Attendance scans look athletes up by GTID, so it has to stay unique.
+      const existing = await prisma.athlete.findFirst({ where: { gtid, id: { not: athleteId } } })
+      if (existing) throw new Error("An athlete with this GTID already exists")
+    }
+    data.gtid = gtid
+  }
+
+  if (input.dob !== undefined) {
+    const dob = input.dob?.trim() || null
+    if (dob === null) {
+      data.dob = null
+    } else {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(dob)) throw new Error("Enter a valid date of birth")
+      // Roster import stores birthdays as midnight Eastern; match it so the day never shifts.
+      const instant = zonedTimeToUtc(dob, "00:00", DEFAULT_TIME_ZONE)
+      if (Number.isNaN(instant.getTime()) || zonedDayKey(instant, DEFAULT_TIME_ZONE) !== dob) {
+        throw new Error("Enter a valid date of birth")
+      }
+      if (instant.getTime() > Date.now()) throw new Error("Date of birth can't be in the future")
+      data.dob = instant
+    }
   }
 
   let email: string | null = null

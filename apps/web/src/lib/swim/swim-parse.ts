@@ -128,6 +128,9 @@ const COURSE_ORDER: Record<string, number> = {
 
 export const COURSE_LABELS = ["SCY", "SCM", "LCM"] as const
 
+/** Course switch order on the athlete page — SCM is the rarest for this team, so it goes last. */
+export const COURSE_SWITCH_ORDER = ["SCY", "LCM", "SCM"] as const
+
 export function parseEventParts(event: string): { distance: number; stroke: string } {
   const match = event.trim().match(/^(\d+)\s+(.+)$/)
   if (!match) return { distance: 0, stroke: event.trim() }

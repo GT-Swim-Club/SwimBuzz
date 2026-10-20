@@ -152,7 +152,7 @@ export default function RosterView({
             {layout === "list" ? (
               <RosterTable rows={rows} showGender={showGender} />
             ) : (
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(max(240px,calc((100%_-_2.25rem)/4)),1fr))] gap-3">
                 {rows.map((r) => (
                   <AthleteGalleryCard
                     key={r.athlete.id}

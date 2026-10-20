@@ -7,6 +7,7 @@ import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
 import { uniqueAthleteSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
+import { redactAthleteForViewer } from "@/lib/athlete/athlete-privacy"
 
 export async function GET() {
   const session = await getSession()
@@ -19,7 +20,7 @@ export async function GET() {
       user: { select: { name: true, email: true, image: true, staffTitle: true } }},
     orderBy: { lastName: "asc" }})
 
-  return NextResponse.json(athletes, {
+  return NextResponse.json(athletes.map((athlete) => redactAthleteForViewer(athlete, session)), {
     headers: { "Cache-Control": "private, max-age=30, stale-while-revalidate=300" }})
 }
 
