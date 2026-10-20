@@ -1,7 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
+import { AppIcon } from "@/components/ui/AppIcon"
+import HoverDetail from "@/components/ui/HoverDetail"
 import { formatClockTime } from "@swimbuzz/shared"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/ui/SegmentedToggle"
 
@@ -49,14 +51,15 @@ export default function RunScraperModal({
   const [error, setError] = useState<string | null>(null)
   const [installed, setInstalled] = useState<boolean | null>(null)
   const [copied, setCopied] = useState<"install" | "run" | null>(null)
+  const [wasConnected, setWasConnected] = useState(connected)
 
-  const copyIcon = (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
-  )
-
-  const checkIcon = (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-  )
+  // Pairing codes are single-use (consumed on register), so once the scraper
+  // connects the shown run command is dead — drop it so stopping the scraper
+  // from the terminal offers "Generate run command" instead of the stale code.
+  if (connected !== wasConnected) {
+    setWasConnected(connected)
+    if (connected) setPairing(null)
+  }
 
   const appUrl =
     typeof window !== "undefined" ? window.location.origin : "https://swimbuzz.gtswimclub.com"
@@ -127,41 +130,50 @@ export default function RunScraperModal({
     setInstalled(true)
   }
 
-  const platformToggle = (
-    <SegmentedToggle
-      selectedIndex={platform === "windows" ? 1 : 0}
-      fullWidth
-      className="mt-5 rounded-xl border border-border bg-fill-secondary"
-    >
-      {(
-        [
-          ["mac", "Mac / Linux"],
-          ["windows", "Windows"],
-        ] as const
-      ).map(([value, label]) => (
-        <button
-          key={value}
-          type="button"
-          onClick={() => setPlatformAndSave(value)}
-          className={segmentedOptionClass(platform === value) + " py-2"}
-        >
-          {label}
-        </button>
-      ))}
-    </SegmentedToggle>
-  )
 
-  const isExpired = pairing ? new Date(pairing.expiresAt).getTime() < Date.now() : false;
+  const isExpired = pairing ? new Date(pairing.expiresAt).getTime() < Date.now() : false
+  const shell = platform === "windows" ? "PowerShell" : "Terminal"
+
+  const header = (
+    <>
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-lg font-medium text-foreground">Run Scraper</h2>
+        <StatusPill loading={loading} connected={connected} />
+      </div>
+      <p className="mt-1 text-sm text-foreground-secondary">
+        Required for SwimCloud and SwimPhone imports
+      </p>
+      <SegmentedToggle
+        selectedIndex={platform === "windows" ? 1 : 0}
+        fullWidth
+        className="mt-5 rounded-xl border border-border bg-fill-secondary"
+      >
+        {(
+          [
+            ["mac", "Mac / Linux"],
+            ["windows", "Windows"],
+          ] as const
+        ).map(([value, label]) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setPlatformAndSave(value)}
+            className={segmentedOptionClass(platform === value) + " py-2"}
+          >
+            {label}
+          </button>
+        ))}
+      </SegmentedToggle>
+    </>
+  )
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      title="Run the Scraper"
-      description="Install the scraper once, and then run it whenever importing data."
       maxWidth="lg"
-      header={platformToggle}
-      bodyClassName="!flex-initial py-5 sm:py-5"
+      header={header}
+      bodyClassName="!flex-initial pt-5 pb-2 sm:pt-5 sm:pb-2"
       footer={
         <ModalFooter>
           {connected && (
@@ -171,7 +183,7 @@ export default function RunScraperModal({
               disabled={terminating}
               className="rounded-lg border border-error bg-error-bg px-4 py-2.5 text-sm font-medium text-error transition-colors hover:bg-error/10 disabled:opacity-50"
             >
-              {terminating ? "Terminating…" : "Terminate scraper"}
+              {terminating ? "Stopping…" : "Stop scraper"}
             </button>
           )}
           <button
@@ -184,129 +196,166 @@ export default function RunScraperModal({
         </ModalFooter>
       }
     >
-      <div className="space-y-5 text-sm">
-        <div
-          className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${
-            loading
-              ? "border-border-secondary bg-fill-secondary text-foreground-secondary"
-              : connected
-                ? "border-success bg-success-bg text-success"
-                : "border-warning bg-warning-bg text-warning"
-          }`}
-        >
-          <span
-            aria-hidden="true"
-            className={`h-2.5 w-2.5 shrink-0 rounded-full ${
-              loading
-                ? "bg-foreground-tertiary"
-                : connected
-                  ? "bg-success motion-safe:animate-pulse"
-                  : "bg-warning"
-            }`}
-          />
-          <p className="font-medium">
-            {loading
-              ? ["Checking", "status…"].join(" ")
-              : connected
-                ? "The scraper is running. You can now import data."
-                : "The scraper is not running."}
-          </p>
-        </div>
-
-        {installed === false && (
-          <div className="space-y-3 rounded-xl border border-border-secondary bg-fill-secondary p-4">
-            <p className="font-medium text-foreground">1. One-time setup</p>
-            <p className="text-foreground-secondary">
-              Downloads the scraper via <code className="text-xs">uv</code>.
-              {platform === "windows" ? " Run in PowerShell." : " Run in Terminal."}
-            </p>
-            <pre className="overflow-x-auto rounded-lg border border-border-subtle bg-background px-3 py-2.5 text-xs leading-5 text-foreground whitespace-pre-wrap break-all">
-              {installCommand}
-            </pre>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <button
-                type="button"
-                onClick={() => void copyText(installCommand, "install")}
-                className="flex items-center gap-1.5 text-xs font-medium text-primary transition-colors hover:text-primary-hover"
-              >
-                {copied === "install" ? checkIcon : copyIcon}
-                Copy install command
+      <div className="flex flex-col gap-[18px] text-sm">
+        <Step number={1} done={installed === true}>
+          <div className="flex min-h-6 items-center justify-between gap-3">
+            <p className="font-medium text-foreground">Run the install command in {shell}</p>
+            {installed === false && (
+              <button type="button" onClick={markInstalled} className={textLinkClass}>
+                I&apos;ve already installed it
               </button>
-              <button
-                type="button"
-                onClick={markInstalled}
-                className="text-xs font-medium text-foreground-secondary transition-colors hover:text-foreground"
-              >
-                I&apos;ve installed it
+            )}
+            {installed === true && (
+              <button type="button" onClick={() => setInstalled(false)} className={textLinkClass}>
+                Show again
               </button>
-            </div>
+            )}
           </div>
-        )}
+          {installed === false && (
+            <CommandBlock
+              command={installCommand}
+              copied={copied === "install"}
+              onCopy={() => void copyText(installCommand, "install")}
+              label="Copy install command"
+            />
+          )}
+        </Step>
 
-        {!connected && (
-          <div className="space-y-3 rounded-xl border border-border-secondary bg-fill-secondary p-4">
-            <p className="font-medium text-foreground">2. Start the scraper</p>
-            <p className="text-foreground-secondary">
-              Generate the run command below, copy it into your terminal, and leave it running.
-            </p>
-
-            {!pairing || isExpired ? (
+        <Step number={2} done={connected}>
+          <div className="flex min-h-6 items-center justify-between gap-3">
+            <p className="font-medium text-foreground">Run the run command in {shell}</p>
+            {!connected && pairing && !isExpired && (
               <button
                 type="button"
                 onClick={() => void generateCode()}
                 disabled={pairingLoading}
-                className="w-full rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium hover:bg-fill-secondary disabled:opacity-50"
+                className={textLinkClass}
               >
-                {pairingLoading ? "Generating…" : "Generate run command"}
+                New command
               </button>
-            ) : (
-              <>
-                <p className="text-xs text-foreground-secondary">
-                  Expires {formatClockTime(new Date(pairing.expiresAt))}
-                </p>
-                <pre className="overflow-x-auto rounded-lg border border-border-subtle bg-background px-3 py-2.5 text-xs leading-5 text-foreground whitespace-pre-wrap break-all">
-                  {runCommand}
-                </pre>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                  <button
-                    type="button"
-                    onClick={() => void copyText(runCommand, "run")}
-                    className="flex items-center gap-1.5 text-xs font-medium text-primary transition-colors hover:text-primary-hover"
-                  >
-                    {copied === "run" ? checkIcon : copyIcon}
-                    Copy command
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void generateCode()}
-                    disabled={pairingLoading}
-                    className="text-xs font-medium text-foreground-secondary transition-colors hover:text-foreground"
-                  >
-                    Generate new command
-                  </button>
-                </div>
-              </>
             )}
           </div>
-        )}
+          {connected ? (
+            <p className="text-foreground-secondary">
+              Connected. Keep the terminal open while you import.
+            </p>
+          ) : !pairing || isExpired ? (
+            <button
+              type="button"
+              onClick={() => void generateCode()}
+              disabled={pairingLoading}
+              className="w-full rounded-lg border border-border px-4 py-[9px] text-sm font-medium text-foreground transition-colors hover:bg-fill-secondary disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {pairingLoading ? "Generating…" : "Generate run command"}
+            </button>
+          ) : (
+            <CommandBlock
+              command={runCommand}
+              copied={copied === "run"}
+              onCopy={() => void copyText(runCommand, "run")}
+              label="Copy run command"
+              footnote={`Expires ${formatClockTime(new Date(pairing.expiresAt))}`}
+            />
+          )}
+        </Step>
 
-        <p className="text-sm font-medium text-foreground">
-          3. Import data, e.g. SwimCloud times, SwimPhone results, meet PDFs
-        </p>
-
-        {installed && (
-          <button
-            type="button"
-            onClick={() => setInstalled(false)}
-            className="inline-flex rounded-md px-1 py-0.5 text-xs font-medium text-foreground-secondary transition-colors hover:text-foreground"
-          >
-            Show install instructions again
-          </button>
-        )}
-
+        <Step number={3} done={false}>
+          <p className="flex min-h-6 items-center font-medium text-foreground">
+            Import SwimCloud times &amp; SwimPhone results
+          </p>
+        </Step>
 
         {error ? <p className="text-sm text-error">{error}</p> : null}
       </div>
     </Modal>
+  )
+}
+
+const textLinkClass =
+  "shrink-0 text-xs font-medium text-foreground-secondary transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+
+function StatusPill({ loading, connected }: { loading: boolean; connected: boolean }) {
+  const [label, pillClass, dotClass] = loading
+    ? ["Checking…", "bg-fill-secondary text-foreground-secondary", "bg-foreground-tertiary"]
+    : connected
+      ? ["Running", "bg-success-bg text-success", "bg-success motion-safe:animate-pulse"]
+      : ["Not running", "bg-warning-bg text-warning", "bg-warning"]
+  return (
+    <span
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-[3px] text-xs font-medium leading-[18px] ${pillClass}`}
+    >
+      <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${dotClass}`} />
+      {label}
+    </span>
+  )
+}
+
+function Step({
+  number,
+  done,
+  children,
+}: {
+  number: number
+  done: boolean
+  children: ReactNode
+}) {
+  return (
+    <div className="grid grid-cols-[24px_minmax(0,1fr)] gap-x-3.5">
+      {done ? (
+        <span
+          aria-hidden="true"
+          className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-contrast"
+        >
+          <AppIcon name="check" className="h-3.5 w-3.5" strokeWidth={2.5} />
+        </span>
+      ) : (
+        <span
+          aria-hidden="true"
+          className="flex h-6 w-6 items-center justify-center rounded-full border border-border text-xs font-medium text-foreground-secondary"
+        >
+          {number}
+        </span>
+      )}
+      <div className="flex min-w-0 flex-col gap-2.5">{children}</div>
+    </div>
+  )
+}
+
+function CommandBlock({
+  command,
+  copied,
+  onCopy,
+  label,
+  footnote,
+}: {
+  command: string
+  copied: boolean
+  onCopy: () => void
+  label: string
+  /** Tiny muted note pinned to the block's bottom-right corner. */
+  footnote?: string
+}) {
+  return (
+    <div className="relative">
+      <pre
+        className={`overflow-x-auto whitespace-pre-wrap break-all rounded-lg border border-border-secondary bg-fill-secondary pl-3 pr-11 pt-2.5 text-xs leading-5 text-foreground ${footnote ? "pb-3.5" : "pb-2.5"}`}
+      >
+        {command}
+      </pre>
+      {footnote ? (
+        <span className="pointer-events-none absolute bottom-1.5 right-2.5 text-[10px] leading-none text-foreground-tertiary">
+          {footnote}
+        </span>
+      ) : null}
+      <button
+        type="button"
+        onClick={onCopy}
+        aria-label={label}
+        className="absolute right-1.5 top-1.5 flex h-[30px] w-[30px] items-center justify-center rounded-md text-foreground-secondary transition-colors hover:bg-background-hover hover:text-foreground"
+      >
+        <AppIcon name={copied ? "check" : "copy"} className="h-4 w-4" />
+        <HoverDetail label={copied ? "Copied" : "Copy"} />
+      </button>
+    </div>
   )
 }
