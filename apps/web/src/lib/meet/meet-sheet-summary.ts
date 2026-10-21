@@ -89,6 +89,8 @@ export type SheetEntry = {
   rosterOnly?: boolean
   /** Seed created by a sign-up sheet import — replaced wholesale on re-import. */
   signupImport?: boolean
+  /** "Attending" row added by a final roster import — removed when the roster is cleared. */
+  rosterImport?: boolean
   /** Swim row id when this entry is a single manual swim. */
   swimId?: string
   prelimSwimId?: string

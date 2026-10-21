@@ -90,6 +90,7 @@ export async function POST(req: Request) {
     course = "SCY",
     gender = "M",
     withinDays = null,
+    limitDays = null,
     athleteIds = null,
     meetId = null,
   } = body
@@ -122,20 +123,28 @@ export async function POST(req: Request) {
       ? new Date(Date.now() - days * 24 * 60 * 60 * 1000)
       : null
 
+  // Hard window: swims before this date are ignored entirely, even when faster.
+  const limit = Number(limitDays)
+  const limitDate =
+    Number.isFinite(limit) && limit > 0
+      ? new Date(Date.now() - limit * 24 * 60 * 60 * 1000)
+      : null
+
   // Each athlete's best per event, preferring swims inside the window and
-  // falling back to their best from any date when they have none there.
+  // falling back to their best from any date (within the limit) when they have none there.
   const preferredBests = async (event: string | string[], ids: string[]): Promise<BestRow[]> => {
     const where: Prisma.SwimWhereInput = {
       event: Array.isArray(event) ? { in: event } : event,
       course: courseEnum,
       athleteId: { in: ids },
+      ...(limitDate ? { date: { gte: limitDate } } : {}),
     }
     const [anyDate, inWindow] = await Promise.all([
       prisma.swim.groupBy({ by: ["athleteId"], where, _min: { timeMs: true } }),
       sinceDate
         ? prisma.swim.groupBy({
             by: ["athleteId"],
-            where: { ...where, date: { gte: sinceDate } },
+            where: { ...where, date: { gte: limitDate && limitDate > sinceDate ? limitDate : sinceDate } },
             _min: { timeMs: true },
           })
         : Promise.resolve([]),
@@ -156,6 +165,7 @@ export async function POST(req: Request) {
     const sourceSwims = await prisma.swim.findMany({
       where: {
         course: courseEnum,
+        ...(limitDate ? { date: { gte: limitDate } } : {}),
         OR: legs.map((leg) => ({
           athleteId: leg.athleteId,
           event: leg.event,

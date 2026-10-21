@@ -10,6 +10,7 @@ export default function MeetsStackLayout() {
       backScreens={[
         { name: "[id]", fallbackHref: "/meets" },
         { name: "new", fallbackHref: "/meets" },
+        { name: "relays/[id]", fallbackHref: "/meets" },
       ]}
     />
   )

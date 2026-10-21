@@ -13,11 +13,14 @@ export default function SetSwimCloudIdForm({
   initialSwimCloudId = null,
   requiresApproval = false,
   pendingSwimCloudId = null,
+  hideLabel = false,
 }: {
   athleteId: string
   initialSwimCloudId?: number | null
   requiresApproval?: boolean
   pendingSwimCloudId?: number | null
+  /** Hide the inline label when the surrounding page already renders a heading. */
+  hideLabel?: boolean
 }) {
   const [swimCloudId, setSwimCloudId] = useState(
     pendingSwimCloudId != null
@@ -64,11 +67,14 @@ export default function SetSwimCloudIdForm({
     <form onSubmit={handleSubmit} className="space-y-2">
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex-1 min-w-[140px]">
-          <label className="text-xs text-foreground-secondary mb-1 block">
-            SwimCloud ID or URL
-          </label>
+          {!hideLabel && (
+            <label className="text-xs text-foreground-secondary mb-1 block">
+              SwimCloud ID or URL
+            </label>
+          )}
           <input
             type="text"
+            aria-label="SwimCloud ID or URL"
             inputMode="numeric"
             required
             placeholder="e.g. 1234567"

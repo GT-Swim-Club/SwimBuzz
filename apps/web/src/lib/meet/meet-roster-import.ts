@@ -6,16 +6,20 @@ import {
 } from "@/lib/athlete/athlete-match"
 import { isEditableSignupSheetSeed } from "@/lib/meet/meet-signup"
 import type { SheetEntry, SheetSummary } from "@/lib/meet/meet-sheet-summary"
+import { normalizeEventName } from "@/lib/swim/swim-parse"
 
 /**
  * Final meet roster import (the coaches' roster sheet, after drops and roster
  * cuts). Only athletes on it stay on the roster summary; it also limits the
- * relay builder's athlete pool.
+ * relay builder's athlete pool. Rows it drops are kept on the roster and come
+ * back when it's cleared or replaced.
  */
 
 export type MeetFinalRoster = {
   importedAt: string
   athleteIds: string[]
+  /** Summary rows (sign-ups, seeds) for athletes off the roster, restored when it's cleared. */
+  removedEntries?: SheetEntry[]
 }
 
 export function isMeetFinalRoster(value: unknown): value is MeetFinalRoster {
@@ -24,7 +28,8 @@ export function isMeetFinalRoster(value: unknown): value is MeetFinalRoster {
   return (
     typeof roster.importedAt === "string" &&
     Array.isArray(roster.athleteIds) &&
-    roster.athleteIds.every((id) => typeof id === "string")
+    roster.athleteIds.every((id) => typeof id === "string") &&
+    (roster.removedEntries === undefined || Array.isArray(roster.removedEntries))
   )
 }
 
@@ -189,13 +194,18 @@ export function applyMeetRosterToEntriesSummary(
   existing: SheetSummary | null | undefined,
   course: string,
   roster: Array<{ athleteId: string; athleteName: string; gender: "M" | "F" }>
-): { summary: SheetSummary; removedAthletes: number; attendingAdded: number } {
+): {
+  summary: SheetSummary
+  removedEntries: SheetEntry[]
+  removedAthletes: number
+  attendingAdded: number
+} {
   const onRoster = new Set(roster.map((a) => a.athleteId))
-  const removed = new Set<string>()
+  const removedEntries: SheetEntry[] = []
 
   const kept = (existing?.entries ?? []).filter((e) => {
     if (onRoster.has(e.athleteId) || e.entryType === "relay_team" || !isRosterSeed(e)) return true
-    removed.add(e.athleteId)
+    removedEntries.push(e)
     return false
   })
 
@@ -210,6 +220,7 @@ export function applyMeetRosterToEntriesSummary(
       entryType: "individual",
       manual: true,
       rosterOnly: true,
+      rosterImport: true,
       gender: athlete.gender,
     })
   }
@@ -220,11 +231,37 @@ export function applyMeetRosterToEntriesSummary(
       course: existing?.course || course,
       entries: [...kept, ...added],
     },
-    removedAthletes: removed.size,
+    removedEntries,
+    removedAthletes: new Set(removedEntries.map((e) => e.athleteId)).size,
     attendingAdded: added.length,
   }
 }
 
-export function buildMeetFinalRoster(athleteIds: string[]): MeetFinalRoster {
-  return { importedAt: new Date().toISOString(), athleteIds }
+/**
+ * Undo a final roster on the summary: drop the "Attending" rows it added and
+ * bring back the rows it removed (skipping any the athlete has since re-gained).
+ */
+export function removeMeetRosterFromEntriesSummary(
+  existing: SheetSummary | null | undefined,
+  course: string,
+  roster: MeetFinalRoster | null
+): SheetSummary {
+  const entries = (existing?.entries ?? []).filter((e) => !e.rosterImport)
+  const keys = new Set(entries.map((e) => `${e.athleteId}|${normalizeEventName(e.event)}`))
+  for (const entry of roster?.removedEntries ?? []) {
+    const key = `${entry.athleteId}|${normalizeEventName(entry.event)}`
+    if (keys.has(key) || (entry.rosterOnly && hasSummaryRow(entries, entry.athleteId))) continue
+    keys.add(key)
+    entries.push(entry)
+  }
+
+  return {
+    sheetType: existing?.sheetType ?? "psych",
+    course: existing?.course || course,
+    entries,
+  }
+}
+
+export function buildMeetFinalRoster(athleteIds: string[], removedEntries: SheetEntry[]): MeetFinalRoster {
+  return { importedAt: new Date().toISOString(), athleteIds, removedEntries }
 }

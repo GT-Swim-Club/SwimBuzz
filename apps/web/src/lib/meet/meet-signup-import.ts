@@ -265,16 +265,13 @@ export function resolveSignupImport(
     const who = displayName(row)
     const events: ImportedSignup["events"] = []
     for (const { number, time, invalidTime } of row.events) {
-      const option = eventOptions.find((o) => eventNumberForGender(o, athlete.gender) === number)
+      // Athletes often enter the other gender's number for the same event
+      // (e.g. women's 5 for the men's 50 Free) — use their gender's version.
+      const option =
+        eventOptions.find((o) => eventNumberForGender(o, athlete.gender) === number) ??
+        eventOptions.find((o) => eventNumberForGender(o, athlete.gender === "F" ? "M" : "F") === number)
       if (!option) {
-        const otherGender = eventOptions.some(
-          (o) => eventNumberForGender(o, athlete.gender === "F" ? "M" : "F") === number
-        )
-        warnings.push(
-          otherGender
-            ? `${who}: event ${number} is a ${athlete.gender === "F" ? "men's" : "women's"} event — skipped`
-            : `${who}: event ${number} isn't in this meet's order of events — skipped`
-        )
+        warnings.push(`${who}: event ${number} isn't in this meet's order of events — skipped`)
         continue
       }
       if (option.isRelay) {
@@ -283,7 +280,11 @@ export function resolveSignupImport(
       }
       if (events.some((e) => e.event === option.event)) continue
       if (invalidTime) warnings.push(`${who}: "${invalidTime}" isn't a time for event ${number} — used NT`)
-      events.push({ event: option.event, eventNumber: number, seedTime: time })
+      events.push({
+        event: option.event,
+        eventNumber: eventNumberForGender(option, athlete.gender) ?? number,
+        seedTime: time,
+      })
     }
 
     signups.delete(athlete.id)
@@ -320,6 +321,8 @@ export function applySignupImportToEntriesSummary(
 
   const kept = (existing?.entries ?? []).filter((e) => {
     if (e.signupImport) return false
+    // A signed-up athlete gets their own rows, so the roster's placeholder goes.
+    if (e.rosterImport) return !importedAthletes.has(e.athleteId)
     if (!isEditableSignupSheetSeed(e)) return true
     if (e.rosterOnly) return !importedAthletes.has(e.athleteId)
     return !importedKeys.has(entryKey(e.athleteId, e.event))

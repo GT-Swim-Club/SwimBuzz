@@ -45,7 +45,6 @@ export default function ImportSignupsButton({
       endpoint={`/api/meets/${meetId}/signup-import`}
       title="Import Sign-ups"
       description="Adds each response's events and entry times to the roster summary, replacing the last sign-up import."
-      csvLabel="Sign-ups CSV"
       hint={
         <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5">
           <dt className="font-medium text-foreground">Required</dt>

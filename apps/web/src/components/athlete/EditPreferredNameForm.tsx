@@ -48,11 +48,9 @@ export default function EditPreferredNameForm({
     <form onSubmit={handleSubmit} className="space-y-2">
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex-1 min-w-[140px]">
-          <label className="text-xs text-foreground-secondary mb-1 block">
-            Preferred name
-          </label>
           <input
             type="text"
+            aria-label="Preferred name"
             placeholder="Optional"
             value={preferredName}
             onChange={(e) => {

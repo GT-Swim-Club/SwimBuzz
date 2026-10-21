@@ -123,27 +123,17 @@ export default async function SettingsPage() {
                 </div>
               )}
               <div className="px-4 py-3 space-y-2">
-                <div>
-                  <p className="text-sm text-foreground">SwimCloud ID</p>
-                  <p className="text-xs text-foreground-secondary">
-                    Find it in your SwimCloud profile URL (e.g. swimcloud.com/swimmer/
-                    <span className="font-mono">1234567</span>).
-                  </p>
-                </div>
+                <p className="text-sm text-foreground">SwimCloud ID or URL</p>
                 <SetSwimCloudIdForm
                   athleteId={athlete.id}
                   initialSwimCloudId={athlete.swimCloudId}
                   requiresApproval={requiresApproval}
                   pendingSwimCloudId={pending?.swimCloudId ?? null}
+                  hideLabel
                 />
               </div>
               <div className="px-4 py-3 space-y-2">
-                <div>
-                  <p className="text-sm text-foreground">Preferred name</p>
-                  <p className="text-xs text-foreground-secondary">
-                    Shown in place of your first name, and used to match imported results to you.
-                  </p>
-                </div>
+                <p className="text-sm text-foreground">Preferred name</p>
                 <EditPreferredNameForm
                   athleteId={athlete.id}
                   initialPreferredName={athlete.preferredName}
