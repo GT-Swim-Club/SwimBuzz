@@ -23,6 +23,7 @@ type Selected = { event: string; course: string }
  */
 export default function AthleteSwimsWorkspace({
   swims,
+  relaySplits,
   isCoach,
   isOwnProfile,
   athleteId,
@@ -31,6 +32,8 @@ export default function AthleteSwimsWorkspace({
   highlights,
 }: {
   swims: AthleteSwim[]
+  /** Relay leg 2–4 splits — extra PB rows and History entries only, never an event page. */
+  relaySplits: AthleteSwim[]
   isCoach: boolean
   isOwnProfile: boolean
   athleteId: string
@@ -51,9 +54,11 @@ export default function AthleteSwimsWorkspace({
 
   const marks = useMemo(() => computeSwimMarks(swims), [swims])
 
+  const historySwims = useMemo(() => [...swims, ...relaySplits], [swims, relaySplits])
+
   const coursesWithSwims = useMemo(
-    () => COURSE_SWITCH_ORDER.filter((c) => swims.some((s) => s.course === c)),
-    [swims]
+    () => COURSE_SWITCH_ORDER.filter((c) => historySwims.some((s) => s.course === c)),
+    [historySwims]
   )
 
   const selected = useMemo<Selected | null>(() => {
@@ -161,6 +166,7 @@ export default function AthleteSwimsWorkspace({
             {highlights}
             <PersonalBestsSidebar
               swims={swims}
+              relaySplits={relaySplits}
               courses={coursesWithSwims}
               course={course}
               onCourseChange={changeCourse}
@@ -186,7 +192,7 @@ export default function AthleteSwimsWorkspace({
             />
           ) : (
             <SwimHistory
-              swims={swims}
+              swims={historySwims}
               marks={marks}
               isCoach={isCoach}
               onOpenEvent={openEvent}

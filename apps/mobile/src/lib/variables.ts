@@ -49,6 +49,7 @@ function colorSchemeVariables(c: ColorPalette) {
     "--brand-color-bg-container": c.bgContainer,
     "--brand-color-bg-elevated": c.bgElevated,
     "--brand-color-bg-hover": c.bgHover,
+    "--brand-color-bg-hover-strong": c.bgHoverStrong,
     "--brand-color-switch-thumb": c.switchThumb,
     "--brand-color-switch-track": c.switchTrack,
     "--brand-color-border": c.border,

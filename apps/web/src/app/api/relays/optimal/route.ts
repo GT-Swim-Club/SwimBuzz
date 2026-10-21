@@ -6,6 +6,7 @@ import { getSession } from "@/lib/auth/session"
 import { athletePreferredName } from "@swimbuzz/shared"
 import { currentSeason } from "@/lib/season"
 import { isMeetFinalRoster } from "@/lib/meet/meet-roster-import"
+import { loadRelaySplits } from "@/lib/meet/relay-splits"
 
 // medley leg → individual event name in DB
 const MEDLEY_LEG_EVENTS: Record<string, string[]> = {
@@ -48,7 +49,11 @@ function fullName(
   return athletePreferredName(athlete)
 }
 
-type BestRow = { athleteId: string; timeMs: number }
+/** A time on record for one swimmer and stroke; relay splits only count after the lead-off. */
+type TimePick = { timeMs: number; relaySplit: boolean; sourceDate: Date | null }
+
+/** `leadoff`: flat-start best (leg 1). `rolling`: a relay split, set only when it beats leadoff for legs 2–4. */
+type AthleteTimes = { leadoff?: TimePick; rolling?: TimePick }
 
 type BuiltLeg = {
   athleteId: string
@@ -60,6 +65,16 @@ type BuiltLeg = {
   outsideWindow?: boolean
   gender?: Gender
   leg?: string
+  /** Timed from a relay split (legs 2–4 only) rather than a flat-start swim. */
+  relaySplit?: boolean
+}
+
+type StrokeTime = {
+  timeMs: number
+  event: string
+  sourceDate: Date | null
+  outsideWindow: boolean
+  relaySplit?: boolean
 }
 
 type StrokeTimes = Record<
@@ -67,10 +82,10 @@ type StrokeTimes = Record<
   {
     name: string
     gender?: Gender
-    times: Record<
-      string,
-      { timeMs: number; event: string; sourceDate: Date | null; outsideWindow: boolean }
-    >
+    /** Flat-start times — usable on any leg. */
+    times: Record<string, StrokeTime>
+    /** Faster relay-split times — usable on legs 2–4 only. */
+    splitTimes?: Record<string, StrokeTime>
   }
 >
 
@@ -130,58 +145,92 @@ export async function POST(req: Request) {
       ? new Date(Date.now() - limit * 24 * 60 * 60 * 1000)
       : null
 
-  // Each athlete's best per event, preferring swims inside the window and
-  // falling back to their best from any date (within the limit) when they have none there.
-  const preferredBests = async (event: string | string[], ids: string[]): Promise<BestRow[]> => {
+  // Window to prefer: swims inside it win, else the best from any date (within the limit).
+  const windowStart = sinceDate ? (limitDate && limitDate > sinceDate ? limitDate : sinceDate) : null
+
+  const faster = (a: TimePick | undefined, b: TimePick | undefined) =>
+    !a ? b : !b ? a : b.timeMs < a.timeMs ? b : a
+
+  // Lead-off and relay-split times per athlete for one stroke's events.
+  const strokeBests = async (events: string[], ids: string[]): Promise<Map<string, AthleteTimes>> => {
     const where: Prisma.SwimWhereInput = {
-      event: Array.isArray(event) ? { in: event } : event,
+      event: { in: events },
       course: courseEnum,
       athleteId: { in: ids },
       ...(limitDate ? { date: { gte: limitDate } } : {}),
     }
     const [anyDate, inWindow] = await Promise.all([
       prisma.swim.groupBy({ by: ["athleteId"], where, _min: { timeMs: true } }),
-      sinceDate
+      windowStart
         ? prisma.swim.groupBy({
             by: ["athleteId"],
-            where: { ...where, date: { gte: limitDate && limitDate > sinceDate ? limitDate : sinceDate } },
+            where: { ...where, date: { gte: windowStart } },
             _min: { timeMs: true },
           })
         : Promise.resolve([]),
     ])
-    const best = new Map<string, number>()
-    for (const row of [...anyDate, ...inWindow]) {
-      if (row._min.timeMs != null) best.set(row.athleteId, row._min.timeMs)
+    const flat = (rows: typeof anyDate) =>
+      new Map(
+        rows
+          .filter((row) => row._min.timeMs != null)
+          .map((row) => [row.athleteId, { timeMs: row._min.timeMs!, relaySplit: false, sourceDate: null }])
+      )
+    const flatAny = flat(anyDate)
+    const flatWindow = flat(inWindow)
+
+    const idSet = new Set(ids)
+    const splitAny = new Map<string, TimePick>()
+    const splitWindow = new Map<string, TimePick>()
+    for (const split of relaySplits) {
+      if (!idSet.has(split.athleteId) || !events.includes(split.event)) continue
+      const pick = { timeMs: split.timeMs, relaySplit: true, sourceDate: split.date }
+      splitAny.set(split.athleteId, faster(splitAny.get(split.athleteId), pick)!)
+      if (windowStart && split.date >= windowStart) {
+        splitWindow.set(split.athleteId, faster(splitWindow.get(split.athleteId), pick)!)
+      }
     }
-    return [...best]
-      .map(([athleteId, timeMs]) => ({ athleteId, timeMs }))
-      .sort((a, b) => a.timeMs - b.timeMs)
+
+    const out = new Map<string, AthleteTimes>()
+    for (const id of new Set([...flatAny.keys(), ...splitAny.keys()])) {
+      const leadoff = flatWindow.get(id) ?? flatAny.get(id)
+      const inWin = faster(flatWindow.get(id), splitWindow.get(id))
+      const best = inWin ?? faster(flatAny.get(id), splitAny.get(id))
+      out.set(id, { leadoff, rolling: best?.relaySplit ? best : undefined })
+    }
+    return out
   }
+
+  /** Time for legs 2–4: a faster relay split, else the flat-start time. */
+  const rollingPick = (t: AthleteTimes | undefined) => t?.rolling ?? t?.leadoff
 
   const sourceKey = (row: Pick<BuiltLeg, "athleteId" | "event" | "timeMs">) =>
     `${row.athleteId}|${row.event}|${row.timeMs}`
   const attachSourceDates = async (legs: BuiltLeg[]): Promise<BuiltLeg[]> => {
     if (legs.length === 0) return legs
-    const sourceSwims = await prisma.swim.findMany({
-      where: {
-        course: courseEnum,
-        ...(limitDate ? { date: { gte: limitDate } } : {}),
-        OR: legs.map((leg) => ({
-          athleteId: leg.athleteId,
-          event: leg.event,
-          timeMs: leg.timeMs,
-        })),
-      },
-      select: { athleteId: true, event: true, timeMs: true, date: true },
-      orderBy: { date: "desc" },
-    })
+    // Relay splits already carry their date; look up the swim behind every flat-start time.
+    const swimLegs = legs.filter((leg) => !leg.relaySplit)
+    const sourceSwims = swimLegs.length
+      ? await prisma.swim.findMany({
+          where: {
+            course: courseEnum,
+            ...(limitDate ? { date: { gte: limitDate } } : {}),
+            OR: swimLegs.map((leg) => ({
+              athleteId: leg.athleteId,
+              event: leg.event,
+              timeMs: leg.timeMs,
+            })),
+          },
+          select: { athleteId: true, event: true, timeMs: true, date: true },
+          orderBy: { date: "desc" },
+        })
+      : []
     const sourceDates = new Map<string, Date | null>()
     for (const swim of sourceSwims) {
       const key = sourceKey(swim)
       if (!sourceDates.has(key)) sourceDates.set(key, swim.date)
     }
     return legs.map((leg) => {
-      const sourceDate = sourceDates.get(sourceKey(leg)) ?? null
+      const sourceDate = leg.relaySplit ? (leg.sourceDate ?? null) : (sourceDates.get(sourceKey(leg)) ?? null)
       return {
         ...leg,
         sourceDate,
@@ -235,148 +284,142 @@ export async function POST(req: Request) {
     )
   }
 
+  const relaySplits = await loadRelaySplits({ athleteIds: eligibleIds, course: courseEnum, since: limitDate })
+
   // Every pool athlete's time per leg stroke, so the builder can swap anyone in.
   const buildStrokeTimes = async (rows: BuiltLeg[]): Promise<StrokeTimes> => {
     const strokeTimes: StrokeTimes = {}
     for (const row of await attachSourceDates(rows)) {
       if (!row.leg) continue
-      if (!strokeTimes[row.athleteId]) {
-        strokeTimes[row.athleteId] = { name: row.name, gender: row.gender, times: {} }
-      }
-      strokeTimes[row.athleteId].times[row.leg] = {
+      const entry = (strokeTimes[row.athleteId] ??= { name: row.name, gender: row.gender, times: {} })
+      const time: StrokeTime = {
         timeMs: row.timeMs,
         event: row.event,
         sourceDate: row.sourceDate ?? null,
         outsideWindow: row.outsideWindow ?? false,
+        ...(row.relaySplit ? { relaySplit: true } : {}),
       }
+      if (row.relaySplit) (entry.splitTimes ??= {})[row.leg] = time
+      else entry.times[row.leg] = time
     }
     return strokeTimes
   }
-  const freeStrokeTimes = (bests: BestRow[], eventName: string) =>
-    buildStrokeTimes(
-      bests.map((b) => ({
-        athleteId: b.athleteId,
-        name: fullName(athleteMap[b.athleteId]),
-        gender: athleteMap[b.athleteId]?.gender,
-        event: eventName,
-        timeMs: b.timeMs,
-        leg: "free",
-      }))
+
+  const legOf = (athleteId: string, event: string, pick: TimePick, leg?: string): BuiltLeg => ({
+    athleteId,
+    name: fullName(athleteMap[athleteId]),
+    gender: athleteMap[athleteId]?.gender,
+    event,
+    timeMs: pick.timeMs,
+    ...(pick.relaySplit ? { relaySplit: true, sourceDate: pick.sourceDate } : {}),
+    ...(leg ? { leg } : {}),
+  })
+
+  /** strokeTimes rows: each swimmer's lead-off time and, when faster, their relay split. */
+  const strokeTimeRows = (times: Map<string, AthleteTimes>, event: string, stroke: string): BuiltLeg[] =>
+    [...times].flatMap(([id, t]) =>
+      [t.leadoff, t.rolling]
+        .filter((pick): pick is TimePick => Boolean(pick))
+        .map((pick) => legOf(id, event, pick, stroke))
     )
 
   if (!isMedley) {
     const eventName = `${legDist} Free`
+    const mixed = gender === "X"
 
-    if (gender === "X") {
-      const menIds = eligibleAthletes.filter((a) => a.gender === Gender.M).map((a) => a.id)
-      const womenIds = eligibleAthletes.filter((a) => a.gender === Gender.F).map((a) => a.id)
-
-      if (menIds.length === 0 || womenIds.length === 0) {
+    if (mixed) {
+      const hasMen = eligibleAthletes.some((a) => a.gender === Gender.M)
+      const hasWomen = eligibleAthletes.some((a) => a.gender === Gender.F)
+      if (!hasMen || !hasWomen) {
         return NextResponse.json(
           { error: "Mixed relays need at least one man and one woman in the pool" },
           { status: 400 }
         )
       }
-
-      const [menPool, womenPool] = await Promise.all([
-        preferredBests(eventName, menIds),
-        preferredBests(eventName, womenIds),
-      ])
-      const strokeTimes = await freeStrokeTimes([...menPool, ...womenPool], eventName)
-
-      const teams: BuiltTeam[] = []
-      for (let t = 0; t < relayCount; t++) {
-        if (menPool.length < 2 || womenPool.length < 2) break
-        const selected = [...menPool.splice(0, 2), ...womenPool.splice(0, 2)]
-        const legs: BuiltLeg[] = await attachSourceDates(
-          selected.map((b) => {
-            const athlete = athleteMap[b.athleteId]
-            return {
-              athleteId: b.athleteId,
-              name: fullName(athlete),
-              gender: athlete?.gender,
-              event: eventName,
-              timeMs: b.timeMs,
-            }
-          })
-        )
-        teams.push({
-          letter: RELAY_LETTERS[t] ?? String(t + 1),
-          totalMs: legs.reduce((sum, l) => sum + l.timeMs, 0),
-          legs,
-        })
-      }
-
-      if (teams.length === 0) {
-        return NextResponse.json(
-          { error: "Not enough athletes with times to build a mixed relay" },
-          { status: 400 }
-        )
-      }
-
-      const alternates: BuiltLeg[] = await attachSourceDates(
-        [...menPool.slice(0, 4), ...womenPool.slice(0, 4)].map((b) => ({
-          athleteId: b.athleteId,
-          name: fullName(athleteMap[b.athleteId]),
-          gender: athleteMap[b.athleteId]?.gender,
-          event: eventName,
-          timeMs: b.timeMs,
-        }))
-      )
-
-      return NextResponse.json({
-        relay: normalizedRelay,
-        course,
-        teams,
-        totalMs: teams[0].totalMs,
-        legs: teams[0].legs,
-        alternates,
-        strokeTimes,
-      })
     }
 
-    const bests = await preferredBests(eventName, eligibleIds)
-    const strokeTimes = await freeStrokeTimes(bests, eventName)
+    const times = await strokeBests([eventName], eligibleIds)
+    const strokeTimes = await buildStrokeTimes(strokeTimeRows(times, eventName, "free"))
+    const rollMs = (id: string) => rollingPick(times.get(id))!.timeMs
+    const leadMs = (id: string) => times.get(id)?.leadoff?.timeMs
 
-    const remaining = [...bests]
+    // Best four in the pool: three swim their legs 2–4 time (a relay split when faster) and one
+    // leads off from a flat start — whoever loses the least by leading off.
+    const bestFreeFromPool = (available: Set<string>) => {
+      const pools = mixed
+        ? [Gender.M, Gender.F].map((g) => [...available].filter((id) => athleteMap[id]?.gender === g))
+        : [[...available]]
+      const perPool = mixed ? 4 : 8
+      const candidates = new Set<string>()
+      for (const pool of pools) {
+        for (const id of [...pool].sort((a, b) => rollMs(a) - rollMs(b)).slice(0, perPool)) {
+          candidates.add(id)
+        }
+        for (const id of pool
+          .filter((id) => leadMs(id) != null)
+          .sort((a, b) => leadMs(a)! - leadMs(b)!)
+          .slice(0, perPool)) {
+          candidates.add(id)
+        }
+      }
+
+      let best: { total: number; leadoff: string; rest: string[] } | null = null
+      for (const combo of combinations([...candidates], 4)) {
+        if (mixed && combo.filter((id) => athleteMap[id]?.gender === Gender.M).length !== 2) continue
+        let leadoff: string | null = null
+        let leadoffCost = Infinity
+        for (const id of combo) {
+          const lead = leadMs(id)
+          if (lead == null) continue
+          if (lead - rollMs(id) < leadoffCost) {
+            leadoffCost = lead - rollMs(id)
+            leadoff = id
+          }
+        }
+        if (!leadoff) continue
+        const total = combo.reduce((sum, id) => sum + rollMs(id), 0) + leadoffCost
+        if (!best || total < best.total) {
+          best = { total, leadoff, rest: combo.filter((id) => id !== leadoff) }
+        }
+      }
+      return best
+    }
+
+    const available = new Set(times.keys())
     const teams: BuiltTeam[] = []
-
     for (let t = 0; t < relayCount; t++) {
-      const letter = RELAY_LETTERS[t] ?? String(t + 1)
-      if (remaining.length < 4) break
-      const selected = remaining.splice(0, 4)
-      if (selected.length < 4) break
-
-      const legs: BuiltLeg[] = await attachSourceDates(
-        selected.map((b) => ({
-          athleteId: b.athleteId,
-          name: fullName(athleteMap[b.athleteId]),
-          event: eventName,
-          timeMs: b.timeMs,
-        }))
-      )
-      teams.push({
-        letter,
-        totalMs: legs.reduce((sum, l) => sum + l.timeMs, 0),
-        legs,
-      })
+      const found = bestFreeFromPool(available)
+      if (!found) break
+      available.delete(found.leadoff)
+      for (const id of found.rest) available.delete(id)
+      const legs = await attachSourceDates([
+        legOf(found.leadoff, eventName, times.get(found.leadoff)!.leadoff!),
+        ...found.rest
+          .map((id) => legOf(id, eventName, rollingPick(times.get(id))!))
+          .sort((a, b) => a.timeMs - b.timeMs),
+      ])
+      teams.push({ letter: RELAY_LETTERS[t] ?? String(t + 1), totalMs: found.total, legs })
     }
 
     if (teams.length === 0) {
       return NextResponse.json(
-        { error: "Not enough athletes with times to build a relay" },
+        {
+          error: mixed
+            ? "Not enough athletes with times to build a mixed relay"
+            : "Not enough athletes with times to build a relay",
+        },
         { status: 400 }
       )
     }
 
+    const remaining = [...available].sort((a, b) => rollMs(a) - rollMs(b))
+    const alternateIds = mixed
+      ? [Gender.M, Gender.F].flatMap((g) => remaining.filter((id) => athleteMap[id]?.gender === g).slice(0, 4))
+      : remaining.slice(0, 8)
     const alternates: BuiltLeg[] = await attachSourceDates(
-      remaining.slice(0, 8).map((b) => ({
-        athleteId: b.athleteId,
-        name: fullName(athleteMap[b.athleteId]),
-        event: eventName,
-        timeMs: b.timeMs,
-      }))
+      alternateIds.map((id) => legOf(id, eventName, rollingPick(times.get(id))!))
     )
+
     return NextResponse.json({
       relay: normalizedRelay,
       course,
@@ -389,13 +432,21 @@ export async function POST(req: Request) {
   }
 
   // --- MEDLEY RELAY ---
+  const strokeEvent = (stroke: string) => `${legDist} ${stroke.charAt(0).toUpperCase()}${stroke.slice(1)}`
   const timeLookup: Record<string, Record<string, number>> = {}
+  const pickLookup: Record<string, Record<string, TimePick>> = {}
+  const strokeTimeLegs: BuiltLeg[] = []
   for (const leg of MEDLEY_LEGS) {
     const eventNames = MEDLEY_LEG_EVENTS[leg].filter((e) => e.startsWith(`${legDist}`))
-    for (const c of await preferredBests(eventNames, eligibleIds)) {
-      if (!timeLookup[c.athleteId]) timeLookup[c.athleteId] = {}
-      timeLookup[c.athleteId][leg] = c.timeMs
+    const times = await strokeBests(eventNames, eligibleIds)
+    for (const [id, t] of times) {
+      // Backstroke leads off from the water (flat start only); breast, fly and free follow an exchange.
+      const pick = leg === "back" ? t.leadoff : rollingPick(t)
+      if (!pick) continue
+      ;(timeLookup[id] ??= {})[leg] = pick.timeMs
+      ;(pickLookup[id] ??= {})[leg] = pick
     }
+    strokeTimeLegs.push(...strokeTimeRows(times, strokeEvent(leg), leg))
   }
 
   function bestMedleyFromPool(available: Set<string>, isMixed: boolean) {
@@ -471,14 +522,7 @@ export async function POST(req: Request) {
     const resultLegs: BuiltLeg[] = await attachSourceDates(
       found.bestAssignment
         .sort((a, b) => LEG_ORDER.indexOf(a.leg) - LEG_ORDER.indexOf(b.leg))
-        .map((a) => ({
-          leg: a.leg,
-          athleteId: a.athleteId,
-          timeMs: a.timeMs,
-          name: fullName(athleteMap[a.athleteId]),
-          gender: athleteMap[a.athleteId]?.gender,
-          event: `${legDist} ${a.leg.charAt(0).toUpperCase() + a.leg.slice(1)}`,
-        }))
+        .map((a) => legOf(a.athleteId, strokeEvent(a.leg), pickLookup[a.athleteId][a.leg], a.leg))
     )
 
     teams.push({
@@ -498,17 +542,9 @@ export async function POST(req: Request) {
   const usedIds = new Set(teams.flatMap((team) => team.legs.map((leg) => leg.athleteId)))
   const remainingAlts: BuiltLeg[] = []
   for (const stroke of MEDLEY_LEGS) {
-    const eventName = `${legDist} ${stroke.charAt(0).toUpperCase()}${stroke.slice(1)}`
-    const rows = Object.entries(timeLookup)
-      .filter(([id, times]) => !usedIds.has(id) && times[stroke] != null)
-      .map(([id, times]) => ({
-        athleteId: id,
-        name: fullName(athleteMap[id]),
-        gender: athleteMap[id]?.gender,
-        event: eventName,
-        timeMs: times[stroke],
-        leg: stroke,
-      }))
+    const rows = Object.entries(pickLookup)
+      .filter(([id, picks]) => !usedIds.has(id) && picks[stroke] != null)
+      .map(([id, picks]) => legOf(id, strokeEvent(stroke), picks[stroke], stroke))
       .sort((a, b) => a.timeMs - b.timeMs)
     if (gender === "X") {
       for (const alternateGender of [Gender.M, Gender.F]) {
@@ -520,22 +556,7 @@ export async function POST(req: Request) {
     }
   }
   const alternates: BuiltLeg[] = await attachSourceDates(remainingAlts)
-
-  const strokeTimeRows: BuiltLeg[] = []
-  for (const [id, times] of Object.entries(timeLookup)) {
-    for (const stroke of MEDLEY_LEGS) {
-      if (times[stroke] == null) continue
-      strokeTimeRows.push({
-        athleteId: id,
-        name: fullName(athleteMap[id]),
-        gender: athleteMap[id]?.gender,
-        event: `${legDist} ${stroke.charAt(0).toUpperCase()}${stroke.slice(1)}`,
-        timeMs: times[stroke],
-        leg: stroke,
-      })
-    }
-  }
-  const strokeTimes = await buildStrokeTimes(strokeTimeRows)
+  const strokeTimes = await buildStrokeTimes(strokeTimeLegs)
 
   return NextResponse.json({
     relay: normalizedRelay,

@@ -53,6 +53,8 @@ export type Leg = {
   outsideWindow?: boolean
   /** Coach-entered time rather than a swim on record. */
   custom?: boolean
+  /** Timed from a relay split (legs 2–4 only) rather than a flat-start swim. */
+  relaySplit?: boolean
 }
 
 export type RelayTeam = {
@@ -68,11 +70,19 @@ type StrokeTime = {
   sourceDate?: string | null
   outsideWindow?: boolean
   custom?: boolean
+  relaySplit?: boolean
 }
 
 export type StrokeTimes = Record<
   string,
-  { name: string; gender?: "M" | "F"; times: Record<string, StrokeTime> }
+  {
+    name: string
+    gender?: "M" | "F"
+    /** Flat-start (and custom) times — usable on any leg. */
+    times: Record<string, StrokeTime>
+    /** Relay splits faster than the flat-start time — usable on legs 2–4 only. */
+    splitTimes?: Record<string, StrokeTime>
+  }
 >
 
 export type RelayResult = {
@@ -202,12 +212,15 @@ export function normalizeResult(data: {
       : data.legs
         ? [{ letter: "A", totalMs: data.totalMs ?? 0, legs: data.legs }]
         : []
+  const result: RelayResult = { relay: data.relay, course: data.course, teams, strokeTimes: data.strokeTimes }
+  // Keep every unused swimmer as an alternate; how many are shown is a display setting.
   return {
-    relay: data.relay,
-    course: data.course,
-    teams,
-    alternates: data.alternates ? rankAlternates(data.alternates) : data.alternates,
-    strokeTimes: data.strokeTimes,
+    ...result,
+    alternates: data.strokeTimes
+      ? rebuildAlternates(result, teams)
+      : data.alternates
+        ? rankAlternates(data.alternates)
+        : data.alternates,
   }
 }
 
@@ -280,9 +293,29 @@ export function formatLegTime(timeMs: number | null): string {
   return timeMs == null ? "NT" : formatTime(timeMs)
 }
 
+/**
+ * A swimmer's time on relay leg `index` (0-based) for `stroke`. A relay split only counts after
+ * the lead-off — leg 1 is a flat start — and a coach's custom time wins everywhere.
+ */
+export function slotTime(
+  data: StrokeTimes[string] | undefined,
+  stroke: string,
+  index: number
+): StrokeTime | undefined {
+  const flat = data?.times[stroke]
+  if (flat?.custom || index === 0) return flat
+  return data?.splitTimes?.[stroke] ?? flat
+}
+
+/** Medley legs are fixed by stroke (back leads off); free alternates show their legs 2–4 time. */
+function strokeSlot(stroke: string): number {
+  const index = (MEDLEY_SLOT_STROKES as readonly string[]).indexOf(stroke)
+  return index >= 0 ? index : 1
+}
+
 function applyStroke(person: Pick<Leg, "athleteId" | "name" | "gender">, stroke: string, strokeTimes: StrokeTimes): Leg | null {
   const data = strokeTimes[person.athleteId]
-  const time = data?.times[stroke]
+  const time = slotTime(data, stroke, strokeSlot(stroke))
   if (!time) return null
   return {
     athleteId: person.athleteId,
@@ -293,17 +326,21 @@ function applyStroke(person: Pick<Leg, "athleteId" | "name" | "gender">, stroke:
     sourceDate: time.sourceDate ?? null,
     outsideWindow: time.outsideWindow ?? false,
     custom: time.custom ?? false,
+    relaySplit: time.relaySplit ?? false,
     leg: stroke,
   }
 }
 
-function rebuildMedleyAlternates(strokeTimes: StrokeTimes, usedIds: Set<string>, mixed = false): Leg[] {
+/** Every unused swimmer with a time for each medley stroke, fastest first. */
+function rebuildMedleyAlternates(strokeTimes: StrokeTimes, usedIds: Set<string>): Leg[] {
   const alts: Leg[] = []
   for (const stroke of MEDLEY_SLOT_STROKES) {
     const rows = Object.entries(strokeTimes)
-      .filter(([id, data]) => !usedIds.has(id) && data.times[stroke])
-      .map(([id, data]) => {
-        const time = data.times[stroke]
+      .flatMap(([id, data]) => {
+        const time = usedIds.has(id) ? undefined : slotTime(data, stroke, strokeSlot(stroke))
+        return time ? [{ id, data, time }] : []
+      })
+      .map(({ id, data, time }) => {
         return {
           athleteId: id,
           name: data.name,
@@ -313,27 +350,24 @@ function rebuildMedleyAlternates(strokeTimes: StrokeTimes, usedIds: Set<string>,
           sourceDate: time.sourceDate ?? null,
           outsideWindow: time.outsideWindow ?? false,
           custom: time.custom ?? false,
+          relaySplit: time.relaySplit ?? false,
           leg: stroke,
         }
       })
       .sort((a, b) => a.timeMs - b.timeMs)
-    const alternates = mixed
-      ? [
-          ...rows.filter((row) => row.gender === "M").slice(0, 1),
-          ...rows.filter((row) => row.gender === "F").slice(0, 1),
-        ]
-      : rows.slice(0, 2)
-    alts.push(...alternates)
+    alts.push(...rows)
   }
   return alts
 }
 
-/** Fastest unused free swimmers, like the optimal builder's free-relay alternates. */
+/** Every unused swimmer with a free time (their legs 2–4 time), fastest first. */
 function rebuildFreeAlternates(strokeTimes: StrokeTimes, usedIds: Set<string>): Leg[] {
   return Object.entries(strokeTimes)
-    .filter(([id, data]) => !usedIds.has(id) && data.times.free)
-    .map(([id, data]) => {
-      const time = data.times.free
+    .flatMap(([id, data]) => {
+      const time = usedIds.has(id) ? undefined : slotTime(data, "free", 1)
+      return time ? [{ id, data, time }] : []
+    })
+    .map(({ id, data, time }) => {
       return {
         athleteId: id,
         name: data.name,
@@ -343,18 +377,18 @@ function rebuildFreeAlternates(strokeTimes: StrokeTimes, usedIds: Set<string>): 
         sourceDate: time.sourceDate ?? null,
         outsideWindow: time.outsideWindow ?? false,
         custom: time.custom ?? false,
+        relaySplit: time.relaySplit ?? false,
       }
     })
     .sort((a, b) => a.timeMs - b.timeMs)
-    .slice(0, 8)
 }
 
-function rebuildAlternates(result: RelayResult, teams: RelayTeam[], mixed: boolean): Leg[] {
+function rebuildAlternates(result: RelayResult, teams: RelayTeam[]): Leg[] {
   const usedIds = new Set(teams.flatMap((team) => team.legs.map((leg) => leg.athleteId)))
   const strokeTimes = result.strokeTimes ?? {}
   return rankAlternates(
     isMedleyRelay(result.relay)
-      ? rebuildMedleyAlternates(strokeTimes, usedIds, mixed)
+      ? rebuildMedleyAlternates(strokeTimes, usedIds)
       : rebuildFreeAlternates(strokeTimes, usedIds)
   )
 }
@@ -409,8 +443,7 @@ export function lineupKey(teams: LineupTeam[]): string {
 export function applyLineupTeams(
   base: RelayResult,
   lineup: LineupTeam[],
-  genders: Map<string, "M" | "F" | undefined>,
-  mixed: boolean
+  genders: Map<string, "M" | "F" | undefined>
 ): RelayResult {
   let next: RelayResult = {
     ...base,
@@ -428,13 +461,13 @@ export function applyLineupTeams(
     })
   }
   const teams = retotalTeams(next.teams)
-  return { ...next, teams, alternates: rebuildAlternates(next, teams, mixed) }
+  return { ...next, teams, alternates: rebuildAlternates(next, teams) }
 }
 
 /** Keep the first `count` relays; swimmers on dropped relays become alternates again. */
-export function truncateTeams(result: RelayResult, count: number, mixed: boolean): RelayResult {
+export function truncateTeams(result: RelayResult, count: number): RelayResult {
   const teams = result.teams.slice(0, count)
-  return { ...result, teams, alternates: rebuildAlternates(result, teams, mixed) }
+  return { ...result, teams, alternates: rebuildAlternates(result, teams) }
 }
 
 /**
@@ -442,7 +475,7 @@ export function truncateTeams(result: RelayResult, count: number, mixed: boolean
  * are. `extra` is an optimal result for the unused swimmers; its teams are re-lettered after
  * the current ones.
  */
-export function appendTeams(result: RelayResult, extra: RelayResult, mixed: boolean): RelayResult {
+export function appendTeams(result: RelayResult, extra: RelayResult): RelayResult {
   const used = new Set(result.teams.flatMap((team) => team.legs.map((leg) => leg.athleteId)))
   const added = extra.teams
     .filter((team) => team.legs.every((leg) => !used.has(leg.athleteId)))
@@ -454,7 +487,46 @@ export function appendTeams(result: RelayResult, extra: RelayResult, mixed: bool
     strokeTimes: { ...extra.strokeTimes, ...result.strokeTimes },
     teams: [...result.teams, ...added],
   }
-  return { ...merged, alternates: rebuildAlternates(merged, merged.teams, mixed) }
+  return { ...merged, alternates: rebuildAlternates(merged, merged.teams) }
+}
+
+/** Alternates shown at first, and how many more each "Show more" adds — per stroke for medley. */
+export const ALTERNATES_SHOWN = { medley: { initial: 2, step: 2 }, free: { initial: 8, step: 4 } }
+
+export type AlternateGroup = { key: string; rows: { alt: Leg; index: number }[]; hidden: number }
+
+/**
+ * Alternates grouped for display — one group per medley stroke, or a single free group — each cut
+ * to `limitFor(key)` rows (indexes point into `alternates`, already ranked by stroke then time).
+ * Mixed relays alternate men and women so a limit of 2 is one of each.
+ */
+export function alternateGroups(
+  alternates: Leg[],
+  medley: boolean,
+  mixed: boolean,
+  limitFor: (key: string) => number
+): AlternateGroup[] {
+  const rows = alternates.map((alt, index) => ({ alt, index }))
+  const groups = medley
+    ? MEDLEY_SLOT_STROKES.map((stroke) => ({
+        key: stroke as string,
+        rows: rows.filter(({ alt }) => alternateStroke(alt) === stroke),
+      }))
+    : [{ key: "free", rows }]
+  return groups.map(({ key, rows: group }) => {
+    let ordered = group
+    if (mixed) {
+      const men = group.filter(({ alt }) => alt.gender === "M")
+      const women = group.filter(({ alt }) => alt.gender !== "M")
+      ordered = []
+      for (let i = 0; i < Math.max(men.length, women.length); i++) {
+        if (men[i]) ordered.push(men[i])
+        if (women[i]) ordered.push(women[i])
+      }
+    }
+    const limit = limitFor(key)
+    return { key, rows: ordered.slice(0, limit), hidden: Math.max(0, ordered.length - limit) }
+  })
 }
 
 export type RowLoc =
@@ -542,11 +614,11 @@ export function canDropOnSlot(result: RelayResult, from: RowLoc, to: RowLoc, mix
   if (!isMedleyRelay(result.relay) || !result.strokeTimes) return true
   const incomingId = athleteIdAt(result, from)
   if (!incomingId) return false
-  if (!result.strokeTimes[incomingId]?.times[slotStroke(to.index)]) return false
+  if (!slotTime(result.strokeTimes[incomingId], slotStroke(to.index), to.index)) return false
   if (from.list === "team") {
     const outgoingId = athleteIdAt(result, to)
     if (!outgoingId) return false
-    if (!result.strokeTimes[outgoingId]?.times[slotStroke(from.index)]) return false
+    if (!slotTime(result.strokeTimes[outgoingId], slotStroke(from.index), from.index)) return false
   }
   return true
 }
@@ -589,7 +661,7 @@ export function moveRelayRow(result: RelayResult, from: RowLoc, to: RowLoc, mixe
     return {
       ...result,
       teams: retotalTeams(teams),
-      alternates: rankAlternates(rebuildMedleyAlternates(strokeTimes, usedIds, mixed)),
+      alternates: rankAlternates(rebuildMedleyAlternates(strokeTimes, usedIds)),
     }
   }
 
@@ -600,6 +672,19 @@ export function moveRelayRow(result: RelayResult, from: RowLoc, to: RowLoc, mixe
     const swapped = fromList[from.index]
     fromList[from.index] = toList[to.index]
     toList[to.index] = swapped
+  }
+
+  if (strokeTimes) {
+    // Moving onto or off the lead-off leg swaps a relay split for a flat-start time.
+    const retimed = teams.map((team) => ({
+      ...team,
+      legs: team.legs.map((leg, i) => legFor(result, leg, i)),
+    }))
+    return {
+      ...result,
+      teams: retotalTeams(retimed),
+      alternates: rankAlternates(alts.map((alt) => legFor(result, alt, 1))),
+    }
   }
 
   return {
@@ -615,7 +700,7 @@ type LegAthlete = Pick<Leg, "athleteId" | "name" | "gender">
 function legFor(result: RelayResult, person: LegAthlete, index: number): Leg {
   const stroke = legStroke(result.relay, index)
   const data = result.strokeTimes?.[person.athleteId]
-  const time = data?.times[stroke]
+  const time = slotTime(data, stroke, index)
   return {
     athleteId: person.athleteId,
     name: person.name || data?.name || "Unknown",
@@ -625,6 +710,7 @@ function legFor(result: RelayResult, person: LegAthlete, index: number): Leg {
     sourceDate: time?.sourceDate ?? null,
     outsideWindow: time?.outsideWindow ?? false,
     custom: time?.custom ?? false,
+    relaySplit: time?.relaySplit ?? false,
     ...(isMedleyRelay(result.relay) ? { leg: stroke } : {}),
   }
 }
@@ -650,9 +736,11 @@ export function replaceLeg(result: RelayResult, letter: string, index: number, p
   if (swapFrom) {
     swapFrom.legs[swapFrom.index] = legFor(result, outgoing, swapFrom.index)
   } else {
+    // Free alternates show their legs 2–4 time, so a benched lead-off may switch to a relay split.
+    const benched = result.strokeTimes && !isMedleyRelay(result.relay) ? legFor(result, outgoing, 1) : outgoing
     alternates = rankAlternates([
       ...alternates.filter((alt) => alt.athleteId !== person.athleteId),
-      outgoing,
+      benched,
     ])
   }
   return { ...result, teams: retotalTeams(teams), alternates }
@@ -666,7 +754,7 @@ export function setLegTime(result: RelayResult, letter: string, index: number, t
   if (!team || !leg) return result
 
   const stroke = legStroke(result.relay, index)
-  team.legs[index] = { ...leg, timeMs, sourceDate: null, outsideWindow: false, custom: true }
+  team.legs[index] = { ...leg, timeMs, sourceDate: null, outsideWindow: false, custom: true, relaySplit: false }
   const prior = result.strokeTimes?.[leg.athleteId]
   return {
     ...result,

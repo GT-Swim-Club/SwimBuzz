@@ -167,14 +167,14 @@ export default function MeetRelaysWorkspace({
     if (suggestion?.status === "ok") {
       return {
         ...base,
-        pills: [{ label: "Suggested", tone: "suggested" as const }],
+        pills: [{ label: "Auto", tone: "suggested" as const }],
         state: "cards" as const,
         cards: lineupSummaryCards(slot.slug, lineupTeamsOf(suggestion.result)),
       }
     }
     return {
       ...base,
-      pills: [{ label: "Suggested", tone: "suggested" as const }],
+      pills: [{ label: "Auto", tone: "suggested" as const }],
       state: suggestion?.status === "error" ? ("empty" as const) : ("loading" as const),
       emptyText: suggestion?.status === "error" ? suggestion.error : undefined,
       cards: [],

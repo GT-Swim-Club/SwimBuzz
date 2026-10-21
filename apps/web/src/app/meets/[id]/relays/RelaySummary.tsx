@@ -37,9 +37,12 @@ const PILL_TONES: Record<RelaySummaryPill["tone"], string> = {
   suggested: "border-dashed border-border text-foreground-secondary",
 }
 
+/** Cards inside a hovered event block take the block's hover color, so it reads as one surface. */
+const groupHover = "transition-colors group-hover:bg-background-hover-strong"
+
 function EventHeader({ event }: { event: RelaySummaryEvent }) {
-  const content = (
-    <>
+  return (
+    <div className="flex min-h-8 items-center justify-between gap-2 py-1 text-left">
       <span className="inline-flex min-w-0 items-center gap-2">
         <span className="truncate text-sm font-medium text-foreground">{event.name}</span>
         {event.pills.map((pill) => (
@@ -57,27 +60,16 @@ function EventHeader({ event }: { event: RelaySummaryEvent }) {
           className="h-4 w-4 shrink-0 text-foreground-tertiary transition-colors group-hover:text-foreground"
         />
       ) : null}
-    </>
-  )
-  const className =
-    "-mx-2 flex min-h-8 w-[calc(100%+1rem)] items-center justify-between gap-2 rounded-lg px-2 py-1 text-left"
-  if (!event.href) return <div className={className}>{content}</div>
-  return (
-    <Link
-      href={event.href}
-      aria-label={`${event.pills.some((p) => p.tone === "published") ? "Edit" : "Build"} ${event.name} Relay`}
-      className={`group ${className} transition-colors hover:bg-fill focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/35`}
-    >
-      {content}
-    </Link>
+    </div>
   )
 }
 
-function SummaryCard({ card }: { card: RelaySummaryCard }) {
+function SummaryCard({ card, clickable }: { card: RelaySummaryCard; clickable: boolean }) {
   return (
     <div
       className={
         "min-w-0 rounded-lg border " +
+        (clickable ? `${groupHover} ` : "") +
         (card.dashed
           ? "border-dashed border-border bg-transparent"
           : card.mine
@@ -135,6 +127,25 @@ export function RelaySummaryCardSkeleton() {
   )
 }
 
+/**
+ * Narrowest column that still shows every event header and swimmer name in full, from approximate
+ * glyph widths (14px names, 11px pills) — same idea as the design prototype.
+ */
+function minColumnWidth(events: RelaySummaryEvent[]): number {
+  let width = 0
+  for (const event of events) {
+    const pills = event.pills.reduce((sum, pill) => sum + pill.label.length * 6.6 + 26, 0)
+    // name + pills (padding, border, gap) + chevron and its gap + header padding
+    width = Math.max(width, event.name.length * 7.9 + pills + (event.href ? 24 : 0) + 16)
+    for (const card of event.cards) {
+      // card header: title + mono total + gap and padding
+      width = Math.max(width, card.title.length * 7.9 + card.total.length * 8.4 + 32)
+      for (const leg of card.legs) width = Math.max(width, leg.name.length * 8.2 + 26)
+    }
+  }
+  return Math.ceil(Math.min(260, Math.max(160, width)))
+}
+
 /** Every relay event at a glance: published lineups solid, drafts and suggestions dashed. */
 export default function RelaySummary({ events }: { events: RelaySummaryEvent[] }) {
   if (events.length === 0) {
@@ -145,29 +156,58 @@ export default function RelaySummary({ events }: { events: RelaySummaryEvent[] }
     )
   }
   return (
-    <BalancedGrid count={events.length} minColumnPx={240} gapXPx={16} className="items-start gap-x-4 gap-y-5">
-      {events.map((event) => (
-        <section key={event.slug} className="flex min-w-0 flex-col gap-2" aria-label={`${event.name} Relay`}>
-          <EventHeader event={event} />
-          {event.state === "loading" ? (
-            <>
-              <RelaySummaryCardSkeleton />
-              <RelaySummaryCardSkeleton />
-            </>
-          ) : event.state === "empty" ? (
-            <div className="flex flex-col items-start gap-2 rounded-lg border border-dashed border-border px-3 py-3.5">
-              <p className="text-sm text-foreground-secondary">{event.emptyText}</p>
-              {event.href ? (
-                <Link href={event.href} className="text-[13px] text-accent hover:underline">
-                  Build lineup
-                </Link>
-              ) : null}
-            </div>
-          ) : (
-            event.cards.map((card) => <SummaryCard key={card.key} card={card} />)
-          )}
-        </section>
-      ))}
+    <BalancedGrid
+      count={events.length}
+      minColumnPx={minColumnWidth(events)}
+      gapXPx={16}
+      className="items-start gap-x-4 gap-y-5"
+    >
+      {events.map((event) => {
+        const content = (
+          <>
+            <EventHeader event={event} />
+            {event.state === "loading" ? (
+              <>
+                <RelaySummaryCardSkeleton />
+                <RelaySummaryCardSkeleton />
+              </>
+            ) : event.state === "empty" ? (
+              <div
+                className={
+                  "flex flex-col items-start gap-2 rounded-lg border border-dashed border-border px-3 py-3.5 " +
+                  (event.href ? groupHover : "")
+                }
+              >
+                <p className="text-sm text-foreground-secondary">{event.emptyText}</p>
+                {event.href ? (
+                  <span className="text-[13px] text-accent group-hover:underline">Build lineup</span>
+                ) : null}
+              </div>
+            ) : (
+              event.cards.map((card) => (
+                <SummaryCard key={card.key} card={card} clickable={Boolean(event.href)} />
+              ))
+            )}
+          </>
+        )
+        return (
+          <section key={event.slug} className="min-w-0" aria-label={`${event.name} Relay`}>
+            {event.href ? (
+              // The whole block — header and relay cards — opens the builder.
+              <Link
+                href={event.href}
+                aria-label={`${event.pills.some((p) => p.tone === "published") ? "Edit" : "Build"} ${event.name} Relay`}
+                // Padded out into the grid gap so the hover fills the header, cards and gaps as one card.
+                className="group -m-2 flex flex-col gap-2 rounded-xl p-2 transition-colors hover:bg-background-hover-strong focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/35"
+              >
+                {content}
+              </Link>
+            ) : (
+              <div className="flex flex-col gap-2">{content}</div>
+            )}
+          </section>
+        )
+      })}
     </BalancedGrid>
   )
 }

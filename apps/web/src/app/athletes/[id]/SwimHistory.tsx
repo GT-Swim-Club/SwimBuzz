@@ -11,6 +11,7 @@ import {
   isDeletableSwim,
   pageButtons,
   paginateMeetGroups,
+  RELAY_SPLIT_LABEL,
   swimMeetHref,
   swimRoundLabel,
   type AthleteSwim,
@@ -171,7 +172,7 @@ export default function SwimHistory({
               </div>
               {group.swims.map((swim) => {
                 const href = swimMeetHref(swim)
-                const round = swimRoundLabel(swim.tags)
+                const round = swim.relaySplit ? RELAY_SPLIT_LABEL : swimRoundLabel(swim.tags)
                 const isCurrentPb = marks.currentPb.has(swim.id)
                 const wasPb = marks.pbAtTime.has(swim.id)
                 const time = formatTime(swim.timeMs)
@@ -183,13 +184,18 @@ export default function SwimHistory({
                     }`}
                   >
                     <span className="flex min-w-0 items-baseline gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => onOpenEvent(swim.event, swim.course)}
-                        className="relative z-[1] truncate text-left font-semibold text-foreground transition-colors hover:text-primary"
-                      >
-                        {swim.event}
-                      </button>
+                      {swim.relaySplit ? (
+                        // Relay splits have no event page.
+                        <span className="truncate font-semibold text-foreground">{swim.event}</span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => onOpenEvent(swim.event, swim.course)}
+                          className="relative z-[1] truncate text-left font-semibold text-foreground transition-colors hover:text-primary"
+                        >
+                          {swim.event}
+                        </button>
+                      )}
                       <span className="shrink-0 text-foreground-secondary">{swim.course}</span>
                       {round && <span className="truncate text-foreground-secondary">{round}</span>}
                     </span>

@@ -11,10 +11,11 @@ import { useUnsavedChangesGuard } from "@/lib/use-unsaved-changes-guard"
 import { formatSwimDate, formatTime } from "@/lib/utils"
 import { parseSwimTime } from "@/lib/swim/swim-parse"
 import {
+  ALTERNATES_SHOWN,
   DEFAULT_RELAY_COUNT,
   RELAY_LETTERS,
   TIME_WINDOWS,
-  alternateStroke,
+  alternateGroups,
   appendTeams,
   applyLineupTeams,
   canDropOnSlot,
@@ -32,6 +33,7 @@ import {
   publishedTeamsFor,
   replaceLeg,
   setLegTime,
+  slotTime,
   truncateTeams,
   windowDays,
   type AthleteOption,
@@ -66,12 +68,12 @@ type BuildRequest = {
   source: Source | null
 }
 
-/** Swim date under a time; red when it falls outside the preferred range. */
+/** Swim date under a time (marked when it's a relay split); red when outside the preferred range. */
 function SourceDate({ leg }: { leg: Leg }) {
   if (leg.custom) {
     return <span className="mt-0.5 text-[11px] text-foreground-secondary">Custom time</span>
   }
-  if (!leg.sourceDate) return null
+  if (!leg.sourceDate && !leg.relaySplit) return null
   return (
     <span
       className={
@@ -80,7 +82,9 @@ function SourceDate({ leg }: { leg: Leg }) {
       }
       title={leg.outsideWindow ? "Outside the preferred date range" : undefined}
     >
-      {formatSwimDate(leg.sourceDate)}
+      {[leg.relaySplit && "Relay split", leg.sourceDate && formatSwimDate(leg.sourceDate)]
+        .filter(Boolean)
+        .join(" · ")}
     </span>
   )
 }
@@ -413,7 +417,7 @@ export default function MeetRelayBuilder({
   const [initial] = useState(() => {
     if (!initialBase) return null
     if (request.fixed) {
-      return applyLineupTeams(initialBase, request.fixed, new Map(athletes.map((a) => [a.id, a.gender])), mixed)
+      return applyLineupTeams(initialBase, request.fixed, new Map(athletes.map((a) => [a.id, a.gender])))
     }
     return initialBase.teams.length > 0 ? initialBase : null
   })
@@ -425,7 +429,13 @@ export default function MeetRelayBuilder({
   const [loaded, setLoaded] = useState<{ source: Source; key: string } | null>(() =>
     initial && request.source ? { source: request.source, key: lineupKey(lineupTeamsOf(initial)) } : null
   )
+  /** The optimal lineup at the current settings and relay count, to compare against; null = unknown. */
+  const [optimalTeams, setOptimalTeams] = useState<LineupTeam[] | null>(() =>
+    initialBase && initialBase.teams.length > 0 ? lineupTeamsOf(initialBase) : null
+  )
   const [error, setError] = useState("")
+  /** Extra alternates revealed by "Show more", per stroke (medley) or "free". */
+  const [extraAlternates, setExtraAlternates] = useState<Record<string, number>>({})
   const [busy, setBusy] = useState<"draft" | "publish" | null>(null)
   const [confirmPublish, setConfirmPublish] = useState(false)
   const [confirmError, setConfirmError] = useState<string | null>(null)
@@ -512,18 +522,15 @@ export default function MeetRelayBuilder({
         if (fixed) {
           // Optimal can fail (e.g. too few timed swimmers) — still show the kept lineup, untimed.
           const base = res.ok ? res.result : { relay: event, course, teams: [], strokeTimes: {} }
-          next = applyLineupTeams(
-            base,
-            fixed,
-            new Map(athletes.map((a) => [a.id, a.gender])),
-            mixed
-          )
+          next = applyLineupTeams(base, fixed, new Map(athletes.map((a) => [a.id, a.gender])))
         } else if (res.ok) {
           next = res.result
         } else {
           setError(res.error)
         }
         setResult(next)
+        // Every build returns the optimal lineup too, even when re-timing a kept one.
+        setOptimalTeams(res.ok && res.result.teams.length > 0 ? lineupTeamsOf(res.result) : null)
         if (next && source) setLoaded({ source, key: lineupKey(lineupTeamsOf(next)) })
       } catch {
         if (!controller.signal.aborted) setError("Something went wrong")
@@ -572,7 +579,9 @@ export default function MeetRelayBuilder({
     const next = Math.max(1, on ? index : index + 1)
     if (next === teamCount || !result) return
     if (next < result.teams.length) {
-      setResult(truncateTeams(result, next, mixed))
+      setResult(truncateTeams(result, next))
+      // Relays are built fastest-first, so fewer optimal relays are the first ones.
+      setOptimalTeams((teams) => teams?.slice(0, next) ?? null)
       return
     }
     addRelays(result, next - result.teams.length)
@@ -611,7 +620,9 @@ export default function MeetRelayBuilder({
           setError(res.ok ? `Not enough swimmers with times left for a ${nextLetter} relay.` : res.error)
           return
         }
-        setResult((cur) => (cur ? appendTeams(cur, res.result, mixed) : cur))
+        setResult((cur) => (cur ? appendTeams(cur, res.result) : cur))
+        // The optimal lineup for the new count isn't known without a full rebuild.
+        setOptimalTeams(null)
       })
       .catch(() => {
         if (!controller.signal.aborted) setError("Something went wrong")
@@ -649,7 +660,7 @@ export default function MeetRelayBuilder({
       .filter((a) => a.id !== outgoing.athleteId && (!mixed || a.gender === outgoing.gender))
       .map((athlete) => ({
         athlete,
-        timeMs: result.strokeTimes?.[athlete.id]?.times[stroke]?.timeMs ?? null,
+        timeMs: slotTime(result.strokeTimes?.[athlete.id], stroke, index)?.timeMs ?? null,
         place: places.get(athlete.id) ?? null,
       }))
       .sort((a, b) => (a.timeMs ?? Infinity) - (b.timeMs ?? Infinity) || 0)
@@ -878,7 +889,18 @@ export default function MeetRelayBuilder({
   const saveDraftLabel = data.published.some((relay) => relay.manual)
     ? "Save as draft and unpublish"
     : "Save as draft"
-  const isLoaded = (source: Source) => loaded?.source === source && !changed
+  // An option counts as loaded whenever the lineup on screen matches it — e.g. a saved draft that
+  // is also the optimal lineup marks both.
+  const currentKey = result && result.teams.length > 0 ? lineupKey(lineupTeamsOf(result)) : null
+  const sourceTeams: Record<Source, LineupTeam[] | null> = {
+    optimal: optimalTeams,
+    published: publishedTeams.length > 0 ? publishedTeams : null,
+    draft: draftTeams,
+  }
+  const isLoaded = (source: Source) => {
+    const teams = sourceTeams[source]
+    return currentKey != null && teams != null && lineupKey(teams) === currentKey
+  }
   const editable = busy == null && adding === 0
   const canAct = result != null && result.teams.length > 0 && !loading && editable
 
@@ -970,15 +992,18 @@ export default function MeetRelayBuilder({
 
   const medley = isMedleyRelay(event)
   const alternates = result?.alternates ?? []
-  const alternateGroups = medley
-    ? medleyStrokeGroups(event).map((group) => ({
-        key: group.stroke,
-        label: group.label as string | null,
-        rows: alternates
-          .map((alt, index) => ({ alt, index }))
-          .filter(({ alt }) => alternateStroke(alt) === group.stroke),
-      }))
-    : [{ key: "free", label: null, rows: alternates.map((alt, index) => ({ alt, index })) }]
+  // Every unused swimmer is kept as an alternate; each list shows a few and "Show more" adds more.
+  const shown = ALTERNATES_SHOWN[medley ? "medley" : "free"]
+  const strokeLabels = new Map(medleyStrokeGroups(event).map((g) => [g.stroke, g.label]))
+  const groups = alternateGroups(
+    alternates,
+    medley,
+    mixed,
+    (key) => shown.initial + (extraAlternates[key] ?? 0)
+  ).map((group) => ({
+    ...group,
+    label: strokeLabels.get(group.key) ?? group.key,
+  }))
 
   return (
     <main className="w-full flex flex-col gap-6 py-2 sm:py-4">
@@ -1232,22 +1257,18 @@ export default function MeetRelayBuilder({
                 <h4 className="mb-2 text-xs font-medium uppercase tracking-wide text-foreground-secondary">
                   Alternates
                 </h4>
-                <div
-                  className={
-                    medley
-                      ? "grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] items-start gap-x-6 gap-y-4"
-                      : ""
-                  }
-                >
-                  {alternateGroups.map((group) => (
-                    <div key={group.key} className="min-w-0">
-                      {group.label ? (
-                        <div className="flex items-baseline justify-between gap-2 pb-1.5">
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] items-start gap-3">
+                  {groups.map((group) => (
+                    // A card like the relays, but on the page background so alternates read as secondary.
+                    <div key={group.key} className="min-w-0 rounded-lg border border-border">
+                      {/* Medley alternates are split by stroke; a free relay's single list needs no header. */}
+                      {medley ? (
+                        <div className="flex items-baseline justify-between gap-2 border-b border-border px-3.5 py-2">
                           <span className="text-[13px] font-medium text-foreground">{group.label}</span>
-                          <span className="text-xs text-foreground-secondary">{group.rows.length}</span>
+                          <span className="text-xs text-foreground-secondary">{group.rows.length + group.hidden}</span>
                         </div>
                       ) : null}
-                      <div className="border-y border-border">
+                      <div>
                         {group.rows.map(({ alt, index }) => {
                           const loc: RowLoc = { list: "alt", index }
                           return (
@@ -1263,7 +1284,7 @@ export default function MeetRelayBuilder({
                               onDragLeave={(e) => handleRowDragLeave(e, loc)}
                               onDrop={(e) => handleRowDrop(e, loc)}
                               onDragEnd={endDrag}
-                              className={`flex items-center justify-between gap-3 border-t border-border py-2.5 first:border-t-0 ${dragStateClass(loc, editable)}`}
+                              className={`flex items-center justify-between gap-3 border-t border-border px-3 py-2 first:border-t-0 ${dragStateClass(loc, editable)}`}
                             >
                               <div className="min-w-0">
                                 <p className="flex min-w-0 items-center gap-1.5 text-sm text-foreground-secondary">
@@ -1284,9 +1305,23 @@ export default function MeetRelayBuilder({
                           )
                         })}
                         {group.rows.length === 0 ? (
-                          <p className="py-2.5 text-xs text-foreground-secondary">No alternates</p>
+                          <p className="px-3 py-2.5 text-xs text-foreground-secondary">No alternates</p>
                         ) : null}
                       </div>
+                      {group.hidden > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setExtraAlternates((prev) => ({
+                              ...prev,
+                              [group.key]: (prev[group.key] ?? 0) + shown.step,
+                            }))
+                          }
+                          className="w-full rounded-b-lg border-t border-border px-3 py-2 text-left text-xs font-medium text-foreground-secondary transition-colors hover:bg-background-hover hover:text-foreground"
+                        >
+                          Show {Math.min(shown.step, group.hidden)} more
+                        </button>
+                      ) : null}
                     </div>
                   ))}
                 </div>

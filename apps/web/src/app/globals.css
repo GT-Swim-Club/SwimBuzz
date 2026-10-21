@@ -48,6 +48,7 @@
   --color-background: var(--brand-color-bg-container);
   --color-background-elevated: var(--brand-color-bg-elevated);
   --color-background-hover: var(--brand-color-bg-hover);
+  --color-background-hover-strong: var(--brand-color-bg-hover-strong);
   
   /* Colors - Border */
   --color-border: var(--brand-color-border);

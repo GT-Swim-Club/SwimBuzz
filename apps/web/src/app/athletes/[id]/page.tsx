@@ -29,6 +29,7 @@ import { parsePendingProfileChanges } from "@/lib/athlete/pending-profile-change
 import { athletePath, isCuid } from "@/lib/slug"
 import StatsHighlights from "@/components/ui/StatsHighlights"
 import { computeAthleteHighlights } from "@/lib/athlete/athlete-stats"
+import { loadRelaySplits } from "@/lib/meet/relay-splits"
 
 /** Season highlights card above the personal bests — hidden for now, coming back later. */
 const SHOW_SEASON_HIGHLIGHTS: boolean = false
@@ -71,6 +72,21 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
     meetDays: swim.meetRef ? meetDayRange(swim.meetRef) : null,
     date: swim.date.toISOString(),
     source: swim.source}))
+
+  const relaySplits: AthleteSwim[] = (await loadRelaySplits({ athleteIds: [athlete.id] })).map((split) => ({
+    id: `relay-split:${split.id}`,
+    event: split.event,
+    course: split.course,
+    timeMs: split.timeMs,
+    tags: "",
+    meet: split.meet.name,
+    meetId: split.meet.id,
+    meetSlug: split.meet.slug,
+    meetIconUrl: split.meet.iconUrl,
+    meetDays: meetDayRange(split.meet),
+    date: split.date.toISOString(),
+    source: "relay",
+    relaySplit: { relayEvent: split.relayEvent, leg: split.leg }}))
 
   const athleteHighlights = SHOW_SEASON_HIGHLIGHTS && computeAthleteHighlights(
     athlete.swims.map((swim) => ({
@@ -180,6 +196,7 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
 
       <AthleteSwimsWorkspace
         swims={swims}
+        relaySplits={relaySplits}
         isCoach={isCoach}
         isOwnProfile={isOwnProfile}
         athleteId={athlete.id}

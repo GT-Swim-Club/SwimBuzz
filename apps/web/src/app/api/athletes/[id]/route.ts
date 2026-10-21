@@ -17,6 +17,7 @@ import { parseSwimCloudProfile, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-
 import { isCuid, uniqueAthleteSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
 import { redactAthleteForViewer } from "@/lib/athlete/athlete-privacy"
+import { loadRelaySplits } from "@/lib/meet/relay-splits"
 
 export async function GET(
   _req: Request,
@@ -40,7 +41,20 @@ export async function GET(
   })
   if (!athlete) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-  return NextResponse.json(redactAthleteForViewer(athlete, session))
+  // Relay leg 2–4 splits: extra PB rows + history entries, never counted as swims.
+  const relaySplits = (await loadRelaySplits({ athleteIds: [athlete.id] })).map((split) => ({
+    id: `relay-split:${split.id}`,
+    event: split.event,
+    course: split.course,
+    timeMs: split.timeMs,
+    date: split.date,
+    relayEvent: split.relayEvent,
+    leg: split.leg,
+    meet: split.meet.name,
+    meetRef: { id: split.meet.id, slug: split.meet.slug, name: split.meet.name },
+  }))
+
+  return NextResponse.json({ ...redactAthleteForViewer(athlete, session), relaySplits })
 }
 
 async function parseSwimCloudIdForSet(

@@ -44,6 +44,8 @@
     --brand-color-bg-elevated: #ffffff;
     /* Hover wash for clickable rows/cards on a container background. */
     --brand-color-bg-hover: #f7f7f7;
+    /* Stronger hover wash for whole clickable cards (e.g. the relays summary). */
+    --brand-color-bg-hover-strong: #f0f0f0;
     --brand-color-switch-thumb: #ffffff;
     --brand-color-switch-track: var(--brand-color-fill);
     --brand-color-border: #eaeaea;
@@ -272,6 +274,7 @@
     --brand-color-bg-container: #141414;
     --brand-color-bg-elevated: #272727;
     --brand-color-bg-hover: #1c1c1c;
+    --brand-color-bg-hover-strong: #222222;
     --brand-color-switch-thumb: #ffffff;
     --brand-color-switch-track: var(--brand-color-fill);
     --brand-color-border: #2c2c2c;

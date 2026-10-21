@@ -1,5 +1,9 @@
 import { Skeleton } from "@/components/ui/Skeleton"
+import BalancedGrid from "@/components/ui/BalancedGrid"
 import { RelaySummaryCardSkeleton } from "./RelaySummary"
+
+/** Placeholder relay events — the real count isn't known until the page loads. */
+const EVENT_PLACEHOLDERS = 8
 
 export default function Loading() {
   return (
@@ -18,8 +22,8 @@ export default function Loading() {
           </div>
         </div>
       </header>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] items-start gap-x-4 gap-y-5">
-        {[0, 1, 2, 3, 4, 5].map((i) => (
+      <BalancedGrid count={EVENT_PLACEHOLDERS} minColumnPx={200} gapXPx={16} className="items-start gap-x-4 gap-y-5">
+        {Array.from({ length: EVENT_PLACEHOLDERS }, (_, i) => (
           <div key={i} className="flex flex-col gap-2">
             <div className="flex min-h-8 items-center gap-2">
               <Skeleton className="h-4 w-36" />
@@ -29,7 +33,7 @@ export default function Loading() {
             <RelaySummaryCardSkeleton />
           </div>
         ))}
-      </div>
+      </BalancedGrid>
     </main>
   )
 }

@@ -207,6 +207,22 @@ export function leadoffEventFromRelay(relayEvent: string): string | null {
   return normalizeEventName(`${legDistance} ${stroke}`)
 }
 
+/**
+ * Individual event for a relay split (legs 2–4, after a relay exchange) — e.g. 200 Medley Relay
+ * leg 3 → 50 Fly. Null for leg 1, which is a flat start (see leadoffEventFromRelay).
+ */
+export function relaySplitEventFromRelay(relayEvent: string, leg: number): string | null {
+  if (leg < 2 || leg > 4) return null
+  const event = relayEventKey(relayEvent)
+  const match = event.match(/^(\d+)\s+(Medley|Free)\s+Relay$/i)
+  if (!match) return null
+  const total = parseInt(match[1], 10)
+  if (!Number.isFinite(total) || total % 4 !== 0) return null
+  const legDistance = total / 4
+  const stroke = match[2].toLowerCase() === "medley" ? (["Breast", "Fly", "Free"] as const)[leg - 2] : "Free"
+  return normalizeEventName(`${legDistance} ${stroke}`)
+}
+
 /** Swim tags for a relay leadoff — encodes source relay and round. */
 export function leadoffSwimTags(relayEvent: string, relayRound: RelayRound = ""): string {
   const event = normalizeEventName(relayEvent)

@@ -38,6 +38,26 @@ type SwimRow = {
   date?: string
   meet?: string
   meetRef?: { id?: string; name?: string; slug?: string; season?: string } | null
+  /** Set on a relay split (leg 2–4 of a relay) — shown in history and as an extra PB row only. */
+  relayEvent?: string
+}
+
+const RELAY_SPLIT_LABEL = "Relay split"
+
+/** Best time per event · course. */
+function bestByEventCourse(swims: SwimRow[]): Map<string, SwimRow> {
+  const best = new Map<string, SwimRow>()
+  for (const swim of swims) {
+    const event = String(swim.event ?? "")
+    const course = String(swim.course ?? "")
+    if (!event || !course || typeof swim.timeMs !== "number") continue
+    const key = `${event}·${course}`
+    const prev = best.get(key)
+    if (!prev || (prev.timeMs ?? Infinity) > swim.timeMs) {
+      best.set(key, swim)
+    }
+  }
+  return best
 }
 
 const COURSES = ["SCY", "LCM", "SCM"] as const
@@ -109,25 +129,48 @@ export default function AthleteDetailScreen() {
     return athlete.swims as SwimRow[]
   }, [athlete])
 
-  const personalBests = useMemo(() => {
-    const best = new Map<string, SwimRow>()
-    for (const swim of swims) {
-      const event = String(swim.event ?? "")
-      const course = String(swim.course ?? "")
-      if (!event || !course || typeof swim.timeMs !== "number") continue
-      const key = `${event}·${course}`
-      const prev = best.get(key)
-      if (!prev || (prev.timeMs ?? Infinity) > swim.timeMs) {
-        best.set(key, swim)
-      }
+  const relaySplits = useMemo(() => {
+    if (!athlete || !Array.isArray(athlete.relaySplits)) return [] as SwimRow[]
+    return athlete.relaySplits as SwimRow[]
+  }, [athlete])
+
+  const personalBests = useMemo(
+    () =>
+      Array.from(bestByEventCourse(swims).values()).sort((a, b) => {
+        const ae = String(a.event ?? "")
+        const be = String(b.event ?? "")
+        if (ae !== be) return ae.localeCompare(be)
+        return String(a.course ?? "").localeCompare(String(b.course ?? ""))
+      }),
+    [swims]
+  )
+
+  /** Flat-start PBs plus a relay split row wherever a split beats them (or there's no flat time). */
+  const personalBestRows = useMemo(() => {
+    const flat = bestByEventCourse(swims)
+    const rows = [...personalBests]
+    for (const [key, split] of bestByEventCourse(relaySplits)) {
+      const pb = flat.get(key)
+      if (!pb || (split.timeMs as number) < (pb.timeMs ?? Infinity)) rows.push(split)
     }
-    return Array.from(best.values()).sort((a, b) => {
+    return rows.sort((a, b) => {
       const ae = String(a.event ?? "")
       const be = String(b.event ?? "")
       if (ae !== be) return ae.localeCompare(be)
-      return String(a.course ?? "").localeCompare(String(b.course ?? ""))
+      const ac = String(a.course ?? "")
+      const bc = String(b.course ?? "")
+      if (ac !== bc) return ac.localeCompare(bc)
+      return Number(Boolean(a.relayEvent)) - Number(Boolean(b.relayEvent))
     })
-  }, [swims])
+  }, [swims, relaySplits, personalBests])
+
+  const historyRows = useMemo(
+    () =>
+      [...swims, ...relaySplits].sort(
+        (a, b) => new Date(String(b.date ?? 0)).getTime() - new Date(String(a.date ?? 0)).getTime()
+      ),
+    [swims, relaySplits]
+  )
 
   const highlightBest = useMemo(() => {
     let best: SwimRow | null = null
@@ -427,13 +470,15 @@ export default function AthleteDetailScreen() {
         ) : null}
 
         <Section title="Personal bests">
-          {personalBests.length === 0 ? (
+          {personalBestRows.length === 0 ? (
             <Muted>No times yet.</Muted>
           ) : (
-            personalBests.map((swim) => (
+            personalBestRows.map((swim) => (
               <ListRow
-                key={`${swim.event}-${swim.course}-${swim.timeMs}`}
-                title={`${swim.event} · ${swim.course}`}
+                key={`${swim.event}-${swim.course}-${swim.timeMs}-${swim.relayEvent ? "split" : "pb"}`}
+                title={[swim.event, swim.course, swim.relayEvent ? RELAY_SPLIT_LABEL : null]
+                  .filter(Boolean)
+                  .join(" · ")}
                 subtitle={formatTime(swim.timeMs as number)}
               />
             ))
@@ -441,10 +486,10 @@ export default function AthleteDetailScreen() {
         </Section>
 
         <Section title="Swim history">
-          {swims.length === 0 ? (
+          {historyRows.length === 0 ? (
             <Muted>No swim history.</Muted>
           ) : (
-            swims.map((swim, index) => {
+            historyRows.map((swim, index) => {
               const meetName =
                 swim.meetRef?.name ||
                 (swim.meet ? String(swim.meet) : null) ||
@@ -457,7 +502,9 @@ export default function AthleteDetailScreen() {
               return (
                 <ListRow
                   key={swim.id ?? `${index}-${swim.event}-${swim.timeMs}`}
-                  title={`${dateLabel} · ${swim.event ?? "Event"}`}
+                  title={[dateLabel, swim.event ?? "Event", swim.relayEvent ? RELAY_SPLIT_LABEL : null]
+                    .filter(Boolean)
+                    .join(" · ")}
                   subtitle={[swim.course, timeLabel, meetName]
                     .filter(Boolean)
                     .join(" · ")}

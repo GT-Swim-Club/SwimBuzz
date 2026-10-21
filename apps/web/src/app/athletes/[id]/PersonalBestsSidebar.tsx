@@ -1,19 +1,23 @@
 "use client"
 
-import { useMemo, type CSSProperties } from "react"
+import { Fragment, useMemo, type CSSProperties } from "react"
 import { formatTime } from "@/lib/utils"
 import {
   compareSwimEvents,
   parseEventParts,
   STROKE_LABELS,
 } from "@/lib/swim/swim-parse"
-import type { AthleteSwim } from "@/lib/athlete/swim-history"
+import { RELAY_SPLIT_LABEL, type AthleteSwim } from "@/lib/athlete/swim-history"
 
 type Selected = { event: string; course: string } | null
 
-/** Best time per event in one course, grouped by stroke, with a switch over the courses swum. */
+/**
+ * Best time per event in one course, grouped by stroke, with a switch over the courses swum.
+ * A faster relay split (or one in an event with no flat-start time) adds a plain, unclickable row.
+ */
 export default function PersonalBestsSidebar({
   swims,
+  relaySplits,
   courses,
   course,
   onCourseChange,
@@ -21,6 +25,7 @@ export default function PersonalBestsSidebar({
   onSelectEvent,
 }: {
   swims: AthleteSwim[]
+  relaySplits: AthleteSwim[]
   /** Courses the athlete has swims in, in switch order. */
   courses: readonly string[]
   course: string
@@ -29,13 +34,18 @@ export default function PersonalBestsSidebar({
   onSelectEvent: (event: string) => void
 }) {
   const strokeGroups = useMemo(() => {
-    const best = new Map<string, number>()
-    for (const s of swims) {
-      if (s.course !== course) continue
-      const prev = best.get(s.event)
-      if (prev == null || s.timeMs < prev) best.set(s.event, s.timeMs)
+    const bestIn = (list: AthleteSwim[]) => {
+      const best = new Map<string, number>()
+      for (const s of list) {
+        if (s.course !== course) continue
+        const prev = best.get(s.event)
+        if (prev == null || s.timeMs < prev) best.set(s.event, s.timeMs)
+      }
+      return best
     }
-    const events = [...best.keys()].sort(compareSwimEvents)
+    const best = bestIn(swims)
+    const bestSplit = bestIn(relaySplits)
+    const events = [...new Set([...best.keys(), ...bestSplit.keys()])].sort(compareSwimEvents)
     const strokes: string[] = [...STROKE_LABELS]
     const groups = strokes.map((stroke) => ({
       stroke,
@@ -47,9 +57,13 @@ export default function PersonalBestsSidebar({
       .filter((g) => g.events.length > 0)
       .map((g) => ({
         ...g,
-        events: g.events.map((event) => ({ event, timeMs: best.get(event)! })),
+        events: g.events.map((event) => {
+          const timeMs = best.get(event) ?? null
+          const splitMs = bestSplit.get(event) ?? null
+          return { event, timeMs, splitMs: splitMs != null && (timeMs == null || splitMs < timeMs) ? splitMs : null }
+        }),
       }))
-  }, [swims, course])
+  }, [swims, relaySplits, course])
 
   const courseIndex = Math.max(0, courses.indexOf(course))
 
@@ -106,29 +120,45 @@ export default function PersonalBestsSidebar({
             <div key={group.stroke} className="pt-[3px]">
               {gi > 0 && <span aria-hidden className="mx-3 mb-[3px] block h-px bg-border-secondary" />}
               <div role="group" aria-label={group.stroke}>
-                {group.events.map(({ event, timeMs }) => {
+                {group.events.map(({ event, timeMs, splitMs }) => {
                   const on = selected?.event === event && selected.course === course
                   return (
-                    <button
-                      key={event}
-                      type="button"
-                      onClick={() => onSelectEvent(event)}
-                      aria-pressed={on}
-                      className={`mx-1.5 flex w-[calc(100%-12px)] items-center justify-between gap-3 rounded-lg border px-3 py-2 text-left text-[15px] text-foreground transition-colors ${
-                        on
-                          ? "border-primary bg-primary/5"
-                          : "border-transparent hover:bg-background-hover"
-                      }`}
-                    >
-                      <span className={`truncate ${on ? "font-medium" : ""}`}>{event}</span>
-                      <span
-                        className={`shrink-0 font-mono text-sm font-medium tabular-nums ${
-                          on ? "text-foreground" : "text-foreground-secondary"
-                        }`}
-                      >
-                        {formatTime(timeMs)}
-                      </span>
-                    </button>
+                    <Fragment key={event}>
+                      {timeMs != null && (
+                        <button
+                          type="button"
+                          onClick={() => onSelectEvent(event)}
+                          aria-pressed={on}
+                          className={`mx-1.5 flex w-[calc(100%-12px)] items-center justify-between gap-3 rounded-lg border px-3 py-2 text-left text-[15px] text-foreground transition-colors ${
+                            on
+                              ? "border-primary bg-primary/5"
+                              : "border-transparent hover:bg-background-hover"
+                          }`}
+                        >
+                          <span className={`truncate ${on ? "font-medium" : ""}`}>{event}</span>
+                          <span
+                            className={`shrink-0 font-mono text-sm font-medium tabular-nums ${
+                              on ? "text-foreground" : "text-foreground-secondary"
+                            }`}
+                          >
+                            {formatTime(timeMs)}
+                          </span>
+                        </button>
+                      )}
+                      {splitMs != null && (
+                        <div className="mx-1.5 flex items-center justify-between gap-3 border border-transparent px-3 py-2 text-[15px]">
+                          <span className="flex min-w-0 items-center gap-2">
+                            <span className="truncate text-foreground-secondary">{event}</span>
+                            <span className="shrink-0 rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-accent">
+                              {RELAY_SPLIT_LABEL}
+                            </span>
+                          </span>
+                          <span className="shrink-0 font-mono text-sm font-medium tabular-nums text-foreground-secondary">
+                            {formatTime(splitMs)}
+                          </span>
+                        </div>
+                      )}
+                    </Fragment>
                   )
                 })}
               </div>

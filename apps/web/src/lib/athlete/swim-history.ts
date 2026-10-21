@@ -20,6 +20,8 @@ export type AthleteSwim = {
   /** ISO instant. */
   date: string
   source: string
+  /** Set on a relay split (leg 2–4 of a relay): History-only, never a PB, chart or event page. */
+  relaySplit?: { relayEvent: string; leg: number }
 }
 
 export function swimKey(swim: { event: string; course: string }): string {
@@ -109,6 +111,9 @@ export function swimRoundLabel(tags: string): string {
   return [round, swimFlagLabel(tags)].filter(Boolean).join(" · ")
 }
 
+/** History label for a relay split row. */
+export const RELAY_SPLIT_LABEL = "Relay split"
+
 /** Only hand-logged swims can be deleted (relay lead-offs come from relay results). */
 export function isDeletableSwim(swim: AthleteSwim): boolean {
   return swim.source === "manual" && !isRelayLeadoffSwimTag(swim.tags)
@@ -116,6 +121,8 @@ export function isDeletableSwim(swim: AthleteSwim): boolean {
 
 /** Link to the swim on its meet page (scrolls to it and opens its detail), or null for unlinked swims. */
 export function swimMeetHref(swim: AthleteSwim): string | null {
+  // Relay splits aren't swims on the meet page; link the meet itself.
+  if (swim.relaySplit) return swim.meetSlug ? meetPath(swim.meetSlug) : swim.meetId ? `/meets/${swim.meetId}` : null
   if (swim.meetSlug) return meetSwimPath(swim.meetSlug, swim.id)
   if (swim.meetId) return `/meets/${swim.meetId}#swim-${swim.id}`
   return null
