@@ -3,10 +3,20 @@
  * Used by web UI and mirrored in @swimbuzz/api for mobile.
  */
 
+/** Live progress the desktop scraper reports while a job is RUNNING. */
+export type ScraperJobProgress = {
+  current?: number
+  total?: number
+  swimmerId?: number
+  /** True while a Cloudflare check is blocking the scraper's browser window. */
+  cloudflare?: boolean
+}
+
 export type ScraperJobStatusPayload = {
   id: string
   status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED" | string
   error?: string | null
+  progress?: ScraperJobProgress | null
   result?: unknown
   applyResult?: unknown
   appliedAt?: string | null
@@ -18,6 +28,8 @@ export async function pollScraperJob(
     intervalMs?: number
     timeoutMs?: number
     fetchJob?: (id: string) => Promise<ScraperJobStatusPayload>
+    /** Called after every poll, e.g. to surface progress in a toast. */
+    onJob?: (job: ScraperJobStatusPayload) => void
   } = {}
 ): Promise<ScraperJobStatusPayload> {
   const intervalMs = options.intervalMs ?? 1500
@@ -34,6 +46,7 @@ export async function pollScraperJob(
   const started = Date.now()
   while (Date.now() - started < timeoutMs) {
     const job = await fetchJob(jobId)
+    options.onJob?.(job)
     if (job.status === "COMPLETED" || job.status === "FAILED") {
       if (job.status === "FAILED") {
         throw new Error(job.error ?? "Run scraper failed")
@@ -51,6 +64,7 @@ export async function pollScraperJob(
 export async function runScraperEnqueuePollFinalize<T extends Record<string, unknown>>(options: {
   enqueue: () => Promise<Response>
   finalize: (jobId: string) => Promise<Response>
+  onJob?: (job: ScraperJobStatusPayload) => void
 }): Promise<T> {
   const enqueueRes = await options.enqueue()
   const enqueueData = await enqueueRes.json()
@@ -65,7 +79,7 @@ export async function runScraperEnqueuePollFinalize<T extends Record<string, unk
 
   let jobId = enqueueData.jobId as string
   for (;;) {
-    await pollScraperJob(jobId)
+    await pollScraperJob(jobId, { onJob: options.onJob })
     const finalizeRes = await options.finalize(jobId)
     const data = await finalizeRes.json()
     if (!finalizeRes.ok) {

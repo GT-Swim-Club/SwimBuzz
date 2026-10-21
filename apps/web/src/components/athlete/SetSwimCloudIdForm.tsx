@@ -3,8 +3,8 @@
 import { useState, useTransition } from "react"
 import {
   isValidSwimCloudIdInput,
+  normalizeSwimCloudIdInput,
   SWIMCLOUD_ID_ERROR,
-  SWIMCLOUD_ID_MAX_LENGTH,
 } from "@/lib/swim/swimcloud-id"
 import { updateSwimCloudId } from "./athlete-profile.actions"
 
@@ -65,21 +65,17 @@ export default function SetSwimCloudIdForm({
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex-1 min-w-[140px]">
           <label className="text-xs text-foreground-secondary mb-1 block">
-            SwimCloud ID
+            SwimCloud ID or URL
           </label>
           <input
             type="text"
             inputMode="numeric"
-            pattern={`\\d{6,${SWIMCLOUD_ID_MAX_LENGTH}}`}
-            maxLength={SWIMCLOUD_ID_MAX_LENGTH}
             required
             placeholder="e.g. 1234567"
             title={SWIMCLOUD_ID_ERROR}
             value={swimCloudId}
             onChange={(e) => {
-              setSwimCloudId(
-                e.target.value.replace(/\D/g, "").slice(0, SWIMCLOUD_ID_MAX_LENGTH)
-              )
+              setSwimCloudId(normalizeSwimCloudIdInput(e.target.value))
               setError(null)
             }}
             className="w-full border border-border-secondary rounded-lg px-3 py-2 text-sm bg-background border-border-secondary"
@@ -103,7 +99,7 @@ export default function SetSwimCloudIdForm({
       </div>
       {showDigitHint && (
         <p id="swimcloud-id-hint" className="text-xs text-info">
-          {SWIMCLOUD_ID_ERROR} ({swimCloudId.length}/{SWIMCLOUD_ID_MAX_LENGTH})
+          {SWIMCLOUD_ID_ERROR}
         </p>
       )}
       {pendingSwimCloudId != null && (

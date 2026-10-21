@@ -5,7 +5,7 @@ import { Gender } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { normalizePreferredName } from "@/lib/athlete/athlete-match"
 import { parseSeasonList } from "@/lib/season"
-import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
+import { parseSwimCloudProfile, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
 import { uniqueAthleteSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
@@ -35,7 +35,7 @@ export async function addAthlete(input: AddAthleteInput) {
   const seasons = parseSeasonList(input.seasons)
   const swimCloudIdRaw = input.swimCloudId
   const swimCloudIdEmpty = swimCloudIdRaw === undefined || swimCloudIdRaw === ""
-  const swimCloudId = swimCloudIdEmpty ? null : parseSwimCloudId(swimCloudIdRaw)
+  const swimCloudId = swimCloudIdEmpty ? null : parseSwimCloudProfile(swimCloudIdRaw)
 
   if (!firstName || !lastName || !email) {
     throw new Error("First name, last name, and email are required")

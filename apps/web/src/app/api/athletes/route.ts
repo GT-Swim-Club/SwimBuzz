@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { normalizePreferredName } from "@/lib/athlete/athlete-match"
 import { Gender } from "@prisma/client"
 import { parseSeasonList } from "@/lib/season"
-import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
+import { parseSwimCloudProfile, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
 import { uniqueAthleteSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
   const swimCloudIdRaw = body.swimCloudId
   const swimCloudIdEmpty =
     swimCloudIdRaw === null || swimCloudIdRaw === undefined || swimCloudIdRaw === ""
-  const swimCloudId = swimCloudIdEmpty ? null : parseSwimCloudId(swimCloudIdRaw)
+  const swimCloudId = swimCloudIdEmpty ? null : parseSwimCloudProfile(swimCloudIdRaw)
 
   if (!firstName || !lastName || !email) {
     return NextResponse.json({ error: "First name, last name, and email are required" }, { status: 400 })

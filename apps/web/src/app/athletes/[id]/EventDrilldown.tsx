@@ -15,7 +15,7 @@ import {
   type SwimMarks,
 } from "@/lib/athlete/swim-history"
 import DeleteSwimButton from "./DeleteSwimButton"
-import { ImprovementCell, PbBadge } from "./SwimMarks"
+import { DeltaPill, PbBadge } from "./SwimMarks"
 
 const DAY_MS = 86_400_000
 /** The chart's default window; it also sets the scale the full history scrolls at. */
@@ -308,7 +308,9 @@ export default function EventDrilldown({
                 <span className="flex justify-center">
                   {(isCurrentPb || wasPb) && <PbBadge current={isCurrentPb} />}
                 </span>
-                <ImprovementCell delta={marks.improvement.get(swim.id) ?? null} />
+                <span className="flex">
+                  <DeltaPill delta={marks.improvement.get(swim.id) ?? null} />
+                </span>
                 <span className="flex min-w-0 items-baseline gap-1.5 pl-3 text-foreground-secondary">
                   <span className="truncate">
                     {href ? (

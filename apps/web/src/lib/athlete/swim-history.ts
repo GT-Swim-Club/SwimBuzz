@@ -155,8 +155,13 @@ export function groupSwimsByMeet(swimsNewestFirst: AthleteSwim[]): MeetGroup[] {
     // The group takes its name and link from a linked swim, never a SwimCloud copy.
     const anchor = swim.meetId ? swim : (linkedSwimOnDay(swim, linked) ?? swim)
     const key = anchor.meetId ?? (swim.meet ? `name:${swim.meet}` : `day:${swim.date.slice(0, 10)}`)
-    let group = groups[groups.length - 1]
-    if (!group || group.key !== key) {
+    const day = swim.date.slice(0, 10)
+    let group: MeetGroup | undefined = groups[groups.length - 1]
+    if (group?.key !== key) {
+      // Same-day swims sort by time, so two meets on one day interleave; rejoin this meet's run.
+      group = groups.find((g) => g.key === key && g.start.slice(0, 10) === day)
+    }
+    if (!group) {
       group = {
         key,
         meet: anchor.meet || "Logged manually",

@@ -21,6 +21,7 @@
   --color-success-border: var(--brand-color-success-border);
   --color-warning: var(--brand-color-warning);
   --color-warning-bg: var(--brand-color-warning-bg);
+  --color-warning-border: var(--brand-color-warning-border);
   --color-error: var(--brand-color-error);
   --color-error-bg: var(--brand-color-error-bg);
   --color-error-border: var(--brand-color-error-border);

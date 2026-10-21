@@ -13,7 +13,7 @@ import {
   notifyAthleteOfProfileChangeDecision,
   resolveProfileChangeRequestNotifications,
   syncProfileChangeRequestNotifications } from "@/lib/notifications/notifications"
-import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
+import { parseSwimCloudProfile, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
 import { isCuid, uniqueAthleteSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
 import { redactAthleteForViewer } from "@/lib/athlete/athlete-privacy"
@@ -47,7 +47,7 @@ async function parseSwimCloudIdForSet(
   raw: unknown,
   athleteId: string
 ): Promise<{ ok: true; swimCloudId: number } | { ok: false; response: NextResponse }> {
-  const swimCloudId = parseSwimCloudId(raw)
+  const swimCloudId = parseSwimCloudProfile(raw)
   if (swimCloudId == null) {
     return {
       ok: false,

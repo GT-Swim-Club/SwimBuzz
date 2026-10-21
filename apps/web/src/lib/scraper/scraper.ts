@@ -188,6 +188,22 @@ export async function completeScraperJob(jobId: string, connectionId: string, re
   })
 }
 
+/**
+ * Store live progress from the desktop scraper in `result` (unused until the job
+ * completes, when the final result overwrites it). Ignored once the job has finished.
+ */
+export async function updateScraperJobProgress(
+  jobId: string,
+  connectionId: string,
+  progress: Prisma.InputJsonValue
+) {
+  const { count } = await prisma.scraperJob.updateMany({
+    where: { id: jobId, connectionId, status: ScraperJobStatus.RUNNING },
+    data: { result: progress },
+  })
+  return count > 0
+}
+
 export async function failScraperJob(jobId: string, connectionId: string, error: string) {
   const job = await prisma.scraperJob.findUnique({ where: { id: jobId } })
   if (!job || job.connectionId !== connectionId) {

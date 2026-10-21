@@ -8,8 +8,8 @@ import HoverDetail from "@/components/ui/HoverDetail"
 import { ICON_BUTTON, ICON_BUTTON_DANGER, SwimCloudProfileLink } from "./AthleteIconButton"
 import {
   isValidSwimCloudIdInput,
+  normalizeSwimCloudIdInput,
   SWIMCLOUD_ID_ERROR,
-  SWIMCLOUD_ID_MAX_LENGTH,
 } from "@/lib/swim/swimcloud-id"
 import { updateAthlete, deleteAthlete } from "./athlete.actions"
 
@@ -236,22 +236,18 @@ export default function AthleteActions({
 
         <div>
           <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
-            SwimCloud ID
+            SwimCloud ID or URL
           </label>
           <input
             type="text"
             inputMode="numeric"
-            pattern={`\\d{6,${SWIMCLOUD_ID_MAX_LENGTH}}`}
-            maxLength={SWIMCLOUD_ID_MAX_LENGTH}
             placeholder="e.g. 1234567"
             title={SWIMCLOUD_ID_ERROR}
             value={form.swimCloudId}
             onChange={(e) =>
               setForm((f) => ({
                 ...f,
-                swimCloudId: e.target.value
-                  .replace(/\D/g, "")
-                  .slice(0, SWIMCLOUD_ID_MAX_LENGTH),
+                swimCloudId: normalizeSwimCloudIdInput(e.target.value),
               }))
             }
             className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
@@ -263,7 +259,7 @@ export default function AthleteActions({
               id="edit-swimcloud-id-hint"
               className="mt-1 text-xs text-amber-600 dark:text-amber-400"
             >
-              {SWIMCLOUD_ID_ERROR} ({form.swimCloudId.length}/{SWIMCLOUD_ID_MAX_LENGTH})
+              {SWIMCLOUD_ID_ERROR}
             </p>
           )}
         </div>

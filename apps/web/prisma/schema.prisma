@@ -524,6 +524,7 @@ model ScraperJob {
   type         ScraperJobType
   payload      Json
   status       ScraperJobStatus   @default(PENDING)
+  /// While RUNNING, holds live progress from the desktop scraper; the final result once COMPLETED.
   result       Json?
   error        String?
   /// Server-only metadata for finalize (not sent to the desktop scraper).

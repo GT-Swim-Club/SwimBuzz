@@ -65,12 +65,14 @@ export default function ImportToast() {
       {tasks.map((task) => (
         <div
           key={task.id}
-          className={`pointer-events-auto flex max-w-sm items-start gap-3 rounded-xl border px-4 py-3 shadow-xl transition-all duration-300 animate-in slide-in-from-right-4 ${
+          className={`pointer-events-auto flex max-w-xs items-start gap-3 rounded-xl border px-4 py-3 shadow-xl transition-all duration-300 animate-in slide-in-from-right-4 ${
             task.status === "error"
               ? "bg-error-bg border-error-border"
               : task.status === "done"
                 ? "bg-success-bg border-success-border"
-                : "border-border/60 bg-background/95 backdrop-blur-sm"
+                : task.alert
+                  ? "bg-warning-bg border-warning-border"
+                  : "border-border/60 bg-background/95 backdrop-blur-sm"
           }`}
           role="status"
         >
@@ -86,6 +88,16 @@ export default function ImportToast() {
             {task.status === "running" && (
               <p className="text-sm font-medium text-foreground leading-snug">
                 {task.label}
+              </p>
+            )}
+            {task.status === "running" && task.detail && (
+              <p className="mt-0.5 text-xs text-foreground-secondary tabular-nums truncate">
+                {task.detail}
+              </p>
+            )}
+            {task.status === "running" && task.alert && (
+              <p className="mt-1 text-xs font-medium text-warning" role="alert">
+                {task.alert}
               </p>
             )}
             

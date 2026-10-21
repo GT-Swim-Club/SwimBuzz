@@ -10,7 +10,7 @@ import {
   parsePendingProfileChanges,
 } from "@/lib/athlete/pending-profile-changes"
 import { syncProfileChangeRequestNotifications } from "@/lib/notifications/notifications"
-import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
+import { parseSwimCloudProfile, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
 import { uniqueAthleteSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
 import { normalizeSwimForInsert, nextSwimOccurrence } from "@/lib/swim/swim-dedup"
@@ -81,7 +81,7 @@ export async function updateAthlete(athleteId: string, input: UpdateAthleteInput
     if (input.swimCloudId === null || input.swimCloudId === "") {
       data.swimCloudId = null
     } else {
-      const swimCloudId = parseSwimCloudId(input.swimCloudId)
+      const swimCloudId = parseSwimCloudProfile(input.swimCloudId)
       if (swimCloudId == null) throw new Error(SWIMCLOUD_ID_ERROR)
       const existing = await prisma.athlete.findFirst({
         where: { swimCloudId, id: { not: athleteId } }})

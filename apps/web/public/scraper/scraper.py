@@ -149,8 +149,27 @@ async def complete_job(
         raise RuntimeError(f"Could not report job result ({res.status_code}): {res.text}")
 
 
-async def run_job(job: dict) -> object:
-    from swimcloud_scrape import scrape_bulk_times, scrape_team_roster
+def progress_reporter(client: httpx.AsyncClient, base_url: str, token: str, job_id: str):
+    """Fire-and-forget progress posts so the app's toast can show live status."""
+    url = f"{base_url.rstrip('/')}/api/scraper/jobs/{job_id}/progress"
+    pending: set[asyncio.Task] = set()
+
+    async def post(progress: dict) -> None:
+        try:
+            await client.post(url, headers=scraper_headers(token), json=progress, timeout=10.0)
+        except httpx.RequestError:
+            pass
+
+    def report(progress: dict) -> None:
+        task = asyncio.create_task(post(progress))
+        pending.add(task)
+        task.add_done_callback(pending.discard)
+
+    return report
+
+
+async def run_job(job: dict, report=None) -> object:
+    from swimcloud_scrape import scrape_bulk_times, scrape_team_roster, set_progress_reporter
 
     job_type = job["type"]
     payload = job["payload"]
@@ -158,6 +177,7 @@ async def run_job(job: dict) -> object:
     print(f"\n--- Run scraper job: {job_type} ---")
 
     print(CLOUDFLARE_NOTE)
+    set_progress_reporter(report)
 
     if job_type == "ROSTER":
         return await scrape_team_roster(
@@ -228,7 +248,9 @@ async def scraper_loop(base_url: str, token: str) -> None:
                         continue
 
                     job_id = job["id"]
-                    job_task = asyncio.create_task(run_job(job))
+                    job_task = asyncio.create_task(
+                        run_job(job, progress_reporter(client, base_url, token, job_id))
+                    )
                     stop_task = asyncio.create_task(stop.wait())
                     try:
                         done, pending = await asyncio.wait(

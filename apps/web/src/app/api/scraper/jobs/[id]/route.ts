@@ -27,6 +27,7 @@ export async function GET(
     type: job.type,
     status: job.status,
     error: job.error,
+    progress: job.status === ScraperJobStatus.RUNNING ? job.result : undefined,
     result: job.status === ScraperJobStatus.COMPLETED ? job.result : undefined,
     appliedAt: job.appliedAt?.toISOString() ?? null,
     applyResult: job.applyResult ?? null,

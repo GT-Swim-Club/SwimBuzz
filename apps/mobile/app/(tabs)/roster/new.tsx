@@ -8,7 +8,7 @@ import {
   ScrollView,
   TextField,
 } from "@swimbuzz/ui"
-import { defaultSeason, formatSeasonLabel } from "@swimbuzz/shared"
+import { defaultSeason, formatSeasonLabel, normalizeSwimCloudIdInput } from "@swimbuzz/shared"
 import { spacing } from "@swimbuzz/tokens"
 import { api } from "../../../src/lib/api"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
@@ -160,10 +160,10 @@ export default function NewAthleteScreen() {
         ) : null}
 
         <TextField
-          label="SwimCloud ID (optional)"
+          label="SwimCloud ID or URL (optional)"
           value={swimCloudId}
-          onChangeText={setSwimCloudId}
-          keyboardType="number-pad"
+          onChangeText={(text) => setSwimCloudId(normalizeSwimCloudIdInput(text))}
+          keyboardType="numbers-and-punctuation"
           autoCapitalize="none"
           autoCorrect={false}
         />

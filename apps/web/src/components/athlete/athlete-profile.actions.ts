@@ -15,7 +15,7 @@ import {
   notifyAthleteOfProfileChangeDecision,
   resolveProfileChangeRequestNotifications,
   syncProfileChangeRequestNotifications } from "@/lib/notifications/notifications"
-import { parseSwimCloudId, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
+import { parseSwimCloudProfile, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
 import { getSession } from "@/lib/auth/session"
 
 /** Shared with PATCH /api/athletes/[id] — same logic, kept in sync manually
@@ -29,7 +29,7 @@ function pendingJson(
 }
 
 async function checkSwimCloudIdAvailable(raw: unknown, athleteId: string): Promise<number> {
-  const swimCloudId = parseSwimCloudId(raw)
+  const swimCloudId = parseSwimCloudProfile(raw)
   if (swimCloudId == null) throw new Error(SWIMCLOUD_ID_ERROR)
   const existing = await prisma.athlete.findFirst({
     where: { swimCloudId, id: { not: athleteId } }})

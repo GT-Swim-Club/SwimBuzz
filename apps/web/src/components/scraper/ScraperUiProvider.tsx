@@ -4,8 +4,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
-  useRef,
   useState,
   type ReactNode,
 } from "react"
@@ -17,8 +15,14 @@ type ScraperUiContextValue = {
   loading: boolean
   refresh: () => Promise<{ connected: boolean; lastSeenAt: string | null }>
   openRunScraper: () => void
-  requireScraper: (proceed: () => void) => void
+  /**
+   * Run `proceed` once the scraper is connected. If it isn't, the Run Scraper modal opens and its
+   * primary button becomes `continueLabel` (e.g. "Continue to import"), which runs `proceed`.
+   */
+  requireScraper: (proceed: () => void, options?: { continueLabel?: string }) => void
 }
+
+type PendingAction = { proceed: () => void; label: string }
 
 const ScraperUiContext = createContext<ScraperUiContextValue | null>(null)
 
@@ -33,37 +37,39 @@ export function useScraperUi() {
 export default function ScraperUiProvider({ children }: { children: ReactNode }) {
   const { connected, loading, refresh } = useScraperStatus()
   const [runOpen, setRunOpen] = useState(false)
-  const pendingRef = useRef<(() => void) | null>(null)
-  const wasRunOpen = useRef(false)
+  const [pending, setPending] = useState<PendingAction | null>(null)
 
   const openRunScraper = useCallback(() => {
+    setPending(null)
     setRunOpen(true)
   }, [])
 
   const requireScraper = useCallback(
-    (proceed: () => void) => {
+    (proceed: () => void, options?: { continueLabel?: string }) => {
       void (async () => {
         const status = loading ? await refresh() : { connected }
         if (status.connected) {
-          pendingRef.current = null
+          setPending(null)
           proceed()
           return
         }
-        pendingRef.current = proceed
+        setPending({ proceed, label: options?.continueLabel ?? "Continue" })
         setRunOpen(true)
       })()
     },
     [connected, loading, refresh]
   )
 
-  useEffect(() => {
-    if (wasRunOpen.current && !runOpen && pendingRef.current) {
-      const proceed = pendingRef.current
-      pendingRef.current = null
-      if (connected) proceed()
-    }
-    wasRunOpen.current = runOpen
-  }, [runOpen, connected])
+  function closeRunScraper() {
+    setRunOpen(false)
+    setPending(null)
+  }
+
+  function continuePending() {
+    const action = pending
+    closeRunScraper()
+    action?.proceed()
+  }
 
   return (
     <ScraperUiContext.Provider
@@ -72,7 +78,9 @@ export default function ScraperUiProvider({ children }: { children: ReactNode })
       {children}
       <RunScraperModal
         open={runOpen}
-        onClose={() => setRunOpen(false)}
+        onClose={closeRunScraper}
+        continueLabel={pending?.label ?? null}
+        onContinue={continuePending}
         connected={connected}
         loading={loading}
         refresh={refresh}

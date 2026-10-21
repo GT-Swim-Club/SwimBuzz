@@ -7,6 +7,7 @@ import {
   DEFAULT_NOTIFICATION_PREFERENCES,
   NOTIFICATION_PREFERENCE_META,
   formatRoleLabel,
+  normalizeSwimCloudIdInput,
   STAFF_TITLE_LABELS,
   type NotificationPreferenceKey,
   type NotificationPreferences,
@@ -245,11 +246,13 @@ export default function SettingsScreen() {
               autoCapitalize="words"
             />
             <TextField
-              label="SwimCloud ID"
+              label="SwimCloud ID or URL"
               value={swimCloudId}
-              onChangeText={setSwimCloudId}
+              onChangeText={(text) => setSwimCloudId(normalizeSwimCloudIdInput(text))}
               placeholder="Optional"
-              keyboardType="number-pad"
+              keyboardType="numbers-and-punctuation"
+              autoCapitalize="none"
+              autoCorrect={false}
             />
             <Button
               label="Save athlete profile"

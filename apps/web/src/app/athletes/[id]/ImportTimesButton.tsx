@@ -92,7 +92,7 @@ export default function ImportTimesButton({
         setOpen(false)
         setResultOpen(true)
       })()
-    })
+    }, { continueLabel: "Import times" })
   }
 
   return (

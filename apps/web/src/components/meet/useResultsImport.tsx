@@ -190,7 +190,7 @@ export function useResultsImport({ meetId, season }: { meetId?: string; season: 
       )
       startTask(swimphone ? "Scraping meet…" : "Importing results…", importPromise)
     }
-    if (swimphone) requireScraper(go)
+    if (swimphone) requireScraper(go, { continueLabel: "Import results" })
     else go()
   }
 

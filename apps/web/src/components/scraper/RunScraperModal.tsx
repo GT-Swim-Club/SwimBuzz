@@ -37,9 +37,14 @@ export default function RunScraperModal({
   connected,
   loading,
   refresh,
+  continueLabel,
+  onContinue,
 }: {
   open: boolean
   onClose: () => void
+  /** Set when an import is waiting on the scraper: replaces "Done" with this, enabled once connected. */
+  continueLabel: string | null
+  onContinue: () => void
   connected: boolean
   loading: boolean
   refresh: () => Promise<unknown>
@@ -176,23 +181,45 @@ export default function RunScraperModal({
       bodyClassName="!flex-initial pt-5 pb-2 sm:pt-5 sm:pb-2"
       footer={
         <ModalFooter>
-          {connected && (
-            <button
-              type="button"
-              onClick={() => void terminateScraper()}
-              disabled={terminating}
-              className="rounded-lg border border-error bg-error-bg px-4 py-2.5 text-sm font-medium text-error transition-colors hover:bg-error/10 disabled:opacity-50"
-            >
-              {terminating ? "Stopping…" : "Stop scraper"}
-            </button>
+          {continueLabel ? (
+            <>
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-fill-secondary"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={onContinue}
+                disabled={!connected}
+                className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast transition-colors hover:enabled:bg-primary-hover disabled:opacity-50"
+              >
+                {continueLabel}
+              </button>
+            </>
+          ) : (
+            <>
+              {connected && (
+                <button
+                  type="button"
+                  onClick={() => void terminateScraper()}
+                  disabled={terminating}
+                  className="rounded-lg border border-error bg-error-bg px-4 py-2.5 text-sm font-medium text-error transition-colors hover:bg-error/10 disabled:opacity-50"
+                >
+                  {terminating ? "Stopping…" : "Stop scraper"}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast transition-colors hover:bg-primary-hover"
+              >
+                Done
+              </button>
+            </>
           )}
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast transition-colors hover:bg-primary-hover"
-          >
-            Done
-          </button>
         </ModalFooter>
       }
     >

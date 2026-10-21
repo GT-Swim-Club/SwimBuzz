@@ -18,6 +18,27 @@ class SwimCloudScrapeError(Exception):
     """Raised when SwimCloud cannot be scraped (Cloudflare, timeout, etc.)."""
 
 
+# Live progress for the app's import toast. scraper.py installs a reporter per job;
+# fields merge so callers only send what changed (e.g. {"cloudflare": True}).
+_progress_reporter = None
+_progress: dict = {}
+
+
+def set_progress_reporter(reporter) -> None:
+    global _progress_reporter, _progress
+    _progress_reporter = reporter
+    _progress = {}
+
+
+def report_progress(**fields) -> None:
+    if _progress_reporter is None:
+        return
+    if all(_progress.get(k) == v for k, v in fields.items()):
+        return
+    _progress.update(fields)
+    _progress_reporter(dict(_progress))
+
+
 def playwright_headless() -> bool:
     return os.environ.get("PLAYWRIGHT_HEADLESS", "true").lower() not in ("0", "false", "no")
 
@@ -170,7 +191,9 @@ async def wait_past_cloudflare(page, timeout_ms: int = 120_000) -> None:
         title = await safe_page_title(page)
         html = await safe_page_content(page)
         if not is_cloudflare_challenge(html, title):
+            report_progress(cloudflare=False)
             return
+        report_progress(cloudflare=True)
         await asyncio.sleep(2.5)
 
     html = await safe_page_content(page)
@@ -387,6 +410,7 @@ async def scrape_bulk_times(swimmer_ids: list[int]):
         browser, page = await launch_browser(p)
         for idx, swimmer_id in enumerate(swimmer_ids):
             label = f"{idx + 1}/{len(swimmer_ids)}"
+            report_progress(current=idx + 1, total=len(swimmer_ids), swimmerId=swimmer_id)
             for attempt in range(2):
                 try:
                     # First swimmer (and retries) go via home to clear CF cookies / session.
