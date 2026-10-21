@@ -92,6 +92,7 @@ export default function EmailSignInForm({
             <span className="font-medium text-foreground">
               {email}
             </span>
+            . It may take a few seconds to appear.
           </p>
           <input
             id="otp-code"

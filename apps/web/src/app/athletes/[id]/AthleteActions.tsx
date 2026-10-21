@@ -270,14 +270,10 @@ export default function AthleteActions({
           </label>
           <input
             type="text"
-            placeholder="Optional"
             value={form.preferredName}
             onChange={(e) => setForm((f) => ({ ...f, preferredName: e.target.value }))}
             className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
           />
-          <p className="mt-1 text-xs text-foreground-tertiary">
-            Shown in place of their first name, and used to match imported results to this athlete.
-          </p>
         </div>
 
         {error && <p className="text-sm text-error dark:text-error">{error}</p>}

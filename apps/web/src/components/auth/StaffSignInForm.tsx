@@ -112,7 +112,8 @@ export default function StaffSignInForm({
           </label>
           <p className="mt-1 text-[13px] text-foreground-tertiary">
             We sent a 6-digit code to{" "}
-            <span className="font-medium text-foreground">{email}</span>
+            <span className="font-medium text-foreground">{email}</span>. It
+            may take a few seconds to appear.
           </p>
           <input
             id="staff-otp-code"
@@ -181,10 +182,6 @@ export default function StaffSignInForm({
         >
           Georgia Tech Email
         </label>
-        <p className="mt-1 text-[13px] text-foreground-tertiary">
-          Coaches and exec verify their roster email first, then sign in with
-          their @gtswimclub.com Google account.
-        </p>
         <input
           id="staff-gatech-email"
           name="email"

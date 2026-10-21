@@ -196,7 +196,7 @@ export default function ProfileMenu({
         onClose={() => !signingOut && setSignOutOpen(false)}
         closeDisabled={signingOut}
         title="Sign Out"
-        description="You'll need to sign in again to access the roster, meets, and other team tools."
+        description="Are you sure you want to sign out of SwimBuzz?"
         maxWidth="sm"
         footer={
           <ModalFooter>
@@ -218,11 +218,7 @@ export default function ProfileMenu({
             </button>
           </ModalFooter>
         }
-      >
-        <p className="text-sm text-foreground-secondary">
-          Are you sure you want to sign out of SwimBuzz?
-        </p>
-      </Modal>
+      />
     </>
   )
 }

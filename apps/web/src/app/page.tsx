@@ -119,7 +119,7 @@ export default async function HomePage() {
       </section>
 
       {/* Role-based features */}
-      <section className="mx-auto max-w-[84rem] px-4 py-8 min-[375px]:px-6 sm:px-10 sm:py-2 lg:px-12 xl:max-w-none xl:px-[clamp(8rem,10vw,18rem)]">
+      <section className="mx-auto max-w-[84rem] px-4 pt-8 pb-12 min-[375px]:px-6 sm:px-10 sm:pt-2 lg:px-12 lg:pb-16 xl:max-w-none xl:px-[clamp(8rem,10vw,18rem)]">
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
           <div className="rounded-2xl border border-border bg-background p-5 shadow-sm sm:p-7">
             <div className="flex items-center gap-3">

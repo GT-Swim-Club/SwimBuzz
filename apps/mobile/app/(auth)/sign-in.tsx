@@ -183,12 +183,6 @@ export default function SignInScreen() {
           {step === "email" ? (
             <View style={styles.form}>
               <Text style={styles.label}>Georgia Tech Email</Text>
-              {method === "staff" ? (
-                <Text style={styles.hint}>
-                  Coaches and exec verify their roster email first, then sign
-                  in with their @gtswimclub.com Google account.
-                </Text>
-              ) : null}
               <TextInput
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -216,7 +210,8 @@ export default function SignInScreen() {
               <Text style={styles.label}>Verification code</Text>
               <Text style={styles.hint}>
                 We sent a 6-digit code to{" "}
-                <Text style={styles.hintEmphasis}>{email}</Text>
+                <Text style={styles.hintEmphasis}>{email}</Text>. It may take a
+                few seconds to appear.
               </Text>
               <TextInput
                 keyboardType="number-pad"

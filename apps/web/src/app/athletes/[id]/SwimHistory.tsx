@@ -140,7 +140,7 @@ export default function SwimHistory({
       </div>
 
       {swims.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border-secondary px-4 py-8 text-center">
+        <div className="rounded-xl border border-border-secondary bg-background px-4 py-9 text-center shadow-xs">
           <p className="text-sm text-foreground-tertiary">No swims logged yet.</p>
         </div>
       ) : (
