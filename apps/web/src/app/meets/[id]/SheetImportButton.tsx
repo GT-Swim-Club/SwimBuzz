@@ -30,7 +30,6 @@ export default function SheetImportButton<T>({
   endpoint,
   title,
   description,
-  csvLabel,
   hint,
   status,
   trigger,
@@ -39,7 +38,6 @@ export default function SheetImportButton<T>({
   endpoint: string
   title: string
   description: string
-  csvLabel: string
   /** Which columns the import reads. */
   hint: ReactNode
   /** Extra content under the hint (e.g. current import + clear); gets `close`. */
@@ -272,7 +270,6 @@ export default function SheetImportButton<T>({
             )
           ) : (
             <div>
-              <span className="mb-1 block text-xs font-medium text-foreground-secondary">{csvLabel}</span>
               <FileDropzone
                 onFilesSelected={(files) => {
                   setSelectedFile(files[0] ?? null)

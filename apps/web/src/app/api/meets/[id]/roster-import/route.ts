@@ -14,7 +14,9 @@ import { collectNameConfirmations } from "@/lib/meet/meet-import"
 import {
   applyMeetRosterToEntriesSummary,
   buildMeetFinalRoster,
+  isMeetFinalRoster,
   parseMeetRosterRecords,
+  removeMeetRosterFromEntriesSummary,
   resolveMeetRosterImport,
   type MeetRosterAthlete,
 } from "@/lib/meet/meet-roster-import"
@@ -34,7 +36,8 @@ function revalidateMeet() {
 
 /**
  * Import the final meet roster (Google Sheet or CSV). Replaces the previous
- * roster; seeds for anyone not on it leave the roster summary. When names need
+ * roster; seeds for anyone not on it leave the roster summary (kept on the
+ * roster so clearing it brings them back). When names need
  * pairing, nothing is saved until the re-run with `paired: true` and the
  * coach's `nameMappings`/`rejectedNames`.
  */
@@ -51,6 +54,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       course: true,
       season: true,
       entriesSheetSummary: true,
+      finalRoster: true,
       relayResultsSummary: true,
       resultStatusesSummary: true,
       _count: { select: { swims: true } },
@@ -119,8 +123,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     return NextResponse.json({ pending: true, nameConfirmations, rosterForPairing })
   }
 
-  const existing = isSheetSummary(meet.entriesSheetSummary) ? meet.entriesSheetSummary : null
-  const { summary, removedAthletes, attendingAdded } = applyMeetRosterToEntriesSummary(
+  // Start from the summary without the previous roster, so replacing it matches a fresh import.
+  const existing = removeMeetRosterFromEntriesSummary(
+    isSheetSummary(meet.entriesSheetSummary) ? meet.entriesSheetSummary : null,
+    meet.course,
+    isMeetFinalRoster(meet.finalRoster) ? meet.finalRoster : null
+  )
+  const { summary, removedEntries, removedAthletes, attendingAdded } = applyMeetRosterToEntriesSummary(
     existing,
     meet.course,
     resolved.athletes.map((a) => ({
@@ -134,7 +143,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     where: { id: meetId },
     data: {
       entriesSheetSummary: summary as Prisma.InputJsonValue,
-      finalRoster: buildMeetFinalRoster(resolved.athletes.map((a) => a.id)) as Prisma.InputJsonValue,
+      finalRoster: buildMeetFinalRoster(
+        resolved.athletes.map((a) => a.id),
+        removedEntries
+      ) as Prisma.InputJsonValue,
     },
   })
   revalidateMeet()
@@ -148,7 +160,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   })
 }
 
-/** Clear the final roster. Rows it already removed stay removed (re-import sign-ups). */
+/** Clear the final roster: restore the sign-ups/seeds it removed and drop its "Attending" rows. */
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession()
   if (!session || !isStaffRole(session.user.role)) {
@@ -156,10 +168,29 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   }
 
   const { id: meetId } = await params
-  const meet = await prisma.meet.findUnique({ where: { id: meetId }, select: { id: true } })
+  const meet = await prisma.meet.findUnique({
+    where: { id: meetId },
+    select: { course: true, entriesSheetSummary: true, finalRoster: true },
+  })
   if (!meet) return NextResponse.json({ error: "Meet not found" }, { status: 404 })
 
-  await prisma.meet.update({ where: { id: meetId }, data: { finalRoster: Prisma.DbNull } })
+  const existing = isSheetSummary(meet.entriesSheetSummary) ? meet.entriesSheetSummary : null
+  const finalRoster = isMeetFinalRoster(meet.finalRoster) ? meet.finalRoster : null
+  await prisma.meet.update({
+    where: { id: meetId },
+    data: {
+      finalRoster: Prisma.DbNull,
+      ...(existing || finalRoster
+        ? {
+            entriesSheetSummary: removeMeetRosterFromEntriesSummary(
+              existing,
+              meet.course,
+              finalRoster
+            ) as Prisma.InputJsonValue,
+          }
+        : {}),
+    },
+  })
   revalidateMeet()
   return NextResponse.json({ ok: true })
 }

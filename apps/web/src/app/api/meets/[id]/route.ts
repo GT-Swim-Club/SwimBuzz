@@ -29,6 +29,7 @@ import {
   swimsToMeetResults,
 } from "@/lib/meet/meet-sheet-summary"
 import { isRelayResultsSummary } from "@/lib/meet/relay-results"
+import { buildRelayLineups } from "@/lib/meet/relay-lineups"
 import { utcDayKey, isStaffRole } from "@swimbuzz/shared"
 
 export const runtime = "nodejs"
@@ -57,10 +58,16 @@ export async function GET(
   if (!meet) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
   const isStaff = isStaffRole(session.user.role)
-  const linked = await prisma.athlete.findUnique({
-    where: { userId: session.user.id },
-    select: { id: true },
-  })
+  const [linked, seasonRoster] = await Promise.all([
+    prisma.athlete.findUnique({
+      where: { userId: session.user.id },
+      select: { id: true },
+    }),
+    prisma.athlete.findMany({
+      where: { seasons: { has: meet.season } },
+      select: { id: true, slug: true, firstName: true, lastName: true, preferredName: true, gender: true },
+    }),
+  ])
   const viewerAthleteId = linked?.id ?? null
 
   const ended = meetHasEndedFn({
@@ -107,6 +114,7 @@ export async function GET(
     ...meetRow,
     eventOrder: isEventOrder(meet.eventOrder) ? meet.eventOrder : null,
     rosterSummary,
+    relayLineups: buildRelayLineups(meet, seasonRoster),
     meetHasEnded: ended,
     viewer: {
       athleteId: viewerAthleteId,

@@ -391,41 +391,10 @@ export default function MeetDetailScreen() {
         legs: relayLegs,
       })
       await load()
-      Alert.alert("Relay saved", `${relayKey} relay was added to the meet roster.`)
+      Alert.alert("Relay published", `${relayKey} relay was published to the meet roster.`)
     } catch (err) {
       Alert.alert(
         "Could not save relay",
-        err instanceof Error ? err.message : "Something went wrong"
-      )
-    } finally {
-      setSavingRelayKey(null)
-    }
-  }
-
-  async function deleteSavedRelay(entry: Record<string, unknown>, index: number) {
-    if (!id) return
-    const event = String(entry.event ?? "").trim()
-    const relayLetter = String(entry.relayLetter ?? "").trim()
-    const relayRound = String(entry.relayRound ?? "").trim()
-    const gender = String(entry.gender ?? "").trim()
-    const relayKey = `${event}:${relayLetter}:${relayRound}:${gender || index}`
-    if (!event) {
-      Alert.alert("Cannot remove relay", "The relay event is missing.")
-      return
-    }
-    setSavingRelayKey(relayKey)
-    try {
-      await api.deleteRelayTeam(id, {
-        event,
-        relayLetter,
-        relayRound,
-        gender,
-      })
-      await load()
-      Alert.alert("Relay removed", "The relay was removed from the meet roster.")
-    } catch (err) {
-      Alert.alert(
-        "Could not remove relay",
         err instanceof Error ? err.message : "Something went wrong"
       )
     } finally {
@@ -470,10 +439,7 @@ export default function MeetDetailScreen() {
     }
   }
 
-  const relaySummary = asRecord(meet?.relayResultsSummary)
-  const savedRelayEntries = Array.isArray(relaySummary?.entries)
-    ? (relaySummary.entries as Array<Record<string, unknown>>)
-    : []
+  const relayLineupCount = Array.isArray(meet?.relayLineups) ? meet.relayLineups.length : 0
 
   return (
     <Screen>
@@ -637,59 +603,21 @@ export default function MeetDetailScreen() {
           />
         ) : null}
 
-        {isStaff ? (
+        {relayLineupCount > 0 ? (
           <Section title="Relays">
+            <ListRow
+              title={`${relayLineupCount} relay${relayLineupCount === 1 ? "" : "s"}`}
+              subtitle="See every relay lineup for this meet"
+              onPress={() => router.push(`/meets/relays/${id}`)}
+            />
+          </Section>
+        ) : null}
+
+        {isStaff ? (
+          <Section title="Relay builder">
             <Muted style={{ marginBottom: spacing.sm }}>
               Build optimal lineups from SwimCloud times.
             </Muted>
-            {savedRelayEntries.length > 0 ? (
-              <View style={{ marginBottom: spacing.md }}>
-                <Muted style={{ marginBottom: spacing.xs }}>
-                  Saved on the meet roster
-                </Muted>
-                {savedRelayEntries.map((entry, index) => {
-                  const event = String(entry.event ?? "Relay")
-                  const relayLetter = String(
-                    entry.relayLetter ?? String.fromCharCode(65 + index)
-                  )
-                  const relayRound = String(entry.relayRound ?? "")
-                  const gender = String(entry.gender ?? "")
-                  const relayKey = `${event}:${relayLetter}:${relayRound}:${gender || index}`
-                  const swimmers = Array.isArray(entry.relaySwimmers)
-                    ? (entry.relaySwimmers as Array<Record<string, unknown>>)
-                    : []
-                  const swimmerNames = swimmers
-                    .map((swimmer) => {
-                      return String(
-                        swimmer.name ?? swimmer.athleteName ?? swimmer.athleteId ?? ""
-                      )
-                    })
-                    .filter(Boolean)
-                    .join(" · ")
-                  const seed = String(entry.seedTime ?? entry.resultTime ?? "")
-                  return (
-                    <ListRow
-                      key={relayKey}
-                      right={
-                        entry.manual ? (
-                          <Button
-                            disabled={
-                              savingRelayKey !== null && savingRelayKey !== relayKey
-                            }
-                            label="Remove"
-                            loading={savingRelayKey === relayKey}
-                            variant="danger"
-                            onPress={() => void deleteSavedRelay(entry, index)}
-                          />
-                        ) : undefined
-                      }
-                      subtitle={[seed, swimmerNames].filter(Boolean).join(" — ")}
-                      title={`${relayLetter} · ${event}`}
-                    />
-                  )
-                })}
-              </View>
-            ) : null}
             <TextField
               label="Relay event"
               value={relayEvent}
@@ -745,7 +673,7 @@ export default function MeetDetailScreen() {
                     disabled={
                       savingRelayKey !== null && savingRelayKey !== relayKey
                     }
-                    label={`Add ${relayKey} relay to roster`}
+                    label={`Publish ${relayKey} relay`}
                     loading={savingRelayKey === relayKey}
                     variant="secondary"
                     onPress={() => void saveSuggestedRelay(team, index)}

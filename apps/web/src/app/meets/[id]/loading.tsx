@@ -26,7 +26,7 @@ function LedgerCardSkeleton({ titleWidth, rows }: { titleWidth: string; rows: st
 /** Mirrors the ledger + roster summary layout (the common case for meets with sheets/results). */
 export default function Loading() {
   return (
-    <main className="relative mx-auto max-w-[1240px]" aria-busy="true" aria-label="Loading meet">
+    <main className="relative" aria-busy="true" aria-label="Loading meet">
       <div className="relative z-10 flex flex-col gap-8">
         <div className="min-w-0">
           <Skeleton className="h-4 w-16" />

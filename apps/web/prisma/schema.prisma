@@ -183,6 +183,9 @@ model Meet {
   finalsHeatSheetSummary Json?
   entriesSheetSummary Json?
   relayResultsSummary Json?
+  /// Relay builder drafts, one per relay event: { drafts: [{ gender, event, teams, savedAt, savedBy }] }.
+  /// Staff only — published lineups live in relayResultsSummary.
+  relayDrafts Json?
   resultStatusesSummary Json?
   photos        Json?
   createdAt     DateTime  @default(now())

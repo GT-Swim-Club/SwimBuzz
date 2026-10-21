@@ -196,7 +196,6 @@ export default function ProfileMenu({
         onClose={() => !signingOut && setSignOutOpen(false)}
         closeDisabled={signingOut}
         title="Sign Out"
-        description="You'll need to sign in again to access the roster, meets, and other team tools."
         maxWidth="sm"
         footer={
           <ModalFooter>

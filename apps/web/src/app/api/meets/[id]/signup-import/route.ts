@@ -19,7 +19,11 @@ import {
   resolveSignupImport,
   type SignupRosterAthlete,
 } from "@/lib/meet/meet-signup-import"
-import { applyMeetRosterToEntriesSummary, isMeetFinalRoster } from "@/lib/meet/meet-roster-import"
+import {
+  applyMeetRosterToEntriesSummary,
+  isMeetFinalRoster,
+  type MeetFinalRoster,
+} from "@/lib/meet/meet-roster-import"
 import {
   isResultStatusesSummary,
   isSheetSummary,
@@ -115,28 +119,40 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   // With a final roster imported, only roster athletes' sign-ups reach the summary.
   // Relay preferences keep every sign-up; the relay builder filters by roster itself.
-  const finalRoster = isMeetFinalRoster(meet.finalRoster) ? new Set(meet.finalRoster.athleteIds) : null
-  const rosterSignups = finalRoster
-    ? resolved.signups.filter((s) => finalRoster.has(s.athleteId))
+  const finalRoster = isMeetFinalRoster(meet.finalRoster) ? meet.finalRoster : null
+  const onRoster = finalRoster ? new Set(finalRoster.athleteIds) : null
+  const rosterSignups = onRoster
+    ? resolved.signups.filter((s) => onRoster.has(s.athleteId))
     : resolved.signups
 
   const existing = isSheetSummary(meet.entriesSheetSummary) ? meet.entriesSheetSummary : null
   const applied = applySignupImportToEntriesSummary(existing, meet.course, rosterSignups)
   const { entries, attendingOnly } = applied
-  const summary = finalRoster
-    ? applyMeetRosterToEntriesSummary(
-        applied.summary,
-        meet.course,
-        roster
-          .filter((a) => finalRoster.has(a.id))
-          .map((a) => ({ athleteId: a.id, athleteName: `${a.lastName}, ${a.firstName}`, gender: a.gender }))
-      ).summary
-    : applied.summary
+  let summary = applied.summary
+  let nextFinalRoster: MeetFinalRoster | null = null
+  if (finalRoster && onRoster) {
+    const rostered = applyMeetRosterToEntriesSummary(
+      applied.summary,
+      meet.course,
+      roster
+        .filter((a) => onRoster.has(a.id))
+        .map((a) => ({ athleteId: a.id, athleteName: `${a.lastName}, ${a.firstName}`, gender: a.gender }))
+    )
+    summary = rostered.summary
+    // Off-roster sign-ups replace the roster's held-back ones, ready for when it's cleared.
+    const heldBack = applySignupImportToEntriesSummary(
+      { sheetType: summary.sheetType, course: summary.course, entries: finalRoster.removedEntries ?? [] },
+      meet.course,
+      resolved.signups.filter((s) => !onRoster.has(s.athleteId))
+    ).summary.entries
+    nextFinalRoster = { ...finalRoster, removedEntries: [...heldBack, ...rostered.removedEntries] }
+  }
 
   await prisma.meet.update({
     where: { id: meetId },
     data: {
       entriesSheetSummary: summary as Prisma.InputJsonValue,
+      ...(nextFinalRoster ? { finalRoster: nextFinalRoster as Prisma.InputJsonValue } : {}),
       signupRelayPreferences: buildSignupRelayPreferences(resolved.signups) as Prisma.InputJsonValue,
     },
   })

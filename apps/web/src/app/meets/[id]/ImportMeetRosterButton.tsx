@@ -69,8 +69,7 @@ export default function ImportMeetRosterButton({
     <SheetImportButton<RosterImportResult>
       endpoint={endpoint}
       title="Import Roster"
-      description="Keeps only athletes on the final roster in the roster summary and relay builder. Anyone on it without a sign-up is added as attending."
-      csvLabel="Roster CSV"
+      description="Keeps only athletes on the final roster in the meet. Clearing the roster brings back everyone who signed up."
       hint={
         <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5">
           <dt className="font-medium text-foreground">Required</dt>

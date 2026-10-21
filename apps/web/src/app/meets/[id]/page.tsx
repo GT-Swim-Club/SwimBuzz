@@ -19,6 +19,7 @@ import {
   isResultStatusesSummary,
   collectMeetRosterAthleteIds } from "@/lib/meet/meet-sheet-summary"
 import { isRelayResultsSummary } from "@/lib/meet/relay-results"
+import { buildRelayLineups } from "@/lib/meet/relay-lineups"
 import {
   normalizeFinalsHeatSheetUrls,
   normalizeHeatSheetUrls,
@@ -230,9 +231,11 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       slug: true,
       firstName: true, 
       lastName: true, 
+      preferredName: true,
       gender: true,
       user: { select: { image: true, staffTitle: true } }
     }})
+  const relayLineupCount = buildRelayLineups(meet, seasonRoster).length
   const rosterAthletes = seasonRoster.map((a) => ({
     id: a.id,
     slug: a.slug ?? a.id,
@@ -454,7 +457,9 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       ? [{ key: "live", label: "Live stream", url: meet.liveStreamUrl, icon: "broadcast" } as const]
       : []),
   ]
-  const relaysHref = isCoach && !meetHasEnded ? `${meetPublicPath}/relays` : undefined
+  // Staff build relays until the meet ends; once any relay exists everyone can view the lineups.
+  const relaysHref =
+    (isCoach && !meetHasEnded) || relayLineupCount > 0 ? `${meetPublicPath}/relays` : undefined
   const showPhotos =
     isBeforeOrToday && (initialPhotos.length > 0 || initialPreviews.length > 0 || isCoach)
 
@@ -542,7 +547,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       {meet.bannerUrl && (
         <MeetPageBackground bannerUrl={meet.bannerUrl} />
       )}
-      <main className="relative mx-auto max-w-[1240px]">
+      <main className="relative">
         <div className="relative z-10 flex flex-col gap-8">
           <div className="flex flex-col gap-4">{header}</div>
           {hasRosterSummaryContent ? (
