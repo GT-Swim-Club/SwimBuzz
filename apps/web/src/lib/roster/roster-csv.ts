@@ -271,6 +271,9 @@ function parseDob(value: string): Date | undefined {
   if (!trimmed) return undefined
   const date = new Date(trimmed)
   if (Number.isNaN(date.getTime())) return undefined
+  // A DOB in the current year is a placeholder (e.g. a sheet's default date), not a real birthday.
+  const currentYear = new Date().getFullYear()
+  if (date.getFullYear() === currentYear || date.getUTCFullYear() === currentYear) return undefined
   return date
 }
 
