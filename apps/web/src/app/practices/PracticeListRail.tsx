@@ -1,11 +1,11 @@
 "use client"
 
-import Link from "next/link"
 import { useMemo } from "react"
 import { formatPracticeDistance, formatZonedInstantRange } from "@swimbuzz/shared"
 import { MONTH_SHORT_NAMES, buildWorkspaceHref, type PracticeRailItem } from "./workspace-params"
 import { practicePath } from "@/lib/slug"
 import { showCardTags, type PracticeCardLabel, type PracticeListSort } from "./usePracticePrefs"
+import { SelectableRailCard, cardSelection, type RailSelection } from "./PracticeSelection"
 
 export function sortPractices<T extends PracticeRailItem>(practices: T[], sort: PracticeListSort): T[] {
   const sorted = [...practices]
@@ -43,6 +43,7 @@ export default function PracticeListRail({
   tags,
   cardLabel,
   emptyMessage,
+  selection,
 }: {
   practices: PracticeRailItem[]
   selectedSlug?: string
@@ -50,6 +51,7 @@ export default function PracticeListRail({
   tags: string[]
   cardLabel: PracticeCardLabel
   emptyMessage: string
+  selection: RailSelection
 }) {
   const sorted = useMemo(() => sortPractices(practices, sort), [practices, sort])
 
@@ -68,13 +70,12 @@ export default function PracticeListRail({
         const { dateNumber, month } = dayParts(practice.dayKey)
         const showTags = showCardTags(tags, practice.tags, cardLabel)
         return (
-          <Link
+          <SelectableRailCard
             key={practice.id}
             href={buildWorkspaceHref(practicePath(practice.slug ?? practice.id), { tags })}
-            className={
-              "flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors " +
-              (selected ? "border-primary bg-primary/5" : "border-border-secondary hover:bg-background-hover")
-            }
+            className="flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors"
+            active={selected}
+            selection={cardSelection(selection, practice.id)}
           >
             <div className="w-10 shrink-0 text-center">
               <div className="text-[11px] font-medium uppercase tracking-wide text-foreground-tertiary">
@@ -104,7 +105,7 @@ export default function PracticeListRail({
                 </span>
               )}
             </div>
-          </Link>
+          </SelectableRailCard>
         )
       })}
     </div>

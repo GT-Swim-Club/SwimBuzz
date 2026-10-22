@@ -218,7 +218,16 @@ export function practicePdfFilename(title: string, dayKey: string | null): strin
   return practiceShareFilename(title, dayKey, "pdf")
 }
 
-export function buildPracticePdf(input: PracticePdfInput): jsPDF {
+/** Filename for a combined export of several practices, spanning their first to last day. */
+export function practicesPdfFilename(dayKeys: string[]): string {
+  const sorted = [...dayKeys].sort()
+  const first = sorted[0]
+  const last = sorted[sorted.length - 1]
+  if (!first) return "practices.pdf"
+  return first === last ? `practices-${first}.pdf` : `practices-${first}-to-${last}.pdf`
+}
+
+export function buildPracticesPdf(inputs: PracticePdfInput[]): jsPDF {
   const doc = new jsPDF({ unit: "pt", format: "letter" })
   const pageWidth = doc.internal.pageSize.getWidth()
   const pageHeight = doc.internal.pageSize.getHeight()
@@ -536,114 +545,125 @@ export function buildPracticePdf(input: PracticePdfInput): jsPDF {
     doc.text(label, x + px(8), baseline)
   }
 
+  function drawPractice(input: PracticePdfInput) {
+    const showDraft = input.showDraft && !input.published
+    setType({ bold: true, italic: false, underline: false }, titleSize, INK)
+    const titleLines = doc.splitTextToSize(
+      input.title,
+      contentWidth - (showDraft ? px(72) : 0)
+    ) as string[]
+    for (const [index, line] of titleLines.entries()) {
+      ensureSpace(titleLh)
+      setType({ bold: true, italic: false, underline: false }, titleSize, INK)
+      doc.text(line, margin, y)
+      if (index === 0 && showDraft) {
+        const lineWidth = doc.getTextWidth(line)
+        const badgeX = margin + lineWidth + gap2
+        if (badgeX + px(64) <= margin + contentWidth) drawDraftBadge(badgeX, y - px(2))
+        else drawDraftBadge(pageWidth - margin - px(64), y - px(2))
+      }
+      if (index < titleLines.length - 1) y += titleLh
+    }
+
+    y += titleSize * 0.22 + mt1 + metaSize * 0.8
+    // Static exports always show the practice's own zone rather than whoever generated it.
+    const range = formatZonedInstantRange(input.startsAt, input.endsAt, input.timeZone)
+    // Header rows mirror the practice page: date/time + location, then distance + tags.
+    const location = input.location?.trim() ?? ""
+    drawMetaRow([
+      { icon: "calendar", text: `${range.date}  ·  ${range.time} ${range.abbrev}` },
+      ...(location ? [{ icon: "location" as const, text: location }] : []),
+    ])
+
+    const secondRow = [
+      ...(input.totalDistance > 0
+        ? [{ icon: "waves" as const, text: formatPracticeDistance(input.totalDistance, input.course) }]
+        : []),
+      ...(input.tags.length > 0 ? [{ icon: "tag" as const, text: input.tags.join(", ") }] : []),
+    ]
+    if (secondRow.length > 0) {
+      y += metaSize * 1.05 + mt1
+      drawMetaRow(secondRow)
+    }
+
+    y += metaSize * 0.25 + spaceY5
+
+    if (input.focus && !isHtmlEmpty(input.focus)) {
+      const innerWidth = contentWidth - calloutPx * 2
+      const boxHeight = calloutPy * 2 + measureBlocks(input.focus, bodySize, innerWidth, bodyLh)
+      ensureSpace(boxHeight + spaceY5)
+      const boxTop = y
+      drawFocusBox(boxTop, boxHeight)
+      y = boxTop + calloutPy + bodySize * 0.8
+      drawBlocks(input.focus, bodySize, INK, margin + calloutPx, innerWidth, bodyLh)
+      y = boxTop + boxHeight + spaceY5
+    }
+
+    const innerX = margin + cardPx
+    const innerWidth = contentWidth - cardPx * 2
+
+    function openSetsCard() {
+      inSetsCard = true
+      cardSegTop = y
+      y += cardPyTop
+    }
+
+    function closeSetsCard() {
+      y += cardPyBottom
+      drawCardBorder(cardSegTop, y)
+      inSetsCard = false
+    }
+
+    openSetsCard()
+
+    if (input.sets.length === 0) {
+      setType(plainStyle(), bodySize, MUTED)
+      doc.text("No sets", innerX, y)
+      y += bodyLh
+    }
+
+    input.sets.forEach((set, index) => {
+      if (index > 0) y += py2 + spaceY2 + py2
+      ensureSpace(setTitleLh + bodyLh)
+      const setTitle = set.title?.trim() || "Set"
+      setType({ bold: true, italic: false, underline: false }, setTitleSize, PRIMARY_ACTIVE)
+      const titleWidth = innerWidth - (set.distance != null ? px(56) : 0)
+      const setTitleLines = doc.splitTextToSize(setTitle, titleWidth) as string[]
+      const titleTop = y
+      for (const line of setTitleLines) {
+        doc.text(line, innerX, y)
+        y += setTitleLh
+      }
+      if (set.distance != null) {
+        const dist = String(set.distance)
+        setType(plainStyle(), distSize, PRIMARY_ACTIVE)
+        const distWidth = doc.getTextWidth(dist)
+        doc.text(dist, margin + contentWidth - cardPx - distWidth, titleTop)
+      }
+
+      if (set.content && !isHtmlEmpty(set.content)) {
+        y += mt1 - (setTitleLh - setTitleSize)
+        drawBlocks(set.content, bodySize, INK, innerX, innerWidth, bodyLh)
+      }
+    })
+
+    closeSetsCard()
+  }
+
   doc.setProperties({
-    title: input.title,
+    title: inputs.length === 1 ? inputs[0].title : "Practices",
     author: "SwimBuzz",
     creator: "SwimBuzz",
   })
 
-  const showDraft = input.showDraft && !input.published
-  setType({ bold: true, italic: false, underline: false }, titleSize, INK)
-  const titleLines = doc.splitTextToSize(
-    input.title,
-    contentWidth - (showDraft ? px(72) : 0)
-  ) as string[]
-  for (const [index, line] of titleLines.entries()) {
-    ensureSpace(titleLh)
-    setType({ bold: true, italic: false, underline: false }, titleSize, INK)
-    doc.text(line, margin, y)
-    if (index === 0 && showDraft) {
-      const lineWidth = doc.getTextWidth(line)
-      const badgeX = margin + lineWidth + gap2
-      if (badgeX + px(64) <= margin + contentWidth) drawDraftBadge(badgeX, y - px(2))
-      else drawDraftBadge(pageWidth - margin - px(64), y - px(2))
+  // Each practice starts on its own page; the footer pass below numbers pages across all of them.
+  inputs.forEach((input, index) => {
+    if (index > 0) {
+      doc.addPage()
+      y = margin + titleSize * 0.85
     }
-    if (index < titleLines.length - 1) y += titleLh
-  }
-
-  y += titleSize * 0.22 + mt1 + metaSize * 0.8
-  // Static exports always show the practice's own zone rather than whoever generated it.
-  const range = formatZonedInstantRange(input.startsAt, input.endsAt, input.timeZone)
-  // Header rows mirror the practice page: date/time + location, then distance + tags.
-  const location = input.location?.trim() ?? ""
-  drawMetaRow([
-    { icon: "calendar", text: `${range.date}  ·  ${range.time} ${range.abbrev}` },
-    ...(location ? [{ icon: "location" as const, text: location }] : []),
-  ])
-
-  const secondRow = [
-    ...(input.totalDistance > 0
-      ? [{ icon: "waves" as const, text: formatPracticeDistance(input.totalDistance, input.course) }]
-      : []),
-    ...(input.tags.length > 0 ? [{ icon: "tag" as const, text: input.tags.join(", ") }] : []),
-  ]
-  if (secondRow.length > 0) {
-    y += metaSize * 1.05 + mt1
-    drawMetaRow(secondRow)
-  }
-
-  y += metaSize * 0.25 + spaceY5
-
-  if (input.focus && !isHtmlEmpty(input.focus)) {
-    const innerWidth = contentWidth - calloutPx * 2
-    const boxHeight = calloutPy * 2 + measureBlocks(input.focus, bodySize, innerWidth, bodyLh)
-    ensureSpace(boxHeight + spaceY5)
-    const boxTop = y
-    drawFocusBox(boxTop, boxHeight)
-    y = boxTop + calloutPy + bodySize * 0.8
-    drawBlocks(input.focus, bodySize, INK, margin + calloutPx, innerWidth, bodyLh)
-    y = boxTop + boxHeight + spaceY5
-  }
-
-  const innerX = margin + cardPx
-  const innerWidth = contentWidth - cardPx * 2
-
-  function openSetsCard() {
-    inSetsCard = true
-    cardSegTop = y
-    y += cardPyTop
-  }
-
-  function closeSetsCard() {
-    y += cardPyBottom
-    drawCardBorder(cardSegTop, y)
-    inSetsCard = false
-  }
-
-  openSetsCard()
-
-  if (input.sets.length === 0) {
-    setType(plainStyle(), bodySize, MUTED)
-    doc.text("No sets", innerX, y)
-    y += bodyLh
-  }
-
-  input.sets.forEach((set, index) => {
-    if (index > 0) y += py2 + spaceY2 + py2
-    ensureSpace(setTitleLh + bodyLh)
-    const setTitle = set.title?.trim() || "Set"
-    setType({ bold: true, italic: false, underline: false }, setTitleSize, PRIMARY_ACTIVE)
-    const titleWidth = innerWidth - (set.distance != null ? px(56) : 0)
-    const setTitleLines = doc.splitTextToSize(setTitle, titleWidth) as string[]
-    const titleTop = y
-    for (const line of setTitleLines) {
-      doc.text(line, innerX, y)
-      y += setTitleLh
-    }
-    if (set.distance != null) {
-      const dist = String(set.distance)
-      setType(plainStyle(), distSize, PRIMARY_ACTIVE)
-      const distWidth = doc.getTextWidth(dist)
-      doc.text(dist, margin + contentWidth - cardPx - distWidth, titleTop)
-    }
-
-    if (set.content && !isHtmlEmpty(set.content)) {
-      y += mt1 - (setTitleLh - setTitleSize)
-      drawBlocks(set.content, bodySize, INK, innerX, innerWidth, bodyLh)
-    }
+    drawPractice(input)
   })
-
-  closeSetsCard()
 
   const pageCount = doc.getNumberOfPages()
   for (let i = 1; i <= pageCount; i++) {
@@ -655,6 +675,10 @@ export function buildPracticePdf(input: PracticePdfInput): jsPDF {
   }
 
   return doc
+}
+
+export function buildPracticePdf(input: PracticePdfInput): jsPDF {
+  return buildPracticesPdf([input])
 }
 
 export function downloadPracticePdf(input: PracticePdfInput) {

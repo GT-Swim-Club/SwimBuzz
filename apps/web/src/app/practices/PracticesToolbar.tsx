@@ -49,6 +49,15 @@ function ClearIcon() {
   )
 }
 
+function SelectIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
+      <path d="M21 10.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.5" />
+      <path d="m9 11 3 3L22 4" />
+    </svg>
+  )
+}
+
 function PlusIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
@@ -415,6 +424,8 @@ export default function PracticesToolbar({
   onQueryChange,
   tags,
   onTagsChange,
+  selecting,
+  onSelectingChange,
 }: {
   isCoach: boolean
   managedTags: ManagedTag[]
@@ -423,6 +434,8 @@ export default function PracticesToolbar({
   onQueryChange: (value: string) => void
   tags: string[]
   onTagsChange: (tags: string[]) => void
+  selecting: boolean
+  onSelectingChange: (selecting: boolean) => void
 }) {
   const [searchOpen, setSearchOpen] = useState(Boolean(q))
   const inputRef = useRef<HTMLInputElement>(null)
@@ -511,6 +524,18 @@ export default function PracticesToolbar({
         )}
         <HoverDetail label="Search practices" />
       </button>
+      {prefs.view !== "deleted" && (
+        <button
+          type="button"
+          onClick={() => onSelectingChange(!selecting)}
+          aria-pressed={selecting}
+          aria-label="Select practices"
+          className={controlClass + (selecting ? " border-primary bg-primary-bg text-primary hover:bg-primary-bg" : "")}
+        >
+          <SelectIcon />
+          <HoverDetail label={selecting ? "Done selecting" : "Select practices"} />
+        </button>
+      )}
 
       <div className="ml-auto flex items-center gap-2">
         <PracticeTagManager

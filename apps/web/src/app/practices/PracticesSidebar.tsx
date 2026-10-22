@@ -10,7 +10,7 @@ import {
   type MouseEvent,
   type ReactNode,
 } from "react"
-import { usePathname, useSearchParams } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { usePracticePrefs } from "./usePracticePrefs"
 import HoverDetail from "@/components/ui/HoverDetail"
 import { ATHLETE_VIEW_ENABLING_EVENT } from "@/lib/athlete/athlete-view"
@@ -18,8 +18,11 @@ import PracticesToolbar from "./PracticesToolbar"
 import WeekRail from "./WeekRail"
 import PracticeListRail from "./PracticeListRail"
 import DeletedPracticeListRail from "./DeletedPracticeListRail"
+import { PracticeSelectionBar, type RailSelection } from "./PracticeSelection"
+import type { DeletePracticesResult } from "./PracticeSelection.actions"
 import PracticeViewSkeleton from "./[id]/PracticeViewSkeleton"
 import {
+  addUtcDays,
   buildWorkspaceHref,
   formatDayParam,
   parseTags,
@@ -118,6 +121,7 @@ export default function PracticesSidebar({
 }) {
   const prefs = usePracticePrefs()
   const pathname = usePathname()
+  const router = useRouter()
   const searchParams = useSearchParams()
   const containerRef = useRef<HTMLDivElement>(null)
   const sidebarRef = useRef<HTMLElement>(null)
@@ -363,6 +367,72 @@ export default function PracticesSidebar({
     return map
   }, [filteredPractices])
 
+  // Select mode (multi-practice PDF export). The selection is kept by id across week changes,
+  // searches and tag filters, so practices can be gathered from several weeks before exporting.
+  const [selecting, setSelecting] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(() => new Set())
+
+  const exitSelecting = useCallback(() => {
+    setSelecting(false)
+    setSelectedIds(new Set())
+  }, [])
+
+  // Trash has no export, so switching to it leaves select mode. Adjusted during render (see the
+  // tags sync above) rather than in an effect.
+  if (selecting && prefs.view === "deleted") exitSelecting()
+
+  const toggleSelected = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }, [])
+
+  // "Select all" covers whatever the active rail is showing: every listed practice in list view,
+  // or the displayed week's practices (minus Fri–Sun when Mon–Thu only is on) in week view.
+  const visibleIds = useMemo(() => {
+    if (prefs.view === "list") return filteredPractices.map((p) => p.id)
+    const weekStart = parseWeekStart(week) ?? startOfUtcWeek(new Date())
+    return Array.from({ length: 7 }, (_, i) => addUtcDays(weekStart, i))
+      .filter((date) => !prefs.monThuOnly || (date.getUTCDay() >= 1 && date.getUTCDay() <= 4))
+      .flatMap((date) => (practicesByDay[formatDayParam(date)] ?? []).map((p) => p.id))
+  }, [prefs.view, prefs.monThuOnly, filteredPractices, practicesByDay, week])
+
+  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id))
+
+  function toggleAllVisible() {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      for (const id of visibleIds) {
+        if (allVisibleSelected) next.delete(id)
+        else next.add(id)
+      }
+      return next
+    })
+  }
+
+  const selection: RailSelection = selecting ? { selectedIds, onToggle: toggleSelected } : null
+
+  // Resolved against the live list, so practices that disappear (e.g. deleted elsewhere) drop
+  // out of the selection on their own. Oldest first, matching the exported PDF's order.
+  const selectedPractices = useMemo(
+    () =>
+      practices
+        .filter((p) => selectedIds.has(p.id))
+        .sort((a, b) => a.startsAt.localeCompare(b.startsAt)),
+    [practices, selectedIds]
+  )
+
+  function handleBulkDeleted({ deletedIds, skipped }: DeletePracticesResult) {
+    // Practices that couldn't be moved (being edited) stay selected so the coach can retry.
+    if (skipped.length === 0) exitSelecting()
+    else setSelectedIds(new Set(skipped.map((item) => item.id)))
+    if (openPractice && deletedIds.includes(openPractice.id)) router.push("/practices")
+    else router.refresh()
+  }
+
   const emptyListMessage =
     query || tags.length
       ? "No practices match your search."
@@ -463,6 +533,8 @@ export default function PracticesSidebar({
           onQueryChange={setQuery}
           tags={tags}
           onTagsChange={updateTags}
+          selecting={selecting}
+          onSelectingChange={(next) => (next ? setSelecting(true) : exitSelecting())}
         />
         {prefs.view === "week" ? (
           <WeekRail
@@ -475,6 +547,7 @@ export default function PracticesSidebar({
             cardLabel={prefs.cardLabel}
             sidebarWidth={width}
             onWeekChange={setWeek}
+            selection={selection}
           />
         ) : prefs.view === "deleted" && isCoach ? (
           <DeletedPracticeListRail
@@ -492,6 +565,19 @@ export default function PracticesSidebar({
             tags={tags}
             cardLabel={prefs.cardLabel}
             emptyMessage={emptyListMessage}
+            selection={selection}
+          />
+        )}
+        {selecting && (
+          <PracticeSelectionBar
+            selected={selectedPractices}
+            canDelete={isCoach}
+            allVisibleSelected={allVisibleSelected}
+            canSelectAll={visibleIds.length > 0}
+            onToggleAll={toggleAllVisible}
+            onCancel={exitSelecting}
+            onExported={exitSelecting}
+            onDeleted={handleBulkDeleted}
           />
         )}
       </>

@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import { useEffect, useState, useSyncExternalStore } from "react"
 import { formatPracticeDistance, formatZonedInstantRange } from "@swimbuzz/shared"
 import { getLocalDayKey, getLocalWeekStartKey } from "./PracticeCalendarLocal"
@@ -18,6 +17,7 @@ import {
 import { practicePath } from "@/lib/slug"
 import MonthPickerPopover from "./MonthPickerPopover"
 import { showCardTags, type PracticeCardLabel } from "./usePracticePrefs"
+import { SelectableRailCard, cardSelection, type RailSelection } from "./PracticeSelection"
 
 function noopSubscribe() {
   return () => {}
@@ -62,6 +62,7 @@ export default function WeekRail({
   cardLabel,
   sidebarWidth,
   onWeekChange,
+  selection,
 }: {
   weekParam: string
   practicesByDay: Record<string, PracticeRailItem[]>
@@ -72,6 +73,7 @@ export default function WeekRail({
   cardLabel: PracticeCardLabel
   sidebarWidth: number
   onWeekChange: (weekKey: string) => void
+  selection: RailSelection
 }) {
   const weekStart = parseWeekStart(weekParam) ?? startOfUtcWeek(new Date())
   const weekDays = Array.from({ length: 7 }, (_, i) => addUtcDays(weekStart, i))
@@ -213,6 +215,7 @@ export default function WeekRail({
                     tags={tags}
                     cardLabel={cardLabel}
                     sidebarWidth={sidebarWidth}
+                    selection={selection}
                   />
                 ))
               ) : (
@@ -297,6 +300,7 @@ function WeekRailRow({
   tags,
   cardLabel,
   sidebarWidth,
+  selection,
 }: {
   practice: PracticeRailItem
   weekday: string
@@ -306,17 +310,15 @@ function WeekRailRow({
   tags: string[]
   cardLabel: PracticeCardLabel
   sidebarWidth: number
+  selection: RailSelection
 }) {
   const showTags = showCardTags(tags, practice.tags, cardLabel)
   return (
-    <Link
+    <SelectableRailCard
       href={buildWorkspaceHref(practicePath(practice.slug ?? practice.id), { tags })}
-      className={
-        "flex flex-1 items-center gap-3 rounded-lg border px-3 py-3 text-left transition-colors " +
-        (selected
-          ? "border-primary bg-primary/5"
-          : "border-border-secondary hover:bg-background-hover")
-      }
+      className="flex flex-1 items-center gap-3 rounded-lg border px-3 py-3 text-left transition-colors"
+      active={selected}
+      selection={cardSelection(selection, practice.id)}
     >
       <DateColumn weekday={weekday} dateNumber={dateNumber} isToday={isToday} dimmed={false} selected={selected} />
       <div className="min-w-0 flex-1">
@@ -341,6 +343,6 @@ function WeekRailRow({
           </span>
         )}
       </div>
-    </Link>
+    </SelectableRailCard>
   )
 }
