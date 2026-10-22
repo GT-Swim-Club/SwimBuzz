@@ -1,14 +1,24 @@
-import { useMemo, useState } from "react"
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { Alert, Platform, Pressable, StyleSheet, Text, View } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { useQuery } from "@tanstack/react-query"
+import * as Clipboard from "expo-clipboard"
+import * as MediaLibrary from "expo-media-library"
+import * as Sharing from "expo-sharing"
+import { File, Paths } from "expo-file-system"
+import { captureRef } from "react-native-view-shot"
 import {
   groupRelayLineups,
   relayLineupHasAthlete,
   relayLineupRoundLabel,
+  relayShareEvents,
+  relayShareFilename,
+  relaySummaryCsv,
   type RelayLineup,
 } from "@swimbuzz/shared"
 import {
+  ActionSheet,
+  Body,
   Button,
   EmptyState,
   ErrorBlock,
@@ -18,10 +28,14 @@ import {
   ScrollView,
   Title,
   usePalette,
+  type ActionSheetItem,
 } from "@swimbuzz/ui"
 import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
 import { api } from "../../../../src/lib/api"
 import { useTabBarScrollPadding } from "../../../../src/lib/tab-bar"
+import { isExternalUrl } from "../../../../src/lib/href"
+import { Icon } from "../../../../src/components/Icon"
+import { RelaysExportCapture } from "../../../../src/components/RelaysExportCapture"
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : null
@@ -50,6 +64,102 @@ export default function MeetRelaysScreen() {
     [meet]
   )
   const groups = useMemo(() => groupRelayLineups(lineups), [lineups])
+  const shareEvents = useMemo(() => relayShareEvents(groups), [groups])
+  const meetName = typeof meet?.name === "string" ? meet.name : "Meet"
+  const iconUrl =
+    typeof meet?.iconUrl === "string" && isExternalUrl(meet.iconUrl) ? meet.iconUrl.trim() : null
+
+  const [shareOpen, setShareOpen] = useState(false)
+  const [shareBusy, setShareBusy] = useState<"copy" | "photos" | "csv" | null>(null)
+  const [copied, setCopied] = useState(false)
+  const [savedToastVisible, setSavedToastVisible] = useState(false)
+  const exportCaptureRef = useRef<View>(null)
+  const shareSheetDismissRef = useRef<(() => void) | null>(null)
+  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const savedToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (copiedTimeoutRef.current) clearTimeout(copiedTimeoutRef.current)
+      if (savedToastTimeoutRef.current) clearTimeout(savedToastTimeoutRef.current)
+    }
+  }, [])
+
+  /**
+   * Closes the share sheet and waits for it to finish dismissing — iOS won't present
+   * another native sheet over a modal that's still animating closed (same as practices).
+   */
+  function closeShareSheetAndWait(): Promise<void> {
+    setShareOpen(false)
+    if (Platform.OS !== "ios") return Promise.resolve()
+    return new Promise((resolve) => {
+      const finish = () => {
+        shareSheetDismissRef.current = null
+        clearTimeout(fallback)
+        resolve()
+      }
+      const fallback = setTimeout(finish, 600)
+      shareSheetDismissRef.current = finish
+    })
+  }
+
+  async function copyPng() {
+    if (!exportCaptureRef.current) return
+    setShareBusy("copy")
+    try {
+      const base64 = await captureRef(exportCaptureRef, { format: "png", quality: 1, result: "base64" })
+      await Clipboard.setImageAsync(base64)
+      setCopied(true)
+      if (copiedTimeoutRef.current) clearTimeout(copiedTimeoutRef.current)
+      copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      Alert.alert("Could not copy image", err instanceof Error ? err.message : "Something went wrong")
+    } finally {
+      setShareBusy(null)
+    }
+  }
+
+  async function saveToPhotos() {
+    if (!exportCaptureRef.current) return
+    setShareBusy("photos")
+    try {
+      const permission = await MediaLibrary.requestPermissionsAsync(true)
+      if (!permission.granted) {
+        Alert.alert("Permission needed", "Allow photo access in Settings to save relay images.")
+        return
+      }
+      const uri = await captureRef(exportCaptureRef, { format: "png", quality: 1, result: "tmpfile" })
+      await MediaLibrary.saveToLibraryAsync(uri)
+      await closeShareSheetAndWait()
+      setSavedToastVisible(true)
+      if (savedToastTimeoutRef.current) clearTimeout(savedToastTimeoutRef.current)
+      savedToastTimeoutRef.current = setTimeout(() => setSavedToastVisible(false), 2000)
+    } catch (err) {
+      Alert.alert("Could not save image", err instanceof Error ? err.message : "Something went wrong")
+    } finally {
+      setShareBusy(null)
+    }
+  }
+
+  async function shareCsv() {
+    setShareBusy("csv")
+    try {
+      const file = new File(Paths.cache, relayShareFilename(meetName, "csv"))
+      if (file.exists) file.delete()
+      // Byte-order mark so Excel opens accented names as UTF-8.
+      file.write("\uFEFF" + relaySummaryCsv(shareEvents))
+      if (!(await Sharing.isAvailableAsync())) {
+        Alert.alert("Sharing unavailable", "This device can't open the share sheet.")
+        return
+      }
+      await closeShareSheetAndWait()
+      await Sharing.shareAsync(file.uri, { mimeType: "text/csv", UTI: "public.comma-separated-values-text" })
+    } catch (err) {
+      Alert.alert("Could not share CSV", err instanceof Error ? err.message : "Something went wrong")
+    } finally {
+      setShareBusy(null)
+    }
+  }
 
   async function removeRelay(relay: RelayLineup) {
     if (!id) return
@@ -90,7 +200,20 @@ export default function MeetRelaysScreen() {
   return (
     <Screen>
       <ScrollView contentContainerStyle={{ paddingBottom: tabBarPad }}>
-        <Title>{typeof meet?.name === "string" ? meet.name : "Meet"}</Title>
+        <View style={styles.titleRow}>
+          <Title style={{ flex: 1 }}>{meetName}</Title>
+          {shareEvents.length > 0 ? (
+            <Pressable
+              onPress={() => setShareOpen(true)}
+              accessibilityRole="button"
+              accessibilityLabel="Share relays"
+              hitSlop={8}
+              style={{ paddingVertical: spacing.xxs, paddingHorizontal: spacing.xs }}
+            >
+              <Icon name="share" size={22} color={c.text} />
+            </Pressable>
+          ) : null}
+        </View>
         <Text style={styles.eyebrow}>RELAYS</Text>
 
         {error ? (
@@ -194,12 +317,76 @@ export default function MeetRelaysScreen() {
           ))
         )}
       </ScrollView>
+
+      <ActionSheet
+        visible={shareOpen}
+        onClose={() => setShareOpen(false)}
+        onDismiss={() => shareSheetDismissRef.current?.()}
+        title="Share relays"
+        groups={[
+          [
+            {
+              key: "copy",
+              label: copied ? "Copied" : "Copy PNG",
+              icon: <Icon name={copied ? "check" : "copy"} size={20} color={c.text} />,
+              busy: shareBusy === "copy",
+              disabled: Boolean(shareBusy) && shareBusy !== "copy",
+              onPress: () => void copyPng(),
+            },
+            {
+              key: "photos",
+              label: "Save to Photos",
+              icon: <Icon name="image" size={20} color={c.text} />,
+              busy: shareBusy === "photos",
+              disabled: Boolean(shareBusy) && shareBusy !== "photos",
+              onPress: () => void saveToPhotos(),
+            },
+            {
+              key: "csv",
+              label: "Share CSV",
+              icon: <Icon name="fileText" size={20} color={c.text} />,
+              busy: shareBusy === "csv",
+              disabled: Boolean(shareBusy) && shareBusy !== "csv",
+              onPress: () => void shareCsv(),
+            },
+          ] satisfies ActionSheetItem[],
+        ]}
+      />
+
+      {/* Off-screen mirror captured to PNG — never shown in the layout. */}
+      <View pointerEvents="none" style={{ position: "absolute", top: 0, left: -10000 }}>
+        <RelaysExportCapture ref={exportCaptureRef} meetName={meetName} iconUrl={iconUrl} events={shareEvents} />
+      </View>
+
+      {savedToastVisible ? (
+        <View
+          pointerEvents="none"
+          style={{ position: "absolute", left: 0, right: 0, bottom: tabBarPad, alignItems: "center" }}
+        >
+          <View style={styles.toast}>
+            <Icon name="check" size={16} color={c.primaryActive} />
+            <Body style={{ fontWeight: "600" }}>Saved to Photos</Body>
+          </View>
+        </View>
+      ) : null}
     </Screen>
   )
 }
 
 function makeStyles(c: ColorPalette) {
   return StyleSheet.create({
+    titleRow: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: spacing.sm },
+    toast: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.xs,
+      borderRadius: 999,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      backgroundColor: c.bgElevated,
+      borderColor: c.border,
+      borderWidth: 1,
+    },
     eyebrow: {
       color: c.primaryActive,
       fontSize: 12,

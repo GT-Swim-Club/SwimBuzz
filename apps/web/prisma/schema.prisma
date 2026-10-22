@@ -61,9 +61,6 @@ enum ScraperJobType {
 }
 
 enum NotificationType {
-  PROFILE_CHANGE_REQUEST
-  PROFILE_CHANGE_APPROVED
-  PROFILE_CHANGE_REJECTED
   PRACTICE_PUBLISHED
   MEET_SIGNUP_OPEN
   MEET_ROSTER_INFO
@@ -111,13 +108,12 @@ model Athlete {
   preferredName String?
   gender       Gender
   seasons      String[]
-  swimCloudId  Int?
+  /// Main profile first. SwimCloud sometimes splits one swimmer across profiles (max 5); times sync pulls from all.
+  swimCloudIds Int[]   @default([])
   gtid         String?
   dob          DateTime?
   year         String?
   timesSyncedAt DateTime?
-  /// Self-service edits awaiting coach approval: { swimCloudId?: number, preferredName?: string | null }
-  pendingProfileChanges Json?
   swims        Swim[]
   meetSignups  MeetSignupEntry[]
   meetRoomPreferences MeetRoomPreference[]
@@ -126,6 +122,7 @@ model Athlete {
 
   @@index([gtid])
   @@index([seasons], type: Gin)
+  @@index([swimCloudIds], type: Gin)
 }
 
 model Meet {

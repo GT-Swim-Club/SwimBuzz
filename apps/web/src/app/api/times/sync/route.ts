@@ -7,6 +7,10 @@ import {
   withoutRecordedSwims,
   type SwimCloudTime,
 } from "@/lib/swim/swimcloud-import"
+import {
+  hasSwimCloudIdWhere,
+  mergeProfileTimes,
+} from "@/lib/swim/swimcloud-profiles"
 import { parseSeason } from "@/lib/season"
 import {
   enqueueScraperJob,
@@ -45,7 +49,7 @@ export async function GET(req: Request) {
       firstName: true,
       lastName: true,
       gender: true,
-      swimCloudId: true,
+      swimCloudIds: true,
       timesSyncedAt: true,
     },
     orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
@@ -81,9 +85,9 @@ export async function POST(req: Request) {
       id: { in: athleteIds },
       seasons: { has: season },
       ...(gender ? { gender } : {}),
-      swimCloudId: { not: null },
+      ...hasSwimCloudIdWhere,
     },
-    select: { id: true, firstName: true, lastName: true, swimCloudId: true },
+    select: { id: true, firstName: true, lastName: true, swimCloudIds: true },
     orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
   })
 
@@ -97,7 +101,7 @@ export async function POST(req: Request) {
     })
   }
 
-  const swimmerIds = athletes.map((a) => a.swimCloudId!)
+  const swimmerIds = athletes.flatMap((a) => a.swimCloudIds)
   const applyContext: TimesApplyContext = {
     kind: "times_sync",
     season,
@@ -137,10 +141,12 @@ export async function applyTimesSyncJob(jobId: string, userId: string) {
   }
 
   const athletes = await prisma.athlete.findMany({
-    where: { id: { in: ctx.athleteIds }, swimCloudId: { not: null } },
-    select: { id: true, firstName: true, lastName: true, swimCloudId: true },
+    where: { id: { in: ctx.athleteIds }, ...hasSwimCloudIdWhere },
+    select: { id: true, firstName: true, lastName: true, swimCloudIds: true },
   })
-  const athleteBySwimCloudId = new Map(athletes.map((a) => [a.swimCloudId!, a]))
+  const athleteBySwimCloudId = new Map(
+    athletes.flatMap((a) => a.swimCloudIds.map((id) => [id, a] as const))
+  )
 
   const scraped = job.result as {
     swimmers: Record<string, SwimCloudTime[]>
@@ -150,10 +156,13 @@ export async function applyTimesSyncJob(jobId: string, userId: string) {
   const allSwims: ReturnType<typeof swimsFromSwimCloudTimes> = []
   const syncedAthleteIds: string[] = []
 
-  for (const [swimCloudIdStr, times] of Object.entries(scraped.swimmers ?? {})) {
-    const athlete = athleteBySwimCloudId.get(parseInt(swimCloudIdStr, 10))
-    if (!athlete || !times?.length) continue
-    allSwims.push(...swimsFromSwimCloudTimes(times, athlete.id))
+  for (const athlete of athletes) {
+    // An athlete with several SwimCloud profiles gets the times from all of them.
+    const profiles = athlete.swimCloudIds
+      .map((id) => scraped.swimmers?.[String(id)])
+      .filter((times): times is SwimCloudTime[] => !!times?.length)
+    if (profiles.length === 0) continue
+    allSwims.push(...swimsFromSwimCloudTimes(mergeProfileTimes(profiles), athlete.id))
     syncedAthleteIds.push(athlete.id)
   }
   const athletesSynced = syncedAthleteIds.length
@@ -180,9 +189,9 @@ export async function applyTimesSyncJob(jobId: string, userId: string) {
 
   const failed = (scraped.failed ?? []).map((id) => {
     const athlete = athleteBySwimCloudId.get(id)
-    return athlete
-      ? `${athlete.firstName} ${athlete.lastName}`
-      : `SwimCloud ID ${id}`
+    if (!athlete) return `SwimCloud ID ${id}`
+    const name = `${athlete.firstName} ${athlete.lastName}`
+    return athlete.swimCloudIds.length > 1 ? `${name} (SwimCloud ID ${id})` : name
   })
 
   const summary = {

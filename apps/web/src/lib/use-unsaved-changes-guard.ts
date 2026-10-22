@@ -36,6 +36,18 @@ export function useUnsavedChangesGuard(dirty: boolean) {
     [router]
   )
 
+  /**
+   * Leave on purpose without a router navigation (the caller swaps the view and updates the URL
+   * itself). Returns true when the guard's history entry is on top, so the caller should replace
+   * that entry rather than push a new one.
+   */
+  const leave = useCallback(() => {
+    leavingRef.current = true
+    const replace = sentinelRef.current
+    sentinelRef.current = false
+    return replace
+  }, [])
+
   /** Navigate, letting the browser ask first when there are unsaved changes. */
   const guardedNavigate = useCallback(
     (href: string) => {
@@ -101,5 +113,5 @@ export function useUnsavedChangesGuard(dirty: boolean) {
     return () => window.removeEventListener("popstate", onPopState)
   }, [])
 
-  return { navigate, guardedNavigate }
+  return { navigate, guardedNavigate, leave }
 }

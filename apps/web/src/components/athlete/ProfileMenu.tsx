@@ -29,7 +29,7 @@ export default function ProfileMenu({
   roleLabel,
   staffTitle,
   rosterProfileHref,
-  swimCloudProfileHref,
+  swimCloudProfileHrefs,
 }: {
   name?: string | null
   email?: string | null
@@ -37,7 +37,8 @@ export default function ProfileMenu({
   roleLabel: string
   staffTitle?: StaffTitle | null
   rosterProfileHref: string | null
-  swimCloudProfileHref: string | null
+  /** Main SwimCloud profile first, then the 2nd one if any. */
+  swimCloudProfileHrefs: string[]
 }) {
   const [open, setOpen] = useState(false)
   const [signOutOpen, setSignOutOpen] = useState(false)
@@ -148,9 +149,10 @@ export default function ProfileMenu({
                     Profile
                   </Link>
                 ) : null}
-                {swimCloudProfileHref ? (
+                {swimCloudProfileHrefs.map((href, index) => (
                   <a
-                    href={swimCloudProfileHref}
+                    key={href}
+                    href={href}
                     target="_blank"
                     rel="noopener noreferrer"
                     role="menuitem"
@@ -158,9 +160,9 @@ export default function ProfileMenu({
                     className="flex items-center gap-2.5 px-3 py-2 text-sm text-foreground-secondary hover:bg-fill-secondary"
                   >
                     <AppIcon name="externalLink" className="h-4 w-4 shrink-0 text-foreground-tertiary" />
-                    SwimCloud Profile
+                    {index ? "2nd SwimCloud" : "SwimCloud"}
                   </a>
-                ) : null}
+                ))}
                 <Link
                   href="/settings"
                   role="menuitem"

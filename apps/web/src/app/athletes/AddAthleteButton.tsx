@@ -6,11 +6,7 @@ import { currentSeason, parseSeason } from "@/lib/season"
 import { formatSeasonLabel } from "@swimbuzz/shared"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import HoverDetail from "@/components/ui/HoverDetail"
-import {
-  isValidSwimCloudIdInput,
-  normalizeSwimCloudIdInput,
-  SWIMCLOUD_ID_ERROR,
-} from "@/lib/swim/swimcloud-id"
+import SwimCloudIdsInput, { useSwimCloudIdsField } from "@/components/athlete/SwimCloudIdsInput"
 import { addAthlete } from "./AddAthleteButton.actions"
 
 export default function AddAthleteButton() {
@@ -28,33 +24,35 @@ export default function AddAthleteButton() {
     firstName: "",
     lastName: "",
     email: "",
-    swimCloudId: "",
     preferredName: "",
   })
+  const swimCloud = useSwimCloudIdsField()
 
   function openModal() {
     setError(null)
     setOpen(true)
   }
 
-  const swimCloudIdOk =
-    form.swimCloudId === "" || isValidSwimCloudIdInput(form.swimCloudId)
-  const showSwimCloudHint =
-    form.swimCloudId.length > 0 && !isValidSwimCloudIdInput(form.swimCloudId)
-
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!swimCloudIdOk) return
+    if (!swimCloud.valid) return
     setError(null)
 
     startTransition(async () => {
       try {
         await addAthlete({
           ...form,
+          swimCloudIds: swimCloud.allIds,
           gender,
           seasons: [season],
         })
-        setForm({ firstName: "", lastName: "", email: "", swimCloudId: "", preferredName: "" })
+        setForm({
+          firstName: "",
+          lastName: "",
+          email: "",
+          preferredName: "",
+        })
+        swimCloud.reset()
         setOpen(false)
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to add athlete")
@@ -107,7 +105,7 @@ export default function AddAthleteButton() {
             </button>
             <button
               type="submit"
-              disabled={loading || !swimCloudIdOk}
+              disabled={loading || !swimCloud.valid}
               className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast hover:bg-primary-hover disabled:opacity-50"
             >
               {loading ? "Adding…" : "Add athlete"}
@@ -142,6 +140,18 @@ export default function AddAthleteButton() {
 
               <div>
                   <label className="block text-xs font-medium text-foreground-secondary dark:text-foreground-secondary mb-1">
+                  Preferred name
+                </label>
+                <input
+                  type="text"
+                  value={form.preferredName}
+                  onChange={(e) => setForm((f) => ({ ...f, preferredName: e.target.value }))}
+                  className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm dark:bg-background-elevated dark:border border-border-secondary"
+                />
+              </div>
+
+              <div>
+                  <label className="block text-xs font-medium text-foreground-secondary dark:text-foreground-secondary mb-1">
                   Email <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -154,45 +164,13 @@ export default function AddAthleteButton() {
               </div>
 
               <div>
-                  <label className="block text-xs font-medium text-foreground-secondary dark:text-foreground-secondary mb-1">
-                  SwimCloud ID or URL
+                <label
+                  htmlFor="add-swimcloud-ids"
+                  className="block text-xs font-medium text-foreground-secondary mb-1"
+                >
+                  SwimCloud ID/URL
                 </label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="e.g. 1234567"
-                  title={SWIMCLOUD_ID_ERROR}
-                  value={form.swimCloudId}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      swimCloudId: normalizeSwimCloudIdInput(e.target.value),
-                    }))
-                  }
-                  className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm dark:bg-background-elevated dark:border border-border-secondary"
-                  aria-invalid={showSwimCloudHint}
-                  aria-describedby={showSwimCloudHint ? "add-swimcloud-id-hint" : undefined}
-                />
-                {showSwimCloudHint && (
-                  <p
-                    id="add-swimcloud-id-hint"
-                    className="mt-1 text-xs text-amber-600 dark:text-amber-400"
-                  >
-                    {SWIMCLOUD_ID_ERROR}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                  <label className="block text-xs font-medium text-foreground-secondary dark:text-foreground-secondary mb-1">
-                  Preferred name
-                </label>
-                <input
-                  type="text"
-                  value={form.preferredName}
-                  onChange={(e) => setForm((f) => ({ ...f, preferredName: e.target.value }))}
-                  className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm dark:bg-background-elevated dark:border border-border-secondary"
-                />
+                <SwimCloudIdsInput field={swimCloud} id="add-swimcloud-ids" />
               </div>
 
         {error && (

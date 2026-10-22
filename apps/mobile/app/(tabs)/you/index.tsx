@@ -47,12 +47,8 @@ export default function YouScreen() {
   })
 
   const athleteId = match ? (match.slug ?? match.id) : null
-  const swimCloudId = (() => {
-    const raw = athleteDetail?.swimCloudId
-    const parsed =
-      typeof raw === "number" ? raw : typeof raw === "string" && raw.trim() ? Number(raw) : null
-    return parsed != null && Number.isFinite(parsed) ? parsed : null
-  })()
+  // Main SwimCloud profile first.
+  const swimCloudIds = athleteDetail?.swimCloudIds ?? []
 
   const profileReady = !user
     ? false
@@ -97,19 +93,13 @@ export default function YouScreen() {
           },
         ]
       : []),
-    ...(swimCloudId
-      ? [
-          {
-            title: "SwimCloud Profile",
-            icon: "externalLink" as const,
-            onPress: () => {
-              void Linking.openURL(
-                `https://www.swimcloud.com/swimmer/${swimCloudId}/`
-              )
-            },
-          },
-        ]
-      : []),
+    ...swimCloudIds.map((id, index) => ({
+      title: index ? `SwimCloud ${index + 1}` : "SwimCloud",
+      icon: "externalLink" as const,
+      onPress: () => {
+        void Linking.openURL(`https://www.swimcloud.com/swimmer/${id}/`)
+      },
+    })),
     {
       title: "Settings",
       icon: "settings",

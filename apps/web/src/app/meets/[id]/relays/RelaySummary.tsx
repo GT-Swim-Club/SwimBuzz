@@ -2,8 +2,14 @@ import Link from "next/link"
 import { AppIcon } from "@/components/ui/AppIcon"
 import { Skeleton } from "@/components/ui/Skeleton"
 import BalancedGrid from "@/components/ui/BalancedGrid"
-import { relayLineupHasAthlete, relayLineupRoundLabel, type RelayLineup } from "@swimbuzz/shared"
-import { formatLegTime, type LineupTeam } from "@/lib/meet/relay-builder"
+import {
+  relayLineupHasAthlete,
+  relayLineupRoundLabel,
+  type RelayLineup,
+  type RelayShareEvent,
+} from "@swimbuzz/shared"
+import { formatLegTime, type LineupTeam, type RelayEventSlot } from "@/lib/meet/relay-builder"
+import { EventBadge } from "../SummaryRow"
 
 export type RelaySummaryCard = {
   key: string
@@ -22,6 +28,8 @@ export type RelaySummaryEvent = {
   slug: string
   /** "Women 200 Medley". */
   name: string
+  /** Meet event number, when the event order has one. */
+  number?: number | null
   /** Opens the builder for this event (staff only). */
   href?: string
   pills: RelaySummaryPill[]
@@ -40,10 +48,11 @@ const PILL_TONES: Record<RelaySummaryPill["tone"], string> = {
 /** Cards inside a hovered event block take the block's hover color, so it reads as one surface. */
 const groupHover = "transition-colors group-hover:bg-background-hover-strong"
 
-function EventHeader({ event }: { event: RelaySummaryEvent }) {
+export function EventHeader({ event }: { event: RelaySummaryEvent }) {
   return (
     <div className="flex min-h-8 items-center justify-between gap-2 py-1 text-left">
       <span className="inline-flex min-w-0 items-center gap-2">
+        {event.number ? <EventBadge number={event.number} compact /> : null}
         <span className="truncate text-sm font-medium text-foreground">{event.name}</span>
         {event.pills.map((pill) => (
           <span
@@ -64,7 +73,7 @@ function EventHeader({ event }: { event: RelaySummaryEvent }) {
   )
 }
 
-function SummaryCard({ card, clickable }: { card: RelaySummaryCard; clickable: boolean }) {
+export function SummaryCard({ card, clickable }: { card: RelaySummaryCard; clickable: boolean }) {
   return (
     <div
       className={
@@ -135,8 +144,9 @@ function minColumnWidth(events: RelaySummaryEvent[]): number {
   let width = 0
   for (const event of events) {
     const pills = event.pills.reduce((sum, pill) => sum + pill.label.length * 6.6 + 26, 0)
-    // name + pills (padding, border, gap) + chevron and its gap + header padding
-    width = Math.max(width, event.name.length * 7.9 + pills + (event.href ? 24 : 0) + 16)
+    // number badge + name + pills (padding, border, gap) + chevron and its gap + header padding
+    const badge = event.number ? 28 : 0
+    width = Math.max(width, badge + event.name.length * 7.9 + pills + (event.href ? 24 : 0) + 16)
     for (const card of event.cards) {
       // card header: title + mono total + gap and padding
       width = Math.max(width, card.title.length * 7.9 + card.total.length * 8.4 + 32)
@@ -147,7 +157,14 @@ function minColumnWidth(events: RelaySummaryEvent[]): number {
 }
 
 /** Every relay event at a glance: published lineups solid, drafts and suggestions dashed. */
-export default function RelaySummary({ events }: { events: RelaySummaryEvent[] }) {
+export default function RelaySummary({
+  events,
+  onOpen,
+}: {
+  events: RelaySummaryEvent[]
+  /** Opens an event's builder without a server round trip (plain clicks only). */
+  onOpen?: (slug: string) => void
+}) {
   if (events.length === 0) {
     return (
       <p className="rounded-lg border border-dashed border-border px-4 py-6 text-center text-sm text-foreground-secondary">
@@ -196,6 +213,11 @@ export default function RelaySummary({ events }: { events: RelaySummaryEvent[] }
               // The whole block — header and relay cards — opens the builder.
               <Link
                 href={event.href}
+                onClick={(e) => {
+                  if (!onOpen || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+                  e.preventDefault()
+                  onOpen(event.slug)
+                }}
                 aria-label={`${event.pills.some((p) => p.tone === "published") ? "Edit" : "Build"} ${event.name} Relay`}
                 // Padded out into the grid gap so the hover fills the header, cards and gaps as one card.
                 className="group -m-2 flex flex-col gap-2 rounded-xl p-2 transition-colors hover:bg-background-hover-strong focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/35"
@@ -210,6 +232,15 @@ export default function RelaySummary({ events }: { events: RelaySummaryEvent[] }
       })}
     </BalancedGrid>
   )
+}
+
+/** A relay event's published lineups, for Share (PNG/CSV). */
+export function relayShareEvent(slot: RelayEventSlot, published: RelayLineup[]): RelayShareEvent {
+  return {
+    number: slot.number ?? (published.find((relay) => relay.eventNumber > 0)?.eventNumber || null),
+    name: slot.label.replace(/ Relay$/, ""),
+    relays: published,
+  }
 }
 
 /** Summary cards for published relays (one per team and round). */

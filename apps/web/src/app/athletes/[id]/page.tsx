@@ -21,11 +21,9 @@ import type { AthleteSwim } from "@/lib/athlete/swim-history"
 import { meetDayRange } from "@/lib/swim/swim-dedup"
 import AthleteActions from "./AthleteActions"
 import AthleteSwimsWorkspace from "./AthleteSwimsWorkspace"
-import { ICON_BUTTON, SwimCloudProfileLink } from "./AthleteIconButton"
-import PendingProfileChangesReview from "@/components/athlete/PendingProfileChangesReview"
+import { ICON_BUTTON, SwimCloudProfileLinks } from "./AthleteIconButton"
 import { isStaffUi } from "@/lib/athlete/athlete-view-server"
 import { DEFAULT_TIME_ZONE, formatSeasonLabel, zonedDayKey } from "@swimbuzz/shared"
-import { parsePendingProfileChanges } from "@/lib/athlete/pending-profile-changes"
 import { athletePath, isCuid } from "@/lib/slug"
 import StatsHighlights from "@/components/ui/StatsHighlights"
 import { computeAthleteHighlights } from "@/lib/athlete/athlete-stats"
@@ -56,7 +54,6 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
 
   const isCoach = await isStaffUi(session.user.role)
   const isOwnProfile = athlete.userId === session.user.id
-  const pending = parsePendingProfileChanges(athlete.pendingProfileChanges)
 
   const swims: AthleteSwim[] = athlete.swims.map((swim) => ({
     id: swim.id,
@@ -160,15 +157,15 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
               firstName={athlete.firstName}
               lastName={athlete.lastName}
               email={athlete.user?.email ?? ""}
-              swimCloudId={athlete.swimCloudId ?? null}
+              swimCloudIds={athlete.swimCloudIds}
               preferredName={athlete.preferredName}
               gtid={athlete.gtid}
               dob={athlete.dob ? zonedDayKey(athlete.dob, DEFAULT_TIME_ZONE) : null}
             />
           ) : (
-            (athlete.swimCloudId != null || isOwnProfile) && (
+            (athlete.swimCloudIds.length > 0 || isOwnProfile) && (
               <div className="flex flex-wrap items-center justify-end gap-2">
-                {athlete.swimCloudId != null && <SwimCloudProfileLink swimCloudId={athlete.swimCloudId} />}
+                <SwimCloudProfileLinks swimCloudIds={athlete.swimCloudIds} />
                 {isOwnProfile && (
                   <Link
                     href="/settings"
@@ -185,22 +182,13 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
         </div>
       </div>
 
-      {isCoach && pending && (
-        <PendingProfileChangesReview
-          athleteId={athlete.id}
-          pending={pending}
-          currentSwimCloudId={athlete.swimCloudId ?? null}
-          currentPreferredName={athlete.preferredName}
-        />
-      )}
-
       <AthleteSwimsWorkspace
         swims={swims}
         relaySplits={relaySplits}
         isCoach={isCoach}
         isOwnProfile={isOwnProfile}
         athleteId={athlete.id}
-        swimCloudId={athlete.swimCloudId ?? null}
+        swimCloudIds={athlete.swimCloudIds}
         timesSyncedAt={athlete.timesSyncedAt?.toISOString() ?? null}
         highlights={
           athleteHighlights && (

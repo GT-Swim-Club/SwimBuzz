@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { AppIcon } from "@/components/ui/AppIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
@@ -11,11 +10,11 @@ import { ImportInfoBox } from "./ImportTimesButton"
 /** Athlete's own History toolbar button: ask a coach to import their times from SwimCloud. */
 export default function RequestTimesImportButton({
   athleteId,
-  swimCloudId,
+  swimCloudIds,
   timesSyncedAt,
 }: {
   athleteId: string
-  swimCloudId: number | null
+  swimCloudIds: number[]
   timesSyncedAt: string | null
 }) {
   const [open, setOpen] = useState(false)
@@ -72,9 +71,9 @@ export default function RequestTimesImportButton({
               disabled={loading}
               className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium transition-colors hover:bg-background-hover disabled:opacity-50"
             >
-              {sent || swimCloudId == null ? "Done" : "Cancel"}
+              {sent || swimCloudIds.length === 0 ? "Done" : "Cancel"}
             </button>
-            {!sent && swimCloudId != null && (
+            {!sent && swimCloudIds.length > 0 && (
               <button
                 type="button"
                 onClick={() => void requestImport()}
@@ -87,15 +86,11 @@ export default function RequestTimesImportButton({
           </ModalFooter>
         }
       >
-        {swimCloudId != null ? (
-          <ImportInfoBox timesSyncedAt={timesSyncedAt} swimCloudId={swimCloudId} />
+        {swimCloudIds.length > 0 ? (
+          <ImportInfoBox timesSyncedAt={timesSyncedAt} swimCloudIds={swimCloudIds} />
         ) : (
           <p className="text-sm text-foreground-secondary">
-            Set your SwimCloud ID in{" "}
-            <Link href="/settings" className="text-primary hover:text-primary-hover">
-              Settings
-            </Link>{" "}
-            before requesting a times import.
+            Your profile isn&apos;t linked to SwimCloud yet. Ask a coach to add your SwimCloud ID.
           </p>
         )}
         {sent && <p className="text-[13px] text-info">Import requested. A coach will run it soon.</p>}

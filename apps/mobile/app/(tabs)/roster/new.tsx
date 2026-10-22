@@ -8,10 +8,14 @@ import {
   ScrollView,
   TextField,
 } from "@swimbuzz/ui"
-import { defaultSeason, formatSeasonLabel, normalizeSwimCloudIdInput } from "@swimbuzz/shared"
+import { defaultSeason, formatSeasonLabel } from "@swimbuzz/shared"
 import { spacing } from "@swimbuzz/tokens"
 import { api } from "../../../src/lib/api"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
+import {
+  SwimCloudIdsField,
+  useSwimCloudIdsField,
+} from "../../../src/components/SwimCloudIdsField"
 
 const GENDERS = [
   { value: "M", label: "Men" },
@@ -27,7 +31,7 @@ export default function NewAthleteScreen() {
   const [gender, setGender] = useState<"M" | "F">("M")
   const [season, setSeason] = useState("")
   const [seasons, setSeasons] = useState<string[]>([])
-  const [swimCloudId, setSwimCloudId] = useState("")
+  const swimCloud = useSwimCloudIdsField()
   const [saving, setSaving] = useState(false)
 
   useFocusEffect(
@@ -62,6 +66,10 @@ export default function NewAthleteScreen() {
       Alert.alert("Season required", "Enter a season like 2025–2026.")
       return
     }
+    if (!swimCloud.valid) {
+      Alert.alert("Check SwimCloud IDs", "Fix the SwimCloud IDs before adding the athlete.")
+      return
+    }
 
     setSaving(true)
     try {
@@ -72,7 +80,7 @@ export default function NewAthleteScreen() {
         gender,
         seasons: [seasonLabel],
       }
-      if (swimCloudId.trim()) body.swimCloudId = swimCloudId.trim()
+      if (swimCloud.allIds.length > 0) body.swimCloudIds = swimCloud.allIds
 
       const athlete = (await api.createAthlete(body)) as { id?: string }
       if (athlete?.id) {
@@ -159,14 +167,7 @@ export default function NewAthleteScreen() {
           </View>
         ) : null}
 
-        <TextField
-          label="SwimCloud ID or URL (optional)"
-          value={swimCloudId}
-          onChangeText={(text) => setSwimCloudId(normalizeSwimCloudIdInput(text))}
-          keyboardType="numbers-and-punctuation"
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
+        <SwimCloudIdsField field={swimCloud} label="SwimCloud ID/URL (optional)" />
 
         <Button label="Add athlete" loading={saving} onPress={() => void onCreate()} />
       </ScrollView>

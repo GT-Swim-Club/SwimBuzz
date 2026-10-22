@@ -5,12 +5,7 @@ import { prisma } from "@/lib/prisma"
 import { normalizePreferredName } from "@/lib/athlete/athlete-match"
 import { DEFAULT_TIME_ZONE, isStaffRole, zonedDayKey, zonedTimeToUtc } from "@swimbuzz/shared"
 import { Prisma, type Course } from "@prisma/client"
-import {
-  clearPendingFields,
-  parsePendingProfileChanges,
-} from "@/lib/athlete/pending-profile-changes"
-import { syncProfileChangeRequestNotifications } from "@/lib/notifications/notifications"
-import { parseSwimCloudProfile, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
+import { resolveSwimCloudProfilesUpdate } from "@/lib/swim/swimcloud-profiles"
 import { uniqueAthleteSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
 import { normalizeSwimForInsert, nextSwimOccurrence } from "@/lib/swim/swim-dedup"
@@ -20,7 +15,8 @@ export type UpdateAthleteInput = {
   firstName?: string
   lastName?: string
   email?: string
-  swimCloudId?: string | null
+  /** Main profile first; replaces the stored list. */
+  swimCloudIds?: number[]
   preferredName?: string | null
   gtid?: string | null
   /** "YYYY-MM-DD". */
@@ -38,17 +34,14 @@ async function requireStaff() {
   return session
 }
 
-/** Staff-edit branch of PATCH /api/athletes/[id] — kept in sync manually
- * since the route can't be refactored without risking the mobile-facing
- * contract (self-service pending-changes branch and approve/reject actions
- * are untouched here since AthleteActions is staff-only UI). */
+/** Same logic as PATCH /api/athletes/[id] — kept in sync manually since the
+ * route can't be refactored without risking the mobile-facing contract. */
 export async function updateAthlete(athleteId: string, input: UpdateAthleteInput) {
   await requireStaff()
 
   const athlete = await prisma.athlete.findUnique({ where: { id: athleteId } })
   if (!athlete) throw new Error("Not found")
 
-  const existingPending = parsePendingProfileChanges(athlete.pendingProfileChanges)
   const data: Prisma.AthleteUpdateInput = {}
 
   if (typeof input.firstName === "string") {
@@ -69,26 +62,15 @@ export async function updateAthlete(athleteId: string, input: UpdateAthleteInput
     data.slug = await uniqueAthleteSlug(nextFirstName, nextLastName, athleteId)
   }
 
-  let clearSwimCloudPending = false
-  let clearPreferredNamePending = false
-
   if (input.preferredName !== undefined) {
     data.preferredName = normalizePreferredName(input.preferredName)
-    clearPreferredNamePending = true
   }
 
-  if (input.swimCloudId !== undefined) {
-    if (input.swimCloudId === null || input.swimCloudId === "") {
-      data.swimCloudId = null
-    } else {
-      const swimCloudId = parseSwimCloudProfile(input.swimCloudId)
-      if (swimCloudId == null) throw new Error(SWIMCLOUD_ID_ERROR)
-      const existing = await prisma.athlete.findFirst({
-        where: { swimCloudId, id: { not: athleteId } }})
-      if (existing) throw new Error("An athlete with this SwimCloud ID already exists")
-      data.swimCloudId = swimCloudId
-    }
-    clearSwimCloudPending = true
+  if (input.swimCloudIds !== undefined) {
+    Object.assign(
+      data,
+      await resolveSwimCloudProfilesUpdate(athlete, { swimCloudIds: input.swimCloudIds }, athleteId)
+    )
   }
 
   if (input.gtid !== undefined) {
@@ -128,13 +110,6 @@ export async function updateAthlete(athleteId: string, input: UpdateAthleteInput
     }
   }
 
-  if (clearSwimCloudPending || clearPreferredNamePending) {
-    const nextPending = clearPendingFields(existingPending, {
-      swimCloudId: clearSwimCloudPending,
-      preferredName: clearPreferredNamePending})
-    data.pendingProfileChanges = nextPending === null ? Prisma.DbNull : (nextPending as Prisma.InputJsonValue)
-  }
-
   if (Object.keys(data).length === 0 && email === null) {
     throw new Error("No valid fields to update")
   }
@@ -153,14 +128,6 @@ export async function updateAthlete(athleteId: string, input: UpdateAthleteInput
 
     return result
   })
-
-  if (clearSwimCloudPending || clearPreferredNamePending) {
-    await syncProfileChangeRequestNotifications({
-      athleteId,
-      firstName: updated.firstName,
-      lastName: updated.lastName,
-      pending: parsePendingProfileChanges(updated.pendingProfileChanges)})
-  }
 
   revalidatePath("/athletes/[id]", "page")
   return updated

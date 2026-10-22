@@ -46,6 +46,7 @@ import {
   type SignupPool,
 } from "@/lib/meet/relay-builder"
 import RelayPageHeader, { relayBackLinkClass, relayEyebrowClass } from "./relays/RelayPageHeader"
+import type { RelayCommit } from "@/lib/meet/relay-save"
 
 type Source = "optimal" | "published" | "draft"
 
@@ -338,7 +339,6 @@ function RelayCardSkeleton() {
       {[0, 1, 2, 3].map((i) => (
         <div key={i} className="flex items-center justify-between border-t border-border px-3 py-2 first:border-t-0">
           <div className="flex items-center gap-2.5">
-            <Skeleton className="h-[22px] w-[22px]" />
             <div className="space-y-1.5">
               <Skeleton className="h-3.5 w-28" />
               <Skeleton className="h-3 w-14" />
@@ -371,6 +371,8 @@ export default function MeetRelayBuilder({
   signupRelayPrefs = null,
   hasImportedResults = false,
   initialBase = null,
+  onCommit,
+  onExit,
 }: {
   meetId: string
   meetName: string
@@ -390,6 +392,10 @@ export default function MeetRelayBuilder({
    * with nothing saved, or used to time the draft / published lineup — so no first fetch.
    */
   initialBase?: RelayResult | null
+  /** Save as draft / publish: the workspace shows the summary at once and saves in the background. */
+  onCommit: (commit: RelayCommit, replaceHistory: boolean) => void
+  /** Leave for the summary (`slug` null) or another event, without a server round trip. */
+  onExit: (slug: string | null, replaceHistory: boolean) => void
 }) {
   const { slot } = data
   const { gender, event } = slot
@@ -436,9 +442,7 @@ export default function MeetRelayBuilder({
   const [error, setError] = useState("")
   /** Extra alternates revealed by "Show more", per stroke (medley) or "free". */
   const [extraAlternates, setExtraAlternates] = useState<Record<string, number>>({})
-  const [busy, setBusy] = useState<"draft" | "publish" | null>(null)
   const [confirmPublish, setConfirmPublish] = useState(false)
-  const [confirmError, setConfirmError] = useState<string | null>(null)
   const [loadOpen, setLoadOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
   const [athleteQuery, setAthleteQuery] = useState("")
@@ -763,59 +767,13 @@ export default function MeetRelayBuilder({
     )
   }
 
-  function draftPayload(teams: RelayResult["teams"]) {
-    return teams.map((team) => ({
-      letter: team.letter,
-      legs: team.legs.map((leg) => ({
-        athleteId: leg.athleteId,
-        timeMs: leg.timeMs,
-        ...(leg.custom ? { custom: true } : {}),
-      })),
-    }))
-  }
-
-  async function saveDraft() {
-    if (!result || result.teams.length === 0 || busy) return
-    setBusy("draft")
-    setError("")
-    try {
-      const res = await fetch(`/api/meets/${meetId}/relays/drafts`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ event, gender, teams: draftPayload(result.teams) }),
-      })
-      const body = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        setError(body.error ?? "Failed to save draft")
-        return
-      }
-      // A draft replaces the published lineup — an event is never both. Imported relays
-      // (from sheets/results) can't be removed and stay as they are.
-      for (const relay of data.published) {
-        if (!relay.manual) continue
-        const params = new URLSearchParams({
-          event: relay.event,
-          relayLetter: relay.letter,
-          relayRound: relay.round,
-          gender,
-        })
-        const removed = await fetch(`/api/meets/${meetId}/relays?${params}`, { method: "DELETE" })
-        if (!removed.ok) {
-          const detail = await removed.json().catch(() => ({}))
-          setError(detail.error ?? `Draft saved, but the published ${relay.letter} relay couldn't be unpublished`)
-          return
-        }
-      }
-      guard.navigate(relaysPath)
-    } catch {
-      setError("Failed to save draft")
-    } finally {
-      setBusy(null)
-    }
+  function saveDraft() {
+    if (!result || result.teams.length === 0) return
+    onCommit({ kind: "draft", teams: lineupTeamsOf(result), relayEvent: result.relay }, guard.leave())
   }
 
   function requestPublish() {
-    if (hasImportedResults || !result || busy) return
+    if (hasImportedResults || !result) return
     if (result.teams.length === 0) return
     const incomplete = result.teams.find((t) => t.legs.length !== 4 || t.legs.some((l) => !l.athleteId))
     if (incomplete) {
@@ -828,57 +786,13 @@ export default function MeetRelayBuilder({
       return
     }
     setError("")
-    setConfirmError(null)
     setConfirmPublish(true)
   }
 
-  async function publish() {
-    if (hasImportedResults || !result || busy) return
-    setBusy("publish")
-    setConfirmError(null)
-    try {
-      for (const team of result.teams) {
-        const res = await fetch(`/api/meets/${meetId}/relays`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            event: result.relay,
-            gender,
-            relayLetter: team.letter,
-            relayRound: "",
-            seedTime: formatLegTime(team.totalMs),
-            legs: team.legs.map((leg, i) => ({ leg: i + 1, athleteId: leg.athleteId })),
-          }),
-        })
-        const body = await res.json().catch(() => ({}))
-        if (!res.ok) {
-          setConfirmError(body.error ?? `Failed to publish the ${team.letter} relay`)
-          return
-        }
-      }
-      // Builder-made relays no longer in the lineup (e.g. a C relay that was dropped).
-      const letters = new Set(result.teams.map((team) => team.letter))
-      for (const relay of data.published) {
-        if (!relay.manual || relay.round !== "" || letters.has(relay.letter)) continue
-        const params = new URLSearchParams({
-          event: relay.event,
-          relayLetter: relay.letter,
-          relayRound: "",
-          gender,
-        })
-        await fetch(`/api/meets/${meetId}/relays?${params}`, { method: "DELETE" })
-      }
-      if (data.draft) {
-        const params = new URLSearchParams({ event, gender })
-        await fetch(`/api/meets/${meetId}/relays/drafts?${params}`, { method: "DELETE" })
-      }
-      setConfirmPublish(false)
-      guard.navigate(relaysPath)
-    } catch {
-      setConfirmError("Failed to publish relays")
-    } finally {
-      setBusy(null)
-    }
+  function publish() {
+    if (hasImportedResults || !result) return
+    setConfirmPublish(false)
+    onCommit({ kind: "publish", teams: lineupTeamsOf(result), relayEvent: result.relay }, guard.leave())
   }
 
   const loadItems: { source: Source; label: string }[] = [
@@ -901,7 +815,7 @@ export default function MeetRelayBuilder({
     const teams = sourceTeams[source]
     return currentKey != null && teams != null && lineupKey(teams) === currentKey
   }
-  const editable = busy == null && adding === 0
+  const editable = adding === 0
   const canAct = result != null && result.teams.length > 0 && !loading && editable
 
   const eventPicker = (
@@ -909,7 +823,11 @@ export default function MeetRelayBuilder({
       <select
         aria-label="Relay event"
         value={slot.slug}
-        onChange={(e) => guard.guardedNavigate(`${relaysPath}?event=${encodeURIComponent(e.target.value)}`)}
+        onChange={(e) => {
+          // Unsaved changes: a full navigation, so the browser asks first.
+          if (changed) guard.guardedNavigate(`${relaysPath}?event=${encodeURIComponent(e.target.value)}`)
+          else onExit(e.target.value, guard.leave())
+        }}
         className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
       >
         {slots.map((s) => (
@@ -933,7 +851,6 @@ export default function MeetRelayBuilder({
           aria-haspopup="menu"
           aria-expanded={loadOpen}
           onClick={() => setLoadOpen(!loadOpen)}
-          disabled={busy != null}
           className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-background px-3.5 text-sm text-foreground transition-colors hover:bg-fill disabled:cursor-not-allowed disabled:opacity-40"
         >
           Load
@@ -968,7 +885,7 @@ export default function MeetRelayBuilder({
       <button
         type="button"
         aria-label={saveDraftLabel}
-        onClick={() => void saveDraft()}
+        onClick={saveDraft}
         disabled={!canAct || isLoaded("draft")}
         className={`${iconButtonClass} border border-fill text-foreground hover:bg-fill-secondary`}
       >
@@ -1011,7 +928,16 @@ export default function MeetRelayBuilder({
         meetName={meetName}
         iconUrl={iconUrl}
         back={
-          <Link href={relaysPath} className={relayBackLinkClass}>
+          <Link
+            href={relaysPath}
+            className={relayBackLinkClass}
+            onClick={(e) => {
+              // With unsaved changes the guard turns this into a full navigation that asks first.
+              if (changed || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+              e.preventDefault()
+              onExit(null, guard.leave())
+            }}
+          >
             ← Relays
           </Link>
         }
@@ -1190,9 +1116,6 @@ export default function MeetRelayBuilder({
                           className={`flex items-center justify-between gap-2.5 border-t border-border px-3 py-1.5 first:border-t-0 last:rounded-b-lg ${dragStateClass(loc, draggable)}`}
                         >
                           <div className="flex min-w-0 items-center gap-2.5">
-                            <span className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-sm border border-primary/30 bg-primary/20 text-xs font-medium text-accent">
-                              {i + 1}
-                            </span>
                             <div className="min-w-0">
                               <div className="flex min-w-0 items-center gap-1.5 text-sm font-medium text-foreground">
                                 {editingField === "name" ? (
@@ -1476,13 +1399,7 @@ export default function MeetRelayBuilder({
 
       <Modal
         open={confirmPublish}
-        onClose={() => {
-          if (busy) return
-          setConfirmPublish(false)
-          setConfirmError(null)
-        }}
-        closeDisabled={busy != null}
-        busy={busy === "publish"}
+        onClose={() => setConfirmPublish(false)}
         title={`Publish ${slot.label}?`}
         description="Athletes will see it on the Relays page."
         maxWidth="md"
@@ -1490,28 +1407,21 @@ export default function MeetRelayBuilder({
           <ModalFooter>
             <button
               type="button"
-              onClick={() => {
-                setConfirmPublish(false)
-                setConfirmError(null)
-              }}
-              disabled={busy != null}
+              onClick={() => setConfirmPublish(false)}
               className="flex-1 rounded-lg border border-border bg-background px-4 py-2.5 text-sm font-medium hover:bg-fill disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="button"
-              onClick={() => void publish()}
-              disabled={busy != null}
+              onClick={publish}
               className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast hover:bg-primary-hover disabled:opacity-50"
             >
-              {busy === "publish" ? "Publishing…" : "Publish"}
+              Publish
             </button>
           </ModalFooter>
         }
-      >
-        {confirmError ? <p className="text-sm text-error">{confirmError}</p> : null}
-      </Modal>
+      />
     </main>
   )
 }

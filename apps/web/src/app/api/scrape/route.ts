@@ -7,6 +7,7 @@ import {
   type SwimCloudTime,
 } from "@/lib/swim/swimcloud-import"
 import { assignSwimOccurrences } from "@/lib/swim/swim-dedup"
+import { mergeProfileTimes } from "@/lib/swim/swimcloud-profiles"
 import {
   enqueueScraperJob,
   getScraperJobForUser,
@@ -22,7 +23,10 @@ export const maxDuration = 300
 type ScrapeApplyContext = {
   kind: "athlete_scrape"
   athleteId: string
-  swimmerCloudId: number
+  /** Every SwimCloud profile of the athlete, main first. */
+  swimmerCloudIds: number[]
+  /** Jobs queued before athletes could have two profiles. */
+  swimmerCloudId?: number
 }
 
 export async function POST(req: Request) {
@@ -31,24 +35,33 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
-  const { athleteId, swimmerCloudId } = await req.json()
+  const { athleteId } = await req.json()
 
-  if (!athleteId || !swimmerCloudId) {
-    return NextResponse.json(
-      { error: "Missing athleteId or swimmerCloudId" },
-      { status: 400 }
-    )
+  if (!athleteId || typeof athleteId !== "string") {
+    return NextResponse.json({ error: "Missing athleteId" }, { status: 400 })
+  }
+
+  const athlete = await prisma.athlete.findUnique({
+    where: { id: athleteId },
+    select: { swimCloudIds: true },
+  })
+  if (!athlete) {
+    return NextResponse.json({ error: "Athlete not found" }, { status: 404 })
+  }
+  const swimmerCloudIds = athlete.swimCloudIds
+  if (swimmerCloudIds.length === 0) {
+    return NextResponse.json({ error: "This athlete has no SwimCloud ID" }, { status: 400 })
   }
 
   try {
     const job = await enqueueScraperJob(
       session.user.id,
       ScraperJobType.TIMES_BULK,
-      { swimmer_ids: [swimmerCloudId] },
+      { swimmer_ids: swimmerCloudIds },
       {
         kind: "athlete_scrape",
         athleteId,
-        swimmerCloudId: Number(swimmerCloudId),
+        swimmerCloudIds,
       } satisfies ScrapeApplyContext
     )
     return NextResponse.json({ jobId: job.id })
@@ -81,11 +94,14 @@ export async function applyAthleteScrapeJob(jobId: string, userId: string) {
     failed: number[]
   }
 
-  if (scraped.failed?.includes(ctx.swimmerCloudId)) {
+  const swimmerCloudIds =
+    ctx.swimmerCloudIds ?? (ctx.swimmerCloudId != null ? [ctx.swimmerCloudId] : [])
+  const succeeded = swimmerCloudIds.filter((id) => !scraped.failed?.includes(id))
+  if (succeeded.length === 0) {
     throw new Error("SwimCloud scrape failed for this athlete")
   }
 
-  const times = scraped.swimmers[String(ctx.swimmerCloudId)] ?? []
+  const times = mergeProfileTimes(succeeded.map((id) => scraped.swimmers?.[String(id)] ?? []))
   const swims = await withoutRecordedSwims(
     assignSwimOccurrences(swimsFromSwimCloudTimes(times, ctx.athleteId))
   )
@@ -104,6 +120,7 @@ export async function applyAthleteScrapeJob(jobId: string, userId: string) {
   const summary = {
     imported: result.count,
     timesSyncedAt: syncedAt.toISOString(),
+    failedSwimCloudIds: swimmerCloudIds.filter((id) => !succeeded.includes(id)),
   }
   await markScraperJobApplied(jobId, summary)
   return summary

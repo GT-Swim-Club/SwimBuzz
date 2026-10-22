@@ -3,7 +3,12 @@ import { prisma } from "@/lib/prisma"
 import { normalizePreferredName } from "@/lib/athlete/athlete-match"
 import { Gender } from "@prisma/client"
 import { parseSeasonList } from "@/lib/season"
-import { parseSwimCloudProfile, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
+import {
+  resolveSwimCloudProfilesUpdate,
+  SwimCloudProfileError,
+  withLegacySwimCloudId,
+  type SwimCloudProfiles,
+} from "@/lib/swim/swimcloud-profiles"
 import { uniqueAthleteSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
@@ -20,8 +25,11 @@ export async function GET() {
       user: { select: { name: true, email: true, image: true, staffTitle: true } }},
     orderBy: { lastName: "asc" }})
 
-  return NextResponse.json(athletes.map((athlete) => redactAthleteForViewer(athlete, session)), {
-    headers: { "Cache-Control": "private, max-age=30, stale-while-revalidate=300" }})
+  return NextResponse.json(
+    athletes.map((athlete) => withLegacySwimCloudId(redactAthleteForViewer(athlete, session))),
+    {
+      headers: { "Cache-Control": "private, max-age=30, stale-while-revalidate=300" }}
+  )
 }
 
 export async function POST(req: Request) {
@@ -37,10 +45,6 @@ export async function POST(req: Request) {
   const preferredName = normalizePreferredName(body.preferredName)
   const gender = body.gender === "F" ? Gender.F : Gender.M
   const seasons = parseSeasonList(body.seasons)
-  const swimCloudIdRaw = body.swimCloudId
-  const swimCloudIdEmpty =
-    swimCloudIdRaw === null || swimCloudIdRaw === undefined || swimCloudIdRaw === ""
-  const swimCloudId = swimCloudIdEmpty ? null : parseSwimCloudProfile(swimCloudIdRaw)
 
   if (!firstName || !lastName || !email) {
     return NextResponse.json({ error: "First name, last name, and email are required" }, { status: 400 })
@@ -48,15 +52,17 @@ export async function POST(req: Request) {
   if (seasons.length === 0) {
     return NextResponse.json({ error: "Season is required (e.g. 2025–2026)" }, { status: 400 })
   }
-  if (!swimCloudIdEmpty && swimCloudId === null) {
-    return NextResponse.json({ error: SWIMCLOUD_ID_ERROR }, { status: 400 })
-  }
 
-  if (swimCloudId !== null) {
-    const existingBySwimCloud = await prisma.athlete.findFirst({ where: { swimCloudId } })
-    if (existingBySwimCloud) {
-      return NextResponse.json({ error: "An athlete with this SwimCloud ID already exists" }, { status: 409 })
-    }
+  let swimCloud: SwimCloudProfiles
+  try {
+    // swimCloudIds, or legacy swimCloudId from older mobile builds.
+    swimCloud = await resolveSwimCloudProfilesUpdate(
+      { swimCloudIds: [] },
+      { swimCloudIds: body.swimCloudIds, swimCloudId: body.swimCloudId }
+    )
+  } catch (err) {
+    if (!(err instanceof SwimCloudProfileError)) throw err
+    return NextResponse.json({ error: err.message }, { status: err.status })
   }
 
   const existingUser = await prisma.user.findUnique({
@@ -89,7 +95,7 @@ export async function POST(req: Request) {
         preferredName,
         gender,
         seasons,
-        ...(swimCloudId !== null ? { swimCloudId } : {})}})
+        ...swimCloud}})
   }).catch((err) => {
     if (err.message === "DUPLICATE_ATHLETE") return null
     throw err
@@ -99,5 +105,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "An athlete with this email already exists" }, { status: 409 })
   }
 
-  return NextResponse.json(athlete, { status: 201 })
+  return NextResponse.json(withLegacySwimCloudId(athlete), { status: 201 })
 }

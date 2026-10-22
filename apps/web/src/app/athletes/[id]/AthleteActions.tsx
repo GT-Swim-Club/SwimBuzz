@@ -5,12 +5,8 @@ import { useRouter } from "next/navigation"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import ActionIcon from "@/components/ui/ActionIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
-import { ICON_BUTTON, ICON_BUTTON_DANGER, SwimCloudProfileLink } from "./AthleteIconButton"
-import {
-  isValidSwimCloudIdInput,
-  normalizeSwimCloudIdInput,
-  SWIMCLOUD_ID_ERROR,
-} from "@/lib/swim/swimcloud-id"
+import { ICON_BUTTON, ICON_BUTTON_DANGER, SwimCloudProfileLinks } from "./AthleteIconButton"
+import SwimCloudIdsInput, { useSwimCloudIdsField } from "@/components/athlete/SwimCloudIdsInput"
 import { updateAthlete, deleteAthlete } from "./athlete.actions"
 
 type AthleteActionsProps = {
@@ -18,7 +14,7 @@ type AthleteActionsProps = {
   firstName: string
   lastName: string
   email: string
-  swimCloudId: number | null
+  swimCloudIds: number[]
   preferredName: string | null
   gtid: string | null
   /** "YYYY-MM-DD", the Eastern calendar day it's stored on. */
@@ -33,7 +29,7 @@ export default function AthleteActions({
   firstName,
   lastName,
   email,
-  swimCloudId,
+  swimCloudIds,
   preferredName,
   gtid,
   dob,
@@ -48,35 +44,31 @@ export default function AthleteActions({
     firstName,
     lastName,
     email,
-    swimCloudId: swimCloudId?.toString() ?? "",
     preferredName: preferredName ?? "",
     gtid: gtid ?? "",
     dob: dob ?? "",
   })
+  const swimCloud = useSwimCloudIdsField(swimCloudIds)
 
   function openEdit() {
     setForm({
       firstName,
       lastName,
       email,
-      swimCloudId: swimCloudId?.toString() ?? "",
       preferredName: preferredName ?? "",
       gtid: gtid ?? "",
       dob: dob ?? "",
     })
+    swimCloud.reset(swimCloudIds)
     setError(null)
     setEditing(true)
   }
 
-  const swimCloudIdOk =
-    form.swimCloudId === "" || isValidSwimCloudIdInput(form.swimCloudId)
-  const showSwimCloudHint =
-    form.swimCloudId.length > 0 && !isValidSwimCloudIdInput(form.swimCloudId)
   const gtidOk = form.gtid === "" || /^90\d{7}$/.test(form.gtid)
 
   function handleSave(e: React.FormEvent) {
     e.preventDefault()
-    if (!swimCloudIdOk || !gtidOk) return
+    if (!swimCloud.valid || !gtidOk) return
     setError(null)
     startTransition(async () => {
       try {
@@ -84,7 +76,7 @@ export default function AthleteActions({
           firstName: form.firstName,
           lastName: form.lastName,
           email: form.email,
-          swimCloudId: form.swimCloudId === "" ? null : form.swimCloudId,
+          swimCloudIds: swimCloud.allIds,
           preferredName: form.preferredName,
           gtid: form.gtid === "" ? null : form.gtid,
           dob: form.dob === "" ? null : form.dob,
@@ -111,7 +103,7 @@ export default function AthleteActions({
   return (
     <>
       <div className="flex flex-wrap items-center justify-end gap-2">
-        {swimCloudId != null && <SwimCloudProfileLink swimCloudId={swimCloudId} />}
+        <SwimCloudProfileLinks swimCloudIds={swimCloudIds} />
         <button
           type="button"
           onClick={openEdit}
@@ -154,7 +146,7 @@ export default function AthleteActions({
             </button>
             <button
               type="submit"
-              disabled={loading || !swimCloudIdOk || !gtidOk}
+              disabled={loading || !swimCloud.valid || !gtidOk}
               className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast hover:bg-primary-hover disabled:opacity-50"
             >
               {loading ? "Saving…" : "Save changes"}
@@ -185,6 +177,18 @@ export default function AthleteActions({
               className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
             />
           </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
+            Preferred name
+          </label>
+          <input
+            type="text"
+            value={form.preferredName}
+            onChange={(e) => setForm((f) => ({ ...f, preferredName: e.target.value }))}
+            className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
+          />
         </div>
 
         <div>
@@ -235,45 +239,13 @@ export default function AthleteActions({
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
-            SwimCloud ID or URL
+          <label
+            htmlFor="edit-swimcloud-ids"
+            className="block text-xs font-medium text-foreground-secondary mb-1"
+          >
+            SwimCloud ID/URL
           </label>
-          <input
-            type="text"
-            inputMode="numeric"
-            placeholder="e.g. 1234567"
-            title={SWIMCLOUD_ID_ERROR}
-            value={form.swimCloudId}
-            onChange={(e) =>
-              setForm((f) => ({
-                ...f,
-                swimCloudId: normalizeSwimCloudIdInput(e.target.value),
-              }))
-            }
-            className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
-            aria-invalid={showSwimCloudHint}
-            aria-describedby={showSwimCloudHint ? "edit-swimcloud-id-hint" : undefined}
-          />
-          {showSwimCloudHint && (
-            <p
-              id="edit-swimcloud-id-hint"
-              className="mt-1 text-xs text-amber-600 dark:text-amber-400"
-            >
-              {SWIMCLOUD_ID_ERROR}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
-            Preferred name
-          </label>
-          <input
-            type="text"
-            value={form.preferredName}
-            onChange={(e) => setForm((f) => ({ ...f, preferredName: e.target.value }))}
-            className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
-          />
+          <SwimCloudIdsInput field={swimCloud} id="edit-swimcloud-ids" />
         </div>
 
         {error && <p className="text-sm text-error dark:text-error">{error}</p>}

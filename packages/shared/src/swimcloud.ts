@@ -37,3 +37,39 @@ export function normalizeSwimCloudIdInput(raw: string): string {
   const id = parseSwimCloudProfile(raw)
   return id === null ? raw : String(id)
 }
+
+/** SwimCloud sometimes splits one swimmer across profiles; an athlete holds at most this many. */
+export const MAX_SWIMCLOUD_IDS = 5
+export const SWIMCLOUD_IDS_LIMIT_ERROR = `An athlete can have at most ${MAX_SWIMCLOUD_IDS} SwimCloud IDs`
+
+/**
+ * Every SwimCloud ID/profile link in `raw`, split on commas, semicolons, and whitespace.
+ * Deduped, in order. Pieces that are not an ID or profile link are reported in `invalid`.
+ */
+export function parseSwimCloudProfileList(raw: string): { ids: number[]; invalid: string[] } {
+  const ids: number[] = []
+  const invalid: string[] = []
+  for (const piece of raw.split(/[\s,;]+/)) {
+    if (!piece) continue
+    const id = parseSwimCloudProfile(piece)
+    if (id == null) invalid.push(piece)
+    else if (!ids.includes(id)) ids.push(id)
+  }
+  return { ids, invalid }
+}
+
+/**
+ * For a multi-ID input: add every ID/link in `text` to `current`, up to MAX_SWIMCLOUD_IDS.
+ * `leftover` holds what couldn't be added (invalid pieces, IDs past the limit) to keep in the box.
+ */
+export function addSwimCloudIds(current: number[], text: string): { ids: number[]; leftover: string } {
+  const { ids: parsed, invalid } = parseSwimCloudProfileList(text)
+  const ids = [...current]
+  const leftover = [...invalid]
+  for (const id of parsed) {
+    if (ids.includes(id)) continue
+    if (ids.length < MAX_SWIMCLOUD_IDS) ids.push(id)
+    else leftover.push(String(id))
+  }
+  return { ids, leftover: leftover.join(" ") }
+}

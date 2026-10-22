@@ -12,19 +12,19 @@ import { ICON_BUTTON } from "./AthleteIconButton"
 
 type Status = "idle" | "loading" | "done" | "error"
 
-/** Key/value box showing when times were last imported and the SwimCloud ID. */
+/** Key/value box showing when times were last imported and the SwimCloud IDs. */
 export function ImportInfoBox({
   timesSyncedAt,
-  swimCloudId,
+  swimCloudIds,
 }: {
   timesSyncedAt: string | null
-  swimCloudId: number
+  swimCloudIds: number[]
 }) {
   return (
     <div className="flex flex-col gap-1.5 rounded-xl border border-border-secondary bg-fill-secondary px-4 py-3 text-[13px] leading-[18px]">
       <InfoRow label="Last imported">{timesSyncedAt ? formatDateTime(timesSyncedAt) : "Never"}</InfoRow>
-      <InfoRow label="SwimCloud ID">
-        <span className="font-mono tabular-nums">{swimCloudId}</span>
+      <InfoRow label={swimCloudIds.length > 1 ? "SwimCloud IDs" : "SwimCloud ID"}>
+        <span className="font-mono tabular-nums">{swimCloudIds.join(", ")}</span>
       </InfoRow>
     </div>
   )
@@ -42,11 +42,11 @@ function InfoRow({ label, children }: { label: string; children: ReactNode }) {
 /** History toolbar button: pull an athlete's new swims from SwimCloud via the desktop scraper. */
 export default function ImportTimesButton({
   athleteId,
-  swimCloudId,
+  swimCloudIds,
   timesSyncedAt,
 }: {
   athleteId: string
-  swimCloudId: number | null
+  swimCloudIds: number[]
   timesSyncedAt: string | null
 }) {
   const router = useRouter()
@@ -55,24 +55,30 @@ export default function ImportTimesButton({
   const [status, setStatus] = useState<Status>("idle")
   const [error, setError] = useState<string | null>(null)
   const [count, setCount] = useState(0)
+  const [failedIds, setFailedIds] = useState<number[]>([])
   const [resultOpen, setResultOpen] = useState(false)
   const [lastSynced, setLastSynced] = useState<string | null>(timesSyncedAt)
   const loading = status === "loading"
+  const linked = swimCloudIds.length > 0
 
   function runImport() {
-    if (!swimCloudId || loading) return
+    if (!linked || loading) return
     requireScraper(() => {
       void (async () => {
         setStatus("loading")
         setError(null)
         try {
           const { runScraperEnqueuePollFinalize } = await import("@/lib/scraper/scraper-job-client")
-          const data = await runScraperEnqueuePollFinalize<{ imported?: number; timesSyncedAt?: string }>({
+          const data = await runScraperEnqueuePollFinalize<{
+            imported?: number
+            timesSyncedAt?: string
+            failedSwimCloudIds?: number[]
+          }>({
             enqueue: () =>
               fetch("/api/scrape", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ athleteId, swimmerCloudId: swimCloudId }),
+                body: JSON.stringify({ athleteId }),
               }),
             finalize: (jobId) =>
               fetch("/api/scrape/finalize", {
@@ -82,6 +88,7 @@ export default function ImportTimesButton({
               }),
           })
           setCount(typeof data.imported === "number" ? data.imported : 0)
+          setFailedIds(data.failedSwimCloudIds ?? [])
           if (data.timesSyncedAt) setLastSynced(data.timesSyncedAt)
           setStatus("done")
           router.refresh()
@@ -115,7 +122,7 @@ export default function ImportTimesButton({
         busy={loading}
         title="Import Times From SwimCloud"
         description={
-          swimCloudId
+          linked
             ? "Pulls any new swims from SwimCloud using the scraper. This usually takes 1–2 minutes."
             : "Link this athlete to SwimCloud to import their times."
         }
@@ -128,9 +135,9 @@ export default function ImportTimesButton({
               disabled={loading}
               className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium transition-colors hover:bg-background-hover disabled:opacity-50"
             >
-              {swimCloudId ? "Cancel" : "Close"}
+              {linked ? "Cancel" : "Close"}
             </button>
-            {swimCloudId != null && (
+            {linked && (
               <button
                 type="button"
                 onClick={runImport}
@@ -143,9 +150,9 @@ export default function ImportTimesButton({
           </ModalFooter>
         }
       >
-        {swimCloudId ? (
+        {linked ? (
           <>
-            <ImportInfoBox timesSyncedAt={lastSynced} swimCloudId={swimCloudId} />
+            <ImportInfoBox timesSyncedAt={lastSynced} swimCloudIds={swimCloudIds} />
             {loading && (
               <p className="text-[13px] text-foreground-secondary">
                 Scraping SwimCloud events, typically 1–2 minutes…
@@ -164,9 +171,15 @@ export default function ImportTimesButton({
         description={
           status === "error"
             ? error ?? "Something went wrong while importing times."
-            : count === 1
-              ? "1 new swim was imported from SwimCloud."
-              : `${count} new swims were imported from SwimCloud.`
+            : `${
+                count === 1
+                  ? "1 new swim was imported from SwimCloud."
+                  : `${count} new swims were imported from SwimCloud.`
+              }${
+                failedIds.length > 0
+                  ? ` SwimCloud profile ${failedIds.join(", ")} couldn't be scraped — try again later.`
+                  : ""
+              }`
         }
         maxWidth="sm"
         footer={

@@ -8,7 +8,7 @@ export function canSeeAthletePrivate(viewer: Viewer, athlete: { userId: string }
 }
 
 /**
- * Blank out email, GTID, DOB, and pending profile requests for viewers who may not see them.
+ * Blank out email, GTID, and DOB for viewers who may not see them.
  * Fields are nulled rather than dropped so the response shape stays the same for both clients
  * (mobile still finds its own athlete by email, which it keeps).
  */
@@ -17,7 +17,6 @@ export function redactAthleteForViewer<
     userId: string
     gtid?: string | null
     dob?: Date | null
-    pendingProfileChanges?: unknown
     user?: { email?: string | null } | null
   },
 >(athlete: T, viewer: Viewer): T {
@@ -26,7 +25,6 @@ export function redactAthleteForViewer<
     ...athlete,
     ...("gtid" in athlete ? { gtid: null } : {}),
     ...("dob" in athlete ? { dob: null } : {}),
-    ...("pendingProfileChanges" in athlete ? { pendingProfileChanges: null } : {}),
     user: athlete.user ? { ...athlete.user, email: null } : athlete.user,
   }
 }

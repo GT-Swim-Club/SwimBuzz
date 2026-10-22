@@ -5,7 +5,7 @@ import { Gender } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { normalizePreferredName } from "@/lib/athlete/athlete-match"
 import { parseSeasonList } from "@/lib/season"
-import { parseSwimCloudProfile, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
+import { resolveSwimCloudProfilesUpdate } from "@/lib/swim/swimcloud-profiles"
 import { uniqueAthleteSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
@@ -14,7 +14,7 @@ export type AddAthleteInput = {
   firstName: string
   lastName: string
   email: string
-  swimCloudId?: string
+  swimCloudIds?: number[]
   preferredName?: string
   gender: "M" | "F"
   seasons: string[]
@@ -33,9 +33,6 @@ export async function addAthlete(input: AddAthleteInput) {
   const preferredName = normalizePreferredName(input.preferredName)
   const gender = input.gender === "F" ? Gender.F : Gender.M
   const seasons = parseSeasonList(input.seasons)
-  const swimCloudIdRaw = input.swimCloudId
-  const swimCloudIdEmpty = swimCloudIdRaw === undefined || swimCloudIdRaw === ""
-  const swimCloudId = swimCloudIdEmpty ? null : parseSwimCloudProfile(swimCloudIdRaw)
 
   if (!firstName || !lastName || !email) {
     throw new Error("First name, last name, and email are required")
@@ -43,16 +40,11 @@ export async function addAthlete(input: AddAthleteInput) {
   if (seasons.length === 0) {
     throw new Error("Season is required (e.g. 2025–2026)")
   }
-  if (!swimCloudIdEmpty && swimCloudId === null) {
-    throw new Error(SWIMCLOUD_ID_ERROR)
-  }
 
-  if (swimCloudId !== null) {
-    const existingBySwimCloud = await prisma.athlete.findFirst({ where: { swimCloudId } })
-    if (existingBySwimCloud) {
-      throw new Error("An athlete with this SwimCloud ID already exists")
-    }
-  }
+  const swimCloud = await resolveSwimCloudProfilesUpdate(
+    { swimCloudIds: [] },
+    { swimCloudIds: input.swimCloudIds ?? [] }
+  )
 
   const existingUser = await prisma.user.findUnique({
     where: { email },
@@ -84,7 +76,7 @@ export async function addAthlete(input: AddAthleteInput) {
         preferredName,
         gender,
         seasons,
-        ...(swimCloudId !== null ? { swimCloudId } : {})}})
+        ...swimCloud}})
   }).catch((err) => {
     if (err instanceof Error && err.message === "DUPLICATE_ATHLETE") return null
     throw err

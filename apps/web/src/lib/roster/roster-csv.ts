@@ -1,6 +1,6 @@
 import { normalizePreferredName, parseFirstNameWithPreferredName, parseRosterName } from "@/lib/athlete/athlete-match"
 import { normalizeGatechEmail } from "@/lib/auth/gatech-email"
-import { parseSwimCloudProfile } from "@/lib/swim/swimcloud-id"
+import { MAX_SWIMCLOUD_IDS, parseSwimCloudProfileList } from "@/lib/swim/swimcloud-id"
 import { toTitleCase } from "@/lib/utils"
 
 export type ParsedRosterCsvRow = {
@@ -13,7 +13,11 @@ export type ParsedRosterCsvRow = {
   email?: string
   gender: "M" | "F"
   preferredName: string | null
-  swimCloudId?: number
+  /**
+   * From up to MAX_SWIMCLOUD_IDS SwimCloud columns, left to right, each cell holding
+   * one or more IDs/links (SwimCloud sometimes splits a swimmer across profiles).
+   */
+  swimCloudIds?: number[]
 }
 
 export type RosterCsvParseResult = {
@@ -190,8 +194,13 @@ function mapHeaders(cells: string[]): Map<string, number> {
     map.set("name", nameCandidates[0].index)
   }
   if (swimCloudCandidates.length > 0) {
-    swimCloudCandidates.sort((a, b) => b.score - a.score || a.index - b.index)
-    map.set("swimCloudId", swimCloudCandidates[0].index)
+    // Several SwimCloud columns (a swimmer can have duplicate profiles): the best
+    // by score, read in sheet order so the leftmost holds the main profile.
+    swimCloudCandidates
+      .sort((a, b) => b.score - a.score || a.index - b.index)
+      .slice(0, MAX_SWIMCLOUD_IDS)
+      .sort((a, b) => a.index - b.index)
+      .forEach(({ index }, slot) => map.set(swimCloudColumnKey(slot), index))
   }
 
   return map
@@ -256,6 +265,22 @@ function parseGender(value: string): "M" | "F" | undefined {
     return "M"
   }
   return undefined
+}
+
+function swimCloudColumnKey(slot: number): string {
+  return `swimCloudId:${slot}`
+}
+
+/** Every SwimCloud ID in the row's SwimCloud columns, left to right, deduped. */
+function rowSwimCloudIds(row: string[], headers: Map<string, number>): number[] {
+  const ids: number[] = []
+  for (let slot = 0; slot < MAX_SWIMCLOUD_IDS; slot++) {
+    // Pieces that aren't an ID or profile link ("N/A", notes) are ignored.
+    for (const id of parseSwimCloudProfileList(cell(row, headers, swimCloudColumnKey(slot))).ids) {
+      if (!ids.includes(id)) ids.push(id)
+    }
+  }
+  return ids
 }
 
 function cell(row: string[], headers: Map<string, number>, key: string): string {
@@ -383,7 +408,13 @@ export function parseRosterRecords(rawRecords: string[][]): RosterCsvParseResult
     // An explicit preferred-name column wins over a "First (Pref)" parenthetical.
     const preferredName =
       normalizePreferredName(cell(cells, headers, "preferredName")) ?? parsedPreferredName
-    const swimCloudId = parseSwimCloudProfile(cell(cells, headers, "swimCloudId")) ?? undefined
+    const swimCloudIds = rowSwimCloudIds(cells, headers)
+    if (swimCloudIds.length > MAX_SWIMCLOUD_IDS) {
+      errors.push({
+        row: rowNumber,
+        message: `More than ${MAX_SWIMCLOUD_IDS} SwimCloud IDs; kept the first ${MAX_SWIMCLOUD_IDS}`,
+      })
+    }
 
     rows.push({
       rowNumber,
@@ -394,7 +425,9 @@ export function parseRosterRecords(rawRecords: string[][]): RosterCsvParseResult
       ...(gtid ? { gtid } : {}),
       ...(dob ? { dob } : {}),
       ...(year ? { year } : {}),
-      ...(swimCloudId != null ? { swimCloudId } : {}),
+      ...(swimCloudIds.length > 0
+        ? { swimCloudIds: swimCloudIds.slice(0, MAX_SWIMCLOUD_IDS) }
+        : {}),
       preferredName,
     })
   }

@@ -27,7 +27,7 @@ export default function AthleteSwimsWorkspace({
   isCoach,
   isOwnProfile,
   athleteId,
-  swimCloudId,
+  swimCloudIds,
   timesSyncedAt,
   highlights,
 }: {
@@ -37,7 +37,8 @@ export default function AthleteSwimsWorkspace({
   isCoach: boolean
   isOwnProfile: boolean
   athleteId: string
-  swimCloudId: number | null
+  /** Main SwimCloud profile first, then the second one if any. */
+  swimCloudIds: number[]
   timesSyncedAt: string | null
   /** Season highlights card shown above the personal bests. */
   highlights?: ReactNode
@@ -137,7 +138,7 @@ export default function AthleteSwimsWorkspace({
 
   const historyActions = isCoach ? (
     <>
-      <ImportTimesButton athleteId={athleteId} swimCloudId={swimCloudId} timesSyncedAt={timesSyncedAt} />
+      <ImportTimesButton athleteId={athleteId} swimCloudIds={swimCloudIds} timesSyncedAt={timesSyncedAt} />
       <button
         type="button"
         onClick={() => setLogOpen(true)}
@@ -149,7 +150,7 @@ export default function AthleteSwimsWorkspace({
       </button>
     </>
   ) : isOwnProfile ? (
-    <RequestTimesImportButton athleteId={athleteId} swimCloudId={swimCloudId} timesSyncedAt={timesSyncedAt} />
+    <RequestTimesImportButton athleteId={athleteId} swimCloudIds={swimCloudIds} timesSyncedAt={timesSyncedAt} />
   ) : null
 
   return (

@@ -1,7 +1,6 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { isStaffRole } from "@swimbuzz/shared"
 import {
   AVATAR_MAX_BYTES,
   deleteStoredAvatar,
@@ -24,17 +23,14 @@ function isUpload(value: unknown): value is File {
   )
 }
 
-async function requireEditableSession() {
+async function requireSession() {
   const session = await getSession()
   if (!session?.user?.id) throw new Error("Unauthorized")
-  if (isStaffRole(session.user.role)) {
-    throw new Error("Coaches and execs can't change their profile picture")
-  }
   return session
 }
 
 export async function uploadProfileAvatar(formData: FormData) {
-  const session = await requireEditableSession()
+  const session = await requireSession()
 
   const file = formData.get("file")
   if (!isUpload(file)) throw new Error("Image is required")
@@ -70,7 +66,7 @@ export async function uploadProfileAvatar(formData: FormData) {
 }
 
 export async function removeProfileAvatar() {
-  const session = await requireEditableSession()
+  const session = await requireSession()
 
   const existing = await prisma.user.findUnique({
     where: { id: session.user.id },

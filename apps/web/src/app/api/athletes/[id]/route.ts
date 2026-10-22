@@ -4,16 +4,11 @@ import { normalizePreferredName } from "@/lib/athlete/athlete-match"
 import { isStaffRole } from "@swimbuzz/shared"
 import { Gender, Prisma } from "@prisma/client"
 import {
-  clearPendingFields,
-  mergePendingProfileChanges,
-  parsePendingProfileChanges,
-  type PendingProfileChanges } from "@/lib/athlete/pending-profile-changes"
-import {
-  dismissProfileChangeRequestNotifications,
-  notifyAthleteOfProfileChangeDecision,
-  resolveProfileChangeRequestNotifications,
-  syncProfileChangeRequestNotifications } from "@/lib/notifications/notifications"
-import { parseSwimCloudProfile, SWIMCLOUD_ID_ERROR } from "@/lib/swim/swimcloud-id"
+  resolveSwimCloudProfilesUpdate,
+  SwimCloudProfileError,
+  withLegacySwimCloudId,
+  type SwimCloudProfiles,
+} from "@/lib/swim/swimcloud-profiles"
 import { isCuid, uniqueAthleteSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
 import { redactAthleteForViewer } from "@/lib/athlete/athlete-privacy"
@@ -54,36 +49,22 @@ export async function GET(
     meetRef: { id: split.meet.id, slug: split.meet.slug, name: split.meet.name },
   }))
 
-  return NextResponse.json({ ...redactAthleteForViewer(athlete, session), relaySplits })
+  return NextResponse.json({
+    ...withLegacySwimCloudId(redactAthleteForViewer(athlete, session)),
+    relaySplits,
+  })
 }
 
-async function parseSwimCloudIdForSet(
-  raw: unknown,
-  athleteId: string
-): Promise<{ ok: true; swimCloudId: number } | { ok: false; response: NextResponse }> {
-  const swimCloudId = parseSwimCloudProfile(raw)
-  if (swimCloudId == null) {
-    return {
-      ok: false,
-      response: NextResponse.json({ error: SWIMCLOUD_ID_ERROR }, { status: 400 })}
+/** resolveSwimCloudProfilesUpdate, with a bad or taken ID turned into the error response. */
+async function resolveSwimCloudOrResponse(
+  ...args: Parameters<typeof resolveSwimCloudProfilesUpdate>
+): Promise<{ ok: true; profiles: SwimCloudProfiles } | { ok: false; response: NextResponse }> {
+  try {
+    return { ok: true, profiles: await resolveSwimCloudProfilesUpdate(...args) }
+  } catch (err) {
+    if (!(err instanceof SwimCloudProfileError)) throw err
+    return { ok: false, response: NextResponse.json({ error: err.message }, { status: err.status }) }
   }
-  const existing = await prisma.athlete.findFirst({
-    where: { swimCloudId, id: { not: athleteId } }})
-  if (existing) {
-    return {
-      ok: false,
-      response: NextResponse.json(
-        { error: "An athlete with this SwimCloud ID already exists" },
-        { status: 409 }
-      )}
-  }
-  return { ok: true, swimCloudId }
-}
-
-function pendingJson(
-  pending: PendingProfileChanges | null
-): Prisma.InputJsonValue | typeof Prisma.DbNull {
-  return pending === null ? Prisma.DbNull : (pending as Prisma.InputJsonValue)
 }
 
 export async function PATCH(
@@ -95,141 +76,17 @@ export async function PATCH(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
+  // Athletes can't edit their own profile; coaches do.
+  if (!isStaffRole(session.user.role)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  }
+
   const { id } = await params
   const body = await req.json()
 
   const athlete = await prisma.athlete.findUnique({ where: { id } })
   if (!athlete) {
     return NextResponse.json({ error: "Not found" }, { status: 404 })
-  }
-
-  const staff = isStaffRole(session.user.role)
-  const isOwnAthlete = athlete.userId === session.user.id
-  const existingPending = parsePendingProfileChanges(athlete.pendingProfileChanges)
-
-  // Athletes may request SwimCloud ID / preferred name changes (coach approval required).
-  if (!staff) {
-    if (!isOwnAthlete) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-    }
-
-    if (body.cancelPendingProfileChanges === true) {
-      const updated = await prisma.athlete.update({
-        where: { id },
-        data: { pendingProfileChanges: Prisma.DbNull }})
-      await dismissProfileChangeRequestNotifications(id)
-      return NextResponse.json(updated)
-    }
-
-    const allowedKeys = new Set(["swimCloudId", "preferredName"])
-    const extraKeys = Object.keys(body).filter((key) => !allowedKeys.has(key))
-    if (extraKeys.length > 0) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-    }
-
-    const patch: PendingProfileChanges = {}
-
-    if ("preferredName" in body) {
-      const nextPreferredName = normalizePreferredName(body.preferredName)
-      if (nextPreferredName === athlete.preferredName) {
-        // Requesting the current value clears any pending preferred name change.
-        if (existingPending?.preferredName !== undefined) {
-          const cleared = clearPendingFields(existingPending, { preferredName: true })
-          const updated = await prisma.athlete.update({
-            where: { id },
-            data: { pendingProfileChanges: pendingJson(cleared) }})
-          await syncProfileChangeRequestNotifications({
-            athleteId: id,
-            firstName: athlete.firstName,
-            lastName: athlete.lastName,
-            pending: cleared})
-          return NextResponse.json(updated)
-        }
-        return NextResponse.json(athlete)
-      }
-      patch.preferredName = nextPreferredName
-    }
-
-    if ("swimCloudId" in body) {
-      if (body.swimCloudId === null || body.swimCloudId === "") {
-        return NextResponse.json(
-          { error: "SwimCloud ID is required" },
-          { status: 400 }
-        )
-      }
-      const parsed = await parseSwimCloudIdForSet(body.swimCloudId, id)
-      if (!parsed.ok) return parsed.response
-      if (athlete.swimCloudId === parsed.swimCloudId) {
-        if (existingPending?.swimCloudId !== undefined) {
-          const cleared = clearPendingFields(existingPending, { swimCloudId: true })
-          const updated = await prisma.athlete.update({
-            where: { id },
-            data: { pendingProfileChanges: pendingJson(cleared) }})
-          await syncProfileChangeRequestNotifications({
-            athleteId: id,
-            firstName: athlete.firstName,
-            lastName: athlete.lastName,
-            pending: cleared})
-          return NextResponse.json(updated)
-        }
-        return NextResponse.json(athlete)
-      }
-      patch.swimCloudId = parsed.swimCloudId
-    }
-
-    if (Object.keys(patch).length === 0) {
-      return NextResponse.json({ error: "No valid fields to update" }, { status: 400 })
-    }
-
-    const pending = mergePendingProfileChanges(existingPending, patch)
-    const updated = await prisma.athlete.update({
-      where: { id },
-      data: { pendingProfileChanges: pendingJson(pending) }})
-    await syncProfileChangeRequestNotifications({
-      athleteId: id,
-      firstName: athlete.firstName,
-      lastName: athlete.lastName,
-      pending})
-    return NextResponse.json(updated)
-  }
-
-  // Staff: approve or reject pending self-service changes.
-  if (body.approvePendingProfileChanges === true || body.rejectPendingProfileChanges === true) {
-    if (!existingPending) {
-      return NextResponse.json({ error: "No pending changes" }, { status: 400 })
-    }
-
-    if (body.rejectPendingProfileChanges === true) {
-      const updated = await prisma.athlete.update({
-        where: { id },
-        data: { pendingProfileChanges: Prisma.DbNull }})
-      await resolveProfileChangeRequestNotifications(id, false)
-      await notifyAthleteOfProfileChangeDecision({
-        userId: athlete.userId,
-        approved: false,
-        pending: existingPending})
-      return NextResponse.json(updated)
-    }
-
-    const data: Prisma.AthleteUpdateInput = {
-      pendingProfileChanges: Prisma.DbNull}
-
-    if (existingPending.swimCloudId !== undefined) {
-      const parsed = await parseSwimCloudIdForSet(existingPending.swimCloudId, id)
-      if (!parsed.ok) return parsed.response
-      data.swimCloudId = parsed.swimCloudId
-    }
-    if (existingPending.preferredName !== undefined) {
-      data.preferredName = existingPending.preferredName
-    }
-
-    const updated = await prisma.athlete.update({ where: { id }, data })
-    await resolveProfileChangeRequestNotifications(id, true)
-    await notifyAthleteOfProfileChangeDecision({
-      userId: athlete.userId,
-      approved: true,
-      pending: existingPending})
-    return NextResponse.json(updated)
   }
 
   const data: Prisma.AthleteUpdateInput = {}
@@ -260,23 +117,19 @@ export async function PATCH(
     data.gender = body.gender === "F" ? Gender.F : Gender.M
   }
 
-  let clearSwimCloudPending = false
-  let clearPreferredNamePending = false
-
   if ("preferredName" in body) {
     data.preferredName = normalizePreferredName(body.preferredName)
-    clearPreferredNamePending = true
   }
 
-  if ("swimCloudId" in body) {
-    if (body.swimCloudId === null || body.swimCloudId === "") {
-      data.swimCloudId = null
-    } else {
-      const parsed = await parseSwimCloudIdForSet(body.swimCloudId, id)
-      if (!parsed.ok) return parsed.response
-      data.swimCloudId = parsed.swimCloudId
-    }
-    clearSwimCloudPending = true
+  // swimCloudIds replaces the list; legacy swimCloudId (older mobile builds) sets the main one.
+  if ("swimCloudIds" in body || "swimCloudId" in body) {
+    const resolved = await resolveSwimCloudOrResponse(
+      athlete,
+      { swimCloudIds: body.swimCloudIds, swimCloudId: body.swimCloudId },
+      id
+    )
+    if (!resolved.ok) return resolved.response
+    Object.assign(data, resolved.profiles)
   }
 
   // Email + display name live on the linked User record.
@@ -290,13 +143,6 @@ export async function PATCH(
     if (existingUser && existingUser.id !== athlete.userId) {
       return NextResponse.json({ error: "Another user already has this email" }, { status: 409 })
     }
-  }
-
-  if (clearSwimCloudPending || clearPreferredNamePending) {
-    const nextPending = clearPendingFields(existingPending, {
-      swimCloudId: clearSwimCloudPending,
-      preferredName: clearPreferredNamePending})
-    data.pendingProfileChanges = pendingJson(nextPending)
   }
 
   if (Object.keys(data).length === 0 && email === null) {
@@ -318,15 +164,7 @@ export async function PATCH(
     return result
   })
 
-  if (clearSwimCloudPending || clearPreferredNamePending) {
-    await syncProfileChangeRequestNotifications({
-      athleteId: id,
-      firstName: updated.firstName,
-      lastName: updated.lastName,
-      pending: parsePendingProfileChanges(updated.pendingProfileChanges)})
-  }
-
-  return NextResponse.json(updated)
+  return NextResponse.json(withLegacySwimCloudId(updated))
 }
 
 export async function DELETE(

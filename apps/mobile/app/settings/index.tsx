@@ -7,7 +7,7 @@ import {
   DEFAULT_NOTIFICATION_PREFERENCES,
   NOTIFICATION_PREFERENCE_META,
   formatRoleLabel,
-  normalizeSwimCloudIdInput,
+  isStaffRole,
   STAFF_TITLE_LABELS,
   type NotificationPreferenceKey,
   type NotificationPreferences,
@@ -21,7 +21,6 @@ import {
   Screen,
   ScrollView,
   Section,
-  TextField,
   usePalette,
 } from "@swimbuzz/ui"
 import { spacing } from "@swimbuzz/tokens"
@@ -37,12 +36,6 @@ import {
 } from "../../src/lib/theme"
 import { useViewPreferences } from "../../src/lib/view-preferences"
 
-type OwnAthlete = {
-  id: string
-  preferredName: string
-  swimCloudId: string
-}
-
 export default function SettingsScreen() {
   const { user, loading, signOut } = useAuth()
   const router = useRouter()
@@ -57,9 +50,6 @@ export default function SettingsScreen() {
   } = useViewPreferences()
   const queryClient = useQueryClient()
   const [pushStatus, setPushStatus] = useState<string | null>(null)
-  const [preferredName, setPreferredName] = useState("")
-  const [swimCloudId, setSwimCloudId] = useState("")
-  const [savingAthlete, setSavingAthlete] = useState(false)
   const [preferences, setPreferences] = useState<NotificationPreferences>(
     DEFAULT_NOTIFICATION_PREFERENCES
   )
@@ -68,8 +58,8 @@ export default function SettingsScreen() {
 
   const email = user?.email?.trim().toLowerCase() ?? null
 
-  // Shares the ["athletes"] / ["athlete", id] / ["notification-preferences"]
-  // cache with (tabs)/settings.tsx, the roster screens, and you/index.tsx.
+  // Shares the ["athletes"] / ["notification-preferences"] cache with
+  // (tabs)/settings.tsx, the roster screens, and you/index.tsx.
   const {
     data: athletes = [],
     isPending: athletesPending,
@@ -86,40 +76,15 @@ export default function SettingsScreen() {
         : undefined,
     [athletes, email]
   )
-  const { data: athleteDetail, isPending: athleteDetailPending } = useQuery({
-    queryKey: ["athlete", match?.id],
-    queryFn: () => api.getAthlete(match!.id),
-    enabled: Boolean(match?.id),
-  })
   const { data: prefRes, isPending: prefsPending } = useQuery({
     queryKey: ["notification-preferences"],
     queryFn: () => api.getNotificationPreferences(),
   })
 
   const pageLoading =
-    (Boolean(email) && (athletesPending || (Boolean(match) && athleteDetailPending))) ||
+    (Boolean(email) && athletesPending) ||
     prefsPending
   const error = athletesError instanceof Error ? athletesError.message : null
-
-  const ownAthlete: OwnAthlete | null = useMemo(() => {
-    if (!match || !athleteDetail) return null
-    const nextPreferredName =
-      typeof athleteDetail.preferredName === "string" ? athleteDetail.preferredName : ""
-    const nextSwimCloud =
-      athleteDetail.swimCloudId == null || athleteDetail.swimCloudId === ""
-        ? ""
-        : String(athleteDetail.swimCloudId)
-    return {
-      id: String(athleteDetail.id ?? match.id),
-      preferredName: nextPreferredName,
-      swimCloudId: nextSwimCloud,
-    }
-  }, [match, athleteDetail])
-
-  useEffect(() => {
-    setPreferredName(ownAthlete?.preferredName ?? "")
-    setSwimCloudId(ownAthlete?.swimCloudId ?? "")
-  }, [ownAthlete])
 
   useEffect(() => {
     if (prefRes?.preferences) {
@@ -141,32 +106,6 @@ export default function SettingsScreen() {
 
   if (!loading && !user) return <Redirect href="/sign-in" />
   if (!user) return null
-
-  async function saveAthleteProfile() {
-    if (!ownAthlete) return
-    setSavingAthlete(true)
-    try {
-      const body: Record<string, unknown> = {
-        preferredName: preferredName.trim() || null,
-      }
-      const trimmedId = swimCloudId.trim()
-      body.swimCloudId = trimmedId === "" ? null : trimmedId
-      await api.updateAthlete(ownAthlete.id, body)
-      Alert.alert(
-        "Saved",
-        "Profile changes submitted. Preferred name and SwimCloud updates may need coach approval."
-      )
-      await queryClient.invalidateQueries({ queryKey: ["athlete", ownAthlete.id] })
-      await queryClient.invalidateQueries({ queryKey: ["athletes"] })
-    } catch (err) {
-      Alert.alert(
-        "Could not save profile",
-        err instanceof Error ? err.message : "Something went wrong"
-      )
-    } finally {
-      setSavingAthlete(false)
-    }
-  }
 
   function togglePreference(
     key: NotificationPreferenceKey,
@@ -199,7 +138,7 @@ export default function SettingsScreen() {
     })()
   }
 
-  const isAthlete = Boolean(ownAthlete) || user.role === "ATHLETE"
+  const isAthlete = Boolean(match) || user.role === "ATHLETE"
 
   return (
     <Screen>
@@ -233,42 +172,14 @@ export default function SettingsScreen() {
           ) : null}
         </View>
 
-        {ownAthlete ? (
-          <Section
-            title="Athlete profile"
-            icon={<Icon color={c.textTertiary} name="idCard" size={18} />}
-          >
-            <TextField
-              label="Preferred name"
-              value={preferredName}
-              onChangeText={setPreferredName}
-              placeholder="Optional"
-              autoCapitalize="words"
-            />
-            <TextField
-              label="SwimCloud ID or URL"
-              value={swimCloudId}
-              onChangeText={(text) => setSwimCloudId(normalizeSwimCloudIdInput(text))}
-              placeholder="Optional"
-              keyboardType="numbers-and-punctuation"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-            <Button
-              label="Save athlete profile"
-              loading={savingAthlete}
-              onPress={() => void saveAthleteProfile()}
-            />
-          </Section>
-        ) : null}
-
         <Section
           title="Notification preferences"
           icon={<Icon color={c.textTertiary} name="bell" size={18} />}
         >
           {NOTIFICATION_PREFERENCE_META.filter(
-            ({ athletesOnly, meetDirectorsOnly }) =>
+            ({ athletesOnly, staffOnly, meetDirectorsOnly }) =>
               (!athletesOnly || isAthlete) &&
+              (!staffOnly || isStaffRole(user.role)) &&
               (!meetDirectorsOnly || user.staffTitle === "MEET_DIRECTOR")
           ).map(({ key, label, description, athleteDescription }) => (
             <View

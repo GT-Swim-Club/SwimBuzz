@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server"
-import { isStaffRole } from "@swimbuzz/shared"
 import {
   AVATAR_MAX_BYTES,
   deleteStoredAvatar,
@@ -29,12 +28,6 @@ export async function POST(req: Request) {
   const session = await getSession()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-  if (isStaffRole(session.user.role)) {
-    return NextResponse.json(
-      { error: "Coaches and execs can't change their profile picture" },
-      { status: 403 }
-    )
   }
 
   const formData = await req.formData()
@@ -99,12 +92,6 @@ export async function DELETE() {
   const session = await getSession()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-  if (isStaffRole(session.user.role)) {
-    return NextResponse.json(
-      { error: "Coaches and execs can't change their profile picture" },
-      { status: 403 }
-    )
   }
 
   const existing = await prisma.user.findUnique({

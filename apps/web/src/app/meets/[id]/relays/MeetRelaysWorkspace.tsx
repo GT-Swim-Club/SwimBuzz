@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import {
   DEFAULT_RELAY_COUNT,
   buildAthleteIds,
@@ -12,13 +13,21 @@ import {
   type RelayResult,
   type RelaySlotData,
 } from "@/lib/meet/relay-builder"
+import {
+  optimisticPublished,
+  persistRelayDraft,
+  persistRelayPublish,
+  type RelayCommit,
+} from "@/lib/meet/relay-save"
 import MeetRelayBuilder from "../MeetRelayBuilder"
 import RelayPageHeader, { relayEyebrowClass } from "./RelayPageHeader"
 import RelaySummary, {
   lineupSummaryCards,
   publishedSummaryCards,
+  relayShareEvent,
   type RelaySummaryEvent,
 } from "./RelaySummary"
+import ShareRelaysButton from "./ShareRelaysButton"
 
 /**
  * Optimal result at the builder's default settings, per relay event. For an event with nothing
@@ -27,15 +36,18 @@ import RelaySummary, {
  */
 type Build = { status: "ok"; result: RelayResult } | { status: "error"; error: string }
 
-/** Staff relays page: the summary of every relay event, or the builder for one (`?event=`). */
+/**
+ * Staff relays page: the summary of every relay event, or the builder for one (`?event=`).
+ * Switching between them only changes the URL on the client, and a saved lineup shows on the
+ * summary at once while it saves in the background — so leaving the builder is instant.
+ */
 export default function MeetRelaysWorkspace({
   meetId,
   meetName,
   relaysPath,
   iconUrl,
   course,
-  slots,
-  selectedSlug,
+  slots: serverSlots,
   athletes,
   signupRelayPrefs,
   hasImportedResults,
@@ -48,7 +60,6 @@ export default function MeetRelaysWorkspace({
   iconUrl: string | null
   course: string
   slots: RelaySlotData[]
-  selectedSlug: string | null
   athletes: AthleteOption[]
   /** Relay preferences by athlete id from the last sign-up import; null when none. */
   signupRelayPrefs: Record<string, string[]> | null
@@ -56,6 +67,76 @@ export default function MeetRelaysWorkspace({
   viewerAthleteId: string | null
   backLink: ReactNode
 }) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Lineups saved from the builder, shown until the server data catches up.
+  const [overrides, setOverrides] = useState<Record<string, RelaySlotData>>({})
+  const [saving, setSaving] = useState<string[]>([])
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [seenSlots, setSeenSlots] = useState(serverSlots)
+  if (seenSlots !== serverSlots) {
+    // Fresh server data: drop overrides for saves that have landed.
+    setSeenSlots(serverSlots)
+    setOverrides((current) =>
+      Object.fromEntries(Object.entries(current).filter(([slug]) => saving.includes(slug)))
+    )
+  }
+  const slots = useMemo(
+    () => serverSlots.map((data) => overrides[data.slot.slug] ?? data),
+    [serverSlots, overrides]
+  )
+  const requestedSlug = searchParams.get("event")
+  const selectedSlug =
+    requestedSlug && slots.some((d) => d.slot.slug === requestedSlug) ? requestedSlug : null
+
+  /** Show the summary (`slug` null) or an event's builder, without a server round trip. */
+  function go(slug: string | null, replace: boolean) {
+    const url = slug ? `${relaysPath}?event=${encodeURIComponent(slug)}` : relaysPath
+    if (replace) window.history.replaceState(null, "", url)
+    else window.history.pushState(null, "", url)
+    document.getElementById("page-scroll")?.scrollTo({ top: 0 })
+  }
+
+  function commit(data: RelaySlotData, { kind, teams, relayEvent }: RelayCommit, replace: boolean) {
+    const { slot } = data
+    const target = {
+      meetId,
+      event: slot.event,
+      relayEvent,
+      gender: slot.gender,
+      published: data.published,
+      hadDraft: data.draft != null,
+    }
+    setOverrides((current) => ({
+      ...current,
+      [slot.slug]:
+        kind === "draft"
+          ? {
+              slot,
+              published: data.published.filter((relay) => !relay.manual),
+              draft: { teams, savedAt: new Date().toISOString() },
+            }
+          : { slot, published: optimisticPublished(target, teams), draft: null },
+    }))
+    setSaving((current) => [...current, slot.slug])
+    setSaveError(null)
+    go(null, replace)
+
+    void (async () => {
+      try {
+        if (kind === "draft") await persistRelayDraft(target, teams)
+        else await persistRelayPublish(target, teams)
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Something went wrong"
+        setSaveError(`${slot.label}: ${message}`)
+      } finally {
+        setSaving((current) => current.filter((slug) => slug !== slot.slug))
+        router.refresh()
+      }
+    })()
+  }
+
   // Kept across builder visits so neither the summary nor the builder re-runs the solver.
   const [builds, setBuilds] = useState<Record<string, Build>>({})
   const requested = useRef(new Set<string>())
@@ -130,6 +211,8 @@ export default function MeetRelaysWorkspace({
         athletes={athletes}
         signupRelayPrefs={signupRelayPrefs}
         hasImportedResults={hasImportedResults}
+        onCommit={(change, replace) => commit(selected, change, replace)}
+        onExit={go}
       />
     )
   }
@@ -138,13 +221,15 @@ export default function MeetRelaysWorkspace({
     const base = {
       slug: slot.slug,
       name: slot.label.replace(/ Relay$/, ""),
+      number: slot.number,
       href: `${relaysPath}?event=${encodeURIComponent(slot.slug)}`,
     }
+    const savingPill = saving.includes(slot.slug) ? [{ label: "Saving…", tone: "suggested" as const }] : []
     // One status per event: a draft (saving one unpublishes the event), else what's published.
     if (draft) {
       return {
         ...base,
-        pills: [{ label: "Draft", tone: "draft" as const }],
+        pills: [{ label: "Draft", tone: "draft" as const }, ...savingPill],
         state: "cards" as const,
         cards: lineupSummaryCards(slot.slug, draft.teams),
       }
@@ -152,7 +237,7 @@ export default function MeetRelaysWorkspace({
     if (published.length > 0) {
       return {
         ...base,
-        pills: [{ label: "Published", tone: "published" as const }],
+        pills: [{ label: "Published", tone: "published" as const }, ...savingPill],
         state: "cards" as const,
         cards: publishedSummaryCards(published, viewerAthleteId),
       }
@@ -181,6 +266,11 @@ export default function MeetRelaysWorkspace({
     }
   })
 
+  // Share exports published lineups only — never drafts or suggestions.
+  const shareEvents = slots
+    .filter(({ published }) => published.length > 0)
+    .map(({ slot, published }) => relayShareEvent(slot, published))
+
   return (
     <main className="w-full flex flex-col gap-6 py-2 sm:py-4">
       <RelayPageHeader
@@ -188,8 +278,28 @@ export default function MeetRelaysWorkspace({
         iconUrl={iconUrl}
         back={backLink}
         eyebrow={<p className={relayEyebrowClass}>Relays</p>}
+        actions={
+          shareEvents.length > 0 ? (
+            <ShareRelaysButton meetName={meetName} iconUrl={iconUrl} events={shareEvents} />
+          ) : null
+        }
       />
-      <RelaySummary events={events} />
+      {saveError ? (
+        <div
+          role="alert"
+          className="flex items-start justify-between gap-3 rounded-lg border border-error-border bg-error-bg px-4 py-3 text-sm text-error"
+        >
+          <p>{saveError}</p>
+          <button
+            type="button"
+            onClick={() => setSaveError(null)}
+            className="shrink-0 font-medium hover:underline"
+          >
+            Dismiss
+          </button>
+        </div>
+      ) : null}
+      <RelaySummary events={events} onOpen={(slug) => go(slug, false)} />
     </main>
   )
 }

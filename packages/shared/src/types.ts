@@ -53,6 +53,8 @@ export type AthleteSummary = {
   preferredName: string | null
   gender: "M" | "F"
   seasons: string[]
+  /** Main profile first; up to MAX_SWIMCLOUD_IDS. */
+  swimCloudIds: number[]
   user: {
     name?: string | null
     email?: string | null

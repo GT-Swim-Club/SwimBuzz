@@ -8,6 +8,7 @@ import {
   type AthleteLookup,
 } from "@/lib/athlete/athlete-match"
 import { uniqueAthleteSlug } from "@/lib/slug"
+import { MAX_SWIMCLOUD_IDS } from "@/lib/swim/swimcloud-id"
 import type { ParsedRosterCsvRow } from "@/lib/roster/roster-csv"
 
 export type RosterImportAthlete = {
@@ -18,7 +19,7 @@ export type RosterImportAthlete = {
   preferredName: string | null
   gender: Gender
   seasons: string[]
-  swimCloudId: number | null
+  swimCloudIds: number[]
   gtid: string | null
   dob: Date | null
   year: string | null
@@ -34,7 +35,8 @@ export type RosterImportInput = {
   gtid?: string | null
   dob?: Date | null
   year?: string | null
-  swimCloudId?: number
+  /** Main profile first. */
+  swimCloudIds?: number[]
 }
 
 export type RosterImportContext = {
@@ -55,7 +57,7 @@ export async function loadRosterImportContext(): Promise<RosterImportContext> {
       preferredName: true,
       gender: true,
       seasons: true,
-      swimCloudId: true,
+      swimCloudIds: true,
       gtid: true,
       dob: true,
       year: true,
@@ -71,7 +73,7 @@ export async function loadRosterImportContext(): Promise<RosterImportContext> {
     preferredName: athlete.preferredName,
     gender: athlete.gender,
     seasons: athlete.seasons,
-    swimCloudId: athlete.swimCloudId,
+    swimCloudIds: athlete.swimCloudIds,
     gtid: athlete.gtid,
     dob: athlete.dob,
     year: athlete.year,
@@ -82,9 +84,7 @@ export async function loadRosterImportContext(): Promise<RosterImportContext> {
   const byEmail = new Map<string, RosterImportAthlete>()
   const byGtid = new Map<string, RosterImportAthlete>()
   for (const athlete of roster) {
-    if (athlete.swimCloudId != null) {
-      bySwimCloudId.set(athlete.swimCloudId, athlete)
-    }
+    for (const id of athlete.swimCloudIds) bySwimCloudId.set(id, athlete)
     byEmail.set(athlete.userEmail.toLowerCase(), athlete)
     const gtid = athlete.gtid?.trim()
     if (gtid && !byGtid.has(gtid)) byGtid.set(gtid, athlete)
@@ -114,8 +114,8 @@ export function findAthleteForImport(
     if (byGtid) return byGtid
   }
 
-  if (input.swimCloudId != null) {
-    const bySwimCloud = context.bySwimCloudId.get(input.swimCloudId)
+  for (const id of input.swimCloudIds ?? []) {
+    const bySwimCloud = context.bySwimCloudId.get(id)
     if (bySwimCloud) return bySwimCloud
   }
 
@@ -160,7 +160,7 @@ const athleteSelect = {
   preferredName: true,
   gender: true,
   seasons: true,
-  swimCloudId: true,
+  swimCloudIds: true,
   gtid: true,
   dob: true,
   year: true,
@@ -175,7 +175,7 @@ function toRosterAthlete(updated: {
   preferredName: string | null
   gender: Gender
   seasons: string[]
-  swimCloudId: number | null
+  swimCloudIds: number[]
   gtid: string | null
   dob: Date | null
   year: string | null
@@ -189,7 +189,7 @@ function toRosterAthlete(updated: {
     preferredName: updated.preferredName,
     gender: updated.gender,
     seasons: updated.seasons,
-    swimCloudId: updated.swimCloudId,
+    swimCloudIds: updated.swimCloudIds,
     gtid: updated.gtid ?? null,
     dob: updated.dob ?? null,
     year: updated.year ?? null,
@@ -237,6 +237,20 @@ async function applyImportEmail(
   })
 }
 
+/**
+ * SwimCloud IDs after an import row: the row's IDs first (so its leftmost is the
+ * main profile), then stored IDs the row didn't list, up to MAX_SWIMCLOUD_IDS.
+ * Undefined when the row has no SwimCloud IDs, which keeps the stored list.
+ */
+function importedSwimCloudProfiles(
+  input: RosterImportInput,
+  athlete?: RosterImportAthlete
+) {
+  if (!input.swimCloudIds?.length) return undefined
+  const swimCloudIds = [...new Set([...input.swimCloudIds, ...(athlete?.swimCloudIds ?? [])])]
+  return { swimCloudIds: swimCloudIds.slice(0, MAX_SWIMCLOUD_IDS) }
+}
+
 export async function mergeImportAthlete(
   athlete: RosterImportAthlete,
   input: RosterImportInput,
@@ -263,7 +277,7 @@ export async function mergeImportAthlete(
       ...(input.gtid != null ? { gtid: input.gtid } : {}),
       ...(input.dob != null ? { dob: input.dob } : {}),
       ...(input.year != null ? { year: input.year } : {}),
-      ...(input.swimCloudId != null ? { swimCloudId: input.swimCloudId } : {}),
+      ...importedSwimCloudProfiles(input, athlete),
     },
     select: athleteSelect,
   })
@@ -305,7 +319,7 @@ export async function createImportAthlete(
         ...(input.gtid != null ? { gtid: input.gtid } : {}),
         ...(input.dob != null ? { dob: input.dob } : {}),
         ...(input.year != null ? { year: input.year } : {}),
-        ...(input.swimCloudId != null ? { swimCloudId: input.swimCloudId } : {}),
+        ...importedSwimCloudProfiles(input),
       },
       select: athleteSelect,
     })
@@ -350,7 +364,7 @@ export async function createImportAthlete(
       ...(input.gtid != null ? { gtid: input.gtid } : {}),
       ...(input.dob != null ? { dob: input.dob } : {}),
       ...(input.year != null ? { year: input.year } : {}),
-      ...(input.swimCloudId != null ? { swimCloudId: input.swimCloudId } : {}),
+      ...importedSwimCloudProfiles(input),
     },
     select: athleteSelect,
   })
@@ -365,26 +379,23 @@ export function registerImportAthlete(
   const existing = context.roster.find((entry) => entry.id === athlete.id)
   if (existing) {
     const oldEmail = existing.userEmail.toLowerCase()
-    const oldSwimCloudId = existing.swimCloudId
+    const oldSwimCloudIds = existing.swimCloudIds
     Object.assign(existing, athlete)
     if (oldEmail !== athlete.userEmail.toLowerCase()) {
       context.byEmail.delete(oldEmail)
     }
-    if (
-      oldSwimCloudId != null &&
-      oldSwimCloudId !== athlete.swimCloudId &&
-      context.bySwimCloudId.get(oldSwimCloudId)?.id === athlete.id
-    ) {
-      context.bySwimCloudId.delete(oldSwimCloudId)
+    const nextSwimCloudIds = athlete.swimCloudIds
+    for (const id of oldSwimCloudIds) {
+      if (!nextSwimCloudIds.includes(id) && context.bySwimCloudId.get(id)?.id === athlete.id) {
+        context.bySwimCloudId.delete(id)
+      }
     }
   } else {
     context.roster.push(athlete)
   }
 
   context.lookup = buildAthleteLookup(context.roster)
-  if (athlete.swimCloudId != null) {
-    context.bySwimCloudId.set(athlete.swimCloudId, athlete)
-  }
+  for (const id of athlete.swimCloudIds) context.bySwimCloudId.set(id, athlete)
   context.byEmail.set(athlete.userEmail.toLowerCase(), athlete)
   const gtid = athlete.gtid?.trim()
   if (gtid) context.byGtid.set(gtid, athlete)
@@ -438,16 +449,15 @@ export async function runRosterImport(
       ...(row.dob && !Number.isNaN(row.dob.getTime()) ? { dob: row.dob } : {}),
       ...(row.year ? { year: row.year } : {}),
       ...(row.preferredName ? { preferredName: row.preferredName } : {}),
-      ...(row.swimCloudId != null ? { swimCloudId: row.swimCloudId } : {}),
+      ...(row.swimCloudIds?.length ? { swimCloudIds: row.swimCloudIds } : {}),
     }
 
     const existing = findAthleteForImport(input, context)
-    if (input.swimCloudId != null) {
-      const owner = context.bySwimCloudId.get(input.swimCloudId)
-      if (owner && owner.id !== existing?.id) {
-        delete input.swimCloudId
-      }
-    }
+    // Drop IDs another athlete already holds.
+    input.swimCloudIds = input.swimCloudIds?.filter((id) => {
+      const owner = context.bySwimCloudId.get(id)
+      return !owner || owner.id === existing?.id
+    })
     const label = `${row.lastName}, ${row.firstName}`
 
     try {
@@ -540,7 +550,7 @@ export async function applySwimCloudRosterImport(
       firstName,
       lastName,
       gender,
-      swimCloudId,
+      swimCloudIds: [swimCloudId],
     }
 
     const existing = findAthleteForImport(input, matchContext)
@@ -558,20 +568,20 @@ export async function applySwimCloudRosterImport(
       continue
     }
 
-    if (existing.swimCloudId === swimCloudId) {
+    if (existing.swimCloudIds.includes(swimCloudId)) {
       alreadyLinked++
       continue
     }
 
-    if (existing.swimCloudId != null) {
-      // Keep the existing ID; do not overwrite from SwimCloud name match.
+    if (existing.swimCloudIds.length > 0) {
+      // Keep the existing IDs; do not add to them from a SwimCloud name match.
       alreadyLinked++
       continue
     }
 
     const updated = await prisma.athlete.update({
       where: { id: existing.id },
-      data: { swimCloudId },
+      data: { swimCloudIds: [swimCloudId] },
       select: athleteSelect,
     })
 

@@ -23,16 +23,16 @@ import {
 import { athletePreferredName } from "@swimbuzz/shared"
 import MeetRelaysWorkspace from "./MeetRelaysWorkspace"
 import RelayPageHeader, { relayBackLinkClass, relayEyebrowClass } from "./RelayPageHeader"
-import RelaySummary, { publishedSummaryCards } from "./RelaySummary"
+import RelaySummary, { publishedSummaryCards, relayShareEvent } from "./RelaySummary"
+import ShareRelaysButton from "./ShareRelaysButton"
 
 export default async function MeetRelaysPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ event?: string | string[] }>
 }) {
-  const [{ id: param }, query] = await Promise.all([params, searchParams])
+  // The open event (`?event=`) is read on the client, so switching events needs no server render.
+  const { id: param } = await params
   const session = await getSession()
   if (!session) {
     redirect(`/signin?callbackUrl=/meets/${encodeURIComponent(param)}/relays`)
@@ -98,17 +98,24 @@ export default async function MeetRelaysPage({
     />
   )
 
+  const eventOrder = resolveSignupEventOptions(meet.eventOrder).filter((option) => option.isRelay)
+
   if (!canBuild) {
-    const slots = relayEventSlots([], relayLineups)
-    const events = slots.map((slot) => ({
+    // Event order supplies the event numbers; only events with a lineup are shown.
+    const slots = relayEventSlots(eventOrder, relayLineups).filter((slot) =>
+      relayLineups.some((relay) => slotMatches(slot, relay.gender, relay.event))
+    )
+    const publishedBySlot = slots.map((slot) => ({
+      slot,
+      published: relayLineups.filter((relay) => slotMatches(slot, relay.gender, relay.event)),
+    }))
+    const events = publishedBySlot.map(({ slot, published }) => ({
       slug: slot.slug,
       name: slot.label.replace(/ Relay$/, ""),
+      number: slot.number,
       pills: [],
       state: "cards" as const,
-      cards: publishedSummaryCards(
-        relayLineups.filter((relay) => slotMatches(slot, relay.gender, relay.event)),
-        viewerAthleteId
-      ),
+      cards: publishedSummaryCards(published, viewerAthleteId),
     }))
     return (
       <main className="w-full flex flex-col gap-6 py-2 sm:py-4">
@@ -117,6 +124,13 @@ export default async function MeetRelaysPage({
           iconUrl={meet.iconUrl}
           back={backLink}
           eyebrow={<p className={relayEyebrowClass}>Relays</p>}
+          actions={
+            <ShareRelaysButton
+              meetName={meet.name}
+              iconUrl={meet.iconUrl}
+              events={publishedBySlot.map(({ slot, published }) => relayShareEvent(slot, published))}
+            />
+          }
         />
         <RelaySummary events={events} />
       </main>
@@ -139,7 +153,6 @@ export default async function MeetRelaysPage({
     : null
 
   const drafts = relayDraftsOf(meet.relayDrafts)
-  const eventOrder = resolveSignupEventOptions(meet.eventOrder).filter((option) => option.isRelay)
   const slots = relayEventSlots(
     eventOrder.length > 0 || relayLineups.length > 0 || drafts.length > 0
       ? eventOrder
@@ -181,8 +194,6 @@ export default async function MeetRelaysPage({
       : [],
   })
 
-  const selected = typeof query.event === "string" ? query.event : null
-
   return (
     <MeetRelaysWorkspace
       meetId={meet.id}
@@ -191,7 +202,6 @@ export default async function MeetRelaysPage({
       iconUrl={meet.iconUrl}
       course={meet.course || "SCY"}
       slots={slotData}
-      selectedSlug={slotData.some((d) => d.slot.slug === selected) ? selected : null}
       athletes={athletes}
       signupRelayPrefs={signupRelayPrefs}
       hasImportedResults={hasImportedResults}

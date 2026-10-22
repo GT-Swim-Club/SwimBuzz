@@ -46,7 +46,7 @@ export default async function Nav() {
   const linkedAthlete = session
     ? await prisma.athlete.findUnique({
         where: { userId: session.user.id },
-        select: { id: true, slug: true, swimCloudId: true }})
+        select: { id: true, slug: true, swimCloudIds: true }})
     : null
 
   const notifications = session
@@ -109,7 +109,11 @@ export default async function Nav() {
         roleLabel={roleLabel}
         staffTitle={staffTitle}
         rosterProfileHref={linkedAthlete ? athletePath(linkedAthlete.slug ?? linkedAthlete.id) : null}
-        swimCloudProfileHref={linkedAthlete?.swimCloudId ? `https://www.swimcloud.com/swimmer/${linkedAthlete.swimCloudId}/` : null}
+        swimCloudProfileHrefs={
+          linkedAthlete
+            ? linkedAthlete.swimCloudIds.map((id) => `https://www.swimcloud.com/swimmer/${id}/`)
+            : []
+        }
       />
     </>
   ) : (

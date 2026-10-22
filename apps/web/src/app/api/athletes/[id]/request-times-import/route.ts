@@ -29,7 +29,7 @@ export async function POST(
       userId: true,
       firstName: true,
       lastName: true,
-      swimCloudId: true,
+      swimCloudIds: true,
       timesSyncedAt: true}})
   if (!athlete) {
     return NextResponse.json({ error: "Not found" }, { status: 404 })
@@ -37,9 +37,10 @@ export async function POST(
   if (athlete.userId !== session.user.id) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
-  if (athlete.swimCloudId == null) {
+  const swimCloudIds = athlete.swimCloudIds
+  if (swimCloudIds.length === 0) {
     return NextResponse.json(
-      { error: "Set a SwimCloud ID before requesting a times import" },
+      { error: "Ask a coach to add your SwimCloud ID before requesting a times import" },
       { status: 400 }
     )
   }
@@ -48,7 +49,7 @@ export async function POST(
     athleteId: athlete.id,
     firstName: athlete.firstName,
     lastName: athlete.lastName,
-    swimCloudId: athlete.swimCloudId,
+    swimCloudIds,
     timesSyncedAt: athlete.timesSyncedAt})
 
   return NextResponse.json({ ok: true })

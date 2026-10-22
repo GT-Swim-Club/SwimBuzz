@@ -23,7 +23,8 @@ type RosterAthlete = {
   firstName: string
   lastName: string
   gender: "M" | "F"
-  swimCloudId: number | null
+  /** Main profile first. */
+  swimCloudIds: number[]
   timesSyncedAt: string | null
 }
 
@@ -71,7 +72,9 @@ function timesImportProgress(
   if (job.status === "COMPLETED") return { detail: "Saving times…" }
   const progress = job.progress
   const total = progress?.total ?? athletes.length
-  const athlete = athletes.find((a) => a.swimCloudId === progress?.swimmerId)
+  const athlete = athletes.find(
+    (a) => progress?.swimmerId != null && a.swimCloudIds.includes(progress.swimmerId)
+  )
   const count = `${progress?.current ?? 0}/${total} athlete${total === 1 ? "" : "s"}`
   return {
     detail: athlete ? `${count} · ${athlete.firstName} ${athlete.lastName}` : count,
@@ -122,7 +125,10 @@ function CheckIcon({ className, strokeWidth }: { className: string; strokeWidth:
   )
 }
 
-/** Inline SwimCloud ID input that accepts a bare ID or a swimcloud.com/swimmer/… profile URL. */
+/**
+ * Inline editor for the athlete's main SwimCloud ID; accepts a bare ID or a
+ * swimcloud.com/swimmer/… profile URL. Other profiles are edited on the athlete page.
+ */
 function SwimCloudIdEditor({
   athlete,
   onSave,
@@ -132,7 +138,8 @@ function SwimCloudIdEditor({
   onSave: (swimCloudId: number) => Promise<void>
   onCancel: () => void
 }) {
-  const [draft, setDraft] = useState(athlete.swimCloudId != null ? String(athlete.swimCloudId) : "")
+  const main = athlete.swimCloudIds[0] ?? null
+  const [draft, setDraft] = useState(main != null ? String(main) : "")
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -141,7 +148,7 @@ function SwimCloudIdEditor({
 
   async function save() {
     if (parsed === null || saving) return
-    if (parsed === athlete.swimCloudId) {
+    if (parsed === main) {
       onCancel()
       return
     }
@@ -310,9 +317,9 @@ export default function SyncTimesButton() {
   const query = searchQuery.trim().toLowerCase()
   const matches = roster.filter((a) => fullName(a).toLowerCase().includes(query))
   const ready = matches.filter(
-    (a) => a.swimCloudId !== null && passesImportFilter(a, importFilter)
+    (a) => a.swimCloudIds.length > 0 && passesImportFilter(a, importFilter)
   )
-  const missing = matches.filter((a) => a.swimCloudId === null)
+  const missing = matches.filter((a) => a.swimCloudIds.length === 0)
   const showMissing = importFilter === "any" && missing.length > 0
   const allSelected = ready.length > 0 && ready.every((a) => selected.has(a.id))
   const selectedCount = selected.size
@@ -338,22 +345,26 @@ export default function SyncTimesButton() {
     })
   }
 
-  async function saveSwimCloudId(athleteId: string, swimCloudId: number) {
-    const res = await fetch(`/api/athletes/${athleteId}`, {
+  /** Replace the main ID, keeping the athlete's other profiles. */
+  async function saveSwimCloudId(athlete: RosterAthlete, swimCloudId: number) {
+    const others = athlete.swimCloudIds.slice(1).filter((id) => id !== swimCloudId)
+    const res = await fetch(`/api/athletes/${athlete.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ swimCloudId: String(swimCloudId) }),
+      body: JSON.stringify({ swimCloudIds: [swimCloudId, ...others] }),
     })
     const data = await res.json().catch(() => ({}))
     if (!res.ok) throw new Error(data.error ?? "Failed to save SwimCloud ID")
-    setRoster((prev) => prev.map((a) => (a.id === athleteId ? { ...a, swimCloudId } : a)))
+    setRoster((prev) =>
+      prev.map((a) => (a.id === athlete.id ? { ...a, swimCloudIds: data.swimCloudIds } : a))
+    )
     setEditingId(null)
     router.refresh()
   }
 
   function handleSync() {
     const toSync = roster.filter(
-      (a) => selected.has(a.id) && a.swimCloudId !== null
+      (a) => selected.has(a.id) && a.swimCloudIds.length > 0
     )
 
     if (toSync.length === 0) {
@@ -413,7 +424,7 @@ export default function SyncTimesButton() {
     return (
       <SwimCloudIdEditor
         athlete={athlete}
-        onSave={(swimCloudId) => saveSwimCloudId(athlete.id, swimCloudId)}
+        onSave={(swimCloudId) => saveSwimCloudId(athlete, swimCloudId)}
         onCancel={() => setEditingId(null)}
       />
     )
@@ -544,15 +555,18 @@ export default function SyncTimesButton() {
                                         {importStatus(athlete.timesSyncedAt)}
                                       </span>
                                       <div className="-mr-1 mt-0.5 flex items-center gap-0.5">
-                                        <a
-                                          href={`https://www.swimcloud.com/swimmer/${athlete.swimCloudId}/`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          aria-label={`Open ${name} on SwimCloud (new tab)`}
-                                          className="text-xs leading-4 tabular-nums text-foreground-tertiary underline-offset-2 transition-colors duration-200 hover:text-primary hover:underline"
-                                        >
-                                          SwimCloud ID {athlete.swimCloudId}
-                                        </a>
+                                        {athlete.swimCloudIds.map((id, index) => (
+                                          <a
+                                            key={id}
+                                            href={`https://www.swimcloud.com/swimmer/${id}/`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            aria-label={`Open ${name}${index ? `'s profile ${index + 1}` : ""} on SwimCloud (new tab)`}
+                                            className="text-xs leading-4 tabular-nums text-foreground-tertiary underline-offset-2 transition-colors duration-200 hover:text-primary hover:underline"
+                                          >
+                                            {index ? `· ${id}` : `SwimCloud ID ${id}`}
+                                          </a>
+                                        ))}
                                         <button
                                           type="button"
                                           aria-label={`Edit SwimCloud ID for ${name}`}

@@ -1,23 +1,58 @@
 import { redirect } from "next/navigation"
 import Link from "next/link"
+import type { ReactNode } from "react"
 import AppearanceSettings from "@/components/settings/AppearanceSettings"
-import CancelPendingProfileChangesButton from "@/components/athlete/CancelPendingProfileChangesButton"
-import EditPreferredNameForm from "@/components/athlete/EditPreferredNameForm"
 import NotificationPreferencesSettings from "@/components/settings/NotificationPreferencesSettings"
 import ProfilePictureSettings from "@/components/athlete/ProfilePictureSettings"
-import SetSwimCloudIdForm from "@/components/athlete/SetSwimCloudIdForm"
 import { STAFF_TITLE_LABELS, formatRoleLabel, isStaffRole } from "@swimbuzz/shared"
 import { parseNotificationPreferences } from "@/lib/notifications/notification-preferences"
-import { parsePendingProfileChanges } from "@/lib/athlete/pending-profile-changes"
 import { prisma } from "@/lib/prisma"
 import { athletePath } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
-import { AppIcon } from "@/components/ui/AppIcon"
 
 export const metadata = {
   title: "Settings — SwimBuzz"}
 
-const sectionIconClass = "h-4 w-4 shrink-0 text-foreground-tertiary"
+/** Gold section heading above a bordered card, like the athlete page's Personal bests. */
+function SettingsSection({
+  title,
+  description,
+  aside,
+  children,
+}: {
+  title: string
+  description?: string
+  aside?: ReactNode
+  children: ReactNode
+}) {
+  return (
+    <section>
+      <div className="mb-1.5 flex min-h-[34px] items-center justify-between gap-4">
+        <div>
+          <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-accent">
+            {title}
+          </h2>
+          {description && (
+            <p className="mt-0.5 text-xs text-foreground-secondary">{description}</p>
+          )}
+        </div>
+        {aside}
+      </div>
+      <div className="divide-y divide-border overflow-hidden rounded-xl border border-border-secondary bg-background shadow-xs">
+        {children}
+      </div>
+    </section>
+  )
+}
+
+function InfoRow({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-4 px-4 py-3">
+      <p className="text-sm text-foreground-secondary">{label}</p>
+      <p className="truncate text-sm font-medium text-foreground">{children}</p>
+    </div>
+  )
+}
 
 export default async function SettingsPage() {
   const session = await getSession()
@@ -26,156 +61,65 @@ export default async function SettingsPage() {
   const [athlete, user] = await Promise.all([
     prisma.athlete.findUnique({
       where: { userId: session.user.id },
-      select: {
-        id: true,
-        slug: true,
-        preferredName: true,
-        swimCloudId: true,
-        pendingProfileChanges: true}}),
+      select: { id: true, slug: true }}),
     prisma.user.findUnique({
       where: { id: session.user.id },
       select: { image: true, notificationPreferences: true }}),
   ])
 
-  const requiresApproval = !isStaffRole(session.user.role)
-  const pending = athlete
-    ? parsePendingProfileChanges(athlete.pendingProfileChanges)
-    : null
   const notificationPreferences = parseNotificationPreferences(
     user?.notificationPreferences
   )
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-        Settings
-      </h1>
-      <p className="mt-1 text-sm text-foreground-secondary">
-        Manage your account, notifications, and appearance.
-      </p>
+    <div className="mx-auto flex max-w-2xl flex-col gap-8">
+      <header>
+        <h1 className="text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
+          Settings
+        </h1>
+        <p className="mt-2 text-sm text-foreground-secondary sm:text-base">
+          Manage your account, notifications, and appearance.
+        </p>
+      </header>
 
-      <div className="mt-8 space-y-6">
-        <section className="rounded-xl border border-border-secondary">
-          <div className="border-b border-border-secondary px-4 py-3">
-            <h2 className="flex items-center gap-2 text-sm font-medium text-foreground">
-              <AppIcon name="user" className={sectionIconClass} />
-              Account
-            </h2>
-          </div>
-          <div className="divide-y divide-border">
-            <ProfilePictureSettings
-              initialImage={user?.image ?? session.user.image}
-              name={session.user.name}
-              email={session.user.email}
-              canEdit={!isStaffRole(session.user.role)}
-            />
-            <div className="flex items-center justify-between gap-4 px-4 py-3">
-              <p className="text-sm text-foreground-secondary">Name</p>
-              <p className="truncate text-sm font-medium text-foreground">
-                {session.user.name || "—"}
-              </p>
-            </div>
-            <div className="flex items-center justify-between gap-4 px-4 py-3">
-              <p className="text-sm text-foreground-secondary">Email</p>
-              <p className="truncate text-sm font-medium text-foreground">
-                {session.user.email || "—"}
-              </p>
-            </div>
-            <div className="flex items-center justify-between gap-4 px-4 py-3">
-              <p className="text-sm text-foreground-secondary">Role</p>
-              <p className="text-sm font-medium text-foreground">
-                {session.user.staffTitle
-                  ? STAFF_TITLE_LABELS[session.user.staffTitle]
-                  : formatRoleLabel(session.user.role)}
-              </p>
-            </div>
-          </div>
-        </section>
+      <SettingsSection
+        title="Account"
+        aside={
+          athlete ? (
+            <Link
+              href={athletePath(athlete.slug ?? athlete.id)}
+              className="shrink-0 text-sm font-medium text-primary transition-colors hover:text-primary-hover"
+            >
+              View profile
+            </Link>
+          ) : null
+        }
+      >
+        <ProfilePictureSettings
+          initialImage={user?.image ?? session.user.image}
+          name={session.user.name}
+          email={session.user.email}
+        />
+        <InfoRow label="Name">{session.user.name || "—"}</InfoRow>
+        <InfoRow label="Email">{session.user.email || "—"}</InfoRow>
+        <InfoRow label="Role">
+          {session.user.staffTitle
+            ? STAFF_TITLE_LABELS[session.user.staffTitle]
+            : formatRoleLabel(session.user.role)}
+        </InfoRow>
+      </SettingsSection>
 
-        <section className="rounded-xl border border-border-secondary">
-          <div className="flex items-center justify-between gap-4 border-b border-border-secondary px-4 py-3">
-            <h2 className="flex items-center gap-2 text-sm font-medium text-foreground">
-              <AppIcon name="idCard" className={sectionIconClass} />
-              Profile
-            </h2>
-            {athlete ? (
-              <Link
-                href={athletePath(athlete.slug ?? athlete.id)}
-                className="shrink-0 text-sm text-primary hover:text-primary-hover"
-              >
-                View profile
-              </Link>
-            ) : null}
-          </div>
-          {athlete ? (
-            <div className="divide-y divide-border">
-              {requiresApproval && (
-                <div className="px-4 py-3">
-                  <p className="text-xs text-foreground-secondary">
-                    SwimCloud ID and preferred name changes need coach approval before
-                    they take effect.
-                  </p>
-                  {pending && (
-                    <div className="mt-2">
-                      <CancelPendingProfileChangesButton athleteId={athlete.id} />
-                    </div>
-                  )}
-                </div>
-              )}
-              <div className="px-4 py-3 space-y-2">
-                <p className="text-sm text-foreground">SwimCloud ID or URL</p>
-                <SetSwimCloudIdForm
-                  athleteId={athlete.id}
-                  initialSwimCloudId={athlete.swimCloudId}
-                  requiresApproval={requiresApproval}
-                  pendingSwimCloudId={pending?.swimCloudId ?? null}
-                  hideLabel
-                />
-              </div>
-              <div className="px-4 py-3 space-y-2">
-                <p className="text-sm text-foreground">Preferred name</p>
-                <EditPreferredNameForm
-                  athleteId={athlete.id}
-                  initialPreferredName={athlete.preferredName}
-                  requiresApproval={requiresApproval}
-                  pendingPreferredName={pending?.preferredName}
-                />
-              </div>
-            </div>
-          ) : (
-            <p className="px-4 py-3 text-sm text-foreground-secondary">
-              Your account isn&apos;t linked to a roster athlete.
-            </p>
-          )}
-        </section>
+      <SettingsSection title="Notifications" description="Choose which in-app alerts you receive">
+        <NotificationPreferencesSettings
+          initialPreferences={notificationPreferences}
+          isAthlete={!isStaffRole(session.user.role)}
+          isMeetDirector={session.user.staffTitle === "MEET_DIRECTOR"}
+        />
+      </SettingsSection>
 
-        <section className="rounded-xl border border-border-secondary">
-          <div className="border-b border-border-secondary px-4 py-3">
-            <h2 className="flex items-center gap-2 text-sm font-medium text-foreground">
-              <AppIcon name="bell" className={sectionIconClass} />
-              Notifications
-            </h2>
-            <p className="mt-0.5 text-xs text-foreground-secondary">
-              Choose which in-app alerts you receive
-            </p>
-          </div>
-          <NotificationPreferencesSettings
-            initialPreferences={notificationPreferences}
-            isAthlete={!isStaffRole(session.user.role)}
-            isMeetDirector={session.user.staffTitle === "MEET_DIRECTOR"}
-          />
-        </section>
-
-        <section className="rounded-xl border border-border-secondary">
-          <div className="border-b border-border-secondary px-4 py-3">
-            <h2 className="flex items-center gap-2 text-sm font-medium text-foreground">
-              <AppIcon name="palette" className={sectionIconClass} />
-              Appearance
-            </h2>
-          </div>
-          <AppearanceSettings />
-        </section>
-      </div>
+      <SettingsSection title="Appearance">
+        <AppearanceSettings />
+      </SettingsSection>
     </div>
   )
 }

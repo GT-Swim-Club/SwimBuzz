@@ -22,6 +22,7 @@ export const NOTIFICATION_PREFERENCE_META: {
   /** Hidden from coaches/staff in notification settings. */
   meetDirectorsOnly?: boolean
   athletesOnly?: boolean
+  staffOnly?: boolean
 }[] = [
   {
     key: "practicePublished",
@@ -45,8 +46,8 @@ export const NOTIFICATION_PREFERENCE_META: {
   {
     key: "profileChanges",
     label: "Athlete requests",
-    description:
-      "Profile changes, times import requests, and approval decisions",
+    description: "When an athlete requests a times import",
+    staffOnly: true,
   },
 ]
 

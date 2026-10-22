@@ -86,25 +86,12 @@ function parseTimeMs(input: string): number | null {
   return Number.isFinite(ms) && ms > 0 ? Math.round(ms) : null
 }
 
-function formatPending(pending: Record<string, unknown>): string {
-  const parts: string[] = []
-  if (pending.swimCloudId !== undefined) {
-    parts.push(`SwimCloud ID → ${String(pending.swimCloudId)}`)
-  }
-  if (pending.preferredName !== undefined) {
-    const preferredName = typeof pending.preferredName === "string" ? pending.preferredName : ""
-    parts.push(`Preferred name → ${preferredName || "(none)"}`)
-  }
-  return parts.join(" · ") || "Pending profile changes"
-}
-
 export default function AthleteDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
   const { user } = useAuth()
   const tabBarPad = useTabBarScrollPadding()
   const [importing, setImporting] = useState(false)
-  const [resolvingPending, setResolvingPending] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [swimEvent, setSwimEvent] = useState("")
   const [swimCourse, setSwimCourse] = useState<(typeof COURSES)[number]>("SCY")
@@ -223,15 +210,7 @@ export default function AthleteDetailScreen() {
     athlete.userId === user.id
   const isStaff = !!user && isStaffRole(user.role)
   const canManage = isOwn || isStaff
-  const swimCloudId =
-    athlete.swimCloudId != null && athlete.swimCloudId !== ""
-      ? String(athlete.swimCloudId)
-      : null
-  const pending =
-    athlete.pendingProfileChanges &&
-    typeof athlete.pendingProfileChanges === "object"
-      ? (athlete.pendingProfileChanges as Record<string, unknown>)
-      : null
+  const swimCloudIds = Array.isArray(athlete.swimCloudIds) ? athlete.swimCloudIds : []
 
   async function requestImport() {
     if (!id) return
@@ -246,32 +225,6 @@ export default function AthleteDetailScreen() {
       )
     } finally {
       setImporting(false)
-    }
-  }
-
-  async function resolvePending(approve: boolean) {
-    if (!id) return
-    setResolvingPending(true)
-    try {
-      await api.updateAthlete(id, {
-        ...(approve
-          ? { approvePendingProfileChanges: true }
-          : { rejectPendingProfileChanges: true }),
-      })
-      await load()
-      Alert.alert(
-        approve ? "Approved" : "Rejected",
-        approve
-          ? "Pending profile changes were applied."
-          : "Pending profile changes were discarded."
-      )
-    } catch (err) {
-      Alert.alert(
-        "Could not update",
-        err instanceof Error ? err.message : "Something went wrong"
-      )
-    } finally {
-      setResolvingPending(false)
     }
   }
 
@@ -372,8 +325,11 @@ export default function AthleteDetailScreen() {
           {seasons.length > 0 ? (
             <MetaRow label="Seasons" value={seasons.join(", ")} />
           ) : null}
-          {canManage && swimCloudId ? (
-            <MetaRow label="SwimCloud ID" value={swimCloudId} />
+          {canManage && swimCloudIds.length > 0 ? (
+            <MetaRow
+              label={swimCloudIds.length > 1 ? "SwimCloud IDs" : "SwimCloud ID"}
+              value={swimCloudIds.join(", ")}
+            />
           ) : null}
         </Section>
 
@@ -387,27 +343,6 @@ export default function AthleteDetailScreen() {
                 value={`${formatTime(highlightBest.timeMs)} · ${highlightBest.event ?? "Event"} ${highlightBest.course ?? ""}`.trim()}
               />
             ) : null}
-          </Section>
-        ) : null}
-
-        {isStaff && pending ? (
-          <Section title="Pending profile changes">
-            <Body style={{ marginBottom: spacing.sm }}>
-              {formatPending(pending)}
-            </Body>
-            <View style={{ gap: spacing.sm }}>
-              <Button
-                label="Approve changes"
-                loading={resolvingPending}
-                onPress={() => void resolvePending(true)}
-              />
-              <Button
-                label="Reject changes"
-                variant="danger"
-                loading={resolvingPending}
-                onPress={() => void resolvePending(false)}
-              />
-            </View>
           </Section>
         ) : null}
 

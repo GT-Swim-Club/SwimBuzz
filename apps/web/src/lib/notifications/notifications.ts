@@ -3,7 +3,6 @@ import {
   parseNotificationPreferences,
   type NotificationPreferenceKey,
 } from "@/lib/notifications/notification-preferences"
-import type { PendingProfileChanges } from "@/lib/athlete/pending-profile-changes"
 import { collectMeetRosterAthleteIds } from "@/lib/meet/meet-sheet-summary"
 import { prisma } from "@/lib/prisma"
 import { formatRelativeTime } from "@/lib/utils"
@@ -26,140 +25,6 @@ async function userIdsWithPreference(
   return users
     .filter((u) => parseNotificationPreferences(u.notificationPreferences)[key])
     .map((u) => u.id)
-}
-
-export function describePendingProfileChanges(
-  pending: PendingProfileChanges
-): string {
-  const parts: string[] = []
-  if (pending.swimCloudId !== undefined) {
-    parts.push(`SwimCloud ID → ${pending.swimCloudId}`)
-  }
-  if (pending.preferredName !== undefined) {
-    parts.push(`Preferred name → ${pending.preferredName ?? "(none)"}`)
-  }
-  return parts.join(" · ")
-}
-
-export async function dismissProfileChangeRequestNotifications(
-  athleteId: string
-): Promise<void> {
-  await prisma.notification.deleteMany({
-    where: {
-      athleteId,
-      type: NotificationType.PROFILE_CHANGE_REQUEST,
-    },
-  })
-}
-
-/** Keep request notifications after a decision; mark them resolved so sync won't remove them. */
-export async function resolveProfileChangeRequestNotifications(
-  athleteId: string,
-  approved: boolean
-): Promise<void> {
-  const existing = await prisma.notification.findMany({
-    where: {
-      athleteId,
-      type: NotificationType.PROFILE_CHANGE_REQUEST,
-    },
-  })
-  if (existing.length === 0) return
-
-  const now = new Date()
-  const suffix = approved ? " — approved" : " — rejected"
-
-  await prisma.$transaction(
-    existing.map((n) => {
-      const alreadyResolved =
-        n.title.endsWith(" — approved") || n.title.endsWith(" — rejected")
-      return prisma.notification.update({
-        where: { id: n.id },
-        data: {
-          title: alreadyResolved ? n.title : `${n.title}${suffix}`,
-          readAt: n.readAt ?? now,
-          // Detach so a later cancel/sync does not delete this history entry.
-          athleteId: null,
-        },
-      })
-    })
-  )
-}
-
-export async function syncProfileChangeRequestNotifications(input: {
-  athleteId: string
-  firstName: string
-  lastName: string
-  pending: PendingProfileChanges | null
-}): Promise<void> {
-  await dismissProfileChangeRequestNotifications(input.athleteId)
-  if (!input.pending) return
-
-  const staff = await prisma.user.findMany({
-    where: {
-      role: { in: [Role.COACH, Role.EXEC] },
-      OR: [{ emailVerified: { not: null } }, { accounts: { some: {} } }],
-    },
-    select: { id: true, notificationPreferences: true },
-  })
-  const recipients = staff
-    .filter((u) =>
-      parseNotificationPreferences(u.notificationPreferences).profileChanges
-    )
-    .map((u) => u.id)
-  if (recipients.length === 0) return
-
-  const title = `${input.firstName} ${input.lastName} requested profile changes`
-  const body = describePendingProfileChanges(input.pending)
-  const href = await athleteHrefForId(input.athleteId)
-
-  await prisma.notification.createMany({
-    data: recipients.map((userId) => ({
-      userId,
-      type: NotificationType.PROFILE_CHANGE_REQUEST,
-      title,
-      body,
-      href,
-      athleteId: input.athleteId,
-    })),
-  })
-  void sendExpoPushToUsers(recipients, { title, body, href })
-}
-
-export async function notifyAthleteOfProfileChangeDecision(input: {
-  userId: string
-  approved: boolean
-  pending: PendingProfileChanges
-}): Promise<void> {
-  const allowed = await userIdsWithPreference([input.userId], "profileChanges")
-  if (allowed.length === 0) return
-
-  const summary = describePendingProfileChanges(input.pending)
-  const title = input.approved
-    ? "Profile changes approved"
-    : "Profile changes rejected"
-  const body = summary
-    ? input.approved
-      ? `Approved: ${summary}`
-      : `Rejected: ${summary}`
-    : input.approved
-      ? "A coach approved your profile changes."
-      : "A coach rejected your profile changes."
-  await prisma.notification.create({
-    data: {
-      userId: input.userId,
-      type: input.approved
-        ? NotificationType.PROFILE_CHANGE_APPROVED
-        : NotificationType.PROFILE_CHANGE_REJECTED,
-      title,
-      body,
-      href: "/settings",
-    },
-  })
-  void sendExpoPushToUsers([input.userId], {
-    title,
-    body,
-    href: "/settings",
-  })
 }
 
 export async function notifyPracticePublished(input: {
@@ -335,7 +200,7 @@ export async function notifyTimesImportRequest(input: {
   athleteId: string
   firstName: string
   lastName: string
-  swimCloudId: number
+  swimCloudIds: number[]
   timesSyncedAt: Date | null
 }): Promise<void> {
   await dismissTimesImportRequestNotifications(input.athleteId)
@@ -354,9 +219,10 @@ export async function notifyTimesImportRequest(input: {
     .map((u) => u.id)
   if (recipients.length === 0) return
 
+  const ids = `SwimCloud ID${input.swimCloudIds.length > 1 ? "s" : ""} ${input.swimCloudIds.join(", ")}`
   const body = input.timesSyncedAt
-    ? `SwimCloud ID ${input.swimCloudId} · last imported ${formatRelativeTime(input.timesSyncedAt)}`
-    : `SwimCloud ID ${input.swimCloudId} · never imported`
+    ? `${ids} · last imported ${formatRelativeTime(input.timesSyncedAt)}`
+    : `${ids} · never imported`
 
   const href = await athleteHrefForId(input.athleteId)
   const title = `${input.firstName} ${input.lastName} requested a times import`

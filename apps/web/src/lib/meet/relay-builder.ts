@@ -121,6 +121,8 @@ export type RelayEventSlot = {
   event: string
   /** "Women 200 Medley Relay". */
   label: string
+  /** Meet event number for this gender, when the event order has one. */
+  number?: number | null
 }
 
 export function relaySlotSlug(gender: RelayGenderCode, event: string): string {
@@ -166,6 +168,19 @@ export function relayEventSlots(
     if (row.men != null || row.women == null) add("M", row.event)
   }
   for (const item of extra) add(item.gender, item.event)
+  for (const slot of slots) {
+    // A "Mixed" row numbers only the mixed relay, and the Women/Men rows only their own.
+    const row = eventOrder.find(
+      (r) => /\bmixed\b/i.test(r.event) === (slot.gender === "X") && slotMatches(slot, slot.gender, r.event)
+    )
+    slot.number = !row
+      ? null
+      : slot.gender === "F"
+        ? row.women
+        : slot.gender === "M"
+          ? row.men
+          : (row.women ?? row.men)
+  }
   return SLOT_GENDER_ORDER.flatMap((gender) => slots.filter((s) => s.gender === gender))
 }
 
