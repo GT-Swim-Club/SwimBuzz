@@ -106,7 +106,10 @@ export default function ImportRosterFromSheetScreen() {
       ]
       if (result.created > 0) parts.push(`${result.created} new`)
       if (result.updated > 0) parts.push(`${result.updated} updated`)
-      if (result.removed > 0) parts.push(`${result.removed} removed`)
+      if (result.removed > 0) {
+        const deleted = result.deleted ?? 0
+        parts.push(deleted > 0 ? `${result.removed} removed (${deleted} deleted)` : `${result.removed} removed`)
+      }
       if (result.errors?.length > 0) parts.push(`${result.errors.length} row(s) skipped`)
       Alert.alert("Import finished", parts.join(" · "), [
         { text: "OK", onPress: () => router.replace("/roster") },

@@ -354,6 +354,7 @@ export function ListRow({
   subtitleSegments,
   onPress,
   left,
+  accessory,
   right,
 }: {
   title: string
@@ -364,6 +365,8 @@ export function ListRow({
   subtitleSegments?: React.ReactNode[]
   onPress?: () => void
   left?: React.ReactNode
+  /** Rendered just before the chevron (e.g. a status icon); unlike `right`, keeps the chevron. */
+  accessory?: React.ReactNode
   right?: React.ReactNode
 }) {
   const styles = useStyles()
@@ -393,6 +396,7 @@ export function ListRow({
           <Text style={styles.rowSubtitle}>{subtitle}</Text>
         ) : null}
       </View>
+      {accessory}
       {right ?? (onPress ? <Text style={styles.rowChevron}>›</Text> : null)}
     </Pressable>
   )

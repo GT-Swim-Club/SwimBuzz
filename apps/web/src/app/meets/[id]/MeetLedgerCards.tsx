@@ -19,6 +19,7 @@ import EventOrderButton from "./EventOrderButton"
 import AddTravelInfoButton from "./AddTravelInfoButton"
 import ImportSignupsButton from "./ImportSignupsButton"
 import ImportMeetRosterButton from "./ImportMeetRosterButton"
+import { SHOW_ROSTER_EVENT } from "./MeetSheetSummarySection"
 import TravelInfoButtons, { type TravelInfoItem } from "./TravelInfoButtons"
 import ManagePhotosButton from "./ManagePhotosButton"
 
@@ -172,20 +173,29 @@ export function MeetSignupCard({
       <ImportMeetRosterButton
         meetId={meetId}
         rosterCount={rosterCount}
-        trigger={(open) => (
-          <LedgerRow
-            icon="download"
-            label="Import roster"
-            onClick={open}
-            trailing={
-              rosterCount != null ? (
-                <span className="shrink-0 text-xs text-foreground-secondary">
-                  {rosterCount} on roster
-                </span>
-              ) : undefined
-            }
-          />
-        )}
+        trigger={(open) =>
+          rosterCount != null ? (
+            <div className="flex items-center border-t border-border text-sm text-foreground">
+              <button
+                type="button"
+                onClick={open}
+                className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 py-[11px] pl-4 text-left transition-colors hover:text-primary"
+              >
+                <LedgerIcon name="download" className="h-4 w-4 shrink-0 text-foreground-tertiary" />
+                <span className="truncate">Import roster</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new Event(SHOW_ROSTER_EVENT))}
+                className="shrink-0 cursor-pointer py-[11px] pl-3 pr-4 text-xs text-foreground-secondary transition-colors hover:text-primary"
+              >
+                {rosterCount} on roster
+              </button>
+            </div>
+          ) : (
+            <LedgerRow icon="download" label="Import roster" onClick={open} />
+          )
+        }
       />
     </LedgerCard>
   )

@@ -411,11 +411,24 @@ export type RosterImportRowOutcome = {
 export type RosterImportSummary = {
   created: number
   updated: number
+  /** Dropped from the season */
   removed: number
+  /** Of `removed`, deleted from the DB (no seasons left, no swims or history) */
+  deleted: number
+  deletedNames: string[]
   parsed: number
   errors: Array<{ row: number; message: string }>
   rowOutcomes: RosterImportRowOutcome[]
 }
+
+export type RosterImportProgress = {
+  /** 0–1 completion across the whole import */
+  progress: number
+  detail: string
+}
+
+/** Share of the progress bar given to writing rows; the rest is dropping leftover athletes. */
+const ROW_PROGRESS_SHARE = 0.9
 
 /**
  * Replace one season's roster from parsed rows (CSV upload, Google Sheets, ...).
@@ -425,7 +438,8 @@ export type RosterImportSummary = {
 export async function runRosterImport(
   rows: ParsedRosterCsvRow[],
   season: string,
-  parseErrors: Array<{ row: number; message: string }>
+  parseErrors: Array<{ row: number; message: string }>,
+  onProgress?: (progress: RosterImportProgress) => void
 ): Promise<RosterImportSummary> {
   let created = 0
   let updated = 0
@@ -436,10 +450,14 @@ export async function runRosterImport(
   const context = await loadRosterImportContext()
 
   if (rows.length === 0) {
-    return { created, updated, removed: 0, parsed: 0, errors, rowOutcomes }
+    return { created, updated, removed: 0, deleted: 0, deletedNames: [], parsed: 0, errors, rowOutcomes }
   }
 
-  for (const row of rows) {
+  for (const [index, row] of rows.entries()) {
+    onProgress?.({
+      progress: (index / rows.length) * ROW_PROGRESS_SHARE,
+      detail: `${index + 1}/${rows.length} athletes · ${row.lastName}, ${row.firstName}`,
+    })
     const input: RosterImportInput = {
       firstName: row.firstName,
       lastName: row.lastName,
@@ -501,14 +519,79 @@ export async function runRosterImport(
   )
   // One statement per athlete. A wrapping transaction cannot run on the
   // transaction-mode pooler (DATABASE_URL, port 6543).
-  for (const athlete of dropping) {
+  for (const [index, athlete] of dropping.entries()) {
+    onProgress?.({
+      progress: ROW_PROGRESS_SHARE + (index / dropping.length) * (1 - ROW_PROGRESS_SHARE),
+      detail: `Removing athletes not in the file · ${index + 1}/${dropping.length}`,
+    })
     await prisma.athlete.update({
       where: { id: athlete.id },
       data: { seasons: athlete.seasons.filter((entry) => entry !== season) },
     })
   }
 
-  return { created, updated, removed: dropping.length, parsed: rows.length, errors, rowOutcomes }
+  if (dropping.length === 0) {
+    onProgress?.({ progress: ROW_PROGRESS_SHARE, detail: "Finishing up" })
+  }
+  const deletedNames = await deleteDroppedAthletes(
+    dropping.filter((athlete) => athlete.seasons.every((entry) => entry === season))
+  )
+
+  return {
+    created,
+    updated,
+    removed: dropping.length,
+    deleted: deletedNames.length,
+    deletedNames,
+    parsed: rows.length,
+    errors,
+    rowOutcomes,
+  }
+}
+
+/**
+ * Delete athletes a replace left on no season, unless they have any swims (so a
+ * wrong roster upload never forces a times re-import) or other team history:
+ * practice attendance, meet sign-ups, or room picks. Their auto-provisioned
+ * login goes with them, same as deleting an athlete.
+ */
+async function deleteDroppedAthletes(candidates: RosterImportAthlete[]): Promise<string[]> {
+  if (candidates.length === 0) return []
+
+  const deletable = await prisma.athlete.findMany({
+    where: {
+      id: { in: candidates.map((athlete) => athlete.id) },
+      seasons: { isEmpty: true },
+      swims: { none: {} },
+      practiceAttendance: { none: {} },
+      meetSignups: { none: {} },
+      meetRoomPreferences: { none: {} },
+      meetRoomAssignments: { none: {} },
+    },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      user: { select: { id: true, role: true, staffTitle: true } },
+    },
+  })
+
+  const deletedNames: string[] = []
+  for (const athlete of deletable) {
+    try {
+      await prisma.$transaction(async (tx) => {
+        await tx.athlete.delete({ where: { id: athlete.id } })
+        if (athlete.user.role === "ATHLETE" && athlete.user.staffTitle == null) {
+          await tx.user.delete({ where: { id: athlete.user.id } })
+        }
+      })
+      deletedNames.push(`${athlete.lastName}, ${athlete.firstName}`)
+    } catch (err) {
+      // Leave them off the roster but in the DB; the season removal already happened.
+      console.error(`[roster import] could not delete ${athlete.id}:`, err)
+    }
+  }
+  return deletedNames
 }
 
 export { parseRosterName as parseSwimCloudName } from "@/lib/athlete/athlete-match"

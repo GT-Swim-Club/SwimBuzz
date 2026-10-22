@@ -567,6 +567,8 @@ export function createApiClient(options: ApiClientOptions = {}) {
         created: number
         updated: number
         removed: number
+        /** Of `removed`, deleted outright (no seasons left, no swims or history) */
+        deleted?: number
         parsed: number
         errors: Array<{ row: number; message: string }>
         tab?: string

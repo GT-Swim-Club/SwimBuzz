@@ -2,11 +2,18 @@ import { useMemo, useState } from "react"
 import {
   Alert,
   RefreshControl,
+  Text,
   View,
 } from "react-native"
 import { useRouter } from "expo-router"
 import { useQuery } from "@tanstack/react-query"
-import { athleteDisplayName, formatSeasonLabel, isStaffRole } from "@swimbuzz/shared"
+import {
+  athleteDisplayName,
+  daysAgoLabel,
+  formatSeasonLabel,
+  isStaffRole,
+  localDayKey,
+} from "@swimbuzz/shared"
 import {
   Button,
   CardSkeleton,
@@ -19,12 +26,14 @@ import {
   Screen,
   Section,
   TextField,
+  usePalette,
 } from "@swimbuzz/ui"
 import { spacing } from "@swimbuzz/tokens"
 import { api } from "../../../src/lib/api"
 import { useAuth } from "../../../src/lib/auth"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 import { GalleryTile } from "../../../src/components/GalleryTile"
+import { Icon } from "../../../src/components/Icon"
 import { StaffBadge } from "../../../src/components/StaffBadge"
 import { useViewPreferences } from "../../../src/lib/view-preferences"
 
@@ -34,6 +43,8 @@ export default function RosterScreen() {
   const router = useRouter()
   const { user } = useAuth()
   const isStaff = !!user && isStaffRole(user.role)
+  const c = usePalette()
+  const todayKey = localDayKey(new Date())
   const { defaultView } = useViewPreferences()
   const tabBarPad = useTabBarScrollPadding()
   const gallery = defaultView === "gallery"
@@ -241,7 +252,27 @@ export default function RosterScreen() {
                 titleAdornment={
                   item.user?.staffTitle ? <StaffBadge title={item.user.staffTitle} /> : undefined
                 }
-                subtitle={[item.gender, item.seasons?.[0] && formatSeasonLabel(item.seasons[0])].filter(Boolean).join(" · ")}
+                subtitle={[
+                  item.gender,
+                  item.seasons?.[0] && formatSeasonLabel(item.seasons[0]),
+                  isStaff &&
+                    (item.timesSyncedAt
+                      ? `Imported ${daysAgoLabel(item.timesSyncedAt, todayKey)?.toLowerCase()}`
+                      : "Never imported"),
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+                accessory={
+                  isStaff ? (
+                    item.swimCloudIds?.length ? (
+                      <Icon name="check" size={18} color={c.success} accessibilityLabel="Has SwimCloud" />
+                    ) : (
+                      <Text style={{ color: c.textTertiary }} accessibilityLabel="No SwimCloud">
+                        —
+                      </Text>
+                    )
+                  ) : undefined
+                }
                 onPress={() => router.push(`/roster/${item.id}`)}
               />
             )

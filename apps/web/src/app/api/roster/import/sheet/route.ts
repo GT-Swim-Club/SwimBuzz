@@ -3,7 +3,8 @@ import { parseSeason } from "@/lib/season"
 import { parseRosterRecords } from "@/lib/roster/roster-csv"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
-import { runRosterImport } from "@/lib/roster/roster-import"
+import { runRosterImport, type RosterImportProgress } from "@/lib/roster/roster-import"
+import { streamRosterImport, wantsRosterImportStream } from "@/lib/roster/roster-import-stream"
 import {
   listSheetTabs,
   readSheetValues,
@@ -70,22 +71,24 @@ export async function POST(req: Request) {
     )
   }
 
-  let summary
+  const execute = async (onProgress?: (progress: RosterImportProgress) => void) => {
+    const summary = await runRosterImport(parsed.rows, season, parsed.errors, onProgress)
+
+    const { created, updated, removed, deleted, deletedNames, errors } = summary
+    console.log("[roster sheet import] summary:", { created, updated, removed, deleted, errors: errors.length })
+    if (deleted > 0) console.log("[roster sheet import] deleted athletes:", deletedNames)
+
+    return { created, updated, removed, deleted, parsed: parsed.rows.length, errors, tab: tabTitle }
+  }
+
+  if (wantsRosterImportStream(req)) {
+    return streamRosterImport(execute, "Import failed while saving athletes")
+  }
+
   try {
-    summary = await runRosterImport(parsed.rows, season, parsed.errors)
+    return NextResponse.json(await execute())
   } catch (err) {
     console.error("Google Sheets roster import failed:", err)
     return NextResponse.json({ error: "Import failed while saving athletes" }, { status: 500 })
   }
-
-  const { created, updated, removed, errors } = summary
-  console.log("[roster sheet import] summary:", { created, updated, removed, errors: errors.length })
-
-  return NextResponse.json({
-    created,
-    updated,
-    removed,
-    parsed: parsed.rows.length,
-    errors,
-    tab: tabTitle})
 }

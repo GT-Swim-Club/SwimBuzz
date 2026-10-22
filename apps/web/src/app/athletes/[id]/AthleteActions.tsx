@@ -8,6 +8,8 @@ import HoverDetail from "@/components/ui/HoverDetail"
 import { ICON_BUTTON, ICON_BUTTON_DANGER, SwimCloudProfileLinks } from "./AthleteIconButton"
 import SwimCloudIdsInput, { useSwimCloudIdsField } from "@/components/athlete/SwimCloudIdsInput"
 import { updateAthlete, deleteAthlete } from "./athlete.actions"
+import { athletePath } from "@/lib/slug"
+import { buildFullPath, carryBackTarget } from "@/lib/navigation-history"
 
 type AthleteActionsProps = {
   athleteId: string
@@ -72,7 +74,7 @@ export default function AthleteActions({
     setError(null)
     startTransition(async () => {
       try {
-        await updateAthlete(athleteId, {
+        const updated = await updateAthlete(athleteId, {
           firstName: form.firstName,
           lastName: form.lastName,
           email: form.email,
@@ -82,6 +84,14 @@ export default function AthleteActions({
           dob: form.dob === "" ? null : form.dob,
         })
         setEditing(false)
+        // A name change produces a new slug. router.replace swaps the current history entry (so
+        // Back still returns to the previous page) and soft-navigates, fetching fresh data.
+        if (updated.slug && athletePath(updated.slug) !== window.location.pathname) {
+          const search = window.location.search.replace(/^\?/, "")
+          const nextPath = buildFullPath(athletePath(updated.slug), search)
+          carryBackTarget(buildFullPath(window.location.pathname, search), nextPath)
+          router.replace(nextPath)
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to save changes")
       }
@@ -163,7 +173,7 @@ export default function AthleteActions({
             required
             value={form.firstName}
             onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
-            className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary focus:ring-[3px] focus:ring-primary/35"
           />
         </div>
         <div>
@@ -174,7 +184,7 @@ export default function AthleteActions({
               required
               value={form.lastName}
               onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
-              className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary focus:ring-[3px] focus:ring-primary/35"
             />
           </div>
         </div>
@@ -187,7 +197,7 @@ export default function AthleteActions({
             type="text"
             value={form.preferredName}
             onChange={(e) => setForm((f) => ({ ...f, preferredName: e.target.value }))}
-            className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary focus:ring-[3px] focus:ring-primary/35"
           />
         </div>
 
@@ -200,7 +210,7 @@ export default function AthleteActions({
             type="email"
             value={form.email}
             onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-            className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background border-border-secondary"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary focus:ring-[3px] focus:ring-primary/35"
           />
         </div>
 
@@ -217,7 +227,7 @@ export default function AthleteActions({
               onChange={(e) =>
                 setForm((f) => ({ ...f, gtid: e.target.value.replace(/\D/g, "").slice(0, GTID_LENGTH) }))
               }
-              className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary focus:ring-[3px] focus:ring-primary/35"
               aria-invalid={!gtidOk}
               aria-describedby={!gtidOk ? "edit-gtid-hint" : undefined}
             />
@@ -233,7 +243,7 @@ export default function AthleteActions({
               type="date"
               value={form.dob}
               onChange={(e) => setForm((f) => ({ ...f, dob: e.target.value }))}
-              className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary focus:ring-[3px] focus:ring-primary/35"
             />
           </div>
         </div>

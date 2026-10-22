@@ -26,7 +26,9 @@ export default function RelayPageHeader({
 }) {
   return (
     <header className="min-w-0">
-      {back}
+      {/* Fragment keeps the server-passed element out of the children array; otherwise
+          React warns about a missing key once the RSC lazy reference resolves. */}
+      <>{back}</>
       <div className="mt-1 flex items-center gap-4 sm:gap-5">
         {iconUrl ? (
           // eslint-disable-next-line @next/next/no-img-element

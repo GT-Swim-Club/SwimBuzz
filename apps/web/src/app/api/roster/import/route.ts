@@ -3,7 +3,8 @@ import { parseSeason } from "@/lib/season"
 import { parseRosterCsv } from "@/lib/roster/roster-csv"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
-import { runRosterImport } from "@/lib/roster/roster-import"
+import { runRosterImport, type RosterImportProgress } from "@/lib/roster/roster-import"
+import { streamRosterImport, wantsRosterImportStream } from "@/lib/roster/roster-import-stream"
 
 export const runtime = "nodejs"
 
@@ -54,34 +55,38 @@ export async function POST(req: Request) {
     )
   }
 
-  let summary
+  const execute = async (onProgress?: (progress: RosterImportProgress) => void) => {
+    const summary = await runRosterImport(parsed.rows, season, parsed.errors, onProgress)
+
+    const { created, updated, removed, deleted, deletedNames, errors, rowOutcomes } = summary
+    console.log("[roster csv import] summary:", {
+      created,
+      updated,
+      removed,
+      deleted,
+      skipped: rowOutcomes.filter((r) => r.action === "skipped").length,
+      parseErrors: parsed.errors.length,
+      importErrors: errors.length - parsed.errors.length})
+    console.log("[roster csv import] rows:", rowOutcomes)
+    if (deleted > 0) console.log("[roster csv import] deleted athletes:", deletedNames)
+    if (errors.length > parsed.errors.length) {
+      console.log(
+        "[roster csv import] import errors:",
+        errors.filter((e) => !parsed.errors.some((p) => p.row === e.row && p.message === e.message))
+      )
+    }
+
+    return { created, updated, removed, deleted, parsed: parsed.rows.length, errors }
+  }
+
+  if (wantsRosterImportStream(req)) {
+    return streamRosterImport(execute, "Import failed while saving athletes")
+  }
+
   try {
-    summary = await runRosterImport(parsed.rows, season, parsed.errors)
+    return NextResponse.json(await execute())
   } catch (err) {
     console.error("CSV roster import failed:", err)
     return NextResponse.json({ error: "Import failed while saving athletes" }, { status: 500 })
   }
-
-  const { created, updated, removed, errors, rowOutcomes } = summary
-  console.log("[roster csv import] summary:", {
-    created,
-    updated,
-    removed,
-    skipped: rowOutcomes.filter((r) => r.action === "skipped").length,
-    parseErrors: parsed.errors.length,
-    importErrors: errors.length - parsed.errors.length})
-  console.log("[roster csv import] rows:", rowOutcomes)
-  if (errors.length > parsed.errors.length) {
-    console.log(
-      "[roster csv import] import errors:",
-      errors.filter((e) => !parsed.errors.some((p) => p.row === e.row && p.message === e.message))
-    )
-  }
-
-  return NextResponse.json({
-    created,
-    updated,
-    removed,
-    parsed: parsed.rows.length,
-    errors})
 }

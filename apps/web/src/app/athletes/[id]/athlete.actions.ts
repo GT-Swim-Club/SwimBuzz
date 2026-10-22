@@ -129,7 +129,9 @@ export async function updateAthlete(athleteId: string, input: UpdateAthleteInput
     return result
   })
 
-  revalidatePath("/athletes/[id]", "page")
+  // When the slug changed, the page the caller is on (old slug) would 404 on re-render, so it
+  // skips the revalidation: the client swaps in the new URL and calls router.refresh() itself.
+  if (updated.slug === athlete.slug) revalidatePath("/athletes/[id]", "page")
   return updated
 }
 

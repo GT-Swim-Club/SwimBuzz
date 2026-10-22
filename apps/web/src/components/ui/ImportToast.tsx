@@ -10,7 +10,7 @@ function ProgressBar({ progress }: { progress?: number }) {
   const percent = known ? Math.round(Math.min(1, Math.max(0, progress)) * 100) : undefined
   return (
     <div
-      className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-fill-secondary"
+      className="mt-3 h-2 w-full overflow-hidden rounded-full bg-fill-secondary"
       role="progressbar"
       aria-valuemin={0}
       aria-valuemax={100}
@@ -34,7 +34,7 @@ function CheckIcon() {
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 20 20"
       fill="currentColor"
-      className="h-4 w-4 shrink-0 text-success"
+      className="h-5 w-5 shrink-0 text-success"
       aria-hidden="true"
     >
       <path
@@ -52,7 +52,7 @@ function ErrorIcon() {
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 20 20"
       fill="currentColor"
-      className="h-4 w-4 shrink-0 text-error"
+      className="h-5 w-5 shrink-0 text-error"
       aria-hidden="true"
     >
       <path
@@ -80,7 +80,7 @@ export default function ImportToast() {
       {tasks.map((task) => (
         <div
           key={task.id}
-          className={`pointer-events-auto flex max-w-xs items-start ${task.status === "running" ? "w-80" : ""} gap-3 rounded-xl border px-4 py-3 shadow-xl transition-all duration-300 animate-in slide-in-from-right-4 ${
+          className={`pointer-events-auto flex max-w-md items-start ${task.status === "running" ? "w-96" : ""} gap-4 rounded-2xl border px-5 py-4 shadow-xl transition-all duration-300 animate-in slide-in-from-right-4 ${
             task.status === "error"
               ? "bg-error-bg border-error-border"
               : task.status === "done"
@@ -102,35 +102,35 @@ export default function ImportToast() {
           {/* Text */}
           <div className="flex-1 min-w-0">
             {task.status === "running" && (
-              <p className="text-sm font-medium text-foreground leading-snug">
+              <p className="text-base font-medium text-foreground leading-snug">
                 {task.label}
               </p>
             )}
             {task.status === "running" && task.detail && (
-              <p className="mt-0.5 text-xs text-foreground-secondary tabular-nums truncate">
+              <p className="mt-1 text-sm text-foreground-secondary tabular-nums truncate">
                 {task.detail}
               </p>
             )}
             {task.status === "running" && task.alert && (
-              <p className="mt-1 text-xs font-medium text-warning" role="alert">
+              <p className="mt-1.5 text-sm font-medium text-warning" role="alert">
                 {task.alert}
               </p>
             )}
             {task.status === "running" && <ProgressBar progress={task.progress} />}
             
             {task.status === "done" && task.summary && (
-              <p className="text-sm font-medium text-foreground leading-snug">
+              <p className="text-base font-medium text-foreground leading-snug">
                 {task.summary}
               </p>
             )}
             
             {task.status === "error" && (
-              <p className="text-sm font-medium text-foreground leading-snug">
+              <p className="text-base font-medium text-foreground leading-snug">
                 {task.label}
               </p>
             )}
             {task.status === "error" && task.error && (
-              <p className="mt-0.5 text-xs text-error">
+              <p className="mt-1 text-sm text-error">
                 {task.error}
               </p>
             )}
@@ -142,13 +142,13 @@ export default function ImportToast() {
               type="button"
               onClick={() => dismissTask(task.id)}
               aria-label="Dismiss"
-              className="ml-1 shrink-0 rounded-md p-0.5 text-foreground-secondary hover:text-foreground hover:bg-fill-secondary transition-colors"
+              className="ml-1 shrink-0 rounded-md p-1 text-foreground-secondary hover:text-foreground hover:bg-fill-secondary transition-colors"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 16 16"
                 fill="currentColor"
-                className="h-3.5 w-3.5"
+                className="h-4 w-4"
                 aria-hidden="true"
               >
                 <path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22z" />

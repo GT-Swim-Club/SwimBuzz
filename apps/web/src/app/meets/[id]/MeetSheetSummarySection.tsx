@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, Fragment } from "react"
+import { useEffect, useRef, useState, Fragment } from "react"
 import Link from "next/link"
 import type { MeetResultEntry, SheetEntry, SheetSummary } from "@/lib/meet/meet-sheet-summary"
 import {
@@ -493,12 +493,19 @@ function detailEventTitle(event: string, gender: string | null | undefined): str
   return [prefix, name].filter(Boolean).join(" ")
 }
 
+/** Fired by the sign-ups & roster card to switch this section to the roster list. */
+export const SHOW_ROSTER_EVENT = "meet:show-roster"
+
 type AthleteRecord = {
   id: string
   slug?: string | null
   name: string
   gender?: "M" | "F"
   image?: string | null
+  /** Coach-only: athlete has no SwimCloud ID, so times can't sync. */
+  missingSwimCloud?: boolean
+  /** Coach-only: has a SwimCloud ID but times have never been imported. */
+  timesNeverImported?: boolean
 }
 
 function SummaryEntryRow({
@@ -802,6 +809,20 @@ export default function MeetSheetSummarySection({
 
   useEscapeToClose(settingsOpen, () => setSettingsOpen(false))
 
+  const sectionRef = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const show = () => {
+      setViewMode("roster")
+      setSearchQuery("")
+      setGenderFilter("all")
+      requestAnimationFrame(() =>
+        sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+      )
+    }
+    window.addEventListener(SHOW_ROSTER_EVENT, show)
+    return () => window.removeEventListener(SHOW_ROSTER_EVENT, show)
+  }, [])
+
   function persist(key: string, value: string) {
     try {
       window.localStorage.setItem(key, value)
@@ -968,19 +989,22 @@ export default function MeetSheetSummarySection({
 
   // Placeholder counts follow the gender filter but not the search query.
   const plural = (n: number, noun: string) => `${n} ${noun}${n === 1 ? "" : "s"}`
+  const genderSuffix = genderFilter === "all" ? "" : ` (${genderFilter === "F" ? "Women" : "Men"})`
   const searchPlaceholder =
     viewMode === "roster"
       ? `Search ${plural(
           rosterAthletes.filter((a) => genderFilter === "all" || a.gender === genderFilter).length,
           "athlete"
-        )}…`
+        )}${genderSuffix}…`
       : `Search ${plural(
           grouped.filter((g) => g.entries.some(matchesGenderFilter)).length,
           "athlete"
         )} and ${plural(
-          [...rawGroupedEvents.values()].filter((g) => g.entries.some((e) => !e.rosterOnly)).length,
+          [...rawGroupedEvents.values()].filter((g) =>
+            g.entries.some((e) => !e.rosterOnly && matchesGenderFilter(e))
+          ).length,
           "event"
-        )}…`
+        )}${genderSuffix}…`
 
   const sortedEventGroups = [...rawGroupedEvents.values()]
     .filter((group) => {
@@ -1011,6 +1035,10 @@ export default function MeetSheetSummarySection({
     (athlete) =>
       (genderFilter === "all" || athlete.gender === genderFilter) &&
       (!q || athlete.name.toLowerCase().includes(q))
+  )
+  // Viewer's own row pins to the top; everyone else keeps roster order.
+  filteredRosterAthletes.sort(
+    (a, b) => Number(b.id === viewerAthleteId) - Number(a.id === viewerAthleteId)
   )
   const hasContent =
     viewMode === "roster"
@@ -1068,7 +1096,7 @@ export default function MeetSheetSummarySection({
   const addMenuVisible = canEdit && meetId
 
   return (
-    <section>
+    <section ref={sectionRef} className="scroll-mt-4">
       <div className="mb-3 flex items-center gap-2 pb-1">
         <input
           type="search"
@@ -1231,9 +1259,14 @@ export default function MeetSheetSummarySection({
                       <span className={`truncate font-medium ${isMe ? "text-accent" : ""}`}>
                         {athlete.name}
                       </span>
-                      {isMe ? (
+                      {athlete.missingSwimCloud ? (
                         <span className="shrink-0 rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-accent">
-                          You
+                          No SwimCloud
+                        </span>
+                      ) : null}
+                      {athlete.timesNeverImported ? (
+                        <span className="shrink-0 rounded-full bg-fill px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-foreground-secondary">
+                          Never imported
                         </span>
                       ) : null}
                     </span>

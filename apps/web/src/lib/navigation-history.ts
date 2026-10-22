@@ -55,6 +55,27 @@ export function setBackTarget(path: string, target: BackTarget) {
   writeBackTargets(targets)
 }
 
+/**
+ * Call right before an in-place rename navigation (e.g. athlete slug change): the new URL is the
+ * same logical page, so it inherits the old URL's back target instead of making the old URL
+ * its "back" destination.
+ */
+export function carryBackTarget(fromPath: string, toPath: string) {
+  if (typeof window === "undefined") return
+  try {
+    const targets = readBackTargets()
+    const target = targets[fromPath]
+    if (target) {
+      targets[toPath] = target
+      delete targets[fromPath]
+      writeBackTargets(targets)
+    }
+    sessionStorage.setItem(NAV_CURR_KEY, toPath)
+  } catch {
+    // sessionStorage unavailable: back link falls back to its default.
+  }
+}
+
 export function isSafeInternalPath(path: string): boolean {
   return path.startsWith("/") && !path.startsWith("//")
 }

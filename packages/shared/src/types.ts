@@ -55,6 +55,8 @@ export type AthleteSummary = {
   seasons: string[]
   /** Main profile first; up to MAX_SWIMCLOUD_IDS. */
   swimCloudIds: number[]
+  /** When SwimCloud times were last imported; null if never. */
+  timesSyncedAt?: string | null
   user: {
     name?: string | null
     email?: string | null

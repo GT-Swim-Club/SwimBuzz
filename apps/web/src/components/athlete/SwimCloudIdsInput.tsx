@@ -89,7 +89,7 @@ export default function SwimCloudIdsInput({
 
   return (
     <div className="space-y-1.5">
-      <div className="flex min-h-[38px] flex-wrap items-center gap-1.5 rounded-lg border border-border-secondary bg-background px-2 py-1.5 focus-within:border-primary">
+      <div className="flex min-h-[38px] flex-wrap items-center gap-1.5 rounded-lg border border-border bg-background px-2 py-1.5 transition-[border-color,box-shadow] focus-within:border-primary focus-within:ring-[3px] focus-within:ring-primary/35">
         {ids.map((swimCloudId) => (
           <span
             key={swimCloudId}
@@ -116,7 +116,7 @@ export default function SwimCloudIdsInput({
               type="text"
               inputMode="numeric"
               aria-label="SwimCloud ID or URL"
-              placeholder={ids.length === 0 ? "Paste a SwimCloud profile link or ID" : "Add another"}
+              placeholder={ids.length === 0 ? undefined : "Add another"}
               title={SWIMCLOUD_ID_ERROR}
               value={draft}
               onChange={(e) => handleChange(e.target.value)}

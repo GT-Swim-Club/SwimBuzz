@@ -12,6 +12,10 @@ export type RosterAthlete = {
   gender: string
   year: string | null
   dob: string | Date | null
+  /** Main profile first; empty when the athlete has no SwimCloud profile. */
+  swimCloudIds: number[]
+  /** When SwimCloud times were last imported; null if never. */
+  timesSyncedAt: string | Date | null
   user: { image: string | null; staffTitle: StaffTitle | null } | null
 }
 

@@ -443,6 +443,7 @@ export default function SyncTimesButton() {
       >
         <ImportIcon />
         Times
+        <HoverDetail label="Import times" />
       </button>
 
       {open && (

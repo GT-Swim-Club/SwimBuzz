@@ -14,7 +14,6 @@ import {
   relativeEventDayLabel,
   relativeInstantDayLabel,
   zoneAbbreviation,
-  zoneDisplayName,
   zonedDayKey,
 } from "@swimbuzz/shared"
 import HoverDetail from "@/components/ui/HoverDetail"
@@ -242,7 +241,7 @@ export function RelativeInstantTime({
   const validInstant = Number.isNaN(instant.getTime()) ? new Date() : instant
   const absolute = formatDateTime(validInstant)
   const relative = relativeInstantDayLabel(validInstant, todayKey)
-  const zoneLabel = `${zoneDisplayName(viewerTimeZone, validInstant)} (${zoneAbbreviation(viewerTimeZone, validInstant)})`
+  const zoneLabel = zoneAbbreviation(viewerTimeZone, validInstant)
   const time = absolute.split(", ").slice(-1)[0]
   return (
     <span className={`group relative inline-block ${className ?? ""}`.trim()} tabIndex={0}>

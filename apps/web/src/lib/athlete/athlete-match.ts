@@ -41,6 +41,11 @@ export function parseFirstNameWithPreferredName(value: string): {
   return { firstName: trimmed, preferredName: null }
 }
 
+const LAST_NAME_PARTICLES = new Set([
+  "de", "del", "della", "der", "den", "di", "da", "das", "dos", "du", "la", "le", "el", "al",
+  "van", "von", "bin", "ibn", "st", "ten", "ter",
+])
+
 /** Parse a full or partial name, extracting a parenthetical preferred name when present. */
 export function parseRosterName(fullName: string): {
   firstName: string
@@ -76,7 +81,17 @@ export function parseRosterName(fullName: string): {
   if (parts.length < 2) {
     return { firstName: parts[0] ?? "", lastName: "", preferredName: null }
   }
-  return { firstName: parts[0], lastName: parts[parts.length - 1], preferredName: null }
+  // Walk back from the final word over surname particles ("De La Cruz", "Van Der Berg") so
+  // multi-word last names stay together; always leave at least the first word as the first name.
+  let lastStart = parts.length - 1
+  while (lastStart > 1 && LAST_NAME_PARTICLES.has(parts[lastStart - 1].toLowerCase().replace(/\.$/, ""))) {
+    lastStart--
+  }
+  return {
+    firstName: parts[0],
+    lastName: parts.slice(lastStart).join(" "),
+    preferredName: null,
+  }
 }
 
 /** The legal first name plus the preferred name, if set. */

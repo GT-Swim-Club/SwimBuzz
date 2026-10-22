@@ -217,6 +217,26 @@ export function relativeInstantDayLabel(value: Date | string, todayKey: string):
   return relativeDayLabel(localDayKey(value), todayKey)
 }
 
+/**
+ * "Today", "Yesterday", "3 days ago", "2 weeks ago", "5 months ago", "1 year ago" for
+ * the calendar days between an instant (in the local zone) and `todayKey`. Returns null
+ * for an empty `todayKey` (the SSR case, like relativeDayLabel).
+ */
+export function daysAgoLabel(value: Date | string, todayKey: string): string | null {
+  if (!todayKey) return null
+  const day = new Date(`${localDayKey(value)}T00:00:00Z`)
+  const today = new Date(`${todayKey}T00:00:00Z`)
+  if (Number.isNaN(day.getTime()) || Number.isNaN(today.getTime())) return null
+  const days = Math.max(0, Math.round((today.getTime() - day.getTime()) / (24 * 60 * 60 * 1000)))
+  if (days === 0) return "Today"
+  if (days === 1) return "Yesterday"
+  const ago = (n: number, unit: string) => `${n} ${unit}${n === 1 ? "" : "s"} ago`
+  if (days < 7) return ago(days, "day")
+  if (days < 30) return ago(Math.floor(days / 7), "week")
+  if (days < 365) return ago(Math.floor(days / 30), "month")
+  return ago(Math.floor(days / 365), "year")
+}
+
 type AthleteNameParts = {
   firstName: string
   lastName: string

@@ -43,6 +43,8 @@ async function RosterContent({ searchParams, layout }: { searchParams: Promise<R
           gender: true,
           year: true,
           dob: true,
+          swimCloudIds: true,
+          timesSyncedAt: true,
           user: { select: { image: true, staffTitle: true } }},
         orderBy: [{ lastName: "asc" }, { firstName: "asc" }]}),
       resolveViewerAthleteId(session.user.id),
@@ -59,6 +61,7 @@ async function RosterContent({ searchParams, layout }: { searchParams: Promise<R
                 seasons={seasons}
                 season={season}
                 viewerAthleteId={viewerAthleteId}
+                staffColumns={isCoach}
                 actions={
                     isCoach ? (
                         <>

@@ -148,7 +148,7 @@ export default function ImportTimesButton({
         title="Import Times From SwimCloud"
         description={
           linked
-            ? "Pulls any new swims from SwimCloud using the scraper. This usually takes 1–2 minutes."
+            ? "Pulls any new swims from SwimCloud using the scraper. This usually takes 2–3 minutes."
             : "Link this athlete to SwimCloud to import their times."
         }
         maxWidth="sm"

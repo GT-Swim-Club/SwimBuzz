@@ -233,6 +233,8 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       lastName: true, 
       preferredName: true,
       gender: true,
+      swimCloudIds: true,
+      timesSyncedAt: true,
       user: { select: { image: true, staffTitle: true } }
     }})
   const relayLineupCount = buildRelayLineups(meet, seasonRoster).length
@@ -241,7 +243,9 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
     slug: a.slug ?? a.id,
     name: `${a.lastName}, ${a.firstName}`,
     gender: a.gender === Gender.F ? ("F" as const) : ("M" as const),
-    image: a.user.image}))
+    image: a.user.image,
+    missingSwimCloud: isCoach && a.swimCloudIds.length === 0,
+    timesNeverImported: isCoach && a.swimCloudIds.length > 0 && !a.timesSyncedAt}))
 
   const meetRosterAthleteIds = new Set(
     collectMeetRosterAthleteIds({

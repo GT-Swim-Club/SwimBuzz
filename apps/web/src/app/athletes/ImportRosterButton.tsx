@@ -6,30 +6,36 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { currentSeason, parseSeason } from "@/lib/season"
 import { formatSeasonLabel } from "@swimbuzz/shared"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
+import HoverDetail from "@/components/ui/HoverDetail"
 import { toolbarButtonClass } from "@/components/ui/FluidToolbar"
 import ImportIcon from "./ImportIcon"
 import { useImportTask } from "@/components/ui/ImportTaskProvider"
 import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/ui/FileDropzone"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/ui/SegmentedToggle"
+import { postRosterImport } from "@/lib/roster/roster-import-client"
 import { pickSpreadsheet, type PickedSpreadsheet } from "@/lib/roster/google-picker-client"
 
 type ImportSource = "csv" | "sheets"
 
 type SheetTab = { gid: number; title: string }
 
-function formatRosterReplaceResult(data: {
+type RosterReplaceResult = {
   created?: number
   updated?: number
   removed?: number
+  deleted?: number
   errors?: unknown[]
-}) {
+}
+
+function formatRosterReplaceResult(data: RosterReplaceResult) {
   const created = data.created ?? 0
   const updated = data.updated ?? 0
   const removed = data.removed ?? 0
+  const deleted = data.deleted ?? 0
   const parts = [`Replaced the roster (${created + updated})`]
   if (created > 0) parts.push(`${created} new`)
   if (updated > 0) parts.push(`${updated} updated`)
-  if (removed > 0) parts.push(`${removed} removed`)
+  if (removed > 0) parts.push(deleted > 0 ? `${removed} removed (${deleted} deleted)` : `${removed} removed`)
   if ((data.errors?.length ?? 0) > 0) parts.push(`${data.errors!.length} row(s) skipped`)
   return parts.join(" · ")
 }
@@ -109,18 +115,19 @@ export default function ImportRosterButton() {
 
       startTask(
         "Importing roster (Google Sheets)…",
-        (async () => {
-          const res = await fetch("/api/roster/import/sheet", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ accessToken, spreadsheetId, gid, season }),
-          })
-          const data = await res.json()
-          if (!res.ok) throw new Error(data.error ?? "Import failed")
+        async (report) => {
+          const data = await postRosterImport<RosterReplaceResult>(
+            "/api/roster/import/sheet",
+            {
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ accessToken, spreadsheetId, gid, season }),
+            },
+            report
+          )
 
           router.refresh()
           return formatRosterReplaceResult(data)
-        })()
+        }
       )
       return
     }
@@ -135,18 +142,16 @@ export default function ImportRosterButton() {
 
     startTask(
       "Importing roster (CSV)…",
-      (async () => {
+      async (report) => {
         const body = new FormData()
         body.append("file", file, file.name)
         body.append("season", season)
 
-        const res = await fetch("/api/roster/import", { method: "POST", body })
-        const data = await res.json()
-        if (!res.ok) throw new Error(data.error ?? "Import failed")
+        const data = await postRosterImport<RosterReplaceResult>("/api/roster/import", { body }, report)
 
         router.refresh()
         return formatRosterReplaceResult(data)
-      })()
+      }
     )
   }
 
@@ -165,6 +170,7 @@ export default function ImportRosterButton() {
       >
         <ImportIcon />
         Roster
+        <HoverDetail label="Import roster" />
       </button>
 
       <Modal
