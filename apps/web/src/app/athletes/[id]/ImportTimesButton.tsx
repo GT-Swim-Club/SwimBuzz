@@ -5,12 +5,17 @@ import { useRouter } from "next/navigation"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { AppIcon } from "@/components/ui/AppIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
+import { RelativeInstantTime } from "@/components/ui/RelativeDate"
 import { useScraperUi } from "@/components/scraper/ScraperUiProvider"
+import { useImportTask, type ImportTaskProgress } from "@/components/ui/ImportTaskProvider"
 import SetSwimCloudIdForm from "@/components/athlete/SetSwimCloudIdForm"
-import { formatDateTime } from "@/lib/utils"
+import {
+  scraperJobFraction,
+  scraperRateLimitNotice,
+  type ScraperJobStatusPayload,
+} from "@/lib/scraper/scraper-job-client"
+import { CLOUDFLARE_ALERT } from "../SyncTimesButton"
 import { ICON_BUTTON } from "./AthleteIconButton"
-
-type Status = "idle" | "loading" | "done" | "error"
 
 /** Key/value box showing when times were last imported and the SwimCloud IDs. */
 export function ImportInfoBox({
@@ -22,7 +27,9 @@ export function ImportInfoBox({
 }) {
   return (
     <div className="flex flex-col gap-1.5 rounded-xl border border-border-secondary bg-fill-secondary px-4 py-3 text-[13px] leading-[18px]">
-      <InfoRow label="Last imported">{timesSyncedAt ? formatDateTime(timesSyncedAt) : "Never"}</InfoRow>
+      <InfoRow label="Last imported">
+        {timesSyncedAt ? <RelativeInstantTime at={timesSyncedAt} separator=", " /> : "Never"}
+      </InfoRow>
       <InfoRow label={swimCloudIds.length > 1 ? "SwimCloud IDs" : "SwimCloud ID"}>
         <span className="font-mono tabular-nums">{swimCloudIds.join(", ")}</span>
       </InfoRow>
@@ -39,6 +46,23 @@ function InfoRow({ label, children }: { label: string; children: ReactNode }) {
   )
 }
 
+/** Toast progress for a single athlete's times-import scraper job, e.g. "100 Free SCY · 3/33". */
+function athleteImportProgress(job: ScraperJobStatusPayload): ImportTaskProgress {
+  if (job.status === "PENDING") return { detail: "Waiting for the scraper to start…" }
+  if (job.status === "COMPLETED") return { detail: "Saving times…", progress: 1 }
+  const progress = job.progress
+  const profile =
+    progress?.total && progress.total > 1 ? `Profile ${progress.current ?? 1}/${progress.total} · ` : ""
+  return {
+    detail:
+      progress?.eventLabel && progress.events
+        ? `${profile}${progress.eventLabel} · ${progress.event ?? 0}/${progress.events}`
+        : undefined,
+    alert: progress?.cloudflare ? CLOUDFLARE_ALERT : scraperRateLimitNotice(progress),
+    progress: scraperJobFraction(progress),
+  }
+}
+
 /** History toolbar button: pull an athlete's new swims from SwimCloud via the desktop scraper. */
 export default function ImportTimesButton({
   athleteId,
@@ -51,22 +75,17 @@ export default function ImportTimesButton({
 }) {
   const router = useRouter()
   const { requireScraper } = useScraperUi()
+  const { startTask } = useImportTask()
   const [open, setOpen] = useState(false)
-  const [status, setStatus] = useState<Status>("idle")
-  const [error, setError] = useState<string | null>(null)
-  const [count, setCount] = useState(0)
-  const [failedIds, setFailedIds] = useState<number[]>([])
-  const [resultOpen, setResultOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [lastSynced, setLastSynced] = useState<string | null>(timesSyncedAt)
-  const loading = status === "loading"
   const linked = swimCloudIds.length > 0
 
   function runImport() {
     if (!linked || loading) return
     requireScraper(() => {
-      void (async () => {
-        setStatus("loading")
-        setError(null)
+      const run = async (report: (progress: ImportTaskProgress) => void) => {
+        setLoading(true)
         try {
           const { runScraperEnqueuePollFinalize } = await import("@/lib/scraper/scraper-job-client")
           const data = await runScraperEnqueuePollFinalize<{
@@ -86,19 +105,27 @@ export default function ImportTimesButton({
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ jobId }),
               }),
+            onJob: (job) => report(athleteImportProgress(job)),
           })
-          setCount(typeof data.imported === "number" ? data.imported : 0)
-          setFailedIds(data.failedSwimCloudIds ?? [])
           if (data.timesSyncedAt) setLastSynced(data.timesSyncedAt)
-          setStatus("done")
           router.refresh()
+
+          const count = typeof data.imported === "number" ? data.imported : 0
+          const failedIds = data.failedSwimCloudIds ?? []
+          return `Imported ${count} new swim${count === 1 ? "" : "s"} from SwimCloud.${
+            failedIds.length > 0
+              ? ` SwimCloud profile ${failedIds.join(", ")} couldn't be scraped — try again later.`
+              : ""
+          }`
         } catch (err) {
-          setError(err instanceof Error ? err.message : "Import failed — is the scraper running?")
-          setStatus("error")
+          throw err instanceof Error ? err : new Error("Import failed — is the scraper running?")
+        } finally {
+          setLoading(false)
         }
-        setOpen(false)
-        setResultOpen(true)
-      })()
+      }
+
+      startTask("Importing SwimCloud times…", run)
+      setOpen(false)
     }, { continueLabel: "Import times" })
   }
 
@@ -118,8 +145,6 @@ export default function ImportTimesButton({
       <Modal
         open={open}
         onClose={() => setOpen(false)}
-        closeDisabled={loading}
-        busy={loading}
         title="Import Times From SwimCloud"
         description={
           linked
@@ -132,7 +157,6 @@ export default function ImportTimesButton({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              disabled={loading}
               className="flex-1 rounded-lg border border-border-secondary px-4 py-2.5 text-sm font-medium transition-colors hover:bg-background-hover disabled:opacity-50"
             >
               {linked ? "Cancel" : "Close"}
@@ -141,59 +165,20 @@ export default function ImportTimesButton({
               <button
                 type="button"
                 onClick={runImport}
-                disabled={loading}
                 className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast transition-colors hover:bg-primary-hover disabled:opacity-50"
               >
-                {loading ? "Importing…" : "Import"}
+                Import
               </button>
             )}
           </ModalFooter>
         }
       >
         {linked ? (
-          <>
-            <ImportInfoBox timesSyncedAt={lastSynced} swimCloudIds={swimCloudIds} />
-            {loading && (
-              <p className="text-[13px] text-foreground-secondary">
-                Scraping SwimCloud events, typically 1–2 minutes…
-              </p>
-            )}
-          </>
+          <ImportInfoBox timesSyncedAt={lastSynced} swimCloudIds={swimCloudIds} />
         ) : (
           <SetSwimCloudIdForm athleteId={athleteId} />
         )}
       </Modal>
-
-      <Modal
-        open={resultOpen && (status === "done" || status === "error")}
-        onClose={() => setResultOpen(false)}
-        title={status === "error" ? "Import failed" : "Import complete"}
-        description={
-          status === "error"
-            ? error ?? "Something went wrong while importing times."
-            : `${
-                count === 1
-                  ? "1 new swim was imported from SwimCloud."
-                  : `${count} new swims were imported from SwimCloud.`
-              }${
-                failedIds.length > 0
-                  ? ` SwimCloud profile ${failedIds.join(", ")} couldn't be scraped — try again later.`
-                  : ""
-              }`
-        }
-        maxWidth="sm"
-        footer={
-          <ModalFooter>
-            <button
-              type="button"
-              onClick={() => setResultOpen(false)}
-              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast transition-colors hover:bg-primary-hover"
-            >
-              Done
-            </button>
-          </ModalFooter>
-        }
-      />
     </>
   )
 }

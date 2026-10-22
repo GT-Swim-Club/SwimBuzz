@@ -10,6 +10,8 @@ import { useScraperUi } from "@/components/scraper/ScraperUiProvider"
 import { useImportTask, type ImportTaskProgress } from "@/components/ui/ImportTaskProvider"
 import {
   runScraperEnqueuePollFinalize,
+  scraperJobFraction,
+  scraperRateLimitNotice,
   type ScraperJobStatusPayload,
 } from "@/lib/scraper/scraper-job-client"
 import { useEscapeToClose } from "@/lib/use-escape-to-close"
@@ -37,8 +39,8 @@ type SyncResult = {
   failed: Array<string | number>
 }
 
-const CLOUDFLARE_ALERT =
-  "Complete the Cloudflare check in the browser to continue."
+export const CLOUDFLARE_ALERT =
+  "Complete the Cloudflare check in the browser."
 
 /** "Last imported" filter: any, never, or at least N days ago (never-imported athletes pass too). */
 const IMPORT_FILTERS = [
@@ -69,7 +71,7 @@ function timesImportProgress(
   athletes: RosterAthlete[]
 ): ImportTaskProgress {
   if (job.status === "PENDING") return { detail: "Waiting for the scraper to start…" }
-  if (job.status === "COMPLETED") return { detail: "Saving times…" }
+  if (job.status === "COMPLETED") return { detail: "Saving times…", progress: 1 }
   const progress = job.progress
   const total = progress?.total ?? athletes.length
   const athlete = athletes.find(
@@ -78,7 +80,8 @@ function timesImportProgress(
   const count = `${progress?.current ?? 0}/${total} athlete${total === 1 ? "" : "s"}`
   return {
     detail: athlete ? `${count} · ${athlete.firstName} ${athlete.lastName}` : count,
-    alert: progress?.cloudflare ? CLOUDFLARE_ALERT : undefined,
+    alert: progress?.cloudflare ? CLOUDFLARE_ALERT : scraperRateLimitNotice(progress),
+    progress: scraperJobFraction(progress),
   }
 }
 
@@ -408,7 +411,7 @@ export default function SyncTimesButton() {
       return `Imported ${result.imported} new swim${result.imported === 1 ? "" : "s"} from ${result.athletesSynced}/${result.athletes} athlete${result.athletes === 1 ? "" : "s"}.`
     }
 
-    startTask("Importing times…", run)
+    startTask("Importing SwimCloud times…", run)
     setOpen(false)
   }
 

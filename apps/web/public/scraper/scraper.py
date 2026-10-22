@@ -21,9 +21,6 @@ from dotenv import load_dotenv
 load_dotenv(Path(__file__).resolve().parent / ".env")
 
 SCRAPER_POLL_SEC = 2.0
-CLOUDFLARE_NOTE = (
-    "If Chromium opens, complete the Cloudflare 'I'm human' check in that window."
-)
 # Modules re-downloaded from the app on each start so scrape fixes apply without reinstall.
 SYNC_FILES = (
     "scraper.py",
@@ -174,9 +171,6 @@ async def run_job(job: dict, report=None) -> object:
     job_type = job["type"]
     payload = job["payload"]
 
-    print(f"\n--- Run scraper job: {job_type} ---")
-
-    print(CLOUDFLARE_NOTE)
     set_progress_reporter(report)
 
     if job_type == "ROSTER":
@@ -230,8 +224,8 @@ async def heartbeat_loop(
 
 async def scraper_loop(base_url: str, token: str) -> None:
     print(f"Scraper running against {base_url}")
-    print("Waiting for sync requests from the app (roster, times, SwimPhone meets)…")
-    print("Leave this running while you import rosters, times, or meet results.\n")
+    print("Waiting for requests from the app (SwimCloud times, SwimPhone results)…")
+    print("Leave this running while you import SwimCloud times or SwimPhone meet results.\n")
 
     stop = asyncio.Event()
     stopped_by_app = False
@@ -248,6 +242,7 @@ async def scraper_loop(base_url: str, token: str) -> None:
                         continue
 
                     job_id = job["id"]
+                    print(f"Job {job_id} started ({job['type']}).")
                     job_task = asyncio.create_task(
                         run_job(job, progress_reporter(client, base_url, token, job_id))
                     )
@@ -284,7 +279,7 @@ async def scraper_loop(base_url: str, token: str) -> None:
                             await complete_job(
                                 client, base_url, token, job_id, result=result
                             )
-                            print(f"Job {job_id} completed.\n")
+                            print(f"Job {job_id} completed.")
                         except Exception as exc:
                             print(f"Job {job_id} failed: {exc}")
                             await complete_job(

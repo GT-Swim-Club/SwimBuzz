@@ -22,11 +22,13 @@ export type ImportTask = {
   error?: string
   /** Secondary progress line while running, e.g. "2/5 athletes · Jane Doe" */
   detail?: string
-  /** Action the user must take for the task to continue, e.g. a Cloudflare check */
+  /** Warning the user should see, e.g. a Cloudflare check to complete or a rate-limit pause */
   alert?: string
+  /** 0–1 completion for the toast's progress bar; indeterminate when unset */
+  progress?: number
 }
 
-export type ImportTaskProgress = Pick<ImportTask, "detail" | "alert">
+export type ImportTaskProgress = Pick<ImportTask, "detail" | "alert" | "progress">
 
 type ImportTaskContextValue = {
   tasks: ImportTask[]
@@ -135,10 +137,10 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
         { id, label, status: "running" },
       ])
 
-      const report = ({ detail, alert }: ImportTaskProgress) => {
+      const report = ({ detail, alert, progress }: ImportTaskProgress) => {
         setTasks((prev) =>
           prev.map((t) =>
-            t.id === id && t.status === "running" ? { ...t, detail, alert } : t
+            t.id === id && t.status === "running" ? { ...t, detail, alert, progress } : t
           )
         )
       }
@@ -149,7 +151,7 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
           setTasks((prev) =>
             prev.map((t) =>
               t.id === id
-                ? { ...t, status: "done", summary, detail: undefined, alert: undefined }
+                ? { ...t, status: "done", summary, detail: undefined, alert: undefined, progress: undefined }
                 : t
             )
           )
@@ -162,7 +164,7 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
           setTasks((prev) =>
             prev.map((t) =>
               t.id === id
-                ? { ...t, status: "error", error: message, detail: undefined, alert: undefined }
+                ? { ...t, status: "error", error: message, detail: undefined, alert: undefined, progress: undefined }
                 : t
             )
           )

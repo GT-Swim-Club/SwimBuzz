@@ -4,12 +4,27 @@ import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import { useImportTask } from "@/components/ui/ImportTaskProvider"
 
-function SpinnerIcon() {
+/** Determinate when `progress` (0–1) is known, otherwise an indeterminate sweep. */
+function ProgressBar({ progress }: { progress?: number }) {
+  const known = typeof progress === "number"
+  const percent = known ? Math.round(Math.min(1, Math.max(0, progress)) * 100) : undefined
   return (
-    <span
-      className="inline-block h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-border border-t-foreground"
-      aria-hidden="true"
-    />
+    <div
+      className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-fill-secondary"
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={percent}
+    >
+      {known ? (
+        <div
+          className="h-full rounded-full bg-primary transition-[width] duration-500 ease-out"
+          style={{ width: `${percent}%` }}
+        />
+      ) : (
+        <div className="import-toast-bar-indeterminate h-full w-2/5 rounded-full bg-primary" />
+      )}
+    </div>
   )
 }
 
@@ -65,7 +80,7 @@ export default function ImportToast() {
       {tasks.map((task) => (
         <div
           key={task.id}
-          className={`pointer-events-auto flex max-w-xs items-start gap-3 rounded-xl border px-4 py-3 shadow-xl transition-all duration-300 animate-in slide-in-from-right-4 ${
+          className={`pointer-events-auto flex max-w-xs items-start ${task.status === "running" ? "w-80" : ""} gap-3 rounded-xl border px-4 py-3 shadow-xl transition-all duration-300 animate-in slide-in-from-right-4 ${
             task.status === "error"
               ? "bg-error-bg border-error-border"
               : task.status === "done"
@@ -76,12 +91,13 @@ export default function ImportToast() {
           }`}
           role="status"
         >
-          {/* Status icon */}
-          <div className="mt-0.5 shrink-0">
-            {task.status === "running" && <SpinnerIcon />}
-            {task.status === "done" && <CheckIcon />}
-            {task.status === "error" && <ErrorIcon />}
-          </div>
+          {/* Status icon (running tasks show a progress bar instead) */}
+          {task.status !== "running" && (
+            <div className="mt-0.5 shrink-0">
+              {task.status === "done" && <CheckIcon />}
+              {task.status === "error" && <ErrorIcon />}
+            </div>
+          )}
 
           {/* Text */}
           <div className="flex-1 min-w-0">
@@ -100,6 +116,7 @@ export default function ImportToast() {
                 {task.alert}
               </p>
             )}
+            {task.status === "running" && <ProgressBar progress={task.progress} />}
             
             {task.status === "done" && task.summary && (
               <p className="text-sm font-medium text-foreground leading-snug">

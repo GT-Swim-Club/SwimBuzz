@@ -8,8 +8,45 @@ export type ScraperJobProgress = {
   current?: number
   total?: number
   swimmerId?: number
+  /** 1-based index of the SwimCloud event being fetched for the current swimmer. */
+  event?: number
+  /** Number of events fetched per swimmer. */
+  events?: number
+  /** Event being fetched, e.g. "100 Free SCY". */
+  eventLabel?: string | null
   /** True while a Cloudflare check is blocking the scraper's browser window. */
   cloudflare?: boolean
+  /** Epoch ms when the scraper retries after SwimCloud rate-limited it (HTTP 429). */
+  rateLimitedUntil?: number | null
+}
+
+/** Plain-language toast notice while SwimCloud is rate-limiting the scraper. */
+export function scraperRateLimitNotice(
+  progress: ScraperJobProgress | null | undefined
+): string | undefined {
+  if (!progress?.rateLimitedUntil) return undefined
+  const seconds = Math.ceil((progress.rateLimitedUntil - Date.now()) / 1000)
+  const resume =
+    seconds <= 0
+      ? "Picking back up now"
+      : seconds < 60
+        ? `Picking back up in ${seconds}s`
+        : `Picking back up in about ${Math.round(seconds / 60)} min`
+  return `SwimCloud is limiting how fast we can import. ${resume} — no action needed.`
+}
+
+/**
+ * Overall 0–1 completion of a times scrape, counting the event currently being
+ * fetched. Undefined until there's measurable progress (so the toast shows an
+ * indeterminate bar rather than an empty track, e.g. during a Cloudflare check
+ * or with an older scraper that only reports per-swimmer progress).
+ */
+export function scraperJobFraction(progress: ScraperJobProgress | null | undefined): number | undefined {
+  if (!progress?.total) return undefined
+  const swimmersDone = Math.max(0, (progress.current ?? 1) - 1)
+  const eventPart = progress.events ? (progress.event ?? 0) / progress.events : 0
+  const fraction = Math.min(1, (swimmersDone + eventPart) / progress.total)
+  return fraction > 0 ? fraction : undefined
 }
 
 export type ScraperJobStatusPayload = {

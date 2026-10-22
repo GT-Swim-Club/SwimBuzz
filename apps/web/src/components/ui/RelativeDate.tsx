@@ -229,9 +229,12 @@ export function RelativeDateRangeTime({
 export function RelativeInstantTime({
   at,
   className,
+  separator = " at ",
 }: {
   at: Date | string
   className?: string
+  /** Joins the relative day and the time, e.g. ", " for "Today, 3:04 PM". */
+  separator?: string
 }) {
   const todayKey = useTodayKey()
   const viewerTimeZone = useViewerTimeZone()
@@ -243,7 +246,7 @@ export function RelativeInstantTime({
   const time = absolute.split(", ").slice(-1)[0]
   return (
     <span className={`group relative inline-block ${className ?? ""}`.trim()} tabIndex={0}>
-      {relative ? `${relative} at ${time}` : absolute}
+      {relative ? `${relative}${separator}${time}` : absolute}
       <HoverDetail label={relative ? `${absolute} · ${zoneLabel}` : zoneLabel} />
     </span>
   )

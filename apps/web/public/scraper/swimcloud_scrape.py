@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import os
 import random
+import time
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -350,20 +351,22 @@ def build_event_requests(swimmer_id: int) -> list[dict]:
     return requests
 
 
-async def fetch_one(page, url: str, pacer: AdaptivePacer, label: str):
+async def fetch_one(page, url: str, pacer: AdaptivePacer):
     for attempt in range(MAX_RETRIES):
         data = await page.evaluate(FETCH_JS, url)
         if isinstance(data, dict) and data.get("error") == 429:
             pacer.on_rate_limit()
             wait = RETRY_BASE_SEC * (2 ** attempt) + random.uniform(0, 1)
-            print(f"429 on {label}, waiting {wait:.0f}s (retry {attempt + 1}/{MAX_RETRIES})")
+            # Epoch ms so the app's toast can count down to the retry.
+            report_progress(rateLimitedUntil=int((time.time() + wait) * 1000))
             await asyncio.sleep(wait)
             continue
+        report_progress(rateLimitedUntil=None)
         if isinstance(data, dict) and "error" in data:
             return None
         pacer.on_success()
         return data
-    print(f"Giving up on {label} after {MAX_RETRIES} retries")
+    report_progress(rateLimitedUntil=None)
     return None
 
 
@@ -379,7 +382,8 @@ async def fetch_times_by_events(page, swimmer_id: int, pacer: AdaptivePacer) -> 
     results = []
     requests = build_event_requests(swimmer_id)
     for i, req in enumerate(requests):
-        data = await fetch_one(page, req["url"], pacer, req["label"])
+        report_progress(event=i + 1, events=len(requests), eventLabel=req["label"])
+        data = await fetch_one(page, req["url"], pacer)
         if data:
             append_times(results, data, req["stroke"], req["distance"], req["course"])
         if i + 1 < len(requests):
@@ -409,8 +413,10 @@ async def scrape_bulk_times(swimmer_ids: list[int]):
     async with async_playwright() as p:
         browser, page = await launch_browser(p)
         for idx, swimmer_id in enumerate(swimmer_ids):
-            label = f"{idx + 1}/{len(swimmer_ids)}"
-            report_progress(current=idx + 1, total=len(swimmer_ids), swimmerId=swimmer_id)
+            report_progress(
+                current=idx + 1, total=len(swimmer_ids), swimmerId=swimmer_id,
+                event=0, events=len(EVENTS), eventLabel=None,
+            )
             for attempt in range(2):
                 try:
                     # First swimmer (and retries) go via home to clear CF cookies / session.
@@ -418,17 +424,11 @@ async def scrape_bulk_times(swimmer_ids: list[int]):
                     await open_swimmer_times_page(page, swimmer_id, via_home=via_home)
                     times = await fetch_times_by_events(page, swimmer_id, pacer)
                     swimmers[str(swimmer_id)] = times
-                    print(f"Bulk sync [{label}] swimmer {swimmer_id}: {len(times)} times")
                     break
                 except Exception as e:
                     if attempt == 0 and is_transient_navigation_error(e):
-                        print(
-                            f"Bulk sync [{label}] swimmer {swimmer_id} "
-                            f"hit mid-navigation, retrying…"
-                        )
                         await asyncio.sleep(1.5 + random.uniform(0, 0.5))
                         continue
-                    print(f"Bulk sync [{label}] swimmer {swimmer_id} failed: {e}")
                     failed.append(swimmer_id)
                     break
             if idx + 1 < len(swimmer_ids):

@@ -188,6 +188,28 @@ select[size="1"] {
 }
 
 
+@keyframes import-toast-bar-indeterminate {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+.import-toast-bar-indeterminate {
+  animation: import-toast-bar-indeterminate 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .import-toast-bar-indeterminate {
+    animation: none;
+    width: 100%;
+    opacity: 0.4;
+  }
+}
+
+
 @keyframes practice-tag-form-open {
   from {
     width: 26px;
