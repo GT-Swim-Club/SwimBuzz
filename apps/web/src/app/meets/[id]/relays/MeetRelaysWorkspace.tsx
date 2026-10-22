@@ -98,7 +98,7 @@ export default function MeetRelaysWorkspace({
     document.getElementById("page-scroll")?.scrollTo({ top: 0 })
   }
 
-  function commit(data: RelaySlotData, { kind, teams, relayEvent }: RelayCommit, replace: boolean) {
+  function commit(data: RelaySlotData, { kind, teams, relayEvent, optimal, settings }: RelayCommit, replace: boolean) {
     const { slot } = data
     const target = {
       meetId,
@@ -115,7 +115,7 @@ export default function MeetRelaysWorkspace({
           ? {
               slot,
               published: data.published.filter((relay) => !relay.manual),
-              draft: { teams, savedAt: new Date().toISOString() },
+              draft: { teams, savedAt: new Date().toISOString(), optimal, settings },
             }
           : { slot, published: optimisticPublished(target, teams), draft: null },
     }))
@@ -125,7 +125,7 @@ export default function MeetRelaysWorkspace({
 
     void (async () => {
       try {
-        if (kind === "draft") await persistRelayDraft(target, teams)
+        if (kind === "draft") await persistRelayDraft(target, teams, optimal, settings)
         else await persistRelayPublish(target, teams)
       } catch (err) {
         const message = err instanceof Error ? err.message : "Something went wrong"
@@ -227,9 +227,16 @@ export default function MeetRelaysWorkspace({
     const savingPill = saving.includes(slot.slug) ? [{ label: "Saving…", tone: "suggested" as const }] : []
     // One status per event: a draft (saving one unpublishes the event), else what's published.
     if (draft) {
+      // A draft reads "Optimal" rather than "Draft" from the flag saved with it.
+      const isOptimal = draft.optimal === true
       return {
         ...base,
-        pills: [{ label: "Draft", tone: "draft" as const }, ...savingPill],
+        pills: [
+          isOptimal
+            ? { label: "Optimal", tone: "suggested" as const }
+            : { label: "Draft", tone: "draft" as const },
+          ...savingPill,
+        ],
         state: "cards" as const,
         cards: lineupSummaryCards(slot.slug, draft.teams),
       }
@@ -252,14 +259,14 @@ export default function MeetRelaysWorkspace({
     if (suggestion?.status === "ok") {
       return {
         ...base,
-        pills: [{ label: "Auto", tone: "suggested" as const }],
+        pills: [{ label: "Optimal", tone: "suggested" as const }],
         state: "cards" as const,
         cards: lineupSummaryCards(slot.slug, lineupTeamsOf(suggestion.result)),
       }
     }
     return {
       ...base,
-      pills: [{ label: "Auto", tone: "suggested" as const }],
+      pills: [{ label: "Optimal", tone: "suggested" as const }],
       state: suggestion?.status === "error" ? ("empty" as const) : ("loading" as const),
       emptyText: suggestion?.status === "error" ? suggestion.error : undefined,
       cards: [],

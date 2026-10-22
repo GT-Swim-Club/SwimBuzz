@@ -1,4 +1,5 @@
 import { relaySignupKey } from "@/lib/swim/swim-parse"
+import type { BuildSettings } from "@/lib/meet/relay-builder"
 
 export type RelayDraftGender = "M" | "F" | "X"
 
@@ -18,6 +19,10 @@ export type RelayDraft = {
   event: string
   teams: RelayDraftTeam[]
   savedAt: string
+  /** Whether the lineup matched the optimal one when saved — lets the summary tag it without a rebuild. */
+  optimal?: boolean
+  /** Builder settings (times windows, athlete pool) at save; ignored once the meet has passed. */
+  settings?: BuildSettings
 }
 
 export type RelayDraftsSummary = { drafts: RelayDraft[] }
@@ -67,6 +72,33 @@ export function parseRelayDraftTeams(raw: unknown): { teams: RelayDraftTeam[] } 
     teams.push({ letter, legs: legs as RelayDraftLeg[] })
   }
   return { teams: teams.sort((a, b) => a.letter.localeCompare(b.letter)) }
+}
+
+const MAX_POOL_IDS = 1000
+
+function parseIdList(raw: unknown): string[] | null {
+  if (!Array.isArray(raw) || raw.length > MAX_POOL_IDS) return null
+  const ids = raw.filter((id): id is string => typeof id === "string" && id.length > 0 && id.length <= 64)
+  return ids.length === raw.length ? [...new Set(ids)] : null
+}
+
+function parseDays(raw: unknown): number | null | undefined {
+  if (raw == null) return null
+  return typeof raw === "number" && Number.isFinite(raw) && raw > 0 ? Math.round(raw) : undefined
+}
+
+/** Validated builder settings from a request body; null when absent or malformed. */
+export function parseRelayDraftSettings(raw: unknown): BuildSettings | null {
+  if (!raw || typeof raw !== "object") return null
+  const value = raw as Record<string, unknown>
+  const limitDays = parseDays(value.limitDays)
+  const withinDays = parseDays(value.withinDays)
+  const excludedIds = parseIdList(value.excludedIds)
+  const addedIds = parseIdList(value.addedIds)
+  const pool = value.signupPool
+  if (limitDays === undefined || withinDays === undefined || !excludedIds || !addedIds) return null
+  if (pool !== "all" && pool !== "meet" && pool !== "relay") return null
+  return { limitDays, withinDays, signupPool: pool, excludedIds, addedIds }
 }
 
 export function isRelayDraftsSummary(value: unknown): value is RelayDraftsSummary {

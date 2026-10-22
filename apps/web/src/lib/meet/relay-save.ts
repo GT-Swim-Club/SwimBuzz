@@ -1,5 +1,5 @@
 import type { RelayLineup } from "@swimbuzz/shared"
-import { formatLegTime, type LineupTeam } from "@/lib/meet/relay-builder"
+import { formatLegTime, type BuildSettings, type LineupTeam } from "@/lib/meet/relay-builder"
 
 /** A lineup the coach saved from the relay builder, to persist after leaving it. */
 export type RelayCommit = {
@@ -7,6 +7,10 @@ export type RelayCommit = {
   teams: LineupTeam[]
   /** The build's relay name, used for published relays. */
   relayEvent: string
+  /** The draft matches the optimal lineup (drafts only). */
+  optimal?: boolean
+  /** The builder settings in use (drafts only). */
+  settings?: BuildSettings
 }
 
 type RelayTarget = {
@@ -33,13 +37,18 @@ export function lineupTeamTotal(team: LineupTeam): number | null {
 }
 
 /** Save a draft; it replaces what the builder published (imported relays stay). Throws on failure. */
-export async function persistRelayDraft(target: RelayTarget, teams: LineupTeam[]): Promise<void> {
+export async function persistRelayDraft(target: RelayTarget, teams: LineupTeam[],
+  optimal = false,
+  settings?: BuildSettings
+): Promise<void> {
   const res = await fetch(`/api/meets/${target.meetId}/relays/drafts`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       event: target.event,
       gender: target.gender,
+      optimal,
+      settings: settings ?? null,
       teams: teams.map((team) => ({
         letter: team.letter,
         legs: team.legs.map((leg) => ({

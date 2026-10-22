@@ -5,6 +5,7 @@ import { isStaffRole } from "@swimbuzz/shared"
 import { normalizeEventName } from "@/lib/swim/swim-parse"
 import {
   parseRelayDraftGender,
+  parseRelayDraftSettings,
   parseRelayDraftTeams,
   relayDraftsOf,
   removeRelayDraft,
@@ -37,11 +38,15 @@ export async function PUT(
   if ("error" in parsed) return NextResponse.json({ error: parsed.error }, { status: 400 })
   const { teams } = parsed
 
+  const settings = parseRelayDraftSettings(body?.settings)
+
   const drafts = upsertRelayDraft(relayDraftsOf(meet.relayDrafts), {
     gender,
     event,
     teams,
     savedAt: new Date().toISOString(),
+    ...(body?.optimal === true ? { optimal: true } : {}),
+    ...(settings ? { settings } : {}),
   })
   await prisma.meet.update({ where: { id }, data: { relayDrafts: { drafts } } })
   return NextResponse.json({ ok: true })

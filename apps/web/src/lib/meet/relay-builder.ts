@@ -41,6 +41,19 @@ export type AthleteOption = {
 
 export type SignupPool = "all" | "meet" | "relay"
 
+/** How the builder picks times and swimmers; saved with a draft so reopening it restores them. */
+export type BuildSettings = {
+  /** "Times from": swims older than this are ignored. */
+  limitDays: number | null
+  /** "Prefer times from": older swims are used only as a fallback (date shown in red). */
+  withinDays: number | null
+  signupPool: SignupPool
+  /** Pool swimmers opted out via Refine athletes. */
+  excludedIds: string[]
+  /** Meet signups outside the chosen pool that were opted in via Refine athletes. */
+  addedIds: string[]
+}
+
 export type Leg = {
   leg?: string
   name: string
@@ -210,6 +223,29 @@ export function poolAthletesFor(
   })
 }
 
+/**
+ * The athletes the "Refine athletes" list offers and those currently in the build. The list always
+ * covers everyone signed up for the meet; swimmers outside the chosen pool start unchecked and
+ * join via `addedIds`, while `excludedIds` drops swimmers the pool would otherwise include.
+ */
+export function refinedPoolFor(
+  athletes: AthleteOption[],
+  gender: string,
+  event: string,
+  settings: { signupPool: SignupPool; excludedIds: string[]; addedIds: string[] },
+  signupRelayPrefs: Record<string, string[]> | null
+): { options: AthleteOption[]; baseIds: Set<string>; included: AthleteOption[] } {
+  const base = poolAthletesFor(athletes, gender, event, settings.signupPool, signupRelayPrefs)
+  const baseIds = new Set(base.map((a) => a.id))
+  // "All athletes" already covers the meet's signups; otherwise widen to every meet signup.
+  const options =
+    settings.signupPool === "all" ? base : poolAthletesFor(athletes, gender, event, "meet", signupRelayPrefs)
+  const excluded = new Set(settings.excludedIds)
+  const added = new Set(settings.addedIds)
+  const included = options.filter((a) => (baseIds.has(a.id) ? !excluded.has(a.id) : added.has(a.id)))
+  return { options, baseIds, included }
+}
+
 // --- Optimal lineups -----------------------------------------------------------------------
 
 export function normalizeResult(data: {
@@ -322,90 +358,54 @@ export function slotTime(
   return data?.splitTimes?.[stroke] ?? flat
 }
 
-/** Medley legs are fixed by stroke (back leads off); free alternates show their legs 2–4 time. */
-function strokeSlot(stroke: string): number {
-  const index = (MEDLEY_SLOT_STROKES as readonly string[]).indexOf(stroke)
-  return index >= 0 ? index : 1
+/** Rebuilt alternates drop swimmers with no time on record; keep the ones already benched or just displaced. */
+function keepUntimedAlternates(rebuilt: Leg[], previous: Leg[], usedIds: Set<string>): Leg[] {
+  const seen = new Set(rebuilt.map((alt) => alt.athleteId))
+  const kept = previous.filter((alt) => {
+    if (usedIds.has(alt.athleteId) || seen.has(alt.athleteId)) return false
+    seen.add(alt.athleteId)
+    return true
+  })
+  return [...rebuilt, ...kept]
 }
 
-function applyStroke(person: Pick<Leg, "athleteId" | "name" | "gender">, stroke: string, strokeTimes: StrokeTimes): Leg | null {
-  const data = strokeTimes[person.athleteId]
-  const time = slotTime(data, stroke, strokeSlot(stroke))
-  if (!time) return null
-  return {
-    athleteId: person.athleteId,
-    name: data.name || person.name,
-    gender: data.gender ?? person.gender,
-    event: time.event,
-    timeMs: time.timeMs,
-    sourceDate: time.sourceDate ?? null,
-    outsideWindow: time.outsideWindow ?? false,
-    custom: time.custom ?? false,
-    relaySplit: time.relaySplit ?? false,
-    leg: stroke,
-  }
+/** Every unused swimmer for each medley stroke, timed first and NT (no time on record) after. */
+function rebuildMedleyAlternates(result: RelayResult, usedIds: Set<string>): Leg[] {
+  const strokeTimes = result.strokeTimes ?? {}
+  return MEDLEY_SLOT_STROKES.flatMap((_, index) =>
+    Object.entries(strokeTimes)
+      .filter(([id]) => !usedIds.has(id))
+      .map(([id, data]) => legFor(result, { athleteId: id, name: data.name, gender: data.gender }, index))
+  )
 }
 
-/** Every unused swimmer with a time for each medley stroke, fastest first. */
-function rebuildMedleyAlternates(strokeTimes: StrokeTimes, usedIds: Set<string>): Leg[] {
-  const alts: Leg[] = []
-  for (const stroke of MEDLEY_SLOT_STROKES) {
-    const rows = Object.entries(strokeTimes)
-      .flatMap(([id, data]) => {
-        const time = usedIds.has(id) ? undefined : slotTime(data, stroke, strokeSlot(stroke))
-        return time ? [{ id, data, time }] : []
-      })
-      .map(({ id, data, time }) => {
-        return {
-          athleteId: id,
-          name: data.name,
-          event: time.event,
-          gender: data.gender,
-          timeMs: time.timeMs,
-          sourceDate: time.sourceDate ?? null,
-          outsideWindow: time.outsideWindow ?? false,
-          custom: time.custom ?? false,
-          relaySplit: time.relaySplit ?? false,
-          leg: stroke,
-        }
-      })
-      .sort((a, b) => a.timeMs - b.timeMs)
-    alts.push(...rows)
-  }
-  return alts
-}
-
-/** Every unused swimmer with a free time (their legs 2–4 time), fastest first. */
-function rebuildFreeAlternates(strokeTimes: StrokeTimes, usedIds: Set<string>): Leg[] {
-  return Object.entries(strokeTimes)
-    .flatMap(([id, data]) => {
-      const time = usedIds.has(id) ? undefined : slotTime(data, "free", 1)
-      return time ? [{ id, data, time }] : []
-    })
-    .map(({ id, data, time }) => {
-      return {
-        athleteId: id,
-        name: data.name,
-        event: time.event,
-        gender: data.gender,
-        timeMs: time.timeMs,
-        sourceDate: time.sourceDate ?? null,
-        outsideWindow: time.outsideWindow ?? false,
-        custom: time.custom ?? false,
-        relaySplit: time.relaySplit ?? false,
-      }
-    })
-    .sort((a, b) => a.timeMs - b.timeMs)
+/** Every unused swimmer (their legs 2–4 time), timed first and NT after. */
+function rebuildFreeAlternates(result: RelayResult, usedIds: Set<string>): Leg[] {
+  return Object.entries(result.strokeTimes ?? {})
+    .filter(([id]) => !usedIds.has(id))
+    .map(([id, data]) => legFor(result, { athleteId: id, name: data.name, gender: data.gender }, 1))
 }
 
 function rebuildAlternates(result: RelayResult, teams: RelayTeam[]): Leg[] {
   const usedIds = new Set(teams.flatMap((team) => team.legs.map((leg) => leg.athleteId)))
-  const strokeTimes = result.strokeTimes ?? {}
   return rankAlternates(
-    isMedleyRelay(result.relay)
-      ? rebuildMedleyAlternates(strokeTimes, usedIds)
-      : rebuildFreeAlternates(strokeTimes, usedIds)
+    isMedleyRelay(result.relay) ? rebuildMedleyAlternates(result, usedIds) : rebuildFreeAlternates(result, usedIds)
   )
+}
+
+/**
+ * Lets pool swimmers with no time on record be alternates too (shown as NT), so they can swap
+ * onto any leg. Rebuilds the alternates to include them.
+ */
+export function withPoolAthletes(result: RelayResult, pool: LegAthlete[]): RelayResult {
+  const strokeTimes = { ...result.strokeTimes }
+  for (const person of pool) {
+    if (!strokeTimes[person.athleteId]) {
+      strokeTimes[person.athleteId] = { name: person.name, gender: person.gender, times: {} }
+    }
+  }
+  const next = { ...result, strokeTimes }
+  return { ...next, alternates: rebuildAlternates(next, next.teams) }
 }
 
 const PUBLISHED_ROUND_RANK: Record<RelayLineup["round"], number> = { "": 0, F: 1, P: 2 }
@@ -505,8 +505,8 @@ export function appendTeams(result: RelayResult, extra: RelayResult): RelayResul
   return { ...merged, alternates: rebuildAlternates(merged, merged.teams) }
 }
 
-/** Alternates shown at first, and how many more each "Show more" adds — per stroke for medley. */
-export const ALTERNATES_SHOWN = { medley: { initial: 2, step: 2 }, free: { initial: 8, step: 4 } }
+/** Alternates shown until "Show more" reveals them all — per stroke for medley. */
+export const ALTERNATES_SHOWN = { medley: 2, free: 8 }
 
 export type AlternateGroup = { key: string; rows: { alt: Leg; index: number }[]; hidden: number }
 
@@ -626,15 +626,9 @@ export function canDropOnSlot(result: RelayResult, from: RowLoc, to: RowLoc, mix
   if (to.list === "alt") return from.list === "team" && canDropOnSlot(result, to, from, mixed)
   if (sameLoc(from, to)) return false
   if (mixed && !preservesMixedComposition(result, from, to)) return false
-  if (!isMedleyRelay(result.relay) || !result.strokeTimes) return true
-  const incomingId = athleteIdAt(result, from)
-  if (!incomingId) return false
-  if (!slotTime(result.strokeTimes[incomingId], slotStroke(to.index), to.index)) return false
-  if (from.list === "team") {
-    const outgoingId = athleteIdAt(result, to)
-    if (!outgoingId) return false
-    if (!slotTime(result.strokeTimes[outgoingId], slotStroke(from.index), from.index)) return false
-  }
+  // A swimmer without a time for the slot can still take it — their leg just reads NT.
+  if (!athleteIdAt(result, from)) return false
+  if (from.list === "team" && !athleteIdAt(result, to)) return false
   return true
 }
 
@@ -660,14 +654,14 @@ export function moveRelayRow(result: RelayResult, from: RowLoc, to: RowLoc, mixe
   const medley = isMedleyRelay(result.relay) && strokeTimes
 
   if (medley) {
-    const incoming = applyStroke(fromList[from.index], slotStroke(to.index), strokeTimes)
-    if (!incoming) return result
+    const incoming = legFor(result, fromList[from.index], to.index)
+    let displaced: Leg
     if (from.list === "team") {
-      const displaced = applyStroke(toList[to.index], slotStroke(from.index), strokeTimes)
-      if (!displaced) return result
+      displaced = legFor(result, toList[to.index], from.index)
       toList[to.index] = incoming
       fromList[from.index] = displaced
     } else {
+      displaced = toList[to.index]
       toList[to.index] = incoming
     }
     const usedIds = new Set(
@@ -676,7 +670,7 @@ export function moveRelayRow(result: RelayResult, from: RowLoc, to: RowLoc, mixe
     return {
       ...result,
       teams: retotalTeams(teams),
-      alternates: rankAlternates(rebuildMedleyAlternates(strokeTimes, usedIds)),
+      alternates: rankAlternates(keepUntimedAlternates(rebuildMedleyAlternates(result, usedIds), [...alts, displaced], usedIds)),
     }
   }
 
@@ -792,7 +786,7 @@ export function setLegTime(result: RelayResult, letter: string, index: number, t
 export type RelaySlotData = {
   slot: RelayEventSlot
   published: RelayLineup[]
-  draft: { teams: LineupTeam[]; savedAt: string } | null
+  draft: { teams: LineupTeam[]; savedAt: string; optimal?: boolean; settings?: BuildSettings } | null
 }
 
 /** What the builder opens on for a relay event: its draft, else what's published, else optimal. */

@@ -29,11 +29,13 @@ import {
   locKey,
   medleyStrokeGroups,
   moveRelayRow,
-  poolAthletesFor,
+  refinedPoolFor,
   publishedTeamsFor,
   replaceLeg,
   setLegTime,
   slotTime,
+  type BuildSettings,
+  withPoolAthletes,
   truncateTeams,
   windowDays,
   type AthleteOption,
@@ -49,15 +51,6 @@ import RelayPageHeader, { relayBackLinkClass, relayEyebrowClass } from "./relays
 import type { RelayCommit } from "@/lib/meet/relay-save"
 
 type Source = "optimal" | "published" | "draft"
-
-type BuildSettings = {
-  /** "Times from": swims older than this are ignored. */
-  limitDays: number | null
-  /** "Prefer times from": older swims are used only as a fallback (date shown in red). */
-  withinDays: number | null
-  signupPool: SignupPool
-  excludedIds: string[]
-}
 
 type BuildRequest = {
   id: number
@@ -101,6 +94,11 @@ function GenderTag({ gender }: { gender?: "M" | "F" }) {
       {gender}
     </span>
   )
+}
+
+/** Pool swimmers as relay-leg people, so those with no time can still be alternates (as NT). */
+function poolPeople(pool: AthleteOption[]) {
+  return pool.map((a) => ({ athleteId: a.id, name: athleteName(a), gender: a.gender }))
 }
 
 type LegCandidate = {
@@ -407,25 +405,32 @@ export default function MeetRelayBuilder({
   )
   const draftTeams = data.draft?.teams ?? null
 
+  const defaultSettings: BuildSettings = {
+    limitDays: null,
+    withinDays: null,
+    signupPool: hasSignups ? "relay" : "all",
+    excludedIds: [],
+    addedIds: [],
+  }
   const [request, setRequest] = useState<BuildRequest>(() => {
-    const settings: BuildSettings = {
-      limitDays: null,
-      withinDays: null,
-      signupPool: hasSignups ? "relay" : "all",
-      excludedIds: [],
-    }
-    // Open on the draft, else what's published, else the optimal lineup.
+    // Open on the draft (with the settings it was saved with), else what's published, else optimal.
     const { source, fixed } = initialLineup(data)
+    const settings = (source === "draft" ? data.draft?.settings : null) ?? defaultSettings
     return { id: 0, settings, fixed, count: fixed ? fixed.length : DEFAULT_RELAY_COUNT, source }
   })
   const settings = request.settings
   // The summary already ran this event's first build (same default settings) — reuse it.
   const [initial] = useState(() => {
-    if (!initialBase) return null
+    // The summary built at default settings; a draft saved with other settings needs its own build.
+    if (!initialBase || (request.source === "draft" && data.draft?.settings)) return null
+    const pool = poolPeople(refinedPoolFor(athletes, gender, event, request.settings, signupRelayPrefs).included)
     if (request.fixed) {
-      return applyLineupTeams(initialBase, request.fixed, new Map(athletes.map((a) => [a.id, a.gender])))
+      return withPoolAthletes(
+        applyLineupTeams(initialBase, request.fixed, new Map(athletes.map((a) => [a.id, a.gender]))),
+        pool
+      )
     }
-    return initialBase.teams.length > 0 ? initialBase : null
+    return initialBase.teams.length > 0 ? withPoolAthletes(initialBase, pool) : null
   })
   const [loading, setLoading] = useState(initial == null)
   /** New relays (C, D, …) being built from swimmers not already on a relay. */
@@ -440,8 +445,8 @@ export default function MeetRelayBuilder({
     initialBase && initialBase.teams.length > 0 ? lineupTeamsOf(initialBase) : null
   )
   const [error, setError] = useState("")
-  /** Extra alternates revealed by "Show more", per stroke (medley) or "free". */
-  const [extraAlternates, setExtraAlternates] = useState<Record<string, number>>({})
+  /** Alternate lists expanded by "Show more", per stroke (medley) or "free". */
+  const [expandedAlternates, setExpandedAlternates] = useState<Record<string, boolean>>({})
   const [confirmPublish, setConfirmPublish] = useState(false)
   const [loadOpen, setLoadOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
@@ -457,19 +462,15 @@ export default function MeetRelayBuilder({
 
   const genderPeople = gender === "F" ? "women" : gender === "M" ? "men" : "athletes"
 
-  const poolAthletes = useMemo(
-    () => poolAthletesFor(athletes, gender, event, settings.signupPool, signupRelayPrefs),
-    [athletes, gender, event, settings.signupPool, signupRelayPrefs]
+  const {
+    options: poolAthletes,
+    baseIds: poolIdSet,
+    included: includedAthletes,
+  } = useMemo(
+    () => refinedPoolFor(athletes, gender, event, settings, signupRelayPrefs),
+    [athletes, gender, event, settings, signupRelayPrefs]
   )
-  const poolIdSet = useMemo(() => new Set(poolAthletes.map((a) => a.id)), [poolAthletes])
-  const excludedInPool = useMemo(
-    () => settings.excludedIds.filter((id) => poolIdSet.has(id)),
-    [settings.excludedIds, poolIdSet]
-  )
-  const includedAthletes = useMemo(
-    () => poolAthletes.filter((a) => !excludedInPool.includes(a.id)),
-    [poolAthletes, excludedInPool]
-  )
+  const includedIdSet = useMemo(() => new Set(includedAthletes.map((a) => a.id)), [includedAthletes])
   const visibleAthletes = useMemo(() => {
     const q = athleteQuery.trim().toLowerCase()
     if (!q) return poolAthletes
@@ -488,8 +489,8 @@ export default function MeetRelayBuilder({
       setLoading(true)
       setAdding(0)
       setError("")
-      const pool = poolAthletesFor(athletes, gender, event, s.signupPool, signupRelayPrefs)
-      const included = pool.filter((a) => !s.excludedIds.includes(a.id)).map((a) => a.id)
+      const { options: pool, included: includedPool } = refinedPoolFor(athletes, gender, event, s, signupRelayPrefs)
+      const included = includedPool.map((a) => a.id)
       const poolIds = s.signupPool === "all" && included.length === pool.length ? null : included
       // A kept lineup stays timed even when its swimmers are outside the current pool.
       const requestIds = poolIds
@@ -532,7 +533,7 @@ export default function MeetRelayBuilder({
         } else {
           setError(res.error)
         }
-        setResult(next)
+        setResult(next ? withPoolAthletes(next, poolPeople(includedPool)) : next)
         // Every build returns the optimal lineup too, even when re-timing a kept one.
         setOptimalTeams(res.ok && res.result.teams.length > 0 ? lineupTeamsOf(res.result) : null)
         if (next && source) setLoaded({ source, key: lineupKey(lineupTeamsOf(next)) })
@@ -571,7 +572,7 @@ export default function MeetRelayBuilder({
     const fixed = source === "draft" ? draftTeams : source === "published" ? publishedTeams : null
     setRequest((r) => ({
       id: r.id + 1,
-      settings: r.settings,
+      settings: (source === "draft" ? data.draft?.settings : null) ?? r.settings,
       fixed,
       count: fixed ? fixed.length : teamCount,
       source,
@@ -639,11 +640,9 @@ export default function MeetRelayBuilder({
   }
 
   function toggleIncluded(id: string) {
-    updateSettings({
-      excludedIds: settings.excludedIds.includes(id)
-        ? settings.excludedIds.filter((x) => x !== id)
-        : [...settings.excludedIds, id],
-    })
+    const toggle = (ids: string[]) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id])
+    // Pool members are opted out via excludedIds; other meet signups are opted in via addedIds.
+    updateSettings(poolIdSet.has(id) ? { excludedIds: toggle(settings.excludedIds) } : { addedIds: toggle(settings.addedIds) })
   }
 
   /** Pool athletes who could take this leg, fastest first, with where they are now. */
@@ -769,7 +768,10 @@ export default function MeetRelayBuilder({
 
   function saveDraft() {
     if (!result || result.teams.length === 0) return
-    onCommit({ kind: "draft", teams: lineupTeamsOf(result), relayEvent: result.relay }, guard.leave())
+    onCommit(
+      { kind: "draft", teams: lineupTeamsOf(result), relayEvent: result.relay, optimal: isLoaded("optimal"), settings },
+      guard.leave()
+    )
   }
 
   function requestPublish() {
@@ -815,6 +817,7 @@ export default function MeetRelayBuilder({
     const teams = sourceTeams[source]
     return currentKey != null && teams != null && lineupKey(teams) === currentKey
   }
+  const poolIsCustom = settings.excludedIds.length > 0 || settings.addedIds.length > 0
   const editable = adding === 0
   const canAct = result != null && result.teams.length > 0 && !loading && editable
 
@@ -909,14 +912,14 @@ export default function MeetRelayBuilder({
 
   const medley = isMedleyRelay(event)
   const alternates = result?.alternates ?? []
-  // Every unused swimmer is kept as an alternate; each list shows a few and "Show more" adds more.
+  // Every unused swimmer is kept as an alternate; each list shows a few until "Show more" reveals all.
   const shown = ALTERNATES_SHOWN[medley ? "medley" : "free"]
   const strokeLabels = new Map(medleyStrokeGroups(event).map((g) => [g.stroke, g.label]))
   const groups = alternateGroups(
     alternates,
     medley,
     mixed,
-    (key) => shown.initial + (extraAlternates[key] ?? 0)
+    (key) => (expandedAlternates[key] ? Infinity : shown)
   ).map((group) => ({
     ...group,
     label: strokeLabels.get(group.key) ?? group.key,
@@ -1026,9 +1029,14 @@ export default function MeetRelayBuilder({
             <SettingsField label="Athlete pool">
               <SelectControl
                 label="Athlete pool"
-                value={settings.signupPool}
-                onChange={(value) => updateSettings({ signupPool: value as SignupPool })}
+                value={poolIsCustom ? "custom" : settings.signupPool}
+                onChange={(value) => {
+                  // "Custom" only reflects the refined list; picking a preset resets it.
+                  if (value === "custom") return
+                  updateSettings({ signupPool: value as SignupPool, excludedIds: [], addedIds: [] })
+                }}
               >
+                {poolIsCustom ? <option value="custom">Custom</option> : null}
                 <option value="relay">Signed up for relay</option>
                 <option value="meet">Signed up for meet</option>
                 <option value="all">All athletes</option>
@@ -1231,18 +1239,15 @@ export default function MeetRelayBuilder({
                           <p className="px-3 py-2.5 text-xs text-foreground-secondary">No alternates</p>
                         ) : null}
                       </div>
-                      {group.hidden > 0 ? (
+                      {group.hidden > 0 || (expandedAlternates[group.key] && group.rows.length > shown) ? (
                         <button
                           type="button"
                           onClick={() =>
-                            setExtraAlternates((prev) => ({
-                              ...prev,
-                              [group.key]: (prev[group.key] ?? 0) + shown.step,
-                            }))
+                            setExpandedAlternates((prev) => ({ ...prev, [group.key]: !prev[group.key] }))
                           }
                           className="w-full rounded-b-lg border-t border-border px-3 py-2 text-left text-xs font-medium text-foreground-secondary transition-colors hover:bg-background-hover hover:text-foreground"
                         >
-                          Show {Math.min(shown.step, group.hidden)} more
+                          {expandedAlternates[group.key] ? "Show less" : "Show more"}
                         </button>
                       ) : null}
                     </div>
@@ -1286,9 +1291,12 @@ export default function MeetRelayBuilder({
             <button
               type="button"
               onClick={() =>
-                updateSettings({ excludedIds: settings.excludedIds.filter((id) => !poolIdSet.has(id)) })
+                updateSettings({
+                  excludedIds: [],
+                  addedIds: poolAthletes.filter((a) => !poolIdSet.has(a.id)).map((a) => a.id),
+                })
               }
-              disabled={excludedInPool.length === 0}
+              disabled={includedAthletes.length === poolAthletes.length}
               className="rounded-lg border border-border px-3 py-1.5 text-xs hover:bg-fill-secondary disabled:opacity-40"
             >
               Include all
@@ -1297,7 +1305,8 @@ export default function MeetRelayBuilder({
               type="button"
               onClick={() =>
                 updateSettings({
-                  excludedIds: [...new Set([...settings.excludedIds, ...poolAthletes.map((a) => a.id)])],
+                  excludedIds: poolAthletes.filter((a) => poolIdSet.has(a.id)).map((a) => a.id),
+                  addedIds: [],
                 })
               }
               disabled={includedAthletes.length === 0}
@@ -1323,7 +1332,7 @@ export default function MeetRelayBuilder({
         ) : (
           <ul className="space-y-1.5">
             {visibleAthletes.map((athlete) => {
-              const included = !excludedInPool.includes(athlete.id)
+              const included = includedIdSet.has(athlete.id)
               const name = athleteName(athlete)
               return (
                 <li key={athlete.id}>
