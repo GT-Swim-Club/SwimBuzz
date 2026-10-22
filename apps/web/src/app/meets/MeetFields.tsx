@@ -329,9 +329,13 @@ export function MeetImageHeader({
     const formData = new FormData()
     if (name) formData.append("file", file, name)
     else formData.append("file", file)
+    // Vercel rejects request bodies over ~4.5MB with a non-JSON page.
+    if (file.size > 4 * 1024 * 1024) throw new Error("Image must be 4 MB or smaller")
     const res = await fetch(endpoint, { method: "POST", body: formData })
-    const data = await res.json()
-    if (!res.ok) throw new Error(data.error ?? "Upload failed")
+    const data = await res.json().catch(() => null)
+    if (!res.ok || !data?.url) {
+      throw new Error(data?.error ?? `Upload failed (${res.status})`)
+    }
     return data.url as string
   }
 

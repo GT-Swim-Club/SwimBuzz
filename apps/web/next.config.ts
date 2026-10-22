@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
     root: monorepoRoot,
   },
   outputFileTracingRoot: monorepoRoot,
+  // Turbopack's tracing misses sharp's native libvips (@img/sharp-libvips-*/lib/*.so),
+  // so sharp fails to load on Vercel (ERR_DLOPEN_FAILED). Include it explicitly.
+  outputFileTracingIncludes: {
+    "/api/meets/*": ["./node_modules/@img/**/*", "../../node_modules/@img/**/*"],
+  },
   transpilePackages: [
     // Prefer not pulling workspace packages into web server routes; mobile uses @swimbuzz/*.
   ],

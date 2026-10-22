@@ -48,7 +48,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
-  const formData = await req.formData()
+  const formData = await req.formData().catch(() => null)
+  if (!formData) {
+    return NextResponse.json({ error: "Could not read upload" }, { status: 400 })
+  }
   const file = formData.get("file")
   if (!isUpload(file)) {
     return NextResponse.json({ error: "File is required" }, { status: 400 })
