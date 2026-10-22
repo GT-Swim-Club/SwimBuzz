@@ -105,10 +105,10 @@ export function SummaryCard({ card, clickable }: { card: RelaySummaryCard; click
               className={
                 "min-w-0 truncate " +
                 (leg.me
-                  ? "font-semibold text-accent"
+                  ? "font-medium text-accent"
                   : card.dashed
                     ? "text-foreground-secondary"
-                    : "font-medium text-foreground")
+                    : "text-foreground")
               }
             >
               {leg.name}
