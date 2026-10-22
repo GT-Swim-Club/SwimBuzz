@@ -12,6 +12,7 @@ import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete/athlete-view-se
 import { getSession } from "@/lib/auth/session"
 import { readListLayout } from "@/lib/list-layout-server"
 import { ListLayoutProvider } from "@/components/ui/ListLayout"
+import PinSearchParams from "@/components/ui/PinSearchParams"
 import type { ListLayout } from "@/lib/list-layout"
 
 export const dynamic = 'force-dynamic'
@@ -19,7 +20,7 @@ export const dynamic = 'force-dynamic'
 type RosterSearchParams = { gender?: string; season?: string; year?: string; q?: string }
 
 async function RosterContent({ searchParams, layout }: { searchParams: Promise<RosterSearchParams>; layout: ListLayout }) {
-    const { gender, season: seasonParam, year: legacyYear, q } = await searchParams
+    const { season: seasonParam, year: legacyYear } = await searchParams
 
     const [seasons, session] = await Promise.all([
         listSeasons(),
@@ -27,14 +28,7 @@ async function RosterContent({ searchParams, layout }: { searchParams: Promise<R
     ])
     if (!session) redirect("/signin")
 
-    const requestedSeason = parseSeason(seasonParam ?? legacyYear)
-    const season = resolveListedSeason(requestedSeason, seasons)
-
-    if (requestedSeason !== season) {
-        const params = new URLSearchParams({ gender: gender ?? "all", season })
-        if (q) params.set("q", q)
-        redirect(`/athletes?${params.toString()}`)
-    }
+    const season = resolveListedSeason(parseSeason(seasonParam ?? legacyYear), seasons)
 
     // Every gender for the season: RosterView filters gender and search client-side.
     const [athletes, viewerAthleteId, isCoach] = await Promise.all([
@@ -57,6 +51,9 @@ async function RosterContent({ searchParams, layout }: { searchParams: Promise<R
 
     return (
         <ListLayoutProvider page="roster" initial={layout}>
+            {/* Pin the resolved season in place rather than redirect()ing, which
+                would flash the skeleton a second time. */}
+            <PinSearchParams params={{ season, year: null }} />
             <RosterView
                 athletes={athletes}
                 seasons={seasons}

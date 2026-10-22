@@ -8,6 +8,7 @@ import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete/athlete-view-se
 import { getSession } from "@/lib/auth/session"
 import { readListLayout } from "@/lib/list-layout-server"
 import { ListLayoutProvider } from "@/components/ui/ListLayout"
+import PinSearchParams from "@/components/ui/PinSearchParams"
 import QualifiersView from "./QualifiersView"
 import QualifiersSkeleton from "./QualifiersSkeleton"
 
@@ -57,23 +58,15 @@ export default async function QualifiersPage({ searchParams }: { searchParams: P
   const params = await searchParams
   const seasonParam = typeof params.season === "string" ? params.season : undefined
   const [seasons, layout] = await Promise.all([listSeasons(), readListLayout("nationals")])
-  const requestedSeason = parseSeason(seasonParam)
-  const season = resolveListedSeason(requestedSeason, seasons)
-
-  // Season is the only server-side filter; pin it in the URL so the season
-  // dropdown, sharing and refresh all agree.
-  if (!seasonParam || requestedSeason !== season) {
-    const next = new URLSearchParams()
-    for (const [key, value] of Object.entries(params)) {
-      if (typeof value === "string" && key !== "season") next.set(key, value)
-    }
-    next.set("season", season)
-    redirect(`/qualifiers?${next.toString()}`)
-  }
+  const season = resolveListedSeason(parseSeason(seasonParam), seasons)
 
   return (
     <main className="flex flex-col gap-4">
       <h1 className="sr-only">Nationals Qualifiers</h1>
+      {/* Season is the only server-side filter; pin it in the URL so the season
+          dropdown, sharing and refresh all agree. In place, not redirect()ed:
+          a redirect would remount the loading skeleton. */}
+      <PinSearchParams params={{ season }} />
       {/* One boundary so the toolbar and the list appear together. Season
           changes navigate in a transition, so they keep this content up
           instead of falling back to the skeleton. */}
