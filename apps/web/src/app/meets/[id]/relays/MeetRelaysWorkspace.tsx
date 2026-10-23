@@ -178,7 +178,7 @@ export default function MeetRelaysWorkspace({
               slot.slug,
               res.ok && (fixed || res.result.teams.length > 0)
                 ? { status: "ok", result: res.result }
-                : { status: "error", error: res.ok ? "Not enough swimmers with times." : res.error },
+                : { status: "error", error: res.ok ? "Not enough swimmers." : res.error },
             ]
           } catch {
             return [slot.slug, { status: "error", error: "Couldn't build a suggestion." }]

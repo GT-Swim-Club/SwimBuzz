@@ -622,7 +622,7 @@ export default function MeetRelayBuilder({
       .then((res) => {
         if (controller.signal.aborted) return
         if (!res.ok || res.result.teams.length === 0) {
-          setError(res.ok ? `Not enough swimmers with times left for a ${nextLetter} relay.` : res.error)
+          setError(res.ok ? `Not enough swimmers left for a ${nextLetter} relay.` : res.error)
           return
         }
         setResult((cur) => (cur ? appendTeams(cur, res.result) : cur))

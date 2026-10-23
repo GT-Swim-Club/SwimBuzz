@@ -351,7 +351,7 @@ export default function MeetDetailScreen() {
           : []
       setRelayTeams(teams)
       if (teams.length === 0) {
-        Alert.alert("No relays", "Not enough athletes with times for this event.")
+        Alert.alert("No relays", "Not enough athletes for this event.")
       }
     } catch (err) {
       Alert.alert(

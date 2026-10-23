@@ -36,6 +36,36 @@ function combinations(arr: string[], k: number): string[][] {
   ]
 }
 
+const SLOT_ORDERS = permutations([0, 1, 2, 3])
+
+/**
+ * The best relay from `candidates` when some legs may go NT: fewest NT legs, then the fastest
+ * timed legs. `slotMs(id, slot)` is a swimmer's time on that leg, undefined when they have none.
+ */
+function bestPartialTeam(
+  candidates: string[],
+  slotMs: (id: string, slot: number) => number | undefined,
+  allowed: (combo: string[]) => boolean
+): { order: string[]; totalMs: number | null } | null {
+  let best: { order: string[]; nt: number; timedMs: number } | null = null
+  for (const combo of combinations(candidates, 4)) {
+    if (!allowed(combo)) continue
+    for (const perm of SLOT_ORDERS) {
+      let nt = 0
+      let timedMs = 0
+      for (let slot = 0; slot < 4; slot++) {
+        const ms = slotMs(combo[perm[slot]], slot)
+        if (ms == null) nt++
+        else timedMs += ms
+      }
+      if (!best || nt < best.nt || (nt === best.nt && timedMs < best.timedMs)) {
+        best = { order: perm.map((i) => combo[i]), nt, timedMs }
+      }
+    }
+  }
+  return best && { order: best.order, totalMs: best.nt === 0 ? best.timedMs : null }
+}
+
 function parseRelayCount(raw: unknown): number {
   const n = Number(raw)
   if (!Number.isFinite(n)) return 1
@@ -59,7 +89,8 @@ type BuiltLeg = {
   athleteId: string
   name: string
   event: string
-  timeMs: number
+  /** null = no time on record (NT). */
+  timeMs: number | null
   sourceDate?: Date | null
   /** The source swim falls outside the preferred date range (fallback time). */
   outsideWindow?: boolean
@@ -91,9 +122,13 @@ type StrokeTimes = Record<
 
 type BuiltTeam = {
   letter: string
-  totalMs: number
+  /** null while any leg is NT. */
+  totalMs: number | null
   legs: BuiltLeg[]
 }
+
+/** Timed legs fastest first, NT legs last. */
+const byLegTime = (a: BuiltLeg, b: BuiltLeg) => (a.timeMs ?? Infinity) - (b.timeMs ?? Infinity)
 
 export async function POST(req: Request) {
   const session = await getSession()
@@ -208,7 +243,9 @@ export async function POST(req: Request) {
   const attachSourceDates = async (legs: BuiltLeg[]): Promise<BuiltLeg[]> => {
     if (legs.length === 0) return legs
     // Relay splits already carry their date; look up the swim behind every flat-start time.
-    const swimLegs = legs.filter((leg) => !leg.relaySplit)
+    const swimLegs = legs.filter(
+      (leg): leg is BuiltLeg & { timeMs: number } => !leg.relaySplit && leg.timeMs != null
+    )
     const sourceSwims = swimLegs.length
       ? await prisma.swim.findMany({
           where: {
@@ -230,6 +267,7 @@ export async function POST(req: Request) {
       if (!sourceDates.has(key)) sourceDates.set(key, swim.date)
     }
     return legs.map((leg) => {
+      if (leg.timeMs == null) return { ...leg, sourceDate: null, outsideWindow: false }
       const sourceDate = leg.relaySplit ? (leg.sourceDate ?? null) : (sourceDates.get(sourceKey(leg)) ?? null)
       return {
         ...leg,
@@ -290,7 +328,7 @@ export async function POST(req: Request) {
   const buildStrokeTimes = async (rows: BuiltLeg[]): Promise<StrokeTimes> => {
     const strokeTimes: StrokeTimes = {}
     for (const row of await attachSourceDates(rows)) {
-      if (!row.leg) continue
+      if (!row.leg || row.timeMs == null) continue
       const entry = (strokeTimes[row.athleteId] ??= { name: row.name, gender: row.gender, times: {} })
       const time: StrokeTime = {
         timeMs: row.timeMs,
@@ -305,15 +343,58 @@ export async function POST(req: Request) {
     return strokeTimes
   }
 
-  const legOf = (athleteId: string, event: string, pick: TimePick, leg?: string): BuiltLeg => ({
+  /** A relay leg; no `pick` = NT. */
+  const legOf = (athleteId: string, event: string, pick: TimePick | undefined, leg?: string): BuiltLeg => ({
     athleteId,
     name: fullName(athleteMap[athleteId]),
     gender: athleteMap[athleteId]?.gender,
     event,
-    timeMs: pick.timeMs,
-    ...(pick.relaySplit ? { relaySplit: true, sourceDate: pick.sourceDate } : {}),
+    timeMs: pick?.timeMs ?? null,
+    ...(pick?.relaySplit ? { relaySplit: true, sourceDate: pick.sourceDate } : {}),
     ...(leg ? { leg } : {}),
   })
+
+  const mixedRelay = gender === "X"
+  const hasMixedSplit = (combo: string[]) =>
+    combo.filter((id) => athleteMap[id]?.gender === Gender.M).length === 2 &&
+    combo.filter((id) => athleteMap[id]?.gender === Gender.F).length === 2
+
+  /**
+   * Swimmers worth trying for a relay that needs NT legs: the fastest few by each leg time, plus
+   * enough swimmers with no times at all to fill a relay — per gender for mixed relays.
+   */
+  const fillCandidates = (used: Set<string>, legTimes: ((id: string) => number | undefined)[]) => {
+    const left = eligibleIds.filter((id) => !used.has(id))
+    const pools = mixedRelay
+      ? [Gender.M, Gender.F].map((g) => left.filter((id) => athleteMap[id]?.gender === g))
+      : [left]
+    const out = new Set<string>()
+    for (const pool of pools) {
+      for (const ms of legTimes) {
+        for (const id of pool
+          .filter((id) => ms(id) != null)
+          .sort((a, b) => ms(a)! - ms(b)!)
+          .slice(0, mixedRelay ? 4 : 8)) {
+          out.add(id)
+        }
+      }
+      for (const id of pool
+        .filter((id) => legTimes.every((ms) => ms(id) == null))
+        .sort((a, b) => fullName(athleteMap[a]).localeCompare(fullName(athleteMap[b])))
+        .slice(0, mixedRelay ? 2 : 4)) {
+        out.add(id)
+      }
+    }
+    return [...out]
+  }
+
+  /** Relay swimmers with no time on record still get an entry, so they can be benched and swapped back. */
+  const withUntimedSwimmers = (strokeTimes: StrokeTimes, teams: BuiltTeam[]): StrokeTimes => {
+    for (const leg of teams.flatMap((team) => team.legs)) {
+      strokeTimes[leg.athleteId] ??= { name: leg.name, gender: leg.gender, times: {} }
+    }
+    return strokeTimes
+  }
 
   /** strokeTimes rows: each swimmer's lead-off time and, when faster, their relay split. */
   const strokeTimeRows = (times: Map<string, AthleteTimes>, event: string, stroke: string): BuiltLeg[] =>
@@ -325,7 +406,7 @@ export async function POST(req: Request) {
 
   if (!isMedley) {
     const eventName = `${legDist} Free`
-    const mixed = gender === "X"
+    const mixed = mixedRelay
 
     if (mixed) {
       const hasMen = eligibleAthletes.some((a) => a.gender === Gender.M)
@@ -395,29 +476,48 @@ export async function POST(req: Request) {
       const legs = await attachSourceDates([
         legOf(found.leadoff, eventName, times.get(found.leadoff)!.leadoff!),
         ...found.rest
-          .map((id) => legOf(id, eventName, rollingPick(times.get(id))!))
-          .sort((a, b) => a.timeMs - b.timeMs),
+          .map((id) => legOf(id, eventName, rollingPick(times.get(id))))
+          .sort(byLegTime),
       ])
       teams.push({ letter: RELAY_LETTERS[t] ?? String(t + 1), totalMs: found.total, legs })
+    }
+
+    // Out of fully timed relays: fill the rest with whoever's left, NT legs included.
+    const used = new Set(teams.flatMap((team) => team.legs.map((leg) => leg.athleteId)))
+    const rollingMs = (id: string) => rollingPick(times.get(id))?.timeMs
+    while (teams.length < relayCount) {
+      const found = bestPartialTeam(
+        fillCandidates(used, [leadMs, rollingMs]),
+        (id, slot) => (slot === 0 ? leadMs(id) : rollingMs(id)),
+        mixed ? hasMixedSplit : () => true
+      )
+      if (!found) break
+      for (const id of found.order) used.add(id)
+      const [leadoff, ...rest] = found.order
+      const legs = await attachSourceDates([
+        legOf(leadoff, eventName, times.get(leadoff)?.leadoff),
+        ...rest.map((id) => legOf(id, eventName, rollingPick(times.get(id)))).sort(byLegTime),
+      ])
+      teams.push({ letter: RELAY_LETTERS[teams.length] ?? String(teams.length + 1), totalMs: found.totalMs, legs })
     }
 
     if (teams.length === 0) {
       return NextResponse.json(
         {
           error: mixed
-            ? "Not enough athletes with times to build a mixed relay"
-            : "Not enough athletes with times to build a relay",
+            ? "Not enough athletes to build a mixed relay (needs two men and two women)"
+            : "Not enough athletes to build a relay",
         },
         { status: 400 }
       )
     }
 
-    const remaining = [...available].sort((a, b) => rollMs(a) - rollMs(b))
+    const remaining = [...available].filter((id) => !used.has(id)).sort((a, b) => rollMs(a) - rollMs(b))
     const alternateIds = mixed
       ? [Gender.M, Gender.F].flatMap((g) => remaining.filter((id) => athleteMap[id]?.gender === g).slice(0, 4))
       : remaining.slice(0, 8)
     const alternates: BuiltLeg[] = await attachSourceDates(
-      alternateIds.map((id) => legOf(id, eventName, rollingPick(times.get(id))!))
+      alternateIds.map((id) => legOf(id, eventName, rollingPick(times.get(id))))
     )
 
     return NextResponse.json({
@@ -427,7 +527,7 @@ export async function POST(req: Request) {
       totalMs: teams[0].totalMs,
       legs: teams[0].legs,
       alternates,
-      strokeTimes,
+      strokeTimes: withUntimedSwimmers(strokeTimes, teams),
     })
   }
 
@@ -532,20 +632,46 @@ export async function POST(req: Request) {
     })
   }
 
+  // Out of fully timed relays: fill the rest with whoever's left, NT legs included.
+  const usedIds = new Set(teams.flatMap((team) => team.legs.map((leg) => leg.athleteId)))
+  while (teams.length < relayCount) {
+    const found = bestPartialTeam(
+      fillCandidates(
+        usedIds,
+        MEDLEY_LEGS.map((stroke) => (id: string) => timeLookup[id]?.[stroke])
+      ),
+      (id, slot) => timeLookup[id]?.[MEDLEY_LEGS[slot]],
+      gender === "X" ? hasMixedSplit : () => true
+    )
+    if (!found) break
+    for (const id of found.order) usedIds.add(id)
+    const legs = await attachSourceDates(
+      found.order.map((id, slot) => {
+        const stroke = MEDLEY_LEGS[slot]
+        return legOf(id, strokeEvent(stroke), pickLookup[id]?.[stroke], stroke)
+      })
+    )
+    teams.push({ letter: RELAY_LETTERS[teams.length] ?? String(teams.length + 1), totalMs: found.totalMs, legs })
+  }
+
   if (teams.length === 0) {
     return NextResponse.json(
-      { error: "Not enough athletes with times to build a medley relay" },
+      {
+        error:
+          gender === "X"
+            ? "Not enough athletes to build a mixed medley relay (needs two men and two women)"
+            : "Not enough athletes to build a medley relay",
+      },
       { status: 400 }
     )
   }
 
-  const usedIds = new Set(teams.flatMap((team) => team.legs.map((leg) => leg.athleteId)))
   const remainingAlts: BuiltLeg[] = []
   for (const stroke of MEDLEY_LEGS) {
     const rows = Object.entries(pickLookup)
       .filter(([id, picks]) => !usedIds.has(id) && picks[stroke] != null)
       .map(([id, picks]) => legOf(id, strokeEvent(stroke), picks[stroke], stroke))
-      .sort((a, b) => a.timeMs - b.timeMs)
+      .sort(byLegTime)
     if (gender === "X") {
       for (const alternateGender of [Gender.M, Gender.F]) {
         const alternate = rows.find((row) => row.gender === alternateGender)
@@ -565,6 +691,6 @@ export async function POST(req: Request) {
     totalMs: teams[0].totalMs,
     legs: teams[0].legs,
     alternates,
-    strokeTimes,
+    strokeTimes: withUntimedSwimmers(strokeTimes, teams),
   })
 }
