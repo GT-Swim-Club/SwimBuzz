@@ -16,6 +16,8 @@ export type ScraperJobProgress = {
   eventLabel?: string | null
   /** True while a Cloudflare check is blocking the scraper's browser window. */
   cloudflare?: boolean
+  /** True while the scraper waits for the coach to clear SwimPhone's archived-meet email + reCAPTCHA form. */
+  swimphoneVerification?: boolean
   /** Epoch ms when the scraper retries after SwimCloud rate-limited it (HTTP 429). */
   rateLimitedUntil?: number | null
 }

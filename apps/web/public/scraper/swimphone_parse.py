@@ -24,10 +24,13 @@ from swim_common import (
     time_token_to_ms,
     ms_to_time_token,
 )
+from swimcloud_scrape import report_progress
 
 BASE_URL = "https://www.swimphone.com/meets/"
 EVENT_ORDER_PATH = "event_order.cfm"
 MEET_MENU_PATH = "meet_menu.cfm"
+# How long the coach has to fill in SwimPhone's archived-meet email + reCAPTCHA form.
+ARCHIVE_ACCESS_TIMEOUT_SEC = 300
 
 STROKE_ALIASES = {
     "free": "Free",
@@ -1544,6 +1547,74 @@ async def _fetch_page_html(page, url: str) -> str:
     return await page.content()
 
 
+ARCHIVE_ACCESS_ERROR = (
+    "SwimPhone needs you to verify access to this archived meet. Run the import again "
+    "and fill in the email + reCAPTCHA form in the SwimPhone browser window on your "
+    "computer, or use PDF import."
+)
+ARCHIVE_ACCESS_HEADLESS_ERROR = (
+    "SwimPhone needs an email + reCAPTCHA check for this archived meet, but the scraper "
+    "is running without a visible browser. Restart it with PLAYWRIGHT_HEADLESS=false "
+    "(the installer's launcher does this) and import again, or use PDF import."
+)
+
+
+class _ArchiveAccess:
+    """Navigates SwimPhone result pages, pausing on the archived-meet gate so the
+    coach can complete it in the browser window. Once the coach lets it time out,
+    later gated pages fail immediately instead of waiting again."""
+
+    def __init__(self, page) -> None:
+        self.page = page
+        self.declined = False
+
+    async def goto(self, url: str) -> str:
+        page = self.page
+        await page.goto(url, wait_until="domcontentloaded", timeout=60000)
+        html = await page.content()
+        if not _is_captcha_page(html, await page.title()):
+            return html
+        if self.declined:
+            raise SwimPhoneCaptchaError(ARCHIVE_ACCESS_ERROR)
+        if _playwright_headless():
+            self.declined = True
+            raise SwimPhoneCaptchaError(ARCHIVE_ACCESS_HEADLESS_ERROR)
+        unlocked = await self._wait_for_coach(url)
+        if unlocked is None:
+            self.declined = True
+            raise SwimPhoneCaptchaError(ARCHIVE_ACCESS_ERROR)
+        return unlocked
+
+    async def _wait_for_coach(self, url: str) -> str | None:
+        page = self.page
+        report_progress(swimphoneVerification=True)
+        try:
+            await page.bring_to_front()
+        except Exception:
+            pass
+        loop = asyncio.get_running_loop()
+        deadline = loop.time() + ARCHIVE_ACCESS_TIMEOUT_SEC
+        try:
+            while loop.time() < deadline:
+                await asyncio.sleep(2)
+                try:
+                    if _is_captcha_page(await page.content(), await page.title()):
+                        continue
+                    # Submitting the form lands on a SwimPhone page that isn't the
+                    # one we wanted; reload the target. A failed reCAPTCHA shows
+                    # the gate again and we keep waiting.
+                    await page.goto(url, wait_until="domcontentloaded", timeout=60000)
+                    html = await page.content()
+                    if not _is_captcha_page(html, await page.title()):
+                        return html
+                except Exception:
+                    # Reading the page mid-navigation (the coach just hit Submit).
+                    continue
+            return None
+        finally:
+            report_progress(swimphoneVerification=False)
+
+
 async def scrape_swimphone_meet(
     url: str,
     team: str | None = None,
@@ -1558,6 +1629,7 @@ async def scrape_swimphone_meet(
     all_relay_results: list[dict] = []
     incomplete_relays: list[str] = []
     captcha = False
+    captcha_error = ARCHIVE_ACCESS_ERROR
     events_with_results: list[SwimPhoneEvent] = []
     meet_name = ""
     meet_date: str | None = None
@@ -1618,14 +1690,19 @@ async def scrape_swimphone_meet(
             await browser.close()
             raise SwimPhoneParseError("No event results are posted for this meet yet.")
 
+        access = _ArchiveAccess(page)
         for idx, event in enumerate(events_with_results):
             assert event.results_url
-            await page.goto(event.results_url, wait_until="domcontentloaded", timeout=60000)
-            title = await page.title()
-            html = await page.content()
-
-            if _is_captcha_page(html, title):
+            report_progress(
+                current=idx + 1,
+                total=len(events_with_results),
+                eventLabel=f"{event.gender} {event.label}".strip(),
+            )
+            try:
+                html = await access.goto(event.results_url)
+            except SwimPhoneCaptchaError as exc:
                 captcha = True
+                captcha_error = str(exc)
                 break
 
             if event.is_relay:
@@ -1653,10 +1730,7 @@ async def scrape_swimphone_meet(
                         )
                         splits_url = f"{BASE_URL}splits.cfm?smid={smid}&rid={rid}&s={sess}"
                         try:
-                            await page.goto(
-                                splits_url, wait_until="domcontentloaded", timeout=60000
-                            )
-                            splits_html = await page.content()
+                            splits_html = await access.goto(splits_url)
                             relay_full = parse_relay_result(
                                 splits_html,
                                 course=event.course,
@@ -1695,10 +1769,7 @@ async def scrape_swimphone_meet(
                     )
                     try:
                         sess_url = _with_session(event.results_url, sess)
-                        await page.goto(
-                            sess_url, wait_until="domcontentloaded", timeout=60000
-                        )
-                        sess_html = await page.content()
+                        sess_html = await access.goto(sess_url)
                         sess_rows = parse_event_results_html(
                             sess_html,
                             event,
@@ -1728,10 +1799,7 @@ async def scrape_swimphone_meet(
                         sep = "&" if "?" in splits_url else "?"
                         splits_url = f"{splits_url}{sep}s={sess}"
                     try:
-                        await page.goto(
-                            splits_url, wait_until="domcontentloaded", timeout=60000
-                        )
-                        splits_html = await page.content()
+                        splits_html = await access.goto(splits_url)
                         splits = parse_individual_splits(splits_html)
                         if splits:
                             r["splits"] = splits
@@ -1746,10 +1814,7 @@ async def scrape_swimphone_meet(
         await browser.close()
 
     if captcha and not all_results:
-        raise SwimPhoneCaptchaError(
-            "SwimPhone blocked access to this archived meet (email + reCAPTCHA required). "
-            "Import during the meet or shortly after, or use PDF import."
-        )
+        raise SwimPhoneCaptchaError(captcha_error)
 
     if not all_results and not all_relay_results:
         raise SwimPhoneParseError("No swim times found in posted results.")

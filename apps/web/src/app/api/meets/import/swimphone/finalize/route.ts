@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { applySwimphoneImportJob } from "../route"
 import { MeetImportValidationError } from "@/lib/meet/meet-import-validate"
+import { normalizeNameMappings, normalizeRejectedNames } from "@/lib/athlete/athlete-match"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
 
@@ -13,13 +14,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
-  const { jobId } = await req.json().catch(() => ({}))
+  const { jobId, nameMappings: nameMappingsRaw, rejectedNames: rejectedNamesRaw } = await req
+    .json()
+    .catch(() => ({}))
   if (!jobId || typeof jobId !== "string") {
     return NextResponse.json({ error: "jobId is required" }, { status: 400 })
   }
+  const nameMappings = normalizeNameMappings(nameMappingsRaw)
 
   try {
-    const summary = await applySwimphoneImportJob(jobId, session.user.id)
+    const summary = await applySwimphoneImportJob(
+      jobId,
+      session.user.id,
+      nameMappings
+        ? { nameMappings, rejectedNames: normalizeRejectedNames(rejectedNamesRaw) }
+        : undefined
+    )
     return NextResponse.json(summary)
   } catch (err) {
     if (err instanceof MeetImportValidationError) {

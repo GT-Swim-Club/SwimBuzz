@@ -131,13 +131,28 @@ export async function POST(req: Request) {
   }
 }
 
-export async function applySwimphoneImportJob(jobId: string, userId: string) {
+/**
+ * Import a finished SwimPhone scrape. With `pairing`, re-applies the same scraped
+ * results for just the coach-paired names instead of scraping the meet again.
+ */
+export async function applySwimphoneImportJob(
+  jobId: string,
+  userId: string,
+  pairing?: {
+    nameMappings: ReturnType<typeof normalizeNameMappings>
+    rejectedNames: ReturnType<typeof normalizeRejectedNames>
+  }
+) {
   const job = await getScraperJobForUser(jobId, userId)
-  if (!job) throw new Error("Job not found")
+  if (!job) {
+    throw new Error(
+      pairing ? "This scrape has expired. Import the meet from SwimPhone again." : "Job not found"
+    )
+  }
   if (job.status !== ScraperJobStatus.COMPLETED) {
     throw new Error(job.error ?? "Job is not complete")
   }
-  if (job.appliedAt && job.applyResult) {
+  if (!pairing && job.appliedAt && job.applyResult) {
     return job.applyResult as Record<string, unknown>
   }
 
@@ -172,18 +187,30 @@ export async function applySwimphoneImportJob(jobId: string, userId: string) {
     throw new Error("Could not read meet date from SwimPhone page")
   }
 
+  const relayResults = coerceParsedRelayResults(scraped.relay_results)
   const summary = await importMeetResults({
     season: ctx.season,
     meetName,
     meetDate,
     results: scraped.results ?? [],
-    relayResults: coerceParsedRelayResults(scraped.relay_results),
+    relayResults,
     source: "swimphone",
     courseDefault: scraped.course ?? "SCY",
     meetId: meet?.id ?? null,
-    nameMappings: ctx.nameMappings,
-    rejectedNames: ctx.rejectedNames,
+    nameMappings: pairing ? pairing.nameMappings : ctx.nameMappings,
+    rejectedNames: pairing ? pairing.rejectedNames : ctx.rejectedNames,
+    pairOnly: Boolean(pairing),
+    allResults: pairing ? (scraped.results ?? []) : null,
+    allRelayResults: pairing ? relayResults : null,
   })
+
+  if (pairing) {
+    return {
+      ...summary,
+      meetName,
+      meetDate: (meet?.startsAt ?? meetDate).toISOString?.() ?? scraped.meet_date,
+    }
+  }
 
   if (meet?.id) {
     await prisma.meet.update({
