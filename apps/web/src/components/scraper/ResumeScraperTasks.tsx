@@ -11,7 +11,11 @@ import {
   summarizeScraperApply,
   type ScraperJobProgress,
 } from "@/lib/scraper/scraper-job-client"
-import { isScraperJobDismissed, scraperJobBusyElsewhere } from "@/lib/scraper/scraper-job-lock"
+import {
+  isScraperJobDismissed,
+  rememberDismissedScraperJob,
+  scraperJobBusyElsewhere,
+} from "@/lib/scraper/scraper-job-lock"
 
 type ResumableJob = {
   id: string
@@ -58,7 +62,15 @@ export default function ResumeScraperTasks() {
               resumedScraperProgress(kind, { id: job.id, status: job.status, progress: job.progress })
             )
           }
-          const data = await resumeScraperJob(job.id, kind, (polled) => report(resumedScraperProgress(kind, polled)))
+          let data: Record<string, unknown>
+          try {
+            data = await resumeScraperJob(job.id, kind, (polled) => report(resumedScraperProgress(kind, polled)))
+          } catch (err) {
+            // Show a failed save once; a job that can't be saved would otherwise
+            // come back with the same error on every page load.
+            rememberDismissedScraperJob(job.id)
+            throw err
+          }
           const confirmations = Array.isArray(data.nameConfirmations)
             ? (data.nameConfirmations as NameConfirmation[])
             : []

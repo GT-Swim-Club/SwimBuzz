@@ -173,8 +173,21 @@ export default function HoverDetail({
       hide()
     }
 
-    function handleFocusIn() {
+    function handleFocusIn(event: FocusEvent) {
+      // Returning to the window refocuses whatever had focus, which would reopen the
+      // tooltip under a pointer that's since moved — only keyboard focus reveals it.
+      if (event.target instanceof Element && !event.target.matches(":focus-visible")) return
       show(true)
+    }
+
+    // Switching apps never fires pointerleave, so the tooltip would stay up on return.
+    function handleWindowBlur() {
+      suppressedByClick = false
+      hide()
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === "hidden") handleWindowBlur()
     }
 
     function handleViewportChange() {
@@ -189,6 +202,8 @@ export default function HoverDetail({
     trigger.addEventListener("focusout", hide)
     window.addEventListener("resize", handleViewportChange)
     window.addEventListener("scroll", handleViewportChange, true)
+    window.addEventListener("blur", handleWindowBlur)
+    document.addEventListener("visibilitychange", handleVisibilityChange)
 
     return () => {
       clearShowTimeout()
@@ -200,6 +215,8 @@ export default function HoverDetail({
       trigger.removeEventListener("focusout", hide)
       window.removeEventListener("resize", handleViewportChange)
       window.removeEventListener("scroll", handleViewportChange, true)
+      window.removeEventListener("blur", handleWindowBlur)
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
     }
   }, [desktopOnly, followPointer, offset, placementProp])
 

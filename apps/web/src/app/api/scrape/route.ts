@@ -81,7 +81,9 @@ export async function applyAthleteScrapeJob(jobId: string, userId: string) {
     throw new Error(job.error ?? "Job is not complete")
   }
   if (job.appliedAt && job.applyResult) {
-    return job.applyResult as Record<string, unknown>
+    const applied = job.applyResult as Record<string, unknown>
+    if (typeof applied.error === "string") throw new Error(applied.error)
+    return applied
   }
 
   const ctx = job.applyContext as ScrapeApplyContext | null
@@ -98,7 +100,10 @@ export async function applyAthleteScrapeJob(jobId: string, userId: string) {
     ctx.swimmerCloudIds ?? (ctx.swimmerCloudId != null ? [ctx.swimmerCloudId] : [])
   const succeeded = swimmerCloudIds.filter((id) => !scraped.failed?.includes(id))
   if (succeeded.length === 0) {
-    throw new Error("SwimCloud scrape failed for this athlete")
+    const error = "SwimCloud scrape failed for this athlete"
+    // Settle the job so a reload doesn't resume it and show this again.
+    await markScraperJobApplied(jobId, { error })
+    throw new Error(error)
   }
 
   const times = mergeProfileTimes(succeeded.map((id) => scraped.swimmers?.[String(id)] ?? []))

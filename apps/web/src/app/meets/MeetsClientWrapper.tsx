@@ -145,18 +145,24 @@ export default function MeetsClientWrapper({
   // below. The list keeps it in place — a lone row wouldn't stand out anyway.
   const lastMeet = layout === "gallery" && !query && upcoming.length === 0 ? past[0] : undefined
   const pastInView = past.filter((m) => m !== lastMeet && inSeason(m))
-  // All seasons: this season's finished meets sit above everything older.
-  // A season filter already scopes the list, so it stays one "Past meets" section.
-  const runningSeason = currentSeason()
-  const splitPast = !season
-  const currentSeasonPast = splitPast ? pastInView.filter((m) => m.season === runningSeason) : []
-  const olderPast = splitPast ? pastInView.filter((m) => m.season !== runningSeason) : pastInView
-  const sections: { label: string; kind: CardKind; items: MeetListItem[] }[] = [
-    { label: "Last meet", kind: "last" as const, items: lastMeet ? [lastMeet] : [] },
-    { label: "Upcoming meets", kind: "upcoming" as const, items: upcoming.filter(inSeason) },
-    { label: formatSeasonLabel(runningSeason), kind: "past" as const, items: currentSeasonPast },
-    { label: "Past meets", kind: "past" as const, items: olderPast },
-  ].filter((s) => s.items.length > 0)
+  // The season section leads with what's coming up (soonest first), then what
+  // already happened (latest first). All seasons: older seasons follow below.
+  const headlineSeason = season ?? currentSeason()
+  const seasonPast = season ? pastInView : pastInView.filter((m) => m.season === headlineSeason)
+  const olderPast = season ? [] : pastInView.filter((m) => m.season !== headlineSeason)
+  const sections: { label: string; groups: { kind: CardKind; items: MeetListItem[] }[] }[] = [
+    { label: "Last meet", groups: [{ kind: "last" as const, items: lastMeet ? [lastMeet] : [] }] },
+    {
+      label: formatSeasonLabel(headlineSeason),
+      groups: [
+        { kind: "upcoming" as const, items: upcoming.filter(inSeason) },
+        { kind: "past" as const, items: seasonPast },
+      ],
+    },
+    { label: "Past seasons", groups: [{ kind: "past" as const, items: olderPast }] },
+  ]
+    .map((s) => ({ ...s, groups: s.groups.filter((g) => g.items.length > 0) }))
+    .filter((s) => s.groups.length > 0)
 
   function renderCard(m: MeetListItem, kind: CardKind, rowSize: number) {
     const href = meetPath(m.slug ?? m.id)
@@ -230,9 +236,21 @@ export default function MeetsClientWrapper({
         <section key={s.label} className="flex flex-col gap-3">
           <h2 className={sectionHeadingClass}>{s.label}</h2>
           {layout === "list" ? (
-            <MeetListTable rows={s.items.map(listRow)} actions={isCoach ? "edit" : "none"} />
+            <MeetListTable
+              rows={s.groups.flatMap((g) => g.items.map(listRow))}
+              actions={isCoach ? "edit" : "none"}
+            />
           ) : (
-            <MeetCardRows items={s.items} renderCard={(m, rowSize) => renderCard(m, s.kind, rowSize)} />
+            // Upcoming cards keep their own rows so they stay large beside past ones.
+            <div className="flex flex-col gap-4">
+              {s.groups.map((g) => (
+                <MeetCardRows
+                  key={g.kind}
+                  items={g.items}
+                  renderCard={(m, rowSize) => renderCard(m, g.kind, rowSize)}
+                />
+              ))}
+            </div>
           )}
         </section>
       ))}
