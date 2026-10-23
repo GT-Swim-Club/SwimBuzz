@@ -247,7 +247,9 @@ function RosterTable({
                   <span className="sr-only">No SwimCloud</span>
                 </span>
               ))}
-            {staffColumns && <LastImport at={athlete.timesSyncedAt} />}
+            {staffColumns && (
+              <LastImport at={athlete.timesSyncedAt} hasSwimCloud={athlete.swimCloudIds.length > 0} />
+            )}
           </Link>
         )
       })}
@@ -255,9 +257,20 @@ function RosterTable({
   )
 }
 
-/** "3 days ago" (absolute date on hover), or "Never"; blank until the viewer's day is known (SSR). */
-function LastImport({ at }: { at: string | Date | null }) {
+/**
+ * "3 days ago" (absolute date on hover), "Never", or a dash for athletes with no SwimCloud to
+ * import from; blank until the viewer's day is known (SSR).
+ */
+function LastImport({ at, hasSwimCloud }: { at: string | Date | null; hasSwimCloud: boolean }) {
   const todayKey = useTodayKey()
+  if (!at && !hasSwimCloud) {
+    return (
+      <span className="hidden text-foreground-tertiary md:block">
+        <span aria-hidden>—</span>
+        <span className="sr-only">No SwimCloud</span>
+      </span>
+    )
+  }
   const label = at ? daysAgoLabel(at, todayKey) : "Never"
   return (
     <span className={`hidden truncate md:block ${at ? "" : "text-foreground-tertiary"}`}>
