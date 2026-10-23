@@ -157,7 +157,7 @@ export function MeetSignupCard({
         meetId={meetId}
         trigger={(open) => (
           <LedgerRow
-            icon="download"
+            icon="import"
             label="Import sign-ups"
             onClick={open}
             trailing={
@@ -181,7 +181,7 @@ export function MeetSignupCard({
                 onClick={open}
                 className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 py-[11px] pl-4 text-left transition-colors hover:text-primary"
               >
-                <LedgerIcon name="download" className="h-4 w-4 shrink-0 text-foreground-tertiary" />
+                <LedgerIcon name="import" className="h-4 w-4 shrink-0 text-foreground-tertiary" />
                 <span className="truncate">Import roster</span>
               </button>
               <button
@@ -193,7 +193,7 @@ export function MeetSignupCard({
               </button>
             </div>
           ) : (
-            <LedgerRow icon="download" label="Import roster" onClick={open} />
+            <LedgerRow icon="import" label="Import roster" onClick={open} />
           )
         }
       />

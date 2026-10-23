@@ -139,7 +139,7 @@ export default function ImportTimesButton({
         aria-label="Import times from SwimCloud"
         className={`${ICON_BUTTON} h-[34px] w-[34px]`}
       >
-        <AppIcon name="download" className="h-[18px] w-[18px]" />
+        <AppIcon name="import" className="h-[18px] w-[18px]" />
         <HoverDetail label={loading ? "Importing times…" : "Import times from SwimCloud"} />
       </button>
 

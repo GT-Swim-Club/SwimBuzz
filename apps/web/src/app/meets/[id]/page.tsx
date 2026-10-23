@@ -10,6 +10,7 @@ import MeetPageBackground from "./MeetPageBackground"
 import MeetSheetSummarySection from "./MeetSheetSummarySection"
 import ScrollToHash from "./ScrollToHash"
 import type { MeetFormState } from "../MeetFields"
+import { MeetListThumb } from "../MeetListMeta"
 import { isEventOrder } from "@/lib/meet/meet-event-order"
 import {
   isSheetSummary,
@@ -340,11 +341,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
           />
           <div className="mt-1 flex items-center gap-4 sm:gap-5">
             {meet.iconUrl && (
-              <img
-                src={meet.iconUrl}
-                alt={`${meet.name} icon`}
-                className="h-20 w-20 rounded-xl object-cover shrink-0"
-              />
+              <MeetListThumb iconUrl={meet.iconUrl} bannerUrl={null} size={80} label={`${meet.name} icon`} />
             )}
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-3">

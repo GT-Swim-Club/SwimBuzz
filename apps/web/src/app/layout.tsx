@@ -13,6 +13,8 @@ import "./variables.css"
 import "./globals.css"
 import "react-pdf/dist/Page/TextLayer.css"
 import { getSession } from "@/lib/auth/session"
+import { readListLayouts } from "@/lib/list-layout-server"
+import { SavedListLayoutsProvider } from "@/components/ui/ListLayout"
 
 export const metadata: Metadata = {
   title: "SwimBuzz",
@@ -24,7 +26,7 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const session = await getSession()
+  const [session, listLayouts] = await Promise.all([getSession(), readListLayouts()])
 
   return (
     <html lang="en" className="overflow-hidden" suppressHydrationWarning>
@@ -42,7 +44,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   {/* Inherit overflow so dialogs that lock body scrolling also lock this area. */}
                   <main id="page-scroll" className="min-h-0 flex-1 overflow-x-hidden [overflow-y:inherit]">
                     <div className="w-full min-w-0 px-(--page-gutter-x) py-(--page-gutter-y)">
-                      {children}
+                      <SavedListLayoutsProvider layouts={listLayouts}>{children}</SavedListLayoutsProvider>
                     </div>
                   </main>
                 </ScraperUiProvider>

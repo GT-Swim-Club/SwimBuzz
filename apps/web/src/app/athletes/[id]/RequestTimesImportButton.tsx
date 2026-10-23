@@ -52,7 +52,7 @@ export default function RequestTimesImportButton({
         aria-label="Request a times import"
         className={`${ICON_BUTTON} h-[34px] w-[34px]`}
       >
-        <AppIcon name="download" className="h-[18px] w-[18px]" />
+        <AppIcon name="import" className="h-[18px] w-[18px]" />
         <HoverDetail label={sent ? "Import requested" : "Request a times import"} />
       </button>
 

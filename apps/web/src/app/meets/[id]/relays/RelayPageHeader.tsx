@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 import FitHeading from "@/components/ui/FitHeading"
+import { MeetListThumb } from "../../MeetListMeta"
 
 export const relayEyebrowClass =
   "text-sm font-semibold uppercase tracking-[0.16em] text-accent whitespace-nowrap"
@@ -30,14 +31,7 @@ export default function RelayPageHeader({
           React warns about a missing key once the RSC lazy reference resolves. */}
       <>{back}</>
       <div className="mt-1 flex items-center gap-4 sm:gap-5">
-        {iconUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={iconUrl}
-            alt={`${meetName} icon`}
-            className="h-20 w-20 shrink-0 rounded-xl object-cover"
-          />
-        ) : null}
+        {iconUrl ? <MeetListThumb iconUrl={iconUrl} bannerUrl={null} size={80} label={`${meetName} icon`} /> : null}
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-3">
             <FitHeading className="min-w-0 flex-1 text-4xl font-semibold text-foreground sm:text-5xl">

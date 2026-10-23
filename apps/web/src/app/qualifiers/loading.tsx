@@ -1,11 +1,14 @@
-import { readListLayout } from "@/lib/list-layout-server"
+import { SavedListLayout } from "@/components/ui/ListLayout"
 import QualifiersSkeleton from "./QualifiersSkeleton"
 
-export default async function Loading() {
-  const layout = await readListLayout("nationals")
+export default function Loading() {
   return (
     <main className="flex flex-col gap-4" aria-busy="true" aria-label="Loading qualifiers">
-      <QualifiersSkeleton layout={layout} />
+      <SavedListLayout
+        page="nationals"
+        list={<QualifiersSkeleton layout="list" />}
+        gallery={<QualifiersSkeleton layout="gallery" />}
+      />
     </main>
   )
 }

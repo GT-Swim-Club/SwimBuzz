@@ -4,9 +4,12 @@ import BannerCropper from "@/components/athlete/BannerCropper"
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react"
 import { createPortal } from "react-dom"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
-import { TimePicker, TimeZonePicker } from "@/components/ui/CustomDateTimePicker"
+import { parseTypedDate, TimePicker, TimeZonePicker } from "@/components/ui/CustomDateTimePicker"
 import { FileDropzone } from "@/components/ui/FileDropzone"
 import { AppIcon } from "@/components/ui/AppIcon"
+import ActionIcon from "@/components/ui/ActionIcon"
+import HoverDetail from "@/components/ui/HoverDetail"
+import { downloadBlob } from "@/components/ui/export-menu"
 import { DEFAULT_TIME_ZONE, defaultSeason, formatClockTime, formatSeasonLabel, zoneAbbreviation } from "@swimbuzz/shared"
 import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
@@ -55,6 +58,33 @@ const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"]
 const ICON_ACCEPT = "image/png,image/jpeg,image/jpg,image/gif,image/webp,image/svg+xml"
 const BANNER_ACCEPT = "image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
+const IMAGE_EXT: Record<string, string> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/gif": "gif",
+  "image/webp": "webp",
+  "image/svg+xml": "svg",
+}
+
+/**
+ * `<a download>` is ignored for cross-origin URLs (Supabase Storage), so the image is
+ * fetched as a blob — directly when the host allows CORS, else via the same-origin proxy.
+ */
+async function fetchImageBlob(url: string) {
+  try {
+    const res = await fetch(url)
+    if (res.ok) return await res.blob()
+  } catch {
+    // Fall through to the proxy.
+  }
+  const res = await fetch("/api/remote-file", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url }),
+  })
+  if (!res.ok) throw new Error(`Download failed (${res.status})`)
+  return res.blob()
+}
 
 function pad(value: number) {
   return String(value).padStart(2, "0")
@@ -115,7 +145,13 @@ function FloatingDateRangePanel({
 }) {
   const panelRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState<PanelPosition | null>(null)
-  useEscapeToClose(true, onClose)
+  // Blur first so a half-typed date field commits before the panel unmounts.
+  const close = useCallback(() => {
+    const active = document.activeElement
+    if (active instanceof HTMLElement && panelRef.current?.contains(active)) active.blur()
+    onClose()
+  }, [onClose])
+  useEscapeToClose(true, close)
 
   const reposition = useCallback(() => {
     const anchor = anchorRef.current
@@ -144,7 +180,7 @@ function FloatingDateRangePanel({
       const target = event.target as Element
       if (anchorRef.current?.contains(target) || panelRef.current?.contains(target)) return
       if (target.closest?.("[data-floating-popover]")) return
-      onClose()
+      close()
     }
     document.addEventListener("mousedown", onPointerDown)
     window.addEventListener("resize", reposition)
@@ -154,7 +190,7 @@ function FloatingDateRangePanel({
       window.removeEventListener("resize", reposition)
       window.removeEventListener("scroll", reposition, true)
     }
-  }, [anchorRef, onClose, reposition])
+  }, [anchorRef, close, reposition])
 
   if (typeof document === "undefined") return null
   return createPortal(
@@ -182,6 +218,90 @@ function FloatingDateRangePanel({
   )
 }
 
+/** "Oct 3, 2026" */
+function shortDate(value: string) {
+  if (!value) return ""
+  const { y, m, d } = parseIso(value)
+  return `${MONTHS[m]} ${d}, ${y}`
+}
+
+/**
+ * Free-text date field inside the range panel. Accepts the same formats as the app's
+ * DatePicker ("10/3/2026", "Oct 3", "next friday"…), commits on blur or Enter, and
+ * flags input the caller rejects.
+ */
+function TypedDateInput({
+  label,
+  value,
+  placeholder,
+  disabled = false,
+  onCommit,
+  onPreview,
+}: {
+  label: string
+  value: string
+  placeholder: string
+  disabled?: boolean
+  /** Returns false to reject the date. "" clears it. */
+  onCommit: (value: string) => boolean
+  /** Called while typing once the text parses, to page the calendar to it. */
+  onPreview: (value: string) => void
+}) {
+  const [text, setText] = useState(() => shortDate(value))
+  const [invalid, setInvalid] = useState(false)
+  const [shownValue, setShownValue] = useState(value)
+  if (value !== shownValue) {
+    setShownValue(value)
+    setText(shortDate(value))
+    setInvalid(false)
+  }
+
+  function toIso(raw: string) {
+    const parsed = parseTypedDate(raw)
+    return parsed ? isoDate(parsed.getFullYear(), parsed.getMonth(), parsed.getDate()) : null
+  }
+
+  function commit() {
+    const raw = text.trim()
+    const next = raw ? toIso(raw) : ""
+    if (next === null || !onCommit(next)) {
+      setInvalid(true)
+      return
+    }
+    setText(shortDate(next))
+    setInvalid(false)
+  }
+
+  return (
+    <div className="min-w-0">
+      <label className={labelClass}>{label}</label>
+      <input
+        aria-label={label}
+        aria-invalid={invalid || undefined}
+        value={text}
+        disabled={disabled}
+        placeholder={placeholder}
+        onChange={(e) => {
+          setText(e.target.value)
+          setInvalid(false)
+          const next = toIso(e.target.value)
+          if (next) onPreview(next)
+        }}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault()
+            e.currentTarget.blur()
+          }
+        }}
+        className={`${inputClass} tabular-nums disabled:cursor-not-allowed disabled:opacity-50 ${
+          invalid ? "!border-error focus:!ring-error/25" : ""
+        }`}
+      />
+    </div>
+  )
+}
+
 function MeetDateRangePanel({
   form,
   setForm,
@@ -199,8 +319,14 @@ function MeetDateRangePanel({
   })
   const [year, month] = view
   const leading = new Date(year, month, 1).getDay()
-  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  // Always six weeks, so the panel keeps one height while paging through months.
+  const days = Array.from({ length: 42 }, (_, i) => new Date(year, month, 1 - leading + i))
   const title = new Date(year, month, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" })
+
+  function showMonthOf(value: string) {
+    const { y, m } = parseIso(value)
+    setView([y, m])
+  }
 
   // First click sets the start; a later click sets the end. Clicking again after a full
   // range (or on/before the start) starts over as a single day.
@@ -211,11 +337,41 @@ function MeetDateRangePanel({
     })
   }
 
+  function commitStart(value: string) {
+    setForm((f) => ({ ...f, startDate: value, endDate: value && f.endDate > value ? f.endDate : "" }))
+    if (value) showMonthOf(value)
+    return true
+  }
+
+  function commitEnd(value: string) {
+    if (value && value < form.startDate) return false
+    setForm((f) => ({ ...f, endDate: value === f.startDate ? "" : value }))
+    if (value) showMonthOf(value)
+    return true
+  }
+
   const navClass =
     "flex h-7 w-7 items-center justify-center rounded-lg text-foreground-secondary transition-colors hover:bg-fill"
 
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-border bg-background-layout p-3.5">
+      <div className="grid grid-cols-2 gap-3">
+        <TypedDateInput
+          label="Start date"
+          value={form.startDate}
+          placeholder="MM/DD/YYYY"
+          onCommit={commitStart}
+          onPreview={showMonthOf}
+        />
+        <TypedDateInput
+          label="End date"
+          value={form.endDate}
+          placeholder={form.startDate ? "Same day" : "MM/DD/YYYY"}
+          disabled={!form.startDate}
+          onCommit={commitEnd}
+          onPreview={showMonthOf}
+        />
+      </div>
       <div className="flex items-center justify-between">
         <button
           type="button"
@@ -241,21 +397,19 @@ function MeetDateRangePanel({
             {day}
           </span>
         ))}
-        {Array.from({ length: leading }, (_, i) => (
-          <span key={`blank-${i}`} />
-        ))}
-        {Array.from({ length: daysInMonth }, (_, i) => {
-          const value = isoDate(year, month, i + 1)
+        {days.map((day) => {
+          const value = isoDate(day.getFullYear(), day.getMonth(), day.getDate())
           const isEnd = value === form.startDate || value === form.endDate
           const inRange =
             Boolean(form.startDate && form.endDate) && value > form.startDate && value < form.endDate
+          const outsideMonth = day.getMonth() !== month
           return (
             <button
               type="button"
               key={value}
               onClick={() => pick(value)}
               aria-pressed={isEnd}
-              aria-label={new Date(year, month, i + 1).toLocaleDateString(undefined, {
+              aria-label={day.toLocaleDateString(undefined, {
                 weekday: "long",
                 month: "long",
                 day: "numeric",
@@ -266,10 +420,12 @@ function MeetDateRangePanel({
                   ? "bg-primary font-semibold text-primary-contrast"
                   : inRange
                     ? "bg-primary/20 text-foreground"
-                    : "text-foreground hover:bg-fill"
+                    : outsideMonth
+                      ? "text-foreground-quaternary hover:bg-fill"
+                      : "text-foreground hover:bg-fill"
               }`}
             >
-              {i + 1}
+              {day.getDate()}
             </button>
           )
         })}
@@ -317,7 +473,23 @@ export function MeetImageHeader({
   const [iconUploading, setIconUploading] = useState(false)
   const [bannerUploading, setBannerUploading] = useState(false)
   const [bannerCroppingSrc, setBannerCroppingSrc] = useState<string | null>(null)
+  const [downloading, setDownloading] = useState<"icon" | "banner" | null>(null)
   const uploading = iconUploading || bannerUploading
+
+  async function downloadImage(kind: "icon" | "banner", url: string) {
+    setDownloading(kind)
+    onError(null)
+    try {
+      const blob = await fetchImageBlob(url)
+      const base = (form.name.trim() || "Meet").replace(/[\\/:*?"<>|]/g, "-")
+      const ext = IMAGE_EXT[blob.type] ?? (kind === "banner" ? "jpg" : "png")
+      downloadBlob(blob, `${base} ${kind === "icon" ? "Icon" : "Banner"}.${ext}`)
+    } catch {
+      onError(`Could not download the ${kind}`)
+    } finally {
+      setDownloading(null)
+    }
+  }
 
   useDontReloadWhileBusy(uploading)
 
@@ -402,21 +574,40 @@ export function MeetImageHeader({
                 bannerUploading ? "opacity-100" : "opacity-0 group-hover:opacity-100"
               }`}
             >
-              <span className="rounded-lg bg-primary px-3.5 py-1.5 text-[13px] font-medium text-primary-contrast transition-colors hover:bg-primary-hover">
-                {bannerUploading ? "Uploading…" : "Click or drop to replace"}
-              </span>
-              {!bannerUploading ? (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setForm((f) => ({ ...f, bannerUrl: "" }))
-                  }}
-                  className="rounded-lg border border-border bg-background px-3.5 py-1.5 text-[13px] font-medium text-foreground transition-colors hover:bg-fill"
-                >
-                  Remove
-                </button>
-              ) : null}
+              <div className="flex items-center gap-2">
+                <span className="flex h-8 items-center rounded-lg bg-primary px-3.5 text-[13px] font-medium text-primary-contrast transition-colors hover:bg-primary-hover">
+                  {bannerUploading ? "Uploading…" : "Click or drop to replace"}
+                </span>
+                {!bannerUploading ? (
+                  <>
+                    <button
+                      type="button"
+                      aria-label="Download banner"
+                      disabled={downloading === "banner"}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        void downloadImage("banner", form.bannerUrl)
+                      }}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-background text-foreground transition-colors hover:bg-fill disabled:opacity-60"
+                    >
+                      <AppIcon name="download" className="h-4 w-4" />
+                      <HoverDetail label="Download banner" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Remove banner"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setForm((f) => ({ ...f, bannerUrl: "" }))
+                      }}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-error-border bg-background text-error transition-colors hover:bg-error-bg"
+                    >
+                      <ActionIcon kind="delete" className="h-4 w-4" />
+                      <HoverDetail label="Remove banner" />
+                    </button>
+                  </>
+                ) : null}
+              </div>
             </div>
           </>
         ) : (
@@ -445,11 +636,23 @@ export function MeetImageHeader({
           <button
             type="button"
             aria-label="Remove icon"
-            title="Remove icon"
             onClick={() => setForm((f) => ({ ...f, iconUrl: "" }))}
             className="absolute right-0.5 top-0.5 z-[1] flex h-[18px] w-[18px] items-center justify-center rounded-full border border-border bg-background text-foreground transition-colors hover:bg-fill"
           >
             <AppIcon name="x" className="h-2.5 w-2.5" strokeWidth={2.5} />
+            <HoverDetail label="Remove icon" />
+          </button>
+        ) : null}
+        {form.iconUrl ? (
+          <button
+            type="button"
+            aria-label="Download icon"
+            disabled={downloading === "icon"}
+            onClick={() => void downloadImage("icon", form.iconUrl)}
+            className="absolute bottom-0.5 right-0.5 z-[1] flex h-[18px] w-[18px] items-center justify-center rounded-full border border-border bg-background text-foreground transition-colors hover:bg-fill disabled:opacity-60"
+          >
+            <AppIcon name="download" className="h-2.5 w-2.5" strokeWidth={2.5} />
+            <HoverDetail label="Download icon" />
           </button>
         ) : null}
       </div>

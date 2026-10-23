@@ -1,12 +1,15 @@
-import { readListLayout } from "@/lib/list-layout-server"
+import { SavedListLayout } from "@/components/ui/ListLayout"
 import MeetsListSkeleton, { MeetsToolbarSkeleton } from "./MeetsListSkeleton"
 
-export default async function Loading() {
-  const layout = await readListLayout("meets")
+export default function Loading() {
   return (
     <main className="flex flex-col gap-6" aria-busy="true" aria-label="Loading meets">
       <MeetsToolbarSkeleton />
-      <MeetsListSkeleton layout={layout} />
+      <SavedListLayout
+        page="meets"
+        list={<MeetsListSkeleton layout="list" />}
+        gallery={<MeetsListSkeleton layout="gallery" />}
+      />
     </main>
   )
 }

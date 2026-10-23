@@ -93,7 +93,7 @@ function relativeWeekday(dayName: string, modifier?: string) {
   return result
 }
 
-function parseTypedDate(value: string) {
+export function parseTypedDate(value: string) {
   const raw = value.trim()
   if (!raw) return null
   const iso = parseDate(raw)

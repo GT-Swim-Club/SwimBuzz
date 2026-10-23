@@ -23,6 +23,15 @@ export function parseListLayout(value: string | null | undefined): ListLayout {
   return value === "gallery" ? "gallery" : "list"
 }
 
+export const LIST_LAYOUT_PAGES = Object.keys(COOKIES) as ListLayoutPage[]
+
+/** Client-only: the layout last saved for `page`, read straight from its cookie. */
+export function readSavedListLayout(page: ListLayoutPage): ListLayout {
+  const prefix = `${COOKIES[page]}=`
+  const entry = document.cookie.split("; ").find((c) => c.startsWith(prefix))
+  return parseListLayout(entry?.slice(prefix.length))
+}
+
 /** Client-only: remember `layout` as this page's default for next time. */
 export function saveListLayout(page: ListLayoutPage, layout: ListLayout) {
   document.cookie = `${COOKIES[page]}=${layout}; path=/; max-age=${MAX_AGE_SECONDS}; SameSite=Lax`

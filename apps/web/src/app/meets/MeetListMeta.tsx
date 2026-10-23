@@ -67,13 +67,25 @@ function contentBox(src: string): Promise<ContentBox | null> {
 }
 
 /**
- * A list row's image, with no frame behind it. An icon has its transparent
+ * A meet's image (list rows, meet page header), with no frame behind it. An icon has its transparent
  * margins trimmed and the visible logo fitted whole into the slot — round and
  * square logos fill it, wide ones show edge to edge at the largest size that
  * fits. Without an icon, the banner fills a rounded square. With neither, the
  * empty slot keeps names aligned.
  */
-export function MeetListThumb({ iconUrl, bannerUrl }: { iconUrl: string | null; bannerUrl: string | null }) {
+export function MeetListThumb({
+  iconUrl,
+  bannerUrl,
+  size = THUMB,
+  label,
+}: {
+  iconUrl: string | null
+  bannerUrl: string | null
+  /** Slot edge in px; defaults to a list row's. */
+  size?: number
+  /** Accessible name; the thumb is decorative without one. */
+  label?: string
+}) {
   const [box, setBox] = useState<{ src: string; box: ContentBox | null } | null>(null)
 
   useEffect(() => {
@@ -87,31 +99,36 @@ export function MeetListThumb({ iconUrl, bannerUrl }: { iconUrl: string | null; 
     }
   }, [iconUrl])
 
-  const slot = "h-9 w-9 shrink-0 bg-no-repeat"
+  const slot = "shrink-0 bg-no-repeat"
+  const a11y = label ? { role: "img", "aria-label": label } : { "aria-hidden": true }
+  const dims = { width: size, height: size }
   if (iconUrl) {
     const image = `url(${JSON.stringify(iconUrl)})`
     // Not measured yet: hold the empty slot rather than flash a mis-sized logo.
-    if (box?.src !== iconUrl) return <div aria-hidden className={slot} />
+    if (box?.src !== iconUrl) return <div {...a11y} className={slot} style={dims} />
     const b = box.box
-    if (!b) return <div aria-hidden className={`${slot} bg-contain bg-center`} style={{ backgroundImage: image }} />
-    const scale = Math.min(THUMB / b.w, THUMB / b.h)
+    if (!b) {
+      return <div {...a11y} className={`${slot} bg-contain bg-center`} style={{ ...dims, backgroundImage: image }} />
+    }
+    const scale = Math.min(size / b.w, size / b.h)
     return (
       <div
-        aria-hidden
+        {...a11y}
         className={slot}
         style={{
+          ...dims,
           backgroundImage: image,
           backgroundSize: `${b.width * scale}px ${b.height * scale}px`,
-          backgroundPosition: `${(THUMB - b.w * scale) / 2 - b.x * scale}px ${(THUMB - b.h * scale) / 2 - b.y * scale}px`,
+          backgroundPosition: `${(size - b.w * scale) / 2 - b.x * scale}px ${(size - b.h * scale) / 2 - b.y * scale}px`,
         }}
       />
     )
   }
   return (
     <div
-      aria-hidden
+      {...a11y}
       className={`${slot} rounded-lg bg-cover bg-center`}
-      style={bannerUrl ? { backgroundImage: `url(${JSON.stringify(bannerUrl)})` } : undefined}
+      style={bannerUrl ? { ...dims, backgroundImage: `url(${JSON.stringify(bannerUrl)})` } : dims}
     />
   )
 }

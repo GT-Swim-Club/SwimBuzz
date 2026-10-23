@@ -1,10 +1,44 @@
 "use client"
 
-import { createContext, useContext, useState, type ReactNode } from "react"
+import { createContext, useContext, useState, useSyncExternalStore, type ReactNode } from "react"
 import { AppIcon } from "@/components/ui/AppIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
 import { SegmentedToggle, segmentedIconOptionClass } from "@/components/ui/SegmentedToggle"
-import { saveListLayout, type ListLayout, type ListLayoutPage } from "@/lib/list-layout"
+import { readSavedListLayout, saveListLayout, type ListLayout, type ListLayoutPage } from "@/lib/list-layout"
+
+const SavedListLayoutsContext = createContext<Record<ListLayoutPage, ListLayout> | null>(null)
+
+/**
+ * Each page's saved layout as the server read it for this document, so a
+ * loading skeleton server-renders (and hydrates) in the right layout.
+ */
+export function SavedListLayoutsProvider({
+  layouts,
+  children,
+}: {
+  layouts: Record<ListLayoutPage, ListLayout>
+  children: ReactNode
+}) {
+  return <SavedListLayoutsContext.Provider value={layouts}>{children}</SavedListLayoutsContext.Provider>
+}
+
+const subscribeNever = () => () => {}
+
+/**
+ * Renders `list` or `gallery` for `page`'s saved layout. For loading.tsx files,
+ * which must not read cookies themselves: that would keep Next from prefetching
+ * them, so navigating in would flash the parent route's skeleton first — and a
+ * prefetched copy would keep the layout from before the last toggle.
+ */
+export function SavedListLayout({ page, list, gallery }: { page: ListLayoutPage; list: ReactNode; gallery: ReactNode }) {
+  const saved = useContext(SavedListLayoutsContext)
+  const layout = useSyncExternalStore(
+    subscribeNever,
+    () => readSavedListLayout(page),
+    () => saved?.[page] ?? "list"
+  )
+  return layout === "gallery" ? gallery : list
+}
 
 const ListLayoutContext = createContext<{ layout: ListLayout; setLayout: (layout: ListLayout) => void } | null>(null)
 
