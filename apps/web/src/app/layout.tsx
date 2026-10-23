@@ -6,6 +6,7 @@ import ScraperUiProvider from "@/components/scraper/ScraperUiProvider"
 import ImportTaskProvider from "@/components/ui/ImportTaskProvider"
 import ImportToast from "@/components/ui/ImportToast"
 import AthletePairingProvider from "@/components/meet/AthletePairingProvider"
+import ResumeScraperTasks from "@/components/scraper/ResumeScraperTasks"
 import Nav from "@/components/nav/Nav"
 import NavigationTracker from "@/components/nav/NavigationTracker"
 import "./variables.css"
@@ -32,6 +33,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <SessionProvider session={session}>
             <ImportTaskProvider>
               <AthletePairingProvider>
+                <ResumeScraperTasks />
                 <ScraperUiProvider>
                   <Nav />
                   <Suspense fallback={null}>

@@ -151,15 +151,16 @@ export function MeetListSkeleton({
 
 /**
  * Mirrors MeetsClientWrapper in the viewer's last-used layout. Gallery: an
- * "Upcoming meets" row of two, then a full "Past meets" row. List: the same
- * two sections as tables.
+ * "Upcoming meets" row of two, a short current-season row, then a full
+ * "Past meets" row. List: the same three sections as tables.
  */
 export default function MeetsListSkeleton({ layout = "list" }: { layout?: ListLayout }) {
   if (layout === "list") {
     return (
       <div className="flex flex-col gap-8">
         <MeetListSkeleton heading="w-36" rows={2} />
-        <MeetListSkeleton heading="w-28" rows={5} />
+        <MeetListSkeleton heading="w-24" rows={2} />
+        <MeetListSkeleton heading="w-28" rows={4} />
       </div>
     )
   }
@@ -170,6 +171,13 @@ export default function MeetsListSkeleton({ layout = "list" }: { layout?: ListLa
         <div className="grid aspect-[32/9] grid-cols-2 gap-4 max-sm:aspect-auto max-sm:grid-cols-1">
           <MeetCardSkeleton eyebrow title="w-1/2" />
           <MeetCardSkeleton eyebrow title="w-2/5" />
+        </div>
+      </section>
+      <section className="flex flex-col gap-3">
+        <Skeleton className="h-4 w-24" />
+        <div className="grid aspect-[32/9] grid-cols-2 gap-4 max-sm:aspect-auto max-sm:grid-cols-1">
+          <MeetCardSkeleton title="w-3/4" />
+          <MeetCardSkeleton title="w-2/3" />
         </div>
       </section>
       <section className="flex flex-col gap-3">

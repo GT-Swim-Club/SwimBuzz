@@ -1,7 +1,28 @@
+import { holdScraperJob, unholdScraperJob } from "@/lib/scraper/scraper-job-lock"
+
 /**
  * Poll a scraper job until COMPLETED or FAILED, then optionally finalize.
  * Used by web UI and mirrored in @swimbuzz/api for mobile.
  */
+
+export const CLOUDFLARE_ALERT = "Complete the Cloudflare check in the browser."
+
+export const SWIMPHONE_VERIFICATION_ALERT =
+  "This meet is archived. Fill in the email and reCAPTCHA form in the SwimPhone window on your computer to continue."
+
+const FINALIZE_PATH: Record<string, string> = {
+  times_sync: "/api/times/sync/finalize",
+  athlete_scrape: "/api/scrape/finalize",
+  swimphone_import: "/api/meets/import/swimphone/finalize",
+  roster_sync: "/api/roster/sync/finalize",
+}
+
+export const SCRAPER_TASK_LABEL: Record<string, string> = {
+  times_sync: "Importing SwimCloud times…",
+  athlete_scrape: "Importing SwimCloud times…",
+  swimphone_import: "Scraping meet…",
+  roster_sync: "Importing SwimCloud roster…",
+}
 
 /** Live progress the desktop scraper reports while a job is RUNNING. */
 export type ScraperJobProgress = {
@@ -117,17 +138,148 @@ export async function runScraperEnqueuePollFinalize<T extends Record<string, unk
   }
 
   let jobId = enqueueData.jobId as string
-  for (;;) {
-    await pollScraperJob(jobId, { onJob: options.onJob })
-    const finalizeRes = await options.finalize(jobId)
-    const data = await finalizeRes.json()
-    if (!finalizeRes.ok) {
-      throw new Error(data.error ?? "Finalize failed")
+  // This tab enqueued the job, so it keeps the toast even if another tab resumes.
+  holdScraperJob(jobId, true)
+  try {
+    for (;;) {
+      await pollScraperJob(jobId, { onJob: options.onJob })
+      const finalizeRes = await options.finalize(jobId)
+      const data = await finalizeRes.json()
+      if (!finalizeRes.ok) {
+        throw new Error(data.error ?? "Finalize failed")
+      }
+      if (data.nextJobId && data.done === false) {
+        unholdScraperJob(jobId)
+        jobId = data.nextJobId
+        holdScraperJob(jobId, true)
+        continue
+      }
+      return data as T
     }
-    if (data.nextJobId && data.done === false) {
-      jobId = data.nextJobId
-      continue
+  } finally {
+    unholdScraperJob(jobId)
+  }
+}
+
+/** Toast progress for a job picked back up after a reload, without the page's athlete list. */
+export function resumedScraperProgress(kind: string, job: ScraperJobStatusPayload) {
+  if (job.status === "PENDING") return { detail: "Waiting for the scraper to start…" }
+  if (job.status === "COMPLETED") {
+    const detail =
+      kind === "roster_sync"
+        ? "Saving roster…"
+        : kind === "swimphone_import"
+          ? "Saving results…"
+          : "Saving times…"
+    return { detail, progress: 1 }
+  }
+
+  const progress = job.progress
+  if (kind === "swimphone_import") {
+    let detail = "Reading SwimPhone results…"
+    if (progress?.total) {
+      detail = `${progress.current ?? 0}/${progress.total} event${progress.total === 1 ? "" : "s"}`
+      if (progress.eventLabel) detail += ` · ${progress.eventLabel}`
     }
-    return data as T
+    return {
+      detail,
+      alert: progress?.swimphoneVerification ? SWIMPHONE_VERIFICATION_ALERT : undefined,
+      progress: scraperJobFraction(progress),
+    }
+  }
+
+  if (kind === "athlete_scrape") {
+    const profile =
+      progress?.total && progress.total > 1 ? `Profile ${progress.current ?? 1}/${progress.total} · ` : ""
+    return {
+      detail:
+        progress?.eventLabel && progress.events
+          ? `${profile}${progress.eventLabel} · ${progress.event ?? 0}/${progress.events}`
+          : "Reading SwimCloud times…",
+      alert: progress?.cloudflare ? CLOUDFLARE_ALERT : undefined,
+      notice: scraperRateLimitNotice(progress),
+      progress: scraperJobFraction(progress),
+    }
+  }
+
+  const noun = kind === "roster_sync" ? "step" : "athlete"
+  const total = progress?.total
+  const detail = total
+    ? `${progress?.current ?? 0}/${total} ${noun}${total === 1 ? "" : "s"}${progress?.eventLabel ? ` · ${progress.eventLabel}` : ""}`
+    : kind === "roster_sync"
+      ? "Reading SwimCloud roster…"
+      : "Reading SwimCloud times…"
+  return {
+    detail,
+    alert: progress?.cloudflare ? CLOUDFLARE_ALERT : undefined,
+    notice: scraperRateLimitNotice(progress),
+    progress: scraperJobFraction(progress),
+  }
+}
+
+export function summarizeScraperApply(kind: string, data: Record<string, unknown>): string {
+  if (kind === "times_sync") {
+    const imported = Number(data.imported ?? 0)
+    const athletesSynced = Number(data.athletesSynced ?? 0)
+    const athletes = Number(data.athletes ?? 0)
+    return `Imported ${imported} new swim${imported === 1 ? "" : "s"} from ${athletesSynced}/${athletes} athlete${athletes === 1 ? "" : "s"}.`
+  }
+  if (kind === "athlete_scrape") {
+    const count = Number(data.imported ?? 0)
+    const failed = Array.isArray(data.failedSwimCloudIds) ? data.failedSwimCloudIds : []
+    return `Imported ${count} new swim${count === 1 ? "" : "s"} from SwimCloud.${
+      failed.length > 0
+        ? ` SwimCloud profile ${failed.join(", ")} couldn't be scraped — try again later.`
+        : ""
+    }`
+  }
+  if (kind === "swimphone_import") {
+    const imported = Number(data.imported ?? 0)
+    const unmatched = Number(data.unmatchedCount ?? 0)
+    let summary = `Imported ${imported} new swim${imported === 1 ? "" : "s"}`
+    if (unmatched > 0) summary += ` (${unmatched} unmatched)`
+    if (data.captchaLimited) {
+      summary += ". Some events were skipped because SwimPhone's archived-meet check wasn't completed"
+    }
+    return summary
+  }
+  if (kind === "roster_sync") {
+    const linked = Number(data.linked ?? 0)
+    return `Linked ${linked} SwimCloud profile${linked === 1 ? "" : "s"}.`
+  }
+  return "Import finished."
+}
+
+/** Poll a job that was already enqueued and save its result. Follows roster chains. */
+export async function resumeScraperJob(
+  jobId: string,
+  kind: string,
+  onJob?: (job: ScraperJobStatusPayload) => void
+): Promise<Record<string, unknown>> {
+  const path = FINALIZE_PATH[kind]
+  if (!path) throw new Error("This import can't be resumed")
+
+  let current = jobId
+  holdScraperJob(current, true)
+  try {
+    for (;;) {
+      await pollScraperJob(current, { onJob })
+      const res = await fetch(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId: current }),
+      })
+      const data = (await res.json()) as Record<string, unknown>
+      if (!res.ok) throw new Error(typeof data.error === "string" ? data.error : "Finalize failed")
+      if (typeof data.nextJobId === "string" && data.done === false) {
+        unholdScraperJob(current)
+        current = data.nextJobId
+        holdScraperJob(current, true)
+        continue
+      }
+      return data
+    }
+  } finally {
+    unholdScraperJob(current)
   }
 }

@@ -13,6 +13,7 @@ import { deleteStoredMeetFile, uploadMeetFile } from "@/lib/meet/meet-storage"
 import { notifyMeetRosterOfInfoDrops } from "@/lib/meet/meet-roster-notify"
 import { parseSeason } from "@/lib/season"
 import { coerceParsedRelayResults } from "@/lib/meet/relay-results"
+import { isClientDisconnected, throwIfDisconnected } from "@/lib/client-disconnect"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
 
@@ -216,6 +217,7 @@ export async function POST(req: Request) {
   // Pairing / cached parse stays synchronous (no scraper).
   if (cachedParse?.results) {
     try {
+      throwIfDisconnected(req.signal)
       const summary = await applyParsedMeetPdf({
         parsed: {
           course: cachedParse.course,
@@ -236,6 +238,7 @@ export async function POST(req: Request) {
       })
       return NextResponse.json(summary)
     } catch (err) {
+      if (isClientDisconnected(err)) return new NextResponse(null, { status: 499 })
       if (err instanceof MeetImportValidationError) {
         return NextResponse.json({ error: err.message }, { status: 400 })
       }
@@ -258,6 +261,7 @@ export async function POST(req: Request) {
   }
 
   try {
+    throwIfDisconnected(req.signal)
     const parsed = await parseMeetPdf<{
       course?: string
       meet_name?: string | null
@@ -267,6 +271,7 @@ export async function POST(req: Request) {
       relay_results?: unknown[]
     }>(session.user.id, resultsPdfUrl, { course: courseDefault, team, fileName })
 
+    throwIfDisconnected(req.signal)
     const summary = await applyParsedMeetPdf({
       parsed,
       season,
@@ -280,6 +285,7 @@ export async function POST(req: Request) {
     })
     return NextResponse.json(summary)
   } catch (err) {
+    if (isClientDisconnected(err)) return new NextResponse(null, { status: 499 })
     if (err instanceof MeetImportValidationError) {
       return NextResponse.json({ error: err.message }, { status: 400 })
     }

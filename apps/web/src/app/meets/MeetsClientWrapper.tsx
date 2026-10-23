@@ -1,6 +1,6 @@
 "use client"
 
-import { formatMeetDateRange, zonedDayKey } from "@swimbuzz/shared"
+import { currentSeason, formatMeetDateRange, formatSeasonLabel, zonedDayKey } from "@swimbuzz/shared"
 import { RelativeDateRange, useTodayKey } from "@/components/ui/RelativeDate"
 import MeetGalleryCard, { MeetCardRows } from "./MeetGalleryCard"
 import MeetListTable, { type MeetListRow } from "./MeetListTable"
@@ -144,10 +144,18 @@ export default function MeetsClientWrapper({
   // "Last meet" section (unless searching) and drops it from the past list
   // below. The list keeps it in place — a lone row wouldn't stand out anyway.
   const lastMeet = layout === "gallery" && !query && upcoming.length === 0 ? past[0] : undefined
+  const pastInView = past.filter((m) => m !== lastMeet && inSeason(m))
+  // All seasons: this season's finished meets sit above everything older.
+  // A season filter already scopes the list, so it stays one "Past meets" section.
+  const runningSeason = currentSeason()
+  const splitPast = !season
+  const currentSeasonPast = splitPast ? pastInView.filter((m) => m.season === runningSeason) : []
+  const olderPast = splitPast ? pastInView.filter((m) => m.season !== runningSeason) : pastInView
   const sections: { label: string; kind: CardKind; items: MeetListItem[] }[] = [
     { label: "Last meet", kind: "last" as const, items: lastMeet ? [lastMeet] : [] },
     { label: "Upcoming meets", kind: "upcoming" as const, items: upcoming.filter(inSeason) },
-    { label: "Past meets", kind: "past" as const, items: past.filter((m) => m !== lastMeet && inSeason(m)) },
+    { label: formatSeasonLabel(runningSeason), kind: "past" as const, items: currentSeasonPast },
+    { label: "Past meets", kind: "past" as const, items: olderPast },
   ].filter((s) => s.items.length > 0)
 
   function renderCard(m: MeetListItem, kind: CardKind, rowSize: number) {

@@ -12,6 +12,7 @@ import {
   saveNationalsStandards,
 } from "@/lib/qualifiers/nationals-qualifiers"
 import { prisma } from "@/lib/prisma"
+import { isClientDisconnected, throwIfDisconnected } from "@/lib/client-disconnect"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
 
@@ -175,6 +176,7 @@ export async function POST(req: Request) {
     }
 
     const inferredCourse = parseNationalsCourse(parsed.course ?? null)
+    throwIfDisconnected(req.signal)
     const set = await saveNationalsStandards({
       season,
       course: inferredCourse ?? course,
@@ -197,6 +199,7 @@ export async function POST(req: Request) {
       },
     })
   } catch (err) {
+    if (isClientDisconnected(err)) return new NextResponse(null, { status: 499 })
     const message = err instanceof Error ? err.message : "Failed to parse NQT PDF"
     return NextResponse.json({ error: message }, { status: 502 })
   }

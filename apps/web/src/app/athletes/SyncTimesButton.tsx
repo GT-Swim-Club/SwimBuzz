@@ -9,6 +9,7 @@ import { normalizeSwimCloudIdInput, parseSwimCloudProfile } from "@/lib/swim/swi
 import { useScraperUi } from "@/components/scraper/ScraperUiProvider"
 import { useImportTask, type ImportTaskProgress } from "@/components/ui/ImportTaskProvider"
 import {
+  CLOUDFLARE_ALERT,
   runScraperEnqueuePollFinalize,
   scraperJobFraction,
   scraperRateLimitNotice,
@@ -38,9 +39,6 @@ type SyncResult = {
   timesSyncedAt: string | null
   failed: Array<string | number>
 }
-
-export const CLOUDFLARE_ALERT =
-  "Complete the Cloudflare check in the browser."
 
 /** "Last imported" filter: any, never, or at least N days ago (never-imported athletes pass too). */
 const IMPORT_FILTERS = [
@@ -412,7 +410,7 @@ export default function SyncTimesButton() {
       return `Imported ${result.imported} new swim${result.imported === 1 ? "" : "s"} from ${result.athletesSynced}/${result.athletes} athlete${result.athletes === 1 ? "" : "s"}.`
     }
 
-    startTask("Importing SwimCloud times…", run)
+    startTask("Importing SwimCloud times…", run, { lifetime: "scraper" })
     setOpen(false)
   }
 

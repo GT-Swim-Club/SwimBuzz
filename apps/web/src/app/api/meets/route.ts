@@ -71,6 +71,10 @@ export async function POST(req: Request) {
 
     const slug = await uniqueMeetSlug(data.name as string)
     const images = await nameMeetImages(data)
+    if (req.signal.aborted) {
+      await images.rollback()
+      return new NextResponse(null, { status: 499 })
+    }
     const meet = await prisma.meet
       .create({
         data: {

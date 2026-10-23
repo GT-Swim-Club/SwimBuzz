@@ -148,6 +148,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     nextFinalRoster = { ...finalRoster, removedEntries: [...heldBack, ...rostered.removedEntries] }
   }
 
+  if (req.signal.aborted) return new NextResponse(null, { status: 499 })
   await prisma.meet.update({
     where: { id: meetId },
     data: {

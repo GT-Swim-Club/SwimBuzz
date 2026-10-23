@@ -229,6 +229,61 @@ export async function getScraperJobForUser(jobId: string, userId: string) {
   })
 }
 
+const RESUME_RUNNING_MS = 24 * 60 * 60 * 1000
+const RESUME_UNAPPLIED_MS = 7 * 24 * 60 * 60 * 1000
+
+function applyKind(ctx: unknown): string | null {
+  if (!ctx || typeof ctx !== "object" || Array.isArray(ctx)) return null
+  const kind = (ctx as { kind?: unknown }).kind
+  return typeof kind === "string" ? kind : null
+}
+
+/** Live progress sits in `result` only while the job is RUNNING. */
+function runningProgress(status: ScraperJobStatus, result: unknown) {
+  if (status !== ScraperJobStatus.RUNNING || !result || typeof result !== "object" || Array.isArray(result)) {
+    return null
+  }
+  return result
+}
+
+/**
+ * Jobs the page should pick back up after a reload or a closed tab: still
+ * scraping, finished but not saved into the app, or failed recently.
+ */
+export async function listResumableScraperJobs(userId: string) {
+  const now = Date.now()
+  const jobs = await prisma.scraperJob.findMany({
+    where: {
+      userId,
+      OR: [
+        {
+          status: { in: [ScraperJobStatus.PENDING, ScraperJobStatus.RUNNING] },
+          createdAt: { gte: new Date(now - RESUME_RUNNING_MS) },
+        },
+        {
+          status: ScraperJobStatus.COMPLETED,
+          appliedAt: null,
+          createdAt: { gte: new Date(now - RESUME_UNAPPLIED_MS) },
+        },
+        {
+          status: ScraperJobStatus.FAILED,
+          completedAt: { gte: new Date(now - RESUME_RUNNING_MS) },
+        },
+      ],
+    },
+    orderBy: { createdAt: "asc" },
+    select: { id: true, status: true, error: true, result: true, applyContext: true },
+  })
+
+  return jobs.map((job) => ({
+    id: job.id,
+    status: job.status,
+    error: job.error,
+    applyKind: applyKind(job.applyContext),
+    progress: runningProgress(job.status, job.result),
+  }))
+}
+
 export async function markScraperJobApplied(
   jobId: string,
   applyResult: Prisma.InputJsonValue

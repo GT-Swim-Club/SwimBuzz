@@ -10,11 +10,11 @@ import { useScraperUi } from "@/components/scraper/ScraperUiProvider"
 import { useImportTask, type ImportTaskProgress } from "@/components/ui/ImportTaskProvider"
 import SetSwimCloudIdForm from "@/components/athlete/SetSwimCloudIdForm"
 import {
+  CLOUDFLARE_ALERT,
   scraperJobFraction,
   scraperRateLimitNotice,
   type ScraperJobStatusPayload,
 } from "@/lib/scraper/scraper-job-client"
-import { CLOUDFLARE_ALERT } from "../SyncTimesButton"
 import { ICON_BUTTON } from "./AthleteIconButton"
 
 /** Key/value box showing when times were last imported and the SwimCloud IDs. */
@@ -125,7 +125,7 @@ export default function ImportTimesButton({
         }
       }
 
-      startTask("Importing SwimCloud times…", run)
+      startTask("Importing SwimCloud times…", run, { lifetime: "scraper" })
       setOpen(false)
     }, { continueLabel: "Import times" })
   }

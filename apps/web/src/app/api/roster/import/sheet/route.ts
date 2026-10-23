@@ -4,6 +4,7 @@ import { parseRosterRecords } from "@/lib/roster/roster-csv"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
 import { runRosterImport, type RosterImportProgress } from "@/lib/roster/roster-import"
+import { isClientDisconnected } from "@/lib/client-disconnect"
 import { streamRosterImport, wantsRosterImportStream } from "@/lib/roster/roster-import-stream"
 import {
   listSheetTabs,
@@ -72,7 +73,7 @@ export async function POST(req: Request) {
   }
 
   const execute = async (onProgress?: (progress: RosterImportProgress) => void) => {
-    const summary = await runRosterImport(parsed.rows, season, parsed.errors, onProgress)
+    const summary = await runRosterImport(parsed.rows, season, parsed.errors, onProgress, req.signal)
 
     const { created, updated, removed, deleted, deletedNames, errors } = summary
     console.log("[roster sheet import] summary:", { created, updated, removed, deleted, errors: errors.length })
@@ -88,6 +89,7 @@ export async function POST(req: Request) {
   try {
     return NextResponse.json(await execute())
   } catch (err) {
+    if (isClientDisconnected(err)) return new NextResponse(null, { status: 499 })
     console.error("Google Sheets roster import failed:", err)
     return NextResponse.json({ error: "Import failed while saving athletes" }, { status: 500 })
   }

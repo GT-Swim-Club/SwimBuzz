@@ -11,6 +11,7 @@ import {
 } from "react"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import { isPageInView, playAttentionChime, primeAttentionChime } from "@/lib/attention-chime"
+import { rememberDismissedScraperJob } from "@/lib/scraper/scraper-job-lock"
 
 export type ImportTask = {
   id: string
@@ -33,6 +34,17 @@ export type ImportTask = {
 
 export type ImportTaskProgress = Pick<ImportTask, "detail" | "alert" | "notice" | "progress">
 
+export type ImportTaskOptions = {
+  /**
+   * A scraper job keeps running on the coach's computer after the page is gone,
+   * and the toast is restored from the server. A request import is tied to this
+   * page: reloading cancels it and the next load says so.
+   */
+  lifetime?: "request" | "scraper"
+  /** A failed scraper job the user closes should not come back on the next visit. */
+  dismissKey?: string
+}
+
 type ImportTaskContextValue = {
   tasks: ImportTask[]
   /**
@@ -45,9 +57,39 @@ type ImportTaskContextValue = {
    */
   startTask: (
     label: string,
-    promise: Promise<string> | ((report: (progress: ImportTaskProgress) => void) => Promise<string>)
+    promise: Promise<string> | ((report: (progress: ImportTaskProgress) => void) => Promise<string>),
+    options?: ImportTaskOptions
   ) => void
   dismissTask: (id: string) => void
+}
+
+const OPEN_REQUESTS_KEY = "swimbuzz-open-imports"
+
+type OpenRequest = { id: string; label: string }
+
+function readOpenRequests(): OpenRequest[] {
+  try {
+    const parsed = JSON.parse(sessionStorage.getItem(OPEN_REQUESTS_KEY) ?? "[]") as unknown
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter(
+      (item): item is OpenRequest =>
+        !!item &&
+        typeof item === "object" &&
+        typeof (item as OpenRequest).id === "string" &&
+        typeof (item as OpenRequest).label === "string"
+    )
+  } catch {
+    return []
+  }
+}
+
+function writeOpenRequests(items: OpenRequest[]) {
+  try {
+    if (items.length === 0) sessionStorage.removeItem(OPEN_REQUESTS_KEY)
+    else sessionStorage.setItem(OPEN_REQUESTS_KEY, JSON.stringify(items))
+  } catch {
+    // Private mode or a full quota shouldn't block the import.
+  }
 }
 
 const ImportTaskContext = createContext<ImportTaskContextValue | null>(null)
@@ -78,14 +120,55 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
   const pendingDismissRef = useRef<Record<string, { doneAt: number; remainingMs: number }>>({})
   /** Each running task's current alert, to chime only when a new one appears. */
   const alertsRef = useRef<Record<string, string | undefined>>({})
+  /** Failed scraper jobs to remember once the user dismisses the toast. */
+  const dismissKeysRef = useRef<Record<string, string>>({})
+  /** Set on pagehide so a dying page doesn't clear the "this import was cancelled" marker. */
+  const unloadingRef = useRef(false)
 
   const isAnyRunning = tasks.some((t) => t.status === "running")
   const isAnyDone = tasks.some((t) => t.status === "done")
   useDontReloadWhileBusy(isAnyRunning)
 
   const dismissTask = useCallback((id: string) => {
+    const dismissKey = dismissKeysRef.current[id]
+    if (dismissKey) {
+      rememberDismissedScraperJob(dismissKey)
+      delete dismissKeysRef.current[id]
+    }
     delete pendingDismissRef.current[id]
     setTasks((prev) => prev.filter((t) => t.id !== id))
+  }, [])
+
+  useEffect(() => {
+    const onHide = () => {
+      unloadingRef.current = true
+    }
+    window.addEventListener("pagehide", onHide)
+    const interrupted = readOpenRequests()
+    writeOpenRequests([])
+    const toastIds = interrupted.map((item) => `cancelled-${item.id}`)
+    if (interrupted.length > 0) {
+      setTasks((prev) => [
+        ...prev.filter((task) => !toastIds.includes(task.id)),
+        ...interrupted.map((item, index) => ({
+          id: toastIds[index],
+          label: item.label,
+          status: "error" as const,
+          error: "Cancelled because the page reloaded. Run it again to finish.",
+        })),
+      ])
+    }
+    return () => {
+      window.removeEventListener("pagehide", onHide)
+      // Dev remounts this effect. Put the marker back unless the page is actually
+      // leaving, and don't clobber an import that started in the meantime.
+      if (unloadingRef.current || interrupted.length === 0) return
+      setTasks((prev) => prev.filter((task) => !toastIds.includes(task.id)))
+      const current = readOpenRequests()
+      const ids = new Set(current.map((item) => item.id))
+      const missing = interrupted.filter((item) => !ids.has(item.id))
+      if (missing.length > 0) writeOpenRequests([...missing, ...current])
+    }
   }, [])
 
   // Count down completed toasts only while the user is actually on the page.
@@ -133,11 +216,18 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
   const startTask = useCallback(
     (
       label: string,
-      run: Promise<string> | ((report: (progress: ImportTaskProgress) => void) => Promise<string>)
+      run: Promise<string> | ((report: (progress: ImportTaskProgress) => void) => Promise<string>),
+      options?: ImportTaskOptions
     ) => {
       const id = String(_nextId++)
+      const lifetime = options?.lifetime ?? "request"
+      if (options?.dismissKey) dismissKeysRef.current[id] = options.dismissKey
       // Imports start from a click, so audio can be unlocked now for an alert chime later.
       primeAttentionChime()
+
+      if (lifetime === "request") {
+        writeOpenRequests([...readOpenRequests(), { id, label }])
+      }
 
       setTasks((prev) => [
         ...prev,
@@ -156,8 +246,14 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
       }
       const promise = typeof run === "function" ? run(report) : run
 
+      const forgetRequest = () => {
+        if (lifetime !== "request" || unloadingRef.current) return
+        writeOpenRequests(readOpenRequests().filter((item) => item.id !== id))
+      }
+
       promise.then(
         (summary) => {
+          forgetRequest()
           delete alertsRef.current[id]
           setTasks((prev) =>
             prev.map((t) =>
@@ -170,6 +266,7 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
           pendingDismissRef.current[id] = { doneAt: Date.now(), remainingMs: AUTO_DISMISS_MS }
         },
         (err: unknown) => {
+          forgetRequest()
           const message =
             err instanceof Error ? err.message : "Import failed"
           delete alertsRef.current[id]

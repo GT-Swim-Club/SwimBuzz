@@ -8,7 +8,11 @@ import {
 } from "@/components/meet/AthletePairingProvider"
 import { useScraperUi } from "@/components/scraper/ScraperUiProvider"
 import { useImportTask, type ImportTaskProgress } from "@/components/ui/ImportTaskProvider"
-import { scraperJobFraction, type ScraperJobStatusPayload } from "@/lib/scraper/scraper-job-client"
+import {
+  scraperJobFraction,
+  SWIMPHONE_VERIFICATION_ALERT,
+  type ScraperJobStatusPayload,
+} from "@/lib/scraper/scraper-job-client"
 
 /** Meet results import (SwimPhone scrape or results PDF) plus the athlete-pairing step. */
 
@@ -39,9 +43,6 @@ type ImportRun = {
   team: string
   course: string
 }
-
-const SWIMPHONE_VERIFICATION_ALERT =
-  "This meet is archived. Fill in the email and reCAPTCHA form in the SwimPhone window on your computer to continue."
 
 function swimphoneImportProgress(job: ScraperJobStatusPayload): ImportTaskProgress {
   if (job.status === "PENDING") return { detail: "Waiting for the scraper to start…" }
@@ -220,7 +221,7 @@ export function useResultsImport({ meetId, season }: { meetId?: string; season: 
           () => onSettled?.(false)
         )
         return importPromise
-      })
+      }, { lifetime: swimphone ? "scraper" : "request" })
     }
     if (swimphone) requireScraper(go, { continueLabel: "Import results" })
     else go()

@@ -1,5 +1,6 @@
 import { Gender } from "@prisma/client"
 import { formatSeasonLabel } from "@swimbuzz/shared"
+import { isClientDisconnected, throwIfDisconnected } from "@/lib/client-disconnect"
 import { prisma } from "@/lib/prisma"
 import {
   buildAthleteLookup,
@@ -439,7 +440,8 @@ export async function runRosterImport(
   rows: ParsedRosterCsvRow[],
   season: string,
   parseErrors: Array<{ row: number; message: string }>,
-  onProgress?: (progress: RosterImportProgress) => void
+  onProgress?: (progress: RosterImportProgress) => void,
+  signal?: AbortSignal
 ): Promise<RosterImportSummary> {
   let created = 0
   let updated = 0
@@ -454,6 +456,7 @@ export async function runRosterImport(
   }
 
   for (const [index, row] of rows.entries()) {
+    throwIfDisconnected(signal)
     onProgress?.({
       progress: (index / rows.length) * ROW_PROGRESS_SHARE,
       detail: `${index + 1}/${rows.length} athletes · ${row.lastName}, ${row.firstName}`,
@@ -506,6 +509,7 @@ export async function runRosterImport(
         detail: row.email ?? athlete.userEmail,
       })
     } catch (err) {
+      if (isClientDisconnected(err)) throw err
       console.error(`[roster import] row ${row.rowNumber} (${label}) failed:`, err)
       errors.push({
         row: row.rowNumber,
@@ -520,6 +524,7 @@ export async function runRosterImport(
   // One statement per athlete. A wrapping transaction cannot run on the
   // transaction-mode pooler (DATABASE_URL, port 6543).
   for (const [index, athlete] of dropping.entries()) {
+    throwIfDisconnected(signal)
     onProgress?.({
       progress: ROW_PROGRESS_SHARE + (index / dropping.length) * (1 - ROW_PROGRESS_SHARE),
       detail: `Removing athletes not in the file · ${index + 1}/${dropping.length}`,
@@ -533,6 +538,7 @@ export async function runRosterImport(
   if (dropping.length === 0) {
     onProgress?.({ progress: ROW_PROGRESS_SHARE, detail: "Finishing up" })
   }
+  throwIfDisconnected(signal)
   const deletedNames = await deleteDroppedAthletes(
     dropping.filter((athlete) => athlete.seasons.every((entry) => entry === season))
   )
