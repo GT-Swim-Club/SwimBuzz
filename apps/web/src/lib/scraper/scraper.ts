@@ -248,7 +248,8 @@ function runningProgress(status: ScraperJobStatus, result: unknown) {
 
 /**
  * Jobs the page should pick back up after a reload or a closed tab: still
- * scraping, finished but not saved into the app, or failed recently.
+ * scraping, or finished but not saved into the app. Failures stay where they
+ * were — replaying each one as a toast stacks every recent error on the next visit.
  */
 export async function listResumableScraperJobs(userId: string) {
   const now = Date.now()
@@ -264,10 +265,6 @@ export async function listResumableScraperJobs(userId: string) {
           status: ScraperJobStatus.COMPLETED,
           appliedAt: null,
           createdAt: { gte: new Date(now - RESUME_UNAPPLIED_MS) },
-        },
-        {
-          status: ScraperJobStatus.FAILED,
-          completedAt: { gte: new Date(now - RESUME_RUNNING_MS) },
         },
       ],
     },

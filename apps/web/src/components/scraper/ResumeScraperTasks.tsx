@@ -46,14 +46,9 @@ export default function ResumeScraperTasks() {
       if (!kind || !SCRAPER_TASK_LABEL[kind]) return
       const label = SCRAPER_TASK_LABEL[kind]
 
-      if (job.status === "FAILED") {
-        const error = job.error ?? "Run scraper failed"
-        startTask(label, Promise.reject(new Error(error)), {
-          lifetime: "scraper",
-          dismissKey: job.id,
-        })
-        return
-      }
+      // A failure already had its toast. Bringing every recent one back stacks
+      // the screen with errors the user already saw.
+      if (job.status === "FAILED") return
 
       startTask(
         label,
@@ -105,7 +100,7 @@ export default function ResumeScraperTasks() {
       for (const job of data.jobs ?? []) {
         if (cancelled || resumedJobIds.has(job.id) || isScraperJobDismissed(job.id)) continue
         if (!job.applyKind || !SCRAPER_TASK_LABEL[job.applyKind]) continue
-        if (job.status !== "FAILED" && scraperJobBusyElsewhere(job.id)) {
+        if (scraperJobBusyElsewhere(job.id)) {
           deferred.push(job)
           continue
         }
