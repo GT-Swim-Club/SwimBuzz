@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
+import { isPageInView, playAttentionChime, primeAttentionChime } from "@/lib/attention-chime"
 
 export type ImportTask = {
   id: string
@@ -75,6 +76,8 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
   const [tasks, setTasks] = useState<ImportTask[]>([])
   /** Completed tasks awaiting auto-dismiss: when they finished and how much presence time is left. */
   const pendingDismissRef = useRef<Record<string, { doneAt: number; remainingMs: number }>>({})
+  /** Each running task's current alert, to chime only when a new one appears. */
+  const alertsRef = useRef<Record<string, string | undefined>>({})
 
   const isAnyRunning = tasks.some((t) => t.status === "running")
   const isAnyDone = tasks.some((t) => t.status === "done")
@@ -133,6 +136,8 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
       run: Promise<string> | ((report: (progress: ImportTaskProgress) => void) => Promise<string>)
     ) => {
       const id = String(_nextId++)
+      // Imports start from a click, so audio can be unlocked now for an alert chime later.
+      primeAttentionChime()
 
       setTasks((prev) => [
         ...prev,
@@ -140,6 +145,9 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
       ])
 
       const report = ({ detail, alert, notice, progress }: ImportTaskProgress) => {
+        // An alert needs the user (e.g. a Cloudflare check) — chime if they've switched away.
+        if (alert && alert !== alertsRef.current[id] && !isPageInView()) playAttentionChime()
+        alertsRef.current[id] = alert
         setTasks((prev) =>
           prev.map((t) =>
             t.id === id && t.status === "running" ? { ...t, detail, alert, notice, progress } : t
@@ -150,6 +158,7 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
 
       promise.then(
         (summary) => {
+          delete alertsRef.current[id]
           setTasks((prev) =>
             prev.map((t) =>
               t.id === id
@@ -163,6 +172,7 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
         (err: unknown) => {
           const message =
             err instanceof Error ? err.message : "Import failed"
+          delete alertsRef.current[id]
           setTasks((prev) =>
             prev.map((t) =>
               t.id === id
