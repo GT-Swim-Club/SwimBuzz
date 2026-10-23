@@ -80,7 +80,8 @@ function timesImportProgress(
   const count = `${progress?.current ?? 0}/${total} athlete${total === 1 ? "" : "s"}`
   return {
     detail: athlete ? `${count} · ${athlete.firstName} ${athlete.lastName}` : count,
-    alert: progress?.cloudflare ? CLOUDFLARE_ALERT : scraperRateLimitNotice(progress),
+    alert: progress?.cloudflare ? CLOUDFLARE_ALERT : undefined,
+    notice: scraperRateLimitNotice(progress),
     progress: scraperJobFraction(progress),
   }
 }

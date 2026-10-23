@@ -22,13 +22,15 @@ export type ImportTask = {
   error?: string
   /** Secondary progress line while running, e.g. "2/5 athletes · Jane Doe" */
   detail?: string
-  /** Warning the user should see, e.g. a Cloudflare check to complete or a rate-limit pause */
+  /** Warning the user must act on, e.g. a Cloudflare check to complete; tints the toast */
   alert?: string
+  /** Heads-up that needs no action, e.g. a rate-limit pause; keeps the normal toast background */
+  notice?: string
   /** 0–1 completion for the toast's progress bar; indeterminate when unset */
   progress?: number
 }
 
-export type ImportTaskProgress = Pick<ImportTask, "detail" | "alert" | "progress">
+export type ImportTaskProgress = Pick<ImportTask, "detail" | "alert" | "notice" | "progress">
 
 type ImportTaskContextValue = {
   tasks: ImportTask[]
@@ -137,10 +139,10 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
         { id, label, status: "running" },
       ])
 
-      const report = ({ detail, alert, progress }: ImportTaskProgress) => {
+      const report = ({ detail, alert, notice, progress }: ImportTaskProgress) => {
         setTasks((prev) =>
           prev.map((t) =>
-            t.id === id && t.status === "running" ? { ...t, detail, alert, progress } : t
+            t.id === id && t.status === "running" ? { ...t, detail, alert, notice, progress } : t
           )
         )
       }
@@ -151,7 +153,7 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
           setTasks((prev) =>
             prev.map((t) =>
               t.id === id
-                ? { ...t, status: "done", summary, detail: undefined, alert: undefined, progress: undefined }
+                ? { ...t, status: "done", summary, detail: undefined, alert: undefined, notice: undefined, progress: undefined }
                 : t
             )
           )
@@ -164,7 +166,7 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
           setTasks((prev) =>
             prev.map((t) =>
               t.id === id
-                ? { ...t, status: "error", error: message, detail: undefined, alert: undefined, progress: undefined }
+                ? { ...t, status: "error", error: message, detail: undefined, alert: undefined, notice: undefined, progress: undefined }
                 : t
             )
           )

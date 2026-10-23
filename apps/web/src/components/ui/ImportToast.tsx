@@ -116,6 +116,9 @@ export default function ImportToast() {
                 {task.alert}
               </p>
             )}
+            {task.status === "running" && !task.alert && task.notice && (
+              <p className="mt-1.5 text-sm font-medium text-warning">{task.notice}</p>
+            )}
             {task.status === "running" && <ProgressBar progress={task.progress} />}
             
             {task.status === "done" && task.summary && (
