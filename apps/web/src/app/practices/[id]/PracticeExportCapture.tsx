@@ -44,7 +44,7 @@ export default function PracticeExportCapture({
   const range = formatZonedInstantRange(startsAt, endsAt, timeZone)
 
   return (
-    <div className="w-fit min-w-[420px] space-y-5 bg-background p-8 text-base text-foreground">
+    <div className="w-fit min-w-[420px] max-w-[760px] space-y-5 bg-background p-8 text-base text-foreground">
       <div>
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="min-w-0 text-[42px] font-semibold text-foreground">

@@ -74,7 +74,9 @@ function PdfMenuIcon({ className }: { className?: string }) {
 const MIN_EXPORT_ASPECT_RATIO = 0.5
 const MAX_EXPORT_ASPECT_RATIO = 2.0
 const MIN_EXPORT_WIDTH = 420
-const MAX_EXPORT_WIDTH = 1600
+// Keep in sync with the max-w on PracticeExportCapture's root; long lines wrap
+// instead of stretching the image.
+const MAX_EXPORT_WIDTH = 760
 
 type Copied = "link" | "text" | "png" | null
 
