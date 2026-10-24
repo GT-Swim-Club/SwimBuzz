@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma"
 import { issueMobileTokens, verifyGoogleIdToken } from "@/lib/auth/mobile-auth"
 import { verifyStaffLinkToken } from "@/lib/auth/staff-link"
 import {
-  currentStaffTerm,
   staffAccountForEmail,
   STAFF_ONLY_SIGNIN_ERROR,
 } from "@swimbuzz/shared"
@@ -14,7 +13,7 @@ import {
  * staff-link token from step 1 (POST /api/auth/mobile/staff/verify), proving
  * they verified their own GT-email OTP first. On success the Google
  * credential is linked to that ROSTER user (never a new user) and the
- * role/title are (re)stamped for the current staff term.
+ * role/title are (re)granted from the mailbox.
  */
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}))
@@ -60,7 +59,7 @@ export async function POST(req: Request) {
     }),
     prisma.user.update({
       where: { id: link.sub },
-      data: { role: staff.role, staffTitle: staff.title, staffTerm: currentStaffTerm() },
+      data: { role: staff.role, staffTitle: staff.title },
     }),
   ])
 

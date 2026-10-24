@@ -11,7 +11,7 @@
  * sign-in flow, which binds them to their roster Athlete and stamps their
  * title.
  *
- * Run after `prisma db push` applies the staffTitle/staffTerm columns:
+ * Run after `prisma db push` applies the staffTitle column:
  *   node scripts/backfill-staff-roles.mjs
  */
 import { PrismaClient } from "@prisma/client"
@@ -43,7 +43,7 @@ async function main() {
 
   const { count } = await prisma.user.updateMany({
     where: { id: { in: orphanedStaff.map((u) => u.id) } },
-    data: { role: "ATHLETE", staffTitle: null, staffTerm: null },
+    data: { role: "ATHLETE", staffTitle: null },
   })
 
   console.log(`Demoted ${count} account(s) to ATHLETE.`)

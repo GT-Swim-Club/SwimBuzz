@@ -6,21 +6,24 @@ import { prisma } from "@/lib/prisma"
 import { Role } from "@prisma/client"
 import { verifyEmailLoginCode } from "@/lib/auth/email-login"
 import { readAndClearStaffLinkCookie } from "@/lib/auth/staff-link"
-import {
-  currentStaffTerm,
-  staffAccountForEmail,
-  STAFF_MUST_USE_STAFF_TAB_ERROR,
-} from "@swimbuzz/shared"
+import { demoteStaffToAthlete } from "@/lib/auth/staff-demote"
+import { staffAccountForEmail } from "@swimbuzz/shared"
 
-/** Re-read role/staffTitle from the DB when the JWT's stamped staff term has lapsed. */
-async function refreshStaffTermIfLapsed(token: {
+/** How long a JWT's role/staffTitle is trusted before re-reading the DB. */
+const STAFF_RESYNC_MS = 5 * 60 * 1000
+
+/**
+ * Re-read role/staffTitle from the DB periodically so a staff rank dropped
+ * elsewhere (signing in as an athlete on another device) reaches this session.
+ */
+async function resyncStaffIfStale(token: {
   sub?: string
   role?: Role
   staffTitle?: import("@prisma/client").StaffTitle | null
-  staffTerm?: string | null
+  staffSyncedAt?: number
 }) {
-  const term = currentStaffTerm()
-  if (token.staffTerm === term) return
+  const now = Date.now()
+  if (token.staffSyncedAt && now - token.staffSyncedAt < STAFF_RESYNC_MS) return
   if (!token.sub) return
   const dbUser = await prisma.user.findUnique({
     where: { id: token.sub },
@@ -30,7 +33,7 @@ async function refreshStaffTermIfLapsed(token: {
     token.role = dbUser.role
     token.staffTitle = dbUser.staffTitle
   }
-  token.staffTerm = term
+  token.staffSyncedAt = now
 }
 
 export const authOptions: NextAuthOptions = {
@@ -57,19 +60,17 @@ export const authOptions: NextAuthOptions = {
           credentials.code
         )
         if (!user) return null
-        // Coach/exec accounts must sign in through the staff two-step flow
-        // (GT-email code, then Google) so a session is only ever issued
-        // after the Google step — this direct-session path is athlete-only.
-        if (user.staffTitle) {
-          throw new Error(STAFF_MUST_USE_STAFF_TAB_ERROR)
-        }
+        // This direct-session path is athlete-only: signing in here drops any
+        // coach/exec rank until the user signs in again via the staff flow
+        // (GT-email code, then Google).
+        const athlete = await demoteStaffToAthlete(user)
         return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-          role: user.role,
-          staffTitle: user.staffTitle,
+          id: athlete.id,
+          email: athlete.email,
+          name: athlete.name,
+          image: athlete.image,
+          role: athlete.role,
+          staffTitle: athlete.staffTitle,
         }
       },
     }),
@@ -119,7 +120,6 @@ export const authOptions: NextAuthOptions = {
           data: {
             role: staff.role,
             staffTitle: staff.title,
-            staffTerm: currentStaffTerm(),
           },
         }),
       ])
@@ -129,7 +129,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.role = user.role
         token.staffTitle = user.staffTitle
-        token.staffTerm = currentStaffTerm()
+        token.staffSyncedAt = Date.now()
       }
       // After profile picture upload/remove, refresh image (and role/title) from DB.
       if (trigger === "update" && token.sub) {
@@ -143,16 +143,13 @@ export const authOptions: NextAuthOptions = {
           token.staffTitle = dbUser.staffTitle
         }
       }
-      // Staff titles expire at the term boundary (1 May) — re-sync a
-      // possibly-stale JWT against the DB once the stamped term lapses.
-      await refreshStaffTermIfLapsed(token)
+      await resyncStaffIfStale(token)
       return token
     },
     session({ session, token }) {
       session.user.id = token.sub!
       session.user.role = token.role as Role
       session.user.staffTitle = token.staffTitle
-      session.user.staffTerm = token.staffTerm
       if (token.picture !== undefined) {
         session.user.image = token.picture as string | null
       }

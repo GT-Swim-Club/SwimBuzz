@@ -6,7 +6,7 @@ SwimBuzz has two deploy targets. Vercel runs the web app, the `/api/*` backend, 
 Vercel project (repo root)
 ├── Next.js app: apps/web (web UI + /api/*)
 ├── Python Function: api/parse-pdf.py (meet PDF parsing)
-└── Vercel Cron: daily cleanup + staff-term expiry
+└── Vercel Cron: daily cleanup
 Supabase: Postgres + Storage (avatars, meet-files)
 EAS: iOS / Android builds, pointed at the Vercel origin
 ```
@@ -62,14 +62,12 @@ Production domain: `https://swimbuzz.gtswimclub.com`
 
 ## 2. Crons
 
-Two routes live under `/api/cron/*`. Each accepts `GET` or `POST` and requires `Authorization: Bearer <CRON_SECRET>`.
+One route lives under `/api/cron/*`. Each accepts `GET` or `POST` and requires `Authorization: Bearer <CRON_SECRET>`.
 
 
 | Route                            | What it does                                                                                                                             | Schedule                       | Runs on       |
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | ------------- |
 | `/api/cron/notification-cleanup` | Deletes old notifications and scraper jobs, and permanently purges Recently Deleted practices and meets whose recovery window has passed | Daily, `0 8 * * *` (08:00 UTC) | Vercel Cron   |
-| `/api/cron/staff-term-expiry`    | Demotes coach/exec accounts whose staff term (May–Apr) has lapsed back to `ATHLETE`                                                      | Daily, `0 8 * * *`             | Vercel Cron   |
-
 
 
 

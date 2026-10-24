@@ -51,10 +51,6 @@ export const STAFF_TITLE_LABELS: Record<StaffTitle, string> = {
 export const STAFF_ONLY_SIGNIN_ERROR =
   "This sign-in is only for coaches and exec. Please sign in as an Athlete."
 
-/** Shown when a coach/exec account tries to sign in through the Athletes tab instead of Coaches & Exec. */
-export const STAFF_MUST_USE_STAFF_TAB_ERROR =
-  "This is a coach/exec account. Sign in from the Coaches & Exec tab instead."
-
 /** Shown on the Coaches & Exec tab if Google is completed before the GT-email code step. */
 export const STAFF_LINK_REQUIRED_ERROR =
   "Verify your Georgia Tech email first, then continue with Google."
@@ -80,17 +76,4 @@ export function staffAccountForEmail(
 /** Which badge icon a title renders as — every title but COACH is exec. */
 export function staffBadgeIcon(title: StaffTitle): "coachBadge" | "execBadge" {
   return title === "COACH" ? "coachBadge" : "execBadge"
-}
-
-/**
- * Staff terms run May-Apr, so a new board's term begins 1 May — distinct from
- * the club season (`seasonFromDate` in ./season.ts, Sep-Aug),
- * which classifies meets/swims/attendance and must NOT be reused here: moving
- * that boundary would silently re-bucket real season data. Label format
- * ("2026-2027") matches the club season's for consistency, nothing else.
- */
-export function currentStaffTerm(date: Date = new Date()): string {
-  const month = date.getUTCMonth() // 4 = May
-  const year = date.getUTCFullYear()
-  return month >= 4 ? `${year}-${year + 1}` : `${year - 1}-${year}`
 }

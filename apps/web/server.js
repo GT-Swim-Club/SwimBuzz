@@ -23,7 +23,6 @@ const DAY_MS = 24 * 60 * MINUTE_MS
 // called on a timer so this long-lived process runs them in-process.
 const CRON_JOBS = [
   { path: "/api/cron/notification-cleanup", intervalMs: DAY_MS },
-  { path: "/api/cron/staff-term-expiry", intervalMs: DAY_MS },
 ]
 
 async function runCron(path) {
