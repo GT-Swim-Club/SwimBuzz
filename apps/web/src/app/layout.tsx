@@ -7,6 +7,7 @@ import ImportTaskProvider from "@/components/ui/ImportTaskProvider"
 import ImportToast from "@/components/ui/ImportToast"
 import AthletePairingProvider from "@/components/meet/AthletePairingProvider"
 import ResumeScraperTasks from "@/components/scraper/ResumeScraperTasks"
+import KeyboardViewportFix from "@/components/ui/KeyboardViewportFix"
 import Nav from "@/components/nav/Nav"
 import NavigationTracker from "@/components/nav/NavigationTracker"
 import "./variables.css"
@@ -37,11 +38,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en" className="overflow-hidden" suppressHydrationWarning>
-      <body className="flex h-dvh flex-col overflow-x-hidden overflow-y-auto bg-background">
+      <body className="flex h-[var(--app-height,100dvh)] flex-col overflow-x-hidden overflow-y-auto bg-background">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <SessionProvider session={session}>
             <ImportTaskProvider>
               <AthletePairingProvider>
+                <KeyboardViewportFix />
                 <ResumeScraperTasks />
                 <ScraperUiProvider>
                   <Nav />
