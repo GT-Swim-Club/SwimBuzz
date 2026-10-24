@@ -131,7 +131,7 @@ export default function NewMeetScreen() {
           optional
           min={startDate || undefined}
         />
-        <TimeZoneSelector label="Time zone" value={timeZone} onChange={setTimeZone} />
+        <TimeZoneSelector label="Time zone" value={timeZone} onChange={setTimeZone} date={startDate} />
         <View
           style={{
             flexDirection: "row",

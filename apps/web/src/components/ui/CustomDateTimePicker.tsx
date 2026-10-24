@@ -2,7 +2,13 @@
 
 import { type KeyboardEvent, type ReactNode, type RefObject, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
-import { formatClockTime, US_TIME_ZONES, zoneAbbreviation, zoneDisplayName } from "@swimbuzz/shared"
+import {
+  formatClockTime,
+  US_TIME_ZONES,
+  zoneAbbreviation,
+  zoneDisplayName,
+  zoneInstantOnDate,
+} from "@swimbuzz/shared"
 import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"]
@@ -897,10 +903,15 @@ type TimeZonePickerProps = {
   className?: string
   /** Label options with just the abbreviation (e.g. "EDT"), for narrow layouts. */
   compact?: boolean
+  /** "YYYY-MM-DD" the zone applies to, so labels reflect DST on that date. Defaults to today. */
+  date?: string
 }
 
-function timeZoneOptionLabel(zone: string, compact = false) {
-  return compact ? zoneAbbreviation(zone) : `${zoneDisplayName(zone)} (${zoneAbbreviation(zone)})`
+function timeZoneOptionLabel(zone: string, date: string | undefined, compact = false) {
+  const instant = zoneInstantOnDate(date, zone)
+  return compact
+    ? zoneAbbreviation(zone, instant)
+    : `${zoneDisplayName(zone, instant)} (${zoneAbbreviation(zone, instant)})`
 }
 
 function useTimeZoneOptions(currentValue: string) {
@@ -914,9 +925,9 @@ function useTimeZoneOptions(currentValue: string) {
 /**
  * Time zone dropdown for Practice/Meet forms — the club only operates within the US,
  * so the options are limited to `US_TIME_ZONES`. Each option is labeled with the
- * zone's friendly name and current abbreviation (e.g. "Eastern Daylight Time (EDT)"),
- * evaluated as of "now" since a form has no fixed instant to resolve the abbreviation
- * against yet.
+ * zone's friendly name and abbreviation (e.g. "Eastern Daylight Time (EDT)"), evaluated
+ * on `date` so it flips to EST etc. when the form's date falls outside DST, and as of
+ * "now" while no date is chosen.
  */
 export function TimeZonePicker({
   value,
@@ -926,6 +937,7 @@ export function TimeZonePicker({
   hasError = false,
   className = "",
   compact = false,
+  date,
 }: TimeZonePickerProps) {
   const zones = useTimeZoneOptions(value)
 
@@ -944,7 +956,7 @@ export function TimeZonePicker({
     >
       {zones.map((zone) => (
         <option key={zone} value={zone}>
-          {timeZoneOptionLabel(zone, compact)}
+          {timeZoneOptionLabel(zone, date, compact)}
         </option>
       ))}
     </select>

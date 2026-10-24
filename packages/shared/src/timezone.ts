@@ -113,6 +113,17 @@ export function nextPrivatePracticeSlot(
   return { startTime: clock(start), endTime: clock(start + 60) }
 }
 
+/**
+ * An instant to resolve a zone's abbreviation/name against for a form's "YYYY-MM-DD" date,
+ * so the label reflects DST on that date (EST in November, EDT in August). Uses noon in
+ * `timeZone` to stay clear of the 2 AM transition hour. Falls back to "now" when the date
+ * is empty or malformed.
+ */
+export function zoneInstantOnDate(dateStr: string | null | undefined, timeZone: string): Date {
+  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return new Date()
+  return zonedTimeToUtc(dateStr, "12:00", timeZone)
+}
+
 /** Short zone abbreviation at a given instant, e.g. "EDT". Falls back to the raw id. */
 export function zoneAbbreviation(timeZone: string, instant: Date = new Date()): string {
   try {

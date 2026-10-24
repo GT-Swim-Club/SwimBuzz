@@ -446,6 +446,7 @@ function MeetDateRangePanel({
             value={form.timeZone}
             onChange={(value) => setForm((f) => ({ ...f, timeZone: value }))}
             ariaLabel="Meet time zone"
+            date={form.startDate}
             compact
           />
         </div>

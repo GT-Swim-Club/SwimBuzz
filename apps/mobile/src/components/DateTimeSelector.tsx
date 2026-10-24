@@ -1,5 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react"
-import { formatClockTime, US_TIME_ZONES, zoneAbbreviation, zoneDisplayName } from "@swimbuzz/shared"
+import {
+  formatClockTime,
+  US_TIME_ZONES,
+  zoneAbbreviation,
+  zoneDisplayName,
+  zoneInstantOnDate,
+} from "@swimbuzz/shared"
 import {
   Modal,
   Pressable,
@@ -496,19 +502,25 @@ export function TimeSelector({
   )
 }
 
-function timeZoneOptionLabel(zone: string) {
-  return `${zoneDisplayName(zone)} (${zoneAbbreviation(zone)})`
+function timeZoneOptionLabel(zone: string, date?: string) {
+  const instant = zoneInstantOnDate(date, zone)
+  return `${zoneDisplayName(zone, instant)} (${zoneAbbreviation(zone, instant)})`
 }
 
-/** Time zone picker for Practice/Meet forms — options limited to `US_TIME_ZONES`. */
+/**
+ * Time zone picker for Practice/Meet forms — options limited to `US_TIME_ZONES`. Labels are
+ * evaluated on `date` ("YYYY-MM-DD") so they show EST etc. when it falls outside DST.
+ */
 export function TimeZoneSelector({
   label,
   value,
   onChange,
+  date,
 }: {
   label: string
   value: string
   onChange: (value: string) => void
+  date?: string
 }) {
   const [open, setOpen] = useState(false)
   const zones = useMemo(
@@ -521,14 +533,14 @@ export function TimeZoneSelector({
     <>
       <FieldButton
         label={label}
-        value={value ? timeZoneOptionLabel(value) : ""}
+        value={value ? timeZoneOptionLabel(value, date) : ""}
         placeholder="Select a time zone"
         kind="zone"
         onPress={() => setOpen(true)}
       />
       {open ? (
         <Sheet onClose={close}>
-          <SheetHeader title={label} value={value ? timeZoneOptionLabel(value) : "Time zone"} onClose={close} />
+          <SheetHeader title={label} value={value ? timeZoneOptionLabel(value, date) : "Time zone"} onClose={close} />
           <ScrollView style={styles.hoursScroller} showsVerticalScrollIndicator={false}>
             {zones.map((zone) => {
               const selected = zone === value
@@ -544,7 +556,7 @@ export function TimeZoneSelector({
                   style={[styles.zoneOption, selected && styles.optionSelected]}
                 >
                   <Text style={[styles.optionText, selected && styles.optionTextSelected]}>
-                    {timeZoneOptionLabel(zone)}
+                    {timeZoneOptionLabel(zone, date)}
                   </Text>
                 </Pressable>
               )

@@ -218,6 +218,7 @@ export default function NewPracticeScreen() {
           label="Time zone"
           value={form.timeZone}
           onChange={(timeZone) => setForm((f) => ({ ...f, timeZone }))}
+          date={form.date}
         />
         <TextField
           label="Location"

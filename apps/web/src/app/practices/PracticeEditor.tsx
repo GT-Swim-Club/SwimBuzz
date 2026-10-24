@@ -1429,6 +1429,7 @@ export default function PracticeEditor({
                   value={form.timeZone}
                   onChange={(value) => updateForm((current) => ({ ...current, timeZone: value }))}
                   ariaLabel="Practice time zone"
+                  date={form.date}
                 />
               </div>
             </div>
@@ -1456,6 +1457,7 @@ export default function PracticeEditor({
                   : "border-border focus:border-primary focus:ring-primary/10"
               }`}
             />
+            <InfoIcon kind="waves" />
             <label className="sr-only" htmlFor="practice-course">Practice course</label>
             <select
               id="practice-course"
