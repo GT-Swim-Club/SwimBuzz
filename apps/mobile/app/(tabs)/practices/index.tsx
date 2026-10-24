@@ -12,10 +12,11 @@ import {
 import { GlassContainer, GlassView, isLiquidGlassAvailable } from "expo-glass-effect"
 import { useRouter } from "expo-router"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import type { PracticeSummary } from "@swimbuzz/shared"
+import type { PracticeScope, PracticeSummary } from "@swimbuzz/shared"
 import { isStaffRole } from "@swimbuzz/shared"
 import {
   Button,
+  Chip,
   EmptyState,
   FlatList,
   Screen,
@@ -55,6 +56,11 @@ import {
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 const WEEKDAYS_SHORT = ["S", "M", "T", "W", "T", "F", "S"]
 const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+const SCOPES: { value: PracticeScope; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "team", label: "Team" },
+  { value: "mine", label: "Mine" },
+]
 
 export default function PracticesScreen() {
   const router = useRouter()
@@ -72,6 +78,7 @@ export default function PracticesScreen() {
   const [monthStart, setMonthStart] = useState(() => startOfUtcMonth(new Date()))
   const [selectedDay, setSelectedDay] = useState(todayUtcKey)
   const [showDeleted, setShowDeleted] = useState(false)
+  const [scope, setScope] = useState<PracticeScope>("all")
   const queryClient = useQueryClient()
 
   const {
@@ -113,6 +120,9 @@ export default function PracticesScreen() {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     return practices.filter((practice) => {
+      if (scope !== "all" && (scope === "mine") !== (practice.visibility === "PRIVATE")) {
+        return false
+      }
       if (
         activeTags.length &&
         !activeTags.some((tag) => (practice.tags ?? []).includes(tag))
@@ -131,7 +141,7 @@ export default function PracticesScreen() {
         .toLowerCase()
       return haystack.includes(q)
     })
-  }, [practices, query, activeTags])
+  }, [practices, query, activeTags, scope])
 
   const byDay = useMemo(() => groupPracticesByDay(filtered), [filtered])
 
@@ -169,14 +179,14 @@ export default function PracticesScreen() {
 
   const filters = (
     <>
-      {isStaff ? (
-        <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm, marginBottom: spacing.sm }}>
-          <View style={{ flex: 1 }}>
-            <Button
-              label="New practice"
-              onPress={() => router.push("/practices/new")}
-            />
-          </View>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm, marginBottom: spacing.sm }}>
+        <View style={{ flex: 1 }}>
+          <Button
+            label={isStaff ? "New practice" : "New private practice"}
+            onPress={() => router.push("/practices/new")}
+          />
+        </View>
+        {isStaff ? (
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Trash"
@@ -194,8 +204,8 @@ export default function PracticesScreen() {
           >
             <Icon name="trash" size={18} color={c.textSecondary} />
           </Pressable>
-        </View>
-      ) : null}
+        ) : null}
+      </View>
       <TextField
         label="Search"
         placeholder="Search practices"
@@ -205,6 +215,16 @@ export default function PracticesScreen() {
         autoCorrect={false}
         clearButtonMode="while-editing"
       />
+      <View style={styles.scopeRow}>
+        {SCOPES.map(({ value, label }) => (
+          <Chip
+            key={value}
+            label={label}
+            selected={scope === value}
+            onPress={() => setScope(value)}
+          />
+        ))}
+      </View>
       <View style={styles.filterRow}>
         <PracticeTagFilter
           tags={catalog}
@@ -247,7 +267,9 @@ export default function PracticesScreen() {
     ? "Could not load practices"
     : practices.length === 0
       ? "No practices yet"
-      : "No matching practices"
+      : scope === "mine" && !practices.some((p) => p.visibility === "PRIVATE")
+        ? "No private practices yet"
+        : "No matching practices"
   const emptyBody = error instanceof Error ? error.message : undefined
 
   if (showDeleted && isStaff) {
@@ -643,6 +665,11 @@ function chunk<T>(items: T[], size: number) {
 
 function makeStyles(c: ColorPalette) {
   return StyleSheet.create({
+    scopeRow: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      marginBottom: spacing.xs,
+    },
     filterRow: {
       alignItems: "center",
       flexDirection: "row",

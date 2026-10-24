@@ -23,12 +23,14 @@ export default function PracticeEditClient({
   title,
   initial,
   availableTags,
+  canChooseVisibility,
 }: {
   practiceId: string
   practiceSlug: string
   title: string
   initial: PracticeFormState
   availableTags: string[]
+  canChooseVisibility: boolean
 }) {
   const router = useRouter()
   const [state, setState] = useState<EditState>("acquiring")
@@ -144,6 +146,7 @@ export default function PracticeEditClient({
               setState("lost")
             }}
             availableTags={availableTags}
+            canChooseVisibility={canChooseVisibility}
           />
         </main>
       )}

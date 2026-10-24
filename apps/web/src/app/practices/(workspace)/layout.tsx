@@ -5,6 +5,7 @@ import { htmlToPlainText, zonedDayKey } from "@swimbuzz/shared"
 import { isStaffUi } from "@/lib/athlete/athlete-view-server"
 import { listManagedPracticeTags } from "@/lib/practice/practice-tag-catalog"
 import { getSession } from "@/lib/auth/session"
+import { practiceListWhere } from "@/lib/practice/practice-access"
 import { withDeleted } from "../../../../soft-delete-policy"
 import PracticesSidebar from "../PracticesSidebar"
 import PracticesWorkspaceSkeleton from "../PracticesWorkspaceSkeleton"
@@ -15,6 +16,7 @@ type PracticeRow = {
   slug: string | null
   title: string
   published: boolean
+  visibility: string
   tags: unknown
   startsAt: Date | null
   endsAt: Date | null
@@ -60,6 +62,7 @@ function toPracticeRailItem(p: PracticeRow): PracticeRailItem {
     slug: p.slug,
     title: p.title,
     published: p.published,
+    isPrivate: p.visibility === "PRIVATE",
     tags: p.tags as string[],
     totalDistance: p.sets.reduce((sum, s) => sum + (s.distance ?? 0), 0),
     dayKey: zonedDayKey(startsAt, p.timeZone),
@@ -93,6 +96,7 @@ export default async function PracticesWorkspaceLayout({ children }: { children:
     slug: true,
     title: true,
     published: true,
+    visibility: true,
     tags: true,
     startsAt: true,
     endsAt: true,
@@ -106,14 +110,14 @@ export default async function PracticesWorkspaceLayout({ children }: { children:
 
   const [rows, deletedRows] = await Promise.all([
     prisma.practice.findMany({
-      where: isCoach ? undefined : { published: true },
+      where: practiceListWhere({ userId: session.user.id, isStaff: isCoach }),
       orderBy: [{ startsAt: "desc" }, { createdAt: "desc" }],
       select: selectFields,
     }),
     isCoach
       ? withDeleted(() =>
           prisma.practice.findMany({
-            where: { deletedAt: { not: null } },
+            where: { deletedAt: { not: null }, visibility: "TEAM" },
             orderBy: { deletedAt: "desc" },
             select: { ...selectFields, deletedAt: true, purgeAfter: true, purgeStartedAt: true },
           })

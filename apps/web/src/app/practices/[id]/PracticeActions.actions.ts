@@ -1,6 +1,6 @@
 "use server"
 
-import { softDeletePractice } from "@/lib/recovery/recovery"
+import { removePractice } from "@/lib/recovery/recovery"
 import { revalidatePath } from "next/cache"
 import { notifyPracticePublished } from "@/lib/notifications/notifications"
 import { prisma } from "@/lib/prisma"
@@ -13,6 +13,13 @@ import { uniquePracticeSlug } from "@/lib/slug"
 import { zonedDayKey, zonedTimeToUtc, utcToZonedParts, isStaffRole } from "@swimbuzz/shared"
 import { getSession } from "@/lib/auth/session"
 import { findUnmanagedPracticeTags } from "@/lib/practice/practice-tag-catalog"
+import {
+  PracticeVisibilityError,
+  assertPrivatePracticeQuota,
+  canViewPractice,
+  loadPracticeAccess,
+  practiceAccessError,
+  practiceViewer } from "@/lib/practice/practice-access"
 import type { PracticeFormState } from "../PracticeEditor"
 
 export type PracticeMutationResult =
@@ -44,6 +51,9 @@ export async function setPracticePublished(
     where: { id: practiceId },
     include: { sets: { select: { id: true } } }})
   if (!existing) return { ok: false, error: "Not found" }
+  if (existing.visibility !== "TEAM") {
+    return { ok: false, error: "Private practices can't be published" }
+  }
 
   try {
     const data = buildPracticeData({ ...form, published }, { requireSets: true })
@@ -71,12 +81,18 @@ export async function setPracticePublished(
         if (s.id && keepIds.has(s.id)) {
           await tx.practiceSet.update({
             where: { id: s.id },
-            data: { order: s.order, title: s.title, content: s.content, distance: s.distance }})
+            data: {
+              order: s.order,
+              startsNewRow: s.startsNewRow,
+              title: s.title,
+              content: s.content,
+              distance: s.distance }})
         } else {
           await tx.practiceSet.create({
             data: {
               practiceId,
               order: s.order,
+              startsNewRow: s.startsNewRow,
               title: s.title,
               content: s.content,
               distance: s.distance }})
@@ -127,18 +143,23 @@ export type PracticeDuplicateResult =
   | { ok: false; error: string }
 
 /** Creates a copy of a practice with today's date/time (same time-of-day and duration as
- * the original) as an unpublished draft, so it doesn't fire a publish notification. */
-export async function duplicatePractice(practiceId: string): Promise<PracticeDuplicateResult> {
+ * the original) as an unpublished draft, so it doesn't fire a publish notification.
+ * Staff copying a team practice get a team draft unless `asPrivate`; everything else becomes
+ * the caller's private practice ("Save a copy"). */
+export async function duplicatePractice(
+  practiceId: string,
+  opts: { asPrivate?: boolean } = {}
+): Promise<PracticeDuplicateResult> {
   const session = await getSession()
-  if (!session || !isStaffRole(session.user.role)) {
-    throw new Error("Forbidden")
-  }
+  if (!session) throw new Error("Forbidden")
+  const viewer = practiceViewer(session)
 
   const existing = await prisma.practice.findUnique({
     where: { id: practiceId },
     include: { sets: { orderBy: { order: "asc" }, select: practiceSetSelect } },
   })
-  if (!existing) return { ok: false, error: "Not found" }
+  if (!existing || !canViewPractice(existing, viewer)) return { ok: false, error: "Not found" }
+  const isPrivate = opts.asPrivate === true || !(viewer.isStaff && existing.visibility === "TEAM")
 
   const timeZone = existing.timeZone
   const startParts = utcToZonedParts(existing.startsAt, timeZone)
@@ -149,29 +170,42 @@ export async function duplicatePractice(practiceId: string): Promise<PracticeDup
     startsAt.getTime() + (existing.endsAt.getTime() - existing.startsAt.getTime())
   )
 
-  const practice = await prisma.practice.create({
-    data: {
-      slug: await uniquePracticeSlug(startsAt, timeZone),
-      title: existing.title,
-      startsAt,
-      endsAt,
-      timeZone,
-      location: existing.location,
-      course: existing.course,
-      focus: existing.focus,
-      tags: existing.tags,
-      published: false,
-      createdById: session.user.id,
-      sets: {
-        create: existing.sets.map((s) => ({
-          order: s.order,
-          title: s.title,
-          content: s.content,
-          distance: s.distance})),
-      },
-    },
-    select: { id: true, slug: true },
-  })
+  const slug = isPrivate ? null : await uniquePracticeSlug(startsAt, timeZone)
+  let practice: { id: string; slug: string | null }
+  try {
+    practice = await prisma.$transaction(async (tx) => {
+      if (isPrivate) await assertPrivatePracticeQuota(tx, session.user.id)
+      return tx.practice.create({
+        data: {
+          slug,
+          title: existing.title,
+          startsAt,
+          endsAt,
+          timeZone,
+          location: existing.location,
+          course: existing.course,
+          focus: existing.focus,
+          tags: existing.tags,
+          published: false,
+          visibility: isPrivate ? "PRIVATE" : "TEAM",
+          ownerId: isPrivate ? session.user.id : null,
+          createdById: session.user.id,
+          sets: {
+            create: existing.sets.map((s) => ({
+              order: s.order,
+              startsNewRow: s.startsNewRow,
+              title: s.title,
+              content: s.content,
+              distance: s.distance})),
+          },
+        },
+        select: { id: true, slug: true },
+      })
+    })
+  } catch (err) {
+    if (err instanceof PracticeVisibilityError) return { ok: false, error: err.message }
+    throw err
+  }
 
   revalidatePath("/practices", "page")
   return { ok: true, id: practice.id, slug: practice.slug }
@@ -180,9 +214,11 @@ export async function duplicatePractice(practiceId: string): Promise<PracticeDup
 /** Same logic as DELETE /api/practices/[id]. */
 export async function deletePractice(practiceId: string): Promise<PracticeMutationResult> {
   const session = await getSession()
-  if (!session || !isStaffRole(session.user.role)) {
-    throw new Error("Forbidden")
-  }
+  if (!session) throw new Error("Forbidden")
+
+  const existing = await loadPracticeAccess(practiceId)
+  const denied = practiceAccessError(existing, practiceViewer(session), "edit")
+  if (denied) return { ok: false, error: denied.error }
 
   try {
     await assertCanMutatePractice(practiceId, session.user.id, null)
@@ -193,10 +229,7 @@ export async function deletePractice(practiceId: string): Promise<PracticeMutati
     throw err
   }
 
-  const existing = await prisma.practice.findUnique({ where: { id: practiceId } })
-  if (!existing) return { ok: false, error: "Not found" }
-
-  await softDeletePractice(practiceId)
+  await removePractice(practiceId, existing!)
   revalidatePath("/practices", "page")
   return { ok: true }
 }

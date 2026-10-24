@@ -5,8 +5,10 @@ import { useEffect, useState } from "react"
 export type PracticeRailView = "week" | "list" | "deleted"
 export type PracticeListSort = "date-desc" | "date-asc" | "yards-desc" | "yards-asc"
 export type PracticeCardLabel = "time" | "tags"
+export type PracticeScopeFilter = "all" | "team" | "mine"
 
 const KEYS = {
+  scope: "swimbuzz-practice-scope",
   view: "swimbuzz-detail-view",
   monThuOnly: "swimbuzz-monThuOnly",
   sidebarOpen: "swimbuzz-detail-sidebar",
@@ -82,6 +84,8 @@ export type PracticePrefs = {
   setSort: (value: PracticeListSort) => void
   cardLabel: PracticeCardLabel
   setCardLabel: (value: PracticeCardLabel) => void
+  scope: PracticeScopeFilter
+  setScope: (value: PracticeScopeFilter) => void
 }
 
 export function usePracticePrefs(): PracticePrefs {
@@ -92,6 +96,7 @@ export function usePracticePrefs(): PracticePrefs {
   const [sidebarWidth, setSidebarWidthState] = useState(DEFAULT_SIDEBAR_WIDTH)
   const [sort, setSortState] = useState<PracticeListSort>("date-desc")
   const [cardLabel, setCardLabelState] = useState<PracticeCardLabel>("time")
+  const [scope, setScopeState] = useState<PracticeScopeFilter>("all")
 
   // localStorage isn't available during SSR, so these all start at their
   // defaults (matching the server-rendered output) and swap to the persisted
@@ -115,6 +120,7 @@ export function usePracticePrefs(): PracticePrefs {
       )
     )
     setCardLabelState(readString(KEYS.cardLabel, ["time", "tags"] as const, "time"))
+    setScopeState(readString(KEYS.scope, ["all", "team", "mine"] as const, "all"))
     setReady(true)
   }, [])
   /* eslint-enable react-hooks/set-state-in-effect */
@@ -150,6 +156,11 @@ export function usePracticePrefs(): PracticePrefs {
     setCardLabel: (value) => {
       setCardLabelState(value)
       write(KEYS.cardLabel, value)
+    },
+    scope,
+    setScope: (value) => {
+      setScopeState(value)
+      write(KEYS.scope, value)
     },
   }
 }

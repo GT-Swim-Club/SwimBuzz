@@ -12,10 +12,18 @@ import {
   usePalette,
 } from "@swimbuzz/ui"
 import { spacing } from "@swimbuzz/tokens"
-import { COURSES, getViewerTimeZone } from "@swimbuzz/shared"
+import {
+  COURSES,
+  getViewerTimeZone,
+  isStaffRole,
+  nextPrivatePracticeSlot,
+  type PracticeVisibility,
+} from "@swimbuzz/shared"
 import { DateSelector, TimeSelector, TimeZoneSelector } from "../../../src/components/DateTimeSelector"
+import { PrivateBadge } from "../../../src/components/PrivateBadge"
 import { UndoRedoButtons } from "../../../src/components/UndoRedoButtons"
 import { api } from "../../../src/lib/api"
+import { useAuth } from "../../../src/lib/auth"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 import { useUndoableState } from "../../../src/lib/use-undoable-state"
 
@@ -29,21 +37,52 @@ type NewPracticeForm = {
   focus: string
   setContent: string
   published: boolean
+  visibility: PracticeVisibility
   timeZone: string
 }
 
-function emptyForm(): NewPracticeForm {
+const TEAM_START_TIME = "19:30"
+const TEAM_END_TIME = "21:00"
+
+function emptyForm(isStaff: boolean): NewPracticeForm {
+  const timeZone = getViewerTimeZone()
+  // Team practices default to the team slot; private ones to the next 15-minute step, for an hour.
+  const slot = isStaff
+    ? { startTime: TEAM_START_TIME, endTime: TEAM_END_TIME }
+    : nextPrivatePracticeSlot(timeZone)
   return {
+    visibility: isStaff ? "TEAM" : "PRIVATE",
     title: "",
     date: "",
-    startTime: "19:30",
-    endTime: "21:00",
+    ...slot,
     location: "CRC Comp Pool",
     course: "SCY",
     focus: "",
     setContent: "",
     published: false,
-    timeZone: getViewerTimeZone(),
+    timeZone,
+  }
+}
+
+/** Swap the team/private default time slots, leaving times the user picked alone. */
+function withVisibility(form: NewPracticeForm, visibility: PracticeVisibility): NewPracticeForm {
+  const privateSlot = nextPrivatePracticeSlot(form.timeZone)
+  if (visibility === "PRIVATE") {
+    const isTeamDefault = form.startTime === TEAM_START_TIME && form.endTime === TEAM_END_TIME
+    return {
+      ...form,
+      visibility,
+      published: false,
+      ...(isTeamDefault ? privateSlot : {}),
+    }
+  }
+  const isPrivateDefault =
+    (!form.startTime && !form.endTime) ||
+    (form.startTime === privateSlot.startTime && form.endTime === privateSlot.endTime)
+  return {
+    ...form,
+    visibility,
+    ...(isPrivateDefault ? { startTime: TEAM_START_TIME, endTime: TEAM_END_TIME } : {}),
   }
 }
 
@@ -71,7 +110,12 @@ export default function NewPracticeScreen() {
   const router = useRouter()
   const c = usePalette()
   const tabBarPad = useTabBarScrollPadding()
-  const { value: form, set: setForm, undo, redo, canUndo, canRedo } = useUndoableState(emptyForm())
+  const { user } = useAuth()
+  const isStaff = !!user && isStaffRole(user.role)
+  const { value: form, set: setForm, undo, redo, canUndo, canRedo } = useUndoableState(
+    emptyForm(isStaff)
+  )
+  const isPrivate = form.visibility === "PRIVATE"
   const [saving, setSaving] = useState(false)
 
   async function onCreate() {
@@ -84,8 +128,12 @@ export default function NewPracticeScreen() {
       Alert.alert("Invalid date", "Select a date or leave it blank.")
       return
     }
-    const start = form.startTime.trim() || "19:30"
-    const end = form.endTime.trim() || "21:00"
+    const start = form.startTime.trim()
+    const end = form.endTime.trim()
+    if (!start || !end) {
+      Alert.alert("Time required", "Pick a start and end time.")
+      return
+    }
     if ((clockToMinutes(end) ?? 0) <= (clockToMinutes(start) ?? 0)) {
       Alert.alert("Invalid end time", "End time must be after start time.")
       return
@@ -106,7 +154,8 @@ export default function NewPracticeScreen() {
         location: form.location.trim() || "CRC Comp Pool",
         course: form.course,
         focus: form.focus.trim() || null,
-        published: form.published,
+        published: !isPrivate && form.published,
+        visibility: form.visibility,
         sets: [{ content, title: null, distance: null }],
       })) as { id?: string }
       if (practice?.id) {
@@ -206,31 +255,63 @@ export default function NewPracticeScreen() {
           multiline
           style={{ minHeight: 88, textAlignVertical: "top" }}
         />
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: spacing.md,
-            paddingVertical: spacing.sm,
-          }}
-        >
-          <View style={{ flex: 1, marginRight: spacing.md }}>
-            <Body style={{ fontWeight: "600" }}>Published</Body>
-            <Muted>Visible to athletes when on</Muted>
+        {isStaff ? (
+          <View style={{ marginBottom: spacing.sm }}>
+            <Body style={{ fontWeight: "600" }}>Visibility</Body>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: spacing.xs }}>
+              <Chip
+                label="Team"
+                selected={!isPrivate}
+                onPress={() => setForm((f) => withVisibility(f, "TEAM"))}
+              />
+              <Chip
+                label="Private"
+                selected={isPrivate}
+                onPress={() => setForm((f) => withVisibility(f, "PRIVATE"))}
+              />
+            </View>
           </View>
-          <Switch
-            value={form.published}
-            onValueChange={(published) => setForm((f) => ({ ...f, published }))}
-            trackColor={{
-              false: c.switchTrack,
-              true: c.primary,
+        ) : null}
+        {isPrivate ? (
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: spacing.sm,
+              marginBottom: spacing.md,
+              paddingVertical: spacing.sm,
             }}
-            thumbColor={c.switchThumb}
-          />
-        </View>
+          >
+            <PrivateBadge />
+            <Muted style={{ flex: 1 }}>Only you can see this practice.</Muted>
+          </View>
+        ) : (
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: spacing.md,
+              paddingVertical: spacing.sm,
+            }}
+          >
+            <View style={{ flex: 1, marginRight: spacing.md }}>
+              <Body style={{ fontWeight: "600" }}>Published</Body>
+              <Muted>Visible to athletes when on</Muted>
+            </View>
+            <Switch
+              value={form.published}
+              onValueChange={(published) => setForm((f) => ({ ...f, published }))}
+              trackColor={{
+                false: c.switchTrack,
+                true: c.primary,
+              }}
+              thumbColor={c.switchThumb}
+            />
+          </View>
+        )}
         <Button
-          label="Create practice"
+          label={isPrivate ? "Create private practice" : "Create practice"}
           loading={saving}
           onPress={() => void onCreate()}
         />

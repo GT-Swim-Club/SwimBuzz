@@ -10,17 +10,21 @@ import { waitForPracticeEditLockChange } from "@/lib/practice/practice-edit-lock
 import { isPracticeEditLockYieldRequested } from "@/lib/practice/practice-edit-lock-yield"
 import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@swimbuzz/shared"
+import { loadPracticeAccess, practiceAccessError, practiceViewer } from "@/lib/practice/practice-access"
 
 export const runtime = "nodejs"
 export const maxDuration = 30
 
-async function requireStaff() {
+async function requireEditor(id: string) {
   const session = await getSession()
-  if (!session || !isStaffRole(session.user.role)) {
-    return null
+  if (!session) {
+    return { response: NextResponse.json({ error: "Forbidden" }, { status: 403 }) } as const
   }
-  return session
+  const denied = practiceAccessError(await loadPracticeAccess(id), practiceViewer(session), "edit")
+  if (denied) {
+    return { response: NextResponse.json({ error: denied.error }, { status: denied.status }) } as const
+  }
+  return { session } as const
 }
 
 function lockTokenFrom(req: Request, body?: { token?: unknown }): string | null {
@@ -34,10 +38,11 @@ export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await requireStaff()
-  if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-
   const { id } = await params
+  const auth = await requireEditor(id)
+  if ("response" in auth) return auth.response
+  const { session } = auth
+
   const url = new URL(req.url)
   const watch = url.searchParams.get("watch") === "1"
   const clientRev = url.searchParams.get("rev")
@@ -81,10 +86,11 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await requireStaff()
-  if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-
   const { id } = await params
+  const auth = await requireEditor(id)
+  if ("response" in auth) return auth.response
+  const { session } = auth
+
   const body = await req.json().catch(() => ({}))
   const force = Boolean(body?.force)
 
@@ -103,10 +109,11 @@ export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await requireStaff()
-  if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-
   const { id } = await params
+  const auth = await requireEditor(id)
+  if ("response" in auth) return auth.response
+  const { session } = auth
+
   const body = await req.json().catch(() => ({}))
   const token = lockTokenFrom(req, body)
   if (!token) {
@@ -128,10 +135,11 @@ export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await requireStaff()
-  if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-
   const { id } = await params
+  const auth = await requireEditor(id)
+  if ("response" in auth) return auth.response
+  const { session } = auth
+
   const token = lockTokenFrom(req)
   await releasePracticeEditLock(id, session.user.id, token)
   return NextResponse.json({ ok: true })

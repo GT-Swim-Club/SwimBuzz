@@ -25,7 +25,7 @@ function loadTS(relative, mocks) {
   return mod.exports
 }
 async function main() {
-  fs.symlinkSync(path.resolve(web, "../../node_modules"), path.join(tmp, "node_modules"), "dir")
+  fs.symlinkSync(path.join(web, "node_modules"), path.join(tmp, "node_modules"), "dir")
   let schema = fs.readFileSync(path.join(web, "prisma/schema.prisma"), "utf8")
   const enums = [...schema.matchAll(/enum (\w+) \{[^}]+\}/g)].map(m => m[1])
   schema = schema.replace(/enum \w+ \{[^}]+\}/g, "")
@@ -37,7 +37,7 @@ async function main() {
     .replace(/\bJson\b/g, "String")
   for (const name of enums) schema = schema.replace(new RegExp(`\\b${name}\\b`, "g"), "String")
   schema = schema.replace(/@default\(([A-Z][A-Z_]+)\)/g, '@default("$1")')
-    .replace(/^(\s*\w+\s+)String\[\]([^\n]*)/gm, (_, prefix, rest) => `${prefix}String ${rest.includes("@default") ? rest.replace(/@default\(\[\]\)/, '@default("")') : '@default("")' + rest}`)
+    .replace(/^(\s*\w+\s+)(?:String|Int)\[\]([^\n]*)/gm, (_, prefix, rest) => `${prefix}String ${rest.includes("@default") ? rest.replace(/@default\(\[\]\)/, '@default("")') : '@default("")' + rest}`)
   const schemaPath = path.join(tmp, "schema.prisma")
   fs.writeFileSync(schemaPath, schema)
   const cli = require.resolve("prisma/build/index.js")
@@ -167,6 +167,40 @@ async function main() {
     assert.equal(await service.purgeDeletedNow("meet", purgeNowMeet.id), false)
     assert.equal(await withDeleted(() => prisma.meet.count({ where: { id: purgeNowMeet.id } })), 0)
 
+    // Private practices: owner-only (coaches included), capped, never in Trash, gone with their owner.
+    const isStaffRole = role => ["COACH", "EXEC"].includes(role)
+    const access = loadTS("src/lib/practice/practice-access.ts", { "@/lib/prisma": { prisma }, "@swimbuzz/shared": { isStaffRole } })
+    const owner = await prisma.user.create({ data: { email: "owner@example.test" } })
+    const me = { userId: owner.id, isStaff: false }
+    const coach = { userId: user.id, isStaff: true }
+    const privateData = title => ({ title, startsAt: now, endsAt: now, visibility: "PRIVATE", ownerId: owner.id, published: false })
+    const mine = await prisma.practice.create({ data: { ...privateData("Mine"), sets: { create: { content: "Kick" } } } })
+    assert.equal(access.canViewPractice(mine, me), true)
+    assert.equal(access.canEditPractice(mine, me), true)
+    assert.equal(access.canViewPractice(mine, coach), false)
+    assert.equal(access.practiceAccessError(mine, coach, "edit").status, 404)
+    assert.equal(access.resolveNewPracticeVisibility("TEAM", me), "PRIVATE")
+    assert.equal(access.resolveNewPracticeVisibility("PRIVATE", coach), "PRIVATE")
+    assert.equal(access.resolveVisibilityChange({ ...mine, createdById: owner.id }, "TEAM", me), "PRIVATE")
+    assert.throws(() => access.resolveVisibilityChange({ visibility: "TEAM", ownerId: null, published: true, createdById: user.id }, "PRIVATE", coach), access.PracticeVisibilityError)
+    assert.ok(!(await prisma.practice.findMany({ where: access.practiceListWhere(coach) })).some(p => p.id === mine.id))
+    assert.deepEqual((await prisma.practice.findMany({ where: access.practiceListWhere(me, "mine") })).map(p => p.id), [mine.id])
+    assert.ok((await prisma.practice.findMany({ where: access.practiceListWhere(me, "team") })).every(p => p.visibility === "TEAM" && p.published))
+    // SQLite has no advisory locks; the count check is what's under test here.
+    const quotaTx = { $executeRaw: async () => 0, practice: prisma.practice }
+    await access.assertPrivatePracticeQuota(quotaTx, owner.id)
+    await prisma.practice.createMany({ data: Array.from({ length: access.MAX_PRIVATE_PRACTICES_PER_USER - 1 }, (_, i) => privateData(`Mine ${i}`)) })
+    await assert.rejects(access.assertPrivatePracticeQuota(quotaTx, owner.id), access.PracticeVisibilityError)
+    await service.removePractice(mine.id, mine)
+    assert.equal(await withDeleted(() => prisma.practice.count({ where: { id: mine.id } })), 0)
+    assert.equal(await withDeleted(() => prisma.practiceSet.count({ where: { practiceId: mine.id } })), 0)
+    await access.assertPrivatePracticeQuota(quotaTx, owner.id)
+    const tombstone = await prisma.practice.create({ data: privateData("Legacy tombstone") })
+    await service.softDeletePractice(tombstone.id)
+    assert.ok(!(await service.listRecentlyDeleted()).items.some(item => item.id === tombstone.id))
+    await prisma.user.delete({ where: { id: owner.id } })
+    assert.equal(await withDeleted(() => prisma.practice.count({ where: { ownerId: owner.id } })), 0)
+
     let session = null
     const routes = loadTS("src/app/api/recently-deleted/route.ts", {
       "next/cache": { revalidatePath() {} }, "@/lib/auth/session": { getSession: async () => session },
@@ -187,7 +221,7 @@ async function main() {
       assert.equal((await routes.DELETE(request({ kind: "invalid", id: "x" }))).status, 400)
       assert.equal((await routes.DELETE(request({ kind: "meet", id: "missing" }))).status, 409)
     }
-    console.log("Recovery checks passed: visibility, nested reads/counts, stale writes, slug reservation, restore, permanent delete, expiry, purge retries, swim preservation, and API permissions.")
+    console.log("Recovery checks passed: visibility, nested reads/counts, stale writes, slug reservation, restore, permanent delete, expiry, purge retries, swim preservation, private practices (visibility, cap, hard delete, owner cascade), and API permissions.")
   } finally { await prisma.$disconnect() }
 }
 main().catch(error => { console.error(error.stdout?.toString() || "", error.stderr?.toString() || error); process.exitCode = 1 }).finally(() => fs.rmSync(tmp, { recursive: true, force: true }))

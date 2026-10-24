@@ -43,6 +43,11 @@ enum AttendanceMethod {
   MANUAL
 }
 
+enum PracticeVisibility {
+  TEAM
+  PRIVATE
+}
+
 enum ScraperJobStatus {
   PENDING
   RUNNING
@@ -91,6 +96,7 @@ model User {
   athlete       Athlete?
   practices         Practice[] @relation("PracticeCreatedBy")
   practiceEditLocks Practice[] @relation("PracticeEditLocks")
+  privatePractices  Practice[] @relation("PracticeOwner")
   attendanceRecorded PracticeAttendance[] @relation("PracticeAttendanceRecordedBy")
   comments          PracticeComment[]
   notifications     Notification[]
@@ -351,6 +357,10 @@ model Practice {
   focus       String?
   tags        String[]      @default([])
   published   Boolean       @default(false)
+  visibility  PracticeVisibility @default(TEAM)
+  /// Set only for PRIVATE practices; only this user can see or edit them.
+  ownerId     String?
+  owner       User?              @relation("PracticeOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   createdById String?
   createdBy   User?              @relation("PracticeCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   /// Exclusive edit lock — only the holder may save while active.
@@ -368,6 +378,7 @@ model Practice {
 
   @@index([startsAt])
   @@index([published])
+  @@index([ownerId, startsAt])
   @@index([tags])
   @@index([editLockedById])
   @@index([editLockExpiresAt])

@@ -5,6 +5,7 @@ import { getSession } from "@/lib/auth/session"
 import { isCuid, practiceEditPath, practicePath } from "@/lib/slug"
 import { listManagedPracticeTagNames } from "@/lib/practice/practice-tag-catalog"
 import { practiceSetSelect } from "@/lib/practice/practice-input"
+import { canEditPractice, canViewPractice } from "@/lib/practice/practice-access"
 import type { PracticeFormState } from "../../PracticeEditor"
 import PracticeEditClient from "./PracticeEditClient"
 import { toDateInput, toTimeInput } from "@/lib/date-input"
@@ -19,7 +20,6 @@ export default async function PracticeEditPage({
   if (!session) redirect("/signin?callbackUrl=/practices")
 
   const isCoach = await isStaffUi(session.user.role)
-  if (!isCoach) redirect(practicePath(param))
 
   const practice = await prisma.practice.findFirst({
     where: isCuid(param) ? { OR: [{ id: param }, { slug: param }] } : { slug: param },
@@ -27,7 +27,12 @@ export default async function PracticeEditPage({
       sets: { orderBy: { order: "asc" }, select: practiceSetSelect },
     },
   })
-  if (!practice) notFound()
+  const viewer = { userId: session.user.id, isStaff: isCoach }
+  if (!practice || !canViewPractice(practice, viewer)) {
+    if (!isCoach) redirect(practicePath(param))
+    notFound()
+  }
+  if (!canEditPractice(practice, viewer)) redirect(practicePath(param))
 
   const practiceSlug = practice.slug ?? practice.id
   if (param !== practiceSlug) redirect(practiceEditPath(practiceSlug))
@@ -43,6 +48,7 @@ export default async function PracticeEditPage({
     focus: practice.focus ?? "",
     tags: practice.tags,
     published: practice.published,
+    visibility: practice.visibility,
     sets: practice.sets.map((set) => ({
       id: set.id,
       title: set.title ?? "",
@@ -61,6 +67,7 @@ export default async function PracticeEditPage({
       title={practice.title}
       initial={initial}
       availableTags={availableTags}
+      canChooseVisibility={isCoach}
     />
   )
 }

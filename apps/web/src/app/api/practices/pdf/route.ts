@@ -8,7 +8,7 @@ import {
   practicePdfStart,
   toPracticePdfInput,
 } from "@/lib/practice/practice-pdf-load"
-import { isStaffRole } from "@swimbuzz/shared"
+import { practiceListWhere, practiceViewer } from "@/lib/practice/practice-access"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -34,9 +34,10 @@ export async function POST(req: Request) {
     )
   }
 
-  const staff = isStaffRole(session.user.role)
+  const viewer = practiceViewer(session)
+  const staff = viewer.isStaff
   const practices = await prisma.practice.findMany({
-    where: { id: { in: ids }, ...(staff ? {} : { published: true }) },
+    where: { AND: [{ id: { in: ids } }, practiceListWhere(viewer)] },
     include: practicePdfInclude,
   })
   if (practices.length === 0) return NextResponse.json({ error: "Not found" }, { status: 404 })

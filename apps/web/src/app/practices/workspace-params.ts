@@ -21,6 +21,8 @@ export type PracticeRailItem = {
   slug: string | null
   title: string
   published: boolean
+  /** Owner-only practice; the viewer is always its owner since others never receive it. */
+  isPrivate: boolean
   tags: string[]
   totalDistance: number
   dayKey: string

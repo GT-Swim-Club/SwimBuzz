@@ -3,6 +3,7 @@ import { checkCommentCreationRateLimit } from "@/lib/practice/comment-rate-limit
 import { notifyPracticeComment } from "@/lib/notifications/notifications"
 import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/auth/session"
+import { canViewPractice, isPrivatePractice, practiceViewer } from "@/lib/practice/practice-access"
 
 export async function POST(
   req: Request,
@@ -14,8 +15,19 @@ export async function POST(
   const { id } = await params
   const practice = await prisma.practice.findUnique({
     where: { id },
-    select: { id: true, title: true, createdById: true }})
-  if (!practice) return NextResponse.json({ error: "Practice not found" }, { status: 404 })
+    select: {
+      id: true,
+      title: true,
+      createdById: true,
+      visibility: true,
+      ownerId: true,
+      published: true }})
+  if (!practice || !canViewPractice(practice, practiceViewer(session))) {
+    return NextResponse.json({ error: "Practice not found" }, { status: 404 })
+  }
+  if (isPrivatePractice(practice)) {
+    return NextResponse.json({ error: "Private practices don't have comments" }, { status: 400 })
+  }
 
   const body = await req.json().catch(() => ({}))
   const text = String(body.body ?? "").trim()

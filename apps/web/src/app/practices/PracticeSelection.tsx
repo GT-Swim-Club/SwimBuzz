@@ -115,6 +115,9 @@ export function PracticeSelectionBar({
   const [error, setError] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const count = selected.length
+  const privateCount = selected.filter((p) => p.isPrivate).length
+  const allPrivate = count > 0 && privateCount === count
+  const deleteLabel = allPrivate ? "Delete" : "Move to Trash"
 
   async function exportPdf() {
     setBusy("pdf")
@@ -147,7 +150,7 @@ export function PracticeSelectionBar({
       if (result.skipped.length > 0) {
         const n = result.skipped.length
         setError(
-          `${n} practice${n === 1 ? " is" : "s are"} being edited and ${n === 1 ? "was" : "were"} not moved to Trash`
+          `${n} practice${n === 1 ? " was" : "s were"} not deleted (being edited, or not yours to delete)`
         )
       }
       onDeleted(result)
@@ -194,7 +197,7 @@ export function PracticeSelectionBar({
             className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border border-error-border bg-background text-[13px] font-medium text-error transition-colors hover:bg-error-bg disabled:cursor-not-allowed disabled:opacity-50"
           >
             <ActionIcon kind="delete" className="h-4 w-4" />
-            Move to Trash
+            {deleteLabel}
           </button>
         )}
         <button
@@ -212,15 +215,26 @@ export function PracticeSelectionBar({
         open={confirmDelete}
         onClose={() => setConfirmDelete(false)}
         closeDisabled={busy === "delete"}
-        title="Move to Trash"
+        title={deleteLabel}
         description={
-          <>
-            Move{" "}
-            <span className="font-medium text-foreground">
-              {count} practice{count === 1 ? "" : "s"}
-            </span>{" "}
-            to Trash.
-          </>
+          allPrivate ? (
+            <>
+              Permanently delete{" "}
+              <span className="font-medium text-foreground">
+                {count} private practice{count === 1 ? "" : "s"}
+              </span>
+              ? This can&apos;t be undone.
+            </>
+          ) : (
+            <>
+              Move{" "}
+              <span className="font-medium text-foreground">
+                {count} practice{count === 1 ? "" : "s"}
+              </span>{" "}
+              to Trash.
+              {privateCount > 0 && " Private practices skip Trash and are deleted permanently."}
+            </>
+          )
         }
         maxWidth="sm"
         footer={
@@ -239,7 +253,7 @@ export function PracticeSelectionBar({
               disabled={busy === "delete"}
               className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-error-contrast hover:bg-red-700 disabled:opacity-50"
             >
-              {busy === "delete" ? "Moving…" : "Move to Trash"}
+              {busy === "delete" ? (allPrivate ? "Deleting…" : "Moving…") : deleteLabel}
             </button>
           </ModalFooter>
         }

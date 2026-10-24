@@ -1,4 +1,4 @@
-import { softDeletePractice } from "@/lib/recovery/recovery"
+import { removePractice } from "@/lib/recovery/recovery"
 import { NextResponse } from "next/server"
 import { notifyPracticePublished } from "@/lib/notifications/notifications"
 import { prisma } from "@/lib/prisma"
@@ -8,9 +8,18 @@ import {
   PracticeEditLockError,
   assertCanMutatePractice } from "@/lib/practice/practice-edit-lock"
 import { uniquePracticeSlug } from "@/lib/slug"
-import { zonedDayKey, isStaffRole } from "@swimbuzz/shared"
+import { zonedDayKey } from "@swimbuzz/shared"
 import { getSession } from "@/lib/auth/session"
 import { findUnmanagedPracticeTags } from "@/lib/practice/practice-tag-catalog"
+import {
+  PracticeVisibilityError,
+  assertPrivatePracticeQuota,
+  canViewPractice,
+  isPrivatePractice,
+  loadPracticeAccess,
+  practiceAccessError,
+  practiceViewer,
+  resolveVisibilityChange } from "@/lib/practice/practice-access"
 
 export async function GET(
   _req: Request,
@@ -28,8 +37,7 @@ export async function GET(
         orderBy: { createdAt: "asc" },
         include: { author: { select: { staffTitle: true } } },
       }}})
-  if (!practice) return NextResponse.json({ error: "Not found" }, { status: 404 })
-  if (!practice.published && !isStaffRole(session.user.role)) {
+  if (!practice || !canViewPractice(practice, practiceViewer(session))) {
     return NextResponse.json({ error: "Not found" }, { status: 404 })
   }
 
@@ -47,11 +55,15 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getSession()
-  if (!session || !isStaffRole(session.user.role)) {
+  if (!session) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
   const { id } = await params
+  const viewer = practiceViewer(session)
+  const denied = practiceAccessError(await loadPracticeAccess(id), viewer, "edit")
+  if (denied) return NextResponse.json({ error: denied.error }, { status: denied.status })
+
   const lockToken = req.headers.get(PRACTICE_EDIT_LOCK_TOKEN_HEADER)?.trim() || null
   try {
     await assertCanMutatePractice(id, session.user.id, lockToken)
@@ -69,7 +81,11 @@ export async function PATCH(
 
   const body = await req.json()
   try {
-    const data = buildPracticeData(body, { requireSets: true })
+    const visibility = resolveVisibilityChange(existing, body?.visibility, viewer)
+    const isPrivate = visibility === "PRIVATE"
+    const becamePrivate = isPrivate && !isPrivatePractice(existing)
+    const becameTeam = !isPrivate && isPrivatePractice(existing)
+    const data = buildPracticeData(body, { requireSets: true, requireTimes: isPrivate })
     const unmanagedTags = await findUnmanagedPracticeTags(data.tags)
     if (unmanagedTags.length) {
       return NextResponse.json(
@@ -87,8 +103,26 @@ export async function PATCH(
       ? zonedDayKey(existing.startsAt, existing.timeZone)
       : null
     const dateChanged = existingDayKey !== zonedDayKey(data.startsAt, data.timeZone)
+    const slugUpdate = isPrivate
+      ? becamePrivate ? { slug: null } : {}
+      : dateChanged || becameTeam
+        ? { slug: await uniquePracticeSlug(data.startsAt, data.timeZone, id) }
+        : {}
 
     const practice = await prisma.$transaction(async (tx) => {
+      if (becamePrivate) {
+        await assertPrivatePracticeQuota(tx, session.user.id)
+        const [comments, attendance] = await Promise.all([
+          tx.practiceComment.count({ where: { practiceId: id } }),
+          tx.practiceAttendance.count({ where: { practiceId: id } }),
+        ])
+        if (comments || attendance) {
+          throw new PracticeVisibilityError(
+            "Practices with comments or attendance can't be made private."
+          )
+        }
+      }
+
       await tx.practiceSet.deleteMany({
         where: { practiceId: id, id: { notIn: [...keepIds] } }})
 
@@ -125,10 +159,10 @@ export async function PATCH(
           course: data.course,
           focus: data.focus,
           tags: data.tags,
-          published: data.published,
-          ...(dateChanged
-            ? { slug: await uniquePracticeSlug(data.startsAt, data.timeZone, id) }
-            : {}),
+          published: isPrivate ? false : data.published,
+          visibility,
+          ownerId: isPrivate ? session.user.id : null,
+          ...slugUpdate,
         },
         include: { sets: { orderBy: { order: "asc" }, select: practiceSetSelect } },
       })
@@ -146,7 +180,7 @@ export async function PATCH(
 
     return NextResponse.json(practice)
   } catch (err) {
-    if (err instanceof PracticeInputError) {
+    if (err instanceof PracticeInputError || err instanceof PracticeVisibilityError) {
       return NextResponse.json({ error: err.message }, { status: 400 })
     }
     throw err
@@ -158,11 +192,15 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getSession()
-  if (!session || !isStaffRole(session.user.role)) {
+  if (!session) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
   const { id } = await params
+  const existing = await loadPracticeAccess(id)
+  const denied = practiceAccessError(existing, practiceViewer(session), "edit")
+  if (denied) return NextResponse.json({ error: denied.error }, { status: denied.status })
+
   const lockToken = req.headers.get(PRACTICE_EDIT_LOCK_TOKEN_HEADER)?.trim() || null
   try {
     await assertCanMutatePractice(id, session.user.id, lockToken)
@@ -173,9 +211,6 @@ export async function DELETE(
     throw err
   }
 
-  const existing = await prisma.practice.findUnique({ where: { id } })
-  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 })
-
-  await softDeletePractice(id)
+  await removePractice(id, existing!)
   return NextResponse.json({ ok: true })
 }

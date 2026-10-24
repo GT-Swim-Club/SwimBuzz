@@ -2,9 +2,9 @@
 
 import { revalidatePath } from "next/cache"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@swimbuzz/shared"
-import { softDeletePractice } from "@/lib/recovery/recovery"
+import { removePractice } from "@/lib/recovery/recovery"
 import { PracticeEditLockError, assertCanMutatePractice } from "@/lib/practice/practice-edit-lock"
+import { loadPracticeAccess, practiceAccessError, practiceViewer } from "@/lib/practice/practice-access"
 
 const MAX_PRACTICES = 100
 
@@ -14,11 +14,13 @@ export type DeletePracticesResult = {
   skipped: { id: string; reason: string }[]
 }
 
-/** Bulk "Move to Trash" from the practices sidebar's select mode. Same per-practice logic as
- * deletePractice / DELETE /api/practices/[id]: practices under an active edit lock are skipped. */
+/** Bulk delete from the practices sidebar's select mode. Same per-practice logic as
+ * deletePractice / DELETE /api/practices/[id]: practices the caller can't edit or that are
+ * under an active edit lock are skipped; private ones are deleted permanently. */
 export async function deletePractices(ids: string[]): Promise<DeletePracticesResult> {
   const session = await getSession()
-  if (!session || !isStaffRole(session.user.role)) throw new Error("Forbidden")
+  if (!session) throw new Error("Forbidden")
+  const viewer = practiceViewer(session)
 
   const unique = [...new Set(ids.filter((id) => typeof id === "string" && id.length > 0))]
   if (unique.length === 0) throw new Error("Select at least one practice")
@@ -29,6 +31,12 @@ export async function deletePractices(ids: string[]): Promise<DeletePracticesRes
   const deletedIds: string[] = []
   const skipped: DeletePracticesResult["skipped"] = []
   for (const id of unique) {
+    const access = await loadPracticeAccess(id)
+    const denied = practiceAccessError(access, viewer, "edit")
+    if (denied) {
+      skipped.push({ id, reason: denied.status === 404 ? "Not found" : "You can't delete this practice" })
+      continue
+    }
     try {
       await assertCanMutatePractice(id, session.user.id, null)
     } catch (err) {
@@ -38,7 +46,7 @@ export async function deletePractices(ids: string[]): Promise<DeletePracticesRes
       }
       throw err
     }
-    await softDeletePractice(id)
+    await removePractice(id, access!)
     deletedIds.push(id)
   }
 

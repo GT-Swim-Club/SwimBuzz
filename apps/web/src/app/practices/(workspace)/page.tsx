@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { isStaffUi } from "@/lib/athlete/athlete-view-server"
 import { getSession } from "@/lib/auth/session"
 import { practicePath } from "@/lib/slug"
+import { practiceListWhere } from "@/lib/practice/practice-access"
 import PracticeDetailLoader from "./PracticeDetailLoader"
 import ReplaceUrl from "./ReplaceUrl"
 
@@ -20,7 +21,7 @@ export default async function PracticesIndexPage() {
   const isCoach = await isStaffUi(session.user.role)
 
   const mostRecent = await prisma.practice.findFirst({
-    where: isCoach ? undefined : { published: true },
+    where: practiceListWhere({ userId: session.user.id, isStaff: isCoach }),
     orderBy: [{ startsAt: "desc" }, { createdAt: "desc" }],
     select: { slug: true, id: true },
   })
@@ -35,7 +36,9 @@ export default async function PracticesIndexPage() {
     )
   }
 
-  const message = isCoach ? "No practices yet. Create one to get started." : "No practices posted yet."
+  const message = isCoach
+    ? "No practices yet. Create one to get started."
+    : "No practices posted yet. Create your own private practice to get started."
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
       <div className="flex flex-1 items-center justify-center rounded-2xl border border-border-secondary bg-background px-4 py-14 text-center text-sm text-foreground-secondary">

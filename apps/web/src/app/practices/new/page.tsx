@@ -9,12 +9,11 @@ export default async function NewPracticePage() {
   if (!session) redirect("/signin?callbackUrl=/practices/new")
 
   const isCoach = await isStaffUi(session.user.role)
-  if (!isCoach) redirect("/practices")
   const availableTags = await listManagedPracticeTagNames()
 
   return (
     <main className="mx-auto max-w-4xl">
-      <PracticeEditor availableTags={availableTags} />
+      <PracticeEditor availableTags={availableTags} canChooseVisibility={isCoach} />
     </main>
   )
 }

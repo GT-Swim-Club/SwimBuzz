@@ -70,7 +70,7 @@ export async function POST(
   // Practice and athlete lookups are independent — run them concurrently
   // instead of one-after-another to keep check-in feeling instant.
   const [practice, athlete] = await Promise.all([
-    prisma.practice.findUnique({ where: { id }, select: { id: true } }),
+    prisma.practice.findUnique({ where: { id, visibility: "TEAM" }, select: { id: true } }),
     rawAthleteId
       ? prisma.athlete.findUnique({
           where: { id: rawAthleteId },

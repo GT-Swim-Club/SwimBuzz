@@ -78,11 +78,54 @@ function UnpublishIcon({ className = iconCls }: { className?: string }) {
   )
 }
 
+/** "Save a copy" for viewers who can't edit — copies the practice into their private practices. */
+export function SavePracticeCopyButton({ practiceId }: { practiceId: string }) {
+  const router = useRouter()
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleSave() {
+    setError(null)
+    setSaving(true)
+    try {
+      const result = await duplicatePractice(practiceId, { asPrivate: true })
+      if (!result.ok) {
+        setError(result.error)
+        return
+      }
+      router.push(practiceEditPath(result.slug ?? result.id))
+    } catch {
+      setError("Something went wrong")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={handleSave}
+        disabled={saving}
+        aria-label="Save a private copy"
+        className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-border rounded-lg bg-background hover:bg-fill transition-colors disabled:opacity-40"
+      >
+        <DuplicateIcon className="h-5 w-5" />
+        <HoverDetail label="Save a private copy" />
+      </button>
+      {error && (
+        <p className="absolute right-0 top-full mt-1.5 w-56 text-right text-xs text-red-500">{error}</p>
+      )}
+    </div>
+  )
+}
+
 export default function PracticeActions({
   practiceId,
   initial,
   title,
   published,
+  isPrivate,
   attendanceHref,
   editLock,
   onEdit,
@@ -92,6 +135,7 @@ export default function PracticeActions({
   initial: PracticeFormState
   title: string
   published: boolean
+  isPrivate: boolean
   attendanceHref: string
   editLock: PracticeEditLockInfo
   onEdit: () => void
@@ -107,6 +151,7 @@ export default function PracticeActions({
   const [duplicating, setDuplicating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const busy = loading || isPending || duplicating
+  const deleteLabel = isPrivate ? "Delete" : "Move to Trash"
 
   // Any active lock blocks this tab until it takes over (other user or other tab).
   const lockedElsewhere = Boolean(editLock?.locked)
@@ -214,6 +259,7 @@ export default function PracticeActions({
     <>
       <div className="flex shrink-0 items-start">
         <div className="flex shrink-0 items-center gap-2">
+        {!isPrivate && (
         <Link
           href={attendanceHref}
           aria-label="Take attendance"
@@ -222,7 +268,8 @@ export default function PracticeActions({
           <ActionIcon kind="attendance" className="h-5 w-5" />
           <HoverDetail label="Attendance" />
         </Link>
-        {published ? (
+        )}
+        {isPrivate ? null : published ? (
           <button
             type="button"
             onClick={() => {
@@ -278,11 +325,11 @@ export default function PracticeActions({
             setConfirmDelete(true)
           }}
           disabled={busy || lockedElsewhere}
-          aria-label="Move to Trash"
+          aria-label={deleteLabel}
           className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-error-border text-error rounded-lg bg-background hover:bg-error-bg transition-colors disabled:opacity-40"
         >
           <ActionIcon kind="delete" className="h-5 w-5" />
-          <HoverDetail label="Move to Trash" />
+          <HoverDetail label={deleteLabel} />
         </button>
       </div>
 
@@ -338,11 +385,18 @@ export default function PracticeActions({
         open={confirmDelete}
         onClose={() => setConfirmDelete(false)}
         closeDisabled={busy}
-        title="Move to Trash"
+        title={deleteLabel}
         description={
-          <>
-            Move <span className="font-medium text-foreground">{title}</span> to Trash.
-          </>
+          isPrivate ? (
+            <>
+              Permanently delete <span className="font-medium text-foreground">{title}</span>? Private
+              practices skip Trash, so this can&apos;t be undone.
+            </>
+          ) : (
+            <>
+              Move <span className="font-medium text-foreground">{title}</span> to Trash.
+            </>
+          )
         }
         maxWidth="sm"
         footer={
@@ -361,7 +415,7 @@ export default function PracticeActions({
               disabled={busy}
               className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-error-contrast hover:bg-red-700 disabled:opacity-50"
             >
-              {busy ? "Moving…" : "Move to Trash"}
+              {busy ? (isPrivate ? "Deleting…" : "Moving…") : deleteLabel}
             </button>
           </ModalFooter>
         }

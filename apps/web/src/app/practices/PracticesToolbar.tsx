@@ -365,6 +365,29 @@ function SettingsPopover({ prefs, isCoach }: { prefs: PracticePrefs; isCoach: bo
           {(prefs.view === "week" || prefs.view === "list") && (
             <div className="mt-1.5 border-t border-border-secondary pt-1.5">
               <div className="flex flex-col gap-0.5">
+                {(["all", "team", "mine"] as const).map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => {
+                      prefs.setScope(value)
+                      setOpen(false)
+                    }}
+                    className={optionRowClass(prefs.scope === value)}
+                  >
+                    <span className="flex-1">
+                      {value === "all" ? "All practices" : value === "team" ? "Team" : "Mine (private)"}
+                    </span>
+                    {prefs.scope === value && <CheckIcon />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {(prefs.view === "week" || prefs.view === "list") && (
+            <div className="mt-1.5 border-t border-border-secondary pt-1.5">
+              <div className="flex flex-col gap-0.5">
                 {(["time", "tags"] as const).map((value) => (
                   <button
                     key={value}
@@ -545,16 +568,14 @@ export default function PracticesToolbar({
           onTagsChange={onTagsChange}
         />
         <SettingsPopover prefs={prefs} isCoach={isCoach} />
-        {isCoach && (
-          <Link
-            href="/practices/new"
-            aria-label="New practice"
-            className={controlClass + " border-0 bg-primary text-primary-contrast hover:bg-primary-hover"}
-          >
-            <PlusIcon />
-            <HoverDetail label="New practice" />
-          </Link>
-        )}
+        <Link
+          href="/practices/new"
+          aria-label={isCoach ? "New practice" : "New private practice"}
+          className={controlClass + " border-0 bg-primary text-primary-contrast hover:bg-primary-hover"}
+        >
+          <PlusIcon />
+          <HoverDetail label={isCoach ? "New practice" : "New private practice"} />
+        </Link>
       </div>
     </div>
   )

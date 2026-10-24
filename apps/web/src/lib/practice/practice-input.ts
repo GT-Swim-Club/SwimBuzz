@@ -7,6 +7,9 @@ import { DEFAULT_TIME_ZONE, isValidTimeZone, zonedTimeToUtc } from "@swimbuzz/sh
 
 export class PracticeInputError extends Error {}
 export const MAX_PRACTICE_SETS = 10
+export const MAX_PRACTICE_TITLE_LENGTH = 120
+/** Sanitized HTML across focus + every set's content. Real practices run well under 1,000. */
+export const MAX_PRACTICE_CONTENT_LENGTH = 20_000
 
 export type NormalizedSet = {
   id?: string
@@ -73,6 +76,13 @@ function normalizeSet(raw: unknown, index: number): NormalizedSet {
     distance = parsed
   }
 
+  const title = optionalString(s.title)
+  if (title && title.length > MAX_PRACTICE_TITLE_LENGTH) {
+    throw new PracticeInputError(
+      `Set ${index + 1} title must be ${MAX_PRACTICE_TITLE_LENGTH} characters or fewer`
+    )
+  }
+
   const id = optionalString(s.id)
   // The first set trivially starts its own row regardless of what's sent.
   const startsNewRow = index === 0 || s.startsNewRow !== false
@@ -80,7 +90,7 @@ function normalizeSet(raw: unknown, index: number): NormalizedSet {
     ...(id ? { id } : {}),
     order: index,
     startsNewRow,
-    title: optionalString(s.title),
+    title,
     content,
     distance,
   }
@@ -102,12 +112,16 @@ export type NormalizedPractice = {
 /**
  * Validate and normalize practice form input (including its nested sets).
  * `requireSets` guards creation; edits may temporarily send fewer.
+ * `requireTimes` is for private practices, which don't get the team's default time slot.
  */
 export function buildPracticeData(
   body: Record<string, unknown>,
-  opts: { requireSets?: boolean } = {}
+  opts: { requireSets?: boolean; requireTimes?: boolean } = {}
 ): NormalizedPractice {
   const title = String(body.title ?? "").trim() || "Untitled Practice"
+  if (title.length > MAX_PRACTICE_TITLE_LENGTH) {
+    throw new PracticeInputError(`Title must be ${MAX_PRACTICE_TITLE_LENGTH} characters or fewer`)
+  }
 
   const rawDate = optionalString(body.date)
   if (!rawDate) throw new PracticeInputError("Practice date is required")
@@ -126,9 +140,14 @@ export function buildPracticeData(
 
   const published = body.published === true
 
-  const startTime = parseClockTime(optionalString(body.startTime) ?? "19:30")
+  const rawStartTime = optionalString(body.startTime)
+  const rawEndTime = optionalString(body.endTime)
+  if (opts.requireTimes && (!rawStartTime || !rawEndTime)) {
+    throw new PracticeInputError("Pick a start and end time")
+  }
+  const startTime = parseClockTime(rawStartTime ?? "19:30")
   if (!startTime) throw new PracticeInputError("Start time must be HH:MM")
-  const endTime = parseClockTime(optionalString(body.endTime) ?? "21:00")
+  const endTime = parseClockTime(rawEndTime ?? "21:00")
   if (!endTime) throw new PracticeInputError("End time must be HH:MM")
 
   const startMinutes = clockToMinutes(startTime)
@@ -146,17 +165,28 @@ export function buildPracticeData(
   const startsAt = zonedTimeToUtc(dayKey, startTime, timeZone)
   const endsAt = zonedTimeToUtc(dayKey, endTime, timeZone)
 
+  const location = optionalString(body.location) ?? "CRC Comp Pool"
+  if (location.length > MAX_PRACTICE_TITLE_LENGTH) {
+    throw new PracticeInputError(`Location must be ${MAX_PRACTICE_TITLE_LENGTH} characters or fewer`)
+  }
+
+  const rawFocus = optionalString(body.focus)
+  const focus = rawFocus ? sanitizePracticeHtml(rawFocus) || null : null
+  const contentLength = sets.reduce((sum, s) => sum + s.content.length, focus?.length ?? 0)
+  if (contentLength > MAX_PRACTICE_CONTENT_LENGTH) {
+    throw new PracticeInputError(
+      "This practice is too long to save. Shorten or remove some sets and try again."
+    )
+  }
+
   return {
     title,
     startsAt,
     endsAt,
     timeZone,
-    location: optionalString(body.location) ?? "CRC Comp Pool",
+    location,
     course: parseCourse(body.course),
-    focus: (() => {
-      const focus = optionalString(body.focus)
-      return focus ? sanitizePracticeHtml(focus) || null : null
-    })(),
+    focus,
     tags: normalizeTags(body.tags),
     published,
     sets,

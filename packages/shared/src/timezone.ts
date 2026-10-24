@@ -96,6 +96,23 @@ export function utcToZonedParts(
   }
 }
 
+/**
+ * Default "HH:MM" slot for a new private practice: starts at the next 15-minute step
+ * after `now` in `timeZone` and lasts an hour. Late at night it's pulled back so the
+ * hour still ends by 23:45, the last step on the time pickers.
+ */
+export function nextPrivatePracticeSlot(
+  timeZone: string,
+  now: Date = new Date()
+): { startTime: string; endTime: string } {
+  const { hour, minute } = utcToZonedParts(now, timeZone)
+  const lastStep = 23 * 60 + 45
+  const start = Math.min(Math.floor((hour * 60 + minute) / 15) * 15 + 15, lastStep - 60)
+  const clock = (minutes: number) =>
+    `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`
+  return { startTime: clock(start), endTime: clock(start + 60) }
+}
+
 /** Short zone abbreviation at a given instant, e.g. "EDT". Falls back to the raw id. */
 export function zoneAbbreviation(timeZone: string, instant: Date = new Date()): string {
   try {

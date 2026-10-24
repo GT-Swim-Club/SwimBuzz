@@ -51,6 +51,7 @@ import { RelativeDateText } from "../../../src/components/RelativeDateText"
 import { UndoRedoButtons } from "../../../src/components/UndoRedoButtons"
 import { ZonedTimeText } from "../../../src/components/ZonedTimeText"
 import { StaffBadge } from "../../../src/components/StaffBadge"
+import { PrivateBadge } from "../../../src/components/PrivateBadge"
 import { useAuth } from "../../../src/lib/auth"
 import { useUndoableState } from "../../../src/lib/use-undoable-state"
 
@@ -205,6 +206,8 @@ export default function PracticeDetailScreen() {
   // treats as their own closures) keep the non-null narrowing this scope
   // already has, instead of re-flagging `practice` as possibly null.
   const currentPractice = practice
+  const isPrivate = practice.visibility === "PRIVATE"
+  const canEdit = isPrivate ? !!user && practice.ownerId === user.id : isStaff
 
   function shareInput(): PracticeShareInput {
     return {
@@ -508,12 +511,14 @@ export default function PracticeDetailScreen() {
   function confirmDelete() {
     if (!id) return
     Alert.alert(
-      "Move practice to Trash?",
-      "You can restore it from Trash later.",
+      isPrivate ? "Delete practice?" : "Move practice to Trash?",
+      isPrivate
+        ? "Private practices skip Trash, so this can't be undone."
+        : "You can restore it from Trash later.",
       [
         { text: "Cancel", style: "cancel" },
         {
-          text: "Move to Trash",
+          text: isPrivate ? "Delete" : "Move to Trash",
           style: "destructive",
           onPress: () => void deletePractice(),
         },
@@ -541,6 +546,11 @@ export default function PracticeDetailScreen() {
       <ScrollView contentContainerStyle={{ paddingBottom: tabBarPad }}>
         <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: spacing.sm }}>
           <Title style={{ flex: 1 }}>{String(practice.title ?? "Practice")}</Title>
+          {isPrivate ? (
+            <View style={{ paddingTop: spacing.xs }}>
+              <PrivateBadge />
+            </View>
+          ) : null}
           <Pressable
             onPress={() => setShareOpen(true)}
             accessibilityRole="button"
@@ -593,33 +603,37 @@ export default function PracticeDetailScreen() {
           <ErrorBlock message={error instanceof Error ? error.message : "Failed to load practice"} />
         ) : null}
 
-        {isStaff ? (
-          <Section title="Staff">
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: spacing.md,
-              }}
-            >
-              <View style={{ flex: 1, marginRight: spacing.md }}>
-                <Body style={{ fontWeight: "600" }}>Published</Body>
-                <Muted>Visible to athletes when on</Muted>
-              </View>
-              <Switch
-                value={published}
-                disabled={saving}
-                onValueChange={(value) => void saveStaffEdits(value)}
-                trackColor={{
-                  false: c.switchTrack,
-                  true: c.primary,
+        {canEdit ? (
+          <Section title={isPrivate ? "Your practice" : "Staff"}>
+            {isPrivate ? (
+              <Muted style={{ marginBottom: spacing.md }}>Only you can see this practice.</Muted>
+            ) : (
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: spacing.md,
                 }}
-                thumbColor={c.switchThumb}
-              />
-            </View>
+              >
+                <View style={{ flex: 1, marginRight: spacing.md }}>
+                  <Body style={{ fontWeight: "600" }}>Published</Body>
+                  <Muted>Visible to athletes when on</Muted>
+                </View>
+                <Switch
+                  value={published}
+                  disabled={saving}
+                  onValueChange={(value) => void saveStaffEdits(value)}
+                  trackColor={{
+                    false: c.switchTrack,
+                    true: c.primary,
+                  }}
+                  thumbColor={c.switchThumb}
+                />
+              </View>
+            )}
             <Button
-              label="Move to Trash"
+              label={isPrivate ? "Delete practice" : "Move to Trash"}
               variant="danger"
               loading={deleting}
               onPress={confirmDelete}
@@ -628,7 +642,7 @@ export default function PracticeDetailScreen() {
         ) : null}
 
         <Section title="Sets">
-          {isStaff ? (
+          {canEdit ? (
             editSets.length === 0 ? (
               <Muted>No sets yet.</Muted>
             ) : (
@@ -711,93 +725,94 @@ export default function PracticeDetailScreen() {
           )}
         </Section>
 
-        <Section title="Comments">
-          {comments.length === 0 ? (
-            <Muted style={{ marginBottom: spacing.sm }}>No comments yet.</Muted>
-          ) : (
-            comments.map((comment) => {
-              const isOwn = !!user && comment.authorId === user.id
-              const canEdit = isOwn
-              const canDelete = isStaff || isOwn
-              return (
-                <ListRow
-                  key={comment.id}
-                  right={
-                    <View style={{ flexDirection: "row" }}>
-                      <IconButton
-                        label="Reply"
-                        onPress={() => {
-                          setEditingComment(null)
-                          setReplyTo(comment)
-                          setCommentBody("")
-                        }}
-                      />
-                      {canEdit ? (
-                        <IconButton label="Edit" onPress={() => startEdit(comment)} />
-                      ) : null}
-                      {canDelete ? (
+        {isPrivate ? null : (
+          <Section title="Comments">
+            {comments.length === 0 ? (
+              <Muted style={{ marginBottom: spacing.sm }}>No comments yet.</Muted>
+            ) : (
+              comments.map((comment) => {
+                const isOwn = !!user && comment.authorId === user.id
+                const canDelete = isStaff || isOwn
+                return (
+                  <ListRow
+                    key={comment.id}
+                    right={
+                      <View style={{ flexDirection: "row" }}>
                         <IconButton
-                          label="Delete"
-                          onPress={() => confirmDeleteComment(comment)}
+                          label="Reply"
+                          onPress={() => {
+                            setEditingComment(null)
+                            setReplyTo(comment)
+                            setCommentBody("")
+                          }}
                         />
-                      ) : null}
-                    </View>
-                  }
-                  title={String(comment.authorName ?? "Someone")}
-                  titleAdornment={
-                    comment.authorStaffTitle ? (
-                      <StaffBadge title={comment.authorStaffTitle} />
-                    ) : undefined
-                  }
-                  subtitleSegments={[
-                    comment.parentId ? "Reply" : null,
-                    comment.body,
-                    comment.createdAt ? (
-                      <RelativeDateText
-                        value={String(comment.createdAt)}
-                        kind="instant"
-                        absolute={formatDateTime(String(comment.createdAt))}
-                        style={{ fontSize: 13, color: c.textSecondary }}
-                      />
-                    ) : null,
-                    comment.editedAt ? "Edited" : null,
-                  ]}
-                />
-              )
-            })
-          )}
+                        {isOwn ? (
+                          <IconButton label="Edit" onPress={() => startEdit(comment)} />
+                        ) : null}
+                        {canDelete ? (
+                          <IconButton
+                            label="Delete"
+                            onPress={() => confirmDeleteComment(comment)}
+                          />
+                        ) : null}
+                      </View>
+                    }
+                    title={String(comment.authorName ?? "Someone")}
+                    titleAdornment={
+                      comment.authorStaffTitle ? (
+                        <StaffBadge title={comment.authorStaffTitle} />
+                      ) : undefined
+                    }
+                    subtitleSegments={[
+                      comment.parentId ? "Reply" : null,
+                      comment.body,
+                      comment.createdAt ? (
+                        <RelativeDateText
+                          value={String(comment.createdAt)}
+                          kind="instant"
+                          absolute={formatDateTime(String(comment.createdAt))}
+                          style={{ fontSize: 13, color: c.textSecondary }}
+                        />
+                      ) : null,
+                      comment.editedAt ? "Edited" : null,
+                    ]}
+                  />
+                )
+              })
+            )}
 
-          {replyTo || editingComment ? (
-            <View
-              style={{
-                alignItems: "center",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginBottom: spacing.xs,
-              }}
-            >
-              <Muted>
-                {editingComment
-                  ? "Editing your comment"
-                  : `Replying to ${replyTo?.authorName ?? "someone"}`}
-              </Muted>
-              <IconButton label="Cancel" onPress={cancelCommentForm} />
-            </View>
-          ) : null}
-          <TextField
-            label={editingComment ? "Edit comment" : replyTo ? "Write a reply" : "Add a comment"}
-            value={commentBody}
-            onChangeText={setCommentBody}
-            placeholder={replyTo ? "Write a reply…" : "Write something…"}
-            multiline
-            style={{ minHeight: 88, textAlignVertical: "top" }}
-          />
-          <Button
-            label={editingComment ? "Save changes" : replyTo ? "Post reply" : "Post comment"}
-            loading={posting}
-            onPress={() => void submitComment()}
-          />
-        </Section>
+            {replyTo || editingComment ? (
+              <View
+                style={{
+                  alignItems: "center",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginBottom: spacing.xs,
+                }}
+              >
+                <Muted>
+                  {editingComment
+                    ? "Editing your comment"
+                    : `Replying to ${replyTo?.authorName ?? "someone"}`}
+                </Muted>
+                <IconButton label="Cancel" onPress={cancelCommentForm} />
+              </View>
+            ) : null}
+            <TextField
+              label={editingComment ? "Edit comment" : replyTo ? "Write a reply" : "Add a comment"}
+              value={commentBody}
+              onChangeText={setCommentBody}
+              placeholder={replyTo ? "Write a reply…" : "Write something…"}
+              multiline
+              style={{ minHeight: 88, textAlignVertical: "top" }}
+            />
+            <Button
+              label={editingComment ? "Save changes" : replyTo ? "Post reply" : "Post comment"}
+              loading={posting}
+              onPress={() => void submitComment()}
+            />
+          </Section>
+        )}
       </ScrollView>
 
       <ActionSheet
@@ -854,7 +869,7 @@ export default function PracticeDetailScreen() {
         <PracticeExportCapture
           ref={exportCaptureRef}
           title={String(practice.title ?? "Practice")}
-          showDraft={isStaff && !published}
+          showDraft={isStaff && !isPrivate && !published}
           startsAt={String(practice.startsAt ?? new Date().toISOString())}
           endsAt={String(practice.endsAt ?? practice.startsAt ?? new Date().toISOString())}
           timeZone={String(practice.timeZone ?? DEFAULT_TIME_ZONE)}

@@ -5,6 +5,7 @@ import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
 import { usePalette } from "@swimbuzz/ui"
 import { useMemo } from "react"
 import { Icon } from "./Icon"
+import { PrivateBadge } from "./PrivateBadge"
 import { RelativeDateText } from "./RelativeDateText"
 import { ZonedTimeText } from "./ZonedTimeText"
 import { practiceYardage } from "../lib/practice-calendar"
@@ -41,7 +42,9 @@ export function PracticeCard({
         <Text numberOfLines={2} style={styles.title}>
           {practice.title}
         </Text>
-        {showDraft && !practice.published ? (
+        {practice.visibility === "PRIVATE" ? (
+          <PrivateBadge />
+        ) : showDraft && !practice.published ? (
           <View style={styles.draft}>
             <Text style={styles.draftText}>Draft</Text>
           </View>

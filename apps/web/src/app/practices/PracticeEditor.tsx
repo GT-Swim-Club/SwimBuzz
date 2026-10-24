@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import RichTextField from "@/components/ui/RichTextField"
 import { DatePicker, TimePicker, TimeZonePicker } from "@/components/ui/CustomDateTimePicker"
 import { useViewerTimeZone } from "@/components/ui/ZonedTime"
-import { DEFAULT_TIME_ZONE } from "@swimbuzz/shared"
+import { DEFAULT_TIME_ZONE, getViewerTimeZone, nextPrivatePracticeSlot } from "@swimbuzz/shared"
 import { PRACTICE_EDIT_IDLE_TIMEOUT_MS, PRACTICE_EDIT_LOCK_HEARTBEAT_MS, PRACTICE_EDIT_LOCK_TOKEN_HEADER, type PracticeEditLockInfo } from "@/lib/practice/practice-edit-lock-shared"
 import { broadcastPracticeEditLockChanged } from "@/lib/practice/practice-edit-lock-client"
 import { ATHLETE_VIEW_ENABLING_EVENT } from "@/lib/athlete/athlete-view"
@@ -43,6 +43,7 @@ export type PracticeFormState = {
   focus: string
   tags: string[]
   published?: boolean
+  visibility?: "TEAM" | "PRIVATE"
   sets: SetFormState[]
 }
 
@@ -117,6 +118,39 @@ function normalizePracticeTimes(form: PracticeFormState): PracticeFormState {
   return { ...form, endTime: endOnOrAfterStart(form.startTime) }
 }
 
+type TimeSlot = { startTime: string; endTime: string }
+
+/**
+ * New practices: team ones start at the usual team slot, private ones at the next
+ * 15-minute step for an hour (`privateSlot`; blank when it can't be computed yet, e.g.
+ * during SSR). Only untouched defaults are swapped.
+ */
+function withVisibilityTimes(
+  form: PracticeFormState,
+  visibility: "TEAM" | "PRIVATE",
+  privateSlot: TimeSlot | null
+): PracticeFormState {
+  const isTeamDefault =
+    form.startTime === emptyPractice.startTime && form.endTime === emptyPractice.endTime
+  const isPrivateDefault =
+    (!form.startTime && !form.endTime) ||
+    (privateSlot != null &&
+      form.startTime === privateSlot.startTime &&
+      form.endTime === privateSlot.endTime)
+  if (visibility === "PRIVATE" && isTeamDefault) {
+    return { ...form, visibility, ...(privateSlot ?? { startTime: "", endTime: "" }) }
+  }
+  if (visibility === "TEAM" && isPrivateDefault) {
+    return {
+      ...form,
+      visibility,
+      startTime: emptyPractice.startTime,
+      endTime: emptyPractice.endTime,
+    }
+  }
+  return { ...form, visibility }
+}
+
 function isPracticeSaveable(form: PracticeFormState) {
   return Boolean(
     form.date.trim() &&
@@ -135,6 +169,7 @@ export default function PracticeEditor({
   editLockToken = null,
   onLockLost,
   availableTags = [],
+  canChooseVisibility = false,
 }: {
   practiceId?: string
   practiceSlug?: string | null
@@ -151,14 +186,23 @@ export default function PracticeEditor({
     nextSlug?: string | null
   ) => void
   availableTags?: string[]
+  /** Staff pick Team or Private; everyone else always writes private practices. */
+  canChooseVisibility?: boolean
 }) {
   const router = useRouter()
   const viewerTimeZone = useViewerTimeZone()
   const [error, setError] = useState<string | null>(null)
   const [setPendingDeletion, setSetPendingDeletion] = useState<{ dragId: string; title: string } | null>(null)
-  const [form, setForm] = useState<PracticeFormState>(() =>
-    ensureSetDragIds(normalizePracticeTimes(initial ?? emptyPractice))
-  )
+  const [form, setForm] = useState<PracticeFormState>(() => {
+    const base = initial ?? emptyPractice
+    const visibility = base.visibility ?? (canChooseVisibility ? "TEAM" : "PRIVATE")
+    return ensureSetDragIds(
+      normalizePracticeTimes(
+        initial ? { ...base, visibility } : withVisibilityTimes(base, visibility, null)
+      )
+    )
+  })
+  const isPrivate = form.visibility === "PRIVATE"
   const isCreateRef = useRef(!initial)
   const zoneSeededRef = useRef(false)
   const [isDirty, setIsDirty] = useState(false)
@@ -217,19 +261,30 @@ export default function PracticeEditor({
   setPendingDeletionRef.current = setPendingDeletion
   confirmPublishStateRef.current = confirmPublishState
 
-  function rememberSlug(data: { slug?: unknown; id?: unknown }): string | null {
-    if (typeof data.slug === "string" && data.slug) {
-      slugRef.current = data.slug
-      return data.slug
+  /** Private practices have no slug (and lose it when switched to private), so fall back to the id. */
+  function rememberSlug(data: { slug?: unknown; id?: unknown }) {
+    if ("slug" in data) {
+      slugRef.current = typeof data.slug === "string" && data.slug ? data.slug : null
     }
-    if (typeof data.id === "string" && data.id) {
-      return slugRef.current ?? data.id
+  }
+
+  /** Path segment for this practice's page: its slug, else its id. */
+  function practiceKey(): string | null {
+    return slugRef.current ?? persistedIdRef.current
+  }
+
+  /** Point the address bar at the new practice's page so a reload lands on it. */
+  function syncCreatedPracticeUrl() {
+    const key = practiceKey()
+    if (!key) return
+    const nextPath = practicePath(key)
+    if (window.location.pathname !== nextPath) {
+      window.history.replaceState(window.history.state, "", nextPath)
     }
-    return slugRef.current
   }
 
   function leaveEditor(nextSlug?: string | null) {
-    const slug = nextSlug ?? slugRef.current
+    const slug = nextSlug ?? practiceKey()
     if (onCancel) {
       onCancel(slug)
       return
@@ -261,6 +316,19 @@ export default function PracticeEditor({
     updateForm((current) => ({ ...current, timeZone: viewerTimeZone }), { silent: true })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewerTimeZone])
+
+  useEffect(() => {
+    // "Now" depends on the viewer's clock, so the private default slot is filled after
+    // hydration rather than in the SSR'd initial state.
+    const current = formRef.current
+    if (!isCreateRef.current || current.visibility !== "PRIVATE") return
+    if (current.startTime || current.endTime) return
+    updateForm(
+      (form) => ({ ...form, ...nextPrivatePracticeSlot(getViewerTimeZone()) }),
+      { silent: true }
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -373,15 +441,16 @@ export default function PracticeEditor({
     setForm(nextForm)
   }
 
-  /** Applies an undo/redo snapshot: carries over `published` and re-maps set ids from
-   * the live form, since older snapshots predate server-assigned ids and `published`
-   * is owned by publish/unpublish, not editing. */
+  /** Applies an undo/redo snapshot: carries over `published`/`visibility` and re-maps set ids
+   * from the live form, since older snapshots predate server-assigned ids and those flags
+   * are owned by publish/visibility controls, not editing. */
   function applyHistoryState(snapshot: PracticeFormState) {
     const currentForm = formRef.current
     const idsByDragId = new Map(currentForm.sets.map((s) => [s.dragId, s.id]))
     const nextForm: PracticeFormState = {
       ...snapshot,
       published: currentForm.published,
+      visibility: currentForm.visibility,
       sets: snapshot.sets.map((s) => ({ ...s, id: s.id ?? idsByDragId.get(s.dragId) })),
     }
     formRef.current = nextForm
@@ -455,11 +524,11 @@ export default function PracticeEditor({
     releasedRef.current = true
     const message = takeoverMessage(data)
     if (onLockLostRef.current) {
-      onLockLostRef.current(message, data.lock ?? null, slugRef.current)
+      onLockLostRef.current(message, data.lock ?? null, practiceKey())
       return
     }
     setError(message)
-    leaveEditor(slugRef.current)
+    leaveEditor(practiceKey())
   }
 
   async function releaseLock() {
@@ -667,13 +736,12 @@ export default function PracticeEditor({
           persistedIdRef.current = data.id
           setPersistedId(data.id)
           rememberSlug(data)
-          const nextPath = slugRef.current ? practicePath(slugRef.current) : null
-          if (nextPath && window.location.pathname !== nextPath) {
-            window.history.replaceState(window.history.state, "", nextPath)
-          }
+          syncCreatedPracticeUrl()
           await acquireCreatedLock(data.id)
         } else {
           rememberSlug(data)
+          // The slug can change under a new practice (switched to private, or its date moved).
+          if (isCreateRef.current) syncCreatedPracticeUrl()
         }
         applyPersistedPractice(snapshot, data)
       } catch {
@@ -1108,7 +1176,8 @@ export default function PracticeEditor({
   }
   async function handleCancel() {
     if (unsavedChangesRef.current) {
-      const nextPath = slugRef.current ? practicePath(slugRef.current) : null
+      const key = practiceKey()
+      const nextPath = key ? practicePath(key) : null
       if (nextPath && nextPath !== window.location.pathname) {
         window.location.assign(nextPath)
       } else {
@@ -1183,7 +1252,11 @@ export default function PracticeEditor({
   const canSave = isPracticeSaveable(form)
   const waitingForAutosave = !persistedId || isDirty || autosaveState === "saving"
   const canPublishOrDraft = canSave && !waitingForAutosave && hasEditedContent
-  const draftButtonLabel = form.published === true ? "Revert to Draft" : "Keep As Draft"
+  const draftButtonLabel = isPrivate
+    ? "Done"
+    : form.published === true
+      ? "Revert to Draft"
+      : "Keep As Draft"
   const autosaveMessage = !hasEditedContent
     ? "Make edits to save changes."
     : autosaveState === "saving"
@@ -1227,29 +1300,75 @@ export default function PracticeEditor({
   return (
     <form ref={formElRef} onSubmit={handleSubmit} className="space-y-5 pb-6">
       <header className="space-y-2">
-        <button
-          type="button"
-          onClick={handleCancel}
-          className="text-sm font-medium text-foreground-tertiary transition hover:text-foreground"
-        >
-          {persistedId && hasEditedContent ? "← Back to practice" : "← All practices"}
-        </button>
-        <div className="flex flex-wrap items-center gap-2">
-          <h1 className="min-w-0 flex-1 text-3xl font-medium leading-tight tracking-tight sm:text-4xl">
-            <input
-              aria-label="Practice title"
-              placeholder="Untitled Practice"
-              value={form.title}
-              onChange={(e) =>
-                updateForm((form) => ({ ...form, title: e.target.value }), { historyKey: "title" })
-              }
-              className="w-full min-w-0 appearance-none rounded-lg border border-border bg-transparent px-3 py-1.5 text-inherit outline-none placeholder:text-foreground-tertiary focus:border-primary focus:ring-2 focus:ring-primary/10"
-            />
-          </h1>
-          <span className="rounded-full bg-primary/20 dark:bg-primary/30 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-active shadow-sm dark:text-primary-hover shrink-0">
-            {initial ? "Editing" : "New practice"}
-          </span>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="text-sm font-medium text-foreground-tertiary transition hover:text-foreground"
+          >
+            {persistedId && hasEditedContent ? "← Back to practice" : "← All practices"}
+          </button>
+          {canChooseVisibility && isCreateRef.current ? (
+            <div
+              role="radiogroup"
+              aria-label="Who can see this practice"
+              className="inline-flex shrink-0 rounded-lg border border-border bg-background p-0.5 text-xs font-medium"
+            >
+              {(["TEAM", "PRIVATE"] as const).map((value) => {
+                const selected = form.visibility === value
+                const locked = value === "PRIVATE" && form.published === true
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    disabled={locked}
+                    title={
+                      locked
+                        ? "Revert to draft before making it private"
+                        : value === "PRIVATE"
+                          ? "Only you can see it"
+                          : "Athletes see it once published"
+                    }
+                    onClick={() => {
+                      if (selected) return
+                      updateForm((current) =>
+                        withVisibilityTimes(current, value, nextPrivatePracticeSlot(current.timeZone))
+                      )
+                    }}
+                    className={`rounded-md px-2.5 py-1 transition-colors disabled:opacity-40 ${
+                      selected
+                        ? "bg-primary/15 text-accent"
+                        : "text-foreground-secondary hover:bg-background-hover"
+                    }`}
+                  >
+                    {value === "TEAM" ? "Team" : "Private"}
+                  </button>
+                )
+              })}
+            </div>
+          ) : (
+            <span
+              title={isPrivate ? "Only you can see this practice" : undefined}
+              className="rounded-full bg-primary/20 dark:bg-primary/30 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-active shadow-sm dark:text-primary-hover shrink-0"
+            >
+              {isPrivate ? "Private Practice" : "Team Practice"}
+            </span>
+          )}
         </div>
+        <h1 className="min-w-0 text-3xl font-medium leading-tight tracking-tight sm:text-4xl">
+          <input
+            aria-label="Practice title"
+            placeholder="Untitled Practice"
+            maxLength={120}
+            value={form.title}
+            onChange={(e) =>
+              updateForm((form) => ({ ...form, title: e.target.value }), { historyKey: "title" })
+            }
+            className="w-full min-w-0 appearance-none rounded-lg border border-border bg-transparent px-3 py-1.5 text-inherit outline-none placeholder:text-foreground-tertiary focus:border-primary focus:ring-2 focus:ring-primary/10"
+          />
+        </h1>
 
         <div className="mt-2 space-y-2 text-foreground-secondary sm:text-base">
           <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
@@ -1324,6 +1443,7 @@ export default function PracticeEditor({
             <input
               id="practice-location"
               required
+              maxLength={120}
               placeholder="Practice location"
               value={form.location}
               onChange={(e) =>
@@ -1587,6 +1707,7 @@ export default function PracticeEditor({
               )}
 
             </button>
+            {!isPrivate && (
             <button
               type="button"
               onClick={() => requestSave(true)}
@@ -1613,6 +1734,7 @@ export default function PracticeEditor({
               )}
 
             </button>
+            )}
           </div>
         </div>
       </div>

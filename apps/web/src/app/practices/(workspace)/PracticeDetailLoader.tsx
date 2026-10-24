@@ -10,6 +10,7 @@ import { isStaffRole } from "@swimbuzz/shared"
 import { practiceSetSelect } from "@/lib/practice/practice-input"
 import { attendedUserIds } from "@/lib/practice/practice-attendance"
 import { toDateInput, toTimeInput } from "@/lib/date-input"
+import { canEditPractice, canViewPractice, isPrivatePractice } from "@/lib/practice/practice-access"
 import { withDeleted } from "../../../../soft-delete-policy"
 
 function canRestoreDeleted(purgeAfter: Date, purgeStartedAt: Date | null): boolean {
@@ -52,7 +53,7 @@ export default async function PracticeDetailLoader({ param }: { param: string })
   if (!practice && isStaffUser) {
     const deleted = await withDeleted(() =>
       prisma.practice.findFirst({
-        where: { ...whereParam, deletedAt: { not: null } },
+        where: { ...whereParam, deletedAt: { not: null }, visibility: "TEAM" },
         include: buildInclude(),
       })
     )
@@ -66,7 +67,11 @@ export default async function PracticeDetailLoader({ param }: { param: string })
   }
 
   if (!practice) notFound()
-  if (!isCoach && (!practice.published || deletedInfo)) {
+  const viewer = { userId: session.user.id, isStaff: isCoach }
+  const isPrivate = isPrivatePractice(practice)
+  // Someone else's private practice: never hint that it exists, even to staff.
+  if (isPrivate && practice.ownerId !== session.user.id) notFound()
+  if (!canViewPractice(practice, viewer) || (!isCoach && deletedInfo)) {
     // Staff who just switched into Athlete View while on a draft/trashed
     // practice: it exists, it's just hidden in this view — land them on the
     // practice list rather than a 404. Real athletes still get the 404.
@@ -76,7 +81,7 @@ export default async function PracticeDetailLoader({ param }: { param: string })
   if (practice.slug && param !== practice.slug) redirect(practicePath(practice.slug))
 
   const totalDistance = practice.sets.reduce((sum, s) => sum + (s.distance ?? 0), 0)
-  const attendedUsers = deletedInfo ? [] : await attendedUserIds(practice.id)
+  const attendedUsers = deletedInfo || isPrivate ? [] : await attendedUserIds(practice.id)
   const initialEditLock = serializePracticeEditLock(practice, session.user.id)
   const startsAt = practice.startsAt ?? practice.createdAt
   const endsAt = practice.endsAt ?? startsAt
@@ -92,6 +97,7 @@ export default async function PracticeDetailLoader({ param }: { param: string })
     focus: practice.focus ?? "",
     tags: practice.tags,
     published: practice.published,
+    visibility: practice.visibility,
     sets: practice.sets.map((s) => ({
       id: s.id,
       title: s.title ?? "",
@@ -124,6 +130,8 @@ export default async function PracticeDetailLoader({ param }: { param: string })
       totalDistance={totalDistance}
       initial={initial}
       isCoach={isCoach}
+      isPrivate={isPrivate}
+      canEdit={canEditPractice(practice, viewer)}
       currentUserId={session.user.id}
       attendedUserIds={attendedUsers}
       comments={practice.comments.map((c) => ({

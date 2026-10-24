@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/auth/session"
 import { buildPracticePdf, practicePdfFilename } from "@/lib/practice/practice-pdf"
 import { practicePdfDayKey, practicePdfInclude, toPracticePdfInput } from "@/lib/practice/practice-pdf-load"
-import { isStaffRole } from "@swimbuzz/shared"
+import { canViewPractice, practiceViewer } from "@/lib/practice/practice-access"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -20,10 +20,9 @@ export async function GET(
     where: { id },
     include: practicePdfInclude,
   })
-  if (!practice) return NextResponse.json({ error: "Not found" }, { status: 404 })
-
-  const staff = isStaffRole(session.user.role)
-  if (!practice.published && !staff) {
+  const viewer = practiceViewer(session)
+  const staff = viewer.isStaff
+  if (!practice || !canViewPractice(practice, viewer)) {
     return NextResponse.json({ error: "Not found" }, { status: 404 })
   }
 

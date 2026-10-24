@@ -27,6 +27,12 @@ export type MeetSummary = {
   athleteCount?: number
 }
 
+/** TEAM practices follow the publish flow; PRIVATE ones are visible only to their owner. */
+export type PracticeVisibility = "TEAM" | "PRIVATE"
+
+/** Which practices a list shows: team + your private ones ("all"), or just one side. */
+export type PracticeScope = "all" | "team" | "mine"
+
 export type PracticeSummary = {
   id: string
   slug?: string | null
@@ -39,6 +45,9 @@ export type PracticeSummary = {
   focus?: string | null
   tags: string[]
   published: boolean
+  visibility: PracticeVisibility
+  /** Set only for PRIVATE practices — always the viewer, since nobody else receives them. */
+  ownerId?: string | null
   sets?: Array<{ distance?: number | null; title?: string | null }>
   _count?: { sets: number }
   /** Sum of set distances, when computed by the server instead of the `sets` array. */

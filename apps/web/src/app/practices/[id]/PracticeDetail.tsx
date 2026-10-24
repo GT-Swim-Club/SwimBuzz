@@ -5,7 +5,8 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { RelativeDateTime } from "@/components/ui/RelativeDate"
 import { FormattedText, isHtmlEmpty } from "@/components/ui/FormattedText"
-import PracticeActions from "./PracticeActions"
+import PracticeActions, { SavePracticeCopyButton } from "./PracticeActions"
+import PrivateBadge from "../PrivateBadge"
 import DeletedPracticeActions from "./DeletedPracticeActions"
 import SharePracticeButton from "./SharePracticeButton"
 import PracticeExportCapture from "./PracticeExportCapture"
@@ -57,6 +58,8 @@ export default function PracticeDetail({
   totalDistance,
   initial,
   isCoach,
+  isPrivate,
+  canEdit,
   currentUserId,
   comments,
   attendedUserIds,
@@ -78,6 +81,9 @@ export default function PracticeDetail({
   totalDistance: number
   initial: PracticeFormState
   isCoach: boolean
+  /** Owner-only practice: no publishing, attendance, or comments. */
+  isPrivate: boolean
+  canEdit: boolean
   currentUserId: string
   comments: PracticeCommentView[]
   attendedUserIds: string[]
@@ -104,7 +110,7 @@ export default function PracticeDetail({
 
   // Long-poll lock status while viewing (not editing) for near-instant updates.
   useEffect(() => {
-    if (!isCoach || deletedInfo) return
+    if (!canEdit || deletedInfo) return
 
     let cancelled = false
     let requestAc: AbortController | null = null
@@ -178,7 +184,7 @@ export default function PracticeDetail({
       lockChannel?.close()
       document.removeEventListener("visibilitychange", onVisible)
     }
-  }, [isCoach, practiceId, deletedInfo])
+  }, [canEdit, practiceId, deletedInfo])
 
   const attendanceHref = `${practicePath(practiceSlug ?? practiceId)}/attendance`
 
@@ -196,10 +202,14 @@ export default function PracticeDetail({
           <div className="w-min min-w-0 flex-[1_1_auto]">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="min-w-0 text-4xl font-semibold text-foreground sm:text-[42px]">{title}</h1>
-              {isCoach && !published && (
-                <span className="text-[10px] uppercase tracking-wide rounded-full bg-primary/20 dark:bg-primary/30 px-2 py-0.5 text-primary-active shadow-sm dark:text-primary-hover">
-                  Draft
-                </span>
+              {isPrivate ? (
+                <PrivateBadge />
+              ) : (
+                isCoach && !published && (
+                  <span className="text-[10px] uppercase tracking-wide rounded-full bg-primary/20 dark:bg-primary/30 px-2 py-0.5 text-primary-active shadow-sm dark:text-primary-hover">
+                    Draft
+                  </span>
+                )
               )}
             </div>
             <div className="mt-1.5 text-lg text-foreground-secondary sm:text-[19px]">
@@ -235,7 +245,7 @@ export default function PracticeDetail({
           </div>
           <div
             className={`relative mr-3 flex shrink-0 items-center gap-2 ${
-              isCoach && editLock?.locked ? "mb-7" : ""
+              canEdit && editLock?.locked ? "mb-7" : ""
             }`}
           >
             {deletedInfo ? (
@@ -262,12 +272,13 @@ export default function PracticeDetail({
                   totalDistance={totalDistance}
                   captureRef={exportCaptureRef}
                 />
-                {isCoach ? (
+                {canEdit ? (
                   <PracticeActions
                     practiceId={practiceId}
                     initial={initial}
                     title={title}
                     published={published}
+                    isPrivate={isPrivate}
                     attendanceHref={attendanceHref}
                     editLock={editLock}
                     onEdit={() => {
@@ -278,16 +289,19 @@ export default function PracticeDetail({
                     onLockChange={setEditLock}
                   />
                 ) : (
-                  <Link
-                    href={attendanceHref}
-                    aria-label="View attendance"
-                    className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-border rounded-lg bg-background hover:bg-fill transition-colors"
-                  >
-                    <ActionIcon kind="attendance" className="h-5 w-5" />
-                    <HoverDetail label="Attendance" />
-                  </Link>
+                  <>
+                    <Link
+                      href={attendanceHref}
+                      aria-label="View attendance"
+                      className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-border rounded-lg bg-background hover:bg-fill transition-colors"
+                    >
+                      <ActionIcon kind="attendance" className="h-5 w-5" />
+                      <HoverDetail label="Attendance" />
+                    </Link>
+                    <SavePracticeCopyButton practiceId={practiceId} />
+                  </>
                 )}
-                {isCoach && editLock?.locked && (
+                {canEdit && editLock?.locked && (
                   <p
                     role="status"
                     className="absolute inset-x-0 top-full mt-1.5 flex items-center justify-end gap-1.5 text-right text-[11px] font-medium text-amber-800 dark:text-amber-200"
@@ -347,7 +361,7 @@ export default function PracticeDetail({
           ))}
         </div>
       </section>
-      {!deletedInfo && (
+      {!deletedInfo && !isPrivate && (
         <CommentSection
           practiceId={practiceId}
           currentUserId={currentUserId}
@@ -365,7 +379,7 @@ export default function PracticeDetail({
       <div ref={exportCaptureRef} className="w-fit">
         <PracticeExportCapture
           title={title}
-          showDraft={isCoach && !published}
+          showDraft={isCoach && !published && !isPrivate}
           startsAt={startsAt}
           endsAt={endsAt}
           timeZone={timeZone}

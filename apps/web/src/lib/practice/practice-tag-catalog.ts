@@ -8,7 +8,7 @@ import { DEFAULT_PRACTICE_TAGS, normalizeTags } from "@/lib/practice/practice-ta
 export async function listManagedPracticeTags() {
   const [catalog, practices] = await Promise.all([
     prisma.practiceTag.findMany({ select: { id: true, name: true } }),
-    prisma.practice.findMany({ select: { tags: true } }),
+    prisma.practice.findMany({ where: { visibility: "TEAM" }, select: { tags: true } }),
   ])
 
   const existing = new Set(catalog.map((tag) => tag.name.toLowerCase()))

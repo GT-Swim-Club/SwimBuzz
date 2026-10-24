@@ -15,6 +15,11 @@ export async function softDeletePractice(id: string) {
     ...dates, editLockedById: null, editLockedAt: null, editLockExpiresAt: null, editLockToken: null,
   } })
 }
+/** Private practices hard-delete: staff-only Recently Deleted can't show them, and it frees the space now. */
+export async function removePractice(id: string, practice: { visibility: string }) {
+  if (practice.visibility === "PRIVATE") return prisma.practice.delete({ where: { id } })
+  return softDeletePractice(id)
+}
 export async function softDeleteMeet(id: string, deleteSwims: boolean) {
   const dates = deletionDates()
   return prisma.meet.update({ where: { id }, data: { ...dates, deleteSwimsOnPurge: deleteSwims } })
@@ -23,7 +28,7 @@ export async function listRecentlyDeleted() {
   return withDeleted(async () => {
     const where = { deletedAt: { not: null } }
     const [practices, meets] = await Promise.all([
-      prisma.practice.findMany({ where, select: { id: true, title: true, startsAt: true, deletedAt: true, purgeAfter: true, purgeStartedAt: true, timeZone: true }, orderBy: { deletedAt: "desc" } }),
+      prisma.practice.findMany({ where: { ...where, visibility: "TEAM" }, select: { id: true, title: true, startsAt: true, deletedAt: true, purgeAfter: true, purgeStartedAt: true, timeZone: true }, orderBy: { deletedAt: "desc" } }),
       prisma.meet.findMany({ where, select: { id: true, name: true, startsAt: true, endsAt: true, location: true, school: true, bannerUrl: true, iconUrl: true, deletedAt: true, purgeAfter: true, purgeStartedAt: true, deleteSwimsOnPurge: true, timeZone: true }, orderBy: { deletedAt: "desc" } }),
     ])
     const now = Date.now()

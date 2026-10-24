@@ -18,6 +18,7 @@ import { practicePath } from "@/lib/slug"
 import MonthPickerPopover from "./MonthPickerPopover"
 import { showCardTags, type PracticeCardLabel } from "./usePracticePrefs"
 import { SelectableRailCard, cardSelection, type RailSelection } from "./PracticeSelection"
+import PrivateBadge from "./PrivateBadge"
 
 function noopSubscribe() {
   return () => {}
@@ -332,10 +333,14 @@ function WeekRailRow({
         </div>
       </div>
       <div className="flex shrink-0 flex-col items-end gap-1">
-        {!practice.published && (
-          <span className="rounded-full bg-primary/20 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-primary-active dark:bg-primary/30 dark:text-primary-hover">
-            Draft
-          </span>
+        {practice.isPrivate ? (
+          <PrivateBadge compact />
+        ) : (
+          !practice.published && (
+            <span className="rounded-full bg-primary/20 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-primary-active dark:bg-primary/30 dark:text-primary-hover">
+              Draft
+            </span>
+          )
         )}
         {practice.totalDistance > 0 && sidebarWidth >= 300 && (
           <span className="text-xs tabular-nums text-foreground-tertiary">

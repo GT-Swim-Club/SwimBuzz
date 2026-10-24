@@ -4,7 +4,9 @@ import type {
   MeetSummary,
   NotificationItem,
   NotificationPreferences,
+  PracticeScope,
   PracticeSummary,
+  PracticeVisibility,
   SessionUser,
 } from "@swimbuzz/shared"
 
@@ -66,7 +68,13 @@ type PracticeWriteFields = {
   course?: "SCY" | "LCM" | "SCM"
   focus?: string | null
   tags?: string[]
+  /** Ignored for private practices, which are never published. */
   published?: boolean
+  /**
+   * Staff only: pick TEAM or PRIVATE (switchable while an unpublished draft). Athletes'
+   * practices are always PRIVATE regardless of what's sent.
+   */
+  visibility?: PracticeVisibility
 }
 
 /** Both POST /api/practices and PATCH /api/practices/[id] require `sets` (full replace, not a partial diff). */
@@ -293,10 +301,11 @@ export function createApiClient(options: ApiClientOptions = {}) {
       })
     },
 
-    listPractices(params?: { q?: string; tag?: string }) {
+    listPractices(params?: { q?: string; tag?: string; scope?: PracticeScope }) {
       const sp = new URLSearchParams()
       if (params?.q) sp.set("q", params.q)
       if (params?.tag) sp.set("tag", params.tag)
+      if (params?.scope && params.scope !== "all") sp.set("scope", params.scope)
       const qs = sp.toString()
       return request<PracticeSummary[]>(`/api/practices${qs ? `?${qs}` : ""}`)
     },

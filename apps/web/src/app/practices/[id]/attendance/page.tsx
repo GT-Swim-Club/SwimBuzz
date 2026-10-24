@@ -29,6 +29,8 @@ export default async function PracticeAttendancePage({
       slug: true,
       title: true,
       published: true,
+      visibility: true,
+      ownerId: true,
       createdAt: true,
       startsAt: true,
       endsAt: true,
@@ -52,8 +54,12 @@ export default async function PracticeAttendancePage({
     },
   })
 
-  // Athletes see attendance only for practices they can otherwise view.
+  // Athletes see attendance only for practices they can otherwise view. Private practices have none.
   if (!practice) notFound()
+  if (practice.visibility !== "TEAM") {
+    if (practice.ownerId === session.user.id) redirect(practicePath(practice.id))
+    notFound()
+  }
   if (!practice.published && !isCoach) {
     // Staff who switched into Athlete View on a draft: send them to the list, not a 404.
     if (isStaffRole(session.user.role)) redirect("/practices")

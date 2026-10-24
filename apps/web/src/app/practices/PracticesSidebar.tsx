@@ -168,7 +168,7 @@ export default function PracticesSidebar({
   const openHiddenFromAthletes =
     openSlug != null &&
     (openPractice
-      ? !openPractice.published
+      ? !openPractice.published && !openPractice.isPrivate
       : deletedPractices.some((p) => (p.slug ?? p.id) === openSlug))
 
   useEffect(() => {
@@ -348,8 +348,12 @@ export default function PracticesSidebar({
 
   const filteredPractices = useMemo(() => {
     const qLower = query.trim().toLowerCase()
-    return practices.filter((p) => matchesSearch(p, tags, qLower))
-  }, [practices, query, tags])
+    return practices.filter(
+      (p) =>
+        (prefs.scope === "all" || (prefs.scope === "mine") === p.isPrivate) &&
+        matchesSearch(p, tags, qLower)
+    )
+  }, [practices, query, tags, prefs.scope])
 
   const filteredDeletedPractices = useMemo(() => {
     const qLower = query.trim().toLowerCase()
@@ -436,9 +440,11 @@ export default function PracticesSidebar({
   const emptyListMessage =
     query || tags.length
       ? "No practices match your search."
-      : isCoach
-        ? "No practices yet. Create one to get started."
-        : "No practices posted yet."
+      : prefs.scope === "mine"
+        ? "No private practices yet. Create one to get started."
+        : isCoach
+          ? "No practices yet. Create one to get started."
+          : "No practices posted yet."
 
   const emptyDeletedMessage =
     query || tags.length ? "No deleted practices match your search." : "Trash is empty."
@@ -571,7 +577,9 @@ export default function PracticesSidebar({
         {selecting && (
           <PracticeSelectionBar
             selected={selectedPractices}
-            canDelete={isCoach}
+            canDelete={
+              isCoach || (selectedPractices.length > 0 && selectedPractices.every((p) => p.isPrivate))
+            }
             allVisibleSelected={allVisibleSelected}
             canSelectAll={visibleIds.length > 0}
             onToggleAll={toggleAllVisible}
