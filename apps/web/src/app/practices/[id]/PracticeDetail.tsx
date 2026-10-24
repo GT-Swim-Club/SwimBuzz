@@ -17,7 +17,6 @@ import { type PracticeEditLockInfo } from "@/lib/practice/practice-edit-lock-sha
 import InfoIcon from "@/components/ui/InfoIcon"
 import ActionIcon from "@/components/ui/ActionIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
-import PracticeEditSkeleton from "./PracticeEditSkeleton"
 import { formatPracticeDistance, groupPracticeSetsIntoRows, type StaffTitle } from "@swimbuzz/shared"
 
 type PracticeSetView = {
@@ -93,7 +92,6 @@ export default function PracticeDetail({
 }) {
   const router = useRouter()
   const exportCaptureRef = useRef<HTMLDivElement>(null)
-  const [openingEditor, setOpeningEditor] = useState(false)
   const openingEditorRef = useRef(false)
   const [editLock, setEditLock] = useState(() =>
     initialEditLock.lockedByMe
@@ -190,9 +188,6 @@ export default function PracticeDetail({
 
   return (
     <>
-    {openingEditor ? (
-      <PracticeEditSkeleton />
-    ) : (
     <main className="space-y-5">
       <div>
         {/* The text column is sized at min-content for line-breaking, so location/tags
@@ -271,6 +266,7 @@ export default function PracticeDetail({
                   sets={sets}
                   totalDistance={totalDistance}
                   captureRef={exportCaptureRef}
+                  isPrivate={isPrivate}
                 />
                 {canEdit ? (
                   <PracticeActions
@@ -282,8 +278,11 @@ export default function PracticeDetail({
                     attendanceHref={attendanceHref}
                     editLock={editLock}
                     onEdit={() => {
+                      // The editor route renders its own full-page skeleton (outside the
+                      // sidebar workspace layout), so keep this view in place until it
+                      // takes over rather than flashing a narrow skeleton in the sidebar pane.
+                      if (openingEditorRef.current) return
                       openingEditorRef.current = true
-                      setOpeningEditor(true)
                       router.push(practiceEditPath(practiceSlug ?? practiceId))
                     }}
                     onLockChange={setEditLock}
@@ -371,7 +370,6 @@ export default function PracticeDetail({
         />
       )}
     </main>
-    )}
     <div
       aria-hidden
       className="pointer-events-none absolute left-[-10000px] top-0 w-[1600px]"

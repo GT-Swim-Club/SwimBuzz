@@ -822,12 +822,17 @@ export default function PracticeDetailScreen() {
         title="Share practice"
         groups={[
           [
-            {
-              key: "link",
-              label: copied === "link" ? "Copied" : "Copy link",
-              icon: <Icon name={copied === "link" ? "check" : "link"} size={20} color={c.text} />,
-              onPress: () => void copyShareLink(),
-            },
+            // A private practice has no public URL, so there is nothing to copy.
+            ...(!isPrivate
+              ? [
+                  {
+                    key: "link",
+                    label: copied === "link" ? "Copied" : "Copy link",
+                    icon: <Icon name={copied === "link" ? "check" : "link"} size={20} color={c.text} />,
+                    onPress: () => void copyShareLink(),
+                  } satisfies ActionSheetItem,
+                ]
+              : []),
             {
               key: "text",
               label: copied === "text" ? "Copied" : "Copy as text",

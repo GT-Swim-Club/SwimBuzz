@@ -92,6 +92,7 @@ export default function SharePracticeButton({
   sets,
   totalDistance,
   captureRef,
+  isPrivate = false,
 }: {
   practiceId: string
   practiceSlug: string | null
@@ -106,6 +107,8 @@ export default function SharePracticeButton({
   sets: PracticeShareSet[]
   totalDistance: number
   captureRef: RefObject<HTMLElement | null>
+  /** Private practices stay off the public practice URL, so there is no link to copy. */
+  isPrivate?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState<"pdf" | "png" | "copy-png" | null>(null)
@@ -296,6 +299,7 @@ export default function SharePracticeButton({
           role="menu"
           className="export-menu-fade-in absolute right-0 top-full z-40 mt-1 w-max overflow-hidden rounded-lg border border-border bg-background-elevated py-1 shadow-md"
         >
+          {!isPrivate && (
           <button
             type="button"
             role="menuitem"
@@ -305,6 +309,7 @@ export default function SharePracticeButton({
             {copied === "link" ? <CheckIcon className="h-4 w-4 shrink-0" /> : <LinkIcon className="h-4 w-4 shrink-0" />}
             {copied === "link" ? "Copied" : "Copy link"}
           </button>
+          )}
           <button
             type="button"
             role="menuitem"
