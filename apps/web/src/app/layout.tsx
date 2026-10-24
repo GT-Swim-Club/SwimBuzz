@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Suspense } from "react"
 import SessionProvider from "@/components/auth/SessionProvider"
 import ThemeProvider from "@/components/ui/ThemeProvider"
@@ -15,6 +15,13 @@ import "react-pdf/dist/Page/TextLayer.css"
 import { getSession } from "@/lib/auth/session"
 import { readListLayouts } from "@/lib/list-layout-server"
 import { SavedListLayoutsProvider } from "@/components/ui/ListLayout"
+
+// maximumScale: 1 stops iOS Safari from auto-zooming into a focused input.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+}
 
 export const metadata: Metadata = {
   title: "SwimBuzz",

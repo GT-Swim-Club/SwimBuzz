@@ -89,9 +89,9 @@ export default function WelcomeScreen() {
       >
         <View style={styles.hero}>
           <Text style={styles.eyebrow}>Georgia Tech Swim Club</Text>
-          <Text style={styles.title}>SwimBuzz.</Text>
+          <Text style={styles.title}>SwimBuzz</Text>
           <Text style={styles.subtitle}>
-            Meet, practice, and times management—all in one place.
+            GTSC meet, practice, and times management
           </Text>
           <View style={styles.actions}>
             <Pressable
