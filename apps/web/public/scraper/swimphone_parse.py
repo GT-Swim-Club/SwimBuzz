@@ -24,7 +24,7 @@ from swim_common import (
     time_token_to_ms,
     ms_to_time_token,
 )
-from swimcloud_scrape import report_progress
+from swimcloud_scrape import browser_is_frontmost, report_progress
 
 BASE_URL = "https://www.swimphone.com/meets/"
 EVENT_ORDER_PATH = "event_order.cfm"
@@ -1587,7 +1587,7 @@ class _ArchiveAccess:
 
     async def _wait_for_coach(self, url: str) -> str | None:
         page = self.page
-        report_progress(swimphoneVerification=True)
+        report_progress(swimphoneVerification=True, browserFocused=browser_is_frontmost())
         try:
             await page.bring_to_front()
         except Exception:

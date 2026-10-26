@@ -56,6 +56,7 @@ function swimphoneImportProgress(job: ScraperJobStatusPayload): ImportTaskProgre
   return {
     detail,
     alert: progress?.swimphoneVerification ? SWIMPHONE_VERIFICATION_ALERT : undefined,
+    quiet: progress?.browserFocused,
     progress: scraperJobFraction(progress),
   }
 }

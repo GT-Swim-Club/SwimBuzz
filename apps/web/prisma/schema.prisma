@@ -86,6 +86,8 @@ model User {
   staffTitle    StaffTitle?
   /// Per-type in-app notification toggles: { practicePublished?, meetSignupOpen?, practiceComments?, profileChanges? }
   notificationPreferences Json?
+  /// Chime when an import needs attention (Cloudflare check, SwimPhone verification) and the tab isn't in view.
+  alertSound    Boolean   @default(false)
   defaultView   String    @default("gallery")
   defaultPracticesView String    @default("week")
   createdAt     DateTime  @default(now())

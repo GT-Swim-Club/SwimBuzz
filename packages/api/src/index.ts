@@ -504,17 +504,27 @@ export function createApiClient(options: ApiClientOptions = {}) {
         })
         if (!enqueued.jobId) return enqueued
 
-        const started = Date.now()
-        const timeoutMs = 20 * 60 * 1000
-        while (Date.now() - started < timeoutMs) {
+        // Idle limit, not a total one: a big import runs longer than this while still progressing.
+        const idleTimeoutMs = 10 * 60 * 1000
+        let lastActivity = Date.now()
+        let lastSignature = ""
+        for (;;) {
           const job = await request<{
             status: string
             error?: string | null
+            progress?: unknown
           }>(`/api/scraper/jobs/${enqueued.jobId}`)
           if (job.status === "FAILED") {
             throw new ApiError(job.error ?? "Run scraper failed", 502, job)
           }
           if (job.status === "COMPLETED") break
+          const signature = `${job.status}:${JSON.stringify(job.progress ?? null)}`
+          if (signature !== lastSignature) {
+            lastSignature = signature
+            lastActivity = Date.now()
+          }
+          // Checked after the request: a phone that slept past the limit should still learn how the job ended.
+          if (Date.now() - lastActivity >= idleTimeoutMs) break
           await new Promise((r) => setTimeout(r, 1500))
         }
 

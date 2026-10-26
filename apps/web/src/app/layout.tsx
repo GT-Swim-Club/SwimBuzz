@@ -13,6 +13,7 @@ import "./variables.css"
 import "./globals.css"
 import "react-pdf/dist/Page/TextLayer.css"
 import { getSession } from "@/lib/auth/session"
+import { prisma } from "@/lib/prisma"
 import { readListLayouts } from "@/lib/list-layout-server"
 import { SavedListLayoutsProvider } from "@/components/ui/ListLayout"
 
@@ -34,13 +35,17 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const [session, listLayouts] = await Promise.all([getSession(), readListLayouts()])
+  const alertSound = session
+    ? ((await prisma.user.findUnique({ where: { id: session.user.id }, select: { alertSound: true } }))
+        ?.alertSound ?? false)
+    : false
 
   return (
     <html lang="en" className="overflow-hidden" suppressHydrationWarning>
       <body className="flex h-dvh flex-col overflow-x-hidden overflow-y-auto bg-background">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <SessionProvider session={session}>
-            <ImportTaskProvider>
+            <ImportTaskProvider alertSound={alertSound}>
               <AthletePairingProvider>
                 <ResumeScraperTasks />
                 <ScraperUiProvider>

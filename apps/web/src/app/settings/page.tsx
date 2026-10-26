@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import type { ReactNode } from "react"
+import AlertSoundSettings from "@/components/settings/AlertSoundSettings"
 import AppearanceSettings from "@/components/settings/AppearanceSettings"
 import NotificationPreferencesSettings from "@/components/settings/NotificationPreferencesSettings"
 import ProfilePictureSettings from "@/components/athlete/ProfilePictureSettings"
@@ -64,7 +65,7 @@ export default async function SettingsPage() {
       select: { id: true, slug: true }}),
     prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { image: true, notificationPreferences: true }}),
+      select: { image: true, notificationPreferences: true, alertSound: true }}),
   ])
 
   const notificationPreferences = parseNotificationPreferences(
@@ -78,7 +79,7 @@ export default async function SettingsPage() {
           Settings
         </h1>
         <p className="mt-2 text-sm text-foreground-secondary sm:text-base">
-          Manage your account, notifications, and appearance.
+          Manage your account, notifications, sounds, and appearance.
         </p>
       </header>
 
@@ -115,6 +116,10 @@ export default async function SettingsPage() {
           isAthlete={!isStaffRole(session.user.role)}
           isMeetDirector={session.user.staffTitle === "MEET_DIRECTOR"}
         />
+      </SettingsSection>
+
+      <SettingsSection title="Sounds">
+        <AlertSoundSettings initialEnabled={user?.alertSound ?? false} />
       </SettingsSection>
 
       <SettingsSection title="Appearance">

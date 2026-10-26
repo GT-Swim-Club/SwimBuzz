@@ -3,6 +3,7 @@ import { Skeleton } from "@/components/ui/Skeleton"
 const sections = [
   { title: "w-20", rows: 4, description: false },
   { title: "w-28", rows: 4, description: true },
+  { title: "w-16", rows: 1, description: false },
   { title: "w-28", rows: 1, description: false },
 ]
 

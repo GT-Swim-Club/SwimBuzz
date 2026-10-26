@@ -38,6 +38,11 @@ type EditMeetSwimButtonProps = {
   date: string
   timeMs: number
   className?: string
+  /** Controlled open state, so the editor can also be opened from elsewhere (e.g. a detail modal). */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  /** Render only the editor modal (opened via `open`), without the pencil button. */
+  hideTrigger?: boolean
 }
 
 export default function EditMeetSwimButton({
@@ -51,8 +56,13 @@ export default function EditMeetSwimButton({
   date,
   timeMs,
   className,
+  open: openProp,
+  onOpenChange,
+  hideTrigger = false,
 }: EditMeetSwimButtonProps) {
-  const [open, setOpen] = useState(false)
+  const [openState, setOpenState] = useState(false)
+  const open = openProp ?? openState
+  const setOpen = onOpenChange ?? setOpenState
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState({
@@ -64,16 +74,14 @@ export default function EditMeetSwimButton({
   })
   const loading = isPending
 
-  function openModal() {
-    setForm({
-      athleteId,
-      event,
-      time: formatTime(timeMs),
-      course,
-      date,
-    })
-    setError(null)
-    setOpen(true)
+  // Reset the form each time the modal opens, whether from the pencil or from outside.
+  const [wasOpen, setWasOpen] = useState(false)
+  if (open !== wasOpen) {
+    setWasOpen(open)
+    if (open) {
+      setForm({ athleteId, event, time: formatTime(timeMs), course, date })
+      setError(null)
+    }
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -120,17 +128,19 @@ export default function EditMeetSwimButton({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={openModal}
+      {hideTrigger ? null : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
           className={
-          className ??
-          "p-1 rounded text-foreground-tertiary hover:text-foreground hover:bg-fill disabled:opacity-50 transition-colors"
-        }
-        aria-label="Edit swim"
-      >
-        <ActionIcon kind="edit" className="w-4 h-4" />
-      </button>
+            className ??
+            "p-1 rounded text-foreground-tertiary hover:text-foreground hover:bg-fill disabled:opacity-50 transition-colors"
+          }
+          aria-label="Edit swim"
+        >
+          <ActionIcon kind="edit" className="w-4 h-4" />
+        </button>
+      )}
 
       <Modal
         open={open}

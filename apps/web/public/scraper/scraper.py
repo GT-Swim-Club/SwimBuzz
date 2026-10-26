@@ -165,13 +165,40 @@ def progress_reporter(client: httpx.AsyncClient, base_url: str, token: str, job_
     return report
 
 
-async def run_job(job: dict, report=None) -> object:
-    from swimcloud_scrape import scrape_bulk_times, scrape_team_roster, set_progress_reporter
+def times_streamer(client: httpx.AsyncClient, base_url: str, token: str, job_id: str):
+    """Post each swimmer's times as they finish so the app saves them even if this job dies later.
+
+    Best effort: the job's final result still carries every swimmer, so a failed post loses nothing.
+    """
+    url = f"{base_url.rstrip('/')}/api/scraper/jobs/{job_id}/swimmer"
+
+    async def stream(swimmer_id: int, times: list) -> None:
+        try:
+            await client.post(
+                url,
+                headers=scraper_headers(token),
+                json={"swimmerId": swimmer_id, "times": times},
+                timeout=30.0,
+            )
+        except Exception:
+            pass
+
+    return stream
+
+
+async def run_job(job: dict, report=None, stream_times=None) -> object:
+    from swimcloud_scrape import (
+        scrape_bulk_times,
+        scrape_team_roster,
+        set_progress_reporter,
+        set_times_sink,
+    )
 
     job_type = job["type"]
     payload = job["payload"]
 
     set_progress_reporter(report)
+    set_times_sink(stream_times)
 
     if job_type == "ROSTER":
         return await scrape_team_roster(
@@ -244,7 +271,11 @@ async def scraper_loop(base_url: str, token: str) -> None:
                     job_id = job["id"]
                     print(f"Job {job_id} started ({job['type']}).")
                     job_task = asyncio.create_task(
-                        run_job(job, progress_reporter(client, base_url, token, job_id))
+                        run_job(
+                            job,
+                            progress_reporter(client, base_url, token, job_id),
+                            times_streamer(client, base_url, token, job_id),
+                        )
                     )
                     stop_task = asyncio.create_task(stop.wait())
                     try:

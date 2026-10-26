@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState, Fragment } from "react"
+import { useEffect, useRef, useState, Fragment, type ReactNode } from "react"
 import Link from "next/link"
 import type { MeetResultEntry, SheetEntry, SheetSummary } from "@/lib/meet/meet-sheet-summary"
 import {
@@ -536,7 +536,7 @@ function SummaryEntryRow({
   /** Rows sit under an event header: label by athlete / relay letter, no event badge. */
   eventView?: boolean
 }) {
-  const [relayEditOpen, setRelayEditOpen] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
   const isRelay = entry.entryType === "relay_team"
   const athleteRecord = athletes?.find((a) => a.id === entry.athleteId)
   const eventNumber = entry.isRelayLeadoff
@@ -647,34 +647,40 @@ function SummaryEntryRow({
     }
   }
 
-  // Relays are edited from the detail modal's "Edit relay" button, so the row has no pencil.
-  const relayEditor =
-    isRelay && canEdit && meetId ? (
-      <EditRelayButton
-        meetId={meetId}
-        athletes={athletes ?? []}
-        entry={entry}
-        open={relayEditOpen}
-        onOpenChange={setRelayEditOpen}
-        hideTrigger
-      />
-    ) : null
-
-  const editButton =
-    canEdit && meetId && !isRelay ? (
-      isRosterOnlySheetEntry(entry) ? (
+  // Entries are edited from the detail modal's edit button, so the row has no pencil.
+  // Only roster-only entries keep a row button (remove), since there is nothing to edit.
+  let editor: ReactNode = null
+  let removeButton: ReactNode = null
+  if (canEdit && meetId) {
+    if (isRelay) {
+      editor = (
+        <EditRelayButton
+          meetId={meetId}
+          athletes={athletes ?? []}
+          entry={entry}
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          hideTrigger
+        />
+      )
+    } else if (isRosterOnlySheetEntry(entry)) {
+      removeButton = (
         <RemoveRosterOnlyButton
           meetId={meetId}
           athleteId={entry.athleteId}
           athleteName={entry.athleteName}
         />
-      ) : entry.manual &&
-        !entry.isRelayLeadoff &&
-        entry.swimId &&
-        entry.course &&
-        entry.date &&
-        entry.timeMs != null &&
-        athletes ? (
+      )
+    } else if (
+      entry.manual &&
+      !entry.isRelayLeadoff &&
+      entry.swimId &&
+      entry.course &&
+      entry.date &&
+      entry.timeMs != null &&
+      athletes
+    ) {
+      editor = (
         <EditMeetSwimButton
           swimId={entry.swimId}
           meetId={meetId}
@@ -685,11 +691,18 @@ function SummaryEntryRow({
           course={entry.course}
           date={entry.date}
           timeMs={entry.timeMs}
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          hideTrigger
         />
-      ) : !entry.isRelayLeadoff &&
-        !entry.swimId &&
-        (entry.manual === true ||
-          editableSeedKeys.has(`${entry.athleteId}|${normalizeEventName(entry.event)}`)) ? (
+      )
+    } else if (
+      !entry.isRelayLeadoff &&
+      !entry.swimId &&
+      (entry.manual === true ||
+        editableSeedKeys.has(`${entry.athleteId}|${normalizeEventName(entry.event)}`))
+    ) {
+      editor = (
         <EditSheetSeedButton
           meetId={meetId}
           athleteId={entry.athleteId}
@@ -698,9 +711,13 @@ function SummaryEntryRow({
           seedTime={entry.seedTime}
           timeStatus={entry.timeStatus}
           eventOptions={individualEventOptions}
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          hideTrigger
         />
-      ) : null
-    ) : null
+      )
+    }
+  }
 
   return (
     <>
@@ -721,10 +738,11 @@ function SummaryEntryRow({
         note={coachNote}
         result={result}
         detail={detail}
-        trailing={editButton}
-        onEditRelay={relayEditor ? () => setRelayEditOpen(true) : undefined}
+        trailing={removeButton}
+        onEdit={editor ? () => setEditOpen(true) : undefined}
+        editLabel={isRelay ? "Edit relay" : "Edit"}
       />
-      {relayEditor}
+      {editor}
     </>
   )
 }

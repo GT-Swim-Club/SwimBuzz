@@ -1,12 +1,10 @@
 "use client"
 
 import { useLayoutEffect, useRef } from "react"
-import type { RelayShareEvent } from "@swimbuzz/shared"
+import { relayShareRows, type RelayShareEvent } from "@swimbuzz/shared"
 import { EventHeader, SummaryCard, publishedSummaryCards } from "./RelaySummary"
 import { relayEyebrowClass } from "./RelayPageHeader"
 
-/** Event columns in the image; more events wrap onto more rows. */
-const MAX_COLUMNS = 6
 /** Breathing room added to the widest card so names don't sit against the border. */
 const EXTRA_COLUMN_PX = 24
 
@@ -20,7 +18,9 @@ export default function RelaysExportCapture({
   iconUrl: string | null
   events: RelayShareEvent[]
 }) {
-  const columns = Math.max(1, Math.min(MAX_COLUMNS, events.length))
+  // One row for a few events; otherwise women's row, then men's (mixed at its end), types in columns.
+  const rows = relayShareRows(events)
+  const columns = Math.max(1, rows[0]?.length ?? 1)
   const gridRef = useRef<HTMLDivElement>(null)
 
   // 1fr columns in a fit-content grid all size to the widest card; measure that, then pin
@@ -30,7 +30,7 @@ export default function RelaysExportCapture({
     const grid = gridRef.current
     if (!grid) return
     grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`
-    const first = grid.firstElementChild
+    const first = grid.querySelector("section")
     if (!first) return
     const width = Math.ceil(first.getBoundingClientRect().width) + EXTRA_COLUMN_PX
     grid.style.gridTemplateColumns = `repeat(${columns}, ${width}px)`
@@ -49,16 +49,20 @@ export default function RelaysExportCapture({
         </div>
       </div>
       <div ref={gridRef} className="grid w-fit items-start gap-x-4 gap-y-5">
-        {events.map((event) => (
-          <section key={`${event.number ?? ""}-${event.name}`} className="flex min-w-0 flex-col gap-2">
-            <EventHeader
-              event={{ slug: event.name, name: event.name, number: event.number, pills: [], state: "cards", cards: [] }}
-            />
-            {publishedSummaryCards(event.relays, null).map((card) => (
-              <SummaryCard key={card.key} card={card} clickable={false} />
-            ))}
-          </section>
-        ))}
+        {rows.flat().map((event, i) =>
+          event ? (
+            <section key={`${event.number ?? ""}-${event.name}`} className="flex min-w-0 flex-col gap-2">
+              <EventHeader
+                event={{ slug: event.name, name: event.name, number: event.number, pills: [], state: "cards", cards: [] }}
+              />
+              {publishedSummaryCards(event.relays, null).map((card) => (
+                <SummaryCard key={card.key} card={card} clickable={false} />
+              ))}
+            </section>
+          ) : (
+            <div key={`empty-${i}`} aria-hidden />
+          )
+        )}
       </div>
     </div>
   )

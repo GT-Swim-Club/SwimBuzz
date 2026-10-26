@@ -29,6 +29,8 @@ export type ScraperJobProgress = {
   current?: number
   total?: number
   swimmerId?: number
+  /** Name of the athlete `swimmerId` belongs to, added by the server for times imports. */
+  swimmerName?: string
   /** 1-based index of the SwimCloud event being fetched for the current swimmer. */
   event?: number
   /** Number of events fetched per swimmer. */
@@ -37,6 +39,8 @@ export type ScraperJobProgress = {
   eventLabel?: string | null
   /** True while a Cloudflare check is blocking the scraper's browser window. */
   cloudflare?: boolean
+  /** True when the scraper's browser window is the frontmost app, so the user is already looking at it. */
+  browserFocused?: boolean
   /** True while the scraper waits for the coach to clear SwimPhone's archived-meet email + reCAPTCHA form. */
   swimphoneVerification?: boolean
   /** Epoch ms when the scraper retries after SwimCloud rate-limited it (HTTP 429). */
@@ -86,14 +90,18 @@ export async function pollScraperJob(
   jobId: string,
   options: {
     intervalMs?: number
-    timeoutMs?: number
+    /**
+     * Give up after this long with no change in status or progress. A big import
+     * legitimately runs far longer than this in total, so it's an idle limit, not a total one.
+     */
+    idleTimeoutMs?: number
     fetchJob?: (id: string) => Promise<ScraperJobStatusPayload>
     /** Called after every poll, e.g. to surface progress in a toast. */
     onJob?: (job: ScraperJobStatusPayload) => void
   } = {}
 ): Promise<ScraperJobStatusPayload> {
   const intervalMs = options.intervalMs ?? 1500
-  const timeoutMs = options.timeoutMs ?? 20 * 60 * 1000
+  const idleTimeoutMs = options.idleTimeoutMs ?? 10 * 60 * 1000
   const fetchJob =
     options.fetchJob ??
     (async (id: string) => {
@@ -103,16 +111,24 @@ export async function pollScraperJob(
       return data as ScraperJobStatusPayload
     })
 
-  const started = Date.now()
-  while (Date.now() - started < timeoutMs) {
+  let lastActivity = Date.now()
+  let lastSignature = ""
+  for (;;) {
     const job = await fetchJob(jobId)
     options.onJob?.(job)
+    const signature = `${job.status}:${JSON.stringify(job.progress ?? null)}`
+    if (signature !== lastSignature) {
+      lastSignature = signature
+      lastActivity = Date.now()
+    }
     if (job.status === "COMPLETED" || job.status === "FAILED") {
       if (job.status === "FAILED") {
         throw new Error(job.error ?? "Run scraper failed")
       }
       return job
     }
+    // Checked after the fetch: a laptop that slept past the limit should still learn how the job ended.
+    if (Date.now() - lastActivity >= idleTimeoutMs) break
     await new Promise((r) => setTimeout(r, intervalMs))
   }
   throw new Error(
@@ -184,6 +200,7 @@ export function resumedScraperProgress(kind: string, job: ScraperJobStatusPayloa
     return {
       detail,
       alert: progress?.swimphoneVerification ? SWIMPHONE_VERIFICATION_ALERT : undefined,
+      quiet: progress?.browserFocused,
       progress: scraperJobFraction(progress),
     }
   }
@@ -197,6 +214,7 @@ export function resumedScraperProgress(kind: string, job: ScraperJobStatusPayloa
           ? `${profile}${progress.eventLabel} · ${progress.event ?? 0}/${progress.events}`
           : "Reading SwimCloud times…",
       alert: progress?.cloudflare ? CLOUDFLARE_ALERT : undefined,
+      quiet: progress?.browserFocused,
       notice: scraperRateLimitNotice(progress),
       progress: scraperJobFraction(progress),
     }
@@ -205,13 +223,14 @@ export function resumedScraperProgress(kind: string, job: ScraperJobStatusPayloa
   const noun = kind === "roster_sync" ? "step" : "athlete"
   const total = progress?.total
   const detail = total
-    ? `${progress?.current ?? 0}/${total} ${noun}${total === 1 ? "" : "s"}${progress?.eventLabel ? ` · ${progress.eventLabel}` : ""}`
+    ? `${progress?.current ?? 0}/${total} ${noun}${total === 1 ? "" : "s"}${progress?.swimmerName ? ` · ${progress.swimmerName}` : progress?.eventLabel ? ` · ${progress.eventLabel}` : ""}`
     : kind === "roster_sync"
       ? "Reading SwimCloud roster…"
       : "Reading SwimCloud times…"
   return {
     detail,
     alert: progress?.cloudflare ? CLOUDFLARE_ALERT : undefined,
+    quiet: progress?.browserFocused,
     notice: scraperRateLimitNotice(progress),
     progress: scraperJobFraction(progress),
   }

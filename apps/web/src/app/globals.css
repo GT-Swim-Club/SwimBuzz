@@ -81,11 +81,13 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* Use the SwimBuzz gold focus state instead of the browser-default blue ring. */
+/* Use the SwimBuzz gold focus state instead of the browser-default blue ring.
+   `.ProseMirror` covers the TipTap rich text fields, which are contenteditable divs. */
 :where(
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
   textarea,
-  select
+  select,
+  .ProseMirror
 ):focus {
   outline: none;
   border-color: var(--brand-color-primary);

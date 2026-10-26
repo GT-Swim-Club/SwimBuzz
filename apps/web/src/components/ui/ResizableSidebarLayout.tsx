@@ -34,6 +34,7 @@ export default function ResizableSidebarLayout({
   mainClassName?: string
 }) {
   const [width, setWidth] = useState(defaultWidth)
+  const [dragging, setDragging] = useState(false)
   const sidebarRef = useRef<HTMLElement>(null)
   const [stickyTop, setStickyTop] = useState(PIN_TOP)
 
@@ -79,12 +80,17 @@ export default function ResizableSidebarLayout({
     const startX = e.clientX
     const startWidth = width
     let latest = startWidth
+    setDragging(true)
+    // Keep the resize cursor even when the pointer leaves the handle mid-drag.
+    document.body.style.cursor = "col-resize"
     const onMove = (ev: PointerEvent) => {
       latest = clampWidth(startWidth + (ev.clientX - startX))
       setWidth(latest)
     }
     const onUp = () => {
       save(latest)
+      setDragging(false)
+      document.body.style.cursor = ""
       window.removeEventListener("pointermove", onMove)
       window.removeEventListener("pointerup", onUp)
     }
@@ -120,9 +126,11 @@ export default function ResizableSidebarLayout({
         tabIndex={0}
         onPointerDown={startResize}
         onKeyDown={nudge}
-        className="flex w-6 shrink-0 cursor-col-resize touch-none items-stretch justify-center self-stretch transition-colors hover:bg-fill-secondary max-[900px]:hidden"
+        className="group flex w-6 shrink-0 cursor-col-resize touch-none items-stretch justify-center self-stretch max-[900px]:hidden"
       >
-        <span className="w-px bg-border" />
+        <span
+          className={`w-px transition-colors group-hover:bg-primary group-hover:delay-100 ${dragging ? "bg-primary" : "bg-border"}`}
+        />
       </div>
       <div
         className={`flex min-w-0 flex-[1_1_480px] flex-col pl-2 max-[900px]:mt-8 max-[900px]:pl-0 ${mainClassName}`}

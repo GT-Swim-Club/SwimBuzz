@@ -27,6 +27,8 @@ import RelaySummary, {
   relayShareEvent,
   type RelaySummaryEvent,
 } from "./RelaySummary"
+import PublishAllRelaysButton from "./PublishAllRelaysButton"
+import { planPublishAll } from "./publish-all"
 import ShareRelaysButton from "./ShareRelaysButton"
 
 /**
@@ -98,7 +100,12 @@ export default function MeetRelaysWorkspace({
     document.getElementById("page-scroll")?.scrollTo({ top: 0 })
   }
 
-  function commit(data: RelaySlotData, { kind, teams, relayEvent, optimal, settings }: RelayCommit, replace: boolean) {
+  /** Show a saved lineup on the summary at once and persist it in the background; resolves to an error message, if any. */
+  async function save(
+    data: RelaySlotData,
+    { kind, teams, relayEvent, optimal, settings }: RelayCommit,
+    report = true
+  ): Promise<string | null> {
     const { slot } = data
     const target = {
       meetId,
@@ -121,20 +128,24 @@ export default function MeetRelaysWorkspace({
     }))
     setSaving((current) => [...current, slot.slug])
     setSaveError(null)
-    go(null, replace)
 
-    void (async () => {
-      try {
-        if (kind === "draft") await persistRelayDraft(target, teams, optimal, settings)
-        else await persistRelayPublish(target, teams)
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "Something went wrong"
-        setSaveError(`${slot.label}: ${message}`)
-      } finally {
-        setSaving((current) => current.filter((slug) => slug !== slot.slug))
-        router.refresh()
-      }
-    })()
+    try {
+      if (kind === "draft") await persistRelayDraft(target, teams, optimal, settings)
+      else await persistRelayPublish(target, teams)
+      return null
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Something went wrong"
+      if (report) setSaveError(`${slot.label}: ${message}`)
+      return message
+    } finally {
+      setSaving((current) => current.filter((slug) => slug !== slot.slug))
+      router.refresh()
+    }
+  }
+
+  function commit(data: RelaySlotData, change: RelayCommit, replace: boolean) {
+    void save(data, change)
+    go(null, replace)
   }
 
   // Kept across builder visits so neither the summary nor the builder re-runs the solver.
@@ -273,6 +284,25 @@ export default function MeetRelaysWorkspace({
     }
   })
 
+  const publishAllPlan = planPublishAll(slots, (slug) => builds[slug], lineupTeamsOf)
+
+  async function publishAll() {
+    const { ready, skipped } = publishAllPlan
+    const errors = await Promise.all(
+      ready.map(({ data, teams, relayEvent }) => save(data, { kind: "publish", teams, relayEvent }, false))
+    )
+    const failed = ready.flatMap(({ data }, i) => (errors[i] ? [`${data.slot.label} (${errors[i]})`] : []))
+    const published = ready.length - failed.length
+    const problems = [
+      ...failed,
+      ...skipped.map((s) => `${s.label} (${s.reason})`),
+    ]
+    if (problems.length === 0) return
+    setSaveError(
+      `Published ${published} ${published === 1 ? "event" : "events"}. Couldn't publish: ${problems.join("; ")}.`
+    )
+  }
+
   // Share exports published lineups only — never drafts or suggestions.
   const shareEvents = slots
     .filter(({ published }) => published.length > 0)
@@ -286,9 +316,18 @@ export default function MeetRelaysWorkspace({
         back={backLink}
         eyebrow={<p className={relayEyebrowClass}>Relays</p>}
         actions={
-          shareEvents.length > 0 ? (
-            <ShareRelaysButton meetName={meetName} iconUrl={iconUrl} events={shareEvents} />
-          ) : null
+          <>
+            {!hasImportedResults && publishAllPlan.unpublished > 0 ? (
+              <PublishAllRelaysButton
+                plan={publishAllPlan}
+                busy={saving.length > 0}
+                onPublish={() => void publishAll()}
+              />
+            ) : null}
+            {shareEvents.length > 0 ? (
+              <ShareRelaysButton meetName={meetName} iconUrl={iconUrl} events={shareEvents} />
+            ) : null}
+          </>
         }
       />
       {saveError ? (

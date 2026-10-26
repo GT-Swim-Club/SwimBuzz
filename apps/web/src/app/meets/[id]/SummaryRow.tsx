@@ -65,7 +65,8 @@ export default function SummaryRow({
   result,
   detail,
   trailing,
-  onEditRelay,
+  onEdit,
+  editLabel,
 }: {
   id?: string
   display: RowDisplay
@@ -81,7 +82,9 @@ export default function SummaryRow({
   result: RowResult
   detail: SwimDetail
   trailing?: ReactNode
-  onEditRelay?: () => void
+  /** Coach edit action, offered from the detail modal instead of a row button. */
+  onEdit?: () => void
+  editLabel?: string
 }) {
   const [open, setOpen] = useState(false)
   const compact = display.density === "compact"
@@ -243,11 +246,12 @@ export default function SummaryRow({
         <SwimDetailModal
           detail={detail}
           onClose={() => setOpen(false)}
-          onEditRelay={
-            onEditRelay
+          editLabel={editLabel}
+          onEdit={
+            onEdit
               ? () => {
                   setOpen(false)
-                  onEditRelay()
+                  onEdit()
                 }
               : undefined
           }

@@ -79,6 +79,7 @@ function timesImportProgress(
   return {
     detail: athlete ? `${count} · ${athlete.firstName} ${athlete.lastName}` : count,
     alert: progress?.cloudflare ? CLOUDFLARE_ALERT : undefined,
+    quiet: progress?.browserFocused,
     notice: scraperRateLimitNotice(progress),
     progress: scraperJobFraction(progress),
   }
@@ -375,25 +376,32 @@ export default function SyncTimesButton() {
     }
 
     const run = async (report: (progress: ImportTaskProgress) => void) => {
-      const data = await runScraperEnqueuePollFinalize<SyncResult>({
-        enqueue: () =>
-          fetch("/api/times/sync", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              season,
-              gender,
-              athleteIds: toSync.map((a) => a.id),
+      let data: SyncResult
+      try {
+        data = await runScraperEnqueuePollFinalize<SyncResult>({
+          enqueue: () =>
+            fetch("/api/times/sync", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                season,
+                gender,
+                athleteIds: toSync.map((a) => a.id),
+              }),
             }),
-          }),
-        finalize: (jobId) =>
-          fetch("/api/times/sync/finalize", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ jobId }),
-          }),
-        onJob: (job) => report(timesImportProgress(job, toSync)),
-      })
+          finalize: (jobId) =>
+            fetch("/api/times/sync/finalize", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ jobId }),
+            }),
+          onJob: (job) => report(timesImportProgress(job, toSync)),
+        })
+      } catch (err) {
+        // A scraper that died partway still saved the athletes it finished.
+        router.refresh()
+        throw err
+      }
 
       if (data.timesSyncedAt && Array.isArray(data.syncedAthleteIds)) {
         const syncedAt = String(data.timesSyncedAt)
@@ -466,7 +474,7 @@ export default function SyncTimesButton() {
                 Import times from SwimCloud
               </h2>
               <p className="mt-1.5 text-sm text-foreground-secondary">
-                Pick athletes from the {rosterLabel} roster. Each one takes about 2–3 minutes.
+                Pick athletes from the {rosterLabel} roster. Each one takes about 3–4 minutes.
               </p>
             </div>
 

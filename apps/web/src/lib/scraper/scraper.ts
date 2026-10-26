@@ -1,6 +1,7 @@
 import { randomInt, randomUUID } from "crypto"
 import { ScraperJobStatus, ScraperJobType, Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
+import { asTimesApplyContext } from "@/lib/swim/times-sync-partial"
 
 function isPrismaUniqueViolation(err: unknown) {
   return err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002"
@@ -223,6 +224,32 @@ export async function failScraperJob(jobId: string, connectionId: string, error:
   })
 }
 
+export const SCRAPER_LOST_ERROR =
+  "Lost contact with your computer. Keep it awake with the scraper running, then try again."
+
+/**
+ * Fail jobs whose scraper stopped checking in (laptop asleep, app closed, offline).
+ * Such a scraper is shut out on its next request, so nothing will finish these jobs.
+ * Pass `jobId` to check just one.
+ */
+export async function failLostScraperJobs(userId: string, jobId?: string) {
+  const cutoff = new Date(Date.now() - CONNECTION_TTL_MS)
+  await prisma.scraperJob.updateMany({
+    where: {
+      userId,
+      ...(jobId ? { id: jobId } : {}),
+      status: { in: [ScraperJobStatus.PENDING, ScraperJobStatus.RUNNING] },
+      // Deleting a connection nulls its jobs' connectionId.
+      OR: [{ connectionId: null }, { connection: { is: { lastSeenAt: { lt: cutoff } } } }],
+    },
+    data: {
+      status: ScraperJobStatus.FAILED,
+      error: SCRAPER_LOST_ERROR,
+      completedAt: new Date(),
+    },
+  })
+}
+
 export async function getScraperJobForUser(jobId: string, userId: string) {
   return prisma.scraperJob.findFirst({
     where: { id: jobId, userId },
@@ -247,11 +274,28 @@ function runningProgress(status: ScraperJobStatus, result: unknown) {
 }
 
 /**
+ * `runningProgress` plus the name of the athlete a times import is on, so a page that reloaded
+ * mid-import (and so lacks the athlete list) can still show who it's reading.
+ */
+export async function namedRunningProgress(status: ScraperJobStatus, result: unknown, applyContext: unknown) {
+  const progress = runningProgress(status, result)
+  const ctx = asTimesApplyContext(applyContext)
+  const swimmerId = (progress as { swimmerId?: unknown } | null)?.swimmerId
+  if (!progress || !ctx || typeof swimmerId !== "number") return progress
+  const athlete = await prisma.athlete.findFirst({
+    where: { id: { in: ctx.athleteIds }, swimCloudIds: { has: swimmerId } },
+    select: { firstName: true, lastName: true },
+  })
+  return athlete ? { ...progress, swimmerName: `${athlete.firstName} ${athlete.lastName}` } : progress
+}
+
+/**
  * Jobs the page should pick back up after a reload or a closed tab: still
  * scraping, or finished but not saved into the app. Failures stay where they
  * were — replaying each one as a toast stacks every recent error on the next visit.
  */
 export async function listResumableScraperJobs(userId: string) {
+  await failLostScraperJobs(userId)
   const now = Date.now()
   const jobs = await prisma.scraperJob.findMany({
     where: {
@@ -272,13 +316,15 @@ export async function listResumableScraperJobs(userId: string) {
     select: { id: true, status: true, error: true, result: true, applyContext: true },
   })
 
-  return jobs.map((job) => ({
-    id: job.id,
-    status: job.status,
-    error: job.error,
-    applyKind: applyKind(job.applyContext),
-    progress: runningProgress(job.status, job.result),
-  }))
+  return Promise.all(
+    jobs.map(async (job) => ({
+      id: job.id,
+      status: job.status,
+      error: job.error,
+      applyKind: applyKind(job.applyContext),
+      progress: await namedRunningProgress(job.status, job.result, job.applyContext),
+    }))
+  )
 }
 
 export async function markScraperJobApplied(

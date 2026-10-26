@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { Gender, ScraperJobStatus, ScraperJobType } from "@prisma/client"
-import { assignSwimOccurrences } from "@/lib/swim/swim-dedup"
+import { swimsFromSwimCloudTimes, type SwimCloudTime } from "@/lib/swim/swimcloud-import"
 import {
-  swimsFromSwimCloudTimes,
-  withoutRecordedSwims,
-  type SwimCloudTime,
-} from "@/lib/swim/swimcloud-import"
+  asTimesApplyContext,
+  saveSwimCloudTimes,
+  type TimesApplyContext,
+} from "@/lib/swim/times-sync-partial"
 import {
   hasSwimCloudIdWhere,
   mergeProfileTimes,
@@ -56,12 +56,6 @@ export async function GET(req: Request) {
   })
 
   return NextResponse.json({ athletes })
-}
-
-type TimesApplyContext = {
-  kind: "times_sync"
-  season: string
-  athleteIds: string[]
 }
 
 export async function POST(req: Request) {
@@ -135,8 +129,8 @@ export async function applyTimesSyncJob(jobId: string, userId: string) {
     return job.applyResult as Record<string, unknown>
   }
 
-  const ctx = job.applyContext as TimesApplyContext | null
-  if (!ctx || ctx.kind !== "times_sync") {
+  const ctx = asTimesApplyContext(job.applyContext)
+  if (!ctx) {
     throw new Error("Invalid job context")
   }
 
@@ -167,17 +161,8 @@ export async function applyTimesSyncJob(jobId: string, userId: string) {
   }
   const athletesSynced = syncedAthleteIds.length
 
-  const swimsToInsert = await withoutRecordedSwims(assignSwimOccurrences(allSwims))
-  let imported = 0
-  const chunkSize = 500
-  for (let i = 0; i < swimsToInsert.length; i += chunkSize) {
-    const chunk = swimsToInsert.slice(i, i + chunkSize)
-    const result = await prisma.swim.createMany({
-      data: chunk,
-      skipDuplicates: true,
-    })
-    imported += result.count
-  }
+  // Athletes the scraper streamed in while running are already saved; this pass only adds what's missing.
+  const imported = (ctx.saved?.imported ?? 0) + (await saveSwimCloudTimes(allSwims))
 
   const syncedAt = new Date()
   if (syncedAthleteIds.length > 0) {

@@ -59,6 +59,7 @@ function athleteImportProgress(job: ScraperJobStatusPayload): ImportTaskProgress
         ? `${profile}${progress.eventLabel} · ${progress.event ?? 0}/${progress.events}`
         : undefined,
     alert: progress?.cloudflare ? CLOUDFLARE_ALERT : undefined,
+    quiet: progress?.browserFocused,
     notice: scraperRateLimitNotice(progress),
     progress: scraperJobFraction(progress),
   }

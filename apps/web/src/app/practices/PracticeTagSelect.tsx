@@ -51,7 +51,7 @@ export default function PracticeTagSelect({
         aria-expanded={open}
         aria-controls={open ? listId : undefined}
         onClick={() => setOpen((o) => !o)}
-        className={`flex w-full items-center gap-2 rounded-lg border bg-background px-3 py-2 text-left text-sm outline-none transition focus:ring-2 focus:ring-primary/10 ${
+        className={`flex w-full items-center gap-2 rounded-lg border bg-background px-3 py-2 text-left text-base outline-none transition focus:ring-2 focus:ring-primary/10 ${
           open ? "border-primary ring-2 ring-primary/10" : "border-border focus:border-primary"
         }`}
       >

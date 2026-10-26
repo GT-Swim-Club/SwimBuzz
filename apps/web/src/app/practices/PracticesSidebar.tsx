@@ -12,7 +12,6 @@ import {
 } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { usePracticePrefs } from "./usePracticePrefs"
-import HoverDetail from "@/components/ui/HoverDetail"
 import { ATHLETE_VIEW_ENABLING_EVENT } from "@/lib/athlete/athlete-view"
 import PracticesToolbar from "./PracticesToolbar"
 import WeekRail from "./WeekRail"
@@ -127,6 +126,8 @@ export default function PracticesSidebar({
   const sidebarRef = useRef<HTMLElement>(null)
   const [dragWidth, setDragWidth] = useState<number | null>(null)
   const draggingRef = useRef(false)
+  // Sidebar width at pointer-down, so the drag is relative to where the divider was grabbed.
+  const dragStartWidthRef = useRef(0)
   const dragCollapsedRef = useRef(false)
   const pointerDownXRef = useRef(0)
   const movedRef = useRef(false)
@@ -482,7 +483,8 @@ export default function PracticesSidebar({
         MIN_WIDTH,
         Math.min((rect.width - overhead) * MAX_WIDTH_FRACTION, rect.width - overhead - 400)
       )
-      const raw = event.clientX - rect.left
+      // Relative to the grab point, so the divider stays under the cursor despite the grid gap.
+      const raw = dragStartWidthRef.current + (event.clientX - pointerDownXRef.current)
       if (raw < COLLAPSE_THRESHOLD) {
         dragCollapsedRef.current = true
         setDragWidth(0)
@@ -494,6 +496,7 @@ export default function PracticesSidebar({
     function onUp() {
       if (!draggingRef.current) return
       draggingRef.current = false
+      document.body.style.cursor = ""
       const prefs = prefsRef.current
       // A press-release with negligible pointer travel is a click: toggle
       // open/closed instead of committing a resize/collapse-preview.
@@ -520,6 +523,7 @@ export default function PracticesSidebar({
     window.addEventListener("pointermove", onMove)
     window.addEventListener("pointerup", onUp)
     return () => {
+      if (draggingRef.current) document.body.style.cursor = ""
       window.removeEventListener("pointermove", onMove)
       window.removeEventListener("pointerup", onUp)
     }
@@ -635,21 +639,19 @@ export default function PracticesSidebar({
         onPointerDown={(e) => {
           e.preventDefault()
           pointerDownXRef.current = e.clientX
+          dragStartWidthRef.current = prefs.sidebarOpen ? effectiveWidth : 0
           movedRef.current = false
           draggingRef.current = true
+          // Keep the resize cursor even when the pointer leaves the divider mid-drag.
+          document.body.style.cursor = "col-resize"
           if (prefs.sidebarOpen) setDragWidth(effectiveWidth)
         }}
-        className="hidden overflow-hidden transition-opacity duration-150 motion-reduce:transition-none md:flex md:items-stretch md:justify-center md:cursor-col-resize md:hover:bg-fill-secondary"
+        className="group hidden overflow-hidden transition-opacity duration-150 motion-reduce:transition-none md:flex md:items-stretch md:justify-center md:cursor-col-resize md:hover:bg-fill-secondary"
       >
-        <span className="w-px bg-border-secondary" aria-hidden />
-        <HoverDetail offset={16} followPointer placement="right" className="rounded-xl">
-          <div className="flex flex-col gap-0.5 px-0.5 py-1">
-            <span className="text-sm font-medium text-foreground">{prefs.sidebarOpen ? "Hide sidebar" : "Show sidebar"}</span>
-            <span className="text-[13px] font-normal text-foreground-secondary">
-              {prefs.sidebarOpen ? "Drag to resize" : "Drag to open"}
-            </span>
-          </div>
-        </HoverDetail>
+        <span
+          className={`w-px transition-colors group-hover:bg-primary group-hover:delay-100 ${dragWidth != null ? "bg-primary" : "bg-border-secondary"}`}
+          aria-hidden
+        />
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col gap-5 md:w-full">

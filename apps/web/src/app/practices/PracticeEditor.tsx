@@ -81,7 +81,8 @@ export const emptyPractice: PracticeFormState = {
 }
 
 const inputCls =
-  "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm transition-shadow focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10"
+  "w-full rounded-lg border border-border bg-background px-3 py-2 transition-shadow focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10"
+const metaIconCls = "h-4 w-4"
 const labelCls = "mb-1 block text-xs font-medium text-foreground-secondary"
 type AutosaveState = "idle" | "saving" | "saved" | "error"
 const AUTOSAVE_DELAY_MS = 700
@@ -1245,6 +1246,7 @@ export default function PracticeEditor({
   const missingStartTime = !form.startTime.trim()
   const missingEndTime = !form.endTime.trim()
   const missingLocation = !form.location.trim()
+  const totalDistance = form.sets.reduce((sum, set) => sum + (Number(set.distance) || 0), 0)
   const endBeforeStart =
     !missingStartTime &&
     !missingEndTime &&
@@ -1357,7 +1359,7 @@ export default function PracticeEditor({
             </span>
           )}
         </div>
-        <h1 className="min-w-0 text-3xl font-medium leading-tight tracking-tight sm:text-4xl">
+        <h1 className="min-w-0 text-4xl font-semibold leading-tight tracking-tight sm:text-[42px]">
           <input
             aria-label="Practice title"
             placeholder="Untitled Practice"
@@ -1370,10 +1372,10 @@ export default function PracticeEditor({
           />
         </h1>
 
-        <div className="mt-2 space-y-2 text-foreground-secondary sm:text-base">
-          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
-            <div className="flex min-w-0 items-center gap-1.5 sm:flex-[0.85] sm:basis-0">
-              <InfoIcon kind="calendar" />
+        <div className="mt-2 space-y-2 text-base text-foreground-secondary [&_input]:text-base [&_select]:text-base">
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="flex min-w-0 items-center gap-1.5 sm:min-w-[11rem] sm:flex-[1] sm:basis-0">
+              <InfoIcon kind="calendar" className={metaIconCls} />
               <label className="sr-only" htmlFor="practice-date">Practice date</label>
               <div id="practice-date" className="min-w-0 flex-1">
                 <DatePicker
@@ -1385,7 +1387,7 @@ export default function PracticeEditor({
                 />
               </div>
             </div>
-            <div className="flex min-w-0 items-center gap-2 sm:flex-[1.15] sm:basis-0">
+            <div className="flex min-w-0 items-center gap-2 sm:min-w-[17rem] sm:flex-[1.35] sm:basis-0">
               <span className="sr-only">Practice time</span>
               <div className="min-w-0 flex-1 [&>div]:w-full">
                 <TimePicker
@@ -1402,7 +1404,7 @@ export default function PracticeEditor({
                   clearable={false}
                 />
               </div>
-              <span className="shrink-0 text-sm text-foreground-tertiary">to</span>
+              <span className="shrink-0 text-foreground-tertiary">to</span>
               <div className="min-w-0 flex-1 [&>div]:w-full">
                 <TimePicker
                   value={form.endTime}
@@ -1422,7 +1424,7 @@ export default function PracticeEditor({
                 />
               </div>
             </div>
-            <div className="flex min-w-0 items-center gap-1.5 sm:flex-[1.15] sm:basis-0">
+            <div className="flex min-w-0 items-center gap-1.5 sm:min-w-[6rem] sm:flex-[0.4] sm:basis-0">
               <label className="sr-only" htmlFor="practice-timezone">Practice time zone</label>
               <div id="practice-timezone" className="min-w-0 flex-1">
                 <TimeZonePicker
@@ -1430,8 +1432,29 @@ export default function PracticeEditor({
                   onChange={(value) => updateForm((current) => ({ ...current, timeZone: value }))}
                   ariaLabel="Practice time zone"
                   date={form.date}
+                  compact
                 />
               </div>
+            </div>
+            <div className="flex min-w-0 items-center gap-1.5 sm:min-w-[12rem] sm:flex-[1.6] sm:basis-0">
+              <InfoIcon kind="location" className={metaIconCls} />
+              <label className="sr-only" htmlFor="practice-location">Practice location</label>
+              <input
+                id="practice-location"
+                required
+                maxLength={120}
+                placeholder="Practice location"
+                value={form.location}
+                onChange={(e) =>
+                  updateForm((form) => ({ ...form, location: e.target.value }), { historyKey: "location" })
+                }
+                aria-invalid={missingLocation || undefined}
+                className={`min-w-0 flex-1 basis-0 rounded-lg border bg-background px-3 py-2 text-foreground outline-none transition focus:ring-2 ${
+                  missingLocation
+                    ? "border-error focus:border-error focus:ring-error/10"
+                    : "border-border focus:border-primary focus:ring-primary/10"
+                }`}
+              />
             </div>
           </div>
           {endBeforeStart && (
@@ -1439,40 +1462,22 @@ export default function PracticeEditor({
           )}
 
           <div className="flex min-w-0 items-center gap-1.5">
-            <InfoIcon kind="location" />
-            <label className="sr-only" htmlFor="practice-location">Practice location</label>
-            <input
-              id="practice-location"
-              required
-              maxLength={120}
-              placeholder="Practice location"
-              value={form.location}
-              onChange={(e) =>
-                updateForm((form) => ({ ...form, location: e.target.value }), { historyKey: "location" })
-              }
-              aria-invalid={missingLocation || undefined}
-              className={`min-w-0 flex-1 basis-0 rounded-lg border bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:ring-2 ${
-                missingLocation
-                  ? "border-error focus:border-error focus:ring-error/10"
-                  : "border-border focus:border-primary focus:ring-primary/10"
-              }`}
-            />
-            <InfoIcon kind="waves" />
+            <InfoIcon kind="waves" className={metaIconCls} />
+            <span className="shrink-0 tabular-nums text-foreground" aria-label="Total practice distance">
+              {totalDistance}
+            </span>
             <label className="sr-only" htmlFor="practice-course">Practice course</label>
             <select
               id="practice-course"
               value={form.course}
               onChange={(e) => updateForm((form) => ({ ...form, course: e.target.value }))}
-              className="min-w-0 flex-1 basis-0 rounded-lg border border-border bg-background px-2 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+              className="w-28 shrink-0 rounded-lg border border-border bg-background px-2 py-2 text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
             >
               <option value="SCY">SCY</option>
               <option value="LCM">LCM</option>
               <option value="SCM">SCM</option>
             </select>
-          </div>
-
-          <div className="flex min-w-0 items-center gap-1.5">
-            <InfoIcon kind="tag" />
+            <InfoIcon kind="tag" className={metaIconCls} />
             <PracticeTagSelect value={form.tags} availableTags={availableTags} onToggle={toggleTag} />
           </div>
         </div>
@@ -1487,7 +1492,7 @@ export default function PracticeEditor({
             rows={1}
             value={form.focus}
             onChange={(focus) => updateForm((form) => ({ ...form, focus }), { historyKey: "focus" })}
-            className="bg-background"
+            className="bg-background text-base!"
             externalHistory
           />
         </div>
@@ -1589,7 +1594,7 @@ export default function PracticeEditor({
                           placeholder="Set"
                           value={set.title}
                           onChange={(event) => updateSet(index, { title: event.target.value })}
-                          className={inputCls + " " + targetFieldClass}
+                          className={inputCls + " text-[15px] font-bold " + targetFieldClass}
                         />
                       </div>
                       <div>
@@ -1600,7 +1605,7 @@ export default function PracticeEditor({
                           step={25}
                           value={set.distance}
                           onChange={(event) => updateSet(index, { distance: event.target.value })}
-                          className={inputCls + " " + targetFieldClass}
+                          className={inputCls + " text-base " + targetFieldClass}
                         />
                       </div>
                       <div className="flex items-center justify-end gap-1">
@@ -1635,7 +1640,7 @@ export default function PracticeEditor({
                         rows={4}
                         value={set.content}
                         onChange={(content) => updateSet(index, { content })}
-                        className={"bg-background " + targetFieldClass}
+                        className={"bg-background text-base! " + targetFieldClass}
                         externalHistory
                       />
                     </div>

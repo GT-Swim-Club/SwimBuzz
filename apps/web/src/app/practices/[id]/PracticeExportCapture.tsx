@@ -57,7 +57,9 @@ export default function PracticeExportCapture({
           )}
         </div>
         <div className="mt-1.5 text-[19px] text-foreground-secondary">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          {/* Same layout as the detail page, but never wrapping: the capture is sized to its
+              content, and a wrapped line there paints over the row below. */}
+          <div className="flex items-center gap-x-3 whitespace-nowrap">
             <span className="flex items-center gap-1.5">
               <InfoIcon kind="calendar" className="h-[17px] w-[17px]" />
               {range.shortDate} · {range.time}

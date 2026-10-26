@@ -32,7 +32,10 @@ export type ImportTask = {
   progress?: number
 }
 
-export type ImportTaskProgress = Pick<ImportTask, "detail" | "alert" | "notice" | "progress">
+export type ImportTaskProgress = Pick<ImportTask, "detail" | "alert" | "notice" | "progress"> & {
+  /** Show the alert without the attention chime, e.g. the user is already in the scraper's browser. */
+  quiet?: boolean
+}
 
 export type ImportTaskOptions = {
   /**
@@ -101,8 +104,8 @@ export function useImportTask() {
 }
 
 /**
- * How long (ms) the user must be present on the page before a completed toast
- * auto-dismisses. Imports often finish while the user is elsewhere, so the
+ * How long (ms) the user must be present on the page before a finished (done or
+ * failed) toast auto-dismisses. Imports often finish while the user is elsewhere, so the
  * countdown only runs while the tab is visible, focused, and the user has
  * interacted with the page since the task finished (and recently).
  */
@@ -114,8 +117,17 @@ const PRESENCE_EVENTS = ["pointermove", "pointerdown", "keydown", "wheel", "touc
 
 let _nextId = 1
 
-export default function ImportTaskProvider({ children }: { children: ReactNode }) {
+export default function ImportTaskProvider({
+  children,
+  alertSound,
+}: {
+  children: ReactNode
+  alertSound: boolean
+}) {
   const [tasks, setTasks] = useState<ImportTask[]>([])
+  /** Read from callbacks that outlive a render, so toggling the setting applies to tasks already running. */
+  const alertSoundRef = useRef(alertSound)
+  alertSoundRef.current = alertSound
   /** Completed tasks awaiting auto-dismiss: when they finished and how much presence time is left. */
   const pendingDismissRef = useRef<Record<string, { doneAt: number; remainingMs: number }>>({})
   /** Each running task's current alert, to chime only when a new one appears. */
@@ -126,7 +138,7 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
   const unloadingRef = useRef(false)
 
   const isAnyRunning = tasks.some((t) => t.status === "running")
-  const isAnyDone = tasks.some((t) => t.status === "done")
+  const isAnyFinished = tasks.some((t) => t.status !== "running")
   useDontReloadWhileBusy(isAnyRunning)
 
   const dismissTask = useCallback((id: string) => {
@@ -148,6 +160,9 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
     writeOpenRequests([])
     const toastIds = interrupted.map((item) => `cancelled-${item.id}`)
     if (interrupted.length > 0) {
+      for (const id of toastIds) {
+        pendingDismissRef.current[id] = { doneAt: Date.now(), remainingMs: AUTO_DISMISS_MS }
+      }
       setTasks((prev) => [
         ...prev.filter((task) => !toastIds.includes(task.id)),
         ...interrupted.map((item, index) => ({
@@ -171,9 +186,9 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
     }
   }, [])
 
-  // Count down completed toasts only while the user is actually on the page.
+  // Count down finished toasts (done or failed) only while the user is actually on the page.
   useEffect(() => {
-    if (!isAnyDone) return
+    if (!isAnyFinished) return
     let lastActivity = 0
     const onActivity = () => {
       lastActivity = Date.now()
@@ -201,7 +216,15 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
         if (pending.remainingMs <= 0) expired.push(id)
       }
       if (expired.length === 0) return
-      for (const id of expired) delete pendingDismissRef.current[id]
+      for (const id of expired) {
+        delete pendingDismissRef.current[id]
+        // Same as closing it by hand: a failed scraper job shouldn't return next visit.
+        const dismissKey = dismissKeysRef.current[id]
+        if (dismissKey) {
+          rememberDismissedScraperJob(dismissKey)
+          delete dismissKeysRef.current[id]
+        }
+      }
       setTasks((prev) => prev.filter((t) => !expired.includes(t.id)))
     }, PRESENCE_TICK_MS)
 
@@ -211,7 +234,7 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
         window.removeEventListener(type, onActivity)
       }
     }
-  }, [isAnyDone])
+  }, [isAnyFinished])
 
   const startTask = useCallback(
     (
@@ -234,9 +257,11 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
         { id, label, status: "running" },
       ])
 
-      const report = ({ detail, alert, notice, progress }: ImportTaskProgress) => {
+      const report = ({ detail, alert, notice, progress, quiet }: ImportTaskProgress) => {
         // An alert needs the user (e.g. a Cloudflare check) — chime if they've switched away.
-        if (alert && alert !== alertsRef.current[id] && !isPageInView()) playAttentionChime()
+        if (alert && alert !== alertsRef.current[id] && alertSoundRef.current && !quiet && !isPageInView()) {
+          playAttentionChime()
+        }
         alertsRef.current[id] = alert
         setTasks((prev) =>
           prev.map((t) =>
@@ -277,7 +302,7 @@ export default function ImportTaskProvider({ children }: { children: ReactNode }
                 : t
             )
           )
-          // Errors do NOT auto-dismiss — user must close manually
+          pendingDismissRef.current[id] = { doneAt: Date.now(), remainingMs: AUTO_DISMISS_MS }
         }
       )
     },

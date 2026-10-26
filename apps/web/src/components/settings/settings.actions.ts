@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/auth/session"
 import { Prisma } from "@prisma/client"
+import { revalidatePath } from "next/cache"
 import {
   mergeNotificationPreferences,
   type NotificationPreferenceKey,
@@ -45,4 +46,18 @@ export async function updateNotificationPreference(
     data: { notificationPreferences: preferences as Prisma.InputJsonValue }})
 
   return preferences
+}
+
+export async function updateAlertSound(enabled: boolean): Promise<boolean> {
+  const session = await getSession()
+  if (!session) throw new Error("Unauthorized")
+  if (typeof enabled !== "boolean") throw new Error("Invalid value")
+
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: { alertSound: enabled }})
+
+  // The root layout feeds this to ImportTaskProvider.
+  revalidatePath("/", "layout")
+  return enabled
 }

@@ -32,6 +32,11 @@ type EditSheetSeedButtonProps = {
   timeStatus?: string
   eventOptions?: string[]
   className?: string
+  /** Controlled open state, so the editor can also be opened from elsewhere (e.g. a detail modal). */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  /** Render only the editor modal (opened via `open`), without the pencil button. */
+  hideTrigger?: boolean
 }
 
 export default function EditSheetSeedButton({
@@ -43,8 +48,13 @@ export default function EditSheetSeedButton({
   timeStatus,
   eventOptions,
   className,
+  open: openProp,
+  onOpenChange,
+  hideTrigger = false,
 }: EditSheetSeedButtonProps) {
-  const [open, setOpen] = useState(false)
+  const [openState, setOpenState] = useState(false)
+  const open = openProp ?? openState
+  const setOpen = onOpenChange ?? setOpenState
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const initialTime = seedTime?.trim() || (timeStatus?.toUpperCase() === "NT" ? "NT" : "")
@@ -58,13 +68,14 @@ export default function EditSheetSeedButton({
         ? FALLBACK_EVENTS
         : [event, ...FALLBACK_EVENTS]
 
-  function openModal() {
-    setForm({
-      event,
-      time: seedTime?.trim() || (timeStatus?.toUpperCase() === "NT" ? "NT" : "NT"),
-    })
-    setError(null)
-    setOpen(true)
+  // Reset the form each time the modal opens, whether from the pencil or from outside.
+  const [wasOpen, setWasOpen] = useState(false)
+  if (open !== wasOpen) {
+    setWasOpen(open)
+    if (open) {
+      setForm({ event, time: initialTime || "NT" })
+      setError(null)
+    }
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -102,17 +113,19 @@ export default function EditSheetSeedButton({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={openModal}
-        className={
-          className ??
-          "p-1 rounded text-foreground-tertiary hover:text-foreground hover:bg-fill disabled:opacity-50 transition-colors"
-        }
-        aria-label="Edit roster entry"
-      >
-        <ActionIcon kind="edit" className="w-4 h-4" />
-      </button>
+      {hideTrigger ? null : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className={
+            className ??
+            "p-1 rounded text-foreground-tertiary hover:text-foreground hover:bg-fill disabled:opacity-50 transition-colors"
+          }
+          aria-label="Edit roster entry"
+        >
+          <ActionIcon kind="edit" className="w-4 h-4" />
+        </button>
+      )}
 
       <Modal
         open={open}

@@ -5,6 +5,9 @@ from __future__ import annotations
 import asyncio
 import os
 import random
+import re
+import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -31,6 +34,15 @@ def set_progress_reporter(reporter) -> None:
     _progress = {}
 
 
+# Async callback(swimmer_id, times) that hands a finished swimmer's times to the app right away.
+_times_sink = None
+
+
+def set_times_sink(sink) -> None:
+    global _times_sink
+    _times_sink = sink
+
+
 def report_progress(**fields) -> None:
     if _progress_reporter is None:
         return
@@ -38,6 +50,44 @@ def report_progress(**fields) -> None:
         return
     _progress.update(fields)
     _progress_reporter(dict(_progress))
+
+
+def _frontmost_app_path() -> str:
+    """Path of the app that has OS focus right now, or "" when it can't be told."""
+    if sys.platform == "darwin":
+        run = lambda *cmd: subprocess.run(cmd, capture_output=True, text=True, timeout=2).stdout
+        match = re.search(r'bundle path="([^"]*)"', run("lsappinfo", "info", "-only", "bundlepath", run("lsappinfo", "front").strip()))
+        return match.group(1) if match else ""
+    if sys.platform == "win32":
+        import ctypes
+        from ctypes import wintypes
+
+        user32, kernel32 = ctypes.windll.user32, ctypes.windll.kernel32
+        kernel32.OpenProcess.restype = wintypes.HANDLE
+        pid = wintypes.DWORD()
+        user32.GetWindowThreadProcessId(user32.GetForegroundWindow(), ctypes.byref(pid))
+        handle = kernel32.OpenProcess(0x1000, False, pid.value)  # PROCESS_QUERY_LIMITED_INFORMATION
+        if not handle:
+            return ""
+        buf, size = ctypes.create_unicode_buffer(1024), wintypes.DWORD(1024)
+        kernel32.QueryFullProcessImageNameW(handle, 0, buf, ctypes.byref(size))
+        kernel32.CloseHandle(handle)
+        return buf.value
+    return ""
+
+
+def browser_is_frontmost() -> bool:
+    """Whether the scraper's own Playwright browser has OS focus, i.e. the user is already looking at it.
+
+    Playwright fakes page focus (document.hasFocus() is always true), so ask the OS instead.
+    Reports False when it can't tell, so the app errs toward alerting.
+    """
+    try:
+        path = _frontmost_app_path().lower()
+    except Exception:
+        return False
+    browsers_dir = os.environ.get("PLAYWRIGHT_BROWSERS_PATH", "")
+    return "ms-playwright" in path or (browsers_dir not in ("", "0") and browsers_dir.lower() in path)
 
 
 def playwright_headless() -> bool:
@@ -194,7 +244,7 @@ async def wait_past_cloudflare(page, timeout_ms: int = 120_000) -> None:
         if not is_cloudflare_challenge(html, title):
             report_progress(cloudflare=False)
             return
-        report_progress(cloudflare=True)
+        report_progress(cloudflare=True, browserFocused=browser_is_frontmost())
         await asyncio.sleep(2.5)
 
     html = await safe_page_content(page)
@@ -363,11 +413,16 @@ async def fetch_one(page, url: str, pacer: AdaptivePacer):
             continue
         report_progress(rateLimitedUntil=None)
         if isinstance(data, dict) and "error" in data:
+            status = data["error"]
+            # Blocked or erroring is not "no times": raise so the swimmer is reported as failed
+            # instead of being saved (or skipped) as if they had no results for this event.
+            if status == 403 or (isinstance(status, int) and status >= 500):
+                raise SwimCloudScrapeError(f"SwimCloud returned HTTP {status} for {url}")
             return None
         pacer.on_success()
         return data
     report_progress(rateLimitedUntil=None)
-    return None
+    raise SwimCloudScrapeError(f"SwimCloud kept rate-limiting {url}")
 
 
 def append_times(results: list, data, stroke: str, distance: str, course: str):
@@ -424,6 +479,8 @@ async def scrape_bulk_times(swimmer_ids: list[int]):
                     await open_swimmer_times_page(page, swimmer_id, via_home=via_home)
                     times = await fetch_times_by_events(page, swimmer_id, pacer)
                     swimmers[str(swimmer_id)] = times
+                    if _times_sink is not None:
+                        await _times_sink(swimmer_id, times)
                     break
                 except Exception as e:
                     if attempt == 0 and is_transient_navigation_error(e):

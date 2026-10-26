@@ -351,12 +351,14 @@ const totalRow = "border-t border-border bg-fill-secondary/60 px-3 py-[9px] text
 export default function SwimDetailModal({
   detail,
   onClose,
-  onEditRelay,
+  onEdit,
+  editLabel = "Edit",
 }: {
   detail: SwimDetail
   onClose: () => void
-  /** Shown as the footer's primary action for coaches on relay rows. */
-  onEditRelay?: () => void
+  /** Shown as the footer's primary action for coaches who can edit this row. */
+  onEdit?: () => void
+  editLabel?: string
 }) {
   const [mounted, setMounted] = useState(false)
   const [chosenStep, setChosenStep] = useState<number | null>(null)
@@ -840,16 +842,16 @@ export default function SwimDetailModal({
           ) : null}
         </div>
         <div className={`flex shrink-0 gap-3 border-t px-6 pb-3 transition-[padding,border-color] ${canScrollDown ? "border-border-subtle pt-3" : "border-transparent pt-2"}`}>
-          {onEditRelay ? (
+          {onEdit ? (
             <button
               type="button"
-              onClick={onEditRelay}
+              onClick={onEdit}
               className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-contrast transition-colors hover:bg-primary-hover"
             >
               <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden>
                 <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
               </svg>
-              Edit relay
+              {editLabel}
             </button>
           ) : null}
           <button
