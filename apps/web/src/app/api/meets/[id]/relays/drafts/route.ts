@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
 import { normalizeEventName } from "@/lib/swim/swim-parse"
+import { meetHasEnded } from "@/lib/meet/meet-ended"
 import {
   parseRelayDraftGender,
   parseRelayDraftSettings,
@@ -28,10 +29,17 @@ export async function PUT(
   }
 
   const { id } = await params
-  const meet = await prisma.meet.findUnique({ where: { id }, select: { relayDrafts: true } })
+  const meet = await prisma.meet.findUnique({
+    where: { id },
+    select: { relayDrafts: true, startsAt: true, endsAt: true },
+  })
   if (!meet) return NextResponse.json({ error: "Not found" }, { status: 404 })
+  // Drafts are deleted once the meet ends; a builder left open mustn't save them back.
+  if (meetHasEnded({ startsAt: meet.startsAt, endsAt: meet.endsAt })) {
+    return NextResponse.json({ error: "This meet has ended" }, { status: 409 })
+  }
 
-  const body = (await req.json().catch(() => null)) as Record<string, unknown> | null
+  const body =(await req.json().catch(() => null)) as Record<string, unknown> | null
   const event = normalizeEventName(String(body?.event ?? ""))
   const gender = parseRelayDraftGender(body?.gender)
   if (!event || !gender) {

@@ -34,7 +34,7 @@ import {
   medleyStrokeGroups,
   moveRelayRow,
   refinedPoolFor,
-  publishedTeamsFor,
+  publishedLineup,
   replaceLeg,
   setLegTime,
   settingsKey,
@@ -408,10 +408,7 @@ export default function MeetRelayBuilder({
   const { gender, event } = slot
   const mixed = gender === "X"
   const hasSignups = signupRelayPrefs != null && Object.keys(signupRelayPrefs).length > 0
-  const publishedTeams = useMemo(
-    () => publishedTeamsFor(data.published, event, gender),
-    [data.published, event, gender]
-  )
+  const publishedTeams = useMemo(() => publishedLineup(data), [data])
   const draftTeams = pendingDraft(data)?.teams ?? null
 
   const defaultSettings: BuildSettings = {

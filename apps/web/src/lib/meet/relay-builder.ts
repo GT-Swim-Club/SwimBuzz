@@ -457,6 +457,29 @@ export function publishedTeamsFor(published: RelayLineup[], event: string, gende
     }))
 }
 
+/**
+ * The event's published lineup with the custom times it was published with. Published relays
+ * only record who swims, so the times come from the draft publishing saved, wherever the same
+ * swimmer is still on that leg.
+ */
+export function publishedLineup(data: RelaySlotData): LineupTeam[] {
+  const teams = publishedTeamsFor(data.published, data.slot.event, data.slot.gender)
+  const saved = data.draft?.published ? data.draft.teams : null
+  if (!saved) return teams
+  return teams.map((team) => {
+    const savedLegs = saved.find((t) => t.letter === team.letter)?.legs ?? []
+    return {
+      ...team,
+      legs: team.legs.map((leg, i) => {
+        const savedLeg = savedLegs[i]
+        return savedLeg?.custom && savedLeg.timeMs != null && savedLeg.athleteId === leg.athleteId
+          ? { ...leg, timeMs: savedLeg.timeMs, custom: true }
+          : leg
+      }),
+    }
+  })
+}
+
 /** The lineup currently on screen, as teams to keep across a rebuild. */
 export function lineupTeamsOf(result: RelayResult): LineupTeam[] {
   return result.teams.map((team) => ({
@@ -866,7 +889,7 @@ export function initialLineup(data: RelaySlotData): {
 } {
   const draft = pendingDraft(data)
   if (draft) return { source: "draft", fixed: draft.teams }
-  const published = publishedTeamsFor(data.published, data.slot.event, data.slot.gender)
+  const published = publishedLineup(data)
   if (published.length > 0) return { source: "published", fixed: published }
   return { source: "optimal", fixed: null }
 }

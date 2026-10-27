@@ -21,6 +21,7 @@ import {
   collectMeetRosterAthleteIds } from "@/lib/meet/meet-sheet-summary"
 import { isRelayResultsSummary } from "@/lib/meet/relay-results"
 import { buildRelayLineups } from "@/lib/meet/relay-lineups"
+import { deleteEndedMeetRelayDrafts } from "@/lib/meet/relay-drafts-expiry"
 import {
   normalizeFinalsHeatSheetUrls,
   normalizeHeatSheetUrls,
@@ -221,6 +222,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
   lastActiveDate.setHours(0, 0, 0, 0)
 
   const meetHasEnded = lastActiveDate <= yesterday
+  await deleteEndedMeetRelayDrafts(meet, meetHasEnded)
 
   const showSignupCard = !meetHasEnded && isCoach
 

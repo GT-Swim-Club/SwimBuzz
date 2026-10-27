@@ -14,6 +14,7 @@ import { isSignupRelayPreferences } from "@/lib/meet/meet-signup-import"
 import { isMeetFinalRoster } from "@/lib/meet/meet-roster-import"
 import { buildRelayLineups } from "@/lib/meet/relay-lineups"
 import { relayDraftsOf } from "@/lib/meet/relay-drafts"
+import { deleteEndedMeetRelayDrafts } from "@/lib/meet/relay-drafts-expiry"
 import {
   FALLBACK_RELAY_EVENTS,
   relayEventSlots,
@@ -79,6 +80,7 @@ export default async function MeetRelaysPage({
   const lastActiveDate = new Date(meet.endsAt ?? meet.startsAt ?? meet.createdAt)
   lastActiveDate.setHours(0, 0, 0, 0)
   const meetHasEnded = lastActiveDate <= yesterday
+  await deleteEndedMeetRelayDrafts(meet, meetHasEnded)
 
   const seasonAthletes = await prisma.athlete.findMany({
     where: { seasons: { has: meet.season } },
