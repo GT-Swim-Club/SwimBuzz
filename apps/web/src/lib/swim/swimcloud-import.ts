@@ -1,4 +1,7 @@
+import type { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
+import { withRelaySplitSwims } from "../../../soft-delete-policy"
+import { isRelaySplitSwimTag, RELAY_SPLIT_TAG_PREFIX } from "@/lib/meet/relay-results"
 import { meetDayRange, pairSameSwims, type CrossSourceSwim } from "@/lib/swim/swim-dedup"
 import { normalizeEventName, parseCourse, parseMeetDate, parseSwimTime } from "@/lib/swim/swim-parse"
 
@@ -11,6 +14,7 @@ export type SwimCloudTime = {
   date?: string
   meet?: string
   tags?: string
+  place?: number | null
 }
 
 export function swimsFromSwimCloudTimes(
@@ -25,6 +29,7 @@ export function swimsFromSwimCloudTimes(
     date: Date
     meet: string | null
     tags: string | null
+    place: number | null
     source: string
   }[] = []
 
@@ -45,6 +50,7 @@ export function swimsFromSwimCloudTimes(
       date,
       meet: swim.meet ?? null,
       tags: swim.tags ?? null,
+      place: Number.isInteger(swim.place) && swim.place! > 0 ? swim.place! : null,
       source: SWIMCLOUD_SOURCE,
     })
   }
@@ -63,13 +69,32 @@ const crossSourceSelect = {
 
 /**
  * Drop SwimCloud swims that are already recorded — by an earlier sync or by a
- * meet results upload that tagged or dated the same race differently.
+ * meet results upload that tagged or dated the same race differently. Relay
+ * split swims (SPLIT|…) are only compared with other split swims, and flat
+ * swims with flat swims (split swims are hidden from normal reads).
  */
-export async function withoutRecordedSwims<T extends CrossSourceSwim>(swims: T[]): Promise<T[]> {
+export async function withoutRecordedSwims<T extends CrossSourceSwim & { tags?: string | null }>(
+  swims: T[]
+): Promise<T[]> {
+  if (swims.length === 0) return swims
+
+  const splits = swims.filter((s) => isRelaySplitSwimTag(s.tags ?? ""))
+  if (splits.length > 0) {
+    const flat = swims.filter((s) => !isRelaySplitSwimTag(s.tags ?? ""))
+    const newSplits = await withRelaySplitSwims(() =>
+      unrecorded(splits, { tags: { startsWith: RELAY_SPLIT_TAG_PREFIX } })
+    )
+    return [...(await unrecorded(flat)), ...newSplits]
+  }
+  return unrecorded(swims)
+}
+
+async function unrecorded<T extends CrossSourceSwim>(swims: T[], where: Prisma.SwimWhereInput = {}): Promise<T[]> {
   if (swims.length === 0) return swims
 
   const existing = await prisma.swim.findMany({
     where: {
+      ...where,
       athleteId: { in: [...new Set(swims.map((s) => s.athleteId))] },
       timeMs: { in: [...new Set(swims.map((s) => s.timeMs))] },
     },

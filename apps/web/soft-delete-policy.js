@@ -25,11 +25,29 @@ const filters = {
   MeetRoom: { form: { is: { meet: { is: activeMeet } } } },
   MeetRoomAssignment: { room: { is: { form: { is: { meet: { is: activeMeet } } } } } },
 }
+// Relay legs 2–4 are Swims tagged "SPLIT|…" (relaySplitSwimTags in lib/meet/relay-results.ts), not
+// flat starts, so reads skip them unless wrapped in withRelaySplitSwims(...). Writes still see them,
+// so deleting an athlete's or a meet's swims takes their splits too.
+const splitContextKey = Symbol.for("swimbuzz.relaySplitContext")
+const splitContext = globalThis[splitContextKey] ??= new AsyncLocalStorage()
+const flatStartSwim = { NOT: { tags: { startsWith: "SPLIT|" } } }
 const models = Object.fromEntries(Prisma.dmmf.datamodel.models.map(m => [m.name, m]))
 const filteredActions = new Set([
   "findUnique", "findUniqueOrThrow", "findFirst", "findFirstOrThrow", "findMany",
   "count", "aggregate", "groupBy", "update", "updateMany", "delete", "deleteMany", "upsert",
 ])
+const readActions = new Set([
+  "findUnique", "findUniqueOrThrow", "findFirst", "findFirstOrThrow", "findMany",
+  "count", "aggregate", "groupBy",
+])
+function readFilter(model) {
+  return model === "Swim" && !splitContext.getStore() ? flatStartSwim : null
+}
+/** Filter for a nested list, include or count of `model`: active records, and flat-start swims only. */
+function nestedFilter(model) {
+  const parts = [filters[model], readFilter(model)].filter(Boolean)
+  return parts.length > 1 ? { AND: parts } : parts[0]
+}
 function andWhere(where, filter) {
   // Keep unique keys at the top level for Prisma's extended WhereUniqueInput.
   return { ...where, AND: [...(where?.AND ? (Array.isArray(where.AND) ? where.AND : [where.AND]) : []), filter] }
@@ -40,7 +58,7 @@ function filterSelections(model, args) {
     for (const field of models[model]?.fields ?? []) {
       if (field.kind !== "object" || !selection[field.name]) continue
       let nested = selection[field.name]
-      const filter = filters[field.type]
+      const filter = nestedFilter(field.type)
       if (filter && (field.isList || !field.isRequired)) {
         if (nested === true) nested = selection[field.name] = {}
         nested.where = andWhere(nested.where, filter)
@@ -53,8 +71,9 @@ function filterSelections(model, args) {
       }
       for (const [name, value] of Object.entries(selection._count.select ?? {})) {
         const field = models[model]?.fields.find(f => f.name === name)
-        if (value && filters[field?.type]) {
-          selection._count.select[name] = { where: andWhere(value === true ? undefined : value.where, filters[field.type]) }
+        const filter = field && nestedFilter(field.type)
+        if (value && filter) {
+          selection._count.select[name] = { where: andWhere(value === true ? undefined : value.where, filter) }
         }
       }
     }
@@ -93,6 +112,8 @@ function installSoftDeletePolicy(prisma) {
     if (filteredActions.has(params.action) && filters[params.model]) {
       params.args.where = andWhere(params.args.where, filters[params.model])
     }
+    const splitFilter = readActions.has(params.action) && readFilter(params.model)
+    if (splitFilter) params.args.where = andWhere(params.args.where, splitFilter)
     if (["create", "createMany", "update", "updateMany", "upsert"].includes(params.action)) {
       await guardParentWrites(transactionContext.getStore() ?? prisma, params.model, params.args.data ?? params.args.create)
       if (params.action === "upsert") await guardParentWrites(transactionContext.getStore() ?? prisma, params.model, params.args.update)
@@ -105,4 +126,6 @@ function installSoftDeletePolicy(prisma) {
 // Only recovery services and slug reservation may bypass active-record filtering.
 // Await inside the context: PrismaPromise executes lazily, when awaited.
 function withDeleted(callback) { return context.run(true, async () => await callback()) }
-module.exports = { installSoftDeletePolicy, withDeleted }
+// Only code that wants relay legs 2–4 (relay split loading and syncing) may read split swims.
+function withRelaySplitSwims(callback) { return splitContext.run(true, async () => await callback()) }
+module.exports = { installSoftDeletePolicy, withDeleted, withRelaySplitSwims }

@@ -1,13 +1,10 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { ScraperJobStatus, ScraperJobType } from "@prisma/client"
-import {
-  swimsFromSwimCloudTimes,
-  withoutRecordedSwims,
-  type SwimCloudTime,
-} from "@/lib/swim/swimcloud-import"
-import { assignSwimOccurrences } from "@/lib/swim/swim-dedup"
+import { swimsFromSwimCloudTimes } from "@/lib/swim/swimcloud-import"
+import { recordSwimCloudMeetSyncs, syncedSwimCloudMeets } from "@/lib/swim/swimcloud-meets"
 import { mergeProfileTimes } from "@/lib/swim/swimcloud-profiles"
+import { saveSwimCloudTimes, swimCloudProfileTimes } from "@/lib/swim/times-sync-partial"
 import {
   enqueueScraperJob,
   getScraperJobForUser,
@@ -57,7 +54,10 @@ export async function POST(req: Request) {
     const job = await enqueueScraperJob(
       session.user.id,
       ScraperJobType.TIMES_BULK,
-      { swimmer_ids: swimmerCloudIds },
+      {
+        swimmer_ids: swimmerCloudIds,
+        synced_meets: await syncedSwimCloudMeets([athleteId]),
+      },
       {
         kind: "athlete_scrape",
         athleteId,
@@ -92,7 +92,7 @@ export async function applyAthleteScrapeJob(jobId: string, userId: string) {
   }
 
   const scraped = job.result as {
-    swimmers: Record<string, SwimCloudTime[]>
+    swimmers: Record<string, unknown>
     failed: number[]
   }
 
@@ -106,15 +106,13 @@ export async function applyAthleteScrapeJob(jobId: string, userId: string) {
     throw new Error(error)
   }
 
-  const times = mergeProfileTimes(succeeded.map((id) => scraped.swimmers?.[String(id)] ?? []))
-  const swims = await withoutRecordedSwims(
-    assignSwimOccurrences(swimsFromSwimCloudTimes(times, ctx.athleteId))
-  )
-
-  const result = await prisma.swim.createMany({
-    data: swims,
-    skipDuplicates: true,
-  })
+  const profiles = succeeded.map((swimmerId) => ({
+    swimmerId,
+    ...(swimCloudProfileTimes(scraped.swimmers?.[String(swimmerId)]) ?? { times: [], meetIds: [] }),
+  }))
+  const times = mergeProfileTimes(profiles.map((profile) => profile.times))
+  const imported = await saveSwimCloudTimes(swimsFromSwimCloudTimes(times, ctx.athleteId))
+  await recordSwimCloudMeetSyncs(ctx.athleteId, profiles.flatMap((profile) => profile.meetIds))
 
   const syncedAt = new Date()
   await prisma.athlete.update({
@@ -123,7 +121,7 @@ export async function applyAthleteScrapeJob(jobId: string, userId: string) {
   })
 
   const summary = {
-    imported: result.count,
+    imported,
     timesSyncedAt: syncedAt.toISOString(),
     failedSwimCloudIds: swimmerCloudIds.filter((id) => !succeeded.includes(id)),
   }

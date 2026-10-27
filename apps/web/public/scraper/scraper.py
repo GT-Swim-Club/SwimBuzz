@@ -21,6 +21,7 @@ from dotenv import load_dotenv
 load_dotenv(Path(__file__).resolve().parent / ".env")
 
 SCRAPER_POLL_SEC = 2.0
+STREAM_ATTEMPTS = 4
 # Modules re-downloaded from the app on each start so scrape fixes apply without reinstall.
 SYNC_FILES = (
     "scraper.py",
@@ -168,20 +169,26 @@ def progress_reporter(client: httpx.AsyncClient, base_url: str, token: str, job_
 def times_streamer(client: httpx.AsyncClient, base_url: str, token: str, job_id: str):
     """Post each swimmer's times as they finish so the app saves them even if this job dies later.
 
-    Best effort: the job's final result still carries every swimmer, so a failed post loses nothing.
+    Retried, because a job that is stopped partway never sends its final result: a post that
+    gave up is a swimmer the app never hears about. `times=None` reports the swimmer as failed.
     """
     url = f"{base_url.rstrip('/')}/api/scraper/jobs/{job_id}/swimmer"
 
-    async def stream(swimmer_id: int, times: list) -> None:
-        try:
-            await client.post(
-                url,
-                headers=scraper_headers(token),
-                json={"swimmerId": swimmer_id, "times": times},
-                timeout=30.0,
-            )
-        except Exception:
-            pass
+    async def stream(swimmer_id: int, result: dict | None) -> bool:
+        """True once the app saved the swimmer; False when it couldn't, or didn't want them streamed."""
+        body = {"swimmerId": swimmer_id, "failed": True} if result is None else {"swimmerId": swimmer_id, **result}
+        for attempt in range(STREAM_ATTEMPTS):
+            try:
+                res = await client.post(url, headers=scraper_headers(token), json=body, timeout=60.0)
+                if res.status_code == 200:
+                    return res.json().get("ok") is True
+                reason = f"HTTP {res.status_code}"
+            except Exception as exc:
+                reason = str(exc) or type(exc).__name__
+            if attempt + 1 < STREAM_ATTEMPTS:
+                await asyncio.sleep(2.0 * (attempt + 1))
+        print(f"Could not send swimmer {swimmer_id} to the app ({reason}).")
+        return False
 
     return stream
 
@@ -209,7 +216,7 @@ async def run_job(job: dict, report=None, stream_times=None) -> object:
 
     if job_type == "TIMES_BULK":
         swimmer_ids = [int(sid) for sid in payload.get("swimmer_ids", [])]
-        return await scrape_bulk_times(swimmer_ids)
+        return await scrape_bulk_times(swimmer_ids, payload.get("synced_meets") or {})
 
     if job_type == "SWIMPHONE_MEET":
         from swimphone_parse import scrape_swimphone_meet

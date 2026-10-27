@@ -5,6 +5,7 @@ import BalancedGrid from "@/components/ui/BalancedGrid"
 import {
   relayLineupHasAthlete,
   relayLineupRoundLabel,
+  relayShareRows,
   type RelayLineup,
   type RelayShareEvent,
 } from "@swimbuzz/shared"
@@ -172,14 +173,28 @@ export default function RelaySummary({
       </p>
     )
   }
+  // Past a few events: women's row, then men's (mixed at its end), event types in shared columns.
+  const rows = relayShareRows(events)
   return (
     <BalancedGrid
       count={events.length}
       minColumnPx={minColumnWidth(events)}
       gapXPx={16}
+      alignedColumns={rows.length > 1 ? rows[0].length : undefined}
       className="items-start gap-x-4 gap-y-5"
     >
-      {events.map((event) => {
+      {rows.flat().map((event, i) => {
+        // Blank cell keeping the other gender's event in its column; hidden when the grid wraps.
+        if (!event) {
+          return (
+            <div
+              key={`blank-${i}`}
+              data-placeholder
+              aria-hidden
+              className="hidden group-data-[aligned=true]/rows:block"
+            />
+          )
+        }
         const content = (
           <>
             <EventHeader event={event} />

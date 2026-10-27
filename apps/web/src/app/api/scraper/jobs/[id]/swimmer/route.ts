@@ -22,6 +22,8 @@ export async function POST(
     return NextResponse.json({ error: "swimmerId is required" }, { status: 400 })
   }
 
-  const saved = await saveStreamedSwimmerTimes(id, connection.id, swimmerId, body.times)
+  // { meets, dates } from the meet-dropdown scraper; `times` from scrapers that predate it.
+  const profile = Array.isArray(body.times) ? body.times : { meets: body.meets, dates: body.dates }
+  const saved = await saveStreamedSwimmerTimes(id, connection.id, swimmerId, profile, body?.failed === true)
   return NextResponse.json({ ok: saved })
 }

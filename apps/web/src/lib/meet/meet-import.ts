@@ -23,6 +23,7 @@ import {
   type ParsedRelayResult,
 } from "@/lib/meet/relay-results"
 import { importRelayLeadoffSwims } from "@/lib/meet/relay-leadoff-sync"
+import { syncMeetRelaySplitSwims } from "@/lib/meet/relay-split-sync"
 import {
   buildHeatSheetLookup,
   isResultStatusesSummary,
@@ -607,6 +608,7 @@ export async function importMeetResults({
 
   // Uploaded results replace any SwimCloud-synced copies of the same swims.
   const swimCloudCopiesRemoved = meetId ? await removeSwimCloudCopiesOfMeet(meetId) : 0
+  if (meetId) await syncMeetRelaySplitSwims(meetId)
 
   console.log(
     `\n--- Meet import (${source}): ${meetName} (${matched.length} matched, ${unmatched.length} unmatched) ---`

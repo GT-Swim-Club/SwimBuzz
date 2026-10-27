@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { Gender, ScraperJobStatus, ScraperJobType } from "@prisma/client"
-import { swimsFromSwimCloudTimes, type SwimCloudTime } from "@/lib/swim/swimcloud-import"
+import { swimsFromSwimCloudTimes } from "@/lib/swim/swimcloud-import"
+import { recordSwimCloudMeetSyncs, syncedSwimCloudMeets } from "@/lib/swim/swimcloud-meets"
 import {
   asTimesApplyContext,
   saveSwimCloudTimes,
+  swimCloudProfileTimes,
   type TimesApplyContext,
 } from "@/lib/swim/times-sync-partial"
 import {
@@ -106,7 +108,7 @@ export async function POST(req: Request) {
     const job = await enqueueScraperJob(
       session.user.id,
       ScraperJobType.TIMES_BULK,
-      { swimmer_ids: swimmerIds },
+      { swimmer_ids: swimmerIds, synced_meets: await syncedSwimCloudMeets(athletes.map((a) => a.id)) },
       applyContext
     )
     return NextResponse.json({ jobId: job.id, athletes: athletes.length })
@@ -143,26 +145,37 @@ export async function applyTimesSyncJob(jobId: string, userId: string) {
   )
 
   const scraped = job.result as {
-    swimmers: Record<string, SwimCloudTime[]>
+    swimmers: Record<string, unknown>
     failed: number[]
   }
 
   const allSwims: ReturnType<typeof swimsFromSwimCloudTimes> = []
   const syncedAthleteIds: string[] = []
+  const meetSyncs: { athleteId: string; meetIds: number[] }[] = []
 
   for (const athlete of athletes) {
     // An athlete with several SwimCloud profiles gets the times from all of them.
-    const profiles = athlete.swimCloudIds
-      .map((id) => scraped.swimmers?.[String(id)])
-      .filter((times): times is SwimCloudTime[] => !!times?.length)
-    if (profiles.length === 0) continue
-    allSwims.push(...swimsFromSwimCloudTimes(mergeProfileTimes(profiles), athlete.id))
+    const profiles = athlete.swimCloudIds.flatMap((swimmerId) => {
+      const profile = swimCloudProfileTimes(scraped.swimmers?.[String(swimmerId)])
+      return profile ? [{ swimmerId, ...profile }] : []
+    })
+    meetSyncs.push({ athleteId: athlete.id, meetIds: profiles.flatMap((profile) => profile.meetIds) })
+    const withTimes = profiles.filter((profile) => profile.times.length > 0)
+    if (withTimes.length === 0) continue
+    allSwims.push(...swimsFromSwimCloudTimes(mergeProfileTimes(withTimes.map((p) => p.times)), athlete.id))
     syncedAthleteIds.push(athlete.id)
+  }
+  // Profiles the app saved as they streamed in come back as { streamed: true }, without their swims.
+  for (const id of ctx.saved?.athleteIds ?? []) {
+    if (!syncedAthleteIds.includes(id)) syncedAthleteIds.push(id)
   }
   const athletesSynced = syncedAthleteIds.length
 
   // Athletes the scraper streamed in while running are already saved; this pass only adds what's missing.
   const imported = (ctx.saved?.imported ?? 0) + (await saveSwimCloudTimes(allSwims))
+  for (const { athleteId, meetIds } of meetSyncs) {
+    await recordSwimCloudMeetSyncs(athleteId, meetIds)
+  }
 
   const syncedAt = new Date()
   if (syncedAthleteIds.length > 0) {

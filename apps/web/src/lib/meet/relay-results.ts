@@ -235,6 +235,34 @@ export function isRelayLeadoffSwimTag(tags: string): boolean {
   return t === "R" || t.startsWith("R|")
 }
 
+/**
+ * Tags prefix of a relay split swim (leg 2–4). Not a flat start, so soft-delete-policy.js hides
+ * these swims from every read outside withRelaySplitSwims(...); keep the two prefixes in sync.
+ */
+export const RELAY_SPLIT_TAG_PREFIX = "SPLIT|"
+
+/** Swim tags for a relay split; leg is null when SwimCloud only says "Split" (leg 2 or 3). */
+export function relaySplitSwimTags(relayEvent: string, leg: number | null, relayRound: RelayRound = ""): string {
+  return `${RELAY_SPLIT_TAG_PREFIX}${normalizeEventName(relayEvent)}|${leg ?? ""}|${relayRound}`
+}
+
+export function isRelaySplitSwimTag(tags: string): boolean {
+  return tags.startsWith(RELAY_SPLIT_TAG_PREFIX)
+}
+
+export function parseRelaySplitTag(
+  tags: string
+): { relayEvent: string; leg: number | null; round: RelayRound } | null {
+  if (!isRelaySplitSwimTag(tags)) return null
+  const [, relayEvent = "", leg = "", round = ""] = tags.split("|")
+  const legNumber = Number(leg)
+  return {
+    relayEvent,
+    leg: leg && Number.isInteger(legNumber) ? legNumber : null,
+    round: relayRoundFromTags(round),
+  }
+}
+
 export function parseLeadoffTag(tags: string): {
   relayEvent?: string
   round?: RelayRound

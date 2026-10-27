@@ -76,13 +76,13 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
     course: split.course,
     timeMs: split.timeMs,
     tags: "",
-    meet: split.meet.name,
-    meetId: split.meet.id,
-    meetSlug: split.meet.slug,
-    meetIconUrl: split.meet.iconUrl,
-    meetDays: meetDayRange(split.meet),
+    meet: split.meetName,
+    meetId: split.meet?.id ?? null,
+    meetSlug: split.meet?.slug ?? null,
+    meetIconUrl: split.meet?.iconUrl ?? null,
+    meetDays: split.meet ? meetDayRange(split.meet) : null,
     date: split.date.toISOString(),
-    source: "relay",
+    source: split.source,
     relaySplit: { relayEvent: split.relayEvent, leg: split.leg }}))
 
   const athleteHighlights = SHOW_SEASON_HIGHLIGHTS && computeAthleteHighlights(

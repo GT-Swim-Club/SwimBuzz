@@ -72,7 +72,8 @@ export default function SwimHistory({
   swims: AthleteSwim[]
   marks: SwimMarks
   isCoach: boolean
-  onOpenEvent: (event: string, course: string) => void
+  /** `splits` opens the event's relay-split view. */
+  onOpenEvent: (event: string, course: string, splits?: boolean) => void
   /** 1-based; kept by the parent so returning from an event drill-down keeps the page. */
   page: number
   onPageChange: (page: number) => void
@@ -184,18 +185,13 @@ export default function SwimHistory({
                     }`}
                   >
                     <span className="flex min-w-0 items-baseline gap-1.5">
-                      {swim.relaySplit ? (
-                        // Relay splits have no event page.
-                        <span className="truncate font-semibold text-foreground">{swim.event}</span>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => onOpenEvent(swim.event, swim.course)}
-                          className="relative z-[1] truncate text-left font-semibold text-foreground transition-colors hover:text-primary"
-                        >
-                          {swim.event}
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => onOpenEvent(swim.event, swim.course, Boolean(swim.relaySplit))}
+                        className="relative z-[1] truncate text-left font-semibold text-foreground transition-colors hover:text-primary"
+                      >
+                        {swim.event}
+                      </button>
                       <span className="shrink-0 text-foreground-secondary">{swim.course}</span>
                       {round && <span className="truncate text-foreground-secondary">{round}</span>}
                     </span>

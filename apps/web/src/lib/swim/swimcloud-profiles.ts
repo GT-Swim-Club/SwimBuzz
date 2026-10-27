@@ -79,13 +79,14 @@ function parseIdList(raw: unknown): number[] {
  * Resolve a coach edit of the SwimCloud profiles. `swimCloudIds` replaces the
  * whole list. Legacy `swimCloudId` (older mobile builds) replaces just the main
  * ID, or drops it when null/"". Omitted fields keep the stored list. Throws
- * SwimCloudProfileError on a bad, excess, or taken ID.
+ * SwimCloudProfileError on a bad, excess, or taken ID. Adding a profile also
+ * clears the imported-meets list, so the next times sync reads every meet of it.
  */
 export async function resolveSwimCloudProfilesUpdate(
   current: SwimCloudProfiles,
   input: { swimCloudIds?: unknown; swimCloudId?: unknown },
   athleteId?: string
-): Promise<SwimCloudProfiles> {
+): Promise<SwimCloudProfiles & { swimCloudSyncedMeetIds?: number[] }> {
   let swimCloudIds = current.swimCloudIds
   if (input.swimCloudIds !== undefined) {
     swimCloudIds = parseIdList(input.swimCloudIds)
@@ -95,7 +96,8 @@ export async function resolveSwimCloudProfilesUpdate(
     swimCloudIds = main == null ? rest : [main, ...rest]
   }
   await assertSwimCloudIdsAvailable(swimCloudIds, athleteId)
-  return { swimCloudIds }
+  const added = swimCloudIds.some((id) => !current.swimCloudIds.includes(id))
+  return added ? { swimCloudIds, swimCloudSyncedMeetIds: [] } : { swimCloudIds }
 }
 
 /**

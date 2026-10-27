@@ -1,8 +1,33 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
+import type { PointerEvent as ReactPointerEvent } from "react"
 import { createPortal } from "react-dom"
 import { useImportTask } from "@/components/ui/ImportTaskProvider"
+
+type Corner = "top-left" | "top-right" | "bottom-left" | "bottom-right"
+
+const CORNER_STORAGE_KEY = "swimbuzz:toast-corner"
+
+const CORNER_CLASSES: Record<Corner, string> = {
+  "top-left": "top-4 left-4 flex-col",
+  "top-right": "top-4 right-4 flex-col",
+  "bottom-left": "bottom-4 left-4 flex-col-reverse",
+  "bottom-right": "bottom-4 right-4 flex-col-reverse",
+}
+
+function isCorner(value: unknown): value is Corner {
+  return typeof value === "string" && value in CORNER_CLASSES
+}
+
+function readSavedCorner(): Corner {
+  if (typeof window === "undefined") return "bottom-right"
+  try {
+    const saved = localStorage.getItem(CORNER_STORAGE_KEY)
+    if (isCorner(saved)) return saved
+  } catch {}
+  return "bottom-right"
+}
 
 /** Determinate when `progress` (0–1) is known, otherwise an indeterminate sweep. */
 function ProgressBar({ progress }: { progress?: number }) {
@@ -67,20 +92,91 @@ function ErrorIcon() {
 export default function ImportToast() {
   const { tasks, dismissTask } = useImportTask()
   const [mounted, setMounted] = useState(false)
+  // Nothing renders before `mounted`, so reading storage here can't cause a hydration mismatch.
+  const [corner, setCorner] = useState<Corner>(readSavedCorner)
+  const [offset, setOffset] = useState({ x: 0, y: 0 })
+  const [dragging, setDragging] = useState(false)
+  const [settling, setSettling] = useState(false)
+  const [releaseTick, setReleaseTick] = useState(0)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const dragRef = useRef<{ pointerId: number; startX: number; startY: number } | null>(null)
+  // Where the stack was when released, so it can glide into its snapped corner.
+  const releasedFromRef = useRef<{ left: number; top: number } | null>(null)
+
   useEffect(() => setMounted(true), [])
+
+  // After snapping to a corner, start from the released position and animate to rest.
+  useLayoutEffect(() => {
+    const from = releasedFromRef.current
+    const el = containerRef.current
+    if (!from || !el) return
+    releasedFromRef.current = null
+    const rect = el.getBoundingClientRect()
+    setSettling(false)
+    setOffset({ x: from.left - rect.left, y: from.top - rect.top })
+    const frame = requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        setSettling(true)
+        setOffset({ x: 0, y: 0 })
+      }),
+    )
+    return () => cancelAnimationFrame(frame)
+  }, [releaseTick])
+
+  function handlePointerDown(e: ReactPointerEvent<HTMLDivElement>) {
+    if (e.button !== 0 || (e.target as HTMLElement).closest("button")) return
+    dragRef.current = { pointerId: e.pointerId, startX: e.clientX, startY: e.clientY }
+    e.currentTarget.setPointerCapture(e.pointerId)
+    setSettling(false)
+    setDragging(true)
+  }
+
+  function handlePointerMove(e: ReactPointerEvent<HTMLDivElement>) {
+    const drag = dragRef.current
+    if (!drag || drag.pointerId !== e.pointerId) return
+    setOffset({ x: e.clientX - drag.startX, y: e.clientY - drag.startY })
+  }
+
+  function handlePointerEnd(e: ReactPointerEvent<HTMLDivElement>) {
+    const drag = dragRef.current
+    if (!drag || drag.pointerId !== e.pointerId) return
+    dragRef.current = null
+    setDragging(false)
+    const rect = e.currentTarget.getBoundingClientRect()
+    const vertical = rect.top + rect.height / 2 < window.innerHeight / 2 ? "top" : "bottom"
+    const horizontal = rect.left + rect.width / 2 < window.innerWidth / 2 ? "left" : "right"
+    const next = `${vertical}-${horizontal}` as Corner
+    releasedFromRef.current = { left: rect.left, top: rect.top }
+    setCorner(next)
+    setOffset({ x: 0, y: 0 })
+    setReleaseTick((tick) => tick + 1)
+    try {
+      localStorage.setItem(CORNER_STORAGE_KEY, next)
+    } catch {}
+  }
 
   if (!mounted || tasks.length === 0) return null
 
   const content = (
     <div
-      className="fixed bottom-4 right-4 z-[60] flex flex-col-reverse gap-2 pointer-events-none"
+      ref={containerRef}
+      className={`fixed z-[60] flex gap-2 pointer-events-none ${CORNER_CLASSES[corner]} ${
+        settling ? "transition-transform duration-300 ease-out" : ""
+      }`}
+      style={{ transform: `translate(${offset.x}px, ${offset.y}px)` }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerEnd}
+      onPointerCancel={handlePointerEnd}
       aria-live="polite"
       aria-label="Import status"
     >
       {tasks.map((task) => (
         <div
           key={task.id}
-          className={`pointer-events-auto flex max-w-md items-start ${task.status === "running" ? "w-96" : ""} gap-4 rounded-2xl border px-5 py-4 shadow-xl transition-all duration-300 animate-in slide-in-from-right-4 ${
+          className={`pointer-events-auto flex max-w-md touch-none items-start ${task.status === "running" ? "w-96" : ""} gap-4 rounded-2xl border px-5 py-4 shadow-xl transition-all duration-300 animate-in ${
+            corner.endsWith("left") ? "slide-in-from-left-4" : "slide-in-from-right-4"
+          } ${dragging ? "cursor-grabbing select-none" : "cursor-grab"} ${
             task.status === "error"
               ? "bg-error-bg border-error-border"
               : task.status === "done"

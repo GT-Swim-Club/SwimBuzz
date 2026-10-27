@@ -45,8 +45,8 @@ export async function GET(
     date: split.date,
     relayEvent: split.relayEvent,
     leg: split.leg,
-    meet: split.meet.name,
-    meetRef: { id: split.meet.id, slug: split.meet.slug, name: split.meet.name },
+    meet: split.meetName,
+    meetRef: split.meet ? { id: split.meet.id, slug: split.meet.slug, name: split.meet.name } : null,
   }))
 
   return NextResponse.json({

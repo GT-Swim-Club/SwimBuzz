@@ -22,6 +22,7 @@ import {
   meetHasImportedResults } from "@/lib/meet/meet-sheet-summary"
 import { Gender } from "@prisma/client"
 import { syncRelayLeadoffSwim, deleteRelayLeadoffSwim } from "@/lib/meet/relay-leadoff-sync"
+import { syncMeetRelaySplitSwims } from "@/lib/meet/relay-split-sync"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
 
@@ -244,6 +245,7 @@ export async function POST(
       relayToSave.relayRound ?? ""
     )
   }
+  await syncMeetRelaySplitSwims(id)
 
   return NextResponse.json({ ok: true, entries: entries.length })
 }
@@ -316,6 +318,7 @@ export async function DELETE(
   await prisma.meet.update({
     where: { id },
     data: { relayResultsSummary: { entries } }})
+  await syncMeetRelaySplitSwims(id)
 
   return NextResponse.json({
     ok: true,

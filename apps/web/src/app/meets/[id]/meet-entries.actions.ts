@@ -36,6 +36,7 @@ import {
   type RelayTeamInput,
 } from "@/lib/meet/relay-results"
 import { syncRelayLeadoffSwim, deleteRelayLeadoffSwim } from "@/lib/meet/relay-leadoff-sync"
+import { syncMeetRelaySplitSwims } from "@/lib/meet/relay-split-sync"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
 
@@ -272,6 +273,7 @@ export async function upsertRelayEntry(meetId: string, input: UpsertRelayEntryIn
       relayToSave.relayRound ?? ""
     )
   }
+  await syncMeetRelaySplitSwims(meetId)
 
   revalidatePath("/meets/[id]", "page")
   return { ok: true, entries: entries.length }
@@ -319,6 +321,7 @@ export async function removeRelayEntry(
   await prisma.meet.update({
     where: { id: meetId },
     data: { relayResultsSummary: { entries } }})
+  await syncMeetRelaySplitSwims(meetId)
 
   revalidatePath("/meets/[id]", "page")
   return { ok: true }

@@ -31,11 +31,11 @@ export type ScraperJobProgress = {
   swimmerId?: number
   /** Name of the athlete `swimmerId` belongs to, added by the server for times imports. */
   swimmerName?: string
-  /** 1-based index of the SwimCloud event being fetched for the current swimmer. */
+  /** 1-based index of the SwimCloud request being made for the current swimmer. */
   event?: number
-  /** Number of events fetched per swimmer. */
+  /** Number of SwimCloud requests (meets, then event dates) for the current swimmer. */
   events?: number
-  /** Event being fetched, e.g. "100 Free SCY". */
+  /** What's being fetched, e.g. a SwimCloud meet's name. */
   eventLabel?: string | null
   /** True while a Cloudflare check is blocking the scraper's browser window. */
   cloudflare?: boolean

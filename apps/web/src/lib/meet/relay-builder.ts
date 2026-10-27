@@ -41,6 +41,30 @@ export type AthleteOption = {
 
 export type SignupPool = "all" | "meet" | "relay"
 
+/** Free relays: `legOrder[rank]` is the 0-based leg the rank-th fastest swimmer takes (0 = fastest). */
+export type LegOrder = number[]
+
+export const LEG_ORDER_PRESETS: { label: string; order: LegOrder }[] = [
+  { label: "Fastest anchors, 2nd fastest leads off", order: [3, 0, 1, 2] },
+  { label: "Fastest leads off, 2nd fastest anchors", order: [0, 3, 1, 2] },
+  { label: "Fastest to slowest", order: [0, 1, 2, 3] },
+  { label: "Slowest to fastest", order: [3, 2, 1, 0] },
+]
+
+export function isLegOrder(value: unknown): value is LegOrder {
+  return (
+    Array.isArray(value) &&
+    value.length === 4 &&
+    [0, 1, 2, 3].every((leg) => value.includes(leg))
+  )
+}
+
+/** "Auto" for no order, a preset's label, else "Custom". */
+export function legOrderLabel(order: LegOrder | null | undefined): string {
+  if (!order) return "Auto"
+  return LEG_ORDER_PRESETS.find((p) => p.order.join() === order.join())?.label ?? "Custom"
+}
+
 /** How the builder picks times and swimmers; saved with a draft so reopening it restores them. */
 export type BuildSettings = {
   /** "Times from": swims older than this are ignored. */
@@ -52,6 +76,8 @@ export type BuildSettings = {
   excludedIds: string[]
   /** Meet signups outside the chosen pool that were opted in via Refine athletes. */
   addedIds: string[]
+  /** Free relays: which leg each speed rank swims. null/absent = Auto (fastest after the lead-off first). */
+  legOrder?: LegOrder | null
 }
 
 export type Leg = {
@@ -452,6 +478,26 @@ export function lineupKey(teams: LineupTeam[]): string {
       team.legs.map((leg) => (leg.custom ? `${leg.athleteId}@${leg.timeMs}` : leg.athleteId)).join(",")
     )
     .join("|")
+}
+
+/**
+ * Reorders each free relay's four swimmers by speed (their legs 2–4 time, NT last) onto the legs
+ * in `order`, re-timing each leg. Medley relays are fixed by stroke, so they come back as-is.
+ */
+export function applyLegOrder(result: RelayResult, order: LegOrder | null | undefined): RelayResult {
+  if (!order || !isLegOrder(order) || isMedleyRelay(result.relay)) return result
+  const rolling = (leg: Leg) => slotTime(result.strokeTimes?.[leg.athleteId], "free", 1)?.timeMs ?? Infinity
+  const teams = result.teams.map((team) => {
+    if (team.legs.length !== 4) return team
+    const legs: Leg[] = new Array(4)
+    ;[...team.legs]
+      .sort((a, b) => rolling(a) - rolling(b))
+      .forEach((leg, rank) => {
+        legs[order[rank]] = legFor(result, leg, order[rank])
+      })
+    return { ...team, legs }
+  })
+  return { ...result, teams: retotalTeams(teams) }
 }
 
 /** Swap the optimal teams for a fixed lineup, timing each leg from times on record. */

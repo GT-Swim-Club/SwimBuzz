@@ -120,6 +120,9 @@ model Athlete {
   dob          DateTime?
   year         String?
   timesSyncedAt DateTime?
+  /// SwimCloud meets already imported from the athlete's profiles, so a times sync only reads new ones.
+  /// Cleared when a SwimCloud profile is added, so its meets are all read once.
+  swimCloudSyncedMeetIds Int[] @default([])
   swims        Swim[]
   meetSignups  MeetSignupEntry[]
   meetRoomPreferences MeetRoomPreference[]

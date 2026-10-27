@@ -15,11 +15,13 @@ import RequestTimesImportButton from "./RequestTimesImportButton"
 import LogSwimModal from "./LogSwimModal"
 import { ICON_BUTTON } from "./AthleteIconButton"
 
-type Selected = { event: string; course: string }
+/** An event + course, and whether its relay splits are shown instead of its flat-start swims. */
+type Selected = { event: string; course: string; splits: boolean }
 
 /**
  * Personal bests sidebar beside either the full meet-grouped History or one event's
- * drill-down. The selected event lives in the URL (`?event=100-free&course=SCY`).
+ * drill-down. The selected event lives in the URL (`?event=100-free&course=SCY`, plus
+ * `&splits=1` for its relay splits).
  */
 export default function AthleteSwimsWorkspace({
   swims,
@@ -32,7 +34,7 @@ export default function AthleteSwimsWorkspace({
   highlights,
 }: {
   swims: AthleteSwim[]
-  /** Relay leg 2–4 splits — extra PB rows and History entries only, never an event page. */
+  /** Relay leg 2–4 splits: extra PB rows, History entries, and their own view of an event. */
   relaySplits: AthleteSwim[]
   isCoach: boolean
   isOwnProfile: boolean
@@ -54,6 +56,7 @@ export default function AthleteSwimsWorkspace({
   const [logOpen, setLogOpen] = useState(false)
 
   const marks = useMemo(() => computeSwimMarks(swims), [swims])
+  const splitMarks = useMemo(() => computeSwimMarks(relaySplits), [relaySplits])
 
   const historySwims = useMemo(() => [...swims, ...relaySplits], [swims, relaySplits])
 
@@ -62,13 +65,21 @@ export default function AthleteSwimsWorkspace({
     [historySwims]
   )
 
+  const has = (list: AthleteSwim[], event: string, eventCourse: string) =>
+    list.some((s) => s.event === event && s.course === eventCourse)
+
   const selected = useMemo<Selected | null>(() => {
     const eventParam = searchParams.get("event")
     const course = searchParams.get("course")?.toUpperCase()
     if (!eventParam || !course) return null
-    const match = swims.find((s) => s.course === course && eventToParam(s.event) === eventParam)
-    return match ? { event: match.event, course } : null
-  }, [searchParams, swims])
+    const match = historySwims.find((s) => s.course === course && eventToParam(s.event) === eventParam)
+    if (!match) return null
+    const hasFlat = swims.some((s) => s.event === match.event && s.course === course)
+    const hasSplits = relaySplits.some((s) => s.event === match.event && s.course === course)
+    // Whichever view the event has when the asked-for one is empty (e.g. splits only).
+    const splits = searchParams.get("splits") === "1" ? hasSplits : !hasFlat
+    return { event: match.event, course, splits }
+  }, [searchParams, historySwims, swims, relaySplits])
 
   const course =
     selected?.course ??
@@ -81,9 +92,12 @@ export default function AthleteSwimsWorkspace({
     if (next) {
       params.set("event", eventToParam(next.event))
       params.set("course", next.course)
+      if (next.splits) params.set("splits", "1")
+      else params.delete("splits")
     } else {
       params.delete("event")
       params.delete("course")
+      params.delete("splits")
     }
     const qs = params.toString()
     const url = qs ? `${pathname}?${qs}` : pathname
@@ -106,12 +120,13 @@ export default function AthleteSwimsWorkspace({
     })
   }
 
-  function openEvent(event: string, eventCourse: string) {
+  function openEvent(event: string, eventCourse: string, splits = false) {
     setCourseChoice(eventCourse)
+    const next = { event, course: eventCourse, splits }
     if (selected) {
-      navigate({ event, course: eventCourse }, "replace")
+      navigate(next, "replace")
     } else {
-      navigate({ event, course: eventCourse }, "push")
+      navigate(next, "push")
       pushedRef.current = true
     }
     revealMain()
@@ -129,8 +144,11 @@ export default function AthleteSwimsWorkspace({
   function changeCourse(next: string) {
     setCourseChoice(next)
     if (!selected) return
-    if (swims.some((s) => s.event === selected.event && s.course === next)) {
-      navigate({ event: selected.event, course: next }, "replace")
+    // Same view in the new course if it has one, else the event's other view there.
+    const sameView = has(selected.splits ? relaySplits : swims, selected.event, next)
+    const otherView = has(selected.splits ? swims : relaySplits, selected.event, next)
+    if (sameView || otherView) {
+      navigate({ event: selected.event, course: next, splits: sameView ? selected.splits : !selected.splits }, "replace")
     } else {
       backToHistory()
     }
@@ -172,10 +190,10 @@ export default function AthleteSwimsWorkspace({
               course={course}
               onCourseChange={changeCourse}
               selected={selected}
-              onSelectEvent={(event) =>
-                selected?.event === event && selected.course === course
+              onSelectEvent={(event, splits) =>
+                selected?.event === event && selected.course === course && selected.splits === splits
                   ? backToHistory()
-                  : openEvent(event, course)
+                  : openEvent(event, course, splits)
               }
             />
           </>
@@ -184,10 +202,18 @@ export default function AthleteSwimsWorkspace({
         <div ref={mainRef} className="flex scroll-mt-4 flex-col gap-4">
           {selected ? (
             <EventDrilldown
+              // Fresh chart state (hover, full history) per view.
+              key={selected.splits ? "splits" : "flat"}
               event={selected.event}
               course={selected.course}
-              swims={swims}
-              marks={marks}
+              swims={selected.splits ? relaySplits : swims}
+              marks={selected.splits ? splitMarks : marks}
+              splits={selected.splits}
+              onViewChange={
+                has(swims, selected.event, selected.course) && has(relaySplits, selected.event, selected.course)
+                  ? (splits) => navigate({ ...selected, splits }, "replace")
+                  : undefined
+              }
               isCoach={isCoach}
               onBack={backToHistory}
             />

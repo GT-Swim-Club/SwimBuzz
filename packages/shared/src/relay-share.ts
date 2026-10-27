@@ -39,12 +39,12 @@ const MAX_SINGLE_ROW_EVENTS = 4
  * a row of men's, with each event type in the same column in both rows (null where a gender has
  * no such event), and mixed relays at the end of the last row.
  */
-export function relayShareRows(events: RelayShareEvent[]): (RelayShareEvent | null)[][] {
+export function relayShareRows<T extends { name: string }>(events: T[]): (T | null)[][] {
   if (events.length <= MAX_SINGLE_ROW_EVENTS) return [events]
   const split = (name: string) => /^(Women|Men)\s+(.+)$/.exec(name)
-  const women = new Map<string, RelayShareEvent>()
-  const men = new Map<string, RelayShareEvent>()
-  const mixed: RelayShareEvent[] = []
+  const women = new Map<string, T>()
+  const men = new Map<string, T>()
+  const mixed: T[] = []
   const columns: string[] = []
   for (const event of events) {
     const match = split(event.name)
@@ -56,7 +56,7 @@ export function relayShareRows(events: RelayShareEvent[]): (RelayShareEvent | nu
     ;(gender === "Women" ? women : men).set(type, event)
     if (!columns.includes(type)) columns.push(type)
   }
-  const rows: (RelayShareEvent | null)[][] = [women, men]
+  const rows: (T | null)[][] = [women, men]
     .filter((byType) => byType.size > 0)
     .map((byType) => columns.map((type) => byType.get(type) ?? null))
   if (mixed.length > 0) {

@@ -20,8 +20,11 @@ export type AthleteSwim = {
   /** ISO instant. */
   date: string
   source: string
-  /** Set on a relay split (leg 2–4 of a relay): History-only, never a PB, chart or event page. */
-  relaySplit?: { relayEvent: string; leg: number }
+  /**
+   * Set on a relay split (leg 2–4 of a relay): never a flat-start PB; it has its own view on the
+   * event page. `leg` is null when SwimCloud only says "Split" (leg 2 or 3).
+   */
+  relaySplit?: { relayEvent: string; leg: number | null }
 }
 
 export function swimKey(swim: { event: string; course: string }): string {
@@ -113,6 +116,11 @@ export function swimRoundLabel(tags: string): string {
 
 /** History label for a relay split row. */
 export const RELAY_SPLIT_LABEL = "Relay split"
+
+/** "200 Free Relay · Leg 3", or "· Split" when SwimCloud didn't say which middle leg. */
+export function relaySplitLegLabel(split: { relayEvent: string; leg: number | null }): string {
+  return `${split.relayEvent} · ${split.leg ? `Leg ${split.leg}` : "Split"}`
+}
 
 /** Only hand-logged swims can be deleted (relay lead-offs come from relay results). */
 export function isDeletableSwim(swim: AthleteSwim): boolean {

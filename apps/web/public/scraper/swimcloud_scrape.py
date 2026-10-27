@@ -9,6 +9,8 @@ import re
 import subprocess
 import sys
 import time
+from collections import Counter
+from datetime import date, timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -34,7 +36,8 @@ def set_progress_reporter(reporter) -> None:
     _progress = {}
 
 
-# Async callback(swimmer_id, times) that hands a finished swimmer's times to the app right away.
+# Async callback(swimmer_id, result) that hands a finished swimmer's meets to the app right away;
+# result is None when the swimmer failed. Returns True once the app has saved them.
 _times_sink = None
 
 
@@ -115,6 +118,8 @@ MAX_RETRIES = 6
 RETRY_BASE_SEC = 12
 BULK_SWIMMER_GAP_SEC = 5.0
 BULK_INITIAL_DELAY_SEC = 2.0
+# A swimmer that errors gets one more go after this long, since blocks and rate limits tend to pass.
+BULK_RETRY_COOLDOWN_SEC = 45.0
 
 STROKE_MAP = {
     "Free": "1", "Back": "2", "Breast": "3", "Fly": "4", "IM": "5",
@@ -371,39 +376,134 @@ def extract_tags(swim: dict) -> str:
     return "".join(labels)
 
 
-def swim_record_to_result(swim: dict, stroke: str, distance: str, course: str) -> dict | None:
-    event_time = swim.get("eventtime")
-    if not event_time:
+# Meets in the profile's "Latest Results" dropdown, as {meetId, lines} (newest first); `lines` is the
+# entry's text, meet name first, then its date ("July 22, 2023").
+SWIMMER_MEETS_JS = r"""
+() => [...document.querySelectorAll('a[href*="/times/latest/"]')].map((a) => ({
+    meetId: Number(new URL(a.href, location.href).searchParams.get("meet_id")),
+    lines: [...a.querySelectorAll("div")].filter((d) => !d.children.length).map((d) => d.textContent.trim()).filter(Boolean),
+})).filter((meet) => Number.isInteger(meet.meetId) && meet.meetId > 0)
+"""
+
+# One meet's results for the swimmer: the dropdown button's date range plus a row per swim.
+MEET_ROWS_JS = r"""
+async (url) => {
+    const res = await fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } });
+    if (!res.ok) return { error: res.status };
+    const doc = new DOMParser().parseFromString(await res.text(), "text/html");
+    const toggle = doc.querySelector(".dropdown-toggle");
+    // The button's text: meet name, then its dates ("Jul 22–23, 2023").
+    const dateLines = toggle
+        ? [...toggle.querySelectorAll("div")].filter((d) => !d.children.length).map((d) => d.textContent.trim()).filter(Boolean)
+        : [];
+    const rows = [...doc.querySelectorAll("table tbody tr")].map((tr) => {
+        const cells = tr.querySelectorAll("td");
+        const link = tr.querySelector('a[href*="/results/"]');
+        const href = link ? link.getAttribute("href") : "";
+        const eventNo = Number((href.match(/\/event\/(\d+)/) || [])[1]);
+        // Place is the last column; some meets add a "Personal Season Best" column before it.
+        const last = cells[cells.length - 1];
+        const place = parseInt((last ? last.textContent : "").trim(), 10);
+        const name = cells[0] && cells[0].querySelector("strong");
+        const round = cells[0] && cells[0].querySelector("span");
+        return {
+            swimId: Number((href.match(/#time(\d+)/) || [])[1]),
+            eventNo: eventNo > 0 ? eventNo : null,
+            event: name ? name.textContent.trim().replace(/\s+/g, " ") : "",
+            round: round ? round.textContent.trim() : "",
+            time: link ? link.textContent.trim() : "",
+            place: place > 0 ? place : null,
+        };
+    }).filter((row) => Number.isInteger(row.swimId) && row.swimId > 0 && row.event && row.time);
+    return { dateLines, rows };
+}
+"""
+
+# SwimCloud's month names ("Nov.", "Sept.", "June") all start with the month's three-letter abbreviation.
+MONTHS = {name: i + 1 for i, name in enumerate(("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"))}
+# Results keep trickling in after a meet, so recent meets are read again even once synced.
+RECENT_MEET_DAYS = 30
+EVENT_KEYS = set(EVENTS)
+STROKES = {stroke.lower(): stroke for stroke in STROKE_MAP}
+COURSE_BY_LETTER = {"Y": "SCY", "L": "LCM", "S": "SCM"}
+INDIVIDUAL_EVENT_RE = re.compile(r"^(\d+)\s+([YLS])\s+(Free|Back|Breast|Fly|IM)$", re.I)
+RELAY_LEG_RE = re.compile(r"^(\d+)\s+(?:Mixed\s+)?(Free|Medley)\s+Relay\s*\(([^)]+)\)$", re.I)
+
+
+def parse_month_day(text: str) -> tuple[int, int] | None:
+    """(month, day) from "Nov. 8" or "June 26"."""
+    match = re.match(r"^\s*([A-Za-z]+)\.?\s+(\d{1,2})\b", text)
+    if not match or match.group(1)[:3].lower() not in MONTHS:
         return None
-    return {
-        "event": f"{distance} {stroke}",
-        "course": course,
-        "time": event_time,
-        "date": swim.get("dateofswim") or "",
-        "meet": swim.get("name") or "",
-        "tags": extract_tags(swim),
-    }
+    return MONTHS[match.group(1)[:3].lower()], int(match.group(2))
 
 
-def build_event_requests(swimmer_id: int) -> list[dict]:
-    requests = []
-    for stroke, distance, course in EVENTS:
-        stroke_code = STROKE_MAP[stroke]
-        course_code = COURSE_MAP[course]
-        event_param = f"{stroke_code}|{distance}|{course_code}|1"
-        requests.append({
-            "url": f"https://www.swimcloud.com/api/swimmers/{swimmer_id}/times_by_event/?event={event_param}",
-            "stroke": stroke,
-            "distance": distance,
-            "course": course,
-            "label": f"{distance} {stroke} {course}",
-        })
-    return requests
+def parse_meet_dates(text: str) -> tuple[date, date] | None:
+    """Start and end from "June 26, 2025", "Nov 8–9, 2025", "Nov 29–Dec 1, 2025" or "Dec 30, 2024–Jan 2, 2025"."""
+    years = re.findall(r"\b\d{4}\b", text)
+    if not years:
+        return None
+    parts = re.split(r"\s*[–—-]\s*", text.strip(), maxsplit=1)
+    start = parse_month_day(parts[0])
+    if not start:
+        return None
+    end = start
+    if len(parts) == 2:
+        day_only = re.match(r"^\s*(\d{1,2})\b", parts[1])
+        end = parse_month_day(parts[1]) or ((start[0], int(day_only.group(1))) if day_only else start)
+    start_year = re.search(r"\b\d{4}\b", parts[0])
+    end_year = int(years[-1])
+    try:
+        start_date = date(int(start_year.group(0)) if start_year else end_year, *start)
+        end_date = date(end_year, *end)
+        if end_date < start_date and not start_year:
+            start_date = date(end_year - 1, *start)  # "Dec 30–Jan 2, 2025"
+    except ValueError:
+        return None
+    return start_date, max(start_date, end_date)
 
 
-async def fetch_one(page, url: str, pacer: AdaptivePacer):
+def meet_dates_from_lines(lines: list[str]) -> tuple[date, date] | None:
+    """Dates from a meet entry's text lines: the first one after the name that reads as dates.
+
+    Meet names can hold a year ("Superleague champs 2023"), so the name isn't parsed as a date.
+    """
+    for line in lines[1:]:
+        dates = parse_meet_dates(line)
+        if dates:
+            return dates
+    return None
+
+
+def individual_event_key(event: str) -> tuple[str, str, str] | None:
+    """("Free", "50", "SCY") for "50 Y Free"."""
+    match = INDIVIDUAL_EVENT_RE.match(event)
+    if not match:
+        return None
+    return STROKES[match.group(3).lower()], match.group(1), COURSE_BY_LETTER[match.group(2).upper()]
+
+
+def leadoff_event_key(event: str, course: str) -> tuple[str, str, str] | None:
+    """The flat-start event a relay lead-off row equals ("200 Medley Relay (Back)" → 50 Back), or None."""
+    match = RELAY_LEG_RE.match(event)
+    if not match or int(match.group(1)) % 4:
+        return None
+    medley = match.group(2).lower() == "medley"
+    label = match.group(3).strip().lower()
+    if label not in ("leadoff", "lead-off") and not (medley and label == "back"):
+        return None
+    return ("Back" if medley else "Free"), str(int(match.group(1)) // 4), course
+
+
+def meet_course(rows: list[dict]) -> str | None:
+    """The course of a meet's individual swims; relay rows don't say."""
+    counts = Counter(key[2] for row in rows if (key := individual_event_key(row["event"])))
+    return counts.most_common(1)[0][0] if counts else None
+
+
+async def fetch_one(page, url: str, pacer: AdaptivePacer, script: str = FETCH_JS):
     for attempt in range(MAX_RETRIES):
-        data = await page.evaluate(FETCH_JS, url)
+        data = await page.evaluate(script, url)
         if isinstance(data, dict) and data.get("error") == 429:
             pacer.on_rate_limit()
             wait = RETRY_BASE_SEC * (2 ** attempt) + random.uniform(0, 1)
@@ -414,55 +514,141 @@ async def fetch_one(page, url: str, pacer: AdaptivePacer):
         report_progress(rateLimitedUntil=None)
         if isinstance(data, dict) and "error" in data:
             status = data["error"]
-            # Blocked or erroring is not "no times": raise so the swimmer is reported as failed
-            # instead of being saved (or skipped) as if they had no results for this event.
-            if status == 403 or (isinstance(status, int) and status >= 500):
-                raise SwimCloudScrapeError(f"SwimCloud returned HTTP {status} for {url}")
-            return None
+            # Only a 404 means "no times". Anything else (blocked, erroring, signed out) must fail the
+            # swimmer instead of saving or skipping them as if they had no results for this event.
+            if status == 404:
+                return None
+            raise SwimCloudScrapeError(f"SwimCloud returned HTTP {status} for {url}")
         pacer.on_success()
         return data
     report_progress(rateLimitedUntil=None)
     raise SwimCloudScrapeError(f"SwimCloud kept rate-limiting {url}")
 
 
-def append_times(results: list, data, stroke: str, distance: str, course: str):
-    times = data if isinstance(data, list) else data.get("results", data.get("times", []))
-    for swim in times:
-        row = swim_record_to_result(swim, stroke, distance, course)
-        if row:
-            results.append(row)
+async def list_swimmer_meets(page, swimmer_id: int, via_home: bool) -> list[dict]:
+    """The profile's meets as {meetId, name, start}, from the Latest Results dropdown."""
+    await navigate_swimcloud(page, f"https://www.swimcloud.com/swimmer/{swimmer_id}/", via_home=via_home)
+    listed = await page.evaluate(SWIMMER_MEETS_JS)
+    if not listed and not await page.query_selector(f'a[href*="/swimmer/{swimmer_id}/times"]'):
+        # No dropdown and no Times tab: not a profile page, so don't report "no times".
+        raise SwimCloudScrapeError(f"Could not read SwimCloud profile {swimmer_id}")
+    meets, seen = [], set()
+    for meet in listed:
+        if meet["meetId"] in seen:
+            continue
+        seen.add(meet["meetId"])
+        lines = meet["lines"]
+        dates = meet_dates_from_lines(lines)
+        meets.append({"meetId": meet["meetId"], "name": lines[0] if lines else "", "start": dates[0] if dates else None})
+    return meets
 
 
-async def fetch_times_by_events(page, swimmer_id: int, pacer: AdaptivePacer) -> list:
-    results = []
-    requests = build_event_requests(swimmer_id)
-    for i, req in enumerate(requests):
-        report_progress(event=i + 1, events=len(requests), eventLabel=req["label"])
-        data = await fetch_one(page, req["url"], pacer)
-        if data:
-            append_times(results, data, req["stroke"], req["distance"], req["course"])
-        if i + 1 < len(requests):
+def meets_to_read(meets: list[dict], synced: set[int]) -> list[dict]:
+    """New meets, plus the newest and recent ones, whose results may have changed since they were read."""
+    recent = date.today() - timedelta(days=RECENT_MEET_DAYS)
+    newest = max((meet["start"] for meet in meets if meet["start"]), default=None)
+    return [
+        meet for meet in meets
+        if meet["meetId"] not in synced or (meet["start"] and (meet["start"] >= recent or meet["start"] == newest))
+    ]
+
+
+async def fetch_event_dates(fetch, swimmer_id: int, key: tuple[str, str, str]) -> dict:
+    """Exact days (and SwimCloud's flags) by swim id for one event, from times_by_event."""
+    stroke, distance, course = key
+    event_param = f"{STROKE_MAP[stroke]}|{distance}|{COURSE_MAP[course]}|1"
+    data = await fetch(f"https://www.swimcloud.com/api/swimmers/{swimmer_id}/times_by_event/?event={event_param}")
+    swims = data if isinstance(data, list) else (data or {}).get("results", (data or {}).get("times", []))
+    return {
+        str(swim["id"]): {"date": str(swim["dateofswim"])[:10], "tags": extract_tags(swim)}
+        for swim in swims
+        if swim.get("id") and swim.get("dateofswim")
+    }
+
+
+async def scrape_swimmer_meets(page, swimmer_id: int, pacer: AdaptivePacer, synced: set[int], via_home: bool = True) -> dict:
+    """One profile's swims, meet by meet: {"meets": [...], "dates": {swimId: {date, tags}}}.
+
+    Meet pages carry relay legs 2–4, which times_by_event never returns, but not each swim's day;
+    times_by_event fills that in, asked only for the events swum at the meets read now.
+    """
+    meets = await list_swimmer_meets(page, swimmer_id, via_home)
+    pending = meets_to_read(meets, synced)
+
+    read: list[dict] = []
+    dates: dict = {}
+    looked_up: set[tuple[str, str, str]] = set()
+    last_course = None
+    requests = 0
+
+    async def paced(url: str, script: str = FETCH_JS):
+        """fetch_one, with the pacer's pause before every request after the first."""
+        nonlocal requests
+        if requests:
             await pacer.wait()
-    return results
+        requests += 1
+        return await fetch_one(page, url, pacer, script)
+
+    # One progress step per meet, its date lookups included, so the total is known from the start
+    # and the bar never jumps back.
+    for i, meet in enumerate(pending):
+        report_progress(event=i + 1, events=len(pending), eventLabel=meet["name"])
+        data = await paced(
+            f"https://www.swimcloud.com/swimmer/{swimmer_id}/times/latest/?meet_id={meet['meetId']}",
+            MEET_ROWS_JS,
+        )
+        if data is None:
+            continue
+        meet_dates = meet_dates_from_lines(data.get("dateLines") or []) or ((meet["start"], meet["start"]) if meet["start"] else None)
+        if not meet_dates:
+            continue  # Undated swims can't be saved; left unsynced so the next sync tries again.
+        rows = data.get("rows") or []
+        course = meet_course(rows)
+        # Only the events times sync has always tracked; relay rows are all kept.
+        kept = [row for row in rows if (key := individual_event_key(row["event"])) is None or key in EVENT_KEYS]
+        read.append({
+            "meetId": meet["meetId"],
+            "name": meet["name"],
+            "startDate": meet_dates[0].isoformat(),
+            "endDate": meet_dates[1].isoformat(),
+            "course": course,
+            "rows": kept,
+        })
+
+        # Dates for this meet's events that no earlier meet already looked up. A relay-only meet's
+        # lead-offs take the course of the last meet read, its nearest in time so far.
+        leadoff_course = course or last_course
+        last_course = leadoff_course
+        keys = sorted({
+            key
+            for row in kept
+            if (key := individual_event_key(row["event"]) or (leadoff_course and leadoff_event_key(row["event"], leadoff_course)))
+            in EVENT_KEYS
+        } - looked_up)
+        # The toast keeps showing the meet's name while its dates are looked up.
+        for key in keys:
+            looked_up.add(key)
+            dates.update(await fetch_event_dates(paced, swimmer_id, key))
+
+    # A meet with only relays takes the course of the nearest meet in time that says.
+    known = [meet for meet in read if meet["course"]]
+    for meet in read:
+        if not meet["course"]:
+            nearest = min(known, key=lambda m: abs(date.fromisoformat(m["startDate"]) - date.fromisoformat(meet["startDate"])), default=None)
+            meet["course"] = nearest["course"] if nearest else "SCY"
+
+    return {"meets": read, "dates": dates}
 
 
-async def open_swimmer_times_page(page, swimmer_id: int, via_home: bool = True):
-    await navigate_swimcloud(
-        page,
-        f"https://www.swimcloud.com/swimmer/{swimmer_id}/times/",
-        selector="button.c-tabs__link",
-        via_home=via_home,
-    )
-
-
-async def scrape_bulk_times(swimmer_ids: list[int]):
+async def scrape_bulk_times(swimmer_ids: list[int], synced_meets: dict | None = None):
     swimmer_ids = [sid for sid in swimmer_ids if sid > 0]
     if not swimmer_ids:
         return {"swimmers": {}, "failed": []}
 
+    synced_meets = synced_meets or {}
     pacer = AdaptivePacer()
     pacer.delay = BULK_INITIAL_DELAY_SEC
-    swimmers: dict[str, list] = {}
+    swimmers: dict[str, dict] = {}
     failed: list[int] = []
 
     async with async_playwright() as p:
@@ -470,23 +656,28 @@ async def scrape_bulk_times(swimmer_ids: list[int]):
         for idx, swimmer_id in enumerate(swimmer_ids):
             report_progress(
                 current=idx + 1, total=len(swimmer_ids), swimmerId=swimmer_id,
-                event=0, events=len(EVENTS), eventLabel=None,
+                event=0, events=0, eventLabel=None,
             )
+            synced = {int(meet_id) for meet_id in synced_meets.get(str(swimmer_id), [])}
             for attempt in range(2):
                 try:
                     # First swimmer (and retries) go via home to clear CF cookies / session.
                     via_home = idx == 0 or attempt > 0
-                    await open_swimmer_times_page(page, swimmer_id, via_home=via_home)
-                    times = await fetch_times_by_events(page, swimmer_id, pacer)
-                    swimmers[str(swimmer_id)] = times
-                    if _times_sink is not None:
-                        await _times_sink(swimmer_id, times)
+                    result = await scrape_swimmer_meets(page, swimmer_id, pacer, synced, via_home=via_home)
+                    # A swimmer the app already saved from the stream stays out of the final result,
+                    # which keeps that under the app's request size limit.
+                    streamed = _times_sink is not None and await _times_sink(swimmer_id, result)
+                    swimmers[str(swimmer_id)] = {"streamed": True} if streamed else result
                     break
                 except Exception as e:
-                    if attempt == 0 and is_transient_navigation_error(e):
-                        await asyncio.sleep(1.5 + random.uniform(0, 0.5))
+                    if attempt == 0:
+                        transient = is_transient_navigation_error(e)
+                        await asyncio.sleep(1.5 + random.uniform(0, 0.5) if transient else BULK_RETRY_COOLDOWN_SEC)
                         continue
+                    print(f"SwimCloud swimmer {swimmer_id} failed: {e}")
                     failed.append(swimmer_id)
+                    if _times_sink is not None:
+                        await _times_sink(swimmer_id, None)
                     break
             if idx + 1 < len(swimmer_ids):
                 gap = BULK_SWIMMER_GAP_SEC + random.uniform(0, 0.75)
@@ -495,20 +686,3 @@ async def scrape_bulk_times(swimmer_ids: list[int]):
         await browser.close()
 
     return {"swimmers": swimmers, "failed": failed}
-
-
-async def scrape_swimmer_times(swimmer_id: int):
-    pacer = AdaptivePacer()
-    async with async_playwright() as p:
-        browser, page = await launch_browser(p)
-        try:
-            await open_swimmer_times_page(page, swimmer_id)
-        except SwimCloudScrapeError:
-            await browser.close()
-            raise
-        except Exception as e:
-            await browser.close()
-            raise SwimCloudScrapeError(f"Failed to load page: {e}") from e
-        results = await fetch_times_by_events(page, swimmer_id, pacer)
-        await browser.close()
-    return results

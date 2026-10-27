@@ -1,5 +1,5 @@
 import { relaySignupKey } from "@/lib/swim/swim-parse"
-import type { BuildSettings } from "@/lib/meet/relay-builder"
+import { isLegOrder, type BuildSettings } from "@/lib/meet/relay-builder"
 
 export type RelayDraftGender = "M" | "F" | "X"
 
@@ -98,7 +98,8 @@ export function parseRelayDraftSettings(raw: unknown): BuildSettings | null {
   const pool = value.signupPool
   if (limitDays === undefined || withinDays === undefined || !excludedIds || !addedIds) return null
   if (pool !== "all" && pool !== "meet" && pool !== "relay") return null
-  return { limitDays, withinDays, signupPool: pool, excludedIds, addedIds }
+  const legOrder = isLegOrder(value.legOrder) ? value.legOrder : null
+  return { limitDays, withinDays, signupPool: pool, excludedIds, addedIds, legOrder }
 }
 
 export function isRelayDraftsSummary(value: unknown): value is RelayDraftsSummary {

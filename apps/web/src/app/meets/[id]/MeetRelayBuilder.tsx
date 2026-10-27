@@ -13,16 +13,19 @@ import { parseSwimTime } from "@/lib/swim/swim-parse"
 import {
   ALTERNATES_SHOWN,
   DEFAULT_RELAY_COUNT,
+  LEG_ORDER_PRESETS,
   RELAY_LETTERS,
   TIME_WINDOWS,
   alternateGroups,
   appendTeams,
+  applyLegOrder,
   applyLineupTeams,
   canDropOnSlot,
   fetchOptimalRelay,
   formatLegTime,
   initialLineup,
   isMedleyRelay,
+  legOrderLabel,
   legStroke,
   lineupKey,
   lineupTeamsOf,
@@ -35,6 +38,7 @@ import {
   setLegTime,
   slotTime,
   type BuildSettings,
+  type LegOrder,
   withPoolAthletes,
   truncateTeams,
   windowDays,
@@ -324,6 +328,9 @@ function HelpButton({ label, onClick }: { label: string; onClick: () => void }) 
   )
 }
 
+const RANK_LABELS = ["Fastest swimmer", "2nd fastest", "3rd fastest", "Slowest"]
+const LEG_NAMES = ["Leg 1 (lead-off)", "Leg 2", "Leg 3", "Leg 4 (anchor)"]
+
 const iconButtonClass =
   "relative inline-grid h-9 w-9 place-items-center rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-50"
 
@@ -411,6 +418,7 @@ export default function MeetRelayBuilder({
     signupPool: hasSignups ? "relay" : "all",
     excludedIds: [],
     addedIds: [],
+    legOrder: null,
   }
   const [request, setRequest] = useState<BuildRequest>(() => {
     // Open on the draft (with the settings it was saved with), else what's published, else optimal.
@@ -450,6 +458,7 @@ export default function MeetRelayBuilder({
   const [confirmPublish, setConfirmPublish] = useState(false)
   const [loadOpen, setLoadOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
+  const [legOrderOpen, setLegOrderOpen] = useState(false)
   const [athleteQuery, setAthleteQuery] = useState("")
   const [athletePoolOpen, setAthletePoolOpen] = useState(false)
   const [dragFrom, setDragFrom] = useState<RowLoc | null>(null)
@@ -529,13 +538,15 @@ export default function MeetRelayBuilder({
           const base = res.ok ? res.result : { relay: event, course, teams: [], strokeTimes: {} }
           next = applyLineupTeams(base, fixed, new Map(athletes.map((a) => [a.id, a.gender])))
         } else if (res.ok) {
-          next = res.result
+          next = applyLegOrder(res.result, s.legOrder)
         } else {
           setError(res.error)
         }
         setResult(next ? withPoolAthletes(next, poolPeople(includedPool)) : next)
         // Every build returns the optimal lineup too, even when re-timing a kept one.
-        setOptimalTeams(res.ok && res.result.teams.length > 0 ? lineupTeamsOf(res.result) : null)
+        setOptimalTeams(
+          res.ok && res.result.teams.length > 0 ? lineupTeamsOf(applyLegOrder(res.result, s.legOrder)) : null
+        )
         if (next && source) setLoaded({ source, key: lineupKey(lineupTeamsOf(next)) })
       } catch {
         if (!controller.signal.aborted) setError("Something went wrong")
@@ -625,7 +636,7 @@ export default function MeetRelayBuilder({
           setError(res.ok ? `Not enough swimmers left for a ${nextLetter} relay.` : res.error)
           return
         }
-        setResult((cur) => (cur ? appendTeams(cur, res.result) : cur))
+        setResult((cur) => (cur ? appendTeams(cur, applyLegOrder(res.result, settings.legOrder)) : cur))
         // The optimal lineup for the new count isn't known without a full rebuild.
         setOptimalTeams(null)
       })
@@ -1025,6 +1036,24 @@ export default function MeetRelayBuilder({
             </SelectControl>
           </SettingsField>
 
+          {!isMedleyRelay(event) ? (
+            <SettingsField
+              label="Leg order"
+              help={<HelpButton label="What does Leg order do?" onClick={() => setHelpOpen(true)} />}
+            >
+              <button
+                type="button"
+                aria-haspopup="dialog"
+                aria-label={`Leg order, ${legOrderLabel(settings.legOrder)}`}
+                disabled={!editable}
+                onClick={() => setLegOrderOpen(true)}
+                className="inline-flex h-9 max-w-[16rem] items-center rounded-lg border border-border bg-background px-3 text-sm text-foreground transition-colors hover:border-border-secondary disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <span className="truncate">{legOrderLabel(settings.legOrder)}</span>
+              </button>
+            </SettingsField>
+          ) : null}
+
           {hasSignups ? (
             <SettingsField label="Athlete pool">
               <SelectControl
@@ -1403,6 +1432,85 @@ export default function MeetRelayBuilder({
             Swims inside this time window are used first. If a swimmer has no time in it, an older swim is used
             and its date is shown in red.
           </p>
+        </div>
+        {!isMedleyRelay(event) ? (
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-medium text-foreground">Leg order</p>
+            <p className="text-sm text-foreground-secondary">
+              Which leg each swimmer takes, ranked by speed. Auto puts the swimmer who loses the least time
+              leading off, then the rest fastest first. Medley relays are set by stroke.
+            </p>
+          </div>
+        ) : null}
+      </Modal>
+
+      <Modal
+        open={legOrderOpen}
+        onClose={() => setLegOrderOpen(false)}
+        title="Leg order"
+        description="Choose which leg each swimmer takes, ranked by their speed on legs 2–4."
+        maxWidth="md"
+        footer={
+          <ModalFooter>
+            <button
+              type="button"
+              onClick={() => setLegOrderOpen(false)}
+              className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm hover:bg-fill-secondary"
+            >
+              Done
+            </button>
+          </ModalFooter>
+        }
+      >
+        <div className="flex flex-col gap-1.5">
+          {[{ label: "Auto", order: null as LegOrder | null }, ...LEG_ORDER_PRESETS].map((preset) => {
+            const selected = legOrderLabel(settings.legOrder) === preset.label
+            return (
+              <button
+                key={preset.label}
+                type="button"
+                aria-pressed={selected}
+                onClick={() => updateSettings({ legOrder: preset.order })}
+                className={
+                  "rounded-lg border px-3 py-2 text-left text-sm transition-colors " +
+                  (selected
+                    ? "border-primary/50 bg-primary/10 text-foreground"
+                    : "border-border-secondary bg-background text-foreground hover:bg-background-hover")
+                }
+              >
+                {preset.label}
+              </button>
+            )
+          })}
+        </div>
+        <div className="flex flex-col gap-2">
+          <p className={fieldLabelClass}>Custom</p>
+          {RANK_LABELS.map((rankLabel, rank) => {
+            const order = settings.legOrder ?? LEG_ORDER_PRESETS[2].order
+            return (
+              <div key={rankLabel} className="flex items-center justify-between gap-3">
+                <span className="text-sm text-foreground">{rankLabel}</span>
+                <SelectControl
+                  label={`${rankLabel} swims`}
+                  value={String(order[rank])}
+                  onChange={(value) => {
+                    // Keep it a permutation: whoever held that leg takes this rank's old one.
+                    const leg = Number(value)
+                    const next = [...order]
+                    next[next.indexOf(leg)] = order[rank]
+                    next[rank] = leg
+                    updateSettings({ legOrder: next })
+                  }}
+                >
+                  {[0, 1, 2, 3].map((leg) => (
+                    <option key={leg} value={leg}>
+                      {LEG_NAMES[leg]}
+                    </option>
+                  ))}
+                </SelectControl>
+              </div>
+            )
+          })}
         </div>
       </Modal>
 

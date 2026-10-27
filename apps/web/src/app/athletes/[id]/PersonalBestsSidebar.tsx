@@ -9,11 +9,12 @@ import {
 } from "@/lib/swim/swim-parse"
 import { RELAY_SPLIT_LABEL, type AthleteSwim } from "@/lib/athlete/swim-history"
 
-type Selected = { event: string; course: string } | null
+type Selected = { event: string; course: string; splits: boolean } | null
 
 /**
  * Best time per event in one course, grouped by stroke, with a switch over the courses swum.
- * A faster relay split (or one in an event with no flat-start time) adds a plain, unclickable row.
+ * A faster relay split (or one in an event with no flat-start time) adds a row that opens the
+ * event's relay splits.
  */
 export default function PersonalBestsSidebar({
   swims,
@@ -31,7 +32,8 @@ export default function PersonalBestsSidebar({
   course: string
   onCourseChange: (course: string) => void
   selected: Selected
-  onSelectEvent: (event: string) => void
+  /** `splits` for the event's relay-split row. */
+  onSelectEvent: (event: string, splits: boolean) => void
 }) {
   const strokeGroups = useMemo(() => {
     const bestIn = (list: AthleteSwim[]) => {
@@ -121,13 +123,16 @@ export default function PersonalBestsSidebar({
               {gi > 0 && <span aria-hidden className="mx-3 mb-[3px] block h-px bg-border-secondary" />}
               <div role="group" aria-label={group.stroke}>
                 {group.events.map(({ event, timeMs, splitMs }) => {
-                  const on = selected?.event === event && selected.course === course
+                  const eventOn = selected?.event === event && selected.course === course
+                  // Viewing splits whose row isn't listed (slower than the flat start) marks the event's row.
+                  const on = eventOn && (!selected.splits || splitMs == null)
+                  const splitOn = eventOn && selected.splits
                   return (
                     <Fragment key={event}>
                       {timeMs != null && (
                         <button
                           type="button"
-                          onClick={() => onSelectEvent(event)}
+                          onClick={() => onSelectEvent(event, false)}
                           aria-pressed={on}
                           className={`mx-1.5 flex w-[calc(100%-12px)] items-center justify-between gap-3 rounded-lg border px-3 py-2 text-left text-[15px] text-foreground transition-colors ${
                             on
@@ -146,17 +151,34 @@ export default function PersonalBestsSidebar({
                         </button>
                       )}
                       {splitMs != null && (
-                        <div className="mx-1.5 flex items-center justify-between gap-3 border border-transparent px-3 py-2 text-[15px]">
+                        <button
+                          type="button"
+                          onClick={() => onSelectEvent(event, true)}
+                          aria-pressed={splitOn}
+                          className={`mx-1.5 flex w-[calc(100%-12px)] items-center justify-between gap-3 rounded-lg border px-3 py-2 text-left text-[15px] transition-colors ${
+                            splitOn
+                              ? "border-primary bg-primary/5"
+                              : "border-transparent hover:bg-background-hover"
+                          }`}
+                        >
                           <span className="flex min-w-0 items-center gap-2">
-                            <span className="truncate text-foreground-secondary">{event}</span>
+                            <span
+                              className={`truncate ${splitOn ? "font-medium text-foreground" : "text-foreground-secondary"}`}
+                            >
+                              {event}
+                            </span>
                             <span className="shrink-0 rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-accent">
                               {RELAY_SPLIT_LABEL}
                             </span>
                           </span>
-                          <span className="shrink-0 font-mono text-sm font-medium tabular-nums text-foreground-secondary">
+                          <span
+                            className={`shrink-0 font-mono text-sm font-medium tabular-nums ${
+                              splitOn ? "text-foreground" : "text-foreground-secondary"
+                            }`}
+                          >
                             {formatTime(splitMs)}
                           </span>
-                        </div>
+                        </button>
                       )}
                     </Fragment>
                   )
