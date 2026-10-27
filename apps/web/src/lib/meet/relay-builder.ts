@@ -72,9 +72,9 @@ export type BuildSettings = {
   /** "Prefer times from": older swims are used only as a fallback (date shown in red). */
   withinDays: number | null
   signupPool: SignupPool
-  /** Pool swimmers opted out via Refine athletes. */
+  /** Pool swimmers opted out via Filter athletes. */
   excludedIds: string[]
-  /** Meet signups outside the chosen pool that were opted in via Refine athletes. */
+  /** Meet signups outside the chosen pool that were opted in via Filter athletes. */
   addedIds: string[]
   /** Free relays: which leg each speed rank swims. null/absent = Auto (fastest after the lead-off first). */
   legOrder?: LegOrder | null
@@ -250,7 +250,7 @@ export function poolAthletesFor(
 }
 
 /**
- * The athletes the "Refine athletes" list offers and those currently in the build. The list always
+ * The athletes the "Filter athletes" list offers and those currently in the build. The list always
  * covers everyone signed up for the meet; swimmers outside the chosen pool start unchecked and
  * join via `addedIds`, while `excludedIds` drops swimmers the pool would otherwise include.
  */

@@ -246,7 +246,8 @@ export default function MeetRelaysWorkspace({
       number: slot.number,
       href: `${relaysPath}?event=${encodeURIComponent(slot.slug)}`,
     }
-    const savingPill = saving.includes(slot.slug) ? [{ label: "Saving…", tone: "suggested" as const }] : []
+    // While saving, the status pill itself reads "Saving…" / "Publishing…".
+    const isSaving = saving.includes(slot.slug)
     // One status per event: a draft (saving one unpublishes the event), else what's published.
     if (draft) {
       // A draft reads "Optimal" rather than "Draft" from the flag saved with it.
@@ -254,10 +255,11 @@ export default function MeetRelaysWorkspace({
       return {
         ...base,
         pills: [
-          isOptimal
-            ? { label: "Optimal", tone: "suggested" as const }
-            : { label: "Draft", tone: "draft" as const },
-          ...savingPill,
+          isSaving
+            ? { label: "Saving…", tone: isOptimal ? ("suggested" as const) : ("draft" as const) }
+            : isOptimal
+              ? { label: "Optimal", tone: "suggested" as const }
+              : { label: "Draft", tone: "draft" as const },
         ],
         state: "cards" as const,
         cards: lineupSummaryCards(slot.slug, draft.teams),
@@ -266,7 +268,9 @@ export default function MeetRelaysWorkspace({
     if (published.length > 0) {
       return {
         ...base,
-        pills: [{ label: "Published", tone: "published" as const }, ...savingPill],
+        pills: [
+          { label: isSaving ? "Publishing…" : "Published", tone: "published" as const },
+        ],
         state: "cards" as const,
         cards: publishedSummaryCards(published, viewerAthleteId),
       }

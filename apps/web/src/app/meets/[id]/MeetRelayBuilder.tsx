@@ -1067,7 +1067,7 @@ export default function MeetRelayBuilder({
                 label="Athlete pool"
                 value={poolIsCustom ? "custom" : settings.signupPool}
                 onChange={(value) => {
-                  // "Custom" only reflects the refined list; picking a preset resets it.
+                  // "Custom" only reflects the filtered list; picking a preset resets it.
                   if (value === "custom") return
                   updateSettings({ signupPool: value as SignupPool, excludedIds: [], addedIds: [] })
                 }}
@@ -1301,7 +1301,7 @@ export default function MeetRelayBuilder({
           setAthletePoolOpen(false)
           setAthleteQuery("")
         }}
-        title="Refine athletes"
+        title="Filter athletes"
         description="Choose the swimmers to consider when building this relay lineup."
         maxWidth="lg"
         footer={
