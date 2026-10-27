@@ -168,8 +168,8 @@ export default async function MeetRelaysPage({
         ? {
             savedAt: draft.savedAt,
             optimal: draft.optimal === true,
-            // Saved settings only matter until the meet is over.
-            settings: meetHasEnded ? undefined : draft.settings,
+            published: draft.published === true,
+            settings: draft.settings,
             teams: draft.teams.map((team) => ({
               letter: team.letter,
               legs: team.legs.map((leg) => {

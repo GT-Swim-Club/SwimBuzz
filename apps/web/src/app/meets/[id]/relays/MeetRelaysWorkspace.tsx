@@ -8,6 +8,7 @@ import {
   fetchOptimalRelay,
   initialLineup,
   lineupTeamsOf,
+  pendingDraft,
   poolAthletesFor,
   type AthleteOption,
   type RelayResult,
@@ -100,21 +101,15 @@ export default function MeetRelaysWorkspace({
     document.getElementById("page-scroll")?.scrollTo({ top: 0 })
   }
 
-  /** Show a saved lineup on the summary at once and persist it in the background; resolves to an error message, if any. */
-  async function save(
-    data: RelaySlotData,
-    { kind, teams, relayEvent, optimal, settings }: RelayCommit,
-    report = true
-  ): Promise<string | null> {
+  function saveTarget(data: RelaySlotData, relayEvent: string) {
     const { slot } = data
-    const target = {
-      meetId,
-      event: slot.event,
-      relayEvent,
-      gender: slot.gender,
-      published: data.published,
-      hadDraft: data.draft != null,
-    }
+    return { meetId, event: slot.event, relayEvent, gender: slot.gender, published: data.published }
+  }
+
+  /** Show a saved lineup on the summary at once, before it persists. */
+  function show(data: RelaySlotData, { kind, teams, relayEvent, optimal, settings }: RelayCommit) {
+    const { slot } = data
+    const savedAt = new Date().toISOString()
     setOverrides((current) => ({
       ...current,
       [slot.slug]:
@@ -122,16 +117,29 @@ export default function MeetRelaysWorkspace({
           ? {
               slot,
               published: data.published.filter((relay) => !relay.manual),
-              draft: { teams, savedAt: new Date().toISOString(), optimal, settings },
+              draft: { teams, savedAt, optimal, settings },
             }
-          : { slot, published: optimisticPublished(target, teams), draft: null },
+          : {
+              slot,
+              published: optimisticPublished(saveTarget(data, relayEvent), teams),
+              draft: { teams, savedAt, settings, published: true },
+            },
     }))
     setSaving((current) => [...current, slot.slug])
     setSaveError(null)
+  }
 
+  /** Persist a lineup `show` put on the summary; resolves to an error message, if any. */
+  async function persist(
+    data: RelaySlotData,
+    { kind, teams, relayEvent, optimal, settings }: RelayCommit,
+    report = true
+  ): Promise<string | null> {
+    const { slot } = data
+    const target = saveTarget(data, relayEvent)
     try {
       if (kind === "draft") await persistRelayDraft(target, teams, optimal, settings)
-      else await persistRelayPublish(target, teams)
+      else await persistRelayPublish(target, teams, settings)
       return null
     } catch (err) {
       const message = err instanceof Error ? err.message : "Something went wrong"
@@ -144,7 +152,8 @@ export default function MeetRelaysWorkspace({
   }
 
   function commit(data: RelaySlotData, change: RelayCommit, replace: boolean) {
-    void save(data, change)
+    show(data, change)
+    void persist(data, change)
     go(null, replace)
   }
 
@@ -228,7 +237,9 @@ export default function MeetRelaysWorkspace({
     )
   }
 
-  const events: RelaySummaryEvent[] = slots.map(({ slot, published, draft }) => {
+  const events: RelaySummaryEvent[] = slots.map((data) => {
+    const { slot, published } = data
+    const draft = pendingDraft(data)
     const base = {
       slug: slot.slug,
       name: slot.label.replace(/ Relay$/, ""),
@@ -288,9 +299,16 @@ export default function MeetRelaysWorkspace({
 
   async function publishAll() {
     const { ready, skipped } = publishAllPlan
-    const errors = await Promise.all(
-      ready.map(({ data, teams, relayEvent }) => save(data, { kind: "publish", teams, relayEvent }, false))
-    )
+    const commits = ready.map(({ data, teams, relayEvent }) => ({
+      data,
+      // A suggestion was built at the default settings; a draft keeps its own.
+      change: { kind: "publish" as const, teams, relayEvent, settings: pendingDraft(data)?.settings },
+    }))
+    for (const { data, change } of commits) show(data, change)
+    // One event at a time: each save rewrites the meet's relays and drafts, so parallel saves
+    // would overwrite each other.
+    const errors: (string | null)[] = []
+    for (const { data, change } of commits) errors.push(await persist(data, change, false))
     const failed = ready.flatMap(({ data }, i) => (errors[i] ? [`${data.slot.label} (${errors[i]})`] : []))
     const published = ready.length - failed.length
     const problems = [

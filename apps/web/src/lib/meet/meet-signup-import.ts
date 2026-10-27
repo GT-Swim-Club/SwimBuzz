@@ -321,10 +321,10 @@ export function applySignupImportToEntriesSummary(
 
   const kept = (existing?.entries ?? []).filter((e) => {
     if (e.signupImport) return false
-    // A signed-up athlete gets their own rows, so the roster's placeholder goes.
-    if (e.rosterImport) return !importedAthletes.has(e.athleteId)
+    // A signed-up athlete gets their own rows, so any "Attending" placeholder (from a roster
+    // import or added by hand) goes. Checked before the seed test, which rejects these rows.
+    if (e.rosterImport || e.rosterOnly) return !importedAthletes.has(e.athleteId)
     if (!isEditableSignupSheetSeed(e)) return true
-    if (e.rosterOnly) return !importedAthletes.has(e.athleteId)
     return !importedKeys.has(entryKey(e.athleteId, e.event))
   })
 

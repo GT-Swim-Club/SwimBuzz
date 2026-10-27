@@ -480,6 +480,18 @@ export function lineupKey(teams: LineupTeam[]): string {
     .join("|")
 }
 
+/** Identifies builder settings regardless of id order, to tell whether they match a saved draft's. */
+export function settingsKey(settings: BuildSettings): string {
+  return JSON.stringify([
+    settings.limitDays,
+    settings.withinDays,
+    settings.signupPool,
+    [...settings.excludedIds].sort(),
+    [...settings.addedIds].sort(),
+    settings.legOrder ?? null,
+  ])
+}
+
 /**
  * Reorders each free relay's four swimmers by speed (their legs 2–4 time, NT last) onto the legs
  * in `order`, re-timing each leg. Medley relays are fixed by stroke, so they come back as-is.
@@ -832,7 +844,19 @@ export function setLegTime(result: RelayResult, letter: string, index: number, t
 export type RelaySlotData = {
   slot: RelayEventSlot
   published: RelayLineup[]
-  draft: { teams: LineupTeam[]; savedAt: string; optimal?: boolean; settings?: BuildSettings } | null
+  /** `published`: saved by publishing, to keep the published lineup's settings — not a draft. */
+  draft: {
+    teams: LineupTeam[]
+    savedAt: string
+    optimal?: boolean
+    settings?: BuildSettings
+    published?: boolean
+  } | null
+}
+
+/** The event's unpublished draft, if any — a draft saved by publishing doesn't count. */
+export function pendingDraft(data: RelaySlotData): RelaySlotData["draft"] {
+  return data.draft && !data.draft.published ? data.draft : null
 }
 
 /** What the builder opens on for a relay event: its draft, else what's published, else optimal. */
@@ -840,7 +864,8 @@ export function initialLineup(data: RelaySlotData): {
   source: "draft" | "published" | "optimal"
   fixed: LineupTeam[] | null
 } {
-  if (data.draft) return { source: "draft", fixed: data.draft.teams }
+  const draft = pendingDraft(data)
+  if (draft) return { source: "draft", fixed: draft.teams }
   const published = publishedTeamsFor(data.published, data.slot.event, data.slot.gender)
   if (published.length > 0) return { source: "published", fixed: published }
   return { source: "optimal", fixed: null }

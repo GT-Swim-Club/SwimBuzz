@@ -30,12 +30,14 @@ import {
   lineupKey,
   lineupTeamsOf,
   locKey,
+  pendingDraft,
   medleyStrokeGroups,
   moveRelayRow,
   refinedPoolFor,
   publishedTeamsFor,
   replaceLeg,
   setLegTime,
+  settingsKey,
   slotTime,
   type BuildSettings,
   type LegOrder,
@@ -410,7 +412,7 @@ export default function MeetRelayBuilder({
     () => publishedTeamsFor(data.published, event, gender),
     [data.published, event, gender]
   )
-  const draftTeams = data.draft?.teams ?? null
+  const draftTeams = pendingDraft(data)?.teams ?? null
 
   const defaultSettings: BuildSettings = {
     limitDays: null,
@@ -420,17 +422,20 @@ export default function MeetRelayBuilder({
     addedIds: [],
     legOrder: null,
   }
+  // Settings are saved with the draft, and publishing saves the published lineup's as one. A draft
+  // from before settings were saved opens on the defaults.
+  const savedSettings = data.draft?.settings ?? defaultSettings
+  const settingsSource: Source = data.draft?.published ? "published" : "draft"
   const [request, setRequest] = useState<BuildRequest>(() => {
-    // Open on the draft (with the settings it was saved with), else what's published, else optimal.
+    // Open on the draft, else what's published, else optimal — with the saved settings.
     const { source, fixed } = initialLineup(data)
-    const settings = (source === "draft" ? data.draft?.settings : null) ?? defaultSettings
-    return { id: 0, settings, fixed, count: fixed ? fixed.length : DEFAULT_RELAY_COUNT, source }
+    return { id: 0, settings: savedSettings, fixed, count: fixed ? fixed.length : DEFAULT_RELAY_COUNT, source }
   })
   const settings = request.settings
   // The summary already ran this event's first build (same default settings) — reuse it.
   const [initial] = useState(() => {
-    // The summary built at default settings; a draft saved with other settings needs its own build.
-    if (!initialBase || (request.source === "draft" && data.draft?.settings)) return null
+    // The summary built at default settings; saved settings that differ need their own build.
+    if (!initialBase || settingsKey(request.settings) !== settingsKey(defaultSettings)) return null
     const pool = poolPeople(refinedPoolFor(athletes, gender, event, request.settings, signupRelayPrefs).included)
     if (request.fixed) {
       return withPoolAthletes(
@@ -560,10 +565,13 @@ export default function MeetRelayBuilder({
     }
   }, [request, initial, athletes, course, event, gender, genderPeople, meetId, mixed, signupRelayPrefs])
 
+  /** The lineup differs from the one last loaded. */
   const changed =
     result != null && loaded != null && lineupKey(lineupTeamsOf(result)) !== loaded.key
+  const settingsChanged = settingsKey(settings) !== settingsKey(savedSettings)
+  const dirty = changed || settingsChanged
   const teamCount = result?.teams.length ?? request.count
-  const guard = useUnsavedChangesGuard(changed)
+  const guard = useUnsavedChangesGuard(dirty)
 
   /** Rebuild with new settings, keeping the coach's lineup unless it's an untouched optimal one. */
   function updateSettings(patch: Partial<BuildSettings>) {
@@ -583,7 +591,7 @@ export default function MeetRelayBuilder({
     const fixed = source === "draft" ? draftTeams : source === "published" ? publishedTeams : null
     setRequest((r) => ({
       id: r.id + 1,
-      settings: (source === "draft" ? data.draft?.settings : null) ?? r.settings,
+      settings: source === settingsSource && data.draft?.settings ? data.draft.settings : r.settings,
       fixed,
       count: fixed ? fixed.length : teamCount,
       source,
@@ -805,7 +813,7 @@ export default function MeetRelayBuilder({
   function publish() {
     if (hasImportedResults || !result) return
     setConfirmPublish(false)
-    onCommit({ kind: "publish", teams: lineupTeamsOf(result), relayEvent: result.relay }, guard.leave())
+    onCommit({ kind: "publish", teams: lineupTeamsOf(result), relayEvent: result.relay, settings }, guard.leave())
   }
 
   const loadItems: { source: Source; label: string }[] = [
@@ -826,7 +834,9 @@ export default function MeetRelayBuilder({
   }
   const isLoaded = (source: Source) => {
     const teams = sourceTeams[source]
-    return currentKey != null && teams != null && lineupKey(teams) === currentKey
+    if (currentKey == null || teams == null || lineupKey(teams) !== currentKey) return false
+    // The saved lineup also holds its settings, so changing one leaves something to save.
+    return source !== settingsSource || !settingsChanged
   }
   const poolIsCustom = settings.excludedIds.length > 0 || settings.addedIds.length > 0
   const editable = adding === 0
@@ -839,7 +849,7 @@ export default function MeetRelayBuilder({
         value={slot.slug}
         onChange={(e) => {
           // Unsaved changes: a full navigation, so the browser asks first.
-          if (changed) guard.guardedNavigate(`${relaysPath}?event=${encodeURIComponent(e.target.value)}`)
+          if (dirty) guard.guardedNavigate(`${relaysPath}?event=${encodeURIComponent(e.target.value)}`)
           else onExit(e.target.value, guard.leave())
         }}
         className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
@@ -947,7 +957,7 @@ export default function MeetRelayBuilder({
             className={relayBackLinkClass}
             onClick={(e) => {
               // With unsaved changes the guard turns this into a full navigation that asks first.
-              if (changed || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+              if (dirty || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
               e.preventDefault()
               onExit(null, guard.leave())
             }}

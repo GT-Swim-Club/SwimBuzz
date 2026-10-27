@@ -9,7 +9,7 @@ export type RelayCommit = {
   relayEvent: string
   /** The draft matches the optimal lineup (drafts only). */
   optimal?: boolean
-  /** The builder settings in use (drafts only). */
+  /** The builder settings in use, saved with the lineup. */
   settings?: BuildSettings
 }
 
@@ -22,7 +22,6 @@ type RelayTarget = {
   gender: string
   /** What was published when the builder opened. */
   published: RelayLineup[]
-  hadDraft: boolean
 }
 
 async function errorOf(res: Response, fallback: string): Promise<string> {
@@ -36,19 +35,21 @@ export function lineupTeamTotal(team: LineupTeam): number | null {
   return times.every((t) => t != null) ? (times as number[]).reduce((sum, t) => sum + t, 0) : null
 }
 
-/** Save a draft; it replaces what the builder published (imported relays stay). Throws on failure. */
-export async function persistRelayDraft(target: RelayTarget, teams: LineupTeam[],
-  optimal = false,
-  settings?: BuildSettings
-): Promise<void> {
-  const res = await fetch(`/api/meets/${target.meetId}/relays/drafts`, {
+/** Store the event's draft (`published`: the lineup just published, kept for its settings). */
+async function putDraft(
+  target: RelayTarget,
+  teams: LineupTeam[],
+  opts: { optimal?: boolean; settings?: BuildSettings; published?: boolean }
+): Promise<Response> {
+  return fetch(`/api/meets/${target.meetId}/relays/drafts`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       event: target.event,
       gender: target.gender,
-      optimal,
-      settings: settings ?? null,
+      optimal: opts.optimal === true,
+      published: opts.published === true,
+      settings: opts.settings ?? null,
       teams: teams.map((team) => ({
         letter: team.letter,
         legs: team.legs.map((leg) => ({
@@ -59,6 +60,14 @@ export async function persistRelayDraft(target: RelayTarget, teams: LineupTeam[]
       })),
     }),
   })
+}
+
+/** Save a draft; it replaces what the builder published (imported relays stay). Throws on failure. */
+export async function persistRelayDraft(target: RelayTarget, teams: LineupTeam[],
+  optimal = false,
+  settings?: BuildSettings
+): Promise<void> {
+  const res = await putDraft(target, teams, { optimal, settings })
   if (!res.ok) throw new Error(await errorOf(res, "Failed to save draft"))
 
   // A draft replaces the published lineup — an event is never both. Imported relays
@@ -80,8 +89,15 @@ export async function persistRelayDraft(target: RelayTarget, teams: LineupTeam[]
   }
 }
 
-/** Publish every relay in the lineup and clear the draft. Throws on failure. */
-export async function persistRelayPublish(target: RelayTarget, teams: LineupTeam[]): Promise<void> {
+/**
+ * Publish every relay in the lineup; the draft becomes the published lineup with its settings,
+ * so reopening the builder restores them. Throws on failure.
+ */
+export async function persistRelayPublish(
+  target: RelayTarget,
+  teams: LineupTeam[],
+  settings?: BuildSettings
+): Promise<void> {
   for (const team of teams) {
     const res = await fetch(`/api/meets/${target.meetId}/relays`, {
       method: "POST",
@@ -109,10 +125,8 @@ export async function persistRelayPublish(target: RelayTarget, teams: LineupTeam
     })
     await fetch(`/api/meets/${target.meetId}/relays?${params}`, { method: "DELETE" })
   }
-  if (target.hadDraft) {
-    const params = new URLSearchParams({ event: target.event, gender: target.gender })
-    await fetch(`/api/meets/${target.meetId}/relays/drafts?${params}`, { method: "DELETE" })
-  }
+  const saved = await putDraft(target, teams, { settings, published: true })
+  if (!saved.ok) throw new Error(await errorOf(saved, "Published, but the builder settings couldn't be saved"))
 }
 
 /** The published relays a publish leaves behind, shown on the summary before the save lands. */

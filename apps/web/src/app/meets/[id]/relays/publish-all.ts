@@ -1,4 +1,4 @@
-import type { LineupTeam, RelayResult, RelaySlotData } from "@/lib/meet/relay-builder"
+import { pendingDraft, type LineupTeam, type RelayResult, type RelaySlotData } from "@/lib/meet/relay-builder"
 import { lineupTeamTotal } from "@/lib/meet/relay-save"
 
 export type PublishAllEntry = {
@@ -40,7 +40,8 @@ export function planPublishAll(
 ): PublishAllPlan {
   const plan: PublishAllPlan = { ready: [], skipped: [], unpublished: 0 }
   for (const data of slots) {
-    const { slot, draft, published } = data
+    const { slot, published } = data
+    const draft = pendingDraft(data)
     if (!draft && published.length > 0) continue
     plan.unpublished++
     const build = suggestion(slot.slug)

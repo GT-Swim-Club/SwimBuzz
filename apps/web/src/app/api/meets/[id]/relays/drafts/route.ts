@@ -14,7 +14,10 @@ import {
 
 export const runtime = "nodejs"
 
-/** Save the relay builder lineup for one relay event as the meet's shared draft. */
+/**
+ * Save the relay builder lineup for one relay event as the meet's shared draft. Publishing saves
+ * one too (`published: true`) so the lineup's settings outlive the publish.
+ */
 export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -47,6 +50,7 @@ export async function PUT(
     savedAt: new Date().toISOString(),
     ...(body?.optimal === true ? { optimal: true } : {}),
     ...(settings ? { settings } : {}),
+    ...(body?.published === true ? { published: true } : {}),
   })
   await prisma.meet.update({ where: { id }, data: { relayDrafts: { drafts } } })
   return NextResponse.json({ ok: true })

@@ -21,8 +21,13 @@ export type RelayDraft = {
   savedAt: string
   /** Whether the lineup matched the optimal one when saved — lets the summary tag it without a rebuild. */
   optimal?: boolean
-  /** Builder settings (times windows, athlete pool) at save; ignored once the meet has passed. */
+  /** Builder settings (times windows, athlete pool, leg order) at save. */
   settings?: BuildSettings
+  /**
+   * Saved by publishing: the lineup is what was published, kept only so its settings survive.
+   * The event reads as published, not as a draft.
+   */
+  published?: boolean
 }
 
 export type RelayDraftsSummary = { drafts: RelayDraft[] }
