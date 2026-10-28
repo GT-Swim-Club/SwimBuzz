@@ -71,8 +71,9 @@ function flatSwimTags(flags: string | undefined, round: string): string {
 }
 
 /**
- * A relay row's day, which times_by_event doesn't give for legs 2–4: the day of the dated swims
- * around it in event order when they agree, else the nearer one, else the meet's first day.
+ * A relay row's day when the scraper sent none (times_by_event doesn't give legs 2–4, and the
+ * scraper only looks up the open ones at multi-day meets): the day of the dated swims around it in
+ * event order when they agree, else the nearer one, else the meet's first day.
  */
 function inferRelayDate(row: SwimCloudMeetRow, dated: { eventNo: number; date: string }[], fallback: string) {
   if (row.eventNo == null) return fallback
@@ -144,9 +145,10 @@ export function swimCloudTimesFromMeets(profile: SwimCloudProfileScrape): SwimCl
         event,
         course: meet.course,
         time: row.time,
-        date: inferRelayDate(row, dated, meet.startDate),
+        date: lookup?.date ?? inferRelayDate(row, dated, meet.startDate),
         meet: meet.name,
         tags: relaySplitSwimTags(relayEvent, leg, relayRound),
+        meetDays: { start: meet.startDate, end: meet.endDate || meet.startDate },
       })
     }
   }

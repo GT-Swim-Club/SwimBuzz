@@ -2,6 +2,7 @@ import { Prisma, ScraperJobStatus, ScraperJobType } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { assignSwimOccurrences } from "@/lib/swim/swim-dedup"
 import {
+  redateRelaySplits,
   swimsFromSwimCloudTimes,
   withoutRecordedSwims,
   type SwimCloudTime,
@@ -44,7 +45,15 @@ export function asTimesApplyContext(ctx: unknown): TimesApplyContext | null {
 export async function saveSwimCloudTimes(
   swims: ReturnType<typeof swimsFromSwimCloudTimes>
 ): Promise<number> {
-  const swimsToInsert = await withoutRecordedSwims(assignSwimOccurrences(swims))
+  // assignSwimOccurrences keeps order but drops relayMeetDays, which re-dating needs.
+  const withOccurrences = assignSwimOccurrences(swims).map((swim, i) => ({
+    ...swim,
+    relayMeetDays: swims[i].relayMeetDays,
+  }))
+  await redateRelaySplits(withOccurrences)
+  const swimsToInsert = (await withoutRecordedSwims(withOccurrences)).map(
+    ({ relayMeetDays: _relayMeetDays, ...swim }) => swim
+  )
   let imported = 0
   for (let i = 0; i < swimsToInsert.length; i += CHUNK_SIZE) {
     const result = await prisma.swim.createMany({

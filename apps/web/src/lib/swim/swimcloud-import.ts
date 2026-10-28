@@ -1,8 +1,15 @@
 import type { Prisma } from "@prisma/client"
+import { utcDayKey } from "@swimbuzz/shared"
 import { prisma } from "@/lib/prisma"
 import { withRelaySplitSwims } from "../../../soft-delete-policy"
 import { isRelaySplitSwimTag, RELAY_SPLIT_TAG_PREFIX } from "@/lib/meet/relay-results"
-import { meetDayRange, pairSameSwims, type CrossSourceSwim } from "@/lib/swim/swim-dedup"
+import {
+  meetDayRange,
+  pairSameSwims,
+  type CrossSourceSwim,
+  type SwimDayRange,
+  type SwimInsertWithOccurrence,
+} from "@/lib/swim/swim-dedup"
 import { normalizeEventName, parseCourse, parseMeetDate, parseSwimTime } from "@/lib/swim/swim-parse"
 
 export const SWIMCLOUD_SOURCE = "swimcloud"
@@ -15,6 +22,8 @@ export type SwimCloudTime = {
   meet?: string
   tags?: string
   place?: number | null
+  /** A relay leg's meet days ("YYYY-MM-DD"), so a later sync can move it off a guessed day. */
+  meetDays?: SwimDayRange
 }
 
 export function swimsFromSwimCloudTimes(
@@ -31,6 +40,7 @@ export function swimsFromSwimCloudTimes(
     tags: string | null
     place: number | null
     source: string
+    relayMeetDays?: SwimDayRange
   }[] = []
 
   for (const swim of times) {
@@ -52,6 +62,8 @@ export function swimsFromSwimCloudTimes(
       tags: swim.tags ?? null,
       place: Number.isInteger(swim.place) && swim.place! > 0 ? swim.place! : null,
       source: SWIMCLOUD_SOURCE,
+      // Not `meetDays`: that would let pairSameSwims match a leg to a different round's leg.
+      ...(swim.meetDays ? { relayMeetDays: swim.meetDays } : {}),
     })
   }
 
@@ -87,6 +99,62 @@ export async function withoutRecordedSwims<T extends CrossSourceSwim & { tags?: 
     return [...(await unrecorded(flat)), ...newSplits]
   }
   return unrecorded(swims)
+}
+
+/**
+ * Move SwimCloud relay legs saved on a guessed day to the day a later sync read, so the re-read
+ * leg pairs with its old row instead of being saved beside it. A leg matches on everything but its
+ * day, which must fall within the leg's meet; nothing moves onto a day where its twin already is.
+ */
+export async function redateRelaySplits(
+  swims: (SwimInsertWithOccurrence & { relayMeetDays?: SwimDayRange })[]
+): Promise<number> {
+  const legs = swims.filter((s) => s.relayMeetDays && isRelaySplitSwimTag(s.tags))
+  if (legs.length === 0) return 0
+
+  const existing = await withRelaySplitSwims(() =>
+    prisma.swim.findMany({
+      where: {
+        tags: { startsWith: RELAY_SPLIT_TAG_PREFIX },
+        athleteId: { in: [...new Set(legs.map((s) => s.athleteId))] },
+        timeMs: { in: [...new Set(legs.map((s) => s.timeMs))] },
+      },
+      select: {
+        id: true,
+        athleteId: true,
+        event: true,
+        timeMs: true,
+        course: true,
+        tags: true,
+        occurrence: true,
+        date: true,
+        source: true,
+      },
+    })
+  )
+  const identity = (s: Pick<SwimInsertWithOccurrence, "athleteId" | "event" | "timeMs" | "course" | "tags" | "occurrence">) =>
+    [s.athleteId, s.event, s.timeMs, s.course, s.tags, s.occurrence].join("\0")
+  const saved = new Map<string, { id: string; day: string; source: string }[]>()
+  for (const swim of existing) {
+    const key = identity(swim)
+    saved.set(key, [...(saved.get(key) ?? []), { id: swim.id, day: utcDayKey(swim.date), source: swim.source }])
+  }
+
+  const moves: { id: string; date: Date }[] = []
+  for (const leg of legs) {
+    const copies = saved.get(identity(leg)) ?? []
+    const day = utcDayKey(leg.date)
+    if (copies.some((copy) => copy.day === day)) continue
+    const { start, end } = leg.relayMeetDays!
+    const stale = copies.find((copy) => copy.source === SWIMCLOUD_SOURCE && start <= copy.day && copy.day <= end)
+    if (!stale) continue
+    stale.day = day
+    moves.push({ id: stale.id, date: leg.date })
+  }
+  if (moves.length > 0) {
+    await prisma.$transaction(moves.map(({ id, date }) => prisma.swim.update({ where: { id }, data: { date } })))
+  }
+  return moves.length
 }
 
 async function unrecorded<T extends CrossSourceSwim>(swims: T[], where: Prisma.SwimWhereInput = {}): Promise<T[]> {

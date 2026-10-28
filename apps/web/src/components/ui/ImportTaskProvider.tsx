@@ -30,6 +30,8 @@ export type ImportTask = {
   notice?: string
   /** 0–1 completion for the toast's progress bar; indeterminate when unset */
   progress?: number
+  /** See `ImportTaskOptions.lifetime`; unset means "request". */
+  lifetime?: "request" | "scraper"
 }
 
 export type ImportTaskProgress = Pick<ImportTask, "detail" | "alert" | "notice" | "progress"> & {
@@ -137,9 +139,9 @@ export default function ImportTaskProvider({
   /** Set on pagehide so a dying page doesn't clear the "this import was cancelled" marker. */
   const unloadingRef = useRef(false)
 
-  const isAnyRunning = tasks.some((t) => t.status === "running")
   const isAnyFinished = tasks.some((t) => t.status !== "running")
-  useDontReloadWhileBusy(isAnyRunning)
+  // Scraper jobs survive a reload and their toasts come back, so only request imports warn.
+  useDontReloadWhileBusy(tasks.some((t) => t.status === "running" && t.lifetime !== "scraper"))
 
   const dismissTask = useCallback((id: string) => {
     const dismissKey = dismissKeysRef.current[id]
@@ -254,7 +256,7 @@ export default function ImportTaskProvider({
 
       setTasks((prev) => [
         ...prev,
-        { id, label, status: "running" },
+        { id, label, status: "running", lifetime },
       ])
 
       const report = ({ detail, alert, notice, progress, quiet }: ImportTaskProgress) => {

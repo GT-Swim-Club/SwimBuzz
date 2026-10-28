@@ -419,6 +419,26 @@ async (url) => {
 }
 """
 
+# A relay event's teams as {timeId, leadoffId}: the team's time id (what each leg's meet row links to)
+# and its lead-off, the first swimmer the team's row names.
+EVENT_LEADOFFS_JS = r"""
+async (url) => {
+    const res = await fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } });
+    if (!res.ok) return { error: res.status };
+    const doc = new DOMParser().parseFromString(await res.text(), "text/html");
+    const teams = [];
+    for (const tr of doc.querySelectorAll("table tbody tr")) {
+        const ids = [...tr.querySelectorAll('[id^="time"]')].map((el) => el.id)
+            .concat([...tr.querySelectorAll('a[href*="#time"]')].map((a) => a.getAttribute("href").split("#")[1]));
+        const timeId = Number((ids.map((id) => /^time(\d+)$/.exec(id)).find(Boolean) || [])[1]);
+        const swimmer = tr.querySelector('a[href*="/swimmer/"]');
+        const leadoffId = Number(((swimmer ? swimmer.getAttribute("href") : "").match(/\/swimmer\/(\d+)/) || [])[1]);
+        if (timeId > 0 && leadoffId > 0) teams.push({ timeId, leadoffId });
+    }
+    return { teams };
+}
+"""
+
 # SwimCloud's month names ("Nov.", "Sept.", "June") all start with the month's three-letter abbreviation.
 MONTHS = {name: i + 1 for i, name in enumerate(("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"))}
 # Results keep trickling in after a meet, so recent meets are read again even once synced.
@@ -483,16 +503,32 @@ def individual_event_key(event: str) -> tuple[str, str, str] | None:
     return STROKES[match.group(3).lower()], match.group(1), COURSE_BY_LETTER[match.group(2).upper()]
 
 
+def relay_leadoff_key(event: str, course: str) -> tuple[str, str, str] | None:
+    """The flat-start event any leg row's relay was led off in ("200 Medley Relay (Fly)" → 50 Back), or None."""
+    match = RELAY_LEG_RE.match(event)
+    if not match or int(match.group(1)) % 4:
+        return None
+    return ("Back" if match.group(2).lower() == "medley" else "Free"), str(int(match.group(1)) // 4), course
+
+
 def leadoff_event_key(event: str, course: str) -> tuple[str, str, str] | None:
     """The flat-start event a relay lead-off row equals ("200 Medley Relay (Back)" → 50 Back), or None."""
     match = RELAY_LEG_RE.match(event)
-    if not match or int(match.group(1)) % 4:
+    if not match:
         return None
     medley = match.group(2).lower() == "medley"
     label = match.group(3).strip().lower()
     if label not in ("leadoff", "lead-off") and not (medley and label == "back"):
         return None
-    return ("Back" if medley else "Free"), str(int(match.group(1)) // 4), course
+    return relay_leadoff_key(event, course)
+
+
+def relay_day_unsure(event_no: int, dated: list[tuple[int, str]]) -> bool:
+    """Whether the dated swims around a relay leg in event order leave its day open: none on one side,
+    or the two sides on different days. Mirrors inferRelayDate in swimcloud-meets.ts."""
+    prev = max((swim for swim in dated if swim[0] < event_no), default=None)
+    following = min((swim for swim in dated if swim[0] > event_no), default=None)
+    return not prev or not following or prev[1] != following[1]
 
 
 def meet_course(rows: list[dict]) -> str | None:
@@ -553,25 +589,81 @@ def meets_to_read(meets: list[dict], synced: set[int]) -> list[dict]:
     ]
 
 
-async def fetch_event_dates(fetch, swimmer_id: int, key: tuple[str, str, str]) -> dict:
-    """Exact days (and SwimCloud's flags) by swim id for one event, from times_by_event."""
+class RelayDays:
+    """Relay days learned during one sync, shared across its swimmers, since relay teammates are
+    usually all being synced together."""
+
+    def __init__(self) -> None:
+        # Relay team time id → the day its lead-off swam it.
+        self.by_relay: dict[int, str] = {}
+        # (meet id, event no) → {team time id: lead-off swimmer id}.
+        self.leadoffs: dict[tuple[int, int], dict[int, int]] = {}
+        # (swimmer id, event key) → that times_by_event lookup's days by swim id, so a lead-off
+        # looked up for a teammate isn't asked again when their own turn comes.
+        self.lookups: dict[tuple[int, tuple[str, str, str]], dict] = {}
+
+
+async def fetch_event_dates(fetch, swimmer_id: int, key: tuple[str, str, str], relays: RelayDays) -> dict:
+    """Exact days (and SwimCloud's flags) by swim id for one event, from times_by_event.
+
+    Lead-off rows also carry their relay's team time id, so they date the relay's other legs too.
+    """
+    if (swimmer_id, key) in relays.lookups:
+        return relays.lookups[(swimmer_id, key)]
     stroke, distance, course = key
     event_param = f"{STROKE_MAP[stroke]}|{distance}|{COURSE_MAP[course]}|1"
     data = await fetch(f"https://www.swimcloud.com/api/swimmers/{swimmer_id}/times_by_event/?event={event_param}")
     swims = data if isinstance(data, list) else (data or {}).get("results", (data or {}).get("times", []))
-    return {
+    for swim in swims:
+        if swim.get("relay_id") and swim.get("dateofswim"):
+            relays.by_relay[int(swim["relay_id"])] = str(swim["dateofswim"])[:10]
+    dates = {
         str(swim["id"]): {"date": str(swim["dateofswim"])[:10], "tags": extract_tags(swim)}
         for swim in swims
         if swim.get("id") and swim.get("dateofswim")
     }
+    relays.lookups[(swimmer_id, key)] = dates
+    return dates
 
 
-async def scrape_swimmer_meets(page, swimmer_id: int, pacer: AdaptivePacer, synced: set[int], via_home: bool = True) -> dict:
+async def date_relay_legs(fetch, meet_id: int, rows: list[dict], course: str | None, dates: dict, relays: RelayDays) -> None:
+    """Exact days for one multi-day meet's relay legs 2–4 that the swims around them leave open.
+
+    A leg's meet row links its relay team's time id; the relay's event page names the team's
+    lead-off, whose times_by_event row for that relay carries the day.
+    """
+    dated = [(row["eventNo"], dates[str(row["swimId"])]["date"]) for row in rows if row["eventNo"] and str(row["swimId"]) in dates]
+    for row in rows:
+        swim_id, event_no = row["swimId"], row["eventNo"]
+        if not event_no or str(swim_id) in dates or not RELAY_LEG_RE.match(row["event"]):
+            continue
+        # Days already known cost nothing, lead-offs included; only open legs 2–4 are looked up.
+        if swim_id not in relays.by_relay:
+            key = course and relay_leadoff_key(row["event"], course)
+            if not key or leadoff_event_key(row["event"], course) or not relay_day_unsure(event_no, dated):
+                continue
+            if (meet_id, event_no) not in relays.leadoffs:
+                data = await fetch(f"https://www.swimcloud.com/results/{meet_id}/event/{event_no}/", EVENT_LEADOFFS_JS)
+                relays.leadoffs[(meet_id, event_no)] = {team["timeId"]: team["leadoffId"] for team in (data or {}).get("teams", [])}
+            leadoff = relays.leadoffs[(meet_id, event_no)].get(swim_id)
+            if leadoff:
+                await fetch_event_dates(fetch, leadoff, key, relays)
+        day = relays.by_relay.get(swim_id)
+        if day:
+            dates[str(swim_id)] = {"date": day}
+            dated.append((event_no, day))
+
+
+async def scrape_swimmer_meets(
+    page, swimmer_id: int, pacer: AdaptivePacer, synced: set[int], via_home: bool = True, relays: RelayDays | None = None,
+) -> dict:
     """One profile's swims, meet by meet: {"meets": [...], "dates": {swimId: {date, tags}}}.
 
     Meet pages carry relay legs 2–4, which times_by_event never returns, but not each swim's day;
-    times_by_event fills that in, asked only for the events swum at the meets read now.
+    times_by_event fills that in, asked only for the events swum at the meets read now. Legs 2–4
+    whose day that leaves open at a multi-day meet take their relay lead-off's day.
     """
+    relays = relays or RelayDays()
     meets = await list_swimmer_meets(page, swimmer_id, via_home)
     pending = meets_to_read(meets, synced)
 
@@ -628,7 +720,9 @@ async def scrape_swimmer_meets(page, swimmer_id: int, pacer: AdaptivePacer, sync
         # The toast keeps showing the meet's name while its dates are looked up.
         for key in keys:
             looked_up.add(key)
-            dates.update(await fetch_event_dates(paced, swimmer_id, key))
+            dates.update(await fetch_event_dates(paced, swimmer_id, key, relays))
+        if meet_dates[0] != meet_dates[1]:
+            await date_relay_legs(paced, meet["meetId"], kept, leadoff_course, dates, relays)
 
     # A meet with only relays takes the course of the nearest meet in time that says.
     known = [meet for meet in read if meet["course"]]
@@ -648,6 +742,7 @@ async def scrape_bulk_times(swimmer_ids: list[int], synced_meets: dict | None = 
     synced_meets = synced_meets or {}
     pacer = AdaptivePacer()
     pacer.delay = BULK_INITIAL_DELAY_SEC
+    relays = RelayDays()
     swimmers: dict[str, dict] = {}
     failed: list[int] = []
 
@@ -663,7 +758,7 @@ async def scrape_bulk_times(swimmer_ids: list[int], synced_meets: dict | None = 
                 try:
                     # First swimmer (and retries) go via home to clear CF cookies / session.
                     via_home = idx == 0 or attempt > 0
-                    result = await scrape_swimmer_meets(page, swimmer_id, pacer, synced, via_home=via_home)
+                    result = await scrape_swimmer_meets(page, swimmer_id, pacer, synced, via_home=via_home, relays=relays)
                     # A swimmer the app already saved from the stream stays out of the final result,
                     # which keeps that under the app's request size limit.
                     streamed = _times_sink is not None and await _times_sink(swimmer_id, result)
