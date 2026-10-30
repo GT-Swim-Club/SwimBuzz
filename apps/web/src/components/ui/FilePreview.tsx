@@ -188,13 +188,23 @@ const ZOOM_STEP_PERCENT = 20
 // most a single event may count for so one mouse-wheel notch doesn't jump too far.
 const WHEEL_ZOOM_SPEED = 0.01
 const MAX_WHEEL_ZOOM_DELTA = 25
+// ctrl+wheel has no "gesture ended" event, so a pinch counts as over after this long without one.
+const WHEEL_GESTURE_END_MS = 150
 
 function clampZoomPercent(zoomPercent: number) {
   return Math.max(MIN_ZOOM_PERCENT, Math.min(MAX_ZOOM_PERCENT, zoomPercent))
 }
 
 // Safari reports trackpad pinches as its own (non-standard) gesture events rather than ctrl+wheel.
-type SafariGestureEvent = UIEvent & { scale: number; clientX: number; clientY: number }
+type SafariGestureEvent = UIEvent & { scale: number; clientX?: number; clientY?: number }
+
+// Where a gesture is centered; the middle of the screen when Safari leaves its position out.
+function gesturePoint(gesture: SafariGestureEvent) {
+  return {
+    x: Number.isFinite(gesture.clientX) ? (gesture.clientX as number) : window.innerWidth / 2,
+    y: Number.isFinite(gesture.clientY) ? (gesture.clientY as number) : window.innerHeight / 2,
+  }
+}
 
 // Fallback for releasing the page counter if a Previous/Next smooth scroll stalls before it lands:
 // this long with no scroll events ends the navigation.
@@ -259,18 +269,25 @@ function getPageScrollTop(pageElement: HTMLElement, container: HTMLElement) {
   )
 }
 
+// A client point as a position in the scroll container's viewport (its center by default).
+function getViewportPoint(container: HTMLElement, clientPoint?: { x: number; y: number }) {
+  const containerRect = container.getBoundingClientRect()
+  return {
+    viewportX: clientPoint
+      ? Math.min(container.clientWidth, Math.max(0, clientPoint.x - containerRect.left))
+      : container.clientWidth / 2,
+    viewportY: clientPoint
+      ? Math.min(container.clientHeight, Math.max(0, clientPoint.y - containerRect.top))
+      : container.clientHeight / 2,
+  }
+}
+
 function getZoomAnchor(
   container: HTMLElement,
   pageElements: Array<HTMLDivElement | null>,
   clientPoint?: { x: number; y: number }
 ): ZoomAnchor | null {
-  const containerRect = container.getBoundingClientRect()
-  const viewportX = clientPoint
-    ? Math.min(container.clientWidth, Math.max(0, clientPoint.x - containerRect.left))
-    : container.clientWidth / 2
-  const viewportY = clientPoint
-    ? Math.min(container.clientHeight, Math.max(0, clientPoint.y - containerRect.top))
-    : container.clientHeight / 2
+  const { viewportX, viewportY } = getViewportPoint(container, clientPoint)
   const centerX = container.scrollLeft + viewportX
   const centerY = container.scrollTop + viewportY
   let anchor: ZoomAnchor | null = null
@@ -295,6 +312,63 @@ function getZoomAnchor(
   return anchor
 }
 
+// Scroll so the anchored point of its page sits back at its spot in the viewport.
+function scrollToZoomAnchor(
+  container: HTMLElement,
+  pageElements: Array<HTMLDivElement | null>,
+  anchor: ZoomAnchor
+) {
+  const pageElement = pageElements[anchor.pageIndex]
+  if (!pageElement) return
+  const pageRect = getRectInScrollContainer(pageElement, container)
+  container.scrollTop = pageRect.top + anchor.fractionY * pageRect.height - anchor.viewportY
+  container.scrollLeft = pageRect.left + anchor.fractionX * pageRect.width - anchor.viewportX
+}
+
+// A pinch in progress. Until it ends, the pages are only CSS-transformed — re-laying out and
+// re-scrolling every page on every frame is what made pinching jittery — and the zoom is committed
+// once the fingers lift.
+type LiveZoom = {
+  source: "wheel" | "gesture" | "touch"
+  baseZoomPercent: number
+  factor: number
+  startPoint: { x: number; y: number }
+  point: { x: number; y: number }
+  // Where the pinch started, within the (untransformed) zoom layer; the scale is centered on it.
+  origin: { x: number; y: number }
+  // Taken before any transform, so it's measured against the real layout.
+  anchor: ZoomAnchor | null
+}
+
+function clampLiveZoomFactor(live: LiveZoom, factor: number) {
+  return clampZoomPercent(live.baseZoomPercent * factor) / live.baseZoomPercent
+}
+
+function applyLiveZoom(layer: HTMLElement, live: LiveZoom) {
+  const dx = live.point.x - live.startPoint.x
+  const dy = live.point.y - live.startPoint.y
+  layer.style.transformOrigin = `${live.origin.x}px ${live.origin.y}px`
+  layer.style.transform = `translate(${dx}px, ${dy}px) scale(${live.factor})`
+}
+
+function clearLiveZoom(layer: HTMLElement | null) {
+  if (!layer) return
+  layer.style.transform = ""
+  layer.style.transformOrigin = ""
+  layer.style.willChange = ""
+}
+
+function touchMidpoint(touches: TouchList) {
+  return {
+    x: (touches[0].clientX + touches[1].clientX) / 2,
+    y: (touches[0].clientY + touches[1].clientY) / 2,
+  }
+}
+
+function touchDistance(touches: TouchList) {
+  return Math.hypot(touches[0].clientX - touches[1].clientX, touches[0].clientY - touches[1].clientY)
+}
+
 export function FilePreviewDialog({
   open,
   onClose,
@@ -315,6 +389,7 @@ export function FilePreviewDialog({
   const printFrameRef = useRef<HTMLIFrameElement | null>(null)
   const dialogRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const zoomLayerRef = useRef<HTMLDivElement>(null)
   const pageRefs = useRef<Array<HTMLDivElement | null>>([])
   const zoomAnchorRef = useRef<ZoomAnchor | null>(null)
   const pageNavigationRef = useRef<{
@@ -452,17 +527,15 @@ export function FilePreviewDialog({
   }, [open, showingPdf])
 
   // After a zoom re-lays out the pages, scroll so the point the zoom centered on (anchored to its
-  // page) is back where it was in the viewport, instead of drifting to another page.
+  // page) is back where it was in the viewport, instead of drifting to another page. A finished
+  // pinch's transform comes off in the same frame, so the pages don't flash at the old size.
   useLayoutEffect(() => {
+    clearLiveZoom(zoomLayerRef.current)
     const anchor = zoomAnchorRef.current
     zoomAnchorRef.current = null
     const container = scrollContainerRef.current
-    const pageElement = anchor ? pageRefs.current[anchor.pageIndex] : null
-    if (!anchor || !container || !pageElement) return
-
-    const pageRect = getRectInScrollContainer(pageElement, container)
-    container.scrollTop = pageRect.top + anchor.fractionY * pageRect.height - anchor.viewportY
-    container.scrollLeft = pageRect.left + anchor.fractionX * pageRect.width - anchor.viewportX
+    if (!anchor || !container) return
+    scrollToZoomAnchor(container, pageRefs.current, anchor)
   }, [zoomPercent])
 
   // null goes back to fitting the window's width. `clientPoint` is where the zoom centers (e.g. the
@@ -491,69 +564,135 @@ export function FilePreviewDialog({
     )
   }
 
-  const onPinchZoom = useEffectEvent((factor: number, clientPoint: { x: number; y: number }) => {
-    zoomTo(zoomPercent * factor, clientPoint)
+  const beginLiveZoom = useEffectEvent(
+    (source: LiveZoom["source"], point: { x: number; y: number }): LiveZoom | null => {
+      const container = scrollContainerRef.current
+      const layer = zoomLayerRef.current
+      if (!container || !layer || pdfFailed) return null
+      endPageNavigation(false)
+      const layerRect = layer.getBoundingClientRect()
+      layer.style.willChange = "transform"
+      return {
+        source,
+        baseZoomPercent: zoomPercent,
+        factor: 1,
+        startPoint: point,
+        point,
+        origin: { x: point.x - layerRect.left, y: point.y - layerRect.top },
+        anchor: getZoomAnchor(container, pageRefs.current, point),
+      }
+    }
+  )
+
+  // The anchored point ends up wherever the pinch finished, so panning mid-pinch carries over.
+  const commitLiveZoom = useEffectEvent((live: LiveZoom) => {
+    const container = scrollContainerRef.current
+    const anchor =
+      live.anchor && container ? { ...live.anchor, ...getViewportPoint(container, live.point) } : null
+    const nextZoomPercent = clampZoomPercent(live.baseZoomPercent * live.factor)
+    if (nextZoomPercent === zoomPercent) {
+      // No re-layout is coming to take the transform off, so do it here.
+      clearLiveZoom(zoomLayerRef.current)
+      if (anchor && container) scrollToZoomAnchor(container, pageRefs.current, anchor)
+      return
+    }
+    zoomAnchorRef.current = anchor
+    setManualZoomPercent(nextZoomPercent)
   })
 
-  // Pinching the trackpad zooms the document around the pointer instead of zooming the whole
-  // page. Chrome, Edge and Firefox report a pinch as a ctrl+wheel event (as is Ctrl + mouse wheel);
-  // Safari sends gesture events instead. Updates are batched to one per frame.
+  // Pinching zooms the document around the fingers or pointer instead of zooming the whole page.
+  // Chrome, Edge and Firefox report a trackpad pinch as a ctrl+wheel event (as is Ctrl + mouse
+  // wheel); Safari on a Mac sends gesture events instead; phones pinch with two touches.
   useEffect(() => {
     if (!open || !showingPdf) return
     const dialog = dialogRef.current
     if (!dialog) return
 
-    let frame = 0
-    let pendingFactor = 1
-    let pendingPoint = { x: 0, y: 0 }
-    let safariGestureScale: number | null = null
-    const queueZoom = (factor: number, clientX: number, clientY: number) => {
-      pendingFactor *= factor
-      pendingPoint = { x: clientX, y: clientY }
-      if (frame) return
-      frame = requestAnimationFrame(() => {
-        frame = 0
-        const factorToApply = pendingFactor
-        pendingFactor = 1
-        onPinchZoom(factorToApply, pendingPoint)
-      })
+    let live: LiveZoom | null = null
+    let wheelEndTimeout: ReturnType<typeof setTimeout> | undefined
+    let touchStartDistance = 0
+    let activeTouches = 0
+
+    const update = (factor: number, point: { x: number; y: number }) => {
+      if (!live || !zoomLayerRef.current) return
+      live.factor = clampLiveZoomFactor(live, factor)
+      live.point = point
+      applyLiveZoom(zoomLayerRef.current, live)
+    }
+    const finish = () => {
+      if (!live) return
+      const finished = live
+      live = null
+      commitLiveZoom(finished)
     }
 
     const onWheel = (event: WheelEvent) => {
       if (!event.ctrlKey) return
       event.preventDefault()
-      if (safariGestureScale !== null) return
+      if (live && live.source !== "wheel") return
+      const point = { x: event.clientX, y: event.clientY }
+      live ??= beginLiveZoom("wheel", point)
+      if (!live) return
       const delta = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? event.deltaY * 16 : event.deltaY
       const clampedDelta = Math.max(-MAX_WHEEL_ZOOM_DELTA, Math.min(MAX_WHEEL_ZOOM_DELTA, delta))
-      queueZoom(Math.exp(-clampedDelta * WHEEL_ZOOM_SPEED), event.clientX, event.clientY)
+      update(live.factor * Math.exp(-clampedDelta * WHEEL_ZOOM_SPEED), point)
+      clearTimeout(wheelEndTimeout)
+      wheelEndTimeout = setTimeout(finish, WHEEL_GESTURE_END_MS)
     }
+
+    // iOS Safari sends gesture events for touch pinches too (without a position), so those are left
+    // to the touch handlers; preventing the default still stops it zooming the whole page.
     const onGestureStart = (event: Event) => {
       event.preventDefault()
-      safariGestureScale = 1
+      if (live || activeTouches > 0) return
+      live = beginLiveZoom("gesture", gesturePoint(event as SafariGestureEvent))
     }
-    // A gesture's scale is relative to where it started, so apply only the change since the last one.
+    // A gesture's scale is relative to where it started.
     const onGestureChange = (event: Event) => {
       event.preventDefault()
+      if (live?.source !== "gesture") return
       const gesture = event as SafariGestureEvent
-      const previousScale = safariGestureScale ?? 1
-      safariGestureScale = gesture.scale
-      queueZoom(gesture.scale / previousScale, gesture.clientX, gesture.clientY)
+      update(gesture.scale, gesturePoint(gesture))
     }
     const onGestureEnd = (event: Event) => {
       event.preventDefault()
-      safariGestureScale = null
+      if (live?.source === "gesture") finish()
+    }
+
+    const onTouchStart = (event: TouchEvent) => {
+      activeTouches = event.touches.length
+      if (event.touches.length !== 2 || live) return
+      touchStartDistance = touchDistance(event.touches)
+      if (touchStartDistance > 0) live = beginLiveZoom("touch", touchMidpoint(event.touches))
+    }
+    const onTouchMove = (event: TouchEvent) => {
+      if (live?.source !== "touch" || event.touches.length < 2) return
+      if (event.cancelable) event.preventDefault()
+      update(touchDistance(event.touches) / touchStartDistance, touchMidpoint(event.touches))
+    }
+    const onTouchEnd = (event: TouchEvent) => {
+      activeTouches = event.touches.length
+      if (live?.source === "touch" && event.touches.length < 2) finish()
     }
 
     dialog.addEventListener("wheel", onWheel, { passive: false })
     dialog.addEventListener("gesturestart", onGestureStart)
     dialog.addEventListener("gesturechange", onGestureChange)
     dialog.addEventListener("gestureend", onGestureEnd)
+    dialog.addEventListener("touchstart", onTouchStart, { passive: true })
+    dialog.addEventListener("touchmove", onTouchMove, { passive: false })
+    dialog.addEventListener("touchend", onTouchEnd)
+    dialog.addEventListener("touchcancel", onTouchEnd)
     return () => {
       dialog.removeEventListener("wheel", onWheel)
       dialog.removeEventListener("gesturestart", onGestureStart)
       dialog.removeEventListener("gesturechange", onGestureChange)
       dialog.removeEventListener("gestureend", onGestureEnd)
-      cancelAnimationFrame(frame)
+      dialog.removeEventListener("touchstart", onTouchStart)
+      dialog.removeEventListener("touchmove", onTouchMove)
+      dialog.removeEventListener("touchend", onTouchEnd)
+      dialog.removeEventListener("touchcancel", onTouchEnd)
+      clearTimeout(wheelEndTimeout)
     }
   }, [open, showingPdf])
 
@@ -741,7 +880,7 @@ export function FilePreviewDialog({
           if (event.target === event.currentTarget) onClose()
         }}
         className={`flex min-h-0 flex-1 items-start justify-center-safe overflow-auto bg-transparent p-4 sm:p-8 ${
-          showingPdf ? "[scrollbar-gutter:stable]" : ""
+          showingPdf ? "touch-pan-x touch-pan-y [scrollbar-gutter:stable]" : ""
         }`}
       >
         {showingPdf ? (
@@ -760,18 +899,21 @@ export function FilePreviewDialog({
               </button>
             </div>
           ) : (
-            <PdfDocumentViewer
-              fileUrl={getPdfPreviewUrl(url)}
-              zoomPercent={zoomPercent}
-              numPages={numPages}
-              pageRefs={pageRefs}
-              onLoadSuccess={({ numPages: loadedPageCount, pageWidthAt100Percent: loadedPageWidth }) => {
-                setNumPages(loadedPageCount)
-                setPageWidthAt100Percent(loadedPageWidth)
-              }}
-              onLoadError={() => setPdfFailed(true)}
-              onRenderError={() => setPdfFailed(true)}
-            />
+            <div ref={zoomLayerRef}>
+              <PdfDocumentViewer
+                fileUrl={getPdfPreviewUrl(url)}
+                zoomPercent={zoomPercent}
+                numPages={numPages}
+                pageRefs={pageRefs}
+                scrollContainerRef={scrollContainerRef}
+                onLoadSuccess={({ numPages: loadedPageCount, pageWidthAt100Percent: loadedPageWidth }) => {
+                  setNumPages(loadedPageCount)
+                  setPageWidthAt100Percent(loadedPageWidth)
+                }}
+                onLoadError={() => setPdfFailed(true)}
+                onRenderError={() => setPdfFailed(true)}
+              />
+            </div>
           )
         ) : kind === "image" ? (
           <img
