@@ -137,6 +137,7 @@ function parseRow(value: unknown): RosterSummaryPdfRow | null {
   return {
     eventNumber: positiveInt(r.eventNumber),
     label,
+    fullLabel: text(r.fullLabel),
     sub: text(r.sub),
     meta: text(r.meta),
     heatLane: text(r.heatLane),
@@ -195,6 +196,7 @@ function withPreferredNames(request: RosterSummaryPdfRequest): RosterSummaryPdfR
       rows: section.rows.map((row) => ({
         ...row,
         label: rosterNamePreferred(row.label),
+        fullLabel: row.fullLabel && rosterNamePreferred(row.fullLabel),
         legs: row.legs?.map(rosterNamePreferred),
       })),
     })),
@@ -209,13 +211,7 @@ function withPreferredNames(request: RosterSummaryPdfRequest): RosterSummaryPdfR
  * splits; a longer one continues in the next column under a repeated title.
  */
 export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
-  const request = withPreferredNames(input.request)
-  // Medley relay rows, by their own label ("200 Medley A") or their event's title ("Relay A").
-  const medleyRows = new Set(
-    request.sections.flatMap((section) =>
-      section.rows.filter((row) => /\bmedley\b/i.test(`${section.title} ${row.label}`))
-    )
-  )
+  let request = withPreferredNames(input.request)
   const doc =new jsPDF({ unit: "pt", format: "letter", orientation: "portrait" })
   const pageWidth = doc.internal.pageSize.getWidth()
   const pageHeight = doc.internal.pageSize.getHeight()
@@ -342,9 +338,12 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
     return end
   }
 
-  /** The meta line rides on the label line when it fits there whole, else gets its own line. */
+  /**
+   * The meta line rides on the label line when it fits there whole, else gets its own line — as it
+   * always does beside a start time, which makes a second line anyway.
+   */
   function metaInline(row: RosterSummaryPdfRow): boolean {
-    if (!row.meta) return false
+    if (!row.meta || row.startTime) return false
     setType("normal", M.metaSize)
     return labelEnd(row) + M.inlineMetaGap + doc.getTextWidth(pdfText(row.meta)) <= textRight(row)
   }
@@ -427,7 +426,14 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
     // Lines under the label run beneath the result block, out to the column edge.
     const maxBelow = right - textLeft
     const labelTop = top + M.rowPadY
-    const baseline = centeredBaseline(labelTop, M.labelLh, M.labelSize)
+    const topBaseline = centeredBaseline(labelTop, M.labelLh, M.labelSize)
+    // With nothing under it but the start time (in the heat & lane column), the label line — label,
+    // sub, result — centers on the row like the event badge.
+    const centered = Boolean(row.startTime) && metaLines(row).length === 0 && legsLineCount(row) === 0
+    // The result centers on the label line and the start time's line either way, like the badge.
+    const twoLineBaseline = centeredBaseline(labelTop, M.labelLh + M.metaLh, M.labelSize)
+    const baseline = centered ? twoLineBaseline : topBaseline
+    const resultBaseline = row.startTime ? twoLineBaseline : baseline
     if (row.eventNumber) {
       // Centered on the label and the line under it when there is one; on the label otherwise.
       const twoLines = linesBelow(row) > 0
@@ -443,13 +449,13 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
       const subLeft = textLeft + labelWidth + px(6)
       doc.text(fit(row.sub, textRight(row) - subLeft), subLeft, baseline)
     }
-    if (row.result) drawResult(row.result, baseline)
+    if (row.result) drawResult(row.result, resultBaseline)
 
     let lineTop = labelTop + M.labelLh
     const metaBaseline = centeredBaseline(lineTop, M.metaLh, M.metaSize)
     if (row.heatLane) {
       setType("normal", M.metaSize, INK_SECONDARY)
-      doc.text(pdfText(row.heatLane), resultLeft(row), baseline, { align: "right" })
+      doc.text(pdfText(row.heatLane), resultLeft(row), topBaseline, { align: "right" })
     }
     if (row.startTime) {
       setType("normal", M.metaSize, INK_TERTIARY)
@@ -541,6 +547,28 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
     left = pageLeft + index * (columnWidth + M.columnGap)
     right = left + columnWidth
   }
+
+  /**
+   * A row that runs onto a second line anyway takes its full label when that fits on the label line
+   * ("200 Free Relay B"); a one-line row keeps the compact one. A longer label never pulls the meta
+   * back onto the label line, so the row's height stays the same.
+   */
+  function withFullLabel(row: RosterSummaryPdfRow): RosterSummaryPdfRow {
+    if (!row.fullLabel || linesBelow(row) === 0) return row
+    const full = { ...row, label: row.fullLabel }
+    return labelEnd(full) <= textRight(full) ? full : row
+  }
+  setColumn(0)
+  request = {
+    ...request,
+    sections: request.sections.map((section) => ({ ...section, rows: section.rows.map(withFullLabel) })),
+  }
+  // Medley relay rows, by their own label ("200 Medley A") or their event's title ("Relay A").
+  const medleyRows = new Set(
+    request.sections.flatMap((section) =>
+      section.rows.filter((row) => /\bmedley\b/i.test(`${section.title} ${row.label}`))
+    )
+  )
 
   // Every row is laid out at column width, so its height is measured once.
   const heights = new Map<RosterSummaryPdfRow, number>()

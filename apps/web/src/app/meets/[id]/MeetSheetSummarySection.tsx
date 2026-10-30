@@ -485,8 +485,9 @@ function summaryRowView(
       ? entry.relaySwimmers?.find((s) => s.athleteId === athleteId)
       : undefined
   const split = sanitizeRelaySplitTime(swimmer?.splitTime)
+  const legSplit = split ? formatDisplayTime(split) : null
   const relayLeg = swimmer
-    ? [`Leg ${swimmer.leg}`, split ? formatDisplayTime(split) : null].filter(Boolean).join(" · ")
+    ? [`Leg ${swimmer.leg}`, legSplit].filter(Boolean).join(" · ")
     : undefined
 
   const heat = formatHeat(entry)
@@ -523,6 +524,8 @@ function summaryRowView(
     podiumPlace,
     relayLetter,
     relayLeg,
+    relayLegNumber: swimmer?.leg,
+    legSplit,
     heat,
     lane,
     heatLane,
@@ -545,12 +548,20 @@ function summaryRowPdf(
   athleteId?: string
 ): RosterSummaryPdfRow {
   const view = summaryRowView(entry, ctx, eventView, athleteId)
-  // Relay names fold the letter in: "200 Medley Relay A" (or "Relay A" under an event title),
-  // rather than repeating it in the meta.
-  const relayName = eventView
-    ? view.label
-    : `${entry.event} ${displayRelayLetter(entry.relayLetter)}`
-  const meta = [display.showRound ? view.round : null, view.isRelay ? view.relayLeg : view.team]
+  // Relay names are compact: "200 Medley A" (or "Relay A" under an event title), with the
+  // letter folded in rather than repeated in the meta — in full ("200 Medley Relay A") when the
+  // row takes two lines.
+  const relayLetter = displayRelayLetter(entry.relayLetter)
+  const relayName = eventView ? view.label : `${entry.event.replace(/\s+Relay$/i, "")} ${relayLetter}`
+  const relayFullName = !eventView ? `${entry.event} ${relayLetter}` : undefined
+  // A relay's leg rides beside its name, with the athlete's split on the line below — unless the
+  // start time already makes a second line, where the leg (and split) then go.
+  const startTime = (display.showHeatLane && entry.startTime) || undefined
+  const legInMeta = view.isRelay && Boolean(startTime)
+  const meta = [
+    display.showRound ? view.round : null,
+    !view.isRelay ? view.team : legInMeta ? view.relayLeg : view.legSplit ? `Split ${view.legSplit}` : null,
+  ]
     .filter(Boolean)
     .join(" | ")
   // Heat & lane get their own column, compact: "Heat 2 of 4" + lane 5 → "H2 of 4 · L5".
@@ -565,10 +576,14 @@ function summaryRowPdf(
   return {
     eventNumber: view.badgeNumber,
     label: (view.isRelay ? relayName : view.label) ?? "",
-    sub: view.sub || undefined,
+    fullLabel: view.isRelay && relayFullName !== relayName ? relayFullName : undefined,
+    sub:
+      (view.isRelay
+        ? !legInMeta && view.relayLegNumber && `Leg ${view.relayLegNumber}`
+        : view.sub) || undefined,
     meta: meta || undefined,
     heatLane: heatLane || undefined,
-    startTime: (display.showHeatLane && entry.startTime) || undefined,
+    startTime,
     legs: view.isRelay
       ? [...(entry.relaySwimmers ?? [])].sort((a, b) => a.leg - b.leg).map((s) => s.name)
       : undefined,

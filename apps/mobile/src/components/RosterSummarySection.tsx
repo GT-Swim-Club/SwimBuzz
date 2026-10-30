@@ -164,20 +164,33 @@ function RosterNameText({ name, mutedColor }: { name: string; mutedColor: string
 /**
  * A list row as a PDF row: title and subtitle, plus relay legs, with heat & lane in their own
  * column. The subtitle leaves out the athlete's name, which the label (or section title) already
- * carries. Relay titles fold the letter in: "200 Medley Relay A (P)".
+ * carries. Relay titles are compact, with the letter folded in: "200 Medley A (P)" — or in full
+ * ("200 Medley Relay A (P)") when the row takes two lines.
  */
 function pdfRow(entry: RosterSummaryEntry, title: string, athleteId?: string) {
   const isRelay = entry.entryType === "relay_team"
-  const relayTitle = [
-    entry.event,
-    entry.relayLetter,
-    entry.relayRound ? `(${entry.relayRound})` : null,
-  ]
-    .filter(Boolean)
-    .join(" ")
+  // The athlete's leg rides beside the relay's name; their split leads the line below.
+  const swimmer =
+    isRelay && athleteId ? entry.relaySwimmers?.find((s) => s.athleteId === athleteId) : undefined
+  const legNumber = swimmer?.leg
+  const split = swimmer?.splitTime?.trim()
+  const relayTitleFrom = (event: string) =>
+    [event, entry.relayLetter, entry.relayRound ? `(${entry.relayRound})` : null]
+      .filter(Boolean)
+      .join(" ")
+  const relayTitle = relayTitleFrom(entry.event.replace(/\s+Relay$/i, ""))
+  const relayFullTitle = relayTitleFrom(entry.event)
   return {
     label: isRelay ? relayTitle : title,
-    meta: entrySubtitle(entry, "athlete", false, athleteId, false) || undefined,
+    fullLabel: isRelay && relayFullTitle !== relayTitle ? relayFullTitle : undefined,
+    sub: legNumber ? `Leg ${legNumber}` : undefined,
+    meta:
+      [
+        split && /\d/.test(split) ? `Split ${split}` : null,
+        entrySubtitle(entry, "athlete", false, undefined, false),
+      ]
+        .filter(Boolean)
+        .join(" · ") || undefined,
     heatLane: formatHeatLane(entry)?.replace("/", " of ") ?? undefined,
     legs: isRelay ? relayLegNames(entry) : undefined,
   }
