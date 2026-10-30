@@ -99,9 +99,18 @@ function rosterFirstNames(athlete: RosterAthlete): string[] {
   return athlete.preferredName ? [athlete.firstName, athlete.preferredName] : [athlete.firstName]
 }
 
+// Letters NFKD doesn't decompose into a base letter plus an accent.
+const UNACCENTED_LETTERS: Record<string, string> = {
+  ø: "o", ł: "l", đ: "d", ð: "d", ħ: "h", ı: "i", ß: "ss", æ: "ae", œ: "oe", þ: "th",
+}
+
+/** Lowercase and fold accented letters to plain ones, so "Polák" and "Polak" compare equal. */
 function normalize(value: string): string {
   return value
     .toLowerCase()
+    .normalize("NFKD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[øłđðħıßæœþ]/g, (ch) => UNACCENTED_LETTERS[ch]!)
     .replace(/[^a-z\s]/g, " ")
     .replace(/\s+/g, " ")
     .trim()
