@@ -38,16 +38,17 @@ const GRID = {
   bandGap: px(24),
   cardGap: px(8),
   eventHeaderHeight: px(32),
-  badgeSize: px(20),
+  // Badge sizes match the roster summary PDF's and the relays PNG's.
+  badgeSize: px(21),
   badgeGap: px(8),
-  badgePx: px(5),
+  badgePx: px(3),
   cardHeaderHeight: px(32),
   legHeight: px(28),
   cardPx: px(12),
   cardRadius: px(8),
   timeGap: px(8),
   textSize: px(14),
-  badgeTextSize: px(10),
+  badgeTextSize: px(10.5),
 }
 
 export function relaysPdfFilename(meetName: string): string {

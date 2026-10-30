@@ -409,6 +409,8 @@ export default function MeetRelayBuilder({
   const mixed = gender === "X"
   const hasSignups = signupRelayPrefs != null && Object.keys(signupRelayPrefs).length > 0
   const publishedTeams = useMemo(() => publishedLineup(data), [data])
+  /** A coach-published lineup is live, so saving a draft takes it down. */
+  const isPublished = data.published.some((relay) => relay.manual)
   const draftTeams = pendingDraft(data)?.teams ?? null
 
   const defaultSettings: BuildSettings = {
@@ -457,7 +459,8 @@ export default function MeetRelayBuilder({
   const [error, setError] = useState("")
   /** Alternate lists expanded by "Show more", per stroke (medley) or "free". */
   const [expandedAlternates, setExpandedAlternates] = useState<Record<string, boolean>>({})
-  const [confirmPublish, setConfirmPublish] = useState(false)
+  /** Like practices: publishing a draft or taking a published lineup back to draft asks first. */
+  const [confirmPublish, setConfirmPublish] = useState<"publish" | "draft" | null>(null)
   const [loadOpen, setLoadOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
   const [legOrderOpen, setLegOrderOpen] = useState(false)
@@ -782,7 +785,14 @@ export default function MeetRelayBuilder({
     )
   }
 
+  function requestDraft() {
+    if (!result || result.teams.length === 0) return
+    if (isPublished) setConfirmPublish("draft")
+    else saveDraft()
+  }
+
   function saveDraft() {
+    setConfirmPublish(null)
     if (!result || result.teams.length === 0) return
     onCommit(
       { kind: "draft", teams: lineupTeamsOf(result), relayEvent: result.relay, optimal: isLoaded("optimal"), settings },
@@ -804,12 +814,14 @@ export default function MeetRelayBuilder({
       return
     }
     setError("")
-    setConfirmPublish(true)
+    // Republishing an already published lineup just updates it.
+    if (isPublished) publish()
+    else setConfirmPublish("publish")
   }
 
   function publish() {
     if (hasImportedResults || !result) return
-    setConfirmPublish(false)
+    setConfirmPublish(null)
     onCommit({ kind: "publish", teams: lineupTeamsOf(result), relayEvent: result.relay, settings }, guard.leave())
   }
 
@@ -818,9 +830,7 @@ export default function MeetRelayBuilder({
     ...(publishedTeams.length > 0 ? [{ source: "published" as const, label: "Published lineup" }] : []),
     ...(draftTeams ? [{ source: "draft" as const, label: "Saved draft" }] : []),
   ]
-  const saveDraftLabel = data.published.some((relay) => relay.manual)
-    ? "Save as draft and unpublish"
-    : "Save as draft"
+  const saveDraftLabel = isPublished ? "Save as draft and unpublish" : "Save as draft"
   // An option counts as loaded whenever the lineup on screen matches it — e.g. a saved draft that
   // is also the optimal lineup marks both.
   const currentKey = result && result.teams.length > 0 ? lineupKey(lineupTeamsOf(result)) : null
@@ -906,7 +916,7 @@ export default function MeetRelayBuilder({
       <button
         type="button"
         aria-label={saveDraftLabel}
-        onClick={saveDraft}
+        onClick={requestDraft}
         disabled={!canAct}
         className={`${iconButtonClass} border border-fill text-foreground hover:bg-fill-secondary`}
       >
@@ -1522,26 +1532,30 @@ export default function MeetRelayBuilder({
       </Modal>
 
       <Modal
-        open={confirmPublish}
-        onClose={() => setConfirmPublish(false)}
-        title={`Publish ${slot.label}?`}
-        description="Athletes will see it on the Relays page."
+        open={confirmPublish != null}
+        onClose={() => setConfirmPublish(null)}
+        title={confirmPublish === "draft" ? `Revert ${slot.label} to draft?` : `Publish ${slot.label}?`}
+        description={
+          confirmPublish === "draft"
+            ? "This will hide it from athletes until it's published again."
+            : "Athletes will see it on the Relays page."
+        }
         maxWidth="md"
         footer={
           <ModalFooter>
             <button
               type="button"
-              onClick={() => setConfirmPublish(false)}
+              onClick={() => setConfirmPublish(null)}
               className="flex-1 rounded-lg border border-border bg-background px-4 py-2.5 text-sm font-medium hover:bg-fill disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="button"
-              onClick={publish}
+              onClick={confirmPublish === "draft" ? saveDraft : publish}
               className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast hover:bg-primary-hover disabled:opacity-50"
             >
-              Publish
+              {confirmPublish === "draft" ? "Revert to Draft" : "Publish"}
             </button>
           </ModalFooter>
         }

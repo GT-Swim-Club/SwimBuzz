@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic"
 import { type ReactNode, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from "react"
-import { createPortal } from "react-dom"
+import { createPortal, flushSync } from "react-dom"
 import HoverDetail from "./HoverDetail"
 import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
@@ -325,37 +325,18 @@ function scrollToZoomAnchor(
   container.scrollLeft = pageRect.left + anchor.fractionX * pageRect.width - anchor.viewportX
 }
 
-// A pinch in progress. Until it ends, the pages are only CSS-transformed — re-laying out and
-// re-scrolling every page on every frame is what made pinching jittery — and the zoom is committed
-// once the fingers lift.
+// A pinch in progress. Its anchor is measured once, when it starts, and every frame scrolls back
+// to that same spot — re-measuring each frame from the last frame's rounded layout made it drift.
 type LiveZoom = {
   source: "wheel" | "gesture" | "touch"
   baseZoomPercent: number
   factor: number
-  startPoint: { x: number; y: number }
   point: { x: number; y: number }
-  // Where the pinch started, within the (untransformed) zoom layer; the scale is centered on it.
-  origin: { x: number; y: number }
-  // Taken before any transform, so it's measured against the real layout.
   anchor: ZoomAnchor | null
 }
 
 function clampLiveZoomFactor(live: LiveZoom, factor: number) {
   return clampZoomPercent(live.baseZoomPercent * factor) / live.baseZoomPercent
-}
-
-function applyLiveZoom(layer: HTMLElement, live: LiveZoom) {
-  const dx = live.point.x - live.startPoint.x
-  const dy = live.point.y - live.startPoint.y
-  layer.style.transformOrigin = `${live.origin.x}px ${live.origin.y}px`
-  layer.style.transform = `translate(${dx}px, ${dy}px) scale(${live.factor})`
-}
-
-function clearLiveZoom(layer: HTMLElement | null) {
-  if (!layer) return
-  layer.style.transform = ""
-  layer.style.transformOrigin = ""
-  layer.style.willChange = ""
 }
 
 function touchMidpoint(touches: TouchList) {
@@ -389,7 +370,6 @@ export function FilePreviewDialog({
   const printFrameRef = useRef<HTMLIFrameElement | null>(null)
   const dialogRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const zoomLayerRef = useRef<HTMLDivElement>(null)
   const pageRefs = useRef<Array<HTMLDivElement | null>>([])
   const zoomAnchorRef = useRef<ZoomAnchor | null>(null)
   const pageNavigationRef = useRef<{
@@ -527,10 +507,8 @@ export function FilePreviewDialog({
   }, [open, showingPdf])
 
   // After a zoom re-lays out the pages, scroll so the point the zoom centered on (anchored to its
-  // page) is back where it was in the viewport, instead of drifting to another page. A finished
-  // pinch's transform comes off in the same frame, so the pages don't flash at the old size.
+  // page) is back where it was in the viewport, instead of drifting to another page.
   useLayoutEffect(() => {
-    clearLiveZoom(zoomLayerRef.current)
     const anchor = zoomAnchorRef.current
     zoomAnchorRef.current = null
     const container = scrollContainerRef.current
@@ -567,37 +545,32 @@ export function FilePreviewDialog({
   const beginLiveZoom = useEffectEvent(
     (source: LiveZoom["source"], point: { x: number; y: number }): LiveZoom | null => {
       const container = scrollContainerRef.current
-      const layer = zoomLayerRef.current
-      if (!container || !layer || pdfFailed) return null
+      if (!container || pdfFailed) return null
       endPageNavigation(false)
-      const layerRect = layer.getBoundingClientRect()
-      layer.style.willChange = "transform"
       return {
         source,
         baseZoomPercent: zoomPercent,
         factor: 1,
-        startPoint: point,
         point,
-        origin: { x: point.x - layerRect.left, y: point.y - layerRect.top },
         anchor: getZoomAnchor(container, pageRefs.current, point),
       }
     }
   )
 
-  // The anchored point ends up wherever the pinch finished, so panning mid-pinch carries over.
-  const commitLiveZoom = useEffectEvent((live: LiveZoom) => {
+  // The anchored spot follows the fingers or pointer, so panning mid-pinch moves the page too.
+  // flushSync lays out and re-scrolls within the frame, so the new size never paints at the old
+  // scroll position.
+  const applyLiveZoom = useEffectEvent((live: LiveZoom) => {
     const container = scrollContainerRef.current
     const anchor =
       live.anchor && container ? { ...live.anchor, ...getViewportPoint(container, live.point) } : null
     const nextZoomPercent = clampZoomPercent(live.baseZoomPercent * live.factor)
     if (nextZoomPercent === zoomPercent) {
-      // No re-layout is coming to take the transform off, so do it here.
-      clearLiveZoom(zoomLayerRef.current)
       if (anchor && container) scrollToZoomAnchor(container, pageRefs.current, anchor)
       return
     }
     zoomAnchorRef.current = anchor
-    setManualZoomPercent(nextZoomPercent)
+    flushSync(() => setManualZoomPercent(nextZoomPercent))
   })
 
   // Pinching zooms the document around the fingers or pointer instead of zooming the whole page.
@@ -609,21 +582,31 @@ export function FilePreviewDialog({
     if (!dialog) return
 
     let live: LiveZoom | null = null
+    let frame = 0
     let wheelEndTimeout: ReturnType<typeof setTimeout> | undefined
     let touchStartDistance = 0
     let activeTouches = 0
 
+    // Zoom updates are batched to one per frame.
     const update = (factor: number, point: { x: number; y: number }) => {
-      if (!live || !zoomLayerRef.current) return
+      if (!live) return
       live.factor = clampLiveZoomFactor(live, factor)
       live.point = point
-      applyLiveZoom(zoomLayerRef.current, live)
+      if (frame) return
+      frame = requestAnimationFrame(() => {
+        frame = 0
+        if (live) applyLiveZoom(live)
+      })
     }
+    // Apply any update still waiting for its frame, then let the next pinch start fresh.
     const finish = () => {
       if (!live) return
-      const finished = live
+      if (frame) {
+        cancelAnimationFrame(frame)
+        frame = 0
+        applyLiveZoom(live)
+      }
       live = null
-      commitLiveZoom(finished)
     }
 
     const onWheel = (event: WheelEvent) => {
@@ -693,6 +676,7 @@ export function FilePreviewDialog({
       dialog.removeEventListener("touchend", onTouchEnd)
       dialog.removeEventListener("touchcancel", onTouchEnd)
       clearTimeout(wheelEndTimeout)
+      cancelAnimationFrame(frame)
     }
   }, [open, showingPdf])
 
@@ -899,21 +883,19 @@ export function FilePreviewDialog({
               </button>
             </div>
           ) : (
-            <div ref={zoomLayerRef}>
-              <PdfDocumentViewer
-                fileUrl={getPdfPreviewUrl(url)}
-                zoomPercent={zoomPercent}
-                numPages={numPages}
-                pageRefs={pageRefs}
-                scrollContainerRef={scrollContainerRef}
-                onLoadSuccess={({ numPages: loadedPageCount, pageWidthAt100Percent: loadedPageWidth }) => {
-                  setNumPages(loadedPageCount)
-                  setPageWidthAt100Percent(loadedPageWidth)
-                }}
-                onLoadError={() => setPdfFailed(true)}
-                onRenderError={() => setPdfFailed(true)}
-              />
-            </div>
+            <PdfDocumentViewer
+              fileUrl={getPdfPreviewUrl(url)}
+              zoomPercent={zoomPercent}
+              numPages={numPages}
+              pageRefs={pageRefs}
+              scrollContainerRef={scrollContainerRef}
+              onLoadSuccess={({ numPages: loadedPageCount, pageWidthAt100Percent: loadedPageWidth }) => {
+                setNumPages(loadedPageCount)
+                setPageWidthAt100Percent(loadedPageWidth)
+              }}
+              onLoadError={() => setPdfFailed(true)}
+              onRenderError={() => setPdfFailed(true)}
+            />
           )
         ) : kind === "image" ? (
           <img

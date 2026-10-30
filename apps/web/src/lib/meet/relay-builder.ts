@@ -223,7 +223,7 @@ export function relayEventSlots(
   return SLOT_GENDER_ORDER.flatMap((gender) => slots.filter((s) => s.gender === gender))
 }
 
-/** A relay event's published lineups, for Share (PNG/PDF/CSV). */
+/** A relay event's published lineups, for Share (PNG/PDF). */
 export function relayShareEvent(slot: RelayEventSlot, published: RelayLineup[]): RelayShareEvent {
   return {
     number: slot.number ?? (published.find((relay) => relay.eventNumber > 0)?.eventNumber || null),

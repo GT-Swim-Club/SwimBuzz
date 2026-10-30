@@ -50,15 +50,10 @@ const M = {
   sectionGap: px(10),
   sectionHeaderHeight: px(26),
   sectionTitleSize: px(14),
+  // Every event circle is the same size, here and in the relays PDF and PNG.
   badgeSize: px(21),
-  badgeTextSize: px(12),
+  badgeTextSize: px(10.5),
   badgeGap: px(6),
-  /** One-line rows. */
-  rowBadgeSize: px(20),
-  rowBadgeTextSize: px(10.5),
-  /** Rows with a second line (meta or relay legs): the circle spans both lines. */
-  rowBadgeTallSize: px(26),
-  rowBadgeTallTextSize: px(11),
   rowPadY: px(3),
   labelLh: px(18),
   labelSize: px(13),
@@ -306,7 +301,7 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
 
   function rowTextLeft(row: RosterSummaryPdfRow): number {
     // A fixed column wide enough for the tall badge, so labels line up across rows.
-    return row.eventNumber ? left + M.rowBadgeTallSize + M.badgeGap : left
+    return row.eventNumber ? left + M.badgeSize + M.badgeGap : left
   }
 
   /** Where the label (and sub) end, in the label line's fonts. */
@@ -382,14 +377,10 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
     const labelTop = top + M.rowPadY
     const baseline = centeredBaseline(labelTop, M.labelLh, M.labelSize)
     if (row.eventNumber) {
-      // Span the label and the line under it when there is one; centered on the label otherwise.
+      // Centered on the label and the line under it when there is one; on the label otherwise.
       const twoLines = (row.meta && !metaInline(row)) || legsLineCount(row) > 0
-      const size = twoLines ? M.rowBadgeTallSize : M.rowBadgeSize
-      const textSize = twoLines ? M.rowBadgeTallTextSize : M.rowBadgeTextSize
       const span = twoLines ? M.labelLh + M.metaLh : M.labelLh
-      // Centered in the badge column, so a small circle sits as close to the label as a tall one.
-      const x = left + (M.rowBadgeTallSize - size) / 2
-      badge(row.eventNumber, x, labelTop + (span - size) / 2, size, textSize)
+      badge(row.eventNumber, left, labelTop + (span - M.badgeSize) / 2, M.badgeSize, M.badgeTextSize)
     }
     setType("normal", M.labelSize)
     const label = fit(row.label, maxText)
@@ -502,10 +493,6 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
     return height
   }
 
-  function stackHeight(pieces: Piece[]): number {
-    return pieces.reduce((sum, piece, i) => sum + (i > 0 ? M.sectionGap : 0) + pieceHeight(piece), 0)
-  }
-
   function drawStack(pieces: Piece[], top: number): number {
     let yy = top
     pieces.forEach((piece, i) => {
@@ -558,41 +545,6 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
     return [taken, []]
   }
 
-  /**
-   * Everything left in `queue`, split between the two columns so they come out about even, if it
-   * fits in `avail`.
-   */
-  type Split = { first: Piece[]; second: Piece[]; height: number }
-
-  /** The shortest of `splits` that fits in `avail`, if any. */
-  function shortestFit(splits: [Piece[], Piece[]][], avail: number): Split | null {
-    let best: Split | null = null
-    for (const [first, second] of splits) {
-      const height = Math.max(stackHeight(first), stackHeight(second))
-      if (height <= avail && (best == null || height < best.height)) best = { first, second, height }
-    }
-    return best
-  }
-
-  function balancedColumns(queue: Piece[], avail: number): Split | null {
-    // Neither column can be shorter than half the total, so skip the search when that can't fit.
-    if (stackHeight(queue) > 2 * avail + M.sectionHeaderHeight) return null
-    const sectionSplits: [Piece[], Piece[]][] = []
-    for (let k = 1; k <= queue.length; k++) sectionSplits.push([queue.slice(0, k), queue.slice(k)])
-    const rowSplits: [Piece[], Piece[]][] = []
-    queue.forEach((piece, j) => {
-      for (let r = piece.startRow + 1; r < piece.endRow; r++) {
-        rowSplits.push([
-          [...queue.slice(0, j), { ...piece, endRow: r }],
-          [{ ...piece, startRow: r }, ...queue.slice(j + 1)],
-        ])
-      }
-    })
-    if (request.splitSections) return shortestFit([...sectionSplits, ...rowSplits], avail)
-    // Otherwise a section only splits across the columns when there's no way to fit it whole.
-    return shortestFit(sectionSplits, avail) ?? shortestFit(rowSplits, avail)
-  }
-
   /** Lay out sections in two columns from `top`; returns the y below them. */
   function flowColumns(sections: RosterSummaryPdfSection[], top: number): number {
     setColumn(0)
@@ -601,14 +553,7 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
     while (queue.length > 0) {
       setColumn(0)
       const avail = contentBottom - yy
-      const fit = balancedColumns(queue, avail)
-      if (fit) {
-        drawStack(fit.first, yy)
-        setColumn(1)
-        drawStack(fit.second, yy)
-        return yy + fit.height
-      }
-      // Too much for this page: fill the left column, then the right, then go on to the next page.
+      // Fill the left column, then the right, then go on to the next page.
       const [first, afterFirst] = takeColumn(queue, avail)
       const firstBottom = drawStack(first, yy)
       setColumn(1)

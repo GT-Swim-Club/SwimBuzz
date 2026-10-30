@@ -52,7 +52,7 @@ export function EventHeader({ event }: { event: RelaySummaryEvent }) {
   return (
     <div className="flex min-h-8 items-center justify-between gap-2 py-1 text-left">
       <span className="inline-flex min-w-0 items-center gap-2">
-        {event.number ? <EventBadge number={event.number} compact /> : null}
+        {event.number ? <EventBadge number={event.number} /> : null}
         <span className="truncate text-sm font-medium text-foreground">{event.name}</span>
         {event.pills.map((pill) => (
           <span
@@ -145,7 +145,7 @@ function minColumnWidth(events: RelaySummaryEvent[]): number {
   for (const event of events) {
     const pills = event.pills.reduce((sum, pill) => sum + pill.label.length * 6.6 + 26, 0)
     // number badge + name + pills (padding, border, gap) + chevron and its gap + header padding
-    const badge = event.number ? 28 : 0
+    const badge = event.number ? 29 : 0
     width = Math.max(width, badge + event.name.length * 7.9 + pills + (event.href ? 24 : 0) + 16)
     for (const card of event.cards) {
       // card header: title + mono total + gap and padding

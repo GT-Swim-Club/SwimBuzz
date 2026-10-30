@@ -2,13 +2,12 @@
 
 import { useEffect, useRef, useState } from "react"
 import { toPng } from "html-to-image"
-import { relayShareFilename, relaySummaryCsv, type RelayShareEvent } from "@swimbuzz/shared"
+import { relayShareFilename, type RelayShareEvent } from "@swimbuzz/shared"
 import ActionIcon from "@/components/ui/ActionIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
 import {
   CheckIcon,
   CopyPngMenuIcon,
-  CsvMenuIcon,
   PdfMenuIcon,
   PngMenuIcon,
   downloadBlob,
@@ -21,7 +20,7 @@ const IMAGE_PLACEHOLDER = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAE
 const MENU_ITEM =
   "flex w-full items-center gap-2 whitespace-nowrap px-3 py-2 text-left text-sm text-foreground hover:bg-fill"
 
-/** Share menu for the published relays: Copy PNG, Download PNG, Download PDF, Download CSV. */
+/** Share menu for the published relays: Copy PNG, Download PNG, Download PDF. */
 export default function ShareRelaysButton({
   meetId,
   meetName,
@@ -122,14 +121,6 @@ export default function ShareRelaysButton({
     }
   }
 
-  function downloadCsv() {
-    setError(null)
-    setOpen(false)
-    // Byte-order mark so Excel opens accented names as UTF-8.
-    const blob = new Blob(["\uFEFF", relaySummaryCsv(events)], { type: "text/csv;charset=utf-8" })
-    downloadBlob(blob, relayShareFilename(meetName, "csv"))
-  }
-
   const label =
     busy === "png"
       ? "Exporting image…"
@@ -169,10 +160,6 @@ export default function ShareRelaysButton({
           <button type="button" role="menuitem" onClick={() => void downloadPdf()} className={MENU_ITEM}>
             <PdfMenuIcon className="h-4 w-4 shrink-0" />
             Download PDF
-          </button>
-          <button type="button" role="menuitem" onClick={downloadCsv} className={MENU_ITEM}>
-            <CsvMenuIcon className="h-4 w-4 shrink-0" />
-            Download CSV
           </button>
         </div>
       )}
