@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { attachmentDisposition } from "@swimbuzz/shared"
 import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/auth/session"
 import { buildPracticePdf, practicePdfFilename } from "@/lib/practice/practice-pdf"
@@ -33,7 +34,7 @@ export async function GET(
   return new NextResponse(bytes, {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Content-Disposition": attachmentDisposition(filename),
       "Cache-Control": "no-store",
     },
   })

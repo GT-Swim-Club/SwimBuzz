@@ -28,8 +28,12 @@ export type RosterSummaryPdfRow = {
   label: string
   /** Small text right after the label (result tags, badges). */
   sub?: string
-  /** Second line: team / round / heat & lane, already filtered by the viewer's row toggles. */
+  /** Second line: round / team, already filtered by the viewer's row toggles. */
   meta?: string
+  /** Heat & lane column, compact ("H2 of 4 · L5"); left out when the viewer hides heat & lane. */
+  heatLane?: string
+  /** Start time, under the heat & lane in the same column ("11:38 AM"). */
+  startTime?: string
   /** Relay legs in order. */
   legs?: string[]
   /** Right-hand column; left out, the row has none (mobile rows are just a title and subtitle). */

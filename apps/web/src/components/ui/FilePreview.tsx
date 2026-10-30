@@ -409,6 +409,25 @@ export function FilePreviewDialog({
     }
   }, [open])
 
+  // Make the page behind the preview inert while it's open, so find-in-page (Cmd/Ctrl+F) only
+  // searches the preview instead of also counting and jumping to matches hidden behind it.
+  useEffect(() => {
+    if (!open) return
+    const dialog = dialogRef.current
+    const background = Array.from(document.body.children).filter(
+      (element): element is HTMLElement =>
+        element instanceof HTMLElement && element !== dialog && !element.inert
+    )
+    background.forEach((element) => {
+      element.inert = true
+    })
+    return () => {
+      background.forEach((element) => {
+        element.inert = false
+      })
+    }
+  }, [open])
+
   useEscapeToClose(open, onClose)
 
   // The print iframe has to outlive the print() call (removing it cancels the print in some

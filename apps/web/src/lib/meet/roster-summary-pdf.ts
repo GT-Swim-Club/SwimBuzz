@@ -14,7 +14,7 @@ import { formatDisplayTime, formatOrdinal } from "@/lib/utils"
 
 export type RosterSummaryPdfInput = {
   meetName: string
-  /** Meet icon as a square PNG (corners already rounded), or null to leave it out. */
+  /** Meet icon as a square PNG (logo fitted whole, transparent padding), or null to leave it out. */
   iconPng: Uint8Array | null
   request: RosterSummaryPdfRequest
 }
@@ -67,11 +67,13 @@ const M = {
   smallSize: px(11),
   seedTagSize: px(9),
   // Result block, sized for a half-page column.
-  deltaWidth: px(52),
+  deltaWidth: px(40),
   timeWidth: px(66),
-  placeWidth: px(38),
+  placeWidth: px(32),
   rightGap: px(10),
-  columnGap: px(28),
+  // Heat & lane ("H2 of 4 · L5" over the start time), right-aligned just left of the result block.
+  heatLaneGap: px(8),
+  columnGap: px(22),
   footerSize: px(10),
 }
 
@@ -137,6 +139,8 @@ function parseRow(value: unknown): RosterSummaryPdfRow | null {
     label,
     sub: text(r.sub),
     meta: text(r.meta),
+    heatLane: text(r.heatLane),
+    startTime: text(r.startTime),
     legs: legs?.length ? legs : undefined,
     result: r.result == null ? undefined : parseResult(r.result),
   }
@@ -200,8 +204,8 @@ function withPreferredNames(request: RosterSummaryPdfRequest): RosterSummaryPdfR
 /**
  * The roster summary as the viewer sees it — sections of rows in a Letter portrait document, flowing
  * down two columns and across pages. Header like the relays PDF (meet icon, name, gold eyebrow), then
- * each section's title (with its event badge) and rows: the label, a meta line, relay legs, and the
- * time, delta and place (or seed and seed rank) on the right. A section that fits in one column never
+ * each section's title (with its event badge) and rows: the label, a meta line, relay legs, the heat
+ * & lane over the start time, and the time, delta and place (or seed and seed rank) on the right. A section that fits in one column never
  * splits; a longer one continues in the next column under a repeated title.
  */
 export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
@@ -224,8 +228,30 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
   // Footer sits in the bottom margin, clear of the last row.
   const footerTop = pageHeight - px(20)
   const contentBottom = pageHeight - M.margin
-  /** The label line stops short of the result block — or runs to the column edge when the row has none. */
-  const textRight = (row: RosterSummaryPdfRow) => (row.result ? right - RIGHT_WIDTH - M.rightGap : right)
+  /** Where the result block starts — or the column edge when the row has none. */
+  const resultLeft = (row: RosterSummaryPdfRow) => (row.result ? right - RIGHT_WIDTH - M.rightGap : right)
+  /**
+   * The heat & lane column's width: as wide as the row's heat & lane or start time, whichever is
+   * wider. Measures without disturbing the current font, since callers measure around it.
+   */
+  function heatLaneWidth(row: RosterSummaryPdfRow): number {
+    const font = doc.getFont()
+    const size = doc.getFontSize()
+    doc.setFont("helvetica", "normal")
+    doc.setFontSize(M.metaSize)
+    const width = Math.max(
+      row.heatLane ? doc.getTextWidth(pdfText(row.heatLane)) : 0,
+      row.startTime ? doc.getTextWidth(pdfText(row.startTime)) : 0
+    )
+    doc.setFont(font.fontName, font.fontStyle)
+    doc.setFontSize(size)
+    return width
+  }
+  /** The label line stops short of the heat & lane column, or of the result block without one. */
+  function textRight(row: RosterSummaryPdfRow): number {
+    const heatLane = heatLaneWidth(row)
+    return resultLeft(row) - (heatLane > 0 ? heatLane + M.heatLaneGap : 0)
+  }
 
   function setType(style: "normal" | "bold", size: number, color: RGB = INK) {
     doc.setFont("helvetica", style)
@@ -323,10 +349,36 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
     return labelEnd(row) + M.inlineMetaGap + doc.getTextWidth(pdfText(row.meta)) <= textRight(row)
   }
 
+  /**
+   * The meta when it gets lines of its own. Beside the start time it stops short of the heat & lane
+   * column and wraps onto a second line rather than lose its end (a relay leg's split); otherwise it
+   * runs to the column edge on one line.
+   */
+  function metaLines(row: RosterSummaryPdfRow): string[] {
+    if (!row.meta || metaInline(row)) return []
+    const textLeft = rowTextLeft(row)
+    setType("normal", M.metaSize)
+    if (!row.startTime) return [fit(row.meta, right - textLeft)]
+    const width = textRight(row) - textLeft
+    // Wrap between the " | " parts ("Timed Finals" / "Leg 2 · 25.31"), not inside one.
+    const lines: string[] = []
+    for (const part of pdfText(row.meta).split(" | ")) {
+      const joined = lines.length ? `${lines[lines.length - 1]} | ${part}` : part
+      if (lines.length && doc.getTextWidth(joined) <= width) lines[lines.length - 1] = joined
+      else lines.push(part)
+    }
+    return lines.length <= 2
+      ? lines.map((line) => fit(line, width))
+      : [fit(lines[0], width), fit(lines.slice(1).join(" | "), width)]
+  }
+
+  /** Lines under the label: the meta (whose first line the start time shares), then the legs. */
+  function linesBelow(row: RosterSummaryPdfRow): number {
+    return Math.max(metaLines(row).length, row.startTime ? 1 : 0) + legsLineCount(row)
+  }
+
   function rowHeight(row: RosterSummaryPdfRow): number {
-    const metaLine = row.meta && !metaInline(row) ? 1 : 0
-    const lines = metaLine + legsLineCount(row)
-    return M.rowPadY * 2 + M.labelLh + lines * M.metaLh
+    return M.rowPadY * 2 + M.labelLh + linesBelow(row) * M.metaLh
   }
 
   function drawResult(result: RosterSummaryPdfResult, baseline: number) {
@@ -378,7 +430,7 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
     const baseline = centeredBaseline(labelTop, M.labelLh, M.labelSize)
     if (row.eventNumber) {
       // Centered on the label and the line under it when there is one; on the label otherwise.
-      const twoLines = (row.meta && !metaInline(row)) || legsLineCount(row) > 0
+      const twoLines = linesBelow(row) > 0
       const span = twoLines ? M.labelLh + M.metaLh : M.labelLh
       badge(row.eventNumber, left, labelTop + (span - M.badgeSize) / 2, M.badgeSize, M.badgeTextSize)
     }
@@ -394,16 +446,27 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
     if (row.result) drawResult(row.result, baseline)
 
     let lineTop = labelTop + M.labelLh
+    const metaBaseline = centeredBaseline(lineTop, M.metaLh, M.metaSize)
+    if (row.heatLane) {
+      setType("normal", M.metaSize, INK_SECONDARY)
+      doc.text(pdfText(row.heatLane), resultLeft(row), baseline, { align: "right" })
+    }
+    if (row.startTime) {
+      setType("normal", M.metaSize, INK_TERTIARY)
+      doc.text(pdfText(row.startTime), resultLeft(row), metaBaseline, { align: "right" })
+    }
     if (row.meta && metaInline(row)) {
       // Measure before styling: labelEnd switches to the label's fonts.
       const metaLeft = labelEnd(row) + M.inlineMetaGap
       setType("normal", M.metaSize, INK_TERTIARY)
       doc.text(pdfText(row.meta), metaLeft, baseline)
-    } else if (row.meta) {
-      setType("normal", M.metaSize, INK_TERTIARY)
-      doc.text(fit(row.meta, maxBelow), textLeft, centeredBaseline(lineTop, M.metaLh, M.metaSize))
-      lineTop += M.metaLh
     }
+    const lines = metaLines(row)
+    setType("normal", M.metaSize, INK_TERTIARY)
+    lines.forEach((line, i) => {
+      doc.text(line, textLeft, centeredBaseline(lineTop + i * M.metaLh, M.metaLh, M.metaSize))
+    })
+    lineTop += Math.max(lines.length, row.startTime ? 1 : 0) * M.metaLh
     drawLegs(row, textLeft, lineTop, maxBelow)
   }
 

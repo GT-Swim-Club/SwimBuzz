@@ -11,7 +11,7 @@ import {
 
 export type RelaysPdfInput = {
   meetName: string
-  /** Meet icon as a square PNG (corners already rounded), or null to leave it out. */
+  /** Meet icon as a square PNG (logo fitted whole, transparent padding), or null to leave it out. */
   iconPng: Uint8Array | null
   /** Published relays only, in display order. */
   events: RelayShareEvent[]

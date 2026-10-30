@@ -3,13 +3,14 @@ import { meetIconStorageUrl } from "@/lib/meet/meet-storage"
 
 const ICON_MAX_BYTES = 5 * 1024 * 1024
 const ICON_EDGE_PX = 256
-/** Matches the Share PNG's rounded-xl corners on its 80px icon. */
-const ICON_RADIUS_PX = Math.round((ICON_EDGE_PX * 12) / 80)
+/** Alpha at or below this counts as transparent margin (matches MeetListThumb). */
+const ALPHA_THRESHOLD = 8
 
 /**
- * The meet icon as a square PNG with rounded corners, ready for jsPDF (which can't read
- * WebP/HEIC uploads or clip images itself). Null when there's no icon in our storage or it
- * can't be fetched — the PDF just goes without it.
+ * The meet icon as a square PNG, ready for jsPDF (which can't read WebP/HEIC uploads). Like
+ * MeetListThumb, transparent margins are trimmed and the visible logo is fitted whole into the
+ * square on a transparent background, so nothing gets cropped. Null when there's no icon in our
+ * storage or it can't be fetched — the PDF just goes without it.
  */
 export async function loadMeetIconPng(iconUrl: string | null): Promise<Uint8Array | null> {
   const url = meetIconStorageUrl(iconUrl)
@@ -19,14 +20,33 @@ export async function loadMeetIconPng(iconUrl: string | null): Promise<Uint8Arra
     if (!res.ok) return null
     const bytes = Buffer.from(await res.arrayBuffer())
     if (bytes.length > ICON_MAX_BYTES) return null
-    // Alpha mask only — the fill color is irrelevant.
-    const mask = Buffer.from(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="${ICON_EDGE_PX}" height="${ICON_EDGE_PX}">` +
-        `<rect width="${ICON_EDGE_PX}" height="${ICON_EDGE_PX}" rx="${ICON_RADIUS_PX}" ry="${ICON_RADIUS_PX}"/></svg>`
-    )
-    const png = await sharp(bytes)
-      .resize(ICON_EDGE_PX, ICON_EDGE_PX, { fit: "cover" })
-      .composite([{ input: mask, blend: "dest-in" }])
+    const { data, info } = await sharp(bytes)
+      .rotate()
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true })
+    const { width, height, channels } = info
+    let x0 = width
+    let y0 = height
+    let x1 = -1
+    let y1 = -1
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        if (data[(y * width + x) * channels + 3] > ALPHA_THRESHOLD) {
+          if (x < x0) x0 = x
+          if (x > x1) x1 = x
+          if (y < y0) y0 = y
+          if (y > y1) y1 = y
+        }
+      }
+    }
+    if (x1 < 0) return null
+    const png = await sharp(data, { raw: { width, height, channels } })
+      .extract({ left: x0, top: y0, width: x1 - x0 + 1, height: y1 - y0 + 1 })
+      .resize(ICON_EDGE_PX, ICON_EDGE_PX, {
+        fit: "contain",
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
       .png()
       .toBuffer()
     return new Uint8Array(png)

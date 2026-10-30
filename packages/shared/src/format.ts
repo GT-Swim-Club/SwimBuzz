@@ -318,8 +318,8 @@ export function athletePreferredInitials(athlete: AthleteNameParts): string {
   return `${first[0] ?? ""}${athlete.lastName[0] ?? ""}`
 }
 /**
- * How every meet file downloads: "Psych Sheet - 2026 CCS Southern Regionals.pdf". Characters a
- * filename can't hold are dropped; without `ext` it's just the name.
+ * How every meet and practice file downloads: "Psych Sheet - 2026 CCS Southern Regionals.pdf".
+ * Characters a filename can't hold are dropped; without `ext` it's just the name.
  */
 export function meetFileName(label: string, meetName: string, ext?: string): string {
   const name = [label, meetName]

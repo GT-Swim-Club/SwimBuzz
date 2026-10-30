@@ -225,10 +225,10 @@ export default function SummaryRow({
                 compact ? "text-[11px]" : "text-xs"
               }`}
             >
-              {team ? <span className="shrink-0">{team}</span> : null}
-              {team && (showRound || showHL) ? <Sep /> : null}
               {showRound ? <span className="shrink-0">{round}</span> : null}
-              {showRound && showHL ? <Sep /> : null}
+              {showRound && (team || showHL) ? <Sep /> : null}
+              {team ? <span className="shrink-0">{team}</span> : null}
+              {team && showHL ? <Sep /> : null}
               {showHL ? <span className="truncate">{heatLane}</span> : null}
               {note ? (
                 <>

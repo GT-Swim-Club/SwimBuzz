@@ -1,5 +1,12 @@
 import { jsPDF } from "jspdf"
-import { formatPracticeDistance, formatZonedInstantRange, practiceShareFilename, zonedDayKey } from "@swimbuzz/shared"
+import {
+  formatPracticeDistance,
+  formatPracticeShareDate,
+  formatZonedInstantRange,
+  meetFileName,
+  practiceShareFilename,
+  zonedDayKey,
+} from "@swimbuzz/shared"
 import { isHtmlEmpty, normalizePracticeHtml } from "@/components/ui/FormattedText"
 
 export type PracticePdfSet = {
@@ -223,8 +230,11 @@ export function practicesPdfFilename(dayKeys: string[]): string {
   const sorted = [...dayKeys].sort()
   const first = sorted[0]
   const last = sorted[sorted.length - 1]
-  if (!first) return "practices.pdf"
-  return first === last ? `practices-${first}.pdf` : `practices-${first}-to-${last}.pdf`
+  if (!first) return "Practices.pdf"
+  const range = first === last
+    ? formatPracticeShareDate(first)
+    : `${formatPracticeShareDate(first)} to ${formatPracticeShareDate(last)}`
+  return meetFileName("Practices", range, "pdf")
 }
 
 export function buildPracticesPdf(inputs: PracticePdfInput[]): jsPDF {

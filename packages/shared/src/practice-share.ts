@@ -1,6 +1,7 @@
 import { htmlToPlainText, isHtmlEmpty } from "./html"
 import { formatZonedInstantRange } from "./timezone"
 import { formatPracticeDistance } from "./course"
+import { meetFileName } from "./format"
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
@@ -56,18 +57,9 @@ export function practiceSharePath(slugOrId: string): string {
   return `/practices/${slugOrId}`
 }
 
-/** "2026-08-18-morning-sprint.pdf" — shared by web's PDF export and mobile's PDF/PNG export. */
+/** "Morning Sprint - Aug 18, 2026.pdf" — shared by web's and mobile's PDF/PNG exports. */
 export function practiceShareFilename(title: string, dayKey: string | null, ext: string): string {
-  const datePart = dayKey || "practice"
-  const titlePart = title
-    .normalize("NFKD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 60)
-  return `${datePart}${titlePart ? `-${titlePart}` : ""}.${ext}`
+  return meetFileName(title.trim() || "Practice", dayKey ? formatPracticeShareDate(dayKey) : "", ext)
 }
 
 /** Absolute, shareable URL for a practice. */

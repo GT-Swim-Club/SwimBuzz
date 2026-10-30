@@ -48,6 +48,8 @@ export type RosterSummaryEntry = {
   resultStatus?: string
   /** Swim-off (tie-breaker) result row. */
   isSwimOff?: boolean
+  /** A relay leg 1 split as its own row; shown on the relay's row instead. */
+  isRelayLeadoff?: boolean
   alternate?: boolean
   rosterOnly?: boolean
   relayLetter?: string | null
@@ -117,14 +119,26 @@ function relayLegNames(entry: RosterSummaryEntry): string[] {
     .map((s) => s.name)
 }
 
+/** The leg an athlete swam on a relay and their split, e.g. "Leg 1 split 25.31". */
+function relayLegLabel(entry: RosterSummaryEntry, athleteId: string | undefined): string | null {
+  if (entry.entryType !== "relay_team" || !athleteId) return null
+  const swimmer = entry.relaySwimmers?.find((s) => s.athleteId === athleteId)
+  if (!swimmer) return null
+  const split = swimmer.splitTime?.trim()
+  return split && /\d/.test(split) ? `Leg ${swimmer.leg} split ${split}` : `Leg ${swimmer.leg}`
+}
+
+/** `athleteId` is the athlete whose group the row sits in, so a relay shows their leg and split. */
 function entrySubtitle(
   entry: RosterSummaryEntry,
   mode: "athlete" | "event",
-  withLegs = true
+  withLegs = true,
+  athleteId?: string,
+  withHeatLane = true
 ): string {
   const bits = [
-    mode === "event" ? entry.athleteName : null,
-    formatHeatLane(entry),
+    mode === "event" ? entry.athleteName : relayLegLabel(entry, athleteId),
+    withHeatLane ? formatHeatLane(entry) : null,
     formatTimes(entry),
     formatPlace(entry) ? `Place ${formatPlace(entry)}` : null,
   ].filter(Boolean)
@@ -148,14 +162,14 @@ function RosterNameText({ name, mutedColor }: { name: string; mutedColor: string
 }
 
 /**
- * A list row as a PDF row: title and subtitle, plus relay legs. The subtitle leaves out the
- * athlete's name, which the label (or section title) already carries. Relay titles are compact:
- * "200 Medley A (P)".
+ * A list row as a PDF row: title and subtitle, plus relay legs, with heat & lane in their own
+ * column. The subtitle leaves out the athlete's name, which the label (or section title) already
+ * carries. Relay titles fold the letter in: "200 Medley Relay A (P)".
  */
-function pdfRow(entry: RosterSummaryEntry, title: string) {
+function pdfRow(entry: RosterSummaryEntry, title: string, athleteId?: string) {
   const isRelay = entry.entryType === "relay_team"
   const relayTitle = [
-    entry.event.replace(/\s+Relay$/i, ""),
+    entry.event,
     entry.relayLetter,
     entry.relayRound ? `(${entry.relayRound})` : null,
   ]
@@ -163,7 +177,8 @@ function pdfRow(entry: RosterSummaryEntry, title: string) {
     .join(" ")
   return {
     label: isRelay ? relayTitle : title,
-    meta: entrySubtitle(entry, "athlete", false) || undefined,
+    meta: entrySubtitle(entry, "athlete", false, athleteId, false) || undefined,
+    heatLane: formatHeatLane(entry)?.replace("/", " of ") ?? undefined,
     legs: isRelay ? relayLegNames(entry) : undefined,
   }
 }
@@ -199,6 +214,8 @@ export function RosterSummarySection({
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     return entries.filter((entry) => {
+      // A leadoff shows on its relay's row, as that athlete's leg 1 split.
+      if (entry.isRelayLeadoff) return false
       if (mineOnly && viewerAthleteId) {
         if (entry.entryType === "relay_team") {
           const onRelay = (entry.relaySwimmers ?? []).some(
@@ -226,10 +243,10 @@ export function RosterSummarySection({
   // Each relay sits in the group of every swimmer on it (only the viewer's with "My events"),
   // in event order with their individual events — there's no separate relays list.
   const athleteGroups = useMemo(() => {
-    const map = new Map<string, { name: string; entries: RosterSummaryEntry[] }>()
+    const map = new Map<string, { athleteId: string; name: string; entries: RosterSummaryEntry[] }>()
     const groupFor = (athleteId: string, name: string) => {
       let group = map.get(athleteId)
-      if (!group) map.set(athleteId, (group = { name, entries: [] }))
+      if (!group) map.set(athleteId, (group = { athleteId, name, entries: [] }))
       return group
     }
     const relayKey = (entry: RosterSummaryEntry) =>
@@ -296,7 +313,10 @@ export function RosterSummarySection({
         ? athleteGroups.map((group) => ({
             title: group.name,
             // Under an athlete, a relay is just the event — no list of its swimmers.
-            rows: group.entries.map((entry) => ({ ...pdfRow(entry, entryTitle(entry)), legs: undefined })),
+            rows: group.entries.map((entry) => ({
+              ...pdfRow(entry, entryTitle(entry), group.athleteId),
+              legs: undefined,
+            })),
           }))
         : eventGroups.map((group) => ({
             title: group.title,
@@ -402,7 +422,7 @@ export function RosterSummarySection({
         <EmptyState title="No matching entries" />
       ) : mode === "athlete" ? (
         athleteGroups.map((group) => (
-          <View key={group.name} style={{ marginBottom: spacing.md }}>
+          <View key={group.athleteId} style={{ marginBottom: spacing.md }}>
             <Body style={{ fontWeight: "700", marginBottom: spacing.xs }}>
               <RosterNameText name={group.name} mutedColor={c.textSecondary} />
             </Body>
@@ -410,7 +430,7 @@ export function RosterSummarySection({
               <ListRow
                 key={`${entry.athleteId}-${entry.event}-${entry.relayLetter ?? ""}-${index}`}
                 title={entryTitle(entry)}
-                subtitle={entrySubtitle(entry, "athlete")}
+                subtitle={entrySubtitle(entry, "athlete", true, group.athleteId)}
               />
             ))}
           </View>

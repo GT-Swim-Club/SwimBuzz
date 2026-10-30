@@ -22,9 +22,7 @@ import {
   inferResultHeatTotals,
   isTimedFinalsEntry,
   isTimedFinalsRound,
-  mergeMeetResultEntries,
   mergeSheetSummaries,
-  relayLeadoffsFromSplits,
   uniqueRelayTeams,
 } from "@/lib/meet/meet-sheet-summary"
 import { canonicalizeStrokeEvent, compareRelayEvents, normalizeEventName } from "@/lib/swim/swim-parse"
@@ -43,7 +41,7 @@ import {
   sanitizeRelaySplitTime,
 } from "@/lib/meet/relay-results"
 import { displayMeetResultTags } from "@/lib/swim/swim-tags"
-import { formatSeedTimeDelta, parseTime } from "@/lib/utils"
+import { formatDisplayTime, formatSeedTimeDelta, parseTime } from "@/lib/utils"
 import { athletePath } from "@/lib/slug"
 import { LedgerIcon } from "@/components/meet/Ledger"
 import RosterName from "@/components/athlete/RosterName"
@@ -164,56 +162,6 @@ function resolveDisplayEventNumber(
   return opt.women ?? opt.men ?? 0
 }
 
-/** The relay (same event and round) this leadoff row's athlete swam leg 1 of. */
-function leadoffParentRelay(
-  entry: SummaryEntry,
-  allEntries: SummaryEntry[] | undefined
-): SummaryEntry | undefined {
-  const source = entry.relayLeadoffSource
-  if (!entry.isRelayLeadoff || !source) return undefined
-  const round = entry.relayLeadoffRound || ""
-  return (allEntries ?? []).find(
-    (e) =>
-      e.entryType === "relay_team" &&
-      normalizeEventName(e.event) === source &&
-      (!round || effectiveRelayRound(e) === round) &&
-      (e.relaySwimmers?.some((s) => s.leg === 1 && s.athleteId === entry.athleteId) ?? false)
-  )
-}
-
-/** A relay leadoff carries its parent relay's event number, not the individual event's. */
-function resolveLeadoffEventNumber(
-  entry: SummaryEntry,
-  allEntries: SummaryEntry[] | undefined,
-  athleteGenders?: Map<string, "M" | "F">,
-  eventOptions?: MeetSignupEventOption[]
-): number {
-  const source = entry.relayLeadoffSource
-  if (!source) return 0
-  const round = entry.relayLeadoffRound || ""
-  const relays = (allEntries ?? []).filter(
-    (e) => e.entryType === "relay_team" && normalizeEventName(e.event) === source
-  )
-  const involvesAthlete = (e: SummaryEntry) =>
-    e.relaySwimmers?.some((s) => s.athleteId === entry.athleteId) ?? false
-  const leadsRelay = (e: SummaryEntry) =>
-    e.relaySwimmers?.some((s) => s.leg === 1 && s.athleteId === entry.athleteId) ?? false
-  const sameRound = (e: SummaryEntry) => !round || effectiveRelayRound(e) === round
-  const relay =
-    relays.find((e) => leadsRelay(e) && sameRound(e)) ??
-    relays.find((e) => leadsRelay(e)) ??
-    relays.find((e) => involvesAthlete(e))
-  if (relay) {
-    const num = resolveDisplayEventNumber(relay, athleteGenders, eventOptions)
-    if (num > 0) return num
-  }
-  return resolveDisplayEventNumber(
-    { ...entry, event: source, eventNumber: 0 },
-    athleteGenders,
-    eventOptions
-  )
-}
-
 type RoundResult = {
   label: string | null
   time?: string
@@ -241,16 +189,6 @@ function rowRoundResult(entry: SummaryEntry, allEntries?: SummaryEntry[]): Round
 
   if (entry.isSwimOff) {
     return { label: "Swim-off", time: entry.resultTime, status: entry.resultStatus, place: entry.resultPlace }
-  }
-
-  if (entry.isRelayLeadoff && entry.relayLeadoffTime) {
-    const relay = leadoffParentRelay(entry, allEntries)
-    return {
-      label: "Leadoff",
-      time: entry.relayLeadoffTime,
-      place: (relay ? relayTeamPlace(relay) : undefined) ?? entry.resultPlace,
-      seed: entry.seedTime,
-    }
   }
 
   if (entry.entryType === "relay_team") {
@@ -331,7 +269,7 @@ function rowRoundResult(entry: SummaryEntry, allEntries?: SummaryEntry[]): Round
 }
 
 function buildIndividualRounds(entry: SheetEntry, allEntries?: SummaryEntry[]): DetailRound[] {
-  if (entry.entryType === "relay_team" || entry.isRelayLeadoff) return []
+  if (entry.entryType === "relay_team") return []
 
   if (entry.isSwimOff) {
     return [
@@ -524,24 +462,37 @@ type RowContext = {
   eventNumberOptions?: MeetSignupEventOption[]
 }
 
-/** What a summary row shows — shared by the on-screen row and the PDF export. */
-function summaryRowView(entry: SummaryEntry, ctx: RowContext, eventView: boolean) {
+/**
+ * What a summary row shows — shared by the on-screen row and the PDF export. `athleteId` is the
+ * athlete whose section the row sits in, so their relay rows can show the leg they swam.
+ */
+function summaryRowView(
+  entry: SummaryEntry,
+  ctx: RowContext,
+  eventView: boolean,
+  athleteId?: string
+) {
   const { athleteGenders, allEntries, eventNumberOptions } = ctx
   const isRelay = entry.entryType === "relay_team"
-  const eventNumber = entry.isRelayLeadoff
-    ? resolveLeadoffEventNumber(entry, allEntries, athleteGenders, eventNumberOptions)
-    : resolveDisplayEventNumber(entry, athleteGenders, eventNumberOptions)
+  const eventNumber = resolveDisplayEventNumber(entry, athleteGenders, eventNumberOptions)
   const res = rowRoundResult(entry, allEntries)
-  // A leadoff swam in its relay's heat and lane, and finished where the relay did.
-  const leadoffRelay = leadoffParentRelay(entry, allEntries)
-  const slotEntry = leadoffRelay ?? entry
-  const podiumPlace = finalsPodiumPlace(slotEntry)
+  const podiumPlace = finalsPodiumPlace(entry)
   const relayLetter = isRelay ? `Relay ${displayRelayLetter(entry.relayLetter)}` : undefined
+  // Under an athlete, a relay also shows the leg they swam and their split (a leg 1 split is
+  // their leadoff time, so leadoffs don't get rows of their own).
+  const swimmer =
+    isRelay && !eventView && athleteId
+      ? entry.relaySwimmers?.find((s) => s.athleteId === athleteId)
+      : undefined
+  const split = sanitizeRelaySplitTime(swimmer?.splitTime)
+  const relayLeg = swimmer
+    ? [`Leg ${swimmer.leg}`, split ? formatDisplayTime(split) : null].filter(Boolean).join(" · ")
+    : undefined
 
-  const heat = formatHeat(slotEntry)
-  const lane = slotEntry.entryType === "relay_team" ? relayLane(slotEntry) : individualLane(slotEntry)
+  const heat = formatHeat(entry)
+  const lane = isRelay ? relayLane(entry) : individualLane(entry)
   const heatLane =
-    [heat, lane != null ? `Lane ${lane}` : null, slotEntry.startTime].filter(Boolean).join(" · ") || null
+    [heat, lane != null ? `Lane ${lane}` : null, entry.startTime].filter(Boolean).join(" · ") || null
 
   const tags = !isRelay ? displayMeetResultTags(entry.resultTags ?? "") : null
   const sub = tags ?? ""
@@ -571,6 +522,7 @@ function summaryRowView(entry: SummaryEntry, ctx: RowContext, eventView: boolean
     res,
     podiumPlace,
     relayLetter,
+    relayLeg,
     heat,
     lane,
     heatLane,
@@ -579,8 +531,8 @@ function summaryRowView(entry: SummaryEntry, ctx: RowContext, eventView: boolean
     eventName,
     badgeNumber: !eventView && eventNumber > 0 ? eventNumber : undefined,
     label: eventView ? (isRelay ? relayLetter : entry.athleteName) : eventName,
-    team: entry.isRelayLeadoff ? "Relay leadoff" : !eventView ? relayLetter : undefined,
-    round: entry.rosterOnly || entry.isRelayLeadoff ? null : res.label,
+    team: !eventView ? [relayLetter, relayLeg].filter(Boolean).join(" · ") || undefined : undefined,
+    round: entry.rosterOnly ? null : res.label,
   }
 }
 
@@ -589,26 +541,34 @@ function summaryRowPdf(
   entry: SummaryEntry,
   ctx: RowContext,
   display: RowDisplay,
-  eventView = false
+  eventView = false,
+  athleteId?: string
 ): RosterSummaryPdfRow {
-  const view = summaryRowView(entry, ctx, eventView)
-  // Relay names are compact: "200 Medley A" (or "Relay A" under an event title), with the
-  // letter folded in rather than repeated in the meta.
+  const view = summaryRowView(entry, ctx, eventView, athleteId)
+  // Relay names fold the letter in: "200 Medley Relay A" (or "Relay A" under an event title),
+  // rather than repeating it in the meta.
   const relayName = eventView
     ? view.label
-    : `${entry.event.replace(/\s+Relay$/i, "")} ${displayRelayLetter(entry.relayLetter)}`
-  const meta = [
-    view.isRelay ? null : view.team,
-    display.showRound ? view.round : null,
-    display.showHeatLane ? view.heatLane : null,
-  ]
+    : `${entry.event} ${displayRelayLetter(entry.relayLetter)}`
+  const meta = [display.showRound ? view.round : null, view.isRelay ? view.relayLeg : view.team]
     .filter(Boolean)
     .join(" | ")
+  // Heat & lane get their own column, compact: "Heat 2 of 4" + lane 5 → "H2 of 4 · L5".
+  const heatLane = display.showHeatLane
+    ? [
+        view.heat?.replace(/^Heat\s+/i, "H"),
+        view.lane != null ? `L${view.lane}` : null,
+      ]
+        .filter(Boolean)
+        .join(" · ")
+    : ""
   return {
     eventNumber: view.badgeNumber,
     label: (view.isRelay ? relayName : view.label) ?? "",
     sub: view.sub || undefined,
     meta: meta || undefined,
+    heatLane: heatLane || undefined,
+    startTime: (display.showHeatLane && entry.startTime) || undefined,
     legs: view.isRelay
       ? [...(entry.relaySwimmers ?? [])].sort((a, b) => a.leg - b.leg).map((s) => s.name)
       : undefined,
@@ -629,6 +589,7 @@ function SummaryEntryRow({
   editableSeedKeys = new Set<string>(),
   eventNumberOptions,
   eventView = false,
+  athleteId,
 }: {
   entry: SummaryEntry
   display: RowDisplay
@@ -643,11 +604,18 @@ function SummaryEntryRow({
   eventNumberOptions?: MeetSignupEventOption[]
   /** Rows sit under an event header: label by athlete / relay letter, no event badge. */
   eventView?: boolean
+  /** The athlete whose section the row sits in (by-athlete view). */
+  athleteId?: string
 }) {
   const [editOpen, setEditOpen] = useState(false)
   const athleteRecord = athletes?.find((a) => a.id === entry.athleteId)
   const compact = display.density === "compact"
-  const view = summaryRowView(entry, { athleteGenders, allEntries, eventNumberOptions }, eventView)
+  const view = summaryRowView(
+    entry,
+    { athleteGenders, allEntries, eventNumberOptions },
+    eventView,
+    athleteId
+  )
   const { isRelay, eventNumber, res, podiumPlace, relayLetter, heat, lane, heatLane, sub, result, eventName } =
     view
   // Rows split per round carry that round's swimId; timed-finals rows only have the result
@@ -710,12 +678,8 @@ function SummaryEntryRow({
       athleteName: entry.athleteName,
       athleteHref: athletePath(athleteRecord?.slug ?? entry.athleteId),
       title: detailTitle,
-      subLine: [
-        entry.isRelayLeadoff ? entry.relayLeadoffSource : null,
+      subLine:
         detailRounds.length > 1 ? detailRounds.map((r) => r.label).join(" · ") : detailRounds[0].label,
-      ]
-        .filter(Boolean)
-        .join(" · "),
       rounds: detailRounds,
     }
   }
@@ -746,7 +710,6 @@ function SummaryEntryRow({
       )
     } else if (
       entry.manual &&
-      !entry.isRelayLeadoff &&
       entry.swimId &&
       entry.course &&
       entry.date &&
@@ -770,7 +733,6 @@ function SummaryEntryRow({
         />
       )
     } else if (
-      !entry.isRelayLeadoff &&
       !entry.swimId &&
       (entry.manual === true ||
         editableSeedKeys.has(`${entry.athleteId}|${normalizeEventName(entry.event)}`))
@@ -943,16 +905,11 @@ export default function MeetSheetSummarySection({
   )
   const athleteNames = new Map(athletes.map((a) => [a.id, a.name]))
 
-  const leadoffResults = mergeMeetResultEntries(
-    results ?? [],
-    relayLeadoffsFromSplits(relayResults)
-  )
-
   const summary = applyRosterNames(
     mergeSheetSummaries(
       psychSummary,
       heatSummary,
-      leadoffResults,
+      results ?? [],
       relayResults,
       entriesSummary,
       finalsHeatSummary
@@ -973,12 +930,13 @@ export default function MeetSheetSummarySection({
         )
       )
   )
+  // A relay leadoff shows on its relay's row (as that athlete's leg 1 split), not as a row of its own.
   const displayEntries = summary
     ? dropSeedOnlyAfterResults(
         expandIndividualResultRows(inferResultHeatTotals(summary.entries)),
         hasImportedResults,
         editableSeedKeySet
-      )
+      ).filter((entry) => !entry.isRelayLeadoff)
     : []
   // By athlete: each relay sits in the section of every swimmer on it (relay-only swimmers get
   // a section too), so there's no separate relays list.
@@ -1006,12 +964,9 @@ export default function MeetSheetSummarySection({
     return [...byAthlete.values()].sort((a, b) => a.name.localeCompare(b.name))
   })()
 
-  // Sort by the event number each row shows — a leadoff's is its relay's, which
-  // only resolves here (its own eventNumber is 0 and would sink it to the end).
+  // Sort by the event number each row shows.
   const displayedEventNumber = (entry: SummaryEntry) =>
-    entry.isRelayLeadoff
-      ? resolveLeadoffEventNumber(entry, displayEntries, athleteGenders, eventNumberOptions)
-      : resolveDisplayEventNumber(entry, athleteGenders, eventNumberOptions)
+    resolveDisplayEventNumber(entry, athleteGenders, eventNumberOptions)
   const compareByDisplayedEvent = (a: SummaryEntry, b: SummaryEntry) =>
     compareIndividualEntries(
       { ...a, eventNumber: displayedEventNumber(a) },
@@ -1032,7 +987,7 @@ export default function MeetSheetSummarySection({
   const myIndividualEntries = viewerAthleteId
     ? displayEntries.filter(
         (e) =>
-          e.athleteId === viewerAthleteId && (e.entryType === "individual" || e.isRelayLeadoff)
+          e.athleteId === viewerAthleteId && e.entryType === "individual"
       )
     : []
   const myRelays = viewerAthleteId
@@ -1076,9 +1031,8 @@ export default function MeetSheetSummarySection({
 
   // For the "by event" view: use the de-duped relay list (the same relays the by-athlete sections use)
   // so that seed rows from the heat sheet don't appear as duplicates alongside result rows.
-  // Leadoffs are part of their relay, not entries in the individual event.
   const deduplicatedByEventEntries: SummaryEntry[] = [
-    ...displayEntries.filter((entry) => entry.entryType !== "relay_team" && !entry.isRelayLeadoff),
+    ...displayEntries.filter((entry) => entry.entryType !== "relay_team"),
     ...relays,
   ].filter(matchesGenderFilter)
 
@@ -1160,7 +1114,7 @@ export default function MeetSheetSummarySection({
 
   const eventCountByAthlete = new Map<string, number>()
   for (const entry of displayEntries) {
-    if (entry.entryType === "relay_team" || entry.rosterOnly || entry.isRelayLeadoff) continue
+    if (entry.entryType === "relay_team" || entry.rosterOnly) continue
     eventCountByAthlete.set(entry.athleteId, (eventCountByAthlete.get(entry.athleteId) ?? 0) + 1)
   }
   for (const relay of relays) {
@@ -1193,8 +1147,8 @@ export default function MeetSheetSummarySection({
    */
   function buildPdfRequest(): RosterSummaryPdfRequest {
     const rowCtx = { athleteGenders, allEntries: displayEntries, eventNumberOptions }
-    const toRow = (entry: SummaryEntry, eventView = false) =>
-      summaryRowPdf(entry, rowCtx, display, eventView)
+    const toRow = (entry: SummaryEntry, eventView = false, athleteId?: string) =>
+      summaryRowPdf(entry, rowCtx, display, eventView, athleteId)
     // "Entries" → "Heats" once a heat sheet is in → "Results" once results are posted.
     const title = rosterSummaryTitle({
       hasHeatSheet: Boolean(heatSummary || finalsHeatSummary),
@@ -1251,7 +1205,7 @@ export default function MeetSheetSummarySection({
           // Under an athlete, a relay is just the event — no list of its swimmers.
           rows: [...athleteGroup.entries]
             .sort(compareMyEntries)
-            .map((entry) => ({ ...toRow(entry), legs: undefined })),
+            .map((entry) => ({ ...toRow(entry, false, athleteGroup.athleteId), legs: undefined })),
         })
       }
     }
@@ -1502,6 +1456,7 @@ export default function MeetSheetSummarySection({
                     <SummaryEntryRow
                       key={`mine-${entryRowKey(entry, i, athleteGenders)}`}
                       entry={entry}
+                      athleteId={viewerAthleteId ?? undefined}
                       {...rowProps}
                     />
                   ))}
@@ -1531,6 +1486,7 @@ export default function MeetSheetSummarySection({
                     <SummaryEntryRow
                       key={`${athleteGroup.athleteId}-${entryRowKey(entry, i, athleteGenders)}`}
                       entry={entry}
+                      athleteId={athleteGroup.athleteId}
                       {...rowProps}
                     />
                   ))}

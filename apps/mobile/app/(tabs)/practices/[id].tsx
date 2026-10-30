@@ -297,7 +297,7 @@ export default function PracticeDetailScreen() {
       if (!res.ok) throw new Error("Could not create PDF")
       const bytes = new Uint8Array(await res.arrayBuffer())
       const filename = practiceShareFilename(
-        String(currentPractice.title ?? "practice"),
+        String(currentPractice.title ?? ""),
         currentPractice.startsAt
           ? zonedDayKey(String(currentPractice.startsAt), String(currentPractice.timeZone ?? DEFAULT_TIME_ZONE))
           : null,

@@ -18,8 +18,9 @@ const PDF_RENDER_SCALE_AT_100_PERCENT = 1.2
 const MAX_CANVAS_PIXELS_TOUCH = 5_242_880
 const MAX_CANVAS_PIXELS = 16_777_216
 
-// Pages within this distance of the viewport (as a share of its height, above and below) render;
-// the rest are empty placeholders, so a long heat sheet doesn't keep every page's canvas in memory.
+// Pages within this distance of the viewport (as a share of its height, above and below) render
+// their canvas; the rest are blank placeholders, so a long heat sheet doesn't keep every page's
+// canvas in memory.
 const RENDER_MARGIN = "100% 0px"
 
 type PageSize = { width: number; height: number }
@@ -51,11 +52,13 @@ function canvasPixelRatio(size: PageSize | null, scale: number) {
   return Math.min(deviceRatio, Math.sqrt(maxPixels / cssPixels))
 }
 
+// The scale every page's text layer renders at; it's CSS-scaled to the current zoom.
+const TEXT_LAYER_SCALE = PDF_RENDER_SCALE_AT_100_PERCENT
+
 type PageLayersProps = {
   pageNumber: number
   scale: number
   size: PageSize | null
-  onLoadSize: (size: PageSize) => void
   onRenderError: () => void
 }
 
@@ -63,7 +66,7 @@ type PageLayersProps = {
 // keep showing the last fully rendered canvas (CSS-scaled to the new size) and render the new scale
 // in a hidden layer on top, swapping it in once it's painted. Layers are keyed by scale so the
 // swapped-in canvas is never re-rendered.
-function PageLayers({ pageNumber, scale, size, onLoadSize, onRenderError }: PageLayersProps) {
+function PageLayers({ pageNumber, scale, size, onRenderError }: PageLayersProps) {
   const [shownScale, setShownScale] = useState(scale)
   const [renderScale, setRenderScale] = useState(scale)
   const latestRenderScaleRef = useRef(scale)
@@ -95,12 +98,8 @@ function PageLayers({ pageNumber, scale, size, onLoadSize, onRenderError }: Page
           scale={layerScale}
           devicePixelRatio={canvasPixelRatio(size, layerScale)}
           renderAnnotationLayer={false}
-          renderTextLayer={true}
+          renderTextLayer={false}
           loading={null}
-          onLoadSuccess={(page) => {
-            const viewport = page.getViewport({ scale: 1 })
-            onLoadSize({ width: viewport.width, height: viewport.height })
-          }}
           onRenderSuccess={() => {
             if (layerScale === latestRenderScaleRef.current) setShownScale(layerScale)
           }}
@@ -109,6 +108,40 @@ function PageLayers({ pageNumber, scale, size, onLoadSize, onRenderError }: Page
       </div>
     )
   })
+}
+
+type PageTextProps = {
+  pageNumber: number
+  scale: number
+  onLoadSize: (size: PageSize) => void
+}
+
+// The text layer is what the browser's find (Cmd/Ctrl+F) and text selection work on. It's kept apart
+// from the canvases so every page has exactly one: it's mounted for all pages, not just those near
+// the viewport, so find reaches the whole document, and it renders once at a fixed scale and is
+// CSS-scaled to the zoom, so zooming never rebuilds the text of every page.
+function PageText({ pageNumber, scale, onLoadSize }: PageTextProps) {
+  return (
+    <div
+      className="absolute left-0 top-0 origin-top-left"
+      style={{ transform: `scale(${scale / TEXT_LAYER_SCALE})` }}
+    >
+      <Page
+        pageNumber={pageNumber}
+        scale={TEXT_LAYER_SCALE}
+        renderMode="none"
+        renderAnnotationLayer={false}
+        renderTextLayer={true}
+        canvasBackground="transparent"
+        loading={null}
+        error={null}
+        onLoadSuccess={(page) => {
+          const viewport = page.getViewport({ scale: 1 })
+          onLoadSize({ width: viewport.width, height: viewport.height })
+        }}
+      />
+    </div>
+  )
 }
 
 type ZoomablePdfPageProps = {
@@ -136,14 +169,9 @@ function ZoomablePdfPage({
       style={size ? { width: Math.floor(size.width * scale), height: Math.floor(size.height * scale) } : undefined}
     >
       {nearViewport ? (
-        <PageLayers
-          pageNumber={pageNumber}
-          scale={scale}
-          size={size}
-          onLoadSize={setLoadedSize}
-          onRenderError={onRenderError}
-        />
+        <PageLayers pageNumber={pageNumber} scale={scale} size={size} onRenderError={onRenderError} />
       ) : null}
+      <PageText pageNumber={pageNumber} scale={scale} onLoadSize={setLoadedSize} />
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { attachmentDisposition } from "@swimbuzz/shared"
 import { normalizeFileUrl } from "@/lib/meet/meet-file-fetch"
 import { fetchPublicHttpUrl } from "@/lib/public-http-url"
 import { getSession } from "@/lib/auth/session"
@@ -129,7 +130,7 @@ export async function POST(req: Request) {
     return new NextResponse(bytes, {
       headers: {
         "Content-Type": contentType,
-        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Disposition": attachmentDisposition(filename),
         "Cache-Control": "no-store",
       },
     })
