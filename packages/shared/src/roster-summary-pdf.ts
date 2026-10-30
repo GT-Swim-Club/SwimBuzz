@@ -26,11 +26,6 @@ export type RosterSummaryPdfResult =
 export type RosterSummaryPdfRow = {
   eventNumber?: number
   label: string
-  /**
-   * The label for when the row runs onto a second line and the full name fits: a relay's
-   * "200 Free Relay B" in place of the compact "200 Free B".
-   */
-  fullLabel?: string
   /** Small text right after the label (result tags, badges). */
   sub?: string
   /** Second line: round / team, already filtered by the viewer's row toggles. */

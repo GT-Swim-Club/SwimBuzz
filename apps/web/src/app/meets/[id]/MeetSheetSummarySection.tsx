@@ -549,18 +549,15 @@ function summaryRowPdf(
 ): RosterSummaryPdfRow {
   const view = summaryRowView(entry, ctx, eventView, athleteId)
   // Relay names are compact: "200 Medley A" (or "Relay A" under an event title), with the
-  // letter folded in rather than repeated in the meta — in full ("200 Medley Relay A") when the
-  // row takes two lines.
-  const relayLetter = displayRelayLetter(entry.relayLetter)
-  const relayName = eventView ? view.label : `${entry.event.replace(/\s+Relay$/i, "")} ${relayLetter}`
-  const relayFullName = !eventView ? `${entry.event} ${relayLetter}` : undefined
-  // A relay's leg rides beside its name, with the athlete's split on the line below — unless the
-  // start time already makes a second line, where the leg (and split) then go.
+  // letter folded in rather than repeated in the meta.
+  const relayName = eventView
+    ? view.label
+    : `${entry.event.replace(/\s+Relay$/i, "")} ${displayRelayLetter(entry.relayLetter)}`
+  // A relay's leg rides beside its name, with the athlete's split on the line below.
   const startTime = (display.showHeatLane && entry.startTime) || undefined
-  const legInMeta = view.isRelay && Boolean(startTime)
   const meta = [
     display.showRound ? view.round : null,
-    !view.isRelay ? view.team : legInMeta ? view.relayLeg : view.legSplit ? `Split ${view.legSplit}` : null,
+    !view.isRelay ? view.team : view.legSplit ? `Split ${view.legSplit}` : null,
   ]
     .filter(Boolean)
     .join(" | ")
@@ -576,11 +573,8 @@ function summaryRowPdf(
   return {
     eventNumber: view.badgeNumber,
     label: (view.isRelay ? relayName : view.label) ?? "",
-    fullLabel: view.isRelay && relayFullName !== relayName ? relayFullName : undefined,
     sub:
-      (view.isRelay
-        ? !legInMeta && view.relayLegNumber && `Leg ${view.relayLegNumber}`
-        : view.sub) || undefined,
+      (view.isRelay ? view.relayLegNumber && `Leg ${view.relayLegNumber}` : view.sub) || undefined,
     meta: meta || undefined,
     heatLane: heatLane || undefined,
     startTime,
