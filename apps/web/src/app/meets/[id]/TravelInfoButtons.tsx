@@ -15,6 +15,8 @@ type TravelLinkItem = {
   label: string
   icon: TravelInfoKind
   href: string
+  /** Saved as when downloaded from the preview: "Packing List - <meet>". */
+  downloadName?: string
 }
 
 type TravelTextItem = {
@@ -109,6 +111,7 @@ export default function TravelInfoButtons({
         onClose={() => setOpenPreview(null)}
         title={openPreview?.label ?? "File preview"}
         url={openPreview?.href ?? ""}
+        downloadName={openPreview?.downloadName}
       />
     </>
   )

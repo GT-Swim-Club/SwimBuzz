@@ -263,6 +263,50 @@ export function athletePreferredName(athlete: AthleteNameParts): string {
   return `${preferredFirstName(athlete) ?? athlete.firstName} ${athlete.lastName}`.trim()
 }
 
+/**
+ * Last-name-first with the preferred name in parentheses, for the meet roster summary:
+ * "Baumann, Matthew (Matt)". No parentheses when there's no preferred name or it's the
+ * same as the first name.
+ */
+export function athleteRosterNameLastFirst(athlete: AthleteNameParts): string {
+  const preferred = preferredFirstName(athlete)
+  const base = `${athlete.lastName}, ${athlete.firstName}`
+  if (!preferred || preferred.toLowerCase() === athlete.firstName.trim().toLowerCase()) return base
+  return `${base} (${preferred})`
+}
+
+/** "Women" / "Men" / "Mixed" for a gender code (F / M / X), or null when unknown. */
+export function eventGenderWord(gender: string | null | undefined): string | null {
+  if (gender === "F") return "Women"
+  if (gender === "M") return "Men"
+  if (gender === "X") return "Mixed"
+  return null
+}
+
+/** Split an athleteRosterNameLastFirst name back into the name and its preferred name, for styling. */
+export function splitRosterName(name: string): { name: string; preferred: string | null } {
+  // Only "Last, First (Preferred)" — not other parentheticals like a relay's "A (P)".
+  const match = /^([^,()]+, [^()]*\S) \(([^()]+)\)$/.exec(name)
+  return match ? { name: match[1], preferred: match[2] } : { name, preferred: null }
+}
+
+/** "Last, First (Preferred)" → "Last, Preferred": the preferred name in place of the legal first name. */
+export function rosterNamePreferred(name: string): string {
+  const { name: base, preferred } = splitRosterName(name)
+  if (!preferred) return name
+  return `${base.slice(0, base.indexOf(", "))}, ${preferred}`
+}
+
+/** "Last, First" → "First Last"; other names come back unchanged. */
+export function rosterNameFirstLast(name: string): string {
+  const comma = name.indexOf(", ")
+  if (comma < 0) return name
+  const last = name.slice(0, comma).trim()
+  const first = name.slice(comma + 2).trim()
+  if (!last || !first) return name
+  return `${first} ${last}`
+}
+
 /** Format a preferred athlete name in last-name-first order for compact lists. */
 export function athletePreferredNameLastFirst(athlete: AthleteNameParts): string {
   return `${athlete.lastName}, ${preferredFirstName(athlete) ?? athlete.firstName}`
@@ -273,6 +317,30 @@ export function athletePreferredInitials(athlete: AthleteNameParts): string {
   const first = preferredFirstName(athlete) ?? athlete.firstName
   return `${first[0] ?? ""}${athlete.lastName[0] ?? ""}`
 }
+/**
+ * How every meet file downloads: "Psych Sheet - 2026 CCS Southern Regionals.pdf". Characters a
+ * filename can't hold are dropped; without `ext` it's just the name.
+ */
+export function meetFileName(label: string, meetName: string, ext?: string): string {
+  const name = [label, meetName]
+    .map((part) => part.replace(/[\\/:*?"<>|]+/g, "").replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .join(" - ")
+  return ext ? `${name || "file"}.${ext}` : name
+}
+
+/**
+ * A `Content-Disposition` attachment header for `filename`, with an ASCII fallback for clients
+ * that don't read the UTF-8 `filename*`.
+ */
+export function attachmentDisposition(filename: string): string {
+  const ascii = filename
+    .normalize("NFKD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[^\x20-\x7e]|["\\]/g, "")
+  return `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(filename)}`
+}
+
 /** Convert milliseconds to "1:23.45" or "58.32". */
 export function formatTime(ms: number): string {
   const totalSeconds = ms / 1000

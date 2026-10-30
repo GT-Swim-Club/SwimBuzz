@@ -54,7 +54,13 @@ import {
   buildAthletePbMap,
   computeMeetResultHighlights } from "@/lib/meet/meet-stats"
 import { toDateInput, toTimeInput } from "@/lib/date-input"
-import { utcDayKey, COURSE_LABELS, type CourseCode } from "@swimbuzz/shared"
+import {
+  athleteRosterNameLastFirst,
+  meetFileName,
+  utcDayKey,
+  COURSE_LABELS,
+  type CourseCode,
+} from "@swimbuzz/shared"
 import LoadingComponent from "./loading"
 
 const RESOURCE_KEYS = [
@@ -160,7 +166,7 @@ async function MeetPageContent({ params }: { params: Promise<{ id: string }> }) 
   const heatSheetLinks =
     storedHeatSheetLinks ?? (meet.heatSheetUrl ? [{ url: meet.heatSheetUrl }] : [])
   const finalsHeatSheetLinks = normalizeFinalsHeatSheetUrls(meet.finalsHeatSheetUrls) ?? []
-  const meetFileName = (label: string) => `${meet.name} - ${label}`
+  const fileName = (label: string) => meetFileName(label, meet.name)
   const eventOrder = isEventOrder(meet.eventOrder) ? meet.eventOrder : null
   const hasResources =
     RESOURCE_KEYS.some((key) => meet[key]) ||
@@ -187,7 +193,8 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       type: "link" as const,
       label: l.label,
       icon: l.icon,
-      href: meet[l.key] as string})),
+      href: meet[l.key] as string,
+      downloadName: fileName(l.label)})),
     ...travelTexts.map((s) => ({
       type: "text" as const,
       label: s.label,
@@ -244,7 +251,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
   const rosterAthletes = seasonRoster.map((a) => ({
     id: a.id,
     slug: a.slug ?? a.id,
-    name: `${a.lastName}, ${a.firstName}`,
+    name: athleteRosterNameLastFirst(a),
     gender: a.gender === Gender.F ? ("F" as const) : ("M" as const),
     image: a.user.image,
     missingSwimCloud: isCoach && a.swimCloudIds.length === 0,
@@ -423,14 +430,14 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
     base: string
   ) => link.name?.trim() || (count > 1 ? `${base} ${index + 1}` : base)
   const linksBeforeOrder: CompetitionLink[] = meet.packetUrl
-    ? [{ key: "packet", label: "Meet packet", url: meet.packetUrl, icon: "file", forcePdf: true, downloadName: meetFileName("Meet Packet") }]
+    ? [{ key: "packet", label: "Meet packet", url: meet.packetUrl, icon: "file", forcePdf: true, downloadName: fileName("Meet Packet") }]
     : []
   const linksAfterOrder: CompetitionLink[] = [
     ...(meet.entriesSheetUrl
-      ? [{ key: "entries", label: "Entries", url: meet.entriesSheetUrl, icon: "fileList", forcePdf: true, downloadName: meetFileName("Entries") } as const]
+      ? [{ key: "entries", label: "Entries", url: meet.entriesSheetUrl, icon: "fileList", forcePdf: true, downloadName: fileName("Entries") } as const]
       : []),
     ...(meet.psychSheetUrl
-      ? [{ key: "psych", label: "Psych sheet", url: meet.psychSheetUrl, icon: "chart", forcePdf: true, downloadName: meetFileName("Psych Sheet") } as const]
+      ? [{ key: "psych", label: "Psych sheet", url: meet.psychSheetUrl, icon: "chart", forcePdf: true, downloadName: fileName("Psych Sheet") } as const]
       : []),
     ...heatSheetLinks.map((link, index) => ({
       key: `heat-${index}-${link.url}`,
@@ -438,7 +445,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       url: link.url,
       icon: "lanes" as const,
       forcePdf: true,
-      downloadName: meetFileName(heatLinkLabel(link, index, heatSheetLinks.length, "Heat Sheet")),
+      downloadName: fileName(heatLinkLabel(link, index, heatSheetLinks.length, "Heat Sheet")),
     })),
     ...finalsHeatSheetLinks.map((link, index) => ({
       key: `finals-${index}-${link.url}`,
@@ -446,12 +453,12 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       url: link.url,
       icon: "lanes" as const,
       forcePdf: true,
-      downloadName: meetFileName(
+      downloadName: fileName(
         heatLinkLabel(link, index, finalsHeatSheetLinks.length, "Finals Heat Sheet")
       ),
     })),
     ...(meet.resultsUrl
-      ? [{ key: "results", label: "Results", url: meet.resultsUrl, icon: "trophy", forcePdf: true, downloadName: meetFileName("Results") } as const]
+      ? [{ key: "results", label: "Results", url: meet.resultsUrl, icon: "trophy", forcePdf: true, downloadName: fileName("Results") } as const]
       : []),
     ...(meet.swimphoneUrl
       ? [{ key: "swimphone", label: "SwimPhone", url: meet.swimphoneUrl, icon: "trophy", external: true } as const]

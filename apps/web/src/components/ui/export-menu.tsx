@@ -11,6 +11,25 @@ export function downloadBlob(blob: Blob, filename: string) {
   URL.revokeObjectURL(url)
 }
 
+export function PdfMenuIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M14 2.75H6.5a2 2 0 0 0-2 2v14.5a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V8.25L14 2.75Z" />
+      <path d="M14 2.75v5.5h5.5" />
+      <path d="M8 12.25h8M8 15.5h8M8 18.75h5" />
+    </svg>
+  )
+}
+
 export function CheckIcon({ className }: { className?: string }) {
   return (
     <svg

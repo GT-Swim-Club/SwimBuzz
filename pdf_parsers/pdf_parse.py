@@ -131,7 +131,7 @@ MEET_NAME_DATE_PREFIX = re.compile(r"^\d{1,2}-\d{1,2}-\d{2,4}\s+")
 DOC_PSYCH = re.compile(r"Psych\s+Sheet", re.I)
 DOC_HEAT = re.compile(r"Meet\s+Program", re.I)
 DOC_ENTRIES = re.compile(
-    r"Team Entries|Individual Meet Entries|Entry Report(?:\s+by\s+Club)?|"
+    r"Team Entries|School Entries|Individual Meet Entries|Entry Report(?:\s+by\s+Club)?|"
     r"Entries Report|Meet Entries Report",
     re.I,
 )

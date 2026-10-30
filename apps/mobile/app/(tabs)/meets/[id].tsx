@@ -596,7 +596,12 @@ export default function MeetDetailScreen() {
 
         {rosterEntries.length > 0 ? (
           <RosterSummarySection
+            meetId={id}
+            meetName={name}
             entries={rosterEntries as RosterSummaryEntry[]}
+            hasHeatSheet={Boolean(
+              asRecord(meet.heatSheetSummary) || asRecord(meet.finalsHeatSheetSummary)
+            )}
             viewerAthleteId={
               viewer?.athleteId ? String(viewer.athleteId) : null
             }

@@ -16,6 +16,9 @@ const CORNER_CLASSES: Record<Corner, string> = {
   "bottom-right": "bottom-4 right-4 flex-col-reverse",
 }
 
+// `w-fit` keeps the selectable area to the text itself, so blank space beside a short line still drags.
+const TEXT_CLASS = "w-fit max-w-full cursor-text select-text"
+
 function isCorner(value: unknown): value is Corner {
   return typeof value === "string" && value in CORNER_CLASSES
 }
@@ -124,7 +127,8 @@ export default function ImportToast() {
   }, [releaseTick])
 
   function handlePointerDown(e: ReactPointerEvent<HTMLDivElement>) {
-    if (e.button !== 0 || (e.target as HTMLElement).closest("button")) return
+    // Pressing on text selects it; the rest of the toast (padding, icon, progress bar) drags.
+    if (e.button !== 0 || (e.target as HTMLElement).closest("button, [data-toast-text]")) return
     dragRef.current = { pointerId: e.pointerId, startX: e.clientX, startY: e.clientY }
     e.currentTarget.setPointerCapture(e.pointerId)
     setSettling(false)
@@ -198,38 +202,40 @@ export default function ImportToast() {
           {/* Text */}
           <div className="flex-1 min-w-0">
             {task.status === "running" && (
-              <p className="text-base font-medium text-foreground leading-snug">
+              <p data-toast-text className={`${TEXT_CLASS} text-base font-medium text-foreground leading-snug`}>
                 {task.label}
               </p>
             )}
             {task.status === "running" && task.detail && (
-              <p className="mt-1 text-sm text-foreground-secondary tabular-nums truncate">
+              <p data-toast-text className={`${TEXT_CLASS} mt-1 text-sm text-foreground-secondary tabular-nums truncate`}>
                 {task.detail}
               </p>
             )}
             {task.status === "running" && task.alert && (
-              <p className="mt-1.5 text-sm font-medium text-warning" role="alert">
+              <p data-toast-text className={`${TEXT_CLASS} mt-1.5 text-sm font-medium text-warning`} role="alert">
                 {task.alert}
               </p>
             )}
             {task.status === "running" && !task.alert && task.notice && (
-              <p className="mt-1.5 text-sm text-foreground-secondary">{task.notice}</p>
+              <p data-toast-text className={`${TEXT_CLASS} mt-1.5 text-sm text-foreground-secondary`}>
+                {task.notice}
+              </p>
             )}
             {task.status === "running" && <ProgressBar progress={task.progress} />}
-            
+
             {task.status === "done" && task.summary && (
-              <p className="text-base font-medium text-foreground leading-snug">
+              <p data-toast-text className={`${TEXT_CLASS} text-base font-medium text-foreground leading-snug`}>
                 {task.summary}
               </p>
             )}
-            
+
             {task.status === "error" && (
-              <p className="text-base font-medium text-foreground leading-snug">
+              <p data-toast-text className={`${TEXT_CLASS} text-base font-medium text-foreground leading-snug`}>
                 {task.label}
               </p>
             )}
             {task.status === "error" && task.error && (
-              <p className="mt-1 text-sm text-error">
+              <p data-toast-text className={`${TEXT_CLASS} mt-1 text-sm text-error`}>
                 {task.error}
               </p>
             )}

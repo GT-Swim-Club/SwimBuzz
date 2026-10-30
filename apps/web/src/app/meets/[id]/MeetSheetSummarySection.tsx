@@ -2,8 +2,16 @@
 
 import { useEffect, useRef, useState, Fragment, type ReactNode } from "react"
 import Link from "next/link"
+import {
+  eventGenderWord,
+  rosterSummaryTitle,
+  type RosterSummaryPdfRequest,
+  type RosterSummaryPdfRow,
+  type RosterSummaryPdfSection,
+} from "@swimbuzz/shared"
 import type { MeetResultEntry, SheetEntry, SheetSummary } from "@/lib/meet/meet-sheet-summary"
 import {
+  applyRosterNames,
   compareIndividualEntries,
   dropSeedOnlyAfterResults,
   displaySeedRank,
@@ -38,11 +46,13 @@ import { displayMeetResultTags } from "@/lib/swim/swim-tags"
 import { formatSeedTimeDelta, parseTime } from "@/lib/utils"
 import { athletePath } from "@/lib/slug"
 import { LedgerIcon } from "@/components/meet/Ledger"
+import RosterName from "@/components/athlete/RosterName"
 import EditMeetSwimButton from "./EditMeetSwimButton"
 import EditSheetSeedButton from "./EditSheetSeedButton"
 import RemoveRosterOnlyButton from "./RemoveRosterOnlyButton"
 import { EditRelayButton } from "./MeetRelayEditor"
 import MeetAddMenu from "./MeetAddMenu"
+import ShareRosterSummaryButton from "./ShareRosterSummaryButton"
 import { MenuDivider, MenuItem, menuPanel } from "./MeetMenu"
 import SummaryRow, { EventBadge, type RowDisplay, type RowDensity, type RowResult } from "./SummaryRow"
 import type { DetailRound, SwimDetail } from "./SwimDetailModal"
@@ -508,41 +518,19 @@ type AthleteRecord = {
   timesNeverImported?: boolean
 }
 
-function SummaryEntryRow({
-  entry,
-  display,
-  canEdit,
-  meetId,
-  meetName,
-  athletes,
-  athleteGenders,
-  allEntries,
-  individualEventOptions,
-  editableSeedKeys = new Set<string>(),
-  eventNumberOptions,
-  eventView = false,
-}: {
-  entry: SummaryEntry
-  display: RowDisplay
-  canEdit?: boolean
-  meetId?: string
-  meetName?: string
-  athletes?: AthleteRecord[]
+type RowContext = {
   athleteGenders?: Map<string, "M" | "F">
   allEntries?: SummaryEntry[]
-  individualEventOptions?: string[]
-  editableSeedKeys?: Set<string>
   eventNumberOptions?: MeetSignupEventOption[]
-  /** Rows sit under an event header: label by athlete / relay letter, no event badge. */
-  eventView?: boolean
-}) {
-  const [editOpen, setEditOpen] = useState(false)
+}
+
+/** What a summary row shows — shared by the on-screen row and the PDF export. */
+function summaryRowView(entry: SummaryEntry, ctx: RowContext, eventView: boolean) {
+  const { athleteGenders, allEntries, eventNumberOptions } = ctx
   const isRelay = entry.entryType === "relay_team"
-  const athleteRecord = athletes?.find((a) => a.id === entry.athleteId)
   const eventNumber = entry.isRelayLeadoff
     ? resolveLeadoffEventNumber(entry, allEntries, athleteGenders, eventNumberOptions)
     : resolveDisplayEventNumber(entry, athleteGenders, eventNumberOptions)
-  const compact = display.density === "compact"
   const res = rowRoundResult(entry, allEntries)
   // A leadoff swam in its relay's heat and lane, and finished where the relay did.
   const leadoffRelay = leadoffParentRelay(entry, allEntries)
@@ -577,6 +565,91 @@ function SummaryEntryRow({
         : { kind: "none" }
 
   const eventName = entry.rosterOnly ? "Attending" : entry.event
+  return {
+    isRelay,
+    eventNumber,
+    res,
+    podiumPlace,
+    relayLetter,
+    heat,
+    lane,
+    heatLane,
+    sub,
+    result,
+    eventName,
+    badgeNumber: !eventView && eventNumber > 0 ? eventNumber : undefined,
+    label: eventView ? (isRelay ? relayLetter : entry.athleteName) : eventName,
+    team: entry.isRelayLeadoff ? "Relay leadoff" : !eventView ? relayLetter : undefined,
+    round: entry.rosterOnly || entry.isRelayLeadoff ? null : res.label,
+  }
+}
+
+/** A summary row for the PDF export, honoring the viewer's Show round / Show heat & lane toggles. */
+function summaryRowPdf(
+  entry: SummaryEntry,
+  ctx: RowContext,
+  display: RowDisplay,
+  eventView = false
+): RosterSummaryPdfRow {
+  const view = summaryRowView(entry, ctx, eventView)
+  // Relay names are compact: "200 Medley A" (or "Relay A" under an event title), with the
+  // letter folded in rather than repeated in the meta.
+  const relayName = eventView
+    ? view.label
+    : `${entry.event.replace(/\s+Relay$/i, "")} ${displayRelayLetter(entry.relayLetter)}`
+  const meta = [
+    view.isRelay ? null : view.team,
+    display.showRound ? view.round : null,
+    display.showHeatLane ? view.heatLane : null,
+  ]
+    .filter(Boolean)
+    .join(" | ")
+  return {
+    eventNumber: view.badgeNumber,
+    label: (view.isRelay ? relayName : view.label) ?? "",
+    sub: view.sub || undefined,
+    meta: meta || undefined,
+    legs: view.isRelay
+      ? [...(entry.relaySwimmers ?? [])].sort((a, b) => a.leg - b.leg).map((s) => s.name)
+      : undefined,
+    result: view.result,
+  }
+}
+
+function SummaryEntryRow({
+  entry,
+  display,
+  canEdit,
+  meetId,
+  meetName,
+  athletes,
+  athleteGenders,
+  allEntries,
+  individualEventOptions,
+  editableSeedKeys = new Set<string>(),
+  eventNumberOptions,
+  eventView = false,
+}: {
+  entry: SummaryEntry
+  display: RowDisplay
+  canEdit?: boolean
+  meetId?: string
+  meetName?: string
+  athletes?: AthleteRecord[]
+  athleteGenders?: Map<string, "M" | "F">
+  allEntries?: SummaryEntry[]
+  individualEventOptions?: string[]
+  editableSeedKeys?: Set<string>
+  eventNumberOptions?: MeetSignupEventOption[]
+  /** Rows sit under an event header: label by athlete / relay letter, no event badge. */
+  eventView?: boolean
+}) {
+  const [editOpen, setEditOpen] = useState(false)
+  const athleteRecord = athletes?.find((a) => a.id === entry.athleteId)
+  const compact = display.density === "compact"
+  const view = summaryRowView(entry, { athleteGenders, allEntries, eventNumberOptions }, eventView)
+  const { isRelay, eventNumber, res, podiumPlace, relayLetter, heat, lane, heatLane, sub, result, eventName } =
+    view
   // Rows split per round carry that round's swimId; timed-finals rows only have the result
   // ids. Used for the `#swim-<id>` anchor that athlete-profile links scroll to and open.
   const anchorSwimId =
@@ -724,16 +797,16 @@ function SummaryEntryRow({
       <SummaryRow
         id={anchorSwimId ? `swim-${anchorSwimId}` : undefined}
         display={display}
-        eventNumber={!eventView && eventNumber > 0 ? eventNumber : undefined}
+        eventNumber={view.badgeNumber}
         avatar={
           eventView && !isRelay ? (
             <AthleteAvatar image={athleteRecord?.image} name={entry.athleteName} compact={compact} />
           ) : undefined
         }
-        label={eventView ? (isRelay ? relayLetter : entry.athleteName) : eventName}
+        label={eventView && !isRelay ? <RosterName name={entry.athleteName} /> : view.label}
         sub={sub || undefined}
-        team={entry.isRelayLeadoff ? "Relay leadoff" : !eventView ? relayLetter : undefined}
-        round={entry.rosterOnly || entry.isRelayLeadoff ? null : res.label}
+        team={view.team}
+        round={view.round}
         heatLane={heatLane}
         note={coachNote}
         result={result}
@@ -875,13 +948,16 @@ export default function MeetSheetSummarySection({
     relayLeadoffsFromSplits(relayResults)
   )
 
-  const summary = mergeSheetSummaries(
-    psychSummary,
-    heatSummary,
-    leadoffResults,
-    relayResults,
-    entriesSummary,
-    finalsHeatSummary
+  const summary = applyRosterNames(
+    mergeSheetSummaries(
+      psychSummary,
+      heatSummary,
+      leadoffResults,
+      relayResults,
+      entriesSummary,
+      finalsHeatSummary
+    ),
+    athleteNames
   )
   const relays = summary ? uniqueRelayTeams(summary.entries, athleteGenders) : []
   const hasImportedResults = Boolean(
@@ -904,7 +980,31 @@ export default function MeetSheetSummarySection({
         editableSeedKeySet
       )
     : []
-  const grouped = summary ? groupSheetByAthlete(displayEntries, athleteNames) : []
+  // By athlete: each relay sits in the section of every swimmer on it (relay-only swimmers get
+  // a section too), so there's no separate relays list.
+  const grouped = (() => {
+    const byAthlete = new Map<string, { athleteId: string; name: string; entries: SummaryEntry[] }>()
+    for (const group of summary ? groupSheetByAthlete(displayEntries, athleteNames) : []) {
+      const athleteId = group.entries[0]?.athleteId ?? ""
+      byAthlete.set(athleteId, { athleteId, name: group.name, entries: [...group.entries] })
+    }
+    for (const relay of relays) {
+      for (const swimmer of relay.relaySwimmers ?? []) {
+        if (!swimmer.athleteId) continue
+        let group = byAthlete.get(swimmer.athleteId)
+        if (!group) {
+          group = {
+            athleteId: swimmer.athleteId,
+            name: athleteNames.get(swimmer.athleteId) ?? swimmer.name,
+            entries: [],
+          }
+          byAthlete.set(swimmer.athleteId, group)
+        }
+        if (!group.entries.includes(relay)) group.entries.push(relay)
+      }
+    }
+    return [...byAthlete.values()].sort((a, b) => a.name.localeCompare(b.name))
+  })()
 
   // Sort by the event number each row shows — a leadoff's is its relay's, which
   // only resolves here (its own eventNumber is 0 and would sink it to the end).
@@ -940,7 +1040,7 @@ export default function MeetSheetSummarySection({
     : []
   const myEntries = [...myIndividualEntries, ...myRelays].sort(compareMyEntries)
   const otherGrouped = viewerAthleteId
-    ? grouped.filter((a) => a.entries[0]?.athleteId !== viewerAthleteId)
+    ? grouped.filter((a) => a.athleteId !== viewerAthleteId)
     : grouped
 
   const q = searchQuery.trim().toLowerCase()
@@ -959,27 +1059,22 @@ export default function MeetSheetSummarySection({
         entry.athleteName.toLowerCase().includes(q) ||
         entry.event.toLowerCase().includes(q))
   )
-  const filteredRelays = relays.filter(
-    (entry) =>
-      matchesGenderFilter(entry) &&
-      (!q ||
-        entry.relaySwimmers?.some((swimmer) => swimmer.name.toLowerCase().includes(q)) ||
-        entry.event.toLowerCase().includes(q))
-  )
-  const filteredOtherGrouped = otherGrouped
-    .map((athleteGroup) => ({
-      ...athleteGroup,
-      entries: athleteGroup.entries.filter(matchesGenderFilter),
-    }))
-    .filter(
-      (athleteGroup) =>
-        athleteGroup.entries.length > 0 &&
-        (!q ||
-          athleteGroup.name.toLowerCase().includes(q) ||
-          athleteGroup.entries.some((entry) => entry.event.toLowerCase().includes(q)))
-    )
+  const filterAthleteGroups = (groups: typeof grouped) =>
+    groups
+      .map((athleteGroup) => ({
+        ...athleteGroup,
+        entries: athleteGroup.entries.filter(matchesGenderFilter),
+      }))
+      .filter(
+        (athleteGroup) =>
+          athleteGroup.entries.length > 0 &&
+          (!q ||
+            athleteGroup.name.toLowerCase().includes(q) ||
+            athleteGroup.entries.some((entry) => entry.event.toLowerCase().includes(q)))
+      )
+  const filteredOtherGrouped = filterAthleteGroups(otherGrouped)
 
-  // For the "by event" view: use the de-duped relay list (same as the by-athlete relay section)
+  // For the "by event" view: use the de-duped relay list (the same relays the by-athlete sections use)
   // so that seed rows from the heat sheet don't appear as duplicates alongside result rows.
   // Leadoffs are part of their relay, not entries in the individual event.
   const deduplicatedByEventEntries: SummaryEntry[] = [
@@ -993,9 +1088,7 @@ export default function MeetSheetSummarySection({
         ? effectiveRelayGender(entry, athleteGenders) || entry.gender || "U"
         : entry.gender || athleteGenders.get(entry.athleteId) || "U"
     const eventNumber = resolveDisplayEventNumber(entry, athleteGenders, eventNumberOptions)
-    const genderLabel =
-      gender === "F" ? "Women's" : gender === "M" ? "Men's" : gender === "X" ? "Mixed" : ""
-    const title = `${genderLabel} ${entry.event}`.trim()
+    const title = `${eventGenderWord(gender) ?? ""} ${entry.event}`.trim()
     // Use the eventNumber, gender, and event name for unique grouping
     const key = `${eventNumber}|${title}`
     if (!acc.has(key)) {
@@ -1048,7 +1141,7 @@ export default function MeetSheetSummarySection({
     })
 
   const hasSummaryContent =
-    filteredMyEntries.length > 0 || filteredRelays.length > 0 || filteredOtherGrouped.length > 0
+    filteredMyEntries.length > 0 || filteredOtherGrouped.length > 0
   const filteredRosterAthletes = rosterAthletes.filter(
     (athlete) =>
       (genderFilter === "all" || athlete.gender === genderFilter) &&
@@ -1090,28 +1183,80 @@ export default function MeetSheetSummarySection({
     eventNumberOptions,
   }
 
-  function renderRelayGroup(title: string | null, entries: SummaryEntry[], prefix: string) {
-    if (entries.length === 0) return null
-    return (
-      <Fragment key={prefix}>
-        {title ? (
-          <li className="border-t border-border px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.025em] text-foreground-secondary">
-            {title}
-          </li>
-        ) : null}
-        {entries.map((entry, i) => (
-          <SummaryEntryRow
-            key={`${prefix}-${entryRowKey(entry, i, athleteGenders)}`}
-            entry={entry}
-            {...rowProps}
-          />
-        ))}
-      </Fragment>
-    )
-  }
 
   const viewerRecord = viewerAthleteId ? athletes.find((a) => a.id === viewerAthleteId) : undefined
   const addMenuVisible = canEdit && meetId
+
+  /**
+   * The view as it's shown — same mode, filters, search, order and row toggles — for the PDF export,
+   * minus the viewer's pinned section: they're listed in their usual place like everyone else.
+   */
+  function buildPdfRequest(): RosterSummaryPdfRequest {
+    const rowCtx = { athleteGenders, allEntries: displayEntries, eventNumberOptions }
+    const toRow = (entry: SummaryEntry, eventView = false) =>
+      summaryRowPdf(entry, rowCtx, display, eventView)
+    // "Entries" → "Heats" once a heat sheet is in → "Results" once results are posted.
+    const title = rosterSummaryTitle({
+      hasHeatSheet: Boolean(heatSummary || finalsHeatSummary),
+      hasResults: hasImportedResults,
+    })
+    const heading = [
+      viewMode === "roster" ? "Roster" : `${title} by ${viewByEvent ? "Event" : "Athlete"}`,
+      genderFilter === "F" ? "Women" : genderFilter === "M" ? "Men" : null,
+      q ? `“${searchQuery.trim()}”` : null,
+    ]
+      .filter(Boolean)
+      .join(" · ")
+
+    let sections: RosterSummaryPdfSection[] = []
+    if (!hasContent) return { heading, sections }
+    if (viewMode === "roster") {
+      // Roster order, without pinning the viewer to the top.
+      const athletesInOrder = rosterAthletes.filter((athlete) => filteredRosterAthletes.includes(athlete))
+      const rows: RosterSummaryPdfRow[] = athletesInOrder.map((athlete) => {
+        const count = eventCountByAthlete.get(athlete.id) ?? 0
+        const gender = athlete.gender === "F" ? "Women" : athlete.gender === "M" ? "Men" : ""
+        const badges = [
+          athlete.missingSwimCloud ? "No SwimCloud" : null,
+          athlete.timesNeverImported ? "Never imported" : null,
+        ].filter(Boolean)
+        return {
+          label: athlete.name,
+          sub: badges.join(" · ") || undefined,
+          result: {
+            kind: "text",
+            text: [`${count} event${count === 1 ? "" : "s"}`, gender].filter(Boolean).join(" · "),
+          },
+        }
+      })
+      sections = [
+        {
+          title: `${filteredRosterAthletes.length} athlete${filteredRosterAthletes.length === 1 ? "" : "s"}`,
+          rows,
+        },
+      ]
+    } else if (viewByEvent) {
+      sections = sortedEventGroups.map((group) => ({
+        title: group.title,
+        eventNumber: group.eventNumber > 0 ? group.eventNumber : undefined,
+        rows: [...group.entries]
+          .sort((a, b) => compareByPlace(a, b, hasImportedResults))
+          .map((entry) => toRow(entry, true)),
+      }))
+      return { heading, sections, splitSections: true }
+    } else {
+      for (const athleteGroup of filterAthleteGroups(grouped)) {
+        sections.push({
+          title: athleteGroup.name,
+          // Under an athlete, a relay is just the event — no list of its swimmers.
+          rows: [...athleteGroup.entries]
+            .sort(compareMyEntries)
+            .map((entry) => ({ ...toRow(entry), legs: undefined })),
+        })
+      }
+    }
+    return { heading, sections }
+  }
 
   return (
     <section ref={sectionRef} className="scroll-mt-4">
@@ -1133,6 +1278,15 @@ export default function MeetSheetSummarySection({
             defaultDate={defaultDate ?? ""}
             athletes={athletes}
             rosterSummaryEntries={entriesSummary?.entries ?? []}
+            onOpen={() => setSettingsOpen(false)}
+          />
+        ) : null}
+
+        {meetId ? (
+          <ShareRosterSummaryButton
+            meetId={meetId}
+            meetName={meetName ?? ""}
+            buildRequest={buildPdfRequest}
             onOpen={() => setSettingsOpen(false)}
           />
         ) : null}
@@ -1275,7 +1429,7 @@ export default function MeetSheetSummarySection({
                     <span className="flex min-w-0 items-center gap-2">
                       <AthleteAvatar image={athlete.image} name={athlete.name} />
                       <span className={`truncate font-medium ${isMe ? "text-accent" : ""}`}>
-                        {athlete.name}
+                        <RosterName name={athlete.name} />
                       </span>
                       {athlete.missingSwimCloud ? (
                         <span className="shrink-0 rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-accent">
@@ -1339,7 +1493,9 @@ export default function MeetSheetSummarySection({
                     image={viewerRecord?.image}
                     name={athleteNames.get(viewerAthleteId!) || "My Profile"}
                   />
-                  <span>{athleteNames.get(viewerAthleteId!)}</span>
+                  <span>
+                    <RosterName name={athleteNames.get(viewerAthleteId!) ?? ""} />
+                  </span>
                 </div>
                 <ul className="border-t border-border-subtle">
                   {filteredMyEntries.map((entry, i) => (
@@ -1353,52 +1509,27 @@ export default function MeetSheetSummarySection({
               </div>
             </div>
           ) : null}
-          {filteredRelays.length > 0 ? (
-            <div className="overflow-hidden rounded-xl border border-border bg-background">
-              <div className="px-4 py-2.5 text-sm font-medium text-foreground">Relays</div>
-              <ul>
-                {renderRelayGroup(
-                  "Women's",
-                  filteredRelays.filter((e) => effectiveRelayGender(e, athleteGenders) === "F"),
-                  "womens"
-                )}
-                {renderRelayGroup(
-                  "Men's",
-                  filteredRelays.filter((e) => effectiveRelayGender(e, athleteGenders) === "M"),
-                  "mens"
-                )}
-                {renderRelayGroup(
-                  "Mixed",
-                  filteredRelays.filter((e) => effectiveRelayGender(e, athleteGenders) === "X"),
-                  "mixed"
-                )}
-                {renderRelayGroup(
-                  null,
-                  filteredRelays.filter((e) => effectiveRelayGender(e, athleteGenders) === ""),
-                  "other"
-                )}
-              </ul>
-            </div>
-          ) : null}
           {filteredOtherGrouped.map((athleteGroup) => {
-            const events = [...athleteGroup.entries].sort(compareByDisplayedEvent)
-            const athleteData = athletes.find((a) => a.id === athleteGroup.entries[0]?.athleteId)
+            const events = [...athleteGroup.entries].sort(compareMyEntries)
+            const athleteData = athletes.find((a) => a.id === athleteGroup.athleteId)
             return (
               <div
-                key={athleteGroup.name}
+                key={athleteGroup.athleteId}
                 className="overflow-hidden rounded-xl border border-border bg-background"
               >
                 <Link
-                  href={athletePath(athleteData?.slug ?? athleteGroup.entries[0]?.athleteId ?? "")}
+                  href={athletePath(athleteData?.slug ?? athleteGroup.athleteId)}
                   className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:text-primary"
                 >
                   <AthleteAvatar image={athleteData?.image} name={athleteGroup.name} />
-                  <span>{athleteGroup.name}</span>
+                  <span>
+                    <RosterName name={athleteGroup.name} />
+                  </span>
                 </Link>
                 <ul className="border-t border-border-subtle">
                   {events.map((entry, i) => (
                     <SummaryEntryRow
-                      key={`${athleteGroup.entries[0]?.athleteId}-${entryRowKey(entry, i, athleteGenders)}`}
+                      key={`${athleteGroup.athleteId}-${entryRowKey(entry, i, athleteGenders)}`}
                       entry={entry}
                       {...rowProps}
                     />

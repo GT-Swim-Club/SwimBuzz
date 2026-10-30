@@ -1,3 +1,4 @@
+import { meetFileName } from "./format"
 import {
   relayLineupGenderLabel,
   relayLineupRoundLabel,
@@ -117,14 +118,7 @@ export function relaySummaryCsv(events: RelayShareEvent[]): string {
   return rows.map((row) => row.map(csvCell).join(",")).join("\r\n") + "\r\n"
 }
 
-/** "ccs-southern-regionals-relays.png". */
+/** "Relays - CCS Southern Regionals.png". */
 export function relayShareFilename(meetName: string, ext: string): string {
-  const slug = meetName
-    .normalize("NFKD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 60)
-  return `${slug ? `${slug}-` : ""}relays.${ext}`
+  return meetFileName("Relays", meetName, ext)
 }

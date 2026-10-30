@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextvars
 import io
 import re
+import string
 from typing import Any
 
 import pdfplumber
@@ -185,7 +186,7 @@ def _current_sheet_team() -> _SheetTeam:
 SHEET_PSYCH = re.compile(r"Psych\s+Sheet", re.I)
 SHEET_HEAT = re.compile(r"Meet\s+Program", re.I)
 SHEET_ENTRIES = re.compile(
-    r"Team Entries|Individual Meet Entries|Entry Report(?:\s+by\s+Club)?|"
+    r"Team Entries|School Entries|Individual Meet Entries|Entry Report(?:\s+by\s+Club)?|"
     r"Entries Report|Meet Entries Report",
     re.I,
 )
@@ -731,7 +732,7 @@ ENTRY_CELL = re.compile(
 # summary-row rule below and _is_meet_banner_line (compares against this
 # document's own parsed meet name instead of one hardcoded string).
 ENTRY_SKIP = re.compile(
-    r"^(HY-TEK|USMS|Page \d|All Events|Team Entries|Entries Report|"
+    r"^(HY-TEK|USMS|Page \d|All Events|Team Entries|School Entries|Entries Report|"
     r"Licensed To|Individual Meet|Sanction:|Female IE|Male IE|FEMALE|MALE|MEET MANAGER)|"
     r"\bTotal\b",
     re.I,
@@ -1109,7 +1110,34 @@ def _group_relay_leg_entries(
                 )
             )
 
+    _assign_relay_letters_by_seed(teams)
     return teams
+
+
+def _assign_relay_letters_by_seed(teams: list[dict[str, Any]]) -> None:
+    """Letter unlettered relays per event — fastest seed is A, the next B, and so on.
+
+    Entry reports don't print relay letters, and downstream code treats a
+    missing letter as "A", so a club's second relay in an event would collide
+    with its first. NT/status seeds sort last; letters the PDF did print are kept.
+    """
+    by_event: dict[tuple[Any, ...], list[dict[str, Any]]] = {}
+    for team in teams:
+        key = (team["eventNumber"], team["event"], team["gender"])
+        by_event.setdefault(key, []).append(team)
+
+    for group in by_event.values():
+        taken = {team["relayLetter"] for team in group if team.get("relayLetter")}
+        unlettered = [team for team in group if not team.get("relayLetter")]
+        unlettered.sort(
+            key=lambda team: (
+                _seed_time_ms(team.get("seedTime")) is None,
+                _seed_time_ms(team.get("seedTime")) or 0.0,
+            )
+        )
+        letters = (letter for letter in string.ascii_uppercase if letter not in taken)
+        for team, letter in zip(unlettered, letters):
+            team["relayLetter"] = letter
 
 
 def _entry_report_uses_column_flow(pdf: Any) -> bool:
@@ -1291,7 +1319,9 @@ def parse_entry_report(content: bytes, team: str | None = None) -> dict[str, Any
             if in_relay_section:
                 names = _parse_relay_roster_names(line)
                 if names and pending_relay_letter is not None:
-                    relay_rosters.append((pending_relay_letter, names))
+                    # Roster blocks don't print a letter either — leave it
+                    # for _assign_relay_letters_by_seed.
+                    relay_rosters.append((None, names))
                     last = names[-1]
                     pending_name_continuation = (
                         last.endswith(",")

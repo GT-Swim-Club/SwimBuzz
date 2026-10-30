@@ -10,6 +10,7 @@ import {
   lineupTeamsOf,
   pendingDraft,
   poolAthletesFor,
+  relayShareEvent,
   type AthleteOption,
   type RelayResult,
   type RelaySlotData,
@@ -25,7 +26,6 @@ import RelayPageHeader, { relayEyebrowClass } from "./RelayPageHeader"
 import RelaySummary, {
   lineupSummaryCards,
   publishedSummaryCards,
-  relayShareEvent,
   type RelaySummaryEvent,
 } from "./RelaySummary"
 import PublishAllRelaysButton from "./PublishAllRelaysButton"
@@ -347,7 +347,7 @@ export default function MeetRelaysWorkspace({
               />
             ) : null}
             {shareEvents.length > 0 ? (
-              <ShareRelaysButton meetName={meetName} iconUrl={iconUrl} events={shareEvents} />
+              <ShareRelaysButton meetId={meetId} meetName={meetName} iconUrl={iconUrl} events={shareEvents} />
             ) : null}
           </>
         }

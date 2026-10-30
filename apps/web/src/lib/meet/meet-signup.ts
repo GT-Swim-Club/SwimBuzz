@@ -98,6 +98,8 @@ export function isEditableSignupSheetSeed(entry: SheetEntry): boolean {
     return false
   }
   if (entry.manual === true) return true
+  // Entries-report rows are seed-only too, so check the import flag first.
+  if (entry.entriesImport === true) return false
   // Legacy sync rows: seed-only, no psych/heat markers.
   return !hasImportedSheetMarkers(entry)
 }

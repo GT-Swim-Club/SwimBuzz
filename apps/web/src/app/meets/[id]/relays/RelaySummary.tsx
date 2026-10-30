@@ -7,9 +7,8 @@ import {
   relayLineupRoundLabel,
   relayShareRows,
   type RelayLineup,
-  type RelayShareEvent,
 } from "@swimbuzz/shared"
-import { formatLegTime, type LineupTeam, type RelayEventSlot } from "@/lib/meet/relay-builder"
+import { formatLegTime, type LineupTeam } from "@/lib/meet/relay-builder"
 import { EventBadge } from "../SummaryRow"
 
 export type RelaySummaryCard = {
@@ -247,15 +246,6 @@ export default function RelaySummary({
       })}
     </BalancedGrid>
   )
-}
-
-/** A relay event's published lineups, for Share (PNG/CSV). */
-export function relayShareEvent(slot: RelayEventSlot, published: RelayLineup[]): RelayShareEvent {
-  return {
-    number: slot.number ?? (published.find((relay) => relay.eventNumber > 0)?.eventNumber || null),
-    name: slot.label.replace(/ Relay$/, ""),
-    relays: published,
-  }
 }
 
 /** Summary cards for published relays (one per team and round). */

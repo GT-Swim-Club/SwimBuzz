@@ -91,6 +91,8 @@ export type SheetEntry = {
   signupImport?: boolean
   /** "Attending" row added by a final roster import — removed when the roster is cleared. */
   rosterImport?: boolean
+  /** Seed from an entries-report PDF — has no seed rank/heat/lane, but is still imported data. */
+  entriesImport?: boolean
   /** Swim row id when this entry is a single manual swim. */
   swimId?: string
   prelimSwimId?: string
@@ -890,6 +892,47 @@ export function countMeetAthletes(opts: {
   swimAthleteIds?: string[]
 }): number {
   return collectMeetRosterAthleteIds(opts).length
+}
+
+/**
+ * Show roster names (with preferred names) instead of the names the sheets were imported with,
+ * on individual rows and relay legs, wherever the athlete is known.
+ */
+export function applyRosterNames(
+  summary: SheetSummary | null,
+  rosterNames: Map<string, string>
+): SheetSummary | null {
+  if (!summary) return null
+  return {
+    ...summary,
+    entries: summary.entries.map((entry) => ({
+      ...entry,
+      athleteName:
+        entry.entryType === "relay_team"
+          ? entry.athleteName
+          : (rosterNames.get(entry.athleteId) ?? entry.athleteName),
+      relaySwimmers: entry.relaySwimmers?.map((swimmer) => {
+        const name = swimmer.athleteId ? rosterNames.get(swimmer.athleteId) : undefined
+        return name ? { ...swimmer, name } : swimmer
+      }),
+    })),
+  }
+}
+
+/** Fill in each individual row's gender from the roster where the sheets didn't give one. */
+export function applyRosterGenders(
+  summary: SheetSummary | null,
+  rosterGenders: Map<string, "M" | "F">
+): SheetSummary | null {
+  if (!summary) return null
+  return {
+    ...summary,
+    entries: summary.entries.map((entry) =>
+      entry.entryType === "relay_team" || entry.gender
+        ? entry
+        : { ...entry, gender: rosterGenders.get(entry.athleteId) ?? entry.gender }
+    ),
+  }
 }
 
 export function groupSheetByAthlete(

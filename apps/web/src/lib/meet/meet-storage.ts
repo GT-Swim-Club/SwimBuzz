@@ -162,6 +162,17 @@ function encodeStoragePath(storagePath: string) {
     .join("/")
 }
 
+/**
+ * Public URL of a meet icon in our `meet-icons` bucket, rebuilt on SUPABASE_URL so a
+ * server-side fetch never leaves our own storage. Null for icons hosted anywhere else.
+ */
+export function meetIconStorageUrl(url: string | null | undefined): string | null {
+  const base = process.env.SUPABASE_URL?.replace(/\/$/, "")
+  const parsed = url ? parsePublicStorageUrl(url) : null
+  if (!base || !parsed || parsed.bucket !== "meet-icons") return null
+  return `${base}/storage/v1/object/public/meet-icons/${encodeStoragePath(parsed.path)}`
+}
+
 /** Remove a stored file from Supabase (or legacy local disk) using its public URL. */
 export async function deleteStoredFileByUrl(url: string | null | undefined) {
   if (!url) return

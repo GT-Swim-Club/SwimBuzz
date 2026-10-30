@@ -832,8 +832,8 @@ export default function MeetRelayBuilder({
   const isLoaded = (source: Source) => {
     const teams = sourceTeams[source]
     if (currentKey == null || teams == null || lineupKey(teams) !== currentKey) return false
-    // The saved lineup also holds its settings, so changing one leaves something to save.
-    return source !== settingsSource || !settingsChanged
+    // Saved lineups also hold their settings, so changing one leaves something to save either way.
+    return source === "optimal" || !settingsChanged
   }
   const poolIsCustom = settings.excludedIds.length > 0 || settings.addedIds.length > 0
   const editable = adding === 0
@@ -907,7 +907,7 @@ export default function MeetRelayBuilder({
         type="button"
         aria-label={saveDraftLabel}
         onClick={saveDraft}
-        disabled={!canAct || isLoaded("draft")}
+        disabled={!canAct}
         className={`${iconButtonClass} border border-fill text-foreground hover:bg-fill-secondary`}
       >
         <ActionIcon kind="check" className="h-4 w-4" />
@@ -918,7 +918,7 @@ export default function MeetRelayBuilder({
           type="button"
           aria-label="Publish"
           onClick={requestPublish}
-          disabled={!canAct || isLoaded("published")}
+          disabled={!canAct}
           className={`${iconButtonClass} bg-primary text-primary-contrast hover:bg-primary-hover disabled:hover:bg-primary`}
         >
           <ActionIcon kind="publish" className="h-4 w-4" />

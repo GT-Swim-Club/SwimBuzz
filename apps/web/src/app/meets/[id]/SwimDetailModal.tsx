@@ -4,6 +4,7 @@ import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import Link from "next/link"
 import type { ResultSplit } from "@/lib/meet/meet-sheet-summary"
+import RosterName from "@/components/athlete/RosterName"
 import { sanitizeRelaySplitTime } from "@/lib/meet/relay-results"
 import { formatDisplayTime, formatOrdinal, formatSeedTimeDelta, parseTime } from "@/lib/utils"
 import { useCanScrollDown } from "@/lib/use-can-scroll-down"
@@ -556,7 +557,9 @@ export default function SwimDetailModal({
                     hasSubRows ? "bg-fill-secondary/40 font-medium" : ""
                   }`}
                 >
-                  <span className="truncate text-foreground">{s.name}</span>
+                  <span className="truncate text-foreground">
+                    <RosterName name={s.name} />
+                  </span>
                   <span className="text-right font-mono tabular-nums text-foreground">
                     {s.split ? formatDisplayTime(s.split) : ""}
                   </span>

@@ -18,13 +18,14 @@ import { deleteEndedMeetRelayDrafts } from "@/lib/meet/relay-drafts-expiry"
 import {
   FALLBACK_RELAY_EVENTS,
   relayEventSlots,
+  relayShareEvent,
   slotMatches,
   type RelaySlotData,
 } from "@/lib/meet/relay-builder"
 import { athletePreferredName } from "@swimbuzz/shared"
 import MeetRelaysWorkspace from "./MeetRelaysWorkspace"
 import RelayPageHeader, { relayBackLinkClass, relayEyebrowClass } from "./RelayPageHeader"
-import RelaySummary, { publishedSummaryCards, relayShareEvent } from "./RelaySummary"
+import RelaySummary, { publishedSummaryCards } from "./RelaySummary"
 import ShareRelaysButton from "./ShareRelaysButton"
 
 export default async function MeetRelaysPage({
@@ -128,6 +129,7 @@ export default async function MeetRelaysPage({
           eyebrow={<p className={relayEyebrowClass}>Relays</p>}
           actions={
             <ShareRelaysButton
+              meetId={meet.id}
               meetName={meet.name}
               iconUrl={meet.iconUrl}
               events={publishedBySlot.map(({ slot, published }) => relayShareEvent(slot, published))}

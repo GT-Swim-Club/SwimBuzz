@@ -31,7 +31,7 @@ import {
   type ActionSheetItem,
 } from "@swimbuzz/ui"
 import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
-import { api } from "../../../../src/lib/api"
+import { api, API_URL, getAccessToken } from "../../../../src/lib/api"
 import { useTabBarScrollPadding } from "../../../../src/lib/tab-bar"
 import { isExternalUrl } from "../../../../src/lib/href"
 import { Icon } from "../../../../src/components/Icon"
@@ -70,7 +70,7 @@ export default function MeetRelaysScreen() {
     typeof meet?.iconUrl === "string" && isExternalUrl(meet.iconUrl) ? meet.iconUrl.trim() : null
 
   const [shareOpen, setShareOpen] = useState(false)
-  const [shareBusy, setShareBusy] = useState<"copy" | "photos" | "csv" | null>(null)
+  const [shareBusy, setShareBusy] = useState<"copy" | "photos" | "pdf" | "csv" | null>(null)
   const [copied, setCopied] = useState(false)
   const [savedToastVisible, setSavedToastVisible] = useState(false)
   const exportCaptureRef = useRef<View>(null)
@@ -136,6 +136,32 @@ export default function MeetRelaysScreen() {
       savedToastTimeoutRef.current = setTimeout(() => setSavedToastVisible(false), 2000)
     } catch (err) {
       Alert.alert("Could not save image", err instanceof Error ? err.message : "Something went wrong")
+    } finally {
+      setShareBusy(null)
+    }
+  }
+
+  async function sharePdf() {
+    if (!id) return
+    setShareBusy("pdf")
+    try {
+      const token = await getAccessToken()
+      const res = await fetch(`${API_URL}/api/meets/${encodeURIComponent(id)}/relays/pdf`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      })
+      if (!res.ok) throw new Error("Could not create PDF")
+      const bytes = new Uint8Array(await res.arrayBuffer())
+      const file = new File(Paths.cache, relayShareFilename(meetName, "pdf"))
+      if (file.exists) file.delete()
+      file.write(bytes)
+      if (!(await Sharing.isAvailableAsync())) {
+        Alert.alert("Sharing unavailable", "This device can't open the share sheet.")
+        return
+      }
+      await closeShareSheetAndWait()
+      await Sharing.shareAsync(file.uri, { mimeType: "application/pdf", UTI: "com.adobe.pdf" })
+    } catch (err) {
+      Alert.alert("Could not share PDF", err instanceof Error ? err.message : "Something went wrong")
     } finally {
       setShareBusy(null)
     }
@@ -340,6 +366,14 @@ export default function MeetRelaysScreen() {
               busy: shareBusy === "photos",
               disabled: Boolean(shareBusy) && shareBusy !== "photos",
               onPress: () => void saveToPhotos(),
+            },
+            {
+              key: "pdf",
+              label: "Share PDF",
+              icon: <Icon name="fileText" size={20} color={c.text} />,
+              busy: shareBusy === "pdf",
+              disabled: Boolean(shareBusy) && shareBusy !== "pdf",
+              onPress: () => void sharePdf(),
             },
             {
               key: "csv",

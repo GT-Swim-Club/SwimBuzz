@@ -324,6 +324,15 @@ function matchSheetToRoster(
   return entries
 }
 
+/** Flag entries-report rows so the sign-up seed cleanup doesn't mistake them for manual seeds. */
+function markEntriesImport(
+  sheetType: "psych" | "heat" | "entries",
+  entries: SheetEntry[]
+): SheetEntry[] {
+  if (sheetType !== "entries") return entries
+  return entries.map((entry) => ({ ...entry, entriesImport: true }))
+}
+
 function validateParsedSheet(
   sheetType: "psych" | "heat" | "entries",
   parsed: {
@@ -388,7 +397,10 @@ export async function applyPairedSheetEntries(
   const allEntries = parsed.entries ?? []
   const sheetNames = collectSheetNames(allEntries)
   const filtered = filterParsedEntriesForPairedNames(allEntries, nameMappings)
-  let newEntries = matchSheetToRoster(filtered, roster, { nameMappings })
+  let newEntries = markEntriesImport(
+    sheetType,
+    matchSheetToRoster(filtered, roster, { nameMappings })
+  )
   if (sheetType === "heat") {
     newEntries = newEntries.map(coercePrelimHeatTimedFinalsEntry)
   }
@@ -423,7 +435,10 @@ export async function parseMeetSheetForRoster(
   const parsed = await callSheetParser(userId, url, sheetType, teamCode)
   validateParsedSheet(sheetType, parsed, options)
   const sheetNames = collectSheetNames(parsed.entries ?? [])
-  const entries = matchSheetToRoster(parsed.entries ?? [], roster, options)
+  const entries = markEntriesImport(
+    sheetType,
+    matchSheetToRoster(parsed.entries ?? [], roster, options)
+  )
   const cachedParse = toCachedSheetParse(parsed)
   if (entries.length === 0) {
     return { summary: null, sheetNames, cachedParse }

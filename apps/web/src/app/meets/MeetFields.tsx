@@ -10,7 +10,14 @@ import { AppIcon } from "@/components/ui/AppIcon"
 import ActionIcon from "@/components/ui/ActionIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
 import { downloadBlob } from "@/components/ui/export-menu"
-import { DEFAULT_TIME_ZONE, defaultSeason, formatClockTime, formatSeasonLabel, zoneAbbreviation } from "@swimbuzz/shared"
+import {
+  DEFAULT_TIME_ZONE,
+  defaultSeason,
+  formatClockTime,
+  formatSeasonLabel,
+  meetFileName,
+  zoneAbbreviation,
+} from "@swimbuzz/shared"
 import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
 export type MeetFormState = {
@@ -482,9 +489,8 @@ export function MeetImageHeader({
     onError(null)
     try {
       const blob = await fetchImageBlob(url)
-      const base = (form.name.trim() || "Meet").replace(/[\\/:*?"<>|]/g, "-")
       const ext = IMAGE_EXT[blob.type] ?? (kind === "banner" ? "jpg" : "png")
-      downloadBlob(blob, `${base} ${kind === "icon" ? "Icon" : "Banner"}.${ext}`)
+      downloadBlob(blob, meetFileName(kind === "icon" ? "Icon" : "Banner", form.name, ext))
     } catch {
       onError(`Could not download the ${kind}`)
     } finally {

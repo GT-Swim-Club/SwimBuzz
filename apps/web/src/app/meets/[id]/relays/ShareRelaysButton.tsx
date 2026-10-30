@@ -9,6 +9,7 @@ import {
   CheckIcon,
   CopyPngMenuIcon,
   CsvMenuIcon,
+  PdfMenuIcon,
   PngMenuIcon,
   downloadBlob,
 } from "@/components/ui/export-menu"
@@ -20,19 +21,21 @@ const IMAGE_PLACEHOLDER = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAE
 const MENU_ITEM =
   "flex w-full items-center gap-2 whitespace-nowrap px-3 py-2 text-left text-sm text-foreground hover:bg-fill"
 
-/** Share menu for the published relays: Copy PNG, Download PNG, Download CSV. */
+/** Share menu for the published relays: Copy PNG, Download PNG, Download PDF, Download CSV. */
 export default function ShareRelaysButton({
+  meetId,
   meetName,
   iconUrl,
   events,
 }: {
+  meetId: string
   meetName: string
   iconUrl: string | null
   /** Published relays only, in display order. */
   events: RelayShareEvent[]
 }) {
   const [open, setOpen] = useState(false)
-  const [busy, setBusy] = useState<"png" | "copy-png" | null>(null)
+  const [busy, setBusy] = useState<"png" | "copy-png" | "pdf" | null>(null)
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -103,6 +106,22 @@ export default function ShareRelaysButton({
     }
   }
 
+  async function downloadPdf() {
+    setBusy("pdf")
+    setError(null)
+    setOpen(false)
+    try {
+      // Built server-side from the published relays, like the mobile app's Share PDF.
+      const res = await fetch(`/api/meets/${encodeURIComponent(meetId)}/relays/pdf`)
+      if (!res.ok) throw new Error("Could not export PDF")
+      downloadBlob(await res.blob(), relayShareFilename(meetName, "pdf"))
+    } catch {
+      setError("Could not export PDF")
+    } finally {
+      setBusy(null)
+    }
+  }
+
   function downloadCsv() {
     setError(null)
     setOpen(false)
@@ -112,7 +131,13 @@ export default function ShareRelaysButton({
   }
 
   const label =
-    busy === "png" ? "Exporting image…" : busy === "copy-png" ? "Copying image…" : "Share relays"
+    busy === "png"
+      ? "Exporting image…"
+      : busy === "copy-png"
+        ? "Copying image…"
+        : busy === "pdf"
+          ? "Exporting PDF…"
+          : "Share relays"
 
   return (
     <div ref={rootRef} className="relative flex shrink-0 flex-col items-end gap-1">
@@ -140,6 +165,10 @@ export default function ShareRelaysButton({
           <button type="button" role="menuitem" onClick={() => void downloadPng()} className={MENU_ITEM}>
             <PngMenuIcon className="h-4 w-4 shrink-0" />
             Download PNG
+          </button>
+          <button type="button" role="menuitem" onClick={() => void downloadPdf()} className={MENU_ITEM}>
+            <PdfMenuIcon className="h-4 w-4 shrink-0" />
+            Download PDF
           </button>
           <button type="button" role="menuitem" onClick={downloadCsv} className={MENU_ITEM}>
             <CsvMenuIcon className="h-4 w-4 shrink-0" />

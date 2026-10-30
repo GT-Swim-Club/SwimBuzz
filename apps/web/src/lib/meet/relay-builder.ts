@@ -1,4 +1,4 @@
-import type { RelayLineup } from "@swimbuzz/shared"
+import type { RelayLineup, RelayShareEvent } from "@swimbuzz/shared"
 import { formatTime } from "@/lib/utils"
 import { canonicalizeStrokeEvent, relaySignupKey } from "@/lib/swim/swim-parse"
 
@@ -221,6 +221,15 @@ export function relayEventSlots(
           : (row.women ?? row.men)
   }
   return SLOT_GENDER_ORDER.flatMap((gender) => slots.filter((s) => s.gender === gender))
+}
+
+/** A relay event's published lineups, for Share (PNG/PDF/CSV). */
+export function relayShareEvent(slot: RelayEventSlot, published: RelayLineup[]): RelayShareEvent {
+  return {
+    number: slot.number ?? (published.find((relay) => relay.eventNumber > 0)?.eventNumber || null),
+    name: slot.label.replace(/ Relay$/, ""),
+    relays: published,
+  }
 }
 
 // --- Athlete pool --------------------------------------------------------------------------

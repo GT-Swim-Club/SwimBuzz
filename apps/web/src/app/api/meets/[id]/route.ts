@@ -25,12 +25,14 @@ import {
   isResultStatusesSummary,
   isSheetSummary,
   mergeMeetResultEntries,
+  applyRosterGenders,
+  applyRosterNames,
   mergeSheetSummaries,
   swimsToMeetResults,
 } from "@/lib/meet/meet-sheet-summary"
 import { isRelayResultsSummary } from "@/lib/meet/relay-results"
 import { buildRelayLineups } from "@/lib/meet/relay-lineups"
-import { utcDayKey, isStaffRole } from "@swimbuzz/shared"
+import { athleteRosterNameLastFirst, utcDayKey, isStaffRole } from "@swimbuzz/shared"
 
 export const runtime = "nodejs"
 export const maxDuration = 300
@@ -97,15 +99,23 @@ export async function GET(
   const relayResults = isRelayResultsSummary(meet.relayResultsSummary)
     ? meet.relayResultsSummary.entries
     : null
-  const rosterSummary = mergeSheetSummaries(
-    isSheetSummary(meet.psychSheetSummary) ? meet.psychSheetSummary : null,
-    isSheetSummary(meet.heatSheetSummary) ? meet.heatSheetSummary : null,
-    results,
-    relayResults,
-    isSheetSummary(meet.entriesSheetSummary) ? meet.entriesSheetSummary : null,
-    isSheetSummary(meet.finalsHeatSheetSummary)
-      ? meet.finalsHeatSheetSummary
-      : null
+  // Roster names and genders, so mobile can show "Baumann, Matthew (Matt)" and title its
+  // by-event groups "Women 50 Free".
+  const rosterSummary = applyRosterGenders(
+    applyRosterNames(
+      mergeSheetSummaries(
+        isSheetSummary(meet.psychSheetSummary) ? meet.psychSheetSummary : null,
+        isSheetSummary(meet.heatSheetSummary) ? meet.heatSheetSummary : null,
+        results,
+        relayResults,
+        isSheetSummary(meet.entriesSheetSummary) ? meet.entriesSheetSummary : null,
+        isSheetSummary(meet.finalsHeatSheetSummary)
+          ? meet.finalsHeatSheetSummary
+          : null
+      ),
+      new Map(seasonRoster.map((a) => [a.id, athleteRosterNameLastFirst(a)]))
+    ),
+    new Map(seasonRoster.map((a) => [a.id, a.gender === "F" ? ("F" as const) : ("M" as const)]))
   )
 
   const { swims: _swims, ...meetRow } = meet
