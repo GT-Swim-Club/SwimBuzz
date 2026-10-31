@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react"
 import { createPortal } from "react-dom"
+import { eventGenderWord } from "@swimbuzz/shared"
 import { deleteRelayTeam, saveRelayTeam } from "./meet-relay.actions"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import type { SheetEntry } from "@/lib/meet/meet-sheet-summary"
@@ -19,6 +20,7 @@ import {
 } from "@/lib/meet/relay-results"
 import { useCanScrollDown } from "@/lib/use-can-scroll-down"
 import { useEscapeToClose } from "@/lib/use-escape-to-close"
+import { DetailEventBadge } from "./SwimDetailModal"
 
 const RELAY_EVENTS = [
   "200 Medley Relay",
@@ -136,10 +138,13 @@ function RelayModal({
   allowDelete,
   deleteParams,
   rosterOnly = false,
+  header,
 }: {
   meetId: string
   athletes: AthleteOption[]
   title: string
+  /** Header like the swim detail modal's: event badge, a small line over `title`, and a line under it. */
+  header?: { eventNumber?: number; kicker: string; subLine?: string }
   initial: RelayForm
   onClose: () => void
   allowDelete?: boolean
@@ -236,7 +241,22 @@ function RelayModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="shrink-0 px-6 pt-6 pb-2">
-          <h2 className="text-lg font-medium text-foreground">{title}</h2>
+          {header ? (
+            <div className="flex min-w-0 items-center gap-3">
+              {header.eventNumber ? <DetailEventBadge number={header.eventNumber} /> : null}
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground-secondary">{header.kicker}</p>
+                <h2 className="m-0 truncate text-lg font-semibold leading-[1.3] tracking-[-0.01em] text-foreground">
+                  {title}
+                </h2>
+                {header.subLine ? (
+                  <div className="text-sm text-foreground-secondary">{header.subLine}</div>
+                ) : null}
+              </div>
+            </div>
+          ) : (
+            <h2 className="text-lg font-medium text-foreground">{title}</h2>
+          )}
           {rosterOnly ? (
             <p className="mt-1 text-sm text-foreground-secondary">
               Update swimmers and leg splits — event, time, and place stay from the import.
@@ -522,10 +542,11 @@ export function EditRelayButton({
       .map((a) => [a.id, a.gender])
   )
   const gender = effectiveRelayGender(entry, athleteGenders) || "F"
-  const roundSuffix = round ? ` · ${roundLabel(round)}` : ""
-  const genderLabel = gender === "F" ? "Women's" : gender === "M" ? "Men's" : gender === "X" ? "Mixed" : "";
-  const eventNum = entry.eventNumber > 0 ? `#${entry.eventNumber} ` : ""
-  const baseTitle = `${eventNum}${genderLabel} ${entry.event} ${displayRelayLetter(entry.relayLetter)}`
+  // Like the swim detail modal's header: "Women 200 Free Relay" over "Relay A · Finals".
+  const eventTitle = [eventGenderWord(gender), entry.event].filter(Boolean).join(" ")
+  const subLine = [`Relay ${displayRelayLetter(entry.relayLetter)}`, round ? roundLabel(round) : null]
+    .filter(Boolean)
+    .join(" · ")
 
   return (
     <>
@@ -554,11 +575,12 @@ export function EditRelayButton({
         <RelayModal
           meetId={meetId}
           athletes={athletes}
-          title={
-            rosterOnly
-              ? `Edit roster · ${baseTitle}${roundSuffix}`
-              : `Edit ${baseTitle}${roundSuffix}`
-          }
+          title={eventTitle}
+          header={{
+            eventNumber: entry.eventNumber > 0 ? entry.eventNumber : undefined,
+            kicker: rosterOnly ? "Edit roster" : "Edit relay",
+            subLine,
+          }}
           initial={formFromEntry(entry, athleteGenders)}
           onClose={() => setOpen(false)}
           allowDelete={entry.manual === true}

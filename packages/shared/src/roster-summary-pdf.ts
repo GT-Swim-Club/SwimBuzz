@@ -26,6 +26,11 @@ export type RosterSummaryPdfResult =
 export type RosterSummaryPdfRow = {
   eventNumber?: number
   label: string
+  /**
+   * The label spelled out ("200 Medley Relay B" for "200 Medley B"), drawn instead when it fits on
+   * the line with the sub — as it does with no heat & lane crowding it.
+   */
+  fullLabel?: string
   /** Small text right after the label (result tags, badges). */
   sub?: string
   /** Second line: round / team, already filtered by the viewer's row toggles. */
@@ -79,7 +84,7 @@ export function rosterSummaryTitle({
   return hasHeatSheet ? "Heats" : "Entries"
 }
 
-/** The heading's view and filters, minus any search: "Heats by Event (Women)". */
+/** The heading's view and filters, minus any search: "Heats by Event (Sunday Finals, Women)". */
 export function rosterSummaryPdfLabel(request?: RosterSummaryPdfRequest): string {
   const [view, ...filters] = (request?.heading ?? "")
     .split(" · ")
@@ -87,7 +92,11 @@ export function rosterSummaryPdfLabel(request?: RosterSummaryPdfRequest): string
   return view ? `${view}${filters.length ? ` (${filters.join(", ")})` : ""}` : "Entries"
 }
 
-/** "Heats by Event (Women) - CCS Southern Regionals.pdf", "Roster - CCS Southern Regionals.pdf". */
-export function rosterSummaryPdfFilename(meetName: string, request?: RosterSummaryPdfRequest): string {
-  return meetFileName(rosterSummaryPdfLabel(request), meetName, "pdf")
+/** "Heats by Event (Women) - CCS Southern Regionals.pdf", "Roster - CCS Southern Regionals.png". */
+export function rosterSummaryPdfFilename(
+  meetName: string,
+  request?: RosterSummaryPdfRequest,
+  ext: "pdf" | "png" = "pdf"
+): string {
+  return meetFileName(rosterSummaryPdfLabel(request), meetName, ext)
 }

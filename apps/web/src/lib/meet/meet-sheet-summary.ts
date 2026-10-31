@@ -1,4 +1,4 @@
-import { formatTime, parseTime } from "@/lib/utils"
+import { formatTime } from "@/lib/utils"
 import { compareRelayEvents, compareSwimEvents, normalizeEventName } from "@/lib/swim/swim-parse"
 import { displayMeetResultTags } from "@/lib/swim/swim-tags"
 import {
@@ -1638,23 +1638,12 @@ function applyPrelimSeedToRelayFinals(entries: SheetEntry[]): SheetEntry[] {
   })
 }
 
-function finalsSeedEventKey(entry: SheetEntry): string {
-  const gender =
-    entry.entryType === "relay_team" ? (entry.gender ?? "") : (entry.gender ?? "")
-  const eventNo = entry.eventNumber > 0 ? String(entry.eventNumber) : ""
-  return `${entry.entryType}|${eventNo}|${normalizeEventName(entry.event)}|${gender}`
-}
-
-function seedTimeMs(time?: string): number | undefined {
-  const raw = time?.trim()
-  if (!raw || /^(NT|NQT|DFS|SCR|DNS|NS|DQ|DNF)$/i.test(raw)) return undefined
-  const ms = parseTime(raw)
-  return Number.isFinite(ms) && ms > 0 ? ms : undefined
-}
-
-/** Rank finals heat-sheet seeds within each event when the parser rank is missing. */
+/**
+ * Finals rows show the finals heat sheet's seed and rank. The rank comes from the parser, which sees
+ * every team in the event; with none, the row shows no rank rather than one among only our swimmers.
+ */
 function applyFinalsSheetSeeds(entries: SheetEntry[]): SheetEntry[] {
-  const withSheetSeed = entries.map((entry) => {
+  return entries.map((entry) => {
     const isFinals =
       entry.resultRound === "F" || effectiveRelayRound(entry) === "F"
     if (!isFinals) return entry
@@ -1663,39 +1652,6 @@ function applyFinalsSheetSeeds(entries: SheetEntry[]): SheetEntry[] {
       seedTime: entry.finalsSheetSeedTime,
       seedRank: entry.finalsSheetSeedRank,
     }
-  })
-
-  const groups = new Map<string, SheetEntry[]>()
-  for (const entry of withSheetSeed) {
-    const isFinals =
-      entry.resultRound === "F" || effectiveRelayRound(entry) === "F"
-    if (!isFinals || entry.finalsSheetSeedRank != null) continue
-    if (!entry.finalsSheetSeedTime) continue
-    const key = finalsSeedEventKey(entry)
-    groups.set(key, [...(groups.get(key) ?? []), entry])
-  }
-
-  const ranks = new Map<SheetEntry, number>()
-  for (const group of groups.values()) {
-    const sortable = group
-      .map((entry) => ({ entry, ms: seedTimeMs(entry.finalsSheetSeedTime) }))
-      .filter((row): row is { entry: SheetEntry; ms: number } => row.ms != null)
-      .sort((a, b) => a.ms - b.ms)
-    let index = 0
-    while (index < sortable.length) {
-      const ms = sortable[index]!.ms
-      const rank = index + 1
-      while (index < sortable.length && sortable[index]!.ms === ms) {
-        ranks.set(sortable[index]!.entry, rank)
-        index += 1
-      }
-    }
-  }
-
-  if (ranks.size === 0) return withSheetSeed
-  return withSheetSeed.map((entry) => {
-    const rank = ranks.get(entry)
-    return rank != null ? { ...entry, seedRank: rank, finalsSheetSeedRank: rank } : entry
   })
 }
 

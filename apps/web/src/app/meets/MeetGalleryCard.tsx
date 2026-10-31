@@ -105,9 +105,12 @@ function CardIcon({ src, textEl }: { src: string; textEl: HTMLDivElement | null 
     const el = textEl
     if (!el) return
     const measure = () => {
+      // Unrounded heights: offsetHeight rounds the block and the title separately, so the
+      // title refitting could nudge the icon by 1px, re-narrowing the title — forever.
       const title = el.querySelector<HTMLElement>("[data-line-box]")
       const lineBox = title ? parseFloat(title.dataset.lineBox ?? "") : NaN
-      const height = title && lineBox ? el.offsetHeight - title.offsetHeight + lineBox : el.offsetHeight
+      const blockHeight = el.getBoundingClientRect().height
+      const height = title && lineBox ? blockHeight - title.getBoundingClientRect().height + lineBox : blockHeight
       setSize(Math.round(height))
     }
     measure()
@@ -117,7 +120,7 @@ function CardIcon({ src, textEl }: { src: string; textEl: HTMLDivElement | null 
   }, [textEl])
 
   if (!size) return null
-  return <img src={src} alt="" className="shrink-0 rounded-lg object-cover" style={{ width: size, height: size }} />
+  return <img src={src} alt="" className="shrink-0 object-contain" style={{ width: size, height: size }} />
 }
 
 /**

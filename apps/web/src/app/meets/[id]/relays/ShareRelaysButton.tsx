@@ -2,12 +2,12 @@
 
 import { useEffect, useRef, useState } from "react"
 import { toPng } from "html-to-image"
-import { relayShareFilename, type MeetHeaderDetails, type RelayShareEvent } from "@swimbuzz/shared"
+import { relayShareFilename, relayShareText, type MeetHeaderDetails, type RelayShareEvent } from "@swimbuzz/shared"
 import ActionIcon from "@/components/ui/ActionIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
 import {
   CheckIcon,
-  CopyPngMenuIcon,
+  CopyTextMenuIcon,
   PdfMenuIcon,
   PngMenuIcon,
   downloadBlob,
@@ -20,7 +20,7 @@ const IMAGE_PLACEHOLDER = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAE
 const MENU_ITEM =
   "flex w-full items-center gap-2 whitespace-nowrap px-3 py-2 text-left text-sm text-foreground hover:bg-fill"
 
-/** Share menu for the published relays: Copy PNG, Download PNG, Download PDF. */
+/** Share menu for the published relays: Copy as text, Download PNG, Download PDF. */
 export default function ShareRelaysButton({
   meetId,
   meetName,
@@ -37,7 +37,7 @@ export default function ShareRelaysButton({
   events: RelayShareEvent[]
 }) {
   const [open, setOpen] = useState(false)
-  const [busy, setBusy] = useState<"png" | "copy-png" | "pdf" | null>(null)
+  const [busy, setBusy] = useState<"png" | "pdf" | null>(null)
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -87,24 +87,15 @@ export default function ShareRelaysButton({
     }
   }
 
-  async function copyPng() {
-    if (typeof ClipboardItem === "undefined" || !navigator.clipboard?.write) {
-      setError("Copying images isn't supported in this browser")
-      return
-    }
-    setBusy("copy-png")
+  async function copyText() {
     setError(null)
     try {
-      // Pass the blob promise directly (instead of awaiting first) so Safari still
-      // treats this as triggered by the click's user gesture.
-      await navigator.clipboard.write([new ClipboardItem({ "image/png": capturePngBlob() })])
+      await navigator.clipboard.writeText(relayShareText({ meetName, details, events }))
       setCopied(true)
       if (copiedTimeoutRef.current) clearTimeout(copiedTimeoutRef.current)
       copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000)
     } catch {
-      setError("Could not copy image")
-    } finally {
-      setBusy(null)
+      setError("Could not copy text")
     }
   }
 
@@ -127,11 +118,9 @@ export default function ShareRelaysButton({
   const label =
     busy === "png"
       ? "Exporting image…"
-      : busy === "copy-png"
-        ? "Copying image…"
-        : busy === "pdf"
-          ? "Exporting PDF…"
-          : "Share relays"
+      : busy === "pdf"
+        ? "Exporting PDF…"
+        : "Share relays"
 
   return (
     <div ref={rootRef} className="relative flex shrink-0 flex-col items-end gap-1">
@@ -152,9 +141,9 @@ export default function ShareRelaysButton({
           role="menu"
           className="export-menu-fade-in absolute right-0 top-full z-40 mt-1 w-max overflow-hidden rounded-lg border border-border bg-background-elevated py-1 shadow-md"
         >
-          <button type="button" role="menuitem" onClick={() => void copyPng()} className={MENU_ITEM}>
-            {copied ? <CheckIcon className="h-4 w-4 shrink-0" /> : <CopyPngMenuIcon className="h-4 w-4 shrink-0" />}
-            {copied ? "Copied" : "Copy PNG"}
+          <button type="button" role="menuitem" onClick={() => void copyText()} className={MENU_ITEM}>
+            {copied ? <CheckIcon className="h-4 w-4 shrink-0" /> : <CopyTextMenuIcon className="h-4 w-4 shrink-0" />}
+            {copied ? "Copied" : "Copy as text"}
           </button>
           <button type="button" role="menuitem" onClick={() => void downloadPng()} className={MENU_ITEM}>
             <PngMenuIcon className="h-4 w-4 shrink-0" />

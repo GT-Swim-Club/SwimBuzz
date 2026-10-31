@@ -147,6 +147,7 @@ function parseRow(value: unknown): RosterSummaryPdfRow | null {
   return {
     eventNumber: positiveInt(r.eventNumber),
     label,
+    fullLabel: text(r.fullLabel),
     sub: text(r.sub),
     meta: text(r.meta),
     heatLane: text(r.heatLane),
@@ -345,16 +346,26 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
     return row.eventNumber ? left + M.badgeSize + M.badgeGap : left
   }
 
-  /** Where the label (and sub) end, in the label line's fonts. */
-  function labelEnd(row: RosterSummaryPdfRow): number {
+  /** Where `label` (and the row's sub) end, in the label line's fonts. */
+  function labelEndWith(row: RosterSummaryPdfRow, label: string): number {
     const textLeft = rowTextLeft(row)
     setType("normal", M.labelSize)
-    let end = textLeft + Math.min(doc.getTextWidth(pdfText(row.label)), textRight(row) - textLeft)
+    let end = textLeft + Math.min(doc.getTextWidth(pdfText(label)), textRight(row) - textLeft)
     if (row.sub) {
       setType("normal", M.subSize)
       end += px(6) + doc.getTextWidth(pdfText(row.sub))
     }
     return end
+  }
+
+  /** The full label when it fits on the line with the sub, else the compact one. */
+  function rowLabel(row: RosterSummaryPdfRow): string {
+    return row.fullLabel && labelEndWith(row, row.fullLabel) <= textRight(row) ? row.fullLabel : row.label
+  }
+
+  /** Where the label (and sub) end, in the label line's fonts. */
+  function labelEnd(row: RosterSummaryPdfRow): number {
+    return labelEndWith(row, rowLabel(row))
   }
 
   /**
@@ -459,8 +470,9 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
       const span = twoLines ? M.labelLh + M.metaLh : M.labelLh
       badge(row.eventNumber, left, labelTop + (span - M.badgeSize) / 2, M.badgeSize, M.badgeTextSize)
     }
+    const shownLabel = rowLabel(row)
     setType("normal", M.labelSize)
-    const label = fit(row.label, maxText)
+    const label = fit(shownLabel, maxText)
     doc.text(label, textLeft, baseline)
     if (row.sub) {
       const labelWidth = doc.getTextWidth(label)

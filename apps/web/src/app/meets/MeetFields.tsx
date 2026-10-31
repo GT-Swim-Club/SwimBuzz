@@ -632,7 +632,7 @@ export function MeetImageHeader({
           className="group !absolute inset-0"
         >
           {form.iconUrl ? (
-            <img src={form.iconUrl} alt="Meet icon" className="absolute inset-0 h-full w-full object-cover" />
+            <img src={form.iconUrl} alt="Meet icon" className="absolute inset-0 h-full w-full object-contain" />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center rounded-[9px] border border-dashed border-foreground-quaternary bg-background text-xs font-medium text-primary transition-colors group-hover:border-primary/60">
               {iconUploading ? "…" : "+ Icon"}

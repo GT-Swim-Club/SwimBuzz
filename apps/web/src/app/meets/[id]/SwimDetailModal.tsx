@@ -45,6 +45,15 @@ const PODIUM_TEXT: Record<number, string> = {
   3: "text-orange-600 dark:text-orange-400",
 }
 
+/** The large event badge leading a modal's header (swim detail, relay editor). */
+export function DetailEventBadge({ number }: { number: number }) {
+  return (
+    <span className="inline-flex h-[60px] w-[60px] shrink-0 items-center justify-center rounded-full border border-accent/45 bg-accent/10 text-lg font-semibold tabular-nums text-accent">
+      {number}
+    </span>
+  )
+}
+
 export function deltaPillClass(delta: string) {
   return delta.startsWith("-") || delta.startsWith("−")
     ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300"
@@ -688,11 +697,7 @@ export default function SwimDetailModal({
           <div className="px-6 pb-4 pt-5">
             <div className="flex items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-3">
-                {detail.eventNumber ? (
-                  <span className="inline-flex h-[60px] w-[60px] shrink-0 items-center justify-center rounded-full border border-accent/45 bg-accent/10 text-lg font-semibold tabular-nums text-accent">
-                    {detail.eventNumber}
-                  </span>
-                ) : null}
+                {detail.eventNumber ? <DetailEventBadge number={detail.eventNumber} /> : null}
                 <div className="min-w-0">
                   {detail.athleteName ? (
                     detail.athleteHref ? (

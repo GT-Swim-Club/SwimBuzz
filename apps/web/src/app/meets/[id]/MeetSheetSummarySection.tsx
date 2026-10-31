@@ -4,7 +4,16 @@ import { useEffect, useRef, useState, Fragment, type ReactNode } from "react"
 import Link from "next/link"
 import {
   eventGenderWord,
+  roundFilterIncludes,
+  roundFilterLabel,
+  rosterSummaryScopeLabel,
+  rosterSummarySessions,
   rosterSummaryTitle,
+  sessionIncludes,
+  SUMMARY_ROUNDS,
+  type SummaryRoundKind,
+  type MeetHeaderDetails,
+  type MeetSessionOrder,
   type RosterSummaryPdfRequest,
   type RosterSummaryPdfRow,
   type RosterSummaryPdfSection,
@@ -51,17 +60,29 @@ import RemoveRosterOnlyButton from "./RemoveRosterOnlyButton"
 import { EditRelayButton } from "./MeetRelayEditor"
 import MeetAddMenu from "./MeetAddMenu"
 import ShareRosterSummaryButton from "./ShareRosterSummaryButton"
-import { MenuDivider, MenuItem, menuPanel } from "./MeetMenu"
+import { MenuDivider, MenuItem, MenuSubmenu, menuPanel } from "./MeetMenu"
 import SummaryRow, { EventBadge, type RowDisplay, type RowDensity, type RowResult } from "./SummaryRow"
 import type { DetailRound, SwimDetail } from "./SwimDetailModal"
 import { useEscapeToClose } from "@/lib/use-escape-to-close"
 
 function formatHeat(entry: SheetSummary["entries"][number]) {
   // Alternates are finals-only; prelim rows may still carry the flag from merge.
-  if (entry.alternate && entry.resultRound !== "P") {
+  if (isAlternateRow(entry)) {
     const rank = displaySeedRank(entry)
     return rank != null ? `Alt ${rank}` : "Alt"
   }
+  const { heat, heatTotal } = rowHeat(entry)
+  if (heat == null || heat < 1) return null
+  if (heatTotal != null) return `Heat ${heat} of ${heatTotal}`
+  return `Heat ${heat}`
+}
+
+function isAlternateRow(entry: SheetSummary["entries"][number]): boolean {
+  return Boolean(entry.alternate) && entry.resultRound !== "P"
+}
+
+/** The heat a row swims in its own round (prelims, finals, or the only one). */
+function rowHeat(entry: SheetSummary["entries"][number]): { heat?: number; heatTotal?: number } {
   let heat = entry.heat
   let heatTotal = entry.heatTotal
   if (entry.entryType === "relay_team") {
@@ -86,9 +107,7 @@ function formatHeat(entry: SheetSummary["entries"][number]) {
     heat = entry.heat ?? entry.finalHeat ?? entry.prelimHeat
     heatTotal = entry.heatTotal ?? entry.finalHeatTotal ?? entry.prelimHeatTotal
   }
-  if (heat == null || heat < 1) return null
-  if (heatTotal != null) return `Heat ${heat} of ${heatTotal}`
-  return `Heat ${heat}`
+  return { heat, heatTotal }
 }
 
 function individualLane(entry: SheetSummary["entries"][number]): number | undefined {
@@ -268,6 +287,20 @@ function rowRoundResult(entry: SummaryEntry, allEntries?: SummaryEntry[]): Round
   return { label: pendingRoundLabel(entry), seed: seed || entry.timeStatus }
 }
 
+/** The round a row stands for, for the round filter — a swim-off goes with prelims. */
+function rowRoundKind(entry: SummaryEntry, allEntries?: SummaryEntry[]): SummaryRoundKind | null {
+  const { label } = rowRoundResult(entry, allEntries)
+  if (label === "Prelims" || label === "Swim-off") return "P"
+  if (label === "Finals") return "F"
+  return label === "Timed Finals" ? "T" : null
+}
+
+/** The round a row stands for, for the session filter — none for timed finals and swim-offs. */
+function rowSessionRounds(entry: SummaryEntry, allEntries?: SummaryEntry[]): ("P" | "F")[] {
+  const { label } = rowRoundResult(entry, allEntries)
+  return label === "Prelims" ? ["P"] : label === "Finals" ? ["F"] : []
+}
+
 function buildIndividualRounds(entry: SheetEntry, allEntries?: SummaryEntry[]): DetailRound[] {
   if (entry.entryType === "relay_team") return []
 
@@ -386,41 +419,54 @@ function initialsFromName(name?: string | null) {
   return "?"
 }
 
-function getEntryPlace(entry: SheetEntry): number | undefined {
-  return entry.resultPlace ?? entry.finalPlace ?? entry.prelimPlace
+/** Numbers ascending, with missing ones last. */
+function compareMissingLast(a: number | undefined, b: number | undefined): number {
+  if (a == null || b == null) return a == null ? (b == null ? 0 : 1) : -1
+  return a - b
 }
 
-function compareByPlace(a: SummaryEntry, b: SummaryEntry, hasResults: boolean): number {
-  const placeA = getEntryPlace(a)
-  const placeB = getEntryPlace(b)
-
-  if (hasResults) {
-    const pA = placeA ?? Infinity
-    const pB = placeB ?? Infinity
-    if (pA !== pB) return pA - pB
-  } else {
-    // 1. Sort by seedTime fastest to slowest
-    const isNt = (time?: string) => !time || /^nt$/i.test(time.trim())
-    const isNtA = isNt(a.seedTime)
-    const isNtB = isNt(b.seedTime)
-
-    if (isNtA && !isNtB) return 1
-    if (!isNtA && isNtB) return -1
-    if (!isNtA && !isNtB) {
-      const msA = parseTime(a.seedTime!)
-      const msB = parseTime(b.seedTime!)
-      if (Number.isFinite(msA) && Number.isFinite(msB) && msA !== msB) {
-        return msA - msB
-      }
-    }
-
-    // 2. Fallback to seedRank if seedTime is the same
-    const rA = a.seedRank != null ? Number(a.seedRank) : Infinity
-    const rB = b.seedRank != null ? Number(b.seedRank) : Infinity
-    if (rA !== rB) return rA - rB
+/** Seed time fastest first (NT last), then seed rank. */
+function compareBySeed(a: SummaryEntry, b: SummaryEntry): number {
+  const isNt = (time?: string) => !time || /^nt$/i.test(time.trim())
+  const isNtA = isNt(a.seedTime)
+  const isNtB = isNt(b.seedTime)
+  if (isNtA !== isNtB) return isNtA ? 1 : -1
+  if (!isNtA && !isNtB) {
+    const msA = parseTime(a.seedTime!)
+    const msB = parseTime(b.seedTime!)
+    if (Number.isFinite(msA) && Number.isFinite(msB) && msA !== msB) return msA - msB
   }
+  return compareMissingLast(
+    a.seedRank != null ? Number(a.seedRank) : undefined,
+    b.seedRank != null ? Number(b.seedRank) : undefined
+  )
+}
 
-  return compareIndividualEntries(a, b)
+/**
+ * One event's rows in swim order: by place once its results are in, by heat and lane once heats
+ * are out, else by seed. Decided per event, so finals still follow heat & lane while only prelims
+ * results are in. Rows without a place (DQ, NS) follow the placed ones; alternates come last.
+ */
+function sortEventEntries(entries: SummaryEntry[], allEntries: SummaryEntry[]): SummaryEntry[] {
+  const place = (entry: SummaryEntry) => rowRoundResult(entry, allEntries).place
+  const lane = (entry: SummaryEntry) =>
+    entry.entryType === "relay_team" ? relayLane(entry) : individualLane(entry)
+  const placed = entries.some((entry) => place(entry) != null)
+  const heated = entries.some((entry) => rowHeat(entry).heat != null)
+  return [...entries].sort((a, b) => {
+    if (isAlternateRow(a) !== isAlternateRow(b)) return isAlternateRow(a) ? 1 : -1
+    if (placed) {
+      const byPlace = compareMissingLast(place(a), place(b))
+      if (byPlace !== 0) return byPlace
+    }
+    if (heated) {
+      const byHeat = compareMissingLast(rowHeat(a).heat, rowHeat(b).heat)
+      if (byHeat !== 0) return byHeat
+      const byLane = compareMissingLast(lane(a), lane(b))
+      if (byLane !== 0) return byLane
+    }
+    return compareBySeed(a, b) || compareIndividualEntries(a, b)
+  })
 }
 
 function AthleteAvatar({
@@ -564,10 +610,12 @@ function summaryRowPdf(
 ): RosterSummaryPdfRow {
   const view = summaryRowView(entry, ctx, eventView, athleteId)
   // Relay names are compact: "200 Medley A" (or "Relay A" under an event title), with the
-  // letter folded in rather than repeated in the meta.
-  const relayName = eventView
-    ? view.label
-    : `${entry.event.replace(/\s+Relay$/i, "")} ${displayRelayLetter(entry.relayLetter)}`
+  // letter folded in rather than repeated in the meta — spelled out ("200 Medley Relay A") where
+  // the line has room.
+  const relayEvent = entry.event.replace(/\s+Relay$/i, "")
+  const relayLetter = displayRelayLetter(entry.relayLetter)
+  const relayName = eventView ? view.label : `${relayEvent} ${relayLetter}`
+  const relayFullName = eventView ? undefined : `${relayEvent} Relay ${relayLetter}`
   // A relay's leg rides beside its name, with the athlete's split on the line below.
   const startTime = (display.showHeatLane && entry.startTime) || undefined
   const meta = [
@@ -588,6 +636,7 @@ function summaryRowPdf(
   return {
     eventNumber: view.badgeNumber,
     label: (view.isRelay ? relayName : view.label) ?? "",
+    fullLabel: view.isRelay ? relayFullName : undefined,
     sub:
       (view.isRelay ? view.relayLegNumber && `Leg ${view.relayLegNumber}` : view.sub) || undefined,
     meta: meta || undefined,
@@ -808,8 +857,43 @@ function SummaryEntryRow({
   )
 }
 
+/** The settings menu's flyouts. */
+type SettingsSubmenu = "view" | "group" | "session" | "rounds" | "gender" | "rows" | "show"
+
 const DENSITY_KEY = "swimbuzz-summary-row-density"
 const ROWINFO_KEY = "swimbuzz-summary-row-info"
+/** Per meet: the view, grouping and filters, kept across reloads for a while (not for good). */
+const VIEW_KEY_PREFIX = "swimbuzz-summary-view:"
+const VIEW_TTL_MS = 12 * 60 * 60 * 1000
+
+type SavedView = {
+  savedAt: number
+  viewMode: "summary" | "roster"
+  viewByEvent: boolean
+  gender: "all" | "F" | "M"
+  session: string | null
+  hiddenRounds: SummaryRoundKind[]
+}
+
+/** The meet's saved view when it's recent and well-formed, else null. */
+function readSavedView(key: string): SavedView | null {
+  try {
+    const v = JSON.parse(window.localStorage.getItem(key) || "null") as Partial<SavedView> | null
+    if (!v || typeof v.savedAt !== "number" || Date.now() - v.savedAt > VIEW_TTL_MS) return null
+    return {
+      savedAt: v.savedAt,
+      viewMode: v.viewMode === "roster" ? "roster" : "summary",
+      viewByEvent: v.viewByEvent === true,
+      gender: v.gender === "F" || v.gender === "M" ? v.gender : "all",
+      session: typeof v.session === "string" ? v.session : null,
+      hiddenRounds: Array.isArray(v.hiddenRounds)
+        ? v.hiddenRounds.filter((k): k is SummaryRoundKind => k === "P" || k === "F" || k === "T")
+        : [],
+    }
+  } catch {
+    return null
+  }
+}
 
 const toolbarButton =
   "inline-flex h-[38px] w-[38px] cursor-pointer items-center justify-center rounded-lg border border-border bg-background text-foreground transition-colors hover:bg-fill"
@@ -832,6 +916,9 @@ export default function MeetSheetSummarySection({
   individualEventOptions = [],
   editableSeedKeys = [],
   eventNumberOptions = [],
+  eventOrder = null,
+  details,
+  iconUrl = null,
 }: {
   psychSummary?: SheetSummary | null
   heatSummary?: SheetSummary | null
@@ -856,19 +943,39 @@ export default function MeetSheetSummarySection({
   editableSeedKeys?: string[]
   /** Meet packet event options used to fill missing event numbers. */
   eventNumberOptions?: MeetSignupEventOption[]
+  /** Meet packet order of events, whose sessions ("Sunday Finals") the view can filter to. */
+  eventOrder?: MeetSessionOrder | null
+  /** Date and location for the PNG export's header. */
+  details?: MeetHeaderDetails
+  iconUrl?: string | null
 }) {
   const editableSeedKeySet = new Set(editableSeedKeys)
   const [searchQuery, setSearchQuery] = useState("")
   const [viewByEvent, setViewByEvent] = useState(false)
   const [viewMode, setViewMode] = useState<"summary" | "roster">("summary")
   const [genderFilter, setGenderFilter] = useState<"all" | "F" | "M">("all")
+  /** A packet session's label, or null for every session. */
+  const [sessionFilter, setSessionFilter] = useState<string | null>(null)
+  const [hiddenRounds, setHiddenRounds] = useState<ReadonlySet<SummaryRoundKind>>(new Set())
   const [density, setDensity] = useState<RowDensity>("cozy")
   const [showRound, setShowRound] = useState(true)
   const [showHeatLane, setShowHeatLane] = useState(true)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  /** The settings menu's open flyout, if any. */
+  const [submenu, setSubmenu] = useState<SettingsSubmenu | null>(null)
+  const submenuProps = (key: SettingsSubmenu) => ({
+    open: submenu === key,
+    // A late close from a flyout the pointer left mustn't close the one it moved to.
+    onOpenChange: (open: boolean) => setSubmenu((current) => (open ? key : current === key ? null : current)),
+  })
+
+  const viewKey = `${VIEW_KEY_PREFIX}${meetId ?? ""}`
+  // Saving waits until the saved view is restored, so the defaults don't overwrite it first.
+  const [viewRestored, setViewRestored] = useState(false)
 
   useEffect(() => {
     let saved: { density?: RowDensity; round?: boolean; hl?: boolean } = {}
+    const view = readSavedView(viewKey)
     try {
       const d = window.localStorage.getItem(DENSITY_KEY)
       const info = JSON.parse(window.localStorage.getItem(ROWINFO_KEY) || "null")
@@ -882,9 +989,32 @@ export default function MeetSheetSummarySection({
       if (saved.density) setDensity(saved.density)
       if (saved.round != null) setShowRound(saved.round)
       if (saved.hl != null) setShowHeatLane(saved.hl)
+      if (view) {
+        setViewMode(view.viewMode)
+        setViewByEvent(view.viewByEvent)
+        setGenderFilter(view.gender)
+        setSessionFilter(view.session)
+        setHiddenRounds(new Set(view.hiddenRounds))
+      }
+      setViewRestored(true)
     })
     return () => cancelAnimationFrame(frame)
-  }, [])
+  }, [viewKey])
+
+  useEffect(() => {
+    if (!viewRestored) return
+    const view: SavedView = {
+      savedAt: Date.now(),
+      viewMode,
+      viewByEvent,
+      gender: genderFilter,
+      session: sessionFilter,
+      hiddenRounds: [...hiddenRounds],
+    }
+    try {
+      window.localStorage.setItem(viewKey, JSON.stringify(view))
+    } catch {}
+  }, [viewRestored, viewKey, viewMode, viewByEvent, genderFilter, sessionFilter, hiddenRounds])
 
   useEscapeToClose(settingsOpen, () => setSettingsOpen(false))
 
@@ -1025,7 +1155,33 @@ export default function MeetSheetSummarySection({
     : grouped
 
   const q = searchQuery.trim().toLowerCase()
-  const matchesGenderFilter = (entry: SummaryEntry) => {
+  const sessions = rosterSummarySessions(eventOrder)
+  const activeSession = sessionFilter && sessions.includes(sessionFilter) ? sessionFilter : null
+  const matchesSessionFilter = (entry: SummaryEntry) =>
+    !activeSession ||
+    !eventOrder ||
+    sessionIncludes(eventOrder, activeSession, {
+      eventNumber: displayedEventNumber(entry),
+      event: entry.event,
+      gender:
+        entry.entryType === "relay_team"
+          ? effectiveRelayGender(entry, athleteGenders)
+          : entry.gender || athleteGenders.get(entry.athleteId),
+      rounds: rowSessionRounds(entry, displayEntries),
+    })
+  // Rounds the summary has rows for; the round filter only shows when there's more than one.
+  const presentRounds = new Set(
+    [...displayEntries, ...relays].map((entry) => rowRoundKind(entry, displayEntries))
+  )
+  const availableRounds = SUMMARY_ROUNDS.map((r) => r.kind).filter((kind) => presentRounds.has(kind))
+  const roundFilterOn = availableRounds.length > 1
+  const matchesRoundFilter = (entry: SummaryEntry) => {
+    if (!roundFilterOn) return true
+    const kind = rowRoundKind(entry, displayEntries)
+    return roundFilterIncludes(hiddenRounds, kind ? [kind] : [], availableRounds)
+  }
+  const matchesFilters = (entry: SummaryEntry) => {
+    if (!matchesSessionFilter(entry) || !matchesRoundFilter(entry)) return false
     if (genderFilter === "all") return true
     if (entry.entryType === "relay_team") {
       const relayGender = effectiveRelayGender(entry, athleteGenders)
@@ -1035,7 +1191,7 @@ export default function MeetSheetSummarySection({
   }
   const filteredMyEntries = myEntries.filter(
     (entry) =>
-      matchesGenderFilter(entry) &&
+      matchesFilters(entry) &&
       (!q ||
         entry.athleteName.toLowerCase().includes(q) ||
         entry.event.toLowerCase().includes(q))
@@ -1044,7 +1200,7 @@ export default function MeetSheetSummarySection({
     groups
       .map((athleteGroup) => ({
         ...athleteGroup,
-        entries: athleteGroup.entries.filter(matchesGenderFilter),
+        entries: athleteGroup.entries.filter(matchesFilters),
       }))
       .filter(
         (athleteGroup) =>
@@ -1060,7 +1216,7 @@ export default function MeetSheetSummarySection({
   const deduplicatedByEventEntries: SummaryEntry[] = [
     ...displayEntries.filter((entry) => entry.entryType !== "relay_team"),
     ...relays,
-  ].filter(matchesGenderFilter)
+  ].filter(matchesFilters)
 
   const rawGroupedEvents = deduplicatedByEventEntries.reduce((acc, entry) => {
     const gender =
@@ -1078,9 +1234,14 @@ export default function MeetSheetSummarySection({
     return acc
   }, new Map<string, { key: string; title: string; eventNumber: number; entries: SummaryEntry[] }>())
 
-  // Placeholder counts follow the gender filter but not the search query.
+  // Placeholder counts follow the gender, session and round filters but not the search query.
   const plural = (n: number, noun: string) => `${n} ${noun}${n === 1 ? "" : "s"}`
+  // The filters in effect, after the counts: " in Sunday Finals (Women)".
   const genderSuffix = genderFilter === "all" ? "" : ` (${genderFilter === "F" ? "Women" : "Men"})`
+  const scope = rosterSummaryScopeLabel(
+    activeSession,
+    roundFilterOn ? roundFilterLabel(hiddenRounds, availableRounds) : null
+  )
   const searchPlaceholder =
     viewMode === "roster"
       ? `Search ${plural(
@@ -1088,14 +1249,14 @@ export default function MeetSheetSummarySection({
           "athlete"
         )}${genderSuffix}…`
       : `Search ${plural(
-          grouped.filter((g) => g.entries.some(matchesGenderFilter)).length,
+          grouped.filter((g) => g.entries.some(matchesFilters)).length,
           "athlete"
         )} and ${plural(
           [...rawGroupedEvents.values()].filter((g) =>
-            g.entries.some((e) => !e.rosterOnly && matchesGenderFilter(e))
+            g.entries.some((e) => !e.rosterOnly && matchesFilters(e))
           ).length,
           "event"
-        )}${genderSuffix}…`
+        )}${scope ? ` in ${scope}` : ""}${genderSuffix}…`
 
   const sortedEventGroups = [...rawGroupedEvents.values()]
     .filter((group) => {
@@ -1180,8 +1341,10 @@ export default function MeetSheetSummarySection({
       hasHeatSheet: Boolean(heatSummary || finalsHeatSummary),
       hasResults: hasImportedResults,
     })
+    // "Heats by Event · Sunday Finals · Women".
     const heading = [
       viewMode === "roster" ? "Roster" : `${title} by ${viewByEvent ? "Event" : "Athlete"}`,
+      viewMode === "summary" ? scope : null,
       genderFilter === "F" ? "Women" : genderFilter === "M" ? "Men" : null,
       q ? `“${searchQuery.trim()}”` : null,
     ]
@@ -1219,9 +1382,7 @@ export default function MeetSheetSummarySection({
       sections = sortedEventGroups.map((group) => ({
         title: group.title,
         eventNumber: group.eventNumber > 0 ? group.eventNumber : undefined,
-        rows: [...group.entries]
-          .sort((a, b) => compareByPlace(a, b, hasImportedResults))
-          .map((entry) => toRow(entry, true)),
+        rows: sortEventEntries(group.entries, displayEntries).map((entry) => toRow(entry, true)),
       }))
       return { heading, sections, splitSections: true }
     } else {
@@ -1266,6 +1427,8 @@ export default function MeetSheetSummarySection({
           <ShareRosterSummaryButton
             meetId={meetId}
             meetName={meetName ?? ""}
+            details={details ?? { date: "", location: null }}
+            iconUrl={iconUrl}
             buildRequest={buildPdfRequest}
             onOpen={() => setSettingsOpen(false)}
           />
@@ -1280,6 +1443,7 @@ export default function MeetSheetSummarySection({
             aria-expanded={settingsOpen}
             onClick={() => {
               setSettingsOpen(!settingsOpen)
+              setSubmenu(null)
             }}
             className={toolbarButton}
           >
@@ -1289,27 +1453,38 @@ export default function MeetSheetSummarySection({
             <>
               <div className="fixed inset-0 z-40" onClick={() => setSettingsOpen(false)} />
               <div role="menu" className={menuPanel}>
-                <MenuItem
-                  icon="grid"
-                  label="Summary"
-                  selected={viewMode === "summary"}
-                  onClick={() => {
-                    setViewMode("summary")
-                    setSettingsOpen(false)
-                  }}
-                />
-                <MenuItem
-                  icon="list"
-                  label="Roster"
-                  selected={viewMode === "roster"}
-                  onClick={() => {
-                    setViewMode("roster")
-                    setSettingsOpen(false)
-                  }}
-                />
+                <MenuSubmenu
+                  icon={viewMode === "summary" ? "grid" : "list"}
+                  label="View"
+                  value={viewMode === "summary" ? "Summary" : "Roster"}
+                  {...submenuProps("view")}
+                >
+                  <MenuItem
+                    icon="grid"
+                    label="Summary"
+                    selected={viewMode === "summary"}
+                    onClick={() => {
+                      setViewMode("summary")
+                      setSettingsOpen(false)
+                    }}
+                  />
+                  <MenuItem
+                    icon="list"
+                    label="Roster"
+                    selected={viewMode === "roster"}
+                    onClick={() => {
+                      setViewMode("roster")
+                      setSettingsOpen(false)
+                    }}
+                  />
+                </MenuSubmenu>
                 {viewMode === "summary" ? (
-                  <>
-                    <MenuDivider />
+                  <MenuSubmenu
+                    icon={viewByEvent ? "numberedList" : "user"}
+                    label="Group by"
+                    value={viewByEvent ? "Event" : "Athlete"}
+                    {...submenuProps("group")}
+                  >
                     <MenuItem
                       icon="user"
                       label="By athlete"
@@ -1328,55 +1503,133 @@ export default function MeetSheetSummarySection({
                         setSettingsOpen(false)
                       }}
                     />
-                  </>
+                  </MenuSubmenu>
                 ) : null}
                 <MenuDivider />
-                {(
-                  [
-                    { value: "all", label: "All", icon: "users" },
-                    { value: "F", label: "Women", icon: "user" },
-                    { value: "M", label: "Men", icon: "user" },
-                  ] as const
-                ).map((g) => (
+                {viewMode === "summary" && sessions.length > 0 ? (
+                  <MenuSubmenu
+                    icon="calendar"
+                    label="Session"
+                    value={activeSession ?? "All"}
+                    active={activeSession != null}
+                    {...submenuProps("session")}
+                  >
+                    {[null, ...sessions].map((session) => (
+                      <MenuItem
+                        key={session ?? "all"}
+                        icon="calendar"
+                        label={session ?? "All sessions"}
+                        selected={activeSession === session}
+                        onClick={() => {
+                          setSessionFilter(session)
+                          setSettingsOpen(false)
+                        }}
+                      />
+                    ))}
+                  </MenuSubmenu>
+                ) : null}
+                {viewMode === "summary" && roundFilterOn ? (
+                  <MenuSubmenu
+                    icon="flag"
+                    label="Rounds"
+                    value={roundFilterLabel(hiddenRounds, availableRounds) ?? "All"}
+                    active={roundFilterLabel(hiddenRounds, availableRounds) != null}
+                    {...submenuProps("rounds")}
+                  >
+                    {SUMMARY_ROUNDS.filter((r) => availableRounds.includes(r.kind)).map((r) => (
+                      <MenuItem
+                        key={r.kind}
+                        role="menuitemcheckbox"
+                        icon="flag"
+                        label={r.label}
+                        selected={!hiddenRounds.has(r.kind)}
+                        onClick={() =>
+                          setHiddenRounds((hidden) => {
+                            const next = new Set(hidden)
+                            if (next.has(r.kind)) next.delete(r.kind)
+                            else next.add(r.kind)
+                            return next
+                          })
+                        }
+                      />
+                    ))}
+                  </MenuSubmenu>
+                ) : null}
+                <MenuSubmenu
+                  icon="users"
+                  label="Gender"
+                  value={genderFilter === "F" ? "Women" : genderFilter === "M" ? "Men" : "All"}
+                  active={genderFilter !== "all"}
+                  {...submenuProps("gender")}
+                >
+                  {(
+                    [
+                      { value: "all", label: "All", icon: "users" },
+                      { value: "F", label: "Women", icon: "user" },
+                      { value: "M", label: "Men", icon: "user" },
+                    ] as const
+                  ).map((g) => (
+                    <MenuItem
+                      key={g.value}
+                      icon={g.icon}
+                      label={g.label}
+                      selected={genderFilter === g.value}
+                      onClick={() => {
+                        setGenderFilter(g.value)
+                        setSettingsOpen(false)
+                      }}
+                    />
+                  ))}
+                </MenuSubmenu>
+                <MenuDivider />
+                <MenuSubmenu
+                  icon={density === "cozy" ? "rowsCozy" : "rowsCompact"}
+                  label="Rows"
+                  value={density === "cozy" ? "Cozy" : "Compact"}
+                  {...submenuProps("rows")}
+                >
                   <MenuItem
-                    key={g.value}
-                    icon={g.icon}
-                    label={g.label}
-                    selected={genderFilter === g.value}
-                    onClick={() => {
-                      setGenderFilter(g.value)
-                      setSettingsOpen(false)
-                    }}
+                    icon="rowsCozy"
+                    label="Cozy rows"
+                    selected={density === "cozy"}
+                    onClick={() => pickDensity("cozy")}
                   />
-                ))}
-                <MenuDivider />
-                <MenuItem
-                  icon="rowsCozy"
-                  label="Cozy rows"
-                  selected={density === "cozy"}
-                  onClick={() => pickDensity("cozy")}
-                />
-                <MenuItem
-                  icon="rowsCompact"
-                  label="Compact rows"
-                  selected={density === "compact"}
-                  onClick={() => pickDensity("compact")}
-                />
-                <MenuDivider />
-                <MenuItem
-                  role="menuitemcheckbox"
-                  icon="flag"
-                  label="Show round"
-                  selected={showRound}
-                  onClick={() => toggleRowInfo("round")}
-                />
-                <MenuItem
-                  role="menuitemcheckbox"
+                  <MenuItem
+                    icon="rowsCompact"
+                    label="Compact rows"
+                    selected={density === "compact"}
+                    onClick={() => pickDensity("compact")}
+                  />
+                </MenuSubmenu>
+                <MenuSubmenu
                   icon="lanes"
-                  label="Show heat & lane"
-                  selected={showHeatLane}
-                  onClick={() => toggleRowInfo("hl")}
-                />
+                  label="Show"
+                  value={
+                    showRound && showHeatLane
+                      ? "All"
+                      : showRound
+                        ? "Round"
+                        : showHeatLane
+                          ? "Heat & lane"
+                          : "None"
+                  }
+                  {...submenuProps("show")}
+                >
+                  <MenuItem
+                    role="menuitemcheckbox"
+                    icon="flag"
+                    label="Round"
+                    selected={showRound}
+                    onClick={() => toggleRowInfo("round")}
+                  />
+                  <MenuItem
+                    role="menuitemcheckbox"
+                    icon="lanes"
+                    label="Heat & lane"
+                    selected={showHeatLane}
+                    onClick={() => toggleRowInfo("hl")}
+                  />
+                </MenuSubmenu>
               </div>
             </>
           ) : null}
@@ -1448,16 +1701,14 @@ export default function MeetSheetSummarySection({
                 <span>{group.title}</span>
               </div>
               <ul className="border-t border-border-subtle">
-                {[...group.entries]
-                  .sort((a, b) => compareByPlace(a, b, hasImportedResults))
-                  .map((entry, j) => (
-                    <SummaryEntryRow
-                      key={`event-${entryRowKey(entry, j, athleteGenders)}`}
-                      entry={entry}
-                      eventView
-                      {...rowProps}
-                    />
-                  ))}
+                {sortEventEntries(group.entries, displayEntries).map((entry, j) => (
+                  <SummaryEntryRow
+                    key={`event-${entryRowKey(entry, j, athleteGenders)}`}
+                    entry={entry}
+                    eventView
+                    {...rowProps}
+                  />
+                ))}
               </ul>
             </div>
           ))}

@@ -59,6 +59,87 @@ export function EventBadge({ number, compact }: { number: number; compact?: bool
   )
 }
 
+/** The row's right-hand block: delta, time and place — or seed and seed rank — in fixed columns. */
+export function SummaryRowResult({ result, compact }: { result: RowResult; compact: boolean }) {
+  const pill = compact ? "h-[18px] px-1.5 text-[10px]" : "h-5 px-[7px] text-[11px]"
+
+  if (result.kind === "done") {
+    const podium =
+      result.podium && result.place != null && result.place >= 1 && result.place <= 3
+        ? result.place
+        : 0
+    return (
+      <span className="flex shrink-0 items-center tabular-nums">
+        <span className={`flex shrink-0 items-center justify-end ${compact ? "w-[58px]" : "w-16"}`}>
+          {result.delta ? (
+            <span
+              className={`inline-flex items-center rounded-full pt-[1.5px] font-mono font-medium leading-none ${pill} ${deltaPillClass(result.delta)}`}
+            >
+              {formatDelta(result.delta)}
+            </span>
+          ) : null}
+        </span>
+        <span
+          className={`text-right font-mono font-semibold ${compact ? "w-[70px] text-[13px]" : "w-[76px] text-sm"} ${
+            result.time ? "text-foreground" : "text-amber-700 dark:text-amber-400"
+          }`}
+        >
+          {result.time ? formatDisplayTime(result.time) : result.status ?? "—"}
+        </span>
+        <span
+          className={`flex items-center justify-end text-foreground-secondary ${compact ? "w-11 text-[11px]" : "w-12 text-xs"}`}
+        >
+          {result.place != null ? (
+            podium ? (
+              <span
+                className={`inline-flex items-center rounded-full pb-px font-semibold leading-none ${pill} ${PODIUM_PILL[podium]}`}
+              >
+                {formatOrdinal(result.place)}
+              </span>
+            ) : (
+              <span className={compact ? "pr-1.5" : "pr-[7px]"}>{formatOrdinal(result.place)}</span>
+            )
+          ) : null}
+        </span>
+      </span>
+    )
+  }
+  if (result.kind === "seed") {
+    return (
+      <span className="flex shrink-0 items-center tabular-nums">
+        <span className={`flex shrink-0 items-center justify-end ${compact ? "w-[58px]" : "w-16"}`}>
+          <span
+            className={`inline-flex items-center rounded-full bg-fill-secondary pt-px font-sans font-semibold uppercase leading-none tracking-[0.1em] text-foreground-secondary dark:bg-fill ${
+              compact ? "h-[18px] px-1.5 text-[9px]" : "h-5 px-[7px] text-[10px]"
+            }`}
+          >
+            Seed
+          </span>
+        </span>
+        <span
+          className={`text-right font-mono font-normal text-foreground-secondary ${compact ? "w-[70px] text-[13px]" : "w-[76px] text-sm"}`}
+        >
+          {result.seed === "NT" ? "NT" : formatDisplayTime(result.seed)}
+        </span>
+        <span
+          className={`flex items-center justify-end text-foreground-tertiary ${compact ? "w-11 text-[11px]" : "w-12 text-xs"}`}
+        >
+          {result.seedRank != null ? (
+            <span className={compact ? "pr-1.5" : "pr-[7px]"}>{formatOrdinal(result.seedRank)}</span>
+          ) : null}
+        </span>
+      </span>
+    )
+  }
+  return (
+    <span
+      className={`shrink-0 text-right font-mono text-foreground-tertiary ${compact ? "w-[172px] text-[13px]" : "w-[188px] text-sm"}`}
+    >
+      —
+    </span>
+  )
+}
+
 export default function SummaryRow({
   id,
   display,
@@ -110,85 +191,6 @@ export default function SummaryRow({
     return () => window.removeEventListener("hashchange", openIfHash)
   }, [id])
 
-  const pill = compact ? "h-[18px] px-1.5 text-[10px]" : "h-5 px-[7px] text-[11px]"
-
-  let right: ReactNode = null
-  if (result.kind === "done") {
-    const podium =
-      result.podium && result.place != null && result.place >= 1 && result.place <= 3
-        ? result.place
-        : 0
-    right = (
-      <span className="flex shrink-0 items-center tabular-nums">
-        <span className={`flex shrink-0 items-center justify-end ${compact ? "w-[58px]" : "w-16"}`}>
-          {result.delta ? (
-            <span
-              className={`inline-flex items-center rounded-full pt-[1.5px] font-mono font-medium leading-none ${pill} ${deltaPillClass(result.delta)}`}
-            >
-              {formatDelta(result.delta)}
-            </span>
-          ) : null}
-        </span>
-        <span
-          className={`text-right font-mono font-semibold ${compact ? "w-[70px] text-[13px]" : "w-[76px] text-sm"} ${
-            result.time ? "text-foreground" : "text-amber-700 dark:text-amber-400"
-          }`}
-        >
-          {result.time ? formatDisplayTime(result.time) : result.status ?? "—"}
-        </span>
-        <span
-          className={`flex items-center justify-end text-foreground-secondary ${compact ? "w-11 text-[11px]" : "w-12 text-xs"}`}
-        >
-          {result.place != null ? (
-            podium ? (
-              <span
-                className={`inline-flex items-center rounded-full pb-px font-semibold leading-none ${pill} ${PODIUM_PILL[podium]}`}
-              >
-                {formatOrdinal(result.place)}
-              </span>
-            ) : (
-              <span className={compact ? "pr-1.5" : "pr-[7px]"}>{formatOrdinal(result.place)}</span>
-            )
-          ) : null}
-        </span>
-      </span>
-    )
-  } else if (result.kind === "seed") {
-    right = (
-      <span className="flex shrink-0 items-center tabular-nums">
-        <span className={`flex shrink-0 items-center justify-end ${compact ? "w-[58px]" : "w-16"}`}>
-          <span
-            className={`inline-flex items-center rounded-full bg-fill-secondary pt-px font-sans font-semibold uppercase leading-none tracking-[0.1em] text-foreground-secondary dark:bg-fill ${
-              compact ? "h-[18px] px-1.5 text-[9px]" : "h-5 px-[7px] text-[10px]"
-            }`}
-          >
-            Seed
-          </span>
-        </span>
-        <span
-          className={`text-right font-mono font-normal text-foreground-secondary ${compact ? "w-[70px] text-[13px]" : "w-[76px] text-sm"}`}
-        >
-          {result.seed === "NT" ? "NT" : formatDisplayTime(result.seed)}
-        </span>
-        <span
-          className={`flex items-center justify-end text-foreground-tertiary ${compact ? "w-11 text-[11px]" : "w-12 text-xs"}`}
-        >
-          {result.seedRank != null ? (
-            <span className={compact ? "pr-1.5" : "pr-[7px]"}>{formatOrdinal(result.seedRank)}</span>
-          ) : null}
-        </span>
-      </span>
-    )
-  } else {
-    right = (
-      <span
-        className={`shrink-0 text-right font-mono text-foreground-tertiary ${compact ? "w-[172px] text-[13px]" : "w-[188px] text-sm"}`}
-      >
-        —
-      </span>
-    )
-  }
-
   return (
     <>
       <li
@@ -239,7 +241,7 @@ export default function SummaryRow({
             </span>
           ) : null}
         </span>
-        {right}
+        <SummaryRowResult result={result} compact={compact} />
         {trailing ? (
           <span
             className="-ml-1 flex shrink-0 items-center"

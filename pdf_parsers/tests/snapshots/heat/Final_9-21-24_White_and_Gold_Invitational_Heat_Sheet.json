@@ -275,6 +275,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "2:03.00",
       "team": "KSU-GA"
     },
@@ -311,6 +312,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "2:00.00",
       "team": "UGA-GA"
     },
@@ -347,6 +349,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "1:55.76",
       "team": "FLOR-FL"
     },
@@ -362,6 +365,7 @@
       "relayLetter": "A",
       "relaySwimmers": [],
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "1:55.24",
       "team": "GTSC-GA"
     },
@@ -398,6 +402,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:54.55",
       "team": "NCSU-NC"
     },
@@ -413,6 +418,7 @@
       "relayLetter": "A",
       "relaySwimmers": [],
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "1:55.00",
       "team": "FSUC"
     },
@@ -449,6 +455,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "1:55.50",
       "team": "UGA-GA"
     },
@@ -485,6 +492,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "1:59.80",
       "team": "NCSU-NC"
     },
@@ -521,6 +529,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "2:00.85",
       "team": "FLOR-FL"
     },
@@ -557,6 +566,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "2:10.00",
       "team": "KSU-GA"
     },
@@ -818,6 +828,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "1:56.00",
       "team": "KSU-GA"
     },
@@ -1034,6 +1045,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "1:50.00",
       "team": "KSU-GA"
     },
@@ -1070,6 +1082,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "1:40.31",
       "team": "NCSU-NC"
     },
@@ -1106,6 +1119,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "1:40.00",
       "team": "UGA-GA"
     },
@@ -1142,6 +1156,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "1:36.00",
       "team": "UGA-GA"
     },
@@ -1157,6 +1172,7 @@
       "relayLetter": "A",
       "relaySwimmers": [],
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:34.11",
       "team": "GTSC-GA"
     },
@@ -1193,6 +1209,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "1:35.00",
       "team": "NCSU-NC"
     },
@@ -1229,6 +1246,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "1:39.45",
       "team": "FLOR-FL"
     },
@@ -1244,6 +1262,7 @@
       "relayLetter": "A",
       "relaySwimmers": [],
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "1:40.00",
       "team": "FSUC"
     },
@@ -1280,6 +1299,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "1:45.00",
       "team": "SCGSU-GA"
     },
@@ -1316,6 +1336,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "1:54.00",
       "team": "SCGSU-GA"
     },
@@ -1806,6 +1827,7 @@
       "lane": 4,
       "name": "Davenport, Eva",
       "round": "finals",
+      "seedRank": 80,
       "seedTime": "35.00",
       "team": ""
     },
@@ -1820,6 +1842,7 @@
       "lane": 5,
       "name": "Lamb, Grayce",
       "round": "finals",
+      "seedRank": 82,
       "seedTime": "35.69",
       "team": ""
     },
@@ -1834,6 +1857,7 @@
       "lane": 6,
       "name": "Gembicki, Emily",
       "round": "finals",
+      "seedRank": 84,
       "seedTime": "43.00",
       "team": ""
     },
@@ -1862,6 +1886,7 @@
       "lane": 1,
       "name": "Farrugia, Amelia",
       "round": "timed_finals",
+      "seedRank": 77,
       "seedTime": "32.80",
       "team": ""
     },
@@ -1876,6 +1901,7 @@
       "lane": 3,
       "name": "Sohmer, Rebecca",
       "round": "timed_finals",
+      "seedRank": 73,
       "seedTime": "31.16",
       "team": ""
     },
@@ -1890,6 +1916,7 @@
       "lane": 4,
       "name": "Cuson, Natalie",
       "round": "timed_finals",
+      "seedRank": 71,
       "seedTime": "30.69",
       "team": ""
     },
@@ -1904,6 +1931,7 @@
       "lane": 5,
       "name": "Fernandez, Heather",
       "round": "timed_finals",
+      "seedRank": 72,
       "seedTime": "31.00",
       "team": ""
     },
@@ -1918,6 +1946,7 @@
       "lane": 6,
       "name": "Wadstein, Elyn",
       "round": "timed_finals",
+      "seedRank": 74,
       "seedTime": "32.00",
       "team": ""
     },
@@ -1932,6 +1961,7 @@
       "lane": 7,
       "name": "Kazemzadeh, Ava",
       "round": "timed_finals",
+      "seedRank": 76,
       "seedTime": "32.50",
       "team": ""
     },
@@ -1946,6 +1976,7 @@
       "lane": 9,
       "name": "Laos, Isabella",
       "round": "timed_finals",
+      "seedRank": 80,
       "seedTime": "35.00",
       "team": ""
     },
@@ -1960,6 +1991,7 @@
       "lane": 0,
       "name": "Riddle, Rebekah",
       "round": "finals",
+      "seedRank": 63,
       "seedTime": "30.00",
       "team": ""
     },
@@ -1974,6 +2006,7 @@
       "lane": 4,
       "name": "Schmid, Sarah",
       "round": "finals",
+      "seedRank": 61,
       "seedTime": "29.50",
       "team": ""
     },
@@ -1988,6 +2021,7 @@
       "lane": 5,
       "name": "Ratliff, Bella",
       "round": "finals",
+      "seedRank": 62,
       "seedTime": "29.70",
       "team": ""
     },
@@ -2002,6 +2036,7 @@
       "lane": 7,
       "name": "Franklin, Selene",
       "round": "finals",
+      "seedRank": 63,
       "seedTime": "30.00",
       "team": ""
     },
@@ -2016,6 +2051,7 @@
       "lane": 0,
       "name": "Chetrit, Nell",
       "round": "finals",
+      "seedRank": 58,
       "seedTime": "29.00",
       "team": ""
     },
@@ -2030,6 +2066,7 @@
       "lane": 1,
       "name": "Holtz, KatrinaL",
       "round": "finals",
+      "seedRank": 57,
       "seedTime": "28.98",
       "team": ""
     },
@@ -2044,6 +2081,7 @@
       "lane": 2,
       "name": "Tiganus, Sara",
       "round": "finals",
+      "seedRank": 55,
       "seedTime": "28.73",
       "team": ""
     },
@@ -2058,6 +2096,7 @@
       "lane": 4,
       "name": "Dee, Becca",
       "round": "finals",
+      "seedRank": 49,
       "seedTime": "28.00",
       "team": ""
     },
@@ -2072,6 +2111,7 @@
       "lane": 5,
       "name": "Fass, Emma",
       "round": "finals",
+      "seedRank": 52,
       "seedTime": "28.05",
       "team": ""
     },
@@ -2086,6 +2126,7 @@
       "lane": 6,
       "name": "Melton, Jacoby",
       "round": "finals",
+      "seedRank": 54,
       "seedTime": "28.69",
       "team": ""
     },
@@ -2100,6 +2141,7 @@
       "lane": 0,
       "name": "Randall, Julia",
       "round": "finals",
+      "seedRank": 49,
       "seedTime": "28.00",
       "team": ""
     },
@@ -2114,6 +2156,7 @@
       "lane": 1,
       "name": "Burlina, Emma",
       "round": "finals",
+      "seedRank": 46,
       "seedTime": "27.69",
       "team": ""
     },
@@ -2128,6 +2171,7 @@
       "lane": 4,
       "name": "Obara, Claire",
       "round": "finals",
+      "seedRank": 41,
       "seedTime": "27.27",
       "team": ""
     },
@@ -2142,6 +2186,7 @@
       "lane": 6,
       "name": "Baker, Amy",
       "round": "finals",
+      "seedRank": 44,
       "seedTime": "27.61",
       "team": ""
     },
@@ -2156,6 +2201,7 @@
       "lane": 7,
       "name": "Malcomson, Brynn",
       "round": "finals",
+      "seedRank": 46,
       "seedTime": "27.69",
       "team": ""
     },
@@ -2170,6 +2216,7 @@
       "lane": 0,
       "name": "Kohs, Madeline",
       "round": "finals",
+      "seedRank": 35,
       "seedTime": "27.00",
       "team": ""
     },
@@ -2184,6 +2231,7 @@
       "lane": 1,
       "name": "Shaw, Morgan",
       "round": "finals",
+      "seedRank": 35,
       "seedTime": "27.00",
       "team": ""
     },
@@ -2198,6 +2246,7 @@
       "lane": 3,
       "name": "Wong, Tara",
       "round": "finals",
+      "seedRank": 33,
       "seedTime": "26.81",
       "team": ""
     },
@@ -2212,6 +2261,7 @@
       "lane": 4,
       "name": "Faust, Amelia",
       "round": "finals",
+      "seedRank": 30,
       "seedTime": "26.69",
       "team": ""
     },
@@ -2226,6 +2276,7 @@
       "lane": 6,
       "name": "Regalado, Elise",
       "round": "finals",
+      "seedRank": 34,
       "seedTime": "26.99",
       "team": ""
     },
@@ -2240,6 +2291,7 @@
       "lane": 7,
       "name": "Roshelli, Caroline",
       "round": "finals",
+      "seedRank": 35,
       "seedTime": "27.00",
       "team": ""
     },
@@ -2254,6 +2306,7 @@
       "lane": 8,
       "name": "Adams, Laine",
       "round": "finals",
+      "seedRank": 35,
       "seedTime": "27.00",
       "team": ""
     },
@@ -2268,6 +2321,7 @@
       "lane": 9,
       "name": "Tucker, Meredith",
       "round": "finals",
+      "seedRank": 40,
       "seedTime": "27.22",
       "team": ""
     },
@@ -2282,6 +2336,7 @@
       "lane": 0,
       "name": "Hunt, Natalie",
       "round": "finals",
+      "seedRank": 29,
       "seedTime": "26.67",
       "team": ""
     },
@@ -2296,6 +2351,7 @@
       "lane": 1,
       "name": "Sloan, Claire",
       "round": "finals",
+      "seedRank": 27,
       "seedTime": "26.63",
       "team": ""
     },
@@ -2310,6 +2366,7 @@
       "lane": 2,
       "name": "Honaker, Olivia",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "26.54",
       "team": ""
     },
@@ -2324,6 +2381,7 @@
       "lane": 3,
       "name": "DiAntonio, Elise",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "26.50",
       "team": ""
     },
@@ -2338,6 +2396,7 @@
       "lane": 4,
       "name": "Peyton, Abby",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "26.50",
       "team": ""
     },
@@ -2352,6 +2411,7 @@
       "lane": 5,
       "name": "Kelly, Jemma",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "26.50",
       "team": ""
     },
@@ -2366,6 +2426,7 @@
       "lane": 6,
       "name": "LaCognata, Grace",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "26.54",
       "team": ""
     },
@@ -2380,6 +2441,7 @@
       "lane": 8,
       "name": "Ewart, Lucy",
       "round": "finals",
+      "seedRank": 27,
       "seedTime": "26.63",
       "team": ""
     },
@@ -2394,6 +2456,7 @@
       "lane": 9,
       "name": "Collerette, Hannah",
       "round": "finals",
+      "seedRank": 30,
       "seedTime": "26.69",
       "team": ""
     },
@@ -2408,6 +2471,7 @@
       "lane": 0,
       "name": "Roberts, Stella",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "26.50",
       "team": ""
     },
@@ -2422,6 +2486,7 @@
       "lane": 1,
       "name": "Avedisian, Michaela",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "26.50",
       "team": ""
     },
@@ -2436,6 +2501,7 @@
       "lane": 2,
       "name": "Freund, Gabby",
       "round": "finals",
+      "seedRank": 15,
       "seedTime": "26.30",
       "team": ""
     },
@@ -2450,6 +2516,7 @@
       "lane": 3,
       "name": "Saini, Meher",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "26.20",
       "team": ""
     },
@@ -2464,6 +2531,7 @@
       "lane": 4,
       "name": "Brefeld, Peyton",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "26.00",
       "team": ""
     },
@@ -2478,6 +2546,7 @@
       "lane": 6,
       "name": "Krzyzaniak, Alexis",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "26.20",
       "team": ""
     },
@@ -2492,6 +2561,7 @@
       "lane": 7,
       "name": "Dolson, Emma",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "26.50",
       "team": ""
     },
@@ -2506,6 +2576,7 @@
       "lane": 8,
       "name": "Ndiaye, Aneesa",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "26.50",
       "team": ""
     },
@@ -2520,6 +2591,7 @@
       "lane": 9,
       "name": "Ruona, Katherine",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "26.50",
       "team": ""
     },
@@ -2534,6 +2606,7 @@
       "lane": 0,
       "name": "Bierman, Caroline",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "26.00",
       "team": ""
     },
@@ -2548,6 +2621,7 @@
       "lane": 1,
       "name": "Munger, Audrey",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "25.90",
       "team": ""
     },
@@ -2562,6 +2636,7 @@
       "lane": 3,
       "name": "Larson, Bryn",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "24.50",
       "team": ""
     },
@@ -2576,6 +2651,7 @@
       "lane": 4,
       "name": "Ochoa, Iris",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "23.76",
       "team": ""
     },
@@ -2590,6 +2666,7 @@
       "lane": 5,
       "name": "Burkus, Sophie",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "24.40",
       "team": ""
     },
@@ -2604,6 +2681,7 @@
       "lane": 8,
       "name": "Petersen, Riley",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "25.94",
       "team": ""
     },
@@ -2968,6 +3046,7 @@
       "lane": 2,
       "name": "Rana, Tanay",
       "round": "finals",
+      "seedRank": 95,
       "seedTime": "36.00",
       "team": ""
     },
@@ -2982,6 +3061,7 @@
       "lane": 3,
       "name": "Friginette, Brandon",
       "round": "finals",
+      "seedRank": 93,
       "seedTime": "34.00",
       "team": ""
     },
@@ -2996,6 +3076,7 @@
       "lane": 4,
       "name": "Phan, Bao",
       "round": "finals",
+      "seedRank": 91,
       "seedTime": "31.95",
       "team": ""
     },
@@ -3010,6 +3091,7 @@
       "lane": 6,
       "name": "Jimenez, AJ",
       "round": "finals",
+      "seedRank": 94,
       "seedTime": "35.00",
       "team": ""
     },
@@ -3024,6 +3106,7 @@
       "lane": 7,
       "name": "Saglam, Semih",
       "round": "finals",
+      "seedRank": 96,
       "seedTime": "45.69",
       "team": ""
     },
@@ -3066,6 +3149,7 @@
       "lane": 0,
       "name": "Lu, Stanley",
       "round": "finals",
+      "seedRank": 89,
       "seedTime": "30.00",
       "team": ""
     },
@@ -3080,6 +3164,7 @@
       "lane": 1,
       "name": "Fernandez, Warren",
       "round": "finals",
+      "seedRank": 86,
       "seedTime": "29.69",
       "team": ""
     },
@@ -3094,6 +3179,7 @@
       "lane": 3,
       "name": "Kelter, Bailey",
       "round": "finals",
+      "seedRank": 83,
       "seedTime": "29.00",
       "team": ""
     },
@@ -3108,6 +3194,7 @@
       "lane": 4,
       "name": "Jackson, Darion",
       "round": "finals",
+      "seedRank": 79,
       "seedTime": "28.00",
       "team": ""
     },
@@ -3122,6 +3209,7 @@
       "lane": 5,
       "name": "Muralidharan, Vish",
       "round": "finals",
+      "seedRank": 82,
       "seedTime": "28.74",
       "team": ""
     },
@@ -3136,6 +3224,7 @@
       "lane": 6,
       "name": "Torchia, Henry",
       "round": "finals",
+      "seedRank": 83,
       "seedTime": "29.00",
       "team": ""
     },
@@ -3150,6 +3239,7 @@
       "lane": 7,
       "name": "Manley, Adam",
       "round": "finals",
+      "seedRank": 86,
       "seedTime": "29.69",
       "team": ""
     },
@@ -3164,6 +3254,7 @@
       "lane": 8,
       "name": "Brogi, Maxi",
       "round": "finals",
+      "seedRank": 86,
       "seedTime": "29.69",
       "team": ""
     },
@@ -3178,6 +3269,7 @@
       "lane": 0,
       "name": "Ryan, Tierney",
       "round": "finals",
+      "seedRank": 79,
       "seedTime": "28.00",
       "team": ""
     },
@@ -3192,6 +3284,7 @@
       "lane": 1,
       "name": "Yeh, Paul",
       "round": "finals",
+      "seedRank": 77,
       "seedTime": "27.00",
       "team": ""
     },
@@ -3206,6 +3299,7 @@
       "lane": 2,
       "name": "Matos, Marc",
       "round": "finals",
+      "seedRank": 73,
       "seedTime": "26.69",
       "team": ""
     },
@@ -3220,6 +3314,7 @@
       "lane": 3,
       "name": "Vo, Brandon",
       "round": "finals",
+      "seedRank": 73,
       "seedTime": "26.69",
       "team": ""
     },
@@ -3234,6 +3329,7 @@
       "lane": 6,
       "name": "Vlady, George",
       "round": "finals",
+      "seedRank": 73,
       "seedTime": "26.69",
       "team": ""
     },
@@ -3248,6 +3344,7 @@
       "lane": 7,
       "name": "Murray, Liam",
       "round": "finals",
+      "seedRank": 76,
       "seedTime": "26.84",
       "team": ""
     },
@@ -3262,6 +3359,7 @@
       "lane": 8,
       "name": "Kohl, Matt",
       "round": "finals",
+      "seedRank": 78,
       "seedTime": "27.58",
       "team": ""
     },
@@ -3276,6 +3374,7 @@
       "lane": 9,
       "name": "Gilbert, Wesley",
       "round": "finals",
+      "seedRank": 79,
       "seedTime": "28.00",
       "team": ""
     },
@@ -3290,6 +3389,7 @@
       "lane": 0,
       "name": "Jagadeesh, Vidhur",
       "round": "finals",
+      "seedRank": 69,
       "seedTime": "26.20",
       "team": ""
     },
@@ -3304,6 +3404,7 @@
       "lane": 2,
       "name": "Kennedy, Avery",
       "round": "finals",
+      "seedRank": 65,
       "seedTime": "26.00",
       "team": ""
     },
@@ -3318,6 +3419,7 @@
       "lane": 3,
       "name": "Grutter, Maxwell",
       "round": "finals",
+      "seedRank": 61,
       "seedTime": "25.69",
       "team": ""
     },
@@ -3332,6 +3434,7 @@
       "lane": 4,
       "name": "Kharel, Avi",
       "round": "finals",
+      "seedRank": 61,
       "seedTime": "25.69",
       "team": ""
     },
@@ -3346,6 +3449,7 @@
       "lane": 5,
       "name": "Cao, Bradley",
       "round": "finals",
+      "seedRank": 61,
       "seedTime": "25.69",
       "team": ""
     },
@@ -3360,6 +3464,7 @@
       "lane": 6,
       "name": "Notarfrancesco, Will",
       "round": "finals",
+      "seedRank": 64,
       "seedTime": "25.70",
       "team": ""
     },
@@ -3374,6 +3479,7 @@
       "lane": 7,
       "name": "Blackwell, Colin",
       "round": "finals",
+      "seedRank": 65,
       "seedTime": "26.00",
       "team": ""
     },
@@ -3388,6 +3494,7 @@
       "lane": 0,
       "name": "Carper, Cole",
       "round": "timed_finals",
+      "seedRank": 58,
       "seedTime": "25.30",
       "team": ""
     },
@@ -3402,6 +3509,7 @@
       "lane": 1,
       "name": "Hall, Nathan",
       "round": "timed_finals",
+      "seedRank": 53,
       "seedTime": "25.00",
       "team": ""
     },
@@ -3416,6 +3524,7 @@
       "lane": 2,
       "name": "Heath, ZacharyC",
       "round": "timed_finals",
+      "seedRank": 53,
       "seedTime": "25.00",
       "team": ""
     },
@@ -3430,6 +3539,7 @@
       "lane": 3,
       "name": "Williams, Crescent",
       "round": "timed_finals",
+      "seedRank": 53,
       "seedTime": "25.00",
       "team": ""
     },
@@ -3444,6 +3554,7 @@
       "lane": 5,
       "name": "Hernandez, Joshua",
       "round": "timed_finals",
+      "seedRank": 52,
       "seedTime": "24.80",
       "team": ""
     },
@@ -3458,6 +3569,7 @@
       "lane": 6,
       "name": "Shepard, Brandon",
       "round": "timed_finals",
+      "seedRank": 53,
       "seedTime": "25.00",
       "team": ""
     },
@@ -3472,6 +3584,7 @@
       "lane": 8,
       "name": "Simmons, Ben",
       "round": "timed_finals",
+      "seedRank": 58,
       "seedTime": "25.30",
       "team": ""
     },
@@ -3486,6 +3599,7 @@
       "lane": 0,
       "name": "Barry, Charles",
       "round": "finals",
+      "seedRank": 47,
       "seedTime": "24.69",
       "team": ""
     },
@@ -3500,6 +3614,7 @@
       "lane": 1,
       "name": "Hughey, Henry",
       "round": "finals",
+      "seedRank": 47,
       "seedTime": "24.69",
       "team": ""
     },
@@ -3514,6 +3629,7 @@
       "lane": 2,
       "name": "Debus, Caleb",
       "round": "finals",
+      "seedRank": 45,
       "seedTime": "24.50",
       "team": ""
     },
@@ -3528,6 +3644,7 @@
       "lane": 3,
       "name": "Wiechertjes, Noah",
       "round": "finals",
+      "seedRank": 37,
       "seedTime": "24.00",
       "team": ""
     },
@@ -3542,6 +3659,7 @@
       "lane": 8,
       "name": "Jiang, Aaron",
       "round": "finals",
+      "seedRank": 47,
       "seedTime": "24.69",
       "team": ""
     },
@@ -3556,6 +3674,7 @@
       "lane": 9,
       "name": "Skidmore, Billy",
       "round": "finals",
+      "seedRank": 47,
       "seedTime": "24.69",
       "team": ""
     },
@@ -3570,6 +3689,7 @@
       "lane": 0,
       "name": "Feller, Curtis",
       "round": "finals",
+      "seedRank": 37,
       "seedTime": "24.00",
       "team": ""
     },
@@ -3584,6 +3704,7 @@
       "lane": 1,
       "name": "Krosner, Samuel",
       "round": "finals",
+      "seedRank": 37,
       "seedTime": "24.00",
       "team": ""
     },
@@ -3598,6 +3719,7 @@
       "lane": 2,
       "name": "Curtiss, Jacob",
       "round": "finals",
+      "seedRank": 34,
       "seedTime": "23.90",
       "team": ""
     },
@@ -3612,6 +3734,7 @@
       "lane": 3,
       "name": "Quesada, Jorge",
       "round": "finals",
+      "seedRank": 33,
       "seedTime": "23.70",
       "team": ""
     },
@@ -3626,6 +3749,7 @@
       "lane": 4,
       "name": "Pianoto, Matthew",
       "round": "finals",
+      "seedRank": 27,
       "seedTime": "23.69",
       "team": ""
     },
@@ -3640,6 +3764,7 @@
       "lane": 5,
       "name": "Matthews, John",
       "round": "finals",
+      "seedRank": 27,
       "seedTime": "23.69",
       "team": ""
     },
@@ -3654,6 +3779,7 @@
       "lane": 7,
       "name": "Howard, Josh",
       "round": "finals",
+      "seedRank": 34,
       "seedTime": "23.90",
       "team": ""
     },
@@ -3668,6 +3794,7 @@
       "lane": 8,
       "name": "Williams, Walker",
       "round": "finals",
+      "seedRank": 37,
       "seedTime": "24.00",
       "team": ""
     },
@@ -3682,6 +3809,7 @@
       "lane": 9,
       "name": "Ghidu, Nicholas",
       "round": "finals",
+      "seedRank": 37,
       "seedTime": "24.00",
       "team": ""
     },
@@ -3696,6 +3824,7 @@
       "lane": 0,
       "name": "McNeill, Carson",
       "round": "finals",
+      "seedRank": 27,
       "seedTime": "23.69",
       "team": ""
     },
@@ -3710,6 +3839,7 @@
       "lane": 1,
       "name": "Abdo, Adel",
       "round": "finals",
+      "seedRank": 27,
       "seedTime": "23.69",
       "team": ""
     },
@@ -3724,6 +3854,7 @@
       "lane": 3,
       "name": "Landis, Tyler",
       "round": "finals",
+      "seedRank": 23,
       "seedTime": "23.50",
       "team": ""
     },
@@ -3738,6 +3869,7 @@
       "lane": 4,
       "name": "Bryson, Ford",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "23.43",
       "team": ""
     },
@@ -3752,6 +3884,7 @@
       "lane": 5,
       "name": "Liu, Eric",
       "round": "finals",
+      "seedRank": 22,
       "seedTime": "23.48",
       "team": ""
     },
@@ -3766,6 +3899,7 @@
       "lane": 6,
       "name": "Bai, Ryan",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "23.60",
       "team": ""
     },
@@ -3780,6 +3914,7 @@
       "lane": 7,
       "name": "Zagorianos, Alexander",
       "round": "finals",
+      "seedRank": 26,
       "seedTime": "23.67",
       "team": ""
     },
@@ -3794,6 +3929,7 @@
       "lane": 8,
       "name": "Rimsa, Thomas",
       "round": "finals",
+      "seedRank": 27,
       "seedTime": "23.69",
       "team": ""
     },
@@ -3808,6 +3944,7 @@
       "lane": 9,
       "name": "Schnupp, Andrew",
       "round": "finals",
+      "seedRank": 27,
       "seedTime": "23.69",
       "team": ""
     },
@@ -3822,6 +3959,7 @@
       "lane": 0,
       "name": "Manuel, Hunter",
       "round": "finals",
+      "seedRank": 19,
       "seedTime": "23.30",
       "team": ""
     },
@@ -3836,6 +3974,7 @@
       "lane": 1,
       "name": "Yu, Jason",
       "round": "finals",
+      "seedRank": 17,
       "seedTime": "23.00",
       "team": ""
     },
@@ -3850,6 +3989,7 @@
       "lane": 2,
       "name": "Armbruster, Noah",
       "round": "finals",
+      "seedRank": 15,
       "seedTime": "22.81",
       "team": ""
     },
@@ -3864,6 +4004,7 @@
       "lane": 3,
       "name": "Teal, Nathan",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "22.66",
       "team": ""
     },
@@ -3878,6 +4019,7 @@
       "lane": 4,
       "name": "Cheifetz, AdamC",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "22.05",
       "team": ""
     },
@@ -3892,6 +4034,7 @@
       "lane": 5,
       "name": "Miller, Christopher",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "22.25",
       "team": ""
     },
@@ -3906,6 +4049,7 @@
       "lane": 7,
       "name": "Jones, Justin",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "22.83",
       "team": ""
     },
@@ -3920,6 +4064,7 @@
       "lane": 8,
       "name": "Seward, Lawson",
       "round": "finals",
+      "seedRank": 17,
       "seedTime": "23.00",
       "team": ""
     },
@@ -3934,6 +4079,7 @@
       "lane": 9,
       "name": "Moore, Joshua",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "23.31",
       "team": ""
     },
@@ -3948,6 +4094,7 @@
       "lane": 0,
       "name": "Gransee, Kyle",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "22.00",
       "team": ""
     },
@@ -3962,6 +4109,7 @@
       "lane": 1,
       "name": "Neumann, Asher",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "21.72",
       "team": ""
     },
@@ -3976,6 +4124,7 @@
       "lane": 3,
       "name": "Wang, Daniel",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "21.21",
       "team": ""
     },
@@ -3990,6 +4139,7 @@
       "lane": 4,
       "name": "White, Keller",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "20.69",
       "team": ""
     },
@@ -4004,6 +4154,7 @@
       "lane": 8,
       "name": "Loughmiller, Max",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "21.76",
       "team": ""
     },
@@ -4018,6 +4169,7 @@
       "lane": 9,
       "name": "Laurie, Aiden",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "22.00",
       "team": ""
     },
@@ -4158,6 +4310,7 @@
       "lane": 2,
       "name": "Sproull, Molly",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "1:18.00",
       "team": ""
     },
@@ -4172,6 +4325,7 @@
       "lane": 4,
       "name": "Graves, Lilly",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "1:15.00",
       "team": ""
     },
@@ -4186,6 +4340,7 @@
       "lane": 7,
       "name": "Millsaps, Alison",
       "round": "finals",
+      "seedRank": 26,
       "seedTime": "1:20.00",
       "team": ""
     },
@@ -4228,6 +4383,7 @@
       "lane": 1,
       "name": "Pyrczak, Aurelia",
       "round": "finals",
+      "seedRank": 17,
       "seedTime": "1:09.61",
       "team": ""
     },
@@ -4242,6 +4398,7 @@
       "lane": 3,
       "name": "Buff, Maddy",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "1:06.02",
       "team": ""
     },
@@ -4256,6 +4413,7 @@
       "lane": 4,
       "name": "Yie, Emiley",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "1:05.69",
       "team": ""
     },
@@ -4270,6 +4428,7 @@
       "lane": 5,
       "name": "Wang, Mingqi",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "1:05.69",
       "team": ""
     },
@@ -4284,6 +4443,7 @@
       "lane": 7,
       "name": "Plantamura, Natalie",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "1:08.69",
       "team": ""
     },
@@ -4298,6 +4458,7 @@
       "lane": 8,
       "name": "Shaw, Morgan",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "1:11.00",
       "team": ""
     },
@@ -4312,6 +4473,7 @@
       "lane": 9,
       "name": "Buynoski, Amelia",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "1:14.00",
       "team": ""
     },
@@ -4326,6 +4488,7 @@
       "lane": 1,
       "name": "May, Kahleia",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "1:05.00",
       "team": ""
     },
@@ -4340,6 +4503,7 @@
       "lane": 3,
       "name": "Rosenkranz, Bobbie",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "1:02.00",
       "team": ""
     },
@@ -4354,6 +4518,7 @@
       "lane": 4,
       "name": "Castle, Kendall",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:01.11",
       "team": ""
     },
@@ -4368,6 +4533,7 @@
       "lane": 6,
       "name": "Houck, Madison",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "1:02.00",
       "team": ""
     },
@@ -4382,6 +4548,7 @@
       "lane": 8,
       "name": "Greaux, Lauren",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "1:05.00",
       "team": ""
     },
@@ -4396,6 +4563,7 @@
       "lane": 9,
       "name": "Nance, Lauren",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "1:05.49",
       "team": ""
     },
@@ -4494,6 +4662,7 @@
       "lane": 4,
       "name": "Nellis, Luke",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "1:05.00",
       "team": ""
     },
@@ -4550,6 +4719,7 @@
       "lane": 0,
       "name": "Jones, Peyton",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "1:03.69",
       "team": ""
     },
@@ -4564,6 +4734,7 @@
       "lane": 1,
       "name": "Springate, Dylan",
       "round": "finals",
+      "seedRank": 17,
       "seedTime": "1:03.18",
       "team": ""
     },
@@ -4578,6 +4749,7 @@
       "lane": 2,
       "name": "Trocchi, Will",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "1:00.00",
       "team": ""
     },
@@ -4592,6 +4764,7 @@
       "lane": 4,
       "name": "Schwandt, Gavin",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "58.69",
       "team": ""
     },
@@ -4606,6 +4779,7 @@
       "lane": 5,
       "name": "Long, Lucas",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "59.69",
       "team": ""
     },
@@ -4620,6 +4794,7 @@
       "lane": 8,
       "name": "Lee, Alexander",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "1:03.69",
       "team": ""
     },
@@ -4634,6 +4809,7 @@
       "lane": 9,
       "name": "Sirgany, Ben",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "1:03.87",
       "team": ""
     },
@@ -4648,6 +4824,7 @@
       "lane": 0,
       "name": "Kruger, Ethan",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "58.00",
       "team": ""
     },
@@ -4662,6 +4839,7 @@
       "lane": 2,
       "name": "Marquez, Alexandro",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "55.00",
       "team": ""
     },
@@ -4676,6 +4854,7 @@
       "lane": 3,
       "name": "Wang, Daniel",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "53.00",
       "team": ""
     },
@@ -4690,6 +4869,7 @@
       "lane": 4,
       "name": "Baldwin, Daniel",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "50.27",
       "team": ""
     },
@@ -4704,6 +4884,7 @@
       "lane": 5,
       "name": "Stuck, Evan",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "51.85",
       "team": ""
     },
@@ -4718,6 +4899,7 @@
       "lane": 6,
       "name": "Riordan, James",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "55.00",
       "team": ""
     },
@@ -4732,6 +4914,7 @@
       "lane": 7,
       "name": "Smith, Ben",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "55.55",
       "team": ""
     },
@@ -4746,6 +4929,7 @@
       "lane": 8,
       "name": "Johnson, Lucas",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "56.69",
       "team": ""
     },
@@ -4760,6 +4944,7 @@
       "lane": 9,
       "name": "Le, Alex",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "58.00",
       "team": ""
     },
@@ -5068,6 +5253,7 @@
       "lane": 6,
       "name": "Graves, Lilly",
       "round": "finals",
+      "seedRank": 34,
       "seedTime": "1:30.00",
       "team": ""
     },
@@ -5110,6 +5296,7 @@
       "lane": 0,
       "name": "Mitchell, Ali",
       "round": "finals",
+      "seedRank": 29,
       "seedTime": "1:18.69",
       "team": ""
     },
@@ -5124,6 +5311,7 @@
       "lane": 3,
       "name": "Greene, Bebe",
       "round": "finals",
+      "seedRank": 23,
       "seedTime": "1:14.21",
       "team": ""
     },
@@ -5138,6 +5326,7 @@
       "lane": 5,
       "name": "Patricio-Taylor, Marissa",
       "round": "finals",
+      "seedRank": 22,
       "seedTime": "1:14.15",
       "team": ""
     },
@@ -5152,6 +5341,7 @@
       "lane": 6,
       "name": "Marim, Isabella",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "1:15.00",
       "team": ""
     },
@@ -5166,6 +5356,7 @@
       "lane": 8,
       "name": "Opipari, Annabella",
       "round": "finals",
+      "seedRank": 28,
       "seedTime": "1:16.00",
       "team": ""
     },
@@ -5180,6 +5371,7 @@
       "lane": 1,
       "name": "DiAntonio, Elise",
       "round": "finals",
+      "seedRank": 17,
       "seedTime": "1:12.00",
       "team": ""
     },
@@ -5194,6 +5386,7 @@
       "lane": 4,
       "name": "Allibone, Jessica",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "1:08.69",
       "team": ""
     },
@@ -5208,6 +5401,7 @@
       "lane": 5,
       "name": "Sloan, Claire",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "1:09.01",
       "team": ""
     },
@@ -5222,6 +5416,7 @@
       "lane": 6,
       "name": "Ruona, Katherine",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "1:10.00",
       "team": ""
     },
@@ -5236,6 +5431,7 @@
       "lane": 9,
       "name": "Randall, Julia",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "1:13.00",
       "team": ""
     },
@@ -5250,6 +5446,7 @@
       "lane": 0,
       "name": "Fannin, Mattie",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "1:08.00",
       "team": ""
     },
@@ -5264,6 +5461,7 @@
       "lane": 4,
       "name": "Alexander, Phoebe",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:05.40",
       "team": ""
     },
@@ -5278,6 +5476,7 @@
       "lane": 5,
       "name": "Greaux, Lauren",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "1:06.00",
       "team": ""
     },
@@ -5292,6 +5491,7 @@
       "lane": 6,
       "name": "Bierman, Caroline",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "1:07.00",
       "team": ""
     },
@@ -5306,6 +5506,7 @@
       "lane": 7,
       "name": "Hunt, Natalie",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "1:07.42",
       "team": ""
     },
@@ -5320,6 +5521,7 @@
       "lane": 8,
       "name": "Roberts, TaylorA",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "1:08.00",
       "team": ""
     },
@@ -5334,6 +5536,7 @@
       "lane": 9,
       "name": "LaCognata, Grace",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "1:08.22",
       "team": ""
     },
@@ -5572,6 +5775,7 @@
       "lane": 0,
       "name": "Matos, Marc",
       "round": "finals",
+      "seedRank": 29,
       "seedTime": "1:23.69",
       "team": ""
     },
@@ -5586,6 +5790,7 @@
       "lane": 1,
       "name": "Fields, Charles",
       "round": "finals",
+      "seedRank": 27,
       "seedTime": "1:20.00",
       "team": ""
     },
@@ -5600,6 +5805,7 @@
       "lane": 2,
       "name": "Hall, Nathan",
       "round": "finals",
+      "seedRank": 25,
       "seedTime": "1:10.00",
       "team": ""
     },
@@ -5614,6 +5820,7 @@
       "lane": 3,
       "name": "Vo, Brandon",
       "round": "finals",
+      "seedRank": 23,
       "seedTime": "1:06.69",
       "team": ""
     },
@@ -5628,6 +5835,7 @@
       "lane": 4,
       "name": "Wygonik, Sam",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "1:04.69",
       "team": ""
     },
@@ -5642,6 +5850,7 @@
       "lane": 5,
       "name": "Ganz, Zach",
       "round": "finals",
+      "seedRank": 22,
       "seedTime": "1:05.00",
       "team": ""
     },
@@ -5656,6 +5865,7 @@
       "lane": 6,
       "name": "Felix, Adrian",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "1:09.00",
       "team": ""
     },
@@ -5670,6 +5880,7 @@
       "lane": 7,
       "name": "Gauntt, Charlie",
       "round": "finals",
+      "seedRank": 26,
       "seedTime": "1:15.50",
       "team": ""
     },
@@ -5684,6 +5895,7 @@
       "lane": 8,
       "name": "Murnieks, Aleksander",
       "round": "finals",
+      "seedRank": 28,
       "seedTime": "1:20.69",
       "team": ""
     },
@@ -5698,6 +5910,7 @@
       "lane": 0,
       "name": "Howard, Josh",
       "round": "finals",
+      "seedRank": 19,
       "seedTime": "1:02.00",
       "team": ""
     },
@@ -5712,6 +5925,7 @@
       "lane": 1,
       "name": "Krosner, Samuel",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "1:01.00",
       "team": ""
     },
@@ -5726,6 +5940,7 @@
       "lane": 2,
       "name": "Rimsa, Thomas",
       "round": "finals",
+      "seedRank": 15,
       "seedTime": "1:00.69",
       "team": ""
     },
@@ -5740,6 +5955,7 @@
       "lane": 3,
       "name": "Xie, David",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "1:00.00",
       "team": ""
     },
@@ -5754,6 +5970,7 @@
       "lane": 7,
       "name": "Mervich, Ian",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "1:01.00",
       "team": ""
     },
@@ -5768,6 +5985,7 @@
       "lane": 9,
       "name": "Nikhil, Mahadevan",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "1:02.50",
       "team": ""
     },
@@ -5782,6 +6000,7 @@
       "lane": 0,
       "name": "Rosal, Gareth",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "1:00.00",
       "team": ""
     },
@@ -5796,6 +6015,7 @@
       "lane": 1,
       "name": "Vlady, George",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "59.69",
       "team": ""
     },
@@ -5810,6 +6030,7 @@
       "lane": 2,
       "name": "Rohovit, Hunter",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "58.69",
       "team": ""
     },
@@ -5824,6 +6045,7 @@
       "lane": 5,
       "name": "Tang, Rocky",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "56.96",
       "team": ""
     },
@@ -5838,6 +6060,7 @@
       "lane": 6,
       "name": "Chenard, Oscar",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "58.00",
       "team": ""
     },
@@ -5852,6 +6075,7 @@
       "lane": 9,
       "name": "Feller, Curtis",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "1:00.00",
       "team": ""
     },
@@ -5894,6 +6118,7 @@
       "lane": 4,
       "name": "Lamb, Grayce",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "3:10.69",
       "team": ""
     },
@@ -5950,6 +6175,7 @@
       "lane": 0,
       "name": "Holtz, KatrinaL",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "2:27.00",
       "team": ""
     },
@@ -5964,6 +6190,7 @@
       "lane": 1,
       "name": "Schug, Sophie",
       "round": "finals",
+      "seedRank": 17,
       "seedTime": "2:23.00",
       "team": ""
     },
@@ -5978,6 +6205,7 @@
       "lane": 3,
       "name": "Yang, Amy",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "2:17.69",
       "team": ""
     },
@@ -5992,6 +6220,7 @@
       "lane": 4,
       "name": "Wong, Tara",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "2:15.69",
       "team": ""
     },
@@ -6006,6 +6235,7 @@
       "lane": 5,
       "name": "Obara, Claire",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "2:16.66",
       "team": ""
     },
@@ -6020,6 +6250,7 @@
       "lane": 6,
       "name": "Bell, AlexandriaJ",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "2:20.00",
       "team": ""
     },
@@ -6034,6 +6265,7 @@
       "lane": 7,
       "name": "Meckley, Irelyn",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "2:20.69",
       "team": ""
     },
@@ -6048,6 +6280,7 @@
       "lane": 8,
       "name": "Franklin, Selene",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "2:27.00",
       "team": ""
     },
@@ -6062,6 +6295,7 @@
       "lane": 9,
       "name": "Millsaps, Alison",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "2:35.00",
       "team": ""
     },
@@ -6076,6 +6310,7 @@
       "lane": 0,
       "name": "Ratliff, Bella",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "2:09.86",
       "team": ""
     },
@@ -6090,6 +6325,7 @@
       "lane": 1,
       "name": "Baker, Amy",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "2:08.24",
       "team": ""
     },
@@ -6104,6 +6340,7 @@
       "lane": 2,
       "name": "Miller, Rita",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "2:06.47",
       "team": ""
     },
@@ -6118,6 +6355,7 @@
       "lane": 3,
       "name": "Rosenkranz, Bobbie",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "2:06.00",
       "team": ""
     },
@@ -6132,6 +6370,7 @@
       "lane": 4,
       "name": "Carlton, Delaney",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "2:00.69",
       "team": ""
     },
@@ -6146,6 +6385,7 @@
       "lane": 6,
       "name": "Ewart, Lucy",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "2:06.05",
       "team": ""
     },
@@ -6160,6 +6400,7 @@
       "lane": 7,
       "name": "Brefeld, Peyton",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "2:08.00",
       "team": ""
     },
@@ -6174,6 +6415,7 @@
       "lane": 9,
       "name": "Clements, Madison",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "2:11.00",
       "team": ""
     },
@@ -6244,6 +6486,7 @@
       "lane": 2,
       "name": "Goodale, Cooper",
       "round": "finals",
+      "seedRank": 25,
       "seedTime": "2:26.95",
       "team": ""
     },
@@ -6258,6 +6501,7 @@
       "lane": 3,
       "name": "Nellis, Luke",
       "round": "finals",
+      "seedRank": 22,
       "seedTime": "2:10.00",
       "team": ""
     },
@@ -6272,6 +6516,7 @@
       "lane": 4,
       "name": "Simmons, Ben",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "2:09.00",
       "team": ""
     },
@@ -6286,6 +6531,7 @@
       "lane": 5,
       "name": "McGahagin, Connor",
       "round": "finals",
+      "seedRank": 22,
       "seedTime": "2:10.00",
       "team": ""
     },
@@ -6300,6 +6546,7 @@
       "lane": 7,
       "name": "Lamberson, Tyler",
       "round": "finals",
+      "seedRank": 26,
       "seedTime": "2:35.00",
       "team": ""
     },
@@ -6342,6 +6589,7 @@
       "lane": 0,
       "name": "Rice, Thomas",
       "round": "timed_finals",
+      "seedRank": 19,
       "seedTime": "2:00.69",
       "team": ""
     },
@@ -6356,6 +6604,7 @@
       "lane": 1,
       "name": "Townsend, Matthew",
       "round": "timed_finals",
+      "seedRank": 17,
       "seedTime": "1:59.69",
       "team": ""
     },
@@ -6370,6 +6619,7 @@
       "lane": 3,
       "name": "Kinter, Nathan",
       "round": "timed_finals",
+      "seedRank": 12,
       "seedTime": "1:55.00",
       "team": ""
     },
@@ -6384,6 +6634,7 @@
       "lane": 4,
       "name": "Teal, Nathan",
       "round": "timed_finals",
+      "seedRank": 11,
       "seedTime": "1:54.00",
       "team": ""
     },
@@ -6398,6 +6649,7 @@
       "lane": 5,
       "name": "Allen, Hunter",
       "round": "timed_finals",
+      "seedRank": 12,
       "seedTime": "1:55.00",
       "team": ""
     },
@@ -6412,6 +6664,7 @@
       "lane": 6,
       "name": "Altera, Ryan",
       "round": "timed_finals",
+      "seedRank": 14,
       "seedTime": "1:55.69",
       "team": ""
     },
@@ -6426,6 +6679,7 @@
       "lane": 7,
       "name": "Wang, Daniel",
       "round": "timed_finals",
+      "seedRank": 16,
       "seedTime": "1:58.50",
       "team": ""
     },
@@ -6440,6 +6694,7 @@
       "lane": 8,
       "name": "Kruger, Ethan",
       "round": "timed_finals",
+      "seedRank": 18,
       "seedTime": "2:00.00",
       "team": ""
     },
@@ -6454,6 +6709,7 @@
       "lane": 9,
       "name": "Liu, Alex",
       "round": "timed_finals",
+      "seedRank": 19,
       "seedTime": "2:00.69",
       "team": ""
     },
@@ -6468,6 +6724,7 @@
       "lane": 1,
       "name": "Bryson, Ford",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "1:49.45",
       "team": ""
     },
@@ -6482,6 +6739,7 @@
       "lane": 2,
       "name": "Giugliano, Joe",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "1:48.22",
       "team": ""
     },
@@ -6496,6 +6754,7 @@
       "lane": 3,
       "name": "Ice, Edward",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "1:44.19",
       "team": ""
     },
@@ -6510,6 +6769,7 @@
       "lane": 4,
       "name": "Renier, Luke",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:40.66",
       "team": ""
     },
@@ -6524,6 +6784,7 @@
       "lane": 5,
       "name": "Gossmann, Christopher",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "1:41.23",
       "team": ""
     },
@@ -6538,6 +6799,7 @@
       "lane": 7,
       "name": "Fries, Ryan",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "1:48.69",
       "team": ""
     },
@@ -6552,6 +6814,7 @@
       "lane": 8,
       "name": "Hall, Jonathan",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "1:50.00",
       "team": ""
     },
@@ -6566,6 +6829,7 @@
       "lane": 9,
       "name": "Martin, Colton",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "1:52.00",
       "team": ""
     },
@@ -6818,6 +7082,7 @@
       "lane": 5,
       "name": "Kazemzadeh, Ava",
       "round": "finals",
+      "seedRank": 42,
       "seedTime": "45.00",
       "team": ""
     },
@@ -6832,6 +7097,7 @@
       "lane": 6,
       "name": "Gembicki, Emily",
       "round": "finals",
+      "seedRank": 44,
       "seedTime": "50.00",
       "team": ""
     },
@@ -6860,6 +7126,7 @@
       "lane": 0,
       "name": "Godoy, Tyler",
       "round": "finals",
+      "seedRank": 39,
       "seedTime": "42.69",
       "team": ""
     },
@@ -6874,6 +7141,7 @@
       "lane": 1,
       "name": "Melton, Jacoby",
       "round": "finals",
+      "seedRank": 37,
       "seedTime": "40.69",
       "team": ""
     },
@@ -6888,6 +7156,7 @@
       "lane": 3,
       "name": "Davenport, Eva",
       "round": "finals",
+      "seedRank": 33,
       "seedTime": "40.00",
       "team": ""
     },
@@ -6902,6 +7171,7 @@
       "lane": 4,
       "name": "Dee, Becca",
       "round": "finals",
+      "seedRank": 26,
       "seedTime": "38.00",
       "team": ""
     },
@@ -6916,6 +7186,7 @@
       "lane": 5,
       "name": "Page, Carole-Ann",
       "round": "finals",
+      "seedRank": 32,
       "seedTime": "38.09",
       "team": ""
     },
@@ -6930,6 +7201,7 @@
       "lane": 7,
       "name": "Farrugia, Amelia",
       "round": "finals",
+      "seedRank": 36,
       "seedTime": "40.41",
       "team": ""
     },
@@ -6944,6 +7216,7 @@
       "lane": 8,
       "name": "Schmid, Sarah",
       "round": "finals",
+      "seedRank": 38,
       "seedTime": "41.69",
       "team": ""
     },
@@ -6958,6 +7231,7 @@
       "lane": 9,
       "name": "DeLosh, McKenzie",
       "round": "finals",
+      "seedRank": 40,
       "seedTime": "43.00",
       "team": ""
     },
@@ -6972,6 +7246,7 @@
       "lane": 3,
       "name": "Elvambuena, Ella",
       "round": "finals",
+      "seedRank": 23,
       "seedTime": "36.69",
       "team": ""
     },
@@ -6986,6 +7261,7 @@
       "lane": 5,
       "name": "Tiganus, Sara",
       "round": "finals",
+      "seedRank": 22,
       "seedTime": "36.66",
       "team": ""
     },
@@ -7000,6 +7276,7 @@
       "lane": 6,
       "name": "Chetrit, Nell",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "37.00",
       "team": ""
     },
@@ -7014,6 +7291,7 @@
       "lane": 7,
       "name": "Walsh, Bridget",
       "round": "finals",
+      "seedRank": 26,
       "seedTime": "38.00",
       "team": ""
     },
@@ -7028,6 +7306,7 @@
       "lane": 0,
       "name": "Roberts, Stella",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "36.00",
       "team": ""
     },
@@ -7042,6 +7321,7 @@
       "lane": 2,
       "name": "Castle, Kendall",
       "round": "finals",
+      "seedRank": 15,
       "seedTime": "35.31",
       "team": ""
     },
@@ -7056,6 +7336,7 @@
       "lane": 4,
       "name": "Tucker, Meredith",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "34.62",
       "team": ""
     },
@@ -7070,6 +7351,7 @@
       "lane": 5,
       "name": "Yie, Emiley",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "34.69",
       "team": ""
     },
@@ -7084,6 +7366,7 @@
       "lane": 7,
       "name": "DiAntonio, Elise",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "35.50",
       "team": ""
     },
@@ -7098,6 +7381,7 @@
       "lane": 9,
       "name": "Nance, Lauren",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "36.46",
       "team": ""
     },
@@ -7112,6 +7396,7 @@
       "lane": 0,
       "name": "Avedisian, Michaela",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "34.00",
       "team": ""
     },
@@ -7126,6 +7411,7 @@
       "lane": 4,
       "name": "Saini, Meher",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "30.30",
       "team": ""
     },
@@ -7140,6 +7426,7 @@
       "lane": 6,
       "name": "Dolson, Emma",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "32.99",
       "team": ""
     },
@@ -7154,6 +7441,7 @@
       "lane": 7,
       "name": "Marim, Isabella",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "33.00",
       "team": ""
     },
@@ -7168,6 +7456,7 @@
       "lane": 8,
       "name": "Faust, Amelia",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "33.69",
       "team": ""
     },
@@ -7182,6 +7471,7 @@
       "lane": 9,
       "name": "Alexander, Phoebe",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "34.23",
       "team": ""
     },
@@ -7364,6 +7654,7 @@
       "lane": 2,
       "name": "Saglam, Semih",
       "round": "finals",
+      "seedRank": 45,
       "seedTime": "55.69",
       "team": ""
     },
@@ -7378,6 +7669,7 @@
       "lane": 3,
       "name": "Jimenez, AJ",
       "round": "finals",
+      "seedRank": 43,
       "seedTime": "40.00",
       "team": ""
     },
@@ -7392,6 +7684,7 @@
       "lane": 4,
       "name": "Muralidharan, Vish",
       "round": "finals",
+      "seedRank": 41,
       "seedTime": "38.39",
       "team": ""
     },
@@ -7406,6 +7699,7 @@
       "lane": 5,
       "name": "Matos, Marc",
       "round": "finals",
+      "seedRank": 42,
       "seedTime": "38.69",
       "team": ""
     },
@@ -7420,6 +7714,7 @@
       "lane": 6,
       "name": "Friginette, Brandon",
       "round": "finals",
+      "seedRank": 44,
       "seedTime": "53.00",
       "team": ""
     },
@@ -7476,6 +7771,7 @@
       "lane": 0,
       "name": "Ryan, Tierney",
       "round": "finals",
+      "seedRank": 38,
       "seedTime": "35.00",
       "team": ""
     },
@@ -7490,6 +7786,7 @@
       "lane": 3,
       "name": "Gauntt, Charlie",
       "round": "finals",
+      "seedRank": 33,
       "seedTime": "33.75",
       "team": ""
     },
@@ -7504,6 +7801,7 @@
       "lane": 4,
       "name": "Heath, ZacharyC",
       "round": "finals",
+      "seedRank": 30,
       "seedTime": "32.00",
       "team": ""
     },
@@ -7518,6 +7816,7 @@
       "lane": 5,
       "name": "Landis, Tyler",
       "round": "finals",
+      "seedRank": 32,
       "seedTime": "33.00",
       "team": ""
     },
@@ -7532,6 +7831,7 @@
       "lane": 6,
       "name": "Williams, Crescent",
       "round": "finals",
+      "seedRank": 34,
       "seedTime": "34.00",
       "team": ""
     },
@@ -7546,6 +7846,7 @@
       "lane": 7,
       "name": "Daves, Brandon",
       "round": "finals",
+      "seedRank": 34,
       "seedTime": "34.00",
       "team": ""
     },
@@ -7560,6 +7861,7 @@
       "lane": 8,
       "name": "Fields, Charles",
       "round": "finals",
+      "seedRank": 38,
       "seedTime": "35.00",
       "team": ""
     },
@@ -7574,6 +7876,7 @@
       "lane": 9,
       "name": "Hernandez, Joshua",
       "round": "finals",
+      "seedRank": 40,
       "seedTime": "36.69",
       "team": ""
     },
@@ -7588,6 +7891,7 @@
       "lane": 0,
       "name": "Fernandez, Warren",
       "round": "finals",
+      "seedRank": 28,
       "seedTime": "31.69",
       "team": ""
     },
@@ -7602,6 +7906,7 @@
       "lane": 1,
       "name": "Ganz, Zach",
       "round": "finals",
+      "seedRank": 27,
       "seedTime": "31.50",
       "team": ""
     },
@@ -7616,6 +7921,7 @@
       "lane": 2,
       "name": "Yeh, Paul",
       "round": "finals",
+      "seedRank": 22,
       "seedTime": "31.00",
       "team": ""
     },
@@ -7630,6 +7936,7 @@
       "lane": 3,
       "name": "Liu, Eric",
       "round": "finals",
+      "seedRank": 22,
       "seedTime": "31.00",
       "team": ""
     },
@@ -7644,6 +7951,7 @@
       "lane": 4,
       "name": "Quesada, Jorge",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "30.70",
       "team": ""
     },
@@ -7658,6 +7966,7 @@
       "lane": 5,
       "name": "Nucci, Renzo",
       "round": "finals",
+      "seedRank": 22,
       "seedTime": "31.00",
       "team": ""
     },
@@ -7672,6 +7981,7 @@
       "lane": 8,
       "name": "Long, Lucas",
       "round": "finals",
+      "seedRank": 28,
       "seedTime": "31.69",
       "team": ""
     },
@@ -7686,6 +7996,7 @@
       "lane": 0,
       "name": "Long, Liam",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "30.69",
       "team": ""
     },
@@ -7700,6 +8011,7 @@
       "lane": 1,
       "name": "Kryski, Wyatt",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "30.00",
       "team": ""
     },
@@ -7714,6 +8026,7 @@
       "lane": 3,
       "name": "Nikhil, Mahadevan",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "29.50",
       "team": ""
     },
@@ -7728,6 +8041,7 @@
       "lane": 4,
       "name": "Zagorianos, Alexander",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "29.18",
       "team": ""
     },
@@ -7742,6 +8056,7 @@
       "lane": 5,
       "name": "Neumann, Asher",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "29.49",
       "team": ""
     },
@@ -7756,6 +8071,7 @@
       "lane": 6,
       "name": "Abdo, Adel",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "29.50",
       "team": ""
     },
@@ -7770,6 +8086,7 @@
       "lane": 8,
       "name": "Jiang, Aaron",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "30.69",
       "team": ""
     },
@@ -7784,6 +8101,7 @@
       "lane": 9,
       "name": "Stephens, Clay",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "30.69",
       "team": ""
     },
@@ -7798,6 +8116,7 @@
       "lane": 0,
       "name": "Williams, Walker",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "29.00",
       "team": ""
     },
@@ -7812,6 +8131,7 @@
       "lane": 2,
       "name": "Fawley, Dylan",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "26.92",
       "team": ""
     },
@@ -7826,6 +8146,7 @@
       "lane": 3,
       "name": "Baldwin, Daniel",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "26.49",
       "team": ""
     },
@@ -7840,6 +8161,7 @@
       "lane": 4,
       "name": "Cheifetz, AdamC",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "26.13",
       "team": ""
     },
@@ -7854,6 +8176,7 @@
       "lane": 6,
       "name": "Lee, Hyoseon",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "26.81",
       "team": ""
     },
@@ -7868,6 +8191,7 @@
       "lane": 8,
       "name": "Fletcher, Alden",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "28.58",
       "team": ""
     },
@@ -7882,6 +8206,7 @@
       "lane": 9,
       "name": "McDevitt, Liam",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "29.03",
       "team": ""
     },
@@ -7952,6 +8277,7 @@
       "lane": 4,
       "name": "Allibone, Jessica",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "1:06.69",
       "team": ""
     },
@@ -7966,6 +8292,7 @@
       "lane": 5,
       "name": "Burlina, Emma",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "1:08.69",
       "team": ""
     },
@@ -7980,6 +8307,7 @@
       "lane": 6,
       "name": "Brooks, Kaia",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "1:12.00",
       "team": ""
     },
@@ -8022,6 +8350,7 @@
       "lane": 1,
       "name": "Johnson, Katherine",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "1:05.00",
       "team": ""
     },
@@ -8036,6 +8365,7 @@
       "lane": 3,
       "name": "Clements, Madison",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "1:01.00",
       "team": ""
     },
@@ -8050,6 +8380,7 @@
       "lane": 5,
       "name": "Becker, Kailyn",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "1:00.83",
       "team": ""
     },
@@ -8064,6 +8395,7 @@
       "lane": 7,
       "name": "Hicks, Erin",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "1:04.69",
       "team": ""
     },
@@ -8078,6 +8410,7 @@
       "lane": 8,
       "name": "Johann, Rachel",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "1:06.00",
       "team": ""
     },
@@ -8092,6 +8425,7 @@
       "lane": 9,
       "name": "Witthoff, Mia",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "1:06.69",
       "team": ""
     },
@@ -8204,6 +8538,7 @@
       "lane": 0,
       "name": "Roy, Ishan",
       "round": "finals",
+      "seedRank": 29,
       "seedTime": "1:10.00",
       "team": ""
     },
@@ -8218,6 +8553,7 @@
       "lane": 1,
       "name": "Kharel, Avi",
       "round": "finals",
+      "seedRank": 27,
       "seedTime": "1:02.69",
       "team": ""
     },
@@ -8232,6 +8568,7 @@
       "lane": 2,
       "name": "Nucci, Renzo",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "1:00.00",
       "team": ""
     },
@@ -8246,6 +8583,7 @@
       "lane": 3,
       "name": "Cao, Bradley",
       "round": "finals",
+      "seedRank": 22,
       "seedTime": "58.69",
       "team": ""
     },
@@ -8260,6 +8598,7 @@
       "lane": 5,
       "name": "Schwandt, Gavin",
       "round": "finals",
+      "seedRank": 22,
       "seedTime": "58.69",
       "team": ""
     },
@@ -8274,6 +8613,7 @@
       "lane": 6,
       "name": "Rosal, Gareth",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "1:00.00",
       "team": ""
     },
@@ -8288,6 +8628,7 @@
       "lane": 8,
       "name": "Goodale, Cooper",
       "round": "finals",
+      "seedRank": 28,
       "seedTime": "1:05.07",
       "team": ""
     },
@@ -8302,6 +8643,7 @@
       "lane": 9,
       "name": "Ghidu, Nicholas",
       "round": "finals",
+      "seedRank": 29,
       "seedTime": "1:10.00",
       "team": ""
     },
@@ -8316,6 +8658,7 @@
       "lane": 0,
       "name": "McNeill, Carson",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "57.69",
       "team": ""
     },
@@ -8330,6 +8673,7 @@
       "lane": 2,
       "name": "Bai, Ryan",
       "round": "finals",
+      "seedRank": 15,
       "seedTime": "56.90",
       "team": ""
     },
@@ -8344,6 +8688,7 @@
       "lane": 4,
       "name": "Chenard, Oscar",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "56.00",
       "team": ""
     },
@@ -8358,6 +8703,7 @@
       "lane": 5,
       "name": "Xie, David",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "56.30",
       "team": ""
     },
@@ -8372,6 +8718,7 @@
       "lane": 6,
       "name": "Skidmore, Billy",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "56.69",
       "team": ""
     },
@@ -8386,6 +8733,7 @@
       "lane": 8,
       "name": "Johnson, Lucas",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "57.69",
       "team": ""
     },
@@ -8400,6 +8748,7 @@
       "lane": 9,
       "name": "Seward, Lawson",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "58.00",
       "team": ""
     },
@@ -8414,6 +8763,7 @@
       "lane": 0,
       "name": "Riordan, James",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "55.00",
       "team": ""
     },
@@ -8428,6 +8778,7 @@
       "lane": 1,
       "name": "White, Aidan",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "55.00",
       "team": ""
     },
@@ -8442,6 +8793,7 @@
       "lane": 2,
       "name": "Laurie, Aiden",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "54.00",
       "team": ""
     },
@@ -8456,6 +8808,7 @@
       "lane": 4,
       "name": "Gossmann, Christopher",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "50.01",
       "team": ""
     },
@@ -8470,6 +8823,7 @@
       "lane": 5,
       "name": "Ice, Edward",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "51.34",
       "team": ""
     },
@@ -8484,6 +8838,7 @@
       "lane": 6,
       "name": "Loughmiller, Max",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "53.11",
       "team": ""
     },
@@ -8775,6 +9130,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "1:54.00",
       "team": "KSU-GA"
     },
@@ -8811,6 +9167,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "1:48.16",
       "team": "FLOR-FL"
     },
@@ -8847,6 +9204,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "1:46.00",
       "team": "UGA-GA"
     },
@@ -8862,6 +9220,7 @@
       "relayLetter": "A",
       "relaySwimmers": [],
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "1:45.00",
       "team": "FSUC"
     },
@@ -8877,6 +9236,7 @@
       "relayLetter": "A",
       "relaySwimmers": [],
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:42.87",
       "team": "GTSC-GA"
     },
@@ -8913,6 +9273,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "1:44.23",
       "team": "FLOR-FL"
     },
@@ -8949,6 +9310,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "1:45.17",
       "team": "NCSU-NC"
     },
@@ -8985,6 +9347,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "1:47.06",
       "team": "NCSU-NC"
     },
@@ -9021,6 +9384,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "1:50.00",
       "team": "UGA-GA"
     },
@@ -9057,6 +9421,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "1:57.00",
       "team": "KSU-GA"
     },
@@ -9282,6 +9647,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "1:43.00",
       "team": "SCGSU-GA"
     },
@@ -9462,6 +9828,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "1:40.00",
       "team": "UGA-GA"
     },
@@ -9498,6 +9865,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "1:36.00",
       "team": "SCGSU-GA"
     },
@@ -9534,6 +9902,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "1:31.00",
       "team": "FLOR-FL"
     },
@@ -9549,6 +9918,7 @@
       "relayLetter": "A",
       "relaySwimmers": [],
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "1:30.00",
       "team": "FSUC"
     },
@@ -9564,6 +9934,7 @@
       "relayLetter": "A",
       "relaySwimmers": [],
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:24.90",
       "team": "GTSC-GA"
     },
@@ -9600,6 +9971,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "1:27.37",
       "team": "NCSU-NC"
     },
@@ -9636,6 +10008,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "1:30.00",
       "team": "UGA-GA"
     },
@@ -9672,6 +10045,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "1:31.80",
       "team": "NCSU-NC"
     },
@@ -9708,6 +10082,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "1:39.00",
       "team": "KSU-GA"
     },
@@ -9744,6 +10119,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "1:40.00",
       "team": "KSU-GA"
     },
@@ -9772,6 +10148,7 @@
       "lane": 4,
       "name": "Mitchell, Ali",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "2:35.69",
       "team": ""
     },
@@ -9800,6 +10177,7 @@
       "lane": 1,
       "name": "Yang, Amy",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "2:33.69",
       "team": ""
     },
@@ -9814,6 +10192,7 @@
       "lane": 2,
       "name": "Roberts, TaylorA",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "2:28.00",
       "team": ""
     },
@@ -9828,6 +10207,7 @@
       "lane": 3,
       "name": "Miller, Rita",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "2:21.15",
       "team": ""
     },
@@ -9842,6 +10222,7 @@
       "lane": 5,
       "name": "Fannin, Mattie",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "2:20.00",
       "team": ""
     },
@@ -9856,6 +10237,7 @@
       "lane": 6,
       "name": "Munger, Audrey",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "2:22.69",
       "team": ""
     },
@@ -9870,6 +10252,7 @@
       "lane": 7,
       "name": "Plantamura, Natalie",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "2:28.69",
       "team": ""
     },
@@ -9912,6 +10295,7 @@
       "lane": 4,
       "name": "Murray, Liam",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "2:30.37",
       "team": ""
     },
@@ -9926,6 +10310,7 @@
       "lane": 5,
       "name": "Roy, Ishan",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "2:35.00",
       "team": ""
     },
@@ -9954,6 +10339,7 @@
       "lane": 0,
       "name": "Luo, Andrew",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "2:20.69",
       "team": ""
     },
@@ -9968,6 +10354,7 @@
       "lane": 2,
       "name": "Tang, Rocky",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "2:06.90",
       "team": ""
     },
@@ -9982,6 +10369,7 @@
       "lane": 3,
       "name": "Long, Lucas",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "2:05.69",
       "team": ""
     },
@@ -9996,6 +10384,7 @@
       "lane": 4,
       "name": "Hall, Jonathan",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "2:00.00",
       "team": ""
     },
@@ -10010,6 +10399,7 @@
       "lane": 7,
       "name": "Mervich, Ian",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "2:15.00",
       "team": ""
     },
@@ -10164,6 +10554,7 @@
       "lane": 0,
       "name": "Miller, Charli",
       "round": "finals",
+      "seedRank": 48,
       "seedTime": "35.69",
       "team": ""
     },
@@ -10178,6 +10569,7 @@
       "lane": 3,
       "name": "Greene, Bebe",
       "round": "finals",
+      "seedRank": 43,
       "seedTime": "32.21",
       "team": ""
     },
@@ -10192,6 +10584,7 @@
       "lane": 4,
       "name": "Pyrczak, Aurelia",
       "round": "finals",
+      "seedRank": 41,
       "seedTime": "32.04",
       "team": ""
     },
@@ -10206,6 +10599,7 @@
       "lane": 7,
       "name": "Ratliff, Bella",
       "round": "finals",
+      "seedRank": 46,
       "seedTime": "34.63",
       "team": ""
     },
@@ -10220,6 +10614,7 @@
       "lane": 8,
       "name": "Godoy, Tyler",
       "round": "finals",
+      "seedRank": 48,
       "seedTime": "35.69",
       "team": ""
     },
@@ -10234,6 +10629,7 @@
       "lane": 1,
       "name": "Tiganus, Sara",
       "round": "finals",
+      "seedRank": 37,
       "seedTime": "31.86",
       "team": ""
     },
@@ -10248,6 +10644,7 @@
       "lane": 2,
       "name": "Opipari, Annabella",
       "round": "finals",
+      "seedRank": 35,
       "seedTime": "31.00",
       "team": ""
     },
@@ -10262,6 +10659,7 @@
       "lane": 3,
       "name": "Malcomson, Brynn",
       "round": "finals",
+      "seedRank": 33,
       "seedTime": "30.69",
       "team": ""
     },
@@ -10276,6 +10674,7 @@
       "lane": 4,
       "name": "Graves, Lilly",
       "round": "finals",
+      "seedRank": 28,
       "seedTime": "30.00",
       "team": ""
     },
@@ -10290,6 +10689,7 @@
       "lane": 6,
       "name": "Fass, Emma",
       "round": "finals",
+      "seedRank": 34,
       "seedTime": "30.80",
       "team": ""
     },
@@ -10304,6 +10704,7 @@
       "lane": 9,
       "name": "Franklin, Selene",
       "round": "finals",
+      "seedRank": 38,
       "seedTime": "32.00",
       "team": ""
     },
@@ -10318,6 +10719,7 @@
       "lane": 0,
       "name": "Peyton, Abby",
       "round": "finals",
+      "seedRank": 28,
       "seedTime": "30.00",
       "team": ""
     },
@@ -10332,6 +10734,7 @@
       "lane": 1,
       "name": "Collerette, Hannah",
       "round": "finals",
+      "seedRank": 26,
       "seedTime": "29.69",
       "team": ""
     },
@@ -10346,6 +10749,7 @@
       "lane": 3,
       "name": "Hunt, Natalie",
       "round": "finals",
+      "seedRank": 23,
       "seedTime": "29.15",
       "team": ""
     },
@@ -10360,6 +10764,7 @@
       "lane": 4,
       "name": "Schug, Sophie",
       "round": "finals",
+      "seedRank": 15,
       "seedTime": "29.00",
       "team": ""
     },
@@ -10374,6 +10779,7 @@
       "lane": 5,
       "name": "Kohs, Madeline",
       "round": "finals",
+      "seedRank": 15,
       "seedTime": "29.00",
       "team": ""
     },
@@ -10388,6 +10794,7 @@
       "lane": 7,
       "name": "Faust, Amelia",
       "round": "finals",
+      "seedRank": 26,
       "seedTime": "29.69",
       "team": ""
     },
@@ -10402,6 +10809,7 @@
       "lane": 8,
       "name": "Greaux, Lauren",
       "round": "finals",
+      "seedRank": 28,
       "seedTime": "30.00",
       "team": ""
     },
@@ -10416,6 +10824,7 @@
       "lane": 2,
       "name": "Shaw, Morgan",
       "round": "finals",
+      "seedRank": 15,
       "seedTime": "29.00",
       "team": ""
     },
@@ -10430,6 +10839,7 @@
       "lane": 3,
       "name": "Petersen, Riley",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "28.93",
       "team": ""
     },
@@ -10444,6 +10854,7 @@
       "lane": 4,
       "name": "Witthoff, Mia",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "28.69",
       "team": ""
     },
@@ -10458,6 +10869,7 @@
       "lane": 5,
       "name": "Ndiaye, Aneesa",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "28.80",
       "team": ""
     },
@@ -10472,6 +10884,7 @@
       "lane": 6,
       "name": "Sloan, Claire",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "28.96",
       "team": ""
     },
@@ -10486,6 +10899,7 @@
       "lane": 8,
       "name": "Kelly, Jemma",
       "round": "finals",
+      "seedRank": 15,
       "seedTime": "29.00",
       "team": ""
     },
@@ -10500,6 +10914,7 @@
       "lane": 9,
       "name": "Rosenkranz, Bobbie",
       "round": "finals",
+      "seedRank": 15,
       "seedTime": "29.00",
       "team": ""
     },
@@ -10514,6 +10929,7 @@
       "lane": 0,
       "name": "Alexander, Phoebe",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "28.56",
       "team": ""
     },
@@ -10528,6 +10944,7 @@
       "lane": 1,
       "name": "Johann, Rachel",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "28.00",
       "team": ""
     },
@@ -10542,6 +10959,7 @@
       "lane": 3,
       "name": "Krzyzaniak, Alexis",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "27.50",
       "team": ""
     },
@@ -10556,6 +10974,7 @@
       "lane": 4,
       "name": "Ochoa, Iris",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "26.70",
       "team": ""
     },
@@ -10570,6 +10989,7 @@
       "lane": 5,
       "name": "Dolson, Emma",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "27.50",
       "team": ""
     },
@@ -10584,6 +11004,7 @@
       "lane": 6,
       "name": "Freund, Gabby",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "27.69",
       "team": ""
     },
@@ -10598,6 +11019,7 @@
       "lane": 7,
       "name": "Bierman, Caroline",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "28.00",
       "team": ""
     },
@@ -10612,6 +11034,7 @@
       "lane": 8,
       "name": "LaCognata, Grace",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "28.44",
       "team": ""
     },
@@ -10626,6 +11049,7 @@
       "lane": 9,
       "name": "Honaker, Olivia",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "28.68",
       "team": ""
     },
@@ -10850,6 +11274,7 @@
       "lane": 3,
       "name": "Jagadeesh, Vidhur",
       "round": "finals",
+      "seedRank": 43,
       "seedTime": "30.64",
       "team": ""
     },
@@ -10864,6 +11289,7 @@
       "lane": 4,
       "name": "Yu, Jason",
       "round": "finals",
+      "seedRank": 40,
       "seedTime": "30.00",
       "team": ""
     },
@@ -10878,6 +11304,7 @@
       "lane": 6,
       "name": "Brogi, Maxi",
       "round": "finals",
+      "seedRank": 44,
       "seedTime": "30.69",
       "team": ""
     },
@@ -10892,6 +11319,7 @@
       "lane": 7,
       "name": "DeLaCruz, Gabriel",
       "round": "finals",
+      "seedRank": 46,
       "seedTime": "31.69",
       "team": ""
     },
@@ -10906,6 +11334,7 @@
       "lane": 8,
       "name": "Lu, Stanley",
       "round": "finals",
+      "seedRank": 48,
       "seedTime": "1:10.00",
       "team": ""
     },
@@ -10934,6 +11363,7 @@
       "lane": 0,
       "name": "Townsend, Matthew",
       "round": "finals",
+      "seedRank": 39,
       "seedTime": "29.69",
       "team": ""
     },
@@ -10948,6 +11378,7 @@
       "lane": 1,
       "name": "Torchia, Henry",
       "round": "finals",
+      "seedRank": 37,
       "seedTime": "29.30",
       "team": ""
     },
@@ -10962,6 +11393,7 @@
       "lane": 2,
       "name": "Wygonik, Sam",
       "round": "finals",
+      "seedRank": 35,
       "seedTime": "28.69",
       "team": ""
     },
@@ -10976,6 +11408,7 @@
       "lane": 3,
       "name": "Felix, Adrian",
       "round": "finals",
+      "seedRank": 33,
       "seedTime": "28.00",
       "team": ""
     },
@@ -10990,6 +11423,7 @@
       "lane": 4,
       "name": "Cao, Bradley",
       "round": "finals",
+      "seedRank": 30,
       "seedTime": "27.69",
       "team": ""
     },
@@ -11004,6 +11438,7 @@
       "lane": 5,
       "name": "Sirgany, Ben",
       "round": "finals",
+      "seedRank": 32,
       "seedTime": "27.88",
       "team": ""
     },
@@ -11018,6 +11453,7 @@
       "lane": 6,
       "name": "McGahagin, Connor",
       "round": "finals",
+      "seedRank": 34,
       "seedTime": "28.50",
       "team": ""
     },
@@ -11032,6 +11468,7 @@
       "lane": 7,
       "name": "Kennedy, Avery",
       "round": "finals",
+      "seedRank": 36,
       "seedTime": "28.80",
       "team": ""
     },
@@ -11046,6 +11483,7 @@
       "lane": 8,
       "name": "Hernandez, Joshua",
       "round": "finals",
+      "seedRank": 38,
       "seedTime": "29.50",
       "team": ""
     },
@@ -11060,6 +11498,7 @@
       "lane": 0,
       "name": "Goodale, Cooper",
       "round": "finals",
+      "seedRank": 29,
       "seedTime": "27.60",
       "team": ""
     },
@@ -11074,6 +11513,7 @@
       "lane": 1,
       "name": "Swain, Ethan",
       "round": "finals",
+      "seedRank": 26,
       "seedTime": "27.00",
       "team": ""
     },
@@ -11088,6 +11528,7 @@
       "lane": 2,
       "name": "Rohovit, Hunter",
       "round": "finals",
+      "seedRank": 25,
       "seedTime": "26.70",
       "team": ""
     },
@@ -11102,6 +11543,7 @@
       "lane": 3,
       "name": "Nikhil, Mahadevan",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "26.50",
       "team": ""
     },
@@ -11116,6 +11558,7 @@
       "lane": 4,
       "name": "Shepard, Brandon",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "26.50",
       "team": ""
     },
@@ -11130,6 +11573,7 @@
       "lane": 5,
       "name": "Howard, Josh",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "26.50",
       "team": ""
     },
@@ -11144,6 +11588,7 @@
       "lane": 6,
       "name": "Hancu, Andrei",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "26.69",
       "team": ""
     },
@@ -11158,6 +11603,7 @@
       "lane": 7,
       "name": "Kinter, Nathan",
       "round": "finals",
+      "seedRank": 26,
       "seedTime": "27.00",
       "team": ""
     },
@@ -11172,6 +11618,7 @@
       "lane": 8,
       "name": "Lewis, Caiden",
       "round": "finals",
+      "seedRank": 28,
       "seedTime": "27.50",
       "team": ""
     },
@@ -11186,6 +11633,7 @@
       "lane": 9,
       "name": "Vo, Brandon",
       "round": "finals",
+      "seedRank": 30,
       "seedTime": "27.69",
       "team": ""
     },
@@ -11200,6 +11648,7 @@
       "lane": 0,
       "name": "Marquez, Alexandro",
       "round": "timed_finals",
+      "seedRank": 16,
       "seedTime": "26.00",
       "team": ""
     },
@@ -11214,6 +11663,7 @@
       "lane": 1,
       "name": "Nucci, Renzo",
       "round": "timed_finals",
+      "seedRank": 16,
       "seedTime": "26.00",
       "team": ""
     },
@@ -11228,6 +11678,7 @@
       "lane": 2,
       "name": "Matthews, John",
       "round": "timed_finals",
+      "seedRank": 14,
       "seedTime": "25.69",
       "team": ""
     },
@@ -11242,6 +11693,7 @@
       "lane": 3,
       "name": "Springate, Dylan",
       "round": "timed_finals",
+      "seedRank": 13,
       "seedTime": "25.66",
       "team": ""
     },
@@ -11256,6 +11708,7 @@
       "lane": 4,
       "name": "Miller, Christopher",
       "round": "timed_finals",
+      "seedRank": 11,
       "seedTime": "25.26",
       "team": ""
     },
@@ -11270,6 +11723,7 @@
       "lane": 5,
       "name": "Kryski, Wyatt",
       "round": "timed_finals",
+      "seedRank": 12,
       "seedTime": "25.50",
       "team": ""
     },
@@ -11284,6 +11738,7 @@
       "lane": 6,
       "name": "Rimsa, Thomas",
       "round": "timed_finals",
+      "seedRank": 14,
       "seedTime": "25.69",
       "team": ""
     },
@@ -11298,6 +11753,7 @@
       "lane": 7,
       "name": "Landis, Tyler",
       "round": "timed_finals",
+      "seedRank": 16,
       "seedTime": "26.00",
       "team": ""
     },
@@ -11312,6 +11768,7 @@
       "lane": 8,
       "name": "Feller, Curtis",
       "round": "timed_finals",
+      "seedRank": 16,
       "seedTime": "26.00",
       "team": ""
     },
@@ -11326,6 +11783,7 @@
       "lane": 0,
       "name": "Xie, David",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "25.00",
       "team": ""
     },
@@ -11340,6 +11798,7 @@
       "lane": 2,
       "name": "White, Aidan",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "25.00",
       "team": ""
     },
@@ -11354,6 +11813,7 @@
       "lane": 3,
       "name": "Neumann, Asher",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "24.04",
       "team": ""
     },
@@ -11368,6 +11828,7 @@
       "lane": 4,
       "name": "Loughmiller, Max",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "23.16",
       "team": ""
     },
@@ -11382,6 +11843,7 @@
       "lane": 5,
       "name": "Renier, Luke",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "23.85",
       "team": ""
     },
@@ -11396,6 +11858,7 @@
       "lane": 6,
       "name": "Schnupp, Andrew",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "24.69",
       "team": ""
     },
@@ -11410,6 +11873,7 @@
       "lane": 7,
       "name": "Trocchi, Will",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "25.00",
       "team": ""
     },
@@ -11424,6 +11888,7 @@
       "lane": 8,
       "name": "Gransee, Kyle",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "25.00",
       "team": ""
     },
@@ -11438,6 +11903,7 @@
       "lane": 9,
       "name": "Armbruster, Noah",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "25.10",
       "team": ""
     },
@@ -11564,6 +12030,7 @@
       "lane": 3,
       "name": "Lamb, Grayce",
       "round": "finals",
+      "seedRank": 23,
       "seedTime": "1:40.69",
       "team": ""
     },
@@ -11578,6 +12045,7 @@
       "lane": 4,
       "name": "Walsh, Bridget",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "1:30.00",
       "team": ""
     },
@@ -11648,6 +12116,7 @@
       "lane": 1,
       "name": "Godoy, Tyler",
       "round": "finals",
+      "seedRank": 17,
       "seedTime": "1:20.69",
       "team": ""
     },
@@ -11662,6 +12131,7 @@
       "lane": 3,
       "name": "Roberts, Stella",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "1:18.00",
       "team": ""
     },
@@ -11676,6 +12146,7 @@
       "lane": 8,
       "name": "Page, Carole-Ann",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "1:21.71",
       "team": ""
     },
@@ -11690,6 +12161,7 @@
       "lane": 0,
       "name": "Elvambuena, Ella",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "1:15.69",
       "team": ""
     },
@@ -11704,6 +12176,7 @@
       "lane": 2,
       "name": "Liem, Jeanette",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "1:11.00",
       "team": ""
     },
@@ -11718,6 +12191,7 @@
       "lane": 5,
       "name": "Saini, Meher",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "1:08.24",
       "team": ""
     },
@@ -11732,6 +12206,7 @@
       "lane": 9,
       "name": "Yie, Emiley",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "1:15.69",
       "team": ""
     },
@@ -11830,6 +12305,7 @@
       "lane": 4,
       "name": "Luo, Andrew",
       "round": "finals",
+      "seedRank": 31,
       "seedTime": "1:20.69",
       "team": ""
     },
@@ -11886,6 +12362,7 @@
       "lane": 0,
       "name": "Daves, Brandon",
       "round": "finals",
+      "seedRank": 29,
       "seedTime": "1:20.00",
       "team": ""
     },
@@ -11900,6 +12377,7 @@
       "lane": 2,
       "name": "Wygonik, Sam",
       "round": "finals",
+      "seedRank": 25,
       "seedTime": "1:11.69",
       "team": ""
     },
@@ -11914,6 +12392,7 @@
       "lane": 3,
       "name": "Kharel, Avi",
       "round": "finals",
+      "seedRank": 23,
       "seedTime": "1:10.69",
       "team": ""
     },
@@ -11928,6 +12407,7 @@
       "lane": 4,
       "name": "Fields, Charles",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "1:10.00",
       "team": ""
     },
@@ -11942,6 +12422,7 @@
       "lane": 6,
       "name": "Heath, ZacharyC",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "1:11.00",
       "team": ""
     },
@@ -11956,6 +12437,7 @@
       "lane": 0,
       "name": "Jiang, Aaron",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "1:07.69",
       "team": ""
     },
@@ -11970,6 +12452,7 @@
       "lane": 2,
       "name": "Liu, Alex",
       "round": "finals",
+      "seedRank": 15,
       "seedTime": "1:05.69",
       "team": ""
     },
@@ -11984,6 +12467,7 @@
       "lane": 3,
       "name": "Rosal, Gareth",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "1:05.00",
       "team": ""
     },
@@ -11998,6 +12482,7 @@
       "lane": 4,
       "name": "Altera, Ryan",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "1:03.69",
       "team": ""
     },
@@ -12012,6 +12497,7 @@
       "lane": 7,
       "name": "Abdo, Adel",
       "round": "finals",
+      "seedRank": 15,
       "seedTime": "1:05.69",
       "team": ""
     },
@@ -12026,6 +12512,7 @@
       "lane": 8,
       "name": "Stephens, Clay",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "1:07.69",
       "team": ""
     },
@@ -12040,6 +12527,7 @@
       "lane": 9,
       "name": "Lee, Alexander",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "1:09.69",
       "team": ""
     },
@@ -12054,6 +12542,7 @@
       "lane": 1,
       "name": "McDevitt, Liam",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "1:02.03",
       "team": ""
     },
@@ -12068,6 +12557,7 @@
       "lane": 2,
       "name": "Fletcher, Alden",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "1:00.87",
       "team": ""
     },
@@ -12082,6 +12572,7 @@
       "lane": 4,
       "name": "Fawley, Dylan",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "58.20",
       "team": ""
     },
@@ -12096,6 +12587,7 @@
       "lane": 5,
       "name": "Lee, Hyoseon",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "59.33",
       "team": ""
     },
@@ -12110,6 +12602,7 @@
       "lane": 8,
       "name": "Pianoto, Matthew",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "1:02.69",
       "team": ""
     },
@@ -12124,6 +12617,7 @@
       "lane": 9,
       "name": "Williams, Walker",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "1:03.00",
       "team": ""
     },
@@ -12362,6 +12856,7 @@
       "lane": 3,
       "name": "Sohmer, Rebecca",
       "round": "finals",
+      "seedRank": 33,
       "seedTime": "40.37",
       "team": ""
     },
@@ -12376,6 +12871,7 @@
       "lane": 4,
       "name": "Fernandez, Heather",
       "round": "finals",
+      "seedRank": 31,
       "seedTime": "37.00",
       "team": ""
     },
@@ -12390,6 +12886,7 @@
       "lane": 5,
       "name": "Kazemzadeh, Ava",
       "round": "finals",
+      "seedRank": 32,
       "seedTime": "38.50",
       "team": ""
     },
@@ -12446,6 +12943,7 @@
       "lane": 3,
       "name": "Opipari, Annabella",
       "round": "finals",
+      "seedRank": 23,
       "seedTime": "32.50",
       "team": ""
     },
@@ -12460,6 +12958,7 @@
       "lane": 4,
       "name": "Pyrczak, Aurelia",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "32.33",
       "team": ""
     },
@@ -12474,6 +12973,7 @@
       "lane": 5,
       "name": "Greene, Bebe",
       "round": "finals",
+      "seedRank": 22,
       "seedTime": "32.46",
       "team": ""
     },
@@ -12488,6 +12988,7 @@
       "lane": 6,
       "name": "Plantamura, Natalie",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "32.69",
       "team": ""
     },
@@ -12502,6 +13003,7 @@
       "lane": 7,
       "name": "Miller, Charli",
       "round": "finals",
+      "seedRank": 26,
       "seedTime": "33.69",
       "team": ""
     },
@@ -12516,6 +13018,7 @@
       "lane": 8,
       "name": "Sproull, Molly",
       "round": "finals",
+      "seedRank": 28,
       "seedTime": "36.00",
       "team": ""
     },
@@ -12530,6 +13033,7 @@
       "lane": 0,
       "name": "Wadstein, Elyn",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "32.00",
       "team": ""
     },
@@ -12544,6 +13048,7 @@
       "lane": 1,
       "name": "Fass, Emma",
       "round": "finals",
+      "seedRank": 17,
       "seedTime": "31.70",
       "team": ""
     },
@@ -12558,6 +13063,7 @@
       "lane": 4,
       "name": "Regalado, Elise",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "30.50",
       "team": ""
     },
@@ -12572,6 +13078,7 @@
       "lane": 5,
       "name": "Buff, Maddy",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "30.70",
       "team": ""
     },
@@ -12586,6 +13093,7 @@
       "lane": 7,
       "name": "Wang, Mingqi",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "31.69",
       "team": ""
     },
@@ -12600,6 +13108,7 @@
       "lane": 9,
       "name": "Baker, Amy",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "32.10",
       "team": ""
     },
@@ -12614,6 +13123,7 @@
       "lane": 0,
       "name": "Kelly, Jemma",
       "round": "timed_finals",
+      "seedRank": 9,
       "seedTime": "30.00",
       "team": ""
     },
@@ -12628,6 +13138,7 @@
       "lane": 1,
       "name": "Ndiaye, Aneesa",
       "round": "timed_finals",
+      "seedRank": 7,
       "seedTime": "29.60",
       "team": ""
     },
@@ -12642,6 +13153,7 @@
       "lane": 2,
       "name": "Houck, Madison",
       "round": "timed_finals",
+      "seedRank": 4,
       "seedTime": "29.00",
       "team": ""
     },
@@ -12656,6 +13168,7 @@
       "lane": 3,
       "name": "Castle, Kendall",
       "round": "timed_finals",
+      "seedRank": 3,
       "seedTime": "28.74",
       "team": ""
     },
@@ -12670,6 +13183,7 @@
       "lane": 4,
       "name": "Carlton, Delaney",
       "round": "timed_finals",
+      "seedRank": 1,
       "seedTime": "27.69",
       "team": ""
     },
@@ -12684,6 +13198,7 @@
       "lane": 5,
       "name": "Krzyzaniak, Alexis",
       "round": "timed_finals",
+      "seedRank": 2,
       "seedTime": "28.70",
       "team": ""
     },
@@ -12698,6 +13213,7 @@
       "lane": 6,
       "name": "Johann, Rachel",
       "round": "timed_finals",
+      "seedRank": 4,
       "seedTime": "29.00",
       "team": ""
     },
@@ -12712,6 +13228,7 @@
       "lane": 7,
       "name": "Dee, Becca",
       "round": "timed_finals",
+      "seedRank": 4,
       "seedTime": "29.00",
       "team": ""
     },
@@ -12726,6 +13243,7 @@
       "lane": 8,
       "name": "Honaker, Olivia",
       "round": "timed_finals",
+      "seedRank": 8,
       "seedTime": "29.90",
       "team": ""
     },
@@ -12740,6 +13258,7 @@
       "lane": 9,
       "name": "Nance, Lauren",
       "round": "timed_finals",
+      "seedRank": 10,
       "seedTime": "30.50",
       "team": ""
     },
@@ -13034,6 +13553,7 @@
       "lane": 0,
       "name": "Muralidharan, Vish",
       "round": "finals",
+      "seedRank": 29,
       "seedTime": "34.00",
       "team": ""
     },
@@ -13048,6 +13568,7 @@
       "lane": 1,
       "name": "Manley, Adam",
       "round": "finals",
+      "seedRank": 27,
       "seedTime": "32.69",
       "team": ""
     },
@@ -13062,6 +13583,7 @@
       "lane": 2,
       "name": "Murnieks, Aleksander",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "31.69",
       "team": ""
     },
@@ -13076,6 +13598,7 @@
       "lane": 3,
       "name": "Swain, Ethan",
       "round": "finals",
+      "seedRank": 23,
       "seedTime": "31.50",
       "team": ""
     },
@@ -13090,6 +13613,7 @@
       "lane": 4,
       "name": "Springate, Dylan",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "30.00",
       "team": ""
     },
@@ -13104,6 +13628,7 @@
       "lane": 5,
       "name": "Grutter, Maxwell",
       "round": "finals",
+      "seedRank": 22,
       "seedTime": "30.69",
       "team": ""
     },
@@ -13118,6 +13643,7 @@
       "lane": 6,
       "name": "DeLaCruz, Gabriel",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "31.69",
       "team": ""
     },
@@ -13132,6 +13658,7 @@
       "lane": 7,
       "name": "Lewis, Caiden",
       "round": "finals",
+      "seedRank": 26,
       "seedTime": "32.00",
       "team": ""
     },
@@ -13146,6 +13673,7 @@
       "lane": 8,
       "name": "Kelter, Bailey",
       "round": "finals",
+      "seedRank": 28,
       "seedTime": "33.00",
       "team": ""
     },
@@ -13160,6 +13688,7 @@
       "lane": 9,
       "name": "Rana, Tanay",
       "round": "finals",
+      "seedRank": 30,
       "seedTime": "42.00",
       "team": ""
     },
@@ -13174,6 +13703,7 @@
       "lane": 0,
       "name": "Jones, Peyton",
       "round": "finals",
+      "seedRank": 19,
       "seedTime": "29.69",
       "team": ""
     },
@@ -13188,6 +13718,7 @@
       "lane": 1,
       "name": "Hall, Nathan",
       "round": "finals",
+      "seedRank": 17,
       "seedTime": "29.00",
       "team": ""
     },
@@ -13202,6 +13733,7 @@
       "lane": 3,
       "name": "Johnson, Lucas",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "27.69",
       "team": ""
     },
@@ -13216,6 +13748,7 @@
       "lane": 4,
       "name": "Long, Liam",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "26.69",
       "team": ""
     },
@@ -13230,6 +13763,7 @@
       "lane": 5,
       "name": "Kryski, Wyatt",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "27.00",
       "team": ""
     },
@@ -13244,6 +13778,7 @@
       "lane": 6,
       "name": "Hancu, Andrei",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "27.69",
       "team": ""
     },
@@ -13258,6 +13793,7 @@
       "lane": 7,
       "name": "Ganz, Zach",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "28.00",
       "team": ""
     },
@@ -13272,6 +13808,7 @@
       "lane": 9,
       "name": "Smith, Ben",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "29.99",
       "team": ""
     },
@@ -13286,6 +13823,7 @@
       "lane": 0,
       "name": "Le, Alex",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "26.00",
       "team": ""
     },
@@ -13300,6 +13838,7 @@
       "lane": 1,
       "name": "Chenard, Oscar",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "25.00",
       "team": ""
     },
@@ -13314,6 +13853,7 @@
       "lane": 2,
       "name": "Marquez, Alexandro",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "25.00",
       "team": ""
     },
@@ -13328,6 +13868,7 @@
       "lane": 4,
       "name": "Baldwin, Daniel",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "23.15",
       "team": ""
     },
@@ -13342,6 +13883,7 @@
       "lane": 5,
       "name": "Stuck, Evan",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "23.93",
       "team": ""
     },
@@ -13356,6 +13898,7 @@
       "lane": 6,
       "name": "Cheifetz, AdamC",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "24.70",
       "team": ""
     },
@@ -13370,6 +13913,7 @@
       "lane": 7,
       "name": "Riordan, James",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "25.00",
       "team": ""
     },
@@ -13384,6 +13928,7 @@
       "lane": 8,
       "name": "Trocchi, Will",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "26.00",
       "team": ""
     },
@@ -13398,6 +13943,7 @@
       "lane": 9,
       "name": "Kruger, Ethan",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "26.50",
       "team": ""
     },
@@ -13776,6 +14322,7 @@
       "lane": 2,
       "name": "DeLosh, McKenzie",
       "round": "finals",
+      "seedRank": 45,
       "seedTime": "1:12.00",
       "team": ""
     },
@@ -13790,6 +14337,7 @@
       "lane": 3,
       "name": "Millsaps, Alison",
       "round": "finals",
+      "seedRank": 43,
       "seedTime": "1:10.00",
       "team": ""
     },
@@ -13804,6 +14352,7 @@
       "lane": 4,
       "name": "Holtz, KatrinaL",
       "round": "finals",
+      "seedRank": 41,
       "seedTime": "1:08.00",
       "team": ""
     },
@@ -13818,6 +14367,7 @@
       "lane": 5,
       "name": "Page, Carole-Ann",
       "round": "finals",
+      "seedRank": 41,
       "seedTime": "1:08.00",
       "team": ""
     },
@@ -13832,6 +14382,7 @@
       "lane": 6,
       "name": "Schmid, Sarah",
       "round": "finals",
+      "seedRank": 44,
       "seedTime": "1:11.69",
       "team": ""
     },
@@ -13860,6 +14411,7 @@
       "lane": 1,
       "name": "Mitchell, Ali",
       "round": "finals",
+      "seedRank": 37,
       "seedTime": "1:03.69",
       "team": ""
     },
@@ -13874,6 +14426,7 @@
       "lane": 3,
       "name": "Witthoff, Mia",
       "round": "finals",
+      "seedRank": 31,
       "seedTime": "1:00.69",
       "team": ""
     },
@@ -13888,6 +14441,7 @@
       "lane": 4,
       "name": "Melton, Jacoby",
       "round": "finals",
+      "seedRank": 31,
       "seedTime": "1:00.69",
       "team": ""
     },
@@ -13902,6 +14456,7 @@
       "lane": 5,
       "name": "Burlina, Emma",
       "round": "finals",
+      "seedRank": 31,
       "seedTime": "1:00.69",
       "team": ""
     },
@@ -13916,6 +14471,7 @@
       "lane": 6,
       "name": "Obara, Claire",
       "round": "finals",
+      "seedRank": 34,
       "seedTime": "1:01.40",
       "team": ""
     },
@@ -13930,6 +14486,7 @@
       "lane": 7,
       "name": "Meckley, Irelyn",
       "round": "finals",
+      "seedRank": 36,
       "seedTime": "1:02.69",
       "team": ""
     },
@@ -13944,6 +14501,7 @@
       "lane": 1,
       "name": "Marim, Isabella",
       "round": "finals",
+      "seedRank": 25,
       "seedTime": "1:00.00",
       "team": ""
     },
@@ -13958,6 +14516,7 @@
       "lane": 2,
       "name": "Ruona, Katherine",
       "round": "finals",
+      "seedRank": 25,
       "seedTime": "1:00.00",
       "team": ""
     },
@@ -13972,6 +14531,7 @@
       "lane": 7,
       "name": "Randall, Julia",
       "round": "finals",
+      "seedRank": 25,
       "seedTime": "1:00.00",
       "team": ""
     },
@@ -13986,6 +14546,7 @@
       "lane": 8,
       "name": "Roshelli, Caroline",
       "round": "finals",
+      "seedRank": 25,
       "seedTime": "1:00.00",
       "team": ""
     },
@@ -14000,6 +14561,7 @@
       "lane": 9,
       "name": "Tucker, Meredith",
       "round": "finals",
+      "seedRank": 30,
       "seedTime": "1:00.56",
       "team": ""
     },
@@ -14014,6 +14576,7 @@
       "lane": 0,
       "name": "Schug, Sophie",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "59.00",
       "team": ""
     },
@@ -14028,6 +14591,7 @@
       "lane": 1,
       "name": "Hicks, Erin",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "58.69",
       "team": ""
     },
@@ -14042,6 +14606,7 @@
       "lane": 3,
       "name": "May, Kahleia",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "58.00",
       "team": ""
     },
@@ -14056,6 +14621,7 @@
       "lane": 4,
       "name": "Clements, Madison",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "58.00",
       "team": ""
     },
@@ -14070,6 +14636,7 @@
       "lane": 7,
       "name": "Wong, Tara",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "58.69",
       "team": ""
     },
@@ -14084,6 +14651,7 @@
       "lane": 8,
       "name": "Avedisian, Michaela",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "59.00",
       "team": ""
     },
@@ -14098,6 +14666,7 @@
       "lane": 0,
       "name": "Freund, Gabby",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "57.80",
       "team": ""
     },
@@ -14112,6 +14681,7 @@
       "lane": 1,
       "name": "Wang, Mingqi",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "57.69",
       "team": ""
     },
@@ -14126,6 +14696,7 @@
       "lane": 3,
       "name": "Becker, Kailyn",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "55.54",
       "team": ""
     },
@@ -14140,6 +14711,7 @@
       "lane": 4,
       "name": "Ochoa, Iris",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "51.55",
       "team": ""
     },
@@ -14154,6 +14726,7 @@
       "lane": 6,
       "name": "Petersen, Riley",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "56.81",
       "team": ""
     },
@@ -14168,6 +14741,7 @@
       "lane": 7,
       "name": "Brefeld, Peyton",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "57.00",
       "team": ""
     },
@@ -14182,6 +14756,7 @@
       "lane": 8,
       "name": "Collerette, Hannah",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "57.69",
       "team": ""
     },
@@ -14196,6 +14771,7 @@
       "lane": 9,
       "name": "Ewart, Lucy",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "57.81",
       "team": ""
     },
@@ -14462,6 +15038,7 @@
       "lane": 0,
       "name": "Lu, Stanley",
       "round": "finals",
+      "seedRank": 48,
       "seedTime": "1:10.00",
       "team": ""
     },
@@ -14476,6 +15053,7 @@
       "lane": 1,
       "name": "Jackson, Darion",
       "round": "finals",
+      "seedRank": 47,
       "seedTime": "1:06.00",
       "team": ""
     },
@@ -14490,6 +15068,7 @@
       "lane": 2,
       "name": "Lamberson, Tyler",
       "round": "finals",
+      "seedRank": 45,
       "seedTime": "1:05.00",
       "team": ""
     },
@@ -14504,6 +15083,7 @@
       "lane": 3,
       "name": "Blackwell, Colin",
       "round": "finals",
+      "seedRank": 43,
       "seedTime": "1:03.00",
       "team": ""
     },
@@ -14518,6 +15098,7 @@
       "lane": 4,
       "name": "Yu, Jason",
       "round": "finals",
+      "seedRank": 41,
       "seedTime": "1:00.00",
       "team": ""
     },
@@ -14532,6 +15113,7 @@
       "lane": 5,
       "name": "Jagadeesh, Vidhur",
       "round": "finals",
+      "seedRank": 42,
       "seedTime": "1:02.00",
       "team": ""
     },
@@ -14546,6 +15128,7 @@
       "lane": 6,
       "name": "Torchia, Henry",
       "round": "finals",
+      "seedRank": 44,
       "seedTime": "1:04.00",
       "team": ""
     },
@@ -14560,6 +15143,7 @@
       "lane": 9,
       "name": "Chown, Victor",
       "round": "finals",
+      "seedRank": 50,
       "seedTime": "1:25.00",
       "team": ""
     },
@@ -14574,6 +15158,7 @@
       "lane": 0,
       "name": "Felix, Adrian",
       "round": "finals",
+      "seedRank": 37,
       "seedTime": "59.00",
       "team": ""
     },
@@ -14588,6 +15173,7 @@
       "lane": 1,
       "name": "Ryan, Tierney",
       "round": "finals",
+      "seedRank": 37,
       "seedTime": "59.00",
       "team": ""
     },
@@ -14602,6 +15188,7 @@
       "lane": 2,
       "name": "Ghidu, Nicholas",
       "round": "finals",
+      "seedRank": 35,
       "seedTime": "58.00",
       "team": ""
     },
@@ -14616,6 +15203,7 @@
       "lane": 3,
       "name": "Barry, Charles",
       "round": "finals",
+      "seedRank": 33,
       "seedTime": "56.69",
       "team": ""
     },
@@ -14630,6 +15218,7 @@
       "lane": 4,
       "name": "Lewis, Caiden",
       "round": "finals",
+      "seedRank": 30,
       "seedTime": "56.00",
       "team": ""
     },
@@ -14644,6 +15233,7 @@
       "lane": 5,
       "name": "McDevitt, Liam",
       "round": "finals",
+      "seedRank": 32,
       "seedTime": "56.04",
       "team": ""
     },
@@ -14658,6 +15248,7 @@
       "lane": 6,
       "name": "Yeh, Paul",
       "round": "finals",
+      "seedRank": 34,
       "seedTime": "57.00",
       "team": ""
     },
@@ -14672,6 +15263,7 @@
       "lane": 7,
       "name": "McGahagin, Connor",
       "round": "finals",
+      "seedRank": 35,
       "seedTime": "58.00",
       "team": ""
     },
@@ -14686,6 +15278,7 @@
       "lane": 8,
       "name": "Kennedy, Avery",
       "round": "finals",
+      "seedRank": 37,
       "seedTime": "59.00",
       "team": ""
     },
@@ -14700,6 +15293,7 @@
       "lane": 9,
       "name": "Nellis, Luke",
       "round": "finals",
+      "seedRank": 37,
       "seedTime": "59.00",
       "team": ""
     },
@@ -14714,6 +15308,7 @@
       "lane": 0,
       "name": "Schwandt, Gavin",
       "round": "finals",
+      "seedRank": 27,
       "seedTime": "55.69",
       "team": ""
     },
@@ -14728,6 +15323,7 @@
       "lane": 1,
       "name": "Hancu, Andrei",
       "round": "finals",
+      "seedRank": 27,
       "seedTime": "55.69",
       "team": ""
     },
@@ -14742,6 +15338,7 @@
       "lane": 3,
       "name": "Mervich, Ian",
       "round": "finals",
+      "seedRank": 23,
       "seedTime": "54.00",
       "team": ""
     },
@@ -14756,6 +15353,7 @@
       "lane": 4,
       "name": "Shepard, Brandon",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "53.00",
       "team": ""
     },
@@ -14770,6 +15368,7 @@
       "lane": 7,
       "name": "Krosner, Samuel",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "55.00",
       "team": ""
     },
@@ -14784,6 +15383,7 @@
       "lane": 8,
       "name": "Matthews, John",
       "round": "finals",
+      "seedRank": 27,
       "seedTime": "55.69",
       "team": ""
     },
@@ -14798,6 +15398,7 @@
       "lane": 9,
       "name": "Simmons, Ben",
       "round": "finals",
+      "seedRank": 30,
       "seedTime": "56.00",
       "team": ""
     },
@@ -14812,6 +15413,7 @@
       "lane": 0,
       "name": "Hughey, Henry",
       "round": "finals",
+      "seedRank": 19,
       "seedTime": "52.69",
       "team": ""
     },
@@ -14826,6 +15428,7 @@
       "lane": 1,
       "name": "Bai, Ryan",
       "round": "finals",
+      "seedRank": 17,
       "seedTime": "52.30",
       "team": ""
     },
@@ -14840,6 +15443,7 @@
       "lane": 2,
       "name": "Kinter, Nathan",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "52.00",
       "team": ""
     },
@@ -14854,6 +15458,7 @@
       "lane": 4,
       "name": "Martin, Colton",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "51.00",
       "team": ""
     },
@@ -14868,6 +15473,7 @@
       "lane": 6,
       "name": "Seward, Lawson",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "52.00",
       "team": ""
     },
@@ -14882,6 +15488,7 @@
       "lane": 7,
       "name": "Teal, Nathan",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "52.00",
       "team": ""
     },
@@ -14896,6 +15503,7 @@
       "lane": 9,
       "name": "Jones, Justin",
       "round": "finals",
+      "seedRank": 19,
       "seedTime": "52.69",
       "team": ""
     },
@@ -14910,6 +15518,7 @@
       "lane": 0,
       "name": "Laurie, Aiden",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "50.00",
       "team": ""
     },
@@ -14924,6 +15533,7 @@
       "lane": 1,
       "name": "Bryson, Ford",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "49.56",
       "team": ""
     },
@@ -14938,6 +15548,7 @@
       "lane": 3,
       "name": "Gossmann, Christopher",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "46.98",
       "team": ""
     },
@@ -14952,6 +15563,7 @@
       "lane": 4,
       "name": "White, Keller",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "44.69",
       "team": ""
     },
@@ -14966,6 +15578,7 @@
       "lane": 5,
       "name": "Renier, Luke",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "46.72",
       "team": ""
     },
@@ -14980,6 +15593,7 @@
       "lane": 6,
       "name": "Ice, Edward",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "47.96",
       "team": ""
     },
@@ -14994,6 +15608,7 @@
       "lane": 7,
       "name": "Miller, Christopher",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "49.23",
       "team": ""
     },
@@ -15008,6 +15623,7 @@
       "lane": 8,
       "name": "Gransee, Kyle",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "50.00",
       "team": ""
     },
@@ -15022,6 +15638,7 @@
       "lane": 9,
       "name": "Vlady, George",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "50.69",
       "team": ""
     },
@@ -15092,6 +15709,7 @@
       "lane": 1,
       "name": "Bell, AlexandriaJ",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "6:20.00",
       "team": ""
     },
@@ -15106,6 +15724,7 @@
       "lane": 2,
       "name": "Patricio-Taylor, Marissa",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "6:18.51",
       "team": ""
     },
@@ -15120,6 +15739,7 @@
       "lane": 3,
       "name": "Munger, Audrey",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "5:40.69",
       "team": ""
     },
@@ -15134,6 +15754,7 @@
       "lane": 4,
       "name": "Johnson, Katherine",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "5:15.00",
       "team": ""
     },
@@ -15148,6 +15769,7 @@
       "lane": 6,
       "name": "Peyton, Abby",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "5:45.00",
       "team": ""
     },
@@ -15162,6 +15784,7 @@
       "lane": 7,
       "name": "Roberts, TaylorA",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "6:20.00",
       "team": ""
     },
@@ -15218,6 +15841,7 @@
       "lane": 4,
       "name": "Kohl, Matt",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "7:46.53",
       "team": ""
     },
@@ -15274,6 +15898,7 @@
       "lane": 0,
       "name": "Murray, Liam",
       "round": "finals",
+      "seedRank": 19,
       "seedTime": "6:02.95",
       "team": ""
     },
@@ -15288,6 +15913,7 @@
       "lane": 1,
       "name": "Lee, Alexander",
       "round": "finals",
+      "seedRank": 17,
       "seedTime": "5:50.69",
       "team": ""
     },
@@ -15302,6 +15928,7 @@
       "lane": 2,
       "name": "Nagel, Lucas",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "5:30.69",
       "team": ""
     },
@@ -15316,6 +15943,7 @@
       "lane": 4,
       "name": "Allen, Hunter",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "5:15.00",
       "team": ""
     },
@@ -15330,6 +15958,7 @@
       "lane": 5,
       "name": "Rice, Thomas",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "5:20.69",
       "team": ""
     },
@@ -15344,6 +15973,7 @@
       "lane": 6,
       "name": "Luo, Andrew",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "5:30.69",
       "team": ""
     },
@@ -15358,6 +15988,7 @@
       "lane": 8,
       "name": "Stephens, Clay",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "6:00.69",
       "team": ""
     },
@@ -15372,6 +16003,7 @@
       "lane": 9,
       "name": "Roy, Ishan",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "6:03.00",
       "team": ""
     },
@@ -15386,6 +16018,7 @@
       "lane": 1,
       "name": "Rohovit, Hunter",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "5:05.69",
       "team": ""
     },
@@ -15400,6 +16033,7 @@
       "lane": 2,
       "name": "Altera, Ryan",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "5:01.69",
       "team": ""
     },
@@ -15414,6 +16048,7 @@
       "lane": 3,
       "name": "Giugliano, Joe",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "5:00.55",
       "team": ""
     },
@@ -15428,6 +16063,7 @@
       "lane": 4,
       "name": "Fries, Ryan",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "4:53.69",
       "team": ""
     },
@@ -15442,6 +16078,7 @@
       "lane": 5,
       "name": "Hall, Jonathan",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "4:55.00",
       "team": ""
     },
@@ -15456,6 +16093,7 @@
       "lane": 6,
       "name": "Long, Liam",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "5:00.69",
       "team": ""
     },
@@ -15470,6 +16108,7 @@
       "lane": 7,
       "name": "Moore, Joshua",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "5:02.40",
       "team": ""
     },
@@ -15484,6 +16123,7 @@
       "lane": 8,
       "name": "Tang, Rocky",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "5:09.60",
       "team": ""
     },
@@ -15498,6 +16138,7 @@
       "lane": 9,
       "name": "White, Aidan",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "5:15.00",
       "team": ""
     },
@@ -15882,6 +16523,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "1:50.00",
       "team": "UGA-GA"
     },
@@ -15897,6 +16539,7 @@
       "relayLetter": "A",
       "relaySwimmers": [],
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:40.00",
       "team": "FSUC"
     },
@@ -15912,6 +16555,7 @@
       "relayLetter": "A",
       "relaySwimmers": [],
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "1:45.69",
       "team": "GTSC-GA"
     },
@@ -15948,6 +16592,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "1:53.00",
       "team": "UGA-GA"
     },

@@ -6,7 +6,14 @@ import { practiceShareText, practiceShareUrl, zonedDayKey, type PracticeShareSet
 import ActionIcon from "@/components/ui/ActionIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
 import { practicePdfFilename } from "@/lib/practice/practice-pdf"
-import { CheckIcon, CopyPngMenuIcon, PdfMenuIcon, PngMenuIcon, downloadBlob } from "@/components/ui/export-menu"
+import {
+  CheckIcon,
+  CopyPngMenuIcon,
+  CopyTextMenuIcon,
+  PdfMenuIcon,
+  PngMenuIcon,
+  downloadBlob,
+} from "@/components/ui/export-menu"
 
 function filenameFromDisposition(header: string | null): string {
   const match = header?.match(/filename="([^"]+)"/)
@@ -27,24 +34,6 @@ function LinkIcon({ className }: { className?: string }) {
     >
       <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
       <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-    </svg>
-  )
-}
-
-function CopyIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <rect x="8" y="8" width="14" height="14" rx="2" />
-      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
     </svg>
   )
 }
@@ -299,7 +288,7 @@ export default function SharePracticeButton({
             onClick={() => void copyText()}
             className="flex w-full items-center gap-2 whitespace-nowrap px-3 py-2 text-left text-sm text-foreground hover:bg-fill"
           >
-            {copied === "text" ? <CheckIcon className="h-4 w-4 shrink-0" /> : <CopyIcon className="h-4 w-4 shrink-0" />}
+            {copied === "text" ? <CheckIcon className="h-4 w-4 shrink-0" /> : <CopyTextMenuIcon className="h-4 w-4 shrink-0" />}
             {copied === "text" ? "Copied" : "Copy as text"}
           </button>
           <button

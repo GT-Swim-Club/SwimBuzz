@@ -1,16 +1,32 @@
-import { useMemo, useState } from "react"
-import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { ActivityIndicator, Alert, Platform, Pressable, Text, View } from "react-native"
+import * as Clipboard from "expo-clipboard"
+import * as MediaLibrary from "expo-media-library"
 import * as Sharing from "expo-sharing"
 import { File, Paths } from "expo-file-system"
+import { captureRef } from "react-native-view-shot"
 import {
   eventGenderWord,
+  roundFilterIncludes,
+  roundFilterLabel,
   rosterSummaryPdfFilename,
+  rosterSummaryScopeLabel,
+  rosterSummaryText,
+  rosterSummarySessions,
   rosterSummaryTitle,
+  sessionIncludes,
+  sessionRound,
   splitRosterName,
+  SUMMARY_ROUNDS,
+  type MeetHeaderDetails,
+  type MeetSessionOrder,
   type RosterSummaryPdfRequest,
   type RosterSummaryPdfSection,
+  type SessionRound,
+  type SummaryRoundKind,
 } from "@swimbuzz/shared"
 import {
+  ActionSheet,
   Body,
   Chip,
   EmptyState,
@@ -20,10 +36,12 @@ import {
   SectionHeader,
   TextField,
   usePalette,
+  type ActionSheetItem,
 } from "@swimbuzz/ui"
 import { spacing } from "@swimbuzz/tokens"
 import { API_URL, getAccessToken } from "../lib/api"
 import { Icon } from "./Icon"
+import { RosterSummaryExportCapture } from "./RosterSummaryExportCapture"
 
 export type RosterSummaryEntry = {
   athleteId: string
@@ -36,9 +54,14 @@ export type RosterSummaryEntry = {
   heatTotal?: number
   lane?: number
   prelimHeat?: number
+  prelimHeatTotal?: number
   prelimLane?: number
   finalHeat?: number
+  finalHeatTotal?: number
   finalLane?: number
+  /** Heat-sheet round text ("Timed Finals"). */
+  round?: string
+  resultRound?: string
   resultTime?: string
   prelimTime?: string
   finalTime?: string
@@ -63,25 +86,94 @@ export type RosterSummaryEntry = {
   }>
 }
 
-function formatHeatLane(entry: RosterSummaryEntry): string | null {
+/** Heat & lane — for that round's swim when the view is filtered to a prelims or finals session. */
+function formatHeatLane(entry: RosterSummaryEntry, round?: SessionRound | null): string | null {
   if (entry.alternate) return "Alt"
-  const heat =
-    entry.heat ??
-    entry.finalHeat ??
-    entry.prelimHeat ??
-    null
-  const lane =
-    entry.lane ?? entry.finalLane ?? entry.prelimLane ?? null
+  const { heat, heatTotal, lane } = heatLaneFor(entry, round)
   const parts: string[] = []
   if (heat != null && heat > 0) {
-    parts.push(
-      entry.heatTotal != null
-        ? `H${heat}/${entry.heatTotal}`
-        : `H${heat}`
-    )
+    parts.push(heatTotal != null ? `H${heat}/${heatTotal}` : `H${heat}`)
   }
   if (lane != null && lane > 0) parts.push(`L${lane}`)
   return parts.length ? parts.join(" · ") : null
+}
+
+function heatLaneFor(entry: RosterSummaryEntry, round?: SessionRound | null) {
+  const heat =
+    round === "F"
+      ? entry.finalHeat ?? entry.heat ?? null
+      : round === "P"
+        ? entry.prelimHeat ?? entry.heat ?? null
+        : entry.heat ?? entry.finalHeat ?? entry.prelimHeat ?? null
+  const heatTotal =
+    round === "F"
+      ? entry.finalHeatTotal ?? entry.heatTotal
+      : round === "P"
+        ? entry.prelimHeatTotal ?? entry.heatTotal
+        : entry.heatTotal
+  const lane =
+    round === "F"
+      ? entry.finalLane ?? entry.lane ?? null
+      : round === "P"
+        ? entry.prelimLane ?? entry.lane ?? null
+        : entry.lane ?? entry.finalLane ?? entry.prelimLane ?? null
+  return { heat, heatTotal, lane }
+}
+
+/** The entry's place — in that round when the view is filtered to a prelims or finals session. */
+function placeFor(entry: RosterSummaryEntry, round?: SessionRound | null): number | undefined {
+  if (round === "P") return entry.prelimPlace
+  if (round === "F") return entry.finalPlace ?? (entry.prelimPlace == null ? entry.resultPlace : undefined)
+  return entry.finalPlace ?? entry.resultPlace ?? entry.prelimPlace
+}
+
+/** Numbers ascending, with missing ones (and non-positive heats/lanes) last. */
+function compareMissingLast(a: number | null | undefined, b: number | null | undefined): number {
+  const av = a != null && a > 0 ? a : undefined
+  const bv = b != null && b > 0 ? b : undefined
+  if (av == null || bv == null) return av == null ? (bv == null ? 0 : 1) : -1
+  return av - bv
+}
+
+/**
+ * One event's entries in swim order: by place once its results are in, else by heat and lane.
+ * Entries without a place (DQ, NS) follow the placed ones; alternates come last.
+ */
+function sortEventEntries(entries: RosterSummaryEntry[], round?: SessionRound | null) {
+  const placed = entries.some((entry) => placeFor(entry, round) != null)
+  return entries.slice().sort((a, b) => {
+    if (Boolean(a.alternate) !== Boolean(b.alternate)) return a.alternate ? 1 : -1
+    if (placed) {
+      const byPlace = compareMissingLast(placeFor(a, round), placeFor(b, round))
+      if (byPlace !== 0) return byPlace
+    }
+    const ah = heatLaneFor(a, round)
+    const bh = heatLaneFor(b, round)
+    return compareMissingLast(ah.heat, bh.heat) || compareMissingLast(ah.lane, bh.lane)
+  })
+}
+
+/**
+ * The rounds an entry stands for — mobile entries carry prelims and finals on one row. Empty when
+ * unknown (a seed before any heat sheet).
+ */
+function entryRoundKinds(entry: RosterSummaryEntry): SummaryRoundKind[] {
+  const kinds: SummaryRoundKind[] = []
+  const round = entry.resultRound || entry.relayRound
+  if (
+    round === "P" ||
+    entry.prelimTime ||
+    entry.prelimPlace != null ||
+    entry.prelimHeat != null ||
+    entry.isSwimOff
+  ) {
+    kinds.push("P")
+  }
+  if (round === "F" || entry.finalTime || entry.finalPlace != null || entry.finalHeat != null) {
+    kinds.push("F")
+  }
+  if (kinds.length === 0 && (/timed/i.test(entry.round ?? "") || entry.resultTime)) kinds.push("T")
+  return kinds
 }
 
 function formatTimes(entry: RosterSummaryEntry): string | null {
@@ -134,11 +226,12 @@ function entrySubtitle(
   mode: "athlete" | "event",
   withLegs = true,
   athleteId?: string,
-  withHeatLane = true
+  withHeatLane = true,
+  round?: SessionRound | null
 ): string {
   const bits = [
     mode === "event" ? entry.athleteName : relayLegLabel(entry, athleteId),
-    withHeatLane ? formatHeatLane(entry) : null,
+    withHeatLane ? formatHeatLane(entry, round) : null,
     formatTimes(entry),
     formatPlace(entry) ? `Place ${formatPlace(entry)}` : null,
   ].filter(Boolean)
@@ -166,22 +259,27 @@ function RosterNameText({ name, mutedColor }: { name: string; mutedColor: string
  * column. The subtitle leaves out the athlete's name, which the label (or section title) already
  * carries. Relay titles are compact, with the letter folded in: "200 Medley A (P)".
  */
-function pdfRow(entry: RosterSummaryEntry, title: string, athleteId?: string) {
+function pdfRow(
+  entry: RosterSummaryEntry,
+  title: string,
+  athleteId?: string,
+  round?: SessionRound | null
+) {
   const isRelay = entry.entryType === "relay_team"
   // The athlete's leg rides beside the relay's name; their split leads the line below.
   const swimmer =
     isRelay && athleteId ? entry.relaySwimmers?.find((s) => s.athleteId === athleteId) : undefined
   const legNumber = swimmer?.leg
   const split = swimmer?.splitTime?.trim()
-  const relayTitle = [
-    entry.event.replace(/\s+Relay$/i, ""),
-    entry.relayLetter,
-    entry.relayRound ? `(${entry.relayRound})` : null,
-  ]
-    .filter(Boolean)
-    .join(" ")
+  const relayTitleFrom = (event: string) =>
+    [event, entry.relayLetter, entry.relayRound ? `(${entry.relayRound})` : null]
+      .filter(Boolean)
+      .join(" ")
+  const relayEvent = entry.event.replace(/\s+Relay$/i, "")
   return {
-    label: isRelay ? relayTitle : title,
+    label: isRelay ? relayTitleFrom(relayEvent) : title,
+    // Spelled out ("200 Medley Relay A (P)") where the line has room.
+    fullLabel: isRelay ? relayTitleFrom(`${relayEvent} Relay`) : undefined,
     sub: legNumber ? `Leg ${legNumber}` : undefined,
     meta:
       [
@@ -190,7 +288,7 @@ function pdfRow(entry: RosterSummaryEntry, title: string, athleteId?: string) {
       ]
         .filter(Boolean)
         .join(" · ") || undefined,
-    heatLane: formatHeatLane(entry)?.replace("/", " of ") ?? undefined,
+    heatLane: formatHeatLane(entry, round)?.replace("/", " of ") ?? undefined,
     legs: isRelay ? relayLegNames(entry) : undefined,
   }
 }
@@ -201,6 +299,9 @@ export function RosterSummarySection({
   meetId,
   meetName,
   hasHeatSheet,
+  eventOrder = null,
+  details,
+  iconUrl = null,
 }: {
   entries: RosterSummaryEntry[]
   viewerAthleteId?: string | null
@@ -208,6 +309,11 @@ export function RosterSummarySection({
   meetName: string
   /** A prelims or finals heat sheet is on the meet. */
   hasHeatSheet: boolean
+  /** Meet packet order of events, whose sessions ("Sunday Finals") the list can filter to. */
+  eventOrder?: MeetSessionOrder | null
+  /** Date and location for the PNG export's header. */
+  details: MeetHeaderDetails
+  iconUrl?: string | null
 }) {
   const c = usePalette()
   // "Entries" → "Heats" once a heat sheet is in → "Results" once results are posted.
@@ -221,13 +327,40 @@ export function RosterSummarySection({
   const [mode, setMode] = useState<"athlete" | "event">("athlete")
   const [query, setQuery] = useState("")
   const [mineOnly, setMineOnly] = useState(false)
-  const [sharing, setSharing] = useState(false)
+  /** A packet session's label, or null for every session. */
+  const [sessionFilter, setSessionFilter] = useState<string | null>(null)
+  const [hiddenRounds, setHiddenRounds] = useState<ReadonlySet<SummaryRoundKind>>(new Set())
+
+  const sessions = useMemo(() => rosterSummarySessions(eventOrder), [eventOrder])
+  const activeSession = sessionFilter && sessions.includes(sessionFilter) ? sessionFilter : null
+  /** The round the chosen session names, for picking that round's heat & lane. */
+  const activeRound = activeSession ? sessionRound(activeSession) : null
+  // Rounds the summary has rows for; the round chips only show when there's more than one.
+  const availableRounds = useMemo(() => {
+    const present = new Set(entries.flatMap(entryRoundKinds))
+    return SUMMARY_ROUNDS.map((r) => r.kind).filter((kind) => present.has(kind))
+  }, [entries])
+  const roundFilterOn = availableRounds.length > 1
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     return entries.filter((entry) => {
       // A leadoff shows on its relay's row, as that athlete's leg 1 split.
       if (entry.isRelayLeadoff) return false
+      const kinds = entryRoundKinds(entry)
+      if (roundFilterOn && !roundFilterIncludes(hiddenRounds, kinds, availableRounds)) return false
+      if (
+        activeSession &&
+        eventOrder &&
+        !sessionIncludes(eventOrder, activeSession, {
+          eventNumber: entry.eventNumber,
+          event: entry.event,
+          gender: entry.gender,
+          rounds: kinds.filter((kind): kind is SessionRound => kind !== "T"),
+        })
+      ) {
+        return false
+      }
       if (mineOnly && viewerAthleteId) {
         if (entry.entryType === "relay_team") {
           const onRelay = (entry.relaySwimmers ?? []).some(
@@ -250,7 +383,7 @@ export function RosterSummarySection({
         .toLowerCase()
       return hay.includes(q)
     })
-  }, [entries, mineOnly, query, viewerAthleteId])
+  }, [entries, mineOnly, query, viewerAthleteId, roundFilterOn, hiddenRounds, availableRounds, activeSession, eventOrder])
 
   // Each relay sits in the group of every swimmer on it (only the viewer's with "My events"),
   // in event order with their individual events — there's no separate relays list.
@@ -297,23 +430,21 @@ export function RosterSummarySection({
         key,
         // "Women 200 Medley Relay"
         title: list[0] ? `${eventGenderWord(list[0].gender) ?? ""} ${list[0].event}`.trim() : key,
-        entries: list.slice().sort((a, b) => {
-          const ah = a.heat ?? a.finalHeat ?? a.prelimHeat ?? 999
-          const bh = b.heat ?? b.finalHeat ?? b.prelimHeat ?? 999
-          if (ah !== bh) return ah - bh
-          const al = a.lane ?? a.finalLane ?? a.prelimLane ?? 99
-          const bl = b.lane ?? b.finalLane ?? b.prelimLane ?? 99
-          return al - bl
-        }),
+        entries: sortEventEntries(list, activeRound),
       }))
       .sort((a, b) => a.title.localeCompare(b.title))
-  }, [filtered])
+  }, [filtered, activeRound])
 
   /** The list as it's shown — same mode, "My events" and search — for the PDF export. */
   function buildPdfRequest(): RosterSummaryPdfRequest {
     const q = query.trim()
+    // "Heats by Event · Sunday Finals · My events".
     const heading = [
       `${title} by ${mode === "athlete" ? "Athlete" : "Event"}`,
+      rosterSummaryScopeLabel(
+        activeSession,
+        roundFilterOn ? roundFilterLabel(hiddenRounds, availableRounds) : null
+      ),
       mineOnly && viewerAthleteId ? "My events" : null,
       q ? `“${q}”` : null,
     ]
@@ -326,24 +457,104 @@ export function RosterSummarySection({
             title: group.name,
             // Under an athlete, a relay is just the event — no list of its swimmers.
             rows: group.entries.map((entry) => ({
-              ...pdfRow(entry, entryTitle(entry), group.athleteId),
+              ...pdfRow(entry, entryTitle(entry), group.athleteId, activeRound),
               legs: undefined,
             })),
           }))
         : eventGroups.map((group) => ({
             title: group.title,
             rows: group.entries.map((entry) =>
-              pdfRow(entry, entry.entryType === "relay_team" ? entryTitle(entry) : entry.athleteName)
+              pdfRow(
+                entry,
+                entry.entryType === "relay_team" ? entryTitle(entry) : entry.athleteName,
+                undefined,
+                activeRound
+              )
             ),
           }))
     return { heading, sections, splitSections: mode !== "athlete" }
   }
 
+  const [shareOpen, setShareOpen] = useState(false)
+  const [shareBusy, setShareBusy] = useState<"photos" | "pdf" | null>(null)
+  const [done, setDone] = useState<"copy" | "photos" | null>(null)
+  // The list as of opening the share sheet, rendered off-screen for the PNG while it's open.
+  const [shareRequest, setShareRequest] = useState<RosterSummaryPdfRequest | null>(null)
+  const exportCaptureRef = useRef<View>(null)
+  const shareSheetDismissRef = useRef<(() => void) | null>(null)
+  const doneTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (doneTimeoutRef.current) clearTimeout(doneTimeoutRef.current)
+    }
+  }, [])
+
+  function openShare() {
+    setShareRequest(buildPdfRequest())
+    setDone(null)
+    setShareOpen(true)
+  }
+
+  /** "Copied" / "Saved" on the item for a moment. */
+  function flashDone(which: "copy" | "photos") {
+    setDone(which)
+    if (doneTimeoutRef.current) clearTimeout(doneTimeoutRef.current)
+    doneTimeoutRef.current = setTimeout(() => setDone(null), 2000)
+  }
+
+  /**
+   * Closes the share sheet and waits for it to finish dismissing — iOS won't present
+   * another native sheet over a modal that's still animating closed (same as relays).
+   */
+  function closeShareSheetAndWait(): Promise<void> {
+    setShareOpen(false)
+    if (Platform.OS !== "ios") return Promise.resolve()
+    return new Promise((resolve) => {
+      const finish = () => {
+        shareSheetDismissRef.current = null
+        clearTimeout(fallback)
+        resolve()
+      }
+      const fallback = setTimeout(finish, 600)
+      shareSheetDismissRef.current = finish
+    })
+  }
+
+  async function copyText() {
+    try {
+      const request = shareRequest ?? buildPdfRequest()
+      await Clipboard.setStringAsync(rosterSummaryText({ meetName, details, request }))
+      flashDone("copy")
+    } catch (err) {
+      Alert.alert("Could not copy text", err instanceof Error ? err.message : "Something went wrong")
+    }
+  }
+
+  async function saveToPhotos() {
+    if (!exportCaptureRef.current) return
+    setShareBusy("photos")
+    try {
+      const permission = await MediaLibrary.requestPermissionsAsync(true)
+      if (!permission.granted) {
+        Alert.alert("Permission needed", "Allow photo access in Settings to save roster summary images.")
+        return
+      }
+      const uri = await captureRef(exportCaptureRef, { format: "png", quality: 1, result: "tmpfile" })
+      await MediaLibrary.saveToLibraryAsync(uri)
+      flashDone("photos")
+    } catch (err) {
+      Alert.alert("Could not save image", err instanceof Error ? err.message : "Something went wrong")
+    } finally {
+      setShareBusy(null)
+    }
+  }
+
   async function sharePdf() {
-    setSharing(true)
+    setShareBusy("pdf")
     try {
       const token = await getAccessToken()
-      const request = buildPdfRequest()
+      const request = shareRequest ?? buildPdfRequest()
       const res = await fetch(
         `${API_URL}/api/meets/${encodeURIComponent(meetId)}/roster-summary/pdf`,
         {
@@ -364,12 +575,22 @@ export function RosterSummarySection({
         Alert.alert("Sharing unavailable", "This device can't open the share sheet.")
         return
       }
+      await closeShareSheetAndWait()
       await Sharing.shareAsync(file.uri, { mimeType: "application/pdf", UTI: "com.adobe.pdf" })
     } catch (err) {
       Alert.alert("Could not share PDF", err instanceof Error ? err.message : "Something went wrong")
     } finally {
-      setSharing(false)
+      setShareBusy(null)
     }
+  }
+
+  function toggleRound(kind: SummaryRoundKind) {
+    setHiddenRounds((hidden) => {
+      const next = new Set(hidden)
+      if (next.has(kind)) next.delete(kind)
+      else next.add(kind)
+      return next
+    })
   }
 
   if (entries.length === 0) return null
@@ -380,14 +601,14 @@ export function RosterSummarySection({
         title={title}
         right={
           <Pressable
-            onPress={() => void sharePdf()}
-            disabled={sharing}
+            onPress={openShare}
+            disabled={Boolean(shareBusy)}
             accessibilityRole="button"
-            accessibilityLabel="Share roster summary PDF"
+            accessibilityLabel="Share roster summary"
             hitSlop={8}
             style={{ paddingVertical: spacing.xxs, paddingHorizontal: spacing.xs }}
           >
-            {sharing ? (
+            {shareBusy ? (
               <ActivityIndicator size="small" color={c.text} />
             ) : (
               <Icon name="share" size={20} color={c.text} />
@@ -420,9 +641,41 @@ export function RosterSummarySection({
           />
         ) : null}
       </View>
+      {sessions.length > 0 ? (
+        <View style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: spacing.sm }}>
+          {[null, ...sessions].map((session) => (
+            <Chip
+              key={session ?? "all"}
+              label={session ?? "All sessions"}
+              selected={activeSession === session}
+              onPress={() => setSessionFilter(session)}
+            />
+          ))}
+        </View>
+      ) : null}
+      {roundFilterOn ? (
+        <View style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: spacing.sm }}>
+          {SUMMARY_ROUNDS.filter((r) => availableRounds.includes(r.kind)).map((r) => (
+            <Chip
+              key={r.kind}
+              label={r.label}
+              selected={!hiddenRounds.has(r.kind)}
+              onPress={() => toggleRound(r.kind)}
+            />
+          ))}
+        </View>
+      ) : null}
       <TextField
         label="Search"
-        placeholder="Athlete or event"
+        placeholder={[
+          "Athlete or event",
+          rosterSummaryScopeLabel(
+            activeSession,
+            roundFilterOn ? roundFilterLabel(hiddenRounds, availableRounds) : null
+          ),
+        ]
+          .filter(Boolean)
+          .join(" in ")}
         value={query}
         onChangeText={setQuery}
         autoCapitalize="none"
@@ -442,7 +695,7 @@ export function RosterSummarySection({
               <ListRow
                 key={`${entry.athleteId}-${entry.event}-${entry.relayLetter ?? ""}-${index}`}
                 title={entryTitle(entry)}
-                subtitle={entrySubtitle(entry, "athlete", true, group.athleteId)}
+                subtitle={entrySubtitle(entry, "athlete", true, group.athleteId, true, activeRound)}
               />
             ))}
           </View>
@@ -469,7 +722,7 @@ export function RosterSummarySection({
                     </Text>
                   ) : undefined
                 }
-                subtitle={entrySubtitle(entry, "event")}
+                subtitle={entrySubtitle(entry, "event", true, undefined, true, activeRound)}
               />
             ))}
           </View>
@@ -478,6 +731,53 @@ export function RosterSummarySection({
       <Muted>
         {filtered.length} entr{filtered.length === 1 ? "y" : "ies"}
       </Muted>
+
+      <ActionSheet
+        visible={shareOpen}
+        onClose={() => setShareOpen(false)}
+        onDismiss={() => shareSheetDismissRef.current?.()}
+        title="Share roster summary"
+        groups={[
+          [
+            {
+              key: "copy",
+              label: done === "copy" ? "Copied" : "Copy as text",
+              icon: <Icon name={done === "copy" ? "check" : "copy"} size={20} color={c.text} />,
+              disabled: Boolean(shareBusy),
+              onPress: () => void copyText(),
+            },
+            {
+              key: "photos",
+              label: done === "photos" ? "Saved to Photos" : "Save to Photos",
+              icon: <Icon name={done === "photos" ? "check" : "image"} size={20} color={c.text} />,
+              busy: shareBusy === "photos",
+              disabled: Boolean(shareBusy) && shareBusy !== "photos",
+              onPress: () => void saveToPhotos(),
+            },
+            {
+              key: "pdf",
+              label: "Share PDF",
+              icon: <Icon name="fileText" size={20} color={c.text} />,
+              busy: shareBusy === "pdf",
+              disabled: Boolean(shareBusy) && shareBusy !== "pdf",
+              onPress: () => void sharePdf(),
+            },
+          ] satisfies ActionSheetItem[],
+        ]}
+      />
+
+      {/* Off-screen mirror captured to PNG while the share sheet is open — never shown in the layout. */}
+      {shareOpen && shareRequest ? (
+        <View pointerEvents="none" style={{ position: "absolute", top: 0, left: -10000 }}>
+          <RosterSummaryExportCapture
+            ref={exportCaptureRef}
+            meetName={meetName}
+            details={details}
+            iconUrl={iconUrl}
+            request={shareRequest}
+          />
+        </View>
+      ) : null}
     </Section>
   )
 }

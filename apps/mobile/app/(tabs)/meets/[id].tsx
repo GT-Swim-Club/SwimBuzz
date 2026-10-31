@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Alert, Image, View } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { DEFAULT_TIME_ZONE, formatFullDate, formatMeetDateRange, formatTime, isHtmlEmpty, zonedDayKey, type IconName } from "@swimbuzz/shared"
+import { DEFAULT_TIME_ZONE, formatFullDate, formatMeetDateRange, formatTime, isHtmlEmpty, meetHeaderDetails, zonedDayKey, type IconName } from "@swimbuzz/shared"
 import {
   Body,
   Button,
@@ -455,7 +455,8 @@ export default function MeetDetailScreen() {
           {iconUrl ? (
             <Image
               source={{ uri: iconUrl }}
-              style={{ width: 56, height: 56, borderRadius: 10 }}
+              resizeMode="contain"
+              style={{ width: 56, height: 56 }}
               accessibilityLabel={`${name} icon`}
             />
           ) : null}
@@ -599,6 +600,9 @@ export default function MeetDetailScreen() {
             meetId={id}
             meetName={name}
             entries={rosterEntries as RosterSummaryEntry[]}
+            eventOrder={isEventOrder(meet.eventOrder) ? meet.eventOrder : null}
+            details={meetHeaderDetails({ location, school, startsAt, endsAt, timeZone })}
+            iconUrl={iconUrl}
             hasHeatSheet={Boolean(
               asRecord(meet.heatSheetSummary) || asRecord(meet.finalsHeatSheetSummary)
             )}

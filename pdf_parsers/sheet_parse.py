@@ -6,6 +6,7 @@ import contextvars
 import io
 import re
 import string
+from collections import Counter
 from typing import Any
 
 import pdfplumber
@@ -274,10 +275,15 @@ INDIVIDUAL_SEED_ANY = re.compile(
     re.I,
 )
 
-RELAY_SEED_ANY = re.compile(
-    rf"(\d+)\s+(.+?)\s+([A-D])\s+({_SEED_TIME_TOKEN})\b",
+# Any individual row whose name came out garbled — Hy-Tek truncates long names and the age bleeds
+# into them ("1 Settembrine, Ni c2h4ol UVA 1:53.90") — taking the row's first time as its seed.
+INDIVIDUAL_SEED_ROW_LOOSE = re.compile(
+    rf"^\d{{1,2}}\s+[A-Z][^,]*,.*?\s({_SEED_TIME_TOKEN})(?=\s|$)",
     re.I,
 )
+
+# Any team's relay row, with or without a relay letter ("8 GTSC 1:23.47", "1 PURD A 1:23.44").
+RELAY_SEED_ANY = _SheetTeam.parse(None).relay_re()
 
 TEAM_SUMMARY = re.compile(r"^\d[\d,]*\s*/\s*\d+\s+", re.I)
 
@@ -1626,6 +1632,7 @@ def _parse_usms_sheet_pages(
     pending_relay: dict[str, Any] | None = None
     event_heat_totals: dict[int, int] = {}
     event_max_heat: dict[int, int] = {}
+    event_seed_times: dict[str, list[str]] = {}
     entries: list[dict[str, Any]] = []
 
     for page in pdf.pages:
@@ -1699,6 +1706,10 @@ def _parse_usms_sheet_pages(
                 if not current_event:
                     continue
 
+                # Every team's seed, not just ours, so a seed rank is our place in the field.
+                if sheet_type == "heat" and not in_alternates:
+                    _collect_line_seed_times(line, current_event, event_seed_times)
+
                 if current_event.get("isRelay"):
                     relay = _parse_relay_team(
                         line,
@@ -1738,6 +1749,7 @@ def _parse_usms_sheet_pages(
 
     if sheet_type == "heat":
         _backfill_heat_totals(entries, event_heat_totals, event_max_heat)
+        _assign_seed_ranks_from_event_times(entries, event_seed_times)
 
     return entries
 
@@ -1785,21 +1797,35 @@ def _collect_line_seed_times(
         for match in RELAY_SEED_ANY.finditer(line):
             times.append(match.group(4))
         return
-    for match in INDIVIDUAL_SEED_ANY.finditer(line):
-        times.append(match.group(2))
+    found = [match.group(2) for match in INDIVIDUAL_SEED_ANY.finditer(line)]
+    if not found and (loose := INDIVIDUAL_SEED_ROW_LOOSE.match(line)):
+        found = [loose.group(1)]
+    times.extend(found)
 
 
 def _assign_seed_ranks_from_event_times(
     entries: list[dict[str, Any]],
     buckets: dict[str, list[str]],
 ) -> None:
+    """Rank each entry's seed among every seed in its event (all teams, alternates aside)."""
+    ms_by_bucket: dict[str, list[float]] = {
+        key: [ms for token in times if (ms := _seed_time_ms(token)) is not None]
+        for key, times in buckets.items()
+    }
+    # A parsed entry whose row the line scan missed still counts — once, not on top of its row.
+    wanted: dict[str, Counter[float]] = {}
+    for entry in entries:
+        ms = _seed_time_ms(entry.get("seedTime"))
+        if ms is not None and not entry.get("alternate"):
+            wanted.setdefault(_event_seed_bucket(entry), Counter())[ms] += 1
+    for key, counts in wanted.items():
+        have = Counter(ms_by_bucket.setdefault(key, []))
+        for ms, n in counts.items():
+            ms_by_bucket[key].extend([ms] * max(0, n - have[ms]))
+
     ranks_by_bucket: dict[str, dict[float, int]] = {}
-    for key, times in buckets.items():
-        parsed = sorted(
-            ms
-            for token in times
-            if (ms := _seed_time_ms(token)) is not None
-        )
+    for key, values in ms_by_bucket.items():
+        parsed = sorted(values)
         ranks: dict[float, int] = {}
         index = 0
         while index < len(parsed):
@@ -1940,7 +1966,7 @@ def parse_sheet_pdf_bytes(
         if not current_event:
             continue
 
-        if parse_as == "heat":
+        if parse_as == "heat" and not in_alternates:
             _collect_line_seed_times(line, current_event, event_seed_times)
 
         if current_event.get("isRelay"):
@@ -2013,10 +2039,6 @@ def parse_sheet_pdf_bytes(
 
     if parse_as == "heat":
         _backfill_heat_totals(entries, event_heat_totals, event_max_heat)
-        for entry in entries:
-            time = entry.get("seedTime")
-            if time:
-                event_seed_times.setdefault(_event_seed_bucket(entry), []).append(str(time))
         _assign_seed_ranks_from_event_times(entries, event_seed_times)
 
     if not entries:

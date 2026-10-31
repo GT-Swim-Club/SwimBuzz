@@ -57,6 +57,7 @@ import { toDateInput, toTimeInput } from "@/lib/date-input"
 import {
   athleteRosterNameLastFirst,
   meetFileName,
+  meetHeaderDetails,
   utcDayKey,
   COURSE_LABELS,
   type CourseCode,
@@ -411,6 +412,9 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       individualEventOptions={individualEventOptions}
       editableSeedKeys={editableSeedKeys}
       eventNumberOptions={signupEventOptions}
+      eventOrder={eventOrder}
+      details={meetHeaderDetails(meet)}
+      iconUrl={meet.iconUrl}
       defaultCourse={meet.course}
       defaultDate={toDateInput(meet.startsAt, meet.timeZone)}
     />

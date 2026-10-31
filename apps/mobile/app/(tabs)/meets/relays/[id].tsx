@@ -15,6 +15,7 @@ import {
   relayLineupRoundLabel,
   relayShareEvents,
   relayShareFilename,
+  relayShareText,
   type RelayLineup,
 } from "@swimbuzz/shared"
 import {
@@ -82,7 +83,7 @@ export default function MeetRelaysScreen() {
   )
 
   const [shareOpen, setShareOpen] = useState(false)
-  const [shareBusy, setShareBusy] = useState<"copy" | "photos" | "pdf" | null>(null)
+  const [shareBusy, setShareBusy] = useState<"photos" | "pdf" | null>(null)
   const [copied, setCopied] = useState(false)
   const [savedToastVisible, setSavedToastVisible] = useState(false)
   const exportCaptureRef = useRef<View>(null)
@@ -115,19 +116,14 @@ export default function MeetRelaysScreen() {
     })
   }
 
-  async function copyPng() {
-    if (!exportCaptureRef.current) return
-    setShareBusy("copy")
+  async function copyText() {
     try {
-      const base64 = await captureRef(exportCaptureRef, { format: "png", quality: 1, result: "base64" })
-      await Clipboard.setImageAsync(base64)
+      await Clipboard.setStringAsync(relayShareText({ meetName, details: headerDetails, events: shareEvents }))
       setCopied(true)
       if (copiedTimeoutRef.current) clearTimeout(copiedTimeoutRef.current)
       copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000)
     } catch (err) {
-      Alert.alert("Could not copy image", err instanceof Error ? err.message : "Something went wrong")
-    } finally {
-      setShareBusy(null)
+      Alert.alert("Could not copy text", err instanceof Error ? err.message : "Something went wrong")
     }
   }
 
@@ -345,11 +341,10 @@ export default function MeetRelaysScreen() {
           [
             {
               key: "copy",
-              label: copied ? "Copied" : "Copy PNG",
+              label: copied ? "Copied" : "Copy as text",
               icon: <Icon name={copied ? "check" : "copy"} size={20} color={c.text} />,
-              busy: shareBusy === "copy",
-              disabled: Boolean(shareBusy) && shareBusy !== "copy",
-              onPress: () => void copyPng(),
+              disabled: Boolean(shareBusy),
+              onPress: () => void copyText(),
             },
             {
               key: "photos",

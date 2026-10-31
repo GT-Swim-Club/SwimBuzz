@@ -120,6 +120,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "2:25.00",
       "startTime": "12:34 PM",
       "team": "SCGSU-GA"
@@ -157,6 +158,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "2:02.00",
       "startTime": "12:34 PM",
       "team": "CLEM-SC"
@@ -194,6 +196,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "1:57.46",
       "startTime": "12:34 PM",
       "team": "GTSC-GA"
@@ -231,6 +234,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:55.00",
       "startTime": "12:34 PM",
       "team": "GTSC-GA"
@@ -268,6 +272,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "1:55.29",
       "startTime": "12:34 PM",
       "team": "UGA-GA"
@@ -305,6 +310,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "1:58.59",
       "startTime": "12:34 PM",
       "team": "UNCW-NC"
@@ -342,6 +348,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "2:04.50",
       "startTime": "12:34 PM",
       "team": "CLEM-SC"
@@ -358,6 +365,7 @@
       "relayLetter": "A",
       "relaySwimmers": [],
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "2:39.00",
       "startTime": "12:34 PM",
       "team": "GSU-NI"
@@ -628,6 +636,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "2:00.69",
       "startTime": "12:41 PM",
       "team": "SCGSU-GA"
@@ -665,6 +674,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "1:45.50",
       "startTime": "12:41 PM",
       "team": "GTSC-GA"
@@ -702,6 +712,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "1:43.00",
       "startTime": "12:41 PM",
       "team": "CLEM-SC"
@@ -739,6 +750,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "1:39.01",
       "startTime": "12:41 PM",
       "team": "GTSC-GA"
@@ -776,6 +788,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:35.73",
       "startTime": "12:41 PM",
       "team": "UGA-GA"
@@ -813,6 +826,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "1:36.82",
       "startTime": "12:41 PM",
       "team": "UNCW-NC"
@@ -850,6 +864,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "1:40.00",
       "startTime": "12:41 PM",
       "team": "CLEM-SC"
@@ -887,6 +902,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "1:43.45",
       "startTime": "12:41 PM",
       "team": "UGA-GA"
@@ -903,6 +919,7 @@
       "relayLetter": "A",
       "relaySwimmers": [],
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "1:49.00",
       "startTime": "12:41 PM",
       "team": "GSU-NI"
@@ -970,6 +987,7 @@
       "lane": 2,
       "name": "Warta, Rachel",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "2:20.00",
       "startTime": "12:47 PM",
       "team": ""
@@ -985,6 +1003,7 @@
       "lane": 3,
       "name": "Bohinc, Kaylee",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "2:11.00",
       "startTime": "12:47 PM",
       "team": ""
@@ -1000,6 +1019,7 @@
       "lane": 4,
       "name": "Moskal, Ava",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "2:08.00",
       "startTime": "12:47 PM",
       "team": ""
@@ -1015,6 +1035,7 @@
       "lane": 5,
       "name": "Slorahn, Piper",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:59.69",
       "startTime": "12:47 PM",
       "team": ""
@@ -1030,6 +1051,7 @@
       "lane": 6,
       "name": "Munger, Audrey",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "2:03.69",
       "startTime": "12:47 PM",
       "team": ""
@@ -1045,6 +1067,7 @@
       "lane": 7,
       "name": "Tumanova, Katya",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "2:09.69",
       "startTime": "12:47 PM",
       "team": ""
@@ -1060,6 +1083,7 @@
       "lane": 8,
       "name": "Wong, Tara",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "2:15.00",
       "startTime": "12:47 PM",
       "team": ""
@@ -1075,6 +1099,7 @@
       "lane": 9,
       "name": "Byther, Jamie",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "2:24.00",
       "startTime": "12:47 PM",
       "team": ""
@@ -1105,6 +1130,7 @@
       "lane": 2,
       "name": "Roberts, AlexT",
       "round": "finals",
+      "seedRank": 17,
       "seedTime": "2:40.00",
       "startTime": "12:50 PM",
       "team": ""
@@ -1120,6 +1146,7 @@
       "lane": 3,
       "name": "Roy, Ishan",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "2:07.69",
       "startTime": "12:50 PM",
       "team": ""
@@ -1135,6 +1162,7 @@
       "lane": 4,
       "name": "Elliott, Luke",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "2:00.00",
       "startTime": "12:50 PM",
       "team": ""
@@ -1150,6 +1178,7 @@
       "lane": 5,
       "name": "Gauntt, Charlie",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "1:56.25",
       "startTime": "12:50 PM",
       "team": ""
@@ -1165,6 +1194,7 @@
       "lane": 6,
       "name": "Trocchi, Tyler",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "1:58.00",
       "startTime": "12:50 PM",
       "team": ""
@@ -1180,6 +1210,7 @@
       "lane": 7,
       "name": "Weitzel, Logan",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "2:07.69",
       "startTime": "12:50 PM",
       "team": ""
@@ -1195,6 +1226,7 @@
       "lane": 8,
       "name": "Harmon, Jack",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "2:13.76",
       "startTime": "12:50 PM",
       "team": ""
@@ -1210,6 +1242,7 @@
       "lane": 1,
       "name": "Townsend, Matthew",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "1:52.69",
       "startTime": "12:53 PM",
       "team": ""
@@ -1225,6 +1258,7 @@
       "lane": 2,
       "name": "Peterson, Bryce",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "1:51.00",
       "startTime": "12:53 PM",
       "team": ""
@@ -1240,6 +1274,7 @@
       "lane": 3,
       "name": "Smith, Ben",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "1:50.69",
       "startTime": "12:53 PM",
       "team": ""
@@ -1255,6 +1290,7 @@
       "lane": 4,
       "name": "Long, Liam",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "1:45.69",
       "startTime": "12:53 PM",
       "team": ""
@@ -1270,6 +1306,7 @@
       "lane": 5,
       "name": "Gravitt, Chase",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:41.50",
       "startTime": "12:53 PM",
       "team": ""
@@ -1285,6 +1322,7 @@
       "lane": 6,
       "name": "Meeks, Charlie",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "1:41.67",
       "startTime": "12:53 PM",
       "team": ""
@@ -1300,6 +1338,7 @@
       "lane": 7,
       "name": "Gray, Matthew",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "1:49.00",
       "startTime": "12:53 PM",
       "team": ""
@@ -1315,6 +1354,7 @@
       "lane": 8,
       "name": "Altera, Ryan",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "1:50.69",
       "startTime": "12:53 PM",
       "team": ""
@@ -1330,6 +1370,7 @@
       "lane": 9,
       "name": "Hafner, Justin",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "1:52.00",
       "startTime": "12:53 PM",
       "team": ""
@@ -1345,6 +1386,7 @@
       "lane": 10,
       "name": "Teal, Nathan",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "1:56.00",
       "startTime": "12:53 PM",
       "team": ""
@@ -1417,6 +1459,7 @@
       "lane": 2,
       "name": "Anderson, Claire",
       "round": "finals",
+      "seedRank": 27,
       "seedTime": "1:20.55",
       "startTime": "01:03 PM",
       "team": ""
@@ -1432,6 +1475,7 @@
       "lane": 3,
       "name": "Farah, Jamie",
       "round": "finals",
+      "seedRank": 25,
       "seedTime": "1:18.95",
       "startTime": "01:03 PM",
       "team": ""
@@ -1447,6 +1491,7 @@
       "lane": 4,
       "name": "Roehrborn, Sophie",
       "round": "finals",
+      "seedRank": 22,
       "seedTime": "1:18.00",
       "startTime": "01:03 PM",
       "team": ""
@@ -1462,6 +1507,7 @@
       "lane": 5,
       "name": "Irvin, Blakely",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "1:17.27",
       "startTime": "01:03 PM",
       "team": ""
@@ -1477,6 +1523,7 @@
       "lane": 6,
       "name": "Fowler, Macon",
       "round": "finals",
+      "seedRank": 22,
       "seedTime": "1:18.00",
       "startTime": "01:03 PM",
       "team": ""
@@ -1492,6 +1539,7 @@
       "lane": 7,
       "name": "Schmitz, Emily",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "1:18.27",
       "startTime": "01:03 PM",
       "team": ""
@@ -1507,6 +1555,7 @@
       "lane": 8,
       "name": "Bold, Abigail",
       "round": "finals",
+      "seedRank": 26,
       "seedTime": "1:19.00",
       "startTime": "01:03 PM",
       "team": ""
@@ -1522,6 +1571,7 @@
       "lane": 9,
       "name": "Wilderson, Breanna",
       "round": "finals",
+      "seedRank": 28,
       "seedTime": "1:26.04",
       "startTime": "01:03 PM",
       "team": ""
@@ -1537,6 +1587,7 @@
       "lane": 1,
       "name": "Gaalswyk, Katherine",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "1:15.69",
       "startTime": "01:04 PM",
       "team": ""
@@ -1552,6 +1603,7 @@
       "lane": 2,
       "name": "Forrer, Therese",
       "round": "finals",
+      "seedRank": 17,
       "seedTime": "1:15.00",
       "startTime": "01:04 PM",
       "team": ""
@@ -1567,6 +1619,7 @@
       "lane": 4,
       "name": "Liebenow, Sarah",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "1:10.00",
       "startTime": "01:04 PM",
       "team": ""
@@ -1582,6 +1635,7 @@
       "lane": 5,
       "name": "Wirz, Val",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "1:08.28",
       "startTime": "01:04 PM",
       "team": ""
@@ -1597,6 +1651,7 @@
       "lane": 6,
       "name": "Hebbar, Esha",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "1:10.00",
       "startTime": "01:04 PM",
       "team": ""
@@ -1612,6 +1667,7 @@
       "lane": 7,
       "name": "Mustard, Mary",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "1:13.00",
       "startTime": "01:04 PM",
       "team": ""
@@ -1627,6 +1683,7 @@
       "lane": 8,
       "name": "Tadder, Emerson",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "1:14.00",
       "startTime": "01:04 PM",
       "team": ""
@@ -1642,6 +1699,7 @@
       "lane": 9,
       "name": "Taheri, Mya",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "1:15.69",
       "startTime": "01:04 PM",
       "team": ""
@@ -1657,6 +1715,7 @@
       "lane": 10,
       "name": "Caruso, Sophia",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "1:16.97",
       "startTime": "01:04 PM",
       "team": ""
@@ -1672,6 +1731,7 @@
       "lane": 1,
       "name": "Plantamura, Natalie",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "1:07.69",
       "startTime": "01:06 PM",
       "team": ""
@@ -1687,6 +1747,7 @@
       "lane": 2,
       "name": "Mesihovic, Sara",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "1:07.00",
       "startTime": "01:06 PM",
       "team": ""
@@ -1702,6 +1763,7 @@
       "lane": 3,
       "name": "Allibone, Jessica",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "1:06.69",
       "startTime": "01:06 PM",
       "team": ""
@@ -1717,6 +1779,7 @@
       "lane": 4,
       "name": "Spaulding, Alice",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "1:05.69",
       "startTime": "01:06 PM",
       "team": ""
@@ -1732,6 +1795,7 @@
       "lane": 6,
       "name": "Fannin, Mattie",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "1:05.50",
       "startTime": "01:06 PM",
       "team": ""
@@ -1747,6 +1811,7 @@
       "lane": 7,
       "name": "Bierman, Caroline",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "1:06.00",
       "startTime": "01:06 PM",
       "team": ""
@@ -1762,6 +1827,7 @@
       "lane": 9,
       "name": "Loomis, Mary",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "1:07.00",
       "startTime": "01:06 PM",
       "team": ""
@@ -1777,6 +1843,7 @@
       "lane": 10,
       "name": "Spies, Caroline",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "1:08.00",
       "startTime": "01:06 PM",
       "team": ""
@@ -1882,6 +1949,7 @@
       "lane": 2,
       "name": "Xu, David",
       "round": "finals",
+      "seedRank": 17,
       "seedTime": "1:14.27",
       "startTime": "01:11 PM",
       "team": ""
@@ -1897,6 +1965,7 @@
       "lane": 3,
       "name": "Goodale, Cooper",
       "round": "finals",
+      "seedRank": 15,
       "seedTime": "1:09.48",
       "startTime": "01:11 PM",
       "team": ""
@@ -1912,6 +1981,7 @@
       "lane": 4,
       "name": "Ryan, Tierney",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "1:09.00",
       "startTime": "01:11 PM",
       "team": ""
@@ -1927,6 +1997,7 @@
       "lane": 5,
       "name": "Ashbaugh, James",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "1:06.69",
       "startTime": "01:11 PM",
       "team": ""
@@ -1942,6 +2013,7 @@
       "lane": 6,
       "name": "Atkins, David",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "1:07.34",
       "startTime": "01:11 PM",
       "team": ""
@@ -1957,6 +2029,7 @@
       "lane": 7,
       "name": "Winick, ZevJ",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "1:09.28",
       "startTime": "01:11 PM",
       "team": ""
@@ -1972,6 +2045,7 @@
       "lane": 8,
       "name": "Westrick, Michael",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "1:12.00",
       "startTime": "01:11 PM",
       "team": ""
@@ -1987,6 +2061,7 @@
       "lane": 9,
       "name": "Mordukhovich, Daniel",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "1:15.00",
       "startTime": "01:11 PM",
       "team": ""
@@ -2002,6 +2077,7 @@
       "lane": 1,
       "name": "Hopper, Will",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "1:05.00",
       "startTime": "01:13 PM",
       "team": ""
@@ -2017,6 +2093,7 @@
       "lane": 2,
       "name": "Skidmore, Billy",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "1:01.69",
       "startTime": "01:13 PM",
       "team": ""
@@ -2032,6 +2109,7 @@
       "lane": 3,
       "name": "Wygonik, Sam",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "1:00.69",
       "startTime": "01:13 PM",
       "team": ""
@@ -2047,6 +2125,7 @@
       "lane": 4,
       "name": "Danforth, Jason",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "57.00",
       "startTime": "01:13 PM",
       "team": ""
@@ -2062,6 +2141,7 @@
       "lane": 5,
       "name": "Smith, Ben",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "55.69",
       "startTime": "01:13 PM",
       "team": ""
@@ -2077,6 +2157,7 @@
       "lane": 6,
       "name": "Van Peteghem, Julian",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "57.00",
       "startTime": "01:13 PM",
       "team": ""
@@ -2092,6 +2173,7 @@
       "lane": 7,
       "name": "Bravo, Edward",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "1:00.00",
       "startTime": "01:13 PM",
       "team": ""
@@ -2107,6 +2189,7 @@
       "lane": 8,
       "name": "King, Alex",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "1:01.00",
       "startTime": "01:13 PM",
       "team": ""
@@ -2122,6 +2205,7 @@
       "lane": 9,
       "name": "Mai, Derek",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "1:03.00",
       "startTime": "01:13 PM",
       "team": ""
@@ -2137,6 +2221,7 @@
       "lane": 10,
       "name": "Balkcum, Kyle",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "1:05.69",
       "startTime": "01:13 PM",
       "team": ""
@@ -2182,6 +2267,7 @@
       "lane": 5,
       "name": "Thai, Katelyn",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "40.00",
       "startTime": "01:17 PM",
       "team": ""
@@ -2197,6 +2283,7 @@
       "lane": 6,
       "name": "Wilderson, Breanna",
       "round": "finals",
+      "seedRank": 22,
       "seedTime": "42.26",
       "startTime": "01:17 PM",
       "team": ""
@@ -2227,6 +2314,7 @@
       "lane": 1,
       "name": "Sortino, Ella",
       "round": "finals",
+      "seedRank": 19,
       "seedTime": "38.50",
       "startTime": "01:19 PM",
       "team": ""
@@ -2242,6 +2330,7 @@
       "lane": 2,
       "name": "Hussaini, Sameena",
       "round": "finals",
+      "seedRank": 17,
       "seedTime": "37.48",
       "startTime": "01:19 PM",
       "team": ""
@@ -2257,6 +2346,7 @@
       "lane": 3,
       "name": "Caruso, Sophia",
       "round": "finals",
+      "seedRank": 15,
       "seedTime": "35.39",
       "startTime": "01:19 PM",
       "team": ""
@@ -2272,6 +2362,7 @@
       "lane": 4,
       "name": "Roehrborn, Sophie",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "35.00",
       "startTime": "01:19 PM",
       "team": ""
@@ -2287,6 +2378,7 @@
       "lane": 5,
       "name": "Shaw, Morgan",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "34.67",
       "startTime": "01:19 PM",
       "team": ""
@@ -2302,6 +2394,7 @@
       "lane": 6,
       "name": "Kinnear, Emily",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "35.00",
       "startTime": "01:19 PM",
       "team": ""
@@ -2317,6 +2410,7 @@
       "lane": 7,
       "name": "Vieira, Ellie",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "35.02",
       "startTime": "01:19 PM",
       "team": ""
@@ -2332,6 +2426,7 @@
       "lane": 8,
       "name": "Taheri, Mya",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "35.69",
       "startTime": "01:19 PM",
       "team": ""
@@ -2347,6 +2442,7 @@
       "lane": 9,
       "name": "Reed, Izzy",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "38.00",
       "startTime": "01:19 PM",
       "team": ""
@@ -2362,6 +2458,7 @@
       "lane": 10,
       "name": "Kazemzadeh, Ava",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "39.00",
       "startTime": "01:19 PM",
       "team": ""
@@ -2377,6 +2474,7 @@
       "lane": 1,
       "name": "Fowler, Macon",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "34.00",
       "startTime": "01:20 PM",
       "team": ""
@@ -2392,6 +2490,7 @@
       "lane": 4,
       "name": "Ochoa, Iris",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "31.69",
       "startTime": "01:20 PM",
       "team": ""
@@ -2407,6 +2506,7 @@
       "lane": 6,
       "name": "Moskal, Ava",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "31.00",
       "startTime": "01:20 PM",
       "team": ""
@@ -2422,6 +2522,7 @@
       "lane": 7,
       "name": "Regalado, Elise",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "31.69",
       "startTime": "01:20 PM",
       "team": ""
@@ -2437,6 +2538,7 @@
       "lane": 9,
       "name": "Peyton, Abby",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "33.21",
       "startTime": "01:20 PM",
       "team": ""
@@ -2452,6 +2554,7 @@
       "lane": 10,
       "name": "Meretta, Tessa",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "34.00",
       "startTime": "01:20 PM",
       "team": ""
@@ -2527,6 +2630,7 @@
       "lane": 3,
       "name": "Vlady, Richard",
       "round": "timed_finals",
+      "seedRank": 15,
       "seedTime": "37.69",
       "team": ""
     },
@@ -2541,6 +2645,7 @@
       "lane": 4,
       "name": "Smith, Logan",
       "round": "timed_finals",
+      "seedRank": 13,
       "seedTime": "32.69",
       "team": ""
     },
@@ -2555,6 +2660,7 @@
       "lane": 5,
       "name": "Sarrafi, Arman",
       "round": "timed_finals",
+      "seedRank": 11,
       "seedTime": "31.49",
       "team": ""
     },
@@ -2569,6 +2675,7 @@
       "lane": 6,
       "name": "Quitian, German",
       "round": "timed_finals",
+      "seedRank": 12,
       "seedTime": "32.50",
       "team": ""
     },
@@ -2583,6 +2690,7 @@
       "lane": 7,
       "name": "Lyon, Nicholas",
       "round": "timed_finals",
+      "seedRank": 14,
       "seedTime": "35.00",
       "team": ""
     },
@@ -2597,6 +2705,7 @@
       "lane": 8,
       "name": "Hidalgo, Justin",
       "round": "timed_finals",
+      "seedRank": 16,
       "seedTime": "39.00",
       "team": ""
     },
@@ -2611,6 +2720,7 @@
       "lane": 1,
       "name": "Norman, Max",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "29.93",
       "startTime": "01:25 PM",
       "team": ""
@@ -2626,6 +2736,7 @@
       "lane": 2,
       "name": "Marra-Ulfe, Kyle",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "27.00",
       "startTime": "01:25 PM",
       "team": ""
@@ -2641,6 +2752,7 @@
       "lane": 3,
       "name": "Mun, Andrew",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "26.50",
       "startTime": "01:25 PM",
       "team": ""
@@ -2656,6 +2768,7 @@
       "lane": 4,
       "name": "Trocchi, Will",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "26.00",
       "startTime": "01:25 PM",
       "team": ""
@@ -2671,6 +2784,7 @@
       "lane": 5,
       "name": "Kruger, Ethan",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "25.30",
       "startTime": "01:25 PM",
       "team": ""
@@ -2686,6 +2800,7 @@
       "lane": 6,
       "name": "Claborn, Nathan",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "26.00",
       "startTime": "01:25 PM",
       "team": ""
@@ -2701,6 +2816,7 @@
       "lane": 7,
       "name": "Kryski, Wyatt",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "26.50",
       "startTime": "01:25 PM",
       "team": ""
@@ -2716,6 +2832,7 @@
       "lane": 8,
       "name": "Healy, Chase",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "27.00",
       "startTime": "01:25 PM",
       "team": ""
@@ -2731,6 +2848,7 @@
       "lane": 9,
       "name": "Otten, Evan",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "27.50",
       "startTime": "01:25 PM",
       "team": ""
@@ -2746,6 +2864,7 @@
       "lane": 10,
       "name": "Mui, Josh",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "30.00",
       "startTime": "01:25 PM",
       "team": ""
@@ -2791,6 +2910,7 @@
       "lane": 2,
       "name": "Gonzalez Cerulli, Ludmila",
       "round": "finals",
+      "seedRank": 27,
       "seedTime": "1:20.00",
       "startTime": "01:30 PM",
       "team": ""
@@ -2806,6 +2926,7 @@
       "lane": 4,
       "name": "Hussaini, Sameena",
       "round": "finals",
+      "seedRank": 23,
       "seedTime": "1:12.57",
       "startTime": "01:30 PM",
       "team": ""
@@ -2821,6 +2942,7 @@
       "lane": 5,
       "name": "Park, Jessica",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "1:09.40",
       "startTime": "01:30 PM",
       "team": ""
@@ -2836,6 +2958,7 @@
       "lane": 6,
       "name": "Schmid, Sarah",
       "round": "finals",
+      "seedRank": 22,
       "seedTime": "1:09.69",
       "startTime": "01:30 PM",
       "team": ""
@@ -2851,6 +2974,7 @@
       "lane": 7,
       "name": "Algeo, Kaitlyn",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "1:12.69",
       "startTime": "01:30 PM",
       "team": ""
@@ -2866,6 +2990,7 @@
       "lane": 8,
       "name": "Smith, Ava",
       "round": "finals",
+      "seedRank": 25,
       "seedTime": "1:15.00",
       "startTime": "01:30 PM",
       "team": ""
@@ -2896,6 +3021,7 @@
       "lane": 1,
       "name": "Vieira, Ellie",
       "round": "finals",
+      "seedRank": 19,
       "seedTime": "1:08.70",
       "startTime": "01:32 PM",
       "team": ""
@@ -2911,6 +3037,7 @@
       "lane": 3,
       "name": "Johannessen, Anna",
       "round": "finals",
+      "seedRank": 15,
       "seedTime": "1:05.69",
       "startTime": "01:32 PM",
       "team": ""
@@ -2926,6 +3053,7 @@
       "lane": 4,
       "name": "Kelley, Sophie",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "1:05.00",
       "startTime": "01:32 PM",
       "team": ""
@@ -2941,6 +3069,7 @@
       "lane": 5,
       "name": "Kinnear, Emily",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "1:05.00",
       "startTime": "01:32 PM",
       "team": ""
@@ -2956,6 +3085,7 @@
       "lane": 6,
       "name": "Glinski, Ella",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "1:05.00",
       "startTime": "01:32 PM",
       "team": ""
@@ -2971,6 +3101,7 @@
       "lane": 7,
       "name": "Anderson, Claire",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "1:05.30",
       "startTime": "01:32 PM",
       "team": ""
@@ -2986,6 +3117,7 @@
       "lane": 8,
       "name": "McCann, Caroline",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "1:06.00",
       "startTime": "01:32 PM",
       "team": ""
@@ -3001,6 +3133,7 @@
       "lane": 10,
       "name": "Reed, Izzy",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "1:09.00",
       "startTime": "01:32 PM",
       "team": ""
@@ -3016,6 +3149,7 @@
       "lane": 1,
       "name": "Cusack, Abigail",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "1:03.00",
       "startTime": "01:33 PM",
       "team": ""
@@ -3031,6 +3165,7 @@
       "lane": 2,
       "name": "Warta, Rachel",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "1:02.00",
       "startTime": "01:33 PM",
       "team": ""
@@ -3046,6 +3181,7 @@
       "lane": 3,
       "name": "Wang, Mingqi",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "1:00.69",
       "startTime": "01:33 PM",
       "team": ""
@@ -3061,6 +3197,7 @@
       "lane": 4,
       "name": "Wirz, Val",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:00.00",
       "startTime": "01:33 PM",
       "team": ""
@@ -3076,6 +3213,7 @@
       "lane": 5,
       "name": "Layton, Tori",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:00.00",
       "startTime": "01:33 PM",
       "team": ""
@@ -3091,6 +3229,7 @@
       "lane": 6,
       "name": "Heil, Emily",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:00.00",
       "startTime": "01:33 PM",
       "team": ""
@@ -3106,6 +3245,7 @@
       "lane": 7,
       "name": "Witthoff, Mia",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "1:00.69",
       "startTime": "01:33 PM",
       "team": ""
@@ -3121,6 +3261,7 @@
       "lane": 9,
       "name": "Burlina, Emma",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "1:02.69",
       "startTime": "01:33 PM",
       "team": ""
@@ -3136,6 +3277,7 @@
       "lane": 10,
       "name": "Byther, Jamie",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "1:05.00",
       "startTime": "01:33 PM",
       "team": ""
@@ -3226,6 +3368,7 @@
       "lane": 4,
       "name": "Roberts, AlexT",
       "round": "finals",
+      "seedRank": 33,
       "seedTime": "1:30.00",
       "startTime": "01:38 PM",
       "team": ""
@@ -3241,6 +3384,7 @@
       "lane": 5,
       "name": "Johnson, Lucas",
       "round": "finals",
+      "seedRank": 31,
       "seedTime": "1:12.69",
       "startTime": "01:38 PM",
       "team": ""
@@ -3256,6 +3400,7 @@
       "lane": 6,
       "name": "Hidalgo, Justin",
       "round": "finals",
+      "seedRank": 32,
       "seedTime": "1:16.00",
       "startTime": "01:38 PM",
       "team": ""
@@ -3301,6 +3446,7 @@
       "lane": 1,
       "name": "Xu, David",
       "round": "finals",
+      "seedRank": 29,
       "seedTime": "1:04.72",
       "startTime": "01:40 PM",
       "team": ""
@@ -3316,6 +3462,7 @@
       "lane": 2,
       "name": "Williams, Luke",
       "round": "finals",
+      "seedRank": 25,
       "seedTime": "1:00.00",
       "startTime": "01:40 PM",
       "team": ""
@@ -3331,6 +3478,7 @@
       "lane": 3,
       "name": "Carson, Sam",
       "round": "finals",
+      "seedRank": 25,
       "seedTime": "1:00.00",
       "startTime": "01:40 PM",
       "team": ""
@@ -3346,6 +3494,7 @@
       "lane": 5,
       "name": "Kang, Matthew",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "58.00",
       "startTime": "01:40 PM",
       "team": ""
@@ -3361,6 +3510,7 @@
       "lane": 7,
       "name": "Weitzel, Logan",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "59.69",
       "startTime": "01:40 PM",
       "team": ""
@@ -3376,6 +3526,7 @@
       "lane": 8,
       "name": "Shell, Landon",
       "round": "finals",
+      "seedRank": 25,
       "seedTime": "1:00.00",
       "startTime": "01:40 PM",
       "team": ""
@@ -3391,6 +3542,7 @@
       "lane": 9,
       "name": "Harmon, Jack",
       "round": "finals",
+      "seedRank": 28,
       "seedTime": "1:01.46",
       "startTime": "01:40 PM",
       "team": ""
@@ -3406,6 +3558,7 @@
       "lane": 10,
       "name": "Phan, Bao",
       "round": "finals",
+      "seedRank": 30,
       "seedTime": "1:09.90",
       "startTime": "01:40 PM",
       "team": ""
@@ -3421,6 +3574,7 @@
       "lane": 1,
       "name": "Ghidu, Nicholas",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "56.00",
       "startTime": "01:42 PM",
       "team": ""
@@ -3436,6 +3590,7 @@
       "lane": 2,
       "name": "Cubarney, Connor",
       "round": "finals",
+      "seedRank": 17,
       "seedTime": "55.00",
       "startTime": "01:42 PM",
       "team": ""
@@ -3451,6 +3606,7 @@
       "lane": 4,
       "name": "Gabriele, Noah",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "51.00",
       "startTime": "01:42 PM",
       "team": ""
@@ -3466,6 +3622,7 @@
       "lane": 5,
       "name": "Li, Andy",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "50.69",
       "startTime": "01:42 PM",
       "team": ""
@@ -3481,6 +3638,7 @@
       "lane": 6,
       "name": "Rimsa, Thomas",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "50.69",
       "startTime": "01:42 PM",
       "team": ""
@@ -3496,6 +3654,7 @@
       "lane": 7,
       "name": "Trocchi, Tyler",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "53.00",
       "startTime": "01:42 PM",
       "team": ""
@@ -3511,6 +3670,7 @@
       "lane": 8,
       "name": "Hunt, Ryan",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "54.00",
       "startTime": "01:42 PM",
       "team": ""
@@ -3526,6 +3686,7 @@
       "lane": 9,
       "name": "Voigt, Christopher",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "56.00",
       "startTime": "01:42 PM",
       "team": ""
@@ -3541,6 +3702,7 @@
       "lane": 10,
       "name": "Elliott, Luke",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "58.00",
       "startTime": "01:42 PM",
       "team": ""
@@ -3556,6 +3718,7 @@
       "lane": 1,
       "name": "Altera, Ryan",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "50.69",
       "startTime": "01:43 PM",
       "team": ""
@@ -3571,6 +3734,7 @@
       "lane": 3,
       "name": "Russell, Ian",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "49.05",
       "startTime": "01:43 PM",
       "team": ""
@@ -3586,6 +3750,7 @@
       "lane": 4,
       "name": "Teal, Nathan",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "47.68",
       "startTime": "01:43 PM",
       "team": ""
@@ -3601,6 +3766,7 @@
       "lane": 5,
       "name": "Meeks, Charlie",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "45.67",
       "startTime": "01:43 PM",
       "team": ""
@@ -3616,6 +3782,7 @@
       "lane": 7,
       "name": "Krom, Tyler",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "48.21",
       "startTime": "01:43 PM",
       "team": ""
@@ -3631,6 +3798,7 @@
       "lane": 8,
       "name": "Danforth, Jason",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "49.39",
       "startTime": "01:43 PM",
       "team": ""
@@ -3646,6 +3814,7 @@
       "lane": 9,
       "name": "Ivan, David",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "49.70",
       "startTime": "01:43 PM",
       "team": ""
@@ -3661,6 +3830,7 @@
       "lane": 10,
       "name": "Townsend, Matthew",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "50.69",
       "startTime": "01:43 PM",
       "team": ""
@@ -3676,6 +3846,7 @@
       "lane": 5,
       "name": "Schmitz, Emily",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "1:27.52",
       "startTime": "01:45 PM",
       "team": ""
@@ -3691,6 +3862,7 @@
       "lane": 1,
       "name": "Layton, Tori",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "1:23.00",
       "startTime": "01:46 PM",
       "team": ""
@@ -3706,6 +3878,7 @@
       "lane": 2,
       "name": "Bold, Abigail",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "1:22.00",
       "startTime": "01:46 PM",
       "team": ""
@@ -3721,6 +3894,7 @@
       "lane": 3,
       "name": "Tumanova, Katya",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "1:18.69",
       "startTime": "01:46 PM",
       "team": ""
@@ -3736,6 +3910,7 @@
       "lane": 4,
       "name": "Hebbar, Esha",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "1:17.00",
       "startTime": "01:46 PM",
       "team": ""
@@ -3751,6 +3926,7 @@
       "lane": 5,
       "name": "Fannin, Mattie",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:13.50",
       "startTime": "01:46 PM",
       "team": ""
@@ -3766,6 +3942,7 @@
       "lane": 7,
       "name": "Wong, Tara",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "1:17.69",
       "startTime": "01:46 PM",
       "team": ""
@@ -3781,6 +3958,7 @@
       "lane": 8,
       "name": "Prassad, Geya",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "1:20.89",
       "startTime": "01:46 PM",
       "team": ""
@@ -3796,6 +3974,7 @@
       "lane": 9,
       "name": "Irvin, Blakely",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "1:22.77",
       "startTime": "01:46 PM",
       "team": ""
@@ -3811,6 +3990,7 @@
       "lane": 10,
       "name": "Pena-Rosales, Norka",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "1:25.00",
       "startTime": "01:46 PM",
       "team": ""
@@ -3826,6 +4006,7 @@
       "lane": 4,
       "name": "Laber, Brady",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "1:20.00",
       "startTime": "01:48 PM",
       "team": ""
@@ -3841,6 +4022,7 @@
       "lane": 5,
       "name": "Kang, Matthew",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "1:14.00",
       "startTime": "01:48 PM",
       "team": ""
@@ -3856,6 +4038,7 @@
       "lane": 6,
       "name": "Hopper, Will",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "1:15.00",
       "startTime": "01:48 PM",
       "team": ""
@@ -3871,6 +4054,7 @@
       "lane": 1,
       "name": "Daves, Brandon",
       "round": "timed_finals",
+      "seedRank": 9,
       "seedTime": "1:11.00",
       "team": ""
     },
@@ -3885,6 +4069,7 @@
       "lane": 3,
       "name": "Skidmore, Billy",
       "round": "timed_finals",
+      "seedRank": 5,
       "seedTime": "1:06.69",
       "team": ""
     },
@@ -3899,6 +4084,7 @@
       "lane": 4,
       "name": "Inlow, Max",
       "round": "timed_finals",
+      "seedRank": 3,
       "seedTime": "1:05.16",
       "team": ""
     },
@@ -3913,6 +4099,7 @@
       "lane": 5,
       "name": "Martin, Isaac",
       "round": "timed_finals",
+      "seedRank": 1,
       "seedTime": "1:01.00",
       "team": ""
     },
@@ -3927,6 +4114,7 @@
       "lane": 6,
       "name": "Tang, Rocky",
       "round": "timed_finals",
+      "seedRank": 2,
       "seedTime": "1:01.95",
       "team": ""
     },
@@ -3941,6 +4129,7 @@
       "lane": 7,
       "name": "Ward, Henry",
       "round": "timed_finals",
+      "seedRank": 4,
       "seedTime": "1:06.00",
       "team": ""
     },
@@ -3955,6 +4144,7 @@
       "lane": 8,
       "name": "Diatchenko, Alexander",
       "round": "timed_finals",
+      "seedRank": 5,
       "seedTime": "1:06.69",
       "team": ""
     },
@@ -3969,6 +4159,7 @@
       "lane": 9,
       "name": "Ashbaugh, James",
       "round": "timed_finals",
+      "seedRank": 8,
       "seedTime": "1:08.69",
       "team": ""
     },
@@ -3983,6 +4174,7 @@
       "lane": 10,
       "name": "Masterson, John",
       "round": "timed_finals",
+      "seedRank": 10,
       "seedTime": "1:12.00",
       "team": ""
     },
@@ -4057,6 +4249,7 @@
       "lane": 4,
       "name": "Faust, Amelia",
       "round": "finals",
+      "seedRank": 23,
       "seedTime": "34.69",
       "startTime": "01:55 PM",
       "team": ""
@@ -4072,6 +4265,7 @@
       "lane": 5,
       "name": "Spies, Caroline",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "33.00",
       "startTime": "01:55 PM",
       "team": ""
@@ -4087,6 +4281,7 @@
       "lane": 6,
       "name": "Roehrborn, Sophie",
       "round": "finals",
+      "seedRank": 22,
       "seedTime": "34.00",
       "startTime": "01:55 PM",
       "team": ""
@@ -4102,6 +4297,7 @@
       "lane": 7,
       "name": "Glinski, Ella",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "35.50",
       "startTime": "01:55 PM",
       "team": ""
@@ -4117,6 +4313,7 @@
       "lane": 2,
       "name": "Johannessen, Anna",
       "round": "finals",
+      "seedRank": 17,
       "seedTime": "31.69",
       "startTime": "01:56 PM",
       "team": ""
@@ -4132,6 +4329,7 @@
       "lane": 3,
       "name": "Burlina, Emma",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "30.69",
       "startTime": "01:56 PM",
       "team": ""
@@ -4147,6 +4345,7 @@
       "lane": 4,
       "name": "Cusack, Abigail",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "30.50",
       "startTime": "01:56 PM",
       "team": ""
@@ -4162,6 +4361,7 @@
       "lane": 5,
       "name": "Reinhold, Jenna",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "30.00",
       "startTime": "01:56 PM",
       "team": ""
@@ -4177,6 +4377,7 @@
       "lane": 7,
       "name": "Spaulding, Alice",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "30.69",
       "startTime": "01:56 PM",
       "team": ""
@@ -4192,6 +4393,7 @@
       "lane": 8,
       "name": "Pena-Rosales, Norka",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "31.00",
       "startTime": "01:56 PM",
       "team": ""
@@ -4207,6 +4409,7 @@
       "lane": 9,
       "name": "Ochoa, Iris",
       "round": "finals",
+      "seedRank": 17,
       "seedTime": "31.69",
       "startTime": "01:56 PM",
       "team": ""
@@ -4222,6 +4425,7 @@
       "lane": 10,
       "name": "Peyton, Abby",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "32.71",
       "startTime": "01:56 PM",
       "team": ""
@@ -4237,6 +4441,7 @@
       "lane": 1,
       "name": "Priebe, Ally",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "29.08",
       "startTime": "01:57 PM",
       "team": ""
@@ -4252,6 +4457,7 @@
       "lane": 2,
       "name": "Allibone, Jessica",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "28.69",
       "startTime": "01:57 PM",
       "team": ""
@@ -4267,6 +4473,7 @@
       "lane": 3,
       "name": "Patton, EllieS",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "28.17",
       "startTime": "01:57 PM",
       "team": ""
@@ -4282,6 +4489,7 @@
       "lane": 5,
       "name": "Donnick, Addy",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "26.93",
       "startTime": "01:57 PM",
       "team": ""
@@ -4297,6 +4505,7 @@
       "lane": 6,
       "name": "Bierman, Caroline",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "27.00",
       "startTime": "01:57 PM",
       "team": ""
@@ -4312,6 +4521,7 @@
       "lane": 7,
       "name": "Ukic, Sara",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "27.92",
       "startTime": "01:57 PM",
       "team": ""
@@ -4327,6 +4537,7 @@
       "lane": 8,
       "name": "Shaw, Morgan",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "28.67",
       "startTime": "01:57 PM",
       "team": ""
@@ -4342,6 +4553,7 @@
       "lane": 9,
       "name": "Powell, Kathryn",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "28.90",
       "startTime": "01:57 PM",
       "team": ""
@@ -4357,6 +4569,7 @@
       "lane": 10,
       "name": "Kelley, Sophie",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "30.00",
       "startTime": "01:57 PM",
       "team": ""
@@ -4552,6 +4765,7 @@
       "lane": 1,
       "name": "Roberts, AlexT",
       "round": "finals",
+      "seedRank": 39,
       "seedTime": "40.00",
       "startTime": "02:02 PM",
       "team": ""
@@ -4567,6 +4781,7 @@
       "lane": 2,
       "name": "Mauney, Daniel",
       "round": "finals",
+      "seedRank": 37,
       "seedTime": "34.94",
       "startTime": "02:02 PM",
       "team": ""
@@ -4582,6 +4797,7 @@
       "lane": 3,
       "name": "King, Alex",
       "round": "finals",
+      "seedRank": 33,
       "seedTime": "30.69",
       "startTime": "02:02 PM",
       "team": ""
@@ -4597,6 +4813,7 @@
       "lane": 4,
       "name": "Grutter, Maxwell",
       "round": "finals",
+      "seedRank": 33,
       "seedTime": "30.69",
       "startTime": "02:02 PM",
       "team": ""
@@ -4612,6 +4829,7 @@
       "lane": 5,
       "name": "Bravo, Edward",
       "round": "finals",
+      "seedRank": 30,
       "seedTime": "30.00",
       "startTime": "02:02 PM",
       "team": ""
@@ -4627,6 +4845,7 @@
       "lane": 6,
       "name": "Westrick, Michael",
       "round": "finals",
+      "seedRank": 32,
       "seedTime": "30.03",
       "startTime": "02:02 PM",
       "team": ""
@@ -4642,6 +4861,7 @@
       "lane": 7,
       "name": "Roy, Ishan",
       "round": "finals",
+      "seedRank": 33,
       "seedTime": "30.69",
       "startTime": "02:02 PM",
       "team": ""
@@ -4657,6 +4877,7 @@
       "lane": 8,
       "name": "Pham, Dylan",
       "round": "finals",
+      "seedRank": 36,
       "seedTime": "33.33",
       "startTime": "02:02 PM",
       "team": ""
@@ -4672,6 +4893,7 @@
       "lane": 9,
       "name": "Phan, Bao",
       "round": "finals",
+      "seedRank": 38,
       "seedTime": "36.08",
       "startTime": "02:02 PM",
       "team": ""
@@ -4687,6 +4909,7 @@
       "lane": 1,
       "name": "Mordukhovich, Daniel",
       "round": "finals",
+      "seedRank": 28,
       "seedTime": "29.00",
       "startTime": "02:03 PM",
       "team": ""
@@ -4702,6 +4925,7 @@
       "lane": 2,
       "name": "Goodale, Cooper",
       "round": "finals",
+      "seedRank": 27,
       "seedTime": "28.90",
       "startTime": "02:03 PM",
       "team": ""
@@ -4717,6 +4941,7 @@
       "lane": 3,
       "name": "Manley, Adam",
       "round": "finals",
+      "seedRank": 25,
       "seedTime": "28.69",
       "startTime": "02:03 PM",
       "team": ""
@@ -4732,6 +4957,7 @@
       "lane": 4,
       "name": "Atkins, David",
       "round": "finals",
+      "seedRank": 23,
       "seedTime": "28.08",
       "startTime": "02:03 PM",
       "team": ""
@@ -4747,6 +4973,7 @@
       "lane": 5,
       "name": "Briggs, Shigeo",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "27.93",
       "startTime": "02:03 PM",
       "team": ""
@@ -4762,6 +4989,7 @@
       "lane": 6,
       "name": "Chavez, Nolan",
       "round": "finals",
+      "seedRank": 22,
       "seedTime": "28.00",
       "startTime": "02:03 PM",
       "team": ""
@@ -4777,6 +5005,7 @@
       "lane": 7,
       "name": "Ghidu, Nicholas",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "28.53",
       "startTime": "02:03 PM",
       "team": ""
@@ -4792,6 +5021,7 @@
       "lane": 8,
       "name": "Harmon, Jack",
       "round": "finals",
+      "seedRank": 26,
       "seedTime": "28.70",
       "startTime": "02:03 PM",
       "team": ""
@@ -4807,6 +5037,7 @@
       "lane": 9,
       "name": "Mai, Derek",
       "round": "finals",
+      "seedRank": 28,
       "seedTime": "29.00",
       "startTime": "02:03 PM",
       "team": ""
@@ -4822,6 +5053,7 @@
       "lane": 10,
       "name": "Williams, Luke",
       "round": "finals",
+      "seedRank": 30,
       "seedTime": "30.00",
       "startTime": "02:03 PM",
       "team": ""
@@ -4837,6 +5069,7 @@
       "lane": 1,
       "name": "Norman, Max",
       "round": "finals",
+      "seedRank": 19,
       "seedTime": "27.13",
       "startTime": "02:04 PM",
       "team": ""
@@ -4852,6 +5085,7 @@
       "lane": 2,
       "name": "Wygonik, Sam",
       "round": "finals",
+      "seedRank": 17,
       "seedTime": "26.69",
       "startTime": "02:04 PM",
       "team": ""
@@ -4867,6 +5101,7 @@
       "lane": 3,
       "name": "Trocchi, Will",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "26.00",
       "startTime": "02:04 PM",
       "team": ""
@@ -4882,6 +5117,7 @@
       "lane": 4,
       "name": "Kryski, Wyatt",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "25.50",
       "startTime": "02:04 PM",
       "team": ""
@@ -4897,6 +5133,7 @@
       "lane": 5,
       "name": "Danforth, Jason",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "25.40",
       "startTime": "02:04 PM",
       "team": ""
@@ -4912,6 +5149,7 @@
       "lane": 6,
       "name": "Martin, Isaac",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "25.50",
       "startTime": "02:04 PM",
       "team": ""
@@ -4927,6 +5165,7 @@
       "lane": 7,
       "name": "Lyon, Nicholas",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "26.00",
       "startTime": "02:04 PM",
       "team": ""
@@ -4942,6 +5181,7 @@
       "lane": 8,
       "name": "Keyes, Daniel",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "26.00",
       "startTime": "02:04 PM",
       "team": ""
@@ -4957,6 +5197,7 @@
       "lane": 10,
       "name": "Bai, Ryan",
       "round": "finals",
+      "seedRank": 19,
       "seedTime": "27.13",
       "startTime": "02:04 PM",
       "team": ""
@@ -4972,6 +5213,7 @@
       "lane": 1,
       "name": "Mervich, Ian",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "25.04",
       "startTime": "02:05 PM",
       "team": ""
@@ -4987,6 +5229,7 @@
       "lane": 2,
       "name": "Hafner, Justin",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "25.00",
       "startTime": "02:05 PM",
       "team": ""
@@ -5002,6 +5245,7 @@
       "lane": 3,
       "name": "Gabriele, Noah",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "24.50",
       "startTime": "02:05 PM",
       "team": ""
@@ -5017,6 +5261,7 @@
       "lane": 4,
       "name": "Ivan, David",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "24.47",
       "startTime": "02:05 PM",
       "team": ""
@@ -5032,6 +5277,7 @@
       "lane": 5,
       "name": "Teal, Nathan",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "23.70",
       "startTime": "02:05 PM",
       "team": ""
@@ -5047,6 +5293,7 @@
       "lane": 6,
       "name": "Burnette, Isaac",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "24.40",
       "startTime": "02:05 PM",
       "team": ""
@@ -5062,6 +5309,7 @@
       "lane": 7,
       "name": "Vargas, Jack",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "24.50",
       "startTime": "02:05 PM",
       "team": ""
@@ -5077,6 +5325,7 @@
       "lane": 8,
       "name": "Otten, Evan",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "25.00",
       "startTime": "02:05 PM",
       "team": ""
@@ -5092,6 +5341,7 @@
       "lane": 9,
       "name": "Gray, Matthew",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "25.00",
       "startTime": "02:05 PM",
       "team": ""
@@ -5107,6 +5357,7 @@
       "lane": 10,
       "name": "Van Peteghem, Julian",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "25.30",
       "startTime": "02:05 PM",
       "team": ""
@@ -5213,6 +5464,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "2:15.00",
       "startTime": "02:09 PM",
       "team": "SCGSU-GA"
@@ -5250,6 +5502,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "1:50.77",
       "startTime": "02:09 PM",
       "team": "UGA-GA"
@@ -5287,6 +5540,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "1:45.00",
       "startTime": "02:09 PM",
       "team": "CLEM-SC"
@@ -5324,6 +5578,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:41.28",
       "startTime": "02:09 PM",
       "team": "GTSC-GA"
@@ -5361,6 +5616,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "1:44.88",
       "startTime": "02:09 PM",
       "team": "GTSC-GA"
@@ -5398,6 +5654,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "1:49.00",
       "startTime": "02:09 PM",
       "team": "CLEM-SC"
@@ -5414,6 +5671,7 @@
       "relayLetter": "A",
       "relaySwimmers": [],
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "2:15.00",
       "startTime": "02:09 PM",
       "team": "GSU-NI"
@@ -5573,6 +5831,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "1:59.67",
       "startTime": "02:15 PM",
       "team": "SCGSU-GA"
@@ -5589,6 +5848,7 @@
       "relayLetter": "A",
       "relaySwimmers": [],
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "1:35.00",
       "startTime": "02:15 PM",
       "team": "GSU-NI"
@@ -5626,6 +5886,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "1:31.73",
       "startTime": "02:15 PM",
       "team": "GTSC-GA"
@@ -5663,6 +5924,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "1:28.70",
       "startTime": "02:15 PM",
       "team": "UNCW-NC"
@@ -5700,6 +5962,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:24.33",
       "startTime": "02:15 PM",
       "team": "UGA-GA"
@@ -5737,6 +6000,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "1:27.55",
       "startTime": "02:15 PM",
       "team": "GTSC-GA"
@@ -5774,6 +6038,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "1:31.60",
       "startTime": "02:15 PM",
       "team": "UGA-GA"
@@ -5811,6 +6076,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "1:32.00",
       "startTime": "02:15 PM",
       "team": "CLEM-SC"
@@ -5827,6 +6093,7 @@
       "relayLetter": "B",
       "relaySwimmers": [],
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "1:50.00",
       "startTime": "02:15 PM",
       "team": "CCRR-NI"
@@ -5924,6 +6191,7 @@
       "lane": 2,
       "name": "Stone, Kaleigh",
       "round": "finals",
+      "seedRank": 27,
       "seedTime": "55.00",
       "startTime": "02:21 PM",
       "team": ""
@@ -5939,6 +6207,7 @@
       "lane": 3,
       "name": "Kazemzadeh, Ava",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "45.00",
       "startTime": "02:21 PM",
       "team": ""
@@ -5954,6 +6223,7 @@
       "lane": 4,
       "name": "Reed, Izzy",
       "round": "finals",
+      "seedRank": 23,
       "seedTime": "44.00",
       "startTime": "02:21 PM",
       "team": ""
@@ -5969,6 +6239,7 @@
       "lane": 5,
       "name": "Caruso, Sophia",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "42.99",
       "startTime": "02:21 PM",
       "team": ""
@@ -5984,6 +6255,7 @@
       "lane": 6,
       "name": "Smith, Ava",
       "round": "finals",
+      "seedRank": 22,
       "seedTime": "43.12",
       "startTime": "02:21 PM",
       "team": ""
@@ -5999,6 +6271,7 @@
       "lane": 7,
       "name": "Thai, Katelyn",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "45.00",
       "startTime": "02:21 PM",
       "team": ""
@@ -6014,6 +6287,7 @@
       "lane": 1,
       "name": "Perry, Emma",
       "round": "finals",
+      "seedRank": 19,
       "seedTime": "42.00",
       "startTime": "02:22 PM",
       "team": ""
@@ -6029,6 +6303,7 @@
       "lane": 2,
       "name": "Schmid, Sarah",
       "round": "finals",
+      "seedRank": 17,
       "seedTime": "40.69",
       "startTime": "02:22 PM",
       "team": ""
@@ -6044,6 +6319,7 @@
       "lane": 3,
       "name": "Prassad, Geya",
       "round": "finals",
+      "seedRank": 15,
       "seedTime": "39.69",
       "startTime": "02:22 PM",
       "team": ""
@@ -6059,6 +6335,7 @@
       "lane": 4,
       "name": "Irvin, Blakely",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "38.68",
       "startTime": "02:22 PM",
       "team": ""
@@ -6074,6 +6351,7 @@
       "lane": 5,
       "name": "Bold, Abigail",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "38.50",
       "startTime": "02:22 PM",
       "team": ""
@@ -6089,6 +6367,7 @@
       "lane": 6,
       "name": "Park, Jessica",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "38.54",
       "startTime": "02:22 PM",
       "team": ""
@@ -6104,6 +6383,7 @@
       "lane": 7,
       "name": "Schmitz, Emily",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "39.33",
       "startTime": "02:22 PM",
       "team": ""
@@ -6119,6 +6399,7 @@
       "lane": 8,
       "name": "Gonzalez Cerulli, Ludmila",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "40.00",
       "startTime": "02:22 PM",
       "team": ""
@@ -6134,6 +6415,7 @@
       "lane": 9,
       "name": "Wilson, Lana",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "41.60",
       "startTime": "02:22 PM",
       "team": ""
@@ -6149,6 +6431,7 @@
       "lane": 10,
       "name": "McCann, Caroline",
       "round": "finals",
+      "seedRank": 19,
       "seedTime": "42.00",
       "startTime": "02:22 PM",
       "team": ""
@@ -6164,6 +6447,7 @@
       "lane": 1,
       "name": "Tadder, Emerson",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "38.00",
       "startTime": "02:23 PM",
       "team": ""
@@ -6179,6 +6463,7 @@
       "lane": 2,
       "name": "Glinski, Ella",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "37.50",
       "startTime": "02:23 PM",
       "team": ""
@@ -6194,6 +6479,7 @@
       "lane": 3,
       "name": "Mustard, Mary",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "36.00",
       "startTime": "02:23 PM",
       "team": ""
@@ -6209,6 +6495,7 @@
       "lane": 4,
       "name": "Liebenow, Sarah",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "35.70",
       "startTime": "02:23 PM",
       "team": ""
@@ -6224,6 +6511,7 @@
       "lane": 5,
       "name": "Fannin, Mattie",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "32.50",
       "startTime": "02:23 PM",
       "team": ""
@@ -6239,6 +6527,7 @@
       "lane": 6,
       "name": "Plantamura, Natalie",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "35.69",
       "startTime": "02:23 PM",
       "team": ""
@@ -6254,6 +6543,7 @@
       "lane": 7,
       "name": "Hebbar, Esha",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "36.00",
       "startTime": "02:23 PM",
       "team": ""
@@ -6269,6 +6559,7 @@
       "lane": 8,
       "name": "Loomis, Mary",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "36.00",
       "startTime": "02:23 PM",
       "team": ""
@@ -6284,6 +6575,7 @@
       "lane": 9,
       "name": "Faust, Amelia",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "37.69",
       "startTime": "02:23 PM",
       "team": ""
@@ -6299,6 +6591,7 @@
       "lane": 10,
       "name": "Cross, Katie",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "38.00",
       "startTime": "02:23 PM",
       "team": ""
@@ -6359,6 +6652,7 @@
       "lane": 5,
       "name": "Vlady, Richard",
       "round": "finals",
+      "seedRank": 21,
       "seedTime": "40.69",
       "startTime": "02:27 PM",
       "team": ""
@@ -6374,6 +6668,7 @@
       "lane": 6,
       "name": "Carson, Sam",
       "round": "finals",
+      "seedRank": 22,
       "seedTime": "43.00",
       "startTime": "02:27 PM",
       "team": ""
@@ -6419,6 +6714,7 @@
       "lane": 1,
       "name": "Masterson, John",
       "round": "timed_finals",
+      "seedRank": 19,
       "seedTime": "36.00",
       "team": ""
     },
@@ -6433,6 +6729,7 @@
       "lane": 2,
       "name": "Laber, Brady",
       "round": "timed_finals",
+      "seedRank": 16,
       "seedTime": "35.00",
       "team": ""
     },
@@ -6447,6 +6744,7 @@
       "lane": 3,
       "name": "Ryan, Tierney",
       "round": "timed_finals",
+      "seedRank": 15,
       "seedTime": "34.77",
       "team": ""
     },
@@ -6461,6 +6759,7 @@
       "lane": 5,
       "name": "Mun, Andrew",
       "round": "timed_finals",
+      "seedRank": 11,
       "seedTime": "33.00",
       "team": ""
     },
@@ -6475,6 +6774,7 @@
       "lane": 6,
       "name": "Gauntt, Charlie",
       "round": "timed_finals",
+      "seedRank": 12,
       "seedTime": "33.30",
       "team": ""
     },
@@ -6489,6 +6789,7 @@
       "lane": 7,
       "name": "Mui, Josh",
       "round": "timed_finals",
+      "seedRank": 14,
       "seedTime": "34.00",
       "team": ""
     },
@@ -6503,6 +6804,7 @@
       "lane": 8,
       "name": "Cubarney, Connor",
       "round": "timed_finals",
+      "seedRank": 16,
       "seedTime": "35.00",
       "team": ""
     },
@@ -6517,6 +6819,7 @@
       "lane": 9,
       "name": "Winick, ZevJ",
       "round": "timed_finals",
+      "seedRank": 18,
       "seedTime": "35.70",
       "team": ""
     },
@@ -6531,6 +6834,7 @@
       "lane": 10,
       "name": "Shell, Landon",
       "round": "timed_finals",
+      "seedRank": 20,
       "seedTime": "39.45",
       "team": ""
     },
@@ -6545,6 +6849,7 @@
       "lane": 1,
       "name": "Chavez, Nolan",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "32.00",
       "startTime": "02:29 PM",
       "team": ""
@@ -6560,6 +6865,7 @@
       "lane": 2,
       "name": "Daves, Brandon",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "31.00",
       "startTime": "02:29 PM",
       "team": ""
@@ -6575,6 +6881,7 @@
       "lane": 3,
       "name": "Ward, Henry",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "30.00",
       "startTime": "02:29 PM",
       "team": ""
@@ -6590,6 +6897,7 @@
       "lane": 4,
       "name": "Wygonik, Sam",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "29.69",
       "startTime": "02:29 PM",
       "team": ""
@@ -6605,6 +6913,7 @@
       "lane": 5,
       "name": "Li, Andy",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "28.69",
       "startTime": "02:29 PM",
       "team": ""
@@ -6620,6 +6929,7 @@
       "lane": 6,
       "name": "Inlow, Max",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "29.37",
       "startTime": "02:29 PM",
       "team": ""
@@ -6635,6 +6945,7 @@
       "lane": 7,
       "name": "Healy, Chase",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "30.00",
       "startTime": "02:29 PM",
       "team": ""
@@ -6650,6 +6961,7 @@
       "lane": 8,
       "name": "Kryski, Wyatt",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "30.00",
       "startTime": "02:29 PM",
       "team": ""
@@ -6665,6 +6977,7 @@
       "lane": 9,
       "name": "Norman, Max",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "31.42",
       "startTime": "02:29 PM",
       "team": ""
@@ -6680,6 +6993,7 @@
       "lane": 10,
       "name": "Mai, Derek",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "32.00",
       "startTime": "02:29 PM",
       "team": ""
@@ -6695,6 +7009,7 @@
       "lane": 5,
       "name": "Priebe, Ally",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "1:13.06",
       "startTime": "02:30 PM",
       "team": ""
@@ -6710,6 +7025,7 @@
       "lane": 1,
       "name": "Warta, Rachel",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "1:10.50",
       "startTime": "02:32 PM",
       "team": ""
@@ -6725,6 +7041,7 @@
       "lane": 2,
       "name": "Johannessen, Anna",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "1:07.00",
       "startTime": "02:32 PM",
       "team": ""
@@ -6740,6 +7057,7 @@
       "lane": 3,
       "name": "Lara Sandoval, LaydaEle",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "1:04.50",
       "startTime": "02:32 PM",
       "team": ""
@@ -6755,6 +7073,7 @@
       "lane": 5,
       "name": "Brown, Sarabeth",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:02.00",
       "startTime": "02:32 PM",
       "team": ""
@@ -6770,6 +7089,7 @@
       "lane": 6,
       "name": "Munger, Audrey",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "1:02.69",
       "startTime": "02:32 PM",
       "team": ""
@@ -6785,6 +7105,7 @@
       "lane": 8,
       "name": "Wirz, Val",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "1:05.62",
       "startTime": "02:32 PM",
       "team": ""
@@ -6800,6 +7121,7 @@
       "lane": 9,
       "name": "Kelley, Sophie",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "1:10.00",
       "startTime": "02:32 PM",
       "team": ""
@@ -6815,6 +7137,7 @@
       "lane": 10,
       "name": "LeGrand, Francesca",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "1:12.20",
       "startTime": "02:32 PM",
       "team": ""
@@ -6830,6 +7153,7 @@
       "lane": 2,
       "name": "Ghidu, Nicholas",
       "round": "finals",
+      "seedRank": 17,
       "seedTime": "1:05.00",
       "startTime": "02:35 PM",
       "team": ""
@@ -6845,6 +7169,7 @@
       "lane": 3,
       "name": "Balkcum, Kyle",
       "round": "finals",
+      "seedRank": 15,
       "seedTime": "1:02.69",
       "startTime": "02:35 PM",
       "team": ""
@@ -6860,6 +7185,7 @@
       "lane": 4,
       "name": "Keyes, Daniel",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "1:01.00",
       "startTime": "02:35 PM",
       "team": ""
@@ -6875,6 +7201,7 @@
       "lane": 5,
       "name": "Trocchi, Tyler",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "58.00",
       "startTime": "02:35 PM",
       "team": ""
@@ -6890,6 +7217,7 @@
       "lane": 6,
       "name": "Marra-Ulfe, Kyle",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "58.00",
       "startTime": "02:35 PM",
       "team": ""
@@ -6905,6 +7233,7 @@
       "lane": 7,
       "name": "Tang, Rocky",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "1:01.00",
       "startTime": "02:35 PM",
       "team": ""
@@ -6920,6 +7249,7 @@
       "lane": 8,
       "name": "Goodale, Cooper",
       "round": "finals",
+      "seedRank": 16,
       "seedTime": "1:04.82",
       "startTime": "02:35 PM",
       "team": ""
@@ -6935,6 +7265,7 @@
       "lane": 2,
       "name": "Hunt, Ryan",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "56.00",
       "startTime": "02:37 PM",
       "team": ""
@@ -6950,6 +7281,7 @@
       "lane": 3,
       "name": "Altera, Ryan",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "55.69",
       "startTime": "02:37 PM",
       "team": ""
@@ -6965,6 +7297,7 @@
       "lane": 5,
       "name": "Mervich, Ian",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "54.46",
       "startTime": "02:37 PM",
       "team": ""
@@ -6980,6 +7313,7 @@
       "lane": 6,
       "name": "Vargas, Jack",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "54.50",
       "startTime": "02:37 PM",
       "team": ""
@@ -6995,6 +7329,7 @@
       "lane": 7,
       "name": "Ivan, David",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "55.07",
       "startTime": "02:37 PM",
       "team": ""
@@ -7010,6 +7345,7 @@
       "lane": 8,
       "name": "Rimsa, Thomas",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "55.69",
       "startTime": "02:37 PM",
       "team": ""
@@ -7025,6 +7361,7 @@
       "lane": 9,
       "name": "Peterson, Bryce",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "56.00",
       "startTime": "02:37 PM",
       "team": ""
@@ -7040,6 +7377,7 @@
       "lane": 10,
       "name": "Bai, Ryan",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "57.30",
       "startTime": "02:37 PM",
       "team": ""
@@ -7055,6 +7393,7 @@
       "lane": 3,
       "name": "Wilson, Lana",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "7:50.07",
       "startTime": "02:46 PM",
       "team": ""
@@ -7070,6 +7409,7 @@
       "lane": 4,
       "name": "Pena-Rosales, Norka",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "6:30.00",
       "startTime": "02:46 PM",
       "team": ""
@@ -7085,6 +7425,7 @@
       "lane": 5,
       "name": "Mesihovic, Sara",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "5:50.00",
       "startTime": "02:46 PM",
       "team": ""
@@ -7100,6 +7441,7 @@
       "lane": 6,
       "name": "Gaalswyk, Katherine",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "6:20.69",
       "startTime": "02:46 PM",
       "team": ""
@@ -7115,6 +7457,7 @@
       "lane": 8,
       "name": "Gonzalez Cerulli, Ludmila",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "8:35.97",
       "startTime": "02:46 PM",
       "team": ""
@@ -7130,6 +7473,7 @@
       "lane": 3,
       "name": "Roy, Ishan",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "5:50.69",
       "startTime": "02:55 PM",
       "team": ""
@@ -7145,6 +7489,7 @@
       "lane": 4,
       "name": "Gray, Matthew",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "5:00.00",
       "startTime": "02:55 PM",
       "team": ""
@@ -7160,6 +7505,7 @@
       "lane": 5,
       "name": "Gravitt, Chase",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "4:43.00",
       "startTime": "02:55 PM",
       "team": ""
@@ -7175,6 +7521,7 @@
       "lane": 6,
       "name": "Long, Liam",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "4:59.69",
       "startTime": "02:55 PM",
       "team": ""
@@ -7190,6 +7537,7 @@
       "lane": 7,
       "name": "Diatchenko, Alexander",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "5:00.69",
       "startTime": "02:55 PM",
       "team": ""
@@ -7205,6 +7553,7 @@
       "lane": 8,
       "name": "Weitzel, Logan",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "5:58.69",
       "startTime": "02:55 PM",
       "team": ""
@@ -7220,6 +7569,7 @@
       "lane": 9,
       "name": "Briggs, Shigeo",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "6:47.23",
       "startTime": "02:55 PM",
       "team": ""
@@ -7310,6 +7660,7 @@
       "lane": 3,
       "name": "Robertson, Brenda",
       "round": "finals",
+      "seedRank": 55,
       "seedTime": "40.00",
       "startTime": "03:07 PM",
       "team": ""
@@ -7325,6 +7676,7 @@
       "lane": 4,
       "name": "Kazemzadeh, Ava",
       "round": "finals",
+      "seedRank": 53,
       "seedTime": "33.00",
       "startTime": "03:07 PM",
       "team": ""
@@ -7340,6 +7692,7 @@
       "lane": 5,
       "name": "Wilderson, Breanna",
       "round": "finals",
+      "seedRank": 51,
       "seedTime": "32.56",
       "startTime": "03:07 PM",
       "team": ""
@@ -7355,6 +7708,7 @@
       "lane": 6,
       "name": "Smith, Ava",
       "round": "finals",
+      "seedRank": 52,
       "seedTime": "32.83",
       "startTime": "03:07 PM",
       "team": ""
@@ -7370,6 +7724,7 @@
       "lane": 7,
       "name": "Stone, Kaleigh",
       "round": "finals",
+      "seedRank": 54,
       "seedTime": "37.00",
       "startTime": "03:07 PM",
       "team": ""
@@ -7385,6 +7740,7 @@
       "lane": 1,
       "name": "LeGrand, Francesca",
       "round": "finals",
+      "seedRank": 49,
       "seedTime": "31.74",
       "startTime": "03:08 PM",
       "team": ""
@@ -7400,6 +7756,7 @@
       "lane": 2,
       "name": "Farah, Jamie",
       "round": "finals",
+      "seedRank": 47,
       "seedTime": "31.40",
       "startTime": "03:08 PM",
       "team": ""
@@ -7415,6 +7772,7 @@
       "lane": 3,
       "name": "Della Porta, Grace",
       "round": "finals",
+      "seedRank": 44,
       "seedTime": "31.00",
       "startTime": "03:08 PM",
       "team": ""
@@ -7430,6 +7788,7 @@
       "lane": 4,
       "name": "Vieira, Ellie",
       "round": "finals",
+      "seedRank": 43,
       "seedTime": "30.75",
       "startTime": "03:08 PM",
       "team": ""
@@ -7445,6 +7804,7 @@
       "lane": 5,
       "name": "Park, Jessica",
       "round": "finals",
+      "seedRank": 41,
       "seedTime": "30.56",
       "startTime": "03:08 PM",
       "team": ""
@@ -7460,6 +7820,7 @@
       "lane": 6,
       "name": "Gaalswyk, Katherine",
       "round": "finals",
+      "seedRank": 42,
       "seedTime": "30.69",
       "startTime": "03:08 PM",
       "team": ""
@@ -7475,6 +7836,7 @@
       "lane": 7,
       "name": "Thai, Katelyn",
       "round": "finals",
+      "seedRank": 44,
       "seedTime": "31.00",
       "startTime": "03:08 PM",
       "team": ""
@@ -7490,6 +7852,7 @@
       "lane": 9,
       "name": "Algeo, Kaitlyn",
       "round": "finals",
+      "seedRank": 48,
       "seedTime": "31.45",
       "startTime": "03:08 PM",
       "team": ""
@@ -7505,6 +7868,7 @@
       "lane": 10,
       "name": "Brown, Miya",
       "round": "finals",
+      "seedRank": 50,
       "seedTime": "32.00",
       "startTime": "03:08 PM",
       "team": ""
@@ -7520,6 +7884,7 @@
       "lane": 1,
       "name": "Prassad, Geya",
       "round": "timed_finals",
+      "seedRank": 39,
       "seedTime": "30.11",
       "team": ""
     },
@@ -7534,6 +7899,7 @@
       "lane": 2,
       "name": "Priebe, Ally",
       "round": "timed_finals",
+      "seedRank": 37,
       "seedTime": "29.72",
       "team": ""
     },
@@ -7548,6 +7914,7 @@
       "lane": 3,
       "name": "Schmid, Sarah",
       "round": "timed_finals",
+      "seedRank": 34,
       "seedTime": "29.69",
       "team": ""
     },
@@ -7562,6 +7929,7 @@
       "lane": 4,
       "name": "Kinnear, Emily",
       "round": "timed_finals",
+      "seedRank": 29,
       "seedTime": "29.00",
       "team": ""
     },
@@ -7576,6 +7944,7 @@
       "lane": 5,
       "name": "Fowler, Macon",
       "round": "timed_finals",
+      "seedRank": 29,
       "seedTime": "29.00",
       "team": ""
     },
@@ -7590,6 +7959,7 @@
       "lane": 7,
       "name": "Burlina, Emma",
       "round": "timed_finals",
+      "seedRank": 34,
       "seedTime": "29.69",
       "team": ""
     },
@@ -7604,6 +7974,7 @@
       "lane": 8,
       "name": "Taheri, Mya",
       "round": "timed_finals",
+      "seedRank": 34,
       "seedTime": "29.69",
       "team": ""
     },
@@ -7618,6 +7989,7 @@
       "lane": 9,
       "name": "Spies, Caroline",
       "round": "timed_finals",
+      "seedRank": 38,
       "seedTime": "30.00",
       "team": ""
     },
@@ -7632,6 +8004,7 @@
       "lane": 10,
       "name": "Sortino, Ella",
       "round": "timed_finals",
+      "seedRank": 40,
       "seedTime": "30.20",
       "team": ""
     },
@@ -7646,6 +8019,7 @@
       "lane": 1,
       "name": "McCann, Caroline",
       "round": "finals",
+      "seedRank": 29,
       "seedTime": "29.00",
       "startTime": "03:10 PM",
       "team": ""
@@ -7661,6 +8035,7 @@
       "lane": 3,
       "name": "Cusack, Abigail",
       "round": "finals",
+      "seedRank": 25,
       "seedTime": "28.50",
       "startTime": "03:10 PM",
       "team": ""
@@ -7676,6 +8051,7 @@
       "lane": 4,
       "name": "Reinhold, Jenna",
       "round": "finals",
+      "seedRank": 19,
       "seedTime": "28.00",
       "startTime": "03:10 PM",
       "team": ""
@@ -7691,6 +8067,7 @@
       "lane": 6,
       "name": "Mustard, Mary",
       "round": "finals",
+      "seedRank": 19,
       "seedTime": "28.00",
       "startTime": "03:10 PM",
       "team": ""
@@ -7706,6 +8083,7 @@
       "lane": 7,
       "name": "Peyton, Abby",
       "round": "finals",
+      "seedRank": 24,
       "seedTime": "28.17",
       "startTime": "03:10 PM",
       "team": ""
@@ -7721,6 +8099,7 @@
       "lane": 8,
       "name": "Loomis, Mary",
       "round": "finals",
+      "seedRank": 25,
       "seedTime": "28.50",
       "startTime": "03:10 PM",
       "team": ""
@@ -7736,6 +8115,7 @@
       "lane": 9,
       "name": "Faust, Amelia",
       "round": "finals",
+      "seedRank": 28,
       "seedTime": "28.69",
       "startTime": "03:10 PM",
       "team": ""
@@ -7751,6 +8131,7 @@
       "lane": 10,
       "name": "Tadder, Emerson",
       "round": "finals",
+      "seedRank": 29,
       "seedTime": "29.00",
       "startTime": "03:10 PM",
       "team": ""
@@ -7766,6 +8147,7 @@
       "lane": 1,
       "name": "Heil, Emily",
       "round": "finals",
+      "seedRank": 19,
       "seedTime": "28.00",
       "startTime": "03:11 PM",
       "team": ""
@@ -7781,6 +8163,7 @@
       "lane": 2,
       "name": "Wang, Mingqi",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "27.69",
       "startTime": "03:11 PM",
       "team": ""
@@ -7796,6 +8179,7 @@
       "lane": 3,
       "name": "Regalado, Elise",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "27.69",
       "startTime": "03:11 PM",
       "team": ""
@@ -7811,6 +8195,7 @@
       "lane": 4,
       "name": "Shaw, Morgan",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "27.67",
       "startTime": "03:11 PM",
       "team": ""
@@ -7826,6 +8211,7 @@
       "lane": 5,
       "name": "Bohinc, Kaylee",
       "round": "finals",
+      "seedRank": 11,
       "seedTime": "27.00",
       "startTime": "03:11 PM",
       "team": ""
@@ -7841,6 +8227,7 @@
       "lane": 7,
       "name": "Ochoa, Iris",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "27.69",
       "startTime": "03:11 PM",
       "team": ""
@@ -7856,6 +8243,7 @@
       "lane": 8,
       "name": "Spaulding, Alice",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "27.69",
       "startTime": "03:11 PM",
       "team": ""
@@ -7871,6 +8259,7 @@
       "lane": 9,
       "name": "Liebenow, Sarah",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "27.80",
       "startTime": "03:11 PM",
       "team": ""
@@ -7886,6 +8275,7 @@
       "lane": 10,
       "name": "Forrer, Therese",
       "round": "finals",
+      "seedRank": 19,
       "seedTime": "28.00",
       "startTime": "03:11 PM",
       "team": ""
@@ -7901,6 +8291,7 @@
       "lane": 1,
       "name": "Munger, Audrey",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "26.69",
       "startTime": "03:12 PM",
       "team": ""
@@ -7916,6 +8307,7 @@
       "lane": 2,
       "name": "Friedl, Amadea",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "26.00",
       "startTime": "03:12 PM",
       "team": ""
@@ -7931,6 +8323,7 @@
       "lane": 3,
       "name": "Patton, EllieS",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "25.70",
       "startTime": "03:12 PM",
       "team": ""
@@ -7946,6 +8339,7 @@
       "lane": 4,
       "name": "Slorahn, Piper",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "25.69",
       "startTime": "03:12 PM",
       "team": ""
@@ -7961,6 +8355,7 @@
       "lane": 5,
       "name": "Ukic, Sara",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "24.95",
       "startTime": "03:12 PM",
       "team": ""
@@ -7976,6 +8371,7 @@
       "lane": 6,
       "name": "Bierman, Caroline",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "25.50",
       "startTime": "03:12 PM",
       "team": ""
@@ -7991,6 +8387,7 @@
       "lane": 7,
       "name": "Powell, Kathryn",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "25.70",
       "startTime": "03:12 PM",
       "team": ""
@@ -8006,6 +8403,7 @@
       "lane": 8,
       "name": "Brown, Sarabeth",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "26.00",
       "startTime": "03:12 PM",
       "team": ""
@@ -8021,6 +8419,7 @@
       "lane": 9,
       "name": "Harbert, Jill",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "26.33",
       "startTime": "03:12 PM",
       "team": ""
@@ -8216,6 +8615,7 @@
       "lane": 5,
       "name": "Hidalgo, Justin",
       "round": "finals",
+      "seedRank": 51,
       "seedTime": "32.00",
       "startTime": "03:16 PM",
       "team": ""
@@ -8261,6 +8661,7 @@
       "lane": 1,
       "name": "Birchler, Andrew",
       "round": "finals",
+      "seedRank": 48,
       "seedTime": "30.00",
       "startTime": "03:17 PM",
       "team": ""
@@ -8276,6 +8677,7 @@
       "lane": 2,
       "name": "Mauney, Daniel",
       "round": "finals",
+      "seedRank": 47,
       "seedTime": "29.33",
       "startTime": "03:17 PM",
       "team": ""
@@ -8291,6 +8693,7 @@
       "lane": 3,
       "name": "Smith, Logan",
       "round": "finals",
+      "seedRank": 45,
       "seedTime": "28.69",
       "startTime": "03:17 PM",
       "team": ""
@@ -8306,6 +8709,7 @@
       "lane": 4,
       "name": "Atkins, David",
       "round": "finals",
+      "seedRank": 43,
       "seedTime": "27.90",
       "startTime": "03:17 PM",
       "team": ""
@@ -8321,6 +8725,7 @@
       "lane": 5,
       "name": "Williams, Luke",
       "round": "finals",
+      "seedRank": 41,
       "seedTime": "27.00",
       "startTime": "03:17 PM",
       "team": ""
@@ -8336,6 +8741,7 @@
       "lane": 6,
       "name": "Pham, Dylan",
       "round": "finals",
+      "seedRank": 41,
       "seedTime": "27.00",
       "startTime": "03:17 PM",
       "team": ""
@@ -8351,6 +8757,7 @@
       "lane": 7,
       "name": "Xu, David",
       "round": "finals",
+      "seedRank": 44,
       "seedTime": "28.37",
       "startTime": "03:17 PM",
       "team": ""
@@ -8366,6 +8773,7 @@
       "lane": 8,
       "name": "Johnson, Lucas",
       "round": "finals",
+      "seedRank": 45,
       "seedTime": "28.69",
       "startTime": "03:17 PM",
       "team": ""
@@ -8381,6 +8789,7 @@
       "lane": 9,
       "name": "Laber, Brady",
       "round": "finals",
+      "seedRank": 48,
       "seedTime": "30.00",
       "startTime": "03:17 PM",
       "team": ""
@@ -8396,6 +8805,7 @@
       "lane": 10,
       "name": "Phan, Bao",
       "round": "finals",
+      "seedRank": 50,
       "seedTime": "30.78",
       "startTime": "03:17 PM",
       "team": ""
@@ -8411,6 +8821,7 @@
       "lane": 1,
       "name": "Grutter, Maxwell",
       "round": "finals",
+      "seedRank": 38,
       "seedTime": "26.69",
       "startTime": "03:18 PM",
       "team": ""
@@ -8426,6 +8837,7 @@
       "lane": 2,
       "name": "Quitian, German",
       "round": "finals",
+      "seedRank": 37,
       "seedTime": "26.20",
       "startTime": "03:18 PM",
       "team": ""
@@ -8441,6 +8853,7 @@
       "lane": 3,
       "name": "Masterson, John",
       "round": "finals",
+      "seedRank": 34,
       "seedTime": "26.00",
       "startTime": "03:18 PM",
       "team": ""
@@ -8456,6 +8869,7 @@
       "lane": 4,
       "name": "Daves, Brandon",
       "round": "finals",
+      "seedRank": 33,
       "seedTime": "25.90",
       "startTime": "03:18 PM",
       "team": ""
@@ -8471,6 +8885,7 @@
       "lane": 5,
       "name": "Ashbaugh, James",
       "round": "finals",
+      "seedRank": 29,
       "seedTime": "25.69",
       "startTime": "03:18 PM",
       "team": ""
@@ -8486,6 +8901,7 @@
       "lane": 6,
       "name": "Norman, Max",
       "round": "finals",
+      "seedRank": 32,
       "seedTime": "25.74",
       "startTime": "03:18 PM",
       "team": ""
@@ -8501,6 +8917,7 @@
       "lane": 7,
       "name": "Kang, Matthew",
       "round": "finals",
+      "seedRank": 34,
       "seedTime": "26.00",
       "startTime": "03:18 PM",
       "team": ""
@@ -8516,6 +8933,7 @@
       "lane": 8,
       "name": "Sarrafi, Arman",
       "round": "finals",
+      "seedRank": 36,
       "seedTime": "26.19",
       "startTime": "03:18 PM",
       "team": ""
@@ -8531,6 +8949,7 @@
       "lane": 9,
       "name": "Balkcum, Kyle",
       "round": "finals",
+      "seedRank": 38,
       "seedTime": "26.69",
       "startTime": "03:18 PM",
       "team": ""
@@ -8546,6 +8965,7 @@
       "lane": 10,
       "name": "Ryan, Tierney",
       "round": "finals",
+      "seedRank": 40,
       "seedTime": "26.90",
       "startTime": "03:18 PM",
       "team": ""
@@ -8561,6 +8981,7 @@
       "lane": 1,
       "name": "Baumann, Matthew",
       "round": "finals",
+      "seedRank": 29,
       "seedTime": "25.69",
       "startTime": "03:19 PM",
       "team": ""
@@ -8576,6 +8997,7 @@
       "lane": 2,
       "name": "Mui, Josh",
       "round": "finals",
+      "seedRank": 27,
       "seedTime": "25.50",
       "startTime": "03:19 PM",
       "team": ""
@@ -8591,6 +9013,7 @@
       "lane": 3,
       "name": "Hopper, Will",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "25.00",
       "startTime": "03:19 PM",
       "team": ""
@@ -8606,6 +9029,7 @@
       "lane": 4,
       "name": "Hunt, Ryan",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "25.00",
       "startTime": "03:19 PM",
       "team": ""
@@ -8621,6 +9045,7 @@
       "lane": 5,
       "name": "Elliott, Luke",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "25.00",
       "startTime": "03:19 PM",
       "team": ""
@@ -8636,6 +9061,7 @@
       "lane": 6,
       "name": "Carson, Sam",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "25.00",
       "startTime": "03:19 PM",
       "team": ""
@@ -8651,6 +9077,7 @@
       "lane": 7,
       "name": "Shell, Landon",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "25.00",
       "startTime": "03:19 PM",
       "team": ""
@@ -8666,6 +9093,7 @@
       "lane": 8,
       "name": "Voigt, Christopher",
       "round": "finals",
+      "seedRank": 26,
       "seedTime": "25.28",
       "startTime": "03:19 PM",
       "team": ""
@@ -8681,6 +9109,7 @@
       "lane": 9,
       "name": "Bravo, Edward",
       "round": "finals",
+      "seedRank": 28,
       "seedTime": "25.55",
       "startTime": "03:19 PM",
       "team": ""
@@ -8696,6 +9125,7 @@
       "lane": 10,
       "name": "Manley, Adam",
       "round": "finals",
+      "seedRank": 29,
       "seedTime": "25.69",
       "startTime": "03:19 PM",
       "team": ""
@@ -8711,6 +9141,7 @@
       "lane": 1,
       "name": "Chavez, Nolan",
       "round": "finals",
+      "seedRank": 19,
       "seedTime": "24.30",
       "startTime": "03:19 PM",
       "team": ""
@@ -8726,6 +9157,7 @@
       "lane": 2,
       "name": "Mun, Andrew",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "23.50",
       "startTime": "03:19 PM",
       "team": ""
@@ -8741,6 +9173,7 @@
       "lane": 3,
       "name": "Claborn, Nathan",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "23.50",
       "startTime": "03:19 PM",
       "team": ""
@@ -8756,6 +9189,7 @@
       "lane": 4,
       "name": "Bai, Ryan",
       "round": "finals",
+      "seedRank": 13,
       "seedTime": "23.46",
       "startTime": "03:19 PM",
       "team": ""
@@ -8771,6 +9205,7 @@
       "lane": 5,
       "name": "Li, Andy",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "22.69",
       "startTime": "03:19 PM",
       "team": ""
@@ -8786,6 +9221,7 @@
       "lane": 6,
       "name": "Ward, Henry",
       "round": "finals",
+      "seedRank": 12,
       "seedTime": "23.00",
       "startTime": "03:19 PM",
       "team": ""
@@ -8801,6 +9237,7 @@
       "lane": 7,
       "name": "Martin, Isaac",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "23.50",
       "startTime": "03:19 PM",
       "team": ""
@@ -8816,6 +9253,7 @@
       "lane": 8,
       "name": "Otten, Evan",
       "round": "finals",
+      "seedRank": 14,
       "seedTime": "23.50",
       "startTime": "03:19 PM",
       "team": ""
@@ -8831,6 +9269,7 @@
       "lane": 9,
       "name": "Gauntt, Charlie",
       "round": "finals",
+      "seedRank": 18,
       "seedTime": "24.15",
       "startTime": "03:19 PM",
       "team": ""
@@ -8846,6 +9285,7 @@
       "lane": 10,
       "name": "Mordukhovich, Daniel",
       "round": "finals",
+      "seedRank": 20,
       "seedTime": "25.00",
       "startTime": "03:19 PM",
       "team": ""
@@ -8861,6 +9301,7 @@
       "lane": 1,
       "name": "Townsend, Matthew",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "22.69",
       "startTime": "03:20 PM",
       "team": ""
@@ -8876,6 +9317,7 @@
       "lane": 2,
       "name": "Gabriele, Noah",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "22.50",
       "startTime": "03:20 PM",
       "team": ""
@@ -8891,6 +9333,7 @@
       "lane": 3,
       "name": "Russell, Ian",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "22.11",
       "startTime": "03:20 PM",
       "team": ""
@@ -8906,6 +9349,7 @@
       "lane": 5,
       "name": "Meeks, Charlie",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "20.75",
       "startTime": "03:20 PM",
       "team": ""
@@ -8921,6 +9365,7 @@
       "lane": 6,
       "name": "Gravitt, Chase",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "21.01",
       "startTime": "03:20 PM",
       "team": ""
@@ -8936,6 +9381,7 @@
       "lane": 7,
       "name": "Krom, Tyler",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "21.95",
       "startTime": "03:20 PM",
       "team": ""
@@ -8951,6 +9397,7 @@
       "lane": 8,
       "name": "Hafner, Justin",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "22.50",
       "startTime": "03:20 PM",
       "team": ""
@@ -8966,6 +9413,7 @@
       "lane": 9,
       "name": "Van Peteghem, Julian",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "22.65",
       "startTime": "03:20 PM",
       "team": ""
@@ -8981,6 +9429,7 @@
       "lane": 10,
       "name": "Rimsa, Thomas",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "22.69",
       "startTime": "03:20 PM",
       "team": ""
@@ -8996,6 +9445,7 @@
       "lane": 3,
       "name": "Mesihovic, Sara",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "2:30.00",
       "startTime": "03:21 PM",
       "team": ""
@@ -9011,6 +9461,7 @@
       "lane": 4,
       "name": "Tumanova, Katya",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "2:22.69",
       "startTime": "03:21 PM",
       "team": ""
@@ -9026,6 +9477,7 @@
       "lane": 5,
       "name": "Patton, EllieS",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "2:20.15",
       "startTime": "03:21 PM",
       "team": ""
@@ -9041,6 +9493,7 @@
       "lane": 7,
       "name": "Witthoff, Mia",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "2:23.69",
       "startTime": "03:21 PM",
       "team": ""
@@ -9056,6 +9509,7 @@
       "lane": 8,
       "name": "Lara Sandoval, LaydaEle",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "2:35.00",
       "startTime": "03:21 PM",
       "team": ""
@@ -9071,6 +9525,7 @@
       "lane": 3,
       "name": "Mai, Derek",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "2:18.00",
       "startTime": "03:24 PM",
       "team": ""
@@ -9086,6 +9541,7 @@
       "lane": 4,
       "name": "King, Alex",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "2:07.69",
       "startTime": "03:24 PM",
       "team": ""
@@ -9101,6 +9557,7 @@
       "lane": 5,
       "name": "Peterson, Bryce",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:56.30",
       "startTime": "03:24 PM",
       "team": ""
@@ -9116,6 +9573,7 @@
       "lane": 6,
       "name": "Tang, Rocky",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "1:59.00",
       "startTime": "03:24 PM",
       "team": ""
@@ -9131,6 +9589,7 @@
       "lane": 2,
       "name": "Hussaini, Sameena",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "1:20.68",
       "startTime": "03:29 PM",
       "team": ""
@@ -9146,6 +9605,7 @@
       "lane": 3,
       "name": "Wang, Mingqi",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "1:10.69",
       "startTime": "03:29 PM",
       "team": ""
@@ -9161,6 +9621,7 @@
       "lane": 4,
       "name": "Plantamura, Natalie",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "1:06.69",
       "startTime": "03:29 PM",
       "team": ""
@@ -9176,6 +9637,7 @@
       "lane": 5,
       "name": "Donnick, Addy",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:00.10",
       "startTime": "03:29 PM",
       "team": ""
@@ -9191,6 +9653,7 @@
       "lane": 7,
       "name": "Meretta, Tessa",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "1:07.00",
       "startTime": "03:29 PM",
       "team": ""
@@ -9206,6 +9669,7 @@
       "lane": 8,
       "name": "LeGrand, Francesca",
       "round": "finals",
+      "seedRank": 6,
       "seedTime": "1:11.74",
       "startTime": "03:29 PM",
       "team": ""
@@ -9251,6 +9715,7 @@
       "lane": 1,
       "name": "Skidmore, Billy",
       "round": "finals",
+      "seedRank": 9,
       "seedTime": "1:08.69",
       "startTime": "03:33 PM",
       "team": ""
@@ -9266,6 +9731,7 @@
       "lane": 2,
       "name": "Keyes, Daniel",
       "round": "finals",
+      "seedRank": 7,
       "seedTime": "59.00",
       "startTime": "03:33 PM",
       "team": ""
@@ -9281,6 +9747,7 @@
       "lane": 3,
       "name": "Marra-Ulfe, Kyle",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "58.00",
       "startTime": "03:33 PM",
       "team": ""
@@ -9296,6 +9763,7 @@
       "lane": 4,
       "name": "Healy, Chase",
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "57.00",
       "startTime": "03:33 PM",
       "team": ""
@@ -9311,6 +9779,7 @@
       "lane": 5,
       "name": "Kruger, Ethan",
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "54.50",
       "startTime": "03:33 PM",
       "team": ""
@@ -9326,6 +9795,7 @@
       "lane": 6,
       "name": "Smith, Ben",
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "55.69",
       "startTime": "03:33 PM",
       "team": ""
@@ -9341,6 +9811,7 @@
       "lane": 7,
       "name": "Baumann, Matthew",
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "57.69",
       "startTime": "03:33 PM",
       "team": ""
@@ -9356,6 +9827,7 @@
       "lane": 8,
       "name": "Trocchi, Will",
       "round": "finals",
+      "seedRank": 5,
       "seedTime": "58.00",
       "startTime": "03:33 PM",
       "team": ""
@@ -9371,6 +9843,7 @@
       "lane": 9,
       "name": "Cubarney, Connor",
       "round": "finals",
+      "seedRank": 8,
       "seedTime": "1:04.00",
       "startTime": "03:33 PM",
       "team": ""
@@ -9386,6 +9859,7 @@
       "lane": 10,
       "name": "Winick, ZevJ",
       "round": "finals",
+      "seedRank": 10,
       "seedTime": "1:10.80",
       "startTime": "03:33 PM",
       "team": ""
@@ -9651,6 +10125,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 3,
       "seedTime": "1:47.50",
       "startTime": "03:39 PM",
       "team": "UGA-GA"
@@ -9688,6 +10163,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 1,
       "seedTime": "1:44.67",
       "startTime": "03:39 PM",
       "team": "UGA-GA"
@@ -9725,6 +10201,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 2,
       "seedTime": "1:45.00",
       "startTime": "03:39 PM",
       "team": "CLEM-SC"
@@ -9762,6 +10239,7 @@
         }
       ],
       "round": "finals",
+      "seedRank": 4,
       "seedTime": "2:55.53",
       "startTime": "03:39 PM",
       "team": "UNCW-NC"
