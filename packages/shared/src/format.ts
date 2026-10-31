@@ -117,6 +117,15 @@ export function formatSeasonLabel(season: string): string {
   return season.replace(/^(\d{4})-(\d{4})$/, "$1–$2")
 }
 
+const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+/** "Oct 2026" for a calendar date (a swim's date), read in UTC so it never shifts a day. */
+export function formatMonthYear(value: string | Date): string {
+  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(date.getTime())) return ""
+  return `${SHORT_MONTHS[date.getUTCMonth()]} ${date.getUTCFullYear()}`
+}
+
 /** "August 17, 2026" for an instant, formatted in `timeZone`. */
 export function formatFullDate(value: string | Date, timeZone: string): string {
   const date = value instanceof Date ? value : new Date(value)

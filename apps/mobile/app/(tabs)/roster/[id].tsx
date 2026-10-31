@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from "expo-router"
 import { useQuery } from "@tanstack/react-query"
 import {
   athleteDisplayName,
+  formatMonthYear,
   formatTime,
   isStaffRole,
   type StaffTitle,
@@ -414,7 +415,9 @@ export default function AthleteDetailScreen() {
                 title={[swim.event, swim.course, swim.relayEvent ? RELAY_SPLIT_LABEL : null]
                   .filter(Boolean)
                   .join(" · ")}
-                subtitle={formatTime(swim.timeMs as number)}
+                subtitle={[swim.date ? formatMonthYear(swim.date) : null, formatTime(swim.timeMs as number)]
+                  .filter(Boolean)
+                  .join(" · ")}
               />
             ))
           )}

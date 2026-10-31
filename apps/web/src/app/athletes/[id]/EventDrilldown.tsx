@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import Link from "next/link"
-import { currentSeason, seasonFromDate } from "@swimbuzz/shared"
+import { currentSeason, formatMonthYear, seasonFromDate } from "@swimbuzz/shared"
 import { formatSwimDate, formatTime } from "@/lib/utils"
 import {
   compareSwimsChronologically,
@@ -24,18 +24,10 @@ const CHART_WINDOW_MS = 5 * 365.25 * DAY_MS
 /** Year labels closer than this to either end (in % of the card's width) would hit the end labels. */
 const YEAR_LABEL_END_GAP_PCT = 8
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-
 const COLS_COACH =
   "grid-cols-[var(--time-w)_44px_72px_minmax(0,1fr)_112px_28px] max-[600px]:grid-cols-[76px_36px_60px_minmax(0,1fr)_28px]"
 const COLS_ATHLETE =
   "grid-cols-[var(--time-w)_44px_72px_minmax(0,1fr)_112px] max-[600px]:grid-cols-[76px_36px_60px_minmax(0,1fr)]"
-
-/** "Jul 2026" */
-function monthYear(iso: string): string {
-  const d = new Date(iso)
-  return `${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`
-}
 
 /** "2026-2027" → "2026–27" */
 function shortSeason(season: string): string {
@@ -182,6 +174,7 @@ export default function EventDrilldown({
   const cols = showDelete ? COLS_COACH : COLS_ATHLETE
 
   if (!pb) return null
+  const pbHref = swimMeetHref(pb)
 
   return (
     <>
@@ -209,6 +202,21 @@ export default function EventDrilldown({
             </h2>
             <p className="mt-1.5 font-mono text-[44px] font-semibold leading-[48px] tracking-[-0.02em] tabular-nums">
               {formatTime(pb.timeMs)}
+            </p>
+            <p className="mt-1 truncate text-sm text-foreground-secondary">
+              {formatSwimDate(pb.date)}
+              {pb.meet && (
+                <>
+                  {" · "}
+                  {pbHref ? (
+                    <Link href={pbHref} className="transition-colors hover:text-primary">
+                      {pb.meet}
+                    </Link>
+                  ) : (
+                    pb.meet
+                  )}
+                </>
+              )}
             </p>
           </div>
           <div className="flex gap-7 text-right max-[600px]:gap-5 max-[600px]:text-left">
@@ -305,13 +313,13 @@ export default function EventDrilldown({
               )}
             </div>
             <div aria-hidden className="relative mt-2 flex justify-between pb-1 text-[11px] text-foreground-tertiary">
-              <span>{n ? monthYear(plotted[0]!.date) : ""}</span>
+              <span>{n ? formatMonthYear(plotted[0]!.date) : ""}</span>
               {yearTicks.map((tick) => (
                 <span key={tick.year} className="absolute top-0 -translate-x-1/2" style={{ left: `${tick.x}%` }}>
                   {tick.year}
                 </span>
               ))}
-              <span>{n > 1 ? monthYear(plotted[n - 1]!.date) : ""}</span>
+              <span>{n > 1 ? formatMonthYear(plotted[n - 1]!.date) : ""}</span>
             </div>
           </div>
           </div>

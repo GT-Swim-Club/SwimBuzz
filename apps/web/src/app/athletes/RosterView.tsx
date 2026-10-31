@@ -294,7 +294,14 @@ function LetterRail({ letters }: { letters: Set<string> }) {
   const jumpTo = (index: number) => {
     const target =
       LETTERS.slice(index).find((l) => letters.has(l)) ?? LETTERS.slice(0, index).findLast((l) => letters.has(l))
-    if (target) document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" })
+    const el = target ? document.getElementById(target) : null
+    const scroller = document.getElementById("page-scroll")
+    if (!el || !scroller) return
+    // Scroll only the page area: scrollIntoView would also scroll the body/html
+    // when a late letter can't reach the top, pushing the nav off screen.
+    const margin = parseFloat(getComputedStyle(el).scrollMarginTop) || 0
+    const top = el.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - margin
+    scroller.scrollTo({ top, behavior: "smooth" })
   }
 
   return (
