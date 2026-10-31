@@ -22,7 +22,7 @@ import {
   slotMatches,
   type RelaySlotData,
 } from "@/lib/meet/relay-builder"
-import { athletePreferredName } from "@swimbuzz/shared"
+import { athletePreferredName, meetHeaderDetails } from "@swimbuzz/shared"
 import MeetRelaysWorkspace from "./MeetRelaysWorkspace"
 import RelayPageHeader, { relayBackLinkClass, relayEyebrowClass } from "./RelayPageHeader"
 import RelaySummary, { publishedSummaryCards } from "./RelaySummary"
@@ -56,6 +56,9 @@ export default async function MeetRelaysPage({
       createdAt: true,
       startsAt: true,
       endsAt: true,
+      timeZone: true,
+      location: true,
+      school: true,
       eventOrder: true,
       resultStatusesSummary: true,
       relayResultsSummary: true,
@@ -131,6 +134,7 @@ export default async function MeetRelaysPage({
             <ShareRelaysButton
               meetId={meet.id}
               meetName={meet.name}
+              details={meetHeaderDetails(meet)}
               iconUrl={meet.iconUrl}
               events={publishedBySlot.map(({ slot, published }) => relayShareEvent(slot, published))}
             />
@@ -205,6 +209,7 @@ export default async function MeetRelaysPage({
     <MeetRelaysWorkspace
       meetId={meet.id}
       meetName={meet.name}
+      details={meetHeaderDetails(meet)}
       relaysPath={relaysPath}
       iconUrl={meet.iconUrl}
       course={meet.course || "SCY"}

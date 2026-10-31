@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import type { MeetHeaderDetails } from "@swimbuzz/shared"
 import {
   DEFAULT_RELAY_COUNT,
   buildAthleteIds,
@@ -47,6 +48,7 @@ type Build = { status: "ok"; result: RelayResult } | { status: "error"; error: s
 export default function MeetRelaysWorkspace({
   meetId,
   meetName,
+  details,
   relaysPath,
   iconUrl,
   course,
@@ -59,6 +61,8 @@ export default function MeetRelaysWorkspace({
 }: {
   meetId: string
   meetName: string
+  /** Date and location for the share PNG's header. */
+  details: MeetHeaderDetails
   relaysPath: string
   iconUrl: string | null
   course: string
@@ -347,7 +351,7 @@ export default function MeetRelaysWorkspace({
               />
             ) : null}
             {shareEvents.length > 0 ? (
-              <ShareRelaysButton meetId={meetId} meetName={meetName} iconUrl={iconUrl} events={shareEvents} />
+              <ShareRelaysButton meetId={meetId} meetName={meetName} details={details} iconUrl={iconUrl} events={shareEvents} />
             ) : null}
           </>
         }

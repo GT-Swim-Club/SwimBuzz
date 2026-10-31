@@ -20,6 +20,8 @@ export type DetailRound = {
   seedTime?: string
   seedRank?: number | string
   heat?: string
+  /** The heat's scheduled start time from the heat sheet. */
+  startTime?: string
   lane?: number
   splits: ResultSplit[]
 }
@@ -660,6 +662,13 @@ export default function SwimDetailModal({
       {r.seedRank != null ? <span className="text-foreground-tertiary">#{r.seedRank}</span> : null}
     </>
   )
+  const heatCell = (r: DetailRound) => (
+    <span className="whitespace-nowrap">
+      {r.heat ?? (r.startTime ? null : "—")}
+      {r.heat && r.startTime ? " " : null}
+      {r.startTime ? <span className="text-xs text-foreground-tertiary">{r.startTime}</span> : null}
+    </span>
+  )
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -778,7 +787,7 @@ export default function SwimDetailModal({
                         {label === "Seed"
                           ? seedCell(r)
                           : label === "Heat"
-                            ? r.heat ?? "—"
+                            ? heatCell(r)
                             : r.lane != null
                               ? String(r.lane)
                               : "—"}
@@ -788,14 +797,14 @@ export default function SwimDetailModal({
                 ))}
               </div>
             ) : (
-              <div className="mt-3.5 grid grid-cols-3 rounded-lg border border-border">
+              <div className="mt-3.5 grid grid-cols-[repeat(3,minmax(max-content,1fr))] rounded-lg border border-border">
                 <div className="border-r border-border px-3 py-2">
                   <div className={cellLabel}>Seed</div>
                   <div className="font-mono text-sm tabular-nums">{seedCell(last)}</div>
                 </div>
                 <div className="border-r border-border px-3 py-2">
                   <div className={cellLabel}>Heat</div>
-                  <div className="font-mono text-sm tabular-nums">{last.heat ?? "—"}</div>
+                  <div className="font-mono text-sm tabular-nums">{heatCell(last)}</div>
                 </div>
                 <div className="px-3 py-2">
                   <div className={cellLabel}>Lane</div>

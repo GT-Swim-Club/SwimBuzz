@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react"
+
 export type InfoKind = "calendar" | "location" | "school" | "attended" | "globe" | "tag" | "waves"
 
 const svgProps = {
@@ -12,9 +14,18 @@ const svgProps = {
   "aria-hidden": true as const,
 }
 
-/** `className` overrides the default 14px size, e.g. to match larger text. */
-export default function InfoIcon({ kind, className }: { kind: InfoKind; className?: string }) {
-  const props = className ? { ...svgProps, className: `shrink-0 ${className}` } : svgProps
+/** `className` overrides the default 14px size, e.g. to match larger text; `style` sizes it exactly. */
+export default function InfoIcon({
+  kind,
+  className,
+  style,
+}: {
+  kind: InfoKind
+  className?: string
+  style?: CSSProperties
+}) {
+  const base = className ? { ...svgProps, className: `shrink-0 ${className}` } : svgProps
+  const props = style ? { ...base, style } : base
   switch (kind) {
     case "calendar":
       return (

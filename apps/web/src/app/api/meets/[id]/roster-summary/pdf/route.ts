@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { attachmentDisposition, rosterSummaryPdfFilename } from "@swimbuzz/shared"
+import { attachmentDisposition, meetHeaderDetails, rosterSummaryPdfFilename } from "@swimbuzz/shared"
 import { getSession } from "@/lib/auth/session"
 import { prisma } from "@/lib/prisma"
 import { loadMeetIconPng } from "@/lib/meet/meet-icon-png"
@@ -22,7 +22,7 @@ export async function POST(
   const { id } = await params
   const meet = await prisma.meet.findFirst({
     where: { OR: [{ id }, { slug: id }] },
-    select: { name: true, iconUrl: true },
+    select: { name: true, location: true, school: true, startsAt: true, endsAt: true, timeZone: true, iconUrl: true },
   })
   if (!meet) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
@@ -31,7 +31,7 @@ export async function POST(
 
   const iconPng = await loadMeetIconPng(meet.iconUrl)
   const bytes = new Uint8Array(
-    buildRosterSummaryPdf({ meetName: meet.name, iconPng, request }).output("arraybuffer")
+    buildRosterSummaryPdf({ meetName: meet.name, details: meetHeaderDetails(meet), iconPng, request }).output("arraybuffer")
   )
   const filename = rosterSummaryPdfFilename(meet.name, request)
 

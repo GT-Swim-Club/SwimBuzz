@@ -1,5 +1,6 @@
 import { jsPDF } from "jspdf"
 import {
+  MEET_HEADER,
   ROSTER_SUMMARY_PDF_LIMITS,
   meetFileName,
   rosterNameFirstLast,
@@ -9,11 +10,15 @@ import {
   type RosterSummaryPdfResult,
   type RosterSummaryPdfRow,
   type RosterSummaryPdfSection,
+  type MeetHeaderDetails,
 } from "@swimbuzz/shared"
 import { formatDisplayTime, formatOrdinal } from "@/lib/utils"
+import { HELVETICA_CAP_HEIGHT, drawMeetPdfDetails } from "@/lib/meet/meet-pdf-details"
 
 export type RosterSummaryPdfInput = {
   meetName: string
+  /** Date and location (with the school), under the meet name. */
+  details: MeetHeaderDetails
   /** Meet icon as a square PNG (logo fitted whole, transparent padding), or null to leave it out. */
   iconPng: Uint8Array | null
   request: RosterSummaryPdfRequest
@@ -38,14 +43,19 @@ const PODIUM: Record<number, RGB> = { 1: [180, 83, 9], 2: [71, 85, 105], 3: [194
 /** CSS px → PDF pt at 96dpi. */
 const px = (n: number) => n * 0.75
 
+const TITLE_SIZE = px(26)
+
 const M = {
   margin: px(40),
-  iconSize: px(56),
-  iconGap: px(14),
-  titleSize: px(26),
+  titleSize: TITLE_SIZE,
   titleLh: px(30),
-  eyebrowSize: px(11),
-  eyebrowGap: px(6),
+  // The header's other sizes follow the meet name's, in the proportions every meet header shares.
+  eyebrowSize: TITLE_SIZE * MEET_HEADER.eyebrowSize,
+  detailsSize: TITLE_SIZE * MEET_HEADER.detailsSize,
+  titleGapAbove: TITLE_SIZE * MEET_HEADER.gapAboveTitle,
+  titleGapBelow: TITLE_SIZE * MEET_HEADER.gapBelowTitle,
+  iconGap: TITLE_SIZE * MEET_HEADER.iconGap,
+  iconOvershoot: TITLE_SIZE * MEET_HEADER.iconOvershoot,
   headerGap: px(14),
   sectionGap: px(10),
   sectionHeaderHeight: px(26),
@@ -514,32 +524,58 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
     creator: "SwimBuzz",
   })
 
-  // Header: icon, then the meet name and the gold heading beside it.
-  let iconDrawn = false
+  // Header: the gold heading, meet name, and date & location, beside an icon as tall as all three.
+  setType("bold", M.titleSize)
+  // Visible gaps around the meet name: from the heading's baseline to the name's capitals, and a
+  // touch more from the name's baseline to the details' capitals and digits. The icon spans the
+  // heading's capitals to the details' baseline, reaching a little past both.
+  const headerHeight = (titleLineCount: number) =>
+    M.eyebrowSize * HELVETICA_CAP_HEIGHT +
+    M.titleGapAbove +
+    M.titleSize * HELVETICA_CAP_HEIGHT +
+    (titleLineCount - 1) * M.titleLh +
+    M.titleGapBelow +
+    M.detailsSize * HELVETICA_CAP_HEIGHT
+  const splitTitle = (left: number) => doc.splitTextToSize(pdfText(input.meetName), pageRight - left) as string[]
+  let iconSize = 0
+  let titleLines: string[] = []
   if (input.iconPng) {
+    // A taller icon leaves the title less room, and a wrapped title makes the icon taller:
+    // grow them together until the title's line count settles.
+    let lineCount = 1
+    for (let pass = 0; pass < 5; pass++) {
+      iconSize = headerHeight(lineCount) + M.iconOvershoot * 2
+      titleLines = splitTitle(pageLeft + iconSize + M.iconGap)
+      if (titleLines.length === lineCount) break
+      lineCount = titleLines.length
+    }
     try {
-      doc.addImage(input.iconPng, "PNG", pageLeft, M.margin, M.iconSize, M.iconSize)
-      iconDrawn = true
+      doc.addImage(input.iconPng, "PNG", pageLeft, M.margin - M.iconOvershoot, iconSize, iconSize)
     } catch {
       // Unreadable image: leave the icon out.
+      iconSize = 0
     }
   }
-  const headerX = iconDrawn ? pageLeft + M.iconSize + M.iconGap : pageLeft
+  const headerX = iconSize ? pageLeft + iconSize + M.iconGap : pageLeft
+  if (!iconSize) titleLines = splitTitle(pageLeft)
+  setType("bold", M.eyebrowSize, ACCENT)
+  let baseline = M.margin + M.eyebrowSize * HELVETICA_CAP_HEIGHT
+  const charSpace = px(1.5)
+  const heading = (request.heading ?? "Entries").toUpperCase()
+  doc.text(fit(heading, pageRight - headerX, charSpace), headerX, baseline, { charSpace })
   setType("bold", M.titleSize)
-  const titleLines = doc.splitTextToSize(pdfText(input.meetName), pageRight - headerX) as string[]
-  const textHeight =
-    M.titleSize * 0.85 + (titleLines.length - 1) * M.titleLh + M.eyebrowGap + M.eyebrowSize
-  let baseline = M.margin + (iconDrawn ? Math.max(0, (M.iconSize - textHeight) / 2) : 0) + M.titleSize * 0.85
+  baseline += M.titleGapAbove + M.titleSize * HELVETICA_CAP_HEIGHT
   titleLines.forEach((line, index) => {
     if (index > 0) baseline += M.titleLh
     doc.text(line, headerX, baseline)
   })
-  setType("bold", M.eyebrowSize, ACCENT)
-  baseline += M.eyebrowGap + M.eyebrowSize
-  const charSpace = px(1.5)
-  const heading = (request.heading ?? "Entries").toUpperCase()
-  doc.text(fit(heading, pageRight - headerX, charSpace), headerX, baseline, { charSpace })
-  let y = Math.max(baseline, iconDrawn ? M.margin + M.iconSize : 0) + M.headerGap
+  baseline += M.titleGapBelow + M.detailsSize * HELVETICA_CAP_HEIGHT
+  const details = {
+    date: pdfText(input.details.date),
+    location: input.details.location && pdfText(input.details.location),
+  }
+  drawMeetPdfDetails(doc, details, headerX, baseline, pageRight - headerX, M.detailsSize, INK_SECONDARY)
+  let y = baseline + M.headerGap
 
   if (request.sections.length === 0) {
     setType("normal", M.labelSize, INK_TERTIARY)

@@ -1,5 +1,6 @@
 import { jsPDF } from "jspdf"
 import {
+  MEET_HEADER,
   meetFileName,
   relayLineupRoundLabel,
   relayShareFilename,
@@ -7,10 +8,14 @@ import {
   relayShareTime,
   type RelayLineup,
   type RelayShareEvent,
+  type MeetHeaderDetails,
 } from "@swimbuzz/shared"
+import { HELVETICA_CAP_HEIGHT, drawMeetPdfDetails } from "@/lib/meet/meet-pdf-details"
 
 export type RelaysPdfInput = {
   meetName: string
+  /** Date and location (with the school), under the meet name. */
+  details: MeetHeaderDetails
   /** Meet icon as a square PNG (logo fitted whole, transparent padding), or null to leave it out. */
   iconPng: Uint8Array | null
   /** Published relays only, in display order. */
@@ -24,6 +29,7 @@ const ACCENT: RGB = [140, 107, 56]
 const ACCENT_BORDER: RGB = [203, 188, 165]
 const ACCENT_BG: RGB = [244, 240, 235]
 const INK: RGB = [31, 31, 31]
+const INK_SECONDARY: RGB = [89, 89, 89]
 const BORDER: RGB = [234, 234, 234]
 
 /** CSS px → PDF pt at 96dpi. */
@@ -91,10 +97,12 @@ function drawRelaysPdf(
 
   const titleSize = px(32)
   const titleLh = px(38)
-  const eyebrowSize = px(12)
-  const eyebrowGap = px(10)
-  const iconSize = px(64)
-  const iconGap = px(16)
+  // The header's other sizes follow the meet name's, in the proportions every meet header shares.
+  const eyebrowSize = titleSize * MEET_HEADER.eyebrowSize
+  const detailsSize = titleSize * MEET_HEADER.detailsSize
+  const titleGapAbove = titleSize * MEET_HEADER.gapAboveTitle
+  const titleGapBelow = titleSize * MEET_HEADER.gapBelowTitle
+  const iconGap = titleSize * MEET_HEADER.iconGap
   const headerGap = px(24)
 
   let m = GRID
@@ -205,30 +213,53 @@ function drawRelaysPdf(
 
   doc.setProperties({ title: meetFileName("Relays", input.meetName), author: "SwimBuzz", creator: "SwimBuzz" })
 
-  // Header: icon, then the meet name and eyebrow centered beside it.
-  let iconDrawn = false
+  // Header: the eyebrow, meet name, and date & location, beside an icon as tall as all three.
+  setType("bold", titleSize)
+  // Visible gaps around the meet name: from the eyebrow's baseline to the name's capitals, and a
+  // touch more from the name's baseline to the details' capitals and digits. The icon spans the
+  // eyebrow's capitals to the details' baseline, reaching a little past both.
+  const headerHeight = (titleLineCount: number) =>
+    eyebrowSize * HELVETICA_CAP_HEIGHT +
+    titleGapAbove +
+    titleSize * HELVETICA_CAP_HEIGHT +
+    (titleLineCount - 1) * titleLh +
+    titleGapBelow +
+    detailsSize * HELVETICA_CAP_HEIGHT
+  const splitTitle = (left: number) => doc.splitTextToSize(input.meetName, pageWidth - margin - left) as string[]
+  const iconOvershoot = titleSize * MEET_HEADER.iconOvershoot
+  let iconSize = 0
+  let titleLines: string[] = []
   if (input.iconPng) {
+    // A taller icon leaves the title less room, and a wrapped title makes the icon taller:
+    // grow them together until the title's line count settles.
+    let lineCount = 1
+    for (let pass = 0; pass < 5; pass++) {
+      iconSize = headerHeight(lineCount) + iconOvershoot * 2
+      titleLines = splitTitle(margin + iconSize + iconGap)
+      if (titleLines.length === lineCount) break
+      lineCount = titleLines.length
+    }
     try {
-      doc.addImage(input.iconPng, "PNG", margin, margin, iconSize, iconSize)
-      iconDrawn = true
+      doc.addImage(input.iconPng, "PNG", margin, margin - iconOvershoot, iconSize, iconSize)
     } catch {
       // Unreadable image: leave the icon out.
+      iconSize = 0
     }
   }
-  const textX = iconDrawn ? margin + iconSize + iconGap : margin
+  const textX = iconSize ? margin + iconSize + iconGap : margin
+  if (!iconSize) titleLines = splitTitle(margin)
+  setType("bold", eyebrowSize, ACCENT)
+  let baseline = margin + eyebrowSize * HELVETICA_CAP_HEIGHT
+  doc.text("RELAYS", textX, baseline, { charSpace: px(1.5) })
   setType("bold", titleSize)
-  const titleLines = doc.splitTextToSize(input.meetName, pageWidth - margin - textX) as string[]
-  const textHeight = titleSize * 0.85 + (titleLines.length - 1) * titleLh + eyebrowGap + eyebrowSize
-  const textTop = margin + (iconDrawn ? Math.max(0, (iconSize - textHeight) / 2) : 0)
-  let baseline = textTop + titleSize * 0.85
+  baseline += titleGapAbove + titleSize * HELVETICA_CAP_HEIGHT
   titleLines.forEach((line, index) => {
     if (index > 0) baseline += titleLh
     doc.text(line, textX, baseline)
   })
-  setType("bold", eyebrowSize, ACCENT)
-  baseline += eyebrowGap + eyebrowSize
-  doc.text("RELAYS", textX, baseline, { charSpace: px(1.5) })
-  const gridTop = Math.max(baseline, iconDrawn ? margin + iconSize : 0) + headerGap
+  baseline += titleGapBelow + detailsSize * HELVETICA_CAP_HEIGHT
+  drawMeetPdfDetails(doc, input.details, textX, baseline, pageWidth - margin - textX, detailsSize, INK_SECONDARY)
+  const gridTop = baseline + headerGap
 
   // Measure at full size, then scale the grid so its widest row and its height fit the page.
   const bands = relayShareRows(input.events)

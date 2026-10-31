@@ -1,3 +1,4 @@
+import { meetHeaderDetails } from "@swimbuzz/shared"
 import { prisma } from "@/lib/prisma"
 import { resolveSignupEventOptions } from "@/lib/meet/meet-signup"
 import { loadMeetIconPng } from "@/lib/meet/meet-icon-png"
@@ -14,6 +15,11 @@ export async function loadRelaysPdfInput(idOrSlug: string): Promise<RelaysPdfInp
     where: { OR: [{ id: idOrSlug }, { slug: idOrSlug }] },
     select: {
       name: true,
+      location: true,
+      school: true,
+      startsAt: true,
+      endsAt: true,
+      timeZone: true,
       iconUrl: true,
       season: true,
       eventOrder: true,
@@ -39,5 +45,5 @@ export async function loadRelaysPdfInput(idOrSlug: string): Promise<RelaysPdfInp
     const published = relayLineups.filter((relay) => slotMatches(slot, relay.gender, relay.event))
     return published.length > 0 ? [relayShareEvent(slot, published)] : []
   })
-  return { meetName: meet.name, iconPng, events }
+  return { meetName: meet.name, details: meetHeaderDetails(meet), iconPng, events }
 }

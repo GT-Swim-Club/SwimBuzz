@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { toPng } from "html-to-image"
-import { relayShareFilename, type RelayShareEvent } from "@swimbuzz/shared"
+import { relayShareFilename, type MeetHeaderDetails, type RelayShareEvent } from "@swimbuzz/shared"
 import ActionIcon from "@/components/ui/ActionIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
 import {
@@ -24,11 +24,14 @@ const MENU_ITEM =
 export default function ShareRelaysButton({
   meetId,
   meetName,
+  details,
   iconUrl,
   events,
 }: {
   meetId: string
   meetName: string
+  /** Date and location for the PNG's header. */
+  details: MeetHeaderDetails
   iconUrl: string | null
   /** Published relays only, in display order. */
   events: RelayShareEvent[]
@@ -166,7 +169,7 @@ export default function ShareRelaysButton({
       {error && <p className="text-xs text-error">{error}</p>}
       <div aria-hidden className="pointer-events-none absolute left-[-10000px] top-0">
         <div ref={captureRef} className="w-fit">
-          <RelaysExportCapture meetName={meetName} iconUrl={iconUrl} events={events} />
+          <RelaysExportCapture meetName={meetName} details={details} iconUrl={iconUrl} events={events} />
         </div>
       </div>
     </div>

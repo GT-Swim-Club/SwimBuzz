@@ -8,7 +8,9 @@ import * as Sharing from "expo-sharing"
 import { File, Paths } from "expo-file-system"
 import { captureRef } from "react-native-view-shot"
 import {
+  DEFAULT_TIME_ZONE,
   groupRelayLineups,
+  meetHeaderDetails,
   relayLineupHasAthlete,
   relayLineupRoundLabel,
   relayShareEvents,
@@ -67,6 +69,17 @@ export default function MeetRelaysScreen() {
   const meetName = typeof meet?.name === "string" ? meet.name : "Meet"
   const iconUrl =
     typeof meet?.iconUrl === "string" && isExternalUrl(meet.iconUrl) ? meet.iconUrl.trim() : null
+  const headerDetails = useMemo(
+    () =>
+      meetHeaderDetails({
+        location: meet?.location ? String(meet.location) : null,
+        school: meet?.school ? String(meet.school) : null,
+        startsAt: String(meet?.startsAt ?? ""),
+        endsAt: meet?.endsAt ? String(meet.endsAt) : null,
+        timeZone: typeof meet?.timeZone === "string" && meet.timeZone ? meet.timeZone : DEFAULT_TIME_ZONE,
+      }),
+    [meet]
+  )
 
   const [shareOpen, setShareOpen] = useState(false)
   const [shareBusy, setShareBusy] = useState<"copy" | "photos" | "pdf" | null>(null)
@@ -360,7 +373,13 @@ export default function MeetRelaysScreen() {
 
       {/* Off-screen mirror captured to PNG — never shown in the layout. */}
       <View pointerEvents="none" style={{ position: "absolute", top: 0, left: -10000 }}>
-        <RelaysExportCapture ref={exportCaptureRef} meetName={meetName} iconUrl={iconUrl} events={shareEvents} />
+        <RelaysExportCapture
+          ref={exportCaptureRef}
+          meetName={meetName}
+          details={headerDetails}
+          iconUrl={iconUrl}
+          events={shareEvents}
+        />
       </View>
 
       {savedToastVisible ? (

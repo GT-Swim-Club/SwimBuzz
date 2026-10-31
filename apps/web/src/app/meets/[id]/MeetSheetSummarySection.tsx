@@ -351,6 +351,21 @@ function buildIndividualRounds(entry: SheetEntry, allEntries?: SummaryEntry[]): 
     })
   }
 
+  // The entry carries one heat start time; with both rounds shown, it only goes on the
+  // round this row is known to be.
+  const startTime = entry.startTime || undefined
+  if (startTime) {
+    const round =
+      rounds.length === 1
+        ? rounds[0]
+        : entry.resultRound === "P"
+          ? rounds.find((r) => r.label === "Prelims")
+          : entry.resultRound === "F"
+            ? rounds.find((r) => r.label !== "Prelims")
+            : undefined
+    if (round) round.startTime = startTime
+  }
+
   return rounds
 }
 
@@ -658,6 +673,7 @@ function SummaryEntryRow({
           seedTime: res.seed && res.seed !== "NT" ? res.seed : undefined,
           seedRank: displaySeedRank(entry),
           heat: formatHeatNumber(heat),
+          startTime: entry.startTime || undefined,
           lane,
           splits: [],
         },
@@ -677,6 +693,7 @@ function SummaryEntryRow({
       seedTime: res.seed && res.seed !== "NT" ? res.seed : undefined,
       seedRank: displaySeedRank(entry),
       heat: formatHeatNumber(heat),
+      startTime: entry.startTime || undefined,
       lane,
       splits: entryDisplaySplits(entry),
     }
