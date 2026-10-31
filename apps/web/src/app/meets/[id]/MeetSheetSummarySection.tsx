@@ -4,6 +4,9 @@ import { useEffect, useRef, useState, Fragment, type ReactNode } from "react"
 import Link from "next/link"
 import {
   eventGenderWord,
+  rosterNameFirstLast,
+  rosterNamePreferred,
+  splitRosterName,
   roundFilterIncludes,
   roundFilterLabel,
   rosterSummaryScopeLabel,
@@ -44,9 +47,9 @@ import {
   displayRelayLetter,
   effectiveRelayGender,
   effectiveRelayRound,
+  isRealRelaySwimmerName,
   relayTeamPlace,
   relayTeamTime,
-  relayCoachIncompleteNote,
   sanitizeRelaySplitTime,
 } from "@/lib/meet/relay-results"
 import { displayMeetResultTags } from "@/lib/swim/swim-tags"
@@ -61,9 +64,12 @@ import { EditRelayButton } from "./MeetRelayEditor"
 import MeetAddMenu from "./MeetAddMenu"
 import ShareRosterSummaryButton from "./ShareRosterSummaryButton"
 import { MenuDivider, MenuItem, MenuSubmenu, menuPanel } from "./MeetMenu"
-import SummaryRow, { EventBadge, type RowDisplay, type RowDensity, type RowResult } from "./SummaryRow"
+import SummaryRow, { EventBadge, SUMMARY_INSET, SummaryRowFold, type RowDisplay, type RowDensity, type RowResult } from "./SummaryRow"
 import type { DetailRound, SwimDetail } from "./SwimDetailModal"
 import { useEscapeToClose } from "@/lib/use-escape-to-close"
+
+/** Card headers inset like the rows below them, so badges and avatars line up. */
+const summaryHeaderInset = { paddingLeft: SUMMARY_INSET, paddingRight: SUMMARY_INSET }
 
 function formatHeat(entry: SheetSummary["entries"][number]) {
   // Alternates are finals-only; prelim rows may still carry the flag from merge.
@@ -447,14 +453,30 @@ function compareBySeed(a: SummaryEntry, b: SummaryEntry): number {
  * are out, else by seed. Decided per event, so finals still follow heat & lane while only prelims
  * results are in. Rows without a place (DQ, NS) follow the placed ones; alternates come last.
  */
+/** Rounds in the order an event lists them: finals, then prelims (and swim-offs), then timed finals. */
+const ROUND_ORDER: Record<SummaryRoundKind, number> = { F: 0, P: 1, T: 2 }
+
 function sortEventEntries(entries: SummaryEntry[], allEntries: SummaryEntry[]): SummaryEntry[] {
   const place = (entry: SummaryEntry) => rowRoundResult(entry, allEntries).place
   const lane = (entry: SummaryEntry) =>
     entry.entryType === "relay_team" ? relayLane(entry) : individualLane(entry)
-  const placed = entries.some((entry) => place(entry) != null)
-  const heated = entries.some((entry) => rowHeat(entry).heat != null)
+  const roundOrder = (entry: SummaryEntry) => {
+    const kind = rowRoundKind(entry, allEntries)
+    return kind ? ROUND_ORDER[kind] : 3
+  }
+  // Within a round, by place once it has results, else by heat & lane once it has heats.
+  const rounds = new Map<number, SummaryEntry[]>()
+  for (const entry of entries) rounds.set(roundOrder(entry), [...(rounds.get(roundOrder(entry)) ?? []), entry])
+  const placedRounds = new Set([...rounds].filter(([, rows]) => rows.some((e) => place(e) != null)).map(([r]) => r))
+  const heatedRounds = new Set(
+    [...rounds].filter(([, rows]) => rows.some((e) => rowHeat(e).heat != null)).map(([r]) => r)
+  )
   return [...entries].sort((a, b) => {
     if (isAlternateRow(a) !== isAlternateRow(b)) return isAlternateRow(a) ? 1 : -1
+    const round = roundOrder(a)
+    if (round !== roundOrder(b)) return round - roundOrder(b)
+    const placed = placedRounds.has(round)
+    const heated = heatedRounds.has(round)
     if (placed) {
       const byPlace = compareMissingLast(place(a), place(b))
       if (byPlace !== 0) return byPlace
@@ -548,13 +570,14 @@ function summaryRowView(
   const split = sanitizeRelaySplitTime(swimmer?.splitTime)
   const legSplit = split ? formatDisplayTime(split) : null
   const relayLeg = swimmer
-    ? [`Leg ${swimmer.leg}`, legSplit].filter(Boolean).join(" · ")
+    ? [`Leg ${swimmer.leg}`, legSplit ? `Split ${legSplit}` : null].filter(Boolean).join(" · ")
     : undefined
 
   const heat = formatHeat(entry)
   const lane = isRelay ? relayLane(entry) : individualLane(entry)
+  // Heat & lane in their own column, compact like the PDF's: "Heat 2 of 4" + lane 5 → "H2 of 4 · L5".
   const heatLane =
-    [heat, lane != null ? `Lane ${lane}` : null, entry.startTime].filter(Boolean).join(" · ") || null
+    [heat?.replace(/^Heat\s+/i, "H"), lane != null ? `L${lane}` : null].filter(Boolean).join(" · ") || null
 
   const tags = !isRelay ? displayMeetResultTags(entry.resultTags ?? "") : null
   const sub = tags ?? ""
@@ -590,14 +613,40 @@ function summaryRowView(
     heat,
     lane,
     heatLane,
+    startTime: entry.startTime || null,
     sub,
     result,
     eventName,
     badgeNumber: !eventView && eventNumber > 0 ? eventNumber : undefined,
-    label: eventView ? (isRelay ? relayLetter : entry.athleteName) : eventName,
-    team: !eventView ? [relayLetter, relayLeg].filter(Boolean).join(" · ") || undefined : undefined,
+    // A relay names its letter ("200 Free Relay A"); its round goes beside the name and, under an
+    // athlete, their leg and split on the line below.
+    label: eventView
+      ? isRelay
+        ? relayLetter
+        : entry.athleteName
+      : isRelay
+        ? `${eventName} ${displayRelayLetter(entry.relayLetter)}`
+        : eventName,
+    team: !eventView && isRelay ? relayLeg : undefined,
     round: entry.rosterOnly ? null : res.label,
   }
+}
+
+/** Medley relay legs in swim order. */
+const MEDLEY_STROKES = ["BK", "BR", "FL", "FR"]
+
+/**
+ * A relay's swimmers in leg order, each with their split ("" when there isn't one), leaving out
+ * "Leg 1"-style placeholders for an unknown roster.
+ */
+function relayLegs(entry: SummaryEntry): { name: string; split: string }[] {
+  return [...(entry.relaySwimmers ?? [])]
+    .filter((s) => isRealRelaySwimmerName(s.name))
+    .sort((a, b) => a.leg - b.leg)
+    .map((s) => {
+      const split = sanitizeRelaySplitTime(s.splitTime)
+      return { name: s.name, split: split ? formatDisplayTime(split) : "" }
+    })
 }
 
 /** A summary row for the PDF export, honoring the viewer's Show round / Show heat & lane toggles. */
@@ -616,35 +665,30 @@ function summaryRowPdf(
   const relayLetter = displayRelayLetter(entry.relayLetter)
   const relayName = eventView ? view.label : `${relayEvent} ${relayLetter}`
   const relayFullName = eventView ? undefined : `${relayEvent} Relay ${relayLetter}`
-  // A relay's leg rides beside its name, with the athlete's split on the line below.
   const startTime = (display.showHeatLane && entry.startTime) || undefined
-  const meta = [
-    display.showRound ? view.round : null,
-    !view.isRelay ? view.team : view.legSplit ? `Split ${view.legSplit}` : null,
-  ]
-    .filter(Boolean)
-    .join(" | ")
-  // Heat & lane get their own column, compact: "Heat 2 of 4" + lane 5 → "H2 of 4 · L5".
-  const heatLane = display.showHeatLane
+  // The round rides beside the name (then any result tags); the line below has a relay athlete's
+  // leg and split.
+  const meta = view.isRelay
     ? [
-        view.heat?.replace(/^Heat\s+/i, "H"),
-        view.lane != null ? `L${view.lane}` : null,
+        view.relayLegNumber ? `Leg ${view.relayLegNumber}` : null,
+        view.legSplit ? `Split ${view.legSplit}` : null,
       ]
         .filter(Boolean)
-        .join(" · ")
-    : ""
+        .join(" | ")
+    : null
+  const heatLane = display.showHeatLane ? view.heatLane : null
   return {
     eventNumber: view.badgeNumber,
     label: (view.isRelay ? relayName : view.label) ?? "",
     fullLabel: view.isRelay ? relayFullName : undefined,
     sub:
-      (view.isRelay ? view.relayLegNumber && `Leg ${view.relayLegNumber}` : view.sub) || undefined,
+      [display.showRound ? view.round : null, view.isRelay ? null : view.sub].filter(Boolean).join(" · ") ||
+      undefined,
     meta: meta || undefined,
     heatLane: heatLane || undefined,
     startTime,
-    legs: view.isRelay
-      ? [...(entry.relaySwimmers ?? [])].sort((a, b) => a.leg - b.leg).map((s) => s.name)
-      : undefined,
+    legs: view.isRelay ? relayLegs(entry).map((leg) => leg.name) : undefined,
+    legSplits: view.isRelay ? relayLegs(entry).map((leg) => leg.split) : undefined,
     result: view.result,
   }
 }
@@ -703,7 +747,10 @@ function SummaryEntryRow({
           ? effectiveRelayGender(entry, athleteGenders)
           : entry.gender || athleteGenders?.get(entry.athleteId)
       )
-  const coachNote = isRelay && canEdit ? relayCoachIncompleteNote(entry) ?? undefined : undefined
+  // Under an event title a relay lists its swimmers and their splits, like the PDF; under an
+  // athlete it's that athlete's leg alone.
+  const legs = isRelay && eventView ? relayLegs(entry) : []
+  const legTags = /\bmedley\b/i.test(entry.event) && legs.length === MEDLEY_STROKES.length ? MEDLEY_STROKES : null
 
   // Detail modal
   let detail: SwimDetail
@@ -841,11 +888,26 @@ function SummaryEntryRow({
           ) : undefined
         }
         label={eventView && !isRelay ? <RosterName name={entry.athleteName} /> : view.label}
+        shortLabel={
+          // "400 Free A" when "400 Free Relay A" doesn't fit on its line; "Tumanova, Katya" for
+          // "Tumanova, Ekaterina (Katya)" once any athlete's name would wrap.
+          !eventView && isRelay
+            ? `${view.eventName.replace(/\s+Relay$/i, "")} ${displayRelayLetter(entry.relayLetter)}`
+            : eventView && !isRelay && splitRosterName(entry.athleteName).preferred
+              ? rosterNamePreferred(entry.athleteName)
+              : undefined
+        }
+        shareShortLabel={eventView && !isRelay}
         sub={sub || undefined}
         team={view.team}
         round={view.round}
         heatLane={heatLane}
-        note={coachNote}
+        startTime={view.startTime}
+        legs={legs.map((leg, i) => ({
+          tag: legTags?.[i] ?? String(i + 1),
+          name: rosterNameFirstLast(rosterNamePreferred(leg.name)),
+          split: leg.split,
+        }))}
         result={result}
         detail={detail}
         trailing={removeButton}
@@ -1392,7 +1454,11 @@ export default function MeetSheetSummarySection({
           // Under an athlete, a relay is just the event — no list of its swimmers.
           rows: [...athleteGroup.entries]
             .sort(compareMyEntries)
-            .map((entry) => ({ ...toRow(entry, false, athleteGroup.athleteId), legs: undefined })),
+            .map((entry) => ({
+              ...toRow(entry, false, athleteGroup.athleteId),
+              legs: undefined,
+              legSplits: undefined,
+            })),
         })
       }
     }
@@ -1400,379 +1466,389 @@ export default function MeetSheetSummarySection({
   }
 
   return (
-    <section ref={sectionRef} className="scroll-mt-4">
-      <div className="mb-3 flex items-center gap-2 pb-1">
-        <input
-          type="search"
-          aria-label={viewMode === "roster" ? "Search athletes" : "Search athletes or events"}
-          placeholder={searchPlaceholder}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/35"
-        />
-
-        {addMenuVisible ? (
-          <MeetAddMenu
-            meetId={meetId}
-            meetName={meetName ?? ""}
-            defaultCourse={defaultCourse ?? "SCY"}
-            defaultDate={defaultDate ?? ""}
-            athletes={athletes}
-            rosterSummaryEntries={entriesSummary?.entries ?? []}
-            onOpen={() => setSettingsOpen(false)}
+    // Every row of the summary lays out alike, however much room its own label needs.
+    <SummaryRowFold>
+      <section ref={sectionRef} className="@container/summary scroll-mt-4">
+        <div className="mb-3 flex items-center gap-2 pb-1">
+          <input
+            type="search"
+            aria-label={viewMode === "roster" ? "Search athletes" : "Search athletes or events"}
+            placeholder={searchPlaceholder}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/35"
           />
-        ) : null}
 
-        {meetId ? (
-          <ShareRosterSummaryButton
-            meetId={meetId}
-            meetName={meetName ?? ""}
-            details={details ?? { date: "", location: null }}
-            iconUrl={iconUrl}
-            buildRequest={buildPdfRequest}
-            onOpen={() => setSettingsOpen(false)}
-          />
-        ) : null}
+          {addMenuVisible ? (
+            <MeetAddMenu
+              meetId={meetId}
+              meetName={meetName ?? ""}
+              defaultCourse={defaultCourse ?? "SCY"}
+              defaultDate={defaultDate ?? ""}
+              athletes={athletes}
+              rosterSummaryEntries={entriesSummary?.entries ?? []}
+              onOpen={() => setSettingsOpen(false)}
+            />
+          ) : null}
 
-        <div className="relative shrink-0">
-          <button
-            type="button"
-            aria-label="View settings"
-            title="View settings"
-            aria-haspopup="menu"
-            aria-expanded={settingsOpen}
-            onClick={() => {
-              setSettingsOpen(!settingsOpen)
-              setSubmenu(null)
-            }}
-            className={toolbarButton}
-          >
-            <LedgerIcon name="settings" className="h-[18px] w-[18px] shrink-0" />
-          </button>
-          {settingsOpen ? (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setSettingsOpen(false)} />
-              <div role="menu" className={menuPanel}>
-                <MenuSubmenu
-                  icon={viewMode === "summary" ? "grid" : "list"}
-                  label="View"
-                  value={viewMode === "summary" ? "Summary" : "Roster"}
-                  {...submenuProps("view")}
-                >
-                  <MenuItem
-                    icon="grid"
-                    label="Summary"
-                    selected={viewMode === "summary"}
-                    onClick={() => {
-                      setViewMode("summary")
-                      setSettingsOpen(false)
-                    }}
-                  />
-                  <MenuItem
-                    icon="list"
-                    label="Roster"
-                    selected={viewMode === "roster"}
-                    onClick={() => {
-                      setViewMode("roster")
-                      setSettingsOpen(false)
-                    }}
-                  />
-                </MenuSubmenu>
-                {viewMode === "summary" ? (
+          {meetId ? (
+            <ShareRosterSummaryButton
+              meetId={meetId}
+              meetName={meetName ?? ""}
+              details={details ?? { date: "", location: null }}
+              iconUrl={iconUrl}
+              buildRequest={buildPdfRequest}
+              onOpen={() => setSettingsOpen(false)}
+            />
+          ) : null}
+
+          <div className="relative shrink-0">
+            <button
+              type="button"
+              aria-label="View settings"
+              title="View settings"
+              aria-haspopup="menu"
+              aria-expanded={settingsOpen}
+              onClick={() => {
+                setSettingsOpen(!settingsOpen)
+                setSubmenu(null)
+              }}
+              className={toolbarButton}
+            >
+              <LedgerIcon name="settings" className="h-[18px] w-[18px] shrink-0" />
+            </button>
+            {settingsOpen ? (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setSettingsOpen(false)} />
+                <div role="menu" className={menuPanel}>
                   <MenuSubmenu
-                    icon={viewByEvent ? "numberedList" : "user"}
-                    label="Group by"
-                    value={viewByEvent ? "Event" : "Athlete"}
-                    {...submenuProps("group")}
+                    icon={viewMode === "summary" ? "grid" : "list"}
+                    label="View"
+                    value={viewMode === "summary" ? "Summary" : "Roster"}
+                    {...submenuProps("view")}
                   >
                     <MenuItem
-                      icon="user"
-                      label="By athlete"
-                      selected={!viewByEvent}
+                      icon="grid"
+                      label="Summary"
+                      selected={viewMode === "summary"}
                       onClick={() => {
-                        setViewByEvent(false)
+                        setViewMode("summary")
                         setSettingsOpen(false)
                       }}
                     />
                     <MenuItem
-                      icon="numberedList"
-                      label="By event"
-                      selected={viewByEvent}
+                      icon="list"
+                      label="Roster"
+                      selected={viewMode === "roster"}
                       onClick={() => {
-                        setViewByEvent(true)
+                        setViewMode("roster")
                         setSettingsOpen(false)
                       }}
                     />
                   </MenuSubmenu>
-                ) : null}
-                <MenuDivider />
-                {viewMode === "summary" && sessions.length > 0 ? (
-                  <MenuSubmenu
-                    icon="calendar"
-                    label="Session"
-                    value={activeSession ?? "All"}
-                    active={activeSession != null}
-                    {...submenuProps("session")}
-                  >
-                    {[null, ...sessions].map((session) => (
+                  {viewMode === "summary" ? (
+                    <MenuSubmenu
+                      icon={viewByEvent ? "numberedList" : "user"}
+                      label="Group by"
+                      value={viewByEvent ? "Event" : "Athlete"}
+                      {...submenuProps("group")}
+                    >
                       <MenuItem
-                        key={session ?? "all"}
-                        icon="calendar"
-                        label={session ?? "All sessions"}
-                        selected={activeSession === session}
+                        icon="user"
+                        label="By athlete"
+                        selected={!viewByEvent}
                         onClick={() => {
-                          setSessionFilter(session)
+                          setViewByEvent(false)
+                          setSettingsOpen(false)
+                        }}
+                      />
+                      <MenuItem
+                        icon="numberedList"
+                        label="By event"
+                        selected={viewByEvent}
+                        onClick={() => {
+                          setViewByEvent(true)
+                          setSettingsOpen(false)
+                        }}
+                      />
+                    </MenuSubmenu>
+                  ) : null}
+                  <MenuDivider />
+                  {viewMode === "summary" && sessions.length > 0 ? (
+                    <MenuSubmenu
+                      icon="calendar"
+                      label="Session"
+                      value={activeSession ?? "All"}
+                      active={activeSession != null}
+                      {...submenuProps("session")}
+                    >
+                      {[null, ...sessions].map((session) => (
+                        <MenuItem
+                          key={session ?? "all"}
+                          icon="calendar"
+                          label={session ?? "All sessions"}
+                          selected={activeSession === session}
+                          onClick={() => {
+                            setSessionFilter(session)
+                            setSettingsOpen(false)
+                          }}
+                        />
+                      ))}
+                    </MenuSubmenu>
+                  ) : null}
+                  {viewMode === "summary" && roundFilterOn ? (
+                    <MenuSubmenu
+                      icon="flag"
+                      label="Rounds"
+                      value={roundFilterLabel(hiddenRounds, availableRounds) ?? "All"}
+                      active={roundFilterLabel(hiddenRounds, availableRounds) != null}
+                      {...submenuProps("rounds")}
+                    >
+                      {SUMMARY_ROUNDS.filter((r) => availableRounds.includes(r.kind)).map((r) => (
+                        <MenuItem
+                          key={r.kind}
+                          role="menuitemcheckbox"
+                          icon="flag"
+                          label={r.label}
+                          selected={!hiddenRounds.has(r.kind)}
+                          onClick={() =>
+                            setHiddenRounds((hidden) => {
+                              const next = new Set(hidden)
+                              if (next.has(r.kind)) next.delete(r.kind)
+                              else next.add(r.kind)
+                              return next
+                            })
+                          }
+                        />
+                      ))}
+                    </MenuSubmenu>
+                  ) : null}
+                  <MenuSubmenu
+                    icon="users"
+                    label="Gender"
+                    value={genderFilter === "F" ? "Women" : genderFilter === "M" ? "Men" : "All"}
+                    active={genderFilter !== "all"}
+                    {...submenuProps("gender")}
+                  >
+                    {(
+                      [
+                        { value: "all", label: "All", icon: "users" },
+                        { value: "F", label: "Women", icon: "user" },
+                        { value: "M", label: "Men", icon: "user" },
+                      ] as const
+                    ).map((g) => (
+                      <MenuItem
+                        key={g.value}
+                        icon={g.icon}
+                        label={g.label}
+                        selected={genderFilter === g.value}
+                        onClick={() => {
+                          setGenderFilter(g.value)
                           setSettingsOpen(false)
                         }}
                       />
                     ))}
                   </MenuSubmenu>
-                ) : null}
-                {viewMode === "summary" && roundFilterOn ? (
+                  <MenuDivider />
                   <MenuSubmenu
-                    icon="flag"
-                    label="Rounds"
-                    value={roundFilterLabel(hiddenRounds, availableRounds) ?? "All"}
-                    active={roundFilterLabel(hiddenRounds, availableRounds) != null}
-                    {...submenuProps("rounds")}
+                    icon={density === "cozy" ? "rowsCozy" : "rowsCompact"}
+                    label="Rows"
+                    value={density === "cozy" ? "Cozy" : "Compact"}
+                    {...submenuProps("rows")}
                   >
-                    {SUMMARY_ROUNDS.filter((r) => availableRounds.includes(r.kind)).map((r) => (
-                      <MenuItem
-                        key={r.kind}
-                        role="menuitemcheckbox"
-                        icon="flag"
-                        label={r.label}
-                        selected={!hiddenRounds.has(r.kind)}
-                        onClick={() =>
-                          setHiddenRounds((hidden) => {
-                            const next = new Set(hidden)
-                            if (next.has(r.kind)) next.delete(r.kind)
-                            else next.add(r.kind)
-                            return next
-                          })
-                        }
-                      />
-                    ))}
-                  </MenuSubmenu>
-                ) : null}
-                <MenuSubmenu
-                  icon="users"
-                  label="Gender"
-                  value={genderFilter === "F" ? "Women" : genderFilter === "M" ? "Men" : "All"}
-                  active={genderFilter !== "all"}
-                  {...submenuProps("gender")}
-                >
-                  {(
-                    [
-                      { value: "all", label: "All", icon: "users" },
-                      { value: "F", label: "Women", icon: "user" },
-                      { value: "M", label: "Men", icon: "user" },
-                    ] as const
-                  ).map((g) => (
                     <MenuItem
-                      key={g.value}
-                      icon={g.icon}
-                      label={g.label}
-                      selected={genderFilter === g.value}
-                      onClick={() => {
-                        setGenderFilter(g.value)
-                        setSettingsOpen(false)
-                      }}
+                      icon="rowsCozy"
+                      label="Cozy rows"
+                      selected={density === "cozy"}
+                      onClick={() => pickDensity("cozy")}
                     />
-                  ))}
-                </MenuSubmenu>
-                <MenuDivider />
-                <MenuSubmenu
-                  icon={density === "cozy" ? "rowsCozy" : "rowsCompact"}
-                  label="Rows"
-                  value={density === "cozy" ? "Cozy" : "Compact"}
-                  {...submenuProps("rows")}
-                >
-                  <MenuItem
-                    icon="rowsCozy"
-                    label="Cozy rows"
-                    selected={density === "cozy"}
-                    onClick={() => pickDensity("cozy")}
-                  />
-                  <MenuItem
-                    icon="rowsCompact"
-                    label="Compact rows"
-                    selected={density === "compact"}
-                    onClick={() => pickDensity("compact")}
-                  />
-                </MenuSubmenu>
-                <MenuSubmenu
-                  icon="lanes"
-                  label="Show"
-                  value={
-                    showRound && showHeatLane
-                      ? "All"
-                      : showRound
-                        ? "Round"
-                        : showHeatLane
-                          ? "Heat & lane"
-                          : "None"
-                  }
-                  {...submenuProps("show")}
-                >
-                  <MenuItem
-                    role="menuitemcheckbox"
-                    icon="flag"
-                    label="Round"
-                    selected={showRound}
-                    onClick={() => toggleRowInfo("round")}
-                  />
-                  <MenuItem
-                    role="menuitemcheckbox"
+                    <MenuItem
+                      icon="rowsCompact"
+                      label="Compact rows"
+                      selected={density === "compact"}
+                      onClick={() => pickDensity("compact")}
+                    />
+                  </MenuSubmenu>
+                  <MenuSubmenu
                     icon="lanes"
-                    label="Heat & lane"
-                    selected={showHeatLane}
-                    onClick={() => toggleRowInfo("hl")}
-                  />
-                </MenuSubmenu>
-              </div>
-            </>
-          ) : null}
-        </div>
-      </div>
-
-      {!hasContent ? (
-        <div className="rounded-xl border border-border bg-background px-4 py-10 text-center text-sm text-foreground-secondary">
-          {viewMode === "roster"
-            ? "No athletes on the roster match these filters."
-            : "No entries match these filters."}
-        </div>
-      ) : viewMode === "roster" ? (
-        <div className="overflow-hidden rounded-xl border border-border bg-background">
-          <div className="px-4 py-2.5 text-sm font-medium text-foreground">
-            {filteredRosterAthletes.length} athlete{filteredRosterAthletes.length === 1 ? "" : "s"}
-          </div>
-          <ul>
-            {filteredRosterAthletes.map((athlete) => {
-              const isMe = athlete.id === viewerAthleteId
-              const count = eventCountByAthlete.get(athlete.id) ?? 0
-              return (
-                <li key={athlete.id} className="border-t border-border">
-                  <Link
-                    href={athletePath(athlete.slug ?? athlete.id)}
-                    className={`grid grid-cols-[1fr_96px_72px] items-center px-4 py-3 text-sm text-foreground transition-colors hover:bg-fill hover:text-primary ${
-                      isMe ? "bg-accent/5" : ""
-                    }`}
+                    label="Show"
+                    value={
+                      showRound && showHeatLane
+                        ? "All"
+                        : showRound
+                          ? "Round"
+                          : showHeatLane
+                            ? "Heat & lane"
+                            : "None"
+                    }
+                    {...submenuProps("show")}
                   >
-                    <span className="flex min-w-0 items-center gap-2">
-                      <AthleteAvatar image={athlete.image} name={athlete.name} />
-                      <span className={`truncate font-medium ${isMe ? "text-accent" : ""}`}>
-                        <RosterName name={athlete.name} />
-                      </span>
-                      {athlete.missingSwimCloud ? (
-                        <span className="shrink-0 rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-accent">
-                          No SwimCloud
-                        </span>
-                      ) : null}
-                      {athlete.timesNeverImported ? (
-                        <span className="shrink-0 rounded-full bg-fill px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-foreground-secondary">
-                          Never imported
-                        </span>
-                      ) : null}
-                    </span>
-                    <span className="text-right text-xs text-foreground-secondary">
-                      {count} event{count === 1 ? "" : "s"}
-                    </span>
-                    <span className="text-right text-xs text-foreground-secondary">
-                      {athlete.gender === "F" ? "Women" : athlete.gender === "M" ? "Men" : ""}
-                    </span>
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
+                    <MenuItem
+                      role="menuitemcheckbox"
+                      icon="flag"
+                      label="Round"
+                      selected={showRound}
+                      onClick={() => toggleRowInfo("round")}
+                    />
+                    <MenuItem
+                      role="menuitemcheckbox"
+                      icon="lanes"
+                      label="Heat & lane"
+                      selected={showHeatLane}
+                      onClick={() => toggleRowInfo("hl")}
+                    />
+                  </MenuSubmenu>
+                </div>
+              </>
+            ) : null}
+          </div>
         </div>
-      ) : viewByEvent ? (
-        <div className="flex flex-col gap-4">
-          {sortedEventGroups.map((group) => (
-            <div
-              key={group.key}
-              className="overflow-hidden rounded-xl border border-border-secondary bg-background"
-            >
-              <div className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-foreground">
-                {group.eventNumber > 0 ? (
-                  <EventBadge number={group.eventNumber} compact={false} />
-                ) : null}
-                <span>{group.title}</span>
-              </div>
-              <ul className="border-t border-border-subtle">
-                {sortEventEntries(group.entries, displayEntries).map((entry, j) => (
-                  <SummaryEntryRow
-                    key={`event-${entryRowKey(entry, j, athleteGenders)}`}
-                    entry={entry}
-                    eventView
-                    {...rowProps}
-                  />
-                ))}
-              </ul>
+
+        {!hasContent ? (
+          <div className="rounded-xl border border-border bg-background px-4 py-10 text-center text-sm text-foreground-secondary">
+            {viewMode === "roster"
+              ? "No athletes on the roster match these filters."
+              : "No entries match these filters."}
+          </div>
+        ) : viewMode === "roster" ? (
+          <div className="overflow-hidden rounded-xl border border-border bg-background">
+            <div className="py-2.5 text-sm font-medium text-foreground" style={summaryHeaderInset}>
+              {filteredRosterAthletes.length} athlete{filteredRosterAthletes.length === 1 ? "" : "s"}
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {filteredMyEntries.length > 0 ? (
-            <div className="overflow-hidden rounded-xl border border-primary bg-background shadow-sm">
-              {/* Tint layered over the opaque base so the meet background doesn't show through. */}
-              <div className="bg-accent/[0.04]">
-                <div className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-accent">
-                  <AthleteAvatar
-                    image={viewerRecord?.image}
-                    name={athleteNames.get(viewerAthleteId!) || "My Profile"}
-                  />
-                  <span>
-                    <RosterName name={athleteNames.get(viewerAthleteId!) ?? ""} />
-                  </span>
+            <ul>
+              {filteredRosterAthletes.map((athlete) => {
+                const isMe = athlete.id === viewerAthleteId
+                const count = eventCountByAthlete.get(athlete.id) ?? 0
+                return (
+                  <li key={athlete.id} className="border-t border-border">
+                    <Link
+                      href={athletePath(athlete.slug ?? athlete.id)}
+                      className={`grid grid-cols-[1fr_96px_72px] items-center px-4 py-3 text-sm text-foreground transition-colors hover:bg-fill hover:text-primary ${
+                        isMe ? "bg-accent/5" : ""
+                      }`}
+                    >
+                      <span className="flex min-w-0 items-center gap-2">
+                        <AthleteAvatar image={athlete.image} name={athlete.name} />
+                        <span className={`truncate font-medium ${isMe ? "text-accent" : ""}`}>
+                          <RosterName name={athlete.name} />
+                        </span>
+                        {athlete.missingSwimCloud ? (
+                          <span className="shrink-0 rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-accent">
+                            No SwimCloud
+                          </span>
+                        ) : null}
+                        {athlete.timesNeverImported ? (
+                          <span className="shrink-0 rounded-full bg-fill px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-foreground-secondary">
+                            Never imported
+                          </span>
+                        ) : null}
+                      </span>
+                      <span className="text-right text-xs text-foreground-secondary">
+                        {count} event{count === 1 ? "" : "s"}
+                      </span>
+                      <span className="text-right text-xs text-foreground-secondary">
+                        {athlete.gender === "F" ? "Women" : athlete.gender === "M" ? "Men" : ""}
+                      </span>
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        ) : viewByEvent ? (
+          <div className="flex flex-col gap-4">
+            {sortedEventGroups.map((group) => (
+              <div
+                key={group.key}
+                className="overflow-hidden rounded-xl border border-border-secondary bg-background"
+              >
+                <div
+                  className="flex items-center gap-2.5 py-2.5 text-sm font-medium text-foreground"
+                  style={summaryHeaderInset}
+                >
+                  {group.eventNumber > 0 ? (
+                    <EventBadge number={group.eventNumber} compact={false} />
+                  ) : null}
+                  <span>{group.title}</span>
                 </div>
                 <ul className="border-t border-border-subtle">
-                  {filteredMyEntries.map((entry, i) => (
+                  {sortEventEntries(group.entries, displayEntries).map((entry, j) => (
                     <SummaryEntryRow
-                      key={`mine-${entryRowKey(entry, i, athleteGenders)}`}
+                      key={`event-${entryRowKey(entry, j, athleteGenders)}`}
                       entry={entry}
-                      athleteId={viewerAthleteId ?? undefined}
+                      eventView
                       {...rowProps}
                     />
                   ))}
                 </ul>
               </div>
-            </div>
-          ) : null}
-          {filteredOtherGrouped.map((athleteGroup) => {
-            const events = [...athleteGroup.entries].sort(compareMyEntries)
-            const athleteData = athletes.find((a) => a.id === athleteGroup.athleteId)
-            return (
-              <div
-                key={athleteGroup.athleteId}
-                className="overflow-hidden rounded-xl border border-border bg-background"
-              >
-                <Link
-                  href={athletePath(athleteData?.slug ?? athleteGroup.athleteId)}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:text-primary"
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {filteredMyEntries.length > 0 ? (
+              <div className="overflow-hidden rounded-xl border border-primary bg-background shadow-sm">
+                {/* Tint layered over the opaque base so the meet background doesn't show through. */}
+                <div className="bg-accent/[0.04]">
+                  <div
+                    className="flex items-center gap-2 py-2 text-sm font-medium text-accent"
+                    style={summaryHeaderInset}
+                  >
+                    <AthleteAvatar
+                      image={viewerRecord?.image}
+                      name={athleteNames.get(viewerAthleteId!) || "My Profile"}
+                    />
+                    <span>
+                      <RosterName name={athleteNames.get(viewerAthleteId!) ?? ""} />
+                    </span>
+                  </div>
+                  <ul className="border-t border-border-subtle">
+                    {filteredMyEntries.map((entry, i) => (
+                      <SummaryEntryRow
+                        key={`mine-${entryRowKey(entry, i, athleteGenders)}`}
+                        entry={entry}
+                        athleteId={viewerAthleteId ?? undefined}
+                        {...rowProps}
+                      />
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            ) : null}
+            {filteredOtherGrouped.map((athleteGroup) => {
+              const events = [...athleteGroup.entries].sort(compareMyEntries)
+              const athleteData = athletes.find((a) => a.id === athleteGroup.athleteId)
+              return (
+                <div
+                  key={athleteGroup.athleteId}
+                  className="overflow-hidden rounded-xl border border-border bg-background"
                 >
-                  <AthleteAvatar image={athleteData?.image} name={athleteGroup.name} />
-                  <span>
-                    <RosterName name={athleteGroup.name} />
-                  </span>
-                </Link>
-                <ul className="border-t border-border-subtle">
-                  {events.map((entry, i) => (
-                    <SummaryEntryRow
-                      key={`${athleteGroup.athleteId}-${entryRowKey(entry, i, athleteGenders)}`}
-                      entry={entry}
-                      athleteId={athleteGroup.athleteId}
-                      {...rowProps}
-                    />
-                  ))}
-                </ul>
-              </div>
-            )
-          })}
-        </div>
-      )}
-    </section>
+                  <Link
+                    href={athletePath(athleteData?.slug ?? athleteGroup.athleteId)}
+                    className="flex items-center gap-2 py-2 text-sm font-medium text-foreground transition-colors hover:text-primary"
+                    style={summaryHeaderInset}
+                  >
+                    <AthleteAvatar image={athleteData?.image} name={athleteGroup.name} />
+                    <span>
+                      <RosterName name={athleteGroup.name} />
+                    </span>
+                  </Link>
+                  <ul className="border-t border-border-subtle">
+                    {events.map((entry, i) => (
+                      <SummaryEntryRow
+                        key={`${athleteGroup.athleteId}-${entryRowKey(entry, i, athleteGenders)}`}
+                        entry={entry}
+                        athleteId={athleteGroup.athleteId}
+                        {...rowProps}
+                      />
+                    ))}
+                  </ul>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </section>
+    </SummaryRowFold>
   )
 }

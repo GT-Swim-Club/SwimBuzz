@@ -43,6 +43,9 @@ function CaptureRow({ row, medley }: { row: RosterSummaryPdfRow; medley: boolean
                   {tags?.[i] ?? i + 1}
                 </span>
                 <span className="truncate">{rosterNameFirstLast(rosterNamePreferred(leg))}</span>
+                {row.legSplits?.[i] ? (
+                  <span className="shrink-0 tabular-nums text-foreground-tertiary">{row.legSplits[i]}</span>
+                ) : null}
               </span>
             ))}
           </span>

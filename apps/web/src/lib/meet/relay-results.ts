@@ -135,7 +135,6 @@ export function sanitizeRelayLegSplits(value: unknown): ResultSplit[] | undefine
 }
 
 const PLACEHOLDER_LEG = /^leg\s*\d+$/i
-const RELAY_LEGS = [1, 2, 3, 4] as const
 
 /** False for empty / "Leg 1"-style placeholders used when roster is unknown. */
 export function isRealRelaySwimmerName(name: string | undefined): boolean {
@@ -143,32 +142,6 @@ export function isRealRelaySwimmerName(name: string | undefined): boolean {
   const trimmed = name.trim()
   if (PLACEHOLDER_LEG.test(trimmed)) return false
   return Boolean(relaySwimmerFullName(trimmed))
-}
-
-export function relayHasCompleteRoster(entry: SheetEntry): boolean {
-  const swimmers = entry.relaySwimmers ?? []
-  return RELAY_LEGS.every((leg) => {
-    const swimmer = swimmers.find((s) => s.leg === leg)
-    return swimmer && isRealRelaySwimmerName(swimmer.name)
-  })
-}
-
-export function relayHasCompleteSplits(entry: SheetEntry): boolean {
-  if (!relayHasCompleteRoster(entry)) return false
-  const swimmers = entry.relaySwimmers ?? []
-  return RELAY_LEGS.every((leg) => {
-    const swimmer = swimmers.find((s) => s.leg === leg)
-    return Boolean(sanitizeRelaySplitTime(swimmer?.splitTime))
-  })
-}
-
-/** Coach-facing hint when a relay still needs roster and/or leg splits. */
-export function relayCoachIncompleteNote(entry: SheetEntry): string | null {
-  if (entry.entryType !== "relay_team") return null
-  if (!relayHasCompleteRoster(entry)) return "No roster"
-  const hasResult = Boolean(relayTeamTime(entry))
-  if (hasResult && !relayHasCompleteSplits(entry)) return "No splits"
-  return null
 }
 
 /** Last name only — for compact relay row display ("Last, First" or "First Last"). */

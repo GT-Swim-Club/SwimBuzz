@@ -95,6 +95,7 @@ export const RosterSummaryExportCapture = forwardRef<
                   <Text style={styles.legName} numberOfLines={1}>
                     {rosterNameFirstLast(rosterNamePreferred(leg))}
                   </Text>
+                  {row.legSplits?.[i] ? <Text style={styles.legSplit}>{row.legSplits[i]}</Text> : null}
                 </View>
               ))}
             </View>
@@ -232,6 +233,7 @@ function makeStyles(c: ColorPalette) {
     leg: { width: "50%", flexDirection: "row", alignItems: "baseline", gap: 5, paddingRight: spacing.xs },
     legTag: { width: 16, color: c.textTertiary, fontSize: 9, fontWeight: "700" },
     legName: { flexShrink: 1, color: c.textSecondary, fontSize: 12 },
+    legSplit: { color: c.textTertiary, fontSize: 12, fontVariant: ["tabular-nums"] },
     heatLane: { alignItems: "flex-end", marginLeft: NAME_GAP },
     heatLaneText: { color: c.textSecondary, fontSize: 12, fontVariant: ["tabular-nums"] },
     startTime: { color: c.textTertiary, fontSize: 12, fontVariant: ["tabular-nums"] },

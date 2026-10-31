@@ -6,7 +6,9 @@ const PIN_TOP = 16
 const PIN_BOTTOM = 24
 
 /**
- * Two-column layout: a resizable sidebar beside the main content. Stacks below 900px.
+ * Two-column layout: a resizable sidebar beside the main content. Stacks below 900px; above it
+ * the columns never wrap (the sticky sidebar would sit over the content below it), the sidebar
+ * giving up width down to `minWidth` when the main content needs room.
  *
  * The sidebar is natively sticky, so it scrolls with the page until you've seen all of it
  * and then simply stays put: a short one sticks under the top edge, a tall one sticks with
@@ -108,11 +110,11 @@ export default function ResizableSidebarLayout({
   }
 
   return (
-    <div className="flex flex-wrap items-start">
+    <div className="flex items-start max-[900px]:flex-wrap">
       <aside
         ref={sidebarRef}
         className={`sticky flex max-w-full flex-col self-start max-[900px]:static max-[900px]:!w-full max-[900px]:!flex-[1_1_100%] ${sidebarClassName}`}
-        style={{ flex: `0 0 ${width}px`, width, top: stickyTop }}
+        style={{ flex: `0 1 ${width}px`, width, minWidth, top: stickyTop }}
       >
         {sidebar}
       </aside>
@@ -133,7 +135,7 @@ export default function ResizableSidebarLayout({
         />
       </div>
       <div
-        className={`flex min-w-0 flex-[1_1_480px] flex-col pl-2 max-[900px]:mt-8 max-[900px]:pl-0 ${mainClassName}`}
+        className={`flex min-w-0 flex-[1_0_480px] flex-col pl-2 max-[900px]:mt-8 max-[900px]:flex-[1_1_100%] max-[900px]:pl-0 ${mainClassName}`}
       >
         {children}
       </div>

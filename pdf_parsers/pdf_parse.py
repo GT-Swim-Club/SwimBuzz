@@ -361,7 +361,7 @@ def extract_times_from_line(line: str) -> list[str]:
     return times
 
 
-def pick_seed_time(line: str) -> str | None:
+def pick_seed_time(line: str, event: str | None = None) -> str | None:
     """Seed time from a Hy-Tek result line when seed, prelim, and final are present.
 
     Only applicable for heat/psych sheets where 3 large times appear (seed, prelim, final).
@@ -369,13 +369,13 @@ def pick_seed_time(line: str) -> str | None:
     """
     cleaned = re.sub(r"\([^)]*\)", " ", line)
     times = extract_times_from_line(cleaned)
-    result_scale = [t for t in times if _is_result_scale_time(t)]
+    result_scale = [t for t in times if _is_result_scale_time(t, event)]
     if len(result_scale) >= 3:
         return result_scale[-3]
     return None
 
 
-def _is_result_scale_time(token: str) -> bool:
+def _is_result_scale_time(token: str, event: str | None = None) -> bool:
     """Return True if the time token is plausibly a full-race result (not a 50-yard split).
     
     50-yard splits are typically < 35 seconds.  A result time for ANY event >= 100y
@@ -386,12 +386,20 @@ def _is_result_scale_time(token: str) -> bool:
     
     This is only used to distinguish column-bleed splits from results times when
     multiple time tokens appear on one result row.
+
+    In a 50 every time is result-scale: a sub-35 final is normal there, so the
+    scale can't tell a split apart (a 36.69 seed then a 29.31 final is not a
+    result plus a bleed split).
     """
     ms = time_token_to_ms(token)
-    return ms is not None and ms >= 35000
+    if ms is None:
+        return False
+    if event and event_race_distance(event) == 50:
+        return True
+    return ms >= 35000
 
 
-def pick_round_times(line: str) -> list[dict[str, str]]:
+def pick_round_times(line: str, event: str | None = None) -> list[dict[str, str]]:
     """Extract prelim/final (or a single result) from a Hy-Tek result line.
 
     Hy-Tek prints seed, prelims, and finals as the last three times on the row
@@ -419,14 +427,14 @@ def pick_round_times(line: str) -> list[dict[str, str]]:
         # Could be: seed+final, or final+bleed-split, or two bleed splits.
         # If the first time is large (result-scale) and second is small (split-scale),
         # the second is a column-bleed — treat as just a single result.
-        if _is_result_scale_time(times[0]) and not _is_result_scale_time(times[1]):
+        if _is_result_scale_time(times[0], event) and not _is_result_scale_time(times[1], event):
             return [{"time": times[0], "tags": ""}]
         # Otherwise: seed and final (the common case).
         return [{"time": times[-1], "tags": ""}]
 
     # 3+ times on the line.
     # Identify which times are "result-scale" (>= 35s) and which are "split-scale".
-    result_scale = [t for t in times if _is_result_scale_time(t)]
+    result_scale = [t for t in times if _is_result_scale_time(t, event)]
     
     if len(result_scale) == 1:
         # Exactly one large time — it is the result; the rest are splits or column bleeds.
@@ -452,10 +460,10 @@ def pick_round_times(line: str) -> list[dict[str, str]]:
     return [{"time": times[0], "tags": ""}]
 
 
-def pick_result_time(line: str) -> str | None:
+def pick_result_time(line: str, event: str | None = None) -> str | None:
     """The swum time is the finals column: Hy-Tek prints "Seed Time Finals Time",
     so take the last time on the line. Parenthesized split times are ignored."""
-    rounds = pick_round_times(line)
+    rounds = pick_round_times(line, event)
     if not rounds:
         return None
     for r in reversed(rounds):
@@ -644,28 +652,43 @@ def parse_team_from_line(line: str) -> str | None:
     if concat_match:
         return concat_match.group(1).upper()
     
-    # Try short code first: name + optional age + short code + time/paren
+    # Try short code first: name + optional age + short code + time/paren/status
+    # (e.g. "UKCS DQ"). A status token is never the code itself.
     match = re.search(
         r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
         r"(?:\s+\d{1,3})?"
-        r"\s+((?![0-9]+\s)[A-Z0-9]{2,10}(?:-[A-Z]{2})?)"
-        r"\s+(?:\(|[\d:xX]|J\d)",
+        rf"\s+((?![0-9]+\s)(?!(?:{INVALID_TIME_PATTERN})\b)[A-Z0-9]{{2,10}}(?:-[A-Z]{{2}})?)"
+        rf"\s+(?:\(|[\d:xX]|J\d|(?:{INVALID_TIME_PATTERN})\b)",
         line,
     )
     if match:
         return match.group(1).upper()
 
     # Full team name: title-case multi-word name optionally ending '-XX'
-    # e.g. 'Georgia Tech Swim Club-GA' or 'Uncw Club Swim-NC'
+    # e.g. 'Georgia Tech Swim Club-GA' or 'Uncw Club Swim-NC'. A team word is
+    # never a status token, so an "NT" seed isn't swallowed into the name.
+    team_word = rf"(?!(?:{INVALID_TIME_PATTERN})\b)[A-Z][A-Za-z]+"
     full_match = re.search(
         r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
         r"(?:\s+\d{1,3})?"
-        r"\s+((?:[A-Z][A-Za-z]+\s+){1,6}(?:[A-Z][A-Za-z]+)(?:-[A-Z]{2})?)"
+        rf"\s+((?:{team_word}\s+){{1,6}}(?:{team_word})(?:-[A-Z]{{2}})?)"
         rf"\s+(?:{INVALID_TIME_PATTERN}|{TIME_TOKEN_PATTERN})",
         line,
     )
     if full_match:
         return full_match.group(1).strip()
+
+    # One-word team name ('Unattached'): only right after the age, where it
+    # can't be a swimmer's middle name.
+    single_match = re.search(
+        r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
+        r"\s+\d{1,3}"
+        rf"\s+({team_word}(?:-[A-Z]{{2}})?)"
+        rf"\s+(?:{INVALID_TIME_PATTERN}|{TIME_TOKEN_PATTERN})",
+        line,
+    )
+    if single_match:
+        return single_match.group(1)
 
     return None
 
@@ -890,7 +913,7 @@ def parse_table_rows(table: list[list[Any]], current_event: str | None, course: 
             if time_idx is not None and time_idx < len(raw_row):
                 _append_result_round(rounds, str(raw_row[time_idx] or ""), "")
             if not rounds:
-                time_value = pick_result_time(row_text)
+                time_value = pick_result_time(row_text, current_event)
                 if time_value:
                     rounds.append({"time": time_value, "tags": ""})
                 else:
@@ -1146,11 +1169,11 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
             last_result_indices = [len(results) - 1]
             continue
 
-        rounds = apply_section_round(pick_round_times(stripped), current_round)
+        rounds = apply_section_round(pick_round_times(stripped, current_event), current_round)
         if not rounds:
             continue
 
-        seed_time = pick_seed_time(stripped)
+        seed_time = pick_seed_time(stripped, current_event)
         paren_splits = extract_parenthetical_split_tokens(stripped)
         for round_time in rounds:
             row = {

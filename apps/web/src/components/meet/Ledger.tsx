@@ -1,5 +1,6 @@
 import Link from "next/link"
 import type { ReactNode } from "react"
+import LedgerFitValue from "./LedgerFitValue"
 
 const LEDGER_ICONS = {
   clipboardCheck: (
@@ -469,17 +470,17 @@ export function LedgerStatTile({
   label: string
   sub?: string
   valueClassName?: string
-  /** Shrink the value to fit the tile's width (for text like event names). */
+  /** Shrink the value to fit the tile's width, then wrap it (for text like names and events). */
   fit?: boolean
 }) {
   return (
-    <div className="@container flex min-w-0 flex-col justify-center rounded-lg bg-background/90 px-2 py-2.5 text-center shadow-sm ring-1 ring-inset ring-black/5 dark:bg-fill-secondary dark:shadow-none dark:ring-white/10">
+    <div className="flex min-w-0 flex-col justify-center rounded-lg bg-background/90 px-2 py-2.5 text-center shadow-sm ring-1 ring-inset ring-black/5 dark:bg-fill-secondary dark:shadow-none dark:ring-white/10">
       <span
-        className={`block whitespace-nowrap font-semibold tabular-nums tracking-[-0.01em] ${
-          fit ? "flex min-h-7 items-center justify-center text-[length:min(20px,21cqi)] leading-[1.2]" : "text-xl"
+        className={`block font-semibold tabular-nums tracking-[-0.01em] ${
+          fit ? "flex min-h-7 items-center justify-center leading-[1.2]" : "whitespace-nowrap text-xl"
         } ${valueClassName}`}
       >
-        {value}
+        {fit ? <LedgerFitValue>{value}</LedgerFitValue> : value}
       </span>
       <span className="mt-1 block text-[10px] font-medium uppercase tracking-[0.025em] text-foreground-tertiary">
         {label}

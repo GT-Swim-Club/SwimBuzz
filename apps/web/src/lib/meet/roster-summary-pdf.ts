@@ -138,12 +138,16 @@ function parseRow(value: unknown): RosterSummaryPdfRow | null {
   const r = (value ?? {}) as Record<string, unknown>
   const label = text(r.label)
   if (!label) return null
-  const legs = Array.isArray(r.legs)
+  // Legs and their splits stay paired, so a leg without a name drops its split with it.
+  const splits = Array.isArray(r.legSplits) ? r.legSplits : []
+  const pairs = Array.isArray(r.legs)
     ? r.legs
         .slice(0, ROSTER_SUMMARY_PDF_LIMITS.legs)
-        .map(text)
-        .filter((leg): leg is string => Boolean(leg))
-    : undefined
+        .map((leg, i) => ({ name: text(leg), split: text(splits[i]) ?? "" }))
+        .filter((pair): pair is { name: string; split: string } => Boolean(pair.name))
+    : []
+  const legs = pairs.map((pair) => pair.name)
+  const legSplits = pairs.some((pair) => pair.split) ? pairs.map((pair) => pair.split) : undefined
   return {
     eventNumber: positiveInt(r.eventNumber),
     label,
@@ -152,7 +156,8 @@ function parseRow(value: unknown): RosterSummaryPdfRow | null {
     meta: text(r.meta),
     heatLane: text(r.heatLane),
     startTime: text(r.startTime),
-    legs: legs?.length ? legs : undefined,
+    legs: legs.length ? legs : undefined,
+    legSplits,
     result: r.result == null ? undefined : parseResult(r.result),
   }
 }
@@ -323,8 +328,8 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
   }
 
   /**
-   * Relay legs in a two-column grid, each name after its stroke (medley) or leg number:
-   * "BK Sara Ukic   BR Piper Slorahn" / "FL Anna Johannessen   FR Tara Wong".
+   * Relay legs in a two-column grid, each name after its stroke (medley) or leg number and before
+   * its split: "BK Sara Ukic 28.41   BR Piper Slorahn 31.02" / "FL Anna Johannessen   FR Tara Wong".
    */
   function drawLegs(row: RosterSummaryPdfRow, x: number, top: number, width: number) {
     const legs = row.legs ?? []
@@ -335,9 +340,19 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
       const baseline = centeredBaseline(top + Math.floor(i / 2) * M.metaLh, M.metaLh, M.metaSize)
       setType("bold", M.seedTagSize, INK_TERTIARY)
       doc.text(tags?.[i] ?? String(i + 1), cellLeft, baseline, { charSpace: px(0.5) })
-      setType("normal", M.metaSize, INK_SECONDARY)
       const nameLeft = cellLeft + M.legTagWidth
-      doc.text(fit(rosterNameFirstLast(leg), cellWidth - M.legTagWidth - px(8)), nameLeft, baseline)
+      const room = cellWidth - M.legTagWidth - px(8)
+      const split = row.legSplits?.[i] ? pdfText(row.legSplits[i]) : ""
+      setType("normal", M.metaSize, INK_TERTIARY)
+      const splitWidth = split ? doc.getTextWidth(split) + px(6) : 0
+      setType("normal", M.metaSize, INK_SECONDARY)
+      const name = fit(rosterNameFirstLast(leg), room - splitWidth)
+      doc.text(name, nameLeft, baseline)
+      if (split) {
+        const splitLeft = nameLeft + doc.getTextWidth(name) + px(6)
+        setType("normal", M.metaSize, INK_TERTIARY)
+        doc.text(split, splitLeft, baseline)
+      }
     })
   }
 
@@ -691,6 +706,19 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
       yy = M.margin
     }
     return yy
+  }
+
+  // A round (with any result tags) that won't fit beside the label leads the line below instead,
+  // rather than being cut off. Every column is as wide as the first, so measuring there holds for
+  // all; rows change in place so the medley set and height cache still know them.
+  setColumn(0)
+  for (const section of request.sections) {
+    for (const row of section.rows) {
+      if (row.sub && labelEnd(row) > textRight(row)) {
+        row.meta = [row.sub, row.meta].filter(Boolean).join(" | ")
+        row.sub = undefined
+      }
+    }
   }
 
   y = flowColumns(request.sections, y)

@@ -41,15 +41,20 @@ function resultText(result: RosterSummaryPdfResult | undefined): string | null {
   return extra.length ? `${main} (${extra.join(", ")})` : main
 }
 
-/** A legs line in last names: "Ukic, Wang, Fulton, Plantamura". */
-function lastNames(legs: string[]): string {
-  return legs.map((leg) => rosterNamePreferred(leg).split(", ")[0]).join(", ")
+/** A legs line in last names, each with its split: "Ukic 25.31, Wang 25.80, Fulton, Plantamura". */
+function lastNames(legs: string[], splits?: string[]): string {
+  return legs
+    .map((leg, i) => {
+      const split = splits?.[i] ? displayTime(splits[i]) : null
+      return [rosterNamePreferred(leg).split(", ")[0], split].filter(Boolean).join(" ")
+    })
+    .join(", ")
 }
 
 function rosterRowLines(row: RosterSummaryPdfRow): string[] {
-  const label = [rosterNamePreferred(row.label), row.sub].filter(Boolean).join(" ")
   const line = [
-    label,
+    rosterNamePreferred(row.label),
+    row.sub,
     row.meta?.replace(/\s+\|\s+/g, " · "),
     row.heatLane,
     row.startTime,
@@ -57,7 +62,7 @@ function rosterRowLines(row: RosterSummaryPdfRow): string[] {
   ]
     .filter(Boolean)
     .join(" · ")
-  return row.legs?.length ? [`  ${line}`, `    ${lastNames(row.legs)}`] : [`  ${line}`]
+  return row.legs?.length ? [`  ${line}`, `    ${lastNames(row.legs, row.legSplits)}`] : [`  ${line}`]
 }
 
 /** The roster summary as shown (same request as the PDF and PNG), as plain text. */

@@ -211,6 +211,17 @@ function relayLegNames(entry: RosterSummaryEntry): string[] {
     .map((s) => s.name)
 }
 
+/** Each leg's split in leg order ("" when there isn't one), beside the names from relayLegNames. */
+function relayLegSplits(entry: RosterSummaryEntry): string[] {
+  return (entry.relaySwimmers ?? [])
+    .slice()
+    .sort((a, b) => a.leg - b.leg)
+    .map((s) => {
+      const split = s.splitTime?.trim()
+      return split && /\d/.test(split) ? split : ""
+    })
+}
+
 /** The leg an athlete swam on a relay and their split, e.g. "Leg 1 split 25.31". */
 function relayLegLabel(entry: RosterSummaryEntry, athleteId: string | undefined): string | null {
   if (entry.entryType !== "relay_team" || !athleteId) return null
@@ -266,7 +277,7 @@ function pdfRow(
   round?: SessionRound | null
 ) {
   const isRelay = entry.entryType === "relay_team"
-  // The athlete's leg rides beside the relay's name; their split leads the line below.
+  // The athlete's leg and split lead the line below the relay's name.
   const swimmer =
     isRelay && athleteId ? entry.relaySwimmers?.find((s) => s.athleteId === athleteId) : undefined
   const legNumber = swimmer?.leg
@@ -280,9 +291,9 @@ function pdfRow(
     label: isRelay ? relayTitleFrom(relayEvent) : title,
     // Spelled out ("200 Medley Relay A (P)") where the line has room.
     fullLabel: isRelay ? relayTitleFrom(`${relayEvent} Relay`) : undefined,
-    sub: legNumber ? `Leg ${legNumber}` : undefined,
     meta:
       [
+        legNumber ? `Leg ${legNumber}` : null,
         split && /\d/.test(split) ? `Split ${split}` : null,
         entrySubtitle(entry, "athlete", false, undefined, false),
       ]
@@ -290,6 +301,7 @@ function pdfRow(
         .join(" · ") || undefined,
     heatLane: formatHeatLane(entry, round)?.replace("/", " of ") ?? undefined,
     legs: isRelay ? relayLegNames(entry) : undefined,
+    legSplits: isRelay ? relayLegSplits(entry) : undefined,
   }
 }
 
@@ -459,6 +471,7 @@ export function RosterSummarySection({
             rows: group.entries.map((entry) => ({
               ...pdfRow(entry, entryTitle(entry), group.athleteId, activeRound),
               legs: undefined,
+              legSplits: undefined,
             })),
           }))
         : eventGroups.map((group) => ({

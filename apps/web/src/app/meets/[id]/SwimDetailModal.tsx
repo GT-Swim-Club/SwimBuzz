@@ -675,7 +675,7 @@ export default function SwimDetailModal({
     <span className="whitespace-nowrap">
       {r.heat ?? (r.startTime ? null : "—")}
       {r.heat && r.startTime ? " " : null}
-      {r.startTime ? <span className="text-xs text-foreground-tertiary">{r.startTime}</span> : null}
+      {r.startTime ? <span className="text-xs text-foreground-secondary">{r.startTime}</span> : null}
     </span>
   )
 

@@ -41,6 +41,8 @@ export type RosterSummaryPdfRow = {
   startTime?: string
   /** Relay legs in order. */
   legs?: string[]
+  /** Each leg's split, drawn beside its name ("" when unknown), in the same order as `legs`. */
+  legSplits?: string[]
   /** Right-hand column; left out, the row has none (mobile rows are just a title and subtitle). */
   result?: RosterSummaryPdfResult
 }
