@@ -257,11 +257,6 @@ function RelayModal({
           ) : (
             <h2 className="text-lg font-medium text-foreground">{title}</h2>
           )}
-          {rosterOnly ? (
-            <p className="mt-1 text-sm text-foreground-secondary">
-              Update swimmers and leg splits — event, time, and place stay from the import.
-            </p>
-          ) : null}
         </div>
 
         <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
@@ -357,12 +352,10 @@ function RelayModal({
           ) : null}
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-xs font-medium text-foreground-secondary">
-                <span className="w-6 shrink-0">#</span>
-                <span className="flex-1">Swimmer</span>
-                <span className="w-24 shrink-0 text-right">Split</span>
-              </div>
+            <div className="flex items-center gap-2 text-xs font-medium text-foreground-secondary">
+              <span className="w-6 shrink-0">#</span>
+              <span className="flex-1">Swimmer</span>
+              <span className="w-24 shrink-0">Split</span>
             </div>
             {form.legs.map((athleteId, i) => (
               <div key={i} className="flex items-center gap-2">
