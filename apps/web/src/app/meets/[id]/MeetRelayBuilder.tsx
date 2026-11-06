@@ -573,16 +573,28 @@ export default function MeetRelayBuilder({
   const teamCount = result?.teams.length ?? request.count
   const guard = useUnsavedChangesGuard(dirty)
 
-  /** Rebuild with new settings, keeping the coach's lineup unless it's an untouched optimal one. */
+  /**
+   * Rebuild with new settings, keeping the coach's lineup unless it's an untouched optimal one. The
+   * published lineup or saved draft stays even when it's also the optimal lineup.
+   */
   function updateSettings(patch: Partial<BuildSettings>) {
     const nextSettings = { ...settings, ...patch }
-    const keep = result != null && result.teams.length > 0 && (loaded?.source !== "optimal" || changed)
+    const current = result && result.teams.length > 0 ? lineupKey(lineupTeamsOf(result)) : null
+    const savedSource: Source | null =
+      current == null
+        ? null
+        : publishedTeams.length > 0 && lineupKey(publishedTeams) === current
+          ? "published"
+          : draftTeams && lineupKey(draftTeams) === current
+            ? "draft"
+            : null
+    const keep = current != null && (loaded?.source !== "optimal" || changed || savedSource != null)
     setRequest((r) => ({
       id: r.id + 1,
       settings: nextSettings,
       fixed: keep && result ? lineupTeamsOf(result) : null,
       count: r.count,
-      source: keep ? null : "optimal",
+      source: keep ? savedSource : "optimal",
     }))
   }
 
@@ -848,6 +860,9 @@ export default function MeetRelayBuilder({
   const poolIsCustom = settings.excludedIds.length > 0 || settings.addedIds.length > 0
   const editable = adding === 0
   const canAct = result != null && result.teams.length > 0 && !loading && editable
+  /** Re-timing a kept lineup (e.g. after a settings change): it stays on screen, dimmed, meanwhile. */
+  const retiming = loading && request.fixed != null && result != null && result.teams.length > 0
+  const retimingClass = retiming ? "pointer-events-none opacity-60 transition-opacity" : "transition-opacity"
 
   const eventPicker = (
     <label className="relative -ml-1.5 inline-flex cursor-pointer items-center gap-1.5 rounded-md px-1.5 py-0.5 transition-colors hover:bg-fill focus-within:ring-[3px] focus-within:ring-primary/35">
@@ -1119,7 +1134,7 @@ export default function MeetRelayBuilder({
 
         {error ? <p className="text-sm text-error">{error}</p> : null}
 
-        {loading ? (
+        {loading && !retiming ? (
           <div role="status" aria-live="polite" aria-label="Building relay teams" className="flex flex-col gap-4">
             <span className="sr-only">Building relay teams</span>
             <div className={`grid items-start gap-3 ${RELAY_GRID_COLS[Math.min(Math.max(teamCount, 1), 4)]}`}>
@@ -1141,7 +1156,10 @@ export default function MeetRelayBuilder({
           </div>
         ) : result && result.teams.length > 0 ? (
           <>
-            <div className={`grid items-start gap-3 ${RELAY_GRID_COLS[Math.min(result.teams.length + adding, 4)]}`}>
+            <div
+              aria-busy={retiming}
+              className={`grid items-start gap-3 ${RELAY_GRID_COLS[Math.min(result.teams.length + adding, 4)]} ${retimingClass}`}
+            >
               {result.teams.map((team) => (
                 <div key={team.letter} className="min-w-0 rounded-lg border border-border bg-background">
                   <div className="flex items-baseline justify-between gap-2 border-b border-border px-3.5 py-2.5 text-[15px] font-medium text-foreground">
@@ -1230,7 +1248,7 @@ export default function MeetRelayBuilder({
             </div>
 
             {alternates.length > 0 ? (
-              <div>
+              <div className={retimingClass}>
                 <h4 className="mb-2 text-xs font-medium uppercase tracking-wide text-foreground-secondary">
                   Alternates
                 </h4>

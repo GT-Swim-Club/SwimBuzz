@@ -13,6 +13,7 @@ import {
   downloadBlob,
 } from "@/components/ui/export-menu"
 import RelaysExportCapture from "./RelaysExportCapture"
+import RelayPngPickerModal from "./RelayPngPickerModal"
 
 /** Transparent 1×1 GIF, used if the meet icon can't be inlined into the image. */
 const IMAGE_PLACEHOLDER = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
@@ -20,7 +21,7 @@ const IMAGE_PLACEHOLDER = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAE
 const MENU_ITEM =
   "flex w-full items-center gap-2 whitespace-nowrap px-3 py-2 text-left text-sm text-foreground hover:bg-fill"
 
-/** Share menu for the published relays: Copy as text, Download PNG, Download PDF. */
+/** Share menu for the published relays: Copy as text, Download PNG (all or picked events), Download PDF. */
 export default function ShareRelaysButton({
   meetId,
   meetName,
@@ -39,6 +40,7 @@ export default function ShareRelaysButton({
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState<"png" | "pdf" | null>(null)
   const [copied, setCopied] = useState(false)
+  const [pickerOpen, setPickerOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const captureRef = useRef<HTMLDivElement>(null)
@@ -59,8 +61,7 @@ export default function ShareRelaysButton({
     }
   }, [])
 
-  async function capturePngBlob(): Promise<Blob> {
-    const node = captureRef.current
+  async function capturePngBlob(node: HTMLElement | null): Promise<Blob> {
     if (!node) throw new Error("Nothing to capture")
     await document.fonts.ready
     const dataUrl = await toPng(node, {
@@ -74,12 +75,13 @@ export default function ShareRelaysButton({
     return (await fetch(dataUrl)).blob()
   }
 
-  async function downloadPng() {
+  async function downloadPng(node: HTMLElement | null) {
     setBusy("png")
     setError(null)
     setOpen(false)
     try {
-      downloadBlob(await capturePngBlob(), relayShareFilename(meetName, "png"))
+      downloadBlob(await capturePngBlob(node), relayShareFilename(meetName, "png"))
+      setPickerOpen(false)
     } catch {
       setError("Could not export image")
     } finally {
@@ -145,17 +147,53 @@ export default function ShareRelaysButton({
             {copied ? <CheckIcon className="h-4 w-4 shrink-0" /> : <CopyTextMenuIcon className="h-4 w-4 shrink-0" />}
             {copied ? "Copied" : "Copy as text"}
           </button>
-          <button type="button" role="menuitem" onClick={() => void downloadPng()} className={MENU_ITEM}>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => void downloadPng(captureRef.current)}
+            className={MENU_ITEM}
+          >
             <PngMenuIcon className="h-4 w-4 shrink-0" />
             Download PNG
           </button>
+          {events.length > 1 ? (
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false)
+                setError(null)
+                setPickerOpen(true)
+              }}
+              className={MENU_ITEM}
+            >
+              <PngMenuIcon className="h-4 w-4 shrink-0" />
+              Download PNG of…
+            </button>
+          ) : null}
           <button type="button" role="menuitem" onClick={() => void downloadPdf()} className={MENU_ITEM}>
             <PdfMenuIcon className="h-4 w-4 shrink-0" />
             Download PDF
           </button>
         </div>
       )}
-      {error && <p className="text-xs text-error">{error}</p>}
+      {error && !pickerOpen && <p className="text-xs text-error">{error}</p>}
+      {pickerOpen ? (
+        <RelayPngPickerModal
+          open
+          onClose={() => {
+            setPickerOpen(false)
+            setError(null)
+          }}
+          meetName={meetName}
+          details={details}
+          iconUrl={iconUrl}
+          events={events}
+          busy={busy === "png"}
+          error={error}
+          onDownload={(node) => void downloadPng(node)}
+        />
+      ) : null}
       <div aria-hidden className="pointer-events-none absolute left-[-10000px] top-0">
         <div ref={captureRef} className="w-fit">
           <RelaysExportCapture meetName={meetName} details={details} iconUrl={iconUrl} events={events} />

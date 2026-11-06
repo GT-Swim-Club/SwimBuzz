@@ -2,6 +2,7 @@ import { forwardRef, useEffect, useRef, useState } from "react"
 import { StyleSheet, Text, View, type LayoutChangeEvent } from "react-native"
 import {
   relayLineupRoundLabel,
+  relayShareEventKey,
   relayShareTime,
   type MeetHeaderDetails,
   type RelayShareEvent,
@@ -38,7 +39,6 @@ export const RelaysExportCapture = forwardRef<
     setColumnWidth(null)
   }, [events])
 
-  const eventKey = (event: RelayShareEvent) => `${event.number ?? ""}-${event.name}`
 
   function onMeasure(key: string, e: LayoutChangeEvent) {
     measured.current.set(key, e.nativeEvent.layout.width)
@@ -86,7 +86,7 @@ export const RelaysExportCapture = forwardRef<
     return (
       <View ref={ref} style={[styles.root, { width: MEASURE_WIDTH, alignItems: "flex-start" }]} collapsable={false}>
         {events.map((event) => (
-          <View key={eventKey(event)} style={styles.event} onLayout={(e) => onMeasure(eventKey(event), e)}>
+          <View key={relayShareEventKey(event)} style={styles.event} onLayout={(e) => onMeasure(relayShareEventKey(event), e)}>
             {renderEvent(event)}
           </View>
         ))}
@@ -103,7 +103,7 @@ export const RelaysExportCapture = forwardRef<
       <MeetExportHeader eyebrow="Relays" meetName={meetName} details={details} iconUrl={iconUrl} />
       <View style={[styles.grid, { width: gridWidth }]}>
         {events.map((event) => (
-          <View key={eventKey(event)} style={[styles.event, { width: columnWidth! }]}>
+          <View key={relayShareEventKey(event)} style={[styles.event, { width: columnWidth! }]}>
             {renderEvent(event)}
           </View>
         ))}

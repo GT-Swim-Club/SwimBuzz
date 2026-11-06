@@ -14,6 +14,11 @@ export type RelayShareEvent = {
   relays: RelayLineup[]
 }
 
+/** Stable id for a share event, e.g. for picking which events an image includes. */
+export function relayShareEventKey(event: Pick<RelayShareEvent, "number" | "name">): string {
+  return `${event.number ?? ""}-${event.name}`
+}
+
 /** "Women" + "200 Medley Relay" → "Women 200 Medley". */
 export function relayShareEventName(gender: RelayLineup["gender"], event: string): string {
   const name = event.replace(/\s+Relay$/i, "")

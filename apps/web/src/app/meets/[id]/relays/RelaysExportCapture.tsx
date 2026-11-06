@@ -1,7 +1,12 @@
 "use client"
 
 import { useLayoutEffect, useRef, type CSSProperties } from "react"
-import { relayShareLayout, type MeetHeaderDetails, type RelayShareEvent } from "@swimbuzz/shared"
+import {
+  relayShareEventKey,
+  relayShareLayout,
+  type MeetHeaderDetails,
+  type RelayShareEvent,
+} from "@swimbuzz/shared"
 import MeetExportHeader from "@/components/meet/MeetExportHeader"
 import { EventHeader, SummaryCard, publishedSummaryCards } from "./RelaySummary"
 
@@ -36,7 +41,9 @@ export default function RelaysExportCapture({
     grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`
     const first = grid.querySelector("section")
     if (!first) return
-    const width = Math.ceil(first.getBoundingClientRect().width) + EXTRA_COLUMN_PX
+    // offsetWidth ignores a scaled-down preview's transform; the rect keeps the fraction otherwise.
+    const width =
+      Math.max(first.offsetWidth, Math.ceil(first.getBoundingClientRect().width)) + EXTRA_COLUMN_PX
     grid.style.gridTemplateColumns = `repeat(${columns}, ${width}px)`
   }, [events, columns])
 
@@ -46,14 +53,14 @@ export default function RelaysExportCapture({
       <div ref={gridRef} className="grid w-fit items-start gap-x-4 gap-y-5">
         {rows.flat().map((event, i) =>
           event ? (
-            <ExportEvent key={`${event.number ?? ""}-${event.name}`} event={event} />
+            <ExportEvent key={relayShareEventKey(event)} event={event} />
           ) : (
             <div key={`empty-${i}`} aria-hidden />
           )
         )}
         {spanning.map((event, i) => (
           <ExportEvent
-            key={`${event.number ?? ""}-${event.name}`}
+            key={relayShareEventKey(event)}
             event={event}
             className="self-center"
             style={{ gridColumn: rows[0].length + i + 1, gridRow: "1 / span 2" }}

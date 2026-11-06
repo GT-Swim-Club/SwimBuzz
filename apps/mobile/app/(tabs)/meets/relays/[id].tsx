@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react"
 import { Alert, Platform, Pressable, StyleSheet, Text, View } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { useQuery } from "@tanstack/react-query"
@@ -13,6 +13,7 @@ import {
   meetHeaderDetails,
   relayLineupHasAthlete,
   relayLineupRoundLabel,
+  relayShareEventKey,
   relayShareEvents,
   relayShareFilename,
   relayShareText,
@@ -38,6 +39,7 @@ import { useTabBarScrollPadding } from "../../../../src/lib/tab-bar"
 import { isExternalUrl } from "../../../../src/lib/href"
 import { Icon } from "../../../../src/components/Icon"
 import { RelaysExportCapture } from "../../../../src/components/RelaysExportCapture"
+import { RelayPngPickerSheet } from "../../../../src/components/RelayPngPickerSheet"
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : null
@@ -67,6 +69,12 @@ export default function MeetRelaysScreen() {
   )
   const groups = useMemo(() => groupRelayLineups(lineups), [lineups])
   const shareEvents = useMemo(() => relayShareEvents(groups), [groups])
+  // Events picked for "Save PNG of…"; null while that picker is closed.
+  const [pngPicks, setPngPicks] = useState<Set<string> | null>(null)
+  const pickedShareEvents = useMemo(
+    () => shareEvents.filter((event) => pngPicks?.has(relayShareEventKey(event))),
+    [shareEvents, pngPicks]
+  )
   const meetName = typeof meet?.name === "string" ? meet.name : "Meet"
   const iconUrl =
     typeof meet?.iconUrl === "string" && isExternalUrl(meet.iconUrl) ? meet.iconUrl.trim() : null
@@ -87,6 +95,7 @@ export default function MeetRelaysScreen() {
   const [copied, setCopied] = useState(false)
   const [savedToastVisible, setSavedToastVisible] = useState(false)
   const exportCaptureRef = useRef<View>(null)
+  const pickedCaptureRef = useRef<View>(null)
   const shareSheetDismissRef = useRef<(() => void) | null>(null)
   const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const savedToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -127,8 +136,9 @@ export default function MeetRelaysScreen() {
     }
   }
 
-  async function saveToPhotos() {
-    if (!exportCaptureRef.current) return
+  /** Capture `target` to Photos, then `close` the sheet it was saved from. */
+  async function saveToPhotos(target: RefObject<View | null>, close: () => Promise<void> | void) {
+    if (!target.current) return
     setShareBusy("photos")
     try {
       const permission = await MediaLibrary.requestPermissionsAsync(true)
@@ -136,9 +146,9 @@ export default function MeetRelaysScreen() {
         Alert.alert("Permission needed", "Allow photo access in Settings to save relay images.")
         return
       }
-      const uri = await captureRef(exportCaptureRef, { format: "png", quality: 1, result: "tmpfile" })
+      const uri = await captureRef(target, { format: "png", quality: 1, result: "tmpfile" })
       await MediaLibrary.saveToLibraryAsync(uri)
-      await closeShareSheetAndWait()
+      await close()
       setSavedToastVisible(true)
       if (savedToastTimeoutRef.current) clearTimeout(savedToastTimeoutRef.current)
       savedToastTimeoutRef.current = setTimeout(() => setSavedToastVisible(false), 2000)
@@ -352,8 +362,22 @@ export default function MeetRelaysScreen() {
               icon: <Icon name="image" size={20} color={c.text} />,
               busy: shareBusy === "photos",
               disabled: Boolean(shareBusy) && shareBusy !== "photos",
-              onPress: () => void saveToPhotos(),
+              onPress: () => void saveToPhotos(exportCaptureRef, closeShareSheetAndWait),
             },
+            ...(shareEvents.length > 1
+              ? [
+                  {
+                    key: "photos-picked",
+                    label: "Save PNG of…",
+                    icon: <Icon name="list" size={20} color={c.text} />,
+                    disabled: Boolean(shareBusy),
+                    onPress: () =>
+                      void closeShareSheetAndWait().then(() =>
+                        setPngPicks(new Set(shareEvents.map(relayShareEventKey)))
+                      ),
+                  },
+                ]
+              : []),
             {
               key: "pdf",
               label: "Share PDF",
@@ -375,7 +399,28 @@ export default function MeetRelaysScreen() {
           iconUrl={iconUrl}
           events={shareEvents}
         />
+        {pngPicks ? (
+          // Keyed by the picks so every change lays the image out (and measures it) afresh.
+          <RelaysExportCapture
+            key={pickedShareEvents.map(relayShareEventKey).join("|")}
+            ref={pickedCaptureRef}
+            meetName={meetName}
+            details={headerDetails}
+            iconUrl={iconUrl}
+            events={pickedShareEvents}
+          />
+        ) : null}
       </View>
+
+      <RelayPngPickerSheet
+        visible={pngPicks != null}
+        onClose={() => setPngPicks(null)}
+        events={shareEvents}
+        picked={pngPicks ?? new Set()}
+        onPickedChange={setPngPicks}
+        saving={shareBusy === "photos"}
+        onSave={() => void saveToPhotos(pickedCaptureRef, () => setPngPicks(null))}
+      />
 
       {savedToastVisible ? (
         <View
