@@ -1,5 +1,6 @@
 import type { RelayLineup } from "@swimbuzz/shared"
 import { formatLegTime, type BuildSettings, type LineupTeam } from "@/lib/meet/relay-builder"
+import { RELAY_EDIT_LOCK_TOKEN_HEADER } from "@/lib/meet/relay-edit-lock-shared"
 
 /** A lineup the coach saved from the relay builder, to persist after leaving it. */
 export type RelayCommit = {
@@ -22,6 +23,12 @@ type RelayTarget = {
   gender: string
   /** What was published when the builder opened. */
   published: RelayLineup[]
+  /** The builder session's edit lock token; the server rejects writes without it while locked. */
+  lockToken?: string | null
+}
+
+function lockHeaders(target: Pick<RelayTarget, "lockToken">, extra?: Record<string, string>): Record<string, string> {
+  return { ...extra, ...(target.lockToken ? { [RELAY_EDIT_LOCK_TOKEN_HEADER]: target.lockToken } : {}) }
 }
 
 async function errorOf(res: Response, fallback: string): Promise<string> {
@@ -43,7 +50,7 @@ async function putDraft(
 ): Promise<Response> {
   return fetch(`/api/meets/${target.meetId}/relays/drafts`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: lockHeaders(target, { "Content-Type": "application/json" }),
     body: JSON.stringify({
       event: target.event,
       gender: target.gender,
@@ -80,7 +87,10 @@ export async function persistRelayDraft(target: RelayTarget, teams: LineupTeam[]
       relayRound: relay.round,
       gender: target.gender,
     })
-    const removed = await fetch(`/api/meets/${target.meetId}/relays?${params}`, { method: "DELETE" })
+    const removed = await fetch(`/api/meets/${target.meetId}/relays?${params}`, {
+      method: "DELETE",
+      headers: lockHeaders(target),
+    })
     if (!removed.ok) {
       throw new Error(
         await errorOf(removed, `Draft saved, but the published ${relay.letter} relay couldn't be unpublished`)
@@ -101,7 +111,7 @@ export async function persistRelayPublish(
   for (const team of teams) {
     const res = await fetch(`/api/meets/${target.meetId}/relays`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: lockHeaders(target, { "Content-Type": "application/json" }),
       body: JSON.stringify({
         event: target.relayEvent,
         gender: target.gender,
@@ -123,7 +133,7 @@ export async function persistRelayPublish(
       relayRound: "",
       gender: target.gender,
     })
-    await fetch(`/api/meets/${target.meetId}/relays?${params}`, { method: "DELETE" })
+    await fetch(`/api/meets/${target.meetId}/relays?${params}`, { method: "DELETE", headers: lockHeaders(target) })
   }
   const saved = await putDraft(target, teams, { settings, published: true })
   if (!saved.ok) throw new Error(await errorOf(saved, "Published, but the builder settings couldn't be saved"))

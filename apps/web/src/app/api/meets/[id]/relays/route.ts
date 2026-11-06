@@ -24,6 +24,8 @@ import { Gender } from "@prisma/client"
 import { syncRelayLeadoffSwim, deleteRelayLeadoffSwim } from "@/lib/meet/relay-leadoff-sync"
 import { syncMeetRelaySplitSwims } from "@/lib/meet/relay-split-sync"
 import { getSession } from "@/lib/auth/session"
+import { relayEditConflict } from "@/lib/meet/relay-edit-lock"
+import { RELAY_EDIT_LOCK_TOKEN_HEADER } from "@/lib/meet/relay-edit-lock-shared"
 import { isStaffRole } from "@swimbuzz/shared"
 
 export const runtime = "nodejs"
@@ -117,6 +119,15 @@ export async function POST(
   }
 
   const rosterOnly = (body as { rosterOnly?: boolean }).rosterOnly === true
+
+  // Only the relay builder session editing this event may change it meanwhile.
+  const lockConflict = await relayEditConflict(
+    id,
+    relay,
+    session.user.id,
+    req.headers.get(RELAY_EDIT_LOCK_TOKEN_HEADER)
+  )
+  if (lockConflict) return NextResponse.json(lockConflict, { status: 409 })
 
   const roster = await prisma.athlete.findMany({
     where: { seasons: { has: meet.season } },
@@ -274,6 +285,14 @@ export async function DELETE(
   if (!event) {
     return NextResponse.json({ error: "Event is required" }, { status: 400 })
   }
+
+  const lockConflict = await relayEditConflict(
+    id,
+    { event, gender },
+    session.user.id,
+    req.headers.get(RELAY_EDIT_LOCK_TOKEN_HEADER)
+  )
+  if (lockConflict) return NextResponse.json(lockConflict, { status: 409 })
 
   const roster = await prisma.athlete.findMany({
     where: { seasons: { has: meet.season } },

@@ -96,6 +96,8 @@ model User {
   athlete       Athlete?
   practices         Practice[] @relation("PracticeCreatedBy")
   practiceEditLocks Practice[] @relation("PracticeEditLocks")
+  relayEditLocks    RelayEditLock[] @relation("RelayEditLocks")
+  relayEditYields   RelayEditLock[] @relation("RelayEditYields")
   privatePractices  Practice[] @relation("PracticeOwner")
   attendanceRecorded PracticeAttendance[] @relation("PracticeAttendanceRecordedBy")
   comments          PracticeComment[]
@@ -205,9 +207,32 @@ model Meet {
   signupForm    MeetSignupForm?
   roomForm      MeetRoomForm?
   signupMonitorEvents MeetSignupMonitorEvent[]
+  relayEditLocks RelayEditLock[]
 
   @@index([startsAt])
   @@index([season])
+}
+
+/// Exclusive edit lock on one relay event in the relay builder — only its session may save.
+model RelayEditLock {
+  id        String   @id @default(cuid())
+  meetId    String
+  meet      Meet     @relation(fields: [meetId], references: [id], onDelete: Cascade)
+  /// Relay slot slug: one gender + event, e.g. "men-200-medley-relay".
+  slot      String
+  userId    String
+  user      User     @relation("RelayEditLocks", fields: [userId], references: [id], onDelete: Cascade)
+  /// Opaque per-tab session token — distinguishes same-user multi-tab editors.
+  token     String
+  lockedAt  DateTime @default(now())
+  expiresAt DateTime
+  /// Set when another session asks to take over; the holder saves a draft and releases.
+  yieldRequestedById String?
+  yieldRequestedBy   User?     @relation("RelayEditYields", fields: [yieldRequestedById], references: [id], onDelete: SetNull)
+  yieldRequestedAt   DateTime?
+
+  @@unique([meetId, slot])
+  @@index([expiresAt])
 }
 
 /// Idempotent signup-window monitor events (serverless-safe; replaces in-memory Maps).

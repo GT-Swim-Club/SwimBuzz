@@ -39,6 +39,7 @@ import { syncRelayLeadoffSwim, deleteRelayLeadoffSwim } from "@/lib/meet/relay-l
 import { syncMeetRelaySplitSwims } from "@/lib/meet/relay-split-sync"
 import { saveMeetHeatLane } from "@/lib/meet/heat-lane-save"
 import { getSession } from "@/lib/auth/session"
+import { assertCanEditRelay } from "@/lib/meet/relay-edit-lock"
 import { isStaffRole, type SetHeatLaneInput } from "@swimbuzz/shared"
 
 async function requireStaff() {
@@ -46,6 +47,7 @@ async function requireStaff() {
   if (!session || !isStaffRole(session.user.role)) {
     throw new Error("Forbidden")
   }
+  return session
 }
 
 export type AddIndividualSheetEntryInput = {
@@ -163,7 +165,7 @@ function parseRelayInput(input: UpsertRelayEntryInput): RelayTeamInput | null {
 
 /** Same logic as POST /api/meets/[id]/relays. */
 export async function upsertRelayEntry(meetId: string, input: UpsertRelayEntryInput) {
-  await requireStaff()
+  const session = await requireStaff()
 
   const meet = await prisma.meet.findUnique({
     where: { id: meetId },
@@ -172,6 +174,8 @@ export async function upsertRelayEntry(meetId: string, input: UpsertRelayEntryIn
 
   const relay = parseRelayInput(input)
   if (!relay) throw new Error("Event and four unique relay legs are required")
+  // Not while a coach is editing this event in the relay builder.
+  await assertCanEditRelay(meetId, relay, session.user.id)
 
   const rosterOnly = input.rosterOnly === true
 
@@ -287,7 +291,7 @@ export async function removeRelayEntry(
   meetId: string,
   params: { event: string; relayLetter?: string | null; relayRound?: string; gender?: string | null }
 ) {
-  await requireStaff()
+  const session = await requireStaff()
 
   const meet = await prisma.meet.findUnique({ where: { id: meetId } })
   if (!meet) throw new Error("Not found")
@@ -299,6 +303,7 @@ export async function removeRelayEntry(
   const gender = parseRelayGender(params.gender)
 
   if (!event) throw new Error("Event is required")
+  await assertCanEditRelay(meetId, { event, gender }, session.user.id)
 
   const roster = await prisma.athlete.findMany({
     where: { seasons: { has: meet.season } },

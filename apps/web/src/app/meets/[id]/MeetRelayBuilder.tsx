@@ -55,6 +55,7 @@ import {
 } from "@/lib/meet/relay-builder"
 import RelayPageHeader, { relayBackLinkClass, relayEyebrowClass } from "./relays/RelayPageHeader"
 import type { RelayCommit } from "@/lib/meet/relay-save"
+import { RELAY_EDIT_IDLE_TIMEOUT_MS } from "@/lib/meet/relay-edit-lock-shared"
 
 type Source = "optimal" | "published" | "draft"
 
@@ -380,6 +381,8 @@ export default function MeetRelayBuilder({
   initialBase = null,
   onCommit,
   onExit,
+  takeoverRequested = false,
+  onSessionEnd,
 }: {
   meetId: string
   meetName: string
@@ -403,6 +406,13 @@ export default function MeetRelayBuilder({
   onCommit: (commit: RelayCommit, replaceHistory: boolean) => void
   /** Leave for the summary (`slug` null) or another event, without a server round trip. */
   onExit: (slug: string | null, replaceHistory: boolean) => void
+  /** Another coach asked to take over this event: save any changes as a draft and leave. */
+  takeoverRequested?: boolean
+  /**
+   * The edit session is over (taken over, or idle too long): `draft` holds unsaved changes to
+   * save as a draft, or is null when there are none.
+   */
+  onSessionEnd: (reason: "takeover" | "idle", draft: RelayCommit | null, replaceHistory: boolean) => void
 }) {
   const { slot } = data
   const { gender, event } = slot
@@ -811,6 +821,32 @@ export default function MeetRelayBuilder({
       guard.leave()
     )
   }
+
+  /** End the edit session, handing over unsaved changes as a draft (like practices' autosave). */
+  function endSession(reason: "takeover" | "idle") {
+    if (sessionEndedRef.current) return
+    sessionEndedRef.current = true
+    const draft: RelayCommit | null =
+      dirty && result && result.teams.length > 0
+        ? { kind: "draft", teams: lineupTeamsOf(result), relayEvent: result.relay, optimal: isLoaded("optimal"), settings }
+        : null
+    onSessionEnd(reason, draft, guard.leave())
+  }
+  const sessionEndedRef = useRef(false)
+  const endSessionRef = useRef(endSession)
+  useEffect(() => {
+    endSessionRef.current = endSession
+  })
+
+  useEffect(() => {
+    if (takeoverRequested) endSessionRef.current("takeover")
+  }, [takeoverRequested])
+
+  // Idle: no lineup or settings change for a while ends the session so the event isn't held.
+  useEffect(() => {
+    const timer = window.setTimeout(() => endSessionRef.current("idle"), RELAY_EDIT_IDLE_TIMEOUT_MS)
+    return () => window.clearTimeout(timer)
+  }, [result, settings])
 
   function requestPublish() {
     if (hasImportedResults || !result) return

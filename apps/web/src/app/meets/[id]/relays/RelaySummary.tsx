@@ -23,7 +23,8 @@ export type RelaySummaryCard = {
   legs: { key: string; name: string; me: boolean }[]
 }
 
-export type RelaySummaryPill = { label: string; tone: "published" | "draft" | "suggested" }
+/** `editing`: another coach (or another tab) has the event open in the relay builder. */
+export type RelaySummaryPill = { label: string; tone: "published" | "draft" | "suggested" | "editing" }
 
 export type RelaySummaryEvent = {
   slug: string
@@ -44,6 +45,7 @@ const PILL_TONES: Record<RelaySummaryPill["tone"], string> = {
   published: "border-primary/30 bg-primary/10 text-accent",
   draft: "border-border text-foreground-secondary",
   suggested: "border-dashed border-border text-foreground-secondary",
+  editing: "border-warning-border bg-warning-bg text-warning",
 }
 
 /**

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/auth/session"
+import { relayEditConflict } from "@/lib/meet/relay-edit-lock"
+import { RELAY_EDIT_LOCK_TOKEN_HEADER } from "@/lib/meet/relay-edit-lock-shared"
 import { isStaffRole } from "@swimbuzz/shared"
 import { normalizeEventName } from "@/lib/swim/swim-parse"
 import { meetHasEnded } from "@/lib/meet/meet-ended"
@@ -45,6 +47,13 @@ export async function PUT(
   if (!event || !gender) {
     return NextResponse.json({ error: "Event and gender are required" }, { status: 400 })
   }
+  const lockConflict = await relayEditConflict(
+    id,
+    { event, gender },
+    session.user.id,
+    req.headers.get(RELAY_EDIT_LOCK_TOKEN_HEADER)
+  )
+  if (lockConflict) return NextResponse.json(lockConflict, { status: 409 })
   const parsed = parseRelayDraftTeams(body?.teams)
   if ("error" in parsed) return NextResponse.json({ error: parsed.error }, { status: 400 })
   const { teams } = parsed
@@ -84,6 +93,14 @@ export async function DELETE(
   if (!event || !gender) {
     return NextResponse.json({ error: "Event and gender are required" }, { status: 400 })
   }
+
+  const lockConflict = await relayEditConflict(
+    id,
+    { event, gender },
+    session.user.id,
+    req.headers.get(RELAY_EDIT_LOCK_TOKEN_HEADER)
+  )
+  if (lockConflict) return NextResponse.json(lockConflict, { status: 409 })
 
   const drafts = removeRelayDraft(relayDraftsOf(meet.relayDrafts), gender, event)
   await prisma.meet.update({ where: { id }, data: { relayDrafts: { drafts } } })

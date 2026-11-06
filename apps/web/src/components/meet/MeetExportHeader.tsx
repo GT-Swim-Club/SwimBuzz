@@ -44,7 +44,9 @@ export default function MeetExportHeader({
   useLayoutEffect(() => {
     const text = headerTextRef.current
     if (!text) return
-    const measure = () => setIconSize(text.getBoundingClientRect().height + ICON_OVERSHOOT_PX * 2)
+    // offsetHeight ignores a scaled-down preview's transform; the rect keeps the fraction otherwise.
+    const measure = () =>
+      setIconSize(Math.max(text.offsetHeight, text.getBoundingClientRect().height) + ICON_OVERSHOOT_PX * 2)
     measure()
     const observer = new ResizeObserver(measure)
     observer.observe(text)
