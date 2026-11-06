@@ -18,7 +18,7 @@ export type RelaySplit = {
   event: string
   relayEvent: string
   relayRound: RelayRound
-  /** Null when SwimCloud only says "Split" (leg 2 or 3 of a free relay). */
+  /** Null when SwimCloud only says "Split" (leg 2 or 3 of a free relay) and the sync couldn't place it. */
   leg: number | null
   course: Course
   timeMs: number

@@ -10,6 +10,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 1,
+      "points": 40.0,
       "relayLetter": "A",
       "relaySwimmers": [],
       "tags": "",
@@ -22,6 +23,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 2,
+      "points": 34.0,
       "relayLetter": "B",
       "relaySwimmers": [],
       "tags": "",
@@ -34,6 +36,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 3,
+      "points": 32.0,
       "relayLetter": "A",
       "relaySwimmers": [],
       "tags": "",
@@ -46,6 +49,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 1,
+      "points": 40.0,
       "relayLetter": "A",
       "relaySwimmers": [],
       "tags": "",
@@ -58,6 +62,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 2,
+      "points": 34.0,
       "relayLetter": "A",
       "relaySwimmers": [],
       "tags": "",
@@ -70,6 +75,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 3,
+      "points": 32.0,
       "relayLetter": "B",
       "relaySwimmers": [],
       "tags": "",
@@ -82,6 +88,7 @@
       "event": "200 Free Relay",
       "gender": "F",
       "place": 1,
+      "points": 40.0,
       "relayLetter": "A",
       "relaySwimmers": [],
       "tags": "",
@@ -94,6 +101,7 @@
       "event": "200 Free Relay",
       "gender": "F",
       "place": 2,
+      "points": 34.0,
       "relayLetter": "A",
       "relaySwimmers": [],
       "tags": "",
@@ -106,6 +114,7 @@
       "event": "200 Free Relay",
       "gender": "F",
       "place": 3,
+      "points": 32.0,
       "relayLetter": "B",
       "relaySwimmers": [],
       "tags": "",
@@ -118,6 +127,7 @@
       "event": "200 Free Relay",
       "gender": "M",
       "place": 1,
+      "points": 40.0,
       "relayLetter": "A",
       "relaySwimmers": [],
       "tags": "",
@@ -130,6 +140,7 @@
       "event": "200 Free Relay",
       "gender": "M",
       "place": 2,
+      "points": 34.0,
       "relayLetter": "A",
       "relaySwimmers": [],
       "tags": "",
@@ -142,6 +153,7 @@
       "event": "200 Free Relay",
       "gender": "M",
       "place": 3,
+      "points": 32.0,
       "relayLetter": "B",
       "relaySwimmers": [],
       "tags": "",
@@ -154,6 +166,7 @@
       "event": "100 Free Relay",
       "gender": "X",
       "place": 1,
+      "points": 40.0,
       "relayLetter": "A",
       "relaySwimmers": [],
       "tags": "",
@@ -166,6 +179,7 @@
       "event": "100 Free Relay",
       "gender": "X",
       "place": 2,
+      "points": 34.0,
       "relayLetter": "A",
       "relaySwimmers": [],
       "tags": "",
@@ -178,6 +192,7 @@
       "event": "100 Free Relay",
       "gender": "X",
       "place": 3,
+      "points": 32.0,
       "relayLetter": "C",
       "relaySwimmers": [],
       "tags": "",
@@ -190,6 +205,7 @@
       "event": "100 Free Relay",
       "gender": "X",
       "place": 4,
+      "points": 30.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -219,6 +235,7 @@
       "event": "100 Free Relay",
       "gender": "X",
       "place": 5,
+      "points": 28.0,
       "relayLetter": "D",
       "relaySwimmers": [],
       "tags": "",
@@ -230,8 +247,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Carle, Juliana",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:06.50"
@@ -239,8 +258,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Allibone, Jessica",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:07.75"
@@ -248,8 +269,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Wang, Mingqi",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:10.54"
@@ -257,8 +280,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "McCall, Cara",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:10.81"
@@ -266,8 +291,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Benway, Kayley",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:11.24"
@@ -275,8 +302,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Weems, Kylie",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:11.47"
@@ -284,8 +313,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Witthoff, Mia",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:12.02"
@@ -293,8 +324,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Hewitt, Kaila",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:13.51"
@@ -302,8 +335,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Godoy, Tyler",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:15.71"
@@ -311,8 +346,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Miller, Charli",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:16.99"
@@ -320,8 +357,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Folk, Katelyn",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:17.91"
@@ -329,8 +368,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Jonas, Lindsay",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:18.06"
@@ -338,8 +379,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Lewis, Abigail",
       "place": 13,
+      "points": 4.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:23.39"
@@ -347,8 +390,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Davis, Elizabeth",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:25.28"
@@ -356,8 +401,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Bullard, Collin",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "58.89"
@@ -365,8 +412,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Rimsa, Thomas",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:01.39"
@@ -374,8 +423,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Vlady, George",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:01.81"
@@ -383,8 +434,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Witham, Noah",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:02.94"
@@ -392,8 +445,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Townsend, Matthew",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:03.62"
@@ -401,8 +456,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Will, Samuel",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:06.09"
@@ -410,8 +467,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Klingenberg, Brennan",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:09.01"
@@ -419,8 +478,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Jones, William",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:10.32"
@@ -428,8 +489,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Carlton, Delaney",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:00.54"
@@ -437,8 +500,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Munger, Audrey",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:03.55"
@@ -446,8 +511,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Ricci, Emily",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:12.82"
@@ -455,8 +522,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Jonas, Lindsay",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:18.30"
@@ -464,8 +533,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Rice, Thomas",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:00.93"
@@ -473,8 +544,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Spaulding, Alice",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "26.27"
@@ -482,8 +555,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Powers, Alexis",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "26.92"
@@ -491,8 +566,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Faust, Amelia",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "26.95"
@@ -500,8 +577,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Kulas, Saline",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "27.90"
@@ -509,8 +588,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Whittington, Veronica",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "28.59"
@@ -518,8 +599,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Sutton, Jennifer",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "29.23"
@@ -527,8 +610,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Anderson, Rilie",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "29.51"
@@ -536,8 +621,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Gray, Paige",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "29.60"
@@ -545,8 +632,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Randall, Lydia",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "29.79"
@@ -554,8 +643,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Paroly, Sarah",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "30.25"
@@ -563,8 +654,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Press, Savannah",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "33.20"
@@ -572,8 +665,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Yie, Emiley",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "34.26"
@@ -581,8 +676,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Fletcher, Abigail",
       "place": 13,
+      "points": 4.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "36.15"
@@ -590,8 +687,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Richardson, Haley",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "37.26"
@@ -599,8 +698,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Lamb, Grayce",
       "place": 15,
+      "points": 2.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "38.08"
@@ -608,8 +709,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Compton, Keira",
       "place": 16,
+      "points": 1.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "38.43"
@@ -617,8 +720,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "White, Keller",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "21.66"
@@ -626,8 +731,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Gossmann, Christopher",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "22.66"
@@ -635,8 +742,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Skidmore, Billy",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "23.33"
@@ -644,8 +753,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Smith, Sadler",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "23.37"
@@ -653,8 +764,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Horton, Fabian",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "Western Carolina Swim Club-NC",
       "time": "23.94"
@@ -662,8 +775,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Oglesby, Dayton",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "24.16"
@@ -671,8 +786,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Townsend, Matthew",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "24.56"
@@ -680,8 +797,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Witham, Noah",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "24.93"
@@ -689,8 +808,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Hernandez, Joshua",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "24.97"
@@ -698,8 +819,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Weitzel, Logan",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "24.98"
@@ -707,8 +830,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Denning, Cooper",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "25.46"
@@ -716,8 +841,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Smith, Logan",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "26.51"
@@ -725,8 +852,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Humann, Brent",
       "place": 13,
+      "points": 4.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "26.61"
@@ -734,8 +863,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Will, Samuel",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "26.73"
@@ -743,8 +874,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Vlady, Richard",
       "place": 15,
+      "points": 2.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "27.07"
@@ -752,8 +885,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Fernandez, Charles",
       "place": 16,
+      "points": 1.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "27.70"
@@ -761,6 +896,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Chaney, Ethan",
       "place": 17,
       "tags": "",
@@ -770,6 +906,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Dail, Joshua",
       "place": 18,
       "tags": "",
@@ -779,6 +916,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Vlady, George",
       "place": 19,
       "tags": "",
@@ -788,8 +926,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Elvambuena, Ella",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:16.82"
@@ -797,8 +937,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Weems, Kylie",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:18.62"
@@ -806,8 +948,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Faust, Amelia",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:24.76"
@@ -815,8 +959,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Lamb, Grayce",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:50.65"
@@ -824,8 +970,10 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "F",
       "name": "Carle, Juliana",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:04.35"
@@ -833,8 +981,10 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "Gossmann, Christopher",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "55.32"
@@ -842,8 +992,10 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "Hall, Jackson",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:01.50"
@@ -851,8 +1003,10 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "Smith, Sadler",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:02.15"
@@ -860,8 +1014,10 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "Horton, Fabian",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "Western Carolina Swim Club-NC",
       "time": "1:04.17"
@@ -869,6 +1025,7 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "Humann, Brent",
       "place": null,
       "tags": "",
@@ -878,8 +1035,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Duffy, Anya",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "32.53"
@@ -887,8 +1046,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Hewitt, Kaila",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "32.54"
@@ -896,8 +1057,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Powers, Alexis",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "33.75"
@@ -905,8 +1068,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Ricci, Emily",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "34.13"
@@ -914,8 +1079,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Miller, Charli",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "34.30"
@@ -923,8 +1090,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Lewis, Abigail",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "35.83"
@@ -932,8 +1101,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Press, Savannah",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "43.06"
@@ -941,8 +1112,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Richardson, Haley",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "43.19"
@@ -950,8 +1123,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Fletcher, Abigail",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "43.72"
@@ -959,8 +1134,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Oglesby, Dayton",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "28.68"
@@ -968,8 +1145,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Rice, Thomas",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "28.96"
@@ -977,8 +1156,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Smith, Logan",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "32.56"
@@ -986,8 +1167,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Vlady, Richard",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "32.66"
@@ -995,8 +1178,10 @@
     {
       "course": "SCY",
       "event": "500 Free",
+      "gender": "F",
       "name": "Carlton, Delaney",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "5:24.72"
@@ -1004,8 +1189,10 @@
     {
       "course": "SCY",
       "event": "500 Free",
+      "gender": "F",
       "name": "Wang, Mingqi",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "6:06.36"
@@ -1013,8 +1200,10 @@
     {
       "course": "SCY",
       "event": "500 Free",
+      "gender": "F",
       "name": "Folk, Katelyn",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "6:37.78"
@@ -1022,8 +1211,10 @@
     {
       "course": "SCY",
       "event": "500 Free",
+      "gender": "M",
       "name": "Weitzel, Logan",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "6:07.61"
@@ -1031,8 +1222,10 @@
     {
       "course": "SCY",
       "event": "500 Free",
+      "gender": "M",
       "name": "Smith, Sadler",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "6:17.38"
@@ -1040,8 +1233,10 @@
     {
       "course": "SCY",
       "event": "500 Free",
+      "gender": "M",
       "name": "Hernandez, Joshua",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "6:53.24"
@@ -1049,8 +1244,10 @@
     {
       "course": "SCY",
       "event": "500 Free",
+      "gender": "M",
       "name": "Languell, Cole",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "7:02.74"
@@ -1058,8 +1255,10 @@
     {
       "course": "SCY",
       "event": "500 Free",
+      "gender": "M",
       "name": "Dail, Joshua",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "7:14.22"
@@ -1067,8 +1266,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Weems, Kylie",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "34.85"
@@ -1076,8 +1277,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Benway, Kayley",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "35.58"
@@ -1085,8 +1288,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Elvambuena, Ella",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "36.35"
@@ -1094,8 +1299,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Hewitt, Kaila",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "38.29"
@@ -1103,8 +1310,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Whittington, Veronica",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "38.70"
@@ -1112,8 +1321,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Godoy, Tyler",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "40.05"
@@ -1121,8 +1332,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Anderson, Rilie",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "41.42"
@@ -1130,8 +1343,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Gray, Paige",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "41.83"
@@ -1139,8 +1354,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Davis, Elizabeth",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "44.20"
@@ -1148,8 +1365,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Fletcher, Abigail",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "48.08"
@@ -1157,8 +1376,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Denning, Cooper",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "30.93"
@@ -1166,8 +1387,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Skidmore, Billy",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "31.28"
@@ -1175,8 +1398,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Vlady, Richard",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "35.11"
@@ -1184,8 +1409,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Fernandez, Charles",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "35.33"
@@ -1193,8 +1420,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Kulas, Saline",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "2:20.76"
@@ -1202,8 +1431,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Townsend, Matthew",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:56.62"
@@ -1211,8 +1442,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Weitzel, Logan",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:14.97"
@@ -1220,8 +1453,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "McCall, Cara",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "29.12"
@@ -1229,8 +1464,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Allibone, Jessica",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "29.20"
@@ -1238,8 +1475,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Faust, Amelia",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "29.65"
@@ -1247,8 +1486,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Elvambuena, Ella",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "30.27"
@@ -1256,8 +1497,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Hicks, Erin",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "30.64"
@@ -1265,8 +1508,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Duffy, Anya",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "31.41"
@@ -1274,8 +1519,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Folk, Katelyn",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "31.90"
@@ -1283,8 +1530,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Godoy, Tyler",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "32.12"
@@ -1292,8 +1541,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Sutton, Jennifer",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "33.14"
@@ -1301,8 +1552,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Miller, Charli",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "35.05"
@@ -1310,8 +1563,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Davis, Elizabeth",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "37.93"
@@ -1319,8 +1574,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Horton, Fabian",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Western Carolina Swim Club-NC",
       "time": "26.28"
@@ -1328,8 +1585,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Rice, Thomas",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "27.19"
@@ -1337,8 +1596,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Languell, Cole",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "28.51"
@@ -1346,8 +1607,10 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "F",
       "name": "Munger, Audrey",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:21.85"
@@ -1355,8 +1618,10 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "F",
       "name": "Spaulding, Alice",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:23.45"
@@ -1364,8 +1629,10 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "F",
       "name": "Carle, Juliana",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:26.95"
@@ -1373,8 +1640,10 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "F",
       "name": "Witthoff, Mia",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:41.73"
@@ -1382,8 +1651,10 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "M",
       "name": "Humann, Brent",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "2:50.47"
@@ -1391,8 +1662,10 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "M",
       "name": "Dail, Joshua",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "2:51.94"
@@ -1400,8 +1673,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Carlton, Delaney",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "53.00"
@@ -1409,8 +1684,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Wang, Mingqi",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:00.33"
@@ -1418,8 +1695,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Kulas, Saline",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:03.87"
@@ -1427,8 +1706,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Randall, Lydia",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:07.34"
@@ -1436,8 +1717,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Paroly, Sarah",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:07.99"
@@ -1445,8 +1728,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Lamb, Grayce",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:30.51"
@@ -1454,8 +1739,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Compton, Keira",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:31.59"
@@ -1463,8 +1750,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "White, Keller",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "49.71"
@@ -1472,8 +1761,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Gossmann, Christopher",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "49.95"
@@ -1481,8 +1772,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Bullard, Collin",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "50.93"
@@ -1490,8 +1783,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Vlady, George",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "53.86"
@@ -1499,8 +1794,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Klingenberg, Brennan",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "54.34"
@@ -1508,8 +1805,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Hall, Jackson",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "54.84"
@@ -1517,8 +1816,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Will, Samuel",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "56.04"
@@ -1526,11 +1827,67 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Smith, Logan",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:02.23"
     }
-  ]
+  ],
+  "team_scores": {
+    "combined": [
+      {
+        "place": 1,
+        "points": 1274.0,
+        "team": "East Carolina University"
+      },
+      {
+        "place": 2,
+        "points": 1171.0,
+        "team": "Georgia Tech Swim Club"
+      },
+      {
+        "place": 3,
+        "points": 49.0,
+        "team": "Western Carolina Swim Club"
+      },
+      {
+        "place": 4,
+        "points": 30.0,
+        "team": "HIGH POINT CLUB SWIMMING"
+      }
+    ],
+    "men": [
+      {
+        "place": 1,
+        "points": 541.0,
+        "team": "Georgia Tech Swim Club"
+      },
+      {
+        "place": 2,
+        "points": 446.0,
+        "team": "East Carolina University"
+      },
+      {
+        "place": 3,
+        "points": 49.0,
+        "team": "Western Carolina Swim Club"
+      }
+    ],
+    "source": "computed",
+    "women": [
+      {
+        "place": 1,
+        "points": 734.0,
+        "team": "East Carolina University"
+      },
+      {
+        "place": 2,
+        "points": 590.0,
+        "team": "Georgia Tech Swim Club"
+      }
+    ]
+  }
 }

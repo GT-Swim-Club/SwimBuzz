@@ -193,6 +193,12 @@ model Meet {
   /// Staff only — published lineups live in relayResultsSummary.
   relayDrafts Json?
   resultStatusesSummary Json?
+  /// Team standings from the results PDF: { importedAt, source: "pdf" | "computed",
+  /// women, men, combined: [{ place, team, points, ours? }] }.
+  teamScores Json?
+  /// Coach-added heat/lane/start time for roster summary rows: { entries: HeatLaneOverride[] }.
+  /// Only shown where no import supplies that field; survives re-imports.
+  heatLaneOverrides Json?
   photos        Json?
   createdAt     DateTime  @default(now())
   swims         Swim[]
@@ -328,6 +334,8 @@ model Swim {
   event      String
   timeMs     Int
   place      Int?
+  /// Points scored, from a results PDF's Points column.
+  points     Float?
   tags       String   @default("")
   course     Course
   date       DateTime

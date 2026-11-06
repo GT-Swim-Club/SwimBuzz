@@ -15,7 +15,8 @@ import { parseSeason } from "@/lib/season"
 import { coerceParsedRelayResults } from "@/lib/meet/relay-results"
 import { isClientDisconnected, throwIfDisconnected } from "@/lib/client-disconnect"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@swimbuzz/shared"
+import { coerceTeamScores, isStaffRole } from "@swimbuzz/shared"
+import { Prisma } from "@prisma/client"
 
 function isUpload(value: unknown): value is Blob {
   return value != null && typeof value !== "string" && typeof (value as Blob).arrayBuffer === "function"
@@ -28,6 +29,7 @@ type ParsedResult = {
   course: string
   tags?: string
   place?: number
+  points?: number
 }
 
 const MAX_BYTES = 20 * 1024 * 1024
@@ -52,6 +54,7 @@ async function applyParsedMeetPdf(input: {
     detectedSheetType?: string | null
     results: ParsedResult[]
     relay_results?: unknown[]
+    team_scores?: unknown
   }
   season: string
   courseDefault: string
@@ -95,9 +98,15 @@ async function applyParsedMeetPdf(input: {
       if (meet.resultsUrl && isStoredMeetFileUrl(meet.resultsUrl)) {
         await deleteStoredMeetFile(meet.resultsUrl)
       }
+      const teamScores = coerceTeamScores(parsed.team_scores)
       await prisma.meet.update({
         where: { id: meet.id },
-        data: { resultsUrl: resultsPdfUrl },
+        data: {
+          resultsUrl: resultsPdfUrl,
+          teamScores: teamScores
+            ? ({ ...teamScores, importedAt: new Date().toISOString() } as Prisma.InputJsonValue)
+            : Prisma.DbNull,
+        },
       })
       if (summary.imported > 0) {
         void notifyMeetRosterOfInfoDrops({
@@ -269,6 +278,7 @@ export async function POST(req: Request) {
       detectedSheetType?: string | null
       results: ParsedResult[]
       relay_results?: unknown[]
+      team_scores?: unknown
     }>(session.user.id, resultsPdfUrl, { course: courseDefault, team, fileName })
 
     throwIfDisconnected(req.signal)

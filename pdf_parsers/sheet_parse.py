@@ -479,11 +479,13 @@ def _session_round_from_line(line: str) -> str | None:
     return None
 
 
-def _parse_heat_with_event(
-    line: str,
-    *,
-    default_round: str = "prelims",
-) -> tuple[dict[str, Any], dict[str, Any]] | None:
+def _parse_heat_with_event(line: str) -> tuple[dict[str, Any], dict[str, Any]] | None:
+    """A heat continued from the previous page: "Heat 3 (#34 Men 200 Yard Backstroke)".
+
+    It names no round of its own ("round" is None — see _remember_heat_round). Another
+    column's "Heat 5 of 16 Prelims" can share the line, so only a header for this same
+    heat right after it counts.
+    """
     match = HEAT_WITH_EVENT.search(line)
     if not match:
         return None
@@ -491,21 +493,21 @@ def _parse_heat_with_event(
     event = _build_event(event_num, gender_label, stroke_raw)
     if not event:
         return None
-    heat_total_m = re.search(
-        r"Heat\s+(\d+)\s+of\s+(\d+)\s+(Prelims|Finals|Timed\s+Finals)",
-        line,
+    heat_total_m = re.match(
+        r"\s*Heat\s+(\d+)\s+of\s+(\d+)\s+(Prelims|Finals|Timed\s+Finals)",
+        line[match.end():],
         re.I,
     )
     heat: dict[str, Any] = {
         "heat": int(heat_num),
         "heatTotal": None,
-        "round": default_round,
+        "round": None,
         "startTime": None,
     }
-    if heat_total_m:
+    if heat_total_m and int(heat_total_m.group(1)) == int(heat_num):
         heat["heatTotal"] = int(heat_total_m.group(2))
         heat["round"] = heat_total_m.group(3).lower().replace(" ", "_")
-    elif HEAT_ABC_FINAL.search(line):
+    elif HEAT_ABC_FINAL.match(line[match.end():].strip()):
         heat["round"] = "finals"
     return event, heat
 
@@ -1597,6 +1599,20 @@ def _remember_heat_total(
     return heat
 
 
+def _remember_heat_round(
+    event_rounds: dict[int, str],
+    event_num: int,
+    heat: dict[str, Any],
+    default_round: str,
+) -> dict[str, Any]:
+    """Record an event's round from its heat headers; a continued heat takes the event's round."""
+    heat_round = heat.get("round")
+    if heat_round:
+        event_rounds[event_num] = heat_round
+        return heat
+    return {**heat, "round": event_rounds.get(event_num) or default_round}
+
+
 def _backfill_heat_totals(
     entries: list[dict[str, Any]],
     event_heat_totals: dict[int, int],
@@ -1632,6 +1648,8 @@ def _parse_usms_sheet_pages(
     pending_relay: dict[str, Any] | None = None
     event_heat_totals: dict[int, int] = {}
     event_max_heat: dict[int, int] = {}
+    # Each event's round from its heat headers, for heats continued onto a new page.
+    event_rounds: dict[int, str] = {}
     event_seed_times: dict[str, list[str]] = {}
     entries: list[dict[str, Any]] = []
 
@@ -1670,17 +1688,22 @@ def _parse_usms_sheet_pages(
                     continue
 
                 default_round = session_round or "prelims"
-                embedded = _parse_heat_with_event(line, default_round=default_round)
+                embedded = _parse_heat_with_event(line)
                 if embedded:
                     current_event, current_heat = embedded
                     in_alternates = False
                     pending = None
                     pending_relay = None
-                    current_heat = _remember_heat_total(
-                        event_heat_totals,
-                        event_max_heat,
+                    current_heat = _remember_heat_round(
+                        event_rounds,
                         current_event["eventNumber"],
-                        current_heat,
+                        _remember_heat_total(
+                            event_heat_totals,
+                            event_max_heat,
+                            current_event["eventNumber"],
+                            current_heat,
+                        ),
+                        default_round,
                     )
                 else:
                     event, pending = _consume_usms_event(line, pending)
@@ -1693,11 +1716,16 @@ def _parse_usms_sheet_pages(
                     heat = _parse_heat_header(line)
                     if heat and current_event:
                         in_alternates = False
-                        current_heat = _remember_heat_total(
-                            event_heat_totals,
-                            event_max_heat,
+                        current_heat = _remember_heat_round(
+                            event_rounds,
                             current_event["eventNumber"],
-                            heat,
+                            _remember_heat_total(
+                                event_heat_totals,
+                                event_max_heat,
+                                current_event["eventNumber"],
+                                heat,
+                            ),
+                            default_round,
                         )
                     elif heat:
                         in_alternates = False
@@ -1903,6 +1931,8 @@ def parse_sheet_pdf_bytes(
     pending_relay: dict[str, Any] | None = None
     event_heat_totals: dict[int, int] = {}
     event_max_heat: dict[int, int] = {}
+    # Each event's round from its heat headers, for heats continued onto a new page.
+    event_rounds: dict[int, str] = {}
     event_seed_times: dict[str, list[str]] = {}
 
     for line in lines:
@@ -1928,15 +1958,20 @@ def parse_sheet_pdf_bytes(
             continue
 
         default_round = session_round or "prelims"
-        embedded = _parse_heat_with_event(line, default_round=default_round)
+        embedded = _parse_heat_with_event(line)
         if embedded:
             current_event, current_heat = embedded
             in_alternates = False
-            current_heat = _remember_heat_total(
-                event_heat_totals,
-                event_max_heat,
+            current_heat = _remember_heat_round(
+                event_rounds,
                 current_event["eventNumber"],
-                current_heat,
+                _remember_heat_total(
+                    event_heat_totals,
+                    event_max_heat,
+                    current_event["eventNumber"],
+                    current_heat,
+                ),
+                default_round,
             )
             pending_relay = None
             continue
@@ -1953,11 +1988,16 @@ def parse_sheet_pdf_bytes(
         if heat:
             in_alternates = False
             if current_event:
-                current_heat = _remember_heat_total(
-                    event_heat_totals,
-                    event_max_heat,
+                current_heat = _remember_heat_round(
+                    event_rounds,
                     current_event["eventNumber"],
-                    heat,
+                    _remember_heat_total(
+                        event_heat_totals,
+                        event_max_heat,
+                        current_event["eventNumber"],
+                        heat,
+                    ),
+                    default_round,
                 )
             else:
                 current_heat = heat

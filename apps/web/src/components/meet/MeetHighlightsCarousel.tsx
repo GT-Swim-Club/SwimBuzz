@@ -1,20 +1,17 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import type { StatCounter } from "@/lib/meet/meet-stats"
+import {
+  paginateHighlights,
+  TEAM_SCORE_SECTIONS,
+  type MeetHighlights,
+  type StatCounter,
+  type TeamScoresSection,
+} from "@swimbuzz/shared"
 import { LedgerIcon, LedgerPanel, LedgerStatTile } from "./Ledger"
+import TeamScoresModal from "./TeamScoresModal"
 
 const AUTOPLAY_MS = 6000
-
-/** Plain counters share a page three-up; counters with a hint line get more room. */
-function paginate(counters: StatCounter[]): StatCounter[][] {
-  const plain = counters.filter((c) => !c.hint)
-  const hinted = counters.filter((c) => c.hint)
-  const pages: StatCounter[][] = []
-  for (let i = 0; i < plain.length; i += 3) pages.push(plain.slice(i, i + 3))
-  for (let i = 0; i < hinted.length; i += 2) pages.push(hinted.slice(i, i + 2))
-  return pages
-}
 
 function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -53,8 +50,33 @@ function isDropValue(value: string | number) {
   return typeof value === "string" && /^[-−]/.test(value)
 }
 
-export default function MeetHighlightsCarousel({ counters }: { counters: StatCounter[] }) {
-  const pages = paginate(counters)
+function HighlightTile({ counter, interactive }: { counter: StatCounter; interactive?: boolean }) {
+  const isText = typeof counter.value === "string" && !/^[-−+]?[\d.:]+$/.test(counter.value)
+  return (
+    <LedgerStatTile
+      label={counter.label}
+      sub={counter.hint}
+      detail={counter.detail}
+      fit={isText && counter.page !== "teamScores"}
+      interactive={interactive}
+      value={
+        typeof counter.value === "number" && Number.isFinite(counter.value) ? (
+          <CountUp value={counter.value} />
+        ) : (
+          counter.value
+        )
+      }
+      valueClassName={
+        isDropValue(counter.value) ? "text-emerald-600 dark:text-emerald-400" : "text-foreground"
+      }
+    />
+  )
+}
+
+export default function MeetHighlightsCarousel({ highlights }: { highlights: MeetHighlights }) {
+  const pages = paginateHighlights(highlights.counters)
+  const teamScores = highlights.teamScores ?? null
+  const [scoresSection, setScoresSection] = useState<TeamScoresSection | null>(null)
   const [index, setIndex] = useState(0)
   const [reduced, setReduced] = useState(false)
   const pausedRef = useRef(false)
@@ -146,32 +168,41 @@ export default function MeetHighlightsCarousel({ counters }: { counters: StatCou
               key={i}
               aria-hidden={i !== current}
               className="grid min-w-0 flex-[0_0_100%] gap-2"
-              style={{ gridTemplateColumns: `repeat(${page.length}, minmax(0, 1fr))` }}
+              style={{ gridTemplateColumns: `repeat(${page.counters.length}, minmax(0, 1fr))` }}
             >
-              {page.map((c) => (
-                <LedgerStatTile
-                  key={c.label}
-                  label={c.label}
-                  sub={c.hint}
-                  fit={typeof c.value === "string" && !/^[-−+]?[\d.:]+$/.test(c.value)}
-                  value={
-                    typeof c.value === "number" && Number.isFinite(c.value) ? (
-                      <CountUp value={c.value} />
-                    ) : (
-                      c.value
-                    )
-                  }
-                  valueClassName={
-                    isDropValue(c.value)
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : "text-foreground"
-                  }
-                />
-              ))}
+              {page.counters.map((c) => {
+                const section =
+                  page.kind === "teamScores"
+                    ? TEAM_SCORE_SECTIONS.find((s) => s.label === c.label)?.key
+                    : undefined
+                return teamScores && section ? (
+                  <button
+                    key={c.label}
+                    type="button"
+                    tabIndex={i === current ? 0 : -1}
+                    aria-label={`${c.label} team scores: ${c.value}, ${c.hint ?? ""}`}
+                    onClick={() => setScoresSection(section)}
+                    className="group flex min-w-0 flex-col rounded-lg focus-visible:outline-2 focus-visible:outline-primary [&>div]:flex-1"
+                  >
+                    <HighlightTile counter={c} interactive />
+                  </button>
+                ) : (
+                  <HighlightTile key={c.label} counter={c} />
+                )
+              })}
             </div>
           ))}
         </div>
       </div>
+      {teamScores ? (
+        <TeamScoresModal
+          teamScores={teamScores}
+          section={scoresSection ?? "combined"}
+          onSectionChange={setScoresSection}
+          open={scoresSection != null}
+          onClose={() => setScoresSection(null)}
+        />
+      ) : null}
     </LedgerPanel>
   )
 }

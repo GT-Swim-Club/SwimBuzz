@@ -34,13 +34,26 @@ export function relayShareEvents(groups: RelayLineupGenderGroup[]): RelayShareEv
 /** Up to this many events stay on one row of the export image; more split into women's and men's rows. */
 const MAX_SINGLE_ROW_EVENTS = 4
 
+/** Relay events laid out in rows, with mixed relays in their own columns when they sit between two. */
+export type RelayShareLayout<T> = {
+  /** Rows of events, padded with null so every row has the same length. */
+  rows: (T | null)[][]
+  /**
+   * Mixed relays, one column each after the rows' columns, each spanning the women's and men's
+   * rows and centered between them. Empty when there aren't both rows; mixed relays are then in
+   * `rows`.
+   */
+  spanning: T[]
+}
+
 /**
- * Events laid out for the export image. Past MAX_SINGLE_ROW_EVENTS: a row of women's events, then
- * a row of men's, with each event type in the same column in both rows (null where a gender has
- * no such event), and mixed relays at the end of the last row.
+ * Events laid out for the relays page and its exports. Past MAX_SINGLE_ROW_EVENTS: a row of
+ * women's events, then a row of men's, with each event type in the same column in both rows
+ * (null where a gender has no such event), and each mixed relay in a column of its own, centered
+ * between both rows. With only one of those rows, mixed relays go at its end.
  */
-export function relayShareRows<T extends { name: string }>(events: T[]): (T | null)[][] {
-  if (events.length <= MAX_SINGLE_ROW_EVENTS) return [events]
+export function relayShareLayout<T extends { name: string }>(events: T[]): RelayShareLayout<T> {
+  if (events.length <= MAX_SINGLE_ROW_EVENTS) return { rows: [events], spanning: [] }
   const split = (name: string) => /^(Women|Men)\s+(.+)$/.exec(name)
   const women = new Map<string, T>()
   const men = new Map<string, T>()
@@ -59,12 +72,13 @@ export function relayShareRows<T extends { name: string }>(events: T[]): (T | nu
   const rows: (T | null)[][] = [women, men]
     .filter((byType) => byType.size > 0)
     .map((byType) => columns.map((type) => byType.get(type) ?? null))
+  if (rows.length === 2) return { rows, spanning: mixed }
   if (mixed.length > 0) {
     if (rows.length === 0) rows.push([])
-    rows[rows.length - 1].push(...mixed)
+    rows[0].push(...mixed)
   }
   const width = Math.max(0, ...rows.map((row) => row.length))
-  return rows.map((row) => [...row, ...Array<null>(width - row.length).fill(null)])
+  return { rows: rows.map((row) => [...row, ...Array<null>(width - row.length).fill(null)]), spanning: [] }
 }
 
 /** Time shown for a relay: the result once swum, else the seed. */

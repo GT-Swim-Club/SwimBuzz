@@ -1,7 +1,7 @@
 "use client"
 
-import { useLayoutEffect, useRef } from "react"
-import { relayShareRows, type MeetHeaderDetails, type RelayShareEvent } from "@swimbuzz/shared"
+import { useLayoutEffect, useRef, type CSSProperties } from "react"
+import { relayShareLayout, type MeetHeaderDetails, type RelayShareEvent } from "@swimbuzz/shared"
 import MeetExportHeader from "@/components/meet/MeetExportHeader"
 import { EventHeader, SummaryCard, publishedSummaryCards } from "./RelaySummary"
 
@@ -21,9 +21,10 @@ export default function RelaysExportCapture({
   iconUrl: string | null
   events: RelayShareEvent[]
 }) {
-  // One row for a few events; otherwise women's row, then men's (mixed at its end), types in columns.
-  const rows = relayShareRows(events)
-  const columns = Math.max(1, rows[0]?.length ?? 1)
+  // One row for a few events; otherwise women's row, then men's, types in columns, and each mixed
+  // relay in a column of its own centered between both rows.
+  const { rows, spanning } = relayShareLayout(events)
+  const columns = Math.max(1, (rows[0]?.length ?? 1) + spanning.length)
   const gridRef = useRef<HTMLDivElement>(null)
 
   // 1fr columns in a fit-content grid all size to the widest card; measure that, then pin
@@ -45,19 +46,41 @@ export default function RelaysExportCapture({
       <div ref={gridRef} className="grid w-fit items-start gap-x-4 gap-y-5">
         {rows.flat().map((event, i) =>
           event ? (
-            <section key={`${event.number ?? ""}-${event.name}`} className="flex min-w-0 flex-col gap-2">
-              <EventHeader
-                event={{ slug: event.name, name: event.name, number: event.number, pills: [], state: "cards", cards: [] }}
-              />
-              {publishedSummaryCards(event.relays, null).map((card) => (
-                <SummaryCard key={card.key} card={card} clickable={false} />
-              ))}
-            </section>
+            <ExportEvent key={`${event.number ?? ""}-${event.name}`} event={event} />
           ) : (
             <div key={`empty-${i}`} aria-hidden />
           )
         )}
+        {spanning.map((event, i) => (
+          <ExportEvent
+            key={`${event.number ?? ""}-${event.name}`}
+            event={event}
+            className="self-center"
+            style={{ gridColumn: rows[0].length + i + 1, gridRow: "1 / span 2" }}
+          />
+        ))}
       </div>
     </div>
+  )
+}
+
+function ExportEvent({
+  event,
+  className = "",
+  style,
+}: {
+  event: RelayShareEvent
+  className?: string
+  style?: CSSProperties
+}) {
+  return (
+    <section className={`flex min-w-0 flex-col gap-2 ${className}`} style={style}>
+      <EventHeader
+        event={{ slug: event.name, name: event.name, number: event.number, pills: [], state: "cards", cards: [] }}
+      />
+      {publishedSummaryCards(event.relays, null).map((card) => (
+        <SummaryCard key={card.key} card={card} clickable={false} />
+      ))}
+    </section>
   )
 }

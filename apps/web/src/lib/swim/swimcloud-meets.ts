@@ -21,6 +21,8 @@ export type SwimCloudMeetRow = {
   round: string
   time: string
   place: number | null
+  /** 2 or 3 for a free-relay "Split", from the relay's lineup on its event page, when the scraper found it. */
+  leg?: number
 }
 
 export type SwimCloudMeetScrape = {
@@ -53,7 +55,7 @@ function roundLetter(round: string): "P" | "F" | "S" | "" {
   return ""
 }
 
-/** Relay leg from SwimCloud's label: 1 for a lead-off, null for a free-relay "Split" (leg 2 or 3). */
+/** Relay leg from SwimCloud's label: 1 for a lead-off, null for a free-relay "Split" (leg 2 or 3, which the label doesn't say). */
 function relayLeg(label: string, medley: boolean): number | null | undefined {
   const l = label.trim().toLowerCase()
   if (l === "leadoff" || l === "lead-off" || (medley && l === "back")) return 1
@@ -119,8 +121,10 @@ export function swimCloudTimesFromMeets(profile: SwimCloudProfileScrape): SwimCl
       const relay = row.event.trim().match(RELAY_LEG)
       if (!relay) continue
       const relayEvent = normalizeEventName(relay[1])
-      const leg = relayLeg(relay[2], /medley/i.test(relayEvent))
-      if (leg === undefined) continue
+      const labeled = relayLeg(relay[2], /medley/i.test(relayEvent))
+      if (labeled === undefined) continue
+      // The scraper reads which of legs 2 and 3 a "Split" was from the relay's event page.
+      const leg = labeled ?? (row.leg === 2 || row.leg === 3 ? row.leg : null)
       const round = roundLetter(row.round)
       const relayRound: RelayRound = round === "P" || round === "F" ? round : ""
 

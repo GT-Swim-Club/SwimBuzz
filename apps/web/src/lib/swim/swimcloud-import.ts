@@ -2,7 +2,7 @@ import type { Prisma } from "@prisma/client"
 import { utcDayKey } from "@swimbuzz/shared"
 import { prisma } from "@/lib/prisma"
 import { withRelaySplitSwims } from "../../../soft-delete-policy"
-import { isRelaySplitSwimTag, RELAY_SPLIT_TAG_PREFIX } from "@/lib/meet/relay-results"
+import { isRelaySplitSwimTag, parseRelaySplitTag, RELAY_SPLIT_TAG_PREFIX } from "@/lib/meet/relay-results"
 import {
   meetDayRange,
   pairSameSwims,
@@ -99,6 +99,68 @@ export async function withoutRecordedSwims<T extends CrossSourceSwim & { tags?: 
     return [...(await unrecorded(flat)), ...newSplits]
   }
   return unrecorded(swims)
+}
+
+/** A split's tags with its leg left blank, as SwimCloud's unnumbered "Split" rows were saved. */
+function unnumberedSplitTags(tags: string): string {
+  const parts = tags.split("|")
+  parts[2] = ""
+  return parts.join("|")
+}
+
+/**
+ * Give SwimCloud relay legs saved as an unnumbered "Split" the leg 2 or 3 a later sync read from
+ * the relay's lineup, so the row says which leg it was and the re-read leg pairs with it. A leg
+ * matches on everything but its leg and day, which must fall within the leg's meet; nothing is
+ * retagged when its numbered twin is already saved or the retag would take another row's place.
+ */
+export async function numberRelaySplits(
+  swims: (SwimInsertWithOccurrence & { relayMeetDays?: SwimDayRange })[]
+): Promise<number> {
+  const legs = swims.filter((s) => {
+    const leg = parseRelaySplitTag(s.tags)?.leg
+    return s.relayMeetDays && (leg === 2 || leg === 3)
+  })
+  if (legs.length === 0) return 0
+
+  const existing = await withRelaySplitSwims(() =>
+    prisma.swim.findMany({
+      where: {
+        tags: { in: [...new Set(legs.flatMap((s) => [s.tags, unnumberedSplitTags(s.tags)]))] },
+        athleteId: { in: [...new Set(legs.map((s) => s.athleteId))] },
+        timeMs: { in: [...new Set(legs.map((s) => s.timeMs))] },
+      },
+      select: { id: true, athleteId: true, event: true, timeMs: true, course: true, tags: true, occurrence: true, date: true, source: true },
+    })
+  )
+  const race = (s: Pick<SwimInsertWithOccurrence, "athleteId" | "event" | "timeMs" | "course">, tags: string) =>
+    [s.athleteId, s.event, s.timeMs, s.course, tags].join("\0")
+  // The unique key a row would hold with the given tags.
+  const slot = (s: Pick<SwimInsertWithOccurrence, "athleteId" | "event" | "timeMs" | "course" | "date" | "occurrence">, tags: string) =>
+    [race(s, tags), s.date.getTime(), s.occurrence].join("\0")
+  const numbered = existing.filter((s) => parseRelaySplitTag(s.tags)?.leg != null)
+  const unnumbered = existing.filter((s) => s.source === SWIMCLOUD_SOURCE && parseRelaySplitTag(s.tags)?.leg == null)
+  const taken = new Set(numbered.map((s) => slot(s, s.tags)))
+
+  const used = new Set<string>()
+  const retags: { id: string; tags: string }[] = []
+  for (const leg of legs) {
+    const { start, end } = leg.relayMeetDays!
+    const inMeet = (s: { date: Date }) => start <= utcDayKey(s.date) && utcDayKey(s.date) <= end
+    if (numbered.some((s) => race(s, s.tags) === race(leg, leg.tags) && inMeet(s))) continue
+    const copies = unnumbered.filter(
+      (s) => !used.has(s.id) && race(s, s.tags) === race(leg, unnumberedSplitTags(leg.tags)) && inMeet(s)
+    )
+    const stale = copies.find((s) => utcDayKey(s.date) === utcDayKey(leg.date)) ?? copies[0]
+    if (!stale || taken.has(slot(stale, leg.tags))) continue
+    used.add(stale.id)
+    taken.add(slot(stale, leg.tags))
+    retags.push({ id: stale.id, tags: leg.tags })
+  }
+  if (retags.length > 0) {
+    await prisma.$transaction(retags.map(({ id, tags }) => prisma.swim.update({ where: { id }, data: { tags } })))
+  }
+  return retags.length
 }
 
 /**

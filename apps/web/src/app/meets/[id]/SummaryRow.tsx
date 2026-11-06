@@ -14,6 +14,7 @@ import {
 } from "react"
 import { flushSync } from "react-dom"
 import { formatDisplayTime, formatOrdinal } from "@/lib/utils"
+import { formatPoints } from "@swimbuzz/shared"
 import SwimDetailModal, { deltaPillClass, formatDelta, type SwimDetail } from "./SwimDetailModal"
 
 export type RowDensity = "cozy" | "compact"
@@ -25,6 +26,8 @@ export type RowResult =
       status?: string
       delta?: string | null
       place?: number
+      /** Points scored (results PDF Points column). */
+      points?: number
       podium?: boolean
     }
   | { kind: "seed"; seed: string; seedRank?: number }
@@ -34,6 +37,8 @@ export type RowDisplay = {
   density: RowDensity
   showRound: boolean
   showHeatLane: boolean
+  /** A points column after place (the results PDF scored this meet). */
+  showPoints?: boolean
 }
 
 const PODIUM_PILL: Record<number, string> = {
@@ -143,17 +148,30 @@ export function SummaryRowResult({
   result,
   compact,
   fluid = false,
+  showPoints = false,
 }: {
   result: RowResult
   compact: boolean
   /** Columns narrowing with the roster summary (see fluidLength); fixed at full width otherwise. */
   fluid?: boolean
+  /** A points column after place — blank on rows that didn't score, so columns line up. */
+  showPoints?: boolean
 }) {
   const pill = compact ? "h-[18px] px-1.5 text-[10px]" : "h-5 px-[7px] text-[11px]"
   const width = (narrow: number, wide: number) => ({ width: fluid ? fluidLength(narrow, wide) : wide })
   const deltaWidth = compact ? width(52, 58) : width(56, 64)
   const timeWidth = compact ? width(64, 70) : width(68, 76)
   const placeWidth = compact ? width(36, 44) : width(40, 48)
+  const pointsWidth = compact ? width(38, 44) : width(42, 48)
+  const pointsColumn = (points?: number) =>
+    showPoints ? (
+      <span
+        style={pointsWidth}
+        className={`shrink-0 whitespace-nowrap text-right text-foreground-tertiary ${compact ? "text-[11px]" : "text-xs"}`}
+      >
+        {points != null ? `${formatPoints(points)} pts` : null}
+      </span>
+    ) : null
 
   if (result.kind === "done") {
     const podium =
@@ -195,6 +213,7 @@ export function SummaryRowResult({
             )
           ) : null}
         </span>
+        {pointsColumn(result.points)}
       </span>
     )
   }
@@ -224,16 +243,20 @@ export function SummaryRowResult({
             <span className={compact ? "pr-1.5" : "pr-[7px]"}>{formatOrdinal(result.seedRank)}</span>
           ) : null}
         </span>
+        {pointsColumn()}
       </span>
     )
   }
   return (
-    <span
-      style={compact ? width(152, 172) : width(164, 188)}
-      className={`shrink-0 text-right font-mono text-foreground-tertiary ${compact ? "text-[13px]" : "text-sm"}`}
-    >
-      —
-    </span>
+    <>
+      <span
+        style={compact ? width(152, 172) : width(164, 188)}
+        className={`shrink-0 text-right font-mono text-foreground-tertiary ${compact ? "text-[13px]" : "text-sm"}`}
+      >
+        —
+      </span>
+      {pointsColumn()}
+    </>
   )
 }
 
@@ -265,6 +288,8 @@ export default function SummaryRow({
   trailing,
   onEdit,
   editLabel,
+  onEditHeatLane,
+  heatLaneLabel,
 }: {
   id?: string
   display: RowDisplay
@@ -295,6 +320,9 @@ export default function SummaryRow({
   /** Coach edit action, offered from the detail modal instead of a row button. */
   onEdit?: () => void
   editLabel?: string
+  /** Coach heat & lane action, also offered from the detail modal. */
+  onEditHeatLane?: () => void
+  heatLaneLabel?: string
 }) {
   const [open, setOpen] = useState(false)
   const compact = display.density === "compact"
@@ -576,7 +604,7 @@ export default function SummaryRow({
           {hlText}
         </span>
       ) : null}
-      <SummaryRowResult result={result} compact={compact} fluid />
+      <SummaryRowResult result={result} compact={compact} fluid showPoints={display.showPoints} />
       {trailing ? (
         <span
           className="-ml-1 flex shrink-0 items-center"
@@ -655,6 +683,15 @@ export default function SummaryRow({
               ? () => {
                   setOpen(false)
                   onEdit()
+                }
+              : undefined
+          }
+          heatLaneLabel={heatLaneLabel}
+          onEditHeatLane={
+            onEditHeatLane
+              ? () => {
+                  setOpen(false)
+                  onEditHeatLane()
                 }
               : undefined
           }

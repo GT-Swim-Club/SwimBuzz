@@ -4,6 +4,7 @@ import { getSession } from "@/lib/auth/session"
 import { prisma } from "@/lib/prisma"
 import { loadMeetIconPng } from "@/lib/meet/meet-icon-png"
 import { buildRosterSummaryPdf, parseRosterSummaryPdfRequest } from "@/lib/meet/roster-summary-pdf"
+import { isEventOrder, type EventOrder } from "@/lib/meet/meet-event-order"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -22,16 +23,41 @@ export async function POST(
   const { id } = await params
   const meet = await prisma.meet.findFirst({
     where: { OR: [{ id }, { slug: id }] },
-    select: { name: true, location: true, school: true, startsAt: true, endsAt: true, timeZone: true, iconUrl: true },
+    select: {
+      name: true,
+      location: true,
+      school: true,
+      startsAt: true,
+      endsAt: true,
+      timeZone: true,
+      iconUrl: true,
+      eventOrder: true,
+    },
   })
   if (!meet) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
   const request = parseRosterSummaryPdfRequest(await req.json().catch(() => null))
   if (!request) return NextResponse.json({ error: "Invalid roster summary" }, { status: 400 })
 
+  // The order of events the client asked for, narrowed to the session its view is filtered to.
+  let eventOrder: EventOrder | null = null
+  if (request.orderOfEvents && isEventOrder(meet.eventOrder)) {
+    const session = request.orderOfEvents.session
+    const sessions = session
+      ? meet.eventOrder.sessions.filter((s) => s.label === session)
+      : meet.eventOrder.sessions
+    eventOrder = { sessions: sessions.length > 0 ? sessions : meet.eventOrder.sessions }
+  }
+
   const iconPng = await loadMeetIconPng(meet.iconUrl)
   const bytes = new Uint8Array(
-    buildRosterSummaryPdf({ meetName: meet.name, details: meetHeaderDetails(meet), iconPng, request }).output("arraybuffer")
+    buildRosterSummaryPdf({
+      meetName: meet.name,
+      details: meetHeaderDetails(meet),
+      iconPng,
+      request,
+      eventOrder,
+    }).output("arraybuffer")
   )
   const filename = rosterSummaryPdfFilename(meet.name, request)
 

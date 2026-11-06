@@ -1436,7 +1436,13 @@ export default function PracticeEditor({
                 />
               </div>
             </div>
-            <div className="flex min-w-0 items-center gap-1.5 sm:min-w-[12rem] sm:flex-[1.6] sm:basis-0">
+          </div>
+          {endBeforeStart && (
+            <p className="text-xs text-red-600 dark:text-red-400">End time must be after start time.</p>
+          )}
+
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="flex min-w-0 items-center gap-1.5 sm:flex-1">
               <InfoIcon kind="location" className={metaIconCls} />
               <label className="sr-only" htmlFor="practice-location">Practice location</label>
               <input
@@ -1456,29 +1462,27 @@ export default function PracticeEditor({
                 }`}
               />
             </div>
-          </div>
-          {endBeforeStart && (
-            <p className="text-xs text-red-600 dark:text-red-400">End time must be after start time.</p>
-          )}
-
-          <div className="flex min-w-0 items-center gap-1.5">
-            <InfoIcon kind="waves" className={metaIconCls} />
-            <span className="shrink-0 tabular-nums text-foreground" aria-label="Total practice distance">
-              {totalDistance}
-            </span>
-            <label className="sr-only" htmlFor="practice-course">Practice course</label>
-            <select
-              id="practice-course"
-              value={form.course}
-              onChange={(e) => updateForm((form) => ({ ...form, course: e.target.value }))}
-              className="w-28 shrink-0 rounded-lg border border-border bg-background px-2 py-2 text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
-            >
-              <option value="SCY">SCY</option>
-              <option value="LCM">LCM</option>
-              <option value="SCM">SCM</option>
-            </select>
-            <InfoIcon kind="tag" className={metaIconCls} />
-            <PracticeTagSelect value={form.tags} availableTags={availableTags} onToggle={toggleTag} />
+            <div className="flex shrink-0 items-center gap-1.5">
+              <InfoIcon kind="waves" className={metaIconCls} />
+              <span className="shrink-0 tabular-nums text-foreground" aria-label="Total practice distance">
+                {totalDistance}
+              </span>
+              <label className="sr-only" htmlFor="practice-course">Practice course</label>
+              <select
+                id="practice-course"
+                value={form.course}
+                onChange={(e) => updateForm((form) => ({ ...form, course: e.target.value }))}
+                className="w-28 shrink-0 rounded-lg border border-border bg-background px-2 py-2 text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+              >
+                <option value="SCY">SCY</option>
+                <option value="LCM">LCM</option>
+                <option value="SCM">SCM</option>
+              </select>
+            </div>
+            <div className="flex min-w-0 items-center gap-1.5 sm:flex-1">
+              <InfoIcon kind="tag" className={metaIconCls} />
+              <PracticeTagSelect value={form.tags} availableTags={availableTags} onToggle={toggleTag} />
+            </div>
           </div>
         </div>
       </header>

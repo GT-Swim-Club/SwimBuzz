@@ -4,7 +4,7 @@ import {
   meetFileName,
   relayLineupRoundLabel,
   relayShareFilename,
-  relayShareRows,
+  relayShareLayout,
   relayShareTime,
   type RelayLineup,
   type RelayShareEvent,
@@ -71,10 +71,11 @@ const PORTRAIT_MIN_GAIN = 1.1
 
 /**
  * The published relays on a single Letter page, laid out like the Share PNG: the meet icon
- * and name, then a women's row and a men's row (mixed at the end), one event per column with
- * its relay cards underneath, lined up across columns by position. The grid scales down as a
- * whole until its widest row and its height fit the page, and every row's events stretch to
- * share the page's full width. Landscape, unless
+ * and name, then a women's row and a men's row, one event per column with its relay cards
+ * underneath, lined up across columns by position, and each mixed relay in a column of its own
+ * centered between both rows. The grid scales down as a whole until its widest row and its
+ * height fit the page, and every row's events stretch to share the width left of the mixed
+ * columns. Landscape, unless
  * the relays are tall enough that portrait keeps the text noticeably bigger.
  */
 export function buildRelaysPdf(input: RelaysPdfInput): jsPDF {
@@ -262,21 +263,40 @@ function drawRelaysPdf(
   const gridTop = baseline + headerGap
 
   // Measure at full size, then scale the grid so its widest row and its height fit the page.
-  const bands = relayShareRows(input.events)
+  const { rows, spanning } = relayShareLayout(input.events)
+  const bands = rows
     .map((row) => row.filter((event): event is RelayShareEvent => event != null))
     .filter((row) => row.length > 0)
-  const columns = Math.max(1, ...bands.map((row) => row.length))
+  const columns = Math.max(1, ...bands.map((row) => row.length)) + spanning.length
   const naturalColumn = Math.max(0, ...input.events.map(eventWidth)) + EXTRA_COLUMN_PT
   const naturalWidth = columns * naturalColumn + (columns - 1) * m.columnGap
-  const naturalHeight = gridHeight(bands)
+  // A mixed column is as tall as one band holding just that event.
+  const contentHeight = () => Math.max(gridHeight(bands), ...spanning.map((event) => gridHeight([[event]])))
+  const naturalHeight = contentHeight()
   const scale = Math.min(1, contentWidth / naturalWidth, (contentBottom - gridTop) / Math.max(1, naturalHeight))
   m = Object.fromEntries(Object.entries(GRID).map(([key, value]) => [key, value * scale])) as typeof GRID
 
-  // Every row spans the full width: its events share the page equally.
+  // Mixed relays take equal columns at the right, each centered between the rows.
+  const spanningColumnWidth = (contentWidth - m.columnGap * (columns - 1)) / columns
+  const bandsWidth = contentWidth - spanning.length * (spanningColumnWidth + m.columnGap)
+  const totalHeight = contentHeight()
+  spanning.forEach((event, index) => {
+    const x = margin + bandsWidth + m.columnGap + index * (spanningColumnWidth + m.columnGap)
+    const top = gridTop + (totalHeight - gridHeight([[event]])) / 2
+    drawEventHeader(event, x, spanningColumnWidth, top)
+    let cardTop = top + m.eventHeaderHeight + m.cardGap
+    event.relays.forEach((relay, relayIndex) => {
+      if (relayIndex > 0) cardTop += m.cardGap
+      drawCard(relay, x, spanningColumnWidth, cardTop)
+      cardTop += cardHeight(relay)
+    })
+  })
+
+  // Every row spans the width left of the mixed columns: its events share it equally.
   let y = gridTop
   bands.forEach((band, bandIndex) => {
     if (bandIndex > 0) y += m.bandGap
-    const columnWidth = (contentWidth - m.columnGap * (band.length - 1)) / band.length
+    const columnWidth = (bandsWidth - m.columnGap * (band.length - 1)) / band.length
     const columnX = (index: number) => margin + index * (columnWidth + m.columnGap)
     band.forEach((event, column) => drawEventHeader(event, columnX(column), columnWidth, y))
     y += m.eventHeaderHeight + m.cardGap

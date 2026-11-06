@@ -47,6 +47,8 @@ export type ParsedMeetResult = {
   tags?: string
   date?: string
   place?: number
+  /** Points scored, from the results PDF's Points column. */
+  points?: number
   heat?: number
   lane?: number
   heatTotal?: number
@@ -257,6 +259,7 @@ export async function importMeetResults({
     meetId: string | null
     tags: string
     place: number | null
+    points: number | null
     source: string
   }[] = []
 
@@ -405,6 +408,7 @@ export async function importMeetResults({
       meetId,
       tags: row.tags ?? "",
       place: row.place ?? null,
+      points: typeof row.points === "number" && Number.isFinite(row.points) ? row.points : null,
       source,
     })
 
@@ -429,8 +433,10 @@ export async function importMeetResults({
     skipDuplicates: true,
   })
 
-  // Re-imports skip duplicate rows — still refresh finish place when provided.
-  const swimsWithPlace = swimsToInsert.filter((s) => s.place != null && s.place > 0)
+  // Re-imports skip duplicate rows — still refresh finish place and points when provided.
+  const swimsWithPlace = swimsToInsert.filter(
+    (s) => (s.place != null && s.place > 0) || s.points != null
+  )
   if (swimsWithPlace.length > 0 && result.count < swimsToInsert.length) {
     const PLACE_UPDATE_BATCH = 5
     for (let i = 0; i < swimsWithPlace.length; i += PLACE_UPDATE_BATCH) {
@@ -447,7 +453,10 @@ export async function importMeetResults({
               tags: swim.tags,
               occurrence: swim.occurrence,
             },
-            data: { place: swim.place },
+            data: {
+              ...(swim.place != null && swim.place > 0 ? { place: swim.place } : {}),
+              ...(swim.points != null ? { points: swim.points } : {}),
+            },
           })
         )
       )

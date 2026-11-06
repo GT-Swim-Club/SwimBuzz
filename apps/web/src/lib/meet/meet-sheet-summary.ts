@@ -1,6 +1,7 @@
 import { formatTime } from "@/lib/utils"
 import { compareRelayEvents, compareSwimEvents, normalizeEventName } from "@/lib/swim/swim-parse"
 import { displayMeetResultTags } from "@/lib/swim/swim-tags"
+import type { CoachHeatLane, HeatLaneFields } from "@swimbuzz/shared"
 import {
   displayRelayLetter,
   effectiveRelayGender,
@@ -47,6 +48,10 @@ export type SheetEntry = {
   /** When prelims/finals are split into separate display rows. */
   resultRound?: "P" | "F" | ""
   startTime?: string | null
+  /** Coach-added heat & lane per round, shown only where no import has that field. */
+  coachHeatLane?: CoachHeatLane
+  /** The heat & lane fields a displayed row shows from coachHeatLane rather than an import. */
+  coachHeatLaneFilled?: Array<keyof HeatLaneFields>
   relayLetter?: string | null
   /** Prelims (P) vs finals (F) relay team — separate rosters allowed. */
   relayRound?: "P" | "F" | ""
@@ -75,6 +80,10 @@ export type SheetEntry = {
   resultPlace?: number
   prelimPlace?: number
   finalPlace?: number
+  /** Points scored (results PDF Points column), per round like the places. */
+  resultPoints?: number
+  prelimPoints?: number
+  finalPoints?: number
   resultStatus?: string
   prelimStatus?: string
   finalStatus?: string
@@ -133,6 +142,10 @@ export type MeetResultEntry = {
   resultPlace?: number
   prelimPlace?: number
   finalPlace?: number
+  /** Points scored (results PDF Points column), per round like the places. */
+  resultPoints?: number
+  prelimPoints?: number
+  finalPoints?: number
   resultStatus?: string
   prelimStatus?: string
   finalStatus?: string
@@ -479,6 +492,9 @@ function mergeMeetResultEntry(
     resultPlace: a.resultPlace ?? b.resultPlace,
     prelimPlace: a.prelimPlace ?? b.prelimPlace,
     finalPlace: a.finalPlace ?? b.finalPlace,
+    resultPoints: a.resultPoints ?? b.resultPoints,
+    prelimPoints: a.prelimPoints ?? b.prelimPoints,
+    finalPoints: a.finalPoints ?? b.finalPoints,
     resultStatus: a.resultStatus ?? b.resultStatus,
     prelimStatus: a.prelimStatus ?? b.prelimStatus,
     finalStatus: a.finalStatus ?? b.finalStatus,
@@ -733,6 +749,17 @@ function applyResultPlace(
   return { ...entry, resultPlace: place }
 }
 
+function applyResultPoints(
+  entry: MeetResultEntry,
+  points: number | null | undefined,
+  tags: string
+): MeetResultEntry {
+  if (points == null || !Number.isFinite(points)) return entry
+  if (isPrelimTag(tags)) return { ...entry, prelimPoints: points }
+  if (isFinalTag(tags)) return { ...entry, finalPoints: points }
+  return { ...entry, resultPoints: points }
+}
+
 type SwimResultInput = {
   id: string
   source: string
@@ -742,6 +769,7 @@ type SwimResultInput = {
   timeMs: number
   tags: string
   place?: number | null
+  points?: number | null
   course: string
   date: string
 }
@@ -802,6 +830,7 @@ export function swimsToMeetResults(swims: SwimResultInput[]): MeetResultEntry[] 
     }
 
     existing = applyResultPlace(existing, swim.place, swim.tags)
+    existing = applyResultPoints(existing, swim.points, swim.tags)
     byKey.set(key, existing)
     swimsByKey.set(key, [...(swimsByKey.get(key) ?? []), swim])
   }
@@ -919,7 +948,10 @@ export function applyRosterNames(
   }
 }
 
-/** Fill in each individual row's gender from the roster where the sheets didn't give one. */
+/**
+ * Fill in each row's gender where the sheets didn't give one: an individual's from the roster, a
+ * relay's from its legs.
+ */
 export function applyRosterGenders(
   summary: SheetSummary | null,
   rosterGenders: Map<string, "M" | "F">
@@ -928,9 +960,11 @@ export function applyRosterGenders(
   return {
     ...summary,
     entries: summary.entries.map((entry) =>
-      entry.entryType === "relay_team" || entry.gender
+      entry.gender
         ? entry
-        : { ...entry, gender: rosterGenders.get(entry.athleteId) ?? entry.gender }
+        : entry.entryType === "relay_team"
+          ? { ...entry, gender: effectiveRelayGender(entry, rosterGenders) || entry.gender }
+          : { ...entry, gender: rosterGenders.get(entry.athleteId) ?? entry.gender }
     ),
   }
 }
@@ -1355,6 +1389,7 @@ export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] 
                 swimId: entry.resultSwimId ?? entry.finalSwimId ?? entry.swimId,
                 resultTime: entry.resultTime ?? entry.finalTime,
                 resultPlace: entry.resultPlace ?? entry.finalPlace,
+                resultPoints: entry.resultPoints ?? entry.finalPoints,
                 resultStatus:
                   entry.resultStatus ??
                   (entry.finalStatus && entry.finalStatus !== "NS"
@@ -1363,6 +1398,7 @@ export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] 
                 finalTime: undefined,
                 finalStatus: undefined,
                 finalPlace: undefined,
+                finalPoints: undefined,
                 finalHeat: undefined,
                 finalLane: undefined,
                 finalHeatTotal: undefined,
@@ -1520,6 +1556,7 @@ function expandRelayTeamRows(
           (entry.relayRound === "P" ? entry.heatTotal : undefined),
         resultTime: entry.prelimTime,
         resultPlace: entry.prelimPlace,
+        resultPoints: entry.prelimPoints,
       },
       {
         ...entry,
@@ -1532,6 +1569,8 @@ function expandRelayTeamRows(
         resultTime: entry.finalTime ?? (entry.relayRound === "F" ? entry.resultTime : undefined),
         resultPlace:
           entry.finalPlace ?? (entry.relayRound === "F" ? entry.resultPlace : undefined),
+        resultPoints:
+          entry.finalPoints ?? (entry.relayRound === "F" ? entry.resultPoints : undefined),
         seedTime: entry.finalsSheetSeedTime,
         seedRank: entry.finalsSheetSeedRank,
       },
@@ -2461,8 +2500,17 @@ function isManualRosterSeed(entry: SheetEntry): boolean {
 function mergeEntries(a: SheetEntry, b: SheetEntry): SheetEntry {
   const aManual = isManualRosterSeed(a)
   const bManual = isManualRosterSeed(b)
-  // Prefer psych/entries/heat/results over coach-added roster seeds.
-  const preferB = aManual && !bManual
+  // A relay lineup published from the builder replaces the swimmers a pre-meet sheet lists for
+  // that team (importing a newer sheet drops it instead); results always win.
+  const imported = aManual ? b : a
+  const publishedLineupWins =
+    aManual !== bManual &&
+    a.entryType === "relay_team" &&
+    b.entryType === "relay_team" &&
+    Boolean(imported.relaySwimmers?.length) &&
+    !hasRelayResultData(imported)
+  // Otherwise prefer psych/entries/heat/results over coach-added roster seeds.
+  const preferB = publishedLineupWins ? bManual : aManual && !bManual
   const primary = preferB ? b : a
   const secondary = preferB ? a : b
   const preferPrimarySwimmers = aManual !== bManual
@@ -2548,13 +2596,19 @@ function mergeEntries(a: SheetEntry, b: SheetEntry): SheetEntry {
     resultPlace: primary.resultPlace ?? secondary.resultPlace,
     prelimPlace: primary.prelimPlace ?? secondary.prelimPlace,
     finalPlace: primary.finalPlace ?? secondary.finalPlace,
+    resultPoints: primary.resultPoints ?? secondary.resultPoints,
+    prelimPoints: primary.prelimPoints ?? secondary.prelimPoints,
+    finalPoints: primary.finalPoints ?? secondary.finalPoints,
     resultStatus: primary.resultStatus ?? secondary.resultStatus,
     prelimStatus: primary.prelimStatus ?? secondary.prelimStatus,
     finalStatus: primary.finalStatus ?? secondary.finalStatus,
     resultTags: primary.resultTags ?? secondary.resultTags,
     alternate: Boolean(primary.alternate || secondary.alternate),
-    // Once sheet/results data is present, treat as imported for edit/delete rules.
-    manual: aManual && bManual ? true : aManual !== bManual ? false : Boolean(a.manual || b.manual),
+    // Once sheet/results data is present, treat as imported for edit/delete rules — unless the
+    // published lineup replaced it, which staff can still unpublish.
+    manual: publishedLineupWins
+      ? true
+      : aManual && bManual ? true : aManual !== bManual ? false : Boolean(a.manual || b.manual),
     swimId: primary.swimId ?? secondary.swimId,
     course: primary.course ?? secondary.course,
     date: primary.date ?? secondary.date,
@@ -2648,6 +2702,9 @@ export function mergeSheetSummaries(
         resultPlace: result.resultPlace ?? existing.resultPlace,
         prelimPlace: result.prelimPlace ?? existing.prelimPlace,
         finalPlace: result.finalPlace ?? existing.finalPlace,
+        resultPoints: result.resultPoints ?? existing.resultPoints,
+        prelimPoints: result.prelimPoints ?? existing.prelimPoints,
+        finalPoints: result.finalPoints ?? existing.finalPoints,
         resultStatus: result.resultStatus ?? existing.resultStatus,
         prelimStatus: result.prelimStatus ?? existing.prelimStatus,
         finalStatus: result.finalStatus ?? existing.finalStatus,
@@ -2691,6 +2748,9 @@ export function mergeSheetSummaries(
         resultPlace: result.resultPlace,
         prelimPlace: result.prelimPlace,
         finalPlace: result.finalPlace,
+        resultPoints: result.resultPoints,
+        prelimPoints: result.prelimPoints,
+        finalPoints: result.finalPoints,
         resultStatus: result.resultStatus,
         prelimStatus: result.prelimStatus,
         finalStatus: result.finalStatus,

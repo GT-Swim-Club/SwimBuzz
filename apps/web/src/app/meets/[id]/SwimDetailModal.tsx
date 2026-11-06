@@ -9,12 +9,15 @@ import { sanitizeRelaySplitTime } from "@/lib/meet/relay-results"
 import { formatDisplayTime, formatOrdinal, formatSeedTimeDelta, parseTime } from "@/lib/utils"
 import { useCanScrollDown } from "@/lib/use-can-scroll-down"
 import { useEscapeToClose } from "@/lib/use-escape-to-close"
+import { formatPoints } from "@swimbuzz/shared"
 
 export type DetailRound = {
   label: string
   time?: string
   status?: string
   place?: number
+  /** Points scored (results PDF Points column). */
+  points?: number
   /** Place counts as a podium finish (finals-type round). */
   podium?: boolean
   seedTime?: string
@@ -365,12 +368,17 @@ export default function SwimDetailModal({
   onClose,
   onEdit,
   editLabel = "Edit",
+  onEditHeatLane,
+  heatLaneLabel = "Heat & lane",
 }: {
   detail: SwimDetail
   onClose: () => void
   /** Shown as the footer's primary action for coaches who can edit this row. */
   onEdit?: () => void
   editLabel?: string
+  /** For coaches: add the heat & lane no import has given this row. */
+  onEditHeatLane?: () => void
+  heatLaneLabel?: string
 }) {
   const [mounted, setMounted] = useState(false)
   const [chosenStep, setChosenStep] = useState<number | null>(null)
@@ -730,7 +738,7 @@ export default function SwimDetailModal({
                       <span className="text-amber-700 dark:text-amber-400">{last.status}</span>
                     )}
                   </div>
-                  {(headDelta || last.place != null) && (
+                  {(headDelta || last.place != null || last.points != null) && (
                     <div className="mt-1.5 flex items-center justify-end gap-2">
                       {headDelta ? (
                         <span
@@ -740,6 +748,11 @@ export default function SwimDetailModal({
                         </span>
                       ) : null}
                       {last.place != null ? <PlaceText round={last} /> : null}
+                      {last.points != null ? (
+                        <span className="text-sm tabular-nums text-foreground-tertiary">
+                          {formatPoints(last.points)} pts
+                        </span>
+                      ) : null}
                     </div>
                   )}
                 </div>
@@ -776,8 +789,13 @@ export default function SwimDetailModal({
                 <div className="grid grid-cols-[64px_1fr_1fr] border-t border-border">
                   <span className="px-3 py-2 text-xs text-foreground-tertiary">Place</span>
                   {[first, last].map((r) => (
-                    <span key={r.label} className="border-l border-border px-3 py-2">
+                    <span key={r.label} className="flex items-center gap-2 border-l border-border px-3 py-2">
                       <PlaceText round={r} />
+                      {r.points != null && r.place != null ? (
+                        <span className="text-xs tabular-nums text-foreground-tertiary">
+                          {formatPoints(r.points)} pts
+                        </span>
+                      ) : null}
                     </span>
                   ))}
                 </div>
@@ -869,6 +887,15 @@ export default function SwimDetailModal({
                 <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
               </svg>
               {editLabel}
+            </button>
+          ) : null}
+          {onEditHeatLane ? (
+            <button
+              type="button"
+              onClick={onEditHeatLane}
+              className="flex-1 whitespace-nowrap rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-fill"
+            >
+              {heatLaneLabel}
             </button>
           ) : null}
           <button

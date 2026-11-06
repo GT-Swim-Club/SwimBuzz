@@ -1721,7 +1721,7 @@
       "isRelay": false,
       "lane": 1,
       "name": "Kolotev, Julia",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 18,
       "seedTime": "1:21.65",
       "team": ""
@@ -1736,7 +1736,7 @@
       "isRelay": false,
       "lane": 2,
       "name": "Layton, Tori",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 16,
       "seedTime": "1:21.00",
       "team": ""
@@ -1751,7 +1751,7 @@
       "isRelay": false,
       "lane": 3,
       "name": "Comesky, Olivia",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 14,
       "seedTime": "1:20.25",
       "team": ""
@@ -1766,7 +1766,7 @@
       "isRelay": false,
       "lane": 6,
       "name": "Prassad, Geya",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 15,
       "seedTime": "1:20.69",
       "team": ""
@@ -4419,7 +4419,7 @@
       "isRelay": false,
       "lane": 3,
       "name": "Chatson, NikkiR",
-      "round": "prelims",
+      "round": "finals",
       "team": "",
       "timeStatus": "NT"
     },
@@ -4433,7 +4433,7 @@
       "isRelay": false,
       "lane": 6,
       "name": "Barr, Khalilah",
-      "round": "prelims",
+      "round": "finals",
       "team": "",
       "timeStatus": "NT"
     },
@@ -4447,7 +4447,7 @@
       "isRelay": false,
       "lane": 7,
       "name": "Pham, Haily",
-      "round": "prelims",
+      "round": "finals",
       "team": "",
       "timeStatus": "NT"
     },
@@ -6967,7 +6967,7 @@
       "isRelay": false,
       "lane": 2,
       "name": "Faulkner, Bree",
-      "round": "prelims",
+      "round": "finals",
       "team": "",
       "timeStatus": "NT"
     },
@@ -6981,7 +6981,7 @@
       "isRelay": false,
       "lane": 3,
       "name": "Clark, Taylor",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 59,
       "seedTime": "1:12.00",
       "team": ""
@@ -6996,7 +6996,7 @@
       "isRelay": false,
       "lane": 4,
       "name": "Reed, Izzy",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 56,
       "seedTime": "1:10.00",
       "team": ""
@@ -7011,7 +7011,7 @@
       "isRelay": false,
       "lane": 5,
       "name": "McClease, Aalysah",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 58,
       "seedTime": "1:10.62",
       "team": ""
@@ -7026,7 +7026,7 @@
       "isRelay": false,
       "lane": 6,
       "name": "Wilderson, Breanna",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 60,
       "seedTime": "1:13.91",
       "team": ""
@@ -8419,7 +8419,7 @@
           "name": "Selikoff, Emily"
         }
       ],
-      "round": "prelims",
+      "round": "finals",
       "team": "ELON-NC",
       "timeStatus": "NT"
     },
@@ -8434,7 +8434,7 @@
       "lane": 2,
       "relayLetter": "B",
       "relaySwimmers": [],
-      "round": "prelims",
+      "round": "finals",
       "team": "ECU-NC",
       "timeStatus": "NT"
     },
@@ -8465,7 +8465,7 @@
           "name": "Sostak, Sydney"
         }
       ],
-      "round": "prelims",
+      "round": "finals",
       "team": "MSST-US",
       "timeStatus": "NT"
     },
@@ -8480,7 +8480,7 @@
       "lane": 4,
       "relayLetter": "A",
       "relaySwimmers": [],
-      "round": "prelims",
+      "round": "finals",
       "team": "SCAR-SC",
       "timeStatus": "NT"
     },
@@ -8516,7 +8516,7 @@
           "name": "Griend, Lucy"
         }
       ],
-      "round": "prelims",
+      "round": "finals",
       "team": "ELON-NC",
       "timeStatus": "NT"
     },
@@ -8552,7 +8552,7 @@
           "name": "Rutig, Lily"
         }
       ],
-      "round": "prelims",
+      "round": "finals",
       "team": "HPU-NC",
       "timeStatus": "NT"
     },
@@ -8567,7 +8567,7 @@
       "lane": 7,
       "relayLetter": "B",
       "relaySwimmers": [],
-      "round": "prelims",
+      "round": "finals",
       "team": "SCAR-SC",
       "timeStatus": "NT"
     },
@@ -8603,7 +8603,7 @@
           "name": "Case, Charlotte"
         }
       ],
-      "round": "prelims",
+      "round": "finals",
       "team": "UNCW-NC",
       "timeStatus": "NT"
     },
@@ -10097,7 +10097,7 @@
       "isRelay": false,
       "lane": 2,
       "name": "Zdilla, Noah",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 11,
       "seedTime": "2:01.00",
       "team": ""
@@ -10112,7 +10112,7 @@
       "isRelay": false,
       "lane": 3,
       "name": "Graham, Zachary",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 9,
       "seedTime": "2:00.07",
       "team": ""
@@ -10127,7 +10127,7 @@
       "isRelay": false,
       "lane": 4,
       "name": "Rice, Thomas",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 7,
       "seedTime": "1:58.69",
       "team": ""
@@ -10142,7 +10142,7 @@
       "isRelay": false,
       "lane": 5,
       "name": "Mitchell, Daniel",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 8,
       "seedTime": "1:58.88",
       "team": ""
@@ -10157,7 +10157,7 @@
       "isRelay": false,
       "lane": 6,
       "name": "Skidmore, Billy",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 10,
       "seedTime": "2:00.69",
       "team": ""
@@ -10172,7 +10172,7 @@
       "isRelay": false,
       "lane": 7,
       "name": "Weitzel, Logan",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 12,
       "seedTime": "2:05.69",
       "team": ""
@@ -10187,7 +10187,7 @@
       "isRelay": false,
       "lane": 8,
       "name": "Yamomato, Taro",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 14,
       "seedTime": "2:15.00",
       "team": ""
@@ -14132,7 +14132,7 @@
       "isRelay": false,
       "lane": 1,
       "name": "Munger, Audrey",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 7,
       "seedTime": "25.80",
       "team": ""
@@ -14147,7 +14147,7 @@
       "isRelay": false,
       "lane": 2,
       "name": "Roberts, Lauren",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 5,
       "seedTime": "25.50",
       "team": ""
@@ -14162,7 +14162,7 @@
       "isRelay": false,
       "lane": 3,
       "name": "Donnick, Addy",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 3,
       "seedTime": "25.14",
       "team": ""
@@ -14177,7 +14177,7 @@
       "isRelay": false,
       "lane": 4,
       "name": "Neira, AddyG",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 1,
       "seedTime": "24.29",
       "team": ""
@@ -14192,7 +14192,7 @@
       "isRelay": false,
       "lane": 6,
       "name": "Powers, Alexis",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 4,
       "seedTime": "25.49",
       "team": ""
@@ -14207,7 +14207,7 @@
       "isRelay": false,
       "lane": 8,
       "name": "Haberacker, Scarlett",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 8,
       "seedTime": "26.00",
       "team": ""

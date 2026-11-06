@@ -134,8 +134,12 @@ export function optimisticPublished(
   target: Pick<RelayTarget, "relayEvent" | "gender" | "published">,
   teams: LineupTeam[]
 ): RelayLineup[] {
-  // Publishing replaces every builder-made relay without a round; imported ones stay.
-  const kept = target.published.filter((relay) => !relay.manual || relay.round !== "")
+  // Publishing replaces every builder-made relay without a round, and an imported one without a
+  // round merges into the published relay with its letter; relays with a round stay.
+  const letters = new Set(teams.map((team) => team.letter))
+  const kept = target.published.filter(
+    (relay) => relay.round !== "" || (!relay.manual && !letters.has(relay.letter))
+  )
   const gender: RelayLineup["gender"] =
     target.gender === "F" || target.gender === "M" || target.gender === "X" ? target.gender : ""
   return [

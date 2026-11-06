@@ -18742,7 +18742,7 @@
       "isRelay": false,
       "lane": 1,
       "name": "Walter, Aiden",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 7,
       "seedTime": "1:55.34",
       "team": ""
@@ -18757,7 +18757,7 @@
       "isRelay": false,
       "lane": 2,
       "name": "Ben Yoseph, Itay",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 5,
       "seedTime": "1:54.88",
       "team": ""
@@ -18772,7 +18772,7 @@
       "isRelay": false,
       "lane": 3,
       "name": "Houston, Charlie",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 3,
       "seedTime": "1:53.95",
       "team": ""
@@ -18787,7 +18787,7 @@
       "isRelay": false,
       "lane": 4,
       "name": "Szabo, Marcus",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 1,
       "seedTime": "1:50.07",
       "team": ""
@@ -18802,7 +18802,7 @@
       "isRelay": false,
       "lane": 5,
       "name": "Batchelor, Hugo",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 2,
       "seedTime": "1:53.17",
       "team": ""
@@ -18817,7 +18817,7 @@
       "isRelay": false,
       "lane": 6,
       "name": "Smith, Christian",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 4,
       "seedTime": "1:54.07",
       "team": ""
@@ -18832,7 +18832,7 @@
       "isRelay": false,
       "lane": 7,
       "name": "Massey, Tristan",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 6,
       "seedTime": "1:55.30",
       "team": ""
@@ -18847,7 +18847,7 @@
       "isRelay": false,
       "lane": 8,
       "name": "Weinand, Christ",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 8,
       "seedTime": "1:55.38",
       "team": ""
@@ -20847,7 +20847,7 @@
       "lane": 1,
       "relayLetter": null,
       "relaySwimmers": [],
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 7,
       "seedTime": "3:24.23",
       "team": "LU"
@@ -20863,7 +20863,7 @@
       "lane": 2,
       "relayLetter": null,
       "relaySwimmers": [],
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 5,
       "seedTime": "3:23.31",
       "team": "CPSC"
@@ -20879,7 +20879,7 @@
       "lane": 3,
       "relayLetter": null,
       "relaySwimmers": [],
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 3,
       "seedTime": "3:20.90",
       "team": "PURD"
@@ -20895,7 +20895,7 @@
       "lane": 4,
       "relayLetter": null,
       "relaySwimmers": [],
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 1,
       "seedTime": "3:16.00",
       "team": "UNCCH"
@@ -20911,7 +20911,7 @@
       "lane": 5,
       "relayLetter": null,
       "relaySwimmers": [],
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 2,
       "seedTime": "3:20.49",
       "team": "NCSU"
@@ -20927,7 +20927,7 @@
       "lane": 6,
       "relayLetter": null,
       "relaySwimmers": [],
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 4,
       "seedTime": "3:22.49",
       "team": "CSOSU"
@@ -20943,7 +20943,7 @@
       "lane": 7,
       "relayLetter": null,
       "relaySwimmers": [],
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 6,
       "seedTime": "3:23.80",
       "team": "UGAS"
@@ -20959,7 +20959,7 @@
       "lane": 8,
       "relayLetter": null,
       "relaySwimmers": [],
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 8,
       "seedTime": "3:24.69",
       "team": "GTSC"
@@ -51217,7 +51217,7 @@
       "isRelay": false,
       "lane": 1,
       "name": "Lahmann, Nolan",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 15,
       "seedTime": "1:54.95",
       "team": ""
@@ -51232,7 +51232,7 @@
       "isRelay": false,
       "lane": 2,
       "name": "Le, Conner",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 13,
       "seedTime": "1:54.56",
       "team": ""
@@ -51247,7 +51247,7 @@
       "isRelay": false,
       "lane": 3,
       "name": "Eachus, Robert",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 11,
       "seedTime": "1:54.31",
       "team": ""
@@ -51262,7 +51262,7 @@
       "isRelay": false,
       "lane": 4,
       "name": "Hayashi, Yuki",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 9,
       "seedTime": "1:54.08",
       "team": ""
@@ -51277,7 +51277,7 @@
       "isRelay": false,
       "lane": 5,
       "name": "Pak, Joshua",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 10,
       "seedTime": "1:54.21",
       "team": ""
@@ -51292,7 +51292,7 @@
       "isRelay": false,
       "lane": 6,
       "name": "Huang, Ryan",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 12,
       "seedTime": "1:54.55",
       "team": ""
@@ -51307,7 +51307,7 @@
       "isRelay": false,
       "lane": 7,
       "name": "Girle, Matthew",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 13,
       "seedTime": "1:54.56",
       "team": ""
@@ -51322,7 +51322,7 @@
       "isRelay": false,
       "lane": 8,
       "name": "Smith, Christian",
-      "round": "prelims",
+      "round": "finals",
       "seedRank": 16,
       "seedTime": "1:55.39",
       "team": ""

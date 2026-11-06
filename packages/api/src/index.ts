@@ -7,6 +7,7 @@ import type {
   PracticeScope,
   PracticeSummary,
   PracticeVisibility,
+  SetHeatLaneInput,
   SessionUser,
 } from "@swimbuzz/shared"
 
@@ -558,6 +559,14 @@ export function createApiClient(options: ApiClientOptions = {}) {
       return request(`/api/meets/${meetId}/relays`, {
         method: "POST",
         body: JSON.stringify(body),
+      })
+    },
+
+    /** Coach heat & lane for one roster summary row's round; null fields clear it. */
+    setMeetHeatLane(meetId: string, input: SetHeatLaneInput) {
+      return request<{ ok: true }>(`/api/meets/${meetId}/heat-lane`, {
+        method: "PUT",
+        body: JSON.stringify(input),
       })
     },
 

@@ -31,6 +31,8 @@ export type ParsedRelayResult = {
   time: string
   tags?: string
   place?: number
+  /** Points scored, from the results PDF's Points column. */
+  points?: number
   date?: string
   heat?: number
   lane?: number
@@ -214,7 +216,7 @@ export function isRelayLeadoffSwimTag(tags: string): boolean {
  */
 export const RELAY_SPLIT_TAG_PREFIX = "SPLIT|"
 
-/** Swim tags for a relay split; leg is null when SwimCloud only says "Split" (leg 2 or 3). */
+/** Swim tags for a relay split; leg is null when SwimCloud only says "Split" (leg 2 or 3) and the sync couldn't place it. */
 export function relaySplitSwimTags(relayEvent: string, leg: number | null, relayRound: RelayRound = ""): string {
   return `${RELAY_SPLIT_TAG_PREFIX}${normalizeEventName(relayEvent)}|${leg ?? ""}|${relayRound}`
 }
@@ -354,6 +356,7 @@ export function matchRelayResultsToRoster(
       relaySwimmers,
       resultTime: row.time,
       resultPlace: place,
+      ...(row.points != null ? { resultPoints: row.points } : {}),
       resultTags: row.tags ?? "",
       manual: false,
       ...(heat != null ? { heat } : {}),
@@ -410,6 +413,8 @@ export function coerceParsedRelayResults(raw: unknown): ParsedRelayResult[] {
     const heatTotal =
       typeof r.heatTotal === "number" && heat != null ? r.heatTotal : undefined
     const seedTime = String(r.seedTime ?? "").trim() || undefined
+    const points =
+      typeof r.points === "number" && Number.isFinite(r.points) ? r.points : undefined
     out.push({
       entryType: "relay_team",
       event,
@@ -419,6 +424,7 @@ export function coerceParsedRelayResults(raw: unknown): ParsedRelayResult[] {
       time,
       tags: r.tags ? String(r.tags) : undefined,
       place,
+      ...(points != null ? { points } : {}),
       date: r.date ? String(r.date) : undefined,
       ...(heat != null ? { heat } : {}),
       ...(lane != null ? { lane } : {}),

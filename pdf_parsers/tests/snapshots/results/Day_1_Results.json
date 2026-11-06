@@ -10,6 +10,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 1,
+      "points": 40.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -39,6 +40,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 2,
+      "points": 34.0,
       "relayLetter": "A",
       "relaySwimmers": [],
       "tags": "",
@@ -51,6 +53,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 3,
+      "points": 32.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -76,6 +79,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 4,
+      "points": 30.0,
       "relayLetter": "A",
       "relaySwimmers": [],
       "tags": "",
@@ -88,6 +92,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 5,
+      "points": 28.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -95,8 +100,16 @@
           "name": "Crum, Josie"
         },
         {
+          "leg": 2,
+          "name": "Carney, KC"
+        },
+        {
           "leg": 3,
           "name": "Granger, Bermuda"
+        },
+        {
+          "leg": 4,
+          "name": "Dobie, Lauren"
         }
       ],
       "tags": "",
@@ -109,6 +122,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 6,
+      "points": 26.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -116,8 +130,16 @@
           "name": "Hauser, Genny"
         },
         {
+          "leg": 2,
+          "name": "Lachowski, Amelia"
+        },
+        {
           "leg": 3,
           "name": "Kondratick, Morgan"
+        },
+        {
+          "leg": 4,
+          "name": "Baxter, Lily"
         }
       ],
       "tags": "",
@@ -130,6 +152,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 7,
+      "points": 24.0,
       "relayLetter": "A",
       "relaySwimmers": [],
       "tags": "",
@@ -142,6 +165,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 8,
+      "points": 22.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -171,6 +195,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 9,
+      "points": 18.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -200,6 +225,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 10,
+      "points": 14.0,
       "relayLetter": "C",
       "relaySwimmers": [
         {
@@ -229,6 +255,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 11,
+      "points": 12.0,
       "relayLetter": "B",
       "relaySwimmers": [],
       "tags": "",
@@ -241,6 +268,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 12,
+      "points": 10.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -270,6 +298,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 15,
+      "points": 4.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -277,8 +306,16 @@
           "name": "Grow, Ashtyn"
         },
         {
+          "leg": 2,
+          "name": "Bretting, Avery"
+        },
+        {
           "leg": 3,
           "name": "Pratt, Tatum"
+        },
+        {
+          "leg": 4,
+          "name": "Eades, Abigail"
         }
       ],
       "tags": "",
@@ -291,6 +328,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 16,
+      "points": 2.0,
       "relayLetter": "B",
       "relaySwimmers": [],
       "tags": "",
@@ -380,8 +418,16 @@
           "name": "Kennedy, Carlyle"
         },
         {
+          "leg": 2,
+          "name": "Malzer, Rebecca"
+        },
+        {
           "leg": 3,
           "name": "Linz, Meghan"
+        },
+        {
+          "leg": 4,
+          "name": "Cleaver, Avery"
         }
       ],
       "tags": "",
@@ -401,8 +447,16 @@
           "name": "Cohn, Olivia"
         },
         {
+          "leg": 2,
+          "name": "Cottone, Ava"
+        },
+        {
           "leg": 3,
           "name": "Mower, Margaret"
+        },
+        {
+          "leg": 4,
+          "name": "Shane, Hennessey"
         }
       ],
       "tags": "",
@@ -492,8 +546,16 @@
           "name": "DeWalt, Kaitlyn"
         },
         {
+          "leg": 2,
+          "name": "Dowd, Lexi"
+        },
+        {
           "leg": 3,
           "name": "McEntire, Aylene"
+        },
+        {
+          "leg": 4,
+          "name": "Larsen, Megan"
         }
       ],
       "tags": "",
@@ -506,6 +568,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 1,
+      "points": 40.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -535,6 +598,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 2,
+      "points": 34.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -564,6 +628,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 3,
+      "points": 32.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -593,6 +658,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 4,
+      "points": 30.0,
       "relayLetter": "A",
       "relaySwimmers": [],
       "tags": "",
@@ -605,6 +671,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 5,
+      "points": 28.0,
       "relayLetter": null,
       "relaySwimmers": [
         {
@@ -634,6 +701,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 6,
+      "points": 26.0,
       "relayLetter": "A",
       "relaySwimmers": [],
       "tags": "",
@@ -646,6 +714,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 7,
+      "points": 24.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -653,8 +722,16 @@
           "name": "Lan, Yuanrui"
         },
         {
+          "leg": 2,
+          "name": "Radgowski, Emmett"
+        },
+        {
           "leg": 3,
           "name": "Gibbs, Thomas"
+        },
+        {
+          "leg": 4,
+          "name": "Sleptsov, Alex"
         }
       ],
       "tags": "",
@@ -667,6 +744,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 8,
+      "points": 22.0,
       "relayLetter": "C",
       "relaySwimmers": [
         {
@@ -696,6 +774,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 9,
+      "points": 18.0,
       "relayLetter": "A",
       "relaySwimmers": [],
       "tags": "",
@@ -708,6 +787,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 10,
+      "points": 14.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -715,8 +795,16 @@
           "name": "Armentrout, Owen"
         },
         {
+          "leg": 2,
+          "name": "Betts, Charlie"
+        },
+        {
           "leg": 3,
           "name": "Cloutier, Briggs"
+        },
+        {
+          "leg": 4,
+          "name": "Ivan, David"
         }
       ],
       "tags": "",
@@ -729,6 +817,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 11,
+      "points": 12.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -746,6 +835,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 12,
+      "points": 10.0,
       "relayLetter": null,
       "relaySwimmers": [
         {
@@ -775,6 +865,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 13,
+      "points": 8.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -804,6 +895,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 14,
+      "points": 6.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -833,6 +925,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 15,
+      "points": 4.0,
       "relayLetter": "B",
       "relaySwimmers": [],
       "tags": "",
@@ -845,6 +938,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 16,
+      "points": 2.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -852,8 +946,16 @@
           "name": "Harris, Jaedin"
         },
         {
+          "leg": 2,
+          "name": "Rantala, Mikael"
+        },
+        {
           "leg": 3,
           "name": "Graham, Zach"
+        },
+        {
+          "leg": 4,
+          "name": "White, Deacon"
         }
       ],
       "tags": "",
@@ -902,8 +1004,16 @@
           "name": "Marsee, Bennett"
         },
         {
+          "leg": 2,
+          "name": "Miller, Shawn"
+        },
+        {
           "leg": 3,
           "name": "Miley, Kian"
+        },
+        {
+          "leg": 4,
+          "name": "Fowler, Matthew"
         }
       ],
       "tags": "",
@@ -923,8 +1033,16 @@
           "name": "Hall, Alex"
         },
         {
+          "leg": 2,
+          "name": "Van Wagner, Wyatt"
+        },
+        {
           "leg": 3,
           "name": "Brandwein, Jared"
+        },
+        {
+          "leg": 4,
+          "name": "Gress, Peter"
         }
       ],
       "tags": "",
@@ -1047,6 +1165,10 @@
           "name": "Durham, Will"
         },
         {
+          "leg": 3,
+          "name": "Cook, Basil"
+        },
+        {
           "leg": 4,
           "name": "Piotrowski, John"
         }
@@ -1089,8 +1211,10 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "F",
       "name": "Miller, Rita",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "4:54.86"
@@ -1098,8 +1222,10 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "F",
       "name": "Jewell, Brynn",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "5:08.26"
@@ -1107,8 +1233,10 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "F",
       "name": "Wang, Mingqi",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "5:15.32"
@@ -1116,8 +1244,10 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "F",
       "name": "Wigglesworth, Elena",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "5:19.51"
@@ -1125,8 +1255,10 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "F",
       "name": "VanderBroek, Allie",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "5:23.71"
@@ -1134,8 +1266,10 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "F",
       "name": "Castle, Kendall",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "5:24.90"
@@ -1143,8 +1277,10 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "F",
       "name": "Yang, Amy",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "5:39.57"
@@ -1152,8 +1288,10 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "F",
       "name": "Hall, Amber",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "5:39.77"
@@ -1161,8 +1299,10 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "M",
       "name": "Altera, Ryan",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "4:21.88"
@@ -1170,8 +1310,10 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "M",
       "name": "Rohovit, Hunter",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "4:30.42"
@@ -1179,8 +1321,10 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "M",
       "name": "Strudgeon, Ryan",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": null,
       "time": "4:31.95"
@@ -1188,8 +1332,10 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "M",
       "name": "Suchyj, Tyler",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": null,
       "time": "4:35.93"
@@ -1197,8 +1343,10 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "M",
       "name": "Rice, Thomas",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "4:44.01"
@@ -1206,8 +1354,10 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "M",
       "name": "Specht, Sam",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "Duke Club Swimming-NC",
       "time": "4:51.33"
@@ -1215,8 +1365,10 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "M",
       "name": "Halbach, Jake",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "UNC Charlotte-NC",
       "time": "4:51.79"
@@ -1224,8 +1376,10 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "M",
       "name": "Jampole, Nolan",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": null,
       "time": "4:57.56"
@@ -1233,8 +1387,10 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "M",
       "name": "Mu, James",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": "Duke Club Swimming-NC",
       "time": "5:04.24"
@@ -1242,8 +1398,10 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "M",
       "name": "Reynolds, Jack",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": "Ung Swim Club-GA",
       "time": "5:14.27"
@@ -1251,17 +1409,21 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "M",
       "name": "Corkey, William",
       "place": 11,
+      "points": 6.0,
       "tags": "",
-      "team": null,
+      "team": "Elon University Club Swim-NC",
       "time": "5:19.18"
     },
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Carlton, Delaney",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "25.16"
@@ -1269,8 +1431,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Asner, Adira",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": null,
       "time": "25.26"
@@ -1278,8 +1442,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Freund, Gabby",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "27.11"
@@ -1287,8 +1453,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Major, Carson",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "27.57"
@@ -1296,8 +1464,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Dobie, Lauren",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": null,
       "time": "27.83"
@@ -1305,8 +1475,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Fields, Colby",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": null,
       "time": "27.93"
@@ -1314,8 +1486,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Kondratick, Morgan",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "27.99"
@@ -1323,8 +1497,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Barrett, Sophia",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": null,
       "time": "28.04"
@@ -1332,8 +1508,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Torres, Gaby",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": "Duke Club Swimming-NC",
       "time": "28.07"
@@ -1341,8 +1519,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Aghjayan, Hannah",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "28.18"
@@ -1350,8 +1530,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Baxter, Lily",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "28.29"
@@ -1359,8 +1541,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Obara, Kendall",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "28.41"
@@ -1368,8 +1552,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Chapman, Morgan",
       "place": 13,
+      "points": 4.0,
       "tags": "",
       "team": null,
       "time": "28.42"
@@ -1377,8 +1563,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Ross, Christina",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "28.49"
@@ -1386,8 +1574,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Hayes, Hanna",
       "place": 15,
+      "points": 2.0,
       "tags": "",
       "team": "East Tennessee State Universit-NI",
       "time": "28.54"
@@ -1395,8 +1585,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Smith, Hanna",
       "place": 16,
+      "points": 1.0,
       "tags": "",
       "team": "Elks Duke Club Swimming-NC",
       "time": "28.61"
@@ -1404,8 +1596,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Mescolote, Joao",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "22.35"
@@ -1413,8 +1607,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Stuck, Evan",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "23.42"
@@ -1422,8 +1618,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Loughmiller, Max",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "23.56"
@@ -1431,8 +1629,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Schnupp, Andrew",
       "place": 4,
+      "points": 14.5,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "23.67"
@@ -1440,8 +1640,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Neumann, Asher",
       "place": 4,
+      "points": 14.5,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "23.67"
@@ -1449,8 +1651,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Rhodenizer, William",
       "place": 6,
+      "points": 12.5,
       "tags": "",
       "team": null,
       "time": "23.97"
@@ -1458,8 +1662,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Young, Hatcher",
       "place": 6,
+      "points": 12.5,
       "tags": "",
       "team": null,
       "time": "23.97"
@@ -1467,8 +1673,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Williams, Xander",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": null,
       "time": "23.98"
@@ -1476,8 +1684,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Ruble, Grant",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": null,
       "time": "24.10"
@@ -1485,8 +1695,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Rosenhein, Drew",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": null,
       "time": "24.22"
@@ -1494,8 +1706,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "White, Keller",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "24.27"
@@ -1503,8 +1717,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Chen, Noah",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": null,
       "time": "24.29"
@@ -1512,8 +1728,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Rantala, Mikael",
       "place": 13,
+      "points": 3.5,
       "tags": "",
       "team": null,
       "time": "24.35"
@@ -1521,8 +1739,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Casey, Jack",
       "place": 13,
+      "points": 3.5,
       "tags": "",
       "team": "Duke Club Swimming-NC",
       "time": "24.35"
@@ -1530,8 +1750,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Blackstone, James",
       "place": 15,
+      "points": 2.0,
       "tags": "",
       "team": null,
       "time": "24.41"
@@ -1539,8 +1761,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Conaton, William",
       "place": 16,
+      "points": 1.0,
       "tags": "",
       "team": null,
       "time": "24.42"
@@ -1548,8 +1772,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Will, Isabel",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": null,
       "time": "1:00.85"
@@ -1557,8 +1783,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Smith, Hanna",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "Elks Duke Club Swimming-NC",
       "time": "1:02.55"
@@ -1566,8 +1794,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Crum, Josie",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": null,
       "time": "1:03.57"
@@ -1575,8 +1805,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Roberts, Lauren",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:03.80"
@@ -1584,8 +1816,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Pitts, Emma",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:04.93"
@@ -1593,8 +1827,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Hauser, Genny",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:05.08"
@@ -1602,8 +1838,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Granger, Bermuda",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": null,
       "time": "1:05.33"
@@ -1611,8 +1849,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Nance, Lauren",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "1:05.49"
@@ -1620,8 +1860,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Kerrigan, Erin",
       "place": 9,
+      "points": 8.0,
       "tags": "",
       "team": "Coastal Carolina Universtiy-SC",
       "time": "1:05.65"
@@ -1629,8 +1871,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Grotjohn, Laine",
       "place": 9,
+      "points": 8.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "1:05.65"
@@ -1638,8 +1882,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Qian, Shakira",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:05.84"
@@ -1647,8 +1893,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Kovacs, Valerie",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "1:06.27"
@@ -1656,8 +1904,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Sidler, Sophia",
       "place": 13,
+      "points": 4.0,
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "1:06.59"
@@ -1665,8 +1915,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Blake, Maddie",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "1:06.99"
@@ -1674,8 +1926,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Tjandra, Sammy",
       "place": 15,
+      "points": 2.0,
       "tags": "",
       "team": "UNC Charlotte-NC",
       "time": "1:07.34"
@@ -1683,8 +1937,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Schneider, Jennifer",
       "place": 16,
+      "points": 1.0,
       "tags": "",
       "team": null,
       "time": "1:07.50"
@@ -1692,6 +1948,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Seitz, Lucy",
       "place": 17,
       "tags": "",
@@ -1701,15 +1958,17 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Compher, Addison",
       "place": 18,
       "tags": "",
-      "team": null,
+      "team": "Elon University Club Swim-NC",
       "time": "1:08.32"
     },
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "McCouch, Sandra",
       "place": 19,
       "tags": "",
@@ -1719,6 +1978,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Bergeron, Ella",
       "place": 20,
       "tags": "",
@@ -1728,6 +1988,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Corrado, Sola",
       "place": 21,
       "tags": "",
@@ -1737,6 +1998,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Haskell, Miyu",
       "place": 22,
       "tags": "",
@@ -1746,6 +2008,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Caudle, Riley",
       "place": 23,
       "tags": "",
@@ -1755,6 +2018,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Flores, Sophia",
       "place": 24,
       "tags": "",
@@ -1764,6 +2028,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Zimmer, Olivia",
       "place": 25,
       "tags": "",
@@ -1773,15 +2038,17 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Kalosstian, Kendall",
       "place": 26,
       "tags": "",
-      "team": null,
+      "team": "Elon University Club Swim-NC",
       "time": "1:11.21"
     },
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Harding, Lauren",
       "place": 27,
       "tags": "",
@@ -1791,6 +2058,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Ricci, Emily",
       "place": 28,
       "tags": "",
@@ -1800,6 +2068,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Miller, Charli",
       "place": 29,
       "tags": "",
@@ -1809,6 +2078,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "LaCognata, Grace",
       "place": 30,
       "tags": "",
@@ -1818,6 +2088,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Lawlor, Celia",
       "place": 31,
       "tags": "",
@@ -1827,6 +2098,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Florian, Violet",
       "place": 32,
       "tags": "",
@@ -1836,6 +2108,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Haff, Sophie",
       "place": 33,
       "tags": "",
@@ -1845,6 +2118,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Mellor, Tatum",
       "place": 34,
       "tags": "",
@@ -1854,6 +2128,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Parker, Brooke",
       "place": 35,
       "tags": "",
@@ -1863,6 +2138,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Kennedy, Carlyle",
       "place": 36,
       "tags": "",
@@ -1872,6 +2148,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Ellsworth, Madi",
       "place": 37,
       "tags": "",
@@ -1881,6 +2158,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Peneva, Denitsa",
       "place": 37,
       "tags": "",
@@ -1890,6 +2168,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Sears, Jadyn",
       "place": 39,
       "tags": "",
@@ -1899,6 +2178,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Simerson, Kynley",
       "place": 40,
       "tags": "",
@@ -1908,6 +2188,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Paroly, Sarah",
       "place": 41,
       "tags": "",
@@ -1917,6 +2198,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Thrush, Hannah",
       "place": 42,
       "tags": "",
@@ -1926,6 +2208,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "DeWalt, Kaitlyn",
       "place": 43,
       "tags": "",
@@ -1935,6 +2218,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Fraley, Carson",
       "place": 44,
       "tags": "",
@@ -1944,6 +2228,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Hussaini, Sameena",
       "place": 45,
       "tags": "",
@@ -1953,6 +2238,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Clark, Taylor",
       "place": 46,
       "tags": "",
@@ -1962,6 +2248,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Hevener, Sarah",
       "place": 47,
       "tags": "",
@@ -1971,6 +2258,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Christman, Grace",
       "place": 48,
       "tags": "",
@@ -1980,6 +2268,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Kohl, Alexis",
       "place": 49,
       "tags": "",
@@ -1989,6 +2278,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Houser, Gracie",
       "place": 50,
       "tags": "",
@@ -1998,8 +2288,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Baldwin, Daniel",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "51.36"
@@ -2007,8 +2299,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Morea, Michael",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "52.16"
@@ -2016,8 +2310,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Lineberry, Alex",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": null,
       "time": "54.11"
@@ -2025,8 +2321,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Schuijt, Chaz",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": null,
       "time": "54.62"
@@ -2034,8 +2332,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Lan, Yuanrui",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": null,
       "time": "54.66"
@@ -2043,8 +2343,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Lee, Christian",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "54.73"
@@ -2052,8 +2354,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Hancu, Andrei",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "56.86"
@@ -2061,8 +2365,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Bataillon, Daniel",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "56.93"
@@ -2070,8 +2376,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Mungas, Will",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "57.08"
@@ -2079,8 +2387,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Schwandt, Gavin",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "57.38"
@@ -2088,8 +2398,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Smith, Sadler",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "57.44"
@@ -2097,8 +2409,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Armentrout, Owen",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "57.93"
@@ -2106,8 +2420,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Sweat, Matthew",
       "place": 13,
+      "points": 4.0,
       "tags": "",
       "team": null,
       "time": "57.96"
@@ -2115,8 +2431,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Sleptsov, Alex",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": null,
       "time": "58.09"
@@ -2124,8 +2442,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Horton, Tommy",
       "place": 15,
+      "points": 2.0,
       "tags": "",
       "team": null,
       "time": "58.37"
@@ -2133,8 +2453,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Bizeau, Benjamin",
       "place": 16,
+      "points": 1.0,
       "tags": "",
       "team": null,
       "time": "59.37"
@@ -2142,6 +2464,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Su, Justin",
       "place": 20,
       "tags": "",
@@ -2151,6 +2474,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Giffel, Ian",
       "place": 21,
       "tags": "",
@@ -2160,6 +2484,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Marsee, Bennett",
       "place": 22,
       "tags": "",
@@ -2169,6 +2494,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Serle, Jeffrey",
       "place": 23,
       "tags": "",
@@ -2178,6 +2504,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Sheffield, Chase",
       "place": 24,
       "tags": "",
@@ -2187,15 +2514,17 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Corkey, William",
       "place": 25,
       "tags": "",
-      "team": null,
+      "team": "Elon University Club Swim-NC",
       "time": "1:02.44"
     },
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Will, Samuel",
       "place": 26,
       "tags": "",
@@ -2205,6 +2534,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "White, Deacon",
       "place": 27,
       "tags": "",
@@ -2214,6 +2544,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Bell, Michael",
       "place": 28,
       "tags": "",
@@ -2223,6 +2554,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Cotton, Jonathan",
       "place": 29,
       "tags": "",
@@ -2232,6 +2564,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "House, Nate",
       "place": 30,
       "tags": "",
@@ -2241,6 +2574,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Smith, Logan",
       "place": 31,
       "tags": "",
@@ -2250,6 +2584,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Brandwein, Jared",
       "place": 32,
       "tags": "",
@@ -2259,6 +2594,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Keatts, Caleb",
       "place": 33,
       "tags": "",
@@ -2268,6 +2604,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Offhaus, Carter",
       "place": 34,
       "tags": "",
@@ -2277,6 +2614,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Xu, David",
       "place": 35,
       "tags": "",
@@ -2286,8 +2624,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Kim, Catherine",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:59.06"
@@ -2295,8 +2635,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Goor, Sterre",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "2:00.79"
@@ -2304,8 +2646,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Munger, Audrey",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:02.91"
@@ -2313,8 +2657,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Faulkner, Bree",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": null,
       "time": "2:04.69"
@@ -2322,8 +2668,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Ghim, Esther",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "2:06.04"
@@ -2331,8 +2679,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Dunnigan, Caitlyn",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "2:07.26"
@@ -2340,8 +2690,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Craig, Mackenzie",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": null,
       "time": "2:07.97"
@@ -2349,8 +2701,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Reese, Mary",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": null,
       "time": "2:08.55"
@@ -2358,8 +2712,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Hayes, Maya",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": "East Tennessee State Universit-NI",
       "time": "2:09.41"
@@ -2367,8 +2723,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Hicks, Erin",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:10.99"
@@ -2376,8 +2734,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Ratliff, Bella",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "2:11.30"
@@ -2385,8 +2745,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Plantamura, Natalie",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:12.00"
@@ -2394,8 +2756,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Baker, Amy",
       "place": 13,
+      "points": 4.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "2:12.90"
@@ -2403,8 +2767,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Kettler, Claire",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": "Duke Club Swimming-NC",
       "time": "2:13.39"
@@ -2412,8 +2778,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Springer, Gabriella",
       "place": 15,
+      "points": 2.0,
       "tags": "",
       "team": null,
       "time": "2:15.29"
@@ -2421,15 +2789,18 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Heestand, Ava",
       "place": 16,
+      "points": 1.0,
       "tags": "",
-      "team": null,
+      "team": "Elon University Club Swim-NC",
       "time": "2:15.62"
     },
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Carney, KC",
       "place": 17,
       "tags": "",
@@ -2439,6 +2810,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Kulas, Saline",
       "place": 18,
       "tags": "",
@@ -2448,6 +2820,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Kelley, Aubrey",
       "place": 19,
       "tags": "",
@@ -2457,6 +2830,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Obara, Claire",
       "place": 20,
       "tags": "",
@@ -2466,6 +2840,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Hall, Amber",
       "place": 21,
       "tags": "",
@@ -2475,6 +2850,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Sutton, Jennifer",
       "place": 22,
       "tags": "",
@@ -2484,6 +2860,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Folk, Katelyn",
       "place": 23,
       "tags": "",
@@ -2493,6 +2870,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Muras, Norah",
       "place": 24,
       "tags": "",
@@ -2502,6 +2880,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "DeWalt, Kaitlyn",
       "place": 25,
       "tags": "",
@@ -2511,15 +2890,17 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Blatchford, Julia",
       "place": 26,
       "tags": "",
-      "team": null,
+      "team": "Elon University Club Swim-NC",
       "time": "2:34.43"
     },
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Robbins, Claire",
       "place": 27,
       "tags": "",
@@ -2529,6 +2910,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Wolter, Amy",
       "place": 28,
       "tags": "",
@@ -2538,6 +2920,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Vasquez-Soto, Jariana",
       "place": 29,
       "tags": "",
@@ -2547,6 +2930,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Lucas, Olivia",
       "place": 30,
       "tags": "",
@@ -2556,6 +2940,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Gamberg, Darrah",
       "place": 31,
       "tags": "",
@@ -2565,6 +2950,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Lamb, Grayce",
       "place": 32,
       "tags": "",
@@ -2574,6 +2960,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Stewart, Emily",
       "place": 33,
       "tags": "",
@@ -2583,8 +2970,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Long, Liam",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:39.77"
@@ -2592,8 +2981,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Lee-Bishop, Nikolas",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": null,
       "time": "1:43.73"
@@ -2601,8 +2992,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Cloutier, Briggs",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:46.30"
@@ -2610,8 +3003,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Hill, Thomas",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": null,
       "time": "1:47.97"
@@ -2619,8 +3014,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Frank, Jack",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": null,
       "time": "1:49.82"
@@ -2628,8 +3025,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Phillips, Maximus",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": null,
       "time": "1:50.44"
@@ -2637,8 +3036,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Rees, Jonah",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": null,
       "time": "1:50.96"
@@ -2646,8 +3047,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Tang, Rocky",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "UNC Charlotte-NC",
       "time": "1:51.38"
@@ -2655,8 +3058,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Altera, Ryan",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:51.93"
@@ -2664,8 +3069,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Williams, Xander",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": null,
       "time": "1:52.10"
@@ -2673,8 +3080,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Ivan, David",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:52.22"
@@ -2682,8 +3091,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Smith, Ben",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:52.51"
@@ -2691,8 +3102,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Mayhew, William",
       "place": 13,
+      "points": 4.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "1:53.62"
@@ -2700,8 +3113,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Bullard, Collin",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:54.11"
@@ -2709,8 +3124,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Casey, Jack",
       "place": 15,
+      "points": 2.0,
       "tags": "",
       "team": "Duke Club Swimming-NC",
       "time": "1:54.98"
@@ -2718,8 +3135,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Lynch, Ryan",
       "place": 16,
+      "points": 1.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "1:55.02"
@@ -2727,6 +3146,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Rantala, Mikael",
       "place": 17,
       "tags": "",
@@ -2736,6 +3156,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Heck, Andrew",
       "place": 18,
       "tags": "",
@@ -2745,6 +3166,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Martinez, Matthew",
       "place": 19,
       "tags": "",
@@ -2754,6 +3176,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Hall, Jackson",
       "place": 20,
       "tags": "",
@@ -2763,6 +3186,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Vlady, George",
       "place": 21,
       "tags": "",
@@ -2772,6 +3196,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Graham, Zach",
       "place": 22,
       "tags": "",
@@ -2781,6 +3206,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Lakeman, Michael",
       "place": 23,
       "tags": "",
@@ -2790,6 +3216,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Bryson, Ford",
       "place": 24,
       "tags": "",
@@ -2799,6 +3226,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Chesnut, Evan",
       "place": 25,
       "tags": "",
@@ -2808,6 +3236,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Major, David",
       "place": 26,
       "tags": "",
@@ -2817,6 +3246,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Zdilla, Noah",
       "place": 27,
       "tags": "",
@@ -2826,6 +3256,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Nagel, Lucas",
       "place": 28,
       "tags": "",
@@ -2835,6 +3266,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Arriaga, Gabriel",
       "place": 29,
       "tags": "",
@@ -2844,6 +3276,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Wean, Drexel",
       "place": 30,
       "tags": "",
@@ -2853,6 +3286,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Norman, Max",
       "place": 31,
       "tags": "",
@@ -2862,6 +3296,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Murray, Liam",
       "place": 32,
       "tags": "",
@@ -2871,15 +3306,17 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Roberts, Alex",
       "place": 33,
       "tags": "",
-      "team": null,
+      "team": "Elon University Club Swim-NC",
       "time": "2:29.92"
     },
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Rainey, James",
       "place": 34,
       "tags": "",
@@ -2889,6 +3326,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Nemes, Rares",
       "place": 35,
       "tags": "",
@@ -2898,6 +3336,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Piotrowski, John",
       "place": 36,
       "tags": "",
@@ -2907,8 +3346,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Carlton, Delaney",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "58.91"
@@ -2916,8 +3357,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Will, Isabel",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": null,
       "time": "1:02.69"
@@ -2925,8 +3368,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Kondratick, Morgan",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:03.25"
@@ -2934,8 +3379,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Aghjayan, Hannah",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:04.61"
@@ -2943,8 +3390,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Smith, Hanna",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "Elks Duke Club Swimming-NC",
       "time": "1:04.76"
@@ -2952,8 +3401,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Torres, Gaby",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "Duke Club Swimming-NC",
       "time": "1:05.05"
@@ -2961,8 +3412,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Obara, Kendall",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:05.35"
@@ -2970,8 +3423,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Berge, Isabel",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:05.78"
@@ -2979,8 +3434,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Baxter, Lily",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:06.18"
@@ -2988,8 +3445,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Lane, Megan",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": null,
       "time": "1:06.24"
@@ -2997,8 +3456,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Hauser, Genny",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:06.25"
@@ -3006,8 +3467,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Wong, Tara",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:06.26"
@@ -3015,8 +3478,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Roberts, Lauren",
       "place": 13,
+      "points": 4.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:06.48"
@@ -3024,8 +3489,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Harbert, Jill",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": "UNC Charlotte-NC",
       "time": "1:06.57"
@@ -3033,8 +3500,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Strout, Jennifer",
       "place": 15,
+      "points": 2.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:06.65"
@@ -3042,8 +3511,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Pitts, Emma",
       "place": 16,
+      "points": 1.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:06.80"
@@ -3051,6 +3522,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Qian, Shakira",
       "place": 17,
       "tags": "",
@@ -3060,6 +3532,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Morton, Lindsay",
       "place": 18,
       "tags": "",
@@ -3069,6 +3542,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Potter, Laurin",
       "place": 19,
       "tags": "",
@@ -3078,6 +3552,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Hayes, Adelle",
       "place": 20,
       "tags": "",
@@ -3087,6 +3562,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Barrett, Sophia",
       "place": 21,
       "tags": "",
@@ -3096,6 +3572,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Granger, Bermuda",
       "place": 22,
       "tags": "",
@@ -3105,6 +3582,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Crum, Josie",
       "place": 23,
       "tags": "",
@@ -3114,6 +3592,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Baraceros, Kamille",
       "place": 24,
       "tags": "",
@@ -3123,6 +3602,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Walsh, Kelly",
       "place": 25,
       "tags": "",
@@ -3132,6 +3612,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "McKinley, Tess",
       "place": 26,
       "tags": "",
@@ -3141,6 +3622,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Sands, Kylie",
       "place": 27,
       "tags": "",
@@ -3150,6 +3632,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Major, Carson",
       "place": 28,
       "tags": "",
@@ -3159,6 +3642,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Hunt, Natalie",
       "place": 29,
       "tags": "",
@@ -3168,6 +3652,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Mounts, Emery",
       "place": 30,
       "tags": "",
@@ -3177,6 +3662,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Healy, Sierra",
       "place": 31,
       "tags": "",
@@ -3186,6 +3672,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "McCouch, Sandra",
       "place": 32,
       "tags": "",
@@ -3195,6 +3682,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Petersen, Riley",
       "place": 33,
       "tags": "",
@@ -3204,6 +3692,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Hayes, Hanna",
       "place": 34,
       "tags": "",
@@ -3213,6 +3702,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Ellstrom, Evie",
       "place": 35,
       "tags": "",
@@ -3222,6 +3712,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Corrado, Sola",
       "place": 36,
       "tags": "",
@@ -3231,6 +3722,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Weems, Kylie",
       "place": 37,
       "tags": "",
@@ -3240,6 +3732,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Seifert, Sophia",
       "place": 38,
       "tags": "",
@@ -3249,24 +3742,27 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Roberts, Taylor",
       "place": 39,
       "tags": "",
-      "team": null,
+      "team": "Elon University Club Swim-NC",
       "time": "1:09.86"
     },
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Huber, Caroline",
       "place": 40,
       "tags": "",
-      "team": null,
+      "team": "Elon University Club Swim-NC",
       "time": "1:10.20"
     },
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "LaCognata, Grace",
       "place": 41,
       "tags": "",
@@ -3276,6 +3772,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Hoffman, Ansley",
       "place": 42,
       "tags": "",
@@ -3285,6 +3782,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Bergeron, Ella",
       "place": 43,
       "tags": "",
@@ -3294,6 +3792,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Stark, Heather",
       "place": 44,
       "tags": "",
@@ -3303,6 +3802,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Wallace, Emma",
       "place": 45,
       "tags": "",
@@ -3312,6 +3812,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Blake, Maddie",
       "place": 46,
       "tags": "",
@@ -3321,6 +3822,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Hickey, Regan",
       "place": 47,
       "tags": "",
@@ -3330,6 +3832,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "McCord, Gigi",
       "place": 48,
       "tags": "",
@@ -3339,6 +3842,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "VanderBroek, Allie",
       "place": 49,
       "tags": "",
@@ -3348,6 +3852,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Priebe, Ally",
       "place": 50,
       "tags": "",
@@ -3357,6 +3862,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Palenscar, Hayley",
       "place": 51,
       "tags": "",
@@ -3366,6 +3872,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Duffy, Anya",
       "place": 52,
       "tags": "",
@@ -3375,6 +3882,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Springer, Gabriella",
       "place": 53,
       "tags": "",
@@ -3384,6 +3892,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Gaur, Tanvi",
       "place": 54,
       "tags": "",
@@ -3393,6 +3902,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Haskell, Miyu",
       "place": 55,
       "tags": "",
@@ -3402,6 +3912,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Pratt, Tatum",
       "place": 56,
       "tags": "",
@@ -3411,6 +3922,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Seitz, Libby",
       "place": 57,
       "tags": "",
@@ -3420,6 +3932,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Yang, Amy",
       "place": 58,
       "tags": "",
@@ -3429,15 +3942,17 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Kalosstian, Kendall",
       "place": 59,
       "tags": "",
-      "team": null,
+      "team": "Elon University Club Swim-NC",
       "time": "1:12.44"
     },
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Li, Anyee",
       "place": 59,
       "tags": "",
@@ -3447,6 +3962,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Peneva, Denitsa",
       "place": 61,
       "tags": "",
@@ -3456,15 +3972,17 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Compher, Addison",
       "place": 62,
       "tags": "",
-      "team": null,
+      "team": "Elon University Club Swim-NC",
       "time": "1:12.49"
     },
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Sears, Jadyn",
       "place": 63,
       "tags": "",
@@ -3474,6 +3992,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Katz, Emory",
       "place": 64,
       "tags": "",
@@ -3483,6 +4002,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Bane, Riley",
       "place": 65,
       "tags": "",
@@ -3492,6 +4012,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Jacobson, Rylan",
       "place": 66,
       "tags": "",
@@ -3501,6 +4022,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Lawlor, Celia",
       "place": 67,
       "tags": "",
@@ -3510,6 +4032,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Jean, Ashley",
       "place": 68,
       "tags": "",
@@ -3519,6 +4042,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Godoy, Tyler",
       "place": 69,
       "tags": "",
@@ -3528,6 +4052,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Howard, Jule",
       "place": 70,
       "tags": "",
@@ -3537,6 +4062,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Rehder, Megan",
       "place": 71,
       "tags": "",
@@ -3546,6 +4072,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "McCall, Cara",
       "place": 72,
       "tags": "",
@@ -3555,6 +4082,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Melton, Jacoby",
       "place": 73,
       "tags": "",
@@ -3564,15 +4092,17 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Helmantel, Fleur",
       "place": 74,
       "tags": "",
-      "team": null,
+      "team": "Elon University Club Swim-NC",
       "time": "1:14.42"
     },
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Merritt, Abby",
       "place": 75,
       "tags": "",
@@ -3582,6 +4112,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Tarantino, Megan",
       "place": 76,
       "tags": "",
@@ -3591,6 +4122,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Greene, Bebe",
       "place": 77,
       "tags": "",
@@ -3600,6 +4132,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Asner, Adira",
       "place": 78,
       "tags": "",
@@ -3609,6 +4142,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Mellor, Tatum",
       "place": 79,
       "tags": "",
@@ -3618,6 +4152,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Hair, Chloe",
       "place": 80,
       "tags": "",
@@ -3627,6 +4162,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Weidner, Mia",
       "place": 81,
       "tags": "",
@@ -3636,6 +4172,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Petrella, Anna",
       "place": 82,
       "tags": "",
@@ -3645,6 +4182,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Collins, Megan",
       "place": 83,
       "tags": "",
@@ -3654,6 +4192,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Barr, Bridget",
       "place": 84,
       "tags": "",
@@ -3663,6 +4202,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Miller, Charli",
       "place": 85,
       "tags": "",
@@ -3672,6 +4212,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Tabberer, Avery",
       "place": 86,
       "tags": "",
@@ -3681,6 +4222,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Prokopik, Jamison",
       "place": 87,
       "tags": "",
@@ -3690,6 +4232,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Ellsworth, Madi",
       "place": 88,
       "tags": "",
@@ -3699,6 +4242,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Jackson, Hannah",
       "place": 89,
       "tags": "",
@@ -3708,6 +4252,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Anderson, Rilie",
       "place": 90,
       "tags": "",
@@ -3717,6 +4262,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Smith, Bethany",
       "place": 91,
       "tags": "",
@@ -3726,6 +4272,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Murdock, Caroline",
       "place": 92,
       "tags": "",
@@ -3735,6 +4282,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Linz, Meghan",
       "place": 93,
       "tags": "",
@@ -3744,6 +4292,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Kennedy, Savannah",
       "place": 94,
       "tags": "",
@@ -3753,6 +4302,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Lewis, Abigail",
       "place": 95,
       "tags": "",
@@ -3762,6 +4312,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Diviney, Cora",
       "place": 96,
       "tags": "",
@@ -3771,6 +4322,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Vasquez-Soto, Jariana",
       "place": 97,
       "tags": "",
@@ -3780,6 +4332,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Malzer, Rebecca",
       "place": 98,
       "tags": "",
@@ -3789,6 +4342,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Nazemi, Natalie",
       "place": 99,
       "tags": "",
@@ -3798,6 +4352,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "McClease, Aalysah",
       "place": 100,
       "tags": "",
@@ -3807,6 +4362,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Clark, Taylor",
       "place": 101,
       "tags": "",
@@ -3816,6 +4372,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "McMichael, Ava",
       "place": 102,
       "tags": "",
@@ -3825,6 +4382,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Christman, Grace",
       "place": 103,
       "tags": "",
@@ -3834,6 +4392,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Watson, Abby",
       "place": 104,
       "tags": "",
@@ -3843,6 +4402,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Gurden, Abigail",
       "place": 105,
       "tags": "",
@@ -3852,6 +4412,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Mosonyi, Ashley",
       "place": 106,
       "tags": "",
@@ -3861,6 +4422,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Nowell, Linsey",
       "place": 107,
       "tags": "",
@@ -3870,6 +4432,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Mcnabb, Cassie",
       "place": 108,
       "tags": "",
@@ -3879,15 +4442,17 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Holtz, Katrina",
       "place": 109,
       "tags": "",
-      "team": null,
+      "team": "Elon University Club Swim-NC",
       "time": "1:32.44"
     },
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Fibraio, Leah",
       "place": 110,
       "tags": "",
@@ -3897,6 +4462,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Wieberg, Addi",
       "place": 111,
       "tags": "",
@@ -3906,6 +4472,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Magierski, Avery",
       "place": 112,
       "tags": "",
@@ -3915,6 +4482,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Osman, Fadumina",
       "place": 113,
       "tags": "",
@@ -3924,8 +4492,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Caballero, Malachi",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": null,
       "time": "52.47"
@@ -3933,8 +4503,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Baldwin, Daniel",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "52.78"
@@ -3942,8 +4514,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Roberts, Topher",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "53.47"
@@ -3951,8 +4525,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Lee, Hyoseon",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "54.53"
@@ -3960,8 +4536,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Brown, Whittman",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": null,
       "time": "55.29"
@@ -3969,8 +4547,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Stuck, Evan",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "55.37"
@@ -3978,8 +4558,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Gaskey, Constantine",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "55.60"
@@ -3987,8 +4569,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Yae, James",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "Duke Club Swimming-NC",
       "time": "55.63"
@@ -3996,8 +4580,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Mistretta, Dominic",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": null,
       "time": "55.84"
@@ -4005,8 +4591,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Kolter, Trent",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": null,
       "time": "56.02"
@@ -4014,8 +4602,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Rees, Jonah",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": null,
       "time": "56.09"
@@ -4023,8 +4613,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Chen, Noah",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": null,
       "time": "56.56"
@@ -4032,8 +4624,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Rohovit, Hunter",
       "place": 13,
+      "points": 4.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "56.72"
@@ -4041,8 +4635,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Simmons, Charlie",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": "Duke Club Swimming-NC",
       "time": "56.86"
@@ -4050,8 +4646,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Keenan, Nathaniel",
       "place": 15,
+      "points": 2.0,
       "tags": "",
       "team": null,
       "time": "56.94"
@@ -4059,6 +4657,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Smith, Ben",
       "place": 16,
       "tags": "",
@@ -4068,6 +4667,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Liu, Alec",
       "place": 16,
       "tags": "",
@@ -4077,6 +4677,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Hall, Nathan",
       "place": 38,
       "tags": "",
@@ -4086,6 +4687,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Wilson, Lucas",
       "place": 39,
       "tags": "",
@@ -4095,6 +4697,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Hamrick, Nat",
       "place": 40,
       "tags": "",
@@ -4104,6 +4707,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Powell, Henry",
       "place": 41,
       "tags": "",
@@ -4113,6 +4717,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Han, Jason",
       "place": 42,
       "tags": "",
@@ -4122,6 +4727,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Cuerdo Agirre, Unai",
       "place": 43,
       "tags": "",
@@ -4131,6 +4737,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Sweat, Matthew",
       "place": 44,
       "tags": "",
@@ -4140,6 +4747,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Seliem, Hamza",
       "place": 45,
       "tags": "",
@@ -4149,6 +4757,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Thrower, Joshua",
       "place": 46,
       "tags": "",
@@ -4158,6 +4767,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Miller, Christopher",
       "place": 47,
       "tags": "",
@@ -4167,6 +4777,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Zemlevskiy, Georgiy",
       "place": 48,
       "tags": "",
@@ -4176,6 +4787,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Lynch, Ryan",
       "place": 49,
       "tags": "",
@@ -4185,6 +4797,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Kharel, Avi",
       "place": 50,
       "tags": "",
@@ -4194,6 +4807,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Beck, Anderson",
       "place": 51,
       "tags": "",
@@ -4203,6 +4817,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Flores-Caceres, Amilcar",
       "place": 52,
       "tags": "",
@@ -4212,6 +4827,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Sheffield, Chase",
       "place": 53,
       "tags": "",
@@ -4221,6 +4837,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "He, Franklin",
       "place": 54,
       "tags": "",
@@ -4230,6 +4847,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Berger, Henry",
       "place": 55,
       "tags": "",
@@ -4239,6 +4857,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Greene, Mason",
       "place": 56,
       "tags": "",
@@ -4248,6 +4867,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Townsend, Matthew",
       "place": 57,
       "tags": "",
@@ -4257,6 +4877,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Gerard, Tyler",
       "place": 58,
       "tags": "",
@@ -4266,6 +4887,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Young, Brodi",
       "place": 59,
       "tags": "",
@@ -4275,6 +4897,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Kahwajy, Andy",
       "place": 60,
       "tags": "",
@@ -4284,6 +4907,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Sallee, Jackson",
       "place": 61,
       "tags": "",
@@ -4293,6 +4917,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Major, David",
       "place": 62,
       "tags": "",
@@ -4302,6 +4927,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Betts, Charlie",
       "place": 63,
       "tags": "",
@@ -4311,15 +4937,17 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Heath, Zachary",
       "place": 64,
       "tags": "",
-      "team": null,
+      "team": "Elon University Club Swim-NC",
       "time": "1:06.30"
     },
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "George, Noah",
       "place": 65,
       "tags": "",
@@ -4329,6 +4957,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Gorman, Aiden",
       "place": 66,
       "tags": "",
@@ -4338,6 +4967,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Daves, Brandon",
       "place": 67,
       "tags": "",
@@ -4347,6 +4977,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Beatty, Alex",
       "place": 68,
       "tags": "",
@@ -4356,6 +4987,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Fowler, Matthew",
       "place": 69,
       "tags": "",
@@ -4365,6 +4997,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Castellino, Ethan",
       "place": 70,
       "tags": "",
@@ -4374,6 +5007,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Stringfield, Robbie",
       "place": 71,
       "tags": "",
@@ -4383,6 +5017,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "White, Deacon",
       "place": 72,
       "tags": "",
@@ -4392,6 +5027,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Cotton, Jonathan",
       "place": 73,
       "tags": "",
@@ -4401,6 +5037,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Humann, Brent",
       "place": 74,
       "tags": "",
@@ -4410,6 +5047,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Young, Colbi",
       "place": 75,
       "tags": "",
@@ -4419,15 +5057,17 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "LaChapelle, Nick",
       "place": 76,
       "tags": "",
-      "team": null,
+      "team": "Elon University Club Swim-NC",
       "time": "1:11.03"
     },
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "McGhee, Bradley",
       "place": 77,
       "tags": "",
@@ -4437,6 +5077,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "House, Nate",
       "place": 78,
       "tags": "",
@@ -4446,6 +5087,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Fajerman, Jason",
       "place": 79,
       "tags": "",
@@ -4455,6 +5097,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Davidson, Devin",
       "place": 80,
       "tags": "",
@@ -4464,6 +5107,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Montgomery, Alex",
       "place": 81,
       "tags": "",
@@ -4473,6 +5117,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Dail, Joshua",
       "place": 82,
       "tags": "",
@@ -4482,6 +5127,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Xu, David",
       "place": 83,
       "tags": "",
@@ -4491,6 +5137,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Mendoza, Benjiro",
       "place": 84,
       "tags": "",
@@ -4500,6 +5147,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Durham, Will",
       "place": 85,
       "tags": "",
@@ -4509,6 +5157,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Chen, Roger",
       "place": 86,
       "tags": "",
@@ -4518,8 +5167,10 @@
     {
       "course": "SCY",
       "event": "200 Fly",
+      "gender": "F",
       "name": "Dobie, Lauren",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": null,
       "time": "2:23.10"
@@ -4527,8 +5178,10 @@
     {
       "course": "SCY",
       "event": "200 Fly",
+      "gender": "F",
       "name": "Caudle, Riley",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "2:23.82"
@@ -4536,8 +5189,10 @@
     {
       "course": "SCY",
       "event": "200 Fly",
+      "gender": "F",
       "name": "Allibone, Jessica",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:26.11"
@@ -4545,8 +5200,10 @@
     {
       "course": "SCY",
       "event": "200 Fly",
+      "gender": "F",
       "name": "Kerrigan, Erin",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "Coastal Carolina Universtiy-SC",
       "time": "2:27.03"
@@ -4554,8 +5211,10 @@
     {
       "course": "SCY",
       "event": "200 Fly",
+      "gender": "F",
       "name": "Witthoff, Mia",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:33.89"
@@ -4563,8 +5222,10 @@
     {
       "course": "SCY",
       "event": "200 Fly",
+      "gender": "F",
       "name": "Castle, Kendall",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "2:46.19"
@@ -4572,8 +5233,10 @@
     {
       "course": "SCY",
       "event": "200 Fly",
+      "gender": "M",
       "name": "Long, Liam",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:52.15"
@@ -4581,8 +5244,10 @@
     {
       "course": "SCY",
       "event": "200 Fly",
+      "gender": "M",
       "name": "Skidmore, Billy",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:00.92"
@@ -4590,8 +5255,10 @@
     {
       "course": "SCY",
       "event": "200 Fly",
+      "gender": "M",
       "name": "Sleptsov, Alex",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": null,
       "time": "2:01.98"
@@ -4599,8 +5266,10 @@
     {
       "course": "SCY",
       "event": "200 Fly",
+      "gender": "M",
       "name": "Johnson, Cameron",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "2:02.61"
@@ -4608,8 +5277,10 @@
     {
       "course": "SCY",
       "event": "200 Fly",
+      "gender": "M",
       "name": "Strudgeon, Ryan",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": null,
       "time": "2:03.36"
@@ -4617,8 +5288,10 @@
     {
       "course": "SCY",
       "event": "200 Fly",
+      "gender": "M",
       "name": "Altera, Ryan",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:03.43"
@@ -4626,8 +5299,10 @@
     {
       "course": "SCY",
       "event": "200 Fly",
+      "gender": "M",
       "name": "Tang, Rocky",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "UNC Charlotte-NC",
       "time": "2:04.44"
@@ -4635,8 +5310,10 @@
     {
       "course": "SCY",
       "event": "200 Fly",
+      "gender": "M",
       "name": "Walter, Aiden",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": null,
       "time": "2:06.43"
@@ -4644,8 +5321,10 @@
     {
       "course": "SCY",
       "event": "200 Fly",
+      "gender": "M",
       "name": "Loughmiller, Max",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "2:06.99"
@@ -4653,8 +5332,10 @@
     {
       "course": "SCY",
       "event": "200 Fly",
+      "gender": "M",
       "name": "Hall, Aaron",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": null,
       "time": "2:07.56"
@@ -4662,8 +5343,10 @@
     {
       "course": "SCY",
       "event": "200 Fly",
+      "gender": "M",
       "name": "Dwyer, Peter",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "2:19.55"
@@ -4671,8 +5354,10 @@
     {
       "course": "SCY",
       "event": "200 Fly",
+      "gender": "M",
       "name": "Keatts, Caleb",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": null,
       "time": "2:48.15"
@@ -4680,8 +5365,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Carlton, Delaney",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "22.91"
@@ -4689,8 +5376,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Will, Isabel",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": null,
       "time": "24.91"
@@ -4698,8 +5387,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Powers, Alexis",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "25.57"
@@ -4707,8 +5398,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Baxter, Lily",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "25.62"
@@ -4716,8 +5409,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Aghjayan, Hannah",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "25.71"
@@ -4725,8 +5420,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Kondratick, Morgan",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "25.72"
@@ -4734,8 +5431,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Munger, Audrey",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "25.78"
@@ -4743,8 +5442,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Barrett, Sophia",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": null,
       "time": "25.79"
@@ -4752,8 +5453,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Roberts, Lauren",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "25.80"
@@ -4761,8 +5464,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Berge, Isabel",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "25.81"
@@ -4770,8 +5475,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Torres, Gaby",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "Duke Club Swimming-NC",
       "time": "25.82"
@@ -4779,8 +5486,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Goor, Sterre",
       "place": 12,
+      "points": 4.5,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "25.86"
@@ -4788,8 +5497,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Major, Carson",
       "place": 12,
+      "points": 4.5,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "25.86"
@@ -4797,8 +5508,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Corrado, Sola",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": "Duke Club Swimming-NC",
       "time": "25.96"
@@ -4806,8 +5519,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Wong, Tara",
       "place": 15,
+      "points": 2.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "26.06"
@@ -4815,8 +5530,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Everling, Corinne",
       "place": 16,
+      "points": 1.0,
       "tags": "",
       "team": "Coastal Carolina Universtiy-SC",
       "time": "26.11"
@@ -4824,6 +5541,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Buff, Maddy",
       "place": null,
       "tags": "",
@@ -4833,8 +5551,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "White, Keller",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "21.09"
@@ -4842,8 +5562,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Cloutier, Briggs",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "21.48"
@@ -4851,8 +5573,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Long, Liam",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "21.52"
@@ -4860,8 +5584,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Lee-Bishop, Nikolas",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": null,
       "time": "21.65"
@@ -4869,8 +5595,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Cook, Cameron",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": null,
       "time": "21.88"
@@ -4878,8 +5606,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Morea, Michael",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "22.00"
@@ -4887,8 +5617,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Brown, Whittman",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": null,
       "time": "22.01"
@@ -4896,8 +5628,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Conaton, William",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": null,
       "time": "22.12"
@@ -4905,8 +5639,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Rosenhein, Drew",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": null,
       "time": "22.14"
@@ -4914,8 +5650,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Gaskey, Constantine",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "22.16"
@@ -4923,8 +5661,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Spade, Gage",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": null,
       "time": "22.21"
@@ -4932,8 +5672,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Armentrout, Owen",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "22.22"
@@ -4941,8 +5683,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Roberts, Topher",
       "place": 13,
+      "points": 4.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "22.29"
@@ -4950,8 +5694,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Rimsa, Thomas",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "22.30"
@@ -4959,8 +5705,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Blackstone, James",
       "place": 15,
+      "points": 2.0,
       "tags": "",
       "team": null,
       "time": "22.31"
@@ -4968,8 +5716,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Young, Hatcher",
       "place": 16,
+      "points": 1.0,
       "tags": "",
       "team": null,
       "time": "22.32"
@@ -4977,8 +5727,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Pyle, Ellee",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": null,
       "time": "1:09.10"
@@ -4986,8 +5738,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Kim, Catherine",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:11.51"
@@ -4995,8 +5749,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Miller, Rita",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "1:12.13"
@@ -5004,8 +5760,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Goor, Sterre",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "1:12.86"
@@ -5013,8 +5771,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Obara, Kendall",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:14.21"
@@ -5022,8 +5782,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Morton, Lindsay",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": null,
       "time": "1:14.33"
@@ -5031,8 +5793,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Strout, Jennifer",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:14.55"
@@ -5040,8 +5804,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Brezinsky, Natalie",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:14.97"
@@ -5049,8 +5815,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Wong, Tara",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:15.06"
@@ -5058,8 +5826,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Elvambuena, Ella",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:16.06"
@@ -5067,8 +5837,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Ghim, Esther",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:16.09"
@@ -5076,8 +5848,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Pitts, Emma",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:17.06"
@@ -5085,8 +5859,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Wallace, Emma",
       "place": 13,
+      "points": 4.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:17.12"
@@ -5094,8 +5870,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Hoffman, Ansley",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "1:17.32"
@@ -5103,8 +5881,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Beugnard, Agathe",
       "place": 15,
+      "points": 2.0,
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "1:17.45"
@@ -5112,8 +5892,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Qian, Shakira",
       "place": 16,
+      "points": 1.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:17.47"
@@ -5121,6 +5903,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Sands, Kylie",
       "place": 17,
       "tags": "",
@@ -5130,6 +5913,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Granger, Bermuda",
       "place": 18,
       "tags": "",
@@ -5139,6 +5923,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Carney, KC",
       "place": 19,
       "tags": "",
@@ -5148,6 +5933,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Pimentel, Aimee",
       "place": 20,
       "tags": "",
@@ -5157,6 +5943,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Gaur, Tanvi",
       "place": 21,
       "tags": "",
@@ -5166,6 +5953,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Weems, Kylie",
       "place": 22,
       "tags": "",
@@ -5175,6 +5963,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Harbert, Jill",
       "place": 23,
       "tags": "",
@@ -5184,6 +5973,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Lachowski, Amelia",
       "place": 24,
       "tags": "",
@@ -5193,6 +5983,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Healy, Sierra",
       "place": 25,
       "tags": "",
@@ -5202,6 +5993,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Jacobson, Rylan",
       "place": 26,
       "tags": "",
@@ -5211,6 +6003,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Earl, Lindsey",
       "place": 27,
       "tags": "",
@@ -5220,6 +6013,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "White, Logan",
       "place": 28,
       "tags": "",
@@ -5229,6 +6023,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Springer, Gabriella",
       "place": 29,
       "tags": "",
@@ -5238,6 +6033,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Faust, Amelia",
       "place": 30,
       "tags": "",
@@ -5247,6 +6043,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Plantamura, Natalie",
       "place": 31,
       "tags": "",
@@ -5256,6 +6053,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Furches, Sarah",
       "place": 32,
       "tags": "",
@@ -5265,6 +6063,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Peneva, Denitsa",
       "place": 33,
       "tags": "",
@@ -5274,6 +6073,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Weidner, Mia",
       "place": 34,
       "tags": "",
@@ -5283,6 +6083,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Bane, Riley",
       "place": 35,
       "tags": "",
@@ -5292,15 +6093,17 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Helmantel, Fleur",
       "place": 36,
       "tags": "",
-      "team": null,
+      "team": "Elon University Club Swim-NC",
       "time": "1:22.86"
     },
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Gustafsson, Vendela",
       "place": 37,
       "tags": "",
@@ -5310,6 +6113,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Klinger, Katie",
       "place": 38,
       "tags": "",
@@ -5319,6 +6123,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Collins, Megan",
       "place": 39,
       "tags": "",
@@ -5328,6 +6133,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Melton, Jacoby",
       "place": 40,
       "tags": "",
@@ -5337,6 +6143,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Godoy, Tyler",
       "place": 41,
       "tags": "",
@@ -5346,6 +6153,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Page, Carole-Ann",
       "place": 42,
       "tags": "",
@@ -5355,6 +6163,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Musman, Chloe",
       "place": 43,
       "tags": "",
@@ -5364,6 +6173,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "McMichael, Ava",
       "place": 44,
       "tags": "",
@@ -5373,6 +6183,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Bretting, Avery",
       "place": 45,
       "tags": "",
@@ -5382,6 +6193,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Murdock, Caroline",
       "place": 46,
       "tags": "",
@@ -5391,6 +6203,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Anderson, Rilie",
       "place": 47,
       "tags": "",
@@ -5400,6 +6213,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Hirsch, Meghan",
       "place": 48,
       "tags": "",
@@ -5409,6 +6223,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Clark, Taylor",
       "place": 49,
       "tags": "",
@@ -5418,6 +6233,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Davis, Gabrielle",
       "place": 50,
       "tags": "",
@@ -5427,6 +6243,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Hellenbrand, Heidi",
       "place": 51,
       "tags": "",
@@ -5436,6 +6253,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Lamb, Grayce",
       "place": 52,
       "tags": "",
@@ -5445,8 +6263,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Morea, Michael",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "58.27"
@@ -5454,8 +6274,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Lee, Hyoseon",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "59.72"
@@ -5463,8 +6285,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Liu, Alec",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "Duke Club Swimming-NC",
       "time": "1:00.04"
@@ -5472,17 +6296,21 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Cheifetz, Adam",
       "place": 4,
+      "points": 15.0,
       "tags": "",
-      "team": null,
+      "team": "Elon University Club Swim-NC",
       "time": "1:01.00"
     },
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Pianoto, Matthew",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:01.27"
@@ -5490,8 +6318,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "McDevitt, Liam",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "1:01.68"
@@ -5499,8 +6329,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Wilson, Lucas",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:02.24"
@@ -5508,8 +6340,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Zamudio, Jack",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:02.28"
@@ -5517,8 +6351,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Long, Carter",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": null,
       "time": "1:02.62"
@@ -5526,8 +6362,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Long, Byron",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": null,
       "time": "1:03.35"
@@ -5535,8 +6373,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Mistretta, Dominic",
       "place": 11,
+      "points": 5.5,
       "tags": "",
       "team": null,
       "time": "1:03.56"
@@ -5544,8 +6384,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Stubbs, Kierro",
       "place": 11,
+      "points": 5.5,
       "tags": "",
       "team": null,
       "time": "1:03.56"
@@ -5553,8 +6395,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Zhang, Jeffrey",
       "place": 13,
+      "points": 4.0,
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:03.58"
@@ -5562,8 +6406,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Cheung, Luke",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": null,
       "time": "1:03.68"
@@ -5571,8 +6417,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Neumann, Asher",
       "place": 15,
+      "points": 2.0,
       "tags": "",
       "team": "NC State Club Swimming-NC",
       "time": "1:04.15"
@@ -5580,8 +6428,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "DiPietro, Austin",
       "place": 16,
+      "points": 1.0,
       "tags": "",
       "team": "Coastal Carolina Universtiy-SC",
       "time": "1:04.26"
@@ -5589,6 +6439,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Ng, Aaron",
       "place": 17,
       "tags": "",
@@ -5598,6 +6449,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Simmons, Charlie",
       "place": 18,
       "tags": "",
@@ -5607,6 +6459,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Ryberg, Matthew",
       "place": 19,
       "tags": "",
@@ -5616,6 +6469,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Liu, Joshua",
       "place": 20,
       "tags": "",
@@ -5625,6 +6479,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Zagorianos, Alexander",
       "place": 21,
       "tags": "",
@@ -5634,6 +6489,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Mu, James",
       "place": 22,
       "tags": "",
@@ -5643,6 +6499,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Wygonik, Sam",
       "place": 23,
       "tags": "",
@@ -5652,6 +6509,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Buenano, Sebastian",
       "place": 24,
       "tags": "",
@@ -5661,6 +6519,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Bizeau, Benjamin",
       "place": 24,
       "tags": "",
@@ -5670,6 +6529,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Powell, Henry",
       "place": 26,
       "tags": "",
@@ -5679,6 +6539,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Cuerdo Agirre, Unai",
       "place": 27,
       "tags": "",
@@ -5688,6 +6549,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Hall, Nathan",
       "place": 28,
       "tags": "",
@@ -5697,6 +6559,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Getter, Matthew",
       "place": 29,
       "tags": "",
@@ -5706,6 +6569,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Jampole, Nolan",
       "place": 30,
       "tags": "",
@@ -5715,6 +6579,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Wilz, George",
       "place": 31,
       "tags": "",
@@ -5724,6 +6589,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Kharel, Avi",
       "place": 32,
       "tags": "",
@@ -5733,15 +6599,17 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Heath, Zachary",
       "place": 33,
       "tags": "",
-      "team": null,
+      "team": "Elon University Club Swim-NC",
       "time": "1:11.86"
     },
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Halbach, Jake",
       "place": 34,
       "tags": "",
@@ -5751,6 +6619,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Hoover, Forrest",
       "place": 35,
       "tags": "",
@@ -5760,6 +6629,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Cockrum, Porter",
       "place": 36,
       "tags": "",
@@ -5769,6 +6639,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Reason, Blake",
       "place": 37,
       "tags": "",
@@ -5778,6 +6649,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Delacruz, Chris",
       "place": 38,
       "tags": "",
@@ -5787,6 +6659,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Beatty, Alex",
       "place": 39,
       "tags": "",
@@ -5796,6 +6669,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Keatts, Caleb",
       "place": 40,
       "tags": "",
@@ -5805,6 +6679,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Daves, Brandon",
       "place": 41,
       "tags": "",
@@ -5814,6 +6689,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Cheung, Chris",
       "place": 42,
       "tags": "",
@@ -5823,6 +6699,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Osterkamp, Nicholas",
       "place": 43,
       "tags": "",
@@ -5832,6 +6709,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Betts, Charlie",
       "place": 44,
       "tags": "",
@@ -5841,6 +6719,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Humann, Brent",
       "place": 45,
       "tags": "",
@@ -5850,6 +6729,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "McGhee, Bradley",
       "place": 46,
       "tags": "",
@@ -5859,6 +6739,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Dail, Joshua",
       "place": 47,
       "tags": "",
@@ -5868,6 +6749,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Xu, David",
       "place": 48,
       "tags": "",
@@ -5877,6 +6759,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Deaton, Miles",
       "place": 49,
       "tags": "",
@@ -5886,6 +6769,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Nemes, Rares",
       "place": 50,
       "tags": "",
@@ -5895,15 +6779,17 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Roberts, Alex",
       "place": 51,
       "tags": "",
-      "team": null,
+      "team": "Elon University Club Swim-NC",
       "time": "1:31.58"
     },
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Kalinin, Daniel",
       "place": 52,
       "tags": "",
@@ -5913,6 +6799,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Rainey, James",
       "place": 53,
       "tags": "",
@@ -5922,11 +6809,216 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Gjerdrum, Dylan",
       "place": 54,
       "tags": "",
       "team": "UNC Charlotte-NC",
       "time": "2:20.84"
     }
-  ]
+  ],
+  "team_scores": {
+    "combined": [
+      {
+        "place": 1,
+        "points": 576.5,
+        "team": "NC State Club Swimming"
+      },
+      {
+        "place": 2,
+        "points": 542.0,
+        "team": "Georgia Tech Swim Club"
+      },
+      {
+        "place": 3,
+        "points": 531.5,
+        "team": "Swim Club at Virginia Tech"
+      },
+      {
+        "place": 4,
+        "points": 414.0,
+        "team": "UNC Chapel Hill"
+      },
+      {
+        "place": 5,
+        "points": 261.0,
+        "team": "Liberty University Men's Swim"
+      },
+      {
+        "place": 6,
+        "points": 229.0,
+        "team": "Uncw Club Swim"
+      },
+      {
+        "place": 7,
+        "points": 192.0,
+        "team": "Duke Club Swimming"
+      },
+      {
+        "place": 8,
+        "points": 80.0,
+        "team": "East Carolina University"
+      },
+      {
+        "place": 9,
+        "points": 47.0,
+        "team": "UNC Charlotte"
+      },
+      {
+        "place": 10,
+        "points": 46.0,
+        "team": "Coastal Carolina Universtiy"
+      },
+      {
+        "place": 11,
+        "points": 29.0,
+        "team": "Elon University Club Swim"
+      },
+      {
+        "place": 12,
+        "points": 12.0,
+        "team": "Appalachian State Club Swim"
+      },
+      {
+        "place": 13,
+        "points": 11.0,
+        "team": "East Tennessee State Universit"
+      },
+      {
+        "place": 14,
+        "points": 7.0,
+        "team": "Ung Swim Club"
+      }
+    ],
+    "men": [
+      {
+        "place": 1,
+        "points": 308.5,
+        "team": "NC State Club Swimming"
+      },
+      {
+        "place": 2,
+        "points": 283.0,
+        "team": "Georgia Tech Swim Club"
+      },
+      {
+        "place": 3,
+        "points": 261.0,
+        "team": "Liberty University Men's Swim"
+      },
+      {
+        "place": 4,
+        "points": 257.5,
+        "team": "Swim Club at Virginia Tech"
+      },
+      {
+        "place": 5,
+        "points": 113.0,
+        "team": "Uncw Club Swim"
+      },
+      {
+        "place": 6,
+        "points": 109.0,
+        "team": "UNC Chapel Hill"
+      },
+      {
+        "place": 7,
+        "points": 96.0,
+        "team": "Duke Club Swimming"
+      },
+      {
+        "place": 8,
+        "points": 35.0,
+        "team": "UNC Charlotte"
+      },
+      {
+        "place": 9,
+        "points": 27.0,
+        "team": "East Carolina University"
+      },
+      {
+        "place": 10,
+        "points": 21.0,
+        "team": "Elon University Club Swim"
+      },
+      {
+        "place": 11,
+        "points": 7.0,
+        "team": "Ung Swim Club"
+      },
+      {
+        "place": 12,
+        "points": 6.0,
+        "team": "Appalachian State Club Swim"
+      },
+      {
+        "place": 13,
+        "points": 1.0,
+        "team": "Coastal Carolina Universtiy"
+      }
+    ],
+    "source": "pdf",
+    "women": [
+      {
+        "place": 1,
+        "points": 305.0,
+        "team": "UNC Chapel Hill"
+      },
+      {
+        "place": 2,
+        "points": 274.0,
+        "team": "Swim Club at Virginia Tech"
+      },
+      {
+        "place": 3,
+        "points": 268.0,
+        "team": "NC State Club Swimming"
+      },
+      {
+        "place": 4,
+        "points": 259.0,
+        "team": "Georgia Tech Swim Club"
+      },
+      {
+        "place": 5,
+        "points": 116.0,
+        "team": "Uncw Club Swim"
+      },
+      {
+        "place": 6,
+        "points": 96.0,
+        "team": "Duke Club Swimming"
+      },
+      {
+        "place": 7,
+        "points": 53.0,
+        "team": "East Carolina University"
+      },
+      {
+        "place": 8,
+        "points": 45.0,
+        "team": "Coastal Carolina Universtiy"
+      },
+      {
+        "place": 9,
+        "points": 12.0,
+        "team": "UNC Charlotte"
+      },
+      {
+        "place": 10,
+        "points": 11.0,
+        "team": "East Tennessee State Universit"
+      },
+      {
+        "place": 11,
+        "points": 8.0,
+        "team": "Elon University Club Swim"
+      },
+      {
+        "place": 12,
+        "points": 6.0,
+        "team": "Appalachian State Club Swim"
+      }
+    ]
+  }
 }

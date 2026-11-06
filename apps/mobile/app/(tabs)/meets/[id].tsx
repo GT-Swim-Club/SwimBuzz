@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Alert, Image, View } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { DEFAULT_TIME_ZONE, formatFullDate, formatMeetDateRange, formatTime, isHtmlEmpty, meetHeaderDetails, zonedDayKey, type IconName } from "@swimbuzz/shared"
+import { coerceMeetHighlights, DEFAULT_TIME_ZONE, formatFullDate, formatMeetDateRange, formatTime, isHtmlEmpty, meetHeaderDetails, zonedDayKey, type IconName } from "@swimbuzz/shared"
 import {
   Body,
   Button,
@@ -30,6 +30,7 @@ import {
   type RosterSummaryEntry,
 } from "../../../src/components/RosterSummarySection"
 import { FilePreviewModal } from "../../../src/components/FilePreviewModal"
+import { MeetHighlightsCarousel } from "../../../src/components/MeetHighlightsCarousel"
 import { api } from "../../../src/lib/api"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 import { FormattedText } from "../../../src/components/FormattedText"
@@ -287,6 +288,7 @@ export default function MeetDetailScreen() {
       : null
   const resources = resourceLinksFromMeet(meet)
   const photoLinks = photoLinksFromMeet(meet)
+  const highlights = coerceMeetHighlights(meet.highlights)
   const rosterSummary = asRecord(meet.rosterSummary)
   const rosterEntries = Array.isArray(rosterSummary?.entries)
     ? rosterSummary.entries
@@ -481,6 +483,8 @@ export default function MeetDetailScreen() {
           <ErrorBlock message={error instanceof Error ? error.message : "Failed to load meet"} />
         ) : null}
 
+        {highlights ? <MeetHighlightsCarousel highlights={highlights} /> : null}
+
         <Section title="Details">
           <MetaRow label="Dates" value={dateRangeSegment({ fontSize: 14, color: c.text })} />
           {hasStartTime ? (
@@ -609,6 +613,8 @@ export default function MeetDetailScreen() {
             viewerAthleteId={
               viewer?.athleteId ? String(viewer.athleteId) : null
             }
+            canEdit={isStaff}
+            onHeatLaneSaved={() => void load()}
           />
         ) : null}
 

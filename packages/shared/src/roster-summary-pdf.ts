@@ -23,6 +23,9 @@ export type RosterSummaryPdfResult =
   | { kind: "text"; text: string }
   | { kind: "none" }
 
+/** One interval split of an individual swim: the time over the stretch ending at `distance`. */
+export type RosterSummaryPdfSplit = { distance: number; time: string }
+
 export type RosterSummaryPdfRow = {
   eventNumber?: number
   label: string
@@ -43,6 +46,8 @@ export type RosterSummaryPdfRow = {
   legs?: string[]
   /** Each leg's split, drawn beside its name ("" when unknown), in the same order as `legs`. */
   legSplits?: string[]
+  /** An individual swim's interval splits, drawn as aligned columns of times under the row. */
+  splits?: RosterSummaryPdfSplit[]
   /** Right-hand column; left out, the row has none (mobile rows are just a title and subtitle). */
   result?: RosterSummaryPdfResult
 }
@@ -62,12 +67,19 @@ export type RosterSummaryPdfRequest = {
    * rather than keeping each one that fits in a column whole.
    */
   splitSections?: boolean
+  /**
+   * Draw the meet's order of events above the sections (Entries and Heats exports), narrowed to
+   * the packet session the view is filtered to, if any. The PDF only — the PNG and text skip it.
+   */
+  orderOfEvents?: { session?: string }
 }
 
 export const ROSTER_SUMMARY_PDF_LIMITS = {
   sections: 500,
   rows: 5000,
   legs: 8,
+  /** Every 25 of a 1650. */
+  splits: 66,
   text: 200,
 } as const
 

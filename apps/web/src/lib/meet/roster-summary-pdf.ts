@@ -10,10 +10,12 @@ import {
   type RosterSummaryPdfResult,
   type RosterSummaryPdfRow,
   type RosterSummaryPdfSection,
+  type RosterSummaryPdfSplit,
   type MeetHeaderDetails,
 } from "@swimbuzz/shared"
 import { formatDisplayTime, formatOrdinal } from "@/lib/utils"
 import { HELVETICA_CAP_HEIGHT, drawMeetPdfDetails } from "@/lib/meet/meet-pdf-details"
+import { cleanEventName, type EventOrder } from "@/lib/meet/meet-event-order"
 
 export type RosterSummaryPdfInput = {
   meetName: string
@@ -22,6 +24,8 @@ export type RosterSummaryPdfInput = {
   /** Meet icon as a square PNG (logo fitted whole, transparent padding), or null to leave it out. */
   iconPng: Uint8Array | null
   request: RosterSummaryPdfRequest
+  /** The meet's order of events (already narrowed to the view's session) to draw under the header. */
+  eventOrder?: EventOrder | null
 }
 
 type RGB = [number, number, number]
@@ -34,6 +38,8 @@ const INK: RGB = [31, 31, 31]
 const INK_SECONDARY: RGB = [89, 89, 89]
 const INK_TERTIARY: RGB = [140, 140, 140]
 const BORDER: RGB = [234, 234, 234]
+const BORDER_SUBTLE: RGB = [228, 228, 231]
+const WHITE: RGB = [255, 255, 255]
 const FASTER: RGB = [56, 158, 13]
 const SLOWER: RGB = [220, 38, 38]
 // The roster summary's status and podium pill colors (SummaryRow).
@@ -68,7 +74,7 @@ const M = {
   labelLh: px(18),
   labelSize: px(13),
   subSize: px(11),
-  inlineMetaGap: px(10),
+  inlineMetaGap: px(6),
   metaLh: px(13),
   metaSize: px(11),
   /** Room for a relay leg's stroke or number ("BK", "2") before the swimmer's name. */
@@ -85,12 +91,29 @@ const M = {
   heatLaneGap: px(8),
   columnGap: px(22),
   footerSize: px(10),
+  // Order of events: sessions two across, in the half-page columns the sections use.
+  orderMaxColumns: 2,
+  orderGap: px(10),
+  orderRadius: px(8),
+  // Column heads and rows take the PDF's "SEED" tag and row label sizes.
+  orderSessionHeight: px(28),
+  orderSessionSize: px(11),
+  orderHeadHeight: px(20),
+  orderRowHeight: px(21),
+  orderNumberWidth: px(40),
+  orderPadX: px(10),
 }
 
 const RIGHT_WIDTH = M.deltaWidth + M.timeWidth + M.placeWidth
 
 /** Medley relay legs in swim order. */
 const MEDLEY_STROKES = ["BK", "BR", "FL", "FR"]
+
+/** An individual swim's splits go four to a line, where relay legs go two. */
+const SPLITS_PER_LINE = 4
+/** The first split column's indent under the name, and the last's inset from the row's edge. */
+const SPLIT_INDENT = px(12)
+const SPLIT_INSET = px(16)
 
 /** Stroke width (pt) that makes regular Helvetica read as a medium weight. */
 const MEDIUM_STROKE = 0.18
@@ -134,6 +157,21 @@ function parseResult(value: unknown): RosterSummaryPdfResult {
   return { kind: "none" }
 }
 
+/** Interval splits in distance order, leaving out any without a distance or a time ("No Data"). */
+function parseSplits(value: unknown): RosterSummaryPdfSplit[] | undefined {
+  if (!Array.isArray(value)) return undefined
+  const splits = value
+    .slice(0, ROSTER_SUMMARY_PDF_LIMITS.splits)
+    .map((raw) => {
+      const s = (raw ?? {}) as Record<string, unknown>
+      return { distance: positiveInt(s.distance), time: text(s.time) }
+    })
+    .filter((s): s is RosterSummaryPdfSplit => s.distance != null && s.time != null && /\d/.test(s.time))
+    .sort((a, b) => a.distance - b.distance)
+  // A lone split is just the swim's time again.
+  return splits.length > 1 ? splits : undefined
+}
+
 function parseRow(value: unknown): RosterSummaryPdfRow | null {
   const r = (value ?? {}) as Record<string, unknown>
   const label = text(r.label)
@@ -158,6 +196,7 @@ function parseRow(value: unknown): RosterSummaryPdfRow | null {
     startTime: text(r.startTime),
     legs: legs.length ? legs : undefined,
     legSplits,
+    splits: parseSplits(r.splits),
     result: r.result == null ? undefined : parseResult(r.result),
   }
 }
@@ -178,7 +217,13 @@ export function parseRosterSummaryPdfRequest(body: unknown): RosterSummaryPdfReq
     if (rows.length === 0) continue
     sections.push({ title, eventNumber: positiveInt(s.eventNumber), rows })
   }
-  return { heading: text(b.heading), sections, splitSections: b.splitSections === true }
+  const order = b.orderOfEvents && typeof b.orderOfEvents === "object" ? (b.orderOfEvents as Record<string, unknown>) : null
+  return {
+    heading: text(b.heading),
+    sections,
+    splitSections: b.splitSections === true,
+    ...(order ? { orderOfEvents: { session: text(order.session) } } : {}),
+  }
 }
 
 // ---- drawing ---------------------------------------------------------------
@@ -220,9 +265,10 @@ function withPreferredNames(request: RosterSummaryPdfRequest): RosterSummaryPdfR
 /**
  * The roster summary as the viewer sees it — sections of rows in a Letter portrait document, flowing
  * down two columns and across pages. Header like the relays PDF (meet icon, name, gold eyebrow), then
- * each section's title (with its event badge) and rows: the label, a meta line, relay legs, the heat
- * & lane over the start time, and the time, delta and place (or seed and seed rank) on the right. A section that fits in one column never
- * splits; a longer one continues in the next column under a repeated title.
+ * each section's title (with its event badge) and rows: the label, a meta line, relay legs or a swim's
+ * splits, the heat & lane over the start time, and the time, delta and place (or seed and seed rank)
+ * on the right. A section that fits in one column never splits; a longer one continues in the next
+ * column under a repeated title.
  */
 export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
   const request = withPreferredNames(input.request)
@@ -356,6 +402,30 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
     })
   }
 
+  /** Lines an individual swim's splits take: four to a line. */
+  function splitsLineCount(row: RosterSummaryPdfRow): number {
+    return Math.ceil((row.splits?.length ?? 0) / SPLITS_PER_LINE)
+  }
+
+  /**
+   * An individual swim's interval splits as times alone, four to a line and muted like a relay leg's
+   * split, each right-aligned at an even spacing so the decimals line up down the columns — the way a
+   * meet results file sets them, the first a little in from the name.
+   */
+  function drawSplits(row: RosterSummaryPdfRow, x: number, top: number, width: number) {
+    const times = (row.splits ?? []).map((split) => pdfText(formatDisplayTime(split.time)))
+    if (times.length === 0) return
+    setType("normal", M.metaSize, INK_TERTIARY)
+    // Columns sit where a minute-long split would fit, so they line up from row to row.
+    const firstRight = x + SPLIT_INDENT + doc.getTextWidth("1:00.00")
+    const lastRight = x + width - SPLIT_INSET
+    const pitch = (lastRight - firstRight) / (SPLITS_PER_LINE - 1)
+    times.forEach((time, i) => {
+      const baseline = centeredBaseline(top + Math.floor(i / SPLITS_PER_LINE) * M.metaLh, M.metaLh, M.metaSize)
+      doc.text(time, firstRight + (i % SPLITS_PER_LINE) * pitch, baseline, { align: "right" })
+    })
+  }
+
   function rowTextLeft(row: RosterSummaryPdfRow): number {
     // A fixed column wide enough for the tall badge, so labels line up across rows.
     return row.eventNumber ? left + M.badgeSize + M.badgeGap : left
@@ -373,9 +443,23 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
     return end
   }
 
-  /** The full label when it fits on the line with the sub, else the compact one. */
+  /** Whether the meta fits whole on the label line after `label`. */
+  function metaFitsWith(row: RosterSummaryPdfRow, label: string): boolean {
+    if (!row.meta || row.startTime) return false
+    const end = labelEndWith(row, label)
+    setType("normal", M.metaSize)
+    return end + M.inlineMetaGap + doc.getTextWidth(pdfText(row.meta)) <= textRight(row)
+  }
+
+  /**
+   * The full label when it fits on the line with the sub, else the compact one — and the compact one
+   * too when only it leaves room for the meta beside it ("400 Free B  Leg 4" on one line rather than
+   * "400 Free Relay B" over "Leg 4").
+   */
   function rowLabel(row: RosterSummaryPdfRow): string {
-    return row.fullLabel && labelEndWith(row, row.fullLabel) <= textRight(row) ? row.fullLabel : row.label
+    if (!row.fullLabel || labelEndWith(row, row.fullLabel) > textRight(row)) return row.label
+    if (row.meta && !metaFitsWith(row, row.fullLabel) && metaFitsWith(row, row.label)) return row.label
+    return row.fullLabel
   }
 
   /** Where the label (and sub) end, in the label line's fonts. */
@@ -388,9 +472,7 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
    * always does beside a start time, which makes a second line anyway.
    */
   function metaInline(row: RosterSummaryPdfRow): boolean {
-    if (!row.meta || row.startTime) return false
-    setType("normal", M.metaSize)
-    return labelEnd(row) + M.inlineMetaGap + doc.getTextWidth(pdfText(row.meta)) <= textRight(row)
+    return metaFitsWith(row, rowLabel(row))
   }
 
   /**
@@ -416,9 +498,12 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
       : [fit(lines[0], width), fit(lines.slice(1).join(" | "), width)]
   }
 
-  /** Lines under the label: the meta (whose first line the start time shares), then the legs. */
+  /**
+   * Lines under the label: the meta (whose first line the start time shares), then the relay legs
+   * or the swim's splits.
+   */
   function linesBelow(row: RosterSummaryPdfRow): number {
-    return Math.max(metaLines(row).length, row.startTime ? 1 : 0) + legsLineCount(row)
+    return Math.max(metaLines(row).length, row.startTime ? 1 : 0) + legsLineCount(row) + splitsLineCount(row)
   }
 
   function rowHeight(row: RosterSummaryPdfRow): number {
@@ -474,7 +559,8 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
     const topBaseline = centeredBaseline(labelTop, M.labelLh, M.labelSize)
     // With nothing under it but the start time (in the heat & lane column), the label line — label,
     // sub, result — centers on the row like the event badge.
-    const centered = Boolean(row.startTime) && metaLines(row).length === 0 && legsLineCount(row) === 0
+    const centered =
+      Boolean(row.startTime) && metaLines(row).length === 0 && legsLineCount(row) === 0 && splitsLineCount(row) === 0
     // The result centers on the label line and the start time's line either way, like the badge.
     const twoLineBaseline = centeredBaseline(labelTop, M.labelLh + M.metaLh, M.labelSize)
     const baseline = centered ? twoLineBaseline : topBaseline
@@ -520,6 +606,7 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
     })
     lineTop += Math.max(lines.length, row.startTime ? 1 : 0) * M.metaLh
     drawLegs(row, textLeft, lineTop, maxBelow)
+    drawSplits(row, textLeft, lineTop + legsLineCount(row) * M.metaLh, maxBelow)
   }
 
   function drawSectionHeader(section: RosterSummaryPdfSection, top: number, continued: boolean) {
@@ -603,6 +690,111 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
   }
   drawMeetPdfDetails(doc, details, headerX, baseline, pageRight - headerX, M.detailsSize, INK_SECONDARY)
   let y = baseline + M.headerGap
+
+  // ---- order of events: each session a bordered table, Women | Event | Men ----
+
+  function drawOrderOfEvents(order: EventOrder, top: number): number {
+    const sessions = order.sessions.filter((session) => session.rows.length > 0)
+    if (sessions.length === 0) return top
+    const columns = M.orderMaxColumns
+    const gap = M.columnGap
+    const width = columnWidth
+    const labelled = (label: string) => label.trim().toLowerCase() !== "order of events"
+    const boxHeight = (session: EventOrder["sessions"][number]) =>
+      (labelled(session.label) ? M.orderSessionHeight : 0) + M.orderHeadHeight + session.rows.length * M.orderRowHeight
+    /** One session's box at (x, yy). */
+    function drawBox(session: EventOrder["sessions"][number], x: number, yy: number) {
+      const height = boxHeight(session)
+      let rowTop = yy
+      if (labelled(session.label)) {
+        // A gold-tinted title strip with the box's rounded top corners, like the event badges.
+        doc.setFillColor(...ACCENT_BG)
+        doc.roundedRect(x, yy, width, M.orderSessionHeight + M.orderRadius, M.orderRadius, M.orderRadius, "F")
+        doc.setFillColor(...WHITE)
+        doc.rect(x, yy + M.orderSessionHeight, width, M.orderRadius, "F")
+        // Gold capitals, centered over the table.
+        const charSpace = px(0.8)
+        setType("bold", M.orderSessionSize, ACCENT)
+        const title = fit(session.label.toUpperCase(), width - M.orderPadX * 2, charSpace)
+        const titleWidth = doc.getTextWidth(title) + title.length * charSpace
+        doc.text(title, x + (width - titleWidth) / 2, centeredBaseline(yy, M.orderSessionHeight, M.orderSessionSize), {
+          charSpace,
+        })
+        rowTop += M.orderSessionHeight
+        doc.setDrawColor(...ACCENT_BORDER)
+        doc.setLineWidth(0.75)
+        doc.line(x, rowTop, x + width, rowTop)
+      }
+      // Column heads like the "SEED" tag.
+      const headBaseline = centeredBaseline(rowTop, M.orderHeadHeight, M.seedTagSize)
+      const headSpace = px(1)
+      setType("bold", M.seedTagSize, INK_TERTIARY)
+      doc.text("WOMEN", x + M.orderPadX, headBaseline, { charSpace: headSpace })
+      const eventHead = "EVENT"
+      doc.text(eventHead, x + (width - doc.getTextWidth(eventHead) - eventHead.length * headSpace) / 2, headBaseline, {
+        charSpace: headSpace,
+      })
+      const menHead = "MEN"
+      doc.text(menHead, x + width - M.orderPadX - doc.getTextWidth(menHead) - menHead.length * headSpace, headBaseline, {
+        charSpace: headSpace,
+      })
+      rowTop += M.orderHeadHeight
+      doc.setDrawColor(...BORDER)
+      doc.setLineWidth(0.75)
+      doc.line(x, rowTop, x + width, rowTop)
+      session.rows.forEach((row, r) => {
+        if (r > 0) {
+          doc.setDrawColor(...BORDER_SUBTLE)
+          doc.setLineWidth(0.5)
+          doc.line(x, rowTop, x + width, rowTop)
+        }
+        const rowBaseline = centeredBaseline(rowTop, M.orderRowHeight, M.labelSize)
+        // Event numbers in the badges' gold, events like row labels.
+        setType("bold", M.labelSize, ACCENT)
+        if (row.women != null) doc.text(String(row.women), x + M.orderPadX, rowBaseline)
+        if (row.men != null) doc.text(String(row.men), x + width - M.orderPadX, rowBaseline, { align: "right" })
+        setType("normal", M.labelSize, INK)
+        const event = fit(cleanEventName(row.event), width - (M.orderPadX + M.orderNumberWidth) * 2)
+        doc.text(event, x + width / 2, rowBaseline, { align: "center" })
+        rowTop += M.orderRowHeight
+      })
+      doc.setDrawColor(...ACCENT_BORDER)
+      doc.setLineWidth(0.75)
+      doc.roundedRect(x, yy, width, height, M.orderRadius, M.orderRadius, "S")
+    }
+
+    // Down the left column, then the right: split where the columns come out most even, in order.
+    const stackHeight = (list: EventOrder["sessions"]) =>
+      list.reduce((sum, session, i) => sum + (i > 0 ? M.orderGap : 0) + boxHeight(session), 0)
+    let split = sessions.length
+    let best = Infinity
+    for (let k = 1; k <= sessions.length && columns > 1; k++) {
+      const tallest = Math.max(stackHeight(sessions.slice(0, k)), stackHeight(sessions.slice(k)))
+      if (tallest < best) {
+        best = tallest
+        split = k
+      }
+    }
+    const stacks = [sessions.slice(0, split), sessions.slice(split)]
+    const height = Math.max(...stacks.map(stackHeight))
+    let yy = top
+    // Too tall for what's left under the header: start it on a fresh page.
+    if (yy + height > contentBottom && yy > M.margin) {
+      doc.addPage()
+      yy = M.margin
+    }
+    stacks.forEach((stack, column) => {
+      const x = pageLeft + column * (width + gap)
+      let boxTop = yy
+      for (const session of stack) {
+        drawBox(session, x, boxTop)
+        boxTop += boxHeight(session) + M.orderGap
+      }
+    })
+    return yy + height + M.headerGap
+  }
+
+  if (input.eventOrder) y = drawOrderOfEvents(input.eventOrder, y)
 
   if (request.sections.length === 0) {
     setType("normal", M.labelSize, INK_TERTIARY)

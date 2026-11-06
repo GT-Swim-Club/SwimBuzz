@@ -2,6 +2,7 @@ import { Prisma, ScraperJobStatus, ScraperJobType } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { assignSwimOccurrences } from "@/lib/swim/swim-dedup"
 import {
+  numberRelaySplits,
   redateRelaySplits,
   swimsFromSwimCloudTimes,
   withoutRecordedSwims,
@@ -50,6 +51,8 @@ export async function saveSwimCloudTimes(
     ...swim,
     relayMeetDays: swims[i].relayMeetDays,
   }))
+  // Numbered first: re-dating matches a saved leg on its tags, leg included.
+  await numberRelaySplits(withOccurrences)
   await redateRelaySplits(withOccurrences)
   const swimsToInsert = (await withoutRecordedSwims(withOccurrences)).map(
     ({ relayMeetDays: _relayMeetDays, ...swim }) => swim

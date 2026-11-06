@@ -37,8 +37,9 @@ import {
 } from "@/lib/meet/relay-results"
 import { syncRelayLeadoffSwim, deleteRelayLeadoffSwim } from "@/lib/meet/relay-leadoff-sync"
 import { syncMeetRelaySplitSwims } from "@/lib/meet/relay-split-sync"
+import { saveMeetHeatLane } from "@/lib/meet/heat-lane-save"
 import { getSession } from "@/lib/auth/session"
-import { isStaffRole } from "@swimbuzz/shared"
+import { isStaffRole, type SetHeatLaneInput } from "@swimbuzz/shared"
 
 async function requireStaff() {
   const session = await getSession()
@@ -484,6 +485,14 @@ export async function removeRosterOnlyEntry(meetId: string, athleteId: string) {
     where: { id: meetId },
     data: { entriesSheetSummary: summary as Prisma.InputJsonValue }})
 
+  revalidatePath("/meets/[id]", "page")
+  return { ok: true }
+}
+
+/** Same logic as PUT /api/meets/[id]/heat-lane. */
+export async function setHeatLane(meetId: string, input: SetHeatLaneInput) {
+  await requireStaff()
+  await saveMeetHeatLane(meetId, input)
   revalidatePath("/meets/[id]", "page")
   return { ok: true }
 }

@@ -1,11 +1,12 @@
 import Link from "next/link"
+import type { CSSProperties } from "react"
 import { AppIcon } from "@/components/ui/AppIcon"
 import { Skeleton } from "@/components/ui/Skeleton"
 import BalancedGrid from "@/components/ui/BalancedGrid"
 import {
   relayLineupHasAthlete,
   relayLineupRoundLabel,
-  relayShareRows,
+  relayShareLayout,
   type RelayLineup,
 } from "@swimbuzz/shared"
 import { formatLegTime, type LineupTeam } from "@/lib/meet/relay-builder"
@@ -44,6 +45,14 @@ const PILL_TONES: Record<RelaySummaryPill["tone"], string> = {
   draft: "border-border text-foreground-secondary",
   suggested: "border-dashed border-border text-foreground-secondary",
 }
+
+/**
+ * A mixed relay's column spanning the women's and men's rows (column from `--span-column`),
+ * centered between them. Applied only while the grid's columns are aligned; once it wraps, mixed
+ * relays flow in after the others.
+ */
+const spanningClass =
+  "group-data-[aligned=true]/rows:[grid-column:var(--span-column)] group-data-[aligned=true]/rows:[grid-row:1/span_2] group-data-[aligned=true]/rows:self-center"
 
 /** Cards inside a hovered event block take the block's hover color, so it reads as one surface. */
 const groupHover = "transition-colors group-hover:bg-background-hover-strong"
@@ -172,17 +181,19 @@ export default function RelaySummary({
       </p>
     )
   }
-  // Past a few events: women's row, then men's (mixed at its end), event types in shared columns.
-  const rows = relayShareRows(events)
+  // Past a few events: women's row, then men's, event types in shared columns, and each mixed
+  // relay in a column of its own centered between both rows.
+  const { rows, spanning } = relayShareLayout(events)
+  const cells = rows.flat()
   return (
     <BalancedGrid
       count={events.length}
       minColumnPx={minColumnWidth(events)}
       gapXPx={16}
-      alignedColumns={rows.length > 1 ? rows[0].length : undefined}
+      alignedColumns={rows.length > 1 ? rows[0].length + spanning.length : undefined}
       className="items-start gap-x-4 gap-y-5"
     >
-      {rows.flat().map((event, i) => {
+      {[...cells, ...spanning].map((event, i) => {
         // Blank cell keeping the other gender's event in its column; hidden when the grid wraps.
         if (!event) {
           return (
@@ -221,8 +232,14 @@ export default function RelaySummary({
             )}
           </>
         )
+        const span = i - cells.length
         return (
-          <section key={event.slug} className="min-w-0" aria-label={`${event.name} Relay`}>
+          <section
+            key={event.slug}
+            className={span < 0 ? "min-w-0" : `min-w-0 ${spanningClass}`}
+            style={span < 0 ? undefined : ({ "--span-column": rows[0].length + span + 1 } as CSSProperties)}
+            aria-label={`${event.name} Relay`}
+          >
             {event.href ? (
               // The whole block — header and relay cards — opens the builder.
               <Link

@@ -23,6 +23,16 @@ import {
 } from "@swimbuzz/shared"
 import type { MeetResultEntry, SheetEntry, SheetSummary } from "@/lib/meet/meet-sheet-summary"
 import {
+  applyCoachHeatLane,
+  attachCoachHeatLanes,
+  canEditHeatLane,
+  coachRowHeatLane,
+  coachRowRound,
+  heatLaneRowIdentity,
+  heatLaneSlot,
+  importedRowHeatLane,
+} from "@/lib/meet/heat-lane-overrides"
+import {
   applyRosterNames,
   compareIndividualEntries,
   dropSeedOnlyAfterResults,
@@ -59,6 +69,7 @@ import { LedgerIcon } from "@/components/meet/Ledger"
 import RosterName from "@/components/athlete/RosterName"
 import EditMeetSwimButton from "./EditMeetSwimButton"
 import EditSheetSeedButton from "./EditSheetSeedButton"
+import EditHeatLaneModal from "./EditHeatLaneModal"
 import RemoveRosterOnlyButton from "./RemoveRosterOnlyButton"
 import { EditRelayButton } from "./MeetRelayEditor"
 import MeetAddMenu from "./MeetAddMenu"
@@ -192,10 +203,14 @@ type RoundResult = {
   time?: string
   status?: string
   place?: number
+  points?: number
   seed?: string
 }
 
-function pendingRoundLabel(entry: SummaryEntry): string | null {
+const ROUND_LABELS: Record<SummaryRoundKind, string> = { P: "Prelims", F: "Finals", T: "Timed Finals" }
+
+/** A row's round before it has swum — the coach's when no import gives it one (unless `coach` is false). */
+function pendingRoundLabel(entry: SummaryEntry, coach = true): string | null {
   if (entry.entryType === "relay_team") {
     const round = effectiveRelayRound(entry)
     if (round === "P") return "Prelims"
@@ -204,16 +219,27 @@ function pendingRoundLabel(entry: SummaryEntry): string | null {
     if (entry.resultRound === "P") return "Prelims"
     if (entry.resultRound === "F") return "Finals"
   }
-  return isTimedFinalsRound(entry.round) ? "Timed Finals" : null
+  if (isTimedFinalsRound(entry.round)) return "Timed Finals"
+  const coachRound = coach ? coachRowRound(entry) : undefined
+  return coachRound ? ROUND_LABELS[coachRound] : null
 }
 
-/** The single round a summary row represents: its time/status, place and the seed it's measured against. */
-function rowRoundResult(entry: SummaryEntry, allEntries?: SummaryEntry[]): RoundResult {
+/**
+ * The single round a summary row represents: its time/status, place and the seed it's measured
+ * against. `coach` false leaves out a coach-picked round, to tell whether an import gave it one.
+ */
+function rowRoundResult(entry: SummaryEntry, allEntries?: SummaryEntry[], coach = true): RoundResult {
   const timedOpts = allEntries ? { allEntries } : undefined
   const nt = entry.timeStatus === "NT" ? "NT" : undefined
 
   if (entry.isSwimOff) {
-    return { label: "Swim-off", time: entry.resultTime, status: entry.resultStatus, place: entry.resultPlace }
+    return {
+      label: "Swim-off",
+      time: entry.resultTime,
+      status: entry.resultStatus,
+      place: entry.resultPlace,
+      points: entry.resultPoints,
+    }
   }
 
   if (entry.entryType === "relay_team") {
@@ -230,8 +256,14 @@ function rowRoundResult(entry: SummaryEntry, allEntries?: SummaryEntry[]): Round
             ? isTimedFinalsEntry(entry)
               ? "Timed Finals"
               : "Finals"
-            : pendingRoundLabel(entry)
-    return { label, time, place: time ? relayTeamPlace(entry) : undefined, seed }
+            : pendingRoundLabel(entry, coach)
+    return {
+      label,
+      time,
+      place: time ? relayTeamPlace(entry) : undefined,
+      points: time ? entry.resultPoints : undefined,
+      seed,
+    }
   }
 
   if (entry.resultRound === "P") {
@@ -240,6 +272,7 @@ function rowRoundResult(entry: SummaryEntry, allEntries?: SummaryEntry[]): Round
       time: entry.prelimTime,
       status: entry.prelimStatus,
       place: entry.prelimPlace,
+      points: entry.prelimPoints,
       seed: entry.seedTime || nt,
     }
   }
@@ -255,10 +288,18 @@ function rowRoundResult(entry: SummaryEntry, allEntries?: SummaryEntry[]): Round
         time: entry.finalTime ?? entry.resultTime,
         status: finalStatus ?? entry.resultStatus,
         place: entry.finalPlace ?? entry.resultPlace,
+        points: entry.finalPoints ?? entry.resultPoints,
         seed,
       }
     }
-    return { label: "Finals", time: entry.finalTime, status: finalStatus, place: entry.finalPlace, seed }
+    return {
+      label: "Finals",
+      time: entry.finalTime,
+      status: finalStatus,
+      place: entry.finalPlace,
+      points: entry.finalPoints,
+      seed,
+    }
   }
 
   const seed = entry.seedTime || entry.prelimTime || nt
@@ -269,6 +310,7 @@ function rowRoundResult(entry: SummaryEntry, allEntries?: SummaryEntry[]): Round
       time: entry.finalTime,
       status: finalStatus,
       place: entry.finalPlace,
+      points: entry.finalPoints,
       seed,
     }
   }
@@ -278,6 +320,7 @@ function rowRoundResult(entry: SummaryEntry, allEntries?: SummaryEntry[]): Round
       time: entry.prelimTime,
       status: entry.prelimStatus,
       place: entry.prelimPlace,
+      points: entry.prelimPoints,
       seed,
     }
   }
@@ -287,10 +330,11 @@ function rowRoundResult(entry: SummaryEntry, allEntries?: SummaryEntry[]): Round
       time: entry.resultTime,
       status: entry.resultStatus,
       place: entry.resultPlace,
+      points: entry.resultPoints,
       seed,
     }
   }
-  return { label: pendingRoundLabel(entry), seed: seed || entry.timeStatus }
+  return { label: pendingRoundLabel(entry, coach), seed: seed || entry.timeStatus }
 }
 
 /** The round a row stands for, for the round filter — a swim-off goes with prelims. */
@@ -316,6 +360,7 @@ function buildIndividualRounds(entry: SheetEntry, allEntries?: SummaryEntry[]): 
         label: "Swim-off",
         time: entry.resultTime,
         place: entry.resultPlace,
+        points: entry.resultPoints,
         status: entry.resultStatus,
         splits: entryDisplaySplits(entry),
       },
@@ -340,6 +385,7 @@ function buildIndividualRounds(entry: SheetEntry, allEntries?: SummaryEntry[]): 
       label: "Prelims",
       time: entry.prelimTime,
       place: entry.prelimPlace,
+      points: entry.prelimPoints,
       status: entry.prelimStatus,
       heat: prelimHeat,
       lane: entry.prelimLane ?? (entry.resultRound === "P" ? individualLane(entry) : undefined),
@@ -361,6 +407,7 @@ function buildIndividualRounds(entry: SheetEntry, allEntries?: SummaryEntry[]): 
       label: timed ? "Timed Finals" : "Finals",
       time: entry.finalTime,
       place: entry.finalPlace,
+      points: entry.finalPoints,
       podium: true,
       status: entry.finalStatus === "NS" ? undefined : entry.finalStatus,
       heat: finalHeat,
@@ -380,6 +427,7 @@ function buildIndividualRounds(entry: SheetEntry, allEntries?: SummaryEntry[]): 
       label: timed ? "Timed Finals" : "Result",
       time: entry.resultTime,
       place: entry.resultPlace,
+      points: entry.resultPoints,
       podium: true,
       status: entry.resultStatus,
       heat: formatHeatNumber(formatHeat(entry)),
@@ -594,6 +642,7 @@ function summaryRowView(
               ? formatSeedTimeDelta(res.seed, res.time)
               : null,
           place: res.place,
+          points: res.points,
           podium: podiumPlace != null && podiumPlace === res.place,
         }
       : res.seed
@@ -649,6 +698,14 @@ function relayLegs(entry: SummaryEntry): { name: string; split: string }[] {
     })
 }
 
+/** An individual swim's interval splits in distance order, leaving out missing ones ("No Data"). */
+function swimSplits(entry: SummaryEntry): { distance: number; time: string }[] {
+  return entryDisplaySplits(entry)
+    .map((s) => ({ distance: s.distance, time: sanitizeRelaySplitTime(s.splitTime) ?? "" }))
+    .filter((s) => s.time)
+    .sort((a, b) => a.distance - b.distance)
+}
+
 /** A summary row for the PDF export, honoring the viewer's Show round / Show heat & lane toggles. */
 function summaryRowPdf(
   entry: SummaryEntry,
@@ -689,6 +746,7 @@ function summaryRowPdf(
     startTime,
     legs: view.isRelay ? relayLegs(entry).map((leg) => leg.name) : undefined,
     legSplits: view.isRelay ? relayLegs(entry).map((leg) => leg.split) : undefined,
+    splits: view.isRelay ? undefined : swimSplits(entry),
     result: view.result,
   }
 }
@@ -725,6 +783,7 @@ function SummaryEntryRow({
   athleteId?: string
 }) {
   const [editOpen, setEditOpen] = useState(false)
+  const [heatLaneOpen, setHeatLaneOpen] = useState(false)
   const athleteRecord = athletes?.find((a) => a.id === entry.athleteId)
   const compact = display.density === "compact"
   const view = summaryRowView(
@@ -765,6 +824,7 @@ function SummaryEntryRow({
           label: res.label ?? "Relay",
           time: res.time,
           place: res.place,
+          points: res.points,
           podium: effectiveRelayRound(entry) !== "P",
           seedTime: res.seed && res.seed !== "NT" ? res.seed : undefined,
           seedRank: displaySeedRank(entry),
@@ -785,6 +845,7 @@ function SummaryEntryRow({
       time: res.time,
       status: res.status,
       place: res.place,
+      points: res.points,
       podium: podiumPlace != null,
       seedTime: res.seed && res.seed !== "NT" ? res.seed : undefined,
       seedRank: displaySeedRank(entry),
@@ -876,6 +937,39 @@ function SummaryEntryRow({
     }
   }
 
+  // Coaches fill in what no import has given this row's round; imported values always win.
+  const heatLaneIdentity = canEdit && meetId && canEditHeatLane(entry) ? heatLaneRowIdentity(entry, athleteGenders) : null
+  const heatLaneImported = importedRowHeatLane(entry)
+  const heatLaneCoach = coachRowHeatLane(entry)
+  // A row no import has given a round can take the coach's (they're all on the T round).
+  const roundEditable =
+    heatLaneIdentity != null &&
+    heatLaneSlot(entry) === "T" &&
+    rowRoundResult(entry, allEntries, false).label == null
+  const canAddHeatLane =
+    heatLaneIdentity != null &&
+    (roundEditable ||
+      (["heat", "heatTotal", "lane", "startTime"] as const).some((f) => heatLaneImported[f] == null))
+  const heatLaneEditor =
+    canAddHeatLane && meetId ? (
+      <EditHeatLaneModal
+        meetId={meetId}
+        row={{ ...heatLaneIdentity, slot: heatLaneSlot(entry) }}
+        description={[
+          isRelay ? `${entry.event} ${displayRelayLetter(entry.relayLetter)}` : entry.athleteName,
+          isRelay ? null : entry.event,
+          res.label,
+        ]
+          .filter(Boolean)
+          .join(" · ")}
+        imported={heatLaneImported}
+        coach={heatLaneCoach}
+        roundEditable={roundEditable}
+        open={heatLaneOpen}
+        onOpenChange={setHeatLaneOpen}
+      />
+    ) : null
+
   return (
     <>
       <SummaryRow
@@ -913,8 +1007,11 @@ function SummaryEntryRow({
         trailing={removeButton}
         onEdit={editor ? () => setEditOpen(true) : undefined}
         editLabel={isRelay ? "Edit relay" : "Edit"}
+        onEditHeatLane={heatLaneEditor ? () => setHeatLaneOpen(true) : undefined}
+        heatLaneLabel={roundEditable ? "Round, heat & lane" : "Heat & lane"}
       />
       {editor}
+      {heatLaneEditor}
     </>
   )
 }
@@ -967,6 +1064,7 @@ export default function MeetSheetSummarySection({
   entriesSummary,
   results,
   relayResults,
+  heatLaneOverrides = null,
   meetId,
   meetName,
   defaultCourse,
@@ -988,6 +1086,8 @@ export default function MeetSheetSummarySection({
   entriesSummary?: SheetSummary | null
   results?: MeetResultEntry[] | null
   relayResults?: SheetSummary["entries"] | null
+  /** Meet.heatLaneOverrides — coach heat & lane, shown where no import has it. */
+  heatLaneOverrides?: unknown
   meetId?: string
   meetName?: string
   /** Defaults for the coach "Add swim" dialog. */
@@ -1114,7 +1214,11 @@ export default function MeetSheetSummarySection({
     persist(ROWINFO_KEY, JSON.stringify({ round, hl }))
   }
 
-  const display: RowDisplay = { density, showRound, showHeatLane }
+  // A points column, lined up across every row, once the results PDF's points are in.
+  const showPoints =
+    (results ?? []).some((r) => r.resultPoints != null || r.finalPoints != null || r.prelimPoints != null) ||
+    (relayResults ?? []).some((r) => r.resultPoints != null)
+  const display: RowDisplay = { density, showRound, showHeatLane, showPoints }
 
   const athleteGenders = new Map(
     athletes
@@ -1124,17 +1228,25 @@ export default function MeetSheetSummarySection({
   const athleteNames = new Map(athletes.map((a) => [a.id, a.name]))
 
   const summary = applyRosterNames(
-    mergeSheetSummaries(
-      psychSummary,
-      heatSummary,
-      results ?? [],
-      relayResults,
-      entriesSummary,
-      finalsHeatSummary
+    attachCoachHeatLanes(
+      mergeSheetSummaries(
+        psychSummary,
+        heatSummary,
+        results ?? [],
+        relayResults,
+        entriesSummary,
+        finalsHeatSummary
+      ),
+      heatLaneOverrides,
+      athleteGenders
     ),
     athleteNames
   )
-  const relays = summary ? uniqueRelayTeams(summary.entries, athleteGenders) : []
+  const relays = summary
+    ? attachCoachHeatLanes(uniqueRelayTeams(summary.entries, athleteGenders), heatLaneOverrides, athleteGenders).map(
+        applyCoachHeatLane
+      )
+    : []
   const hasImportedResults = Boolean(
     (results?.length ?? 0) > 0 ||
       (relayResults ?? []).some((e) =>
@@ -1154,7 +1266,9 @@ export default function MeetSheetSummarySection({
         expandIndividualResultRows(inferResultHeatTotals(summary.entries)),
         hasImportedResults,
         editableSeedKeySet
-      ).filter((entry) => !entry.isRelayLeadoff)
+      )
+        .filter((entry) => !entry.isRelayLeadoff)
+        .map(applyCoachHeatLane)
     : []
   // By athlete: each relay sits in the section of every swimmer on it (relay-only swimmers get
   // a section too), so there's no separate relays list.
@@ -1412,9 +1526,14 @@ export default function MeetSheetSummarySection({
     ]
       .filter(Boolean)
       .join(" · ")
+    // Entries and Heats exports lead with the order of events (the session's, when filtered to one).
+    const orderOfEvents =
+      viewMode === "summary" && title !== "Results" && eventOrder?.sessions.length
+        ? { orderOfEvents: { session: activeSession ?? undefined } }
+        : {}
 
     let sections: RosterSummaryPdfSection[] = []
-    if (!hasContent) return { heading, sections }
+    if (!hasContent) return { heading, sections, ...orderOfEvents }
     if (viewMode === "roster") {
       // Roster order, without pinning the viewer to the top.
       const athletesInOrder = rosterAthletes.filter((athlete) => filteredRosterAthletes.includes(athlete))
@@ -1446,7 +1565,7 @@ export default function MeetSheetSummarySection({
         eventNumber: group.eventNumber > 0 ? group.eventNumber : undefined,
         rows: sortEventEntries(group.entries, displayEntries).map((entry) => toRow(entry, true)),
       }))
-      return { heading, sections, splitSections: true }
+      return { heading, sections, splitSections: true, ...orderOfEvents }
     } else {
       for (const athleteGroup of filterAthleteGroups(grouped)) {
         sections.push({
@@ -1462,7 +1581,7 @@ export default function MeetSheetSummarySection({
         })
       }
     }
-    return { heading, sections }
+    return { heading, sections, ...orderOfEvents }
   }
 
   return (

@@ -22,7 +22,8 @@ export type AthleteSwim = {
   source: string
   /**
    * Set on a relay split (leg 2–4 of a relay): never a flat-start PB; it has its own view on the
-   * event page. `leg` is null when SwimCloud only says "Split" (leg 2 or 3).
+   * event page. `leg` is null when SwimCloud only says "Split" (leg 2 or 3) and the sync couldn't
+   * place it in the relay's lineup.
    */
   relaySplit?: { relayEvent: string; leg: number | null }
 }

@@ -6,6 +6,7 @@ import * as Sharing from "expo-sharing"
 import { File, Paths } from "expo-file-system"
 import { captureRef } from "react-native-view-shot"
 import {
+  formatPoints,
   eventGenderWord,
   roundFilterIncludes,
   roundFilterLabel,
@@ -18,11 +19,14 @@ import {
   sessionRound,
   splitRosterName,
   SUMMARY_ROUNDS,
+  type CoachHeatLane,
+  type HeatLaneFields,
   type MeetHeaderDetails,
   type MeetSessionOrder,
   type RosterSummaryPdfRequest,
   type RosterSummaryPdfSection,
   type SessionRound,
+  type SetHeatLaneInput,
   type SummaryRoundKind,
 } from "@swimbuzz/shared"
 import {
@@ -39,7 +43,8 @@ import {
   type ActionSheetItem,
 } from "@swimbuzz/ui"
 import { spacing } from "@swimbuzz/tokens"
-import { API_URL, getAccessToken } from "../lib/api"
+import { API_URL, api, getAccessToken } from "../lib/api"
+import { HeatLaneSheet, type HeatLaneSlot } from "./HeatLaneSheet"
 import { Icon } from "./Icon"
 import { RosterSummaryExportCapture } from "./RosterSummaryExportCapture"
 
@@ -59,6 +64,10 @@ export type RosterSummaryEntry = {
   finalHeat?: number
   finalHeatTotal?: number
   finalLane?: number
+  /** The heat's start time from the heat sheet ("03:19 PM"). */
+  startTime?: string | null
+  /** Coach-added heat & lane per round, shown only where no import has that field. */
+  coachHeatLane?: CoachHeatLane
   /** Heat-sheet round text ("Timed Finals"). */
   round?: string
   resultRound?: string
@@ -68,6 +77,10 @@ export type RosterSummaryEntry = {
   resultPlace?: number
   prelimPlace?: number
   finalPlace?: number
+  /** Points scored (results PDF Points column), per round like the places. */
+  resultPoints?: number
+  prelimPoints?: number
+  finalPoints?: number
   resultStatus?: string
   /** Swim-off (tie-breaker) result row. */
   isSwimOff?: boolean
@@ -84,6 +97,10 @@ export type RosterSummaryEntry = {
     athleteId?: string
     splitTime?: string
   }>
+  /** Individual race splits (interval times), per round where the swim has both. */
+  splits?: Array<{ distance: number; splitTime: string }>
+  prelimSplits?: Array<{ distance: number; splitTime: string }>
+  finalSplits?: Array<{ distance: number; splitTime: string }>
 }
 
 /** Heat & lane — for that round's swim when the view is filtered to a prelims or finals session. */
@@ -99,12 +116,23 @@ function formatHeatLane(entry: RosterSummaryEntry, round?: SessionRound | null):
 }
 
 function heatLaneFor(entry: RosterSummaryEntry, round?: SessionRound | null) {
+  const imported = importedHeatLaneFor(entry, round)
+  const coach = coachHeatLaneFor(entry, round)
+  return {
+    heat: imported.heat ?? coach.heat ?? null,
+    heatTotal: imported.heatTotal ?? coach.heatTotal,
+    lane: imported.lane ?? coach.lane ?? null,
+  }
+}
+
+/** Heat & lane from the heat sheets and results — for that round's swim when the view names one. */
+export function importedHeatLaneFor(entry: RosterSummaryEntry, round?: SessionRound | null): HeatLaneFields {
   const heat =
     round === "F"
-      ? entry.finalHeat ?? entry.heat ?? null
+      ? entry.finalHeat ?? entry.heat
       : round === "P"
-        ? entry.prelimHeat ?? entry.heat ?? null
-        : entry.heat ?? entry.finalHeat ?? entry.prelimHeat ?? null
+        ? entry.prelimHeat ?? entry.heat
+        : entry.heat ?? entry.finalHeat ?? entry.prelimHeat
   const heatTotal =
     round === "F"
       ? entry.finalHeatTotal ?? entry.heatTotal
@@ -113,11 +141,66 @@ function heatLaneFor(entry: RosterSummaryEntry, round?: SessionRound | null) {
         : entry.heatTotal
   const lane =
     round === "F"
-      ? entry.finalLane ?? entry.lane ?? null
+      ? entry.finalLane ?? entry.lane
       : round === "P"
-        ? entry.prelimLane ?? entry.lane ?? null
-        : entry.lane ?? entry.finalLane ?? entry.prelimLane ?? null
-  return { heat, heatTotal, lane }
+        ? entry.prelimLane ?? entry.lane
+        : entry.lane ?? entry.finalLane ?? entry.prelimLane
+  return {
+    heat: heat != null && heat > 0 ? heat : undefined,
+    heatTotal: heatTotal ?? undefined,
+    lane: lane ?? undefined,
+    startTime: entry.startTime || undefined,
+  }
+}
+
+/** The coach's heat & lane for that round, or (with no round) whichever round has one. */
+function coachHeatLaneFor(entry: RosterSummaryEntry, round?: SessionRound | null): HeatLaneFields {
+  const coach = entry.coachHeatLane
+  if (!coach) return {}
+  if (round) return coach[round] ?? {}
+  const pick = <K extends keyof HeatLaneFields>(field: K) =>
+    coach.T?.[field] ?? coach.F?.[field] ?? coach.P?.[field]
+  return { heat: pick("heat"), heatTotal: pick("heatTotal"), lane: pick("lane"), startTime: pick("startTime") }
+}
+
+/**
+ * The rounds of a row a coach can add heat & lane to (only the session's round when the view names
+ * one), or null when every field already comes from an import.
+ */
+function heatLaneSlots(entry: RosterSummaryEntry, round?: SessionRound | null): HeatLaneSlot[] | null {
+  if (entry.isRelayLeadoff || entry.isSwimOff || entry.rosterOnly) return null
+  // Saved by the rounds imports give the row, so a coach-picked round doesn't move them; a row with
+  // none keeps its heat & lane (and the coach's round) on T.
+  const imported = importedRoundKinds(entry)
+  const kinds: SummaryRoundKind[] = imported.length === 0 ? ["T"] : round ? [round] : imported
+  const slots: HeatLaneSlot[] = kinds
+    // Alternates are finals-only and have no heat or lane.
+    .filter((kind) => !(kind === "F" && entry.alternate))
+    .map((slot) => ({
+      slot,
+      imported: importedHeatLaneFor(entry, slot === "T" ? null : slot),
+      coach: entry.coachHeatLane?.[slot] ?? {},
+      roundEditable: imported.length === 0,
+    }))
+  const missing = slots.some(
+    (s) =>
+      s.roundEditable ||
+      (["heat", "heatTotal", "lane", "startTime"] as const).some((f) => s.imported[f] == null)
+  )
+  return missing ? slots : null
+}
+
+/** Which row a heat & lane is saved to. */
+function heatLaneRow(entry: RosterSummaryEntry): Omit<SetHeatLaneInput, "slot"> {
+  return entry.entryType === "relay_team"
+    ? { kind: "relay", event: entry.event, relayLetter: entry.relayLetter ?? null, gender: entry.gender ?? "" }
+    : { kind: "individual", athleteId: entry.athleteId, event: entry.event }
+}
+
+/** The heat's start time, the coach's when no heat sheet has one. */
+function startTimeFor(entry: RosterSummaryEntry, round?: SessionRound | null): string | undefined {
+  if (entry.alternate) return undefined
+  return entry.startTime || coachHeatLaneFor(entry, round).startTime || undefined
 }
 
 /** The entry's place — in that round when the view is filtered to a prelims or finals session. */
@@ -154,10 +237,17 @@ function sortEventEntries(entries: RosterSummaryEntry[], round?: SessionRound | 
 }
 
 /**
- * The rounds an entry stands for — mobile entries carry prelims and finals on one row. Empty when
- * unknown (a seed before any heat sheet).
+ * The rounds an entry stands for — mobile entries carry prelims and finals on one row — with the
+ * coach's round for one no import has given any. Empty when unknown (a seed before any heat sheet).
  */
-function entryRoundKinds(entry: RosterSummaryEntry): SummaryRoundKind[] {
+export function entryRoundKinds(entry: RosterSummaryEntry): SummaryRoundKind[] {
+  const kinds = importedRoundKinds(entry)
+  const coach = entry.coachHeatLane?.T?.round
+  return kinds.length === 0 && coach ? [coach] : kinds
+}
+
+/** The rounds the heat sheets and results give an entry, leaving out a coach-picked one. */
+function importedRoundKinds(entry: RosterSummaryEntry): SummaryRoundKind[] {
   const kinds: SummaryRoundKind[] = []
   const round = entry.resultRound || entry.relayRound
   if (
@@ -195,10 +285,24 @@ function formatPlace(entry: RosterSummaryEntry): string | null {
   return null
 }
 
+/** "20 pts" for the round whose place shows. */
+function formatEntryPoints(entry: RosterSummaryEntry): string | null {
+  const points =
+    entry.finalPlace != null
+      ? entry.finalPoints
+      : entry.resultPlace != null
+        ? entry.resultPoints
+        : entry.prelimPoints
+  return points != null ? `${formatPoints(points)} pts` : null
+}
+
 function entryTitle(entry: RosterSummaryEntry): string {
   if (entry.entryType === "relay_team") {
     const letter = entry.relayLetter ? ` ${entry.relayLetter}` : ""
-    const round = entry.relayRound ? ` (${entry.relayRound})` : ""
+    // A relay no import has given a round shows the coach's prelims or finals.
+    const coachRound = entry.coachHeatLane?.T?.round
+    const relayRound = entry.relayRound || (coachRound === "P" || coachRound === "F" ? coachRound : "")
+    const round = relayRound ? ` (${relayRound})` : ""
     return `${entry.event}${letter}${round}`
   }
   return entry.event
@@ -222,6 +326,23 @@ function relayLegSplits(entry: RosterSummaryEntry): string[] {
     })
 }
 
+/**
+ * An individual swim's interval splits — that round's when the view is filtered to prelims or
+ * finals, else the finals' — leaving out missing ones ("No Data").
+ */
+function swimSplits(entry: RosterSummaryEntry, round?: SessionRound | null) {
+  if (entry.entryType === "relay_team") return undefined
+  const splits =
+    round === "P"
+      ? entry.prelimSplits ?? (entry.resultRound !== "F" ? entry.splits : undefined)
+      : round === "F"
+        ? entry.finalSplits ?? (entry.resultRound !== "P" ? entry.splits : undefined)
+        : entry.finalSplits ?? entry.splits ?? entry.prelimSplits
+  return (splits ?? [])
+    .map((s) => ({ distance: s.distance, time: s.splitTime?.trim() ?? "" }))
+    .filter((s) => /\d/.test(s.time))
+}
+
 /** The leg an athlete swam on a relay and their split, e.g. "Leg 1 split 25.31". */
 function relayLegLabel(entry: RosterSummaryEntry, athleteId: string | undefined): string | null {
   if (entry.entryType !== "relay_team" || !athleteId) return null
@@ -243,8 +364,10 @@ function entrySubtitle(
   const bits = [
     mode === "event" ? entry.athleteName : relayLegLabel(entry, athleteId),
     withHeatLane ? formatHeatLane(entry, round) : null,
+    withHeatLane ? startTimeFor(entry, round) : null,
     formatTimes(entry),
     formatPlace(entry) ? `Place ${formatPlace(entry)}` : null,
+    formatEntryPoints(entry),
   ].filter(Boolean)
   if (withLegs && entry.entryType === "relay_team" && entry.relaySwimmers?.length) {
     bits.push(relayLegNames(entry).join(", "))
@@ -300,8 +423,10 @@ function pdfRow(
         .filter(Boolean)
         .join(" · ") || undefined,
     heatLane: formatHeatLane(entry, round)?.replace("/", " of ") ?? undefined,
+    startTime: startTimeFor(entry, round),
     legs: isRelay ? relayLegNames(entry) : undefined,
     legSplits: isRelay ? relayLegSplits(entry) : undefined,
+    splits: swimSplits(entry, round),
   }
 }
 
@@ -314,6 +439,8 @@ export function RosterSummarySection({
   eventOrder = null,
   details,
   iconUrl = null,
+  canEdit = false,
+  onHeatLaneSaved,
 }: {
   entries: RosterSummaryEntry[]
   viewerAthleteId?: string | null
@@ -326,6 +453,10 @@ export function RosterSummarySection({
   /** Date and location for the PNG export's header. */
   details: MeetHeaderDetails
   iconUrl?: string | null
+  /** Coaches can tap a row to add the heat & lane no import has given it. */
+  canEdit?: boolean
+  /** After a coach saves a heat & lane, to reload the meet. */
+  onHeatLaneSaved?: () => void
 }) {
   const c = usePalette()
   // "Entries" → "Heats" once a heat sheet is in → "Results" once results are posted.
@@ -462,7 +593,12 @@ export function RosterSummarySection({
     ]
       .filter(Boolean)
       .join(" · ")
-    if (filtered.length === 0) return { heading, sections: [] }
+    // Entries and Heats exports lead with the order of events (the session's, when filtered to one).
+    const orderOfEvents =
+      title !== "Results" && eventOrder?.sessions.length
+        ? { orderOfEvents: { session: activeSession ?? undefined } }
+        : {}
+    if (filtered.length === 0) return { heading, sections: [], ...orderOfEvents }
     const sections: RosterSummaryPdfSection[] =
       mode === "athlete"
         ? athleteGroups.map((group) => ({
@@ -485,7 +621,24 @@ export function RosterSummarySection({
               )
             ),
           }))
-    return { heading, sections, splitSections: mode !== "athlete" }
+    return { heading, sections, splitSections: mode !== "athlete", ...orderOfEvents }
+  }
+
+  /** The row whose heat & lane a coach is editing, with its rounds. */
+  const [heatLaneEditing, setHeatLaneEditing] = useState<{
+    entry: RosterSummaryEntry
+    slots: HeatLaneSlot[]
+  } | null>(null)
+  /** A row's tap handler: opens the heat & lane editor for coaches, when there's anything to add. */
+  function heatLanePress(entry: RosterSummaryEntry) {
+    if (!canEdit) return undefined
+    const slots = heatLaneSlots(entry, activeRound)
+    return slots ? () => setHeatLaneEditing({ entry, slots }) : undefined
+  }
+
+  async function saveHeatLane(inputs: SetHeatLaneInput[]) {
+    for (const input of inputs) await api.setMeetHeatLane(meetId, input)
+    onHeatLaneSaved?.()
   }
 
   const [shareOpen, setShareOpen] = useState(false)
@@ -709,6 +862,7 @@ export function RosterSummarySection({
                 key={`${entry.athleteId}-${entry.event}-${entry.relayLetter ?? ""}-${index}`}
                 title={entryTitle(entry)}
                 subtitle={entrySubtitle(entry, "athlete", true, group.athleteId, true, activeRound)}
+                onPress={heatLanePress(entry)}
               />
             ))}
           </View>
@@ -736,6 +890,7 @@ export function RosterSummarySection({
                   ) : undefined
                 }
                 subtitle={entrySubtitle(entry, "event", true, undefined, true, activeRound)}
+                onPress={heatLanePress(entry)}
               />
             ))}
           </View>
@@ -778,6 +933,21 @@ export function RosterSummarySection({
           ] satisfies ActionSheetItem[],
         ]}
       />
+
+      {heatLaneEditing ? (
+        <HeatLaneSheet
+          visible
+          onClose={() => setHeatLaneEditing(null)}
+          title={
+            heatLaneEditing.entry.entryType === "relay_team"
+              ? entryTitle(heatLaneEditing.entry)
+              : `${heatLaneEditing.entry.event} · ${splitRosterName(heatLaneEditing.entry.athleteName).name}`
+          }
+          row={heatLaneRow(heatLaneEditing.entry)}
+          slots={heatLaneEditing.slots}
+          onSave={saveHeatLane}
+        />
+      ) : null}
 
       {/* Off-screen mirror captured to PNG while the share sheet is open — never shown in the layout. */}
       {shareOpen && shareRequest ? (

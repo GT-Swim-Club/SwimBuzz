@@ -7,7 +7,7 @@
   "functions": {
     "api/parse-pdf.py": {
       "maxDuration": 60,
-      "excludeFiles": "apps/web/public/scraper/**"
+      "excludeFiles": "{apps/web/public/scraper/**,pdf_parsers/tests/**}"
     }
   },
   "crons": [

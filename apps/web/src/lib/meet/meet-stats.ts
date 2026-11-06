@@ -2,25 +2,19 @@ import type { MeetResultEntry, SheetEntry } from "@/lib/meet/meet-sheet-summary"
 import { isRelaySignupEvent } from "@/lib/meet/meet-signup"
 import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
 import { canonicalizeStrokeEvent, normalizeEventName } from "@/lib/swim/swim-parse"
-import { parseTime } from "@/lib/utils"
+import { formatOrdinal, parseTime } from "@/lib/utils"
+import {
+  formatPoints,
+  TEAM_SCORE_SECTIONS,
+  teamPlaceLabel,
+  teamScoreGap,
+  type MeetHighlights,
+  type StatCounter,
+  type StatSpotlight,
+  type TeamScores,
+} from "@swimbuzz/shared"
 
-export type StatCounter = {
-  label: string
-  value: string | number
-  hint?: string
-}
-
-export type StatSpotlight = {
-  text: string
-  href?: string
-  /** Substring of `text` to wrap in a link when `href` is set. */
-  linkLabel?: string
-}
-
-export type MeetHighlights = {
-  counters: StatCounter[]
-  spotlight?: StatSpotlight | null
-}
+export type { MeetHighlights, StatCounter, StatSpotlight }
 
 export type MeetSwimForStats = {
   id: string
@@ -31,6 +25,8 @@ export type MeetSwimForStats = {
   athleteName?: string
   gender?: string
   tags?: string
+  /** Points scored (results PDF Points column). */
+  points?: number | null
 }
 
 export type NationalsCutForStats = {
@@ -116,6 +112,8 @@ export function computeMeetResultHighlights(opts: {
   nationalsCuts?: NationalsCutForStats[]
   /** Relay team results — used for busiest-swimmer (each leg counts). */
   relayResults?: SheetEntry[] | null
+  /** Team standings from the results PDF — the carousel's first page. */
+  teamScores?: TeamScores | null
 }): MeetHighlights | null {
   const {
     results,
@@ -125,16 +123,55 @@ export function computeMeetResultHighlights(opts: {
     nationalsCuts,
     athleteHrefById,
     relayResults,
+    teamScores,
   } = opts
 
   const timedOrPlaced = results.filter(
     (r) => !r.isRelayLeadoff && (hasTimedResult(r) || preferredPlace(r) != null)
   )
-  const hasSignal = timedOrPlaced.length > 0 || meetSwims.length > 0
+  const hasSignal = timedOrPlaced.length > 0 || meetSwims.length > 0 || Boolean(teamScores)
   if (!hasSignal) return null
 
   const counters: StatCounter[] = []
   let spotlight: StatSpotlight | null = null
+
+  // Team scores — our place, points and margin in each standings list
+  for (const { key, label } of TEAM_SCORE_SECTIONS) {
+    const standings = teamScores?.[key] ?? []
+    const ours = standings.find((s) => s.ours)
+    if (!ours) continue
+    counters.push({
+      page: "teamScores",
+      label,
+      value: teamPlaceLabel(ours, standings),
+      hint: `${formatPoints(ours.points)} pts`,
+      detail: teamScoreGap(standings) ?? undefined,
+    })
+  }
+
+  // Top scorers — individual swims only; relay points stay with the relay
+  const scorers = new Map<string, { athleteName: string; points: number; swims: number }>()
+  for (const s of meetSwims) {
+    if (s.points == null || s.points <= 0 || isRelayLeadoffSwimTag(s.tags ?? "")) continue
+    const prev = scorers.get(s.athleteId)
+    if (prev) {
+      prev.points += s.points
+      prev.swims += 1
+    } else {
+      scorers.set(s.athleteId, { athleteName: s.athleteName ?? "", points: s.points, swims: 1 })
+    }
+  }
+  const topScorers = [...scorers.values()]
+    .sort((a, b) => b.points - a.points || a.athleteName.localeCompare(b.athleteName))
+    .slice(0, 3)
+  topScorers.forEach((scorer, i) => {
+    counters.push({
+      page: "topScorers",
+      label: i === 0 ? "Top scorer" : `${formatOrdinal(i + 1)} scorer`,
+      value: displayName(scorer.athleteName),
+      hint: `${formatPoints(scorer.points)} pts · ${scorer.swims} ${scorer.swims === 1 ? "event" : "events"}`,
+    })
+  })
 
   // Swimmers with results
   const swimmerIds = new Set<string>()
@@ -337,5 +374,5 @@ export function computeMeetResultHighlights(opts: {
   }
 
   if (counters.length === 0) return null
-  return { counters, spotlight }
+  return { counters, spotlight, teamScores: teamScores ?? null }
 }

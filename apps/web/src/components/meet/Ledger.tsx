@@ -463,18 +463,30 @@ export function LedgerStatTile({
   value,
   label,
   sub,
+  detail,
   valueClassName = "text-foreground",
   fit = false,
+  interactive = false,
 }: {
   value: ReactNode
   label: string
   sub?: string
+  /** A quieter second line under `sub`. */
+  detail?: string
   valueClassName?: string
   /** Shrink the value to fit the tile's width, then wrap it (for text like names and events). */
   fit?: boolean
+  /** Inside a button (a `group`): take the shared hover wash. */
+  interactive?: boolean
 }) {
   return (
-    <div className="flex min-w-0 flex-col justify-center rounded-lg bg-background/90 px-2 py-2.5 text-center shadow-sm ring-1 ring-inset ring-black/5 dark:bg-fill-secondary dark:shadow-none dark:ring-white/10">
+    <div
+      className={`flex min-w-0 flex-col justify-center rounded-lg bg-background/90 px-2 py-2.5 text-center shadow-sm ring-1 ring-inset ring-black/5 dark:bg-fill-secondary dark:shadow-none dark:ring-white/10 ${
+        interactive
+          ? "transition-colors group-hover:bg-background-hover dark:group-hover:bg-background-hover"
+          : ""
+      }`}
+    >
       <span
         className={`block font-semibold tabular-nums tracking-[-0.01em] ${
           fit ? "flex min-h-7 items-center justify-center leading-[1.2]" : "whitespace-nowrap text-xl"
@@ -487,6 +499,9 @@ export function LedgerStatTile({
       </span>
       {sub ? (
         <span className="mt-0.5 block truncate text-xs text-foreground-secondary">{sub}</span>
+      ) : null}
+      {detail ? (
+        <span className="mt-px block truncate text-[11px] text-foreground-tertiary">{detail}</span>
       ) : null}
     </div>
   )

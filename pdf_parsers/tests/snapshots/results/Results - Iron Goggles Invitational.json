@@ -1,0 +1,8276 @@
+{
+  "course": "SCY",
+  "detectedSheetType": "results",
+  "meet_date": "2026-10-17",
+  "meet_name": "2026 Iron Goggles Intivational",
+  "relay_results": [
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 1,
+      "points": 40.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Regalado, Elise"
+        },
+        {
+          "leg": 2,
+          "name": "LaVigne, Mia"
+        },
+        {
+          "leg": 3,
+          "name": "Elvambuena, Ellaisa"
+        },
+        {
+          "leg": 4,
+          "name": "Wong, Tara"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB",
+      "time": "1:56.70"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 2,
+      "points": 34.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Ngo, Gia"
+        },
+        {
+          "leg": 2,
+          "name": "Kornegay, Ava"
+        },
+        {
+          "leg": 3,
+          "name": "Freund, Gabby"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB",
+      "time": "1:56.94"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 3,
+      "points": 32.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Crilley, Stella"
+        },
+        {
+          "leg": 2,
+          "name": "Cavanagh, Isabella"
+        },
+        {
+          "leg": 3,
+          "name": "Loving, Kate"
+        },
+        {
+          "leg": 4,
+          "name": "Kaemmerer, Emma"
+        }
+      ],
+      "tags": "",
+      "team": "MIZZOU SWIM CLUB",
+      "time": "2:01.31"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 4,
+      "points": 30.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Kent, Marisa"
+        },
+        {
+          "leg": 2,
+          "name": "Sheldon, Jane"
+        },
+        {
+          "leg": 3,
+          "name": "Schneider, Katherine"
+        },
+        {
+          "leg": 4,
+          "name": "Protain, Josie"
+        }
+      ],
+      "tags": "",
+      "team": "UC CLUB SWIMMING",
+      "time": "2:03.20"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 5,
+      "points": 28.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Damge, Evelyn"
+        },
+        {
+          "leg": 2,
+          "name": "Wyly, Ava"
+        },
+        {
+          "leg": 3,
+          "name": "Day, Abby"
+        },
+        {
+          "leg": 4,
+          "name": "Klaibor, Haley"
+        }
+      ],
+      "tags": "",
+      "team": "MIZZOU SWIM CLUB",
+      "time": "2:05.16"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 6,
+      "points": 26.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "May, Kahleia"
+        },
+        {
+          "leg": 2,
+          "name": "Chetrit, Nell"
+        },
+        {
+          "leg": 3,
+          "name": "Swearingen, Myles"
+        },
+        {
+          "leg": 4,
+          "name": "Shumaker, Erin"
+        }
+      ],
+      "tags": "",
+      "team": "KSU SWIM CLUB",
+      "time": "2:05.20"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 7,
+      "points": 24.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Carraway, Leslie"
+        },
+        {
+          "leg": 2,
+          "name": "Albritton, Paisley"
+        },
+        {
+          "leg": 3,
+          "name": "Newton, Keaton"
+        },
+        {
+          "leg": 4,
+          "name": "Sostak, Sydney"
+        }
+      ],
+      "tags": "",
+      "team": "MISSISSIPPI STATE SWIM CLUB",
+      "time": "2:08.90"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 8,
+      "points": 22.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Lopez, Criss"
+        },
+        {
+          "leg": 2,
+          "name": "Crowe, Katie"
+        },
+        {
+          "leg": 3,
+          "name": "McIntyre, Averee"
+        },
+        {
+          "leg": 4,
+          "name": "Riddle, Rebekah"
+        }
+      ],
+      "tags": "",
+      "team": "UA CLUB SWIMMING",
+      "time": "2:17.84"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 9,
+      "points": 18.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Rainer, Suzanne"
+        },
+        {
+          "leg": 2,
+          "name": "Calhoun, Margaret"
+        },
+        {
+          "leg": 3,
+          "name": "Lockhart, Haley"
+        },
+        {
+          "leg": 4,
+          "name": "Lown, Olivia"
+        }
+      ],
+      "tags": "",
+      "team": "SAMFORD UNIVERSITY SWIM CLUB",
+      "time": "2:19.52"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 10,
+      "points": 14.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Horwitz, Mia"
+        },
+        {
+          "leg": 2,
+          "name": "Walsh, Bridget"
+        },
+        {
+          "leg": 3,
+          "name": "Overway, Sora"
+        },
+        {
+          "leg": 4,
+          "name": "Marshall, Valerie"
+        }
+      ],
+      "tags": "",
+      "team": "SWIM CLUB AT GEORGIA STATE UNI",
+      "time": "2:19.63"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 11,
+      "points": 12.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Wahdan, Hana"
+        },
+        {
+          "leg": 2,
+          "name": "Fleege, Rene"
+        },
+        {
+          "leg": 3,
+          "name": "Messina, Olivia"
+        },
+        {
+          "leg": 4,
+          "name": "Foreman, Faith"
+        }
+      ],
+      "tags": "",
+      "team": "UC CLUB SWIMMING",
+      "time": "2:23.65"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 12,
+      "points": 10.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Brown, Lauren"
+        },
+        {
+          "leg": 2,
+          "name": "Costilow, Elliott"
+        },
+        {
+          "leg": 3,
+          "name": "Foran, Lucilia"
+        },
+        {
+          "leg": 4,
+          "name": "Harding, Ember"
+        }
+      ],
+      "tags": "",
+      "team": "KSU SWIM CLUB",
+      "time": "2:41.97"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 1,
+      "points": 40.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Smith, Christian"
+        },
+        {
+          "leg": 2,
+          "name": "Altera, Ryan"
+        },
+        {
+          "leg": 3,
+          "name": "Skidmore, William"
+        },
+        {
+          "leg": 4,
+          "name": "Dunbar, Jack"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB",
+      "time": "1:38.01"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 2,
+      "points": 34.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Lancellotti, Mason"
+        },
+        {
+          "leg": 2,
+          "name": "Lu, Alex"
+        },
+        {
+          "leg": 3,
+          "name": "Einwag, Christian"
+        },
+        {
+          "leg": 4,
+          "name": "Judy, Nathan"
+        }
+      ],
+      "tags": "",
+      "team": "EMORY CLUB SWIMMING",
+      "time": "1:39.20"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 3,
+      "points": 32.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Maruyama, Tsubasa"
+        },
+        {
+          "leg": 2,
+          "name": "Le, Jaden"
+        },
+        {
+          "leg": 3,
+          "name": "Smedley, Logan"
+        },
+        {
+          "leg": 4,
+          "name": "Dukat, Jackson"
+        }
+      ],
+      "tags": "",
+      "team": "KSU SWIM CLUB",
+      "time": "1:40.31"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 4,
+      "points": 30.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Baumann, Matthew"
+        },
+        {
+          "leg": 2,
+          "name": "Hernandez, Joshua"
+        },
+        {
+          "leg": 3,
+          "name": "Luken, Joseph"
+        },
+        {
+          "leg": 4,
+          "name": "Slater, Landon"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB",
+      "time": "1:42.87"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 5,
+      "points": 28.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Tropf, Nicholas"
+        },
+        {
+          "leg": 2,
+          "name": "McMasters, William"
+        },
+        {
+          "leg": 3,
+          "name": "Schoelwer, Sean"
+        },
+        {
+          "leg": 4,
+          "name": "Pytlinski, Nick"
+        }
+      ],
+      "tags": "",
+      "team": "UC CLUB SWIMMING",
+      "time": "1:43.33"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 6,
+      "points": 26.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Manuel, Hunter"
+        },
+        {
+          "leg": 2,
+          "name": "Allran, Colton"
+        },
+        {
+          "leg": 3,
+          "name": "Moody, Steven"
+        },
+        {
+          "leg": 4,
+          "name": "Azzaoui, Adam"
+        }
+      ],
+      "tags": "",
+      "team": "UA CLUB SWIMMING",
+      "time": "1:43.56"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 7,
+      "points": 24.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Grann, Aaron"
+        },
+        {
+          "leg": 2,
+          "name": "Stephen, Husain"
+        },
+        {
+          "leg": 3,
+          "name": "Kardes, Doruk"
+        },
+        {
+          "leg": 4,
+          "name": "McCalla, Nicholas"
+        }
+      ],
+      "tags": "",
+      "team": "KSU SWIM CLUB",
+      "time": "1:45.01"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 8,
+      "points": 22.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Dalchuk, Philip"
+        },
+        {
+          "leg": 2,
+          "name": "Frayer, Evan"
+        },
+        {
+          "leg": 3,
+          "name": "Ebeidy, Yassin"
+        },
+        {
+          "leg": 4,
+          "name": "Mueller, Andrew"
+        }
+      ],
+      "tags": "",
+      "team": "UC CLUB SWIMMING",
+      "time": "1:46.76"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 9,
+      "points": 18.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Badstibner, Landon"
+        },
+        {
+          "leg": 2,
+          "name": "Schutz, Ryan"
+        },
+        {
+          "leg": 3,
+          "name": "Black, Peyton"
+        },
+        {
+          "leg": 4,
+          "name": "Basham, Jacob"
+        }
+      ],
+      "tags": "",
+      "team": "WKU SWIM CLUB",
+      "time": "1:47.26"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 10,
+      "points": 14.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Hackiewicz, Kevin"
+        },
+        {
+          "leg": 2,
+          "name": "Whitlock, Zachary"
+        },
+        {
+          "leg": 3,
+          "name": "Everett, James"
+        },
+        {
+          "leg": 4,
+          "name": "Carper, Cole"
+        }
+      ],
+      "tags": "",
+      "team": "UA CLUB SWIMMING",
+      "time": "1:48.62"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 11,
+      "points": 12.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Schmutz, Evan"
+        },
+        {
+          "leg": 2,
+          "name": "Roberts, Jack"
+        },
+        {
+          "leg": 3,
+          "name": "Smale-Murillo, Scott"
+        },
+        {
+          "leg": 4,
+          "name": "Collins, Andrew"
+        }
+      ],
+      "tags": "",
+      "team": "MIZZOU SWIM CLUB",
+      "time": "1:52.68"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 12,
+      "points": 10.0,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Arakas, Rory"
+        },
+        {
+          "leg": 2,
+          "name": "Felix, Adrian"
+        },
+        {
+          "leg": 3,
+          "name": "Routly, Seth"
+        },
+        {
+          "leg": 4,
+          "name": "Kennedy, Lexi"
+        }
+      ],
+      "tags": "",
+      "team": "KSU SWIM CLUB",
+      "time": "1:53.20"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 13,
+      "points": 8.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Patrick, Kristopher"
+        },
+        {
+          "leg": 2,
+          "name": "Mulet, Isaiah"
+        },
+        {
+          "leg": 3,
+          "name": "Marchisano, Ethan"
+        },
+        {
+          "leg": 4,
+          "name": "Busby, Matthew"
+        }
+      ],
+      "tags": "",
+      "team": "MISSISSIPPI STATE SWIM CLUB",
+      "time": "2:01.00"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 14,
+      "points": 6.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Venu Bangrae, Vishal"
+        },
+        {
+          "leg": 2,
+          "name": "Kang, Matthew"
+        },
+        {
+          "leg": 3,
+          "name": "Torchia, Henry"
+        },
+        {
+          "leg": 4,
+          "name": "Bagighni, Yoseph"
+        }
+      ],
+      "tags": "",
+      "team": "SWIM CLUB AT GEORGIA STATE UNI",
+      "time": "2:01.22"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 1,
+      "points": 40.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Wong, Tara"
+        },
+        {
+          "leg": 2,
+          "name": "Carpenter, Eliana"
+        },
+        {
+          "leg": 3,
+          "name": "Freund, Gabby"
+        },
+        {
+          "leg": 4,
+          "name": "Ukic, Sara"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB",
+      "time": "1:45.62"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 2,
+      "points": 34.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Kornegay, Ava"
+        },
+        {
+          "leg": 2,
+          "name": "Tumanova, Ekaterina"
+        },
+        {
+          "leg": 3,
+          "name": "Burlina, Emma"
+        },
+        {
+          "leg": 4,
+          "name": "Lee, Chloe"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB",
+      "time": "1:49.18"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 3,
+      "points": 32.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Loving, Kate"
+        },
+        {
+          "leg": 2,
+          "name": "Ginalick, Alexis"
+        },
+        {
+          "leg": 3,
+          "name": "Martin, Elizabeth"
+        },
+        {
+          "leg": 4,
+          "name": "Klaibor, Haley"
+        }
+      ],
+      "tags": "",
+      "team": "MIZZOU SWIM CLUB",
+      "time": "1:50.03"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 4,
+      "points": 30.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Feichtner, Jane"
+        },
+        {
+          "leg": 2,
+          "name": "Fleege, Rene"
+        },
+        {
+          "leg": 3,
+          "name": "Vachout, Kara"
+        },
+        {
+          "leg": 4,
+          "name": "Schneider, Katherine"
+        }
+      ],
+      "tags": "",
+      "team": "UC CLUB SWIMMING",
+      "time": "1:54.78"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 5,
+      "points": 28.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Chetrit, Nell"
+        },
+        {
+          "leg": 2,
+          "name": "Swearingen, Myles"
+        },
+        {
+          "leg": 3,
+          "name": "Shumaker, Erin"
+        },
+        {
+          "leg": 4,
+          "name": "May, Kahleia"
+        }
+      ],
+      "tags": "",
+      "team": "KSU SWIM CLUB",
+      "time": "1:56.29"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 6,
+      "points": 26.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Brown, Madeleine"
+        },
+        {
+          "leg": 2,
+          "name": "Butler, Belinda"
+        },
+        {
+          "leg": 3,
+          "name": "Carraway, Leslie"
+        },
+        {
+          "leg": 4,
+          "name": "Wheat, Keziah"
+        }
+      ],
+      "tags": "",
+      "team": "MISSISSIPPI STATE SWIM CLUB",
+      "time": "1:56.48"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 7,
+      "points": 24.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Kent, Avery"
+        },
+        {
+          "leg": 2,
+          "name": "Calhoun, Margaret"
+        },
+        {
+          "leg": 3,
+          "name": "Lockhart, Haley"
+        },
+        {
+          "leg": 4,
+          "name": "Rainer, Suzanne"
+        }
+      ],
+      "tags": "",
+      "team": "SAMFORD UNIVERSITY SWIM CLUB",
+      "time": "2:01.14"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 8,
+      "points": 22.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Bolling, Meghan"
+        },
+        {
+          "leg": 2,
+          "name": "Heinze, Amelia"
+        },
+        {
+          "leg": 3,
+          "name": "Dickson, Sophia"
+        },
+        {
+          "leg": 4,
+          "name": "Damge, Evelyn"
+        }
+      ],
+      "tags": "",
+      "team": "MIZZOU SWIM CLUB",
+      "time": "2:03.57"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 9,
+      "points": 18.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Crowe, Katie"
+        },
+        {
+          "leg": 2,
+          "name": "Lopez, Criss"
+        },
+        {
+          "leg": 3,
+          "name": "Riddle, Rebekah"
+        },
+        {
+          "leg": 4,
+          "name": "McIntyre, Averee"
+        }
+      ],
+      "tags": "",
+      "team": "UA CLUB SWIMMING",
+      "time": "2:03.66"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 10,
+      "points": 14.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Brown, Lauren"
+        },
+        {
+          "leg": 2,
+          "name": "Franks, Amelia"
+        },
+        {
+          "leg": 3,
+          "name": "Costilow, Elliott"
+        },
+        {
+          "leg": 4,
+          "name": "Altamirano-Paz, Regina"
+        }
+      ],
+      "tags": "",
+      "team": "KSU SWIM CLUB",
+      "time": "2:24.61"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 11,
+      "points": 12.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Sloggy, Laila"
+        },
+        {
+          "leg": 2,
+          "name": "Soriano, Lesly"
+        },
+        {
+          "leg": 3,
+          "name": "Gonzalez, Arleth"
+        },
+        {
+          "leg": 4,
+          "name": "Kim, Seonae"
+        }
+      ],
+      "tags": "",
+      "team": "SWIM CLUB AT GEORGIA STATE UNI",
+      "time": "2:26.92"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 1,
+      "points": 40.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Smith, Christian"
+        },
+        {
+          "leg": 2,
+          "name": "Dunbar, Jack"
+        },
+        {
+          "leg": 3,
+          "name": "Long, Liam"
+        },
+        {
+          "leg": 4,
+          "name": "Gupta, Tanay"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB",
+      "time": "1:26.14"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 2,
+      "points": 34.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Basa, Suryanshu"
+        },
+        {
+          "leg": 2,
+          "name": "Cardosi, Dylan"
+        },
+        {
+          "leg": 3,
+          "name": "Swanson, Ian"
+        },
+        {
+          "leg": 4,
+          "name": "Altera, Ryan"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB",
+      "time": "1:27.95"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 3,
+      "points": 32.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Smedley, Logan"
+        },
+        {
+          "leg": 2,
+          "name": "Maruyama, Tsubasa"
+        },
+        {
+          "leg": 3,
+          "name": "Grann, Aaron"
+        },
+        {
+          "leg": 4,
+          "name": "Dukat, Jackson"
+        }
+      ],
+      "tags": "",
+      "team": "KSU SWIM CLUB",
+      "time": "1:30.67"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 4,
+      "points": 30.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Judy, Nathan"
+        },
+        {
+          "leg": 2,
+          "name": "Lu, Alex"
+        },
+        {
+          "leg": 3,
+          "name": "Lee, William"
+        },
+        {
+          "leg": 4,
+          "name": "Emre, Emir"
+        }
+      ],
+      "tags": "",
+      "team": "EMORY CLUB SWIMMING",
+      "time": "1:32.58"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 5,
+      "points": 28.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Manuel, Hunter"
+        },
+        {
+          "leg": 2,
+          "name": "Everett, James"
+        },
+        {
+          "leg": 3,
+          "name": "Malerich, William"
+        },
+        {
+          "leg": 4,
+          "name": "Moody, Steven"
+        }
+      ],
+      "tags": "",
+      "team": "UA CLUB SWIMMING",
+      "time": "1:33.12"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 6,
+      "points": 26.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Callahan, Tomas"
+        },
+        {
+          "leg": 2,
+          "name": "Bixler, Ben"
+        },
+        {
+          "leg": 3,
+          "name": "Jones, Isaiah"
+        },
+        {
+          "leg": 4,
+          "name": "Dusing, Will"
+        }
+      ],
+      "tags": "",
+      "team": "UC CLUB SWIMMING",
+      "time": "1:34.15"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 7,
+      "points": 24.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Black, Peyton"
+        },
+        {
+          "leg": 2,
+          "name": "Basham, Jacob"
+        },
+        {
+          "leg": 3,
+          "name": "Badstibner, Landon"
+        },
+        {
+          "leg": 4,
+          "name": "Schutz, Ryan"
+        }
+      ],
+      "tags": "",
+      "team": "WKU SWIM CLUB",
+      "time": "1:36.29"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 8,
+      "points": 22.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Collins, Ethan"
+        },
+        {
+          "leg": 2,
+          "name": "Roberts, Jack"
+        },
+        {
+          "leg": 3,
+          "name": "Collins, Andrew"
+        },
+        {
+          "leg": 4,
+          "name": "Bartlett, Parker"
+        }
+      ],
+      "tags": "",
+      "team": "MIZZOU SWIM CLUB",
+      "time": "1:36.98"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 9,
+      "points": 18.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Carper, Cole"
+        },
+        {
+          "leg": 2,
+          "name": "Lohr, Noah"
+        },
+        {
+          "leg": 3,
+          "name": "Spohn, William"
+        },
+        {
+          "leg": 4,
+          "name": "Adamski, Tyler"
+        }
+      ],
+      "tags": "",
+      "team": "UA CLUB SWIMMING",
+      "time": "1:40.98"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 10,
+      "points": 14.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Burke, Nolan"
+        },
+        {
+          "leg": 2,
+          "name": "Kaesemeyer, Jacob"
+        },
+        {
+          "leg": 3,
+          "name": "Burgess, Jackson"
+        },
+        {
+          "leg": 4,
+          "name": "Rickert, Lucas"
+        }
+      ],
+      "tags": "",
+      "team": "UC CLUB SWIMMING",
+      "time": "1:42.34"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 11,
+      "points": 12.0,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Estrada-Marquez, Derek"
+        },
+        {
+          "leg": 2,
+          "name": "Kiner, Cassius"
+        },
+        {
+          "leg": 3,
+          "name": "Friginette, Brandon"
+        },
+        {
+          "leg": 4,
+          "name": "Rice, Jackson"
+        }
+      ],
+      "tags": "",
+      "team": "KSU SWIM CLUB",
+      "time": "1:46.11"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 12,
+      "points": 10.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Busby, Matthew"
+        },
+        {
+          "leg": 2,
+          "name": "Marchisano, Ethan"
+        },
+        {
+          "leg": 3,
+          "name": "Mulet, Isaiah"
+        },
+        {
+          "leg": 4,
+          "name": "Patrick, Kristopher"
+        }
+      ],
+      "tags": "",
+      "team": "MISSISSIPPI STATE SWIM CLUB",
+      "time": "1:46.33"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 13,
+      "points": 8.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Kang, Matthew"
+        },
+        {
+          "leg": 2,
+          "name": "Torchia, Henry"
+        },
+        {
+          "leg": 3,
+          "name": "Clua, Bernat"
+        },
+        {
+          "leg": 4,
+          "name": "Bagighni, Yoseph"
+        }
+      ],
+      "tags": "",
+      "team": "SWIM CLUB AT GEORGIA STATE UNI",
+      "time": "1:50.11"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 14,
+      "points": 6.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Rampley, Gavin"
+        },
+        {
+          "leg": 2,
+          "name": "Phillips, Seth"
+        },
+        {
+          "leg": 3,
+          "name": "Frame, Peter"
+        },
+        {
+          "leg": 4,
+          "name": "Campos, Joaquin"
+        }
+      ],
+      "tags": "",
+      "team": "KSU SWIM CLUB",
+      "time": "1:51.96"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "X",
+      "place": 1,
+      "points": 40.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Dunbar, Jack"
+        },
+        {
+          "leg": 2,
+          "name": "Long, Liam"
+        },
+        {
+          "leg": 3,
+          "name": "Lee, Chloe"
+        },
+        {
+          "leg": 4,
+          "name": "LaVigne, Mia"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB",
+      "time": "1:36.55"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "X",
+      "place": 2,
+      "points": 34.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Gupta, Tanay"
+        },
+        {
+          "leg": 2,
+          "name": "Smith, Christian"
+        },
+        {
+          "leg": 3,
+          "name": "Wong, Tara"
+        },
+        {
+          "leg": 4,
+          "name": "Ukic, Sara"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB",
+      "time": "1:37.39"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "X",
+      "place": 3,
+      "points": 32.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Smith, Jasper"
+        },
+        {
+          "leg": 2,
+          "name": "Ziino, Lilianne"
+        },
+        {
+          "leg": 3,
+          "name": "Schoelwer, Sean"
+        },
+        {
+          "leg": 4,
+          "name": "Pytlinski, Nick"
+        }
+      ],
+      "tags": "",
+      "team": "UC CLUB SWIMMING",
+      "time": "1:41.56"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "X",
+      "place": 4,
+      "points": 30.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Crilley, Stella"
+        },
+        {
+          "leg": 2,
+          "name": "Loving, Kate"
+        },
+        {
+          "leg": 3,
+          "name": "Schmutz, Evan"
+        },
+        {
+          "leg": 4,
+          "name": "Woodruff, Johnny"
+        }
+      ],
+      "tags": "",
+      "team": "MIZZOU SWIM CLUB",
+      "time": "1:42.06"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "X",
+      "place": 5,
+      "points": 28.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Feichtner, Jane"
+        },
+        {
+          "leg": 2,
+          "name": "Glatt, Landon"
+        },
+        {
+          "leg": 3,
+          "name": "Rockenberger, Janet"
+        },
+        {
+          "leg": 4,
+          "name": "Stein, Caleb"
+        }
+      ],
+      "tags": "",
+      "team": "UC CLUB SWIMMING",
+      "time": "1:42.13"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "X",
+      "place": 6,
+      "points": 26.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Smedley, Logan"
+        },
+        {
+          "leg": 2,
+          "name": "Kardes, Doruk"
+        },
+        {
+          "leg": 3,
+          "name": "Shumaker, Erin"
+        },
+        {
+          "leg": 4,
+          "name": "May, Kahleia"
+        }
+      ],
+      "tags": "",
+      "team": "KSU SWIM CLUB",
+      "time": "1:42.70"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "X",
+      "place": 7,
+      "points": 24.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Allran, Colton"
+        },
+        {
+          "leg": 2,
+          "name": "Azzaoui, Adam"
+        },
+        {
+          "leg": 3,
+          "name": "McIntyre, Averee"
+        },
+        {
+          "leg": 4,
+          "name": "Crowe, Katie"
+        }
+      ],
+      "tags": "",
+      "team": "UA CLUB SWIMMING",
+      "time": "1:43.13"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "X",
+      "place": 8,
+      "points": 22.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Martin, Elizabeth"
+        },
+        {
+          "leg": 2,
+          "name": "Cavanagh, Isabella"
+        },
+        {
+          "leg": 3,
+          "name": "Roberts, Jack"
+        },
+        {
+          "leg": 4,
+          "name": "Gruben, Owen"
+        }
+      ],
+      "tags": "",
+      "team": "MIZZOU SWIM CLUB",
+      "time": "1:46.93"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "X",
+      "place": 9,
+      "points": 18.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Marchisano, Ethan"
+        },
+        {
+          "leg": 2,
+          "name": "Albritton, Paisley"
+        },
+        {
+          "leg": 3,
+          "name": "Wheat, Keziah"
+        },
+        {
+          "leg": 4,
+          "name": "Busby, Matthew"
+        }
+      ],
+      "tags": "",
+      "team": "MISSISSIPPI STATE SWIM CLUB",
+      "time": "1:48.64"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "X",
+      "place": 10,
+      "points": 14.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Fleischer, Eli"
+        },
+        {
+          "leg": 2,
+          "name": "Maruyama, Tsubasa"
+        },
+        {
+          "leg": 3,
+          "name": "Chetrit, Nell"
+        },
+        {
+          "leg": 4,
+          "name": "Swearingen, Myles"
+        }
+      ],
+      "tags": "",
+      "team": "KSU SWIM CLUB",
+      "time": "1:49.84"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "X",
+      "place": 11,
+      "points": 12.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Malerich, William"
+        },
+        {
+          "leg": 2,
+          "name": "Whitlock, Zachary"
+        },
+        {
+          "leg": 3,
+          "name": "Lopez, Criss"
+        },
+        {
+          "leg": 4,
+          "name": "Riddle, Rebekah"
+        }
+      ],
+      "tags": "",
+      "team": "UA CLUB SWIMMING",
+      "time": "1:53.01"
+    }
+  ],
+  "results": [
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Loving, Kate",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "2:04.43"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Maley, Ellie",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "2:04.84"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Ngo, Gia",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "2:05.03"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Albritton, Paisley",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "2:05.28"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Rockenberger, Janet",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "2:05.84"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Kornegay, Ava",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "2:06.97"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Martin, Elizabeth",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "2:11.02"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Bolling, Meghan",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "2:31.96"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Roberts, Cassandra",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "2:36.56"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Funke, Claire",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "2:46.29"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Walsh, Bridget",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": null,
+      "time": "3:06.86"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Einwag, Christian",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "1:45.03"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Skidmore, William",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:47.45"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Azzaoui, Adam",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "1:50.03"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Callahan, Tomas",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "1:50.88"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Harting, Alden",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "1:52.25"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Patrick, Kristopher",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "1:53.20"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Everett, James",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "1:54.97"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Lee, William",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "1:57.34"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Moreno, Lorenzo",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "Wku Swim Club",
+      "time": "1:58.20"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Rickert, Lucas",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "2:01.05"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Bixler, Ben",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "2:01.47"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Bartlett, Parker",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "2:02.32"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Weitzel, Logan",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "2:04.44"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Burke, Nolan",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "2:06.13"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Lohr, Noah",
+      "place": 15,
+      "points": 2.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "2:06.60"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Armel, Lyle",
+      "place": 16,
+      "points": 1.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "2:09.67"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Hemminger, Gavin",
+      "place": 17,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "2:14.14"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Frame, Peter",
+      "place": 18,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "2:27.31"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Rampley, Gavin",
+      "place": 19,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "2:31.11"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Brady, Daniel",
+      "place": 20,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "2:55.33"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Sikder, Ash",
+      "place": null,
+      "tags": "",
+      "team": null,
+      "time": "DQ"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Freund, Gabby",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "26.73"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Smith, Jasper",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "26.93"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Armstrong, Clara",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "28.01"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Kaemmerer, Emma",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "28.28"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "LaVigne, Mia",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "28.71"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Elvambuena, Ellaisa",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "29.31"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Albritton, Paisley",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "29.41"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Rainer, Suzanne",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "Samford University Swim Club",
+      "time": "29.46"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Maley, Quincy",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "29.60"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Maley, Ellie",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "30.09"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Schneider, Katherine",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "30.76"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Johannessen, Anna",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "30.90"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Damge, Evelyn",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "30.95"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Butler, Belinda",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "31.09"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Dallas, Kathryn",
+      "place": 15,
+      "points": 2.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "31.20"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Crain, Anna",
+      "place": 16,
+      "points": 1.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "31.48"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Sostak, Sydney",
+      "place": 17,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "31.56"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Day, Abby",
+      "place": 18,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "31.68"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Wheat, Keziah",
+      "place": 19,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "32.35"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Newton, Keaton",
+      "place": 20,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "32.53"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Fleege, Rene",
+      "place": 21,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "32.61"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Bolling, Meghan",
+      "place": 22,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "32.69"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Costilow, Elliott",
+      "place": 24,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "33.69"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Overway, Sora",
+      "place": 25,
+      "tags": "",
+      "team": null,
+      "time": "33.97"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Lockhart, Haley",
+      "place": 26,
+      "tags": "",
+      "team": "Samford University Swim Club",
+      "time": "34.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Marshall, Valerie",
+      "place": 27,
+      "tags": "",
+      "team": null,
+      "time": "34.04"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Boisen, Eleni",
+      "place": 28,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "34.39"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Sloggy, Laila",
+      "place": 30,
+      "tags": "",
+      "team": null,
+      "time": "35.50"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Lopez, Criss",
+      "place": 31,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "39.49"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Brown, Lauren",
+      "place": 32,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "42.20"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Kim, Seonae",
+      "place": 33,
+      "tags": "",
+      "team": null,
+      "time": "44.82"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Greene, Alexis",
+      "place": 34,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "49.09"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Long, Liam",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "23.20"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Szarvas, Gergely",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "23.48"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Dillon, Chase",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "23.89"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Lancellotti, Mason",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "23.98"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Altera, Ryan",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "24.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Basa, Suryanshu",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "24.06"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Schoelwer, Sean",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "24.10"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Smith, Christian",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "24.17"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Schlafer, Samuel",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "24.65"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Le, Jaden",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "24.77"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Dusing, Will",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "24.80"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Judy, Nathan",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "24.87"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Smedley, Logan",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "25.28"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Moody, Steven",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "25.45"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Black, Peyton",
+      "place": 15,
+      "points": 2.0,
+      "tags": "",
+      "team": "Wku Swim Club",
+      "time": "25.53"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Olsen, Erik",
+      "place": 16,
+      "points": 1.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "25.62"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Joshi, Jaison",
+      "place": 17,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "25.76"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Corcoran, Declan",
+      "place": 18,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "25.82"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Glatt, Landon",
+      "place": 19,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "25.84"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Rohovit, Hunter",
+      "place": 20,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "26.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Elarabi, Farouk",
+      "place": 20,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "26.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Felix, Adrian",
+      "place": 23,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "26.23"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Carper, Cole",
+      "place": 24,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "26.57"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Patterson, Alexander",
+      "place": 26,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "26.76"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Busby, Matthew",
+      "place": 27,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "26.83"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Arakas, Rory",
+      "place": 29,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "27.31"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Stein, Caleb",
+      "place": 30,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "27.33"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Hackiewicz, Kevin",
+      "place": 31,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "27.53"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Spohn, William",
+      "place": 32,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "27.81"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Grutter, Maxwell",
+      "place": 33,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "27.86"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Curtin, William",
+      "place": 34,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "28.06"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Kaesemeyer, Jacob",
+      "place": 35,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "28.15"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Rice, Thomas",
+      "place": 36,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "28.23"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Torchia, Henry",
+      "place": 37,
+      "tags": "",
+      "team": null,
+      "time": "28.38"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Schneider, Jake",
+      "place": 38,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "28.45"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Hughes, Will",
+      "place": 39,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "28.47"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Purser, Kaleb",
+      "place": 40,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "28.61"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Hernandez, Joshua",
+      "place": 41,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "28.75"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Venu Bangrae, Vishal",
+      "place": 42,
+      "tags": "",
+      "team": null,
+      "time": "29.43"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Fitzpatrick, Thomas",
+      "place": 43,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "29.48"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Estrada-Marquez, Derek",
+      "place": 44,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "29.51"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Scherz, Tre",
+      "place": 45,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "29.54"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Chouteau, Benjamin",
+      "place": 46,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "29.98"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Noseibeh, Dany",
+      "place": 47,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "30.33"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Rahbari, Cyrus",
+      "place": 48,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "31.12"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Campos, Joaquin",
+      "place": 49,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "31.23"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Clua, Bernat",
+      "place": 51,
+      "tags": "",
+      "team": null,
+      "time": "31.59"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Neese, Rowen",
+      "place": 52,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "33.51"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Kiner, Cassius",
+      "place": 53,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "34.31"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "May, Kahleia",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:03.53"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Carpenter, Eliana",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:03.72"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Regalado, Elise",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": null,
+      "time": "1:06.05"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Feichtner, Jane",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "1:06.45"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Kent, Marisa",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "1:09.40"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Sheldon, Jane",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "1:11.10"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Tumanova, Ekaterina",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:11.20"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Carraway, Leslie",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "1:12.31"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Molinares, Valeria",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:12.60"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Kent, Avery",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "Samford University Swim Club",
+      "time": "1:14.62"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Koschewa, Kendra",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:15.51"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "McIntyre, Averee",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "1:15.56"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Roberts, Cassandra",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "1:18.91"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Lopez, Criss",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "1:28.12"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "McMasters, William",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "52.62"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Badstibner, Landon",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Wku Swim Club",
+      "time": "54.53"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Smith, Benjamin",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "54.87"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Baumann, Matthew",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "55.64"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Dunbar, Jack",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "56.42"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Schmutz, Evan",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "58.04"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Burgess, Jackson",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "58.67"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Dalchuk, Philip",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "58.86"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Tropf, Nicholas",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "59.03"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Zhou, David",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "59.78"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Manuel, Hunter",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "1:00.83"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Collins, Ethan",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:03.21"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Frayer, Evan",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "1:03.54"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Collins, Andrew",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:04.08"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Adamski, Tyler",
+      "place": 15,
+      "points": 2.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "1:04.45"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Patrick, Kristopher",
+      "place": 16,
+      "points": 1.0,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "1:08.67"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Kubik, Max",
+      "place": 17,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "1:14.36"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Rampley, Gavin",
+      "place": 18,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:18.66"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Burkman, Trever",
+      "place": 19,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:54.51"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Smith, Jasper",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "25.37"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Ukic, Sara",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "25.54"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Lee, Chloe",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "25.89"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Wong, Tara",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "26.22"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Freund, Gabby",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "26.42"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Burlina, Emma",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "26.68"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Raley, Sarah",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "26.84"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Protain, Josie",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "26.95"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Maley, Quincy",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "27.06"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Regalado, Elise",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": null,
+      "time": "27.09"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Ziino, Lilianne",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "27.31"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Klaibor, Haley",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "27.32"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Rainer, Suzanne",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "Samford University Swim Club",
+      "time": "27.49"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Chetrit, Nell",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "27.67"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Carpenter, Eliana",
+      "place": 15,
+      "points": 2.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "27.75"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Lockery, Amelia",
+      "place": 16,
+      "points": 1.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "28.26"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Swearingen, Myles",
+      "place": 17,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "28.31"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Taheri, Mya",
+      "place": 18,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "28.37"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Cavanagh, Isabella",
+      "place": 19,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "28.41"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Ginalick, Alexis",
+      "place": 20,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "28.71"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Brown, Madeleine",
+      "place": 21,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "28.92"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Schneider, Katherine",
+      "place": 22,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "29.36"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Dallas, Kathryn",
+      "place": 23,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "29.69"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Butler, Belinda",
+      "place": 24,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "29.95"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Shumaker, Erin",
+      "place": 25,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "30.15"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Heinze, Amelia",
+      "place": 26,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "30.28"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Newton, Keaton",
+      "place": 27,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "30.36"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Lockhart, Haley",
+      "place": 28,
+      "tags": "",
+      "team": "Samford University Swim Club",
+      "time": "30.47"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Boisen, Eleni",
+      "place": 29,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "30.48"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Schmid, Sarah",
+      "place": 31,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "31.11"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Horwitz, Mia",
+      "place": 32,
+      "tags": "",
+      "team": null,
+      "time": "31.15"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Wahdan, Hana",
+      "place": 33,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "31.26"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Brown, Miya",
+      "place": 34,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "31.59"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Costilow, Elliott",
+      "place": 35,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "31.83"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Foreman, Faith",
+      "place": 36,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "31.89"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Riddle, Rebekah",
+      "place": 37,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "32.25"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Dickson, Sophia",
+      "place": 40,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "32.90"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Franks, Amelia",
+      "place": 41,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "33.03"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Overway, Sora",
+      "place": 42,
+      "tags": "",
+      "team": null,
+      "time": "33.04"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Kim, Seonae",
+      "place": 44,
+      "tags": "",
+      "team": null,
+      "time": "35.89"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Soriano, Lesly",
+      "place": 45,
+      "tags": "",
+      "team": null,
+      "time": "36.61"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Greene, Alexis",
+      "place": 47,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "37.73"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Dang, Bao",
+      "place": 48,
+      "tags": "",
+      "team": null,
+      "time": "39.77"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Gonzalez, Arleth",
+      "place": 49,
+      "tags": "",
+      "team": null,
+      "time": "40.14"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Altamirano-Paz, Regina",
+      "place": 51,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "44.81"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Mandujano, Katie",
+      "place": 52,
+      "tags": "",
+      "team": null,
+      "time": "45.92"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Harding, Ember",
+      "place": 53,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "48.66"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Gupta, Tanay",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "20.93"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Long, Liam",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "21.72"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Dukat, Jackson",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "21.83"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Basa, Suryanshu",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "22.13"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Cardosi, Dylan",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "22.62"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Elwell, Colin",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "22.63"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Lu, Alex",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "22.67"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Hua, Ethan",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "22.80"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Grann, Aaron",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "22.83"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Judy, Nathan",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "22.99"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Slater, Landon",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "23.04"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Swanson, Ian",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "23.09"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Lancellotti, Mason",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "23.16"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Schlafer, Samuel",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "23.23"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "McCalla, Nicholas",
+      "place": 15,
+      "points": 2.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "23.48"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Corcoran, Declan",
+      "place": 16,
+      "points": 1.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "23.58"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Joshi, Gajendra",
+      "place": 17,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "23.59"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Townsend, Matthew",
+      "place": 18,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "23.60"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Holbrook, Mason",
+      "place": 19,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "23.67"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Rice, Jacob",
+      "place": 20,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "23.73"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Malerich, William",
+      "place": 21,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "23.75"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Moreno, Lorenzo",
+      "place": 22,
+      "tags": "",
+      "team": "Wku Swim Club",
+      "time": "23.87"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Witham, Noah",
+      "place": 23,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "23.92"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Elarabi, Farouk",
+      "place": 24,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "23.95"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Whitlock, Zachary",
+      "place": 25,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "23.98"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Schutz, Ryan",
+      "place": 26,
+      "tags": "",
+      "team": "Wku Swim Club",
+      "time": "24.06"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Rickert, Lucas",
+      "place": 27,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "24.07"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Jones, Isaiah",
+      "place": 28,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "24.09"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Rice, Jackson",
+      "place": 29,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "24.20"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Kardes, Doruk",
+      "place": 30,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "24.27"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Adamski, Tyler",
+      "place": 30,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "24.27"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Stephen, Husain",
+      "place": 32,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "24.30"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Hernandez, Joshua",
+      "place": 33,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "24.40"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Stein, Caleb",
+      "place": 34,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "24.55"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Patterson, Alexander",
+      "place": 35,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "24.56"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Black, Peyton",
+      "place": 36,
+      "tags": "",
+      "team": "Wku Swim Club",
+      "time": "24.61"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Spohn, William",
+      "place": 37,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "24.69"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Weitzel, Logan",
+      "place": 38,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "25.02"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Dick, Elliott",
+      "place": 39,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "25.05"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Busby, Matthew",
+      "place": 40,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "25.07"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Arakas, Rory",
+      "place": 41,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "25.09"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Fleischer, Eli",
+      "place": 42,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "25.11"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Pytlinski, Nick",
+      "place": 43,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "25.15"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Carper, Cole",
+      "place": 44,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "25.17"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "King, Alex",
+      "place": 45,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "25.28"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Basham, Jacob",
+      "place": 46,
+      "tags": "",
+      "team": "Wku Swim Club",
+      "time": "25.52"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Grutter, Maxwell",
+      "place": 47,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "25.56"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Kaesemeyer, Jacob",
+      "place": 47,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "25.56"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Roberts, Jack",
+      "place": 49,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "25.58"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Bennett, Andrew",
+      "place": 50,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "25.92"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Curtin, William",
+      "place": 51,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "25.99"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Schneider, Jake",
+      "place": 52,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "26.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Kang, Matthew",
+      "place": 53,
+      "tags": "",
+      "team": null,
+      "time": "26.23"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Tajar, Vedad",
+      "place": 55,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "26.76"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Marchisano, Ethan",
+      "place": 57,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "26.89"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Lohr, Noah",
+      "place": 58,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "26.90"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Venu Bangrae, Vishal",
+      "place": 59,
+      "tags": "",
+      "team": null,
+      "time": "27.34"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Rice, Thomas",
+      "place": 60,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "27.37"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Donnelly, Jackson",
+      "place": 61,
+      "tags": "",
+      "team": "Wku Swim Club",
+      "time": "27.55"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Purser, Kaleb",
+      "place": 62,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "27.65"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Campos, Joaquin",
+      "place": 63,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "27.75"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Chouteau, Benjamin",
+      "place": 65,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "27.86"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Rahbari, Cyrus",
+      "place": 66,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "28.11"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Kiner, Cassius",
+      "place": 67,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "28.18"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Bagighni, Yoseph",
+      "place": 68,
+      "tags": "",
+      "team": null,
+      "time": "28.34"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Estrada-Marquez, Derek",
+      "place": 69,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "28.59"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Patil, Svayam",
+      "place": 70,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "28.92"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Clua, Bernat",
+      "place": 71,
+      "tags": "",
+      "team": null,
+      "time": "28.97"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Neese, Rowen",
+      "place": 72,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "29.18"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Frame, Peter",
+      "place": 73,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "29.28"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Mendieta Hidalgo, Danilo",
+      "place": 74,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "29.38"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Phillips, Seth",
+      "place": 75,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "29.53"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Friginette, Brandon",
+      "place": 76,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "29.59"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Guerrier, Zion",
+      "place": 79,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "32.01"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Jackson, Aaron",
+      "place": 81,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "41.40"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Sikder, Ash",
+      "place": 82,
+      "tags": "",
+      "team": null,
+      "time": "45.06"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "F",
+      "name": "Ngo, Gia",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "5:40.39"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "F",
+      "name": "Mehendale, Ruhie",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "6:02.33"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "F",
+      "name": "Prasad, Geya",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "6:54.79"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "F",
+      "name": "Messina, Olivia",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "7:05.09"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "F",
+      "name": "Funke, Claire",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "7:38.79"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "F",
+      "name": "Gonzalez Cerulli, Ludmila",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": null,
+      "time": "7:58.23"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "M",
+      "name": "Altera, Ryan",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "4:50.16"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "M",
+      "name": "Luken, Joseph",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "4:58.02"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "M",
+      "name": "Woodruff, Johnny",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "5:18.61"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "M",
+      "name": "Roy, Ishan",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "5:44.16"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "M",
+      "name": "Rohovit, Hunter",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "5:49.76"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "M",
+      "name": "Vlady, Richard",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "6:30.01"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Rockenberger, Janet",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "1:03.83"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Martin, Elizabeth",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:05.45"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Albritton, Paisley",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "1:07.12"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "May, Kahleia",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:07.53"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Wyly, Ava",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:07.57"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "LaVigne, Mia",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:08.33"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Crilley, Stella",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:08.88"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Kornegay, Ava",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:08.94"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Damge, Evelyn",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:12.47"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Day, Abby",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:12.95"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Crowe, Katie",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "1:13.59"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Wheat, Keziah",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "1:13.60"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Kent, Marisa",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "1:13.69"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Taheri, Mya",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:13.87"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Fleege, Rene",
+      "place": 15,
+      "points": 2.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "1:15.23"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Kent, Avery",
+      "place": 16,
+      "points": 1.0,
+      "tags": "",
+      "team": "Samford University Swim Club",
+      "time": "1:16.51"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Marshall, Valerie",
+      "place": 17,
+      "tags": "",
+      "team": null,
+      "time": "1:17.14"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Vachout, Kara",
+      "place": 18,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "1:19.03"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Johannessen, Anna",
+      "place": 19,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:20.06"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Sloggy, Laila",
+      "place": 20,
+      "tags": "",
+      "team": null,
+      "time": "1:21.88"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Shumaker, Erin",
+      "place": 21,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:22.25"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Lown, Olivia",
+      "place": 22,
+      "tags": "",
+      "team": "Samford University Swim Club",
+      "time": "1:22.75"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Foreman, Faith",
+      "place": 23,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "1:24.53"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Wahdan, Hana",
+      "place": 24,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "1:25.18"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Lopez, Criss",
+      "place": 25,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "1:27.94"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Brown, Lauren",
+      "place": 26,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:37.28"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Gonzalez, Arleth",
+      "place": 27,
+      "tags": "",
+      "team": null,
+      "time": "1:47.48"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Crain, Anna",
+      "place": null,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "DQ"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Szarvas, Gergely",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "53.67"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Maruyama, Tsubasa",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "55.41"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Azzaoui, Adam",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "55.91"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Schoelwer, Sean",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "56.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Moody, Steven",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "56.54"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Dusing, Will",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "56.64"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Le, Jaden",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "58.07"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Swanson, Ian",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "58.31"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Emre, Emir",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "59.03"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Kardes, Doruk",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "59.70"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Whitlock, Zachary",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "59.72"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Joshi, Jaison",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "1:00.70"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Bartlett, Parker",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:00.81"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Hackiewicz, Kevin",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "1:00.96"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Townsend, Matthew",
+      "place": 15,
+      "points": 2.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:01.50"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Schmutz, Evan",
+      "place": 16,
+      "points": 1.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:01.81"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Witham, Noah",
+      "place": 17,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:02.34"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Houck, Ryan",
+      "place": 18,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:02.40"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "King, Alex",
+      "place": 19,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:03.69"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Spohn, William",
+      "place": 20,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "1:04.76"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Gruben, Owen",
+      "place": 21,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:04.80"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Smale-Murillo, Scott",
+      "place": 22,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:05.39"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Stickle, Alec",
+      "place": 23,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:05.82"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Kidin, Roman",
+      "place": 24,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:07.37"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Hughes, Will",
+      "place": 25,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:07.50"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Fitzpatrick, Thomas",
+      "place": 26,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "1:10.30"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Kennedy, Lexi",
+      "place": 27,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:10.33"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Donnelly, Jackson",
+      "place": 28,
+      "tags": "",
+      "team": "Wku Swim Club",
+      "time": "1:12.13"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Marchisano, Ethan",
+      "place": 29,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "1:13.02"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Olsen, Erik",
+      "place": 30,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:14.51"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Rahbari, Cyrus",
+      "place": 31,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "1:15.61"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Vonfischbach, Parker",
+      "place": 32,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:33.98"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "LaVigne, Mia",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:13.71"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Wyly, Ava",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:14.25"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Cavanagh, Isabella",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:15.00"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Elvambuena, Ellaisa",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:17.43"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Sheldon, Jane",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "1:18.14"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Rainer, Suzanne",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Samford University Swim Club",
+      "time": "1:18.92"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Crowe, Katie",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "1:20.80"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Sostak, Sydney",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "1:22.36"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Mehendale, Ruhie",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:23.78"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Algeo, Kaitlin",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:29.81"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Calhoun, Margaret",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "Samford University Swim Club",
+      "time": "1:31.00"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Lown, Olivia",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "Samford University Swim Club",
+      "time": "1:32.00"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Walsh, Bridget",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": null,
+      "time": "1:39.03"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Gonzalez Cerulli, Ludmila",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": null,
+      "time": "1:47.32"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Smedley, Logan",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:02.71"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Hua, Ethan",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:03.66"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Lu, Alex",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "1:04.90"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Frayer, Evan",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "1:05.47"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Routly, Seth",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:05.71"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Whitlock, Zachary",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "1:06.82"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Ebeidy, Yassin",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "1:07.45"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Crouchley, John",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:07.65"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Armel, Lyle",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:08.67"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Rice, Jacob",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "1:09.25"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Stickle, Alec",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:10.50"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Callahan, Tomas",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "1:12.40"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Kubik, Max",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "1:12.97"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Kennedy, Lexi",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:15.72"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Olsen, Erik",
+      "place": 15,
+      "points": 2.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:21.32"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Mulet, Isaiah",
+      "place": 16,
+      "points": 1.0,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "1:28.89"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Bagighni, Yoseph",
+      "place": 17,
+      "tags": "",
+      "team": null,
+      "time": "1:31.25"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Guerrier, Zion",
+      "place": 18,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:32.81"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Kofsky, Jakob",
+      "place": 19,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "1:48.65"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Freund, Gabby",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:01.17"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Armstrong, Clara",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "1:01.56"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Ziino, Lilianne",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "1:05.11"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Elvambuena, Ellaisa",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:06.10"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Burlina, Emma",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:06.22"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Loving, Kate",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:06.45"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Tumanova, Ekaterina",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:07.34"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Kornegay, Ava",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:08.53"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Butler, Belinda",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "1:13.04"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Johannessen, Anna",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:14.24"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Einwag, Christian",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "51.72"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Cardosi, Dylan",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "53.23"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Skidmore, William",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "53.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Slater, Landon",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "54.39"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Dunbar, Jack",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "55.66"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Dusing, Will",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "56.26"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Everett, James",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "56.75"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Le, Jaden",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "57.53"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Schlafer, Samuel",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "58.16"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Joshi, Gajendra",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "58.57"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Moreno, Lorenzo",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "Wku Swim Club",
+      "time": "58.83"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Pytlinski, Nick",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "1:00.38"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "King, Alex",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:00.45"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Rickert, Lucas",
+      "place": 15,
+      "points": 2.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "1:01.90"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Crouchley, John",
+      "place": 16,
+      "points": 1.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:02.42"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Stephen, Husain",
+      "place": 17,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:02.95"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "McCalla, Nicholas",
+      "place": 18,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:03.22"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Felix, Adrian",
+      "place": 19,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:03.81"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Smale-Murillo, Scott",
+      "place": 20,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:04.35"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Roy, Ishan",
+      "place": 21,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:06.64"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Scherz, Tre",
+      "place": 22,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "1:10.49"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Burke, Nolan",
+      "place": null,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "DQ"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Ukic, Sara",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "28.75"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Lee, Chloe",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "29.41"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Regalado, Elise",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": null,
+      "time": "29.58"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Carpenter, Eliana",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "29.78"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Ngo, Gia",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "30.07"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Crilley, Stella",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "30.92"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Gompper, Hannah",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "31.31"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Raley, Sarah",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "32.44"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Kent, Marisa",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "32.91"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Lockery, Amelia",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "33.31"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Carraway, Leslie",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "33.55"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Molinares, Valeria",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "34.15"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Damge, Evelyn",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "34.45"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Vachout, Kara",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "36.14"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Wheat, Keziah",
+      "place": 15,
+      "points": 2.0,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "36.40"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Overway, Sora",
+      "place": 16,
+      "points": 1.0,
+      "tags": "",
+      "team": null,
+      "time": "36.97"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Messina, Olivia",
+      "place": 18,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "48.28"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Harding, Ember",
+      "place": 19,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "51.97"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Soriano, Lesly",
+      "place": 20,
+      "tags": "",
+      "team": null,
+      "time": "55.52"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Altamirano-Paz, Regina",
+      "place": 21,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "55.84"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Mandujano, Katie",
+      "place": 23,
+      "tags": "",
+      "team": null,
+      "time": "1:00.66"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Dillon, Chase",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "24.19"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Long, Liam",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "24.40"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "McMasters, William",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "24.92"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Lancellotti, Mason",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "25.50"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Baumann, Matthew",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "25.87"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Badstibner, Landon",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Wku Swim Club",
+      "time": "26.06"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Swanson, Ian",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "26.27"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Zhou, David",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "26.84"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Tropf, Nicholas",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "27.11"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Schmutz, Evan",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "27.20"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Burgess, Jackson",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "27.82"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Grann, Aaron",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "28.23"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Arakas, Rory",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "29.20"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Adamski, Tyler",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "30.42"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Venu Bangrae, Vishal",
+      "place": 15,
+      "points": 2.0,
+      "tags": "",
+      "team": null,
+      "time": "31.59"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Kaesemeyer, Jacob",
+      "place": 16,
+      "points": 1.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "31.72"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Vlady, Richard",
+      "place": 18,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "33.84"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Trouve, Antoine",
+      "place": 19,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "36.65"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Friginette, Brandon",
+      "place": 20,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "41.25"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Burkman, Trever",
+      "place": 21,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "47.24"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "F",
+      "name": "Martin, Elizabeth",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "2:22.11"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "F",
+      "name": "Sheldon, Jane",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "2:31.31"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "F",
+      "name": "Tumanova, Ekaterina",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "2:34.72"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "F",
+      "name": "Roberts, Cassandra",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "2:55.58"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "F",
+      "name": "Horwitz, Mia",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": null,
+      "time": "2:55.92"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "F",
+      "name": "Funke, Claire",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "3:21.92"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "M",
+      "name": "Luken, Joseph",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "2:02.03"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "M",
+      "name": "Badstibner, Landon",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Wku Swim Club",
+      "time": "2:04.25"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "M",
+      "name": "Woodruff, Johnny",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "2:06.86"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "M",
+      "name": "Smith, Benjamin",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "2:07.11"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "M",
+      "name": "Ebeidy, Yassin",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "2:12.66"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "M",
+      "name": "Everett, James",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "2:12.81"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "M",
+      "name": "Roberts, Jack",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "2:22.76"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "M",
+      "name": "Hackiewicz, Kevin",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "2:23.00"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "M",
+      "name": "Kubik, Max",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "2:27.48"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Smith, Jasper",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "56.82"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Feichtner, Jane",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "57.96"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Wong, Tara",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "58.83"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Kaemmerer, Emma",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "58.95"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Burlina, Emma",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "59.41"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Gompper, Hannah",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "59.81"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Raley, Sarah",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "1:00.37"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Crilley, Stella",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:01.88"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Dallas, Kathryn",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:02.83"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "McIntyre, Averee",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "1:03.75"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Sostak, Sydney",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "1:04.36"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Brown, Madeleine",
+      "place": 12,
+      "points": 4.5,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "1:05.87"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Koschewa, Kendra",
+      "place": 12,
+      "points": 4.5,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:05.87"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Newton, Keaton",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "1:08.28"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Heinze, Amelia",
+      "place": 15,
+      "points": 2.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:11.58"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Boisen, Eleni",
+      "place": 16,
+      "points": 1.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "1:12.04"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Algeo, Kaitlin",
+      "place": 17,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:12.59"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Brown, Miya",
+      "place": 18,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:13.04"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Franks, Amelia",
+      "place": 19,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:14.37"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Sloggy, Laila",
+      "place": 20,
+      "tags": "",
+      "team": null,
+      "time": "1:17.20"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Gonzalez Cerulli, Ludmila",
+      "place": 21,
+      "tags": "",
+      "team": null,
+      "time": "1:20.32"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Brown, Lauren",
+      "place": 22,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:23.08"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Gupta, Tanay",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "47.36"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Einwag, Christian",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "47.65"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Szarvas, Gergely",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "47.90"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Smith, Christian",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "48.05"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Altera, Ryan",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "48.53"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Dukat, Jackson",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "49.06"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Smedley, Logan",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "49.25"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Azzaoui, Adam",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "49.47"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Manuel, Hunter",
+      "place": 9,
+      "points": 8.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "49.80"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Dillon, Chase",
+      "place": 9,
+      "points": 8.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "49.80"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Cardosi, Dylan",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "50.37"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Elwell, Colin",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "50.91"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Patrick, Kristopher",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "51.08"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Slater, Landon",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "51.29"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Corcoran, Declan",
+      "place": 15,
+      "points": 2.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "51.31"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Hua, Ethan",
+      "place": 16,
+      "points": 1.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "51.72"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Rice, Jacob",
+      "place": 17,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "51.82"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Callahan, Tomas",
+      "place": 18,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "52.02"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Malerich, William",
+      "place": 19,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "52.45"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Harting, Alden",
+      "place": 20,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "52.51"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Dalchuk, Philip",
+      "place": 21,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "52.60"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "McCalla, Nicholas",
+      "place": 22,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "52.68"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Emre, Emir",
+      "place": 23,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "52.78"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Zhou, David",
+      "place": 24,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "53.10"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Kardes, Doruk",
+      "place": 25,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "53.23"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Woodruff, Johnny",
+      "place": 26,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "53.37"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Joshi, Gajendra",
+      "place": 27,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "53.59"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Ebeidy, Yassin",
+      "place": 28,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "53.69"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Patterson, Alexander",
+      "place": 29,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "53.97"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Elarabi, Farouk",
+      "place": 31,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "54.17"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Pytlinski, Nick",
+      "place": 32,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "55.39"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Rice, Jackson",
+      "place": 33,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "55.43"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Burke, Nolan",
+      "place": 34,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "56.03"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Collins, Andrew",
+      "place": 35,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "56.52"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Schneider, Jake",
+      "place": 36,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "56.55"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Burgess, Jackson",
+      "place": 37,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "56.84"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Curtin, William",
+      "place": 38,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "58.45"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Noseibeh, Dany",
+      "place": 39,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "58.60"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Fitzpatrick, Thomas",
+      "place": 40,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "58.84"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Felix, Adrian",
+      "place": 41,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "58.91"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Kang, Matthew",
+      "place": 43,
+      "tags": "",
+      "team": null,
+      "time": "1:00.04"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Bennett, Andrew",
+      "place": 44,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:00.20"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Lohr, Noah",
+      "place": 45,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "1:00.22"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Campos, Joaquin",
+      "place": 46,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:01.36"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Marchisano, Ethan",
+      "place": 47,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "1:01.81"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Chouteau, Benjamin",
+      "place": 48,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "1:02.14"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Estrada-Marquez, Derek",
+      "place": 49,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:02.89"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Tajar, Vedad",
+      "place": 50,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:03.01"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Rampley, Gavin",
+      "place": 51,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:03.81"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Frame, Peter",
+      "place": 52,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:06.25"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Mendieta Hidalgo, Danilo",
+      "place": 53,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:06.40"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Guedje Ngatsi, Yemeli",
+      "place": 54,
+      "tags": "",
+      "team": null,
+      "time": "1:07.69"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Kiner, Cassius",
+      "place": 55,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:08.90"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Brady, Daniel",
+      "place": 56,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "1:09.32"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Mulet, Isaiah",
+      "place": 57,
+      "tags": "",
+      "team": "Mississippi State Swim Club",
+      "time": "1:13.03"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Friginette, Brandon",
+      "place": 58,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:23.12"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Guerrier, Zion",
+      "place": 59,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:25.16"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Burkman, Trever",
+      "place": 60,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "1:45.47"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Sikder, Ash",
+      "place": 61,
+      "tags": "",
+      "team": null,
+      "time": "1:54.79"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Rockenberger, Janet",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "33.36"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Crowe, Katie",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "34.13"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Cavanagh, Isabella",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "34.31"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Wong, Tara",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "34.34"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Wyly, Ava",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "34.53"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Armstrong, Clara",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "35.03"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Chetrit, Nell",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "35.47"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Protain, Josie",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "35.54"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "May, Kahleia",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "35.80"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Taheri, Mya",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "36.96"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Day, Abby",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "37.45"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Heinze, Amelia",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "38.19"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Prasad, Geya",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "38.46"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Loving, Kate",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "38.48"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Costilow, Elliott",
+      "place": 15,
+      "points": 2.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "43.05"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Marshall, Valerie",
+      "place": 16,
+      "points": 1.0,
+      "tags": "",
+      "team": null,
+      "time": "43.32"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Franks, Amelia",
+      "place": 17,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "43.73"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Walsh, Bridget",
+      "place": 18,
+      "tags": "",
+      "team": null,
+      "time": "43.94"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Gonzalez, Arleth",
+      "place": 19,
+      "tags": "",
+      "team": null,
+      "time": "50.95"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Dang, Bao",
+      "place": 20,
+      "tags": "",
+      "team": null,
+      "time": "51.98"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "McMasters, William",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "27.18"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Maruyama, Tsubasa",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "28.07"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Basa, Suryanshu",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "28.40"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Lu, Alex",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "28.49"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Schoelwer, Sean",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "28.72"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Holbrook, Mason",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "28.78"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Routly, Seth",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "28.95"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Moody, Steven",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "29.01"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Frayer, Evan",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "29.35"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Grann, Aaron",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "29.49"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Joshi, Jaison",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "UC Club Swimming",
+      "time": "29.95"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Collins, Ethan",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "30.04"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Crouchley, John",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "31.12"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Bartlett, Parker",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "31.17"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Rohovit, Hunter",
+      "place": 15,
+      "points": 2.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "31.22"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Armel, Lyle",
+      "place": 16,
+      "points": 1.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "31.39"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Roberts, Jack",
+      "place": 17,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "32.13"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Purser, Kaleb",
+      "place": 19,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "33.20"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Hemminger, Gavin",
+      "place": 20,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "33.48"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Dick, Elliott",
+      "place": 21,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "34.31"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Trouve, Antoine",
+      "place": 22,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "34.99"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Kang, Matthew",
+      "place": 23,
+      "tags": "",
+      "team": null,
+      "time": "35.12"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Kennedy, Lexi",
+      "place": 24,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "35.32"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Torchia, Henry",
+      "place": 25,
+      "tags": "",
+      "team": null,
+      "time": "35.38"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Smale-Murillo, Scott",
+      "place": 26,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "35.65"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Bagighni, Yoseph",
+      "place": 28,
+      "tags": "",
+      "team": null,
+      "time": "37.12"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Tajar, Vedad",
+      "place": 30,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "38.59"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Frame, Peter",
+      "place": 31,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "39.36"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Neese, Rowen",
+      "place": 32,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "40.07"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Guerrier, Zion",
+      "place": 33,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "43.66"
+    }
+  ],
+  "team_scores": {
+    "combined": [
+      {
+        "place": 1,
+        "points": 1568.5,
+        "team": "Georgia Tech Swim Club"
+      },
+      {
+        "place": 2,
+        "points": 730.0,
+        "team": "UC Club Swimming"
+      },
+      {
+        "place": 3,
+        "points": 550.0,
+        "team": "UA Club Swimming"
+      },
+      {
+        "place": 4,
+        "points": 545.0,
+        "team": "Mizzou Swim Club"
+      },
+      {
+        "place": 5,
+        "points": 477.0,
+        "team": "Ksu Swim Club"
+      },
+      {
+        "place": 6,
+        "points": 321.0,
+        "team": "Emory Club Swimming"
+      },
+      {
+        "place": 7,
+        "points": 190.5,
+        "team": "Mississippi State Swim Club"
+      },
+      {
+        "place": 8,
+        "points": 105.0,
+        "team": "Wku Swim Club"
+      },
+      {
+        "place": 9,
+        "points": 89.0,
+        "team": "Samford University Swim Club"
+      },
+      {
+        "place": 10,
+        "points": 84.0,
+        "team": "Swim Club at Georgia State Uni"
+      }
+    ],
+    "men": [
+      {
+        "place": 1,
+        "points": 782.0,
+        "team": "Georgia Tech Swim Club"
+      },
+      {
+        "place": 2,
+        "points": 374.0,
+        "team": "UC Club Swimming"
+      },
+      {
+        "place": 3,
+        "points": 355.0,
+        "team": "UA Club Swimming"
+      },
+      {
+        "place": 4,
+        "points": 324.0,
+        "team": "Ksu Swim Club"
+      },
+      {
+        "place": 5,
+        "points": 275.0,
+        "team": "Emory Club Swimming"
+      },
+      {
+        "place": 6,
+        "points": 124.0,
+        "team": "Mizzou Swim Club"
+      },
+      {
+        "place": 7,
+        "points": 105.0,
+        "team": "Wku Swim Club"
+      },
+      {
+        "place": 8,
+        "points": 37.0,
+        "team": "Mississippi State Swim Club"
+      },
+      {
+        "place": 9,
+        "points": 16.0,
+        "team": "Swim Club at Georgia State Uni"
+      }
+    ],
+    "source": "pdf",
+    "women": [
+      {
+        "place": 1,
+        "points": 786.5,
+        "team": "Georgia Tech Swim Club"
+      },
+      {
+        "place": 2,
+        "points": 421.0,
+        "team": "Mizzou Swim Club"
+      },
+      {
+        "place": 3,
+        "points": 356.0,
+        "team": "UC Club Swimming"
+      },
+      {
+        "place": 4,
+        "points": 195.0,
+        "team": "UA Club Swimming"
+      },
+      {
+        "place": 5,
+        "points": 153.5,
+        "team": "Mississippi State Swim Club"
+      },
+      {
+        "place": 6,
+        "points": 153.0,
+        "team": "Ksu Swim Club"
+      },
+      {
+        "place": 7,
+        "points": 89.0,
+        "team": "Samford University Swim Club"
+      },
+      {
+        "place": 8,
+        "points": 68.0,
+        "team": "Swim Club at Georgia State Uni"
+      },
+      {
+        "place": 9,
+        "points": 46.0,
+        "team": "Emory Club Swimming"
+      }
+    ]
+  }
+}

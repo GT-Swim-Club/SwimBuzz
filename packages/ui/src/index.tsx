@@ -3,7 +3,9 @@ import {
   ActivityIndicator,
   Animated,
   FlatList as RNFlatList,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   ScrollView as RNScrollView,
   StyleSheet,
@@ -545,6 +547,46 @@ export function ActionSheet({
           ))}
         </View>
       </View>
+    </Modal>
+  )
+}
+
+/** A bottom sheet for a small form, styled like ActionSheet; lifts above the keyboard. */
+export function BottomSheet({
+  visible,
+  onClose,
+  title,
+  children,
+}: {
+  visible: boolean
+  onClose: () => void
+  title?: string
+  children: React.ReactNode
+}) {
+  const styles = useStyles()
+  const insets = useSafeAreaInsets()
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
+      <KeyboardAvoidingView
+        style={styles.actionSheetOverlay}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+        />
+        <View
+          style={[
+            styles.actionSheetPanel,
+            { paddingHorizontal: spacing.md, paddingBottom: insets.bottom + spacing.md },
+          ]}
+        >
+          {title ? <Text style={[styles.actionSheetTitle, { paddingHorizontal: 0 }]}>{title}</Text> : null}
+          {children}
+        </View>
+      </KeyboardAvoidingView>
     </Modal>
   )
 }

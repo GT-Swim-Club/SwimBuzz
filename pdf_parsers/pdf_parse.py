@@ -78,10 +78,12 @@ LEADOFF_NAME = re.compile(
     r"([A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
 )
 
+# The age is optional, and never the next leg's number: without an age, "1) Dunbar, Jack 2) Altera,
+# Ryan 22" would read the "2" of "2)" as Dunbar's age and lose leg 2.
 RELAY_LEG = re.compile(
     r"(\d)\)\s*"
     r"([A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
-    r"(?:\s+(\d+))?",
+    r"(?:\s+(\d+)\b(?!\s*\)))?",
 )
 
 # Relay team result line: place, team code, optional A-D letter, times.
@@ -359,6 +361,31 @@ def extract_times_from_line(line: str) -> list[str]:
         if parsed:
             times.append(parsed)
     return times
+
+
+def pick_points(line: str, time: str | None) -> float | None:
+    """Points scored by a result row: the number Hy-Tek prints right after the
+    swum time in a results PDF's Points column ("1:52.14 50", "2:13.17 9.0 25.85").
+
+    Points are a whole number or one decimal ("16.5") — never a two-decimal time
+    — so the splits that may follow are never mistaken for them. The exception is
+    a tie (place marked "*7"), whose split points print as "11.50" (text flow
+    sometimes breaks that into "14. 50"). Many PDFs print the column without a
+    "Points" heading, so this doesn't rely on one; a number followed by a name is
+    the next column's place, not points.
+    """
+    if not time:
+        return None
+    tied = line.lstrip().startswith("*")
+    value = r"\d{1,3}(?:\.\s?\d{1,2})?" if tied else r"\d{1,3}(?:\.\d)?"
+    pattern = re.compile(
+        rf"(?<![\d:.])[xX]?{re.escape(time)}[*^!#]*\s+({value})"
+        rf"(?=\s*$|\s+(?:{TIME_TOKEN_PATTERN}|\d{{1,3}})(?:\s|$))"
+    )
+    matches = list(pattern.finditer(line))
+    if not matches:
+        return None
+    return float(re.sub(r"\s", "", matches[-1].group(1)))
 
 
 def pick_seed_time(line: str, event: str | None = None) -> str | None:
@@ -645,6 +672,7 @@ def parse_team_from_line(line: str) -> str | None:
     # e.g. "Smith, Benjamin 18GTSC 1:52.91"
     concat_match = re.search(
         r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
+        r"(?:\s+[A-Z]\.?(?=\s))?"
         r"\s+\d{1,3}([A-Z0-9]{2,10}(?:-[A-Z]{2})?)"
         r"\s+(?:\(|[\d:xX]|J\d)",
         line,
@@ -656,6 +684,7 @@ def parse_team_from_line(line: str) -> str | None:
     # (e.g. "UKCS DQ"). A status token is never the code itself.
     match = re.search(
         r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
+        r"(?:\s+[A-Z]\.?(?=\s))?"
         r"(?:\s+\d{1,3})?"
         rf"\s+((?![0-9]+\s)(?!(?:{INVALID_TIME_PATTERN})\b)[A-Z0-9]{{2,10}}(?:-[A-Z]{{2}})?)"
         rf"\s+(?:\(|[\d:xX]|J\d|(?:{INVALID_TIME_PATTERN})\b)",
@@ -670,6 +699,7 @@ def parse_team_from_line(line: str) -> str | None:
     team_word = rf"(?!(?:{INVALID_TIME_PATTERN})\b)[A-Z][A-Za-z]+"
     full_match = re.search(
         r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
+        r"(?:\s+[A-Z]\.?(?=\s))?"
         r"(?:\s+\d{1,3})?"
         rf"\s+((?:{team_word}\s+){{1,6}}(?:{team_word})(?:-[A-Z]{{2}})?)"
         rf"\s+(?:{INVALID_TIME_PATTERN}|{TIME_TOKEN_PATTERN})",
@@ -682,6 +712,7 @@ def parse_team_from_line(line: str) -> str | None:
     # can't be a swimmer's middle name.
     single_match = re.search(
         r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
+        r"(?:\s+[A-Z]\.?(?=\s))?"
         r"\s+\d{1,3}"
         rf"\s+({team_word}(?:-[A-Z]{{2}})?)"
         rf"\s+(?:{INVALID_TIME_PATTERN}|{TIME_TOKEN_PATTERN})",
@@ -1063,6 +1094,7 @@ SWIM_OFF_TAG = "S"
 def parse_text_lines(lines: list[str], course: str) -> list[dict]:
     results: list[dict] = []
     current_event: str | None = None
+    current_gender: str = ""
     current_round: str | None = None
     last_result_indices: list[int] = []
     in_relay_section: bool = False
@@ -1108,6 +1140,7 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
         if maybe_event and len(stripped) < 120:
             flush_pending_splits()
             current_event = maybe_event
+            current_gender = relay_gender_from_header(stripped)
             # "#35S Women 50 Yard Fly Swim-off" — its rows are tie-breaker swims,
             # not the event's prelims/finals.
             in_swim_off = bool(SWIM_OFF_HEADER.search(stripped))
@@ -1164,6 +1197,7 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
                 "tags": SWIM_OFF_TAG if in_swim_off else current_round or "",
                 "place": place,
                 "team": team,
+                "gender": current_gender,
             }
             results.append(row)
             last_result_indices = [len(results) - 1]
@@ -1184,9 +1218,13 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
                 "tags": SWIM_OFF_TAG if in_swim_off else round_time.get("tags", ""),
                 "place": place,
                 "team": team,
+                "gender": current_gender,
             }
             if seed_time:
                 row["seedTime"] = seed_time
+            points = pick_points(stripped, round_time.get("time"))
+            if points is not None:
+                row["points"] = points
             results.append(row)
             last_result_indices.append(len(results) - 1)
 
@@ -1397,6 +1435,9 @@ def parse_relay_results(lines: list[str], course: str) -> list[dict[str, Any]]:
             }
             if block.get("seedTime"):
                 row["seedTime"] = block["seedTime"]
+            points = pick_points(block.get("line", ""), round_time.get("time"))
+            if points is not None:
+                row["points"] = points
             results.append(row)
         block = None
 
@@ -1448,6 +1489,7 @@ def parse_relay_results(lines: list[str], course: str) -> list[dict[str, Any]]:
                 "relaySwimmers": [],
                 "rounds": rounds,
                 "place": place,
+                "line": tail,
             }
             if seed_time:
                 block["seedTime"] = seed_time
@@ -1836,6 +1878,170 @@ def extract_page_lines(
     return _fix_name_overflow(result) if text_flow else result
 
 
+# Team standings Hy-Tek prints after the last event: "Combined Team Scores",
+# "Scores - Women" / "Women - Team Rankings - Through Event 38", and a
+# "(Combined Team Scores)" continuation header when a list runs onto the next page.
+_SCORES_COMBINED = re.compile(r"^\(?\s*Combined\s+Team\s+Scores\b", re.I)
+_SCORES_WOMEN = re.compile(r"\b(?:Women|Girls|Female)\s*-\s*Team\s+Rankings\b", re.I)
+_SCORES_MEN = re.compile(r"\b(?:Men|Boys|Male)\s*-\s*Team\s+Rankings\b", re.I)
+# "1. Georgia Tech Swim Club 1815.5" — Day 1 PDFs print two per line.
+_STANDING_ENTRY = re.compile(
+    r"(?:^|\s)(\d{1,3})\.\s+(\S.*?)\s+(-?\d+(?:\.\d+)?)(?=\s+\d{1,3}\.\s|\s*$)"
+)
+_TEAM_REGION_SUFFIX = re.compile(r"-[A-Z]{2}$")
+
+
+def _scores_section(line: str) -> tuple[str, bool] | None:
+    """(section, is_continuation) when the line heads a standings list."""
+    if _SCORES_COMBINED.search(line):
+        return "combined", line.lstrip().startswith("(")
+    if _SCORES_WOMEN.search(line):
+        return "women", False
+    if _SCORES_MEN.search(line):
+        return "men", False
+    return None
+
+
+def parse_team_scores(lines: list[str]) -> dict[str, list[dict[str, Any]]]:
+    """The team standings a results PDF prints, keyed women/men/combined.
+
+    A list restarts on each new header for it, so a PDF that prints standings
+    after every session keeps the last (whole-meet) standings.
+    """
+    lists: dict[str, list[dict[str, Any]]] = {}
+    section: str | None = None
+    for raw in lines:
+        line = raw.strip()
+        if not line:
+            continue
+        header = _scores_section(line)
+        if header:
+            section, continuation = header
+            if not continuation:
+                lists[section] = []
+            continue
+        if section is None:
+            continue
+        if relay_header_match(line) or re.match(r"^(?:Event\s+\d+|#\d+)\b", line, re.I):
+            section = None
+            continue
+        for place, team, points in _STANDING_ENTRY.findall(line):
+            lists[section].append(
+                {"place": int(place), "team": team.strip(), "points": float(points)}
+            )
+    return {k: v for k, v in lists.items() if v}
+
+
+def _rank_standings(totals: dict[str, float]) -> list[dict[str, Any]]:
+    """Standings from team → points, ties sharing a place (1, 2, 2, 4)."""
+    ordered = sorted(totals.items(), key=lambda kv: (-kv[1], kv[0].lower()))
+    out: list[dict[str, Any]] = []
+    for i, (team, points) in enumerate(ordered):
+        place = out[-1]["place"] if out and out[-1]["points"] == points else i + 1
+        out.append({"place": place, "team": team, "points": points})
+    return out
+
+
+def _team_key(team: str) -> str:
+    return re.sub(r"\s+", " ", _TEAM_REGION_SUFFIX.sub("", team.strip())).lower()
+
+
+def compute_team_scores(
+    rows: list[dict[str, Any]],
+) -> dict[str, list[dict[str, Any]]]:
+    """Standings summed from every scoring row (individual and relay), for a
+    results PDF with a Points column but no printed standings.
+
+    Empty unless a fair share of placed rows carry points — a PDF without a
+    Points column (a championship that scores elsewhere) would otherwise get
+    standings made from a few stray numbers.
+    """
+    placed = [r for r in rows if isinstance(r.get("place"), int)]
+    scored = [r for r in placed if r.get("points") is not None]
+    if not placed or len(scored) < len(placed) * 0.25:
+        return {}
+    totals: dict[str, dict[str, float]] = {"women": {}, "men": {}, "combined": {}}
+    names: dict[str, str] = {}
+    for row in rows:
+        points = row.get("points")
+        team = str(row.get("team") or "").strip()
+        if points is None or not team:
+            continue
+        key = _team_key(team)
+        display = _TEAM_REGION_SUFFIX.sub("", team).strip()
+        # Relay rows upper-case the team; keep a row's own casing when there is one.
+        if key not in names or (names[key].isupper() and not display.isupper()):
+            names[key] = display
+        gender = {"F": "women", "M": "men"}.get(str(row.get("gender") or ""))
+        for section in ("combined", gender):
+            if section:
+                totals[section][key] = totals[section].get(key, 0.0) + float(points)
+    out: dict[str, list[dict[str, Any]]] = {}
+    for section, by_key in totals.items():
+        if by_key:
+            out[section] = _rank_standings({names[k]: v for k, v in by_key.items()})
+    return out
+
+
+def _combined_from_genders(
+    women: list[dict[str, Any]], men: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    totals: dict[str, float] = {}
+    for entry in [*women, *men]:
+        totals[entry["team"]] = totals.get(entry["team"], 0.0) + entry["points"]
+    return _rank_standings(totals)
+
+
+def _mark_our_team(
+    standings: list[dict[str, Any]], team: str | None, our_points: float
+) -> None:
+    """Flag our team's entry: the one whose name matches a team code, or —
+    when none or several do — the one whose points equal our rows' points."""
+    codes = [t.strip().lower() for t in (team or "").split(",") if t.strip()]
+    if not codes or not standings:
+        return
+    matches = [e for e in standings if any(club_matches(e["team"], c) for c in codes)]
+    if len(matches) != 1:
+        pool = matches or standings
+        by_points = [e for e in pool if our_points > 0 and abs(e["points"] - our_points) < 0.01]
+        matches = by_points if len(by_points) == 1 else matches[:1]
+    if matches:
+        matches[0]["ours"] = True
+
+
+def build_team_scores(
+    lines: list[str], rows: list[dict[str, Any]], team: str | None
+) -> dict[str, Any] | None:
+    """Women/men/combined standings — printed by the PDF, else computed from
+    its Points column — with our team's entries flagged."""
+    printed = parse_team_scores(lines)
+    scores = printed or compute_team_scores(rows)
+    if not scores:
+        return None
+    if "combined" not in scores and ("women" in scores or "men" in scores):
+        scores["combined"] = _combined_from_genders(
+            scores.get("women", []), scores.get("men", [])
+        )
+
+    ours = filter_results_by_team(rows, team) if team else []
+    our_points = {"women": 0.0, "men": 0.0, "combined": 0.0}
+    for row in ours:
+        points = float(row.get("points") or 0)
+        our_points["combined"] += points
+        gender = {"F": "women", "M": "men"}.get(str(row.get("gender") or ""))
+        if gender:
+            our_points[gender] += points
+    for section, standings in scores.items():
+        _mark_our_team(standings, team, our_points.get(section, 0.0))
+
+    return {
+        "source": "pdf" if printed else "computed",
+        "women": scores.get("women", []),
+        "men": scores.get("men", []),
+        "combined": scores.get("combined", []),
+    }
+
+
 def parse_meet_pdf_bytes(
     content: bytes, default_course: str = "SCY", team: str | None = None
 ) -> dict[str, Any]:
@@ -1906,8 +2112,10 @@ def parse_meet_pdf_bytes(
 
     course = detect_course(joined_text, default_course)
     meet_name, meet_date = parse_meet_header(header_lines or all_text)
-    results = filter_results_by_team(parse_text_lines(all_text, course), team)
-    relay_results = filter_results_by_team(parse_relay_results(all_text, course), team)
+    all_results = parse_text_lines(all_text, course)
+    all_relay_results = parse_relay_results(all_text, course)
+    results = filter_results_by_team(all_results, team)
+    relay_results = filter_results_by_team(all_relay_results, team)
 
     return {
         "course": course,
@@ -1916,4 +2124,7 @@ def parse_meet_pdf_bytes(
         "detectedSheetType": detected,
         "results": dedupe_results(results),
         "relay_results": relay_results,
+        "team_scores": build_team_scores(
+            all_text, [*dedupe_results(all_results), *all_relay_results], team
+        ),
     }

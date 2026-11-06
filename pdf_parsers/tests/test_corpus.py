@@ -179,6 +179,15 @@ def test_parses_and_matches_invariants(kind: str, path: Path, request: pytest.Fi
     if kind == "results":
         assert parsed.get("meet_name"), f"{path.name}: missing meet_name"
         assert parsed.get("meet_date"), f"{path.name}: missing meet_date"
+        for section, standings in (parsed.get("team_scores") or {}).items():
+            if section == "source":
+                continue
+            places = [e["place"] for e in standings]
+            points = [e["points"] for e in standings]
+            assert places == sorted(places), f"{path.name}: {section} standings out of place order"
+            assert points == sorted(points, reverse=True), (
+                f"{path.name}: {section} standings points not descending"
+            )
     if kind in ("heat", "psych"):
         assert parsed.get("meet_name"), f"{path.name}: missing meet_name"
 

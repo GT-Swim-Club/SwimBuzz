@@ -1885,7 +1885,7 @@
       "isRelay": false,
       "lane": 1,
       "name": "Farrugia, Amelia",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 77,
       "seedTime": "32.80",
       "team": ""
@@ -1900,7 +1900,7 @@
       "isRelay": false,
       "lane": 3,
       "name": "Sohmer, Rebecca",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 73,
       "seedTime": "31.16",
       "team": ""
@@ -1915,7 +1915,7 @@
       "isRelay": false,
       "lane": 4,
       "name": "Cuson, Natalie",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 71,
       "seedTime": "30.69",
       "team": ""
@@ -1930,7 +1930,7 @@
       "isRelay": false,
       "lane": 5,
       "name": "Fernandez, Heather",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 72,
       "seedTime": "31.00",
       "team": ""
@@ -1945,7 +1945,7 @@
       "isRelay": false,
       "lane": 6,
       "name": "Wadstein, Elyn",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 74,
       "seedTime": "32.00",
       "team": ""
@@ -1960,7 +1960,7 @@
       "isRelay": false,
       "lane": 7,
       "name": "Kazemzadeh, Ava",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 76,
       "seedTime": "32.50",
       "team": ""
@@ -1975,7 +1975,7 @@
       "isRelay": false,
       "lane": 9,
       "name": "Laos, Isabella",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 80,
       "seedTime": "35.00",
       "team": ""
@@ -3493,7 +3493,7 @@
       "isRelay": false,
       "lane": 0,
       "name": "Carper, Cole",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 58,
       "seedTime": "25.30",
       "team": ""
@@ -3508,7 +3508,7 @@
       "isRelay": false,
       "lane": 1,
       "name": "Hall, Nathan",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 53,
       "seedTime": "25.00",
       "team": ""
@@ -3523,7 +3523,7 @@
       "isRelay": false,
       "lane": 2,
       "name": "Heath, ZacharyC",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 53,
       "seedTime": "25.00",
       "team": ""
@@ -3538,7 +3538,7 @@
       "isRelay": false,
       "lane": 3,
       "name": "Williams, Crescent",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 53,
       "seedTime": "25.00",
       "team": ""
@@ -3553,7 +3553,7 @@
       "isRelay": false,
       "lane": 5,
       "name": "Hernandez, Joshua",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 52,
       "seedTime": "24.80",
       "team": ""
@@ -3568,7 +3568,7 @@
       "isRelay": false,
       "lane": 6,
       "name": "Shepard, Brandon",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 53,
       "seedTime": "25.00",
       "team": ""
@@ -3583,7 +3583,7 @@
       "isRelay": false,
       "lane": 8,
       "name": "Simmons, Ben",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 58,
       "seedTime": "25.30",
       "team": ""
@@ -5126,7 +5126,7 @@
       "isRelay": false,
       "lane": 0,
       "name": "Foran, Lucilia",
-      "round": "timed_finals",
+      "round": "finals",
       "team": "",
       "timeStatus": "NT"
     },
@@ -5140,7 +5140,7 @@
       "isRelay": false,
       "lane": 1,
       "name": "Helmantel, FleurJ",
-      "round": "timed_finals",
+      "round": "finals",
       "team": "",
       "timeStatus": "NT"
     },
@@ -5154,7 +5154,7 @@
       "isRelay": false,
       "lane": 2,
       "name": "Catalasan, Mariann",
-      "round": "timed_finals",
+      "round": "finals",
       "team": "",
       "timeStatus": "NT"
     },
@@ -5168,7 +5168,7 @@
       "isRelay": false,
       "lane": 3,
       "name": "Tsynman, Katherine",
-      "round": "timed_finals",
+      "round": "finals",
       "team": "",
       "timeStatus": "NT"
     },
@@ -5182,7 +5182,7 @@
       "isRelay": false,
       "lane": 5,
       "name": "Plinski, Victoria",
-      "round": "timed_finals",
+      "round": "finals",
       "team": "",
       "timeStatus": "NT"
     },
@@ -5196,7 +5196,7 @@
       "isRelay": false,
       "lane": 7,
       "name": "Luchinina, Natasha",
-      "round": "timed_finals",
+      "round": "finals",
       "team": "",
       "timeStatus": "NT"
     },
@@ -5210,7 +5210,7 @@
       "isRelay": false,
       "lane": 8,
       "name": "Tjandra, Sammy",
-      "round": "timed_finals",
+      "round": "finals",
       "team": "",
       "timeStatus": "NT"
     },
@@ -6588,7 +6588,7 @@
       "isRelay": false,
       "lane": 0,
       "name": "Rice, Thomas",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 19,
       "seedTime": "2:00.69",
       "team": ""
@@ -6603,7 +6603,7 @@
       "isRelay": false,
       "lane": 1,
       "name": "Townsend, Matthew",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 17,
       "seedTime": "1:59.69",
       "team": ""
@@ -6618,7 +6618,7 @@
       "isRelay": false,
       "lane": 3,
       "name": "Kinter, Nathan",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 12,
       "seedTime": "1:55.00",
       "team": ""
@@ -6633,7 +6633,7 @@
       "isRelay": false,
       "lane": 4,
       "name": "Teal, Nathan",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 11,
       "seedTime": "1:54.00",
       "team": ""
@@ -6648,7 +6648,7 @@
       "isRelay": false,
       "lane": 5,
       "name": "Allen, Hunter",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 12,
       "seedTime": "1:55.00",
       "team": ""
@@ -6663,7 +6663,7 @@
       "isRelay": false,
       "lane": 6,
       "name": "Altera, Ryan",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 14,
       "seedTime": "1:55.69",
       "team": ""
@@ -6678,7 +6678,7 @@
       "isRelay": false,
       "lane": 7,
       "name": "Wang, Daniel",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 16,
       "seedTime": "1:58.50",
       "team": ""
@@ -6693,7 +6693,7 @@
       "isRelay": false,
       "lane": 8,
       "name": "Kruger, Ethan",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 18,
       "seedTime": "2:00.00",
       "team": ""
@@ -6708,7 +6708,7 @@
       "isRelay": false,
       "lane": 9,
       "name": "Liu, Alex",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 19,
       "seedTime": "2:00.69",
       "team": ""
@@ -11647,7 +11647,7 @@
       "isRelay": false,
       "lane": 0,
       "name": "Marquez, Alexandro",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 16,
       "seedTime": "26.00",
       "team": ""
@@ -11662,7 +11662,7 @@
       "isRelay": false,
       "lane": 1,
       "name": "Nucci, Renzo",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 16,
       "seedTime": "26.00",
       "team": ""
@@ -11677,7 +11677,7 @@
       "isRelay": false,
       "lane": 2,
       "name": "Matthews, John",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 14,
       "seedTime": "25.69",
       "team": ""
@@ -11692,7 +11692,7 @@
       "isRelay": false,
       "lane": 3,
       "name": "Springate, Dylan",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 13,
       "seedTime": "25.66",
       "team": ""
@@ -11707,7 +11707,7 @@
       "isRelay": false,
       "lane": 4,
       "name": "Miller, Christopher",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 11,
       "seedTime": "25.26",
       "team": ""
@@ -11722,7 +11722,7 @@
       "isRelay": false,
       "lane": 5,
       "name": "Kryski, Wyatt",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 12,
       "seedTime": "25.50",
       "team": ""
@@ -11737,7 +11737,7 @@
       "isRelay": false,
       "lane": 6,
       "name": "Rimsa, Thomas",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 14,
       "seedTime": "25.69",
       "team": ""
@@ -11752,7 +11752,7 @@
       "isRelay": false,
       "lane": 7,
       "name": "Landis, Tyler",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 16,
       "seedTime": "26.00",
       "team": ""
@@ -11767,7 +11767,7 @@
       "isRelay": false,
       "lane": 8,
       "name": "Feller, Curtis",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 16,
       "seedTime": "26.00",
       "team": ""
@@ -13122,7 +13122,7 @@
       "isRelay": false,
       "lane": 0,
       "name": "Kelly, Jemma",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 9,
       "seedTime": "30.00",
       "team": ""
@@ -13137,7 +13137,7 @@
       "isRelay": false,
       "lane": 1,
       "name": "Ndiaye, Aneesa",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 7,
       "seedTime": "29.60",
       "team": ""
@@ -13152,7 +13152,7 @@
       "isRelay": false,
       "lane": 2,
       "name": "Houck, Madison",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 4,
       "seedTime": "29.00",
       "team": ""
@@ -13167,7 +13167,7 @@
       "isRelay": false,
       "lane": 3,
       "name": "Castle, Kendall",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 3,
       "seedTime": "28.74",
       "team": ""
@@ -13182,7 +13182,7 @@
       "isRelay": false,
       "lane": 4,
       "name": "Carlton, Delaney",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 1,
       "seedTime": "27.69",
       "team": ""
@@ -13197,7 +13197,7 @@
       "isRelay": false,
       "lane": 5,
       "name": "Krzyzaniak, Alexis",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 2,
       "seedTime": "28.70",
       "team": ""
@@ -13212,7 +13212,7 @@
       "isRelay": false,
       "lane": 6,
       "name": "Johann, Rachel",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 4,
       "seedTime": "29.00",
       "team": ""
@@ -13227,7 +13227,7 @@
       "isRelay": false,
       "lane": 7,
       "name": "Dee, Becca",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 4,
       "seedTime": "29.00",
       "team": ""
@@ -13242,7 +13242,7 @@
       "isRelay": false,
       "lane": 8,
       "name": "Honaker, Olivia",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 8,
       "seedTime": "29.90",
       "team": ""
@@ -13257,7 +13257,7 @@
       "isRelay": false,
       "lane": 9,
       "name": "Nance, Lauren",
-      "round": "timed_finals",
+      "round": "finals",
       "seedRank": 10,
       "seedTime": "30.50",
       "team": ""
@@ -14925,7 +14925,7 @@
       "isRelay": false,
       "lane": 0,
       "name": "Johnson, BenjaminScott",
-      "round": "timed_finals",
+      "round": "finals",
       "team": "",
       "timeStatus": "NT"
     },
@@ -14939,7 +14939,7 @@
       "isRelay": false,
       "lane": 1,
       "name": "Manuel, Hunter",
-      "round": "timed_finals",
+      "round": "finals",
       "team": "",
       "timeStatus": "NT"
     },
@@ -14953,7 +14953,7 @@
       "isRelay": false,
       "lane": 3,
       "name": "Briggs, Shigeo",
-      "round": "timed_finals",
+      "round": "finals",
       "team": "",
       "timeStatus": "NT"
     },
@@ -14967,7 +14967,7 @@
       "isRelay": false,
       "lane": 4,
       "name": "Varela, Marcelo",
-      "round": "timed_finals",
+      "round": "finals",
       "team": "",
       "timeStatus": "NT"
     },
@@ -14981,7 +14981,7 @@
       "isRelay": false,
       "lane": 5,
       "name": "Malerich, William",
-      "round": "timed_finals",
+      "round": "finals",
       "team": "",
       "timeStatus": "NT"
     },
@@ -14995,7 +14995,7 @@
       "isRelay": false,
       "lane": 6,
       "name": "Shue, William",
-      "round": "timed_finals",
+      "round": "finals",
       "team": "",
       "timeStatus": "NT"
     },
@@ -15009,7 +15009,7 @@
       "isRelay": false,
       "lane": 8,
       "name": "George, Noah",
-      "round": "timed_finals",
+      "round": "finals",
       "team": "",
       "timeStatus": "NT"
     },
@@ -15023,7 +15023,7 @@
       "isRelay": false,
       "lane": 9,
       "name": "Scudder, Nathan",
-      "round": "timed_finals",
+      "round": "finals",
       "team": "",
       "timeStatus": "NT"
     },

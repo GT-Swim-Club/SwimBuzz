@@ -1,5 +1,6 @@
 import { softDeleteMeet } from "@/lib/recovery/recovery"
 import { NextResponse } from "next/server"
+import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { buildMeetData, MeetInputError, toPrismaMeetWriteData } from "@/lib/meet/meet-input"
 import {
@@ -24,6 +25,7 @@ import { isEventOrder } from "@/lib/meet/meet-event-order"
 import {
   isResultStatusesSummary,
   isSheetSummary,
+  meetHasImportedResults,
   mergeMeetResultEntries,
   applyRosterGenders,
   applyRosterNames,
@@ -32,6 +34,8 @@ import {
 } from "@/lib/meet/meet-sheet-summary"
 import { isRelayResultsSummary } from "@/lib/meet/relay-results"
 import { buildRelayLineups } from "@/lib/meet/relay-lineups"
+import { attachCoachHeatLanes } from "@/lib/meet/heat-lane-overrides"
+import { loadMeetHighlights } from "@/lib/meet/meet-highlights-load"
 import { athleteRosterNameLastFirst, utcDayKey, isStaffRole } from "@swimbuzz/shared"
 
 export const runtime = "nodejs"
@@ -51,7 +55,7 @@ export async function GET(
       swims: {
         include: {
           athlete: {
-            select: { id: true, firstName: true, lastName: true },
+            select: { id: true, firstName: true, lastName: true, gender: true },
           },
         },
       },
@@ -88,6 +92,7 @@ export async function GET(
         timeMs: s.timeMs,
         tags: s.tags,
         place: s.place,
+        points: s.points,
         course: s.course,
         date: utcDayKey(s.date),
       }))
@@ -101,22 +106,36 @@ export async function GET(
     : null
   // Roster names and genders, so mobile can show "Baumann, Matthew (Matt)" and title its
   // by-event groups "Women 50 Free".
+  const rosterGenders = new Map(
+    seasonRoster.map((a) => [a.id, a.gender === "F" ? ("F" as const) : ("M" as const)])
+  )
   const rosterSummary = applyRosterGenders(
     applyRosterNames(
-      mergeSheetSummaries(
-        isSheetSummary(meet.psychSheetSummary) ? meet.psychSheetSummary : null,
-        isSheetSummary(meet.heatSheetSummary) ? meet.heatSheetSummary : null,
-        results,
-        relayResults,
-        isSheetSummary(meet.entriesSheetSummary) ? meet.entriesSheetSummary : null,
-        isSheetSummary(meet.finalsHeatSheetSummary)
-          ? meet.finalsHeatSheetSummary
-          : null
+      attachCoachHeatLanes(
+        mergeSheetSummaries(
+          isSheetSummary(meet.psychSheetSummary) ? meet.psychSheetSummary : null,
+          isSheetSummary(meet.heatSheetSummary) ? meet.heatSheetSummary : null,
+          results,
+          relayResults,
+          isSheetSummary(meet.entriesSheetSummary) ? meet.entriesSheetSummary : null,
+          isSheetSummary(meet.finalsHeatSheetSummary)
+            ? meet.finalsHeatSheetSummary
+            : null
+        ),
+        meet.heatLaneOverrides,
+        rosterGenders
       ),
       new Map(seasonRoster.map((a) => [a.id, athleteRosterNameLastFirst(a)]))
     ),
-    new Map(seasonRoster.map((a) => [a.id, a.gender === "F" ? ("F" as const) : ("M" as const)]))
+    rosterGenders
   )
+
+  const highlights = await loadMeetHighlights({
+    meet,
+    results,
+    relayResults,
+    hasImportedResults: meetHasImportedResults({ individualResults: results, relayResults }),
+  })
 
   const { swims: _swims, ...meetRow } = meet
 
@@ -124,6 +143,7 @@ export async function GET(
     ...meetRow,
     eventOrder: isEventOrder(meet.eventOrder) ? meet.eventOrder : null,
     rosterSummary,
+    highlights,
     relayLineups: buildRelayLineups(meet, seasonRoster),
     meetHasEnded: ended,
     viewer: {
@@ -270,6 +290,7 @@ export async function DELETE(
         resultsUrl: null,
         swimphoneUrl: null,
         resultStatusesSummary: { entries: [] },
+        teamScores: Prisma.DbNull,
       },
     })
   }

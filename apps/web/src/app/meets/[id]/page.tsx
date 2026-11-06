@@ -50,9 +50,7 @@ import { isSignupRelayPreferences } from "@/lib/meet/meet-signup-import"
 import { isMeetFinalRoster } from "@/lib/meet/meet-roster-import"
 import { athletePath, isCuid, meetPath } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
-import {
-  buildAthletePbMap,
-  computeMeetResultHighlights } from "@/lib/meet/meet-stats"
+import { loadMeetHighlights } from "@/lib/meet/meet-highlights-load"
 import { toDateInput, toTimeInput } from "@/lib/date-input"
 import {
   athleteRosterNameLastFirst,
@@ -120,6 +118,7 @@ async function MeetPageContent({ params }: { params: Promise<{ id: string }> }) 
         timeMs: s.timeMs,
         tags: s.tags,
         place: s.place,
+        points: s.points,
         course: s.course,
         date: utcDayKey(s.date)}))
     ),
@@ -280,64 +279,13 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
     heatSummary
   )
 
-  const meetSwimsForStats = meet.swims.map((s) => ({
-    id: s.id,
-    athleteId: s.athlete.id,
-    event: s.event,
-    course: s.course,
-    timeMs: s.timeMs,
-    athleteName: `${s.athlete.firstName} ${s.athlete.lastName}`,
-    gender: s.athlete.gender,
-    tags: s.tags}))
-
-  let meetHighlights = null
-  if (hasImportedResults || meet.swims.length > 0) {
-    const athleteIds = [
-      ...new Set([
-        ...meet.swims.map((s) => s.athlete.id),
-        ...results.map((r) => r.athleteId),
-      ]),
-    ]
-    const [pbSwims, nationalsCuts] = await Promise.all([
-      athleteIds.length > 0
-        ? prisma.swim.findMany({
-            where: { athleteId: { in: athleteIds } },
-            select: {
-              athleteId: true,
-              event: true,
-              course: true,
-              timeMs: true,
-              date: true,
-              meetId: true}})
-        : [],
-      prisma.nationalsCut.findMany({
-        where: { isRelay: false, set: { season: meet.season } },
-        select: { event: true, gender: true, timeMs: true, set: { select: { course: true } } }}),
-    ])
-    // "Before this meet" = other meets' swims dated before this meet's first swim.
-    const firstMeetSwimMs = meet.swims.reduce(
-      (min, s) => Math.min(min, s.date.getTime()),
-      meet.startsAt.getTime()
-    )
-    const priorSwims = pbSwims.filter(
-      (s) => s.meetId !== meet.id && s.date.getTime() < firstMeetSwimMs
-    )
-    const athleteHrefById = new Map(
-      seasonRoster.map((a) => [a.id, athletePath(a.slug ?? a.id)])
-    )
-    meetHighlights = computeMeetResultHighlights({
-      results,
-      meetSwims: meetSwimsForStats,
-      pbMap: buildAthletePbMap(pbSwims),
-      priorPbMap: buildAthletePbMap(priorSwims),
-      nationalsCuts: nationalsCuts.map((c) => ({
-        event: c.event,
-        gender: c.gender,
-        course: c.set.course,
-        timeMs: c.timeMs})),
-      athleteHrefById,
-      relayResults})
-  }
+  const meetHighlights = await loadMeetHighlights({
+    meet,
+    results,
+    relayResults,
+    hasImportedResults,
+    athleteHrefById: new Map(seasonRoster.map((a) => [a.id, athletePath(a.slug ?? a.id)])),
+  })
 
   const header = (
     <>
@@ -403,6 +351,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       entriesSummary={entriesSummary}
       results={results}
       relayResults={relayResults}
+      heatLaneOverrides={meet.heatLaneOverrides}
       meetId={meet.id}
       meetName={meet.name}
       athletes={rosterAthletes}
@@ -478,7 +427,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
     isBeforeOrToday && (initialPhotos.length > 0 || initialPreviews.length > 0 || isCoach)
 
   const highlightsCard = meetHighlights ? (
-    <MeetHighlightsCarousel counters={meetHighlights.counters} />
+    <MeetHighlightsCarousel highlights={meetHighlights} />
   ) : null
   const countdownCard =
     isUpcomingMeet && meet.hasStartTime ? (
