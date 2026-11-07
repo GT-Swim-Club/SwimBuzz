@@ -15,7 +15,8 @@ import {
 } from "@swimbuzz/shared"
 import { formatDisplayTime, formatOrdinal } from "@/lib/utils"
 import { HELVETICA_CAP_HEIGHT, drawMeetPdfDetails } from "@/lib/meet/meet-pdf-details"
-import { cleanEventName, type EventOrder } from "@/lib/meet/meet-event-order"
+import { cleanEventName } from "@/lib/meet/meet-event-order"
+import type { EventOrderWithHeats } from "@/lib/meet/event-heats"
 
 export type RosterSummaryPdfInput = {
   meetName: string
@@ -25,7 +26,7 @@ export type RosterSummaryPdfInput = {
   iconPng: Uint8Array | null
   request: RosterSummaryPdfRequest
   /** The meet's order of events (already narrowed to the view's session) to draw under the header. */
-  eventOrder?: EventOrder | null
+  eventOrder?: EventOrderWithHeats | null
 }
 
 type RGB = [number, number, number]
@@ -102,6 +103,10 @@ const M = {
   orderRowHeight: px(21),
   orderNumberWidth: px(40),
   orderPadX: px(10),
+  /** From the WOMEN / MEN head to the HEATS head beside it. */
+  orderHeatsGap: px(12),
+  /** A lone session's table, centered: this much wider than a half-page column. */
+  orderSoloScale: 1.15,
 }
 
 const RIGHT_WIDTH = M.deltaWidth + M.timeWidth + M.placeWidth
@@ -693,17 +698,18 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
 
   // ---- order of events: each session a bordered table, Women | Event | Men ----
 
-  function drawOrderOfEvents(order: EventOrder, top: number): number {
+  function drawOrderOfEvents(order: EventOrderWithHeats, top: number): number {
     const sessions = order.sessions.filter((session) => session.rows.length > 0)
     if (sessions.length === 0) return top
     const columns = M.orderMaxColumns
     const gap = M.columnGap
-    const width = columnWidth
+    const width = sessions.length === 1 ? columnWidth * M.orderSoloScale : columnWidth
     const labelled = (label: string) => label.trim().toLowerCase() !== "order of events"
-    const boxHeight = (session: EventOrder["sessions"][number]) =>
+    type Session = EventOrderWithHeats["sessions"][number]
+    const boxHeight = (session: Session) =>
       (labelled(session.label) ? M.orderSessionHeight : 0) + M.orderHeadHeight + session.rows.length * M.orderRowHeight
     /** One session's box at (x, yy). */
-    function drawBox(session: EventOrder["sessions"][number], x: number, yy: number) {
+    function drawBox(session: Session, x: number, yy: number) {
       const height = boxHeight(session)
       let rowTop = yy
       if (labelled(session.label)) {
@@ -729,15 +735,25 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
       const headBaseline = centeredBaseline(rowTop, M.orderHeadHeight, M.seedTagSize)
       const headSpace = px(1)
       setType("bold", M.seedTagSize, INK_TERTIARY)
+      const headWidth = (head: string) => doc.getTextWidth(head) + head.length * headSpace
       doc.text("WOMEN", x + M.orderPadX, headBaseline, { charSpace: headSpace })
       const eventHead = "EVENT"
-      doc.text(eventHead, x + (width - doc.getTextWidth(eventHead) - eventHead.length * headSpace) / 2, headBaseline, {
-        charSpace: headSpace,
-      })
+      doc.text(eventHead, x + (width - headWidth(eventHead)) / 2, headBaseline, { charSpace: headSpace })
       const menHead = "MEN"
-      doc.text(menHead, x + width - M.orderPadX - doc.getTextWidth(menHead) - menHead.length * headSpace, headBaseline, {
-        charSpace: headSpace,
-      })
+      doc.text(menHead, x + width - M.orderPadX - headWidth(menHead), headBaseline, { charSpace: headSpace })
+      // Heat counts, when a heat sheet gives any: a HEATS column inside each event-number column,
+      // the same distance in from both sides.
+      const heatsHead = "HEATS"
+      const hasHeats = session.rows.some((row) => row.womenHeats != null || row.menHeats != null)
+      const heatsInset = M.orderPadX + Math.max(headWidth("WOMEN"), headWidth(menHead)) + M.orderHeatsGap
+      const heatsWidth = headWidth(heatsHead)
+      const womenHeatsCenter = x + heatsInset + heatsWidth / 2
+      const menHeatsCenter = x + width - heatsInset - heatsWidth / 2
+      if (hasHeats) {
+        doc.text(heatsHead, womenHeatsCenter - heatsWidth / 2, headBaseline, { charSpace: headSpace })
+        doc.text(heatsHead, menHeatsCenter - heatsWidth / 2, headBaseline, { charSpace: headSpace })
+      }
+      const eventInset = hasHeats ? heatsInset + heatsWidth + M.orderHeatsGap / 2 : M.orderPadX + M.orderNumberWidth
       rowTop += M.orderHeadHeight
       doc.setDrawColor(...BORDER)
       doc.setLineWidth(0.75)
@@ -753,8 +769,11 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
         setType("bold", M.labelSize, ACCENT)
         if (row.women != null) doc.text(String(row.women), x + M.orderPadX, rowBaseline)
         if (row.men != null) doc.text(String(row.men), x + width - M.orderPadX, rowBaseline, { align: "right" })
+        setType("normal", M.labelSize, INK_SECONDARY)
+        if (row.womenHeats != null) doc.text(String(row.womenHeats), womenHeatsCenter, rowBaseline, { align: "center" })
+        if (row.menHeats != null) doc.text(String(row.menHeats), menHeatsCenter, rowBaseline, { align: "center" })
         setType("normal", M.labelSize, INK)
-        const event = fit(cleanEventName(row.event), width - (M.orderPadX + M.orderNumberWidth) * 2)
+        const event = fit(cleanEventName(row.event), width - eventInset * 2)
         doc.text(event, x + width / 2, rowBaseline, { align: "center" })
         rowTop += M.orderRowHeight
       })
@@ -764,7 +783,7 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
     }
 
     // Down the left column, then the right: split where the columns come out most even, in order.
-    const stackHeight = (list: EventOrder["sessions"]) =>
+    const stackHeight = (list: Session[]) =>
       list.reduce((sum, session, i) => sum + (i > 0 ? M.orderGap : 0) + boxHeight(session), 0)
     let split = sessions.length
     let best = Infinity
@@ -783,8 +802,10 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
       doc.addPage()
       yy = M.margin
     }
+    // A lone session is centered on the page; several fill the columns from the left.
+    const firstX = sessions.length === 1 ? pageLeft + (pageRight - pageLeft - width) / 2 : pageLeft
     stacks.forEach((stack, column) => {
-      const x = pageLeft + column * (width + gap)
+      const x = firstX + column * (width + gap)
       let boxTop = yy
       for (const session of stack) {
         drawBox(session, x, boxTop)

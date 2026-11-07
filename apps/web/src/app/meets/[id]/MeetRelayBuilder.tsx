@@ -67,7 +67,12 @@ type BuildRequest = {
   count: number
   /** What this build loads (marks the lineup unchanged); null keeps the current source. */
   source: Source | null
+  /** A settings change re-timing the lineup on screen: what it was loaded with stays the baseline. */
+  retime?: boolean
 }
+
+/** The lineup last loaded (draft, published or optimal), and the settings it was loaded with. */
+type LoadedLineup = { source: Source; key: string; settings: string }
 
 /** Swim date under a time (marked when it's a relay split); red when outside the preferred range. */
 function SourceDate({ leg }: { leg: Leg }) {
@@ -382,6 +387,7 @@ export default function MeetRelayBuilder({
   onCommit,
   onExit,
   takeoverRequested = false,
+  locked = true,
   onSessionEnd,
 }: {
   meetId: string
@@ -408,6 +414,8 @@ export default function MeetRelayBuilder({
   onExit: (slug: string | null, replaceHistory: boolean) => void
   /** Another coach asked to take over this event: save any changes as a draft and leave. */
   takeoverRequested?: boolean
+  /** This tab holds the event's edit lock; saving and publishing wait for it. */
+  locked?: boolean
   /**
    * The edit session is over (taken over, or idle too long): `draft` holds unsaved changes to
    * save as a draft, or is null when there are none.
@@ -421,6 +429,8 @@ export default function MeetRelayBuilder({
   const publishedTeams = useMemo(() => publishedLineup(data), [data])
   /** A coach-published lineup is live, so saving a draft takes it down. */
   const isPublished = data.published.some((relay) => relay.manual)
+  /** Something is published for the event — from the builder or imported from a sheet. */
+  const hasPublishedLineup = publishedTeams.length > 0
   const draftTeams = pendingDraft(data)?.teams ?? null
 
   const defaultSettings: BuildSettings = {
@@ -459,8 +469,10 @@ export default function MeetRelayBuilder({
   const [adding, setAdding] = useState(0)
   const addAbortRef = useRef<AbortController | null>(null)
   const [result, setResult] = useState<RelayResult | null>(initial)
-  const [loaded, setLoaded] = useState<{ source: Source; key: string } | null>(() =>
-    initial && request.source ? { source: request.source, key: lineupKey(lineupTeamsOf(initial)) } : null
+  const [loaded, setLoaded] = useState<LoadedLineup | null>(() =>
+    initial && request.source
+      ? { source: request.source, key: lineupKey(lineupTeamsOf(initial)), settings: settingsKey(request.settings) }
+      : null
   )
   /** The optimal lineup at the current settings and relay count, to compare against; null = unknown. */
   const [optimalTeams, setOptimalTeams] = useState<LineupTeam[] | null>(() =>
@@ -469,8 +481,8 @@ export default function MeetRelayBuilder({
   const [error, setError] = useState("")
   /** Alternate lists expanded by "Show more", per stroke (medley) or "free". */
   const [expandedAlternates, setExpandedAlternates] = useState<Record<string, boolean>>({})
-  /** Like practices: publishing a draft or taking a published lineup back to draft asks first. */
-  const [confirmPublish, setConfirmPublish] = useState<"publish" | "draft" | null>(null)
+  /** Publishing asks first, unless it's re-publishing the published lineup unchanged. */
+  const [confirmPublish, setConfirmPublish] = useState(false)
   const [loadOpen, setLoadOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
   const [legOrderOpen, setLegOrderOpen] = useState(false)
@@ -503,7 +515,7 @@ export default function MeetRelayBuilder({
 
   useEffect(() => {
     const controller = new AbortController()
-    const { settings: s, fixed, count, source } = request
+    const { settings: s, fixed, count, source, retime } = request
     // First build is already done when opening from a summary suggestion.
     if (initial && request.id === 0) return
     // A full rebuild supersedes any relays still being added.
@@ -562,7 +574,14 @@ export default function MeetRelayBuilder({
         setOptimalTeams(
           res.ok && res.result.teams.length > 0 ? lineupTeamsOf(applyLegOrder(res.result, s.legOrder)) : null
         )
-        if (next && source) setLoaded({ source, key: lineupKey(lineupTeamsOf(next)) })
+        if (next && source) {
+          const key = lineupKey(lineupTeamsOf(next))
+          setLoaded((prev) => ({
+            source,
+            key,
+            settings: retime && prev?.source === source ? prev.settings : settingsKey(s),
+          }))
+        }
       } catch {
         if (!controller.signal.aborted) setError("Something went wrong")
       } finally {
@@ -605,6 +624,7 @@ export default function MeetRelayBuilder({
       fixed: keep && result ? lineupTeamsOf(result) : null,
       count: r.count,
       source: keep ? savedSource : "optimal",
+      retime: keep,
     }))
   }
 
@@ -807,14 +827,23 @@ export default function MeetRelayBuilder({
     )
   }
 
-  function requestDraft() {
-    if (!result || result.teams.length === 0) return
-    if (isPublished) setConfirmPublish("draft")
-    else saveDraft()
-  }
+  /**
+   * The lineup on screen is the published one, swimmers unchanged (times may be re-timed): opened as
+   * published and not edited since, or the same swimmers as what's published.
+   */
+  const showsPublishedLineup =
+    hasPublishedLineup &&
+    result != null &&
+    ((loaded?.source === "published" && !changed) ||
+      lineupKey(lineupTeamsOf(result)) === lineupKey(publishedTeams))
+  /** Opened as published, and neither the lineup nor its settings changed since. */
+  const publishedUnchanged =
+    showsPublishedLineup &&
+    (loaded?.source === "published" && !changed
+      ? settingsKey(settings) === loaded.settings
+      : !settingsChanged)
 
   function saveDraft() {
-    setConfirmPublish(null)
     if (!result || result.teams.length === 0) return
     onCommit(
       { kind: "draft", teams: lineupTeamsOf(result), relayEvent: result.relay, optimal: isLoaded("optimal"), settings },
@@ -826,8 +855,10 @@ export default function MeetRelayBuilder({
   function endSession(reason: "takeover" | "idle") {
     if (sessionEndedRef.current) return
     sessionEndedRef.current = true
+    // The published lineup left as it was (even re-timed with other settings) stays published —
+    // a draft would take it down.
     const draft: RelayCommit | null =
-      dirty && result && result.teams.length > 0
+      dirty && !showsPublishedLineup && result && result.teams.length > 0
         ? { kind: "draft", teams: lineupTeamsOf(result), relayEvent: result.relay, optimal: isLoaded("optimal"), settings }
         : null
     onSessionEnd(reason, draft, guard.leave())
@@ -862,14 +893,14 @@ export default function MeetRelayBuilder({
       return
     }
     setError("")
-    // Republishing an already published lineup just updates it.
-    if (isPublished) publish()
-    else setConfirmPublish("publish")
+    // Re-publishing the published lineup unchanged needs no confirmation; anything else does.
+    if (publishedUnchanged) publish()
+    else setConfirmPublish(true)
   }
 
   function publish() {
     if (hasImportedResults || !result) return
-    setConfirmPublish(null)
+    setConfirmPublish(false)
     onCommit({ kind: "publish", teams: lineupTeamsOf(result), relayEvent: result.relay, settings }, guard.leave())
   }
 
@@ -895,7 +926,7 @@ export default function MeetRelayBuilder({
   }
   const poolIsCustom = settings.excludedIds.length > 0 || settings.addedIds.length > 0
   const editable = adding === 0
-  const canAct = result != null && result.teams.length > 0 && !loading && editable
+  const canAct = result != null && result.teams.length > 0 && !loading && editable && locked
   /** Re-timing a kept lineup (e.g. after a settings change): it stays on screen, dimmed, meanwhile. */
   const retiming = loading && request.fixed != null && result != null && result.teams.length > 0
   const retimingClass = retiming ? "pointer-events-none opacity-60 transition-opacity" : "transition-opacity"
@@ -967,7 +998,7 @@ export default function MeetRelayBuilder({
       <button
         type="button"
         aria-label={saveDraftLabel}
-        onClick={requestDraft}
+        onClick={saveDraft}
         disabled={!canAct}
         className={`${iconButtonClass} border border-fill text-foreground hover:bg-fill-secondary`}
       >
@@ -1586,12 +1617,12 @@ export default function MeetRelayBuilder({
       </Modal>
 
       <Modal
-        open={confirmPublish != null}
-        onClose={() => setConfirmPublish(null)}
-        title={confirmPublish === "draft" ? `Revert ${slot.label} to draft?` : `Publish ${slot.label}?`}
+        open={confirmPublish}
+        onClose={() => setConfirmPublish(false)}
+        title={hasPublishedLineup ? `Update the published ${slot.label}?` : `Publish ${slot.label}?`}
         description={
-          confirmPublish === "draft"
-            ? "This will hide it from athletes until it's published again."
+          hasPublishedLineup
+            ? "Athletes will see the new lineup on the Relays page."
             : "Athletes will see it on the Relays page."
         }
         maxWidth="md"
@@ -1599,17 +1630,17 @@ export default function MeetRelayBuilder({
           <ModalFooter>
             <button
               type="button"
-              onClick={() => setConfirmPublish(null)}
+              onClick={() => setConfirmPublish(false)}
               className="flex-1 rounded-lg border border-border bg-background px-4 py-2.5 text-sm font-medium hover:bg-fill disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="button"
-              onClick={confirmPublish === "draft" ? saveDraft : publish}
+              onClick={publish}
               className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-contrast hover:bg-primary-hover disabled:opacity-50"
             >
-              {confirmPublish === "draft" ? "Revert to Draft" : "Publish"}
+              Publish
             </button>
           </ModalFooter>
         }

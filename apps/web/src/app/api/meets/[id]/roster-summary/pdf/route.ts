@@ -4,7 +4,8 @@ import { getSession } from "@/lib/auth/session"
 import { prisma } from "@/lib/prisma"
 import { loadMeetIconPng } from "@/lib/meet/meet-icon-png"
 import { buildRosterSummaryPdf, parseRosterSummaryPdfRequest } from "@/lib/meet/roster-summary-pdf"
-import { isEventOrder, type EventOrder } from "@/lib/meet/meet-event-order"
+import { isEventOrder } from "@/lib/meet/meet-event-order"
+import { eventOrderWithHeats, type EventOrderWithHeats } from "@/lib/meet/event-heats"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -32,6 +33,8 @@ export async function POST(
       timeZone: true,
       iconUrl: true,
       eventOrder: true,
+      heatSheetSummary: true,
+      finalsHeatSheetSummary: true,
     },
   })
   if (!meet) return NextResponse.json({ error: "Not found" }, { status: 404 })
@@ -39,14 +42,18 @@ export async function POST(
   const request = parseRosterSummaryPdfRequest(await req.json().catch(() => null))
   if (!request) return NextResponse.json({ error: "Invalid roster summary" }, { status: 400 })
 
-  // The order of events the client asked for, narrowed to the session its view is filtered to.
-  let eventOrder: EventOrder | null = null
+  // The order of events the client asked for, narrowed to the session its view is filtered to,
+  // with each event's heat count from the heat sheets.
+  let eventOrder: EventOrderWithHeats | null = null
   if (request.orderOfEvents && isEventOrder(meet.eventOrder)) {
     const session = request.orderOfEvents.session
     const sessions = session
       ? meet.eventOrder.sessions.filter((s) => s.label === session)
       : meet.eventOrder.sessions
-    eventOrder = { sessions: sessions.length > 0 ? sessions : meet.eventOrder.sessions }
+    eventOrder = eventOrderWithHeats(
+      { sessions: sessions.length > 0 ? sessions : meet.eventOrder.sessions },
+      meet
+    )
   }
 
   const iconPng = await loadMeetIconPng(meet.iconUrl)

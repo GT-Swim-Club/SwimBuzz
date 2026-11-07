@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, Fragment, type ReactNode } from "react"
 import Link from "next/link"
 import {
+  alternateLabel,
   eventGenderWord,
   rosterNameFirstLast,
   rosterNamePreferred,
@@ -37,6 +38,7 @@ import {
   compareIndividualEntries,
   dropSeedOnlyAfterResults,
   displaySeedRank,
+  sheetAlternateNumber,
   finalsSeedRank,
   entryDisplaySplits,
   expandIndividualResultRows,
@@ -85,8 +87,7 @@ const summaryHeaderInset = { paddingLeft: SUMMARY_INSET, paddingRight: SUMMARY_I
 function formatHeat(entry: SheetSummary["entries"][number]) {
   // Alternates are finals-only; prelim rows may still carry the flag from merge.
   if (isAlternateRow(entry)) {
-    const rank = displaySeedRank(entry)
-    return rank != null ? `Alt ${rank}` : "Alt"
+    return alternateLabel(sheetAlternateNumber(entry))
   }
   const { heat, heatTotal } = rowHeat(entry)
   if (heat == null || heat < 1) return null

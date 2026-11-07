@@ -1,9 +1,12 @@
 import { parseMeetSheetPdf } from "@/lib/meet/pdf-parser-client"
-import type { SheetSummary, SheetEntry } from "@/lib/meet/meet-sheet-summary"
+import type { EventHeats, SheetSummary, SheetEntry } from "@/lib/meet/meet-sheet-summary"
 import {
   appendSheetSummaryEntries,
   coercePrelimHeatTimedFinalsEntry,
   isSheetSummary,
+  mergeEventHeats,
+  relaySeedAthleteId,
+  withoutSheetRelayLineups,
 } from "@/lib/meet/meet-sheet-summary"
 import {
   buildAthleteLookup,
@@ -40,6 +43,7 @@ type ParsedSheetEntry = {
   relayLetter?: string | null
   gender?: "M" | "F" | "X" | ""
   alternate?: boolean
+  alternateNumber?: number
   relaySwimmers?: Array<{ leg: number; name: string; age?: number }>
 }
 
@@ -49,6 +53,7 @@ export type CachedSheetParse = {
   entries: ParsedSheetEntry[]
   detectedSheetType?: string | null
   meet_name?: string | null
+  eventHeats?: EventHeats
 }
 
 export type CachedSheetParses = Partial<
@@ -64,6 +69,8 @@ type ParsedSheetResult = {
   entries: ParsedSheetEntry[]
   detectedSheetType?: string | null
   meet_name?: string | null
+  /** Heat sheets: every event's heat count, including events with none of our swimmers. */
+  eventHeats?: EventHeats
 }
 
 async function callSheetParser(
@@ -85,6 +92,7 @@ async function callSheetParser(
       course: result.course,
       detectedSheetType: result.detectedSheetType,
       meet_name: result.meet_name,
+      eventHeats: result.eventHeats,
     }
     if (result.entries && result.entries.length > 0) {
       allEntries.push(...result.entries)
@@ -101,6 +109,7 @@ async function callSheetParser(
       course: result.course,
       detectedSheetType: result.detectedSheetType,
       meet_name: result.meet_name,
+      eventHeats: result.eventHeats,
     }
     allEntries.push(...(result.entries ?? []))
   }
@@ -110,6 +119,7 @@ async function callSheetParser(
     course: lastResult?.course ?? "SCY",
     detectedSheetType: lastResult?.detectedSheetType ?? null,
     meet_name: lastResult?.meet_name ?? null,
+    ...(lastResult?.eventHeats ? { eventHeats: lastResult.eventHeats } : {}),
     entries: allEntries,
   }
 }
@@ -142,14 +152,12 @@ export type ParseMeetSheetResult = {
   cachedParse?: CachedSheetParse
 }
 
+/** Individual swimmers' names — relay swimmers aren't imported, so they need no pairing. */
 function collectSheetNames(entries: ParsedSheetEntry[]): string[] {
   const names: string[] = []
   for (const row of entries) {
     if (row.entryType === "individual" && row.name?.trim()) {
       names.push(row.name.trim())
-    }
-    for (const leg of row.relaySwimmers ?? []) {
-      if (leg.name?.trim()) names.push(leg.name.trim())
     }
   }
   return names
@@ -171,13 +179,6 @@ function filterParsedEntriesForPairedNames(
     }
     return false
   })
-}
-
-function relaySeedAthleteId(row: ParsedSheetEntry): string {
-  const gender = row.gender ?? ""
-  const letter = normalizeRelayLetter(row.relayLetter) ?? "A"
-  const seed = row.seedTime ?? row.timeStatus ?? ""
-  return `relay-seed:${row.eventNumber}:${gender}:${letter}:${seed}`
 }
 
 function coerceFinalsSheetEntries(entries: SheetEntry[]): SheetEntry[] {
@@ -244,80 +245,45 @@ function matchSheetToRoster(
         round: row.round,
         startTime: row.startTime,
         alternate: row.alternate || undefined,
+        alternateNumber: row.alternateNumber,
       })
       continue
     }
 
     if (row.entryType === "relay_team") {
-      const relayRound = roundToRelayRound(row.round)
+      // Lineups come only from the relay builder or results — keep just the team's seed,
+      // heat and lane. A listed lineup still has to include one of ours to count as our team.
+      if (
+        row.relaySwimmers?.length &&
+        !row.relaySwimmers.some((leg) => matchAthleteIdFast(leg.name, lookup, nameMappings))
+      ) {
+        continue
+      }
       const gender =
         row.gender === "F" || row.gender === "M" || row.gender === "X"
           ? row.gender
           : undefined
-
-      if (!row.relaySwimmers?.length) {
-        entries.push({
-          athleteId: relaySeedAthleteId(row),
-          athleteName: "Relay",
-          event,
-          eventNumber: row.eventNumber,
-          entryType: "relay_team",
-          seedTime: row.seedTime,
-          timeStatus: row.timeStatus,
-          seedRank: row.seedRank,
-          heat: row.heat,
-          heatTotal: row.heatTotal,
-          lane: row.lane,
-          round: row.round,
-          startTime: row.startTime,
-          relayLetter: normalizeRelayLetter(row.relayLetter),
-          relayRound,
-          gender,
-          alternate: row.alternate || undefined,
-          relaySwimmers: [],
-        })
-        continue
-      }
-
-      const matchedLegs = row.relaySwimmers
-        .map((leg) => {
-          const athleteId = matchAthleteIdFast(leg.name, lookup, nameMappings)
-          if (!athleteId) return null
-          return {
-            leg: leg.leg,
-            name: leg.name,
-            athleteId,
-          }
-        })
-        .filter((leg): leg is NonNullable<typeof leg> => leg !== null)
-
-      if (matchedLegs.length === 0) continue
-
-      const seenAthletes = new Set<string>()
-      for (const leg of matchedLegs) {
-        if (seenAthletes.has(leg.athleteId)) continue
-        seenAthletes.add(leg.athleteId)
-        entries.push({
-          athleteId: leg.athleteId,
-          athleteName: rosterName(leg.athleteId, roster) || leg.name,
-          event,
-          eventNumber: row.eventNumber,
-          entryType: "relay_team",
-          seedTime: row.seedTime,
-          timeStatus: row.timeStatus,
-          seedRank: row.seedRank,
-          heat: row.heat,
-          heatTotal: row.heatTotal,
-          lane: row.lane,
-          round: row.round,
-          startTime: row.startTime,
-          relayLetter: normalizeRelayLetter(row.relayLetter),
-          relayRound,
-          gender,
-          alternate: row.alternate || undefined,
-          relaySwimmers: matchedLegs,
-        })
-      }
+      entries.push({
+        athleteId: relaySeedAthleteId(row),
+        athleteName: "Relay",
+        event,
+        eventNumber: row.eventNumber,
+        entryType: "relay_team",
+        seedTime: row.seedTime,
+        timeStatus: row.timeStatus,
+        seedRank: row.seedRank,
+        heat: row.heat,
+        heatTotal: row.heatTotal,
+        lane: row.lane,
+        round: row.round,
+        startTime: row.startTime,
+        relayLetter: normalizeRelayLetter(row.relayLetter),
+        relayRound: roundToRelayRound(row.round),
+        gender,
+        alternate: row.alternate || undefined,
+        alternateNumber: row.alternateNumber,
+        relaySwimmers: [],
+      })
     }
   }
 
@@ -352,7 +318,13 @@ function toCachedSheetParse(parsed: ParsedSheetResult): CachedSheetParse {
     entries: parsed.entries ?? [],
     detectedSheetType: parsed.detectedSheetType ?? null,
     meet_name: parsed.meet_name ?? null,
+    ...(parsed.eventHeats ? { eventHeats: parsed.eventHeats } : {}),
   }
+}
+
+/** A heat sheet summary with its sheets' heat counts, when it has any. */
+function withEventHeats(summary: SheetSummary, eventHeats: EventHeats): SheetSummary {
+  return Object.keys(eventHeats).length > 0 ? { ...summary, eventHeats } : summary
 }
 
 export async function applyPairedSheetEntries(
@@ -404,9 +376,11 @@ export async function applyPairedSheetEntries(
   if (sheetType === "heat") {
     newEntries = newEntries.map(coercePrelimHeatTimedFinalsEntry)
   }
+  // Drop relay lineups stored by earlier imports along the way.
+  const existing = withoutSheetRelayLineups(existingSummary)
   if (newEntries.length === 0) {
     return {
-      summary: existingSummary,
+      summary: existing,
       sheetNames,
       cachedParse: cachedParse ?? undefined,
     }
@@ -414,7 +388,7 @@ export async function applyPairedSheetEntries(
 
   return {
     summary: jsonSafeSheetSummary(
-      appendSheetSummaryEntries(existingSummary, newEntries)
+      appendSheetSummaryEntries(existing, newEntries)
     ),
     sheetNames,
     cachedParse: toCachedSheetParse({
@@ -511,6 +485,7 @@ export async function resolveHeatSheetSummaries(
   }
 
   let summary: SheetSummary | null = null
+  let eventHeats: EventHeats = {}
   const sheetNames: string[] = []
   const cachedParses: Record<string, CachedSheetParse> = {}
 
@@ -524,6 +499,7 @@ export async function resolveHeatSheetSummaries(
           entries: cached.entries,
           detectedSheetType: cached.detectedSheetType,
           meet_name: cached.meet_name,
+          eventHeats: cached.eventHeats,
         }
       : await callSheetParser(userId, url, "heat", teamCode)
     console.log(`[resolveHeatSheetSummaries] callSheetParser ${cached?.entries ? "(cached)" : ""} in ${Date.now() - parseStart}ms`)
@@ -531,6 +507,7 @@ export async function resolveHeatSheetSummaries(
     const allEntries = parsed.entries ?? []
     sheetNames.push(...collectSheetNames(allEntries))
     cachedParses[url] = toCachedSheetParse({ ...parsed, sheetType: "heat" })
+    eventHeats = mergeEventHeats(eventHeats, parsed.eventHeats)
 
     const matchStart = Date.now()
     const matched = matchSheetToRoster(allEntries, roster, options).map(
@@ -550,7 +527,7 @@ export async function resolveHeatSheetSummaries(
   }
 
   return {
-    summary: summary ? jsonSafeSheetSummary(summary) : null,
+    summary: summary ? jsonSafeSheetSummary(withEventHeats(summary, eventHeats)) : null,
     sheetNames,
     cachedParses,
   }
@@ -577,7 +554,9 @@ export async function applyPairedHeatSheetEntries(
     )
   }
 
-  let summary: SheetSummary = existingSummary
+  // Drop relay lineups stored by earlier imports along the way.
+  let summary: SheetSummary = withoutSheetRelayLineups(existingSummary)
+  let eventHeats: EventHeats = {}
   const sheetNames: string[] = []
   const cachedParses: Record<string, CachedSheetParse> = {}
 
@@ -590,12 +569,14 @@ export async function applyPairedHeatSheetEntries(
           entries: cached.entries,
           detectedSheetType: cached.detectedSheetType,
           meet_name: cached.meet_name,
+          eventHeats: cached.eventHeats,
         }
       : await callSheetParser(userId, url, "heat", teamCode)
     validateParsedSheet("heat", parsed, options)
     const allEntries = parsed.entries ?? []
     sheetNames.push(...collectSheetNames(allEntries))
     cachedParses[url] = toCachedSheetParse({ ...parsed, sheetType: "heat" })
+    eventHeats = mergeEventHeats(eventHeats, parsed.eventHeats)
 
     const filtered = filterParsedEntriesForPairedNames(allEntries, nameMappings)
     const newEntries = matchSheetToRoster(filtered, roster, { nameMappings }).map(
@@ -606,7 +587,7 @@ export async function applyPairedHeatSheetEntries(
   }
 
   return {
-    summary: jsonSafeSheetSummary(summary),
+    summary: jsonSafeSheetSummary(withEventHeats(summary, eventHeats)),
     sheetNames,
     cachedParses,
   }
@@ -632,6 +613,7 @@ export async function resolveFinalsHeatSheetSummaries(
   }
 
   let summary: SheetSummary | null = null
+  let eventHeats: EventHeats = {}
   const sheetNames: string[] = []
   const cachedParses: Record<string, CachedSheetParse> = {}
 
@@ -645,6 +627,7 @@ export async function resolveFinalsHeatSheetSummaries(
         entries: cached.entries,
         detectedSheetType: cached.detectedSheetType,
         meet_name: cached.meet_name,
+        eventHeats: cached.eventHeats,
       }
     } else {
       parsed = await callSheetParser(userId, url, "heat", teamCode)
@@ -655,6 +638,7 @@ export async function resolveFinalsHeatSheetSummaries(
       ...parsed,
       sheetType: "heat",
     })
+    eventHeats = mergeEventHeats(eventHeats, parsed.eventHeats)
 
     const matched = coerceFinalsSheetEntries(
       matchSheetToRoster(parsed.entries ?? [], roster, options)
@@ -672,7 +656,7 @@ export async function resolveFinalsHeatSheetSummaries(
   }
 
   return {
-    summary: summary ? jsonSafeSheetSummary(summary) : null,
+    summary: summary ? jsonSafeSheetSummary(withEventHeats(summary, eventHeats)) : null,
     sheetNames,
     cachedParses,
   }
@@ -699,7 +683,9 @@ export async function applyPairedFinalsHeatSheetEntries(
     )
   }
 
-  let summary: SheetSummary = existingSummary
+  // Drop relay lineups stored by earlier imports along the way.
+  let summary: SheetSummary = withoutSheetRelayLineups(existingSummary)
+  let eventHeats: EventHeats = {}
   const sheetNames: string[] = []
   const cachedParses: Record<string, CachedSheetParse> = {}
 
@@ -713,6 +699,7 @@ export async function applyPairedFinalsHeatSheetEntries(
         entries: cached.entries,
         detectedSheetType: cached.detectedSheetType,
         meet_name: cached.meet_name,
+        eventHeats: cached.eventHeats,
       }
     } else {
       parsed = await callSheetParser(userId, url, "heat", teamCode)
@@ -721,6 +708,7 @@ export async function applyPairedFinalsHeatSheetEntries(
     const allEntries = parsed.entries ?? []
     sheetNames.push(...collectSheetNames(allEntries))
     cachedParses[url] = toCachedSheetParse({ ...parsed, sheetType: "heat" })
+    eventHeats = mergeEventHeats(eventHeats, parsed.eventHeats)
 
     const filtered = filterParsedEntriesForPairedNames(allEntries, nameMappings)
     const newEntries = coerceFinalsSheetEntries(
@@ -731,7 +719,7 @@ export async function applyPairedFinalsHeatSheetEntries(
   }
 
   return {
-    summary: jsonSafeSheetSummary(summary),
+    summary: jsonSafeSheetSummary(withEventHeats(summary, eventHeats)),
     sheetNames,
     cachedParses,
   }

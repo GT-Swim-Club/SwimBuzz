@@ -169,12 +169,17 @@ export default function MeetRelaysWorkspace({
 
   // --- Edit locks ---------------------------------------------------------------------------
   const lockUrl = `/api/meets/${encodeURIComponent(meetId)}/relays/lock`
-  /** This tab's lock on the event whose builder is open. */
-  const [held, setHeld] = useState<{ slug: string; token: string } | null>(null)
+  /**
+   * This tab's lock on the event whose builder is open. The builder opens at once while the lock is
+   * claimed (`token` null until it lands), so opening an event doesn't wait on the server.
+   */
+  const [held, setHeldState] = useState<{ slug: string; token: string | null } | null>(null)
   const heldRef = useRef(held)
-  useEffect(() => {
-    heldRef.current = held
-  }, [held])
+  /** Kept in step with the ref, which async handlers read before the next render. */
+  function setHeld(next: { slug: string; token: string | null } | null) {
+    heldRef.current = next
+    setHeldState(next)
+  }
   /** Someone else is editing the event this tab tried to open: offer to take over. */
   const [takeover, setTakeover] = useState<{ slug: string; lock: RelayEditLockInfo } | null>(null)
   const [takingOver, setTakingOver] = useState(false)
@@ -188,29 +193,68 @@ export default function MeetRelaysWorkspace({
 
   const slotLabel = (slug: string) => slots.find((d) => d.slot.slug === slug)?.slot.label ?? "this relay"
 
-  function releaseLock(lock: { slug: string; token: string }) {
+  /**
+   * Events whose lock this tab still has but is giving up (a save landing, then the release). The
+   * lock list still shows them as ours meanwhile — not "Open in another tab".
+   */
+  const [releasing, setReleasing] = useState<string[]>([])
+  /** Bumped once a release lands, to refresh the lock list right away. */
+  const [locksVersion, setLocksVersion] = useState(0)
+
+  function markReleasing(slug: string) {
+    setReleasing((current) => (current.includes(slug) ? current : [...current, slug]))
+  }
+
+  function releaseLock(lock: { slug: string; token: string | null }) {
+    if (!lock.token) return
+    markReleasing(lock.slug)
     void fetch(`${lockUrl}?slot=${encodeURIComponent(lock.slug)}`, {
       method: "DELETE",
       keepalive: true,
       headers: { [RELAY_EDIT_LOCK_TOKEN_HEADER]: lock.token },
-    }).catch(() => undefined)
+    })
+      .catch(() => undefined)
+      .finally(() => {
+        // Drop it from the list now rather than when the refetch lands, or it'd flash as another tab's.
+        setLocks((current) => current.filter((held) => !(held.slot === lock.slug && held.lockedByMe)))
+        setReleasing((current) => current.filter((slug) => slug !== lock.slug))
+        setLocksVersion((version) => version + 1)
+      })
   }
 
   /** Events this tab is claiming right now, so a double request can't trip over its own lock. */
   const acquiringRef = useRef(new Set<string>())
 
-  /** Claim an event's lock, then show its builder; if someone else has it, offer to take over. */
+  /**
+   * Show an event's builder and claim its lock. A plain open shows the builder at once and backs out
+   * to the takeover dialog if someone else has it; a takeover waits for the lock first.
+   */
   async function openEvent(slug: string, { replace = false, force = false } = {}) {
     const current = heldRef.current
     if (current?.slug === slug) {
       go(slug, replace)
       return
     }
+    if (!force) {
+      // Switching events from the builder: the previous one is free again.
+      if (current) releaseLock(current)
+      setHeld({ slug, token: null })
+      setTakeover(null)
+      setNotice(null)
+      go(slug, replace)
+    }
+    // A claim already in flight (e.g. reopened right after leaving) lands on the builder shown above.
     if (acquiringRef.current.has(slug)) return
     acquiringRef.current.add(slug)
     if (force) {
       setTakingOver(true)
       setTakeoverError(null)
+    }
+    /** Back to the summary if this open is still the builder on screen. */
+    const backOut = () => {
+      if (force || heldRef.current?.slug !== slug || heldRef.current.token) return
+      setHeld(null)
+      go(null, true)
     }
     try {
       const res = await fetch(lockUrl, {
@@ -224,24 +268,32 @@ export default function MeetRelaysWorkspace({
       }
       if (!res.ok || !body.token) {
         if (body.lock && !force) {
+          backOut()
           setTakeover({ slug, lock: body.lock })
-          // Opened by URL (a reload or Back): show the summary under the dialog.
-          if (new URLSearchParams(window.location.search).get("event") === slug) go(null, true)
           return
         }
         throw new Error(body.error ?? "Couldn't open this relay")
       }
-      // Switching events from the builder: the previous one is free again.
-      if (current) releaseLock(current)
-      setHeld({ slug, token: body.token })
-      setTakeover(null)
-      setTakeoverBy(null)
-      setNotice(null)
-      go(slug, replace)
+      if (force) {
+        if (current) releaseLock(current)
+        setHeld({ slug, token: body.token })
+        setTakeover(null)
+        setTakeoverBy(null)
+        setNotice(null)
+        go(slug, replace)
+      } else if (heldRef.current?.slug === slug && !heldRef.current.token) {
+        setHeld({ slug, token: body.token })
+      } else {
+        // Left the builder before the lock landed.
+        releaseLock({ slug, token: body.token })
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Something went wrong"
       if (force) setTakeoverError(message)
-      else setSaveError(message)
+      else {
+        backOut()
+        setSaveError(message)
+      }
     } finally {
       acquiringRef.current.delete(slug)
       if (force) setTakingOver(false)
@@ -263,6 +315,7 @@ export default function MeetRelaysWorkspace({
   function commit(data: RelaySlotData, change: RelayCommit, replace: boolean) {
     // The save carries this tab's lock, which is released only once it lands.
     const lock = heldRef.current?.slug === data.slot.slug ? heldRef.current : null
+    if (lock) markReleasing(lock.slug)
     setHeld(null)
     show(data, change)
     void persist(data, change, true, lock?.token).finally(() => {
@@ -310,8 +363,8 @@ export default function MeetRelaysWorkspace({
 
   // While editing: renew the lock, and hand over when someone takes over or the lock is lost.
   useEffect(() => {
-    if (!held) return
-    const lock = held
+    if (!held?.token) return
+    const lock = { slug: held.slug, token: held.token }
     async function beat() {
       const res = await fetch(lockUrl, {
         method: "PATCH",
@@ -345,7 +398,7 @@ export default function MeetRelaysWorkspace({
       window.removeEventListener("pagehide", onPageHide)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [held])
+  }, [held?.slug, held?.token])
 
   // Leaving the page another way (a nav link) frees the event. Deferred so React Strict Mode's
   // remount in development doesn't drop the lock.
@@ -362,7 +415,8 @@ export default function MeetRelaysWorkspace({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // On the summary: who is editing which event.
+  // On the summary: who is editing which event. Re-run when a release lands, which also drops any
+  // poll still in flight from before it.
   useEffect(() => {
     if (selectedSlug) return
     let cancelled = false
@@ -379,11 +433,13 @@ export default function MeetRelaysWorkspace({
       cancelled = true
       window.clearInterval(timer)
     }
-  }, [selectedSlug, lockUrl])
+  }, [selectedSlug, lockUrl, locksVersion])
 
   /** Another session's lock on an event — not this tab's own, still releasing after a save. */
   const editorOf = (slug: string) =>
-    locks.find((lock) => lock.slot === slug && !(lock.lockedByMe && saving.includes(slug))) ?? null
+    locks.find(
+      (lock) => lock.slot === slug && !(lock.lockedByMe && (releasing.includes(slug) || saving.includes(slug)))
+    ) ?? null
 
   // Kept across builder visits so neither the summary nor the builder re-runs the solver.
   const [builds, setBuilds] = useState<Record<string, Build>>({})
@@ -516,6 +572,7 @@ export default function MeetRelaysWorkspace({
           onCommit={(change, replace) => commit(selected, change, replace)}
           onExit={(slug, replace) => (slug ? void openEvent(slug, { replace }) : leave(replace))}
           takeoverRequested={takeoverBy != null}
+          locked={held?.token != null}
           onSessionEnd={(reason, draft, replace) => endSession(selected, reason, draft, replace)}
         />
         {takeoverModal}

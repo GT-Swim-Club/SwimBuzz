@@ -55,7 +55,15 @@ export function buildRelayLineups(
     athletes.map((a) => [a.id, a.gender === Gender.F ? ("F" as const) : ("M" as const)])
   )
 
-  return uniqueRelayTeams(summary.entries, athleteGenders).map((entry, index) => {
+  // A sheet's relay seed row lists no swimmers — it isn't a lineup until one is published or swum.
+  const teams = uniqueRelayTeams(summary.entries, athleteGenders).filter(
+    (entry) =>
+      (entry.relaySwimmers?.length ?? 0) > 0 ||
+      Boolean(relayTeamTime(entry)) ||
+      relayTeamPlace(entry) != null ||
+      Boolean(entry.resultStatus || entry.prelimStatus || entry.finalStatus)
+  )
+  return teams.map((entry, index) => {
     const gender = effectiveRelayGender(entry, athleteGenders)
     const round = effectiveRelayRound(entry)
     const medley = /\bmedley\b/i.test(entry.event)

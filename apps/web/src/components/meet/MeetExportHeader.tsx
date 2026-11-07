@@ -16,6 +16,11 @@ const ICON_OVERSHOOT_PX = TITLE_PX * MEET_HEADER.iconOvershoot
 const MEET_NAME_PX = 42
 /** As small as a long meet name shrinks to fit the export's width before it wraps instead. */
 const MEET_NAME_MIN_PX = 26
+/**
+ * The most of the header's width the icon takes. Otherwise a narrow export loops: the text wraps,
+ * the icon grows to its height, and the text gets narrower still.
+ */
+const ICON_MAX_WIDTH_FRACTION = 0.3
 /** Details icons at the text size, pulled in to the text's capitals so they don't widen the gaps. */
 const DETAILS_ICON_STYLE = { width: DETAILS_PX, height: DETAILS_PX, margin: `${-DETAILS_PX * 0.15}px 0` }
 
@@ -39,16 +44,22 @@ export default function MeetExportHeader({
 }) {
   // The icon spans the header's three rows, reaching past them a little since a round logo that
   // only touches a line looks short of it. Re-measured as the fonts load and change the rows.
+  const headerRef = useRef<HTMLDivElement>(null)
   const headerTextRef = useRef<HTMLDivElement>(null)
   const [iconSize, setIconSize] = useState<number | null>(null)
   useLayoutEffect(() => {
+    const header = headerRef.current
     const text = headerTextRef.current
-    if (!text) return
-    // offsetHeight ignores a scaled-down preview's transform; the rect keeps the fraction otherwise.
-    const measure = () =>
-      setIconSize(Math.max(text.offsetHeight, text.getBoundingClientRect().height) + ICON_OVERSHOOT_PX * 2)
+    if (!header || !text) return
+    // offsetHeight/Width ignore a scaled-down preview's transform; the rect keeps the fraction otherwise.
+    const measure = () => {
+      const height = Math.max(text.offsetHeight, text.getBoundingClientRect().height) + ICON_OVERSHOOT_PX * 2
+      const width = Math.max(header.offsetWidth, header.getBoundingClientRect().width)
+      setIconSize(width > 0 ? Math.min(height, width * ICON_MAX_WIDTH_FRACTION) : height)
+    }
     measure()
     const observer = new ResizeObserver(measure)
+    observer.observe(header)
     observer.observe(text)
     return () => observer.disconnect()
   }, [])
@@ -86,7 +97,7 @@ export default function MeetExportHeader({
 
   return (
     // Width 0 growing to the container's: the content below sets the export's width, not the header.
-    <div className="flex items-start" style={{ gap: TITLE_PX * MEET_HEADER.iconGap, width: 0, minWidth: "100%" }}>
+    <div ref={headerRef} className="flex items-start" style={{ gap: TITLE_PX * MEET_HEADER.iconGap, width: 0, minWidth: "100%" }}>
       {iconUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -112,7 +123,7 @@ export default function MeetExportHeader({
           className="flex flex-wrap items-center gap-x-5 gap-y-2 text-foreground-secondary"
           style={{ fontSize: DETAILS_PX, marginTop: TITLE_PX * MEET_HEADER.gapBelowTitle }}
         >
-          <span className="flex items-center gap-1.5">
+          <span className="flex items-center gap-1.5 whitespace-nowrap">
             <InfoIcon kind="calendar" style={DETAILS_ICON_STYLE} />
             <span className={TRIM_TO_CAPS}>{details.date}</span>
           </span>

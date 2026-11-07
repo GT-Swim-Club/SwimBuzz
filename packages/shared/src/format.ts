@@ -357,3 +357,13 @@ export function formatTime(ms: number): string {
   const seconds = (totalSeconds % 60).toFixed(2).padStart(5, "0")
   return minutes > 0 ? `${minutes}:${seconds}` : `${seconds}`
 }
+
+/** A finals alternate's place in line: "1st Alternate", or "Alternate" when it's unknown. */
+export function alternateLabel(alternateNumber: number | null | undefined): string {
+  if (alternateNumber == null || alternateNumber < 1) return "Alternate"
+  const mod100 = alternateNumber % 100
+  const mod10 = alternateNumber % 10
+  const suffix =
+    mod100 >= 11 && mod100 <= 13 ? "th" : mod10 === 1 ? "st" : mod10 === 2 ? "nd" : mod10 === 3 ? "rd" : "th"
+  return `${alternateNumber}${suffix} Alternate`
+}

@@ -102,10 +102,9 @@ export async function acquireRelayEditLock(
   userId: string,
   opts: { force?: boolean } = {}
 ): Promise<RelayEditLockInfo> {
-  const existing = await loadLock(meetId, slot)
+  // Only a takeover needs the current lock up front; a plain claim just tries to create it.
+  const existing = opts.force ? await loadLock(meetId, slot) : null
   if (existing && isActive(existing)) {
-    const info = serialize(existing, userId)
-    if (!opts.force) throw new RelayEditLockError(conflictMessage(info), 409, info)
 
     // Stored on the row (not in memory) so the holder's heartbeat sees it on any server instance.
     await prisma.relayEditLock.updateMany({
@@ -142,6 +141,10 @@ export async function acquireRelayEditLock(
     try {
       await prisma.relayEditLock.create({ data: { meetId, slot, ...data } })
     } catch (err) {
+      // No such meet.
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2003") {
+        throw new RelayEditLockError("Not found", 404, unlocked(slot))
+      }
       if (!(err instanceof Prisma.PrismaClientKnownRequestError) || err.code !== "P2002") throw err
       const latest = await loadLock(meetId, slot)
       const info = latest ? serialize(latest, userId) : unlocked(slot)

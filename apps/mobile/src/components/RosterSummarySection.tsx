@@ -6,6 +6,7 @@ import * as Sharing from "expo-sharing"
 import { File, Paths } from "expo-file-system"
 import { captureRef } from "react-native-view-shot"
 import {
+  alternateLabel,
   formatPoints,
   eventGenderWord,
   roundFilterIncludes,
@@ -87,6 +88,8 @@ export type RosterSummaryEntry = {
   /** A relay leg 1 split as its own row; shown on the relay's row instead. */
   isRelayLeadoff?: boolean
   alternate?: boolean
+  /** An alternate's place in line (1st, 2nd alternate). */
+  alternateNumber?: number
   rosterOnly?: boolean
   relayLetter?: string | null
   relayRound?: string
@@ -105,7 +108,7 @@ export type RosterSummaryEntry = {
 
 /** Heat & lane — for that round's swim when the view is filtered to a prelims or finals session. */
 function formatHeatLane(entry: RosterSummaryEntry, round?: SessionRound | null): string | null {
-  if (entry.alternate) return "Alt"
+  if (entry.alternate) return alternateLabel(entry.alternateNumber)
   const { heat, heatTotal, lane } = heatLaneFor(entry, round)
   const parts: string[] = []
   if (heat != null && heat > 0) {

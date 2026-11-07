@@ -12,16 +12,11 @@ import {
   type CachedSheetParses,
   type SheetMatchOptions,
 } from "@/lib/meet/meet-sheet-parse"
-import { isSheetSummary, type SheetEntry } from "@/lib/meet/meet-sheet-summary"
-import {
-  effectiveRelayGender,
-  isRelayResultsSummary,
-  relayTeamKey,
-} from "@/lib/meet/relay-results"
+import { isSheetSummary } from "@/lib/meet/meet-sheet-summary"
 import { isEditableSignupSheetSeed } from "@/lib/meet/meet-signup"
 import type { NameConfirmation, RosterPairingOption } from "@/lib/meet/meet-import"
 import { MeetImportValidationError } from "@/lib/meet/meet-import-validate"
-import { Gender, Prisma } from "@prisma/client"
+import { Prisma } from "@prisma/client"
 import {
   normalizeFinalsHeatSheetUrls,
   normalizeHeatSheetUrls,
@@ -137,55 +132,6 @@ function sheetUrlsChanged(
   return existing.some((link, index) => link.url !== next[index]?.url)
 }
 
-const SHEET_SUMMARY_KEYS = [
-  "psychSheetSummary",
-  "heatSheetSummary",
-  "finalsHeatSheetSummary",
-  "entriesSheetSummary",
-] as const
-
-/**
- * Relay lineups published from the builder, minus those a just-imported sheet lists a lineup for
- * (same event, letter and gender) — the newer sheet replaces them. Null when none are dropped.
- */
-async function relayResultsWithoutSheetLineups(
-  relayResultsSummary: unknown,
-  data: Record<string, unknown>,
-  season: string
-): Promise<Prisma.InputJsonValue | null> {
-  if (!isRelayResultsSummary(relayResultsSummary)) return null
-  const published = relayResultsSummary.entries.filter((e) => e.manual === true)
-  if (published.length === 0) return null
-
-  const sheetRelays = SHEET_SUMMARY_KEYS.flatMap((key) => {
-    const summary = key in data ? data[key] : null
-    return isSheetSummary(summary)
-      ? summary.entries.filter((e) => e.entryType === "relay_team" && e.relaySwimmers?.length)
-      : []
-  })
-  if (sheetRelays.length === 0) return null
-
-  const athletes = await prisma.athlete.findMany({
-    where: { seasons: { has: season } },
-    select: { id: true, gender: true },
-  })
-  const athleteGenders = new Map(
-    athletes.map((a) => [a.id, a.gender === Gender.F ? ("F" as const) : ("M" as const)])
-  )
-  const teamKey = (entry: SheetEntry) => {
-    const gender = effectiveRelayGender(entry, athleteGenders)
-    return gender ? relayTeamKey(entry.event, entry.relayLetter, "", gender) : null
-  }
-  const listed = new Set(sheetRelays.map(teamKey).filter((key) => key != null))
-  const kept = relayResultsSummary.entries.filter((e) => {
-    if (e.manual !== true) return true
-    const key = teamKey(e)
-    return key == null || !listed.has(key)
-  })
-  if (kept.length === relayResultsSummary.entries.length) return null
-  return JSON.parse(JSON.stringify({ entries: kept })) as Prisma.InputJsonValue
-}
-
 export async function attachSheetSummaries(
   userId: string,
   existing: {
@@ -202,7 +148,6 @@ export async function attachSheetSummaries(
     heatSheetSummary: unknown
     finalsHeatSheetSummary?: unknown
     entriesSheetSummary: unknown
-    relayResultsSummary?: unknown
   },
   data: Record<string, unknown>,
   matchOptions: SheetMatchOptions = {}
@@ -521,14 +466,6 @@ export async function attachSheetSummaries(
   // takes precedence. If the entries sheet itself was just resolved above we use
   // that; otherwise we fall back to the existing DB value.
   if (sheetImported) {
-    // Before the strip below rewrites entriesSheetSummary: only newly parsed sheets are in `data`.
-    const relayResults = await relayResultsWithoutSheetLineups(
-      existing.relayResultsSummary,
-      data,
-      existing.season
-    )
-    if (relayResults) data.relayResultsSummary = relayResults
-
     const currentEntries =
       "entriesSheetSummary" in data
         ? data.entriesSheetSummary

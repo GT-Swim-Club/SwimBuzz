@@ -12,6 +12,8 @@ import { EventHeader, SummaryCard, publishedSummaryCards } from "./RelaySummary"
 
 /** Breathing room added to the widest card so names don't sit against the border. */
 const EXTRA_COLUMN_PX = 24
+/** As narrow as the image gets with only an event or two, so the meet header has room (like mobile's). */
+const MIN_EXPORT_WIDTH_PX = 640
 
 /** Off-screen copy of the published relays for PNG export. Not shown in the page layout. */
 export default function RelaysExportCapture({
@@ -48,7 +50,10 @@ export default function RelaysExportCapture({
   }, [events, columns])
 
   return (
-    <div className="flex w-fit flex-col gap-6 bg-background p-8 text-foreground">
+    <div
+      className="flex w-fit flex-col gap-6 bg-background p-8 text-foreground"
+      style={{ minWidth: MIN_EXPORT_WIDTH_PX }}
+    >
       <MeetExportHeader eyebrow="Relays" meetName={meetName} details={details} iconUrl={iconUrl} />
       <div ref={gridRef} className="grid w-fit items-start gap-x-4 gap-y-5">
         {rows.flat().map((event, i) =>

@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
 import {
@@ -18,13 +17,12 @@ export const maxDuration = 30
 /** Relay slot slugs look like "men-200-medley-relay". */
 const SLOT_PATTERN = /^[a-z0-9-]{1,80}$/
 
-async function requireStaff(id: string) {
+/** Staff only. No meet lookup: locks are keyed by meet, and claiming one for no meet fails anyway. */
+async function requireStaff() {
   const session = await getSession()
   if (!session || !isStaffRole(session.user.role)) {
     return { response: NextResponse.json({ error: "Forbidden" }, { status: 403 }) } as const
   }
-  const meet = await prisma.meet.findUnique({ where: { id }, select: { id: true } })
-  if (!meet) return { response: NextResponse.json({ error: "Not found" }, { status: 404 }) } as const
   return { userId: session.user.id } as const
 }
 
@@ -42,7 +40,7 @@ function lockErrorResponse(err: unknown) {
 /** Who is editing which relay event at this meet. */
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const auth = await requireStaff(id)
+  const auth = await requireStaff()
   if ("response" in auth) return auth.response
   return NextResponse.json({ locks: await listRelayEditLocks(id, auth.userId) })
 }
@@ -50,7 +48,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 /** Start editing a relay event: `{ slot, force? }`. 409 with the current lock when someone else is. */
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const auth = await requireStaff(id)
+  const auth = await requireStaff()
   if ("response" in auth) return auth.response
   const body = (await req.json().catch(() => null)) as { slot?: unknown; force?: unknown } | null
   const slot = slotFrom(body?.slot)
@@ -65,7 +63,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 /** Heartbeat: `{ slot, token }`. Renews the lock and says whether someone asked to take over. */
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const auth = await requireStaff(id)
+  const auth = await requireStaff()
   if ("response" in auth) return auth.response
   const body = (await req.json().catch(() => null)) as { slot?: unknown; token?: unknown } | null
   const slot = slotFrom(body?.slot)
@@ -81,7 +79,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 /** Stop editing: `?slot=` with the session token header. */
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const auth = await requireStaff(id)
+  const auth = await requireStaff()
   if ("response" in auth) return auth.response
   const slot = slotFrom(new URL(req.url).searchParams.get("slot"))
   if (!slot) return NextResponse.json({ error: "Relay event is required" }, { status: 400 })

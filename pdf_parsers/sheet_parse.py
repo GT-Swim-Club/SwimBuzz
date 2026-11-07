@@ -238,9 +238,10 @@ HEAT_HEADER = re.compile(
     r"(?:\s+Starts\s+at\s+([\d:]+\s*[AP]M))?",
     re.I,
 )
-# A/B/C/D finals programs: "Heat 1 C - Final", "Heat 3 A - Final"
+# A/B/C/D finals programs: "Heat 1 C - Final", "Heat 3 A - Final Starts at 06:00 PM"
 HEAT_ABC_FINAL = re.compile(
-    r"Heat\s+(\d+)\s+([ABCD])\s*-\s*Finals?",
+    r"Heat\s+(\d+)\s+([ABCD])\s*-\s*Finals?"
+    r"(?:\s+Starts\s+at\s+([\d:]+\s*[AP]M))?",
     re.I,
 )
 MEET_PROGRAM_SESSION = re.compile(
@@ -507,8 +508,9 @@ def _parse_heat_with_event(line: str) -> tuple[dict[str, Any], dict[str, Any]] |
     if heat_total_m and int(heat_total_m.group(1)) == int(heat_num):
         heat["heatTotal"] = int(heat_total_m.group(2))
         heat["round"] = heat_total_m.group(3).lower().replace(" ", "_")
-    elif HEAT_ABC_FINAL.match(line[match.end():].strip()):
+    elif abc := HEAT_ABC_FINAL.match(line[match.end():].strip()):
         heat["round"] = "finals"
+        heat["startTime"] = abc.group(3)
     return event, heat
 
 
@@ -577,7 +579,8 @@ def _build_individual_entry(
         entry["seedTime"] = time_token
 
     if alternate:
-        entry["seedRank"] = int(rank_or_lane)
+        # Its place in line; its seed rank follows everyone seeded in the final (set later).
+        entry["alternateNumber"] = int(rank_or_lane)
         entry["alternate"] = True
         entry["round"] = (heat or {}).get("round") or "finals"
     elif sheet_type == "psych" or not heat:
@@ -675,7 +678,8 @@ def _parse_relay_team(
             entry["timeStatus"] = status_m.group(1).upper()
 
     if alternate:
-        entry["seedRank"] = int(rank_or_lane)
+        # Its place in line; its seed rank follows everyone seeded in the final (set later).
+        entry["alternateNumber"] = int(rank_or_lane)
         entry["alternate"] = True
         entry["round"] = (heat or {}).get("round") or "finals"
     elif sheet_type == "psych" or not heat:
@@ -1569,12 +1573,12 @@ def _parse_heat_header(line: str) -> dict[str, Any] | None:
         }
     abc = HEAT_ABC_FINAL.search(line)
     if abc:
-        heat_num, _letter = abc.groups()
+        heat_num, _letter, start_time = abc.groups()
         return {
             "heat": int(heat_num),
             "heatTotal": None,
             "round": "finals",
-            "startTime": None,
+            "startTime": start_time,
         }
     return None
 
@@ -1630,9 +1634,21 @@ def _backfill_heat_totals(
             entry["heatTotal"] = total
 
 
+def _event_heat_counts(
+    event_heat_totals: dict[int, int],
+    event_max_heat: dict[int, int],
+) -> dict[str, int]:
+    """Heats in every event the sheet lists, ours or not: its "of N" total, else its highest heat."""
+    return {
+        str(event_num): event_heat_totals.get(event_num) or event_max_heat[event_num]
+        for event_num in sorted(set(event_heat_totals) | set(event_max_heat))
+        if (event_heat_totals.get(event_num) or event_max_heat.get(event_num))
+    }
+
+
 def _parse_usms_sheet_pages(
     pdf: Any, sheet_type: str, meet_name: str | None = None
-) -> list[dict[str, Any]]:
+) -> tuple[list[dict[str, Any]], dict[str, int]]:
     """Read columns left-to-right, top-to-bottom, with one current event (and heat).
 
     Hy-Tek multi-column psych and meet-program sheets flow an event across
@@ -1775,11 +1791,11 @@ def _parse_usms_sheet_pages(
                 ):
                     entries.append(individual)
 
-    if sheet_type == "heat":
-        _backfill_heat_totals(entries, event_heat_totals, event_max_heat)
-        _assign_seed_ranks_from_event_times(entries, event_seed_times)
-
-    return entries
+    if sheet_type != "heat":
+        return entries, {}
+    _backfill_heat_totals(entries, event_heat_totals, event_max_heat)
+    _assign_seed_ranks_from_event_times(entries, event_seed_times)
+    return entries, _event_heat_counts(event_heat_totals, event_max_heat)
 
 
 def _extract_lines(pdf: Any, sheet_type: str) -> list[str]:
@@ -1835,7 +1851,7 @@ def _assign_seed_ranks_from_event_times(
     entries: list[dict[str, Any]],
     buckets: dict[str, list[str]],
 ) -> None:
-    """Rank each entry's seed among every seed in its event (all teams, alternates aside)."""
+    """Rank each entry's seed among every seed in its event (all teams), alternates after them."""
     ms_by_bucket: dict[str, list[float]] = {
         key: [ms for token in times if (ms := _seed_time_ms(token)) is not None]
         for key, times in buckets.items()
@@ -1866,6 +1882,13 @@ def _assign_seed_ranks_from_event_times(
 
     for entry in entries:
         if entry.get("seedRank"):
+            continue
+        if entry.get("alternate"):
+            # Alternates rank after everyone seeded in the final, in their listed order.
+            key = _event_seed_bucket(entry)
+            seeded = max(len(buckets.get(key, [])), len(ms_by_bucket.get(key, [])))
+            if seeded and entry.get("alternateNumber"):
+                entry["seedRank"] = seeded + entry["alternateNumber"]
             continue
         ms = _seed_time_ms(entry.get("seedTime"))
         if ms is None:
@@ -1911,7 +1934,7 @@ def parse_sheet_pdf_bytes(
         usms_multicol = _is_usms_multicol(all_text)
 
         if usms_multicol:
-            entries = _parse_usms_sheet_pages(pdf, parse_as, meet_name)
+            entries, event_heats = _parse_usms_sheet_pages(pdf, parse_as, meet_name)
             if entries:
                 return {
                     "sheetType": parse_as,
@@ -1919,6 +1942,7 @@ def parse_sheet_pdf_bytes(
                     "meet_name": meet_name,
                     "course": course,
                     "entries": entries,
+                    **({"eventHeats": event_heats} if parse_as == "heat" else {}),
                 }
 
         lines = _extract_lines(pdf, parse_as)
@@ -2091,4 +2115,9 @@ def parse_sheet_pdf_bytes(
         "meet_name": meet_name,
         "course": course,
         "entries": entries,
+        **(
+            {"eventHeats": _event_heat_counts(event_heat_totals, event_max_heat)}
+            if parse_as == "heat"
+            else {}
+        ),
     }

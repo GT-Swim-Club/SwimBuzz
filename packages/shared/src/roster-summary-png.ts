@@ -5,9 +5,10 @@
 
 import type { RosterSummaryPdfRow, RosterSummaryPdfSection } from "./roster-summary-pdf"
 
-/** About how many rows' height a column holds before another column is added. */
-const ROWS_PER_COLUMN = 18
 const MAX_COLUMNS = 3
+/** A column's width, and the meet header plus padding's height, in row heights (as drawn). */
+const COLUMN_WIDTH_ROWS = 20
+const HEADER_ROWS = 5.5
 
 /** A row's height in label lines: the label, then a line each for meta / start time and per two legs. */
 function rowWeight(row: RosterSummaryPdfRow): number {
@@ -20,15 +21,30 @@ function sectionWeight(section: RosterSummaryPdfSection): number {
   return 1.4 + section.rows.reduce((sum, row) => sum + rowWeight(row), 0)
 }
 
+/** How many columns make the image closest to square — never a wide strip of short columns. */
+function columnCount(total: number, sections: number): number {
+  let best = 1
+  let bestDistance = Infinity
+  for (let count = 1; count <= Math.min(MAX_COLUMNS, sections); count++) {
+    const aspect = (count * COLUMN_WIDTH_ROWS) / (HEADER_ROWS + total / count)
+    const distance = Math.abs(Math.log(aspect))
+    if (distance < bestDistance) {
+      best = count
+      bestDistance = distance
+    }
+  }
+  return best
+}
+
 /**
- * The sections split, in order, into columns of about equal height: one column for a short list,
- * up to three for a long one. Reading order runs down each column, then across.
+ * The sections split, in order, into columns of about equal height, as many (up to three) as keep
+ * the image about square. Reading order runs down each column, then across.
  */
 export function rosterSummaryPngColumns(sections: RosterSummaryPdfSection[]): RosterSummaryPdfSection[][] {
   if (sections.length === 0) return []
   const weights = sections.map(sectionWeight)
   const total = weights.reduce((a, b) => a + b, 0)
-  const count = Math.max(1, Math.min(MAX_COLUMNS, sections.length, Math.ceil(total / ROWS_PER_COLUMN)))
+  const count = columnCount(total, sections.length)
   const target = total / count
   const columns: RosterSummaryPdfSection[][] = [[]]
   let used = 0

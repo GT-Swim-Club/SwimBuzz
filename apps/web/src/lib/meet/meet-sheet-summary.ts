@@ -94,6 +94,8 @@ export type SheetEntry = {
   manual?: boolean
   /** Finals heat-sheet alternate (not a scored heat/lane). */
   alternate?: boolean
+  /** An alternate's place in line (1st, 2nd alternate); its seedRank follows the final's seeds. */
+  alternateNumber?: number
   /** Athlete on meet roster without entering an event. */
   rosterOnly?: boolean
   /** Seed created by a sign-up sheet import — replaced wholesale on re-import. */
@@ -121,10 +123,27 @@ export type ResultSplit = {
   splitTime: string
 }
 
+/** Heats in every event a heat sheet lists, ours or not, by event number ("5" → 25). */
+export type EventHeats = Record<string, number>
+
 export type SheetSummary = {
   sheetType: "psych" | "heat"
   course: string
   entries: SheetEntry[]
+  /** Heat sheets only: each event's heat count, from every imported sheet. */
+  eventHeats?: EventHeats
+}
+
+/** Two sheets' heat counts together; where both list an event, the larger count. */
+export function mergeEventHeats(
+  a: EventHeats | null | undefined,
+  b: EventHeats | null | undefined
+): EventHeats {
+  const merged: EventHeats = { ...(a ?? {}) }
+  for (const [eventNumber, heats] of Object.entries(b ?? {})) {
+    merged[eventNumber] = Math.max(merged[eventNumber] ?? 0, heats)
+  }
+  return merged
 }
 
 export type MeetResultEntry = {
@@ -218,8 +237,20 @@ export function finalsSeedRank(
   return rank != null && rank > 0 ? rank : undefined
 }
 
+/** Imported before alternateNumber: its seed rank held its place in line, not a seed rank. */
+function isLegacyAlternate(entry: SheetEntry): boolean {
+  return Boolean(entry.alternate) && entry.alternateNumber == null
+}
+
+/** An alternate's place in line (1st, 2nd alternate). */
+export function sheetAlternateNumber(entry: SheetEntry): number | undefined {
+  if (!isLegacyAlternate(entry)) return entry.alternateNumber
+  return finalsSeedRank(entry) ?? entry.seedRank
+}
+
 /** Seed rank shown for a roster row. Finals use the finals heat-sheet rank only. */
 export function displaySeedRank(entry: SheetEntry): number | undefined {
+  if (isLegacyAlternate(entry)) return undefined
   if (entry.resultRound === "F" || effectiveRelayRound(entry) === "F") {
     return finalsSeedRank(entry)
   }
@@ -855,6 +886,45 @@ export function isSheetSummary(value: unknown): value is SheetSummary {
   )
 }
 
+/** Stable id for a sheet relay row, which lists no swimmers. */
+export function relaySeedAthleteId(
+  entry: Pick<SheetEntry, "eventNumber" | "gender" | "relayLetter" | "seedTime" | "timeStatus">
+): string {
+  const gender = entry.gender ?? ""
+  const letter = normalizeRelayLetter(entry.relayLetter) ?? "A"
+  const seed = entry.seedTime ?? entry.timeStatus ?? ""
+  return `relay-seed:${entry.eventNumber}:${gender}:${letter}:${seed}`
+}
+
+/**
+ * A psych/heat/entries sheet summary without relay lineups — only the relay builder and results
+ * supply those. Earlier imports stored one row per swimmer; each team collapses to one seed row.
+ */
+export function withoutSheetRelayLineups(summary: SheetSummary): SheetSummary {
+  if (!summary.entries.some((e) => e.entryType === "relay_team" && e.relaySwimmers?.length)) {
+    return summary
+  }
+  const seen = new Set<string>()
+  const entries: SheetEntry[] = []
+  for (const entry of summary.entries) {
+    if (entry.entryType !== "relay_team" || !entry.relaySwimmers?.length || entry.manual === true) {
+      entries.push(entry)
+      continue
+    }
+    const seed: SheetEntry = {
+      ...entry,
+      athleteId: relaySeedAthleteId(entry),
+      athleteName: "Relay",
+      relaySwimmers: [],
+    }
+    const key = JSON.stringify(seed)
+    if (seen.has(key)) continue
+    seen.add(key)
+    entries.push(seed)
+  }
+  return { ...summary, entries }
+}
+
 /** Unique roster athletes appearing on sheet/relay/result rows for a meet. */
 export function collectMeetRosterAthleteIds(opts: {
   psychSheetSummary?: unknown
@@ -885,7 +955,7 @@ export function collectMeetRosterAthleteIds(opts: {
     opts.finalsHeatSheetSummary,
     opts.entriesSheetSummary,
   ]) {
-    if (isSheetSummary(summary)) addFromEntries(summary.entries)
+    if (isSheetSummary(summary)) addFromEntries(withoutSheetRelayLineups(summary).entries)
   }
 
   const relays = opts.relayResultsSummary
@@ -1104,6 +1174,8 @@ export function eventHasReprintedFinalsHeats(
   let sameHeat = 0
   let laneComparable = 0
   let sameLane = 0
+  let seedComparable = 0
+  let sameSeed = 0
 
   for (const entry of rows) {
     const prelim = entryPrelimHeatLane(entry)
@@ -1112,6 +1184,10 @@ export function eventHasReprintedFinalsHeats(
     if (finals.heat != null) finalHeats.add(finals.heat)
     if (prelim.heat == null || finals.heat == null) continue
     overlap += 1
+    if (entry.seedTime && entry.finalsSheetSeedTime) {
+      seedComparable += 1
+      if (entry.seedTime.trim() === entry.finalsSheetSeedTime.trim()) sameSeed += 1
+    }
     const laneKnown = prelim.lane != null && finals.lane != null
     if (prelim.heat === finals.heat && (!laneKnown || prelim.lane === finals.lane)) {
       sameHeat += 1
@@ -1123,6 +1199,10 @@ export function eventHasReprintedFinalsHeats(
   }
 
   if (prelimHeats.size === 0 || finalHeats.size === 0) return false
+
+  // A reprinted heat keeps its entry seeds; a real finals sheet seeds by the prelims swims instead,
+  // so mostly new seeds mean a final — however the heats and lanes happen to line up.
+  if (seedComparable > 0 && sameSeed * 2 < seedComparable) return false
 
   if (overlap > 0) {
     if (sameHeat * 2 >= overlap) return true
@@ -2500,8 +2580,8 @@ function isManualRosterSeed(entry: SheetEntry): boolean {
 function mergeEntries(a: SheetEntry, b: SheetEntry): SheetEntry {
   const aManual = isManualRosterSeed(a)
   const bManual = isManualRosterSeed(b)
-  // A relay lineup published from the builder replaces the swimmers a pre-meet sheet lists for
-  // that team (importing a newer sheet drops it instead); results always win.
+  // A relay lineup published from the builder replaces the swimmers an imported row without
+  // results lists for that team; results always win.
   const imported = aManual ? b : a
   const publishedLineupWins =
     aManual !== bManual &&
@@ -2653,13 +2733,15 @@ export function mergeSheetSummaries(
   const hasRelayResults = Boolean(relayResults?.length)
   if (!hasSheets && !hasResults && !hasRelayResults) return null
 
+  const sheetEntries = (summary: SheetSummary | null | undefined) =>
+    summary ? withoutSheetRelayLineups(summary).entries : []
   const byKey = new Map<string, SheetEntry>()
   for (const entry of [
-    ...(psych?.entries ?? []),
-    ...(entries?.entries ?? []),
+    ...sheetEntries(psych),
+    ...sheetEntries(entries),
     // Main heat sheet "Finals" heats → timed finals (not P/F finals).
-    ...(heat?.entries ?? []).map(coercePrelimHeatTimedFinalsEntry),
-    ...(finalsHeat?.entries ?? []).map((entry) => ({
+    ...sheetEntries(heat).map(coercePrelimHeatTimedFinalsEntry),
+    ...sheetEntries(finalsHeat).map((entry) => ({
       ...entry,
       finalsSheetSeedTime: entry.finalsSheetSeedTime ?? entry.seedTime,
       finalsSheetSeedRank:
