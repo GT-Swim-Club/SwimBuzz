@@ -5,7 +5,7 @@ import {
   computeMeetResultHighlights,
   type MeetHighlights,
 } from "@/lib/meet/meet-stats"
-import { coerceTeamScores } from "@swimbuzz/shared"
+import { athletePreferredName, coerceTeamScores } from "@swimbuzz/shared"
 
 export type MeetForHighlights = {
   id: string
@@ -47,7 +47,16 @@ export async function loadMeetHighlights({
   const athleteIds = [
     ...new Set([...meet.swims.map((s) => s.athlete.id), ...results.map((r) => r.athleteId)]),
   ]
-  const [pbSwims, nationalsCuts] = await Promise.all([
+  // Relay legs too, so every name a highlight shows can be the athlete's preferred one.
+  const namedIds = [
+    ...new Set([
+      ...athleteIds,
+      ...(relayResults ?? []).flatMap((relay) =>
+        (relay.relaySwimmers ?? []).map((leg) => leg.athleteId).filter((id): id is string => Boolean(id))
+      ),
+    ]),
+  ]
+  const [pbSwims, nationalsCuts, namedAthletes] = await Promise.all([
     athleteIds.length > 0
       ? prisma.swim.findMany({
           where: { athleteId: { in: athleteIds } },
@@ -58,6 +67,8 @@ export async function loadMeetHighlights({
             timeMs: true,
             date: true,
             meetId: true,
+            tags: true,
+            meetRef: { select: { season: true } },
           },
         })
       : [],
@@ -65,6 +76,12 @@ export async function loadMeetHighlights({
       where: { isRelay: false, set: { season: meet.season } },
       select: { event: true, gender: true, timeMs: true, set: { select: { course: true } } },
     }),
+    namedIds.length > 0
+      ? prisma.athlete.findMany({
+          where: { id: { in: namedIds } },
+          select: { id: true, firstName: true, lastName: true, preferredName: true, gender: true },
+        })
+      : [],
   ])
   // "Before this meet" = other meets' swims dated before this meet's first swim.
   const firstMeetSwimMs = meet.swims.reduce(
@@ -74,6 +91,7 @@ export async function loadMeetHighlights({
   const priorSwims = pbSwims.filter(
     (s) => s.meetId !== meet.id && s.date.getTime() < firstMeetSwimMs
   )
+  const priorSeasonSwims = priorSwims.filter((s) => s.meetRef?.season === meet.season)
 
   return computeMeetResultHighlights({
     results,
@@ -96,8 +114,14 @@ export async function loadMeetHighlights({
       course: c.set.course,
       timeMs: c.timeMs,
     })),
+    priorSeasonSwims,
     athleteHrefById,
     relayResults,
     teamScores,
+    nameById: new Map(namedAthletes.map((a) => [a.id, athletePreferredName(a)])),
+    sortNameById: new Map(
+      namedAthletes.map((a) => [a.id, `${a.lastName} ${a.preferredName?.trim() || a.firstName}`])
+    ),
+    genderById: new Map(namedAthletes.map((a) => [a.id, a.gender])),
   })
 }

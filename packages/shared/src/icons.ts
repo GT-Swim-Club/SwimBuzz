@@ -60,6 +60,22 @@ export const ICONS = {
     },
     { tag: "path", d: "M18 2H6v7a6 6 0 0 0 12 0V2Z" },
   ],
+  medal: [
+    {
+      tag: "path",
+      d: "M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15",
+    },
+    { tag: "path", d: "M11 12 5.12 2.2" },
+    { tag: "path", d: "m13 12 5.88-9.8" },
+    { tag: "path", d: "M8 7h8" },
+    { tag: "circle", cx: 12, cy: 17, r: 5 },
+    { tag: "path", d: "M12 18v-2h-.5" },
+  ],
+  stopwatch: [
+    { tag: "line", x1: 10, y1: 2, x2: 14, y2: 2 },
+    { tag: "line", x1: 12, y1: 14, x2: 15, y2: 11 },
+    { tag: "circle", cx: 12, cy: 14, r: 8 },
+  ],
   user: [
     { tag: "path", d: "M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" },
     { tag: "circle", cx: 12, cy: 7, r: 4 },

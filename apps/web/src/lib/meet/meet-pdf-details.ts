@@ -3,6 +3,26 @@ import type { MeetHeaderDetails } from "@swimbuzz/shared"
 
 type RGB = [number, number, number]
 
+/** Stroke width (pt) that takes regular Helvetica to a semibold: results times, a step under bold. */
+export const SEMIBOLD_STROKE = 0.42
+/** Letter spacing (pt) that gives back the gap the semibold stroke takes from between glyphs. */
+export const SEMIBOLD_CHAR_SPACE = 0.3
+
+/**
+ * Text in the current font and color stroked to a semibold, with its letter spacing, from `x` — or
+ * ending at `x` when `align` is "right" (measured here, since the spacing widens it).
+ */
+export function semiboldText(doc: jsPDF, value: string, x: number, baseline: number, align?: "right") {
+  // jsPDF spaces after every glyph; only the gaps between them show.
+  const width = doc.getTextWidth(value) + Math.max(0, value.length - 1) * SEMIBOLD_CHAR_SPACE
+  doc.setDrawColor(doc.getTextColor())
+  doc.setLineWidth(SEMIBOLD_STROKE)
+  doc.text(value, align === "right" ? x - width : x, baseline, {
+    renderingMode: "fillThenStroke",
+    charSpace: SEMIBOLD_CHAR_SPACE,
+  })
+}
+
 /** Helvetica's cap height, as a fraction of the font size: where capitals visibly top out. */
 export const HELVETICA_CAP_HEIGHT = 0.718
 

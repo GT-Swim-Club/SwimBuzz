@@ -10,7 +10,7 @@ import {
   type RelayShareEvent,
   type MeetHeaderDetails,
 } from "@swimbuzz/shared"
-import { HELVETICA_CAP_HEIGHT, drawMeetPdfDetails } from "@/lib/meet/meet-pdf-details"
+import { HELVETICA_CAP_HEIGHT, drawMeetPdfDetails, semiboldText } from "@/lib/meet/meet-pdf-details"
 
 export type RelaysPdfInput = {
   meetName: string
@@ -198,8 +198,10 @@ function drawRelaysPdf(
     const time = relayShareTime(relay) || "—"
     const timeWidth = doc.getTextWidth(time)
     const headerBaseline = centeredBaseline(top, m.cardHeaderHeight, m.textSize)
-    doc.text(time, x + width - m.cardPx, headerBaseline, { align: "right" })
     doc.text(fit(relayTitle(relay), innerWidth - timeWidth - m.timeGap), innerX, headerBaseline)
+    // The time a step under bold, like a results time in the roster summary PDF: regular, stroked.
+    setType("normal", m.textSize)
+    semiboldText(doc, time, x + width - m.cardPx, headerBaseline, "right")
 
     let legTop = top + m.cardHeaderHeight
     const legs = [...relay.legs].sort((a, b) => a.leg - b.leg)

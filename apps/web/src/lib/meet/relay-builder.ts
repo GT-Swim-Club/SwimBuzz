@@ -764,14 +764,9 @@ export function moveRelayRow(result: RelayResult, from: RowLoc, to: RowLoc, mixe
     }
   }
 
-  if (fromList === toList) {
-    const [item] = fromList.splice(from.index, 1)
-    fromList.splice(to.index, 0, item)
-  } else {
-    const swapped = fromList[from.index]
-    fromList[from.index] = toList[to.index]
-    toList[to.index] = swapped
-  }
+  const swapped = fromList[from.index]
+  fromList[from.index] = toList[to.index]
+  toList[to.index] = swapped
 
   if (strokeTimes) {
     // Moving onto or off the lead-off leg swaps a relay split for a flat-start time.

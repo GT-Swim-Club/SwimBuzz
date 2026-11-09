@@ -1,17 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { ActivityIndicator, Alert, Platform, Pressable, Text, View } from "react-native"
 import * as Clipboard from "expo-clipboard"
-import * as MediaLibrary from "expo-media-library"
 import * as Sharing from "expo-sharing"
-import { File, Paths } from "expo-file-system"
-import { captureRef } from "react-native-view-shot"
 import {
   alternateLabel,
   formatPoints,
   eventGenderWord,
   roundFilterIncludes,
   roundFilterLabel,
-  rosterSummaryPdfFilename,
   rosterSummaryScopeLabel,
   rosterSummaryText,
   rosterSummarySessions,
@@ -44,7 +40,8 @@ import {
   type ActionSheetItem,
 } from "@swimbuzz/ui"
 import { spacing } from "@swimbuzz/tokens"
-import { API_URL, api, getAccessToken } from "../lib/api"
+import { api } from "../lib/api"
+import { rosterSummaryPdfFile, saveCaptureToPhotos } from "../lib/roster-summary-share"
 import { HeatLaneSheet, type HeatLaneSlot } from "./HeatLaneSheet"
 import { Icon } from "./Icon"
 import { RosterSummaryExportCapture } from "./RosterSummaryExportCapture"
@@ -346,13 +343,13 @@ function swimSplits(entry: RosterSummaryEntry, round?: SessionRound | null) {
     .filter((s) => /\d/.test(s.time))
 }
 
-/** The leg an athlete swam on a relay and their split, e.g. "Leg 1 split 25.31". */
+/** The leg an athlete swam on a relay and their split, e.g. "Leg 1 - 25.31". */
 function relayLegLabel(entry: RosterSummaryEntry, athleteId: string | undefined): string | null {
   if (entry.entryType !== "relay_team" || !athleteId) return null
   const swimmer = entry.relaySwimmers?.find((s) => s.athleteId === athleteId)
   if (!swimmer) return null
   const split = swimmer.splitTime?.trim()
-  return split && /\d/.test(split) ? `Leg ${swimmer.leg} split ${split}` : `Leg ${swimmer.leg}`
+  return split && /\d/.test(split) ? `Leg ${swimmer.leg} - ${split}` : `Leg ${swimmer.leg}`
 }
 
 /** `athleteId` is the athlete whose group the row sits in, so a relay shows their leg and split. */
@@ -419,8 +416,12 @@ function pdfRow(
     fullLabel: isRelay ? relayTitleFrom(`${relayEvent} Relay`) : undefined,
     meta:
       [
-        legNumber ? `Leg ${legNumber}` : null,
-        split && /\d/.test(split) ? `Split ${split}` : null,
+        // "Leg 4 - 20.05": the leg, then its split.
+        legNumber
+          ? `Leg ${legNumber}${split && /\d/.test(split) ? ` - ${split}` : ""}`
+          : split && /\d/.test(split)
+            ? `Split ${split}`
+            : null,
         entrySubtitle(entry, "athlete", false, undefined, false),
       ]
         .filter(Boolean)
@@ -704,13 +705,10 @@ export function RosterSummarySection({
     if (!exportCaptureRef.current) return
     setShareBusy("photos")
     try {
-      const permission = await MediaLibrary.requestPermissionsAsync(true)
-      if (!permission.granted) {
+      if (!(await saveCaptureToPhotos(exportCaptureRef))) {
         Alert.alert("Permission needed", "Allow photo access in Settings to save roster summary images.")
         return
       }
-      const uri = await captureRef(exportCaptureRef, { format: "png", quality: 1, result: "tmpfile" })
-      await MediaLibrary.saveToLibraryAsync(uri)
       flashDone("photos")
     } catch (err) {
       Alert.alert("Could not save image", err instanceof Error ? err.message : "Something went wrong")
@@ -722,24 +720,7 @@ export function RosterSummarySection({
   async function sharePdf() {
     setShareBusy("pdf")
     try {
-      const token = await getAccessToken()
-      const request = shareRequest ?? buildPdfRequest()
-      const res = await fetch(
-        `${API_URL}/api/meets/${encodeURIComponent(meetId)}/roster-summary/pdf`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify(request),
-        }
-      )
-      if (!res.ok) throw new Error("Could not create PDF")
-      const bytes = new Uint8Array(await res.arrayBuffer())
-      const file = new File(Paths.cache, rosterSummaryPdfFilename(meetName, request))
-      if (file.exists) file.delete()
-      file.write(bytes)
+      const file = await rosterSummaryPdfFile(meetId, meetName, shareRequest ?? buildPdfRequest())
       if (!(await Sharing.isAvailableAsync())) {
         Alert.alert("Sharing unavailable", "This device can't open the share sheet.")
         return

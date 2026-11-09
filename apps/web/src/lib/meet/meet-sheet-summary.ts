@@ -203,7 +203,8 @@ export function isSwimOffTag(tags: string): boolean {
   return tags.trim().toUpperCase() === "S"
 }
 
-function isPrelimTag(tags: string): boolean {
+/** Swim tag "P" (or a "Prelim…" tag): a prelims swim. */
+export function isPrelimTag(tags: string): boolean {
   const t = tags.trim().toUpperCase()
   return t === "P" || t.includes("PRELIM")
 }
@@ -2858,6 +2859,29 @@ export function mergeSheetSummaries(
   return {
     sheetType: heat ? "heat" : "psych",
     course: heat?.course ?? entries?.course ?? psych?.course ?? "SCY",
-    entries: [...byKey.values()],
+    entries: retireUnusedAlternates([...byKey.values()]),
   }
+}
+
+/**
+ * Once an event's finals results are in, its finals alternates who didn't swim are no longer in
+ * line for anything: each keeps just their prelims swim, and one with none is dropped.
+ */
+function retireUnusedAlternates(entries: SheetEntry[]): SheetEntry[] {
+  const eventKey = (entry: SheetEntry) => `${entry.eventNumber}|${normalizeEventName(entry.event)}`
+  const swamFinal = (entry: SheetEntry) =>
+    Boolean(entry.finalTime || entry.finalStatus) || (entry.finalPlace != null && entry.finalPlace > 0)
+  const finalsSwum = new Set(
+    entries
+      .filter((entry) => entry.entryType === "individual" && !entry.alternate && swamFinal(entry))
+      .map(eventKey)
+  )
+  if (finalsSwum.size === 0) return entries
+  return entries.flatMap((entry) => {
+    if (entry.entryType !== "individual" || !entry.alternate || swamFinal(entry)) return [entry]
+    if (!finalsSwum.has(eventKey(entry))) return [entry]
+    const swamPrelim =
+      Boolean(entry.prelimTime || entry.prelimStatus) || (entry.prelimPlace != null && entry.prelimPlace > 0)
+    return swamPrelim ? [{ ...entry, alternate: undefined, alternateNumber: undefined }] : []
+  })
 }

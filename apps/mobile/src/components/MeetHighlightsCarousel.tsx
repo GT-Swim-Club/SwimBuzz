@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import {
   AccessibilityInfo,
+  ActivityIndicator,
+  Alert,
+  Platform,
   Pressable,
   ScrollView as RNScrollView,
   Text,
@@ -9,18 +12,34 @@ import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from "react-native"
+import * as Sharing from "expo-sharing"
 import {
   formatPoints,
+  meetHighlightsExportRequest,
   paginateHighlights,
   TEAM_SCORE_SECTIONS,
   teamPlaceLabel,
+  type MeetHeaderDetails,
   type MeetHighlights,
+  type RosterSummaryPdfRequest,
   type StatCounter,
   type TeamScores,
   type TeamScoresSection,
 } from "@swimbuzz/shared"
-import { BottomSheet, Chip, Muted, Section, SectionHeader, usePalette } from "@swimbuzz/ui"
+import {
+  ActionSheet,
+  BottomSheet,
+  Chip,
+  Muted,
+  Section,
+  SectionHeader,
+  usePalette,
+  type ActionSheetItem,
+} from "@swimbuzz/ui"
 import { radii, spacing } from "@swimbuzz/tokens"
+import { rosterSummaryPdfFile, saveCaptureToPhotos } from "../lib/roster-summary-share"
+import { Icon } from "./Icon"
+import { RosterSummaryExportCapture } from "./RosterSummaryExportCapture"
 
 const AUTOPLAY_MS = 6000
 const TILE_GAP = spacing.xs
@@ -29,7 +48,8 @@ function isDropValue(value: string | number) {
   return typeof value === "string" && /^[-−]/.test(value)
 }
 
-function HighlightTile({ counter }: { counter: StatCounter }) {
+/** One highlight: its value (a drop in green), caps label, hint and detail. Also drawn in the Results PNG. */
+export function HighlightTile({ counter }: { counter: StatCounter }) {
   const c = usePalette()
   const isText = typeof counter.value === "string" && !/^[-−+]?[\d.:]+$/.test(counter.value)
   return (
@@ -48,7 +68,8 @@ function HighlightTile({ counter }: { counter: StatCounter }) {
       }}
     >
       <Text
-        numberOfLines={isText ? 2 : 1}
+        // Room for names tied for a highlight ("Ann Lee, Bo Kim & Cy Diaz").
+        numberOfLines={isText ? 3 : 1}
         adjustsFontSizeToFit
         minimumFontScale={0.6}
         style={{
@@ -174,11 +195,118 @@ function TeamScoresSheet({
 }
 
 /**
+ * The highlights card's share sheet, like the roster summary's: Save to Photos (the one-page
+ * highlights image) and Share PDF (the same page, laid out by the API).
+ */
+function useHighlightsShare(meetId: string, meetName: string, highlights: MeetHighlights) {
+  const [visible, setVisible] = useState(false)
+  const [busy, setBusy] = useState<"photos" | "pdf" | null>(null)
+  const [saved, setSaved] = useState(false)
+  // The highlights as of opening the sheet, rendered off-screen for the PNG while it's open.
+  const [request, setRequest] = useState<RosterSummaryPdfRequest | null>(null)
+  const captureRef = useRef<View>(null)
+  const dismissRef = useRef<(() => void) | null>(null)
+  const savedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current)
+    }
+  }, [])
+
+  function open() {
+    setRequest(meetHighlightsExportRequest(highlights))
+    setSaved(false)
+    setVisible(true)
+  }
+
+  /**
+   * Closes the sheet and waits for it to finish dismissing — iOS won't present another native
+   * sheet over a modal that's still animating closed (same as the roster summary).
+   */
+  function closeAndWait(): Promise<void> {
+    setVisible(false)
+    if (Platform.OS !== "ios") return Promise.resolve()
+    return new Promise((resolve) => {
+      const finish = () => {
+        dismissRef.current = null
+        clearTimeout(fallback)
+        resolve()
+      }
+      const fallback = setTimeout(finish, 600)
+      dismissRef.current = finish
+    })
+  }
+
+  async function saveToPhotos() {
+    if (!captureRef.current) return
+    setBusy("photos")
+    try {
+      if (!(await saveCaptureToPhotos(captureRef))) {
+        Alert.alert("Permission needed", "Allow photo access in Settings to save highlights images.")
+        return
+      }
+      setSaved(true)
+      if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current)
+      savedTimeoutRef.current = setTimeout(() => setSaved(false), 2000)
+    } catch (err) {
+      Alert.alert("Could not save image", err instanceof Error ? err.message : "Something went wrong")
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  async function sharePdf() {
+    setBusy("pdf")
+    try {
+      const file = await rosterSummaryPdfFile(meetId, meetName, request ?? meetHighlightsExportRequest(highlights))
+      if (!(await Sharing.isAvailableAsync())) {
+        Alert.alert("Sharing unavailable", "This device can't open the share sheet.")
+        return
+      }
+      await closeAndWait()
+      await Sharing.shareAsync(file.uri, { mimeType: "application/pdf", UTI: "com.adobe.pdf" })
+    } catch (err) {
+      Alert.alert("Could not share PDF", err instanceof Error ? err.message : "Something went wrong")
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  return {
+    visible,
+    busy,
+    saved,
+    request,
+    captureRef,
+    open,
+    close: () => setVisible(false),
+    onDismiss: () => dismissRef.current?.(),
+    saveToPhotos,
+    sharePdf,
+  }
+}
+
+/**
  * The meet's highlights, a page at a time like the web's: team scores (tap for every team's
  * standing), top scorers, then result stats. Swipe between pages; they also advance on their own.
  */
-export function MeetHighlightsCarousel({ highlights }: { highlights: MeetHighlights }) {
+export function MeetHighlightsCarousel({
+  highlights,
+  meetId,
+  meetName,
+  details,
+  iconUrl,
+}: {
+  highlights: MeetHighlights
+  /** The meet, for the one-page highlights export (Save to Photos, Share PDF). */
+  meetId: string
+  meetName: string
+  details: MeetHeaderDetails
+  iconUrl: string | null
+}) {
   const c = usePalette()
+  const share = useHighlightsShare(meetId, meetName, highlights)
   const pages = paginateHighlights(highlights.counters)
   const teamScores = highlights.teamScores ?? null
   const scrollRef = useRef<RNScrollView>(null)
@@ -250,7 +378,28 @@ export function MeetHighlightsCarousel({ highlights }: { highlights: MeetHighlig
 
   return (
     <Section>
-      <SectionHeader title="Highlights" right={dots} />
+      <SectionHeader
+        title="Highlights"
+        right={
+          <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
+            {dots}
+            <Pressable
+              onPress={share.open}
+              disabled={Boolean(share.busy)}
+              accessibilityRole="button"
+              accessibilityLabel="Share highlights"
+              hitSlop={8}
+              style={{ paddingVertical: spacing.xxs, paddingHorizontal: spacing.xs }}
+            >
+              {share.busy ? (
+                <ActivityIndicator size="small" color={c.text} />
+              ) : (
+                <Icon name="share" size={20} color={c.text} />
+              )}
+            </Pressable>
+          </View>
+        }
+      />
       <View onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
         <RNScrollView
           ref={scrollRef}
@@ -299,6 +448,44 @@ export function MeetHighlightsCarousel({ highlights }: { highlights: MeetHighlig
           onSectionChange={setScoresSection}
           onClose={() => setScoresSection(null)}
         />
+      ) : null}
+      <ActionSheet
+        visible={share.visible}
+        onClose={share.close}
+        onDismiss={share.onDismiss}
+        title="Share highlights"
+        groups={[
+          [
+            {
+              key: "photos",
+              label: share.saved ? "Saved to Photos" : "Save to Photos",
+              icon: <Icon name={share.saved ? "check" : "image"} size={20} color={c.text} />,
+              busy: share.busy === "photos",
+              disabled: Boolean(share.busy) && share.busy !== "photos",
+              onPress: () => void share.saveToPhotos(),
+            },
+            {
+              key: "pdf",
+              label: "Share PDF",
+              icon: <Icon name="fileText" size={20} color={c.text} />,
+              busy: share.busy === "pdf",
+              disabled: Boolean(share.busy) && share.busy !== "pdf",
+              onPress: () => void share.sharePdf(),
+            },
+          ] satisfies ActionSheetItem[],
+        ]}
+      />
+      {/* Off-screen mirror captured to PNG while the share sheet is open — never shown in the layout. */}
+      {share.visible && share.request ? (
+        <View pointerEvents="none" style={{ position: "absolute", top: 0, left: -10000 }}>
+          <RosterSummaryExportCapture
+            ref={share.captureRef}
+            meetName={meetName}
+            details={details}
+            iconUrl={iconUrl}
+            request={share.request}
+          />
+        </View>
       ) : null}
     </Section>
   )

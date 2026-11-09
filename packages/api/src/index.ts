@@ -134,6 +134,9 @@ type MeetWriteFields = {
   packingList?: string | null
   itinerary?: string | null
   photos?: MeetPhotosInput
+  /** Points by place, as written ("20, 17, 16"); both empty clears the meet's scoring table. */
+  scoringIndividual?: string
+  scoringRelay?: string
 }
 
 export type CreateMeetBody = MeetWriteFields & {

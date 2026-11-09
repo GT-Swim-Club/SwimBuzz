@@ -659,6 +659,11 @@ def club_matches(club: str, team_norm: str) -> bool:
     return False
 
 
+# Given names past the first ("Regalado, Elise Victoria 22 GTSC"), taken only when an
+# age follows, so a full club name printed without an age isn't read as a middle name.
+MORE_GIVEN_NAMES = r"(?:(?:\s+[A-Z][a-z][A-Za-z'\-]*)+(?=\s+\d{1,3}(?:\s|[A-Z])))?"
+
+
 def parse_team_from_line(line: str) -> str | None:
     """Extract team/club code from a Hy-Tek-style result line.
 
@@ -673,6 +678,7 @@ def parse_team_from_line(line: str) -> str | None:
     concat_match = re.search(
         r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
         r"(?:\s+[A-Z]\.?(?=\s))?"
+        + MORE_GIVEN_NAMES +
         r"\s+\d{1,3}([A-Z0-9]{2,10}(?:-[A-Z]{2})?)"
         r"\s+(?:\(|[\d:xX]|J\d)",
         line,
@@ -685,6 +691,7 @@ def parse_team_from_line(line: str) -> str | None:
     match = re.search(
         r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
         r"(?:\s+[A-Z]\.?(?=\s))?"
+        + MORE_GIVEN_NAMES +
         r"(?:\s+\d{1,3})?"
         rf"\s+((?![0-9]+\s)(?!(?:{INVALID_TIME_PATTERN})\b)[A-Z0-9]{{2,10}}(?:-[A-Z]{{2}})?)"
         rf"\s+(?:\(|[\d:xX]|J\d|(?:{INVALID_TIME_PATTERN})\b)",
@@ -700,6 +707,7 @@ def parse_team_from_line(line: str) -> str | None:
     full_match = re.search(
         r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
         r"(?:\s+[A-Z]\.?(?=\s))?"
+        + MORE_GIVEN_NAMES +
         r"(?:\s+\d{1,3})?"
         rf"\s+((?:{team_word}\s+){{1,6}}(?:{team_word})(?:-[A-Z]{{2}})?)"
         rf"\s+(?:{INVALID_TIME_PATTERN}|{TIME_TOKEN_PATTERN})",
@@ -713,6 +721,7 @@ def parse_team_from_line(line: str) -> str | None:
     single_match = re.search(
         r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
         r"(?:\s+[A-Z]\.?(?=\s))?"
+        + MORE_GIVEN_NAMES +
         r"\s+\d{1,3}"
         rf"\s+({team_word}(?:-[A-Z]{{2}})?)"
         rf"\s+(?:{INVALID_TIME_PATTERN}|{TIME_TOKEN_PATTERN})",
@@ -1090,6 +1099,12 @@ def extract_parenthetical_split_tokens(line: str) -> list[str]:
 SWIM_OFF_HEADER = re.compile(r"\bswim[\s-]?off\b", re.I)
 SWIM_OFF_TAG = "S"
 
+# Relay lead-off events ("Event 101 Women 50 Yard Backstroke Relay Lead Off", or a
+# typo'd "Event 219 Women 100 Yard Freestyle Rely Lead Off") list each relay's
+# leadoff leg — already read from the relays themselves, so their rows are skipped
+# rather than taken as the individual event.
+LEAD_OFF_EVENT_HEADER = re.compile(r"^\(?\s*(?:Event|#)\s*\d+\b.*\blead[\s-]*off\b", re.I)
+
 
 def parse_text_lines(lines: list[str], course: str) -> list[dict]:
     results: list[dict] = []
@@ -1133,6 +1148,14 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
         if relay_header_match(stripped):
             flush_pending_splits()
             in_relay_section = True
+            last_result_indices = []
+            continue
+
+        if LEAD_OFF_EVENT_HEADER.search(stripped):
+            flush_pending_splits()
+            current_event = None
+            in_relay_section = False
+            in_swim_off = False
             last_result_indices = []
             continue
 

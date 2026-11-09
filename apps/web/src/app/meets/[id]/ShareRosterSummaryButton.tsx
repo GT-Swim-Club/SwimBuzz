@@ -25,7 +25,10 @@ const IMAGE_PLACEHOLDER = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAE
 const MENU_ITEM =
   "flex w-full items-center gap-2 whitespace-nowrap px-3 py-2 text-left text-sm text-foreground hover:bg-fill"
 
-/** Share menu for the roster summary: Copy as text, Download PNG, Download PDF of the view as it's shown. */
+/**
+ * Share menu for the roster summary: Copy as text, Download PNG, Download PDF of the view as it's
+ * shown. The highlights card uses it too, for its one-page export (no text).
+ */
 export default function ShareRosterSummaryButton({
   meetId,
   meetName,
@@ -33,6 +36,9 @@ export default function ShareRosterSummaryButton({
   iconUrl,
   buildRequest,
   onOpen,
+  label: shareLabel = "Share roster summary",
+  copyText: canCopyText = true,
+  compact = false,
 }: {
   meetId: string
   meetName: string
@@ -42,6 +48,12 @@ export default function ShareRosterSummaryButton({
   /** The current view (session, mode, filters, search, row toggles) as sections of rows. */
   buildRequest: () => RosterSummaryPdfRequest
   onOpen?: () => void
+  /** The button's accessible name and hover label. */
+  label?: string
+  /** Offer Copy as text. */
+  copyText?: boolean
+  /** A small icon button, for a panel header beside its other controls. */
+  compact?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState<"png" | "pdf" | null>(null)
@@ -136,7 +148,7 @@ export default function ShareRosterSummaryButton({
       ? "Exporting image…"
       : busy === "pdf"
         ? "Exporting PDF…"
-        : "Share roster summary"
+        : shareLabel
 
   return (
     <div ref={rootRef} className="relative shrink-0">
@@ -153,10 +165,14 @@ export default function ShareRosterSummaryButton({
         disabled={Boolean(busy)}
         aria-expanded={open}
         aria-haspopup="menu"
-        aria-label="Share roster summary"
-        className="group relative inline-flex h-[38px] w-[38px] cursor-pointer items-center justify-center rounded-lg border border-border bg-background text-foreground transition-colors hover:bg-fill disabled:opacity-40"
+        aria-label={shareLabel}
+        className={
+          compact
+            ? "group relative inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-foreground-secondary transition-colors hover:bg-fill hover:text-foreground disabled:opacity-40"
+            : "group relative inline-flex h-[38px] w-[38px] cursor-pointer items-center justify-center rounded-lg border border-border bg-background text-foreground transition-colors hover:bg-fill disabled:opacity-40"
+        }
       >
-        <ActionIcon kind="share" className="h-[18px] w-[18px]" />
+        <ActionIcon kind="share" className={compact ? "h-4 w-4" : "h-[18px] w-[18px]"} />
         {!open && <HoverDetail label={label} />}
       </button>
       {open && (
@@ -164,10 +180,12 @@ export default function ShareRosterSummaryButton({
           role="menu"
           className="export-menu-fade-in absolute right-0 top-full z-40 mt-1 w-max overflow-hidden rounded-lg border border-border bg-background-elevated py-1 shadow-md"
         >
-          <button type="button" role="menuitem" onClick={() => void copyText()} className={MENU_ITEM}>
-            {copied ? <CheckIcon className="h-4 w-4 shrink-0" /> : <CopyTextMenuIcon className="h-4 w-4 shrink-0" />}
-            {copied ? "Copied" : "Copy as text"}
-          </button>
+          {canCopyText ? (
+            <button type="button" role="menuitem" onClick={() => void copyText()} className={MENU_ITEM}>
+              {copied ? <CheckIcon className="h-4 w-4 shrink-0" /> : <CopyTextMenuIcon className="h-4 w-4 shrink-0" />}
+              {copied ? "Copied" : "Copy as text"}
+            </button>
+          ) : null}
           <button type="button" role="menuitem" onClick={() => void downloadPng()} className={MENU_ITEM}>
             <PngMenuIcon className="h-4 w-4 shrink-0" />
             Download PNG

@@ -2,14 +2,18 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import {
+  meetHighlightsExportRequest,
   paginateHighlights,
   TEAM_SCORE_SECTIONS,
+  type MeetHeaderDetails,
   type MeetHighlights,
   type StatCounter,
   type TeamScoresSection,
 } from "@swimbuzz/shared"
 import { LedgerIcon, LedgerPanel, LedgerStatTile } from "./Ledger"
 import TeamScoresModal from "./TeamScoresModal"
+import ShareRosterSummaryButton from "@/app/meets/[id]/ShareRosterSummaryButton"
+import { podiumPlaceClass } from "@/lib/utils"
 
 const AUTOPLAY_MS = 6000
 
@@ -67,13 +71,30 @@ function HighlightTile({ counter, interactive }: { counter: StatCounter; interac
         )
       }
       valueClassName={
-        isDropValue(counter.value) ? "text-emerald-600 dark:text-emerald-400" : "text-foreground"
+        counter.place != null && counter.place <= 3
+          ? podiumPlaceClass(counter.place)
+          : isDropValue(counter.value)
+            ? "text-emerald-600 dark:text-emerald-400"
+            : "text-foreground"
       }
     />
   )
 }
 
-export default function MeetHighlightsCarousel({ highlights }: { highlights: MeetHighlights }) {
+export default function MeetHighlightsCarousel({
+  highlights,
+  meetId,
+  meetName,
+  details,
+  iconUrl,
+}: {
+  highlights: MeetHighlights
+  /** The meet, for the one-page highlights export (PDF and PNG). */
+  meetId: string
+  meetName: string
+  details: MeetHeaderDetails
+  iconUrl: string | null
+}) {
   const pages = paginateHighlights(highlights.counters)
   const teamScores = highlights.teamScores ?? null
   const [scoresSection, setScoresSection] = useState<TeamScoresSection | null>(null)
@@ -133,26 +154,38 @@ export default function MeetHighlightsCarousel({ highlights }: { highlights: Mee
         ) : null
       }
       aside={
-        pageCount > 1 ? (
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              aria-label="Previous highlights"
-              onClick={() => go(current - 1)}
-              className="inline-flex h-6 w-6 items-center justify-center rounded-md text-foreground-secondary transition-colors hover:bg-fill hover:text-foreground"
-            >
-              <LedgerIcon name="chevronLeft" />
-            </button>
-            <button
-              type="button"
-              aria-label="Next highlights"
-              onClick={() => go(current + 1)}
-              className="inline-flex h-6 w-6 items-center justify-center rounded-md text-foreground-secondary transition-colors hover:bg-fill hover:text-foreground"
-            >
-              <LedgerIcon name="chevronRight" />
-            </button>
-          </div>
-        ) : null
+        <div className="flex items-center gap-1">
+          <ShareRosterSummaryButton
+            meetId={meetId}
+            meetName={meetName}
+            details={details}
+            iconUrl={iconUrl}
+            buildRequest={() => meetHighlightsExportRequest(highlights)}
+            label="Share highlights"
+            copyText={false}
+            compact
+          />
+          {pageCount > 1 ? (
+            <>
+              <button
+                type="button"
+                aria-label="Previous highlights"
+                onClick={() => go(current - 1)}
+                className="inline-flex h-6 w-6 items-center justify-center rounded-md text-foreground-secondary transition-colors hover:bg-fill hover:text-foreground"
+              >
+                <LedgerIcon name="chevronLeft" />
+              </button>
+              <button
+                type="button"
+                aria-label="Next highlights"
+                onClick={() => go(current + 1)}
+                className="inline-flex h-6 w-6 items-center justify-center rounded-md text-foreground-secondary transition-colors hover:bg-fill hover:text-foreground"
+              >
+                <LedgerIcon name="chevronRight" />
+              </button>
+            </>
+          ) : null}
+        </div>
       }
     >
       <div className="overflow-hidden">

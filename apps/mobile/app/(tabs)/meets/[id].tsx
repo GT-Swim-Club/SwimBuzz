@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Alert, Image, View } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { coerceMeetHighlights, DEFAULT_TIME_ZONE, formatFullDate, formatMeetDateRange, formatTime, isHtmlEmpty, meetHeaderDetails, zonedDayKey, type IconName } from "@swimbuzz/shared"
+import { coerceMeetHighlights, coerceScoringTable, DEFAULT_TIME_ZONE, doubledScoringValues, formatScoringValues, parseScoringValues, formatFullDate, formatMeetDateRange, formatTime, isHtmlEmpty, meetHeaderDetails, zonedDayKey, type IconName } from "@swimbuzz/shared"
 import {
   Body,
   Button,
@@ -195,6 +195,10 @@ export default function MeetDetailScreen() {
   const [packingList, setPackingList] = useState("")
   const [itinerary, setItinerary] = useState("")
   const [savingTravel, setSavingTravel] = useState(false)
+  // Points by place, as written ("20, 17, 16"), for individual events and relays.
+  const [scoringIndividual, setScoringIndividual] = useState("")
+  const [scoringRelay, setScoringRelay] = useState("")
+  const [savingScoring, setSavingScoring] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [relayEvent, setRelayEvent] = useState("200 Free Relay")
   const [relayGender, setRelayGender] = useState<"M" | "F" | "X">("M")
@@ -228,6 +232,9 @@ export default function MeetDetailScreen() {
     setHotel(typeof meet.hotel === "string" ? meet.hotel : "")
     setPackingList(typeof meet.packingList === "string" ? meet.packingList : "")
     setItinerary(typeof meet.itinerary === "string" ? meet.itinerary : "")
+    const scoring = coerceScoringTable(meet.scoringTable)
+    setScoringIndividual(formatScoringValues(scoring?.individual))
+    setScoringRelay(formatScoringValues(scoring?.relay))
   }, [meet])
 
   if (!id) {
@@ -332,6 +339,23 @@ export default function MeetDetailScreen() {
       )
     } finally {
       setSavingTravel(false)
+    }
+  }
+
+  async function saveScoring() {
+    if (!id) return
+    setSavingScoring(true)
+    try {
+      await api.updateMeet(id, { scoringIndividual, scoringRelay })
+      await load()
+      Alert.alert("Saved", "Points by place updated.")
+    } catch (err) {
+      Alert.alert(
+        "Could not save scoring",
+        err instanceof Error ? err.message : "Something went wrong"
+      )
+    } finally {
+      setSavingScoring(false)
     }
   }
 
@@ -483,7 +507,15 @@ export default function MeetDetailScreen() {
           <ErrorBlock message={error instanceof Error ? error.message : "Failed to load meet"} />
         ) : null}
 
-        {highlights ? <MeetHighlightsCarousel highlights={highlights} /> : null}
+        {highlights ? (
+          <MeetHighlightsCarousel
+            highlights={highlights}
+            meetId={id}
+            meetName={name}
+            details={meetHeaderDetails({ location, school, startsAt, endsAt, timeZone })}
+            iconUrl={iconUrl}
+          />
+        ) : null}
 
         <Section title="Details">
           <MetaRow label="Dates" value={dateRangeSegment({ fontSize: 14, color: c.text })} />
@@ -596,6 +628,45 @@ export default function MeetDetailScreen() {
                 ))}
               </View>
             ) : null}
+          </Section>
+        ) : null}
+
+        {isStaff ? (
+          <Section title="Scoring (staff)">
+            <Muted style={{ marginBottom: spacing.sm }}>
+              Scores finals and timed finals by place when the results don&apos;t list points. Past
+              8th, B and C finals score by overall place.
+            </Muted>
+            <TextField
+              label="Individual points by place"
+              value={scoringIndividual}
+              onChangeText={setScoringIndividual}
+              placeholder="20, 17, 16, 15, 14, 13, 12, 11, 9, 7, 6, 5, 4, 3, 2, 1"
+              keyboardType="numbers-and-punctuation"
+            />
+            <TextField
+              label="Relay points by place"
+              value={scoringRelay}
+              onChangeText={setScoringRelay}
+              placeholder="40, 34, 32, 30, 28, 26, 24, 22, 18, 14, 12, 10, 8, 6, 4, 2"
+              keyboardType="numbers-and-punctuation"
+            />
+            <View style={{ gap: spacing.sm }}>
+              <Button
+                label="Double individual for relays"
+                variant="secondary"
+                disabled={!parseScoringValues(scoringIndividual)?.length}
+                onPress={() => {
+                  const individual = parseScoringValues(scoringIndividual)
+                  if (individual) setScoringRelay(formatScoringValues(doubledScoringValues(individual)))
+                }}
+              />
+              <Button
+                label="Save scoring"
+                loading={savingScoring}
+                onPress={() => void saveScoring()}
+              />
+            </View>
           </Section>
         ) : null}
 

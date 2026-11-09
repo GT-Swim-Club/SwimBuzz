@@ -59,7 +59,8 @@ export function formatPoints(points: number): string {
   return String(Math.round(points * 10) / 10)
 }
 
-function ordinal(n: number): string {
+/** "1st", "2nd", "11th". */
+export function formatOrdinal(n: number): string {
   const mod100 = n % 100
   if (mod100 >= 11 && mod100 <= 13) return `${n}th`
   const mod10 = n % 10
@@ -72,7 +73,7 @@ function ordinal(n: number): string {
 /** "1st", or "T-14th" when another team shares the place. */
 export function teamPlaceLabel(standing: TeamStanding, standings: TeamStanding[]): string {
   const tied = standings.some((s) => s !== standing && s.place === standing.place)
-  return `${tied ? "T-" : ""}${ordinal(standing.place)}`
+  return `${tied ? "T-" : ""}${formatOrdinal(standing.place)}`
 }
 
 const CLUB_WORDS = new Set([

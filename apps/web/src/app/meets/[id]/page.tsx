@@ -51,9 +51,12 @@ import { isMeetFinalRoster } from "@/lib/meet/meet-roster-import"
 import { athletePath, isCuid, meetPath } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
 import { loadMeetHighlights } from "@/lib/meet/meet-highlights-load"
+import { scoreMeetSwims, scoreRelayResults } from "@/lib/meet/meet-scoring"
 import { toDateInput, toTimeInput } from "@/lib/date-input"
 import {
   athleteRosterNameLastFirst,
+  coerceScoringTable,
+  formatScoringValues,
   meetFileName,
   meetHeaderDetails,
   utcDayKey,
@@ -107,9 +110,11 @@ async function MeetPageContent({ params }: { params: Promise<{ id: string }> }) 
   const meetPublicPath = meetPath(meet.slug ?? meet.id)
   const meetStartsAt = meet.startsAt ?? meet.createdAt
 
+  // Finals and timed-finals swims the results gave no points score from the meet's scoring table.
+  const scoredSwims = scoreMeetSwims(meet.swims, meet.scoringTable)
   const results = mergeMeetResultEntries(
     swimsToMeetResults(
-      meet.swims.map((s) => ({
+      scoredSwims.map((s) => ({
         id: s.id,
         source: s.source,
         athleteId: s.athlete.id,
@@ -142,7 +147,9 @@ async function MeetPageContent({ params }: { params: Promise<{ id: string }> }) 
     packetUrl: meet.packetUrl ?? "",
     psychSheetUrl: meet.psychSheetUrl ?? "",
     heatSheetUrl: meet.heatSheetUrl ?? "",
-    resultsUrl: meet.resultsUrl ?? ""}
+    resultsUrl: meet.resultsUrl ?? "",
+    scoringIndividual: formatScoringValues(coerceScoringTable(meet.scoringTable)?.individual),
+    scoringRelay: formatScoringValues(coerceScoringTable(meet.scoringTable)?.relay)}
 
   let initialPhotos: { url: string; name: string }[] = []
   let initialPreviews: string[] = []
@@ -182,7 +189,9 @@ async function MeetPageContent({ params }: { params: Promise<{ id: string }> }) 
     finalsHeatSheetUrls: finalsHeatSheetLinks,
     liveStreamUrl: meet.liveStreamUrl ?? "",
     swimphoneUrl: meet.swimphoneUrl ?? "",
-    resultsUrl: meet.resultsUrl ?? ""}
+    resultsUrl: meet.resultsUrl ?? "",
+    scoringIndividual: formatScoringValues(coerceScoringTable(meet.scoringTable)?.individual),
+    scoringRelay: formatScoringValues(coerceScoringTable(meet.scoringTable)?.relay)}
 const isHtmlEmpty = (html: string | null | undefined) =>
   !html || html.replace(/<[^>]*>?/gm, "").trim() === ""
 
@@ -214,9 +223,10 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
   const entriesSummary = isSheetSummary(meet.entriesSheetSummary)
     ? meet.entriesSheetSummary
     : null
-  const relayResults = isRelayResultsSummary(meet.relayResultsSummary)
-    ? meet.relayResultsSummary.entries
-    : null
+  const relayResults = scoreRelayResults(
+    isRelayResultsSummary(meet.relayResultsSummary) ? meet.relayResultsSummary.entries : null,
+    meet.scoringTable
+  )
   const hasImportedResults = meetHasImportedResults({
     individualResults: results,
     relayResults})
@@ -280,7 +290,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
   )
 
   const meetHighlights = await loadMeetHighlights({
-    meet,
+    meet: { ...meet, swims: scoredSwims },
     results,
     relayResults,
     hasImportedResults,
@@ -427,7 +437,13 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
     isBeforeOrToday && (initialPhotos.length > 0 || initialPreviews.length > 0 || isCoach)
 
   const highlightsCard = meetHighlights ? (
-    <MeetHighlightsCarousel highlights={meetHighlights} />
+    <MeetHighlightsCarousel
+      highlights={meetHighlights}
+      meetId={meet.id}
+      meetName={meet.name}
+      details={meetHeaderDetails(meet)}
+      iconUrl={meet.iconUrl}
+    />
   ) : null
   const countdownCard =
     isUpcomingMeet && meet.hasStartTime ? (

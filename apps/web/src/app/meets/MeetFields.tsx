@@ -13,9 +13,12 @@ import { downloadBlob } from "@/components/ui/export-menu"
 import {
   DEFAULT_TIME_ZONE,
   defaultSeason,
+  doubledScoringValues,
   formatClockTime,
+  formatScoringValues,
   formatSeasonLabel,
   meetFileName,
+  parseScoringValues,
   zoneAbbreviation,
 } from "@swimbuzz/shared"
 import { useEscapeToClose } from "@/lib/use-escape-to-close"
@@ -36,6 +39,12 @@ export type MeetFormState = {
   psychSheetUrl: string
   heatSheetUrl: string
   resultsUrl: string
+  /**
+   * Points by place, as written ("20, 17, 16"), for individual events and relays. Left out where
+   * the meet's table isn't loaded (the meets list), so saving there keeps it.
+   */
+  scoringIndividual?: string
+  scoringRelay?: string
 }
 
 export const emptyMeetForm: MeetFormState = {
@@ -54,6 +63,8 @@ export const emptyMeetForm: MeetFormState = {
   psychSheetUrl: "",
   heatSheetUrl: "",
   resultsUrl: "",
+  scoringIndividual: "",
+  scoringRelay: "",
 }
 
 const inputClass =
@@ -833,6 +844,60 @@ export default function MeetFields({
           </div>
         </div>
       </div>
+
+      {form.scoringIndividual != null ? <ScoringFields form={form} set={set} /> : null}
+    </div>
+  )
+}
+
+/**
+ * The meet's points by place, for individual events and relays. They score finals and timed
+ * finals the results give no points for.
+ */
+function ScoringFields({
+  form,
+  set,
+}: {
+  form: MeetFormState
+  set: <K extends keyof MeetFormState>(key: K, value: MeetFormState[K]) => void
+}) {
+  const individual = parseScoringValues(form.scoringIndividual ?? "")
+  return (
+    <div className="flex flex-col gap-2">
+      <div>
+        <label className={labelClass}>Individual points by place</label>
+        <input
+          value={form.scoringIndividual ?? ""}
+          onChange={(e) => set("scoringIndividual", e.target.value)}
+          placeholder="20, 17, 16, 15, 14, 13, 12, 11, 9, 7, 6, 5, 4, 3, 2, 1"
+          inputMode="decimal"
+          className={`${inputClass} tabular-nums`}
+        />
+      </div>
+      <div>
+        <div className="mb-1 flex items-baseline justify-between gap-2">
+          <label className="block text-xs font-medium text-foreground-secondary">Relay points by place</label>
+          <button
+            type="button"
+            onClick={() => individual && set("scoringRelay", formatScoringValues(doubledScoringValues(individual)))}
+            disabled={!individual?.length}
+            className="text-xs font-medium text-foreground-secondary transition-colors hover:text-primary disabled:opacity-40 disabled:hover:text-foreground-secondary"
+          >
+            Double individual
+          </button>
+        </div>
+        <input
+          value={form.scoringRelay ?? ""}
+          onChange={(e) => set("scoringRelay", e.target.value)}
+          placeholder="40, 34, 32, 30, 28, 26, 24, 22, 18, 14, 12, 10, 8, 6, 4, 2"
+          inputMode="decimal"
+          className={`${inputClass} tabular-nums`}
+        />
+      </div>
+      <p className="text-xs text-foreground-tertiary">
+        Scores finals and timed finals by place when the results don&apos;t list points. Past 8th, B and C
+        finals score by overall place (9th, 10th…).
+      </p>
     </div>
   )
 }

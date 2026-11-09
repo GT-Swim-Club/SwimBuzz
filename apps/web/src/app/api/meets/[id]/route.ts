@@ -36,6 +36,7 @@ import { isRelayResultsSummary } from "@/lib/meet/relay-results"
 import { buildRelayLineups } from "@/lib/meet/relay-lineups"
 import { attachCoachHeatLanes } from "@/lib/meet/heat-lane-overrides"
 import { loadMeetHighlights } from "@/lib/meet/meet-highlights-load"
+import { scoreMeetSwims, scoreRelayResults } from "@/lib/meet/meet-scoring"
 import { athleteRosterNameLastFirst, utcDayKey, isStaffRole } from "@swimbuzz/shared"
 
 export const runtime = "nodejs"
@@ -81,9 +82,11 @@ export async function GET(
     endsAt: meet.endsAt,
   })
 
+  // Finals and timed-finals swims the results gave no points score from the meet's scoring table.
+  const scoredSwims = scoreMeetSwims(meet.swims, meet.scoringTable)
   const results = mergeMeetResultEntries(
     swimsToMeetResults(
-      meet.swims.map((s) => ({
+      scoredSwims.map((s) => ({
         id: s.id,
         source: s.source,
         athleteId: s.athlete.id,
@@ -101,9 +104,10 @@ export async function GET(
       ? meet.resultStatusesSummary.entries
       : []
   )
-  const relayResults = isRelayResultsSummary(meet.relayResultsSummary)
-    ? meet.relayResultsSummary.entries
-    : null
+  const relayResults = scoreRelayResults(
+    isRelayResultsSummary(meet.relayResultsSummary) ? meet.relayResultsSummary.entries : null,
+    meet.scoringTable
+  )
   // Roster names and genders, so mobile can show "Baumann, Matthew (Matt)" and title its
   // by-event groups "Women 50 Free".
   const rosterGenders = new Map(
@@ -131,7 +135,7 @@ export async function GET(
   )
 
   const highlights = await loadMeetHighlights({
-    meet,
+    meet: { ...meet, swims: scoredSwims },
     results,
     relayResults,
     hasImportedResults: meetHasImportedResults({ individualResults: results, relayResults }),

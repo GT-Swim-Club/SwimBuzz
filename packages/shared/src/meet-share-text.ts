@@ -52,8 +52,11 @@ function lastNames(legs: string[], splits?: string[]): string {
 }
 
 function rosterRowLines(row: RosterSummaryPdfRow): string[] {
+  // A subsection's heading ("Finals:") over its rows.
+  if (row.subheading) return [`  ${row.label}:`]
   const line = [
     rosterNamePreferred(row.label),
+    row.round,
     row.sub,
     row.meta?.replace(/\s+\|\s+/g, " · "),
     row.heatLane,
@@ -77,7 +80,7 @@ export function rosterSummaryText({
 }): string {
   const sections = request.sections.map((section) =>
     [
-      `${section.eventNumber ? `#${section.eventNumber} ` : ""}${rosterNamePreferred(section.title)}`,
+      `${section.eventNumber ? `#${section.eventNumber} ` : ""}${rosterNamePreferred(section.title)}${section.sub ? ` · ${section.sub}` : ""}`,
       ...section.rows.flatMap(rosterRowLines),
     ].join("\n")
   )

@@ -497,14 +497,38 @@ function compareBySeed(a: SummaryEntry, b: SummaryEntry): number {
   )
 }
 
+/** Rounds in the order an event lists them: finals, then prelims (and swim-offs), then timed finals. */
+const ROUND_ORDER: Record<SummaryRoundKind, number> = { F: 0, P: 1, T: 2 }
+
+/** An export's round subsections: a swim-off gets its own, between finals and prelims. */
+type ExportRoundKind = SummaryRoundKind | "S"
+const EXPORT_ROUND_ORDER: Record<ExportRoundKind, number> = { F: 0, S: 1, P: 2, T: 3 }
+const EXPORT_ROUND_LABELS: Record<ExportRoundKind, string> = { ...ROUND_LABELS, S: "Swim-off" }
+
+/**
+ * An event's rows (in swim order) by round — finals, swim-offs, prelims, then timed finals — or
+ * null when a row's round isn't known.
+ */
+function entriesByRound(
+  entries: SummaryEntry[],
+  allEntries: SummaryEntry[]
+): { kind: ExportRoundKind; entries: SummaryEntry[] }[] | null {
+  const byKind = new Map<ExportRoundKind, SummaryEntry[]>()
+  for (const entry of entries) {
+    const kind = entry.isSwimOff ? "S" : rowRoundKind(entry, allEntries)
+    if (!kind) return null
+    byKind.set(kind, [...(byKind.get(kind) ?? []), entry])
+  }
+  return [...byKind]
+    .sort(([a], [b]) => EXPORT_ROUND_ORDER[a] - EXPORT_ROUND_ORDER[b])
+    .map(([kind, entries]) => ({ kind, entries }))
+}
+
 /**
  * One event's rows in swim order: by place once its results are in, by heat and lane once heats
  * are out, else by seed. Decided per event, so finals still follow heat & lane while only prelims
  * results are in. Rows without a place (DQ, NS) follow the placed ones; alternates come last.
  */
-/** Rounds in the order an event lists them: finals, then prelims (and swim-offs), then timed finals. */
-const ROUND_ORDER: Record<SummaryRoundKind, number> = { F: 0, P: 1, T: 2 }
-
 function sortEventEntries(entries: SummaryEntry[], allEntries: SummaryEntry[]): SummaryEntry[] {
   const place = (entry: SummaryEntry) => rowRoundResult(entry, allEntries).place
   const lane = (entry: SummaryEntry) =>
@@ -618,9 +642,7 @@ function summaryRowView(
       : undefined
   const split = sanitizeRelaySplitTime(swimmer?.splitTime)
   const legSplit = split ? formatDisplayTime(split) : null
-  const relayLeg = swimmer
-    ? [`Leg ${swimmer.leg}`, legSplit ? `Split ${legSplit}` : null].filter(Boolean).join(" · ")
-    : undefined
+  const relayLeg = swimmer ? `Leg ${swimmer.leg}${legSplit ? ` - ${legSplit}` : ""}` : undefined
 
   const heat = formatHeat(entry)
   const lane = isRelay ? relayLane(entry) : individualLane(entry)
@@ -725,23 +747,25 @@ function summaryRowPdf(
   const relayFullName = eventView ? undefined : `${relayEvent} Relay ${relayLetter}`
   const startTime = (display.showHeatLane && entry.startTime) || undefined
   // The round rides beside the name (then any result tags); the line below has a relay athlete's
-  // leg and split.
+  // leg and split ("Leg 4 - 20.05").
   const meta = view.isRelay
-    ? [
-        view.relayLegNumber ? `Leg ${view.relayLegNumber}` : null,
-        view.legSplit ? `Split ${view.legSplit}` : null,
-      ]
-        .filter(Boolean)
-        .join(" | ")
+    ? view.relayLegNumber
+      ? `Leg ${view.relayLegNumber}${view.legSplit ? ` - ${view.legSplit}` : ""}`
+      : view.legSplit
+        ? `Split ${view.legSplit}`
+        : null
     : null
   const heatLane = display.showHeatLane ? view.heatLane : null
   return {
     eventNumber: view.badgeNumber,
     label: (view.isRelay ? relayName : view.label) ?? "",
     fullLabel: view.isRelay ? relayFullName : undefined,
+    // By event the round is its own gold tag; by athlete it leads the grey text after the label.
+    round: (eventView && display.showRound && view.round) || undefined,
     sub:
-      [display.showRound ? view.round : null, view.isRelay ? null : view.sub].filter(Boolean).join(" · ") ||
-      undefined,
+      [!eventView && display.showRound ? view.round : null, view.isRelay ? null : view.sub]
+        .filter(Boolean)
+        .join(" · ") || undefined,
     meta: meta || undefined,
     heatLane: heatLane || undefined,
     startTime,
@@ -1215,10 +1239,11 @@ export default function MeetSheetSummarySection({
     persist(ROWINFO_KEY, JSON.stringify({ round, hl }))
   }
 
-  // A points column, lined up across every row, once the results PDF's points are in.
+  // A points column, lined up across every row, once there are points (the results PDF's, or the
+  // meet's scoring table's).
   const showPoints =
     (results ?? []).some((r) => r.resultPoints != null || r.finalPoints != null || r.prelimPoints != null) ||
-    (relayResults ?? []).some((r) => r.resultPoints != null)
+    (relayResults ?? []).some((r) => r.resultPoints != null || r.finalPoints != null)
   const display: RowDisplay = { density, showRound, showHeatLane, showPoints }
 
   const athleteGenders = new Map(
@@ -1511,8 +1536,8 @@ export default function MeetSheetSummarySection({
    */
   function buildPdfRequest(): RosterSummaryPdfRequest {
     const rowCtx = { athleteGenders, allEntries: displayEntries, eventNumberOptions }
-    const toRow = (entry: SummaryEntry, eventView = false, athleteId?: string) =>
-      summaryRowPdf(entry, rowCtx, display, eventView, athleteId)
+    const toRow = (entry: SummaryEntry, eventView = false, athleteId?: string, showRound = display.showRound) =>
+      summaryRowPdf(entry, rowCtx, { ...display, showRound }, eventView, athleteId)
     // "Entries" → "Heats" once a heat sheet is in → "Results" once results are posted.
     const title = rosterSummaryTitle({
       hasHeatSheet: Boolean(heatSummary || finalsHeatSummary),
@@ -1561,11 +1586,33 @@ export default function MeetSheetSummarySection({
         },
       ]
     } else if (viewByEvent) {
-      sections = sortedEventGroups.map((group) => ({
-        title: group.title,
-        eventNumber: group.eventNumber > 0 ? group.eventNumber : undefined,
-        rows: sortEventEntries(group.entries, displayEntries).map((entry) => toRow(entry, true)),
-      }))
+      sections = sortedEventGroups.map((group) => {
+        const entries = sortEventEntries(group.entries, displayEntries)
+        const rounds = entriesByRound(entries, displayEntries)
+        const section = {
+          title: group.title,
+          eventNumber: group.eventNumber > 0 ? group.eventNumber : undefined,
+        }
+        // A timed final names its round once beside the title (when rounds are shown).
+        if (rounds?.length === 1 && rounds[0].kind === "T") {
+          return {
+            ...section,
+            sub: display.showRound ? EXPORT_ROUND_LABELS[rounds[0].kind] : undefined,
+            rows: entries.map((entry) => toRow(entry, true, undefined, false)),
+          }
+        }
+        // Prelims and finals each go under their own subheading — even when only one of them is
+        // listed — which then names the round in place of its rows.
+        return {
+          ...section,
+          rows: rounds
+            ? rounds.flatMap(({ kind, entries }) => [
+                { label: EXPORT_ROUND_LABELS[kind], subheading: true },
+                ...entries.map((entry) => toRow(entry, true, undefined, false)),
+              ])
+            : entries.map((entry) => toRow(entry, true)),
+        }
+      })
       return { heading, sections, splitSections: true, ...orderOfEvents }
     } else {
       for (const athleteGroup of filterAthleteGroups(grouped)) {

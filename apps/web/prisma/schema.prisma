@@ -201,6 +201,9 @@ model Meet {
   /// Coach-added heat/lane/start time for roster summary rows: { entries: HeatLaneOverride[] }.
   /// Only shown where no import supplies that field; survives re-imports.
   heatLaneOverrides Json?
+  /// Staff-entered points by place: { individual: number[], relay: number[] } (index = place - 1).
+  /// Scores finals and timed-finals swims (and relays) a results PDF gave no points.
+  scoringTable  Json?
   photos        Json?
   createdAt     DateTime  @default(now())
   swims         Swim[]

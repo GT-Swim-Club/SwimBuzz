@@ -10,6 +10,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 1,
+      "points": 40.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -47,6 +48,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 2,
+      "points": 34.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -84,6 +86,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 3,
+      "points": 32.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -121,6 +124,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 4,
+      "points": 30.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -158,6 +162,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 5,
+      "points": 28.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -195,6 +200,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 6,
+      "points": 26.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -232,6 +238,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 7,
+      "points": 24.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -269,6 +276,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 8,
+      "points": 22.0,
       "relayLetter": "C",
       "relaySwimmers": [
         {
@@ -306,6 +314,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 9,
+      "points": 18.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -380,6 +389,7 @@
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 11,
+      "points": 14.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -417,6 +427,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 1,
+      "points": 40.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -454,6 +465,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 2,
+      "points": 34.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -491,6 +503,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 3,
+      "points": 32.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -528,6 +541,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 4,
+      "points": 30.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -565,6 +579,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 5,
+      "points": 28.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -602,6 +617,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 6,
+      "points": 26.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -637,6 +653,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 7,
+      "points": 24.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -711,6 +728,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 9,
+      "points": 22.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -785,6 +803,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 11,
+      "points": 18.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -818,6 +837,7 @@
       "event": "200 Medley Relay",
       "gender": "M",
       "place": 12,
+      "points": 14.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -855,6 +875,7 @@
       "event": "200 Free Relay",
       "gender": "F",
       "place": 1,
+      "points": 40.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -892,6 +913,7 @@
       "event": "200 Free Relay",
       "gender": "F",
       "place": 2,
+      "points": 34.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -929,6 +951,7 @@
       "event": "200 Free Relay",
       "gender": "F",
       "place": 3,
+      "points": 32.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -966,6 +989,7 @@
       "event": "200 Free Relay",
       "gender": "F",
       "place": 4,
+      "points": 30.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -1003,6 +1027,7 @@
       "event": "200 Free Relay",
       "gender": "F",
       "place": 5,
+      "points": 28.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -1040,6 +1065,7 @@
       "event": "200 Free Relay",
       "gender": "F",
       "place": 6,
+      "points": 26.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -1077,6 +1103,7 @@
       "event": "200 Free Relay",
       "gender": "F",
       "place": 7,
+      "points": 24.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -1151,6 +1178,7 @@
       "event": "200 Free Relay",
       "gender": "F",
       "place": 9,
+      "points": 22.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -1188,6 +1216,7 @@
       "event": "200 Free Relay",
       "gender": "F",
       "place": 10,
+      "points": 18.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -1225,6 +1254,7 @@
       "event": "200 Free Relay",
       "gender": "F",
       "place": 11,
+      "points": 14.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -1336,6 +1366,7 @@
       "event": "200 Free Relay",
       "gender": "M",
       "place": 1,
+      "points": 40.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -1373,6 +1404,7 @@
       "event": "200 Free Relay",
       "gender": "M",
       "place": 2,
+      "points": 34.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -1410,6 +1442,7 @@
       "event": "200 Free Relay",
       "gender": "M",
       "place": 3,
+      "points": 32.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -1447,6 +1480,7 @@
       "event": "200 Free Relay",
       "gender": "M",
       "place": 4,
+      "points": 30.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -1484,6 +1518,7 @@
       "event": "200 Free Relay",
       "gender": "M",
       "place": 5,
+      "points": 28.0,
       "relayLetter": "C",
       "relaySwimmers": [
         {
@@ -1517,6 +1552,7 @@
       "event": "200 Free Relay",
       "gender": "M",
       "place": 6,
+      "points": 26.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -1591,6 +1627,7 @@
       "event": "200 Free Relay",
       "gender": "M",
       "place": 8,
+      "points": 24.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -1628,6 +1665,7 @@
       "event": "200 Free Relay",
       "gender": "M",
       "place": 9,
+      "points": 22.0,
       "relayLetter": "A",
       "relaySwimmers": [
         {
@@ -1665,6 +1703,7 @@
       "event": "200 Free Relay",
       "gender": "M",
       "place": 10,
+      "points": 18.0,
       "relayLetter": "B",
       "relaySwimmers": [
         {
@@ -1738,6 +1777,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Kofman, Tahlia",
       "place": 1,
       "splits": [
@@ -1765,6 +1805,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Munger, Audrey",
       "place": 2,
       "splits": [
@@ -1792,8 +1833,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "McMullan, Nicole",
       "place": 3,
+      "points": 16.0,
       "splits": [
         {
           "distance": 50,
@@ -1819,8 +1862,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Kelly, Jemma",
       "place": 4,
+      "points": 15.0,
       "splits": [
         {
           "distance": 66,
@@ -1842,8 +1887,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Hawkins, Taylor",
       "place": 5,
+      "points": 14.0,
       "splits": [
         {
           "distance": 50,
@@ -1869,8 +1916,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Lee, Morgan",
       "place": 6,
+      "points": 13.0,
       "splits": [
         {
           "distance": 50,
@@ -1896,8 +1945,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Witthoff, Mia",
       "place": 7,
+      "points": 12.0,
       "splits": [
         {
           "distance": 50,
@@ -1923,8 +1974,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Britto, Camryn",
       "place": 8,
+      "points": 11.0,
       "splits": [
         {
           "distance": 50,
@@ -1950,6 +2003,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Lamb, Grayce",
       "place": null,
       "splits": [
@@ -1973,6 +2027,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Carlton, Delaney",
       "place": null,
       "tags": "",
@@ -1982,6 +2037,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "F",
       "name": "Amaral, Joana",
       "place": null,
       "tags": "",
@@ -1991,6 +2047,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Marquez, Alexandro",
       "place": 1,
       "splits": [
@@ -2018,6 +2075,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Mackay, Nolan",
       "place": 2,
       "splits": [
@@ -2045,6 +2103,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Grossman, Oliver",
       "place": 3,
       "splits": [
@@ -2072,6 +2131,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Martin, Colton",
       "place": 4,
       "splits": [
@@ -2099,8 +2159,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Smith, Benjamin",
       "place": 5,
+      "points": 14.0,
       "splits": [
         {
           "distance": 50,
@@ -2126,8 +2188,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Bratu, Dan",
       "place": 6,
+      "points": 13.0,
       "splits": [
         {
           "distance": 50,
@@ -2153,8 +2217,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Nagel, Lucas",
       "place": 7,
+      "points": 12.0,
       "splits": [
         {
           "distance": 50,
@@ -2180,8 +2246,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Williams, Mayon",
       "place": null,
+      "points": 11.0,
       "splits": [
         {
           "distance": 50,
@@ -2207,8 +2275,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Weitzel, Logan",
       "place": 9,
+      "points": 9.0,
       "splits": [
         {
           "distance": 50,
@@ -2234,8 +2304,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Grann, Gavin",
       "place": 10,
+      "points": 7.0,
       "splits": [
         {
           "distance": 50,
@@ -2261,8 +2333,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Murray, Liam",
       "place": 11,
+      "points": 6.0,
       "splits": [
         {
           "distance": 50,
@@ -2288,8 +2362,10 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Johnson, Benjamin",
       "place": 12,
+      "points": 5.0,
       "splits": [
         {
           "distance": 50,
@@ -2309,14 +2385,16 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "FSUC",
       "time": "2:23.81"
     },
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Varela, Marcelo",
       "place": 13,
+      "points": 4.0,
       "splits": [
         {
           "distance": 50,
@@ -2342,6 +2420,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Vlady, George",
       "place": null,
       "tags": "",
@@ -2351,6 +2430,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "Farrar, Ted",
       "place": null,
       "tags": "",
@@ -2360,6 +2440,7 @@
     {
       "course": "SCY",
       "event": "200 Free",
+      "gender": "M",
       "name": "McGahagin, Connor",
       "place": null,
       "tags": "",
@@ -2369,6 +2450,7 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "F",
       "name": "Vroon, Katelyn",
       "place": 1,
       "splits": [
@@ -2396,6 +2478,7 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "F",
       "name": "Plantamura, Natalie",
       "place": 2,
       "splits": [
@@ -2423,6 +2506,7 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "F",
       "name": "Austin, Whitney",
       "place": 3,
       "splits": [
@@ -2450,6 +2534,7 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "F",
       "name": "Roth, Alison",
       "place": 4,
       "splits": [
@@ -2477,8 +2562,10 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "F",
       "name": "Albert, Katie",
       "place": 5,
+      "points": 14.0,
       "splits": [
         {
           "distance": 50,
@@ -2504,8 +2591,10 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "F",
       "name": "Mitchell, Ali",
       "place": 6,
+      "points": 13.0,
       "splits": [
         {
           "distance": 50,
@@ -2531,8 +2620,10 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "F",
       "name": "Everitt, Julia",
       "place": 7,
+      "points": 12.0,
       "splits": [
         {
           "distance": 50,
@@ -2558,8 +2649,10 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "F",
       "name": "Pye, Allison",
       "place": 8,
+      "points": 11.0,
       "splits": [
         {
           "distance": 50,
@@ -2585,8 +2678,10 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "F",
       "name": "Yang, Amy",
       "place": 9,
+      "points": 9.0,
       "splits": [
         {
           "distance": 100,
@@ -2604,8 +2699,10 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "F",
       "name": "Hoang, Alexa",
       "place": 10,
+      "points": 7.0,
       "splits": [
         {
           "distance": 50,
@@ -2631,6 +2728,7 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "F",
       "name": "Li, Adeline",
       "place": null,
       "tags": "",
@@ -2640,6 +2738,7 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "F",
       "name": "May, Kahleia",
       "place": null,
       "tags": "",
@@ -2649,6 +2748,7 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "M",
       "name": "Hall, Jonathan",
       "place": 1,
       "splits": [
@@ -2676,6 +2776,7 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "M",
       "name": "Pianoto, Matthew",
       "place": 2,
       "splits": [
@@ -2703,6 +2804,7 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "M",
       "name": "Slater, Landon",
       "place": 3,
       "splits": [
@@ -2730,6 +2832,7 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "M",
       "name": "Moore, Nicholas",
       "place": 4,
       "splits": [
@@ -2757,6 +2860,7 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "M",
       "name": "Rohovit, Hunter",
       "place": 5,
       "splits": [
@@ -2784,8 +2888,10 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "M",
       "name": "Mirsaderov, Nik",
       "place": 6,
+      "points": 13.0,
       "splits": [
         {
           "distance": 50,
@@ -2811,8 +2917,10 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "M",
       "name": "McCright, David",
       "place": 7,
+      "points": 12.0,
       "splits": [
         {
           "distance": 50,
@@ -2838,8 +2946,10 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "M",
       "name": "Johnson, Lucas",
       "place": 8,
+      "points": 11.0,
       "splits": [
         {
           "distance": 50,
@@ -2865,8 +2975,10 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "M",
       "name": "Liu, Alex",
       "place": 9,
+      "points": 9.0,
       "splits": [
         {
           "distance": 50,
@@ -2892,8 +3004,10 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "M",
       "name": "Rice, Thomas",
       "place": 10,
+      "points": 7.0,
       "splits": [
         {
           "distance": 50,
@@ -2919,8 +3033,10 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "M",
       "name": "Feller, Curtis",
       "place": 11,
+      "points": 6.0,
       "splits": [
         {
           "distance": 50,
@@ -2946,8 +3062,10 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "M",
       "name": "Allen, Hunter",
       "place": 12,
+      "points": 5.0,
       "splits": [
         {
           "distance": 50,
@@ -2973,8 +3091,10 @@
     {
       "course": "SCY",
       "event": "200 IM",
+      "gender": "M",
       "name": "Kinter, Nathan",
       "place": 13,
+      "points": 4.0,
       "splits": [
         {
           "distance": 50,
@@ -3000,6 +3120,7 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "F",
       "name": "Freund, Gabby",
       "place": 1,
       "splits": [
@@ -3019,6 +3140,7 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "F",
       "name": "Sealey, Isabelle",
       "place": 2,
       "splits": [
@@ -3038,6 +3160,7 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "F",
       "name": "Hicks, Erin",
       "place": 3,
       "splits": [
@@ -3057,6 +3180,7 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "F",
       "name": "Spaulding, Alice",
       "place": 4,
       "splits": [
@@ -3076,6 +3200,7 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "F",
       "name": "Kofman, Tahlia",
       "place": 5,
       "splits": [
@@ -3095,8 +3220,10 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "F",
       "name": "Hawkins, Taylor",
       "place": 6,
+      "points": 13.0,
       "splits": [
         {
           "distance": 50,
@@ -3114,8 +3241,10 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "F",
       "name": "Greaux, Lauren",
       "place": 7,
+      "points": 12.0,
       "splits": [
         {
           "distance": 50,
@@ -3133,8 +3262,10 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "F",
       "name": "Elder, Ashley",
       "place": 8,
+      "points": 11.0,
       "splits": [
         {
           "distance": 50,
@@ -3152,6 +3283,7 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "Kvashchuk, Mykhailo",
       "place": 1,
       "splits": [
@@ -3171,6 +3303,7 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "Rimsa, Thomas",
       "place": 2,
       "splits": [
@@ -3190,6 +3323,7 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "Cresap, Brandon",
       "place": 3,
       "splits": [
@@ -3209,8 +3343,10 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "Forkey, Carson",
       "place": 4,
+      "points": 15.0,
       "splits": [
         {
           "distance": 50,
@@ -3228,8 +3364,10 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "White, Aidan",
       "place": 5,
+      "points": 14.0,
       "splits": [
         {
           "distance": 50,
@@ -3247,8 +3385,10 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "Westin, Michael",
       "place": 6,
+      "points": 13.0,
       "splits": [
         {
           "distance": 50,
@@ -3266,8 +3406,10 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "Nucci, Renzo",
       "place": 7,
+      "points": 12.0,
       "splits": [
         {
           "distance": 50,
@@ -3285,8 +3427,10 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "Chen, Alex",
       "place": 8,
+      "points": 11.0,
       "splits": [
         {
           "distance": 50,
@@ -3304,8 +3448,10 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "Cao, Bradley",
       "place": 9,
+      "points": 9.0,
       "splits": [
         {
           "distance": 50,
@@ -3323,8 +3469,10 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "Moore, Nicholas",
       "place": 10,
+      "points": 7.0,
       "splits": [
         {
           "distance": 50,
@@ -3342,8 +3490,10 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "Bataillon, Daniel",
       "place": 11,
+      "points": 6.0,
       "splits": [
         {
           "distance": 50,
@@ -3361,8 +3511,10 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "Kharel, Avi",
       "place": 12,
+      "points": 5.0,
       "splits": [
         {
           "distance": 50,
@@ -3380,8 +3532,10 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "Davis, Lukas",
       "place": 13,
+      "points": 4.0,
       "splits": [
         {
           "distance": 50,
@@ -3399,8 +3553,10 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "Felix, Adrian",
       "place": 14,
+      "points": 3.0,
       "splits": [
         {
           "distance": 50,
@@ -3418,6 +3574,7 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "Whitaker, Brock",
       "place": null,
       "splits": [
@@ -3437,6 +3594,7 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "Burke, Aidan",
       "place": null,
       "tags": "",
@@ -3446,6 +3604,7 @@
     {
       "course": "SCY",
       "event": "100 Fly",
+      "gender": "M",
       "name": "Vlady, George",
       "place": null,
       "tags": "",
@@ -3455,6 +3614,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Fulton, Rachel",
       "place": 1,
       "tags": "",
@@ -3464,6 +3624,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Gavin, Anna",
       "place": 2,
       "tags": "",
@@ -3473,6 +3634,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Ochoa, Iris",
       "place": 3,
       "tags": "",
@@ -3482,6 +3644,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "McMullan, Nicole",
       "place": 4,
       "tags": "",
@@ -3491,8 +3654,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Roberts, Stella",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "FSUC",
       "time": "26.36"
@@ -3500,8 +3665,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Munger, Audrey",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "GTSC",
       "time": "26.37"
@@ -3509,8 +3676,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Baker, Regan",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "AUB",
       "time": "26.38"
@@ -3518,8 +3687,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Freund, Gabby",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "GTSC",
       "time": "26.42"
@@ -3527,8 +3698,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Kelly, Jemma",
       "place": 9,
+      "points": 8.0,
       "tags": "",
       "team": "FSUC",
       "time": "26.51"
@@ -3536,8 +3709,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Ruona, Kate",
       "place": 9,
+      "points": 8.0,
       "tags": "",
       "team": "FSUC",
       "time": "26.51"
@@ -3545,8 +3720,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "May, Kahleia",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "KSU",
       "time": "26.66"
@@ -3554,8 +3731,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Brefeld, Peyton",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": "FSUC",
       "time": "26.71"
@@ -3563,8 +3742,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Kohs, Madeline",
       "place": 13,
+      "points": 4.0,
       "tags": "",
       "team": "FSUC",
       "time": "26.76"
@@ -3572,8 +3753,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Kofman, Tahlia",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": "FSUC",
       "time": "26.77"
@@ -3581,8 +3764,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Long, Piper",
       "place": 15,
+      "points": 2.0,
       "tags": "",
       "team": "AUB",
       "time": "26.83"
@@ -3590,8 +3775,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Mathis, Amber",
       "place": 16,
+      "points": 1.0,
       "tags": "",
       "team": "AUB",
       "time": "26.91"
@@ -3599,6 +3786,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Avedisian, Michaela",
       "place": 17,
       "tags": "",
@@ -3608,6 +3796,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Newcome, Ava",
       "place": 18,
       "tags": "",
@@ -3617,6 +3806,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Cole, Lily",
       "place": 19,
       "tags": "",
@@ -3626,6 +3816,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Stepanian, Alique",
       "place": 20,
       "tags": "",
@@ -3635,6 +3826,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Alsobrook, Katharine",
       "place": 21,
       "tags": "",
@@ -3644,6 +3836,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Peterson, Skylar",
       "place": 22,
       "tags": "",
@@ -3653,6 +3846,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Stewart, Caroline",
       "place": 23,
       "tags": "",
@@ -3662,6 +3856,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Lee, Morgan",
       "place": 24,
       "tags": "",
@@ -3671,6 +3866,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Smith, Mackenzie",
       "place": 25,
       "tags": "",
@@ -3680,6 +3876,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Hudson, Ruby",
       "place": 26,
       "tags": "",
@@ -3689,6 +3886,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Meckley, Irelyn",
       "place": 27,
       "tags": "",
@@ -3698,6 +3896,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Baumhover, Aubrey",
       "place": 28,
       "tags": "",
@@ -3707,6 +3906,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Kimbrell, Mackenzie",
       "place": 29,
       "tags": "",
@@ -3716,6 +3916,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Heritage, Greer",
       "place": 30,
       "tags": "",
@@ -3725,6 +3926,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Moor, Grace",
       "place": 31,
       "tags": "",
@@ -3734,6 +3936,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Everitt, Julia",
       "place": 32,
       "tags": "",
@@ -3743,6 +3946,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Ashley, Ella",
       "place": 33,
       "tags": "",
@@ -3752,6 +3956,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Chetrit, Nell",
       "place": 34,
       "tags": "",
@@ -3761,6 +3966,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Swearingen, Myles",
       "place": 35,
       "tags": "",
@@ -3770,6 +3976,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Florit, Alexis",
       "place": 36,
       "tags": "",
@@ -3779,6 +3986,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Amaral, Joana",
       "place": 37,
       "tags": "",
@@ -3788,6 +3996,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Shumaker, Erin",
       "place": 38,
       "tags": "",
@@ -3797,6 +4006,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Davey, Olivia",
       "place": 39,
       "tags": "",
@@ -3806,6 +4016,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Bargellini, Faith",
       "place": 40,
       "tags": "",
@@ -3815,6 +4026,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Butlak, Makenna",
       "place": 41,
       "tags": "",
@@ -3824,6 +4036,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Eaton, Emily",
       "place": 42,
       "tags": "",
@@ -3833,6 +4046,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "McAlister, Jordan",
       "place": 43,
       "tags": "",
@@ -3842,6 +4056,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Halterman, Grace",
       "place": 44,
       "tags": "",
@@ -3851,6 +4066,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Schmid, Sarah",
       "place": 45,
       "tags": "",
@@ -3860,6 +4076,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Covaliu-Fuentes, Veronic",
       "place": 46,
       "tags": "",
@@ -3869,6 +4086,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Houck, Madison",
       "place": 47,
       "tags": "",
@@ -3878,6 +4096,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Kopkas, Grace",
       "place": 48,
       "tags": "",
@@ -3887,6 +4106,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Pierre, Ella",
       "place": 49,
       "tags": "",
@@ -3896,6 +4116,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "DeLosh, McKenzie",
       "place": 50,
       "tags": "",
@@ -3905,6 +4126,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Adams, Ella",
       "place": 51,
       "tags": "",
@@ -3914,6 +4136,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Harmon, Liliana",
       "place": 52,
       "tags": "",
@@ -3923,6 +4146,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Grant, Alyssa",
       "place": 52,
       "tags": "",
@@ -3932,6 +4156,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Nolan, Maura",
       "place": 54,
       "tags": "",
@@ -3941,6 +4166,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Cornette, Amanda",
       "place": 55,
       "tags": "",
@@ -3950,6 +4176,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Yie, Emiley",
       "place": 56,
       "tags": "",
@@ -3959,6 +4186,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Evans, Ashley",
       "place": 57,
       "tags": "",
@@ -3968,6 +4196,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "O'Malley, Emily",
       "place": 58,
       "tags": "",
@@ -3977,6 +4206,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Concha, Mariafe",
       "place": 59,
       "tags": "",
@@ -3986,6 +4216,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Marazas, Isabelle",
       "place": 60,
       "tags": "",
@@ -3995,6 +4226,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Patel, Jesal",
       "place": 61,
       "tags": "",
@@ -4004,6 +4236,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Gaulin, Lily",
       "place": 62,
       "tags": "",
@@ -4013,6 +4246,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Lamb, Grayce",
       "place": 63,
       "tags": "",
@@ -4022,6 +4256,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "LaGrone, Allison",
       "place": null,
       "tags": "",
@@ -4031,6 +4266,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Choukri, Nora",
       "place": null,
       "tags": "",
@@ -4040,6 +4276,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Renter, Julia",
       "place": null,
       "tags": "",
@@ -4049,6 +4286,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Carlton, Delaney",
       "place": null,
       "tags": "",
@@ -4058,6 +4296,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "F",
       "name": "Anderson, Katie",
       "place": null,
       "tags": "",
@@ -4067,6 +4306,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "White, Keller",
       "place": 1,
       "tags": "",
@@ -4076,6 +4316,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Shoemaker, Harrison",
       "place": 2,
       "tags": "",
@@ -4085,6 +4326,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Gransee, Kyle",
       "place": 3,
       "tags": "",
@@ -4094,6 +4336,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Scott, Sam",
       "place": 4,
       "tags": "",
@@ -4103,6 +4346,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Seward, Lawson",
       "place": 4,
       "tags": "",
@@ -4112,8 +4356,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Herold, Jonathan",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "FSUC",
       "time": "22.63"
@@ -4121,8 +4367,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Matthews, John",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "GTSC",
       "time": "22.71"
@@ -4130,8 +4378,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Kramer, Garrett",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "LSUSC",
       "time": "22.72"
@@ -4139,8 +4389,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Vlady, George",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": "GTSC",
       "time": "22.86"
@@ -4148,8 +4400,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Hall, Jonathan",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": "FSUC",
       "time": "23.00"
@@ -4157,8 +4411,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Holbrook, Mason",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "KSU",
       "time": "23.28"
@@ -4166,8 +4422,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Bratu, Dan",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": "GTSC",
       "time": "23.36"
@@ -4175,8 +4433,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Jones, Justin",
       "place": 13,
+      "points": 4.0,
       "tags": "",
       "team": "GTSC",
       "time": "23.52"
@@ -4184,8 +4444,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Conners, Jack",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": "AUB",
       "time": "23.59"
@@ -4193,8 +4455,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Laurie, Aiden",
       "place": 15,
+      "points": 1.5,
       "tags": "",
       "team": "FSUC",
       "time": "23.60"
@@ -4202,8 +4466,10 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Klingenberg, Brennan",
       "place": 15,
+      "points": 1.5,
       "tags": "",
       "team": "GTSC",
       "time": "23.60"
@@ -4211,6 +4477,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Hamrick, Nat",
       "place": 17,
       "tags": "",
@@ -4220,6 +4487,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Witham, Noah",
       "place": 18,
       "tags": "",
@@ -4229,6 +4497,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Curtiss, Jacob",
       "place": 19,
       "tags": "",
@@ -4238,6 +4507,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Townsend, Matthew",
       "place": 20,
       "tags": "",
@@ -4247,6 +4517,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Ball, Patrick",
       "place": 21,
       "tags": "",
@@ -4256,6 +4527,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Hernandez, Joshua",
       "place": 22,
       "tags": "",
@@ -4265,6 +4537,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Jeon, Peyton",
       "place": 23,
       "tags": "",
@@ -4274,6 +4547,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Jones, Peyton",
       "place": 24,
       "tags": "",
@@ -4283,6 +4557,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Grann, Gavin",
       "place": 25,
       "tags": "",
@@ -4292,6 +4567,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Simmons, Ben",
       "place": 26,
       "tags": "",
@@ -4301,6 +4577,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Westin, Michael",
       "place": 27,
       "tags": "",
@@ -4310,6 +4587,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Balkcum, Kyle",
       "place": 28,
       "tags": "",
@@ -4319,6 +4597,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Grutter, Maxwell",
       "place": 29,
       "tags": "",
@@ -4328,6 +4607,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Chen, Alex",
       "place": 30,
       "tags": "",
@@ -4337,6 +4617,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Weitzel, Logan",
       "place": 31,
       "tags": "",
@@ -4346,6 +4627,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Cheung, Chris",
       "place": 32,
       "tags": "",
@@ -4355,6 +4637,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Pro, Sawyer",
       "place": 33,
       "tags": "",
@@ -4364,6 +4647,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Hudson, Noah",
       "place": 33,
       "tags": "",
@@ -4373,6 +4657,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Vo, Brandon",
       "place": 35,
       "tags": "",
@@ -4382,6 +4667,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Kennedy, Avery",
       "place": 36,
       "tags": "",
@@ -4391,6 +4677,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Manley, Adam",
       "place": 37,
       "tags": "",
@@ -4400,6 +4687,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Murray, Liam",
       "place": 38,
       "tags": "",
@@ -4409,6 +4697,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Davis, Lukas",
       "place": 39,
       "tags": "",
@@ -4418,6 +4707,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Cao, Bradley",
       "place": 40,
       "tags": "",
@@ -4427,6 +4717,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Smith, Logan",
       "place": 41,
       "tags": "",
@@ -4436,6 +4727,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Jeyaseelan, Robert",
       "place": 42,
       "tags": "",
@@ -4445,6 +4737,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Rainbow, Ben",
       "place": 43,
       "tags": "",
@@ -4454,6 +4747,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "McGahagin, Connor",
       "place": 44,
       "tags": "",
@@ -4463,15 +4757,17 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Johnson, Benjamin",
       "place": 45,
       "tags": "",
-      "team": null,
+      "team": "FSUC",
       "time": "27.49"
     },
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Radio, Jack",
       "place": 46,
       "tags": "",
@@ -4481,6 +4777,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Vlady, Richard",
       "place": 47,
       "tags": "",
@@ -4490,6 +4787,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Musabeh, Khaled",
       "place": 48,
       "tags": "",
@@ -4499,6 +4797,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Ferretiz, Aldo",
       "place": 49,
       "tags": "",
@@ -4508,6 +4807,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Muralidharan, Vish",
       "place": 50,
       "tags": "",
@@ -4517,6 +4817,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Friginette, Brandon",
       "place": 51,
       "tags": "",
@@ -4526,6 +4827,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Kamau, Kevin",
       "place": 52,
       "tags": "",
@@ -4535,6 +4837,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Varela, Marcelo",
       "place": 53,
       "tags": "",
@@ -4544,6 +4847,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Saglam, Semih",
       "place": 54,
       "tags": "",
@@ -4553,6 +4857,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Owens, Logan",
       "place": 55,
       "tags": "",
@@ -4562,6 +4867,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Guy, Jonathan",
       "place": null,
       "tags": "",
@@ -4571,6 +4877,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "White, Aidan",
       "place": null,
       "tags": "",
@@ -4580,6 +4887,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Foran, Gavin",
       "place": null,
       "tags": "",
@@ -4589,6 +4897,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Bustard, Nate",
       "place": null,
       "tags": "",
@@ -4598,6 +4907,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Payne, Tristan",
       "place": null,
       "tags": "",
@@ -4607,6 +4917,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Skidmore, Billy",
       "place": null,
       "tags": "",
@@ -4616,6 +4927,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Stephenson, AJ",
       "place": null,
       "tags": "",
@@ -4625,6 +4937,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Metersky, Joshua",
       "place": null,
       "tags": "",
@@ -4634,6 +4947,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Taylor, Holden",
       "place": null,
       "tags": "",
@@ -4643,6 +4957,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Sanders, Maxwell",
       "place": null,
       "tags": "",
@@ -4652,6 +4967,7 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "M",
       "name": "Cresap, Brandon",
       "place": null,
       "tags": "",
@@ -4661,6 +4977,7 @@
     {
       "course": "SCY",
       "event": "200 Breast",
+      "gender": "F",
       "name": "Lorber, Suhzanne",
       "place": 1,
       "splits": [
@@ -4688,6 +5005,7 @@
     {
       "course": "SCY",
       "event": "200 Breast",
+      "gender": "F",
       "name": "Elvambuena, Ella",
       "place": 2,
       "splits": [
@@ -4715,6 +5033,7 @@
     {
       "course": "SCY",
       "event": "200 Breast",
+      "gender": "F",
       "name": "Wong, Tara",
       "place": 3,
       "splits": [
@@ -4742,8 +5061,10 @@
     {
       "course": "SCY",
       "event": "200 Breast",
+      "gender": "F",
       "name": "Foran, Lucilia",
       "place": 4,
+      "points": 15.0,
       "splits": [
         {
           "distance": 50,
@@ -4769,6 +5090,7 @@
     {
       "course": "SCY",
       "event": "200 Breast",
+      "gender": "F",
       "name": "Smith, Chelsea",
       "place": null,
       "tags": "",
@@ -4778,6 +5100,7 @@
     {
       "course": "SCY",
       "event": "200 Breast",
+      "gender": "M",
       "name": "Long, Liam",
       "place": 1,
       "splits": [
@@ -4805,6 +5128,7 @@
     {
       "course": "SCY",
       "event": "200 Breast",
+      "gender": "M",
       "name": "Pianoto, Matthew",
       "place": 2,
       "splits": [
@@ -4832,8 +5156,10 @@
     {
       "course": "SCY",
       "event": "200 Breast",
+      "gender": "M",
       "name": "Liu, Alex",
       "place": 3,
+      "points": 16.0,
       "splits": [
         {
           "distance": 50,
@@ -4859,8 +5185,10 @@
     {
       "course": "SCY",
       "event": "200 Breast",
+      "gender": "M",
       "name": "Fleischer, Eli",
       "place": 4,
+      "points": 15.0,
       "splits": [
         {
           "distance": 50,
@@ -4886,6 +5214,7 @@
     {
       "course": "SCY",
       "event": "200 Breast",
+      "gender": "M",
       "name": "Howard, Josh",
       "place": null,
       "tags": "",
@@ -4895,6 +5224,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Sealey, Isabelle",
       "place": 1,
       "splits": [
@@ -4914,6 +5244,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Brefeld, Peyton",
       "place": 2,
       "splits": [
@@ -4933,6 +5264,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "May, Kahleia",
       "place": 3,
       "splits": [
@@ -4952,6 +5284,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Wang, Mingqi",
       "place": 4,
       "splits": [
@@ -4971,8 +5304,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "McCarty, Ava",
       "place": 5,
+      "points": 14.0,
       "splits": [
         {
           "distance": 50,
@@ -4990,8 +5325,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "McMullan, Nicole",
       "place": 6,
+      "points": 13.0,
       "splits": [
         {
           "distance": 50,
@@ -5009,8 +5346,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Haskell, Miyu",
       "place": 7,
+      "points": 12.0,
       "splits": [
         {
           "distance": 50,
@@ -5028,8 +5367,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Catalasan, Mariann",
       "place": 8,
+      "points": 11.0,
       "splits": [
         {
           "distance": 50,
@@ -5047,8 +5388,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Kelly, Jemma",
       "place": 9,
+      "points": 9.0,
       "splits": [
         {
           "distance": 50,
@@ -5066,8 +5409,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Alsobrook, Katharine",
       "place": 10,
+      "points": 7.0,
       "splits": [
         {
           "distance": 50,
@@ -5085,8 +5430,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Mitchell, Ali",
       "place": 11,
+      "points": 6.0,
       "splits": [
         {
           "distance": 50,
@@ -5104,8 +5451,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Miller, Charli",
       "place": 12,
+      "points": 5.0,
       "splits": [
         {
           "distance": 50,
@@ -5123,8 +5472,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Kimbrell, Mackenzie",
       "place": 13,
+      "points": 4.0,
       "splits": [
         {
           "distance": 50,
@@ -5142,8 +5493,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Sampson, Mackenzie",
       "place": 14,
+      "points": 3.0,
       "splits": [
         {
           "distance": 50,
@@ -5161,8 +5514,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "F",
       "name": "Gaulin, Lily",
       "place": 15,
+      "points": 2.0,
       "splits": [
         {
           "distance": 50,
@@ -5180,6 +5535,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Riordan, James",
       "place": 1,
       "splits": [
@@ -5199,6 +5555,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Marquez, Alexandro",
       "place": 2,
       "splits": [
@@ -5218,6 +5575,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Moore, Nicholas",
       "place": 3,
       "splits": [
@@ -5237,8 +5595,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Johnson, Lucas",
       "place": 4,
+      "points": 15.0,
       "splits": [
         {
           "distance": 50,
@@ -5256,8 +5616,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Bataillon, Daniel",
       "place": 5,
+      "points": 14.0,
       "splits": [
         {
           "distance": 50,
@@ -5275,8 +5637,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Johnson, Benny",
       "place": 6,
+      "points": 13.0,
       "splits": [
         {
           "distance": 50,
@@ -5294,8 +5658,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Hamrick, Nat",
       "place": 7,
+      "points": 12.0,
       "splits": [
         {
           "distance": 50,
@@ -5313,8 +5679,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Ball, Patrick",
       "place": 8,
+      "points": 10.0,
       "splits": [
         {
           "distance": 50,
@@ -5332,8 +5700,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Nagel, Lucas",
       "place": 8,
+      "points": 10.0,
       "tags": "",
       "team": "GTSC",
       "time": "1:05.10"
@@ -5341,8 +5711,10 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Smith, Logan",
       "place": 10,
+      "points": 7.0,
       "splits": [
         {
           "distance": 50,
@@ -5360,6 +5732,7 @@
     {
       "course": "SCY",
       "event": "100 Back",
+      "gender": "M",
       "name": "Conners, Jack",
       "place": null,
       "tags": "",
@@ -5369,6 +5742,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Marim, Isabella",
       "place": 1,
       "tags": "",
@@ -5378,6 +5752,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Gavin, Anna",
       "place": 2,
       "tags": "",
@@ -5387,6 +5762,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Stewart, Caroline",
       "place": 3,
       "tags": "",
@@ -5396,6 +5772,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Lorber, Suhzanne",
       "place": 4,
       "tags": "",
@@ -5405,8 +5782,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Wong, Tara",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "GTSC",
       "time": "34.76"
@@ -5414,8 +5793,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Hudson, Ruby",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "AUB",
       "time": "34.99"
@@ -5423,8 +5804,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Vroon, Katelyn",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "FLOR",
       "time": "35.00"
@@ -5432,8 +5815,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Elvambuena, Ella",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "GTSC",
       "time": "35.23"
@@ -5441,8 +5826,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Roth, Alison",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": "AUB",
       "time": "35.39"
@@ -5450,8 +5837,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Avedisian, Michaela",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": "FSUC",
       "time": "35.44"
@@ -5459,8 +5848,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Smith, Mackenzie",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "FLOR",
       "time": "35.87"
@@ -5468,8 +5859,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Ashley, Ella",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": "FSUC",
       "time": "36.38"
@@ -5477,8 +5870,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Carver, Chloe",
       "place": 13,
+      "points": 4.0,
       "tags": "",
       "team": "AUB",
       "time": "36.48"
@@ -5486,8 +5881,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Chetrit, Nell",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": "KSU",
       "time": "36.52"
@@ -5495,8 +5892,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Allibone, Jessica",
       "place": 15,
+      "points": 2.0,
       "tags": "",
       "team": "GTSC",
       "time": "36.83"
@@ -5504,8 +5903,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Heritage, Greer",
       "place": 16,
+      "points": 1.0,
       "tags": "",
       "team": "AUB",
       "time": "36.99"
@@ -5513,6 +5914,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Peterson, Skylar",
       "place": 17,
       "tags": "",
@@ -5522,6 +5924,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Pye, Allison",
       "place": 18,
       "tags": "",
@@ -5531,6 +5934,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Moor, Grace",
       "place": 19,
       "tags": "",
@@ -5540,6 +5944,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Bontrager, Allison",
       "place": 20,
       "tags": "",
@@ -5549,6 +5954,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Johnson, Madelyn",
       "place": 21,
       "tags": "",
@@ -5558,6 +5964,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "DeLosh, McKenzie",
       "place": 22,
       "tags": "",
@@ -5567,6 +5974,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Schmid, Sarah",
       "place": 23,
       "tags": "",
@@ -5576,6 +5984,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Britto, Camryn",
       "place": 24,
       "tags": "",
@@ -5585,6 +5994,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Nolan, Maura",
       "place": 25,
       "tags": "",
@@ -5594,6 +6004,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Sampson, Mackenzie",
       "place": 26,
       "tags": "",
@@ -5603,6 +6014,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Covaliu-Fuentes, Veronic",
       "place": 27,
       "tags": "",
@@ -5612,6 +6024,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Cornette, Amanda",
       "place": 28,
       "tags": "",
@@ -5621,6 +6034,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "LaGrone, Allison",
       "place": 29,
       "tags": "",
@@ -5630,6 +6044,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "F",
       "name": "Grant, Alyssa",
       "place": 30,
       "tags": "",
@@ -5639,8 +6054,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Rosal, Gareth",
       "place": 1,
+      "points": 20.0,
       "tags": "",
       "team": "FSUC",
       "time": "28.95"
@@ -5648,8 +6065,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Cresap, Brandon",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "AUB",
       "time": "29.39"
@@ -5657,8 +6076,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Blount, Owen",
       "place": 3,
+      "points": 16.0,
       "tags": "",
       "team": "FLOR",
       "time": "29.45"
@@ -5666,8 +6087,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Seward, Lawson",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "FSUC",
       "time": "29.77"
@@ -5675,8 +6098,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Nucci, Renzo",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "FSUC",
       "time": "30.02"
@@ -5684,8 +6109,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Ernest, Asa",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "AUB",
       "time": "30.05"
@@ -5693,8 +6120,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Holbrook, Mason",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "KSU",
       "time": "30.09"
@@ -5702,8 +6131,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Hudson, Noah",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "LSUSC",
       "time": "30.86"
@@ -5711,8 +6142,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Burke, Aidan",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": "AUB",
       "time": "31.61"
@@ -5720,8 +6153,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Zhang, Andrew",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": "GTSC",
       "time": "31.64"
@@ -5729,8 +6164,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Klingenberg, Brennan",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "GTSC",
       "time": "32.28"
@@ -5738,8 +6175,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Balkcum, Kyle",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": "GTSC",
       "time": "32.81"
@@ -5747,8 +6186,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Kharel, Avi",
       "place": 13,
+      "points": 4.0,
       "tags": "",
       "team": "GTSC",
       "time": "32.94"
@@ -5756,8 +6197,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Stephenson, AJ",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": "AUB",
       "time": "33.01"
@@ -5765,8 +6208,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Schmidt, Logan",
       "place": 15,
+      "points": 2.0,
       "tags": "",
       "team": "AUB",
       "time": "33.14"
@@ -5774,8 +6219,10 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Vo, Brandon",
       "place": 16,
+      "points": 1.0,
       "tags": "",
       "team": "GTSC",
       "time": "34.16"
@@ -5783,6 +6230,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Radio, Jack",
       "place": 17,
       "tags": "",
@@ -5792,6 +6240,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Jeyaseelan, Robert",
       "place": 18,
       "tags": "",
@@ -5801,6 +6250,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Fleischer, Eli",
       "place": 19,
       "tags": "",
@@ -5810,6 +6260,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Vlady, Richard",
       "place": 20,
       "tags": "",
@@ -5819,6 +6270,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Muralidharan, Vish",
       "place": 21,
       "tags": "",
@@ -5828,6 +6280,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Friginette, Brandon",
       "place": 22,
       "tags": "",
@@ -5837,6 +6290,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Musabeh, Khaled",
       "place": null,
       "tags": "",
@@ -5846,6 +6300,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Payne, Tristan",
       "place": null,
       "tags": "",
@@ -5855,6 +6310,7 @@
     {
       "course": "SCY",
       "event": "50 Breast",
+      "gender": "M",
       "name": "Metersky, Joshua",
       "place": null,
       "tags": "",
@@ -5864,6 +6320,7 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "F",
       "name": "Plantamura, Natalie",
       "place": 1,
       "splits": [
@@ -5907,6 +6364,7 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "M",
       "name": "Altera, Ryan",
       "place": 1,
       "splits": [
@@ -5950,6 +6408,7 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "M",
       "name": "Long, Liam",
       "place": 2,
       "splits": [
@@ -5993,8 +6452,10 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "M",
       "name": "McCright, David",
       "place": 3,
+      "points": 16.0,
       "splits": [
         {
           "distance": 50,
@@ -6036,6 +6497,7 @@
     {
       "course": "SCY",
       "event": "400 IM",
+      "gender": "M",
       "name": "Hall, Jonathan",
       "place": null,
       "tags": "",
@@ -6045,8 +6507,10 @@
     {
       "course": "SCY",
       "event": "500 Free",
+      "gender": "F",
       "name": "Lorber, Suhzanne",
       "place": 1,
+      "points": 20.0,
       "splits": [
         {
           "distance": 50,
@@ -6096,8 +6560,10 @@
     {
       "course": "SCY",
       "event": "500 Free",
+      "gender": "F",
       "name": "Robertson, Lucy",
       "place": 2,
+      "points": 17.0,
       "splits": [
         {
           "distance": 50,
@@ -6147,8 +6613,10 @@
     {
       "course": "SCY",
       "event": "500 Free",
+      "gender": "F",
       "name": "Kopkas, Grace",
       "place": 3,
+      "points": 16.0,
       "splits": [
         {
           "distance": 50,
@@ -6198,6 +6666,7 @@
     {
       "course": "SCY",
       "event": "500 Free",
+      "gender": "M",
       "name": "Mackay, Nolan",
       "place": 1,
       "splits": [
@@ -6249,8 +6718,10 @@
     {
       "course": "SCY",
       "event": "500 Free",
+      "gender": "M",
       "name": "Martin, Colton",
       "place": 2,
+      "points": 17.0,
       "splits": [
         {
           "distance": 50,
@@ -6300,8 +6771,10 @@
     {
       "course": "SCY",
       "event": "500 Free",
+      "gender": "M",
       "name": "Allen, Hunter",
       "place": 3,
+      "points": 16.0,
       "splits": [
         {
           "distance": 50,
@@ -6351,8 +6824,10 @@
     {
       "course": "SCY",
       "event": "500 Free",
+      "gender": "M",
       "name": "Weitzel, Logan",
       "place": 4,
+      "points": 15.0,
       "splits": [
         {
           "distance": 50,
@@ -6402,8 +6877,10 @@
     {
       "course": "SCY",
       "event": "500 Free",
+      "gender": "M",
       "name": "Varela, Marcelo",
       "place": 5,
+      "points": 14.0,
       "splits": [
         {
           "distance": 50,
@@ -6453,6 +6930,7 @@
     {
       "course": "SCY",
       "event": "500 Free",
+      "gender": "M",
       "name": "Farrar, Ted",
       "place": null,
       "tags": "",
@@ -6462,6 +6940,7 @@
     {
       "course": "SCY",
       "event": "200 Back",
+      "gender": "F",
       "name": "Greaux, Lauren",
       "place": 1,
       "splits": [
@@ -6489,8 +6968,10 @@
     {
       "course": "SCY",
       "event": "200 Back",
+      "gender": "F",
       "name": "Miller, Merritt",
       "place": 2,
+      "points": 17.0,
       "splits": [
         {
           "distance": 66,
@@ -6512,8 +6993,10 @@
     {
       "course": "SCY",
       "event": "200 Back",
+      "gender": "F",
       "name": "Wang, Mingqi",
       "place": 3,
+      "points": 16.0,
       "splits": [
         {
           "distance": 50,
@@ -6539,8 +7022,10 @@
     {
       "course": "SCY",
       "event": "200 Back",
+      "gender": "F",
       "name": "Catalasan, Mariann",
       "place": 4,
+      "points": 15.0,
       "splits": [
         {
           "distance": 50,
@@ -6566,6 +7051,7 @@
     {
       "course": "SCY",
       "event": "200 Back",
+      "gender": "F",
       "name": "Newcome, Ava",
       "place": null,
       "tags": "",
@@ -6575,6 +7061,7 @@
     {
       "course": "SCY",
       "event": "200 Back",
+      "gender": "M",
       "name": "Marquez, Alexandro",
       "place": 1,
       "splits": [
@@ -6602,6 +7089,7 @@
     {
       "course": "SCY",
       "event": "200 Back",
+      "gender": "M",
       "name": "Altera, Ryan",
       "place": 2,
       "splits": [
@@ -6629,6 +7117,7 @@
     {
       "course": "SCY",
       "event": "200 Back",
+      "gender": "M",
       "name": "Rohovit, Hunter",
       "place": 3,
       "splits": [
@@ -6656,8 +7145,10 @@
     {
       "course": "SCY",
       "event": "200 Back",
+      "gender": "M",
       "name": "Johnson, Lucas",
       "place": 4,
+      "points": 15.0,
       "splits": [
         {
           "distance": 50,
@@ -6683,8 +7174,10 @@
     {
       "course": "SCY",
       "event": "200 Back",
+      "gender": "M",
       "name": "Rice, Thomas",
       "place": 5,
+      "points": 14.0,
       "splits": [
         {
           "distance": 50,
@@ -6710,8 +7203,10 @@
     {
       "course": "SCY",
       "event": "200 Back",
+      "gender": "M",
       "name": "McCright, David",
       "place": 6,
+      "points": 13.0,
       "splits": [
         {
           "distance": 50,
@@ -6737,6 +7232,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Gavin, Anna",
       "place": 1,
       "splits": [
@@ -6756,6 +7252,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Spaulding, Alice",
       "place": 2,
       "splits": [
@@ -6775,6 +7272,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Elvambuena, Ella",
       "place": 3,
       "splits": [
@@ -6794,8 +7292,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Stewart, Caroline",
       "place": 4,
+      "points": 15.0,
       "splits": [
         {
           "distance": 50,
@@ -6813,8 +7313,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Kimbrell, Mackenzie",
       "place": 5,
+      "points": 14.0,
       "splits": [
         {
           "distance": 50,
@@ -6832,8 +7334,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Hudson, Ruby",
       "place": 6,
+      "points": 13.0,
       "splits": [
         {
           "distance": 50,
@@ -6851,8 +7355,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Allibone, Jessica",
       "place": 7,
+      "points": 12.0,
       "splits": [
         {
           "distance": 50,
@@ -6870,8 +7376,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Smith, Mackenzie",
       "place": 8,
+      "points": 11.0,
       "splits": [
         {
           "distance": 50,
@@ -6889,8 +7397,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Heritage, Greer",
       "place": 9,
+      "points": 9.0,
       "splits": [
         {
           "distance": 50,
@@ -6908,8 +7418,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Everitt, Julia",
       "place": 10,
+      "points": 7.0,
       "splits": [
         {
           "distance": 50,
@@ -6927,8 +7439,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Lamb, Grayce",
       "place": 11,
+      "points": 6.0,
       "splits": [
         {
           "distance": 50,
@@ -6946,6 +7460,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Smith, Chelsea",
       "place": null,
       "tags": "",
@@ -6955,6 +7470,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Lee, Morgan",
       "place": null,
       "tags": "",
@@ -6964,6 +7480,7 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "F",
       "name": "Adams, Ella",
       "place": null,
       "tags": "",
@@ -6973,8 +7490,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Rosal, Gareth",
       "place": 1,
+      "points": 20.0,
       "splits": [
         {
           "distance": 50,
@@ -6992,8 +7511,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Chen, Alex",
       "place": 2,
+      "points": 17.0,
       "splits": [
         {
           "distance": 50,
@@ -7011,8 +7532,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Blount, Owen",
       "place": 3,
+      "points": 16.0,
       "splits": [
         {
           "distance": 50,
@@ -7030,8 +7553,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Kinter, Nathan",
       "place": 4,
+      "points": 15.0,
       "splits": [
         {
           "distance": 50,
@@ -7049,8 +7574,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Cheung, Chris",
       "place": 5,
+      "points": 14.0,
       "splits": [
         {
           "distance": 50,
@@ -7068,8 +7595,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Zhang, Andrew",
       "place": 6,
+      "points": 13.0,
       "splits": [
         {
           "distance": 50,
@@ -7087,8 +7616,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Schmidt, Logan",
       "place": 7,
+      "points": 12.0,
       "splits": [
         {
           "distance": 50,
@@ -7106,8 +7637,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Jeyaseelan, Robert",
       "place": 8,
+      "points": 11.0,
       "splits": [
         {
           "distance": 50,
@@ -7125,8 +7658,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Murray, Liam",
       "place": 9,
+      "points": 9.0,
       "splits": [
         {
           "distance": 50,
@@ -7144,8 +7679,10 @@
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Johnson, Benjamin",
       "place": 10,
+      "points": 7.0,
       "splits": [
         {
           "distance": 50,
@@ -7157,14 +7694,16 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "FSUC",
       "time": "1:26.84"
     },
     {
       "course": "SCY",
       "event": "100 Breast",
+      "gender": "M",
       "name": "Saglam, Semih",
       "place": 11,
+      "points": 6.0,
       "splits": [
         {
           "distance": 50,
@@ -7182,6 +7721,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Fulton, Rachel",
       "place": 1,
       "tags": "",
@@ -7191,6 +7731,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Ochoa, Iris",
       "place": 2,
       "tags": "",
@@ -7200,6 +7741,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Rosenkranz, Bobbie",
       "place": 3,
       "tags": "",
@@ -7209,6 +7751,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Sealey, Isabelle",
       "place": 4,
       "tags": "",
@@ -7218,6 +7761,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Mathis, Amber",
       "place": 5,
       "tags": "",
@@ -7227,6 +7771,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "May, Kahleia",
       "place": 6,
       "tags": "",
@@ -7236,8 +7781,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Carver, Chloe",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "AUB",
       "time": "30.54"
@@ -7245,8 +7792,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Kelly, Jemma",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "FSUC",
       "time": "31.01"
@@ -7254,8 +7803,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Brefeld, Peyton",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": "FSUC",
       "time": "31.10"
@@ -7263,8 +7814,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Kohs, Madeline",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": "FSUC",
       "time": "31.18"
@@ -7272,8 +7825,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "McCarty, Ava",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "FLOR",
       "time": "31.43"
@@ -7281,8 +7836,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Haskell, Miyu",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": "GTSC",
       "time": "31.92"
@@ -7290,8 +7847,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Albert, Katie",
       "place": 13,
+      "points": 4.0,
       "tags": "",
       "team": "AUB",
       "time": "32.32"
@@ -7299,8 +7858,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Foran, Lucilia",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": "KSU",
       "time": "33.34"
@@ -7308,8 +7869,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Chetrit, Nell",
       "place": 15,
+      "points": 2.0,
       "tags": "",
       "team": "KSU",
       "time": "34.32"
@@ -7317,8 +7880,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Amaral, Joana",
       "place": 16,
+      "points": 1.0,
       "tags": "",
       "team": "FLOR",
       "time": "34.88"
@@ -7326,6 +7891,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Houck, Madison",
       "place": 17,
       "tags": "",
@@ -7335,6 +7901,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Sampson, Mackenzie",
       "place": 18,
       "tags": "",
@@ -7344,6 +7911,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Cornette, Amanda",
       "place": 19,
       "tags": "",
@@ -7353,6 +7921,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Covaliu-Fuentes, Veronic",
       "place": 20,
       "tags": "",
@@ -7362,6 +7931,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Evans, Ashley",
       "place": 21,
       "tags": "",
@@ -7371,6 +7941,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Yie, Emiley",
       "place": 22,
       "tags": "",
@@ -7380,6 +7951,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Patel, Jesal",
       "place": 23,
       "tags": "",
@@ -7389,6 +7961,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Gaulin, Lily",
       "place": 24,
       "tags": "",
@@ -7398,6 +7971,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Miller, Merritt",
       "place": null,
       "tags": "",
@@ -7407,6 +7981,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Anderson, Katie",
       "place": null,
       "tags": "",
@@ -7416,6 +7991,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Carlton, Delaney",
       "place": null,
       "tags": "",
@@ -7425,6 +8001,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "F",
       "name": "Marazas, Isabelle",
       "place": null,
       "tags": "",
@@ -7434,6 +8011,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Riordan, James",
       "place": 1,
       "tags": "",
@@ -7443,6 +8021,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Marquez, Alexandro",
       "place": 2,
       "tags": "",
@@ -7452,6 +8031,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Kvashchuk, Mykhailo",
       "place": 3,
       "tags": "",
@@ -7461,6 +8041,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Szabo, Marcus",
       "place": 4,
       "tags": "",
@@ -7470,8 +8051,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "May, Cooper",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "AUB",
       "time": "26.93"
@@ -7479,8 +8062,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Rimsa, Thomas",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "GTSC",
       "time": "27.24"
@@ -7488,8 +8073,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Kramer, Garrett",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "LSUSC",
       "time": "27.62"
@@ -7497,8 +8084,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Conners, Jack",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "AUB",
       "time": "28.01"
@@ -7506,8 +8095,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Seward, Lawson",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": "FSUC",
       "time": "28.19"
@@ -7515,8 +8106,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Johnson, Benny",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": "AUB",
       "time": "28.36"
@@ -7524,8 +8117,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Jones, Peyton",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "GTSC",
       "time": "29.87"
@@ -7533,8 +8128,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Grutter, Maxwell",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": "GTSC",
       "time": "30.73"
@@ -7542,8 +8139,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Manley, Adam",
       "place": 13,
+      "points": 4.0,
       "tags": "",
       "team": "GTSC",
       "time": "30.75"
@@ -7551,8 +8150,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Feller, Curtis",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": "FSUC",
       "time": "30.78"
@@ -7560,8 +8161,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Fleischer, Eli",
       "place": 15,
+      "points": 2.0,
       "tags": "",
       "team": "KSU",
       "time": "31.27"
@@ -7569,8 +8172,10 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Kennedy, Avery",
       "place": 16,
+      "points": 1.0,
       "tags": "",
       "team": "KSU",
       "time": "31.76"
@@ -7578,6 +8183,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Muralidharan, Vish",
       "place": 17,
       "tags": "",
@@ -7587,6 +8193,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Radio, Jack",
       "place": 18,
       "tags": "",
@@ -7596,6 +8203,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Ferretiz, Aldo",
       "place": 19,
       "tags": "",
@@ -7605,6 +8213,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Vlady, Richard",
       "place": 20,
       "tags": "",
@@ -7614,6 +8223,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Skidmore, Billy",
       "place": null,
       "tags": "",
@@ -7623,6 +8233,7 @@
     {
       "course": "SCY",
       "event": "50 Back",
+      "gender": "M",
       "name": "Taylor, Holden",
       "place": null,
       "tags": "",
@@ -7632,6 +8243,7 @@
     {
       "course": "SCY",
       "event": "200 Fly",
+      "gender": "F",
       "name": "Munger, Audrey",
       "place": 1,
       "splits": [
@@ -7659,8 +8271,10 @@
     {
       "course": "SCY",
       "event": "200 Fly",
+      "gender": "F",
       "name": "Witthoff, Mia",
       "place": 2,
+      "points": 17.0,
       "splits": [
         {
           "distance": 50,
@@ -7686,6 +8300,7 @@
     {
       "course": "SCY",
       "event": "200 Fly",
+      "gender": "M",
       "name": "Slater, Landon",
       "place": 1,
       "splits": [
@@ -7713,6 +8328,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Kofman, Tahlia",
       "place": 1,
       "splits": [
@@ -7732,6 +8348,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Hicks, Erin",
       "place": 2,
       "splits": [
@@ -7751,6 +8368,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Rosenkranz, Bobbie",
       "place": 3,
       "splits": [
@@ -7770,6 +8388,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Brefeld, Peyton",
       "place": 4,
       "splits": [
@@ -7789,8 +8408,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Li, Adeline",
       "place": 5,
+      "points": 14.0,
       "splits": [
         {
           "distance": 50,
@@ -7808,8 +8429,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Freund, Gabby",
       "place": 6,
+      "points": 13.0,
       "splits": [
         {
           "distance": 50,
@@ -7827,8 +8450,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Marim, Isabella",
       "place": 7,
+      "points": 12.0,
       "splits": [
         {
           "distance": 50,
@@ -7846,8 +8471,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Hawkins, Taylor",
       "place": 8,
+      "points": 11.0,
       "splits": [
         {
           "distance": 50,
@@ -7865,8 +8492,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "May, Kahleia",
       "place": 9,
+      "points": 9.0,
       "splits": [
         {
           "distance": 50,
@@ -7884,8 +8513,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Wong, Tara",
       "place": 10,
+      "points": 7.0,
       "splits": [
         {
           "distance": 50,
@@ -7903,8 +8534,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Heritage, Greer",
       "place": 11,
+      "points": 6.0,
       "splits": [
         {
           "distance": 50,
@@ -7922,8 +8555,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Houck, Cadence",
       "place": 12,
+      "points": 5.0,
       "splits": [
         {
           "distance": 50,
@@ -7941,8 +8576,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Meckley, Irelyn",
       "place": 13,
+      "points": 4.0,
       "splits": [
         {
           "distance": 50,
@@ -7960,8 +8597,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Davey, Olivia",
       "place": 14,
+      "points": 3.0,
       "splits": [
         {
           "distance": 50,
@@ -7979,8 +8618,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Swearingen, Myles",
       "place": 15,
+      "points": 2.0,
       "splits": [
         {
           "distance": 50,
@@ -7998,8 +8639,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Greaux, Lauren",
       "place": 16,
+      "points": 1.0,
       "splits": [
         {
           "distance": 50,
@@ -8017,6 +8660,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Moor, Grace",
       "place": 17,
       "splits": [
@@ -8036,6 +8680,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Butlak, Makenna",
       "place": 18,
       "splits": [
@@ -8055,6 +8700,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Kimbrell, Mackenzie",
       "place": 19,
       "splits": [
@@ -8074,6 +8720,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Schmid, Sarah",
       "place": 20,
       "splits": [
@@ -8093,6 +8740,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "McAlister, Jordan",
       "place": 21,
       "splits": [
@@ -8112,6 +8760,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Grant, Alyssa",
       "place": 22,
       "splits": [
@@ -8131,6 +8780,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Harmon, Liliana",
       "place": 23,
       "splits": [
@@ -8150,6 +8800,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Evans, Ashley",
       "place": 24,
       "splits": [
@@ -8169,6 +8820,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Newcome, Ava",
       "place": null,
       "tags": "",
@@ -8178,6 +8830,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Renter, Julia",
       "place": null,
       "tags": "",
@@ -8187,6 +8840,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Cornette, Amanda",
       "place": null,
       "tags": "",
@@ -8196,6 +8850,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "Choukri, Nora",
       "place": null,
       "tags": "",
@@ -8205,6 +8860,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "F",
       "name": "McCarty, Ava",
       "place": null,
       "tags": "",
@@ -8214,6 +8870,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Long, Liam",
       "place": 1,
       "splits": [
@@ -8233,6 +8890,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Whitaker, Brock",
       "place": 2,
       "splits": [
@@ -8252,6 +8910,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Hall, Jonathan",
       "place": 3,
       "splits": [
@@ -8271,6 +8930,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Altera, Ryan",
       "place": 4,
       "splits": [
@@ -8290,6 +8950,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Gransee, Kyle",
       "place": 5,
       "splits": [
@@ -8309,8 +8970,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Rimsa, Thomas",
       "place": 6,
+      "points": 13.0,
       "splits": [
         {
           "distance": 50,
@@ -8328,8 +8991,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Herold, Jonathan",
       "place": 7,
+      "points": 12.0,
       "splits": [
         {
           "distance": 50,
@@ -8347,8 +9012,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Bratu, Dan",
       "place": 8,
+      "points": 11.0,
       "splits": [
         {
           "distance": 50,
@@ -8366,8 +9033,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "White, Keller",
       "place": 9,
+      "points": 9.0,
       "splits": [
         {
           "distance": 50,
@@ -8385,8 +9054,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Slater, Landon",
       "place": 10,
+      "points": 7.0,
       "splits": [
         {
           "distance": 50,
@@ -8404,8 +9075,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Vlady, George",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "GTSC",
       "time": "52.07"
@@ -8413,8 +9086,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Martin, Colton",
       "place": 12,
+      "points": 5.0,
       "splits": [
         {
           "distance": 50,
@@ -8432,8 +9107,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Matthews, John",
       "place": 13,
+      "points": 4.0,
       "splits": [
         {
           "distance": 50,
@@ -8451,8 +9128,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Jones, Justin",
       "place": 14,
+      "points": 3.0,
       "splits": [
         {
           "distance": 50,
@@ -8470,8 +9149,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Townsend, Matthew",
       "place": 15,
+      "points": 2.0,
       "splits": [
         {
           "distance": 50,
@@ -8489,8 +9170,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Allen, Hunter",
       "place": 16,
+      "points": 0.5,
       "splits": [
         {
           "distance": 50,
@@ -8508,8 +9191,10 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Grann, Gavin",
       "place": 16,
+      "points": 0.5,
       "splits": [
         {
           "distance": 50,
@@ -8527,6 +9212,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Nagel, Lucas",
       "place": 18,
       "splits": [
@@ -8546,6 +9232,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Curtiss, Jacob",
       "place": 19,
       "splits": [
@@ -8565,6 +9252,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Johnson, Benny",
       "place": 20,
       "splits": [
@@ -8584,6 +9272,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Kinter, Nathan",
       "place": 21,
       "splits": [
@@ -8603,6 +9292,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Ball, Patrick",
       "place": 21,
       "splits": [
@@ -8622,6 +9312,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Liu, Alex",
       "place": 23,
       "splits": [
@@ -8641,6 +9332,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Rohovit, Hunter",
       "place": 24,
       "splits": [
@@ -8660,6 +9352,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Simmons, Ben",
       "place": 25,
       "splits": [
@@ -8679,6 +9372,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Balkcum, Kyle",
       "place": 26,
       "splits": [
@@ -8698,6 +9392,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Kharel, Avi",
       "place": 27,
       "splits": [
@@ -8717,6 +9412,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Williams, Mayon",
       "place": 28,
       "splits": [
@@ -8736,6 +9432,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Hernandez, Joshua",
       "place": 29,
       "splits": [
@@ -8755,6 +9452,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Hudson, Noah",
       "place": 30,
       "splits": [
@@ -8774,6 +9472,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Murray, Liam",
       "place": 31,
       "splits": [
@@ -8793,6 +9492,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "McGahagin, Connor",
       "place": 32,
       "splits": [
@@ -8812,6 +9512,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Smith, Logan",
       "place": 33,
       "splits": [
@@ -8831,6 +9532,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Kennedy, Avery",
       "place": 34,
       "splits": [
@@ -8850,6 +9552,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Muralidharan, Vish",
       "place": 35,
       "splits": [
@@ -8869,6 +9572,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Varela, Marcelo",
       "place": 36,
       "splits": [
@@ -8888,6 +9592,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Davis, Lukas",
       "place": null,
       "tags": "",
@@ -8897,6 +9602,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Pro, Sawyer",
       "place": null,
       "tags": "",
@@ -8906,6 +9612,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Sanders, Maxwell",
       "place": null,
       "tags": "",
@@ -8915,6 +9622,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Klingenberg, Brennan",
       "place": null,
       "tags": "",
@@ -8924,6 +9632,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Stephenson, AJ",
       "place": null,
       "tags": "",
@@ -8933,6 +9642,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Howard, Josh",
       "place": null,
       "tags": "",
@@ -8942,6 +9652,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Rainbow, Ben",
       "place": null,
       "tags": "",
@@ -8951,6 +9662,7 @@
     {
       "course": "SCY",
       "event": "100 Free",
+      "gender": "M",
       "name": "Jeon, Peyton",
       "place": null,
       "tags": "",
@@ -8960,6 +9672,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "King, Amanda",
       "place": 1,
       "tags": "",
@@ -8969,6 +9682,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Freund, Gabby",
       "place": 2,
       "tags": "",
@@ -8978,6 +9692,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Ochoa, Iris",
       "place": 3,
       "tags": "",
@@ -8987,6 +9702,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Baker, Regan",
       "place": 4,
       "tags": "",
@@ -8996,6 +9712,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Li, Adeline",
       "place": 5,
       "tags": "",
@@ -9005,6 +9722,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Munger, Audrey",
       "place": 6,
       "tags": "",
@@ -9014,6 +9732,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Austin, Whitney",
       "place": 7,
       "tags": "",
@@ -9023,6 +9742,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Ruona, Kate",
       "place": 8,
       "tags": "",
@@ -9032,6 +9752,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Hicks, Erin",
       "place": 9,
       "tags": "",
@@ -9041,8 +9762,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Vroon, Katelyn",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": "FLOR",
       "time": "28.85"
@@ -9050,8 +9773,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Kohs, Madeline",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "FSUC",
       "time": "29.17"
@@ -9059,8 +9784,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Carver, Chloe",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": "AUB",
       "time": "29.19"
@@ -9068,8 +9795,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Lee, Morgan",
       "place": 13,
+      "points": 4.0,
       "tags": "",
       "team": "FSUC",
       "time": "29.25"
@@ -9077,8 +9806,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Elder, Ashley",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": "AUB",
       "time": "29.29"
@@ -9086,8 +9817,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Houck, Cadence",
       "place": 15,
+      "points": 2.0,
       "tags": "",
       "team": "FLOR",
       "time": "29.30"
@@ -9095,8 +9828,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Elvambuena, Ella",
       "place": 16,
+      "points": 1.0,
       "tags": "",
       "team": "GTSC",
       "time": "29.69"
@@ -9104,6 +9839,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Everitt, Julia",
       "place": 17,
       "tags": "",
@@ -9113,6 +9849,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Roberts, Stella",
       "place": 18,
       "tags": "",
@@ -9122,6 +9859,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Cole, Lily",
       "place": 19,
       "tags": "",
@@ -9131,6 +9869,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Stepanian, Alique",
       "place": 20,
       "tags": "",
@@ -9140,6 +9879,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Alsobrook, Katharine",
       "place": 21,
       "tags": "",
@@ -9149,6 +9889,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Peterson, Skylar",
       "place": 22,
       "tags": "",
@@ -9158,6 +9899,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Bargellini, Faith",
       "place": 23,
       "tags": "",
@@ -9167,6 +9909,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Hoang, Alexa",
       "place": 24,
       "tags": "",
@@ -9176,6 +9919,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Ashley, Ella",
       "place": 25,
       "tags": "",
@@ -9185,6 +9929,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Eaton, Emily",
       "place": 26,
       "tags": "",
@@ -9194,6 +9939,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Stewart, Caroline",
       "place": 27,
       "tags": "",
@@ -9203,6 +9949,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Baumhover, Aubrey",
       "place": 28,
       "tags": "",
@@ -9212,6 +9959,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Britto, Camryn",
       "place": 29,
       "tags": "",
@@ -9221,6 +9969,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Pierre, Ella",
       "place": 30,
       "tags": "",
@@ -9230,6 +9979,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Shumaker, Erin",
       "place": 31,
       "tags": "",
@@ -9239,6 +9989,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Concha, Mariafe",
       "place": 32,
       "tags": "",
@@ -9248,6 +9999,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Davey, Olivia",
       "place": null,
       "tags": "",
@@ -9257,6 +10009,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Smith, Mackenzie",
       "place": null,
       "tags": "",
@@ -9266,6 +10019,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Carlton, Delaney",
       "place": null,
       "tags": "",
@@ -9275,6 +10029,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Pye, Allison",
       "place": null,
       "tags": "",
@@ -9284,6 +10039,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Long, Piper",
       "place": null,
       "tags": "",
@@ -9293,6 +10049,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "F",
       "name": "Choukri, Nora",
       "place": null,
       "tags": "",
@@ -9302,6 +10059,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Mirsaderov, Nik",
       "place": 1,
       "tags": "",
@@ -9311,6 +10069,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Laurie, Aiden",
       "place": 2,
       "tags": "",
@@ -9320,6 +10079,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Cresap, Brandon",
       "place": 3,
       "tags": "",
@@ -9329,8 +10089,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Riordan, James",
       "place": 4,
+      "points": 15.0,
       "tags": "",
       "team": "FSUC",
       "time": "24.88"
@@ -9338,8 +10100,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Forkey, Carson",
       "place": 5,
+      "points": 14.0,
       "tags": "",
       "team": "AUB",
       "time": "24.93"
@@ -9347,8 +10111,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Seward, Lawson",
       "place": 6,
+      "points": 13.0,
       "tags": "",
       "team": "FSUC",
       "time": "24.99"
@@ -9356,8 +10122,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Szabo, Marcus",
       "place": 7,
+      "points": 12.0,
       "tags": "",
       "team": "FSUC",
       "time": "25.02"
@@ -9365,8 +10133,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "May, Cooper",
       "place": 8,
+      "points": 11.0,
       "tags": "",
       "team": "AUB",
       "time": "25.34"
@@ -9374,8 +10144,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Bustard, Nate",
       "place": 9,
+      "points": 9.0,
       "tags": "",
       "team": "AUB",
       "time": "25.40"
@@ -9383,8 +10155,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "White, Aidan",
       "place": 10,
+      "points": 7.0,
       "tags": "",
       "team": "FSUC",
       "time": "25.42"
@@ -9392,8 +10166,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Westin, Michael",
       "place": 11,
+      "points": 6.0,
       "tags": "",
       "team": "FLOR",
       "time": "25.54"
@@ -9401,8 +10177,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Scott, Sam",
       "place": 12,
+      "points": 5.0,
       "tags": "",
       "team": "AUB",
       "time": "25.74"
@@ -9410,8 +10188,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Cao, Bradley",
       "place": 13,
+      "points": 4.0,
       "tags": "",
       "team": "GTSC",
       "time": "25.87"
@@ -9419,8 +10199,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Mackay, Nolan",
       "place": 14,
+      "points": 3.0,
       "tags": "",
       "team": "GTSC",
       "time": "25.95"
@@ -9428,8 +10210,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Klingenberg, Brennan",
       "place": 15,
+      "points": 2.0,
       "tags": "",
       "team": "GTSC",
       "time": "26.13"
@@ -9437,8 +10221,10 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Matthews, John",
       "place": 16,
+      "points": 1.0,
       "tags": "",
       "team": "GTSC",
       "time": "26.14"
@@ -9446,6 +10232,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Nucci, Renzo",
       "place": 17,
       "tags": "",
@@ -9455,6 +10242,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Kramer, Garrett",
       "place": 18,
       "tags": "",
@@ -9464,6 +10252,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Feller, Curtis",
       "place": 19,
       "tags": "",
@@ -9473,6 +10262,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Burke, Aidan",
       "place": 20,
       "tags": "",
@@ -9482,6 +10272,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Felix, Adrian",
       "place": 21,
       "tags": "",
@@ -9491,6 +10282,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Blount, Owen",
       "place": 22,
       "tags": "",
@@ -9500,6 +10292,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Davis, Lukas",
       "place": 23,
       "tags": "",
@@ -9509,6 +10302,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Rice, Thomas",
       "place": 24,
       "tags": "",
@@ -9518,6 +10312,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Vo, Brandon",
       "place": 25,
       "tags": "",
@@ -9527,6 +10322,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Simmons, Ben",
       "place": 26,
       "tags": "",
@@ -9536,6 +10332,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Williams, Mayon",
       "place": 27,
       "tags": "",
@@ -9545,6 +10342,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "McGahagin, Connor",
       "place": 28,
       "tags": "",
@@ -9554,6 +10352,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Radio, Jack",
       "place": 29,
       "tags": "",
@@ -9563,6 +10362,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Hudson, Noah",
       "place": 30,
       "tags": "",
@@ -9572,6 +10372,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Ferretiz, Aldo",
       "place": 31,
       "tags": "",
@@ -9581,6 +10382,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Friginette, Brandon",
       "place": 32,
       "tags": "",
@@ -9590,15 +10392,17 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Johnson, Benjamin",
       "place": 33,
       "tags": "",
-      "team": null,
+      "team": "FSUC",
       "time": "34.40"
     },
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Payne, Tristan",
       "place": null,
       "tags": "",
@@ -9608,6 +10412,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Sanders, Maxwell",
       "place": null,
       "tags": "",
@@ -9617,6 +10422,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Grutter, Maxwell",
       "place": null,
       "tags": "",
@@ -9626,6 +10432,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Curtiss, Jacob",
       "place": null,
       "tags": "",
@@ -9635,6 +10442,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Taylor, Holden",
       "place": null,
       "tags": "",
@@ -9644,6 +10452,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Holbrook, Mason",
       "place": null,
       "tags": "",
@@ -9653,6 +10462,7 @@
     {
       "course": "SCY",
       "event": "50 Fly",
+      "gender": "M",
       "name": "Ernest, Asa",
       "place": null,
       "tags": "",
@@ -9662,6 +10472,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Rosenkranz, Bobbie",
       "place": 1,
       "splits": [
@@ -9681,6 +10492,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Plantamura, Natalie",
       "place": 2,
       "splits": [
@@ -9700,6 +10512,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Sealey, Isabelle",
       "place": 3,
       "splits": [
@@ -9719,6 +10532,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Spaulding, Alice",
       "place": 4,
       "splits": [
@@ -9738,8 +10552,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Allibone, Jessica",
       "place": 5,
+      "points": 14.0,
       "splits": [
         {
           "distance": 50,
@@ -9757,8 +10573,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Peterson, Skylar",
       "place": 6,
+      "points": 13.0,
       "splits": [
         {
           "distance": 50,
@@ -9776,8 +10594,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Roth, Alison",
       "place": 7,
+      "points": 12.0,
       "splits": [
         {
           "distance": 50,
@@ -9795,8 +10615,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Roberts, Stella",
       "place": 8,
+      "points": 11.0,
       "splits": [
         {
           "distance": 50,
@@ -9814,8 +10636,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "McCarty, Ava",
       "place": 9,
+      "points": 9.0,
       "splits": [
         {
           "distance": 50,
@@ -9833,8 +10657,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Wang, Mingqi",
       "place": 10,
+      "points": 7.0,
       "splits": [
         {
           "distance": 50,
@@ -9852,8 +10678,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Hawkins, Taylor",
       "place": 11,
+      "points": 6.0,
       "splits": [
         {
           "distance": 50,
@@ -9871,8 +10699,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Mitchell, Ali",
       "place": 12,
+      "points": 5.0,
       "splits": [
         {
           "distance": 50,
@@ -9890,8 +10720,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Haskell, Miyu",
       "place": 13,
+      "points": 4.0,
       "splits": [
         {
           "distance": 50,
@@ -9909,8 +10741,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Hudson, Ruby",
       "place": 14,
+      "points": 3.0,
       "splits": [
         {
           "distance": 50,
@@ -9928,8 +10762,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Houck, Cadence",
       "place": 15,
+      "points": 2.0,
       "splits": [
         {
           "distance": 50,
@@ -9947,8 +10783,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Cole, Lily",
       "place": 16,
+      "points": 1.0,
       "splits": [
         {
           "distance": 50,
@@ -9966,6 +10804,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Greaux, Lauren",
       "place": 17,
       "splits": [
@@ -9985,6 +10824,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Eaton, Emily",
       "place": 18,
       "splits": [
@@ -10004,6 +10844,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Foran, Lucilia",
       "place": 19,
       "splits": [
@@ -10023,6 +10864,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Yang, Amy",
       "place": 20,
       "splits": [
@@ -10042,6 +10884,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Amaral, Joana",
       "place": 21,
       "splits": [
@@ -10061,6 +10904,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Miller, Charli",
       "place": 22,
       "splits": [
@@ -10080,6 +10924,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Bargellini, Faith",
       "place": 23,
       "splits": [
@@ -10099,6 +10944,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Shumaker, Erin",
       "place": 24,
       "splits": [
@@ -10118,6 +10964,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Halterman, Grace",
       "place": 25,
       "splits": [
@@ -10137,6 +10984,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "O'Malley, Emily",
       "place": 26,
       "splits": [
@@ -10156,6 +11004,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "DeLosh, McKenzie",
       "place": null,
       "splits": [
@@ -10175,6 +11024,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Marim, Isabella",
       "place": null,
       "tags": "",
@@ -10184,6 +11034,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Smith, Chelsea",
       "place": null,
       "tags": "",
@@ -10193,6 +11044,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Anderson, Katie",
       "place": null,
       "tags": "",
@@ -10202,6 +11054,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Florit, Alexis",
       "place": null,
       "tags": "",
@@ -10211,6 +11064,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "F",
       "name": "Pye, Allison",
       "place": null,
       "tags": "",
@@ -10220,6 +11074,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Grossman, Oliver",
       "place": 1,
       "splits": [
@@ -10239,8 +11094,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Whitaker, Brock",
       "place": 2,
+      "points": 17.0,
       "tags": "",
       "team": "FLOR",
       "time": "57.07"
@@ -10248,8 +11105,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Smith, Benjamin",
       "place": 3,
+      "points": 16.0,
       "splits": [
         {
           "distance": 50,
@@ -10267,8 +11126,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Bataillon, Daniel",
       "place": 4,
+      "points": 15.0,
       "splits": [
         {
           "distance": 50,
@@ -10286,8 +11147,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Rosal, Gareth",
       "place": 5,
+      "points": 14.0,
       "splits": [
         {
           "distance": 50,
@@ -10305,8 +11168,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "McCright, David",
       "place": 6,
+      "points": 13.0,
       "splits": [
         {
           "distance": 50,
@@ -10324,8 +11189,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Townsend, Matthew",
       "place": 7,
+      "points": 12.0,
       "splits": [
         {
           "distance": 50,
@@ -10343,8 +11210,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Nagel, Lucas",
       "place": 8,
+      "points": 11.0,
       "splits": [
         {
           "distance": 50,
@@ -10362,8 +11231,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Witham, Noah",
       "place": 9,
+      "points": 9.0,
       "splits": [
         {
           "distance": 50,
@@ -10381,8 +11252,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Kramer, Garrett",
       "place": 10,
+      "points": 7.0,
       "splits": [
         {
           "distance": 50,
@@ -10400,8 +11273,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Vo, Brandon",
       "place": 11,
+      "points": 6.0,
       "splits": [
         {
           "distance": 50,
@@ -10419,8 +11294,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Kennedy, Avery",
       "place": 12,
+      "points": 5.0,
       "splits": [
         {
           "distance": 50,
@@ -10438,8 +11315,10 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Ferretiz, Aldo",
       "place": 13,
+      "points": 4.0,
       "splits": [
         {
           "distance": 50,
@@ -10457,6 +11336,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Johnson, Benny",
       "place": null,
       "tags": "",
@@ -10466,6 +11346,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Schmidt, Logan",
       "place": null,
       "tags": "",
@@ -10475,6 +11356,7 @@
     {
       "course": "SCY",
       "event": "100 IM",
+      "gender": "M",
       "name": "Fleischer, Eli",
       "place": null,
       "tags": "",
@@ -10484,11 +11366,111 @@
     {
       "course": "SCY",
       "event": "50 Free",
+      "gender": "X",
       "name": "Herold, Jonathan",
       "place": 1,
       "tags": "",
       "team": "FSUC",
       "time": "22.47"
     }
-  ]
+  ],
+  "team_scores": {
+    "combined": [
+      {
+        "place": 1,
+        "points": 1702.5,
+        "team": "Georgia Tech Swim Club"
+      },
+      {
+        "place": 2,
+        "points": 1440.5,
+        "team": "Fsu Swim Club"
+      },
+      {
+        "place": 3,
+        "points": 824.0,
+        "team": "Auburn University Swim Club"
+      },
+      {
+        "place": 4,
+        "points": 555.0,
+        "team": "Florida Club Swim Team"
+      },
+      {
+        "place": 5,
+        "points": 263.0,
+        "team": "Ksu Swim Club"
+      },
+      {
+        "place": 6,
+        "points": 79.0,
+        "team": "Lsu Swim Club"
+      }
+    ],
+    "men": [
+      {
+        "place": 1,
+        "points": 933.5,
+        "team": "Georgia Tech Swim Club"
+      },
+      {
+        "place": 2,
+        "points": 754.5,
+        "team": "Fsu Swim Club"
+      },
+      {
+        "place": 3,
+        "points": 359.0,
+        "team": "Auburn University Swim Club"
+      },
+      {
+        "place": 4,
+        "points": 252.0,
+        "team": "Florida Club Swim Team"
+      },
+      {
+        "place": 5,
+        "points": 130.0,
+        "team": "Ksu Swim Club"
+      },
+      {
+        "place": 6,
+        "points": 59.0,
+        "team": "Lsu Swim Club"
+      }
+    ],
+    "source": "pdf",
+    "women": [
+      {
+        "place": 1,
+        "points": 769.0,
+        "team": "Georgia Tech Swim Club"
+      },
+      {
+        "place": 2,
+        "points": 686.0,
+        "team": "Fsu Swim Club"
+      },
+      {
+        "place": 3,
+        "points": 465.0,
+        "team": "Auburn University Swim Club"
+      },
+      {
+        "place": 4,
+        "points": 303.0,
+        "team": "Florida Club Swim Team"
+      },
+      {
+        "place": 5,
+        "points": 133.0,
+        "team": "Ksu Swim Club"
+      },
+      {
+        "place": 6,
+        "points": 20.0,
+        "team": "Lsu Swim Club"
+      }
+    ]
+  }
 }

@@ -29,6 +29,8 @@ export type RowResult =
       /** Points scored (results PDF Points column). */
       points?: number
       podium?: boolean
+      /** No place column: the time ends the row (the place leads it instead). */
+      placeless?: boolean
     }
   | { kind: "seed"; seed: string; seedRank?: number }
   | { kind: "none" }
@@ -41,7 +43,7 @@ export type RowDisplay = {
   showPoints?: boolean
 }
 
-const PODIUM_PILL: Record<number, string> = {
+export const PODIUM_PILL: Record<number, string> = {
   1: "bg-amber-500/15 text-amber-700 dark:bg-amber-400/15 dark:text-amber-400",
   2: "bg-slate-500/15 text-slate-600 dark:bg-slate-300/15 dark:text-slate-300",
   3: "bg-orange-500/15 text-orange-700 dark:bg-orange-400/15 dark:text-orange-400",
@@ -197,22 +199,24 @@ export function SummaryRowResult({
         >
           {result.time ? formatDisplayTime(result.time) : result.status ?? "—"}
         </span>
-        <span
-          style={placeWidth}
-          className={`flex items-center justify-end text-foreground-secondary ${compact ? "text-[11px]" : "text-xs"}`}
-        >
-          {result.place != null ? (
-            podium ? (
-              <span
-                className={`inline-flex items-center rounded-full pb-px font-semibold leading-none ${pill} ${PODIUM_PILL[podium]}`}
-              >
-                {formatOrdinal(result.place)}
-              </span>
-            ) : (
-              <span className={compact ? "pr-1.5" : "pr-[7px]"}>{formatOrdinal(result.place)}</span>
-            )
-          ) : null}
-        </span>
+        {result.placeless ? null : (
+          <span
+            style={placeWidth}
+            className={`flex items-center justify-end text-foreground-secondary ${compact ? "text-[11px]" : "text-xs"}`}
+          >
+            {result.place != null ? (
+              podium ? (
+                <span
+                  className={`inline-flex items-center rounded-full pb-px font-semibold leading-none ${pill} ${PODIUM_PILL[podium]}`}
+                >
+                  {formatOrdinal(result.place)}
+                </span>
+              ) : (
+                <span className={compact ? "pr-1.5" : "pr-[7px]"}>{formatOrdinal(result.place)}</span>
+              )
+            ) : null}
+          </span>
+        )}
         {pointsColumn(result.points)}
       </span>
     )

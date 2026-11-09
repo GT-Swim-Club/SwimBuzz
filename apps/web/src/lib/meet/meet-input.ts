@@ -9,6 +9,7 @@ import {
 import {
   DEFAULT_TIME_ZONE,
   isValidTimeZone,
+  parseScoringValues,
   utcToZonedParts,
   zonedDayKey,
   zonedTimeToUtc,
@@ -52,6 +53,7 @@ const MEET_JSON_KEYS = [
   "entriesSheetSummary",
   "relayResultsSummary",
   "resultStatusesSummary",
+  "scoringTable",
 ] as const
 
 /**
@@ -174,6 +176,16 @@ export function buildMeetData(body: Record<string, unknown>, opts: BuildOptions 
     data.teamCode = team
   }
 
+  // The scoring table, as the form writes it: "20, 17, 16 …" for individual events and relays.
+  // Only a form that loaded the table sends it (both fields), so others leave it alone.
+  if (typeof body.scoringIndividual === "string" || typeof body.scoringRelay === "string") {
+    const individual = parseScoringValues(String(body.scoringIndividual ?? ""))
+    const relay = parseScoringValues(String(body.scoringRelay ?? ""))
+    if (!individual || !relay) {
+      throw new MeetInputError("Points must be numbers by place, like 20, 17, 16, 15")
+    }
+    data.scoringTable = individual.length > 0 || relay.length > 0 ? { individual, relay } : null
+  }
   if ("location" in body) data.location = optionalString(body.location)
   if ("school" in body) data.school = optionalString(body.school)
   if ("iconUrl" in body) data.iconUrl = optionalString(body.iconUrl)
