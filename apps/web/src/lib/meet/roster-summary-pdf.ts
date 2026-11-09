@@ -172,9 +172,6 @@ const ONE_PAGE_MIN_SCALE = 0.75
 const ONE_PAGE_MAX_SCALE = 4
 const ONE_PAGE_PRECISION = 0.01
 
-/** Highlights the PDF leaves out for now. */
-const PDF_HIDDEN_COUNTERS = new Set(["Biggest PB drop"])
-
 
 /** Stroke width (pt) that makes regular Helvetica read as a medium weight. */
 const MEDIUM_STROKE = 0.18
@@ -1270,10 +1267,7 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
    * across), then the rest — returns the y below.
    */
   function drawHighlights(counters: StatCounter[], top: number): number {
-    const rows = highlightTileRows(
-      counters.filter((c) => !PDF_HIDDEN_COUNTERS.has(c.label)),
-      6
-    )
+    const rows = highlightTileRows(counters, 6)
     if (rows.length === 0) return top
     // The page's eyebrow already says "Highlights".
     let yy = top

@@ -110,7 +110,6 @@ export async function loadMeetHighlights({
       points: s.points,
     })),
     pbMap: buildAthletePbMap(pbSwims),
-    priorPbMap: buildAthletePbMap(priorSwims),
     nationalsCuts: nationalsCuts.map((c) => ({
       event: c.event,
       gender: c.gender,

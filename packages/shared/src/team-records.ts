@@ -153,7 +153,7 @@ export function recordsExportFilename(ext: "png" | "pdf"): string {
   return meetFileName(RECORDS_EXPORT.title, RECORDS_EXPORT.eyebrow, ext)
 }
 
-/** The export's date line, "As of Nov 9, 2026", in the team's time zone. */
+/** The export's date line, "Rev. Nov 9, 2026", in the team's time zone. */
 export function recordsAsOfLabel(date: Date = new Date()): string {
   const day = date.toLocaleDateString("en-US", {
     month: "short",
@@ -161,5 +161,5 @@ export function recordsAsOfLabel(date: Date = new Date()): string {
     year: "numeric",
     timeZone: DEFAULT_TIME_ZONE,
   })
-  return `As of ${day}`
+  return `Rev. ${day}`
 }

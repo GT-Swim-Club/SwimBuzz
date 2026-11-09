@@ -11,7 +11,7 @@ import {
 import { seasonClass } from "./RecordCells"
 
 /** Year · Name · Time | Event | Time · Name · Year, on a fixed-width sheet so every row's columns line up. */
-const COLS = "grid-cols-[4.5rem_minmax(0,1fr)_7.5rem_19.5rem_7.5rem_minmax(0,1fr)_4.5rem]"
+const COLS = "grid-cols-[4.5rem_minmax(0,1fr)_7.5rem_17rem_7.5rem_minmax(0,1fr)_4.5rem]"
 const SHEET_WIDTH_PX = 1160
 /** The ledger's gold caps, larger for the sheet's header band (the event column fits the club's name). */
 const bandClass = "text-base font-semibold uppercase tracking-[0.1em] text-accent"
@@ -53,7 +53,7 @@ export default function RecordsExportCapture({ rows, asOf }: { rows: TeamRecordR
       <div className="overflow-hidden rounded-xl border border-border bg-background" style={{ width: SHEET_WIDTH_PX }}>
         <div className={`grid ${COLS} border-b border-border bg-fill-secondary/60`}>
           <p className={`col-span-3 py-2.5 text-center ${bandClass}`}>Women&apos;s Records</p>
-          <p className={`whitespace-nowrap border-x border-border px-4 py-2.5 text-center ${bandClass}`}>
+          <p className={`whitespace-nowrap border-x border-border px-2 py-2.5 text-center ${bandClass}`}>
             {RECORDS_EXPORT.eyebrow}
           </p>
           <p className={`col-span-3 py-2.5 text-center ${bandClass}`}>Men&apos;s Records</p>
@@ -86,7 +86,7 @@ export default function RecordsExportCapture({ rows, asOf }: { rows: TeamRecordR
                 {row.label}
               </div>
               {mixed ? (
-                <div className="col-span-3 flex items-end justify-end bg-fill px-3 py-2 text-xs text-foreground-secondary">
+                <div className="col-span-3 flex items-end justify-end px-3 py-2 text-sm text-foreground-secondary">
                   {asOf}
                 </div>
               ) : (

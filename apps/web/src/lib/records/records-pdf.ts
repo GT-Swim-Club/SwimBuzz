@@ -11,7 +11,7 @@ import {
 
 export type RecordsPdfInput = {
   rows: TeamRecordRow[]
-  /** "As of Nov 9, 2026", in the mixed relay's empty men's cell at the table's bottom right. */
+  /** "Rev. Nov 9, 2026", in the mixed relay's empty men's cell at the table's bottom right. */
   asOf: string
 }
 
@@ -23,7 +23,7 @@ const INK: RGB = [31, 31, 31]
 const INK_SECONDARY: RGB = [89, 89, 89]
 const INK_TERTIARY: RGB = [140, 140, 140]
 const BORDER: RGB = [234, 234, 234]
-/** --brand-color-fill: the heavier rules between stroke groups, and the mixed relay's empty side. */
+/** --brand-color-fill: the heavier rules between stroke groups. */
 const FILL: RGB = [217, 217, 217]
 /** The table's header band: --brand-color-fill-secondary at 60% on white, like the records page. */
 const HEADER_BG: RGB = [246, 246, 246]
@@ -36,7 +36,7 @@ const TABLE = {
   bandHeight: px(42),
   bandSize: px(15),
   bandCharSpace: px(1.5),
-  asOfSize: px(10),
+  asOfSize: px(12),
   /** The date's distance from the empty cell's bottom and right edges. */
   asOfInset: px(8),
   labelHeight: px(24),
@@ -233,16 +233,6 @@ function drawRecordsPdf(input: RecordsPdfInput, orientation: "portrait" | "lands
     const record = (gender: RecordGender) => row.records[gender]
     drawSide(record(mixed ? "X" : "F"), womenColumns, y, rowHeight)
     if (mixed) {
-      doc.setFillColor(...FILL)
-      // The table's last row: round the bottom-right corner with the border.
-      const last = index === rows.length - 1
-      if (last) {
-        doc.roundedRect(menX, y, sideWidth, rowHeight, m.radius, m.radius, "F")
-        doc.rect(menX, y, sideWidth, rowHeight - m.radius, "F")
-        doc.rect(menX, y, sideWidth - m.radius, rowHeight, "F")
-      } else {
-        doc.rect(menX, y, sideWidth, rowHeight, "F")
-      }
       // The empty cell holds the date, at its bottom right.
       setType("normal", m.asOfSize, INK_SECONDARY)
       doc.text(input.asOf, menX + sideWidth - m.asOfInset, y + rowHeight - m.asOfInset, { align: "right" })

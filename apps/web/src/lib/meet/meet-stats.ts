@@ -191,10 +191,6 @@ function formatDeltaMs(deltaMs: number): string {
   return `${sign}${minutes}:${seconds}`
 }
 
-function formatDropPct(pct: number): string {
-  return `-${pct >= 10 ? pct.toFixed(0) : pct.toFixed(1)}%`
-}
-
 function displayName(athleteName: string): string {
   // Stored as "Last, First" on many sheet rows
   if (athleteName.includes(",")) {
@@ -212,8 +208,6 @@ export function computeMeetResultHighlights(opts: {
   meetSwims: MeetSwimForStats[]
   pbMap: AthletePbMap
   athleteHrefById?: Map<string, string>
-  /** Bests from swims before this meet — used for biggest PB drop. */
-  priorPbMap?: AthletePbMap
   /** Individual Nationals cuts for the meet's season. */
   nationalsCuts?: NationalsCutForStats[]
   /** Swims from earlier meets this season — a cut made there isn't new here. */
@@ -235,7 +229,6 @@ export function computeMeetResultHighlights(opts: {
     results,
     meetSwims,
     pbMap,
-    priorPbMap,
     nationalsCuts,
     priorSeasonSwims,
     athleteHrefById,
@@ -576,33 +569,6 @@ export function computeMeetResultHighlights(opts: {
         linkLabel: name,
       }
     }
-  }
-
-  // Biggest PB drop — largest % drop vs. the athlete's best from before this meet
-  let bestPbDrop: {
-    athleteName: string
-    event: string
-    deltaMs: number
-    pct: number
-  } | null = null
-  for (const s of meetSwims) {
-    if (!Number.isFinite(s.timeMs) || s.timeMs <= 0) continue
-    const prior = priorPbMap?.get(pbKey(s.athleteId, s.event, s.course))
-    if (prior == null || prior <= 0) continue
-    const deltaMs = s.timeMs - prior
-    if (deltaMs >= 0) continue
-    const pct = (-deltaMs / prior) * 100
-    if (!bestPbDrop || pct > bestPbDrop.pct) {
-      bestPbDrop = { athleteName: nameOf(s.athleteId, s.athleteName), event: s.event, deltaMs, pct }
-    }
-  }
-  if (bestPbDrop) {
-    counters.push({
-      label: "Biggest PB drop",
-      row: "swims",
-      value: formatDropPct(bestPbDrop.pct),
-      hint: `${displayName(bestPbDrop.athleteName)} · ${canonicalizeStrokeEvent(bestPbDrop.event)} · ${formatDeltaMs(bestPbDrop.deltaMs)}`,
-    })
   }
 
   // Most PBs — only worth calling out with 2+; everyone tied for the most

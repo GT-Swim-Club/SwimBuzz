@@ -127,7 +127,7 @@ function makeStyles(c: ColorPalette) {
       paddingVertical: 10,
       textAlign: "center",
     },
-    asOf: { color: c.textSecondary, fontSize: 12 },
+    asOf: { color: c.textSecondary, fontSize: 14 },
     // Half of what the event column leaves, the same as a row's year, names and time.
     side: { flex: 1 },
     labels: { borderBottomColor: c.fill, borderBottomWidth: 1 },
@@ -160,7 +160,6 @@ function makeStyles(c: ColorPalette) {
     // The date sits at its bottom right.
     mixedEmpty: {
       alignItems: "flex-end",
-      backgroundColor: c.fill,
       flexBasis: YEAR_WIDTH + TIME_WIDTH,
       flexGrow: 1,
       justifyContent: "flex-end",
