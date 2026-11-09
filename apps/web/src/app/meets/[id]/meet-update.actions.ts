@@ -1,6 +1,7 @@
 "use server"
 
 import { softDeleteMeet } from "@/lib/recovery/recovery"
+import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { buildMeetData, MeetInputError, toPrismaMeetWriteData } from "@/lib/meet/meet-input"
@@ -120,6 +121,8 @@ export async function updateMeet(
       })
     await images.commit()
     await deleteRemovedMeetFiles(existing as MeetStoredFiles, data)
+    // Records show the meet's name and only count SCY meets.
+    if (meet.name !== existing.name || meet.course !== existing.course) await syncTeamRecordsSafely()
 
     void notifyMeetRosterOfInfoDrops({
       meetId: meet.id,
@@ -182,6 +185,7 @@ export async function deleteMeetEntirely(
         resultStatusesSummary: { entries: [] },
       },
     })
+    await syncTeamRecordsSafely()
   }
 
   if (shouldDeleteMeet) {

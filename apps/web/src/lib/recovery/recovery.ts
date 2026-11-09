@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { withDeleted } from "../../../soft-delete-policy"
 import { deleteAllMeetFiles } from "@/lib/meet/meet-storage"
+import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
 import { RECOVERY_RETENTION_DAYS } from "@swimbuzz/shared"
 
 export type RecoveryKind = "practice" | "meet"
@@ -22,7 +23,10 @@ export async function removePractice(id: string, practice: { visibility: string 
 }
 export async function softDeleteMeet(id: string, deleteSwims: boolean) {
   const dates = deletionDates()
-  return prisma.meet.update({ where: { id }, data: { ...dates, deleteSwimsOnPurge: deleteSwims } })
+  const meet = await prisma.meet.update({ where: { id }, data: { ...dates, deleteSwimsOnPurge: deleteSwims } })
+  // Records set at a deleted meet fall back to the ones before them.
+  await syncTeamRecordsSafely()
+  return meet
 }
 export async function listRecentlyDeleted() {
   return withDeleted(async () => {
@@ -47,7 +51,7 @@ export async function listRecentlyDeleted() {
   })
 }
 export async function restoreDeleted(kind: RecoveryKind, id: string) {
-  return withDeleted(async () => {
+  const restored = await withDeleted(async () => {
     // The conditional UPDATE takes a row lock: only restore or purge can win.
     const where = { id, deletedAt: { not: null }, purgeAfter: { gt: new Date() }, purgeStartedAt: null }
     const data = { deletedAt: null, purgeAfter: null }
@@ -56,6 +60,9 @@ export async function restoreDeleted(kind: RecoveryKind, id: string) {
       : await prisma.meet.updateMany({ where, data: { ...data, deleteSwimsOnPurge: false } })
     return result.count === 1
   })
+  // Outside withDeleted, so the sync only sees active meets.
+  if (restored && kind === "meet") await syncTeamRecordsSafely()
+  return restored
 }
 async function purgeMeet(meet: Parameters<typeof deleteAllMeetFiles>[0] & { id: string }) {
   await deleteAllMeetFiles(meet, { strict: true })

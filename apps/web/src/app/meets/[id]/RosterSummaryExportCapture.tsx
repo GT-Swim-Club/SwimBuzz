@@ -165,6 +165,7 @@ function CaptureHighlights({ counters }: { counters: StatCounter[] }) {
               label={counter.label}
               value={counter.value}
               sub={counter.hint}
+              subBesideLabel={counter.hintBesideLabel}
               detail={counter.detail}
               fit={typeof counter.value === "string" && !/^[-−+]?[\d.:]+$/.test(counter.value) && counter.page !== "teamScores"}
               valueClassName={

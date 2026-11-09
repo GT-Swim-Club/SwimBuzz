@@ -130,9 +130,16 @@ function relayGender(sheet: string | undefined, legGenders: (string | undefined)
   return "X"
 }
 
-/** "Ann Lee", "Ann Lee & Bo Kim", "Ann Lee, Bo Kim & Cy Diaz". */
+/** A count tile's label, singular for one ("1 Win", "2 Wins"). */
+function countLabel(count: number, one: string, many: string): string {
+  return count === 1 ? one : many
+}
+
+/** "Ann Lee", "Ann Lee & Bo Kim", "Ann Lee, Bo Kim, & Cy Diaz" (with the serial comma). */
 function joinNames(names: string[]): string {
-  return names.length > 1 ? `${names.slice(0, -1).join(", ")} & ${names[names.length - 1]}` : names[0] ?? ""
+  if (names.length <= 1) return names[0] ?? ""
+  if (names.length === 2) return `${names[0]} & ${names[1]}`
+  return `${names.slice(0, -1).join(", ")}, & ${names[names.length - 1]}`
 }
 
 /** "Ann Lee" → "Lee Ann": a shown name keyed for ordering by last name. */
@@ -221,6 +228,8 @@ export function computeMeetResultHighlights(opts: {
   sortNameById?: Map<string, string>
   /** Each athlete's gender ("F" / "M"), by id — labels each win women's or men's. */
   genderById?: Map<string, string>
+  /** GTSC records set at this meet — a tile after Swimmers. */
+  recordCount?: number
 }): MeetHighlights | null {
   const {
     results,
@@ -235,6 +244,7 @@ export function computeMeetResultHighlights(opts: {
     nameById,
     sortNameById,
     genderById,
+    recordCount,
   } = opts
 
   /** An athlete's preferred "First Last", else the sheet's name made readable. */
@@ -362,17 +372,26 @@ export function computeMeetResultHighlights(opts: {
       events: scorer.swims,
     }))
 
-  // Swimmers with results
+  // Swimmers who raced — a DQ or DNF counts, only a no-show or scratch in every event doesn't
   const swimmerIds = new Set<string>()
   for (const r of results) {
     if (r.isRelayLeadoff) continue
-    if (hasTimedResult(r) || preferredPlace(r) != null) {
+    if (racesSwum(r) > 0 || hasTimedResult(r) || preferredPlace(r) != null) {
       swimmerIds.add(r.athleteId)
+    }
+  }
+  for (const relay of relayResults ?? []) {
+    if (relay.entryType !== "relay_team" || racesSwum(relay) === 0) continue
+    for (const leg of relay.relaySwimmers ?? []) {
+      if (leg.athleteId) swimmerIds.add(leg.athleteId)
     }
   }
   for (const s of meetSwims) swimmerIds.add(s.athleteId)
   if (swimmerIds.size > 0) {
-    counters.push({ label: "Swimmers", value: swimmerIds.size })
+    counters.push({ label: countLabel(swimmerIds.size, "Swimmer", "Swimmers"), value: swimmerIds.size, row: "results" })
+  }
+  if (recordCount) {
+    counters.push({ label: countLabel(recordCount, "GTSC Record", "GTSC Records"), value: recordCount, row: "results" })
   }
 
   // Wins / podiums / top 8s — at most one per athlete×event (prefer final place), and one per
@@ -399,18 +418,18 @@ export function computeMeetResultHighlights(opts: {
   const wins = computeTopPerformances()
   const winCount = countPlacedAtOrBetter(1)
   if (winCount > 0) {
-    counters.push({ label: "Wins", value: winCount })
+    counters.push({ label: countLabel(winCount, "Win", "Wins"), value: winCount, row: "results" })
   }
   const podiumCount = countPlacedAtOrBetter(3)
   if (podiumCount > 0) {
-    counters.push({ label: "Podiums", value: podiumCount })
+    counters.push({ label: countLabel(podiumCount, "Podium", "Podiums"), value: podiumCount, row: "results" })
   }
   const topEightCount = countPlacedAtOrBetter(8)
   if (topEightCount > 0) {
-    counters.push({ label: "Top 8 Finishes", value: topEightCount })
+    counters.push({ label: countLabel(topEightCount, "Top 8 Finish", "Top 8 Finishes"), value: topEightCount, row: "results" })
   }
 
-  // PBs set (including relay leadoffs)
+  // Personal bests set (including relay leadoffs)
   let pbCount = 0
   const pbCountsByAthlete = new Map<string, { athleteName: string; sortName: string; count: number }>()
   for (const s of meetSwims) {
@@ -426,7 +445,32 @@ export function computeMeetResultHighlights(opts: {
     }
   }
   if (pbCount > 0) {
-    counters.push({ label: "PBs set", value: pbCount })
+    counters.push({ label: countLabel(pbCount, "Personal Best", "Personal Bests"), value: pbCount, row: "swims" })
+  }
+
+  // Season bests — each athlete × event's fastest swim here (prelims and finals count once), when
+  // it's their first of the season in that event or beats every earlier one this season
+  if (priorSeasonSwims) {
+    const fastestHere = new Map<string, number>()
+    for (const s of meetSwims) {
+      if (!Number.isFinite(s.timeMs) || s.timeMs <= 0) continue
+      const key = pbKey(s.athleteId, s.event, s.course)
+      const prev = fastestHere.get(key)
+      if (prev == null || s.timeMs < prev) fastestHere.set(key, s.timeMs)
+    }
+    const priorSeasonBest = buildAthletePbMap(priorSeasonSwims)
+    let seasonBestCount = 0
+    for (const [key, timeMs] of fastestHere) {
+      const prior = priorSeasonBest.get(key)
+      if (prior == null || timeMs < prior) seasonBestCount += 1
+    }
+    if (seasonBestCount > 0) {
+      counters.push({
+        label: countLabel(seasonBestCount, "Season Best", "Season Bests"),
+        value: seasonBestCount,
+        row: "swims",
+      })
+    }
   }
 
   // New Nationals cuts — first cuts of the season made here, at most one per athlete×event, relay
@@ -470,7 +514,7 @@ export function computeMeetResultHighlights(opts: {
       if (!prev || s.timeMs < prev.swim.timeMs) newCuts.set(key, { swim: s, cutMs: made.cutMs })
     }
     if (newCuts.size > 0) {
-      counters.push({ label: "New Nattys Cuts", value: newCuts.size })
+      counters.push({ label: countLabel(newCuts.size, "New Nattys Cut", "New Nattys Cuts"), value: newCuts.size, row: "swims" })
     }
     newNationalsCuts = [...newCuts.values()]
       .map(({ swim, cutMs }) => ({
@@ -520,6 +564,7 @@ export function computeMeetResultHighlights(opts: {
     const deltaStr = formatDeltaMs(bestDrop.deltaMs)
     counters.push({
       label: "Biggest drop",
+      row: "swims",
       value: deltaStr,
       hint: `${displayName(bestDrop.athleteName)} · ${bestDrop.event}`,
     })
@@ -554,6 +599,7 @@ export function computeMeetResultHighlights(opts: {
   if (bestPbDrop) {
     counters.push({
       label: "Biggest PB drop",
+      row: "swims",
       value: formatDropPct(bestPbDrop.pct),
       hint: `${displayName(bestPbDrop.athleteName)} · ${canonicalizeStrokeEvent(bestPbDrop.event)} · ${formatDeltaMs(bestPbDrop.deltaMs)}`,
     })
@@ -564,8 +610,10 @@ export function computeMeetResultHighlights(opts: {
   if (mostPbs && mostPbs.count > 1) {
     counters.push({
       label: "Most PBs",
+      row: "swims",
+      hintBesideLabel: true,
       value: mostPbs.names,
-      hint: `${mostPbs.count} PBs${mostPbs.tied ? " each" : ""}`,
+      hint: mostPbs.tied ? `${mostPbs.count} each` : `${mostPbs.count} PBs`,
     })
   }
 
@@ -601,6 +649,8 @@ export function computeMeetResultHighlights(opts: {
   if (busiest && busiest.count > 1) {
     counters.push({
       label: "Busiest",
+      row: "swims",
+      hintBesideLabel: true,
       value: busiest.names,
       hint: `${busiest.count} races${busiest.tied ? " each" : ""}`,
     })

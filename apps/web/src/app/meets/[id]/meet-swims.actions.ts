@@ -7,6 +7,7 @@ import { normalizeSwimForInsert, nextSwimOccurrence } from "@/lib/swim/swim-dedu
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
 import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
+import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
 
 export type AddMeetSwimInput = {
   athleteId: string
@@ -47,6 +48,7 @@ export async function addMeetSwim(input: AddMeetSwimInput) {
   for (let attempt = 0; attempt < 5; attempt++) {
     try {
       const created = await prisma.swim.create({ data: { ...base, occurrence } })
+      if (created.meetId) await syncTeamRecordsSafely()
       revalidatePath("/meets/[id]", "page")
       return created
     } catch (err) {
@@ -112,6 +114,7 @@ export async function editMeetSwim(swimId: string, input: EditMeetSwimInput) {
       const updated = await prisma.swim.update({
         where: { id: swimId },
         data: { ...base, occurrence }})
+      if (updated.meetId || swim.meetId) await syncTeamRecordsSafely()
       revalidatePath("/meets/[id]", "page")
       return updated
     } catch (err) {
@@ -143,6 +146,7 @@ export async function deleteMeetSwim(swimId: string) {
   }
 
   await prisma.swim.delete({ where: { id: swimId } })
+  if (swim.meetId) await syncTeamRecordsSafely()
   revalidatePath("/meets/[id]", "page")
   return { ok: true }
 }

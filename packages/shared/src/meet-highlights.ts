@@ -12,7 +12,13 @@ export type StatCounter = {
   /** Our team's place, on a team score — 1st to 3rd are tinted like a podium finish. */
   place?: number
   page?: StatCounterPage
+  /** The export row it shares with its group: results (swimmers, records, places) or swims (PBs, cuts, standouts). */
+  row?: StatCounterRow
+  /** Exports set the hint on the label's line, after a dot ("BUSIEST · 12 races"), when it fits. */
+  hintBesideLabel?: boolean
 }
+
+export type StatCounterRow = "results" | "swims"
 
 export type StatSpotlight = {
   text: string
@@ -62,6 +68,21 @@ export type MeetWin = {
   place: number
 }
 
+/** A GTSC team record set at this meet (it still counts once a later meet breaks it). */
+export type MeetRecord = {
+  /** "X" for the mixed relay. */
+  gender: "F" | "M" | "X"
+  /** "100 Free", "200 Free Relay". */
+  event: string
+  /** The holder, or a relay's swimmers in leg order. */
+  swimmers: string[]
+  /** Set leading off a relay — "(R)" after the holder. */
+  leadoff?: boolean
+  time: string
+  /** The record it broke, when there was one. */
+  previous?: { time: string; year: number; holder?: string }
+}
+
 export type MeetHighlights = {
   counters: StatCounter[]
   spotlight?: StatSpotlight | null
@@ -76,11 +97,14 @@ export type MeetHighlights = {
    * 1st, 2nd and 3rd when they're fewer than ten, else 1sts and 2nds when those are, else just 1sts.
    */
   wins?: MeetWin[]
+  /** GTSC records set here — the "GTSC Records" counter and the Results exports' section. */
+  records?: MeetRecord[]
 }
 
 export type HighlightsPage = { kind: StatCounterPage | "stats"; counters: StatCounter[] }
 
 const PAGE_ORDER: StatCounterPage[] = ["teamScores", "topScorers"]
+const COUNTER_ROWS: StatCounterRow[] = ["results", "swims"]
 
 /**
  * The highlights carousel's pages: team scores, then top scorers, then plain counters
@@ -104,9 +128,11 @@ export function paginateHighlights(counters: StatCounter[]): HighlightsPage[] {
 export type HighlightTileRow = { counters: StatCounter[]; perRow: number }
 
 /**
- * The highlights as rows of tiles for an export: team scores three to a row, then plain counters
- * `plainPerRow` to a row (four, or six to keep a page's highlights to three rows) and counters with
- * a hint three. Top scorers are left out — an export lists its top five instead.
+ * The highlights as rows of tiles for an export: team scores three to a row, then the results row
+ * (swimmers, GTSC records, wins, podiums, top 8s) and the swims row (PBs, new cuts, standouts) each
+ * whole on one row, then any other counters — plain ones `plainPerRow` to a row (four, or six to keep
+ * a page's highlights to three rows) and ones with a hint three. Top scorers are left out — an
+ * export lists its top five instead.
  */
 export function highlightTileRows(counters: StatCounter[], plainPerRow = 4): HighlightTileRow[] {
   const rows: HighlightTileRow[] = []
@@ -115,8 +141,13 @@ export function highlightTileRows(counters: StatCounter[], plainPerRow = 4): Hig
   }
   chunk(counters.filter((c) => c.page === "teamScores"), 3)
   const rest = counters.filter((c) => !c.page)
-  chunk(rest.filter((c) => !c.hint), plainPerRow)
-  chunk(rest.filter((c) => c.hint), 3)
+  for (const row of COUNTER_ROWS) {
+    const grouped = rest.filter((c) => c.row === row)
+    if (grouped.length) rows.push({ counters: grouped, perRow: grouped.length })
+  }
+  const ungrouped = rest.filter((c) => !c.row)
+  chunk(ungrouped.filter((c) => !c.hint), plainPerRow)
+  chunk(ungrouped.filter((c) => c.hint), 3)
   return rows
 }
 
@@ -147,6 +178,8 @@ export function coerceMeetHighlights(raw: unknown): MeetHighlights | null {
       ...(typeof c.page === "string" && COUNTER_PAGES.has(c.page)
         ? { page: c.page as StatCounterPage }
         : {}),
+      ...(c.row === "results" || c.row === "swims" ? { row: c.row } : {}),
+      ...(c.hintBesideLabel === true ? { hintBesideLabel: true } : {}),
     })
   }
   if (counters.length === 0) return null
@@ -156,6 +189,7 @@ export function coerceMeetHighlights(raw: unknown): MeetHighlights | null {
     newNationalsCuts: coerceNewNationalsCuts(r.newNationalsCuts),
     topScorers: coerceTopScorers(r.topScorers),
     wins: coerceMeetWins(r.wins),
+    records: coerceMeetRecords(r.records),
   }
 }
 
@@ -219,4 +253,31 @@ export function coerceNewNationalsCuts(raw: unknown): NewNationalsCut[] {
     })
   }
   return cuts
+}
+
+/** GTSC records from an API response or export request, dropping any malformed row. */
+export function coerceMeetRecords(raw: unknown): MeetRecord[] {
+  if (!Array.isArray(raw)) return []
+  const records: MeetRecord[] = []
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue
+    const c = item as Record<string, unknown>
+    if (c.gender !== "F" && c.gender !== "M" && c.gender !== "X") continue
+    if (!isString(c.event) || !isString(c.time)) continue
+    const swimmers = Array.isArray(c.swimmers) ? c.swimmers.filter(isString) : []
+    const p = c.previous && typeof c.previous === "object" ? (c.previous as Record<string, unknown>) : null
+    const previous =
+      p && isString(p.time) && typeof p.year === "number" && Number.isInteger(p.year)
+        ? { time: p.time, year: p.year, ...(isString(p.holder) ? { holder: p.holder } : {}) }
+        : undefined
+    records.push({
+      gender: c.gender,
+      event: c.event,
+      swimmers,
+      ...(c.leadoff === true ? { leadoff: true } : {}),
+      time: c.time,
+      ...(previous ? { previous } : {}),
+    })
+  }
+  return records
 }

@@ -7,8 +7,12 @@ import type {
   PracticeScope,
   PracticeSummary,
   PracticeVisibility,
+  RecordGender,
   SetHeatLaneInput,
   SessionUser,
+  TeamRecordEditInput,
+  TeamRecordHistoryResponse,
+  TeamRecordsResponse,
 } from "@swimbuzz/shared"
 
 export type DeletedItem = {
@@ -411,6 +415,36 @@ export function createApiClient(options: ApiClientOptions = {}) {
         qualifierCount?: number
         standards?: Array<{ event: string; women: string; men: string }>
       }>(`/api/qualifiers?${sp}`)
+    },
+
+    getRecords() {
+      return request<TeamRecordsResponse>("/api/records")
+    },
+
+    getRecordHistory(gender: RecordGender, event: string) {
+      const sp = new URLSearchParams({ gender, event })
+      return request<TeamRecordHistoryResponse>(`/api/records/history?${sp}`)
+    },
+
+    /** Staff: set an event's record; returns the updated table. */
+    updateRecord(input: TeamRecordEditInput) {
+      return request<TeamRecordsResponse>("/api/records", {
+        method: "PATCH",
+        body: JSON.stringify(input),
+      })
+    },
+
+    /** Staff: clear an event's current record; returns the updated table. */
+    clearRecord(gender: RecordGender, event: string) {
+      return request<TeamRecordsResponse>("/api/records/clear", {
+        method: "POST",
+        body: JSON.stringify({ gender, event }),
+      })
+    },
+
+    /** Staff: remove one record from an event's history. */
+    removeRecord(id: string) {
+      return request<{ ok: true }>(`/api/records/${id}`, { method: "DELETE" })
     },
 
     listNotifications() {

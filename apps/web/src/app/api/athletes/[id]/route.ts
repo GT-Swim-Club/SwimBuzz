@@ -11,6 +11,7 @@ import {
 } from "@/lib/swim/swimcloud-profiles"
 import { isCuid, uniqueAthleteSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
+import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
 import { redactAthleteForViewer } from "@/lib/athlete/athlete-privacy"
 import { loadRelaySplits } from "@/lib/meet/relay-splits"
 
@@ -163,6 +164,8 @@ export async function PATCH(
 
     return result
   })
+  // Record holders' names and genders come from the roster.
+  if (data.firstName !== undefined || data.lastName !== undefined || data.preferredName !== undefined || data.gender !== undefined) await syncTeamRecordsSafely()
 
   return NextResponse.json(withLegacySwimCloudId(updated))
 }
@@ -194,6 +197,7 @@ export async function DELETE(
       await tx.user.delete({ where: { id: athlete.user.id } })
     }
   })
+  await syncTeamRecordsSafely()
 
   return NextResponse.json({ ok: true })
 }

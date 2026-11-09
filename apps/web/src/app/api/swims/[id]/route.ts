@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { normalizeSwimForInsert, nextSwimOccurrence } from "@/lib/swim/swim-dedup"
 import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
 import { getSession } from "@/lib/auth/session"
+import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
 import { isStaffRole } from "@swimbuzz/shared"
 
 export async function PATCH(
@@ -58,6 +59,7 @@ export async function PATCH(
       const updated = await prisma.swim.update({
         where: { id },
         data: { ...base, occurrence }})
+      if (updated.meetId || swim.meetId) await syncTeamRecordsSafely()
       return NextResponse.json(updated)
     } catch (err) {
       if (
@@ -106,5 +108,6 @@ export async function DELETE(
   }
 
   await prisma.swim.delete({ where: { id } })
+  if (swim.meetId) await syncTeamRecordsSafely()
   return NextResponse.json({ ok: true })
 }

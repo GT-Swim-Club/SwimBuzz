@@ -467,10 +467,13 @@ export function LedgerStatTile({
   valueClassName = "text-foreground",
   fit = false,
   interactive = false,
+  subBesideLabel = false,
 }: {
   value: ReactNode
   label: string
   sub?: string
+  /** Set `sub` after the label on its line ("BUSIEST · 12 races") rather than under it. */
+  subBesideLabel?: boolean
   /** A quieter second line under `sub`. */
   detail?: string
   valueClassName?: string
@@ -496,8 +499,11 @@ export function LedgerStatTile({
       </span>
       <span className="mt-1 block text-[10px] font-medium uppercase tracking-[0.025em] text-foreground-tertiary">
         {label}
+        {sub && subBesideLabel ? (
+          <span className="text-xs font-normal normal-case tracking-normal text-foreground-secondary"> · {sub}</span>
+        ) : null}
       </span>
-      {sub ? (
+      {sub && !subBesideLabel ? (
         <span className="mt-0.5 block truncate text-xs text-foreground-secondary">{sub}</span>
       ) : null}
       {detail ? (

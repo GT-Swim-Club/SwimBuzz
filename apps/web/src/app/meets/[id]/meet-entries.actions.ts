@@ -37,6 +37,7 @@ import {
 } from "@/lib/meet/relay-results"
 import { syncRelayLeadoffSwim, deleteRelayLeadoffSwim } from "@/lib/meet/relay-leadoff-sync"
 import { syncMeetRelaySplitSwims } from "@/lib/meet/relay-split-sync"
+import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
 import { saveMeetHeatLane } from "@/lib/meet/heat-lane-save"
 import { getSession } from "@/lib/auth/session"
 import { assertCanEditRelay } from "@/lib/meet/relay-edit-lock"
@@ -279,6 +280,7 @@ export async function upsertRelayEntry(meetId: string, input: UpsertRelayEntryIn
     )
   }
   await syncMeetRelaySplitSwims(meetId)
+  await syncTeamRecordsSafely()
 
   revalidatePath("/meets/[id]", "page")
   return { ok: true, entries: entries.length }
@@ -328,6 +330,7 @@ export async function removeRelayEntry(
     where: { id: meetId },
     data: { relayResultsSummary: { entries } }})
   await syncMeetRelaySplitSwims(meetId)
+  await syncTeamRecordsSafely()
 
   revalidatePath("/meets/[id]", "page")
   return { ok: true }

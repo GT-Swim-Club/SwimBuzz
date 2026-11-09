@@ -23,6 +23,7 @@ import {
 import { Gender } from "@prisma/client"
 import { syncRelayLeadoffSwim, deleteRelayLeadoffSwim } from "@/lib/meet/relay-leadoff-sync"
 import { syncMeetRelaySplitSwims } from "@/lib/meet/relay-split-sync"
+import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
 import { getSession } from "@/lib/auth/session"
 import { relayEditConflict } from "@/lib/meet/relay-edit-lock"
 import { RELAY_EDIT_LOCK_TOKEN_HEADER } from "@/lib/meet/relay-edit-lock-shared"
@@ -257,6 +258,7 @@ export async function POST(
     )
   }
   await syncMeetRelaySplitSwims(id)
+  await syncTeamRecordsSafely()
 
   return NextResponse.json({ ok: true, entries: entries.length })
 }
@@ -338,6 +340,7 @@ export async function DELETE(
     where: { id },
     data: { relayResultsSummary: { entries } }})
   await syncMeetRelaySplitSwims(id)
+  await syncTeamRecordsSafely()
 
   return NextResponse.json({
     ok: true,

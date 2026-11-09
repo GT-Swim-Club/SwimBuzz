@@ -37,6 +37,11 @@ export default async function Nav() {
       label: "Nationals",
       prefetch: false,
       icon: <AppIcon key="nationals" name="trophy" className={navIconClass} />},
+    {
+      href: "/records",
+      label: "Records",
+      prefetch: false,
+      icon: <AppIcon key="records" name="medal" className={navIconClass} />},
   ] as const
 
   const isStaff = !!session && isStaffRole(session.user.role)

@@ -6,7 +6,7 @@
 
 import { meetFileName } from "./format"
 import type { IconName } from "./icons"
-import type { MeetHighlights, MeetWin, NewNationalsCut, StatCounter, TopScorer } from "./meet-highlights"
+import type { MeetHighlights, MeetRecord, MeetWin, NewNationalsCut, StatCounter, TopScorer } from "./meet-highlights"
 
 export type RosterSummaryPdfResult =
   | {
@@ -107,6 +107,7 @@ export type RosterSummaryHighlights = {
   newNationalsCuts: NewNationalsCut[]
   topScorers: TopScorer[]
   wins: MeetWin[]
+  records: MeetRecord[]
 }
 
 export const ROSTER_SUMMARY_PDF_LIMITS = {
@@ -120,6 +121,7 @@ export const ROSTER_SUMMARY_PDF_LIMITS = {
   newNationalsCuts: 300,
   topScorers: 20,
   wins: 300,
+  records: 60,
 } as const
 
 /**
@@ -168,6 +170,7 @@ export function meetHighlightsExportRequest(highlights: MeetHighlights): RosterS
       newNationalsCuts: highlights.newNationalsCuts ?? [],
       topScorers: highlights.topScorers ?? [],
       wins: highlights.wins ?? [],
+      records: highlights.records ?? [],
     },
   }
 }
@@ -239,9 +242,44 @@ function topPerformancesSection(request: RosterSummaryPdfRequest): RosterSummary
   ]
 }
 
-/** A highlights export's sections under its tiles: top scorers, top performances, then new Nationals cuts. */
+/**
+ * A highlights export's "GTSC Records" section, women's, men's then mixed in event order: the holder
+ * (or a relay by its event, swimmers under it), the new time, and the record it broke.
+ */
+function recordsSection(request: RosterSummaryPdfRequest): RosterSummaryPdfSection[] {
+  const records = request.highlights?.records ?? []
+  if (records.length === 0) return []
+  return [
+    {
+      title: "GTSC Records",
+      icon: "award",
+      rows: records.map((record): RosterSummaryPdfRow => {
+        const event = `${GENDER_LABELS[record.gender]} ${record.event}`
+        // The year before the holder, so a long line loses the end of a name, not the year.
+        const previous = record.previous
+          ? `Prev ${record.previous.time} (${record.previous.year})${record.previous.holder ? `, ${record.previous.holder}` : ""}`
+          : undefined
+        const result: RosterSummaryPdfResult = { kind: "text", text: record.time, strong: true }
+        if (record.swimmers.length > 1) return { label: event, meta: previous, legs: record.swimmers, result }
+        const holder = record.swimmers[0] || "–"
+        return {
+          label: record.leadoff ? `${holder} (R)` : holder,
+          meta: [event, previous].filter(Boolean).join(" · "),
+          result,
+        }
+      }),
+    },
+  ]
+}
+
+/** A highlights export's sections under its tiles: top scorers, top performances, GTSC records, then new Nationals cuts. */
 export function rosterSummaryHighlightSections(request: RosterSummaryPdfRequest): RosterSummaryPdfSection[] {
-  return [...topScorersSection(request), ...topPerformancesSection(request), ...rosterSummaryCutsSections(request)]
+  return [
+    ...topScorersSection(request),
+    ...topPerformancesSection(request),
+    ...recordsSection(request),
+    ...rosterSummaryCutsSections(request),
+  ]
 }
 
 /** The sections an image or PDF of the request draws: any highlight sections, then the rest. */

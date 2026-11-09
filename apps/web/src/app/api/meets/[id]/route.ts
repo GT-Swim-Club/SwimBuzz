@@ -37,6 +37,7 @@ import { buildRelayLineups } from "@/lib/meet/relay-lineups"
 import { attachCoachHeatLanes } from "@/lib/meet/heat-lane-overrides"
 import { loadMeetHighlights } from "@/lib/meet/meet-highlights-load"
 import { scoreMeetSwims, scoreRelayResults } from "@/lib/meet/meet-scoring"
+import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
 import { athleteRosterNameLastFirst, utcDayKey, isStaffRole } from "@swimbuzz/shared"
 
 export const runtime = "nodejs"
@@ -235,6 +236,8 @@ export async function PATCH(
       })
     await images.commit()
     await deleteRemovedMeetFiles(existing as MeetStoredFiles, data)
+    // Records show the meet's name and only count SCY meets.
+    if (meet.name !== existing.name || meet.course !== existing.course) await syncTeamRecordsSafely()
 
     void notifyMeetRosterOfInfoDrops({
       meetId: meet.id,
@@ -297,6 +300,7 @@ export async function DELETE(
         teamScores: Prisma.DbNull,
       },
     })
+    await syncTeamRecordsSafely()
   }
 
   if (deleteMeet) {

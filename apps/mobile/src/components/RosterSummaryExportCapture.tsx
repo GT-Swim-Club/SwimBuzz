@@ -54,7 +54,7 @@ function CaptureHighlights({ counters }: { counters: StatCounter[] }) {
       {rows.map(({ counters: row, perRow }, i) => (
         <View key={i} style={styles.tileRow}>
           {row.map((counter) => (
-            <HighlightTile key={counter.label} counter={counter} />
+            <HighlightTile key={counter.label} counter={counter} hintBesideLabel />
           ))}
           {/* A short row keeps its tiles the width of a full row's. */}
           {Array.from({ length: perRow - row.length }, (_, k) => (

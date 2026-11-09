@@ -6,6 +6,7 @@ import {
   type MeetHighlights,
 } from "@/lib/meet/meet-stats"
 import { athletePreferredName, coerceTeamScores } from "@swimbuzz/shared"
+import { loadMeetRecords } from "@/lib/records/meet-records"
 
 export type MeetForHighlights = {
   id: string
@@ -25,8 +26,9 @@ export type MeetForHighlights = {
 }
 
 /**
- * A meet's highlights carousel (team scores, top scorers, then result stats), loaded the same
- * way for the web meet page and the API mobile reads. Null before there's anything to show.
+ * A meet's highlights carousel (team scores, top scorers, then result stats with any GTSC records
+ * set here), loaded the same way for the web meet page and the API mobile reads. Null before
+ * there's anything to show.
  */
 export async function loadMeetHighlights({
   meet,
@@ -56,7 +58,7 @@ export async function loadMeetHighlights({
       ),
     ]),
   ]
-  const [pbSwims, nationalsCuts, namedAthletes] = await Promise.all([
+  const [pbSwims, nationalsCuts, namedAthletes, records] = await Promise.all([
     athleteIds.length > 0
       ? prisma.swim.findMany({
           where: { athleteId: { in: athleteIds } },
@@ -82,6 +84,7 @@ export async function loadMeetHighlights({
           select: { id: true, firstName: true, lastName: true, preferredName: true, gender: true },
         })
       : [],
+    loadMeetRecords(meet.id),
   ])
   // "Before this meet" = other meets' swims dated before this meet's first swim.
   const firstMeetSwimMs = meet.swims.reduce(
@@ -93,7 +96,7 @@ export async function loadMeetHighlights({
   )
   const priorSeasonSwims = priorSwims.filter((s) => s.meetRef?.season === meet.season)
 
-  return computeMeetResultHighlights({
+  const highlights = computeMeetResultHighlights({
     results,
     meetSwims: meet.swims.map((s) => ({
       id: s.id,
@@ -123,5 +126,7 @@ export async function loadMeetHighlights({
       namedAthletes.map((a) => [a.id, `${a.lastName} ${a.preferredName?.trim() || a.firstName}`])
     ),
     genderById: new Map(namedAthletes.map((a) => [a.id, a.gender])),
+    recordCount: records.length,
   })
+  return highlights && records.length > 0 ? { ...highlights, records } : highlights
 }

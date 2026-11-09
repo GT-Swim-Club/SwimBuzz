@@ -622,6 +622,49 @@ model NationalsCut {
   @@index([setId])
 }
 
+/// Women's (F), men's (M), or mixed (X, relays only).
+enum RecordGender {
+  F
+  M
+  X
+}
+
+/// One team record, current or past. The current record for (course, gender, event) is its latest
+/// established (createdAt) non-dismissed row; earlier rows are its history. Rows from imported
+/// meets are kept in step by lib/records/record-sync.ts.
+model TeamRecord {
+  id          String       @id @default(cuid())
+  course      Course       @default(SCY)
+  gender      RecordGender
+  /// Normalized event name, e.g. "50 Free", "400 Medley Relay".
+  event       String
+  timeMs      Int
+  year        Int
+  /// Day the record was swum; null for a year-only record.
+  date        DateTime?
+  /// [{ name, athleteId? }]: one swimmer for an individual event, legs 1–4 for a relay.
+  swimmers    Json
+  /// Set leading off a relay — shown "(R)".
+  leadoff     Boolean      @default(false)
+  meetName    String?
+  meetId      String?
+  /// Individual: the imported Swim behind the record.
+  swimId      String?
+  /// Relay: "<meetId>|<relayTeamKey>" of the relayResultsSummary entry behind the record.
+  relayKey    String?
+  /// "meet" (kept in step with its swim), "manual" (staff), or "seed" (the club's records sheet).
+  source      String
+  /// Staff cleared it; kept so the sync won't add that same swim back.
+  dismissed   Boolean      @default(false)
+  updatedById String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([course, gender, event])
+  @@index([swimId])
+  @@index([meetId])
+}
+
 model Season {
   label     String   @id // e.g., "2026-2027"
   createdAt DateTime @default(now())

@@ -8,6 +8,8 @@ import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
 import { api } from "../../../src/lib/api"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 import { GalleryTile } from "../../../src/components/GalleryTile"
+import { RecordsSection } from "../../../src/components/RecordsSection"
+import { SegmentedOption, SegmentedToggle } from "../../../src/components/SegmentedToggle"
 import { useViewPreferences } from "../../../src/lib/view-preferences"
 
 type CutRow = {
@@ -35,6 +37,13 @@ type QualifierAthlete = {
 }
 
 const COURSES = ["SCY", "LCM"] as const
+
+/** The Nationals tab holds team records too: the native tab bar has no room for a sixth tab on Android. */
+const VIEWS = [
+  { value: "nationals", label: "Nationals" },
+  { value: "records", label: "Records" },
+] as const
+type TabView = (typeof VIEWS)[number]["value"]
 
 function genderLabel(gender: unknown) {
   if (gender === "F") return "Women"
@@ -67,6 +76,7 @@ export default function NationalsScreen() {
   const [seasonState, setSeasonState] = useState<string | null>(null)
   const [course, setCourse] = useState<(typeof COURSES)[number]>("SCY")
   const [query, setQuery] = useState("")
+  const [view, setView] = useState<TabView>("nationals")
 
   const { data: seasons = [] } = useQuery({
     queryKey: ["seasons"],
@@ -123,12 +133,43 @@ export default function NationalsScreen() {
     return [...groups.entries()].sort(([a], [b]) => genderSortKey(a) - genderSortKey(b))
   }, [cuts])
 
+  const viewSwitch = (
+    <SegmentedToggle selectedIndex={VIEWS.findIndex((v) => v.value === view)} fill style={styles.viewSwitch}>
+      {VIEWS.map((v) => (
+        <SegmentedOption
+          key={v.value}
+          flex
+          selected={v.value === view}
+          accessibilityLabel={v.label}
+          onPress={() => setView(v.value)}
+        >
+          <Text style={[styles.viewSwitchText, v.value === view && styles.viewSwitchTextOn]}>{v.label}</Text>
+        </SegmentedOption>
+      ))}
+    </SegmentedToggle>
+  )
+
+  if (view === "records") {
+    return (
+      <Screen style={styles.screen}>
+        <ScrollView
+          contentContainerStyle={[styles.content, { paddingBottom: tabBarPad }]}
+          showsVerticalScrollIndicator={false}
+        >
+          {viewSwitch}
+          <RecordsSection />
+        </ScrollView>
+      </Screen>
+    )
+  }
+
   return (
     <Screen style={styles.screen}>
       <ScrollView
         contentContainerStyle={[styles.content, { paddingBottom: tabBarPad }]}
         showsVerticalScrollIndicator={false}
       >
+        {viewSwitch}
         <View style={styles.intro}>
           <Text style={styles.eyebrow}>CHAMPIONSHIP STANDARDS</Text>
           <Text style={styles.description}>
@@ -371,6 +412,9 @@ function makeStyles(c: ColorPalette) {
   return StyleSheet.create({
   screen: { paddingBottom: 0 },
   content: {},
+  viewSwitch: { alignSelf: "stretch", marginBottom: spacing.md },
+  viewSwitchText: { color: c.textSecondary, fontSize: 14, fontWeight: "700" },
+  viewSwitchTextOn: { color: c.primaryContrast },
   intro: { marginBottom: spacing.md },
   eyebrow: {
     color: c.primaryActive,

@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { normalizeSwimForInsert, nextSwimOccurrence } from "@/lib/swim/swim-dedup"
 import { getSession } from "@/lib/auth/session"
+import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
 import { isStaffRole } from "@swimbuzz/shared"
 
 export async function POST(req: Request) {
@@ -36,6 +37,7 @@ export async function POST(req: Request) {
       try {
         const created = await prisma.swim.create({
           data: { ...base, occurrence }})
+        if (created.meetId) await syncTeamRecordsSafely()
         return NextResponse.json(created, { status: 201 })
       } catch (err) {
         if (

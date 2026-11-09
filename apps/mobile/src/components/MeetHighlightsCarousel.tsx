@@ -48,9 +48,13 @@ function isDropValue(value: string | number) {
   return typeof value === "string" && /^[-−]/.test(value)
 }
 
-/** One highlight: its value (a drop in green), caps label, hint and detail. Also drawn in the Results PNG. */
-export function HighlightTile({ counter }: { counter: StatCounter }) {
+/**
+ * One highlight: its value (a drop in green), caps label, hint and detail. Also drawn in the Results
+ * PNG, which passes `hintBesideLabel` to set a counter's hint after its label ("BUSIEST · 12 races").
+ */
+export function HighlightTile({ counter, hintBesideLabel = false }: { counter: StatCounter; hintBesideLabel?: boolean }) {
   const c = usePalette()
+  const besideLabel = hintBesideLabel && counter.hintBesideLabel && counter.hint
   const isText = typeof counter.value === "string" && !/^[-−+]?[\d.:]+$/.test(counter.value)
   return (
     <View
@@ -94,8 +98,13 @@ export function HighlightTile({ counter }: { counter: StatCounter }) {
         }}
       >
         {counter.label}
+        {besideLabel ? (
+          <Text style={{ fontSize: 12, fontWeight: "400", letterSpacing: 0, textTransform: "none", color: c.textSecondary }}>
+            {` · ${counter.hint}`}
+          </Text>
+        ) : null}
       </Text>
-      {counter.hint ? (
+      {counter.hint && !besideLabel ? (
         <Text numberOfLines={1} style={{ marginTop: 2, fontSize: 12, color: c.textSecondary }}>
           {counter.hint}
         </Text>

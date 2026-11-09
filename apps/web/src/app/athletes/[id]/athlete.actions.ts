@@ -10,6 +10,7 @@ import { uniqueAthleteSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
 import { normalizeSwimForInsert, nextSwimOccurrence } from "@/lib/swim/swim-dedup"
 import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
+import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
 
 export type UpdateAthleteInput = {
   firstName?: string
@@ -128,6 +129,8 @@ export async function updateAthlete(athleteId: string, input: UpdateAthleteInput
 
     return result
   })
+  // Record holders' names and genders come from the roster.
+  if (data.firstName !== undefined || data.lastName !== undefined || data.preferredName !== undefined || data.gender !== undefined) await syncTeamRecordsSafely()
 
   // When the slug changed, the page the caller is on (old slug) would 404 on re-render, so it
   // skips the revalidation: the client swaps in the new URL and calls router.refresh() itself.
@@ -151,6 +154,7 @@ export async function deleteAthlete(athleteId: string) {
       await tx.user.delete({ where: { id: athlete.user.id } })
     }
   })
+  await syncTeamRecordsSafely()
 
   revalidatePath("/athletes")
   return { ok: true }
@@ -224,6 +228,7 @@ export async function deleteAthleteSwim(swimId: string) {
   }
 
   await prisma.swim.delete({ where: { id: swimId } })
+  if (swim.meetId) await syncTeamRecordsSafely()
   revalidatePath("/athletes/[id]", "page")
   return { ok: true }
 }
