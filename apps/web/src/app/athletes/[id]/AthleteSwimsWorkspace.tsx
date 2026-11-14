@@ -209,6 +209,7 @@ export default function AthleteSwimsWorkspace({
               swims={selected.splits ? relaySplits : swims}
               marks={selected.splits ? splitMarks : marks}
               splits={selected.splits}
+              relaySplits={relaySplits}
               onViewChange={
                 has(swims, selected.event, selected.course) && has(relaySplits, selected.event, selected.course)
                   ? (splits) => navigate({ ...selected, splits }, "replace")

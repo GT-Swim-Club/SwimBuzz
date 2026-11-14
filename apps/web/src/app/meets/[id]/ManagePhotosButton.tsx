@@ -112,7 +112,7 @@ export default function ManagePhotosButton({
     setPreviewsUploading(true)
 
     try {
-      const results = await Promise.allSettled(filesToUpload.map(uploadMeetResourceFile))
+      const results = await Promise.allSettled(filesToUpload.map((file) => uploadMeetResourceFile(file, meetId)))
       const successfulUrls: string[] = []
       const errors: string[] = []
 
@@ -291,7 +291,7 @@ export default function ManagePhotosButton({
                 <button
                   type="button"
                   onClick={() => setForm((f) => ({ ...f, photos: [...f.photos, { name: "", url: "" }] }))}
-                  className="text-[13px] font-medium text-primary transition-colors hover:text-primary-hover"
+                  className="text-[13px] font-medium text-accent transition-colors hover:text-primary"
                 >
                   + Add another album
                 </button>

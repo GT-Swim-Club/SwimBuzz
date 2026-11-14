@@ -4,7 +4,8 @@ import Link from "next/link"
 import type { ReactNode } from "react"
 import HoverDetail from "@/components/ui/HoverDetail"
 import type { QualifierRow } from "@/lib/qualifiers/nationals-qualifiers"
-import { qualifierSwimHref } from "@/lib/qualifiers/qualifier-events"
+import { qualifierMarginLabel, qualifierSwimHref } from "@/lib/qualifiers/qualifier-events"
+import { meTintClass } from "./qualifier-styles"
 
 /** Hover card listing a qualifying swim's details, for the compact gallery rows. */
 export function SwimDetailPanel({ details }: { details: [label: string, value: string][] }) {
@@ -49,13 +50,23 @@ export function QualifierSwimRow({
     <Link
       href={href}
       aria-label={ariaLabel}
-      className={`${className} hover:bg-primary-bg/70 ${highlight ? "bg-primary-bg/60" : ""}`}
+      className={`${className} hover:bg-background-hover ${highlight ? meTintClass : ""}`}
     >
       {children}
     </Link>
   ) : (
-    <div aria-label={ariaLabel} className={`${className} ${highlight ? "bg-primary-bg/60" : "bg-fill-secondary/45"}`}>
+    <div aria-label={ariaLabel} className={`${className} ${highlight ? meTintClass : "bg-fill-secondary/45"}`}>
       {children}
     </div>
+  )
+}
+
+/** A qualifying time with how far under the cut it is, for the compact gallery rows. */
+export function GallerySwimTime({ swim }: { swim: QualifierRow }) {
+  return (
+    <span className="shrink-0 whitespace-nowrap font-mono text-sm font-semibold tabular-nums text-foreground transition-colors group-hover:text-primary">
+      {swim.time}
+      <span className="ml-1.5 text-xs font-medium text-success-text">{qualifierMarginLabel(swim)}</span>
+    </span>
   )
 }

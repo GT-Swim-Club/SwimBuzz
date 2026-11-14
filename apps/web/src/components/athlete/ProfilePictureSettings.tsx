@@ -229,7 +229,7 @@ return (
           disabled={busy || !canEdit}
           className="flex items-center gap-2"
         >
-          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-border bg-primary/10 text-sm font-medium text-primary">
+          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-border bg-primary/10 text-sm font-medium text-accent">
             {image ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img

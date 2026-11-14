@@ -14,6 +14,7 @@ import { getSession } from "@/lib/auth/session"
 import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
 import { redactAthleteForViewer } from "@/lib/athlete/athlete-privacy"
 import { loadRelaySplits } from "@/lib/meet/relay-splits"
+import { AthleteYearError, applyYearEdits } from "@/lib/athlete/athlete-year"
 
 export async function GET(
   _req: Request,
@@ -131,6 +132,16 @@ export async function PATCH(
     )
     if (!resolved.ok) return resolved.response
     Object.assign(data, resolved.profiles)
+  }
+
+  // Academic year per season: { "2025-2026": "3" }; a blank or null value clears that season.
+  if ("yearBySeason" in body) {
+    try {
+      Object.assign(data, applyYearEdits(athlete, body.yearBySeason))
+    } catch (err) {
+      if (!(err instanceof AthleteYearError)) throw err
+      return NextResponse.json({ error: err.message }, { status: 400 })
+    }
   }
 
   // Email + display name live on the linked User record.

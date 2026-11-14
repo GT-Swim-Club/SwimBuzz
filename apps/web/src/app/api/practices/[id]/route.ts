@@ -1,13 +1,14 @@
 import { removePractice } from "@/lib/recovery/recovery"
 import { NextResponse } from "next/server"
 import { notifyPracticePublished } from "@/lib/notifications/notifications"
+import { runAfterResponse } from "@/lib/notifications/after-response"
 import { prisma } from "@/lib/prisma"
 import { buildPracticeData, PracticeInputError, practiceSetSelect } from "@/lib/practice/practice-input"
 import {
   PRACTICE_EDIT_LOCK_TOKEN_HEADER,
   PracticeEditLockError,
   assertCanMutatePractice } from "@/lib/practice/practice-edit-lock"
-import { uniquePracticeSlug } from "@/lib/slug"
+import { isCuid, uniquePracticeSlug } from "@/lib/slug"
 import { zonedDayKey } from "@swimbuzz/shared"
 import { getSession } from "@/lib/auth/session"
 import { findUnmanagedPracticeTags } from "@/lib/practice/practice-tag-catalog"
@@ -29,8 +30,9 @@ export async function GET(
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
-  const practice = await prisma.practice.findUnique({
-    where: { id },
+  // Accepts the slug too: notification links (and shared URLs) use it.
+  const practice = await prisma.practice.findFirst({
+    where: isCuid(id) ? { OR: [{ id }, { slug: id }] } : { slug: id },
     include: {
       sets: { orderBy: { order: "asc" }, select: practiceSetSelect },
       comments: {
@@ -169,13 +171,15 @@ export async function PATCH(
     })
 
     if (!existing.published && practice.published) {
-      await notifyPracticePublished({
+      runAfterResponse("practice published notification", () =>
+        notifyPracticePublished({
         practiceId: practice.id,
         title: practice.title,
         startsAt: practice.startsAt,
         timeZone: practice.timeZone,
         focus: practice.focus,
         excludeUserId: session.user.id})
+      )
     }
 
     return NextResponse.json(practice)

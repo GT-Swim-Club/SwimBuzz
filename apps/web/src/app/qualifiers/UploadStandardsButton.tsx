@@ -15,9 +15,12 @@ type Source = "pdf" | "url"
 export default function UploadStandardsButton({
   season: seasonProp,
   course: courseProp = "SCY",
+  variant = "icon",
 }: {
   season?: string
   course?: string
+  /** "icon" for the toolbar; "text" for the labeled button in the no-standards empty state. */
+  variant?: "icon" | "text"
 }) {
   const router = useRouter()
   const { startTask } = useImportTask()
@@ -79,18 +82,32 @@ export default function UploadStandardsButton({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => {
-          resetForm()
-          setOpen(true)
-        }}
-        aria-label="Upload standards"
-        className="group relative inline-flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg bg-primary text-primary-contrast transition-colors hover:bg-primary-hover"
-      >
-        <AppIcon name="upload" className="h-4 w-4 shrink-0" />
-        <HoverDetail label="Upload standards" />
-      </button>
+      {variant === "text" ? (
+        <button
+          type="button"
+          onClick={() => {
+            resetForm()
+            setOpen(true)
+          }}
+          className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-3.5 text-sm font-medium text-primary-contrast transition-colors hover:bg-primary-hover"
+        >
+          <AppIcon name="upload" className="h-4 w-4 shrink-0" />
+          Upload standards
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => {
+            resetForm()
+            setOpen(true)
+          }}
+          aria-label="Upload standards"
+          className="group relative inline-flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg bg-primary text-primary-contrast transition-colors hover:bg-primary-hover"
+        >
+          <AppIcon name="upload" className="h-4 w-4 shrink-0" />
+          <HoverDetail label="Upload standards" />
+        </button>
+      )}
 
       <Modal
         open={open}
@@ -205,7 +222,7 @@ export default function UploadStandardsButton({
         </div>
 
         {error ? (
-          <p className="text-sm text-error dark:text-error">{error}</p>
+          <p className="text-sm text-error">{error}</p>
         ) : null}
       </Modal>
     </>

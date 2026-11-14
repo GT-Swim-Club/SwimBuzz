@@ -43,9 +43,9 @@ export type SwimDetail = {
 }
 
 const PODIUM_TEXT: Record<number, string> = {
-  1: "text-amber-600 dark:text-amber-400",
-  2: "text-slate-500 dark:text-slate-300",
-  3: "text-orange-600 dark:text-orange-400",
+  1: "text-medal-gold",
+  2: "text-medal-silver",
+  3: "text-medal-bronze",
 }
 
 /** The large event badge leading a modal's header (swim detail, relay editor). */
@@ -59,8 +59,8 @@ export function DetailEventBadge({ number }: { number: number }) {
 
 export function deltaPillClass(delta: string) {
   return delta.startsWith("-") || delta.startsWith("−")
-    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300"
-    : "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300"
+    ? "bg-success-bg text-success-text"
+    : "bg-error-bg text-error"
 }
 
 /** Display a signed delta with a true minus sign. */
@@ -88,9 +88,9 @@ function diffClass(d: number, bold = false) {
   const tone = !Number.isFinite(d)
     ? "text-foreground-tertiary"
     : d < 0
-      ? "text-emerald-600 dark:text-emerald-300"
+      ? "text-success-text"
       : d > 0
-        ? "text-red-600 dark:text-red-300"
+        ? "text-error"
         : "text-foreground-secondary"
   return `text-right ${bold ? "font-semibold" : "font-normal"} ${tone}`
 }
@@ -735,7 +735,7 @@ export default function SwimDetailModal({
                 <div className="shrink-0 text-right">
                   <div className="font-mono text-2xl font-semibold leading-[1.1] tabular-nums">
                     {last.time ? formatDisplayTime(last.time) : (
-                      <span className="text-amber-700 dark:text-amber-400">{last.status}</span>
+                      <span className="text-warning-text">{last.status}</span>
                     )}
                   </div>
                   {(headDelta || last.place != null || last.points != null) && (

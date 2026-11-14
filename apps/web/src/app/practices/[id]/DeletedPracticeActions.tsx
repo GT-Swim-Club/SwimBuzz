@@ -12,7 +12,7 @@ const api = createApiClient({})
 
 const TONE_CLASS = {
   normal: "text-foreground-secondary",
-  warning: "text-warning",
+  warning: "text-warning-text",
   expired: "text-error",
 } as const
 
@@ -105,7 +105,7 @@ export default function DeletedPracticeActions({
               type="button"
               onClick={() => void purge()}
               disabled={busy}
-              className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-error-contrast hover:bg-red-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-error px-4 py-2.5 text-sm font-medium text-error-contrast hover:bg-error-hover disabled:opacity-50"
             >
               {busy ? "Deleting…" : "Delete permanently"}
             </button>

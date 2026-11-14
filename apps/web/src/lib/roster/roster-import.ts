@@ -1,5 +1,10 @@
 import { Gender } from "@prisma/client"
-import { formatSeasonLabel } from "@swimbuzz/shared"
+import {
+  effectiveYearBySeason,
+  formatSeasonLabel,
+  prefillYearForSeason,
+  type YearBySeason,
+} from "@swimbuzz/shared"
 import { isClientDisconnected, throwIfDisconnected } from "@/lib/client-disconnect"
 import { prisma } from "@/lib/prisma"
 import {
@@ -9,6 +14,7 @@ import {
   type AthleteLookup,
 } from "@/lib/athlete/athlete-match"
 import { uniqueAthleteSlug } from "@/lib/slug"
+import { athleteYearData } from "@/lib/athlete/athlete-year"
 import { MAX_SWIMCLOUD_IDS } from "@/lib/swim/swimcloud-id"
 import type { ParsedRosterCsvRow } from "@/lib/roster/roster-csv"
 
@@ -24,6 +30,8 @@ export type RosterImportAthlete = {
   gtid: string | null
   dob: Date | null
   year: string | null
+  /** Academic year per season (legacy `year` folded in until the backfill runs). */
+  yearBySeason: YearBySeason
   userEmail: string
 }
 
@@ -62,6 +70,7 @@ export async function loadRosterImportContext(): Promise<RosterImportContext> {
       gtid: true,
       dob: true,
       year: true,
+      yearBySeason: true,
       user: { select: { email: true } },
     },
   })
@@ -78,6 +87,7 @@ export async function loadRosterImportContext(): Promise<RosterImportContext> {
     gtid: athlete.gtid,
     dob: athlete.dob,
     year: athlete.year,
+    yearBySeason: effectiveYearBySeason(athlete),
     userEmail: athlete.user.email,
   }))
 
@@ -165,6 +175,7 @@ const athleteSelect = {
   gtid: true,
   dob: true,
   year: true,
+  yearBySeason: true,
   user: { select: { email: true } },
 } as const
 
@@ -180,6 +191,7 @@ function toRosterAthlete(updated: {
   gtid: string | null
   dob: Date | null
   year: string | null
+  yearBySeason: unknown
   user: { email: string }
 }): RosterImportAthlete {
   return {
@@ -194,6 +206,7 @@ function toRosterAthlete(updated: {
     gtid: updated.gtid ?? null,
     dob: updated.dob ?? null,
     year: updated.year ?? null,
+    yearBySeason: effectiveYearBySeason(updated),
     userEmail: updated.user.email,
   }
 }
@@ -261,6 +274,12 @@ export async function mergeImportAthlete(
     ? athlete.seasons
     : [...athlete.seasons, season]
 
+  // The row's year for this season; with none, keep what's stored, else step up from the
+  // nearest other season (FR → SO → JR → SR) so joining a new season starts one year on.
+  const years = { ...athlete.yearBySeason }
+  const year = input.year?.trim() || years[season] || prefillYearForSeason(years, season)
+  if (year) years[season] = year
+
   if (input.email) {
     await applyImportEmail(athlete, input.email)
   }
@@ -277,7 +296,7 @@ export async function mergeImportAthlete(
       ...(input.preferredName ? { preferredName: input.preferredName } : {}),
       ...(input.gtid != null ? { gtid: input.gtid } : {}),
       ...(input.dob != null ? { dob: input.dob } : {}),
-      ...(input.year != null ? { year: input.year } : {}),
+      ...athleteYearData(years, seasons),
       ...importedSwimCloudProfiles(input, athlete),
     },
     select: athleteSelect,
@@ -290,6 +309,12 @@ export async function mergeImportAthlete(
   })
 
   return toRosterAthlete(updated)
+}
+
+/** A new athlete's years: the row's year for the imported season, if it has one. */
+function importYearData(input: RosterImportInput, season: string) {
+  const year = input.year?.trim()
+  return athleteYearData(year ? { [season]: year } : {}, [season])
 }
 
 export async function createImportAthlete(
@@ -319,7 +344,7 @@ export async function createImportAthlete(
         seasons: [season],
         ...(input.gtid != null ? { gtid: input.gtid } : {}),
         ...(input.dob != null ? { dob: input.dob } : {}),
-        ...(input.year != null ? { year: input.year } : {}),
+        ...importYearData(input, season),
         ...importedSwimCloudProfiles(input),
       },
       select: athleteSelect,
@@ -364,7 +389,7 @@ export async function createImportAthlete(
       seasons: [season],
       ...(input.gtid != null ? { gtid: input.gtid } : {}),
       ...(input.dob != null ? { dob: input.dob } : {}),
-      ...(input.year != null ? { year: input.year } : {}),
+      ...importYearData(input, season),
       ...importedSwimCloudProfiles(input),
     },
     select: athleteSelect,
@@ -529,9 +554,11 @@ export async function runRosterImport(
       progress: ROW_PROGRESS_SHARE + (index / dropping.length) * (1 - ROW_PROGRESS_SHARE),
       detail: `Removing athletes not in the file · ${index + 1}/${dropping.length}`,
     })
+    const remaining = athlete.seasons.filter((entry) => entry !== season)
     await prisma.athlete.update({
       where: { id: athlete.id },
-      data: { seasons: athlete.seasons.filter((entry) => entry !== season) },
+      // The season's year goes with it.
+      data: { seasons: remaining, ...athleteYearData(athlete.yearBySeason, remaining) },
     })
   }
 

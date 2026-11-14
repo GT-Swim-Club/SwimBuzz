@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { notifyPracticePublished } from "@/lib/notifications/notifications"
+import { runAfterResponse } from "@/lib/notifications/after-response"
 import { prisma } from "@/lib/prisma"
 import { buildPracticeData, PracticeInputError, practiceSetSelect } from "@/lib/practice/practice-input"
 import { Prisma } from "@prisma/client"
@@ -112,13 +113,15 @@ export async function POST(req: Request) {
       })
     })
     if (practice.published) {
-      await notifyPracticePublished({
+      runAfterResponse("practice published notification", () =>
+        notifyPracticePublished({
         practiceId: practice.id,
         title: practice.title,
         startsAt: practice.startsAt,
         timeZone: practice.timeZone,
         focus: practice.focus,
         excludeUserId: session.user.id})
+      )
     }
     return NextResponse.json(practice, { status: 201 })
   } catch (err) {

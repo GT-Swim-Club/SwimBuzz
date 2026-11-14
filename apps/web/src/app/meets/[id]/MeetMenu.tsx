@@ -36,12 +36,13 @@ export function MenuDivider() {
 }
 
 export const menuPanel =
-  "absolute right-0 top-[calc(100%+6px)] z-[41] flex min-w-[200px] flex-col gap-0.5 rounded-xl border border-border bg-background p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.4)]"
+  "absolute right-0 top-[calc(100%+6px)] z-[41] flex min-w-[200px] flex-col gap-0.5 rounded-xl border border-border bg-background p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.4)]"
 
 /**
- * A row that opens its options in a flyout to the left (the menu sits at the right edge) on hover,
- * or on click for touch. `open` is the parent's, so only one flyout shows at a time; `onOpenChange(false)`
- * comes a moment after the pointer leaves, so it can cross the gap into the flyout.
+ * A row that opens its options in a flyout to the left (the menu sits at the right edge) on mouse
+ * hover, or on tap/click. On a narrow screen there's no room beside the menu, so the options open
+ * inline under the row instead. `open` is the parent's, so only one flyout shows at a time;
+ * `onOpenChange(false)` comes a moment after the mouse leaves, so it can cross the gap into the flyout.
  */
 export function MenuSubmenu({
   icon,
@@ -77,7 +78,16 @@ export function MenuSubmenu({
   }
 
   return (
-    <div className="relative" onMouseEnter={show} onMouseLeave={scheduleClose}>
+    <div
+      className="relative"
+      // Mouse only: a touch "hover" would open it just before the tap's click closed it again.
+      onPointerEnter={(e) => {
+        if (e.pointerType === "mouse") show()
+      }}
+      onPointerLeave={(e) => {
+        if (e.pointerType === "mouse") scheduleClose()
+      }}
+    >
       <button
         type="button"
         role="menuitem"
@@ -107,4 +117,4 @@ export function MenuSubmenu({
 }
 
 const submenuPanel =
-  "absolute right-[calc(100%+12px)] top-[-6px] z-[42] flex min-w-[200px] flex-col gap-0.5 rounded-xl border border-border bg-background p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.4)]"
+  "absolute right-[calc(100%+12px)] top-[-6px] z-[42] flex min-w-[200px] flex-col gap-0.5 rounded-xl border border-border bg-background p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.4)] max-[560px]:static max-[560px]:mt-0.5 max-[560px]:min-w-0 max-[560px]:rounded-lg max-[560px]:border-0 max-[560px]:bg-fill-secondary max-[560px]:p-1 max-[560px]:shadow-none"

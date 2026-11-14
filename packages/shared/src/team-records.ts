@@ -55,6 +55,17 @@ export type TeamRecordSwimmer = {
 
 export type TeamRecordSource = "meet" | "manual" | "seed"
 
+/**
+ * Whether staff may change or clear a record: only one staff entered by hand. One from imported meet
+ * results follows its swim or relay, and one from the club's records sheet (seed) is the record of
+ * note; both are fixed.
+ */
+export function isRecordEditable(record: { source: string }): boolean {
+  return record.source === "manual"
+}
+
+export const LOCKED_RECORD_MESSAGE = "Only records entered by hand can be changed"
+
 export type TeamRecordItem = {
   id: string
   gender: RecordGender
@@ -88,6 +99,41 @@ export type TeamRecordsResponse = {
 export type TeamRecordHistoryResponse = {
   /** Newest first; the first one is the current record. */
   records: TeamRecordItem[]
+}
+
+/** An event's top 10: each swimmer once at their best (performers) or the ten fastest swims (performances). */
+export type TopTimesMode = "performers" | "performances"
+
+export const TOP_TIMES_LIMIT = 10
+
+export function isTopTimesMode(value: unknown): value is TopTimesMode {
+  return value === "performers" || value === "performances"
+}
+
+/** One swim (or relay) in an event's top 10; ties share a rank, so a list can run past ten. */
+export type TeamTopTime = {
+  /** Stable key for lists. */
+  key: string
+  rank: number
+  timeMs: number
+  year: number
+  /** ISO instant of the swim, or null for a year-only record. */
+  date: string | null
+  /** One swimmer for individual events; legs 1–4 for relays. */
+  swimmers: TeamRecordSwimmer[]
+  /** Swum leading off a relay — shown "(R)". */
+  leadoff: boolean
+  meetName: string | null
+  meetSlug: string | null
+  /** Was a team record when swum (current or past). */
+  isRecord: boolean
+  isThisSeason: boolean
+}
+
+export type TeamTopTimesResponse = {
+  /** Relays are always "performances". */
+  mode: TopTimesMode
+  times: TeamTopTime[]
 }
 
 /** Staff edit of an event's record (see lib/records/record-edit.ts for how it's applied). */

@@ -1,9 +1,10 @@
 import { Skeleton } from "@/components/ui/Skeleton"
 
+// The athlete layout (most visitors): Account, Notifications, Appearance.
+// Staff also get Desktop scraper and Sounds once the page loads.
 const sections = [
   { title: "w-20", rows: 4, description: false },
-  { title: "w-28", rows: 4, description: true },
-  { title: "w-16", rows: 1, description: false },
+  { title: "w-28", rows: 7, description: true },
   { title: "w-28", rows: 1, description: false },
 ]
 

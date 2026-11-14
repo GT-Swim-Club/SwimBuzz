@@ -141,7 +141,7 @@ export default function EditSheetSeedButton({
               type="button"
               onClick={handleDelete}
               disabled={loading}
-              className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-error bg-background hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-950/30 disabled:opacity-50"
+              className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-error bg-background hover:bg-error-bg disabled:opacity-50"
             >
               Delete
             </button>
@@ -183,7 +183,7 @@ export default function EditSheetSeedButton({
 
         <div>
           <label className="block text-xs font-medium text-foreground-secondary mb-1">
-            Seed time <span className="text-red-500">*</span>
+            Seed time <span className="text-error">*</span>
           </label>
           <input
             required

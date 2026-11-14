@@ -11,6 +11,7 @@ export default function RosterStackLayout() {
         { name: "[id]", fallbackHref: "/roster" },
         { name: "new", fallbackHref: "/roster" },
         { name: "import-sheet", fallbackHref: "/roster" },
+        { name: "clearance", fallbackHref: "/roster" },
       ]}
     />
   )

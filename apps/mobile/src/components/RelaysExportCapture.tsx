@@ -130,7 +130,7 @@ function makeStyles(c: ColorPalette) {
       paddingHorizontal: 4,
       borderRadius: 11,
       borderWidth: 1,
-      // Dark mode's primaryBorder is white; the web badge is gold-outlined.
+      // Gold-outlined, like the web badge.
       borderColor: c.accent,
       backgroundColor: c.primaryBg,
     },

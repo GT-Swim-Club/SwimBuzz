@@ -4,6 +4,7 @@ import Link from "next/link"
 import { createContext, useContext, useState, type FocusEvent, type KeyboardEvent, type ReactNode } from "react"
 import {
   formatRecordTime,
+  isRecordEditable,
   recordSetLabel,
   recordSwimmerLabel,
   type RecordEventDef,
@@ -81,7 +82,7 @@ export function seasonClass(record: TeamRecordItem | undefined): string {
  */
 export function RecordSide({ def, gender, record, children }: SideProps & { children: ReactNode }) {
   const editing = useEditing()
-  if (!editing.editing) return <>{children}</>
+  if (!editing.editing || isLocked(record)) return <>{children}</>
   const key = recordKey(gender, def.event)
 
   function onBlur(event: FocusEvent<HTMLDivElement>) {
@@ -106,13 +107,22 @@ export function RecordSide({ def, gender, record, children }: SideProps & { chil
   )
 }
 
+/** Only a record staff entered by hand can be changed or cleared; imported and records-sheet ones are fixed. */
+function isLocked(record: TeamRecordItem | undefined): boolean {
+  return !!record && !isRecordEditable(record)
+}
+
 function useSide({ def, gender, record }: SideProps) {
-  const editing = useEditing()
+  const ctx = useEditing()
+  // A locked record shows as saved even while staff edit the rest of the table.
+  const editing = isLocked(record) ? { ...ctx, editing: false } : ctx
   const key = recordKey(gender, def.event)
   const draft = editing.drafts[key] ?? draftFromRecord(def, record)
   const label = `${gender === "F" ? "Women's" : gender === "M" ? "Men's" : ""} ${def.label}`.trim()
   return {
     editing,
+    /** Staff are editing the table (even if this record is locked). */
+    tableEditing: ctx.editing,
     key,
     draft,
     label,
@@ -170,7 +180,7 @@ export function RecordTime(props: SideProps & { className?: string }) {
 /** Holder (or relay legs 1–4, one per line); staff type names, picking roster athletes from the suggestions. */
 export function RecordNames(props: SideProps & { className?: string; align?: "center" | "start" }) {
   const { def, record, className = "", align = "center" } = props
-  const { editing, key, draft, label, saving, update } = useSide(props)
+  const { editing, tableEditing, key, draft, label, saving, update } = useSide(props)
   const alignClass = align === "center" ? "items-center text-center" : "items-start text-left"
 
   if (editing.editing) {
@@ -212,8 +222,11 @@ export function RecordNames(props: SideProps & { className?: string; align?: "ce
   }
 
   if (!record) return <span className={`text-foreground-tertiary ${className}`}>—</span>
+  // While staff edit the table, say why this one stays as it is.
+  const lockedNote = tableEditing && isLocked(record)
   return (
     <div className={`flex min-w-0 flex-col ${alignClass} ${seasonClass(record)} ${className}`}>
+      {lockedNote ? <span className="text-xs font-normal text-foreground-tertiary">From meet results</span> : null}
       {record.swimmers.map((swimmer, i) => {
         const text = recordSwimmerLabel(record, swimmer)
         return swimmer.athleteSlug ? (
@@ -233,8 +246,10 @@ export function RecordNames(props: SideProps & { className?: string; align?: "ce
 /** Staff action on one record while editing: Clear (confirmed inline). History is on the event name. */
 export function RecordActions(props: SideProps & { className?: string }) {
   const { def, gender, record, className = "" } = props
-  const { editing, key, saving, label } = useSide(props)
+  const { editing, tableEditing, key, saving, label } = useSide(props)
   const [busy, setBusy] = useState(false)
+  // A locked record keeps its grid slot empty so the cells around it stay put.
+  if (tableEditing && isLocked(record)) return <div aria-hidden className={className} />
   if (!editing.editing) return null
 
   if (editing.confirmingClear === key) {

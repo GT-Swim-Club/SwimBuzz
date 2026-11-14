@@ -9,7 +9,7 @@ import {
   type TeamRecordRow,
 } from "@swimbuzz/shared"
 import { usePalette } from "@swimbuzz/ui"
-import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
+import { spacing, type ColorPalette } from "@swimbuzz/tokens"
 
 /** The sheet's width: both genders side by side, like the web's wide records table. */
 const CAPTURE_WIDTH = 1060
@@ -109,14 +109,9 @@ export const RecordsExportCapture = forwardRef<View, { rows: TeamRecordRow[]; as
 
 function makeStyles(c: ColorPalette) {
   return StyleSheet.create({
-    root: { padding: spacing.sm, backgroundColor: c.bgLayout },
-    table: {
-      backgroundColor: c.bgContainer,
-      borderColor: c.border,
-      borderRadius: radii.lg,
-      borderWidth: 1,
-      overflow: "hidden",
-    },
+    // Edge to edge: no margin around the sheet and no outer border, only the lines inside it.
+    root: { backgroundColor: c.bgContainer },
+    table: { backgroundColor: c.bgContainer },
     row: { flexDirection: "row", alignItems: "stretch" },
     band: { backgroundColor: c.fillSecondary, borderBottomColor: c.border, borderBottomWidth: 1 },
     bandText: {

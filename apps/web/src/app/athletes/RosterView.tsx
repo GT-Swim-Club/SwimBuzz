@@ -237,7 +237,7 @@ function RosterTable({
             <span className="hidden text-center tabular-nums md:block">{age ?? "—"}</span>
             {staffColumns &&
               (athlete.swimCloudIds.length > 0 ? (
-                <span className="flex justify-center text-success">
+                <span className="flex justify-center text-success-text">
                   <AppIcon name="check" className="h-5 w-5" />
                   <span className="sr-only">Has SwimCloud</span>
                 </span>

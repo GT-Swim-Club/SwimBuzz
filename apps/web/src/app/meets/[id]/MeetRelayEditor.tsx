@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useTransition } from "react"
+import { useEffect, useState, useSyncExternalStore, useTransition } from "react"
 import { createPortal } from "react-dom"
 import { eventGenderWord } from "@swimbuzz/shared"
 import { deleteRelayTeam, saveRelayTeam } from "./meet-relay.actions"
@@ -31,6 +31,8 @@ const RELAY_EVENTS = [
 ]
 
 const RELAY_LETTERS = ["A", "B", "C", "D"]
+
+const subscribeToNothing = () => () => {}
 
 const RELAY_ROUNDS: Array<{ value: RelayRound; label: string }> = [
   { value: "", label: "Timed final" },
@@ -160,9 +162,8 @@ function RelayModal({
   const [isPending, startTransition] = useTransition()
   const loading = isPending
   const [error, setError] = useState<string | null>(null)
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => setMounted(true), [])
+  // The portal needs document.body: false while server-rendering and hydrating, true after.
+  const mounted = useSyncExternalStore(subscribeToNothing, () => true, () => false)
   useDontReloadWhileBusy(loading)
   useEscapeToClose(true, onClose, { disabled: loading })
   const [bodyRef, canScrollDown] = useCanScrollDown()
@@ -444,7 +445,7 @@ function RelayModal({
                 type="button"
                 onClick={handleDelete}
                 disabled={loading}
-                className="rounded-lg border border-border border-red-200 px-4 py-2.5 text-sm font-medium text-error hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-950/30 disabled:opacity-50"
+                className="rounded-lg border border-error-border px-4 py-2.5 text-sm font-medium text-error hover:bg-error-bg disabled:opacity-50"
               >
                 Delete
               </button>

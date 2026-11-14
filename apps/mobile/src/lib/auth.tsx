@@ -15,6 +15,7 @@ import {
   saveSession,
   setUnauthorizedHandler,
 } from "./api"
+import { unregisterPushToken } from "./push"
 
 type AuthState = {
   user: SessionUser | null
@@ -35,6 +36,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   const signOut = useCallback(async () => {
+    // While the session is still valid: this device stops getting this user's pushes.
+    await unregisterPushToken()
     await clearSession()
     setUser(null)
   }, [])

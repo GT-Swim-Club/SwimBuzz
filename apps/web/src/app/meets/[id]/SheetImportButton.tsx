@@ -17,6 +17,8 @@ export type SheetImportPairing = {
   nameMappings?: Record<string, string>
   rejectedNames?: string[]
   paired?: boolean
+  /** Import-specific options (e.g. a confirmed column mapping), sent as `fields`. */
+  fields?: Record<string, unknown>
 }
 
 export type SheetImportRun<T> = (pairing: SheetImportPairing) => Promise<T>
@@ -119,6 +121,7 @@ export default function SheetImportButton<T>({
       if (pairing.nameMappings) body.append("nameMappings", JSON.stringify(pairing.nameMappings))
       if (pairing.rejectedNames?.length) body.append("rejectedNames", JSON.stringify(pairing.rejectedNames))
       if (pairing.paired) body.append("paired", "true")
+      if (pairing.fields) body.append("fields", JSON.stringify(pairing.fields))
       const res = await fetch(endpoint, { method: "POST", body })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? "Import failed")

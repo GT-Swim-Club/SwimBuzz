@@ -450,7 +450,7 @@ function FloatingPopover({
       ref={panelRef}
       role="dialog"
       data-floating-popover
-      className="fixed z-[70] rounded-xl border border-border bg-background-elevated p-3 shadow-2xl shadow-black/30"
+      className="fixed z-[70] rounded-xl border border-border bg-background-elevated p-3 shadow-2xl shadow-black/10 dark:shadow-black/30"
       style={scrollable
         ? { left: position.left, top: position.top, width, maxHeight: position.maxHeight, overflowY: "auto" }
         : { left: position.left, top: position.top, width }}
@@ -620,7 +620,7 @@ export function DatePicker({
                     : selected
                       ? "bg-primary font-bold text-primary-contrast"
                       : isToday
-                        ? "bg-primary-bg font-bold text-primary-active hover:bg-primary-bg-hover"
+                        ? "bg-primary-bg font-bold text-accent hover:bg-primary-bg-hover"
                         : outsideMonth
                           ? "text-foreground-quaternary hover:bg-fill-secondary"
                           : "text-foreground hover:bg-fill-secondary"
@@ -645,7 +645,7 @@ export function DatePicker({
               commitDate(dateValue(clampDateToRange(today, min, max)))
               floating.close()
             }}
-            className="rounded px-1.5 py-1 text-xs font-semibold text-primary-active transition hover:bg-primary-bg disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded px-1.5 py-1 text-xs font-semibold text-accent transition hover:bg-primary-bg disabled:cursor-not-allowed disabled:opacity-40"
           >
             Today
           </button>
@@ -882,7 +882,7 @@ export function TimePicker({
                 }
                 if (earliest) applyTime(earliest.hour, earliest.minute)
               }}
-              className="rounded px-1.5 py-1 text-xs font-semibold text-primary-active transition hover:bg-primary-bg disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded px-1.5 py-1 text-xs font-semibold text-accent transition hover:bg-primary-bg disabled:cursor-not-allowed disabled:opacity-40"
             >
               Now
             </button>

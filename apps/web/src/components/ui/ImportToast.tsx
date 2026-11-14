@@ -62,7 +62,7 @@ function CheckIcon() {
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 20 20"
       fill="currentColor"
-      className="h-5 w-5 shrink-0 text-success"
+      className="h-5 w-5 shrink-0 text-success-text"
       aria-hidden="true"
     >
       <path
@@ -212,7 +212,7 @@ export default function ImportToast() {
               </p>
             )}
             {task.status === "running" && task.alert && (
-              <p data-toast-text className={`${TEXT_CLASS} mt-1.5 text-sm font-medium text-warning`} role="alert">
+              <p data-toast-text className={`${TEXT_CLASS} mt-1.5 text-sm font-medium text-warning-text`} role="alert">
                 {task.alert}
               </p>
             )}

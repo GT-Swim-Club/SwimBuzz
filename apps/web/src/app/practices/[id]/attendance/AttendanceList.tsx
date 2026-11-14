@@ -42,7 +42,7 @@ export default function AttendanceList({
         <h1 className="text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
           {title}
         </h1>
-        <p className="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-primary">
+        <p className="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-accent">
           Attendance
         </p>
         <div className="mt-2 text-sm text-foreground-secondary sm:text-base">

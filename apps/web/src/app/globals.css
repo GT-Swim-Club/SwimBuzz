@@ -14,14 +14,17 @@
   --color-primary-text: var(--brand-color-primary-text);
   --color-primary-contrast: var(--brand-color-primary-contrast);
   --color-primary-bg: var(--brand-color-primary-bg);
+  --color-primary-bg-hover: var(--brand-color-primary-bg-hover);
 
   /* Colors - Status */
   --color-success: var(--brand-color-success);
   --color-success-bg: var(--brand-color-success-bg);
   --color-success-border: var(--brand-color-success-border);
+  --color-success-text: var(--brand-color-success-text);
   --color-warning: var(--brand-color-warning);
   --color-warning-bg: var(--brand-color-warning-bg);
   --color-warning-border: var(--brand-color-warning-border);
+  --color-warning-text: var(--brand-color-warning-text);
   --color-error: var(--brand-color-error);
   --color-error-bg: var(--brand-color-error-bg);
   --color-error-border: var(--brand-color-error-border);
@@ -55,6 +58,10 @@
   --color-border-secondary: var(--brand-color-border-secondary);
   --color-border-subtle: var(--brand-color-border-subtle);
   --color-accent: var(--brand-color-accent);
+  --color-accent-on-image: var(--brand-color-accent-on-image);
+  --color-medal-gold: var(--brand-color-medal-gold);
+  --color-medal-silver: var(--brand-color-medal-silver);
+  --color-medal-bronze: var(--brand-color-medal-bronze);
 }
 
 :root {

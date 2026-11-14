@@ -308,7 +308,7 @@ function makeStyles(c: ColorPalette, mono: boolean) {
     underline: { textDecorationLine: "underline" },
     strike: { textDecorationLine: "line-through" },
     code: { fontFamily: "Menlo", fontSize: 14 },
-    link: { color: c.link, textDecorationLine: "underline" },
+    link: { color: c.accent, textDecorationLine: "underline" },
     paragraph: { marginBottom: 8 },
     list: { marginBottom: 8, marginTop: 2 },
     listItem: { flexDirection: "row", marginBottom: 4 },

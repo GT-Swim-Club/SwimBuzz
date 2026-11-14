@@ -8,7 +8,7 @@ import {
   detectMeetResourceDrops,
   notifyMeetRosterOfInfoDrops } from "@/lib/meet/meet-roster-notify"
 import { uniqueMeetSlug } from "@/lib/slug"
-import { nameMeetImages } from "@/lib/meet/meet-storage"
+import { adoptPendingMeetFiles, nameMeetImages, type MeetStoredFiles } from "@/lib/meet/meet-storage"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
 
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
       await images.rollback()
       return new NextResponse(null, { status: 499 })
     }
-    const meet = await prisma.meet
+    const created = await prisma.meet
       .create({
         data: {
           ...(toPrismaMeetWriteData(data) as Parameters<typeof prisma.meet.create>[0]["data"]),
@@ -86,7 +86,23 @@ export async function POST(req: Request) {
       })
     await images.commit()
 
-    void notifyMeetRosterOfInfoDrops({
+    // Files uploaded while the meet didn't exist yet wait in pending/ — move them into its folder.
+    let meet = created
+    const adoption = await adoptPendingMeetFiles(created as MeetStoredFiles & { id: string })
+    if (adoption.patch) {
+      try {
+        meet = await prisma.meet.update({
+          where: { id: created.id },
+          data: toPrismaMeetWriteData(adoption.patch),
+        })
+        await adoption.commit()
+      } catch (err) {
+        console.error("Failed to point the new meet at its moved files:", err)
+        await adoption.rollback()
+      }
+    }
+
+    notifyMeetRosterOfInfoDrops({
       meetId: meet.id,
       meetName: meet.name,
       drops: [...sheetDrops, ...resourceDrops]})

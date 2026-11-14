@@ -195,6 +195,7 @@ export default function AddTravelInfoButton({
               >
                 {link ? (
                   <ResourceFileOrLink
+                    meetId={meetId}
                     onAdd={(url) => {
                       setForm((f) => ({ ...f, [key]: url }))
                       setExpanded(null)

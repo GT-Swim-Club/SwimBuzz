@@ -49,53 +49,52 @@ function SideCells({ record, mirrored }: { record: TeamRecordItem | undefined; m
  */
 export default function RecordsExportCapture({ rows, asOf }: { rows: TeamRecordRow[]; asOf: string }) {
   return (
-    <div className="w-fit bg-background p-3 text-foreground">
-      <div className="overflow-hidden rounded-xl border border-border bg-background" style={{ width: SHEET_WIDTH_PX }}>
-        <div className={`grid ${COLS} border-b border-border bg-fill-secondary/60`}>
-          <p className={`col-span-3 py-2.5 text-center ${bandClass}`}>Women&apos;s Records</p>
-          <p className={`whitespace-nowrap border-x border-border px-2 py-2.5 text-center ${bandClass}`}>
-            {RECORDS_EXPORT.eyebrow}
-          </p>
-          <p className={`col-span-3 py-2.5 text-center ${bandClass}`}>Men&apos;s Records</p>
-        </div>
-        <div className={`grid ${COLS} border-b border-fill`}>
-          {["YEAR", "NAME", "TIME"].map((label) => (
-            <span key={label} className={columnLabelClass}>
-              {label}
-            </span>
-          ))}
-          <span className={`${columnLabelClass} border-x border-border`}>EVENT</span>
-          {["TIME", "NAME", "YEAR"].map((label) => (
-            <span key={label} className={columnLabelClass}>
-              {label}
-            </span>
-          ))}
-        </div>
-
-        {rows.map((row, index) => {
-          const groupStart = index > 0 && rows[index - 1]!.group !== row.group
-          const mixed = row.genders.length === 1 && row.genders[0] === "X"
-          const record = (gender: RecordGender) => row.records[gender]
-          return (
-            <div
-              key={`${row.genders.join("")}|${row.event}`}
-              className={`grid ${COLS} ${index === 0 ? "" : groupStart || row.relay ? "border-t border-fill" : "border-t border-border"}`}
-            >
-              <SideCells record={record(mixed ? "X" : "F")} mirrored={false} />
-              <div className="flex items-center justify-center whitespace-nowrap border-x border-border px-4 py-1 text-center text-[15px] leading-[22px] font-medium text-foreground">
-                {row.label}
-              </div>
-              {mixed ? (
-                <div className="col-span-3 flex items-end justify-end px-3 py-2 text-sm text-foreground-secondary">
-                  {asOf}
-                </div>
-              ) : (
-                <SideCells record={record("M")} mirrored />
-              )}
-            </div>
-          )
-        })}
+    // Edge to edge: no margin around the sheet and no outer border, only the lines inside it.
+    <div className="bg-background text-foreground" style={{ width: SHEET_WIDTH_PX }}>
+      <div className={`grid ${COLS} border-b border-border bg-fill-secondary/60`}>
+        <p className={`col-span-3 py-2.5 text-center ${bandClass}`}>Women&apos;s Records</p>
+        <p className={`whitespace-nowrap border-x border-border px-2 py-2.5 text-center ${bandClass}`}>
+          {RECORDS_EXPORT.eyebrow}
+        </p>
+        <p className={`col-span-3 py-2.5 text-center ${bandClass}`}>Men&apos;s Records</p>
       </div>
+      <div className={`grid ${COLS} border-b border-fill`}>
+        {["YEAR", "NAME", "TIME"].map((label) => (
+          <span key={label} className={columnLabelClass}>
+            {label}
+          </span>
+        ))}
+        <span className={`${columnLabelClass} border-x border-border`}>EVENT</span>
+        {["TIME", "NAME", "YEAR"].map((label) => (
+          <span key={label} className={columnLabelClass}>
+            {label}
+          </span>
+        ))}
+      </div>
+
+      {rows.map((row, index) => {
+        const groupStart = index > 0 && rows[index - 1]!.group !== row.group
+        const mixed = row.genders.length === 1 && row.genders[0] === "X"
+        const record = (gender: RecordGender) => row.records[gender]
+        return (
+          <div
+            key={`${row.genders.join("")}|${row.event}`}
+            className={`grid ${COLS} ${index === 0 ? "" : groupStart || row.relay ? "border-t border-fill" : "border-t border-border"}`}
+          >
+            <SideCells record={record(mixed ? "X" : "F")} mirrored={false} />
+            <div className="flex items-center justify-center whitespace-nowrap border-x border-border px-4 py-1 text-center text-[15px] leading-[22px] font-medium text-foreground">
+              {row.label}
+            </div>
+            {mixed ? (
+              <div className="col-span-3 flex items-end justify-end px-3 py-2 text-sm text-foreground-secondary">
+                {asOf}
+              </div>
+            ) : (
+              <SideCells record={record("M")} mirrored />
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }

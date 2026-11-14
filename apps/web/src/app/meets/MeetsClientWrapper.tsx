@@ -90,7 +90,7 @@ function CardEyebrow({ meet, past }: { meet: MeetListItem; past: boolean }) {
   const relative = days === null ? null : past ? relativeAgo(-days) : relativeAhead(days)
   return (
     <div
-      className={`text-[length:clamp(11px,9px+0.15cqw+0.08vw,15px)] font-semibold uppercase tracking-[0.16em] ${past ? "text-white/85" : "text-accent"}`}
+      className={`text-[length:clamp(11px,9px+0.15cqw+0.08vw,15px)] font-semibold uppercase tracking-[0.16em] ${past ? "text-white/85" : "text-accent-on-image"}`}
     >
       {relative ? `${label} · ${relative}` : label}
     </div>

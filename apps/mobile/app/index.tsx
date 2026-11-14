@@ -23,5 +23,5 @@ export default function Index() {
   }
 
   if (user) return <Redirect href="/practices" />
-  return <Redirect href="/welcome" />
+  return <Redirect href="/sign-in" />
 }

@@ -1,23 +1,32 @@
 import { useMemo, useState } from "react"
-import { Pressable, StyleSheet, Text, View } from "react-native"
-import { useRouter } from "expo-router"
+import { Pressable, RefreshControl, StyleSheet, Text, View } from "react-native"
+import { useLocalSearchParams, useRouter } from "expo-router"
 import { useQuery } from "@tanstack/react-query"
-import { athletePreferredName, defaultSeason, formatSeasonLabel, formatTime } from "@swimbuzz/shared"
-import { EmptyState, ErrorBlock, LoadingBlock, Muted, Screen, ScrollView, TextField, usePalette } from "@swimbuzz/ui"
+import {
+  athletePreferredInitials,
+  athletePreferredName,
+  defaultSeason,
+  formatSeasonLabel,
+  formatTime,
+} from "@swimbuzz/shared"
+import { Chip, EmptyState, ErrorBlock, LoadingBlock, Screen, ScrollView, TextField, usePalette } from "@swimbuzz/ui"
 import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
 import { api } from "../../../src/lib/api"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 import { GalleryTile } from "../../../src/components/GalleryTile"
 import { RecordsSection } from "../../../src/components/RecordsSection"
 import { SegmentedOption, SegmentedToggle } from "../../../src/components/SegmentedToggle"
-import { useViewPreferences } from "../../../src/lib/view-preferences"
+import { useGalleryView } from "../../../src/lib/view-preferences"
+import { GalleryViewToggle } from "../../../src/components/GalleryViewToggle"
 
-type CutRow = {
+type QualifierSwim = {
   id?: string
-  event?: string
-  gender?: string
+  event: string
+  time?: string
   timeMs?: number
-  note?: string | null
+  cut?: string
+  cutMs?: number
+  meetName?: string
 }
 
 type QualifierAthlete = {
@@ -27,16 +36,10 @@ type QualifierAthlete = {
   lastName: string
   preferredName?: string | null
   gender: string
-  events: Array<{
-    event: string
-    time?: string
-    timeMs?: number
-    cut?: string
-    meetName?: string
-  }>
+  events: QualifierSwim[]
 }
 
-const COURSES = ["SCY", "LCM"] as const
+type StandardsRow = { event: string; women: string; men: string }
 
 /** The Nationals tab holds team records too: the native tab bar has no room for a sixth tab on Android. */
 const VIEWS = [
@@ -45,25 +48,34 @@ const VIEWS = [
 ] as const
 type TabView = (typeof VIEWS)[number]["value"]
 
-function genderLabel(gender: unknown) {
-  if (gender === "F") return "Women"
-  if (gender === "M") return "Men"
-  return gender ? String(gender) : "Open"
+const GENDERS = [
+  { value: "all", label: "All" },
+  { value: "F", label: "Women" },
+  { value: "M", label: "Men" },
+] as const
+type GenderFilter = (typeof GENDERS)[number]["value"]
+
+function swimTime(swim: QualifierSwim) {
+  return swim.time ?? (typeof swim.timeMs === "number" ? formatTime(swim.timeMs) : "")
 }
 
-function genderSortKey(gender: unknown) {
-  if (gender === "F") return 0
-  if (gender === "M") return 1
-  return 2
+/** How far under the cut a swim is, e.g. "−0.42" — the same label as the web page. */
+function marginLabel(swim: QualifierSwim) {
+  if (typeof swim.timeMs !== "number" || typeof swim.cutMs !== "number") return ""
+  const diff = Math.max(0, swim.cutMs - swim.timeMs)
+  if (diff === 0) return "0.00"
+  const seconds = diff / 1000
+  if (seconds < 60) return `−${seconds.toFixed(2)}`
+  return `−${Math.floor(seconds / 60)}:${(seconds % 60).toFixed(2).padStart(5, "0")}`
 }
 
-function athleteInitials(athlete: QualifierAthlete) {
-  return `${athlete.firstName?.[0] ?? ""}${athlete.lastName?.[0] ?? ""}`.toUpperCase()
+function cutsLabel(athlete: QualifierAthlete, showGender: boolean) {
+  const cuts = `${athlete.events.length} ${athlete.events.length === 1 ? "cut" : "cuts"}`
+  return showGender ? `${athlete.gender === "F" ? "Women" : "Men"} · ${cuts}` : cuts
 }
 
-function eventTime(event: QualifierAthlete["events"][number]) {
-  const time = event.time ?? (typeof event.timeMs === "number" ? formatTime(event.timeMs) : "")
-  return `${event.event}${time ? ` · ${time}` : ""}`
+function isBlankCut(value: string | undefined) {
+  return !value || value === "--"
 }
 
 export default function NationalsScreen() {
@@ -71,14 +83,27 @@ export default function NationalsScreen() {
   const c = usePalette()
   const tabBarPad = useTabBarScrollPadding()
   const styles = useMemo(() => makeStyles(c), [c])
-  const { defaultView } = useViewPreferences()
-  const gallery = defaultView === "gallery"
+  const [galleryView, setGalleryView] = useGalleryView("nationals")
+  const gallery = galleryView === "gallery"
   const [seasonState, setSeasonState] = useState<string | null>(null)
-  const [course, setCourse] = useState<(typeof COURSES)[number]>("SCY")
+  const [course, setCourse] = useState("SCY")
+  const [gender, setGender] = useState<GenderFilter>("all")
   const [query, setQuery] = useState("")
-  const [view, setView] = useState<TabView>("nationals")
+  // A "team record" notification opens this tab with ?view=records.
+  const { view: viewParam } = useLocalSearchParams<{ view?: string }>()
+  const [view, setView] = useState<TabView>(viewParam === "records" ? "records" : "nationals")
+  const [seenViewParam, setSeenViewParam] = useState(viewParam)
+  if (viewParam !== seenViewParam) {
+    setSeenViewParam(viewParam)
+    if (viewParam === "records") setView("records")
+  }
 
-  const { data: seasons = [] } = useQuery({
+  const {
+    data: seasons = [],
+    refetch: refetchSeasons,
+    isRefetching: seasonsRefetching,
+    isPending: seasonsPending,
+  } = useQuery({
     queryKey: ["seasons"],
     queryFn: () => api.listSeasons(),
   })
@@ -88,6 +113,8 @@ export default function NationalsScreen() {
     data: qualifiersData,
     isPending,
     error,
+    refetch: refetchQualifiers,
+    isRefetching: qualifiersRefetching,
   } = useQuery({
     queryKey: ["qualifiers", season, course],
     queryFn: () => api.getQualifiers({ season: season as string, course }),
@@ -95,43 +122,61 @@ export default function NationalsScreen() {
   })
   // Only a genuinely new (season, course) pair shows a spinner — TanStack
   // Query serves cached data for a previously-visited pair instantly.
-  const loading = Boolean(season) && isPending
+  const loading = seasonsPending || (Boolean(season) && isPending)
+  const refreshing = seasonsRefetching || qualifiersRefetching
+  const refresh = () => Promise.all([refetchSeasons(), season ? refetchQualifiers() : null])
 
-  const cuts = useMemo<CutRow[]>(() => {
-    const set = qualifiersData?.set
-    return set && typeof set === "object" && Array.isArray((set as { cuts?: unknown }).cuts)
-      ? ((set as { cuts: CutRow[] }).cuts ?? [])
-      : []
-  }, [qualifiersData])
+  const viewerAthleteId = qualifiersData?.viewerAthleteId ?? null
+  // Offer a course switch only when the season has standards in a course other than SCY.
+  const courses = useMemo(() => {
+    const list = qualifiersData?.courses ?? []
+    return list.some((value) => value !== "SCY") ? [...new Set(["SCY", ...list])] : []
+  }, [qualifiersData?.courses])
+
+  const set = qualifiersData?.set as { yearLabel?: string | null; course?: string } | null | undefined
+  const hasStandards = Boolean(set)
+  const standardsTitle = `${set?.yearLabel ? `${set.yearLabel} ` : ""}Nationals Standards`
 
   const qualifiers = useMemo<QualifierAthlete[]>(
-    () =>
-      Array.isArray(qualifiersData?.qualifiers)
-        ? (qualifiersData.qualifiers as QualifierAthlete[])
-        : [],
-    [qualifiersData]
+    () => (Array.isArray(qualifiersData?.qualifiers) ? (qualifiersData.qualifiers as QualifierAthlete[]) : []),
+    [qualifiersData],
+  )
+  const genderQualifiers = useMemo(
+    () => (gender === "all" ? qualifiers : qualifiers.filter((athlete) => athlete.gender === gender)),
+    [qualifiers, gender],
   )
 
-  const filteredQualifiers = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    if (!q) return qualifiers
-    return qualifiers.filter((athlete) => {
-      const name = `${athlete.firstName} ${athlete.lastName}`.toLowerCase()
-      const preferred = athlete.preferredName?.toLowerCase() ?? ""
-      return name.includes(q) || preferred.includes(q)
-    })
-  }, [qualifiers, query])
+  const needle = query.trim().toLowerCase()
 
-  const cutsByGender = useMemo(() => {
-    const groups = new Map<string, CutRow[]>()
-    for (const cut of cuts) {
-      const key = String(cut.gender ?? "")
-      const list = groups.get(key) ?? []
-      list.push(cut)
-      groups.set(key, list)
-    }
-    return [...groups.entries()].sort(([a], [b]) => genderSortKey(a) - genderSortKey(b))
-  }, [cuts])
+  // Alphabetical from the server, with you first; a search matches names or events.
+  const filteredQualifiers = useMemo(() => {
+    const matches = needle
+      ? genderQualifiers.filter((athlete) => {
+          const names = [athlete.firstName, athlete.lastName, athlete.preferredName ?? ""]
+          return (
+            names.some((name) => name.toLowerCase().includes(needle)) ||
+            athlete.events.some((swim) => swim.event.toLowerCase().includes(needle))
+          )
+        })
+      : genderQualifiers
+    return [...matches].sort(
+      (a, b) => Number(b.athleteId === viewerAthleteId) - Number(a.athleteId === viewerAthleteId),
+    )
+  }, [genderQualifiers, needle, viewerAthleteId])
+
+  const standardRows = useMemo<StandardsRow[]>(() => {
+    const rows = Array.isArray(qualifiersData?.standards) ? qualifiersData.standards : []
+    return rows.filter((row) => {
+      if (needle && !row.event.toLowerCase().includes(needle)) return false
+      if (gender === "F") return !isBlankCut(row.women)
+      if (gender === "M") return !isBlankCut(row.men)
+      return true
+    })
+  }, [qualifiersData, needle, gender])
+
+  const cutCount = genderQualifiers.reduce((sum, athlete) => sum + athlete.events.length, 0)
+  const showGender = gender === "all"
+  const openAthlete = (athlete: QualifierAthlete) => router.push(`/roster/${athlete.athleteSlug || athlete.athleteId}`)
 
   const viewSwitch = (
     <SegmentedToggle selectedIndex={VIEWS.findIndex((v) => v.value === view)} fill style={styles.viewSwitch}>
@@ -143,7 +188,7 @@ export default function NationalsScreen() {
           accessibilityLabel={v.label}
           onPress={() => setView(v.value)}
         >
-          <Text style={[styles.viewSwitchText, v.value === view && styles.viewSwitchTextOn]}>{v.label}</Text>
+          <Text style={[styles.toggleText, v.value === view && styles.toggleTextOn]}>{v.label}</Text>
         </SegmentedOption>
       ))}
     </SegmentedToggle>
@@ -163,244 +208,221 @@ export default function NationalsScreen() {
     )
   }
 
+  function renderStandards() {
+    if (standardRows.length === 0) return null
+    const both = gender === "all"
+    return (
+      <View style={styles.group}>
+        <Text style={styles.groupTitle}>{standardsTitle.toUpperCase()}</Text>
+        <View style={styles.card}>
+          <View style={[styles.standardRow, styles.standardHead]}>
+            {both ? <Text style={[styles.columnLabel, styles.sideCell]}>WOMEN</Text> : null}
+            <Text style={[styles.columnLabel, styles.eventCell]}>EVENT</Text>
+            <Text style={[styles.columnLabel, styles.sideCell]}>{both ? "MEN" : gender === "F" ? "WOMEN" : "MEN"}</Text>
+          </View>
+          {standardRows.map((row, index) => {
+            const cell = (value: string) => (
+              <Text style={[styles.sideCell, isBlankCut(value) ? styles.blankCut : styles.cutTime]}>
+                {isBlankCut(value) ? "—" : value}
+              </Text>
+            )
+            return (
+              <View key={`${row.event}|${index}`} style={[styles.standardRow, index > 0 && styles.rowDivider]}>
+                {both ? cell(row.women) : null}
+                <Text style={[styles.eventCell, styles.standardEvent]}>{row.event}</Text>
+                {cell(both ? row.men : gender === "F" ? row.women : row.men)}
+              </View>
+            )
+          })}
+        </View>
+      </View>
+    )
+  }
+
+  function renderQualifiers() {
+    if (filteredQualifiers.length === 0) {
+      return (
+        <EmptyState
+          title={needle ? "No matching qualifiers" : "No qualifiers yet"}
+          body={
+            needle
+              ? `No qualifiers match “${query.trim()}”.`
+              : "No athletes have an individual Nationals cut this season yet. The standards are below."
+          }
+        />
+      )
+    }
+    if (gallery) {
+      return (
+        <View style={styles.galleryGrid}>
+          {filteredQualifiers.map((athlete) => {
+            const isMe = athlete.athleteId === viewerAthleteId
+            const events = athlete.events.map((swim) => swim.event).join(", ")
+            return (
+              <View key={athlete.athleteId} style={styles.galleryItem}>
+                <GalleryTile
+                  title={athletePreferredName(athlete)}
+                  titleAdornment={isMe ? <YouPill styles={styles} /> : undefined}
+                  subtitle={`${cutsLabel(athlete, showGender)} · ${events}`}
+                  onPress={() => openAthlete(athlete)}
+                />
+              </View>
+            )
+          })}
+        </View>
+      )
+    }
+    return (
+      <View style={[styles.card, styles.listCard]}>
+        {filteredQualifiers.map((athlete, index) => {
+          const name = athletePreferredName(athlete)
+          const isMe = athlete.athleteId === viewerAthleteId
+          return (
+            <Pressable
+              key={athlete.athleteId}
+              accessibilityRole="button"
+              accessibilityLabel={`View ${name}'s profile`}
+              onPress={() => openAthlete(athlete)}
+              style={({ pressed }) => [
+                styles.athleteRow,
+                index > 0 && styles.rowDivider,
+                isMe && styles.meRow,
+                pressed && styles.rowPressed,
+              ]}
+            >
+              <View style={styles.athleteHead}>
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarText}>{athletePreferredInitials(athlete)}</Text>
+                </View>
+                <View style={styles.athleteContent}>
+                  <View style={styles.nameLine}>
+                    <Text numberOfLines={1} style={styles.athleteName}>
+                      {name}
+                    </Text>
+                    {isMe ? <YouPill styles={styles} /> : null}
+                  </View>
+                  <Text style={styles.athleteMeta}>{cutsLabel(athlete, showGender)}</Text>
+                </View>
+                <Text style={styles.chevron}>›</Text>
+              </View>
+              <View style={styles.cutLines}>
+                {athlete.events.map((swim, swimIndex) => {
+                  const margin = marginLabel(swim)
+                  return (
+                    <View key={swim.id ?? `${swim.event}-${swimIndex}`} style={styles.cutLine}>
+                      <Text numberOfLines={1} style={styles.cutEvent}>
+                        {swim.event}
+                      </Text>
+                      <Text style={styles.cutTimeText}>
+                        {swimTime(swim)}
+                        {margin ? <Text style={styles.cutMargin}>{`  ${margin}`}</Text> : null}
+                      </Text>
+                    </View>
+                  )
+                })}
+              </View>
+            </Pressable>
+          )
+        })}
+      </View>
+    )
+  }
+
   return (
     <Screen style={styles.screen}>
       <ScrollView
         contentContainerStyle={[styles.content, { paddingBottom: tabBarPad }]}
         showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void refresh()} />}
       >
         {viewSwitch}
-        <View style={styles.intro}>
-          <Text style={styles.eyebrow}>CHAMPIONSHIP STANDARDS</Text>
-          <Text style={styles.description}>
-            Track qualifying standards and athletes who have earned their place.
-          </Text>
-        </View>
 
-        {error ? (
-          <ErrorBlock message={error instanceof Error ? error.message : "Failed to load qualifiers"} />
+        {seasons.length > 0 ? (
+          <ScrollView horizontal contentContainerStyle={styles.chipRow}>
+            {seasons.map((label) => (
+              <Chip
+                key={label}
+                label={formatSeasonLabel(label)}
+                selected={season === label}
+                onPress={() => {
+                  setSeasonState(label)
+                  // Courses differ by season; start each season on SCY.
+                  setCourse("SCY")
+                }}
+              />
+            ))}
+            {courses.map((value) => (
+              <Chip key={value} label={value} selected={course === value} onPress={() => setCourse(value)} />
+            ))}
+          </ScrollView>
         ) : null}
 
-        <View style={styles.filtersCard}>
-          <Text style={styles.filterLabel}>SEASON</Text>
-          {seasons.length === 0 && !loading ? (
-            <Muted>No seasons available.</Muted>
-          ) : (
-            <ScrollView
-              horizontal
-              contentContainerStyle={styles.seasonRow}
-              showsHorizontalScrollIndicator={false}
-            >
-              {seasons.map((label) => {
-                const selected = season === label
-                return (
-                  <Pressable
-                    key={label}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected }}
-                    onPress={() => setSeasonState(label)}
-                    style={({ pressed }) => [
-                      styles.seasonPill,
-                      selected && styles.seasonPillSelected,
-                      pressed && styles.pressed,
-                    ]}
-                  >
-                    <Text style={[styles.seasonText, selected && styles.seasonTextSelected]}>
-                      {formatSeasonLabel(label)}
-                    </Text>
-                  </Pressable>
-                )
-              })}
-            </ScrollView>
-          )}
-
-          <View style={styles.divider} />
-          <Text style={styles.filterLabel}>COURSE</Text>
-          <View style={styles.courseControl}>
-            {COURSES.map((value) => {
-              const selected = course === value
-              return (
-                <Pressable
-                  key={value}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected }}
-                  onPress={() => setCourse(value)}
-                  style={({ pressed }) => [
-                    styles.courseOption,
-                    selected && styles.courseOptionSelected,
-                    pressed && styles.pressed,
-                  ]}
-                >
-                  <Text style={[styles.courseText, selected && styles.courseTextSelected]}>
-                    {value}
-                  </Text>
-                </Pressable>
-              )
-            })}
-          </View>
+        <View style={styles.filterRow}>
+          <SegmentedToggle
+            selectedIndex={GENDERS.findIndex((g) => g.value === gender)}
+            fill
+            style={styles.genderSwitch}
+          >
+            {GENDERS.map((g) => (
+              <SegmentedOption
+                key={g.value}
+                flex
+                selected={g.value === gender}
+                accessibilityLabel={g.value === "all" ? "All qualifiers" : `${g.label} qualifiers`}
+                onPress={() => setGender(g.value)}
+              >
+                <Text style={[styles.toggleText, g.value === gender && styles.toggleTextOn]}>{g.label}</Text>
+              </SegmentedOption>
+            ))}
+          </SegmentedToggle>
+          <GalleryViewToggle value={galleryView} onChange={setGalleryView} />
         </View>
 
+        <TextField
+          label="Search"
+          placeholder="Search by name or event"
+          value={query}
+          onChangeText={setQuery}
+          autoCapitalize="none"
+          autoCorrect={false}
+          clearButtonMode="while-editing"
+        />
+
+        {error ? <ErrorBlock message={error instanceof Error ? error.message : "Failed to load qualifiers"} /> : null}
+
         {loading ? (
-          <View style={styles.loadingCard}>
+          <View style={styles.card}>
             <LoadingBlock />
           </View>
+        ) : !season ? (
+          <EmptyState title="No seasons yet" />
+        ) : !hasStandards ? (
+          <EmptyState
+            title={`No standards for ${formatSeasonLabel(season)}`}
+            body={
+              course === "SCY"
+                ? "Coaches haven't uploaded the Nationals qualifying times for this season yet."
+                : `No ${course} qualifying times for this season.`
+            }
+          />
         ) : (
           <>
             <View style={styles.summaryCard}>
               <View>
-                <Text style={styles.summaryNumber}>{qualifiers.length}</Text>
-                <Text style={styles.summaryLabel}>
-                  {qualifiers.length === 1 ? "qualified athlete" : "qualified athletes"}
-                </Text>
+                <Text style={styles.summaryNumber}>{genderQualifiers.length}</Text>
+                <Text style={styles.summaryLabel}>{genderQualifiers.length === 1 ? "qualifier" : "qualifiers"}</Text>
               </View>
               <View style={styles.summaryRule} />
               <View style={styles.summaryCopy}>
-                <Text style={styles.summaryTitle}>{season ? formatSeasonLabel(season) : "Current season"}</Text>
-                <Text style={styles.summaryDetail}>{course} qualifying cuts</Text>
+                <Text style={styles.summaryTitle}>{standardsTitle}</Text>
+                <Text style={styles.summaryDetail}>
+                  {`${set?.course ?? course} · ${cutCount} ${cutCount === 1 ? "cut" : "cuts"}`}
+                </Text>
               </View>
             </View>
 
-            <TextField
-              label="Search"
-              placeholder="Search qualifiers by name"
-              value={query}
-              onChangeText={setQuery}
-              autoCapitalize="none"
-              autoCorrect={false}
-              clearButtonMode="while-editing"
-            />
-
-            <View style={styles.sectionHeader}>
-              <View>
-                <Text style={styles.sectionTitle}>Qualified athletes</Text>
-                <Text style={styles.sectionCaption}>Tap an athlete to view their profile.</Text>
-              </View>
-              <View style={styles.countBadge}>
-                <Text style={styles.countBadgeText}>{filteredQualifiers.length}</Text>
-              </View>
-            </View>
-
-            {filteredQualifiers.length === 0 ? (
-              <EmptyState
-                title={qualifiers.length === 0 ? "No qualifiers yet" : "No matching qualifiers"}
-                body={
-                  qualifiers.length === 0
-                    ? "No athletes have made an NQT cut for this season and course."
-                    : undefined
-                }
-              />
-            ) : gallery ? (
-              <View style={styles.galleryGrid}>
-                {filteredQualifiers.map((athlete) => {
-                  const name = athletePreferredName({
-                    firstName: athlete.firstName,
-                    lastName: athlete.lastName,
-                    preferredName: athlete.preferredName,
-                  })
-                  const visibleEvents = athlete.events.slice(0, 2)
-                  const hiddenEventCount = athlete.events.length - visibleEvents.length
-                  const subtitle = [
-                    ...visibleEvents.map(eventTime),
-                    hiddenEventCount > 0 ? `+${hiddenEventCount} more` : null,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")
-                  return (
-                    <View key={athlete.athleteId} style={styles.galleryItem}>
-                      <GalleryTile
-                        title={name}
-                        subtitle={subtitle}
-                        onPress={() =>
-                          router.push(`/roster/${athlete.athleteSlug || athlete.athleteId}`)
-                        }
-                      />
-                    </View>
-                  )
-                })}
-              </View>
-            ) : (
-              <View style={styles.listCard}>
-                {filteredQualifiers.map((athlete, index) => {
-                  const name = athletePreferredName({
-                    firstName: athlete.firstName,
-                    lastName: athlete.lastName,
-                    preferredName: athlete.preferredName,
-                  })
-                  const visibleEvents = athlete.events.slice(0, 2)
-                  const hiddenEventCount = athlete.events.length - visibleEvents.length
-                  return (
-                    <Pressable
-                      key={athlete.athleteId}
-                      accessibilityRole="button"
-                      accessibilityLabel={`View ${name}'s profile`}
-                      onPress={() => router.push(`/roster/${athlete.athleteSlug || athlete.athleteId}`)}
-                      style={({ pressed }) => [
-                        styles.athleteRow,
-                        index < filteredQualifiers.length - 1 && styles.listDivider,
-                        pressed && styles.rowPressed,
-                      ]}
-                    >
-                      <View style={styles.avatar}>
-                        <Text style={styles.avatarText}>{athleteInitials(athlete)}</Text>
-                      </View>
-                      <View style={styles.athleteContent}>
-                        <Text numberOfLines={1} style={styles.athleteName}>{name}</Text>
-                        <View style={styles.eventLine}>
-                          {visibleEvents.map((event, eventIndex) => (
-                            <Text key={`${event.event}-${eventIndex}`} numberOfLines={1} style={styles.eventText}>
-                              {eventTime(event)}
-                            </Text>
-                          ))}
-                          {hiddenEventCount > 0 ? (
-                            <Text style={styles.moreEvents}>+{hiddenEventCount} more</Text>
-                          ) : null}
-                        </View>
-                      </View>
-                      <Text style={styles.chevron}>›</Text>
-                    </Pressable>
-                  )
-                })}
-              </View>
-            )}
-
-            <View style={styles.standardsHeader}>
-              <Text style={styles.sectionTitle}>Qualifying standards</Text>
-              <Text style={styles.sectionCaption}>
-                {cuts.length} {cuts.length === 1 ? "event" : "events"} in this course
-              </Text>
-            </View>
-
-            {cuts.length === 0 ? (
-              <EmptyState
-                title="No standards yet"
-                body={season ? `No ${course} cuts found for ${formatSeasonLabel(season)}.` : "Pick a season to view cuts."}
-              />
-            ) : (
-              cutsByGender.map(([gender, rows]) => (
-                <View key={gender || "open"} style={styles.standardsGroup}>
-                  <View style={styles.standardsGroupHeader}>
-                    <Text style={styles.standardsGroupTitle}>{genderLabel(gender)}</Text>
-                    <Text style={styles.standardsGroupCount}>{rows.length} events</Text>
-                  </View>
-                  <View style={styles.standardsList}>
-                    {rows.map((cut, index) => (
-                      <View
-                        key={cut.id ?? `${cut.event}-${cut.gender}-${index}`}
-                        style={[styles.standardRow, index < rows.length - 1 && styles.listDivider]}
-                      >
-                        <View style={styles.standardEvent}>
-                          <Text style={styles.standardName}>{cut.event ?? "Event"}</Text>
-                          {cut.note ? <Text style={styles.standardNote}>{cut.note}</Text> : null}
-                        </View>
-                        <Text style={styles.standardTime}>
-                          {typeof cut.timeMs === "number" ? formatTime(cut.timeMs) : "—"}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              ))
-            )}
+            {renderQualifiers()}
+            {renderStandards()}
           </>
         )}
       </ScrollView>
@@ -408,208 +430,181 @@ export default function NationalsScreen() {
   )
 }
 
+function YouPill({ styles }: { styles: ReturnType<typeof makeStyles> }) {
+  return (
+    <View style={styles.youPill}>
+      <Text style={styles.youPillText}>You</Text>
+    </View>
+  )
+}
+
 function makeStyles(c: ColorPalette) {
   return StyleSheet.create({
-  screen: { paddingBottom: 0 },
-  content: {},
-  viewSwitch: { alignSelf: "stretch", marginBottom: spacing.md },
-  viewSwitchText: { color: c.textSecondary, fontSize: 14, fontWeight: "700" },
-  viewSwitchTextOn: { color: c.primaryContrast },
-  intro: { marginBottom: spacing.md },
-  eyebrow: {
-    color: c.primaryActive,
-    fontSize: 10,
-    fontWeight: "800",
-    letterSpacing: 1,
-    marginBottom: spacing.xxs,
-  },
-  description: {
-    color: c.textSecondary,
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: spacing.xxs,
-    maxWidth: 330,
-  },
-  filtersCard: {
-    backgroundColor: c.bgContainer,
-    borderColor: c.border,
-    borderRadius: radii.lg,
-    borderWidth: 1,
-    marginBottom: spacing.md,
-    overflow: "hidden",
-    padding: spacing.sm,
-  },
-  filterLabel: {
-    color: c.textTertiary,
-    fontSize: 11,
-    fontWeight: "800",
-    letterSpacing: 0.8,
-    marginBottom: spacing.xs,
-  },
-  seasonRow: { gap: spacing.xs, paddingRight: spacing.sm },
-  seasonPill: {
-    backgroundColor: c.fillSecondary,
-    borderColor: "transparent",
-    borderRadius: 999,
-    borderWidth: 1,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 6,
-  },
-  seasonPillSelected: { backgroundColor: c.primaryBg, borderColor: c.primaryActive },
-  seasonText: { color: c.textSecondary, fontSize: 14, fontWeight: "600" },
-  seasonTextSelected: { color: c.primaryText, fontWeight: "800" },
-  divider: {
-    backgroundColor: c.border,
-    height: StyleSheet.hairlineWidth,
-    marginVertical: spacing.sm,
-  },
-  courseControl: {
-    backgroundColor: c.fillSecondary,
-    borderRadius: radii.md,
-    flexDirection: "row",
-    padding: 3,
-  },
-  courseOption: {
-    alignItems: "center",
-    borderRadius: radii.sm,
-    flex: 1,
-    paddingVertical: 7,
-  },
-  courseOptionSelected: {
-    backgroundColor: c.bgContainer,
-    elevation: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-  },
-  courseText: { color: c.textSecondary, fontSize: 14, fontWeight: "700" },
-  courseTextSelected: { color: c.text },
-  pressed: { opacity: 0.72 },
-  loadingCard: {
-    backgroundColor: c.bgContainer,
-    borderColor: c.border,
-    borderRadius: radii.lg,
-    borderWidth: 1,
-  },
-  summaryCard: {
-    alignItems: "center",
-    backgroundColor: c.primaryBg,
-    borderColor: c.primaryBorder,
-    borderRadius: radii.lg,
-    borderWidth: 1,
-    flexDirection: "row",
-    marginBottom: spacing.lg,
-    padding: spacing.sm,
-  },
-  summaryNumber: {
-    color: c.primaryText,
-    fontSize: 27,
-    fontWeight: "800",
-    letterSpacing: -0.8,
-    lineHeight: 35,
-  },
-  summaryLabel: { color: c.primaryText, fontSize: 11, fontWeight: "600" },
-  summaryRule: { backgroundColor: c.primaryBorderHover, height: 32, marginHorizontal: spacing.sm, width: 1 },
-  summaryCopy: { flex: 1 },
-  summaryTitle: { color: c.primaryText, fontSize: 15, fontWeight: "800" },
-  summaryDetail: { color: c.primaryActive, fontSize: 13, fontWeight: "600", marginTop: 2 },
-  sectionHeader: {
-    alignItems: "flex-start",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: spacing.sm,
-  },
-  sectionTitle: { color: c.text, fontSize: 18, fontWeight: "800", letterSpacing: -0.2 },
-  sectionCaption: { color: c.textSecondary, fontSize: 12, marginTop: 2 },
-  countBadge: {
-    alignItems: "center",
-    backgroundColor: c.fillSecondary,
-    borderRadius: 999,
-    justifyContent: "center",
-    minWidth: 28,
-    paddingHorizontal: spacing.xs,
-    paddingVertical: 4,
-  },
-  countBadgeText: { color: c.textSecondary, fontSize: 12, fontWeight: "800" },
-  listCard: {
-    backgroundColor: c.bgContainer,
-    borderColor: c.border,
-    borderRadius: radii.lg,
-    borderWidth: 1,
-    marginBottom: spacing.lg,
-    overflow: "hidden",
-  },
-  athleteRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    minHeight: 64,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
-  rowPressed: { backgroundColor: c.fillSecondary },
-  listDivider: { borderBottomColor: c.border, borderBottomWidth: StyleSheet.hairlineWidth },
-  avatar: {
-    alignItems: "center",
-    backgroundColor: c.primaryBgHover,
-    borderRadius: 16,
-    height: 32,
-    justifyContent: "center",
-    marginRight: spacing.sm,
-    width: 32,
-  },
-  avatarText: { color: c.primaryText, fontSize: 12, fontWeight: "800" },
-  athleteContent: { flex: 1, minWidth: 0 },
-  athleteName: { color: c.text, fontSize: 16, fontWeight: "700" },
-  eventLine: { flexDirection: "row", flexWrap: "wrap", gap: 2, marginTop: 4 },
-  eventText: { color: c.textSecondary, fontSize: 12, lineHeight: 17, maxWidth: "100%" },
-  moreEvents: { color: c.primaryActive, fontSize: 12, fontWeight: "700", lineHeight: 17 },
-  chevron: {
-    color: c.textTertiary,
-    fontSize: 25,
-    fontWeight: "300",
-    marginLeft: spacing.xs,
-  },
-  standardsHeader: { marginBottom: spacing.sm },
-  standardsGroup: { marginBottom: spacing.sm },
-  standardsGroupHeader: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: spacing.xs,
-    paddingHorizontal: spacing.xs,
-  },
-  standardsGroupTitle: { color: c.text, fontSize: 15, fontWeight: "800" },
-  standardsGroupCount: { color: c.textTertiary, fontSize: 12, fontWeight: "600" },
-  standardsList: {
-    backgroundColor: c.bgContainer,
-    borderColor: c.border,
-    borderRadius: radii.lg,
-    borderWidth: 1,
-    overflow: "hidden",
-  },
-  standardRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    minHeight: 50,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
-  standardEvent: { flex: 1, paddingRight: spacing.sm },
-  standardName: { color: c.text, fontSize: 15, fontWeight: "700" },
-  standardNote: { color: c.textSecondary, fontSize: 12, marginTop: 2 },
-  standardTime: {
-    color: c.primaryActive,
-    fontSize: 15,
-    fontVariant: ["tabular-nums"],
-    fontWeight: "800",
-  },
-  galleryGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginHorizontal: -spacing.xxs,
-    marginBottom: spacing.lg,
-  },
-  galleryItem: { width: "50%" },
+    screen: { paddingBottom: 0 },
+    content: {},
+    viewSwitch: { alignSelf: "stretch", marginBottom: spacing.md },
+    filterRow: {
+      alignItems: "center",
+      flexDirection: "row",
+      gap: spacing.sm,
+      marginBottom: spacing.sm,
+    },
+    genderSwitch: { flex: 1, minWidth: 0 },
+    toggleText: { color: c.textSecondary, fontSize: 14, fontWeight: "700" },
+    toggleTextOn: { color: c.primaryContrast },
+    chipRow: {
+      alignItems: "center",
+      paddingBottom: spacing.sm,
+      paddingRight: spacing.sm,
+    },
+    card: {
+      backgroundColor: c.bgContainer,
+      borderColor: c.border,
+      borderRadius: radii.lg,
+      borderWidth: 1,
+      overflow: "hidden",
+    },
+    listCard: { marginBottom: spacing.lg },
+    summaryCard: {
+      alignItems: "center",
+      backgroundColor: c.primaryBg,
+      borderColor: c.primaryBorderHover,
+      borderRadius: radii.lg,
+      borderWidth: 1,
+      flexDirection: "row",
+      marginBottom: spacing.md,
+      padding: spacing.sm,
+    },
+    summaryNumber: {
+      color: c.primaryText,
+      fontSize: 27,
+      fontVariant: ["tabular-nums"],
+      fontWeight: "800",
+      letterSpacing: -0.8,
+      lineHeight: 35,
+    },
+    summaryLabel: { color: c.primaryText, fontSize: 11, fontWeight: "600" },
+    summaryRule: {
+      backgroundColor: c.primaryBorderHover,
+      height: 32,
+      marginHorizontal: spacing.sm,
+      width: 1,
+    },
+    summaryCopy: { flex: 1 },
+    summaryTitle: { color: c.primaryText, fontSize: 15, fontWeight: "800" },
+    summaryDetail: {
+      color: c.accent,
+      fontSize: 13,
+      fontWeight: "600",
+      marginTop: 2,
+    },
+    athleteRow: { paddingHorizontal: spacing.sm, paddingVertical: spacing.sm },
+    meRow: { backgroundColor: c.primaryBg },
+    rowPressed: { backgroundColor: c.bgHover },
+    rowDivider: {
+      borderTopColor: c.border,
+      borderTopWidth: StyleSheet.hairlineWidth,
+    },
+    athleteHead: { alignItems: "center", flexDirection: "row" },
+    avatar: {
+      alignItems: "center",
+      backgroundColor: c.primaryBgHover,
+      borderRadius: 16,
+      height: 32,
+      justifyContent: "center",
+      marginRight: spacing.sm,
+      width: 32,
+    },
+    avatarText: { color: c.primaryText, fontSize: 12, fontWeight: "800" },
+    athleteContent: { flex: 1, minWidth: 0 },
+    nameLine: { alignItems: "center", flexDirection: "row", gap: 6 },
+    athleteName: {
+      color: c.text,
+      flexShrink: 1,
+      fontSize: 16,
+      fontWeight: "700",
+    },
+    athleteMeta: { color: c.textSecondary, fontSize: 12, marginTop: 1 },
+    youPill: {
+      backgroundColor: c.primary,
+      borderRadius: 999,
+      paddingHorizontal: 6,
+    },
+    youPillText: {
+      color: c.primaryContrast,
+      fontSize: 11,
+      fontWeight: "700",
+      lineHeight: 16,
+    },
+    chevron: {
+      color: c.textTertiary,
+      fontSize: 25,
+      fontWeight: "300",
+      marginLeft: spacing.xs,
+    },
+    cutLines: { gap: 2, marginLeft: 32 + spacing.sm, marginTop: spacing.xs },
+    cutLine: {
+      alignItems: "baseline",
+      flexDirection: "row",
+      gap: spacing.sm,
+      justifyContent: "space-between",
+    },
+    cutEvent: {
+      color: c.textSecondary,
+      flexShrink: 1,
+      fontSize: 14,
+      fontWeight: "600",
+    },
+    cutTimeText: {
+      color: c.text,
+      fontSize: 14,
+      fontVariant: ["tabular-nums"],
+      fontWeight: "700",
+    },
+    cutMargin: { color: c.successText, fontSize: 12, fontWeight: "600" },
+    group: { marginBottom: spacing.md },
+    groupTitle: {
+      color: c.accent,
+      fontSize: 11,
+      fontWeight: "800",
+      letterSpacing: 1,
+      marginBottom: spacing.xs,
+      paddingHorizontal: spacing.xs,
+    },
+    standardHead: {
+      backgroundColor: c.fillSecondary,
+      minHeight: 0,
+      paddingVertical: 6,
+    },
+    standardRow: {
+      alignItems: "center",
+      flexDirection: "row",
+      minHeight: 44,
+      paddingHorizontal: spacing.xs,
+    },
+    columnLabel: {
+      color: c.textTertiary,
+      fontSize: 11,
+      fontWeight: "700",
+      letterSpacing: 1,
+      textAlign: "center",
+    },
+    sideCell: { flex: 1, textAlign: "center" },
+    eventCell: { flex: 1.3, textAlign: "center" },
+    standardEvent: { color: c.text, fontSize: 15, fontWeight: "600" },
+    cutTime: {
+      color: c.text,
+      fontSize: 15,
+      fontVariant: ["tabular-nums"],
+      fontWeight: "600",
+    },
+    blankCut: { color: c.textTertiary, fontSize: 15 },
+    galleryGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      marginHorizontal: -spacing.xxs,
+      marginBottom: spacing.lg,
+    },
+    galleryItem: { width: "50%" },
   })
 }

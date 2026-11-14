@@ -114,7 +114,7 @@ export function SavePracticeCopyButton({ practiceId }: { practiceId: string }) {
         <HoverDetail label="Save a private copy" />
       </button>
       {error && (
-        <p className="absolute right-0 top-full mt-1.5 w-56 text-right text-xs text-red-500">{error}</p>
+        <p className="absolute right-0 top-full mt-1.5 w-56 text-right text-xs text-error">{error}</p>
       )}
     </div>
   )
@@ -334,7 +334,7 @@ export default function PracticeActions({
       </div>
 
       {error && !confirmDelete && !confirmPublish && !confirmUnpublish && (
-        <p className="text-xs text-red-500">{error}</p>
+        <p className="text-xs text-error">{error}</p>
       )}
       </div>
 
@@ -379,7 +379,7 @@ export default function PracticeActions({
             </>
           )}
         </p>
-        {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
+        {error && <p className="mt-3 text-sm text-error">{error}</p>}
       </Modal>
       <Modal
         open={confirmDelete}
@@ -413,14 +413,14 @@ export default function PracticeActions({
               type="button"
               onClick={handleDelete}
               disabled={busy}
-              className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-error-contrast hover:bg-red-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-error px-4 py-2.5 text-sm font-medium text-error-contrast hover:bg-error-hover disabled:opacity-50"
             >
               {busy ? (isPrivate ? "Deleting…" : "Moving…") : deleteLabel}
             </button>
           </ModalFooter>
         }
       >
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && <p className="text-sm text-error">{error}</p>}
       </Modal>
       <Modal
         open={confirmPublish}
@@ -450,7 +450,7 @@ export default function PracticeActions({
           </ModalFooter>
         }
       >
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && <p className="text-sm text-error">{error}</p>}
       </Modal>
       <Modal
         open={confirmUnpublish}
@@ -480,7 +480,7 @@ export default function PracticeActions({
           </ModalFooter>
         }
       >
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && <p className="text-sm text-error">{error}</p>}
       </Modal>
     </>
   )

@@ -491,6 +491,7 @@ export default function ImportMeetResourcesButton({
             </div>
           ))}
           <ResourceFileOrLink
+            meetId={meetId}
             onAdd={(url) => updateLinks(def.key, (l) => [...l, { url }])}
             onUploaded={trackUpload}
             onUploadingChange={getFieldUploadHandler(def.key)}
@@ -543,6 +544,7 @@ export default function ImportMeetResourcesButton({
         onClear={() => setSingle(def.key, "")}
       >
         <ResourceFileOrLink
+          meetId={meetId}
           accept={def.accept}
           linkPlaceholder={def.placeholder}
           onAdd={(url) => {
@@ -589,7 +591,7 @@ export default function ImportMeetResourcesButton({
             }}
             aria-label="Save team code"
             title="Save team code"
-            className="inline-flex h-6 w-6 items-center justify-center rounded-md text-primary transition-colors hover:bg-fill-secondary hover:text-primary-hover"
+            className="inline-flex h-6 w-6 items-center justify-center rounded-md text-accent transition-colors hover:bg-fill-secondary hover:text-primary"
           >
             <AppIcon name="check" className="h-3.5 w-3.5" />
           </button>

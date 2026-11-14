@@ -6,16 +6,19 @@ import {
   type NotificationPreferences,
   type NotificationPreferenceKey,
 } from "@/lib/notifications/notification-preferences"
+import {
+  notificationPreferenceDescription,
+  visibleNotificationPreferences,
+  type NotificationSettingsViewer,
+} from "@swimbuzz/shared"
 import { updateNotificationPreference } from "./settings.actions"
 
 export default function NotificationPreferencesSettings({
   initialPreferences,
-  isAthlete = false,
-  isMeetDirector = false,
+  viewer,
 }: {
   initialPreferences: NotificationPreferences
-  isAthlete?: boolean
-  isMeetDirector?: boolean
+  viewer: NotificationSettingsViewer
 }) {
   const [preferences, setPreferences] = useState(initialPreferences)
   const [error, setError] = useState<string | null>(null)
@@ -46,20 +49,15 @@ export default function NotificationPreferencesSettings({
 
   return (
     <div className="divide-y divide-border">
-      {NOTIFICATION_PREFERENCE_META.filter(
-        ({ athletesOnly, staffOnly, meetDirectorsOnly }) =>
-          (!athletesOnly || isAthlete) &&
-          (!staffOnly || !isAthlete) &&
-          (!meetDirectorsOnly || isMeetDirector)
-      ).map(({ key, label, description, athleteDescription }) => (
+      {visibleNotificationPreferences(NOTIFICATION_PREFERENCE_META, viewer).map((item) => {
+        const { key, label } = item
+        return (
           <div key={key}>
             <div className="flex items-center justify-between gap-4 px-4 py-3">
               <div>
                 <p className="text-sm text-foreground">{label}</p>
                 <p className="text-xs text-foreground-secondary">
-                  {isAthlete && athleteDescription
-                    ? athleteDescription
-                    : description}
+                  {notificationPreferenceDescription(item, viewer)}
                 </p>
               </div>
               <button
@@ -83,7 +81,7 @@ export default function NotificationPreferencesSettings({
             </div>
           </div>
         )
-      )}
+      })}
       {error ? (
         <p className="px-4 py-2 text-xs text-error">{error}</p>
       ) : null}

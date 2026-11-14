@@ -163,7 +163,11 @@ export async function acquireRelayEditLock(
   }
 }
 
-/** Renew this session's lock; says whether someone asked to take over. Throws 409 once it's lost. */
+/**
+ * Renew this session's lock; says whether someone asked to take over. Throws 409 once it's lost.
+ * A lock that lapsed while nobody else claimed it (a throttled background tab, a sleeping laptop)
+ * is still this session's row, so it's renewed rather than lost.
+ */
 export async function heartbeatRelayEditLock(
   meetId: string,
   slot: string,
@@ -172,7 +176,7 @@ export async function heartbeatRelayEditLock(
 ): Promise<RelayEditLockInfo> {
   const now = new Date()
   const renewed = await prisma.relayEditLock.updateMany({
-    where: { meetId, slot, userId, token, expiresAt: { gt: now } },
+    where: { meetId, slot, userId, token },
     data: { expiresAt: lockExpiry(now) },
   })
   const latest = await loadLock(meetId, slot)

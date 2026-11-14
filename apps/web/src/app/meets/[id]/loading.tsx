@@ -23,7 +23,35 @@ function LedgerCardSkeleton({ titleWidth, rows }: { titleWidth: string; rows: st
   )
 }
 
-/** Mirrors the ledger + roster summary layout (the common case for meets with sheets/results). */
+/** The highlights panel: a header line and a row of three stat tiles. */
+function HighlightsSkeleton({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`flex flex-col gap-3 rounded-xl border border-border bg-fill-secondary/60 p-4 dark:bg-fill-secondary/90 ${className}`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <Skeleton className="h-3.5 w-24" />
+        <Skeleton className="h-4 w-12" />
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        {[...Array(3)].map((_, i) => (
+          <div
+            key={i}
+            className="flex flex-col items-center gap-2 rounded-lg px-2 py-3 ring-1 ring-inset ring-black/5 dark:ring-white/10"
+          >
+            <Skeleton className="h-6 w-10" />
+            <Skeleton className="h-2.5 w-14" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Mirrors the ledger + roster summary layout (the common case for meets with sheets/results): on a
+ * phone, highlights, then the summary's toolbar and rows, then the ledger cards.
+ */
 export default function Loading() {
   return (
     <main className="relative" aria-busy="true" aria-label="Loading meet">
@@ -42,24 +70,8 @@ export default function Loading() {
         </div>
 
         <div className="flex flex-wrap items-start">
-          <aside className="flex max-w-full flex-[0_0_420px] flex-col gap-4 max-[900px]:!flex-[1_1_100%]">
-            <div className="flex flex-col gap-3 rounded-xl border border-border bg-fill-secondary/60 p-4 dark:bg-fill-secondary/90">
-              <div className="flex items-center justify-between gap-2">
-                <Skeleton className="h-3.5 w-24" />
-                <Skeleton className="h-4 w-12" />
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {[...Array(3)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex flex-col items-center gap-2 rounded-lg px-2 py-3 ring-1 ring-inset ring-black/5 dark:ring-white/10"
-                  >
-                    <Skeleton className="h-6 w-10" />
-                    <Skeleton className="h-2.5 w-14" />
-                  </div>
-                ))}
-              </div>
-            </div>
+          <aside className="flex max-w-full flex-[0_0_420px] flex-col gap-4 max-[900px]:order-2 max-[900px]:mt-8 max-[900px]:!flex-[1_1_100%]">
+            <HighlightsSkeleton className="max-[900px]:hidden" />
             <LedgerCardSkeleton titleWidth="w-24" rows={competitionRows} />
             <LedgerCardSkeleton titleWidth="w-14" rows={["w-28"]} />
           </aside>
@@ -68,9 +80,11 @@ export default function Loading() {
             <span className="w-px bg-border" />
           </div>
 
-          <div className="flex min-w-0 flex-[1_1_480px] flex-col gap-3 pl-2 max-[900px]:mt-8 max-[900px]:pl-0">
-            <div className="flex items-center gap-2 pb-1">
-              <Skeleton className="h-[38px] min-w-0 flex-1 rounded-lg" />
+          <div className="@container flex min-w-0 flex-[1_1_480px] flex-col gap-3 pl-2 max-[900px]:order-1 max-[900px]:pl-0">
+            <HighlightsSkeleton className="mb-5 min-[901px]:hidden" />
+            <div className="flex flex-wrap items-center gap-2 pb-1">
+              <Skeleton className="h-[38px] w-full shrink-0 rounded-lg @[560px]:w-[260px]" />
+              <Skeleton className="h-[38px] min-w-0 flex-1 basis-32 rounded-lg" />
               <Skeleton className="h-[38px] w-[38px] shrink-0 rounded-lg" />
               <Skeleton className="h-[38px] w-[38px] shrink-0 rounded-lg" />
             </div>

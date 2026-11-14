@@ -18,10 +18,30 @@ import { Icon } from "./Icon"
 import { RelativeDateText } from "./RelativeDateText"
 import { useDeletedItems } from "../lib/use-deleted-items"
 
-export function DeletedItemsList({ kind, tabBarPad }: { kind: "practice" | "meet"; tabBarPad: number }) {
+export function DeletedItemsList({
+  kind,
+  tabBarPad,
+  query = "",
+  sort,
+}: {
+  kind: "practice" | "meet"
+  tabBarPad: number
+  /** Filters by name — the Practices toolbar's search. */
+  query?: string
+  /** By the item's date; omitted keeps the server's order (most recently deleted first). */
+  sort?: "date-desc" | "date-asc"
+}) {
   const c = usePalette()
   const { showToast } = useToast()
-  const { items, error, isPending, isFetching, busyId, restore, purge, refetch } = useDeletedItems(kind, true)
+  const { items: allItems, error, isPending, isFetching, busyId, restore, purge, refetch } =
+    useDeletedItems(kind, true)
+  const qLower = query.trim().toLowerCase()
+  const filtered = qLower ? allItems.filter((item) => item.name.toLowerCase().includes(qLower)) : allItems
+  const items = sort
+    ? [...filtered].sort((a, b) =>
+        sort === "date-asc" ? a.startsAt.localeCompare(b.startsAt) : b.startsAt.localeCompare(a.startsAt)
+      )
+    : filtered
   const [sheetItem, setSheetItem] = useState<DeletedItem | null>(null)
 
   async function handleRestore(item: DeletedItem) {
@@ -107,14 +127,20 @@ export function DeletedItemsList({ kind, tabBarPad }: { kind: "practice" | "meet
         refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refetch} />}
         ListEmptyComponent={
           <EmptyState
-            title={error ? "Could not load Trash" : "Trash is empty"}
+            title={
+              error
+                ? "Could not load Trash"
+                : qLower && allItems.length > 0
+                  ? `No deleted ${kind}s match your search`
+                  : "Trash is empty"
+            }
             body={error instanceof Error ? error.message : undefined}
           />
         }
         renderItem={({ item }) => {
           const countdown = recoveryCountdown(item.purgeAfter)
           const toneColor =
-            countdown.tone === "expired" ? c.error : countdown.tone === "warning" ? c.warning : c.textSecondary
+            countdown.tone === "expired" ? c.error : countdown.tone === "warning" ? c.warningText : c.textSecondary
           return (
             <ListRow
               title={item.name}

@@ -115,7 +115,7 @@ export default function MobileNavMenu({
                         className={
                           "flex items-center gap-3 rounded-lg px-3 py-3 text-[15px] transition-colors " +
                           (active
-                            ? "bg-primary-bg font-medium text-primary"
+                            ? "bg-primary-bg font-medium text-accent"
                             : "text-foreground hover:bg-fill-secondary")
                         }
                       >

@@ -8,7 +8,8 @@ import InfoIcon from "@/components/ui/InfoIcon"
 import { athletePath } from "@/lib/slug"
 import { ZonedInstantTime } from "@/components/ui/ZonedTime"
 import { RelativeDateTime } from "@/components/ui/RelativeDate"
-import { formatClockTime } from "@swimbuzz/shared"
+import ClearanceFlag, { WarningGlyph } from "@/components/athlete/ClearanceFlag"
+import { clearanceFlagDetail, formatClockTime, type ClearanceCheck } from "@swimbuzz/shared"
 
 type AttendanceRecord = {
   id: string
@@ -19,6 +20,8 @@ type AttendanceRecord = {
   year: string | null
   method: "SCAN" | "MANUAL"
   recordedAt: string
+  /** Clearance checks missing for this practice's season (physical / concussion test). */
+  uncleared?: ClearanceCheck[]
 }
 
 type RosterEntry = {
@@ -28,11 +31,12 @@ type RosterEntry = {
   preferredName: string | null
   gender: "M" | "F"
   year: string | null
+  uncleared: ClearanceCheck[]
 }
 
 type Feedback =
-  | { kind: "added"; name: string; via: "SCAN" | "MANUAL" }
-  | { kind: "duplicate"; name: string }
+  | { kind: "added"; name: string; via: "SCAN" | "MANUAL"; uncleared: ClearanceCheck[] }
+  | { kind: "duplicate"; name: string; uncleared: ClearanceCheck[] }
   | { kind: "error"; message: string }
 
 const FEEDBACK_MS = 4000
@@ -53,6 +57,7 @@ export default function AttendanceManager({
   location,
   initialAttendance,
   roster,
+  season,
 }: {
   practiceId: string
   title: string
@@ -62,6 +67,8 @@ export default function AttendanceManager({
   location: string
   initialAttendance: AttendanceRecord[]
   roster: RosterEntry[]
+  /** Season the practice falls in — for the clearance list link. */
+  season: string
 }) {
   const [attendance, setAttendance] = useState<AttendanceRecord[]>(initialAttendance)
   // Only the rows present on load stagger their entrance; scans slide in at once.
@@ -159,7 +166,7 @@ export default function AttendanceManager({
                 ? withoutTemp
                 : [record, ...withoutTemp]
             })
-            showFeedback({ kind: "duplicate", name: record.name })
+            showFeedback({ kind: "duplicate", name: record.name, uncleared: record.uncleared ?? [] })
             return
           }
           setAttendance((current) => {
@@ -167,7 +174,7 @@ export default function AttendanceManager({
             return [record, ...withoutTemp.filter((r) => r.id !== record.id)]
           })
           markNew(record.id)
-          showFeedback({ kind: "added", name: record.name, via: record.method })
+          showFeedback({ kind: "added", name: record.name, via: record.method, uncleared: record.uncleared ?? [] })
         } catch {
           if (tempId) setAttendance((current) => current.filter((r) => r.id !== tempId))
           showFeedback({ kind: "error", message: "Something went wrong. Try that scan again." })
@@ -246,6 +253,8 @@ export default function AttendanceManager({
   }, [recording])
 
   const scannedCount = attendance.filter((r) => r.method === "SCAN").length
+  const unclearedCount = attendance.filter((r) => (r.uncleared?.length ?? 0) > 0).length
+  const feedbackUncleared = feedback && feedback.kind !== "error" ? clearanceFlagDetail(feedback.uncleared) : null
 
   return (
     <>
@@ -253,7 +262,7 @@ export default function AttendanceManager({
         <h1 className="text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
           {title}
         </h1>
-        <p className="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-primary">
+        <p className="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-accent">
           Attendance
         </p>
         <div className="mt-2 text-base text-foreground-secondary sm:text-lg">
@@ -354,10 +363,10 @@ export default function AttendanceManager({
             className={
               "attendance-feedback-in mt-4 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm " +
               (feedback.kind === "added"
-                ? "border-primary/30 bg-primary/10 text-primary-active dark:text-primary-hover"
+                ? "border-primary/30 bg-primary/10 text-accent"
                 : feedback.kind === "duplicate"
-                  ? "border-amber-500/25 bg-amber-500/10 text-amber-800 dark:border-amber-300/20 dark:text-amber-200"
-                  : "border-red-200 bg-red-50 text-error dark:border-red-900/50 dark:bg-red-950/30")
+                  ? "border-warning-border bg-warning-bg text-warning-text"
+                  : "border-error-border bg-error-bg text-error")
             }
           >
             {feedback.kind === "added" ? (
@@ -377,6 +386,17 @@ export default function AttendanceManager({
             )}
           </div>
         )}
+        {feedback && feedbackUncleared && (
+          <div
+            role="alert"
+            className="attendance-feedback-in mt-2 flex items-center gap-2 rounded-lg border border-warning-border bg-warning-bg px-3 py-2 text-sm text-warning-text"
+          >
+            <WarningGlyph className="h-4 w-4 shrink-0" />
+            <span>
+              <span className="font-medium">{feedbackUncleared}</span> for {feedback.kind !== "error" ? feedback.name : ""} — checked in, but not cleared to practice.
+            </span>
+          </div>
+        )}
       </section>
 
       <section className="rounded-2xl border border-border bg-background px-5 py-4 shadow-sm sm:px-6 sm:py-5">
@@ -390,6 +410,18 @@ export default function AttendanceManager({
             </p>
           )}
         </div>
+        {unclearedCount > 0 && (
+          <p className="mt-1 flex flex-wrap items-center gap-x-1.5 text-xs text-foreground-secondary">
+            <WarningGlyph className="h-3.5 w-3.5 shrink-0 text-warning-text" />
+            {unclearedCount} checked in {unclearedCount === 1 ? "isn't" : "aren't"} cleared (physical or concussion test).
+            <Link
+              href={`/athletes/clearance?season=${encodeURIComponent(season)}`}
+              className="font-medium text-foreground transition-colors hover:text-primary"
+            >
+              Clearance list
+            </Link>
+          </p>
+        )}
 
         <div className="relative mt-3">
           <label className="block">
@@ -421,12 +453,16 @@ export default function AttendanceManager({
                           year: entry.year,
                           method: "MANUAL",
                           recordedAt: new Date().toISOString(),
+                          uncleared: entry.uncleared,
                         }
                       )
                     }}
                     className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-fill-secondary"
                   >
-                    <span className="truncate">{entry.name}</span>
+                    <span className="flex min-w-0 items-center gap-2">
+                      <span className="truncate">{entry.name}</span>
+                      <ClearanceFlag missing={entry.uncleared} />
+                    </span>
                     <ActionIcon kind="check" className="h-4 w-4 shrink-0 text-foreground-tertiary" />
                   </button>
                 </li>
@@ -467,16 +503,19 @@ export default function AttendanceManager({
                   {attendance.length - index}
                 </span>
                 <div className="relative min-w-0 flex-1">
-                  {record.athleteSlug ? (
-                    <Link
-                      href={athletePath(record.athleteSlug)}
-                      className="truncate font-medium text-foreground transition-colors hover:text-primary"
-                    >
-                      {record.name}
-                    </Link>
-                  ) : (
-                    <span className="truncate font-medium text-foreground">{record.name}</span>
-                  )}
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    {record.athleteSlug ? (
+                      <Link
+                        href={athletePath(record.athleteSlug)}
+                        className="truncate font-medium text-foreground transition-colors hover:text-primary"
+                      >
+                        {record.name}
+                      </Link>
+                    ) : (
+                      <span className="truncate font-medium text-foreground">{record.name}</span>
+                    )}
+                    <ClearanceFlag missing={record.uncleared} />
+                  </div>
                   <p className="text-xs text-foreground-tertiary">
                     {/* Check-in times render in the viewer's timezone. */}
                     <ZonedInstantTime at={record.recordedAt}>
@@ -491,7 +530,7 @@ export default function AttendanceManager({
                   onClick={() => void removeAttendee(record, index)}
                   disabled={removingId === record.id}
                   aria-label={`Remove ${record.name} from attendance`}
-                  className="group relative z-10 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-foreground-tertiary transition-colors hover:bg-red-50 hover:text-error disabled:opacity-40 dark:hover:bg-red-950/40"
+                  className="group relative z-10 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-foreground-tertiary transition-colors hover:bg-error-bg hover:text-error disabled:opacity-40 "
                 >
                   <ActionIcon kind="close" className="h-4 w-4" />
                   <HoverDetail label="Remove" />

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma"
-import type { StaffTitle } from "@swimbuzz/shared"
+import { athleteYearForSeason, seasonFromDate, type StaffTitle } from "@swimbuzz/shared"
 
 /** Buzzcard scanners type the GTID then Enter; GT ids are 9 digits starting with 90. */
 const GTID_RE = /90\d{7}/
@@ -68,6 +68,8 @@ export function serializeAttendance(record: {
     lastName: string
     gender: string
     year: string | null
+    yearBySeason?: unknown
+    seasons?: string[]
     user?: { staffTitle: StaffTitle | null } | null
   }
 }): AttendanceRecord {
@@ -77,7 +79,8 @@ export function serializeAttendance(record: {
     athleteSlug: record.athlete.slug,
     name: attendanceDisplayName(record.athlete),
     gender: record.athlete.gender === "F" ? "F" : "M",
-    year: record.athlete.year,
+    // The year they were in when checked in, not their latest.
+    year: athleteYearForSeason(record.athlete, seasonFromDate(record.recordedAt.toISOString().slice(0, 10))),
     method: record.method === "MANUAL" ? "MANUAL" : "SCAN",
     recordedAt: record.recordedAt.toISOString(),
     staffTitle: record.athlete.user?.staffTitle ?? null,

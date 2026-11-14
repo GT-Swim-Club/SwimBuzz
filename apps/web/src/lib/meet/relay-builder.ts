@@ -21,6 +21,14 @@ export const TIME_WINDOWS: { label: string; days: number | null }[] = [
   { label: "Last 6 months", days: 180 },
 ]
 
+/** A "Times from" window in brief, for the builder's status: "All Time", "3Y", "1Y", "6M". */
+export function timeWindowTag(days: number | null): string {
+  if (days == null) return "All Time"
+  if (days % 365 === 0) return `${days / 365}Y`
+  if (days % 30 === 0) return `${days / 30}M`
+  return `${days}D`
+}
+
 /** Days in a window, with all time as unbounded — for "prefer is no wider than limit". */
 export function windowDays(days: number | null): number {
   return days ?? Infinity
@@ -443,18 +451,38 @@ export function withPoolAthletes(result: RelayResult, pool: LegAthlete[]): Relay
   return { ...next, alternates: rebuildAlternates(next, next.teams) }
 }
 
-const PUBLISHED_ROUND_RANK: Record<RelayLineup["round"], number> = { "": 0, F: 1, P: 2 }
+/** A relay round in the builder, at a meet with a finals session. */
+export type BuilderRound = "P" | "F"
 
-/** Published lineups for this relay event, one per letter (finals over prelims). */
-export function publishedTeamsFor(published: RelayLineup[], event: string, gender: string): LineupTeam[] {
+/**
+ * Which published relays a round reads, best first: one-round meets prefer the round-less lineup
+ * (then finals, then prelims); prelims reads its own lineup, else the round-less one (every
+ * lineup saved before rounds existed); finals reads only its own — none means it follows prelims.
+ */
+const PUBLISHED_ROUND_RANK: Record<"all" | BuilderRound, Partial<Record<RelayLineup["round"], number>>> = {
+  all: { "": 0, F: 1, P: 2 },
+  P: { P: 0, "": 1 },
+  F: { F: 0 },
+}
+
+/** Published lineups for this relay event, one per letter (for `round`, or the best of any round). */
+export function publishedTeamsFor(
+  published: RelayLineup[],
+  event: string,
+  gender: string,
+  round?: BuilderRound
+): LineupTeam[] {
   const key = relaySignupKey(canonicalRelayEvent(event))
+  const rank = PUBLISHED_ROUND_RANK[round ?? "all"]
   const byLetter = new Map<string, RelayLineup>()
   for (const relay of published) {
     if (relay.gender !== gender) continue
     if (relaySignupKey(canonicalRelayEvent(relay.event)) !== key) continue
     if (relay.legs.length !== 4 || relay.legs.some((leg) => !leg.athleteId)) continue
+    const relayRank = rank[relay.round]
+    if (relayRank == null) continue
     const current = byLetter.get(relay.letter)
-    if (!current || PUBLISHED_ROUND_RANK[relay.round] < PUBLISHED_ROUND_RANK[current.round]) {
+    if (!current || relayRank < (rank[current.round] ?? Infinity)) {
       byLetter.set(relay.letter, relay)
     }
   }
@@ -466,14 +494,26 @@ export function publishedTeamsFor(published: RelayLineup[], event: string, gende
     }))
 }
 
+/** The saved draft's lineup for a round (finals follows prelims unless the draft has its own). */
+export function draftTeamsFor(
+  draft: RelaySlotData["draft"],
+  round?: BuilderRound
+): LineupTeam[] | null {
+  if (!draft) return null
+  return round === "F" ? (draft.finalsTeams ?? draft.teams) : draft.teams
+}
+
 /**
  * The event's published lineup with the custom times it was published with. Published relays
  * only record who swims, so the times come from the draft publishing saved, wherever the same
- * swimmer is still on that leg.
+ * swimmer is still on that leg. Finals with no lineup of its own is the prelims lineup.
  */
-export function publishedLineup(data: RelaySlotData): LineupTeam[] {
-  const teams = publishedTeamsFor(data.published, data.slot.event, data.slot.gender)
-  const saved = data.draft?.published ? data.draft.teams : null
+export function publishedLineup(data: RelaySlotData, round?: BuilderRound): LineupTeam[] {
+  let teams = publishedTeamsFor(data.published, data.slot.event, data.slot.gender, round)
+  if (round === "F" && teams.length === 0) {
+    teams = publishedTeamsFor(data.published, data.slot.event, data.slot.gender, "P")
+  }
+  const saved = data.draft?.published ? draftTeamsFor(data.draft, round) : null
   if (!saved) return teams
   return teams.map((team) => {
     const savedLegs = saved.find((t) => t.letter === team.letter)?.legs ?? []
@@ -487,6 +527,60 @@ export function publishedLineup(data: RelaySlotData): LineupTeam[] {
       }),
     }
   })
+}
+
+/** Results are in for this round of the event (a timed-final result counts for both rounds). */
+export function relayRoundSwum(published: RelayLineup[], round: BuilderRound): boolean {
+  return published.some(
+    (relay) => (relay.resultTime != null || relay.place != null) && (relay.round === round || relay.round === "")
+  )
+}
+
+/**
+ * The finals lineup the builder opens with when it isn't simply following prelims: the draft's own
+ * finals lineup, else a published finals lineup that differs from the published prelims one.
+ */
+export function initialFinalsLineup(data: RelaySlotData): LineupTeam[] | null {
+  const draft = pendingDraft(data)
+  if (draft) return draft.finalsTeams ?? null
+  const finals = publishedTeamsFor(data.published, data.slot.event, data.slot.gender, "F")
+  if (finals.length === 0) return null
+  const withTimes = publishedLineup(data, "F")
+  return lineupKey(withTimes) === lineupKey(publishedLineup(data, "P")) ? null : withTimes
+}
+
+/** How a working relay compares with the published relay of the same letter. */
+export type RelayComparison = {
+  /** The published relay, re-timed with the working lineup's times; null when the letter is new. */
+  published: RelayTeam | null
+  /** Legs (0-based) whose swimmer differs from the published relay. */
+  changedLegs: number[]
+  /** Working total minus published total (negative = faster); null when either is untimed. */
+  diffMs: number | null
+}
+
+/**
+ * Each working relay against the published lineup — `published` comes re-timed by the same
+ * times as the working lineup (applyLineupTeams), so the difference is like for like.
+ */
+export function compareWithPublished(working: RelayTeam[], published: RelayTeam[]): Map<string, RelayComparison> {
+  const byLetter = new Map(published.map((team) => [team.letter, team]))
+  return new Map(
+    working.map((team) => {
+      const match = byLetter.get(team.letter) ?? null
+      const changedLegs = team.legs.flatMap((leg, i) => (match?.legs[i]?.athleteId === leg.athleteId ? [] : [i]))
+      const diffMs = match && team.totalMs != null && match.totalMs != null ? team.totalMs - match.totalMs : null
+      return [team.letter, { published: match, changedLegs, diffMs }]
+    })
+  )
+}
+
+/** "−0.84" / "+1.20" / "±0.00" for a projected time difference. */
+export function formatTimeDiff(ms: number): string {
+  const rounded = Math.round(ms / 10) * 10
+  const abs = Math.abs(rounded)
+  const text = abs >= 60000 ? formatTime(abs) : (abs / 1000).toFixed(2)
+  return `${rounded < 0 ? "\u2212" : rounded > 0 ? "+" : "\u00b1"}${text}`
 }
 
 /** The lineup currently on screen, as teams to keep across a rebuild. */
@@ -513,6 +607,22 @@ export function lineupKey(teams: LineupTeam[]): string {
 }
 
 /** Identifies builder settings regardless of id order, to tell whether they match a saved draft's. */
+/**
+ * The builder's settings before a coach changes any: times from the last year, and signups narrow
+ * the pool when there are any.
+ */
+export function defaultBuildSettings(hasSignups: boolean): BuildSettings {
+  return {
+    limitDays: 365,
+    // No wider than "Times from" (the builder clamps it), so it changes nothing by default.
+    withinDays: 365,
+    signupPool: hasSignups ? "relay" : "all",
+    excludedIds: [],
+    addedIds: [],
+    legOrder: null,
+  }
+}
+
 export function settingsKey(settings: BuildSettings): string {
   return JSON.stringify([
     settings.limitDays,
@@ -567,6 +677,29 @@ export function applyLineupTeams(
   }
   const teams = retotalTeams(next.teams)
   return { ...next, teams, alternates: rebuildAlternates(next, teams) }
+}
+
+/**
+ * A saved lineup shown before its build lands: the swimmers with the leg times saved with it, no
+ * alternates yet. The builder shows it dimmed until the build re-times it.
+ */
+export function provisionalLineupResult(
+  event: string,
+  course: string,
+  lineup: LineupTeam[],
+  genders: Map<string, "M" | "F" | undefined>
+): RelayResult {
+  const applied = applyLineupTeams({ relay: event, course, teams: [], strokeTimes: {} }, lineup, genders)
+  const teams = retotalTeams(
+    applied.teams.map((team, t) => ({
+      ...team,
+      legs: team.legs.map((leg, i) => {
+        const saved = lineup[t]?.legs[i]?.timeMs
+        return leg.timeMs == null && saved != null ? { ...leg, timeMs: saved } : leg
+      }),
+    }))
+  )
+  return { ...applied, teams, alternates: [] }
 }
 
 /** Keep the first `count` relays; swimmers on dropped relays become alternates again. */
@@ -878,7 +1011,30 @@ export type RelaySlotData = {
     optimal?: boolean
     settings?: BuildSettings
     published?: boolean
+    /** Finals' own lineup (prelims & finals relays); absent = finals follows `teams`. */
+    finalsTeams?: LineupTeam[] | null
+    /** Who saved it; null when unknown. */
+    savedBy?: string | null
   } | null
+  /** Earlier saves of the event (drafts and publishes), newest first, to load again. */
+  versions?: RelaySlotVersion[]
+  /** Whether the event swims prelims and finals (relayEventRounds); absent = timed final. */
+  rounds?: { on: boolean; locked: "rounds" | "timed" | null }
+}
+
+/** An earlier save of a relay event's lineup, loadable in the builder. */
+export type RelaySlotVersion = {
+  id: string
+  savedAt: string
+  /** Who saved it; null when unknown. */
+  savedBy: string | null
+  published: boolean
+  teams: LineupTeam[]
+  /** Finals' own lineup; null = finals followed `teams`. */
+  finalsTeams: LineupTeam[] | null
+  settings?: BuildSettings
+  /** The event swam prelims and finals when saved; absent when not recorded. */
+  prelimsFinals?: boolean
 }
 
 /** The event's unpublished draft, if any — a draft saved by publishing doesn't count. */
@@ -886,14 +1042,17 @@ export function pendingDraft(data: RelaySlotData): RelaySlotData["draft"] {
   return data.draft && !data.draft.published ? data.draft : null
 }
 
-/** What the builder opens on for a relay event: its draft, else what's published, else optimal. */
-export function initialLineup(data: RelaySlotData): {
+/**
+ * What the builder opens on for a relay event: its draft, else what's published, else optimal.
+ * Pass `round` "P" for a prelims & finals relay, so a published finals lineup isn't read as prelims.
+ */
+export function initialLineup(data: RelaySlotData, round?: BuilderRound): {
   source: "draft" | "published" | "optimal"
   fixed: LineupTeam[] | null
 } {
   const draft = pendingDraft(data)
   if (draft) return { source: "draft", fixed: draft.teams }
-  const published = publishedLineup(data)
+  const published = publishedLineup(data, round)
   if (published.length > 0) return { source: "published", fixed: published }
   return { source: "optimal", fixed: null }
 }

@@ -30,8 +30,12 @@ export function resolveAppHref(href: string | null | undefined): Href | null {
   if (pathname === "/meets" || pathname === "/meets/") {
     return "/(tabs)/meets"
   }
+  if (pathname === "/records" || pathname.startsWith("/records/")) {
+    return "/(tabs)/nationals?view=records" as Href
+  }
   if (pathname.startsWith("/meets/")) {
-    const id = pathname.slice("/meets/".length).split("/")[0]
+    const [id, section] = pathname.slice("/meets/".length).split("/")
+    if (id && section === "relays") return `/(tabs)/meets/relays/${id}` as Href
     if (id) return `/(tabs)/meets/${id}${qs}` as Href
   }
   if (pathname === "/practices" || pathname === "/practices/") {

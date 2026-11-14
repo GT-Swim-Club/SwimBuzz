@@ -2,6 +2,10 @@ packages:
   - "apps/*"
   - "packages/*"
 
+# Hoisted (flat) node_modules, which the mobile app's Metro config expects.
+# pnpm 11+ no longer reads `node-linker` from .npmrc, so it must be set here.
+nodeLinker: hoisted
+
 # Skip the auto-download of the pnpm version pinned in package.json's
 # "packageManager" field and use the locally installed pnpm instead. The
 # on-demand engine download can stall with no output and hang every pnpm

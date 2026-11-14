@@ -327,6 +327,11 @@ export const ICONS = {
   check: [
     { tag: "path", d: "M20 6 9 17l-5-5" },
   ],
+  /** Select mode (pick several practices) — a ticked box, as on the web practices toolbar. */
+  select: [
+    { tag: "path", d: "M21 10.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.5" },
+    { tag: "path", d: "m9 11 3 3L22 4" },
+  ],
   award: [
     {
       tag: "path",

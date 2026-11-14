@@ -158,8 +158,9 @@ export default function SharePracticeButton({
   async function capturePngBlob(node: HTMLElement): Promise<Blob> {
     await document.fonts.ready
     const backgroundColor =
-      getComputedStyle(document.body).backgroundColor ||
+      // The capture root is bg-background; match it so no layout-gray edge shows.
       getComputedStyle(document.documentElement).getPropertyValue("--brand-color-bg-container").trim() ||
+      getComputedStyle(document.body).backgroundColor ||
       "#ffffff"
 
     // `node` is an empty w-fit wrapper around PracticeExportCapture's own root div,
@@ -320,7 +321,7 @@ export default function SharePracticeButton({
           </button>
         </div>
       )}
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-xs text-error">{error}</p>}
     </div>
   )
 }

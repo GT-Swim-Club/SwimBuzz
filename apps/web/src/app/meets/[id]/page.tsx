@@ -64,6 +64,10 @@ import {
   type CourseCode,
 } from "@swimbuzz/shared"
 import LoadingComponent from "./loading"
+import MeetSummaryEmptyCard from "./MeetSummaryEmptyCard"
+import { parseSummaryView, searchParamsString } from "@/lib/meet/roster-summary-view"
+
+type SearchParams = Record<string, string | string[] | undefined>
 
 const RESOURCE_KEYS = [
   "packetUrl",
@@ -89,8 +93,14 @@ const TRAVEL_TEXT_SECTIONS: {
   { key: "itinerary", label: "Itinerary", icon: "itinerary" },
 ]
 
-async function MeetPageContent({ params }: { params: Promise<{ id: string }> }) {
-  const { id: param } = await params
+async function MeetPageContent({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<SearchParams>
+}) {
+  const [{ id: param }, query] = await Promise.all([params, searchParams])
   const session = await getSession()
   if (!session) redirect("/signin")
 
@@ -105,7 +115,9 @@ async function MeetPageContent({ params }: { params: Promise<{ id: string }> }) 
   ])
 
   if (!meet) notFound()
-  if (meet.slug && param !== meet.slug) redirect(meetPath(meet.slug))
+  // Keep the query: it carries the roster summary's view and filters.
+  if (meet.slug && param !== meet.slug) redirect(`${meetPath(meet.slug)}${searchParamsString(query)}`)
+  const summaryView = parseSummaryView(query)
 
   const meetPublicPath = meetPath(meet.slug ?? meet.id)
   const meetStartsAt = meet.startsAt ?? meet.createdAt
@@ -376,6 +388,8 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       iconUrl={meet.iconUrl}
       defaultCourse={meet.course}
       defaultDate={toDateInput(meet.startsAt, meet.timeZone)}
+      initialView={summaryView.state}
+      viewFromUrl={summaryView.fromUrl}
     />
   )
 
@@ -501,13 +515,37 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
     />
   ) : null
 
-  // Before any sheets exist: meet timing/people cards on the left, logistics on the right.
-  // If one side is empty (e.g. a past meet with no sign-ups), move a card over so the
-  // page doesn't render a blank half.
+  // Before any sheets exist: where the roster summary will be (what's coming for athletes, the
+  // steps that fill it in for staff — which covers the sign-ups & roster card), then meet timing
+  // cards on the left and logistics on the right. If one side is empty (e.g. a past meet), move a
+  // card over so the page doesn't render a blank half.
+  const summaryEmptyCard = (
+    <MeetSummaryEmptyCard
+      isCoach={isCoach}
+      meetId={meet.id}
+      meetName={meet.name}
+      meetHasEnded={meetHasEnded}
+      hasEventOrder={eventOrder !== null}
+      importedSignups={
+        isSignupRelayPreferences(meet.signupRelayPreferences)
+          ? meet.signupRelayPreferences.athletes.length
+          : null
+      }
+      rosterCount={isMeetFinalRoster(meet.finalRoster) ? meet.finalRoster.athleteIds.length : null}
+      hasSheets={Boolean(
+        meet.entriesSheetUrl || meet.psychSheetUrl || heatSheetLinks.length > 0 || finalsHeatSheetLinks.length > 0
+      )}
+      hasResults={Boolean(meet.resultsUrl || meet.swimphoneUrl)}
+      season={meet.season}
+      course={meet.course}
+      defaultDate={toDateInput(meet.startsAt, meet.timeZone)}
+      resourceInitial={resourceInitial}
+      athletes={rosterAthletes}
+    />
+  )
   const preSheetsLeft: ReactNode[] = [
     countdownCard && <Fragment key="countdown">{countdownCard}</Fragment>,
     highlightsCard && <Fragment key="highlights">{highlightsCard}</Fragment>,
-    signupCard && <Fragment key="signup">{signupCard}</Fragment>,
   ].filter(Boolean)
   const preSheetsCompetition = renderCompetitionCard()
   const preSheetsRight: ReactNode[] = [
@@ -531,9 +569,9 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
           <div className="flex flex-col gap-4">{header}</div>
           {hasRosterSummaryContent ? (
             <MeetLedgerLayout
+              lead={highlightsCard}
               ledger={
                 <>
-                  {highlightsCard}
                   {countdownCard}
                   {signupCard}
                   {renderCompetitionCard()}
@@ -545,7 +583,10 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
               {summarySection}
             </MeetLedgerLayout>
           ) : (
-            <MeetPreSheetsLayout left={preSheetsLeft} right={preSheetsRight} />
+            <div className="flex flex-col gap-4">
+              {summaryEmptyCard}
+              <MeetPreSheetsLayout left={preSheetsLeft} right={preSheetsRight} />
+            </div>
           )}
         </div>
       </main>
@@ -553,7 +594,10 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
   )
 }
 
-export default function MeetPage(props: { params: Promise<{ id: string }> }) {
+export default function MeetPage(props: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<SearchParams>
+}) {
   return (
     <Suspense fallback={<LoadingComponent />}>
       <MeetPageContent {...props} />

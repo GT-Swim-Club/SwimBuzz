@@ -25,10 +25,10 @@ function ScraperIcon({ className }: { className?: string }) {
 export default function RunScraperButton({ compact = false }: { compact?: boolean }) {
   const { connected, loading, openRunScraper } = useScraperUi()
   const statusClass = loading
-    ? "bg-gray-300"
+    ? "bg-fill"
     : connected
-      ? "bg-emerald-500 motion-safe:animate-pulse"
-      : "bg-amber-500"
+      ? "bg-success motion-safe:animate-pulse"
+      : "bg-warning"
 
   return (
     <button
@@ -39,7 +39,7 @@ export default function RunScraperButton({ compact = false }: { compact?: boolea
         "group relative inline-flex h-9 items-center justify-center rounded-lg border transition-colors " +
         (compact ? "w-9" : "gap-2 px-3 text-xs") +
         (connected
-          ? " border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:border-emerald-600 dark:hover:bg-emerald-900/50 dark:hover:text-emerald-200"
+          ? " border-success-border bg-success-bg text-success-text hover:border-success"
           : " border-border-secondary bg-background text-foreground hover:border-border hover:bg-fill-secondary dark:bg-background dark:hover:border-border dark:hover:bg-fill")
       }
     >

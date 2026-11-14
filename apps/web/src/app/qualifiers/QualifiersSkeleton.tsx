@@ -7,6 +7,7 @@ const galleryGridClass = "grid grid-cols-[repeat(auto-fill,minmax(max(220px,calc
 /** Per-row widths, varied so the rows don't look stamped. */
 const NAME_WIDTHS = ["w-28", "w-36", "w-24", "w-32", "w-28", "w-20", "w-36", "w-24"]
 const LINE_COUNTS = [2, 4, 1, 3, 1, 2, 3, 1]
+const STANDARD_EVENT_WIDTHS = ["w-16", "w-20", "w-20", "w-24", "w-16", "w-20"]
 
 /**
  * Mirrors the Nationals toolbar: search box, View standards, the Gender,
@@ -42,15 +43,19 @@ function ToolbarSkeleton() {
   )
 }
 
-/** A swim line: lead cell, meet, date, then time and standard. */
+/**
+ * A swim line: lead cell, meet, date, time, margin and standard. Phones: lead
+ * and time (with margin), then meet · date and the cut.
+ */
 function SwimLineSkeleton({ lead }: { lead: string }) {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 px-2.5 py-1.5 md:col-span-full md:grid-cols-subgrid md:gap-x-2 md:px-0">
       <Skeleton className={`h-4 max-w-full md:ml-2.5 ${lead}`} />
       <Skeleton className="h-4 w-40 max-w-full max-md:row-start-2 md:ml-2.5" />
-      <Skeleton className="h-4 w-20 max-md:row-start-2 max-md:justify-self-end md:ml-2.5" />
-      <Skeleton className="h-4 w-14 justify-self-end max-md:col-start-2 max-md:row-start-1" />
-      <Skeleton className="mr-2.5 h-4 w-14 justify-self-end max-md:hidden" />
+      <Skeleton className="h-4 w-20 max-md:hidden md:ml-2.5" />
+      <Skeleton className="h-4 w-14 justify-self-end max-md:col-start-2 max-md:row-start-1 max-md:w-24" />
+      <Skeleton className="h-4 w-10 justify-self-end max-md:hidden" />
+      <Skeleton className="h-4 w-14 justify-self-end max-md:col-start-2 max-md:row-start-2 md:mr-2.5" />
     </div>
   )
 }
@@ -60,8 +65,8 @@ function ListSkeleton({ byEvent }: { byEvent: boolean }) {
   return (
     <div className="overflow-hidden rounded-xl border border-border-secondary bg-background">
       <div className={`hidden gap-2 border-b border-border-secondary px-5 py-2.5 md:grid ${cols}`}>
-        {["w-14", "w-12", "w-10", "w-10", "w-10", "w-16"].map((w, i) => (
-          <Skeleton key={i} className={`h-2.5 ${w} ${i === 0 ? "" : i >= 4 ? "justify-self-end" : "ml-2.5"} ${i === 5 ? "mr-2.5" : ""}`} />
+        {["w-14", "w-12", "w-10", "w-10", "w-10", "w-12", "w-16"].map((w, i) => (
+          <Skeleton key={i} className={`h-2.5 ${w} ${i === 0 ? "" : i >= 4 ? "justify-self-end" : "ml-2.5"} ${i === 6 ? "mr-2.5" : ""}`} />
         ))}
       </div>
       <div className="divide-y divide-border-secondary">
@@ -81,7 +86,7 @@ function ListSkeleton({ byEvent }: { byEvent: boolean }) {
                 </div>
               </div>
             )}
-            <div className="grid min-w-0 content-start md:col-span-5 md:grid-cols-subgrid">
+            <div className="grid min-w-0 content-start md:col-span-6 md:grid-cols-subgrid">
               {Array.from({ length: LINE_COUNTS[i] }, (_, j) => (
                 <SwimLineSkeleton key={j} lead={byEvent ? NAME_WIDTHS[(i + j + 3) % NAME_WIDTHS.length] : "w-16"} />
               ))}
@@ -116,10 +121,36 @@ function GallerySkeleton({ byEvent }: { byEvent: boolean }) {
             {Array.from({ length: Math.min(LINE_COUNTS[i], byEvent ? 4 : 3) }, (_, j) => (
               <div key={j} className="flex items-center justify-between gap-3 py-1">
                 <Skeleton className={`h-3.5 ${byEvent ? NAME_WIDTHS[(i + j + 3) % NAME_WIDTHS.length] : "w-16"}`} />
-                <Skeleton className="h-3.5 w-14" />
+                <Skeleton className="h-3.5 w-20" />
               </div>
             ))}
           </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/** The standards sheet below the qualifiers: a title band, column labels, then Women · Event · Men rows. */
+function StandardsSheetSkeleton() {
+  return (
+    <div className="overflow-hidden rounded-xl border border-border-secondary bg-background">
+      <div className="flex justify-center border-b border-border-secondary px-3 py-3.5">
+        <Skeleton className="h-3 w-44" />
+      </div>
+      <div className="grid grid-cols-[minmax(0,1fr)_minmax(7.5rem,15rem)_minmax(0,1fr)] border-b border-border-secondary py-2">
+        {["w-12", "w-10", "w-8"].map((w, i) => (
+          <Skeleton key={i} className={`h-2.5 justify-self-center ${w}`} />
+        ))}
+      </div>
+      {STANDARD_EVENT_WIDTHS.map((w, i) => (
+        <div
+          key={i}
+          className={`grid grid-cols-[minmax(0,1fr)_minmax(7.5rem,15rem)_minmax(0,1fr)] py-2.5 ${i === 0 ? "" : "border-t border-border-secondary"}`}
+        >
+          <Skeleton className="h-4 w-14 justify-self-center" />
+          <Skeleton className={`h-4 justify-self-center ${w}`} />
+          <Skeleton className="h-4 w-14 justify-self-center" />
         </div>
       ))}
     </div>
@@ -131,7 +162,10 @@ export default function QualifiersSkeleton({ layout, byEvent = false }: { layout
   return (
     <>
       <ToolbarSkeleton />
+      {/* The standards and counts line. */}
+      <Skeleton className="-mb-1 ml-1 h-3 w-72 max-w-[80%]" />
       {layout === "list" ? <ListSkeleton byEvent={byEvent} /> : <GallerySkeleton byEvent={byEvent} />}
+      <StandardsSheetSkeleton />
     </>
   )
 }

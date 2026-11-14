@@ -40,8 +40,9 @@ import { syncMeetRelaySplitSwims } from "@/lib/meet/relay-split-sync"
 import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
 import { saveMeetHeatLane } from "@/lib/meet/heat-lane-save"
 import { getSession } from "@/lib/auth/session"
-import { assertCanEditRelay } from "@/lib/meet/relay-edit-lock"
+import { relayEditConflict } from "@/lib/meet/relay-edit-lock"
 import { isStaffRole, type SetHeatLaneInput } from "@swimbuzz/shared"
+import { notifyRelayLineupChanges } from "@/lib/notifications/relay-lineup-notify"
 
 async function requireStaff() {
   const session = await getSession()
@@ -175,8 +176,10 @@ export async function upsertRelayEntry(meetId: string, input: UpsertRelayEntryIn
 
   const relay = parseRelayInput(input)
   if (!relay) throw new Error("Event and four unique relay legs are required")
-  // Not while a coach is editing this event in the relay builder.
-  await assertCanEditRelay(meetId, relay, session.user.id)
+  // Not while a coach is editing this event in the relay builder. Returned, not thrown: production
+  // builds hide a thrown server-action error's message, and this one says who is editing.
+  const conflict = await relayEditConflict(meetId, relay, session.user.id)
+  if (conflict) return { ok: false as const, error: conflict.error }
 
   const rosterOnly = input.rosterOnly === true
 
@@ -263,6 +266,7 @@ export async function upsertRelayEntry(meetId: string, input: UpsertRelayEntryIn
   await prisma.meet.update({
     where: { id: meetId },
     data: { relayResultsSummary: { entries } }})
+  notifyRelayLineupChanges({ meetId: meet.id, before: meet.relayResultsSummary, after: entries, actorUserId: session.user.id })
 
   const leg1 = relayToSave.legs.find((leg) => leg.leg === 1)
   if (priorLeg1AthleteId && priorLeg1AthleteId !== leg1?.athleteId) {
@@ -283,7 +287,7 @@ export async function upsertRelayEntry(meetId: string, input: UpsertRelayEntryIn
   await syncTeamRecordsSafely()
 
   revalidatePath("/meets/[id]", "page")
-  return { ok: true, entries: entries.length }
+  return { ok: true as const, entries: entries.length }
 }
 
 /** Same logic as DELETE /api/meets/[id]/relays (not currently used by any of
@@ -305,7 +309,8 @@ export async function removeRelayEntry(
   const gender = parseRelayGender(params.gender)
 
   if (!event) throw new Error("Event is required")
-  await assertCanEditRelay(meetId, { event, gender }, session.user.id)
+  const conflict = await relayEditConflict(meetId, { event, gender }, session.user.id)
+  if (conflict) return { ok: false as const, error: conflict.error }
 
   const roster = await prisma.athlete.findMany({
     where: { seasons: { has: meet.season } },
@@ -333,7 +338,7 @@ export async function removeRelayEntry(
   await syncTeamRecordsSafely()
 
   revalidatePath("/meets/[id]", "page")
-  return { ok: true }
+  return { ok: true as const }
 }
 
 export type EditSheetSeedInput = {

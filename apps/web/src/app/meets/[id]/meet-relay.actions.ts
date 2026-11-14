@@ -28,6 +28,7 @@ import { syncMeetRelaySplitSwims } from "@/lib/meet/relay-split-sync"
 import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
+import { notifyRelayLineupChanges } from "@/lib/notifications/relay-lineup-notify"
 
 /** Shared with POST/DELETE /api/meets/[id]/relays — same logic, kept in sync
  * manually since the route can't be refactored without risking the
@@ -199,6 +200,7 @@ export async function saveRelayTeam(meetId: string, input: SaveRelayInput) {
   await prisma.meet.update({
     where: { id: meetId },
     data: { relayResultsSummary: { entries } }})
+  notifyRelayLineupChanges({ meetId: meet.id, before: meet.relayResultsSummary, after: entries, actorUserId: null })
 
   const leg1 = relayToSave.legs.find((leg) => leg.leg === 1)
   if (priorLeg1AthleteId && priorLeg1AthleteId !== leg1?.athleteId) {

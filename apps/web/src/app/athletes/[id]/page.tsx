@@ -5,25 +5,24 @@ import BackLink from "@/components/ui/BackLink"
 import StaffBadge from "@/components/ui/StaffBadge"
 import { getSession } from "@/lib/auth/session"
 
-function formatYear(year: string): string {
-  if (year.toLowerCase().includes("phd")) return "PhD"
-  if (year.toLowerCase().includes("master")) return "Masters"
-  const num = parseInt(year)
-  if (isNaN(num)) return year
-  const suffixes = ["th", "st", "nd", "rd"]
-  const v = num % 100
-  return num + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]) + " Year"
-}
-
 import ActionIcon from "@/components/ui/ActionIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
 import type { AthleteSwim } from "@/lib/athlete/swim-history"
 import { meetDayRange } from "@/lib/swim/swim-dedup"
 import AthleteActions from "./AthleteActions"
 import AthleteSwimsWorkspace from "./AthleteSwimsWorkspace"
+import AthleteClearance from "./AthleteClearance"
 import { ICON_BUTTON, SwimCloudProfileLinks } from "./AthleteIconButton"
 import { isStaffUi } from "@/lib/athlete/athlete-view-server"
-import { DEFAULT_TIME_ZONE, formatSeasonLabel, zonedDayKey } from "@swimbuzz/shared"
+import {
+  athleteSeasonInView,
+  currentSeason,
+  DEFAULT_TIME_ZONE,
+  effectiveYearBySeason,
+  formatAcademicYear,
+  formatSeasonLabel,
+  zonedDayKey,
+} from "@swimbuzz/shared"
 import { athletePath, isCuid } from "@/lib/slug"
 import StatsHighlights from "@/components/ui/StatsHighlights"
 import { computeAthleteHighlights } from "@/lib/athlete/athlete-stats"
@@ -105,7 +104,14 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
 
   const rosterHref = "/athletes?gender=all"
   // Other athletes' emails stay private; staff (outside Athlete view) and the athlete themselves see it.
-  const meta = [athlete.year && formatYear(athlete.year), (isCoach || isOwnProfile) && athlete.user?.email].filter(Boolean)
+  // The year for the running season, else their newest; a past season's year names the season.
+  const yearBySeason = effectiveYearBySeason(athlete)
+  const yearSeason = athleteSeasonInView(athlete.seasons)
+  const year = yearSeason ? yearBySeason[yearSeason] : null
+  const yearLabel =
+    year &&
+    `${formatAcademicYear(year)}${yearSeason !== currentSeason() ? ` (${formatSeasonLabel(yearSeason!)})` : ""}`
+  const meta = [yearLabel, (isCoach || isOwnProfile) && athlete.user?.email].filter(Boolean)
 
   return (
     <main className="flex flex-col gap-6">
@@ -117,7 +123,7 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
         />
         <div className="mt-1 flex flex-wrap items-center justify-between gap-4">
           <div className="flex min-w-0 flex-[1_1_360px] items-center gap-5">
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-primary/10 font-medium text-primary">
+            <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-primary/10 font-medium text-accent">
               {athlete.user?.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -161,6 +167,8 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
               preferredName={athlete.preferredName}
               gtid={athlete.gtid}
               dob={athlete.dob ? zonedDayKey(athlete.dob, DEFAULT_TIME_ZONE) : null}
+              seasons={athlete.seasons}
+              yearBySeason={yearBySeason}
             />
           ) : (
             (athlete.swimCloudIds.length > 0 || isOwnProfile) && (
@@ -181,6 +189,11 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
           )}
         </div>
       </div>
+
+      {/* Physical & concussion clearance: staff and the athlete themself only. */}
+      {(isCoach || isOwnProfile) && (
+        <AthleteClearance athleteId={athlete.id} seasons={athlete.seasons} canEdit={isCoach} />
+      )}
 
       <AthleteSwimsWorkspace
         swims={swims}

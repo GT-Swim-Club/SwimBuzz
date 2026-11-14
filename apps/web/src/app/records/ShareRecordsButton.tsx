@@ -44,7 +44,7 @@ export default function ShareRecordsButton({ rows }: { rows: TeamRecordRow[] }) 
       const dataUrl = await toPng(node, {
         pixelRatio: 3,
         cacheBust: true,
-        backgroundColor: getComputedStyle(document.body).backgroundColor || undefined,
+        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--brand-color-bg-container").trim() || undefined,
         imagePlaceholder: IMAGE_PLACEHOLDER,
         width: node.scrollWidth,
         height: node.scrollHeight,

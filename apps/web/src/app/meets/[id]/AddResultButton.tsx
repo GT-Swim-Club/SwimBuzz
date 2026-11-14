@@ -108,7 +108,7 @@ export default function AddResultButton({
 
       startTransition(async () => {
         try {
-          await upsertRelayEntry(meetId, {
+          const saved = await upsertRelayEntry(meetId, {
             event: form.relayForm.event,
             relayLetter: "A",
             relayRound: "",
@@ -119,6 +119,11 @@ export default function AddResultButton({
             })),
             resultTime: form.time,
           })
+          // A relay being edited in the relay builder comes back as an error, not a throw.
+          if (!saved.ok) {
+            setError(saved.error)
+            return
+          }
           setOpen(false)
         } catch (err) {
           setError(err instanceof Error ? err.message : "Failed to save relay")
@@ -182,7 +187,7 @@ export default function AddResultButton({
         {type === "individual" ? (
          <>
             <div>
-              <label className="block text-xs font-medium text-foreground-secondary mb-1">Athlete <span className="text-red-500">*</span></label>
+              <label className="block text-xs font-medium text-foreground-secondary mb-1">Athlete <span className="text-error">*</span></label>
               <select required value={form.athleteId} onChange={(e) => setForm((f) => ({ ...f, athleteId: e.target.value }))} className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background">
                 <option value="">Select swimmer...</option>
                 {athletes.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
@@ -204,11 +209,11 @@ export default function AddResultButton({
             </div>
             <div className="grid grid-cols-2 gap-3 mt-3">
               <div>
-                <label className="block text-xs font-medium text-foreground-secondary mb-1">Time <span className="text-red-500">*</span></label>
+                <label className="block text-xs font-medium text-foreground-secondary mb-1">Time <span className="text-error">*</span></label>
                 <input required placeholder="1:23.45" value={form.time} onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))} className="w-full rounded-lg border border-border px-3 py-2 text-sm font-mono bg-background" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-foreground-secondary mb-1">Date <span className="text-red-500">*</span></label>
+                <label className="block text-xs font-medium text-foreground-secondary mb-1">Date <span className="text-error">*</span></label>
                 <DatePicker
                   value={form.date}
                   onChange={(value) => setForm((form) => ({ ...form, date: value }))}
@@ -236,7 +241,7 @@ export default function AddResultButton({
               </div>
             </div>
             <div className="space-y-2 mt-3">
-              <label className="block text-xs font-medium text-foreground-secondary">Athletes <span className="text-red-500">*</span></label>
+              <label className="block text-xs font-medium text-foreground-secondary">Athletes <span className="text-error">*</span></label>
               {[0, 1, 2, 3].map(i => (
                 <select required key={i} value={form.relayForm.legs[i]} onChange={(e) => { const legs = [...form.relayForm.legs] as [string, string, string, string]; legs[i] = e.target.value; setForm(f => ({ ...f, relayForm: {...f.relayForm, legs} })) }} className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background">
                   <option value="">Select swimmer...</option>
@@ -245,7 +250,7 @@ export default function AddResultButton({
               ))}
             </div>
             <div className="mt-3">
-              <label className="block text-xs font-medium text-foreground-secondary mb-1">Time <span className="text-red-500">*</span></label>
+              <label className="block text-xs font-medium text-foreground-secondary mb-1">Time <span className="text-error">*</span></label>
               <input required placeholder="1:23.45" value={form.time} onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))} className="w-full rounded-lg border border-border px-3 py-2 text-sm font-mono bg-background" />
             </div>
           </>

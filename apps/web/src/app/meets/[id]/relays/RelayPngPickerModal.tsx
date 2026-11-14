@@ -7,7 +7,7 @@ import { CheckIcon } from "@/components/ui/export-menu"
 import RelaysExportCapture from "./RelaysExportCapture"
 
 const LINK_BUTTON =
-  "text-xs font-medium text-primary transition-colors duration-200 hover:text-primary-hover"
+  "text-xs font-medium text-accent transition-colors duration-200 hover:text-primary"
 const SECTION_HEADER =
   "flex items-center justify-between gap-3 border-b border-border-secondary bg-fill-secondary px-4 py-2 text-xs font-medium tabular-nums text-foreground-secondary"
 

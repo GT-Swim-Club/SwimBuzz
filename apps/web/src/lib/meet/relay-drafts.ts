@@ -17,7 +17,13 @@ export type RelayDraftTeam = { letter: string; legs: RelayDraftLeg[] }
 export type RelayDraft = {
   gender: RelayDraftGender
   event: string
+  /** The prelims lineup at a meet with a finals session, else the event's only lineup. */
   teams: RelayDraftTeam[]
+  /**
+   * The finals lineup, once a coach made it differ from prelims. Absent (every draft saved before
+   * rounds existed) = finals follows `teams`.
+   */
+  finalsTeams?: RelayDraftTeam[]
   savedAt: string
   /** Whether the lineup matched the optimal one when saved — lets the summary tag it without a rebuild. */
   optimal?: boolean
@@ -28,9 +34,35 @@ export type RelayDraft = {
    * The event reads as published, not as a draft.
    */
   published?: boolean
+  /** Who saved it (absent on drafts saved before this was recorded). */
+  savedBy?: RelayDraftAuthor
 }
 
-export type RelayDraftsSummary = { drafts: RelayDraft[] }
+export type RelayDraftAuthor = { id: string; name: string | null }
+
+/**
+ * An earlier save of a relay event's lineup — a draft or a publish — that the builder can load
+ * again. The last RELAY_DRAFT_VERSIONS_KEPT per event are kept; all go when the meet ends.
+ */
+export type RelayDraftVersion = {
+  id: string
+  gender: RelayDraftGender
+  event: string
+  teams: RelayDraftTeam[]
+  finalsTeams?: RelayDraftTeam[]
+  settings?: BuildSettings
+  /** The event swam prelims and finals when it was saved. */
+  prelimsFinals?: boolean
+  /** Saved by publishing. */
+  published?: boolean
+  savedAt: string
+  savedBy?: RelayDraftAuthor
+}
+
+export type RelayDraftsSummary = { drafts: RelayDraft[]; history?: RelayDraftVersion[] }
+
+/** Versions kept per relay event (gender and event). */
+export const RELAY_DRAFT_VERSIONS_KEPT = 5
 
 const LETTERS = ["A", "B", "C", "D"]
 
@@ -125,6 +157,48 @@ export function isRelayDraftsSummary(value: unknown): value is RelayDraftsSummar
 
 export function relayDraftsOf(value: unknown): RelayDraft[] {
   return isRelayDraftsSummary(value) ? value.drafts : []
+}
+
+/** Every relay event's saved versions, oldest first. */
+export function relayDraftHistoryOf(value: unknown): RelayDraftVersion[] {
+  if (!isRelayDraftsSummary(value) || !Array.isArray(value.history)) return []
+  return value.history.filter(
+    (v) =>
+      v &&
+      typeof v === "object" &&
+      typeof v.id === "string" &&
+      isDraftGender(v.gender) &&
+      typeof v.event === "string" &&
+      Array.isArray(v.teams) &&
+      typeof v.savedAt === "string"
+  )
+}
+
+/** The relay event's versions, newest first. */
+export function relayDraftVersionsFor(
+  history: RelayDraftVersion[],
+  gender: string,
+  event: string
+): RelayDraftVersion[] {
+  return history.filter((v) => sameRelay(v, gender, event)).reverse()
+}
+
+/** Add a version, keeping the newest RELAY_DRAFT_VERSIONS_KEPT for its relay event. */
+export function appendRelayDraftVersion(history: RelayDraftVersion[], version: RelayDraftVersion): RelayDraftVersion[] {
+  const next = [...history, version]
+  const ofEvent = next.filter((v) => sameRelay(v, version.gender, version.event))
+  const dropped = new Set(ofEvent.slice(0, Math.max(0, ofEvent.length - RELAY_DRAFT_VERSIONS_KEPT)))
+  return next.filter((v) => !dropped.has(v))
+}
+
+/** The stored summary with new drafts, keeping the version history. */
+export function withRelayDrafts(value: unknown, drafts: RelayDraft[], history?: RelayDraftVersion[]): RelayDraftsSummary {
+  return { drafts, history: history ?? relayDraftHistoryOf(value) }
+}
+
+/** A draft or version of this relay event (gender and event). */
+export function isRelayDraftFor(draft: Pick<RelayDraft, "gender" | "event">, gender: string, event: string): boolean {
+  return sameRelay(draft, gender, event)
 }
 
 function sameRelay(draft: Pick<RelayDraft, "gender" | "event">, gender: string, event: string) {

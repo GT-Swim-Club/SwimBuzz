@@ -35,7 +35,8 @@ import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 import { GalleryTile } from "../../../src/components/GalleryTile"
 import { Icon } from "../../../src/components/Icon"
 import { StaffBadge } from "../../../src/components/StaffBadge"
-import { useViewPreferences } from "../../../src/lib/view-preferences"
+import { useGalleryView } from "../../../src/lib/view-preferences"
+import { GalleryViewToggle } from "../../../src/components/GalleryViewToggle"
 
 type GenderFilter = "ALL" | "M" | "F"
 
@@ -45,9 +46,9 @@ export default function RosterScreen() {
   const isStaff = !!user && isStaffRole(user.role)
   const c = usePalette()
   const todayKey = localDayKey(new Date())
-  const { defaultView } = useViewPreferences()
+  const [galleryView, setGalleryView] = useGalleryView("roster")
   const tabBarPad = useTabBarScrollPadding()
-  const gallery = defaultView === "gallery"
+  const gallery = galleryView === "gallery"
   const [seasonState, setSeasonState] = useState<string | null>(null)
   const [gender, setGender] = useState<GenderFilter>("ALL")
   const [query, setQuery] = useState("")
@@ -140,6 +141,13 @@ export default function RosterScreen() {
             variant="secondary"
             onPress={() => router.push("/roster/import-sheet")}
           />
+          <Button
+            label="Physical & concussion clearance"
+            variant="secondary"
+            onPress={() =>
+              router.push(season ? `/roster/clearance?season=${encodeURIComponent(season)}` : "/roster/clearance")
+            }
+          />
           {season ? (
             <Button
               label={`Sync SwimCloud times (${formatSeasonLabel(season)})`}
@@ -152,15 +160,22 @@ export default function RosterScreen() {
           )}
         </View>
       ) : null}
-      <TextField
-        label="Search"
-        placeholder="Search by name"
-        value={query}
-        onChangeText={setQuery}
-        autoCapitalize="none"
-        autoCorrect={false}
-        clearButtonMode="while-editing"
-      />
+      <View style={{ flexDirection: "row", alignItems: "flex-end", gap: spacing.sm }}>
+        <View style={{ flex: 1 }}>
+          <TextField
+            label="Search"
+            placeholder="Search by name"
+            value={query}
+            onChangeText={setQuery}
+            autoCapitalize="none"
+            autoCorrect={false}
+            clearButtonMode="while-editing"
+          />
+        </View>
+        <View style={{ height: 44, justifyContent: "center", marginBottom: spacing.sm }}>
+          <GalleryViewToggle value={galleryView} onChange={setGalleryView} />
+        </View>
+      </View>
       <Section title="Gender">
         <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
           {(
@@ -265,7 +280,7 @@ export default function RosterScreen() {
                 accessory={
                   isStaff ? (
                     item.swimCloudIds?.length ? (
-                      <Icon name="check" size={18} color={c.success} accessibilityLabel="Has SwimCloud" />
+                      <Icon name="check" size={18} color={c.successText} accessibilityLabel="Has SwimCloud" />
                     ) : (
                       <Text style={{ color: c.textTertiary }} accessibilityLabel="No SwimCloud">
                         —

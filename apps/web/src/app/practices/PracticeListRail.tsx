@@ -99,7 +99,7 @@ export default function PracticeListRail({
                 <PrivateBadge compact />
               ) : (
                 !practice.published && (
-                  <span className="rounded-full bg-primary/20 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-primary-active dark:bg-primary/30 dark:text-primary-hover">
+                  <span className="rounded-full bg-primary/20 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-accent dark:bg-primary/30">
                     Draft
                   </span>
                 )

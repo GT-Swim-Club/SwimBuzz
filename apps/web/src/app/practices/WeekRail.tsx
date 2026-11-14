@@ -158,7 +158,7 @@ export default function WeekRail({
             <ChevronIcon dir="left" />
           </button>
           {isCurrentWeek ? (
-            <span className="rounded-lg border border-primary bg-primary-bg px-3 py-[5px] text-[13px] font-medium text-primary">
+            <span className="rounded-lg border border-primary bg-primary-bg px-3 py-[5px] text-[13px] font-medium text-accent">
               Today
             </span>
           ) : (
@@ -337,7 +337,7 @@ function WeekRailRow({
           <PrivateBadge compact />
         ) : (
           !practice.published && (
-            <span className="rounded-full bg-primary/20 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-primary-active dark:bg-primary/30 dark:text-primary-hover">
+            <span className="rounded-full bg-primary/20 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-accent dark:bg-primary/30">
               Draft
             </span>
           )

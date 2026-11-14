@@ -20,11 +20,13 @@ function colorSchemeVariables(c: ColorPalette) {
     "--brand-color-success-border": c.successBorder,
     "--brand-color-success-hover": c.successHover,
     "--brand-color-success-active": c.successActive,
+    "--brand-color-success-text": c.successText,
     "--brand-color-warning": c.warning,
     "--brand-color-warning-bg": c.warningBg,
     "--brand-color-warning-border": c.warningBorder,
     "--brand-color-warning-hover": c.warningHover,
     "--brand-color-warning-active": c.warningActive,
+    "--brand-color-warning-text": c.warningText,
     "--brand-color-error": c.error,
     "--brand-color-error-bg": c.errorBg,
     "--brand-color-error-border": c.errorBorder,
@@ -56,6 +58,10 @@ function colorSchemeVariables(c: ColorPalette) {
     "--brand-color-border-secondary": c.borderSecondary,
     "--brand-color-border-subtle": c.borderSubtle,
     "--brand-color-accent": c.accent,
+    "--brand-color-accent-on-image": c.accentOnImage,
+    "--brand-color-medal-gold": c.medalGold,
+    "--brand-color-medal-silver": c.medalSilver,
+    "--brand-color-medal-bronze": c.medalBronze,
   } as const
 }
 

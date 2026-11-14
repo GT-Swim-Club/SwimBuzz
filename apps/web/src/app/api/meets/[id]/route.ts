@@ -28,13 +28,11 @@ import {
   meetHasImportedResults,
   mergeMeetResultEntries,
   applyRosterGenders,
-  applyRosterNames,
-  mergeSheetSummaries,
   swimsToMeetResults,
 } from "@/lib/meet/meet-sheet-summary"
+import { buildRosterSummary, rosterSummaryDisplayEntries } from "@/lib/meet/roster-summary-display"
 import { isRelayResultsSummary } from "@/lib/meet/relay-results"
 import { buildRelayLineups } from "@/lib/meet/relay-lineups"
-import { attachCoachHeatLanes } from "@/lib/meet/heat-lane-overrides"
 import { loadMeetHighlights } from "@/lib/meet/meet-highlights-load"
 import { scoreMeetSwims, scoreRelayResults } from "@/lib/meet/meet-scoring"
 import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
@@ -110,28 +108,26 @@ export async function GET(
     meet.scoringTable
   )
   // Roster names and genders, so mobile can show "Baumann, Matthew (Matt)" and title its
-  // by-event groups "Women 50 Free".
+  // by-event groups "Women 50 Free" — and the rows cleaned up as the web summary shows them.
   const rosterGenders = new Map(
     seasonRoster.map((a) => [a.id, a.gender === "F" ? ("F" as const) : ("M" as const)])
   )
+  const summarySources = {
+    psychSummary: isSheetSummary(meet.psychSheetSummary) ? meet.psychSheetSummary : null,
+    heatSummary: isSheetSummary(meet.heatSheetSummary) ? meet.heatSheetSummary : null,
+    finalsHeatSummary: isSheetSummary(meet.finalsHeatSheetSummary) ? meet.finalsHeatSheetSummary : null,
+    entriesSummary: isSheetSummary(meet.entriesSheetSummary) ? meet.entriesSheetSummary : null,
+    results,
+    relayResults,
+    heatLaneOverrides: meet.heatLaneOverrides,
+  }
+  const merged = buildRosterSummary(
+    summarySources,
+    rosterGenders,
+    new Map(seasonRoster.map((a) => [a.id, athleteRosterNameLastFirst(a)]))
+  )
   const rosterSummary = applyRosterGenders(
-    applyRosterNames(
-      attachCoachHeatLanes(
-        mergeSheetSummaries(
-          isSheetSummary(meet.psychSheetSummary) ? meet.psychSheetSummary : null,
-          isSheetSummary(meet.heatSheetSummary) ? meet.heatSheetSummary : null,
-          results,
-          relayResults,
-          isSheetSummary(meet.entriesSheetSummary) ? meet.entriesSheetSummary : null,
-          isSheetSummary(meet.finalsHeatSheetSummary)
-            ? meet.finalsHeatSheetSummary
-            : null
-        ),
-        meet.heatLaneOverrides,
-        rosterGenders
-      ),
-      new Map(seasonRoster.map((a) => [a.id, athleteRosterNameLastFirst(a)]))
-    ),
+    merged ? { ...merged, entries: rosterSummaryDisplayEntries(merged, summarySources, rosterGenders) } : null,
     rosterGenders
   )
 
@@ -239,7 +235,7 @@ export async function PATCH(
     // Records show the meet's name and only count SCY meets.
     if (meet.name !== existing.name || meet.course !== existing.course) await syncTeamRecordsSafely()
 
-    void notifyMeetRosterOfInfoDrops({
+    notifyMeetRosterOfInfoDrops({
       meetId: meet.id,
       meetName: meet.name,
       drops: [...sheetDrops, ...resourceDrops]})

@@ -58,6 +58,8 @@ async function main() {
       storageAttempts++
       if (storageFailure) throw new Error("Simulated storage failure")
     } },
+    "@/lib/records/record-sync": { syncTeamRecordsSafely: async () => {} },
+    "@/lib/notifications/notification-refs": { deleteNotificationsFor: async () => {} },
     "@swimbuzz/shared": { RECOVERY_RETENTION_DAYS: 30 },
   })
   try {

@@ -143,7 +143,7 @@ export default function SwimCloudIdsInput({
         )}
       </div>
       {(draftInvalid || overLimit) && (
-        <p id={hintId} className="text-xs text-info">
+        <p id={hintId} className="text-xs text-accent">
           {draftInvalid ? SWIMCLOUD_ID_ERROR : SWIMCLOUD_IDS_LIMIT_ERROR}
         </p>
       )}

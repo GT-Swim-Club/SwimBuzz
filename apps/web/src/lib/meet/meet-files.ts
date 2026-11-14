@@ -1,5 +1,25 @@
 export const MEET_FILE_BUCKET = "meet-files"
 
+/**
+ * Folders inside the meet-files bucket. Each meet's uploads live in
+ * `meets/<meetId>/`: keyed by id rather than slug because the slug changes when
+ * a meet is renamed, which would leave a folder named after the old name (or
+ * force moving every file and rewriting every URL on each rename). Files from
+ * before folders existed stay readable at their flat `uploads/…` URLs until
+ * `scripts/migrate-meet-files.mjs` moves them.
+ */
+export const MEET_FOLDER_ROOT = "meets"
+/** Uploads made before their meet exists (the create-meet form); moved into the meet's folder on create. */
+export const PENDING_MEET_FILE_FOLDER = "pending"
+/** Copies made only so the PDF parser can fetch a file; deleted once the parse finishes. */
+export const PARSE_TMP_FOLDER = "parse-tmp"
+/** Uploaded Nationals standards PDFs (not tied to a meet). */
+export const NATIONALS_FILE_FOLDER = "nationals"
+
+export function meetFileFolder(meetId: string): string {
+  return `${MEET_FOLDER_ROOT}/${meetId}`
+}
+
 export const MEET_RESOURCE_URL_KEYS = [
   "packetUrl",
   "entriesSheetUrl",
@@ -64,10 +84,16 @@ export function isStoredMeetFileUrl(url: string | null | undefined): boolean {
   return trimmed.includes(`/storage/v1/object/public/${MEET_FILE_BUCKET}/`)
 }
 
+/** Object key inside the meet-files bucket (decoded), e.g. `meets/<id>/Psych Sheet.pdf`. */
 export function storagePathFromMeetFileUrl(url: string): string | null {
   const marker = `/object/public/${MEET_FILE_BUCKET}/`
   const idx = url.indexOf(marker)
   if (idx === -1) return null
   const rest = url.slice(idx + marker.length).split("?")[0].split("#")[0]
-  return rest || null
+  if (!rest) return null
+  try {
+    return decodeURIComponent(rest)
+  } catch {
+    return rest
+  }
 }

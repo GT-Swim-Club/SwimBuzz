@@ -59,7 +59,7 @@ const DAY_MS = 24 * 60 * 60 * 1000
 const ICON_BUTTON =
   "inline-flex shrink-0 items-center justify-center rounded-md text-foreground-tertiary transition-colors duration-200 hover:bg-fill-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/34"
 const LINK_BUTTON =
-  "text-xs font-medium text-primary transition-colors duration-200 hover:text-primary-hover"
+  "text-xs font-medium text-accent transition-colors duration-200 hover:text-primary"
 const SECTION_HEADER =
   "sticky top-0 z-[1] flex items-center justify-between gap-3 border-b border-border-secondary bg-fill-secondary px-4 py-2 text-xs font-medium tabular-nums text-foreground-secondary"
 
@@ -549,7 +549,7 @@ export default function SyncTimesButton() {
                                       <CheckIcon className="h-3 w-3" strokeWidth={3} />
                                     </span>
                                   </span>
-                                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/18 text-xs font-semibold text-primary">
+                                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/18 text-xs font-semibold text-accent">
                                     {initials(athlete)}
                                   </div>
                                   <p className="min-w-0 flex-1 truncate text-base leading-[22px] font-medium text-foreground">

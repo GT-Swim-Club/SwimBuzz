@@ -8,12 +8,18 @@ import {
   isResultStatusesSummary,
   meetHasImportedResults,
 } from "@/lib/meet/meet-sheet-summary"
-import { isRelayResultsSummary } from "@/lib/meet/relay-results"
+import { isRelayResultsSummary, type RelayGender } from "@/lib/meet/relay-results"
 import { resolveSignupEventOptions } from "@/lib/meet/meet-signup"
 import { isSignupRelayPreferences } from "@/lib/meet/meet-signup-import"
 import { isMeetFinalRoster } from "@/lib/meet/meet-roster-import"
 import { buildRelayLineups } from "@/lib/meet/relay-lineups"
-import { relayDraftsOf } from "@/lib/meet/relay-drafts"
+import {
+  relayDraftHistoryOf,
+  relayDraftVersionsFor,
+  relayDraftsOf,
+  type RelayDraftTeam,
+} from "@/lib/meet/relay-drafts"
+import { meetHasFinalsSession, relayEventRounds } from "@/lib/meet/relay-rounds"
 import { deleteEndedMeetRelayDrafts } from "@/lib/meet/relay-drafts-expiry"
 import {
   FALLBACK_RELAY_EVENTS,
@@ -69,6 +75,7 @@ export default async function MeetRelaysPage({
       signupRelayPreferences: true,
       finalRoster: true,
       relayDrafts: true,
+      relayPrelimsFinals: true,
       swims: { select: { id: true } },
     },
   })
@@ -146,6 +153,9 @@ export default async function MeetRelaysPage({
   }
 
   const athleteById = new Map(seasonAthletes.map((a) => [a.id, a]))
+  const athleteGenders = new Map<string, RelayGender>(
+    seasonAthletes.map((a) => [a.id, a.gender === Gender.F ? "F" : "M"])
+  )
   // Once the final meet roster is imported, only those athletes can swim relays.
   const finalRoster = isMeetFinalRoster(meet.finalRoster) ? new Set(meet.finalRoster.athleteIds) : null
   const athletes = seasonAthletes
@@ -161,6 +171,20 @@ export default async function MeetRelaysPage({
     : null
 
   const drafts = relayDraftsOf(meet.relayDrafts)
+  const history = relayDraftHistoryOf(meet.relayDrafts)
+  const lineupTeams = (teams: RelayDraftTeam[]) =>
+    teams.map((team) => ({
+      letter: team.letter,
+      legs: team.legs.map((leg) => {
+        const athlete = athleteById.get(leg.athleteId)
+        return {
+          athleteId: leg.athleteId,
+          name: athlete ? athletePreferredName(athlete) : "Unknown",
+          timeMs: leg.timeMs,
+          custom: leg.custom,
+        }
+      }),
+    }))
   const slots = relayEventSlots(
     eventOrder.length > 0 || relayLineups.length > 0 || drafts.length > 0
       ? eventOrder
@@ -178,20 +202,22 @@ export default async function MeetRelaysPage({
             optimal: draft.optimal === true,
             published: draft.published === true,
             settings: draft.settings,
-            teams: draft.teams.map((team) => ({
-              letter: team.letter,
-              legs: team.legs.map((leg) => {
-                const athlete = athleteById.get(leg.athleteId)
-                return {
-                  athleteId: leg.athleteId,
-                  name: athlete ? athletePreferredName(athlete) : "Unknown",
-                  timeMs: leg.timeMs,
-                  custom: leg.custom,
-                }
-              }),
-            })),
+            teams: lineupTeams(draft.teams),
+            finalsTeams: draft.finalsTeams?.length ? lineupTeams(draft.finalsTeams) : null,
+            savedBy: draft.savedBy?.name ?? null,
           }
         : null,
+      versions: relayDraftVersionsFor(history, slot.gender, slot.event).map((version) => ({
+        id: version.id,
+        savedAt: version.savedAt,
+        savedBy: version.savedBy?.name ?? null,
+        published: version.published === true,
+        teams: lineupTeams(version.teams),
+        finalsTeams: version.finalsTeams?.length ? lineupTeams(version.finalsTeams) : null,
+        settings: version.settings,
+        prelimsFinals: version.prelimsFinals,
+      })),
+      rounds: relayEventRounds(meet, slot.event, slot.gender, athleteGenders),
     }
   })
 
@@ -217,6 +243,7 @@ export default async function MeetRelaysPage({
       athletes={athletes}
       signupRelayPrefs={signupRelayPrefs}
       hasImportedResults={hasImportedResults}
+      finalsSession={meetHasFinalsSession(meet)}
       viewerAthleteId={viewerAthleteId}
       backLink={backLink}
     />

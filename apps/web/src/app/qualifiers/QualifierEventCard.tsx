@@ -2,8 +2,8 @@
 
 import { useState } from "react"
 import { athletePreferredName } from "@swimbuzz/shared"
-import type { QualifierEventGroup } from "@/lib/qualifiers/qualifier-events"
-import { QualifierSwimRow, SwimDetailPanel } from "./QualifierSwimRow"
+import { qualifierMarginLabel, type QualifierEventGroup } from "@/lib/qualifiers/qualifier-events"
+import { GallerySwimTime, QualifierSwimRow, SwimDetailPanel } from "./QualifierSwimRow"
 import { galleryCardClass, galleryRowClass, moreButtonClass } from "./QualifierGalleryCard"
 import { eventGroupTitle, qualifierCountLabel } from "./QualifierEventList"
 
@@ -29,27 +29,26 @@ export default function QualifierEventCard({
           {eventGroupTitle(group, splitGender)}
         </h3>
         <p className="shrink-0 whitespace-nowrap text-right text-xs text-foreground-secondary">
-          {group.cut} · {qualifierCountLabel(group.swims.length)}
+          Cut {group.cut} · {qualifierCountLabel(group.swims.length)}
         </p>
       </div>
 
       <div className="mt-3 flex flex-col gap-1">
         {swims.map(({ athlete, swim }) => {
           const name = athletePreferredName(athlete)
+          const isMe = athlete.athleteId === currentAthleteId
           return (
             <QualifierSwimRow
               key={swim.id}
               swim={swim}
-              highlight={athlete.athleteId === currentAthleteId}
+              highlight={isMe}
               className={galleryRowClass}
-              ariaLabel={`${name}, ${swim.time}, ${swim.meetName || "qualifying swim"}, ${swim.date || "date unavailable"}`}
+              ariaLabel={`${name}${isMe ? " (you)" : ""}, ${swim.time}, ${qualifierMarginLabel(swim)} under the cut, ${swim.meetName || "qualifying swim"}, ${swim.date || "date unavailable"}`}
             >
               <span className="min-w-0 truncate text-sm font-medium text-foreground-secondary transition-colors group-hover:text-primary">
                 {name}
               </span>
-              <span className="shrink-0 font-mono text-sm font-medium tabular-nums text-foreground transition-colors group-hover:text-primary">
-                {swim.time}
-              </span>
+              <GallerySwimTime swim={swim} />
               <SwimDetailPanel
                 details={[
                   ["Athlete", name],
@@ -57,6 +56,7 @@ export default function QualifierEventCard({
                   ["Date", swim.date || "—"],
                   ["Time", swim.time || "—"],
                   ["Standard", swim.cut || "—"],
+                  ["Under the cut", qualifierMarginLabel(swim)],
                 ]}
               />
             </QualifierSwimRow>

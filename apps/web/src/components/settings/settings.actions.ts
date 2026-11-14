@@ -5,21 +5,11 @@ import { getSession } from "@/lib/auth/session"
 import { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 import {
+  isNotificationPreferenceKey,
   mergeNotificationPreferences,
   type NotificationPreferenceKey,
   type NotificationPreferences,
 } from "@/lib/notifications/notification-preferences"
-
-/** Shared with PATCH /api/notifications/preferences — same logic, kept in
- * sync manually since the route can't be refactored without risking the
- * mobile-facing contract. */
-
-const PATCH_KEYS: NotificationPreferenceKey[] = [
-  "practicePublished",
-  "meetRosterInfo",
-  "practiceComments",
-  "profileChanges",
-]
 
 export async function updateNotificationPreference(
   key: NotificationPreferenceKey,
@@ -29,7 +19,8 @@ export async function updateNotificationPreference(
   if (!session) throw new Error("Unauthorized")
 
   const patch: Partial<NotificationPreferences> = {}
-  if (!PATCH_KEYS.includes(key) || typeof value !== "boolean") {
+  // Same rules as PATCH /api/notifications/preferences: any key in the shared list.
+  if (!isNotificationPreferenceKey(key) || typeof value !== "boolean") {
     throw new Error(`Invalid value for ${key}`)
   }
   patch[key] = value

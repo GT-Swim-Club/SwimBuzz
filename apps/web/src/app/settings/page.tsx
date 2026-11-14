@@ -4,6 +4,7 @@ import type { ReactNode } from "react"
 import AlertSoundSettings from "@/components/settings/AlertSoundSettings"
 import AppearanceSettings from "@/components/settings/AppearanceSettings"
 import NotificationPreferencesSettings from "@/components/settings/NotificationPreferencesSettings"
+import ScraperSettings from "@/components/settings/ScraperSettings"
 import ProfilePictureSettings from "@/components/athlete/ProfilePictureSettings"
 import { STAFF_TITLE_LABELS, formatRoleLabel, isStaffRole } from "@swimbuzz/shared"
 import { parseNotificationPreferences } from "@/lib/notifications/notification-preferences"
@@ -71,6 +72,7 @@ export default async function SettingsPage() {
   const notificationPreferences = parseNotificationPreferences(
     user?.notificationPreferences
   )
+  const isStaff = isStaffRole(session.user.role)
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-8">
@@ -79,7 +81,9 @@ export default async function SettingsPage() {
           Settings
         </h1>
         <p className="mt-2 text-sm text-foreground-secondary sm:text-base">
-          Manage your account, notifications, sounds, and appearance.
+          {isStaff
+            ? "Manage your account, notifications, scraper, sounds, and appearance."
+            : "Manage your account, notifications, and appearance."}
         </p>
       </header>
 
@@ -89,7 +93,7 @@ export default async function SettingsPage() {
           athlete ? (
             <Link
               href={athletePath(athlete.slug ?? athlete.id)}
-              className="shrink-0 text-sm font-medium text-primary transition-colors hover:text-primary-hover"
+              className="shrink-0 text-sm font-medium text-accent transition-colors hover:text-primary"
             >
               View profile
             </Link>
@@ -110,17 +114,30 @@ export default async function SettingsPage() {
         </InfoRow>
       </SettingsSection>
 
-      <SettingsSection title="Notifications" description="Choose which in-app alerts you receive">
+      <SettingsSection title="Notifications" description="Choose which alerts you get, in the app and as push notifications">
         <NotificationPreferencesSettings
           initialPreferences={notificationPreferences}
-          isAthlete={!isStaffRole(session.user.role)}
-          isMeetDirector={session.user.staffTitle === "MEET_DIRECTOR"}
+          viewer={{
+            role: session.user.role,
+            hasAthleteRecord: athlete != null,
+          }}
         />
       </SettingsSection>
 
-      <SettingsSection title="Sounds">
-        <AlertSoundSettings initialEnabled={user?.alertSound ?? false} />
-      </SettingsSection>
+      {isStaff ? (
+        <>
+          <SettingsSection
+            title="Desktop scraper"
+            description="Runs SwimCloud and SwimPhone imports from your computer"
+          >
+            <ScraperSettings />
+          </SettingsSection>
+
+          <SettingsSection title="Sounds">
+            <AlertSoundSettings initialEnabled={user?.alertSound ?? false} />
+          </SettingsSection>
+        </>
+      ) : null}
 
       <SettingsSection title="Appearance">
         <AppearanceSettings />

@@ -29,16 +29,17 @@ import { GalleryTile } from "../../../src/components/GalleryTile"
 import { RelativeDateText } from "../../../src/components/RelativeDateText"
 import { DeletedItemsList } from "../../../src/components/DeletedItemsList"
 import { Icon } from "../../../src/components/Icon"
-import { useViewPreferences } from "../../../src/lib/view-preferences"
+import { useGalleryView } from "../../../src/lib/view-preferences"
+import { GalleryViewToggle } from "../../../src/components/GalleryViewToggle"
 
 export default function MeetsScreen() {
   const router = useRouter()
   const { user } = useAuth()
   const isStaff = !!user && isStaffRole(user.role)
-  const { defaultView } = useViewPreferences()
+  const [galleryView, setGalleryView] = useGalleryView("meets")
   const c = usePalette()
   const tabBarPad = useTabBarScrollPadding()
-  const gallery = defaultView === "gallery"
+  const gallery = galleryView === "gallery"
   const [seasonState, setSeasonState] = useState<string | null>(null)
   const [query, setQuery] = useState("")
   const [showDeleted, setShowDeleted] = useState(false)
@@ -132,15 +133,22 @@ export default function MeetsScreen() {
           </Pressable>
         </View>
       ) : null}
-      <TextField
-        label="Search"
-        placeholder="Search meets by name"
-        value={query}
-        onChangeText={setQuery}
-        autoCapitalize="none"
-        autoCorrect={false}
-        clearButtonMode="while-editing"
-      />
+      <View style={{ flexDirection: "row", alignItems: "flex-end", gap: spacing.sm }}>
+        <View style={{ flex: 1 }}>
+          <TextField
+            label="Search"
+            placeholder="Search meets by name"
+            value={query}
+            onChangeText={setQuery}
+            autoCapitalize="none"
+            autoCorrect={false}
+            clearButtonMode="while-editing"
+          />
+        </View>
+        <View style={{ height: 44, justifyContent: "center", marginBottom: spacing.sm }}>
+          <GalleryViewToggle value={galleryView} onChange={setGalleryView} />
+        </View>
+      </View>
       {seasons.length > 0 ? (
         <Section title="Season">
           <View style={{ flexDirection: "row", flexWrap: "wrap" }}>

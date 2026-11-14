@@ -1,6 +1,5 @@
 import { Stack } from "expo-router"
 import { HeaderBrand, useAppHeaderOptions } from "../../src/components/AppHeader"
-import { ScreenBackButton } from "../../src/components/ScreenBackButton"
 
 export default function AuthLayout() {
   const appHeaderOptions = useAppHeaderOptions()
@@ -8,8 +7,9 @@ export default function AuthLayout() {
     <Stack
       screenOptions={{
         ...appHeaderOptions,
+        // Sign-in is the signed-out entry point, so there is nothing to go back to.
         headerBackVisible: false,
-        headerLeft: () => <ScreenBackButton fallbackHref="/welcome" />,
+        headerLeft: () => null,
         headerTitle: () => <HeaderBrand />,
       }}
     >

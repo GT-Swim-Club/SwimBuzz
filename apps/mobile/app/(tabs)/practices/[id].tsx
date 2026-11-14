@@ -52,6 +52,7 @@ import { UndoRedoButtons } from "../../../src/components/UndoRedoButtons"
 import { ZonedTimeText } from "../../../src/components/ZonedTimeText"
 import { StaffBadge } from "../../../src/components/StaffBadge"
 import { PrivateBadge } from "../../../src/components/PrivateBadge"
+import { AttendanceIcon } from "../../../src/components/AttendanceIcon"
 import { useAuth } from "../../../src/lib/auth"
 import { useUndoableState } from "../../../src/lib/use-undoable-state"
 
@@ -139,6 +140,13 @@ export default function PracticeDetailScreen() {
     enabled: Boolean(id),
   })
   const load = refetch
+
+  // Opened by slug (a notification or shared link): switch to the id, which every save,
+  // comment and delete below is keyed on.
+  const loadedId = typeof practice?.id === "string" ? practice.id : null
+  useEffect(() => {
+    if (loadedId && id && loadedId !== id) router.setParams({ id: loadedId })
+  }, [loadedId, id, router])
 
   /** Apply an optimistic patch to the cached practice, returning a rollback. */
   function patchPracticeOptimistically(
@@ -560,6 +568,18 @@ export default function PracticeDetailScreen() {
           >
             <Icon name="share" size={22} color={c.text} />
           </Pressable>
+          {/* Attendance, like web: staff take it, athletes see who's checked in. Team practices only. */}
+          {!isPrivate && loadedId ? (
+            <Pressable
+              onPress={() => router.push(`/practices/attendance?id=${encodeURIComponent(loadedId)}`)}
+              accessibilityRole="button"
+              accessibilityLabel={isStaff ? "Take attendance" : "View attendance"}
+              hitSlop={8}
+              style={{ paddingVertical: spacing.xxs, paddingHorizontal: spacing.xs }}
+            >
+              <AttendanceIcon size={22} color={c.text} />
+            </Pressable>
+          ) : null}
         </View>
         <View
           style={{

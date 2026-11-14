@@ -20,14 +20,14 @@ export default function StaffBadge({
   const label = STAFF_TITLE_LABELS[title]
   return (
     <span
-      className={`group relative ml-1.5 inline-flex translate-y-[1px] items-center text-primary ${className}`}
+      className={`group relative ml-1.5 inline-flex translate-y-[1px] items-center text-accent ${className}`}
     >
       <AppIcon name={staffBadgeIcon(title)} className="h-3.5 w-3.5 shrink-0" />
       <span className="sr-only">{label}</span>
       <HoverDetail
         label={label}
         placement={placement}
-        textClassName="text-primary-active dark:text-primary-hover"
+        textClassName="text-accent"
       />
     </span>
   )

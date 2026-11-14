@@ -216,7 +216,7 @@ function FloatingDateRangePanel({
       ref={panelRef}
       role="dialog"
       aria-label="Meet dates"
-      className="fixed z-[60] overflow-y-auto rounded-xl shadow-2xl shadow-black/30"
+      className="fixed z-[60] overflow-y-auto rounded-xl shadow-2xl shadow-black/10 dark:shadow-black/30"
       style={
         position
           ? {
@@ -645,7 +645,7 @@ export function MeetImageHeader({
           {form.iconUrl ? (
             <img src={form.iconUrl} alt="Meet icon" className="absolute inset-0 h-full w-full object-contain" />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center rounded-[9px] border border-dashed border-foreground-quaternary bg-background text-xs font-medium text-primary transition-colors group-hover:border-primary/60">
+            <div className="absolute inset-0 flex items-center justify-center rounded-[9px] border border-dashed border-foreground-quaternary bg-background text-xs font-medium text-accent transition-colors group-hover:border-primary/60">
               {iconUploading ? "…" : "+ Icon"}
             </div>
           )}

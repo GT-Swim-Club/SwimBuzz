@@ -1,16 +1,17 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { Alert, Platform, Switch, View } from "react-native"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { Alert, Switch, View } from "react-native"
 import { Redirect, useRouter } from "expo-router"
-import { useFocusEffect } from "expo-router"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   DEFAULT_NOTIFICATION_PREFERENCES,
   NOTIFICATION_PREFERENCE_META,
   formatRoleLabel,
-  isStaffRole,
+  notificationPreferenceDescription,
   STAFF_TITLE_LABELS,
+  visibleNotificationPreferences,
   type NotificationPreferenceKey,
   type NotificationPreferences,
+  type NotificationSettingsViewer,
 } from "@swimbuzz/shared"
 import {
   Body,
@@ -25,16 +26,16 @@ import {
 } from "@swimbuzz/ui"
 import { spacing } from "@swimbuzz/tokens"
 import { Icon } from "../../src/components/Icon"
+import { ProfilePictureSettings } from "../../src/components/ProfilePictureSettings"
+import { PushNotificationsRow } from "../../src/components/PushNotificationsRow"
 import { SegmentedOption, SegmentedToggle } from "../../src/components/SegmentedToggle"
 import { api } from "../../src/lib/api"
 import { useTabBarScrollPadding } from "../../src/lib/tab-bar"
 import { useAuth } from "../../src/lib/auth"
-import { registerForPushNotifications } from "../../src/lib/push"
 import {
   useThemePreference,
   type ThemePreference,
 } from "../../src/lib/theme"
-import { useViewPreferences } from "../../src/lib/view-preferences"
 
 export default function SettingsScreen() {
   const { user, loading, signOut } = useAuth()
@@ -42,14 +43,7 @@ export default function SettingsScreen() {
   const c = usePalette()
   const tabBarPad = useTabBarScrollPadding()
   const { preference, setPreference } = useThemePreference()
-  const {
-    defaultView,
-    defaultPracticesView,
-    setDefaultView,
-    setDefaultPracticesView,
-  } = useViewPreferences()
   const queryClient = useQueryClient()
-  const [pushStatus, setPushStatus] = useState<string | null>(null)
   const [preferences, setPreferences] = useState<NotificationPreferences>(
     DEFAULT_NOTIFICATION_PREFERENCES
   )
@@ -58,8 +52,8 @@ export default function SettingsScreen() {
 
   const email = user?.email?.trim().toLowerCase() ?? null
 
-  // Shares the ["athletes"] / ["notification-preferences"] cache with
-  // (tabs)/settings.tsx, the roster screens, and you/index.tsx.
+  // Shares the ["athletes"] / ["notification-preferences"] cache with the
+  // roster screens and you/index.tsx.
   const {
     data: athletes = [],
     isPending: athletesPending,
@@ -93,16 +87,6 @@ export default function SettingsScreen() {
       setPreferences(next)
     }
   }, [prefRes])
-
-  useFocusEffect(
-    useCallback(() => {
-      if (!user) return
-      void (async () => {
-        const result = await registerForPushNotifications()
-        setPushStatus(result)
-      })()
-    }, [user])
-  )
 
   if (!loading && !user) return <Redirect href="/sign-in" />
   if (!user) return null
@@ -138,7 +122,11 @@ export default function SettingsScreen() {
     })()
   }
 
-  const isAthlete = Boolean(match) || user.role === "ATHLETE"
+  // Same rule as web Settings: athlete toggles for anyone with an Athlete record.
+  const viewer: NotificationSettingsViewer = {
+    role: user.role,
+    hasAthleteRecord: Boolean(match),
+  }
 
   return (
     <Screen>
@@ -152,67 +140,50 @@ export default function SettingsScreen() {
         </Muted>
 
         {error ? <ErrorBlock message={error} /> : null}
-        {pageLoading ? <LoadingBlock /> : null}
-
-        {pushStatus ? (
-          <Muted style={{ marginBottom: spacing.md }}>Push: {pushStatus}</Muted>
-        ) : null}
-
-        <View style={{ gap: spacing.sm, marginBottom: spacing.lg }}>
-          {Platform.OS !== "web" ? (
-            <Button
-              label="Enable push notifications"
-              variant="secondary"
-              onPress={async () => {
-                const result = await registerForPushNotifications()
-                setPushStatus(result)
-                Alert.alert("Push notifications", result)
-              }}
-            />
-          ) : null}
-        </View>
 
         <Section
-          title="Notification preferences"
+          title="Account"
+          icon={<Icon color={c.textTertiary} name="user" size={18} />}
+        >
+          <ProfilePictureSettings />
+        </Section>
+
+        <Section
+          title="Notifications"
           icon={<Icon color={c.textTertiary} name="bell" size={18} />}
         >
-          {NOTIFICATION_PREFERENCE_META.filter(
-            ({ athletesOnly, staffOnly, meetDirectorsOnly }) =>
-              (!athletesOnly || isAthlete) &&
-              (!staffOnly || isStaffRole(user.role)) &&
-              (!meetDirectorsOnly || user.staffTitle === "MEET_DIRECTOR")
-          ).map(({ key, label, description, athleteDescription }) => (
-            <View
-              key={key}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: spacing.md,
-                paddingVertical: spacing.sm,
-                borderBottomWidth: 1,
-                borderBottomColor: c.border,
-              }}
-            >
-              <View style={{ flex: 1 }}>
-                <Body style={{ fontWeight: "600" }}>{label}</Body>
-                <Muted>
-                  {isAthlete && athleteDescription
-                    ? athleteDescription
-                    : description}
-                </Muted>
-              </View>
-              <Switch
-                value={Boolean(preferences[key])}
-                onValueChange={(value) => togglePreference(key, value)}
-                trackColor={{
-                  false: c.switchTrack,
-                  true: c.primary,
-                }}
-                thumbColor={c.switchThumb}
-              />
-            </View>
-          ))}
+          <PushNotificationsRow />
+          {pageLoading ? <LoadingBlock /> : null}
+          {pageLoading
+            ? null
+            : visibleNotificationPreferences(NOTIFICATION_PREFERENCE_META, viewer).map((item) => (
+                <View
+                  key={item.key}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: spacing.md,
+                    paddingVertical: spacing.sm,
+                    borderBottomWidth: 1,
+                    borderBottomColor: c.border,
+                  }}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Body style={{ fontWeight: "600" }}>{item.label}</Body>
+                    <Muted>{notificationPreferenceDescription(item, viewer)}</Muted>
+                  </View>
+                  <Switch
+                    value={Boolean(preferences[item.key])}
+                    onValueChange={(value) => togglePreference(item.key, value)}
+                    trackColor={{
+                      false: c.switchTrack,
+                      true: c.primary,
+                    }}
+                    thumbColor={c.switchThumb}
+                  />
+                </View>
+              ))}
         </Section>
 
         <Section
@@ -259,115 +230,6 @@ export default function SettingsScreen() {
               ))}
             </SegmentedToggle>
           </View>
-
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: spacing.md,
-              paddingVertical: spacing.sm,
-            }}
-          >
-            <View style={{ flex: 1 }}>
-              <Body style={{ fontWeight: "600" }}>Roster, Meets, Nationals</Body>
-              <Muted>Gallery or List view</Muted>
-            </View>
-            <SegmentedToggle selectedIndex={defaultView === "list" ? 1 : 0}>
-              <SegmentedOption
-                accessibilityLabel="Gallery View"
-                selected={defaultView === "gallery"}
-                onPress={() =>
-                  void setDefaultView("gallery").catch((err) =>
-                    Alert.alert(
-                      "Could not update view",
-                      err instanceof Error ? err.message : "Something went wrong"
-                    )
-                  )
-                }
-              >
-                <Icon
-                  color={defaultView === "gallery" ? c.primaryContrast : c.textSecondary}
-                  name="gallery"
-                  size={16}
-                />
-              </SegmentedOption>
-              <SegmentedOption
-                accessibilityLabel="List View"
-                selected={defaultView === "list"}
-                onPress={() =>
-                  void setDefaultView("list").catch((err) =>
-                    Alert.alert(
-                      "Could not update view",
-                      err instanceof Error ? err.message : "Something went wrong"
-                    )
-                  )
-                }
-              >
-                <Icon
-                  color={defaultView === "list" ? c.primaryContrast : c.textSecondary}
-                  name="list"
-                  size={16}
-                />
-              </SegmentedOption>
-            </SegmentedToggle>
-          </View>
-
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: spacing.md,
-              paddingVertical: spacing.sm,
-            }}
-          >
-            <View style={{ flex: 1 }}>
-              <Body style={{ fontWeight: "600" }}>Practices</Body>
-              <Muted>Weekly, Monthly, or List view</Muted>
-            </View>
-            <SegmentedToggle
-              selectedIndex={
-                defaultPracticesView === "month"
-                  ? 1
-                  : defaultPracticesView === "list"
-                    ? 2
-                    : 0
-              }
-            >
-              {(
-                [
-                  ["week", "Week", "calendarWeek"],
-                  ["month", "Month", "calendarMonth"],
-                  ["list", "List", "list"],
-                ] as const
-              ).map(([value, label, icon]) => (
-                <SegmentedOption
-                  key={value}
-                  accessibilityLabel={`${label} View`}
-                  selected={defaultPracticesView === value}
-                  onPress={() =>
-                    void setDefaultPracticesView(value).catch((err) =>
-                      Alert.alert(
-                        "Could not update view",
-                        err instanceof Error ? err.message : "Something went wrong"
-                      )
-                    )
-                  }
-                >
-                  <Icon
-                    color={
-                      defaultPracticesView === value
-                        ? c.primaryContrast
-                        : c.textSecondary
-                    }
-                    name={icon}
-                    size={16}
-                  />
-                </SegmentedOption>
-              ))}
-            </SegmentedToggle>
-          </View>
         </Section>
 
         <Button
@@ -375,7 +237,7 @@ export default function SettingsScreen() {
           variant="danger"
           onPress={async () => {
             await signOut()
-            router.replace("/welcome")
+            router.replace("/sign-in")
           }}
         />
       </ScrollView>

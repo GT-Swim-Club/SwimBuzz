@@ -34,7 +34,7 @@ function initialsFromName(name: string) {
 function CommentAvatar({ name, image }: { name: string; image: string | null }) {
   return (
     <div
-      className="relative flex h-[2.125rem] w-[2.125rem] shrink-0 items-center justify-center overflow-hidden rounded-full border border-border-secondary bg-primary/10 text-[10px] font-medium text-primary"
+      className="relative flex h-[2.125rem] w-[2.125rem] shrink-0 items-center justify-center overflow-hidden rounded-full border border-border-secondary bg-primary/10 text-[10px] font-medium text-accent"
       aria-label={`${name}'s profile picture`}
     >
       <span aria-hidden>{initialsFromName(name)}</span>
@@ -98,7 +98,7 @@ function buildThreads(comments: CommentDTO[]): Thread[] {
 
 function AttendedBadge() {
   return (
-    <span className="group relative ml-1.5 inline-flex translate-y-[1px] items-center text-primary">
+    <span className="group relative ml-1.5 inline-flex translate-y-[1px] items-center text-accent">
       <InfoIcon kind="attended" />
       <span className="sr-only">Attended</span>
       <HoverDetail label="Attended" placement="above" />
@@ -335,7 +335,7 @@ export default function CommentSection({
                   onClick={() => void handleDelete(comment.id)}
                   disabled={loading}
                   aria-label="Confirm delete"
-                  className="group relative inline-flex h-9 w-9 items-center justify-center rounded-md bg-red-600 text-error-contrast transition-colors hover:bg-red-700 disabled:opacity-40"
+                  className="group relative inline-flex h-9 w-9 items-center justify-center rounded-md bg-error text-error-contrast transition-colors hover:bg-error-hover disabled:opacity-40"
                 >
                   <ActionIcon kind="check" className="h-5 w-5" />
                   <HoverDetail label="Confirm delete" />
@@ -377,7 +377,7 @@ export default function CommentSection({
                   <button
                     type="button"
                     onClick={() => setDeleteConfirmId(comment.id)}
-                    className="group relative inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground-tertiary transition-colors hover:bg-red-50 hover:text-error dark:hover:bg-red-950/40"
+                    className="group relative inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground-tertiary transition-colors hover:bg-error-bg hover:text-error"
                     aria-label="Delete comment"
                   >
                     <ActionIcon kind="delete" className="h-5 w-5" />
@@ -470,7 +470,7 @@ export default function CommentSection({
         </button>
         {isAddLoading && <CommentLoadingOverlay />}
       </form>
-      {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
+      {error && <p className="mt-2 text-xs text-error">{error}</p>}
     </section>
   )
 }

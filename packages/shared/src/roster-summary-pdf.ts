@@ -60,6 +60,12 @@ export type RosterSummaryPdfRow = {
   legs?: string[]
   /** Each leg's split, drawn beside its name ("" when unknown), in the same order as `legs`. */
   legSplits?: string[]
+  /**
+   * Each leg's own interval splits within the leg (the 50s of a 100 leg), already formatted, in the
+   * same order as `legs` (empty for a leg without them) — drawn on a line under the leg's name.
+   * Only results that time every 50 of a longer leg carry them (400/800 relays).
+   */
+  legSubSplits?: string[][]
   /** An individual swim's interval splits, drawn as aligned columns of times under the row. */
   splits?: RosterSummaryPdfSplit[]
   /** An athlete's new Nationals cuts, a line each under their name (the cuts sections only). */
@@ -137,6 +143,52 @@ export function rosterSummaryTitle({
 }): "Entries" | "Heats" | "Results" {
   if (hasResults) return "Results"
   return hasHeatSheet ? "Heats" : "Entries"
+}
+
+// ---- relay leg sub-splits ----------------------------------------------------
+// Shared by the web and mobile roster summaries and their PNG/PDF exports, so a relay leg reads the
+// same everywhere: "Leg 2 - 49.20 (23.83 · 25.37)" under an athlete, and the times alone on a line
+// under the swimmer's name in an event's list of legs.
+
+/** Sub-splits drawn per leg, at most (an 800 relay's 200 leg has four 50s). */
+export const RELAY_LEG_SUB_SPLITS_MAX = 8
+
+/**
+ * A relay leg's interval splits within the leg (`{distance, splitTime}` as stored on a relay
+ * swimmer), in distance order and formatted with `format`, leaving out missing ones ("No Data").
+ * Empty unless there are at least two: one would just be the leg's split again.
+ */
+export function relayLegSubSplitTimes(
+  splits: ReadonlyArray<{ distance: number; splitTime?: string | null }> | null | undefined,
+  format: (time: string) => string = (time) => time
+): string[] {
+  const times = [...(splits ?? [])]
+    .filter((s) => Number.isFinite(s.distance) && s.distance > 0 && /\d/.test(s.splitTime ?? ""))
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, RELAY_LEG_SUB_SPLITS_MAX)
+    .map((s) => format(String(s.splitTime).trim()))
+  return times.length > 1 ? times : []
+}
+
+/** A leg's sub-splits as one run of times: "23.83 · 25.37" ("" without any). */
+export function relayLegSubSplitsText(times: readonly string[] | null | undefined): string {
+  return (times ?? []).filter(Boolean).join(" · ")
+}
+
+/**
+ * The leg an athlete swam on a relay with its split and, when the results time every 50 of the
+ * leg, its sub-splits: "Leg 2 - 49.20 (23.83 · 25.37)", "Leg 4 - 20.05", "Leg 1"; or "Split 20.05"
+ * when the leg number is unknown.
+ */
+export function relayLegLabel(
+  leg: number | null | undefined,
+  split?: string | null,
+  subSplits?: readonly string[] | null
+): string | null {
+  const sub = split ? relayLegSubSplitsText(subSplits) : ""
+  const time = split ? `${split}${sub ? ` (${sub})` : ""}` : ""
+  if (leg) return `Leg ${leg}${time ? ` - ${time}` : ""}`
+  return time ? `Split ${time}` : null
 }
 
 /** The heading's view and filters, minus any search: "Heats by Event (Sunday Finals, Women)". */

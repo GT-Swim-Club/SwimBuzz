@@ -218,7 +218,7 @@ export default function MeetGalleryCard({
           className="absolute inset-0 -z-10 h-full w-full object-cover transition-transform duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
         />
       ) : (
-        <div className="absolute inset-0 -z-10 flex items-center justify-center pb-16 text-foreground-tertiary">
+        <div className="absolute inset-0 -z-10 flex items-center justify-center bg-linear-to-b from-primary/70 to-primary-active pb-16 text-white/60">
           <AppIcon name="image" className="h-12 w-12" />
         </div>
       )}

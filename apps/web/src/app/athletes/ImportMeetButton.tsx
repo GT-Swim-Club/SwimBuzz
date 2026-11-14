@@ -63,6 +63,7 @@ export default function ImportMeetButton({
     if (selectedFile) {
       const body = new FormData()
       body.append("file", selectedFile, selectedFile.name)
+      body.append("meetId", meetId)
       const res = await fetch("/api/meets/upload", { method: "POST", body })
       const data = await res.json()
       if (!res.ok || !data.url) throw new Error(data.error ?? "Failed to upload Results PDF")
@@ -236,7 +237,7 @@ export default function ImportMeetButton({
         <div className="grid gap-3 grid-cols-2">
           <div>
             <label className="block text-xs font-medium text-foreground-secondary mb-1">
-              Team code <span className="text-red-500">*</span>
+              Team code <span className="text-error">*</span>
             </label>
             <input
               required
@@ -263,7 +264,7 @@ export default function ImportMeetButton({
             </div>
           </div>
         </div>
-        <p className="text-xs text-gray-400 dark:text-zinc-500 -mt-2">
+        <p className="text-xs text-foreground-secondary -mt-2">
           Only swimmers listed under this team in the results are imported.
         </p>
       </Modal>

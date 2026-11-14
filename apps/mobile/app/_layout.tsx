@@ -3,6 +3,7 @@ import { Stack } from "expo-router"
 import { StatusBar } from "expo-status-bar"
 import { useMemo } from "react"
 import { AuthProvider } from "../src/lib/auth"
+import { PushNotificationsBridge } from "../src/components/PushNotificationsBridge"
 import { QueryProvider } from "../src/lib/query"
 import { ThemeProvider, useThemePreference } from "../src/lib/theme"
 import { ViewPreferencesProvider } from "../src/lib/view-preferences"
@@ -38,7 +39,6 @@ function ThemedStack() {
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="welcome" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="notifications" options={{ headerShown: false }} />
@@ -56,6 +56,7 @@ export default function RootLayout() {
           <ViewPreferencesProvider>
             <ToastProvider>
               <ThemedStack />
+              <PushNotificationsBridge />
             </ToastProvider>
           </ViewPreferencesProvider>
         </QueryProvider>

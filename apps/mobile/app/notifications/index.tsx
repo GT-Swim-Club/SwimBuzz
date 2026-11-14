@@ -15,14 +15,16 @@ import { useTabBarScrollPadding } from "../../src/lib/tab-bar"
 import { isExternalUrl, resolveAppHref } from "../../src/lib/href"
 import { RelativeDateText } from "../../src/components/RelativeDateText"
 
+type NotificationsData = { notifications: NotificationItem[] }
+
 export default function NotificationsScreen() {
   const router = useRouter()
   const c = usePalette()
   const tabBarPad = useTabBarScrollPadding()
   const queryClient = useQueryClient()
 
-  // Shared ["notifications"] key with (tabs)/notifications.tsx and
-  // AppHeader's unread badge — one request instead of one per consumer.
+  // Shared ["notifications"] key with AppHeader's badge — one request, and the
+  // badge follows what this screen writes into the cache.
   const {
     data,
     isPending,
@@ -31,15 +33,15 @@ export default function NotificationsScreen() {
     refetch,
   } = useQuery({ queryKey: ["notifications"], queryFn: () => api.listNotifications() })
   const items = data?.notifications ?? []
+  const hasUnread = items.some((n) => !n.readAt)
 
-  // This screen (reached from the header bell) auto-marks everything read
-  // on every visit — distinct from the tab screen, which only does it on tap.
+  // Opening the list clears the badge (seen); each item stays highlighted until tapped (read).
   useFocusEffect(
     useCallback(() => {
       let active = true
       void (async () => {
         try {
-          await api.markAllNotificationsRead()
+          await api.markNotificationsSeen()
         } catch {
           // still refresh the list
         }
@@ -51,19 +53,22 @@ export default function NotificationsScreen() {
     }, [refetch])
   )
 
+  function setReadLocally(match: (item: NotificationItem) => boolean) {
+    const now = new Date().toISOString()
+    queryClient.setQueryData<NotificationsData>(["notifications"], (old) =>
+      old && {
+        ...old,
+        notifications: old.notifications.map((n) =>
+          match(n) && !n.readAt ? { ...n, readAt: now, seenAt: n.seenAt ?? now } : n
+        ),
+      }
+    )
+  }
+
   async function onOpen(item: NotificationItem) {
     if (!item.readAt) {
       const previous = queryClient.getQueryData(["notifications"])
-      queryClient.setQueryData(
-        ["notifications"],
-        (old: typeof data) =>
-          old && {
-            ...old,
-            notifications: old.notifications.map((n) =>
-              n.id === item.id ? { ...n, readAt: new Date().toISOString() } : n
-            ),
-          }
-      )
+      setReadLocally((n) => n.id === item.id)
       try {
         await api.markNotificationRead(item.id)
       } catch {
@@ -82,16 +87,23 @@ export default function NotificationsScreen() {
     }
   }
 
-  async function markAll() {
-    await api.markAllNotificationsRead()
-    await refetch()
+  async function markAllRead() {
+    const previous = queryClient.getQueryData(["notifications"])
+    setReadLocally(() => true)
+    try {
+      await api.markAllNotificationsRead()
+    } catch {
+      queryClient.setQueryData(["notifications"], previous)
+    }
   }
 
   return (
     <Screen style={{ paddingBottom: 0 }}>
-      <View style={{ marginBottom: spacing.sm }}>
-        <Button label="Mark all read" variant="secondary" onPress={() => void markAll()} />
-      </View>
+      {hasUnread ? (
+        <View style={{ marginBottom: spacing.sm }}>
+          <Button label="Mark all read" variant="secondary" onPress={() => void markAllRead()} />
+        </View>
+      ) : null}
       {isPending ? (
         <View style={{ paddingTop: 40 }}>
           <ActivityIndicator color={c.primaryActive} />
@@ -113,6 +125,18 @@ export default function NotificationsScreen() {
           renderItem={({ item }) => (
             <ListRow
               title={item.title}
+              left={
+                <View
+                  accessible={!item.readAt}
+                  accessibilityLabel={item.readAt ? undefined : "Unread"}
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 4,
+                    ...(item.readAt ? null : { backgroundColor: c.primary }),
+                  }}
+                />
+              }
               subtitleSegments={[
                 item.body,
                 <RelativeDateText
@@ -121,7 +145,6 @@ export default function NotificationsScreen() {
                   absolute={formatDateTime(item.createdAt)}
                   style={{ fontSize: 13, color: c.textSecondary }}
                 />,
-                item.readAt ? "Read" : "Unread",
               ]}
               onPress={() => void onOpen(item)}
             />

@@ -4,6 +4,7 @@ import { Fragment, useLayoutEffect, useRef } from "react"
 import {
   highlightTileRows,
   isDropCounterValue,
+  relayLegSubSplitsText,
   rosterNameFirstLast,
   rosterNamePreferred,
   rosterSummaryPngColumns,
@@ -74,13 +75,21 @@ function CaptureRow({ row, medley }: { row: RosterSummaryPdfRow; medley: boolean
         {legs.length > 0 ? (
           <span className="grid grid-cols-2 gap-x-3 text-xs leading-[1.4] text-foreground-secondary">
             {legs.map((leg, i) => (
-              <span key={`${i}-${leg}`} className="flex min-w-0 items-baseline gap-1.5">
-                <span className="w-4 shrink-0 text-[9px] font-semibold tracking-[0.05em] text-foreground-tertiary">
-                  {tags?.[i] ?? i + 1}
+              // The leg line, then any sub-splits under the name (as on the summary's rows).
+              <span key={`${i}-${leg}`} className="flex min-w-0 flex-col">
+                <span className="flex min-w-0 items-baseline gap-1.5">
+                  <span className="w-4 shrink-0 text-[9px] font-semibold tracking-[0.05em] text-foreground-tertiary">
+                    {tags?.[i] ?? i + 1}
+                  </span>
+                  <span className="truncate">{rosterNameFirstLast(rosterNamePreferred(leg))}</span>
+                  {row.legSplits?.[i] ? (
+                    <span className="shrink-0 tabular-nums text-foreground-tertiary">{row.legSplits[i]}</span>
+                  ) : null}
                 </span>
-                <span className="truncate">{rosterNameFirstLast(rosterNamePreferred(leg))}</span>
-                {row.legSplits?.[i] ? (
-                  <span className="shrink-0 tabular-nums text-foreground-tertiary">{row.legSplits[i]}</span>
+                {row.legSubSplits?.[i]?.length ? (
+                  <span className="truncate pl-[22px] tabular-nums text-foreground-tertiary">
+                    {relayLegSubSplitsText(row.legSubSplits[i])}
+                  </span>
                 ) : null}
               </span>
             ))}
@@ -172,7 +181,7 @@ function CaptureHighlights({ counters }: { counters: StatCounter[] }) {
                 counter.place != null && counter.place <= 3
                   ? podiumPlaceClass(counter.place)
                   : isDropCounterValue(counter.value)
-                    ? "text-emerald-600 dark:text-emerald-400"
+                    ? "text-success-text"
                     : "text-foreground"
               }
             />

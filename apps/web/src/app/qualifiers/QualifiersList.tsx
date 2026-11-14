@@ -1,33 +1,63 @@
 import Link from "next/link"
 import { athletePreferredInitials, athletePreferredName } from "@swimbuzz/shared"
-import type { QualifierAthlete } from "@/lib/qualifiers/nationals-qualifiers"
+import type { QualifierAthlete, QualifierRow } from "@/lib/qualifiers/nationals-qualifiers"
+import { qualifierMarginLabel } from "@/lib/qualifiers/qualifier-events"
 import { athletePath } from "@/lib/slug"
 import { QualifierSwimRow } from "./QualifierSwimRow"
+import { athleteCutsLabel, meTintClass, qualifierAvatarClass, youPillClass } from "./qualifier-styles"
 
 /**
- * Athlete · Event · Meet · Date · Time · Standard (md+; phones stack). Meet
- * stops growing at a readable width so wide windows widen the athlete column.
+ * Athlete · Event · Meet · Date · Time · Margin · Standard (md+; phones stack).
+ * Meet stops growing at a readable width so wide windows widen the athlete column.
  */
 export const QUALIFIER_LIST_COLS =
-  "md:grid-cols-[minmax(10rem,1fr)_minmax(7rem,10rem)_minmax(5rem,18rem)_minmax(7rem,7.5rem)_5.5rem_6rem]"
-/** The by-event list: Event · Athlete · Meet · Date · Time · Standard, sized like the athlete list. */
+  "md:grid-cols-[minmax(10rem,1fr)_minmax(7rem,10rem)_minmax(5rem,18rem)_minmax(7rem,7.5rem)_5.5rem_4.5rem_6rem]"
+/** The by-event list: Event · Athlete · Meet · Date · Time · Margin · Standard, sized like the athlete list. */
 export const EVENT_LIST_COLS =
-  "md:grid-cols-[minmax(10rem,1fr)_minmax(10rem,15rem)_minmax(5rem,18rem)_minmax(7rem,7.5rem)_5.5rem_6rem]"
+  "md:grid-cols-[minmax(10rem,1fr)_minmax(10rem,15rem)_minmax(5rem,18rem)_minmax(7rem,7.5rem)_5.5rem_4.5rem_6rem]"
 
 /**
  * Each swim row sits on its parent's columns through subgrid, so every cell
- * lines up down the table. Phones get two lines per swim: event and time, then
- * meet and date.
+ * lines up down the table. Phones get two lines per swim: event and time
+ * (with the margin under the cut), then meet · date and the cut.
  */
 export const swimRowClass =
   "group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 rounded-md px-2.5 py-1 transition-colors md:col-span-full md:grid-cols-subgrid md:gap-x-2 md:px-0"
 const swimCellClass = "min-w-0 truncate text-[15px] transition-colors group-hover:text-primary md:pl-2.5"
 export const swimLeadCellClass = `${swimCellClass} font-medium text-foreground`
 export const swimMetaCellClass = `${swimCellClass} font-medium text-foreground-secondary max-md:row-start-2 max-md:text-[13px]`
-export const swimTimeCellClass =
-  "font-mono text-[15px] font-medium tabular-nums transition-colors group-hover:text-primary max-md:col-start-2 max-md:row-start-1 text-right"
-export const swimCutCellClass =
-  "min-w-0 truncate pr-2.5 text-right font-mono text-[15px] font-medium tabular-nums text-foreground-secondary transition-colors group-hover:text-primary max-md:hidden"
+const swimTimeCellClass =
+  "whitespace-nowrap text-right font-mono text-[15px] font-semibold tabular-nums text-foreground transition-colors group-hover:text-primary max-md:col-start-2 max-md:row-start-1"
+const swimMarginCellClass =
+  "text-right font-mono text-[15px] font-medium tabular-nums text-success-text transition-colors group-hover:text-primary max-md:hidden"
+const swimCutCellClass =
+  "min-w-0 truncate text-right font-mono text-[15px] font-medium tabular-nums text-foreground-secondary transition-colors group-hover:text-primary max-md:col-start-2 max-md:row-start-2 max-md:text-[13px] md:pr-2.5"
+
+/**
+ * The cells after a swim's lead cell (event or athlete): meet, date, time,
+ * margin under the cut and the standard, on the parent's subgrid.
+ */
+export function SwimCells({ swim }: { swim: QualifierRow }) {
+  const margin = qualifierMarginLabel(swim)
+  return (
+    <>
+      <span className={swimMetaCellClass}>
+        {swim.meetName || "Qualifying swim"}
+        {swim.date ? <span className="md:hidden"> · {swim.date}</span> : null}
+      </span>
+      <span className={`${swimMetaCellClass} max-md:hidden`}>{swim.date || "—"}</span>
+      <span className={swimTimeCellClass}>
+        {swim.time}
+        <span className="ml-1.5 text-[13px] font-medium text-success-text md:hidden">{margin}</span>
+      </span>
+      <span className={swimMarginCellClass}>{margin}</span>
+      <span className={swimCutCellClass}>
+        <span className="md:hidden">cut </span>
+        {swim.cut || "—"}
+      </span>
+    </>
+  )
+}
 
 export function QualifierListHeader({ cols, first, second }: { cols: string; first: string; second: string }) {
   return (
@@ -39,6 +69,7 @@ export function QualifierListHeader({ cols, first, second }: { cols: string; fir
       <span className="pl-2.5">MEET</span>
       <span className="pl-2.5">DATE</span>
       <span className="text-right">TIME</span>
+      <span className="text-right">MARGIN</span>
       <span className="pr-2.5 text-right">STANDARD</span>
     </div>
   )
@@ -48,9 +79,11 @@ export function QualifierListHeader({ cols, first, second }: { cols: string; fir
 export default function QualifiersList({
   qualifiers,
   currentAthleteId,
+  showGender,
 }: {
   qualifiers: QualifierAthlete[]
   currentAthleteId: string | null
+  showGender: boolean
 }) {
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-background shadow-sm">
@@ -60,19 +93,16 @@ export default function QualifiersList({
           const isMe = athlete.athleteId === currentAthleteId
           const athleteHref = athletePath(athlete.athleteSlug ?? athlete.athleteId)
           const name = athletePreferredName(athlete)
-          const cuts = `${athlete.events.length} ${athlete.events.length === 1 ? "cut" : "cuts"}`
           return (
             <article
               key={athlete.athleteId}
-              className={`grid gap-2 px-3 py-2 transition-colors sm:px-5 ${QUALIFIER_LIST_COLS} ${
-                isMe ? "bg-primary-bg/60" : "hover:bg-background-hover"
-              }`}
+              className={`grid gap-2 px-3 py-2 sm:px-5 ${QUALIFIER_LIST_COLS} ${isMe ? meTintClass : ""}`}
             >
               <div className="flex items-center gap-2.5 self-start max-md:px-2.5">
                 <Link
                   href={athleteHref}
                   aria-label={`View ${name}`}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-bg text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-contrast"
+                  className={`${qualifierAvatarClass} hover:border-primary`}
                 >
                   {athletePreferredInitials(athlete)}
                 </Link>
@@ -84,26 +114,19 @@ export default function QualifiersList({
                     >
                       {name}
                     </Link>
-                    {isMe ? (
-                      <span className="shrink-0 rounded-full bg-primary px-1.5 text-[11px] font-semibold leading-4 text-primary-contrast">
-                        You
-                      </span>
-                    ) : null}
+                    {isMe ? <span className={youPillClass}>You</span> : null}
                   </div>
                   <p className="mt-0.5 whitespace-nowrap text-[13px] text-foreground-secondary">
-                    {athlete.gender === "F" ? "Women" : "Men"} · {cuts}
+                    {athleteCutsLabel(athlete.gender, athlete.events.length, showGender)}
                   </p>
                 </div>
               </div>
 
-              <div className="grid min-w-0 content-start gap-y-0.5 md:col-span-5 md:grid-cols-subgrid">
+              <div className="grid min-w-0 content-start gap-y-0.5 md:col-span-6 md:grid-cols-subgrid">
                 {athlete.events.map((event) => (
                   <QualifierSwimRow key={event.id} swim={event} className={swimRowClass}>
-                    <p className={swimLeadCellClass}>{event.event}</p>
-                    <p className={swimMetaCellClass}>{event.meetName || "Qualifying swim"}</p>
-                    <p className={`${swimMetaCellClass} max-md:text-right`}>{event.date || "—"}</p>
-                    <p className={`${swimTimeCellClass} text-success`}>{event.time}</p>
-                    <p className={swimCutCellClass}>{event.cut ?? "—"}</p>
+                    <span className={swimLeadCellClass}>{event.event}</span>
+                    <SwimCells swim={event} />
                   </QualifierSwimRow>
                 ))}
               </div>

@@ -464,7 +464,8 @@ function makeStyles(c: ColorPalette) {
     codeInput: {
       fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
       fontSize: 20,
-      letterSpacing: 8,
+      // No letterSpacing on text inputs: iOS reuses native text fields across
+      // screens and the spacing sticks, stretching later placeholders.
       textAlign: "center",
     },
     action: { borderRadius: 12, minHeight: 48 },

@@ -77,7 +77,7 @@ export default function PracticeTagSelect({
           role="listbox"
           aria-multiselectable
           aria-label="Practice tags"
-          className="absolute left-0 top-full z-50 mt-1 max-h-64 w-full min-w-48 overflow-y-auto rounded-xl border border-border bg-background-elevated p-1 shadow-2xl shadow-black/30"
+          className="absolute left-0 top-full z-50 mt-1 max-h-64 w-full min-w-48 overflow-y-auto rounded-xl border border-border bg-background-elevated p-1 shadow-2xl shadow-black/10 dark:shadow-black/30"
         >
           {options.map((tag) => {
             const active = value.includes(tag)

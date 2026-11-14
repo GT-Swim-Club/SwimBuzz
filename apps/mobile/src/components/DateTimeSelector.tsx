@@ -13,10 +13,9 @@ import {
   Text,
   View,
 } from "react-native"
-import { colors, radii, spacing } from "@swimbuzz/tokens"
-import { ScrollView } from "@swimbuzz/ui"
+import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
+import { ScrollView, usePalette } from "@swimbuzz/ui"
 
-const c = colors.light
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 const HOURS = Array.from({ length: 24 }, (_, hour) => hour)
 const MINUTES = [0, 15, 30, 45]
@@ -131,6 +130,7 @@ function hourLabel(hour: number) {
 }
 
 function ChevronIcon({ direction }: { direction: "left" | "right" }) {
+  const styles = useStyles()
   return <View style={[styles.chevronIcon, direction === "left" && styles.chevronIconLeft]} />
 }
 
@@ -149,6 +149,7 @@ function FieldButton({
   kind: "date" | "time" | "zone"
   onPress: () => void
 }) {
+  const styles = useStyles()
   const hasValue = Boolean(value)
   return (
     <View style={styles.field}>
@@ -199,6 +200,7 @@ function Sheet({
   children: React.ReactNode
   onClose: () => void
 }) {
+  const styles = useStyles()
   return (
     <Modal transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.modalRoot}>
@@ -215,6 +217,7 @@ function Sheet({
 }
 
 function SheetHeader({ title, value, onClose }: { title: string; value: string; onClose: () => void }) {
+  const styles = useStyles()
   return (
     <>
       <View style={styles.sheetHandle} />
@@ -245,6 +248,7 @@ function SheetActions({
   onAlternate: () => void
   onConfirm: () => void
 }) {
+  const styles = useStyles()
   return (
     <View style={styles.actions}>
       <Pressable accessibilityRole="button" onPress={onAlternate} style={styles.textAction}>
@@ -265,6 +269,7 @@ export function DateSelector({
   optional = false,
   min,
 }: DateSelectorProps) {
+  const styles = useStyles()
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState<Date>(() => parseDate(value) ?? new Date())
   const today = useMemo(() => new Date(), [])
@@ -390,6 +395,7 @@ export function TimeSelector({
   min,
   minExclusive = false,
 }: TimeSelectorProps) {
+  const styles = useStyles()
   const [open, setOpen] = useState(false)
   const initial = parseTime(value)
   const [hour, setHour] = useState(initial.hour)
@@ -522,6 +528,7 @@ export function TimeZoneSelector({
   onChange: (value: string) => void
   date?: string
 }) {
+  const styles = useStyles()
   const [open, setOpen] = useState(false)
   const zones = useMemo(
     () => (value && !US_TIME_ZONES.includes(value) ? [...US_TIME_ZONES, value] : US_TIME_ZONES),
@@ -568,114 +575,122 @@ export function TimeZoneSelector({
   )
 }
 
-const styles = StyleSheet.create({
-  field: { marginBottom: spacing.md },
-  fieldLabel: { color: c.text, fontSize: 14, fontWeight: "700", marginBottom: spacing.xs },
-  fieldButton: {
-    alignItems: "center",
-    backgroundColor: c.bgContainer,
-    borderColor: c.border,
-    borderRadius: radii.md,
-    borderWidth: 1,
-    flexDirection: "row",
-    minHeight: 62,
-    paddingHorizontal: spacing.sm,
-  },
-  fieldButtonPressed: { backgroundColor: c.primaryBg, borderColor: c.primaryHover },
-  fieldIcon: {
-    alignItems: "center",
-    borderColor: c.primaryActive,
-    borderRadius: radii.xs,
-    borderWidth: 1.5,
-    height: 30,
-    justifyContent: "center",
-    marginRight: spacing.sm,
-    overflow: "hidden",
-    width: 30,
-  },
-  fieldIconTop: { backgroundColor: c.primary, height: 7, left: 0, position: "absolute", right: 0, top: 0 },
-  fieldIconDots: { flexDirection: "row", gap: 3, marginTop: 5 },
-  fieldIconDot: { backgroundColor: c.primaryActive, borderRadius: 3, height: 3, width: 3 },
-  timeIcon: { borderRadius: 999 },
-  clockHandShort: { backgroundColor: c.primaryActive, borderRadius: 2, height: 8, position: "absolute", top: 6, width: 2 },
-  clockHandLong: { backgroundColor: c.primaryActive, borderRadius: 2, height: 10, position: "absolute", right: 8, top: 13, transform: [{ rotate: "-45deg" }], width: 2 },
-  globeRing: { borderColor: c.primaryActive, borderRadius: 999, borderWidth: 1.5, height: 18, width: 18 },
-  zoneOption: {
-    alignItems: "center",
-    backgroundColor: c.fillSecondary,
-    borderColor: c.fillSecondary,
-    borderRadius: radii.sm,
-    borderWidth: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: spacing.xs,
-    minHeight: 48,
-    paddingHorizontal: spacing.sm,
-  },
-  fieldCopy: { flex: 1 },
-  fieldValue: { color: c.text, fontSize: 16, fontWeight: "600" },
-  fieldPlaceholder: { color: c.textTertiary, fontWeight: "400" },
-  helperText: { color: c.textSecondary, fontSize: 12, marginTop: 2 },
-  fieldChevron: { marginLeft: spacing.xs },
-  chevronIcon: {
-    borderBottomWidth: 2,
-    borderColor: c.primaryActive,
-    borderRightWidth: 2,
-    height: 10,
-    transform: [{ rotate: "-45deg" }],
-    width: 10,
-  },
-  chevronIconLeft: { transform: [{ rotate: "135deg" }] },
-  modalRoot: { flex: 1, justifyContent: "flex-end" },
-  scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(31, 31, 31, 0.45)" },
-  sheet: {
-    backgroundColor: c.bgElevated,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    maxHeight: "92%",
-    paddingBottom: spacing.lg,
-    paddingHorizontal: spacing.md,
-  },
-  sheetHandle: { alignSelf: "center", backgroundColor: c.fill, borderRadius: 2, height: 4, marginBottom: spacing.sm, marginTop: spacing.sm, width: 42 },
-  sheetHeader: { alignItems: "flex-start", flexDirection: "row", justifyContent: "space-between", marginBottom: spacing.md },
-  sheetEyebrow: { color: c.textSecondary, fontSize: 13, fontWeight: "600", marginBottom: 2 },
-  sheetTitle: { color: c.text, fontSize: 22, fontWeight: "800" },
-  closeButton: { alignItems: "center", backgroundColor: c.fillSecondary, borderRadius: 18, height: 36, justifyContent: "center", width: 36 },
-  closeButtonLabel: { color: c.textSecondary, fontSize: 27, fontWeight: "300", lineHeight: 29 },
-  monthControls: { alignItems: "center", flexDirection: "row", justifyContent: "space-between", marginBottom: spacing.sm },
-  monthButton: { alignItems: "center", backgroundColor: c.primaryBg, borderRadius: radii.sm, height: 36, justifyContent: "center", width: 36 },
-  monthLabel: { color: c.text, fontSize: 16, fontWeight: "700" },
-  weekdayRow: { flexDirection: "row", marginBottom: 2 },
-  weekday: { color: c.textTertiary, flex: 1, fontSize: 11, fontWeight: "700", textAlign: "center" },
-  calendarGrid: { flexDirection: "row", flexWrap: "wrap" },
-  day: { alignItems: "center", aspectRatio: 1, justifyContent: "center", padding: 3, width: "14.2857%" },
-  daySelected: { backgroundColor: c.primaryActive, borderRadius: 999 },
-  dayPressed: { backgroundColor: c.primaryBg, borderRadius: 999 },
-  dayDisabled: { opacity: 0.35 },
-  dayLabel: { color: c.text, fontSize: 15, fontWeight: "600" },
-  dayOutsideMonth: { color: c.textTertiary, fontWeight: "400" },
-  dayToday: { color: c.primaryActive, fontWeight: "800" },
-  dayLabelSelected: { color: c.bgContainer, fontWeight: "800" },
-  dayLabelDisabled: { color: c.textTertiary, fontWeight: "400" },
-  timeDisplay: { alignItems: "baseline", flexDirection: "row", justifyContent: "center", marginBottom: spacing.md },
-  timeDisplayNumber: { color: c.primaryActive, fontSize: 42, fontVariant: ["tabular-nums"], fontWeight: "800", letterSpacing: -1 },
-  timeDisplayColon: { color: c.textTertiary, fontSize: 38, fontWeight: "600", marginHorizontal: 3 },
-  timeDisplayMeridiem: { color: c.textSecondary, fontSize: 15, fontWeight: "800", marginLeft: spacing.xs },
-  optionLabel: { color: c.textSecondary, fontSize: 12, fontWeight: "800", letterSpacing: 0.6, marginBottom: spacing.xs, textTransform: "uppercase" },
-  hoursScroller: { maxHeight: 164, marginBottom: spacing.md },
-  hoursGrid: { flexDirection: "row", flexWrap: "wrap", gap: spacing.xs },
-  hourOption: { alignItems: "center", backgroundColor: c.fillSecondary, borderColor: c.fillSecondary, borderRadius: radii.sm, borderWidth: 1, flexBasis: "31%", flexGrow: 1, justifyContent: "center", minHeight: 42 },
-  minutesRow: { flexDirection: "row", gap: spacing.xs, marginBottom: spacing.md },
-  minuteOption: { alignItems: "center", backgroundColor: c.fillSecondary, borderColor: c.fillSecondary, borderRadius: radii.sm, borderWidth: 1, flex: 1, justifyContent: "center", minHeight: 42 },
-  optionSelected: { backgroundColor: c.primaryBg, borderColor: c.primaryActive },
-  optionPressed: { borderColor: c.primaryHover },
-  optionDisabled: { opacity: 0.4 },
-  optionText: { color: c.textSecondary, fontSize: 14, fontWeight: "700" },
-  optionTextSelected: { color: c.primaryText },
-  optionTextDisabled: { color: c.textTertiary },
-  actions: { alignItems: "center", borderTopColor: c.border, borderTopWidth: 1, flexDirection: "row", justifyContent: "space-between", marginTop: spacing.xs, paddingTop: spacing.sm },
-  textAction: { paddingHorizontal: spacing.sm, paddingVertical: spacing.sm },
-  textActionLabel: { color: c.primaryActive, fontSize: 15, fontWeight: "800" },
-  confirmButton: { alignItems: "center", backgroundColor: c.primary, borderRadius: radii.sm, justifyContent: "center", minHeight: 44, minWidth: 96, paddingHorizontal: spacing.md },
-  confirmButtonLabel: { color: c.primaryContrast, fontSize: 15, fontWeight: "800" },
-})
+/** Styles in the current theme's palette (the pickers used to be light-only, even in dark mode). */
+function useStyles() {
+  const c = usePalette()
+  return useMemo(() => makeStyles(c), [c])
+}
+
+function makeStyles(c: ColorPalette) {
+  return StyleSheet.create({
+    field: { marginBottom: spacing.md },
+    fieldLabel: { color: c.text, fontSize: 14, fontWeight: "700", marginBottom: spacing.xs },
+    fieldButton: {
+      alignItems: "center",
+      backgroundColor: c.bgContainer,
+      borderColor: c.border,
+      borderRadius: radii.md,
+      borderWidth: 1,
+      flexDirection: "row",
+      minHeight: 62,
+      paddingHorizontal: spacing.sm,
+    },
+    fieldButtonPressed: { backgroundColor: c.primaryBg, borderColor: c.primaryHover },
+    fieldIcon: {
+      alignItems: "center",
+      borderColor: c.primaryActive,
+      borderRadius: radii.xs,
+      borderWidth: 1.5,
+      height: 30,
+      justifyContent: "center",
+      marginRight: spacing.sm,
+      overflow: "hidden",
+      width: 30,
+    },
+    fieldIconTop: { backgroundColor: c.primary, height: 7, left: 0, position: "absolute", right: 0, top: 0 },
+    fieldIconDots: { flexDirection: "row", gap: 3, marginTop: 5 },
+    fieldIconDot: { backgroundColor: c.primaryActive, borderRadius: 3, height: 3, width: 3 },
+    timeIcon: { borderRadius: 999 },
+    clockHandShort: { backgroundColor: c.primaryActive, borderRadius: 2, height: 8, position: "absolute", top: 6, width: 2 },
+    clockHandLong: { backgroundColor: c.primaryActive, borderRadius: 2, height: 10, position: "absolute", right: 8, top: 13, transform: [{ rotate: "-45deg" }], width: 2 },
+    globeRing: { borderColor: c.primaryActive, borderRadius: 999, borderWidth: 1.5, height: 18, width: 18 },
+    zoneOption: {
+      alignItems: "center",
+      backgroundColor: c.fillSecondary,
+      borderColor: c.fillSecondary,
+      borderRadius: radii.sm,
+      borderWidth: 1,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginBottom: spacing.xs,
+      minHeight: 48,
+      paddingHorizontal: spacing.sm,
+    },
+    fieldCopy: { flex: 1 },
+    fieldValue: { color: c.text, fontSize: 16, fontWeight: "600" },
+    fieldPlaceholder: { color: c.textTertiary, fontWeight: "400" },
+    helperText: { color: c.textSecondary, fontSize: 12, marginTop: 2 },
+    fieldChevron: { marginLeft: spacing.xs },
+    chevronIcon: {
+      borderBottomWidth: 2,
+      borderColor: c.primaryActive,
+      borderRightWidth: 2,
+      height: 10,
+      transform: [{ rotate: "-45deg" }],
+      width: 10,
+    },
+    chevronIconLeft: { transform: [{ rotate: "135deg" }] },
+    modalRoot: { flex: 1, justifyContent: "flex-end" },
+    scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(31, 31, 31, 0.45)" },
+    sheet: {
+      backgroundColor: c.bgElevated,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      maxHeight: "92%",
+      paddingBottom: spacing.lg,
+      paddingHorizontal: spacing.md,
+    },
+    sheetHandle: { alignSelf: "center", backgroundColor: c.fill, borderRadius: 2, height: 4, marginBottom: spacing.sm, marginTop: spacing.sm, width: 42 },
+    sheetHeader: { alignItems: "flex-start", flexDirection: "row", justifyContent: "space-between", marginBottom: spacing.md },
+    sheetEyebrow: { color: c.textSecondary, fontSize: 13, fontWeight: "600", marginBottom: 2 },
+    sheetTitle: { color: c.text, fontSize: 22, fontWeight: "800" },
+    closeButton: { alignItems: "center", backgroundColor: c.fillSecondary, borderRadius: 18, height: 36, justifyContent: "center", width: 36 },
+    closeButtonLabel: { color: c.textSecondary, fontSize: 27, fontWeight: "300", lineHeight: 29 },
+    monthControls: { alignItems: "center", flexDirection: "row", justifyContent: "space-between", marginBottom: spacing.sm },
+    monthButton: { alignItems: "center", backgroundColor: c.primaryBg, borderRadius: radii.sm, height: 36, justifyContent: "center", width: 36 },
+    monthLabel: { color: c.text, fontSize: 16, fontWeight: "700" },
+    weekdayRow: { flexDirection: "row", marginBottom: 2 },
+    weekday: { color: c.textTertiary, flex: 1, fontSize: 11, fontWeight: "700", textAlign: "center" },
+    calendarGrid: { flexDirection: "row", flexWrap: "wrap" },
+    day: { alignItems: "center", aspectRatio: 1, justifyContent: "center", padding: 3, width: "14.2857%" },
+    daySelected: { backgroundColor: c.primaryActive, borderRadius: 999 },
+    dayPressed: { backgroundColor: c.primaryBg, borderRadius: 999 },
+    dayDisabled: { opacity: 0.35 },
+    dayLabel: { color: c.text, fontSize: 15, fontWeight: "600" },
+    dayOutsideMonth: { color: c.textTertiary, fontWeight: "400" },
+    dayToday: { color: c.primaryActive, fontWeight: "800" },
+    dayLabelSelected: { color: c.bgContainer, fontWeight: "800" },
+    dayLabelDisabled: { color: c.textTertiary, fontWeight: "400" },
+    timeDisplay: { alignItems: "baseline", flexDirection: "row", justifyContent: "center", marginBottom: spacing.md },
+    timeDisplayNumber: { color: c.primaryActive, fontSize: 42, fontVariant: ["tabular-nums"], fontWeight: "800", letterSpacing: -1 },
+    timeDisplayColon: { color: c.textTertiary, fontSize: 38, fontWeight: "600", marginHorizontal: 3 },
+    timeDisplayMeridiem: { color: c.textSecondary, fontSize: 15, fontWeight: "800", marginLeft: spacing.xs },
+    optionLabel: { color: c.textSecondary, fontSize: 12, fontWeight: "800", letterSpacing: 0.6, marginBottom: spacing.xs, textTransform: "uppercase" },
+    hoursScroller: { maxHeight: 164, marginBottom: spacing.md },
+    hoursGrid: { flexDirection: "row", flexWrap: "wrap", gap: spacing.xs },
+    hourOption: { alignItems: "center", backgroundColor: c.fillSecondary, borderColor: c.fillSecondary, borderRadius: radii.sm, borderWidth: 1, flexBasis: "31%", flexGrow: 1, justifyContent: "center", minHeight: 42 },
+    minutesRow: { flexDirection: "row", gap: spacing.xs, marginBottom: spacing.md },
+    minuteOption: { alignItems: "center", backgroundColor: c.fillSecondary, borderColor: c.fillSecondary, borderRadius: radii.sm, borderWidth: 1, flex: 1, justifyContent: "center", minHeight: 42 },
+    optionSelected: { backgroundColor: c.primaryBg, borderColor: c.primaryActive },
+    optionPressed: { borderColor: c.primaryHover },
+    optionDisabled: { opacity: 0.4 },
+    optionText: { color: c.textSecondary, fontSize: 14, fontWeight: "700" },
+    optionTextSelected: { color: c.primaryText },
+    optionTextDisabled: { color: c.textTertiary },
+    actions: { alignItems: "center", borderTopColor: c.border, borderTopWidth: 1, flexDirection: "row", justifyContent: "space-between", marginTop: spacing.xs, paddingTop: spacing.sm },
+    textAction: { paddingHorizontal: spacing.sm, paddingVertical: spacing.sm },
+    textActionLabel: { color: c.accent, fontSize: 15, fontWeight: "800" },
+    confirmButton: { alignItems: "center", backgroundColor: c.primary, borderRadius: radii.sm, justifyContent: "center", minHeight: 44, minWidth: 96, paddingHorizontal: spacing.md },
+    confirmButtonLabel: { color: c.primaryContrast, fontSize: 15, fontWeight: "800" },
+  })
+}

@@ -33,6 +33,7 @@ import {
   placementsToMeetResults,
   resultKey,
   seedsToMeetResults,
+  sheetEntryHasResultData,
   splitsToMeetResults,
   statusesToMeetResults,
   type MeetResultEntry,
@@ -555,6 +556,13 @@ export async function importMeetResults({
           )
         )
       )
+      // A timed-final result (no round) is the team's only swim: it replaces the lineups the relay
+      // builder published for that team in any round (prelims, finals or the round-less one).
+      const timedFinalTeams = new Set(
+        relayEntries
+          .filter((e) => (e.relayRound ?? "") === "")
+          .map((e) => relayTeamKey(e.event, e.relayLetter, "", e.gender ?? ""))
+      )
       const leftoverManual = existingRelays.filter((e) => {
         if (e.entryType !== "relay_team" || !e.manual) return false
         const key = relayTeamKey(
@@ -563,7 +571,12 @@ export async function importMeetResults({
           effectiveRelayRound(e),
           e.gender ?? ""
         )
-        return !importedKeys.has(key)
+        if (importedKeys.has(key)) return false
+        // Results by round replace the builder lineup of the same round through `importedKeys`.
+        return (
+          sheetEntryHasResultData(e) ||
+          !timedFinalTeams.has(relayTeamKey(e.event, e.relayLetter, "", e.gender ?? ""))
+        )
       })
       const keptExisting = pairOnly
         ? existingRelays.filter((e) => {

@@ -1,30 +1,27 @@
-import type { IconName } from "@swimbuzz/shared"
+import type { StyleProp, ViewStyle } from "react-native"
 import { usePalette } from "@swimbuzz/ui"
 import { Icon } from "./Icon"
 import { SegmentedOption, SegmentedToggle } from "./SegmentedToggle"
-import type { DefaultPracticesView } from "../lib/view-preferences"
+import type { DefaultView } from "../lib/view-preferences"
 
-const OPTIONS: Array<{ view: DefaultPracticesView; label: string; icon: IconName }> = [
-  { view: "week", label: "Week", icon: "calendarWeek" },
-  { view: "month", label: "Month", icon: "calendarMonth" },
-  { view: "list", label: "List", icon: "list" },
-]
+const OPTIONS = [
+  { view: "gallery", label: "Gallery view", icon: "gallery" },
+  { view: "list", label: "List view", icon: "list" },
+] as const
 
-export function PracticeViewToggle({
+/** Gallery / list switch for the Roster, Meets and Nationals screens. */
+export function GalleryViewToggle({
   value,
   onChange,
+  style,
 }: {
-  value: DefaultPracticesView
-  onChange: (value: DefaultPracticesView) => void
+  value: DefaultView
+  onChange: (value: DefaultView) => void
+  style?: StyleProp<ViewStyle>
 }) {
   const c = usePalette()
-  const selectedIndex = Math.max(
-    0,
-    OPTIONS.findIndex((option) => option.view === value)
-  )
-
   return (
-    <SegmentedToggle selectedIndex={selectedIndex}>
+    <SegmentedToggle selectedIndex={value === "list" ? 1 : 0} style={style}>
       {OPTIONS.map((option) => {
         const selected = option.view === value
         return (

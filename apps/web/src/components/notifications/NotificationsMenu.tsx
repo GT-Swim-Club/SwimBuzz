@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import Link from "next/link"
+import { isUnseenNotification } from "@swimbuzz/shared"
 import { formatDateTime, formatRelativeTime } from "@/lib/utils"
 import { AppIcon } from "@/components/ui/AppIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
@@ -14,8 +15,12 @@ export type NotificationItem = {
   body: string
   href: string | null
   readAt: string | null
+  seenAt: string | null
   createdAt: string
 }
+
+/** How often the closed bell checks for new notifications while the tab is in view. */
+const POLL_MS = 60_000
 
 export default function NotificationsMenu({
   initialNotifications,
@@ -30,14 +35,16 @@ export default function NotificationsMenu({
   const [prevInitial, setPrevInitial] = useState(initialNotifications)
   const rootRef = useRef<HTMLDivElement>(null)
 
-  // Only resync when the server actually sends a new list; marking read is
-  // local + API-only, so re-applying the original prop on close would bring
-  // back stale unread badges.
+  // Only resync when the server actually sends a new list; reads are local +
+  // API-only, so re-applying the original prop would bring back stale state.
   if (initialNotifications !== prevInitial) {
     setPrevInitial(initialNotifications)
     setNotifications(initialNotifications)
   }
 
+  // The badge counts what arrived since the list was last opened; opening it
+  // clears the badge, while each item stays highlighted until it's tapped.
+  const unseenCount = notifications.filter(isUnseenNotification).length
   const unreadCount = notifications.filter((n) => !n.readAt).length
 
   function closeMenu() {
@@ -46,6 +53,35 @@ export default function NotificationsMenu({
 
   useEscapeToClose(open, closeMenu)
 
+  const refresh = useCallback(async (): Promise<boolean> => {
+    try {
+      const res = await fetch("/api/notifications", { cache: "no-store" })
+      if (!res.ok) return false
+      const data: { notifications: NotificationItem[] } = await res.json()
+      setNotifications(data.notifications)
+      return true
+    } catch {
+      return false
+    }
+  }, [])
+
+  // The bell lives in the root layout, which doesn't re-render on client
+  // navigation — poll while the tab is visible, and catch up when it's back.
+  useEffect(() => {
+    if (open) return
+    const tick = () => {
+      if (document.visibilityState === "visible") void refresh()
+    }
+    const timer = window.setInterval(tick, POLL_MS)
+    window.addEventListener("focus", tick)
+    document.addEventListener("visibilitychange", tick)
+    return () => {
+      window.clearInterval(timer)
+      window.removeEventListener("focus", tick)
+      document.removeEventListener("visibilitychange", tick)
+    }
+  }, [open, refresh])
+
   useEffect(() => {
     if (!open) return
 
@@ -53,27 +89,9 @@ export default function NotificationsMenu({
 
     async function syncNotifications() {
       const now = new Date().toISOString()
-      try {
-        const [res] = await Promise.all([
-          fetch("/api/notifications"),
-          patchNotificationsRead(),
-        ])
-        if (cancelled) return
-        if (res.ok) {
-          const data: { notifications: NotificationItem[] } = await res.json()
-          if (cancelled) return
-          setNotifications(
-            data.notifications.map((n) => ({ ...n, readAt: n.readAt ?? now }))
-          )
-          return
-        }
-      } catch {
-        // Fall through to the list we already have.
-      }
+      await Promise.all([refresh(), patchNotifications({ seen: true }).catch(() => null)])
       if (cancelled) return
-      setNotifications((prev) =>
-        prev.map((n) => ({ ...n, readAt: n.readAt ?? now }))
-      )
+      setNotifications((prev) => prev.map((n) => ({ ...n, seenAt: n.seenAt ?? now })))
     }
     void syncNotifications().finally(() => {
       if (!cancelled) setLoaded(true)
@@ -90,11 +108,11 @@ export default function NotificationsMenu({
       cancelled = true
       document.removeEventListener("pointerdown", onPointerDown)
     }
-  }, [open])
+  }, [open, refresh])
 
   async function markRead(id?: string) {
     try {
-      const res = await patchNotificationsRead(id)
+      const res = await patchNotifications(id ? { id } : { all: true })
       if (!res.ok) return
     } catch {
       return
@@ -103,7 +121,9 @@ export default function NotificationsMenu({
     const now = new Date().toISOString()
     setNotifications((prev) =>
       prev.map((n) =>
-        id ? (n.id === id && !n.readAt ? { ...n, readAt: now } : n) : { ...n, readAt: n.readAt ?? now }
+        !id || n.id === id
+          ? { ...n, readAt: n.readAt ?? now, seenAt: n.seenAt ?? now }
+          : n
       )
     )
   }
@@ -116,18 +136,19 @@ export default function NotificationsMenu({
         aria-expanded={open}
         aria-haspopup="menu"
         aria-label={
-          unreadCount > 0
-            ? `Notifications, ${unreadCount} unread`
+          unseenCount > 0
+            ? `Notifications, ${unseenCount} new`
             : "Notifications"
         }
-        className="relative flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground-secondary transition-colors hover:bg-fill-secondary"
+        className="relative flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground-secondary transition-colors hover:bg-background-hover"
       >
         <AppIcon name="bell" className="h-5 w-5" />
-        {unreadCount > 0 ? (
+        {unseenCount > 0 ? (
           <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-medium text-primary-contrast">
-            {unreadCount > 9 ? "9+" : unreadCount}
+            {unseenCount > 9 ? "9+" : unseenCount}
           </span>
         ) : null}
+        {open ? null : <HoverDetail label="Notifications" />}
       </button>
 
       {open ? (
@@ -144,7 +165,7 @@ export default function NotificationsMenu({
                 <button
                   type="button"
                   onClick={() => void markRead()}
-                  className="text-xs text-primary hover:text-primary-hover"
+                  className="text-xs text-accent hover:text-primary"
                 >
                   Mark all read
                 </button>
@@ -165,34 +186,40 @@ export default function NotificationsMenu({
             ) : (
               <ul className="max-h-80 overflow-y-auto py-1">
                 {notifications.map((n) => {
+                  const unread = !n.readAt
                   const content = (
-                    <>
-                      <p
-                        className={`text-sm ${
-                          n.readAt
-                            ? "font-normal text-foreground-secondary"
-                            : "font-medium text-foreground"
-                        }`}
-                      >
-                        {n.title}
-                      </p>
-                      {n.body ? (
-                        <p className="mt-0.5 line-clamp-2 text-xs text-foreground-tertiary">
-                          {n.body}
+                    <div className="flex gap-2">
+                      <span
+                        aria-hidden
+                        className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${unread ? "bg-primary" : ""}`}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p
+                          className={`text-sm ${
+                            unread
+                              ? "font-semibold text-foreground"
+                              : "font-normal text-foreground-secondary"
+                          }`}
+                        >
+                          {unread ? <span className="sr-only">Unread: </span> : null}
+                          {n.title}
                         </p>
-                      ) : null}
-                      <p className="mt-1 text-[11px] text-foreground-quaternary">
-                        <span className="group relative inline-block" tabIndex={0}>
-                          {formatRelativeTime(n.createdAt)}
-                          <HoverDetail label={formatDateTime(n.createdAt)} />
-                        </span>
-                      </p>
-                    </>
+                        {n.body ? (
+                          <p className="mt-0.5 line-clamp-2 text-xs text-foreground-tertiary">
+                            {n.body}
+                          </p>
+                        ) : null}
+                        <p className="mt-1 text-[11px] text-foreground-tertiary">
+                          <span className="group relative inline-block" tabIndex={0}>
+                            {formatRelativeTime(n.createdAt)}
+                            <HoverDetail label={formatDateTime(n.createdAt)} />
+                          </span>
+                        </p>
+                      </div>
+                    </div>
                   )
 
-                  const className = `block px-3 py-2.5 hover:bg-fill-secondary ${
-                    !n.readAt ? "bg-primary/10" : ""
-                  }`
+                  const className = "block px-3 py-2.5 transition-colors hover:bg-background-hover"
 
                   return (
                     <li key={n.id} role="none">
@@ -233,10 +260,10 @@ export default function NotificationsMenu({
   )
 }
 
-function patchNotificationsRead(id?: string) {
+function patchNotifications(body: { seen: true } | { all: true } | { id: string }) {
   return fetch("/api/notifications", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(id ? { id } : { all: true }),
+    body: JSON.stringify(body),
   })
 }

@@ -51,7 +51,7 @@ export default function PracticeExportCapture({
             {title}
           </h1>
           {showDraft && (
-            <span className="rounded-full bg-primary/20 px-2 py-0.5 text-[10px] uppercase tracking-wide text-primary-active shadow-sm dark:bg-primary/30 dark:text-primary-hover">
+            <span className="rounded-full bg-primary/20 px-2 py-0.5 text-[10px] uppercase tracking-wide text-accent shadow-sm dark:bg-primary/30">
               Draft
             </span>
           )}
@@ -111,11 +111,11 @@ export default function PracticeExportCapture({
               {row.map((set) => (
                 <section key={set.id}>
                   <div className="flex items-center justify-between gap-3">
-                    <h3 className="min-w-0 font-bold text-primary-active dark:text-primary-hover">
+                    <h3 className="min-w-0 font-bold text-accent">
                       {set.title || "Set"}
                     </h3>
                     {set.distance != null && (
-                      <span className="shrink-0 text-xs font-medium text-primary-active dark:text-primary-hover">
+                      <span className="shrink-0 text-xs font-medium text-accent">
                         {set.distance}
                       </span>
                     )}

@@ -13,7 +13,7 @@ export function StaffBadge({ title, size = 14 }: { title: StaffTitle; size?: num
     <Icon
       name={staffBadgeIcon(title)}
       size={size}
-      color={c.primary}
+      color={c.accent}
       strokeWidth={2}
       accessibilityLabel={STAFF_TITLE_LABELS[title]}
     />

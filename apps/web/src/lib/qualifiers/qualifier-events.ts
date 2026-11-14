@@ -20,6 +20,16 @@ export function qualifierSwimHref(swim: QualifierRow): string | null {
   return swim.meetSlug ? meetSwimPath(swim.meetSlug, swim.id) : `/meets/${swim.meetId}#swim-${swim.id}`
 }
 
+/** How far under the cut a qualifying swim is, e.g. "−0.42" (a cut matched exactly is "0.00"). */
+export function qualifierMarginLabel(swim: Pick<QualifierRow, "timeMs" | "cutMs">): string {
+  const diff = Math.max(0, swim.cutMs - swim.timeMs)
+  if (diff === 0) return "0.00"
+  const seconds = diff / 1000
+  if (seconds < 60) return `−${seconds.toFixed(2)}`
+  const minutes = Math.floor(seconds / 60)
+  return `−${minutes}:${(seconds % 60).toFixed(2).padStart(5, "0")}`
+}
+
 /**
  * Regroups qualifying swims by event (and gender, when both are shown), in
  * `eventRank` order with women first within an event. `includeSwim` filters

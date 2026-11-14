@@ -1,11 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from "react"
-import { ActivityIndicator, Alert, Platform, Pressable, Text, View } from "react-native"
+import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react"
+import { ActivityIndicator, Alert, Platform, Pressable, Text, View, type ScrollView } from "react-native"
 import * as Clipboard from "expo-clipboard"
 import * as Sharing from "expo-sharing"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import {
   alternateLabel,
   formatPoints,
   eventGenderWord,
+  relayLegLabel,
+  relayLegSubSplitTimes,
   roundFilterIncludes,
   roundFilterLabel,
   rosterSummaryScopeLabel,
@@ -28,6 +31,7 @@ import {
 } from "@swimbuzz/shared"
 import {
   ActionSheet,
+  BottomSheet,
   Body,
   Chip,
   EmptyState,
@@ -45,6 +49,67 @@ import { rosterSummaryPdfFile, saveCaptureToPhotos } from "../lib/roster-summary
 import { HeatLaneSheet, type HeatLaneSlot } from "./HeatLaneSheet"
 import { Icon } from "./Icon"
 import { RosterSummaryExportCapture } from "./RosterSummaryExportCapture"
+import { RosterSummaryJumpBar, rosterSummaryJumpLetter, type RosterSummaryJumpTarget } from "./RosterSummaryJumpBar"
+import { SegmentedOption, SegmentedToggle } from "./SegmentedToggle"
+
+/** Per meet: the list's view and filters, kept for a while (like the web's saved view), not for good. */
+const VIEW_KEY_PREFIX = "swimbuzz.summaryView:"
+const VIEW_TTL_MS = 12 * 60 * 60 * 1000
+
+type SavedSummaryView = {
+  savedAt: number
+  mode: "athlete" | "event"
+  mineOnly: boolean
+  gender: "all" | "F" | "M"
+  session: string | null
+  hiddenRounds: SummaryRoundKind[]
+}
+
+async function readSavedView(meetId: string): Promise<SavedSummaryView | null> {
+  try {
+    const v = JSON.parse((await AsyncStorage.getItem(`${VIEW_KEY_PREFIX}${meetId}`)) || "null") as
+      | Partial<SavedSummaryView>
+      | null
+    if (!v || typeof v.savedAt !== "number" || Date.now() - v.savedAt > VIEW_TTL_MS) return null
+    return {
+      savedAt: v.savedAt,
+      mode: v.mode === "event" ? "event" : "athlete",
+      mineOnly: v.mineOnly === true,
+      gender: v.gender === "F" || v.gender === "M" ? v.gender : "all",
+      session: typeof v.session === "string" ? v.session : null,
+      hiddenRounds: Array.isArray(v.hiddenRounds)
+        ? v.hiddenRounds.filter((k): k is SummaryRoundKind => k === "P" || k === "F" || k === "T")
+        : [],
+    }
+  } catch {
+    return null
+  }
+}
+
+/** A filter that's on, as a removable chip under the search field. */
+type ActiveFilter = { key: string; label: string; clear: () => void }
+
+/** One labelled group of chips in the filters sheet. */
+function FilterGroup({ label, children }: { label: string; children: ReactNode }) {
+  const c = usePalette()
+  return (
+    <View style={{ marginBottom: spacing.md }}>
+      <Text
+        style={{
+          fontSize: 12,
+          fontWeight: "600",
+          letterSpacing: 0.4,
+          textTransform: "uppercase",
+          color: c.textTertiary,
+          marginBottom: spacing.xs,
+        }}
+      >
+        {label}
+      </Text>
+      <View style={{ flexDirection: "row", flexWrap: "wrap" }}>{children}</View>
+    </View>
+  )
+}
 
 export type RosterSummaryEntry = {
   athleteId: string
@@ -96,6 +161,8 @@ export type RosterSummaryEntry = {
     name: string
     athleteId?: string
     splitTime?: string
+    /** The leg's own interval splits (the 50s of a 100 leg), when the results time them. */
+    splits?: Array<{ distance: number; splitTime: string }>
   }>
   /** Individual race splits (interval times), per round where the swim has both. */
   splits?: Array<{ distance: number; splitTime: string }>
@@ -326,6 +393,14 @@ function relayLegSplits(entry: RosterSummaryEntry): string[] {
     })
 }
 
+/** Each leg's sub-splits in leg order ([] for a leg without them), beside relayLegNames. */
+function relayLegSubSplits(entry: RosterSummaryEntry): string[][] {
+  return (entry.relaySwimmers ?? [])
+    .slice()
+    .sort((a, b) => a.leg - b.leg)
+    .map((s) => relayLegSubSplitTimes(s.splits))
+}
+
 /**
  * An individual swim's interval splits — that round's when the view is filtered to prelims or
  * finals, else the finals' — leaving out missing ones ("No Data").
@@ -343,13 +418,16 @@ function swimSplits(entry: RosterSummaryEntry, round?: SessionRound | null) {
     .filter((s) => /\d/.test(s.time))
 }
 
-/** The leg an athlete swam on a relay and their split, e.g. "Leg 1 - 25.31". */
-function relayLegLabel(entry: RosterSummaryEntry, athleteId: string | undefined): string | null {
+/**
+ * The leg an athlete swam on a relay with their split, e.g. "Leg 1 - 25.31". The leg's own 50s are
+ * left to the exports.
+ */
+function athleteLegLabel(entry: RosterSummaryEntry, athleteId: string | undefined): string | null {
   if (entry.entryType !== "relay_team" || !athleteId) return null
   const swimmer = entry.relaySwimmers?.find((s) => s.athleteId === athleteId)
   if (!swimmer) return null
   const split = swimmer.splitTime?.trim()
-  return split && /\d/.test(split) ? `Leg ${swimmer.leg} - ${split}` : `Leg ${swimmer.leg}`
+  return relayLegLabel(swimmer.leg, split && /\d/.test(split) ? split : null)
 }
 
 /** `athleteId` is the athlete whose group the row sits in, so a relay shows their leg and split. */
@@ -362,7 +440,7 @@ function entrySubtitle(
   round?: SessionRound | null
 ): string {
   const bits = [
-    mode === "event" ? entry.athleteName : relayLegLabel(entry, athleteId),
+    mode === "event" ? entry.athleteName : athleteLegLabel(entry, athleteId),
     withHeatLane ? formatHeatLane(entry, round) : null,
     withHeatLane ? startTimeFor(entry, round) : null,
     formatTimes(entry),
@@ -405,6 +483,7 @@ function pdfRow(
     isRelay && athleteId ? entry.relaySwimmers?.find((s) => s.athleteId === athleteId) : undefined
   const legNumber = swimmer?.leg
   const split = swimmer?.splitTime?.trim()
+  const legSubSplits = isRelay ? relayLegSubSplits(entry) : []
   const relayTitleFrom = (event: string) =>
     [event, entry.relayLetter, entry.relayRound ? `(${entry.relayRound})` : null]
       .filter(Boolean)
@@ -416,12 +495,8 @@ function pdfRow(
     fullLabel: isRelay ? relayTitleFrom(`${relayEvent} Relay`) : undefined,
     meta:
       [
-        // "Leg 4 - 20.05": the leg, then its split.
-        legNumber
-          ? `Leg ${legNumber}${split && /\d/.test(split) ? ` - ${split}` : ""}`
-          : split && /\d/.test(split)
-            ? `Split ${split}`
-            : null,
+        // "Leg 4 - 20.05": the leg, then its split (and its 50s: "Leg 2 - 49.20 (23.83 · 25.37)").
+        relayLegLabel(legNumber, split && /\d/.test(split) ? split : null, relayLegSubSplitTimes(swimmer?.splits)),
         entrySubtitle(entry, "athlete", false, undefined, false),
       ]
         .filter(Boolean)
@@ -430,6 +505,7 @@ function pdfRow(
     startTime: startTimeFor(entry, round),
     legs: isRelay ? relayLegNames(entry) : undefined,
     legSplits: isRelay ? relayLegSplits(entry) : undefined,
+    legSubSplits: legSubSplits.some((times) => times.length) ? legSubSplits : undefined,
     splits: swimSplits(entry, round),
   }
 }
@@ -445,6 +521,7 @@ export function RosterSummarySection({
   iconUrl = null,
   canEdit = false,
   onHeatLaneSaved,
+  scrollRef,
 }: {
   entries: RosterSummaryEntry[]
   viewerAthleteId?: string | null
@@ -461,6 +538,8 @@ export function RosterSummarySection({
   canEdit?: boolean
   /** After a coach saves a heat & lane, to reload the meet. */
   onHeatLaneSaved?: () => void
+  /** The screen's scroll view, for the jump bar to scroll to a group (no jump bar without it). */
+  scrollRef?: RefObject<Pick<ScrollView, "scrollTo"> | null>
 }) {
   const c = usePalette()
   // "Entries" → "Heats" once a heat sheet is in → "Results" once results are posted.
@@ -474,9 +553,44 @@ export function RosterSummarySection({
   const [mode, setMode] = useState<"athlete" | "event">("athlete")
   const [query, setQuery] = useState("")
   const [mineOnly, setMineOnly] = useState(false)
+  const [genderFilter, setGenderFilter] = useState<"all" | "F" | "M">("all")
   /** A packet session's label, or null for every session. */
   const [sessionFilter, setSessionFilter] = useState<string | null>(null)
   const [hiddenRounds, setHiddenRounds] = useState<ReadonlySet<SummaryRoundKind>>(new Set())
+  const [filtersOpen, setFiltersOpen] = useState(false)
+
+  // The view and filters come back for this meet (for 12 hours); saving waits for the restore so the
+  // defaults don't overwrite the saved view first.
+  const [viewRestored, setViewRestored] = useState(false)
+  useEffect(() => {
+    let cancelled = false
+    void readSavedView(meetId).then((view) => {
+      if (cancelled) return
+      if (view) {
+        setMode(view.mode)
+        setMineOnly(view.mineOnly)
+        setGenderFilter(view.gender)
+        setSessionFilter(view.session)
+        setHiddenRounds(new Set(view.hiddenRounds))
+      }
+      setViewRestored(true)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [meetId])
+  useEffect(() => {
+    if (!viewRestored) return
+    const view: SavedSummaryView = {
+      savedAt: Date.now(),
+      mode,
+      mineOnly,
+      gender: genderFilter,
+      session: sessionFilter,
+      hiddenRounds: [...hiddenRounds],
+    }
+    void AsyncStorage.setItem(`${VIEW_KEY_PREFIX}${meetId}`, JSON.stringify(view)).catch(() => {})
+  }, [viewRestored, meetId, mode, mineOnly, genderFilter, sessionFilter, hiddenRounds])
 
   const sessions = useMemo(() => rosterSummarySessions(eventOrder), [eventOrder])
   const activeSession = sessionFilter && sessions.includes(sessionFilter) ? sessionFilter : null
@@ -508,6 +622,12 @@ export function RosterSummarySection({
       ) {
         return false
       }
+      if (genderFilter !== "all") {
+        // A mixed relay belongs to both.
+        if (entry.entryType === "relay_team" ? entry.gender !== genderFilter && entry.gender !== "X" : entry.gender !== genderFilter) {
+          return false
+        }
+      }
       if (mineOnly && viewerAthleteId) {
         if (entry.entryType === "relay_team") {
           const onRelay = (entry.relaySwimmers ?? []).some(
@@ -530,7 +650,7 @@ export function RosterSummarySection({
         .toLowerCase()
       return hay.includes(q)
     })
-  }, [entries, mineOnly, query, viewerAthleteId, roundFilterOn, hiddenRounds, availableRounds, activeSession, eventOrder])
+  }, [entries, mineOnly, genderFilter, query, viewerAthleteId, roundFilterOn, hiddenRounds, availableRounds, activeSession, eventOrder])
 
   // Each relay sits in the group of every swimmer on it (only the viewer's with "My events"),
   // in event order with their individual events — there's no separate relays list.
@@ -560,27 +680,81 @@ export function RosterSummarySection({
     }
     const order = (entry: RosterSummaryEntry) =>
       entry.eventNumber && entry.eventNumber > 0 ? entry.eventNumber : Number.MAX_SAFE_INTEGER
+    // The viewer's own group first (as on web), then everyone by name.
+    const isViewer = (athleteId: string) => Boolean(viewerAthleteId) && athleteId === viewerAthleteId
     return [...map.values()]
       .map((group) => ({ ...group, entries: group.entries.slice().sort((a, b) => order(a) - order(b)) }))
-      .sort((a, b) => a.name.localeCompare(b.name))
+      .sort(
+        (a, b) => Number(isViewer(b.athleteId)) - Number(isViewer(a.athleteId)) || a.name.localeCompare(b.name)
+      )
   }, [filtered, mineOnly, viewerAthleteId])
 
   const eventGroups = useMemo(() => {
     const map = new Map<string, RosterSummaryEntry[]>()
     for (const entry of filtered) {
+      // Roster-only "Attending" rows aren't an event.
+      if (entry.rosterOnly) continue
       const key = `${entry.event}|${entry.gender ?? ""}|${entry.entryType ?? "individual"}`
       if (!map.has(key)) map.set(key, [])
       map.get(key)!.push(entry)
     }
+    // In meet order (by event number, as on web — events without one last), then by title.
+    const number = (n?: number) => (n != null && n > 0 ? n : Number.MAX_SAFE_INTEGER)
     return [...map.entries()]
       .map(([key, list]) => ({
         key,
         // "Women 200 Medley Relay"
         title: list[0] ? `${eventGenderWord(list[0].gender) ?? ""} ${list[0].event}`.trim() : key,
+        eventNumber: list.find((entry) => entry.eventNumber != null && entry.eventNumber > 0)?.eventNumber,
         entries: sortEventEntries(list, activeRound),
       }))
-      .sort((a, b) => a.title.localeCompare(b.title))
+      .sort((a, b) => number(a.eventNumber) - number(b.eventNumber) || a.title.localeCompare(b.title))
   }, [filtered, activeRound])
+
+  // Jump bar: by athlete a letter per first letter of the names listed, by event a number per
+  // numbered event, each keyed to the first group it names (whose View is kept in `groupViews`).
+  const groupViews = useRef(new Map<string, View>())
+  const jumpTargets = useMemo(() => {
+    const targets: (RosterSummaryJumpTarget & { groupKey: string })[] = []
+    const add = (groupKey: string, key: string, accessibilityLabel: string) => {
+      if (!targets.some((t) => t.key === key)) targets.push({ key, label: key, accessibilityLabel, groupKey })
+    }
+    if (mode === "athlete") {
+      for (const group of athleteGroups) {
+        const letter = rosterSummaryJumpLetter(group.name)
+        add(group.athleteId, letter, `Athletes starting with ${letter}`)
+      }
+    } else {
+      for (const group of eventGroups) {
+        if (group.eventNumber) add(group.key, String(group.eventNumber), `Event ${group.eventNumber}, ${group.title}`)
+      }
+    }
+    return targets
+  }, [mode, athleteGroups, eventGroups])
+
+  /**
+   * Scrolls the screen so the group starts just below its top. The meet screen has no sticky
+   * header inside its scroll view (the navigation header sits above it), so a small gap is all the
+   * offset needed.
+   */
+  function jumpTo(key: string) {
+    const scroll = scrollRef?.current
+    const groupKey = jumpTargets.find((t) => t.key === key)?.groupKey
+    const target = groupKey ? groupViews.current.get(groupKey) : undefined
+    // The scroll view's content view, which group offsets are measured against (getInnerViewRef is
+    // on ScrollView at runtime, though missing from its typings).
+    const content = (
+      scroll as unknown as { getInnerViewRef?: () => Parameters<View["measureLayout"]>[0] | null } | null
+    )?.getInnerViewRef?.()
+    if (!scroll || !target || content == null) return
+    target.measureLayout(content, (_x, y) => scroll.scrollTo({ y: Math.max(0, y - spacing.sm), animated: true }))
+  }
+
+  /** The ref callback that registers a group's View for the jump bar. */
+  const groupViewRef = (groupKey: string) => (view: View | null) => {
+    if (view) groupViews.current.set(groupKey, view)
+    else groupViews.current.delete(groupKey)
+  }
 
   /** The list as it's shown — same mode, "My events" and search — for the PDF export. */
   function buildPdfRequest(): RosterSummaryPdfRequest {
@@ -592,6 +766,7 @@ export function RosterSummarySection({
         activeSession,
         roundFilterOn ? roundFilterLabel(hiddenRounds, availableRounds) : null
       ),
+      genderFilter === "F" ? "Women" : genderFilter === "M" ? "Men" : null,
       mineOnly && viewerAthleteId ? "My events" : null,
       q ? `“${q}”` : null,
     ]
@@ -612,6 +787,7 @@ export function RosterSummarySection({
               ...pdfRow(entry, entryTitle(entry), group.athleteId, activeRound),
               legs: undefined,
               legSplits: undefined,
+              legSubSplits: undefined,
             })),
           }))
         : eventGroups.map((group) => ({
@@ -743,6 +919,24 @@ export function RosterSummarySection({
     })
   }
 
+  // The filters in effect, as chips under the search field.
+  const roundsShown = roundFilterOn ? roundFilterLabel(hiddenRounds, availableRounds) : null
+  const activeFilters: ActiveFilter[] = [
+    ...(mineOnly && viewerAthleteId ? [{ key: "mine", label: "My events", clear: () => setMineOnly(false) }] : []),
+    ...(activeSession ? [{ key: "session", label: activeSession, clear: () => setSessionFilter(null) }] : []),
+    ...(roundsShown ? [{ key: "rounds", label: roundsShown, clear: () => setHiddenRounds(new Set()) }] : []),
+    ...(genderFilter !== "all"
+      ? [{ key: "gender", label: genderFilter === "F" ? "Women" : "Men", clear: () => setGenderFilter("all") }]
+      : []),
+  ]
+  function clearFilters() {
+    setMineOnly(false)
+    setSessionFilter(null)
+    setHiddenRounds(new Set())
+    setGenderFilter("all")
+  }
+  const listEmpty = mode === "athlete" ? athleteGroups.length === 0 : eventGroups.length === 0
+
   if (entries.length === 0) return null
 
   return (
@@ -766,79 +960,114 @@ export function RosterSummarySection({
           </Pressable>
         }
       />
-      <View
-        style={{
-          flexDirection: "row",
-          flexWrap: "wrap",
-          marginBottom: spacing.sm,
-        }}
-      >
-        <Chip
-          label="By athlete"
-          selected={mode === "athlete"}
-          onPress={() => setMode("athlete")}
-        />
-        <Chip
-          label="By event"
-          selected={mode === "event"}
-          onPress={() => setMode("event")}
-        />
-        {viewerAthleteId ? (
-          <Chip
-            label="My events"
-            selected={mineOnly}
-            onPress={() => setMineOnly((v) => !v)}
+      <SegmentedToggle fill selectedIndex={mode === "athlete" ? 0 : 1} style={{ marginBottom: spacing.sm }}>
+        {(
+          [
+            ["athlete", "By athlete"],
+            ["event", "By event"],
+          ] as const
+        ).map(([value, label]) => (
+          <SegmentedOption
+            key={value}
+            flex
+            accessibilityLabel={label}
+            selected={mode === value}
+            onPress={() => setMode(value)}
+          >
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "600",
+                color: mode === value ? c.primaryContrast : c.textSecondary,
+              }}
+            >
+              {label}
+            </Text>
+          </SegmentedOption>
+        ))}
+      </SegmentedToggle>
+      <View style={{ flexDirection: "row", alignItems: "flex-start", gap: spacing.xs }}>
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <TextField
+            accessibilityLabel="Search athletes or events"
+            placeholder={[
+              "Athlete or event",
+              rosterSummaryScopeLabel(
+                activeSession,
+                roundFilterOn ? roundFilterLabel(hiddenRounds, availableRounds) : null
+              ),
+            ]
+              .filter(Boolean)
+              .join(" in ")}
+            value={query}
+            onChangeText={setQuery}
+            autoCapitalize="none"
+            autoCorrect={false}
+            clearButtonMode="while-editing"
           />
-        ) : null}
+        </View>
+        <Pressable
+          onPress={() => setFiltersOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel={
+            activeFilters.length > 0 ? `Filters, ${activeFilters.length} on` : "Filters"
+          }
+          style={({ pressed }) => ({
+            height: 44,
+            paddingHorizontal: spacing.sm,
+            borderRadius: 10,
+            borderWidth: 1,
+            borderColor: activeFilters.length > 0 ? c.accent : c.border,
+            backgroundColor: pressed ? c.bgHover : c.bgContainer,
+            alignItems: "center",
+            justifyContent: "center",
+          })}
+        >
+          <Text style={{ fontSize: 14, fontWeight: "600", color: activeFilters.length > 0 ? c.accent : c.text }}>
+            {activeFilters.length > 0 ? `Filters · ${activeFilters.length}` : "Filters"}
+          </Text>
+        </Pressable>
       </View>
-      {sessions.length > 0 ? (
-        <View style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: spacing.sm }}>
-          {[null, ...sessions].map((session) => (
+      {activeFilters.length > 0 ? (
+        <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", marginBottom: spacing.xs }}>
+          {activeFilters.map((filter) => (
             <Chip
-              key={session ?? "all"}
-              label={session ?? "All sessions"}
-              selected={activeSession === session}
-              onPress={() => setSessionFilter(session)}
+              key={filter.key}
+              label={`${filter.label}  ×`}
+              selected
+              accessibilityLabel={`Remove filter: ${filter.label}`}
+              onPress={filter.clear}
             />
           ))}
+          {activeFilters.length > 1 ? (
+            <Pressable
+              onPress={clearFilters}
+              accessibilityRole="button"
+              hitSlop={8}
+              style={{ paddingHorizontal: spacing.xs, paddingVertical: spacing.xxs }}
+            >
+              <Text style={{ fontSize: 13, fontWeight: "600", color: c.textSecondary }}>Clear all</Text>
+            </Pressable>
+          ) : null}
         </View>
       ) : null}
-      {roundFilterOn ? (
-        <View style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: spacing.sm }}>
-          {SUMMARY_ROUNDS.filter((r) => availableRounds.includes(r.kind)).map((r) => (
-            <Chip
-              key={r.kind}
-              label={r.label}
-              selected={!hiddenRounds.has(r.kind)}
-              onPress={() => toggleRound(r.kind)}
-            />
-          ))}
-        </View>
-      ) : null}
-      <TextField
-        label="Search"
-        placeholder={[
-          "Athlete or event",
-          rosterSummaryScopeLabel(
-            activeSession,
-            roundFilterOn ? roundFilterLabel(hiddenRounds, availableRounds) : null
-          ),
-        ]
-          .filter(Boolean)
-          .join(" in ")}
-        value={query}
-        onChangeText={setQuery}
-        autoCapitalize="none"
-        autoCorrect={false}
-        clearButtonMode="while-editing"
-      />
+      {scrollRef && !listEmpty ? <RosterSummaryJumpBar targets={jumpTargets} onJump={jumpTo} /> : null}
 
-      {filtered.length === 0 ? (
-        <EmptyState title="No matching entries" />
+      {listEmpty ? (
+        <EmptyState
+          title={mineOnly && viewerAthleteId && !query.trim() ? "You have no events here" : "No matching entries"}
+          body={activeFilters.length > 0 || query.trim() ? "Change the search or clear the filters to see more." : undefined}
+        />
       ) : mode === "athlete" ? (
         athleteGroups.map((group) => (
-          <View key={group.athleteId} style={{ marginBottom: spacing.md }}>
-            <Body style={{ fontWeight: "700", marginBottom: spacing.xs }}>
+          <View key={group.athleteId} ref={groupViewRef(group.athleteId)} collapsable={false} style={{ marginBottom: spacing.md }}>
+            <Body
+              style={{
+                fontWeight: "700",
+                marginBottom: spacing.xs,
+                color: viewerAthleteId && group.athleteId === viewerAthleteId ? c.accent : undefined,
+              }}
+            >
               <RosterNameText name={group.name} mutedColor={c.textSecondary} />
             </Body>
             {group.entries.map((entry, index) => (
@@ -853,7 +1082,7 @@ export function RosterSummarySection({
         ))
       ) : (
         eventGroups.map((group) => (
-          <View key={group.key} style={{ marginBottom: spacing.md }}>
+          <View key={group.key} ref={groupViewRef(group.key)} collapsable={false} style={{ marginBottom: spacing.md }}>
             <Body style={{ fontWeight: "700", marginBottom: spacing.xs }}>
               {group.title}
             </Body>
@@ -883,6 +1112,60 @@ export function RosterSummarySection({
       <Muted>
         {filtered.length} entr{filtered.length === 1 ? "y" : "ies"}
       </Muted>
+
+      <BottomSheet visible={filtersOpen} onClose={() => setFiltersOpen(false)} title="Filters">
+        {viewerAthleteId ? (
+          <FilterGroup label="Show">
+            <Chip label="Everyone" selected={!mineOnly} onPress={() => setMineOnly(false)} />
+            <Chip label="My events" selected={mineOnly} onPress={() => setMineOnly(true)} />
+          </FilterGroup>
+        ) : null}
+        <FilterGroup label="Gender">
+          {(
+            [
+              ["all", "All"],
+              ["F", "Women"],
+              ["M", "Men"],
+            ] as const
+          ).map(([value, label]) => (
+            <Chip key={value} label={label} selected={genderFilter === value} onPress={() => setGenderFilter(value)} />
+          ))}
+        </FilterGroup>
+        {sessions.length > 0 ? (
+          <FilterGroup label="Session">
+            {[null, ...sessions].map((session) => (
+              <Chip
+                key={session ?? "all"}
+                label={session ?? "All sessions"}
+                selected={activeSession === session}
+                onPress={() => setSessionFilter(session)}
+              />
+            ))}
+          </FilterGroup>
+        ) : null}
+        {roundFilterOn ? (
+          <FilterGroup label="Rounds">
+            {SUMMARY_ROUNDS.filter((r) => availableRounds.includes(r.kind)).map((r) => (
+              <Chip
+                key={r.kind}
+                label={r.label}
+                selected={!hiddenRounds.has(r.kind)}
+                onPress={() => toggleRound(r.kind)}
+              />
+            ))}
+          </FilterGroup>
+        ) : null}
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <Muted>
+            {filtered.length} entr{filtered.length === 1 ? "y" : "ies"}
+          </Muted>
+          {activeFilters.length > 0 ? (
+            <Pressable onPress={clearFilters} accessibilityRole="button" hitSlop={8}>
+              <Text style={{ fontSize: 15, fontWeight: "600", color: c.accent }}>Clear all</Text>
+            </Pressable>
+          ) : null}
+        </View>
+      </BottomSheet>
 
       <ActionSheet
         visible={shareOpen}

@@ -28,6 +28,7 @@ import { getSession } from "@/lib/auth/session"
 import { relayEditConflict } from "@/lib/meet/relay-edit-lock"
 import { RELAY_EDIT_LOCK_TOKEN_HEADER } from "@/lib/meet/relay-edit-lock-shared"
 import { isStaffRole } from "@swimbuzz/shared"
+import { notifyRelayLineupChanges } from "@/lib/notifications/relay-lineup-notify"
 
 export const runtime = "nodejs"
 
@@ -232,6 +233,7 @@ export async function POST(
   await prisma.meet.update({
     where: { id },
     data: { relayResultsSummary: { entries } }})
+  notifyRelayLineupChanges({ meetId: meet.id, before: meet.relayResultsSummary, after: entries, actorUserId: session.user.id })
 
   const leg1 = relayToSave.legs.find((leg) => leg.leg === 1)
   if (priorLeg1AthleteId && priorLeg1AthleteId !== leg1?.athleteId) {

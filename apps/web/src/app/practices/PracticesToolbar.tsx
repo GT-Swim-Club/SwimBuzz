@@ -183,7 +183,7 @@ function ChevronRightIcon() {
 
 function CheckIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 shrink-0 text-primary-active dark:text-primary-hover" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 shrink-0 text-accent" aria-hidden="true">
       <path d="M20 6 9 17l-5-5" />
     </svg>
   )
@@ -216,7 +216,7 @@ const VIEWPORT_PADDING = 8
 function optionRowClass(selected: boolean) {
   return (
     "flex items-center gap-2 whitespace-nowrap rounded-lg px-2 py-2 text-left text-sm hover:bg-fill-secondary " +
-    (selected ? "text-primary-active dark:text-primary-hover" : "text-foreground")
+    (selected ? "text-accent" : "text-foreground")
   )
 }
 
@@ -422,7 +422,7 @@ function SettingsPopover({ prefs, isCoach }: { prefs: PracticePrefs; isCoach: bo
                   }
                 >
                   <span
-                    className="absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-[left] duration-200"
+                    className="absolute top-0.5 h-4 w-4 rounded-full bg-[var(--brand-color-switch-thumb)] shadow transition-[left] duration-200"
                     style={{ left: prefs.monThuOnly ? 18 : 2 }}
                   />
                 </button>
@@ -553,7 +553,7 @@ export default function PracticesToolbar({
           onClick={() => onSelectingChange(!selecting)}
           aria-pressed={selecting}
           aria-label="Select practices"
-          className={controlClass + (selecting ? " border-primary bg-primary-bg text-primary hover:bg-primary-bg" : "")}
+          className={controlClass + (selecting ? " border-primary bg-primary-bg text-accent hover:bg-primary-bg" : "")}
         >
           <SelectIcon />
           <HoverDetail label={selecting ? "Done selecting" : "Select practices"} />

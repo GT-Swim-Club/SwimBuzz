@@ -1,4 +1,5 @@
-import { notifyMeetRosterInfoDropped } from "@/lib/notifications/notifications"
+import { notifyMeetInfoPosted } from "@/lib/notifications/notifications"
+import { runAfterResponse } from "@/lib/notifications/after-response"
 
 export const MEET_INFO_LABELS = {
   psych_sheet: "Psych sheet",
@@ -80,25 +81,34 @@ export function meetInfoLabel(kind: MeetInfoDropKind): string {
   return MEET_INFO_LABELS[kind]
 }
 
-export async function notifyMeetRosterOfInfoDrops(input: {
+/** Sheets get their own "posted" notice (and toggle); the rest is general meet info. */
+const SHEET_KINDS: ReadonlySet<MeetInfoDropKind> = new Set([
+  "psych_sheet",
+  "heat_sheet",
+  "finals_heat_sheet",
+  "entries_sheet",
+])
+
+/**
+ * Tell the meet's athletes what was just posted, once the response is sent (`after()`), as one
+ * sheets notice and one meet-info notice at most.
+ */
+export function notifyMeetRosterOfInfoDrops(input: {
   meetId: string
   meetName: string
   drops: MeetInfoDropKind[]
-}): Promise<void> {
+  /** Whoever posted it isn't told about it. */
+  excludeUserId?: string | null
+}): void {
   const uniqueDrops = [...new Set(input.drops)]
   if (uniqueDrops.length === 0) return
-
-  await Promise.all(
-    uniqueDrops.map(async (kind) => {
-      try {
-        await notifyMeetRosterInfoDropped({
-          meetId: input.meetId,
-          meetName: input.meetName,
-          infoLabel: meetInfoLabel(kind),
-        })
-      } catch (err) {
-        console.error(`Meet roster notification failed (${kind}):`, err)
-      }
+  runAfterResponse("meet info notification", () =>
+    notifyMeetInfoPosted({
+      meetId: input.meetId,
+      meetName: input.meetName,
+      sheetLabels: uniqueDrops.filter((kind) => SHEET_KINDS.has(kind)).map(meetInfoLabel),
+      infoLabels: uniqueDrops.filter((kind) => !SHEET_KINDS.has(kind)).map(meetInfoLabel),
+      excludeUserId: input.excludeUserId,
     })
   )
 }

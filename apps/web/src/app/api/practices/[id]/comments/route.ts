@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { checkCommentCreationRateLimit } from "@/lib/practice/comment-rate-limit"
 import { notifyPracticeComment } from "@/lib/notifications/notifications"
+import { runAfterResponse } from "@/lib/notifications/after-response"
 import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/auth/session"
 import { canViewPractice, isPrivatePractice, practiceViewer } from "@/lib/practice/practice-access"
@@ -78,7 +79,8 @@ export async function POST(
       body: text,
       parentId}})
 
-  await notifyPracticeComment({
+  runAfterResponse("practice comment notification", () =>
+    notifyPracticeComment({
     practiceId: practice.id,
     practiceTitle: practice.title,
     commentBody: text,
@@ -87,6 +89,7 @@ export async function POST(
     practiceAuthorId: practice.createdById,
     parentAuthorId,
     isReply: parentId != null})
+  )
 
   return NextResponse.json(
     {

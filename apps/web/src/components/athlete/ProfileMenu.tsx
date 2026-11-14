@@ -106,7 +106,7 @@ export default function ProfileMenu({
           aria-expanded={open}
           aria-haspopup="menu"
           aria-label="Open profile menu"
-          className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-border-secondary bg-primary/10 text-sm font-medium text-primary transition-opacity hover:opacity-90"
+          className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-border-secondary bg-primary/10 text-sm font-medium text-accent transition-opacity hover:opacity-90"
         >
           {image ? (
             // eslint-disable-next-line @next/next/no-img-element

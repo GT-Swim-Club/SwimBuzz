@@ -1353,7 +1353,7 @@ export default function PracticeEditor({
           ) : (
             <span
               title={isPrivate ? "Only you can see this practice" : undefined}
-              className="rounded-full bg-primary/20 dark:bg-primary/30 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-active shadow-sm dark:text-primary-hover shrink-0"
+              className="rounded-full bg-primary/20 dark:bg-primary/30 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent shadow-sm shrink-0"
             >
               {isPrivate ? "Private Practice" : "Team Practice"}
             </span>
@@ -1438,7 +1438,7 @@ export default function PracticeEditor({
             </div>
           </div>
           {endBeforeStart && (
-            <p className="text-xs text-red-600 dark:text-red-400">End time must be after start time.</p>
+            <p className="text-xs text-error">End time must be after start time.</p>
           )}
 
           <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
@@ -1593,7 +1593,7 @@ export default function PracticeEditor({
                     )}
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_9rem_auto] sm:items-end">
                       <div>
-                        <label className="mb-1 block text-xs font-medium text-primary-active dark:text-primary-hover">Set Name</label>
+                        <label className="mb-1 block text-xs font-medium text-accent">Set Name</label>
                         <input
                           placeholder="Set"
                           value={set.title}
@@ -1631,7 +1631,7 @@ export default function PracticeEditor({
                           onClick={() => setSetPendingDeletion({ dragId, title: set.title })}
                           disabled={form.sets.length === 1}
                           aria-label="Delete set"
-                          className="group relative grid h-9 w-9 place-items-center rounded-lg border border-red-200 text-red-600 transition-colors hover:bg-red-50 disabled:opacity-30 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/30"
+                          className="group relative grid h-9 w-9 place-items-center rounded-lg border border-error-border text-error transition-colors hover:bg-error-bg disabled:opacity-30   "
                         >
                           <ActionIcon kind="delete" className="h-4 w-4" />
                           <HoverDetail label="Delete" />
@@ -1673,7 +1673,7 @@ export default function PracticeEditor({
         style={{ maxWidth: barMaxWidth }}
         className="sticky bottom-4 z-20 mx-auto w-full rounded-2xl border border-border bg-background/95 px-4 py-3 shadow-lg shadow-black/5 backdrop-blur transition-[max-width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] sm:px-5"
       >
-        {error && <p className="mb-3 text-sm text-red-600 dark:text-red-400">{error}</p>}
+        {error && <p className="mb-3 text-sm text-error">{error}</p>}
         <div
           className={
             "flex gap-3 " +
@@ -1771,7 +1771,7 @@ export default function PracticeEditor({
             <button
               type="button"
               onClick={confirmSetDeletion}
-              className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-error-contrast hover:bg-red-700"
+              className="flex-1 rounded-lg bg-error px-4 py-2.5 text-sm font-medium text-error-contrast hover:bg-error-hover"
             >
               Delete
             </button>

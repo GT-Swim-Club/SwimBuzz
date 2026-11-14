@@ -6,7 +6,7 @@ import { FilePreviewDialog } from "@/components/ui/FilePreview"
 import HoverDetail from "@/components/ui/HoverDetail"
 import { toolbarIconButtonClass, useToolbarCondensed } from "@/components/ui/FluidToolbar"
 
-const linkClass = "shrink-0 whitespace-nowrap px-1 text-sm text-primary hover:underline"
+const linkClass = "shrink-0 whitespace-nowrap px-1 text-sm text-accent hover:underline"
 
 /** "View standards" in the Nationals toolbar — an icon button once the toolbar condenses. */
 export default function StandardsTableModal({

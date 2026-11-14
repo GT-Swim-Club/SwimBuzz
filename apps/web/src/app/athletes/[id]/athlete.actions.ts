@@ -11,6 +11,8 @@ import { getSession } from "@/lib/auth/session"
 import { normalizeSwimForInsert, nextSwimOccurrence } from "@/lib/swim/swim-dedup"
 import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
 import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
+import { removeAthleteSeasons } from "@/lib/athlete/athlete-seasons"
+import { applyYearEdits } from "@/lib/athlete/athlete-year"
 
 export type UpdateAthleteInput = {
   firstName?: string
@@ -22,6 +24,8 @@ export type UpdateAthleteInput = {
   gtid?: string | null
   /** "YYYY-MM-DD". */
   dob?: string | null
+  /** Academic year per season they're on; blank or null clears that season. */
+  yearBySeason?: Record<string, string | null>
 }
 
 /** GT ids are 9 digits starting with 90 (same shape the attendance Buzzcard scanner expects). */
@@ -101,6 +105,10 @@ export async function updateAthlete(athleteId: string, input: UpdateAthleteInput
     }
   }
 
+  if (input.yearBySeason !== undefined) {
+    Object.assign(data, applyYearEdits(athlete, input.yearBySeason))
+  }
+
   let email: string | null = null
   if (typeof input.email === "string") {
     email = input.email.trim().toLowerCase()
@@ -136,6 +144,15 @@ export async function updateAthlete(athleteId: string, input: UpdateAthleteInput
   // skips the revalidation: the client swaps in the new URL and calls router.refresh() itself.
   if (updated.slug === athlete.slug) revalidatePath("/athletes/[id]", "page")
   return updated
+}
+
+/** Same logic as PATCH /api/athletes/[id]/seasons. Returns the seasons left. */
+export async function removeAthleteFromSeasons(athleteId: string, seasons: string[]) {
+  await requireStaff()
+  const remaining = await removeAthleteSeasons(athleteId, seasons)
+  revalidatePath("/athletes")
+  revalidatePath("/athletes/[id]", "page")
+  return remaining
 }
 
 /** Same logic as DELETE /api/athletes/[id]. */

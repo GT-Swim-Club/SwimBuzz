@@ -72,15 +72,15 @@ export default function DeleteSwimButton({
               type="button"
               onClick={handleDelete}
               disabled={loading}
-              className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-error-contrast hover:bg-red-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-error px-4 py-2.5 text-sm font-medium text-error-contrast hover:bg-error-hover disabled:opacity-50"
             >
               {loading ? "Deleting…" : "Delete"}
             </button>
           </ModalFooter>
         }
       >
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-950/50">
-          <ActionIcon kind="delete" className="h-5 w-5 text-error dark:text-error" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-error-bg">
+          <ActionIcon kind="delete" className="h-5 w-5 text-error" />
         </div>
 
         <div className="rounded-xl border border-border-secondary dark:border border-border-secondary bg-fill-secondary dark:bg-background-elevated px-4 py-3">

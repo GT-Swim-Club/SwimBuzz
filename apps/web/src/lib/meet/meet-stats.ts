@@ -45,7 +45,7 @@ export type NationalsCutForStats = {
   timeMs: number
 }
 
-/** Lifetime PB map: athleteId|normalizedEvent|course → best timeMs */
+/** Best-time map: athleteId|normalizedEvent|course → best timeMs (e.g. each athlete's bests before a meet) */
 export type AthletePbMap = Map<string, number>
 
 export function pbKey(athleteId: string, event: string, course: string): string {
@@ -206,7 +206,11 @@ function displayName(athleteName: string): string {
 export function computeMeetResultHighlights(opts: {
   results: MeetResultEntry[]
   meetSwims: MeetSwimForStats[]
-  pbMap: AthletePbMap
+  /**
+   * Each athlete × event × course's best before this meet. A swim here is a PB when it beats that, or
+   * when it's the athlete's first swim in the event — so a later, faster meet never takes it back.
+   */
+  priorBestMap: AthletePbMap
   athleteHrefById?: Map<string, string>
   /** Individual Nationals cuts for the meet's season. */
   nationalsCuts?: NationalsCutForStats[]
@@ -228,7 +232,7 @@ export function computeMeetResultHighlights(opts: {
   const {
     results,
     meetSwims,
-    pbMap,
+    priorBestMap,
     nationalsCuts,
     priorSeasonSwims,
     athleteHrefById,
@@ -256,7 +260,8 @@ export function computeMeetResultHighlights(opts: {
     const seen = new Set<string>()
     for (const r of results) {
       const place = preferredPlace(r)
-      if (r.isRelayLeadoff || place == null || place > 3) continue
+      // A swim-off only breaks a tie for a place in the next round — not a podium of its own.
+      if (r.isRelayLeadoff || r.isSwimOff || place == null || place > 3) continue
       const key = `${r.athleteId}|${normalizeEventName(r.event)}`
       if (seen.has(key)) continue
       seen.add(key)
@@ -273,7 +278,7 @@ export function computeMeetResultHighlights(opts: {
     }
     for (const relay of relayResults ?? []) {
       const place = preferredPlace(relay)
-      if (relay.entryType !== "relay_team" || relay.relayRound === "P" || place == null || place > 3) continue
+      if (relay.entryType !== "relay_team" || relay.relayRound === "P" || relay.isSwimOff || place == null || place > 3) continue
       const legs = [...(relay.relaySwimmers ?? [])].sort((a, b) => a.leg - b.leg)
       const gender = relayGender(relay.gender, legs.map((leg) => (leg.athleteId ? genderById?.get(leg.athleteId) : undefined)))
       const event = `${eventLabel(relay.event)}${relay.relayLetter ? ` ${relay.relayLetter}` : ""}`
@@ -392,13 +397,14 @@ export function computeMeetResultHighlights(opts: {
   function countPlacedAtOrBetter(maxPlace: number): number {
     const keys = new Set<string>()
     for (const r of results) {
-      if (r.isRelayLeadoff) continue
+      // A swim-off's place is only a tie-break for the next round.
+      if (r.isRelayLeadoff || r.isSwimOff) continue
       const place = preferredPlace(r)
       if (place == null || place > maxPlace) continue
       keys.add(`${r.athleteId}|${normalizeEventName(r.event)}`)
     }
     for (const relay of relayResults ?? []) {
-      if (relay.entryType !== "relay_team" || relay.relayRound === "P") continue
+      if (relay.entryType !== "relay_team" || relay.relayRound === "P" || relay.isSwimOff) continue
       const place = preferredPlace(relay)
       if (place == null || place > maxPlace) continue
       // Its gender from the sheet, else its swimmers, so women's and men's relays stay apart.
@@ -422,13 +428,23 @@ export function computeMeetResultHighlights(opts: {
     counters.push({ label: countLabel(topEightCount, "Top 8 Finish", "Top 8 Finishes"), value: topEightCount, row: "results" })
   }
 
-  // Personal bests set (including relay leadoffs)
-  let pbCount = 0
-  const pbCountsByAthlete = new Map<string, { athleteName: string; sortName: string; count: number }>()
+  // Each athlete × event's fastest swim here (prelims and finals count once), relay leadoffs included
+  const fastestHere = new Map<string, MeetSwimForStats>()
   for (const s of meetSwims) {
     if (!Number.isFinite(s.timeMs) || s.timeMs <= 0) continue
-    const best = pbMap.get(pbKey(s.athleteId, s.event, s.course))
-    if (best == null || s.timeMs !== best) continue
+    const key = pbKey(s.athleteId, s.event, s.course)
+    const prev = fastestHere.get(key)
+    if (!prev || s.timeMs < prev.timeMs) fastestHere.set(key, s)
+  }
+
+  // Personal bests — that fastest swim, when it beats every swim before this meet or is the
+  // athlete's first in the event. One per athlete × event: a PB in prelims bettered again in finals
+  // is one PB, as Season Bests counts it.
+  let pbCount = 0
+  const pbCountsByAthlete = new Map<string, { athleteName: string; sortName: string; count: number }>()
+  for (const [key, s] of fastestHere) {
+    const prior = priorBestMap.get(key)
+    if (prior != null && s.timeMs >= prior) continue
     pbCount += 1
     const prev = pbCountsByAthlete.get(s.athleteId)
     if (prev) prev.count += 1
@@ -441,21 +457,14 @@ export function computeMeetResultHighlights(opts: {
     counters.push({ label: countLabel(pbCount, "Personal Best", "Personal Bests"), value: pbCount, row: "swims" })
   }
 
-  // Season bests — each athlete × event's fastest swim here (prelims and finals count once), when
-  // it's their first of the season in that event or beats every earlier one this season
+  // Season bests — the same fastest swims, when it's the athlete's first of the season in that
+  // event or beats every earlier one this season
   if (priorSeasonSwims) {
-    const fastestHere = new Map<string, number>()
-    for (const s of meetSwims) {
-      if (!Number.isFinite(s.timeMs) || s.timeMs <= 0) continue
-      const key = pbKey(s.athleteId, s.event, s.course)
-      const prev = fastestHere.get(key)
-      if (prev == null || s.timeMs < prev) fastestHere.set(key, s.timeMs)
-    }
     const priorSeasonBest = buildAthletePbMap(priorSeasonSwims)
     let seasonBestCount = 0
-    for (const [key, timeMs] of fastestHere) {
+    for (const [key, s] of fastestHere) {
       const prior = priorSeasonBest.get(key)
-      if (prior == null || timeMs < prior) seasonBestCount += 1
+      if (prior == null || s.timeMs < prior) seasonBestCount += 1
     }
     if (seasonBestCount > 0) {
       counters.push({
@@ -537,7 +546,7 @@ export function computeMeetResultHighlights(opts: {
     deltaMs: number
   } | null = null
   for (const r of results) {
-    if (r.isRelayLeadoff || !r.seedTime?.trim()) continue
+    if (r.isRelayLeadoff || r.isSwimOff || !r.seedTime?.trim()) continue
     const resultMs = bestResultTimeMs(r)
     if (resultMs == null) continue
     const seedMs = parseTime(r.seedTime)

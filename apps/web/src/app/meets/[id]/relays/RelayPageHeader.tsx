@@ -32,14 +32,18 @@ export default function RelayPageHeader({
       <>{back}</>
       <div className="mt-1 flex items-center gap-4 sm:gap-5">
         {iconUrl ? <MeetListThumb iconUrl={iconUrl} bannerUrl={null} size={80} label={`${meetName} icon`} /> : null}
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-3">
-            <FitHeading className="min-w-0 flex-1 text-4xl font-semibold text-foreground sm:text-5xl">
-              {meetName}
-            </FitHeading>
-            {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
+        {/* Phones: name, eyebrow, then the actions on a row of their own, so they never squeeze the
+            name. Wider: the actions sit beside the name. */}
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3">
+          <FitHeading className="min-w-0 basis-full text-4xl font-semibold text-foreground sm:flex-1 sm:basis-0 sm:text-5xl">
+            {meetName}
+          </FitHeading>
+          <div className="order-1 mt-1.5 flex min-w-0 basis-full flex-wrap items-center gap-x-2.5 gap-y-1 sm:order-2">
+            {eyebrow}
           </div>
-          <div className="mt-1.5 flex items-center gap-2.5">{eyebrow}</div>
+          {actions ? (
+            <div className="order-2 mt-2.5 flex shrink-0 items-center gap-2 sm:order-1 sm:mt-0">{actions}</div>
+          ) : null}
         </div>
       </div>
     </header>

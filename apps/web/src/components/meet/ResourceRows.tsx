@@ -28,9 +28,11 @@ export function resourceValueLabel(value: string): string {
   return trimmed
 }
 
-export async function uploadMeetResourceFile(file: File): Promise<string> {
+/** Upload into the meet's storage folder (`meetId`), or pending/ before the meet exists. */
+export async function uploadMeetResourceFile(file: File, meetId?: string): Promise<string> {
   const body = new FormData()
   body.append("file", file)
+  if (meetId) body.append("meetId", meetId)
   const res = await fetch("/api/meets/upload", { method: "POST", body })
   const data = await res.json().catch(() => ({}))
   if (!res.ok || !data.url) throw new Error(data.error ?? `Upload failed for ${file.name}`)
@@ -136,7 +138,7 @@ export function ResourceRow({
       <button
         type="button"
         onClick={onToggle}
-        className="text-[13px] font-medium text-primary transition-colors hover:text-primary-hover"
+        className="text-[13px] font-medium text-accent transition-colors hover:text-primary"
       >
         + Add
       </button>
@@ -260,10 +262,13 @@ export function ResourceFileOrLink({
   dropLabel,
   linkPlaceholder,
   showDrop = true,
+  meetId,
   onAdd,
   onUploaded,
   onUploadingChange,
 }: {
+  /** Meet whose storage folder uploads go in. */
+  meetId?: string
   accept?: string
   dropLabel?: string
   linkPlaceholder?: string
@@ -294,7 +299,7 @@ export function ResourceFileOrLink({
     setUploading(true)
     setError(null)
     try {
-      const url = await uploadMeetResourceFile(file)
+      const url = await uploadMeetResourceFile(file, meetId)
       onUploaded?.(url)
       onAdd(url)
     } catch (err) {

@@ -12,6 +12,8 @@ import { useScraperStatus } from "@/lib/scraper/use-scraper-status"
 
 type ScraperUiContextValue = {
   connected: boolean
+  /** Last heartbeat from the connected scraper (ISO); null when not connected. */
+  lastSeenAt: string | null
   loading: boolean
   refresh: () => Promise<{ connected: boolean; lastSeenAt: string | null }>
   openRunScraper: () => void
@@ -35,7 +37,7 @@ export function useScraperUi() {
 }
 
 export default function ScraperUiProvider({ children }: { children: ReactNode }) {
-  const { connected, loading, refresh } = useScraperStatus()
+  const { connected, lastSeenAt, loading, refresh } = useScraperStatus()
   const [runOpen, setRunOpen] = useState(false)
   const [pending, setPending] = useState<PendingAction | null>(null)
 
@@ -73,7 +75,7 @@ export default function ScraperUiProvider({ children }: { children: ReactNode })
 
   return (
     <ScraperUiContext.Provider
-      value={{ connected, loading, refresh, openRunScraper, requireScraper }}
+      value={{ connected, lastSeenAt, loading, refresh, openRunScraper, requireScraper }}
     >
       {children}
       <RunScraperModal

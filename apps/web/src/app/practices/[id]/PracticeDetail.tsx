@@ -201,7 +201,7 @@ export default function PracticeDetail({
                 <PrivateBadge />
               ) : (
                 isCoach && !published && (
-                  <span className="text-[10px] uppercase tracking-wide rounded-full bg-primary/20 dark:bg-primary/30 px-2 py-0.5 text-primary-active shadow-sm dark:text-primary-hover">
+                  <span className="text-[10px] uppercase tracking-wide rounded-full bg-primary/20 dark:bg-primary/30 px-2 py-0.5 text-accent shadow-sm">
                     Draft
                   </span>
                 )
@@ -303,9 +303,9 @@ export default function PracticeDetail({
                 {canEdit && editLock?.locked && (
                   <p
                     role="status"
-                    className="absolute inset-x-0 top-full mt-1.5 flex items-center justify-end gap-1.5 text-right text-[11px] font-medium text-amber-800 dark:text-amber-200"
+                    className="absolute inset-x-0 top-full mt-1.5 flex items-center justify-end gap-1.5 text-right text-[11px] font-medium text-warning-text"
                   >
-                    <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500 dark:bg-amber-300" />
+                    <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-warning " />
                     {editLock.lockedByMe
                       ? "You're editing in another window."
                       : `${editLock.lockedBy?.name?.trim() || "Another coach"} is editing.`}
@@ -339,12 +339,12 @@ export default function PracticeDetail({
                 <section key={set.id}>
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
-                      <h3 className="text-[15px] font-bold text-primary-active dark:text-primary-hover">
+                      <h3 className="text-[15px] font-bold text-accent">
                         {set.title || "Set"}
                       </h3>
                     </div>
                     {set.distance != null && (
-                      <span className="shrink-0 text-xs font-medium tabular-nums text-primary-active dark:text-primary-hover">
+                      <span className="shrink-0 text-xs font-medium tabular-nums text-accent">
                         {set.distance}
                       </span>
                     )}

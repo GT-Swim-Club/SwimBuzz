@@ -30,7 +30,7 @@ export default async function SignInPage({
 
       <div className="fixed inset-0 z-30 flex items-center justify-center px-4 py-12">
         <div className="relative w-full max-w-lg">
-          <p className="absolute bottom-full left-0 right-0 mb-4 text-center text-xs text-foreground-quaternary">
+          <p className="absolute bottom-full left-0 right-0 mb-4 text-center text-xs text-foreground-tertiary">
             <Link href="/" className="hover:text-foreground">
               ← Back to home
             </Link>
@@ -39,7 +39,7 @@ export default async function SignInPage({
           <div className="rounded-2xl border border-border bg-background/90 p-8 shadow-xl backdrop-blur-sm">
             <Link
               href="/"
-              className="flex w-full items-center justify-center gap-2.5 text-[15px] font-semibold tracking-tight text-primary-active dark:text-primary-hover"
+              className="flex w-full items-center justify-center gap-2.5 text-[15px] font-semibold tracking-tight text-accent"
             >
               <Image
                 src="/swimbuzz-logo.png"

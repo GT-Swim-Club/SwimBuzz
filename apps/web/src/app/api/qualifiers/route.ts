@@ -4,7 +4,8 @@ import { parseSeason } from "@/lib/season"
 import { fetchMeetFileBytes } from "@/lib/meet/meet-file-fetch"
 import { isParsablePacketUrl } from "@/lib/meet/meet-event-order"
 import { parseNqtPdf } from "@/lib/meet/pdf-parser-client"
-import { uploadMeetFile } from "@/lib/meet/meet-storage"
+import { deleteUnreferencedStoredFiles, uploadMeetFile } from "@/lib/meet/meet-storage"
+import { NATIONALS_FILE_FOLDER } from "@/lib/meet/meet-files"
 import {
   computeNationalsQualifiers,
   isNqtParseResult,
@@ -14,6 +15,7 @@ import {
 import { prisma } from "@/lib/prisma"
 import { isClientDisconnected, throwIfDisconnected } from "@/lib/client-disconnect"
 import { getSession } from "@/lib/auth/session"
+import { resolveViewerAthleteId } from "@/lib/athlete/athlete-view-server"
 import { isStaffRole } from "@swimbuzz/shared"
 
 export const runtime = "nodejs"
@@ -44,31 +46,19 @@ export async function GET(req: Request) {
   const gender =
     genderRaw === "M" || genderRaw === "F" ? (genderRaw as "M" | "F") : null
 
-  const { set, qualifiers, qualifierCount, standards } =
-    await computeNationalsQualifiers({
+  const [{ set, qualifiers, qualifierCount, standards, cuts, courses }, viewerAthleteId] = await Promise.all([
+    computeNationalsQualifiers({
       season,
       course,
       gender,
       includeRelays: false,
-    })
-
-  const cuts = standards.flatMap((row) => {
-    const out: Array<{
-      event: string
-      gender: "M" | "F"
-      note: string | null
-      timeMs?: number
-    }> = []
-    if (row.women && row.women !== "--") {
-      out.push({ event: row.event, gender: "F", note: row.women })
-    }
-    if (row.men && row.men !== "--") {
-      out.push({ event: row.event, gender: "M", note: row.men })
-    }
-    return out
-  })
+    }),
+    resolveViewerAthleteId(session.user.id),
+  ])
 
   return NextResponse.json({
+    courses,
+    viewerAthleteId,
     set: set
       ? {
           id: set.id,
@@ -159,13 +149,20 @@ export async function POST(req: Request) {
 
   let sourceUrlForParse: string
   try {
-    const { url } = await uploadMeetFile(fileBytes, "nqt-standards.pdf", "application/pdf")
+    const { url } = await uploadMeetFile(
+      fileBytes,
+      "nqt-standards.pdf",
+      "application/pdf",
+      NATIONALS_FILE_FOLDER
+    )
     sourceUrlForParse = url
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to upload PDF"
     return NextResponse.json({ error: message }, { status: 502 })
   }
 
+  // The stored copy of the set this replaces, deleted once nothing points at it.
+  const replacedSourceUrls: (string | null)[] = []
   try {
     const parsed = await parseNqtPdf<unknown>(session.user.id, sourceUrlForParse)
     if (!isNqtParseResult(parsed) || parsed.cuts.length === 0) {
@@ -177,6 +174,11 @@ export async function POST(req: Request) {
 
     const inferredCourse = parseNationalsCourse(parsed.course ?? null)
     throwIfDisconnected(req.signal)
+    const previous = await prisma.nationalsStandardSet.findUnique({
+      where: { season_course: { season, course: inferredCourse ?? course } },
+      select: { sourceUrl: true },
+    })
+    replacedSourceUrls.push(previous?.sourceUrl ?? null)
     const set = await saveNationalsStandards({
       season,
       course: inferredCourse ?? course,
@@ -202,6 +204,10 @@ export async function POST(req: Request) {
     if (isClientDisconnected(err)) return new NextResponse(null, { status: 499 })
     const message = err instanceof Error ? err.message : "Failed to parse NQT PDF"
     return NextResponse.json({ error: message }, { status: 502 })
+  } finally {
+    // Reference-checked: the copy stays when the saved set points at it (file uploads);
+    // a parse-only copy (URL imports, failed parses) and the replaced set's copy go.
+    await deleteUnreferencedStoredFiles([sourceUrlForParse, ...replacedSourceUrls])
   }
 }
 
@@ -218,8 +224,13 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: "Valid season is required" }, { status: 400 })
   }
 
+  const removed = await prisma.nationalsStandardSet.findMany({
+    where: { season, course },
+    select: { sourceUrl: true },
+  })
   await prisma.nationalsStandardSet.deleteMany({
     where: { season, course },
   })
+  await deleteUnreferencedStoredFiles(removed.map((set) => set.sourceUrl))
   return NextResponse.json({ ok: true })
 }

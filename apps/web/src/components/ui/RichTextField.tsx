@@ -153,7 +153,7 @@ export default function RichTextField({
           openOnClick: false,
           autolink: false, // Prevents automatic link creation on click
           HTMLAttributes: {
-              class: 'text-[var(--brand-color-primary)] underline',
+              class: 'text-accent underline hover:text-primary',
           },
         },
         underline: {
@@ -325,7 +325,7 @@ export default function RichTextField({
                 <button type="button" onClick={() => setLinkModalOpen(false)} className="rounded-lg border border-border px-4 py-2 text-sm hover:bg-fill-secondary">Cancel</button>
                 <div className="flex-1" />
                 {linkUrl && (
-                    <button type="button" onClick={handleRemoveLink} className="rounded-lg border border-border px-4 py-2 text-sm text-red-600 hover:bg-fill-secondary">Remove</button>
+                    <button type="button" onClick={handleRemoveLink} className="rounded-lg border border-border px-4 py-2 text-sm text-error hover:bg-fill-secondary">Remove</button>
                 )}
                 <button type="button" onClick={handleAddLink} className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-contrast">Apply</button>
             </ModalFooter>
@@ -355,7 +355,7 @@ export default function RichTextField({
               className={`w-full rounded-lg border border-border px-3 py-2 text-sm bg-background ${urlError ? 'border-error' : ''}`}
               placeholder="https://example.com"
           />
-          {urlError && <p className="text-xs text-red-500">Please enter a valid URL</p>}
+          {urlError && <p className="text-xs text-error">Please enter a valid URL</p>}
         </div>
       </Modal>
     </div>

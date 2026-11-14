@@ -251,7 +251,7 @@ export function PracticeSelectionBar({
               type="button"
               onClick={handleDelete}
               disabled={busy === "delete"}
-              className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-error-contrast hover:bg-red-700 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-error px-4 py-2.5 text-sm font-medium text-error-contrast hover:bg-error-hover disabled:opacity-50"
             >
               {busy === "delete" ? (allPrivate ? "Deleting…" : "Moving…") : deleteLabel}
             </button>

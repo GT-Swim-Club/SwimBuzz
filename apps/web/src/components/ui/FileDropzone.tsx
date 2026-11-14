@@ -333,7 +333,7 @@ export const FileDropzoneContent: React.FC<FileDropzoneContentProps> = ({
 
   return (
     <div className="flex min-w-0 items-center gap-2 text-left">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-accent">
         <svg
           className="h-4 w-4"
           fill="none"
@@ -359,7 +359,7 @@ export const FileDropzoneContent: React.FC<FileDropzoneContentProps> = ({
             event.stopPropagation();
             onRemove();
           }}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-foreground-tertiary transition-colors hover:bg-red-500/10 hover:text-red-500"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-foreground-tertiary transition-colors hover:bg-error-bg hover:text-error"
           aria-label={`Remove ${fileName}`}
           title="Remove file"
         >

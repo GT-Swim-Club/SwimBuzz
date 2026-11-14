@@ -92,7 +92,7 @@ export default async function HomePage() {
         </div>
 
         <div className="relative mx-auto max-w-[84rem] px-4 py-12 min-[375px]:px-6 sm:px-10 sm:py-20 lg:px-12 lg:py-24 xl:max-w-none xl:px-[clamp(8rem,10vw,18rem)]">
-          <p className="text-sm font-medium uppercase tracking-widest text-primary">
+          <p className="text-sm font-medium uppercase tracking-widest text-accent">
             Georgia Tech Swim Club
           </p>
           <h1 className="mt-4 max-w-2xl text-4xl font-semibold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
@@ -123,7 +123,7 @@ export default async function HomePage() {
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
           <div className="rounded-2xl border border-border bg-background p-5 shadow-sm sm:p-7">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-accent">
                 <AppIcon name="userRound" className="h-5 w-5" strokeWidth={1.75} />
               </div>
               <div>
@@ -136,7 +136,7 @@ export default async function HomePage() {
 
           <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5 shadow-sm sm:p-7">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-accent">
                 <AppIcon name="graduationCap" className="h-5 w-5" strokeWidth={1.75} />
               </div>
               <div>

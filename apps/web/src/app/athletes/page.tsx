@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import ImportRosterButton from "./ImportRosterButton"
 import SyncTimesButton from "./SyncTimesButton"
 import AddAthleteButton from "./AddAthleteButton"
+import ClearanceLinkButton from "./ClearanceLinkButton"
 import RosterView from "./RosterView"
 import RosterSkeleton from "./RosterSkeleton"
 import { parseSeason, resolveListedSeason } from "@/lib/season"
@@ -14,6 +15,7 @@ import { readListLayout } from "@/lib/list-layout-server"
 import { ListLayoutProvider } from "@/components/ui/ListLayout"
 import PinSearchParams from "@/components/ui/PinSearchParams"
 import type { ListLayout } from "@/lib/list-layout"
+import { athleteYearForSeason } from "@swimbuzz/shared"
 
 export const dynamic = 'force-dynamic'
 
@@ -31,7 +33,7 @@ async function RosterContent({ searchParams, layout }: { searchParams: Promise<R
     const season = resolveListedSeason(parseSeason(seasonParam ?? legacyYear), seasons)
 
     // Every gender for the season: RosterView filters gender and search client-side.
-    const [athletes, viewerAthleteId, isCoach] = await Promise.all([
+    const [rows, viewerAthleteId, isCoach] = await Promise.all([
       prisma.athlete.findMany({
         where: { seasons: { has: season } },
         select: {
@@ -42,6 +44,8 @@ async function RosterContent({ searchParams, layout }: { searchParams: Promise<R
           preferredName: true,
           gender: true,
           year: true,
+          yearBySeason: true,
+          seasons: true,
           dob: true,
           swimCloudIds: true,
           timesSyncedAt: true,
@@ -50,6 +54,12 @@ async function RosterContent({ searchParams, layout }: { searchParams: Promise<R
       resolveViewerAthleteId(session.user.id),
       isStaffUi(session.user.role),
     ])
+
+    // The year each athlete was in the season on screen, not their latest.
+    const athletes = rows.map(({ yearBySeason, seasons: athleteSeasons, ...athlete }) => ({
+      ...athlete,
+      year: athleteYearForSeason({ yearBySeason, year: athlete.year, seasons: athleteSeasons }, season),
+    }))
 
     return (
         <ListLayoutProvider page="roster" initial={layout}>
@@ -67,6 +77,7 @@ async function RosterContent({ searchParams, layout }: { searchParams: Promise<R
                         <>
                             <ImportRosterButton />
                             <SyncTimesButton />
+                            <ClearanceLinkButton season={season} />
                             <AddAthleteButton />
                         </>
                     ) : null

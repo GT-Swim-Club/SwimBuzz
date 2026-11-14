@@ -34,6 +34,8 @@ export type SheetImportSource =
       rejectedNames?: unknown
       /** True on the re-run after the pairing dialog (paired or skipped). */
       paired: boolean
+      /** Import-specific options (e.g. a confirmed column mapping). */
+      fields?: unknown
     }
   | { error: string; status: number }
 
@@ -50,6 +52,7 @@ export async function readSheetImportSource(req: Request): Promise<SheetImportSo
       nameMappings: parseJsonField(form.get("nameMappings")),
       rejectedNames: parseJsonField(form.get("rejectedNames")),
       paired: form.get("paired") === "true",
+      fields: parseJsonField(form.get("fields")),
     }
   }
 
@@ -67,6 +70,7 @@ export async function readSheetImportSource(req: Request): Promise<SheetImportSo
       nameMappings: body.nameMappings,
       rejectedNames: body.rejectedNames,
       paired: body.paired === true,
+      fields: body.fields,
     }
   } catch (err) {
     if (err instanceof SheetAccessExpiredError) {

@@ -14,12 +14,14 @@ import {
   relayTeamTime,
   type RelayGender,
 } from "@/lib/meet/relay-results"
+import type { SheetEntry } from "@/lib/meet/meet-sheet-summary"
 import { SWIMCLOUD_SOURCE } from "@/lib/swim/swimcloud-import"
 import { parseSwimTime } from "@/lib/swim/swim-parse"
 import { readRecordSwimmers, recordKey } from "@/lib/records/record-rows"
+import { notifyTeamRecordsBroken, type NewTeamRecord } from "@/lib/notifications/record-notify"
 
 /** A swim or relay from an imported SCY meet that could hold a record. */
-type Candidate = {
+export type Candidate = {
   gender: RecordGender
   event: string
   timeMs: number
@@ -32,26 +34,39 @@ type Candidate = {
   relayKey: string | null
 }
 
-type AthleteName = { id: string; firstName: string; lastName: string; preferredName: string | null; gender: "M" | "F" }
+export type AthleteName = { id: string; firstName: string; lastName: string; preferredName: string | null; gender: "M" | "F" }
 
 const INDIVIDUAL_EVENTS = [...new Set(RECORD_EVENTS.filter((def) => !def.relay).map((def) => def.event))]
 
-function swimmerOf(athlete: AthleteName): TeamRecordSwimmer {
+/**
+ * Swims that count for records and top times: from imported SCY meets, never SwimCloud copies or
+ * relay split legs (legs 2–4). DQs and other statuses are never stored as swims.
+ */
+export const RECORD_SWIM_WHERE = {
+  course: "SCY",
+  meetId: { not: null },
+  source: { not: SWIMCLOUD_SOURCE },
+  // Explicit as well as in the soft-delete policy, which a withDeleted(...) caller turns off.
+  NOT: { tags: { startsWith: RELAY_SPLIT_TAG_PREFIX } },
+  meetRef: { is: { deletedAt: null, course: "SCY" } },
+} satisfies Prisma.SwimWhereInput
+
+export function swimmerOf(athlete: Pick<AthleteName, "id" | "firstName" | "lastName" | "preferredName">): TeamRecordSwimmer {
   return { name: athletePreferredName(athlete), athleteId: athlete.id }
+}
+
+/** A relay team's status (DQ, DNF, …) in the round its time is from, when the results gave one. */
+function relayRoundStatus(entry: SheetEntry): string | undefined {
+  const round = effectiveRelayRound(entry)
+  if (round === "F") return entry.finalStatus ?? entry.resultStatus
+  if (round === "P") return entry.prelimStatus ?? entry.resultStatus
+  return entry.resultStatus
 }
 
 /** Individual swims from imported meets: never SwimCloud copies or relay split legs (legs 2–4). */
 async function individualCandidates(): Promise<Candidate[]> {
   const swims = await prisma.swim.findMany({
-    where: {
-      course: "SCY",
-      meetId: { not: null },
-      source: { not: SWIMCLOUD_SOURCE },
-      event: { in: INDIVIDUAL_EVENTS },
-      // Explicit as well as in the soft-delete policy, which a withDeleted(...) caller turns off.
-      NOT: { tags: { startsWith: RELAY_SPLIT_TAG_PREFIX } },
-      meetRef: { is: { deletedAt: null, course: "SCY" } },
-    },
+    where: { ...RECORD_SWIM_WHERE, event: { in: INDIVIDUAL_EVENTS } },
     select: {
       id: true,
       event: true,
@@ -83,8 +98,11 @@ async function individualCandidates(): Promise<Candidate[]> {
   })
 }
 
-/** Our relay teams' results in imported SCY meets (relayResultsSummary), skipping lineups with no result time. */
-async function relayCandidates(athletes: Map<string, AthleteName>): Promise<Candidate[]> {
+/**
+ * Our relay teams' results in imported SCY meets (relayResultsSummary), skipping lineups with no
+ * result time and DQ'd (or otherwise statused) teams.
+ */
+export async function relayCandidates(athletes: Map<string, AthleteName>): Promise<Candidate[]> {
   const meets = await prisma.meet.findMany({
     where: { course: "SCY", deletedAt: null },
     select: { id: true, name: true, startsAt: true, relayResultsSummary: true },
@@ -109,7 +127,7 @@ async function relayCandidates(athletes: Map<string, AthleteName>): Promise<Cand
       const event = relayEventKey(entry.event)
       if (!recordEventDef(event, gender)) continue
       const timeMs = parseSwimTime(relayTeamTime(entry) ?? "")
-      if (!timeMs) continue
+      if (!timeMs || relayRoundStatus(entry)?.trim()) continue
       const round = effectiveRelayRound(entry)
       const legs = [...(entry.relaySwimmers ?? [])].sort((a, b) => a.leg - b.leg)
       const swimmers = [1, 2, 3, 4].map((leg): TeamRecordSwimmer => {
@@ -180,6 +198,9 @@ export async function syncTeamRecords(): Promise<void> {
   }
   for (const list of byEvent.values()) list.sort((a, b) => a.timeMs - b.timeMs || a.date.getTime() - b.date.getTime())
 
+  /** Records this sync set from a swim; announced once the transaction commits. */
+  const newRecords: NewTeamRecord[] = []
+
   await prisma.$transaction(
     async (tx) => {
       // One sync at a time, so two can't both promote the same swim.
@@ -237,12 +258,23 @@ export async function syncTeamRecords(): Promise<void> {
                 source: "meet",
               },
             })
+            newRecords.push({
+              gender,
+              event: def.event,
+              timeMs: best.timeMs,
+              date: best.date,
+              swimmers: best.swimmers,
+              leadoff: best.leadoff,
+              meetId: best.meetId,
+              meetName: best.meetName,
+            })
           }
         }
       }
     },
     { timeout: 30_000, maxWait: 10_000 }
   )
+  notifyTeamRecordsBroken(newRecords)
 }
 
 /** syncTeamRecords for callers whose own write already succeeded: a failed sync is logged, not thrown. */

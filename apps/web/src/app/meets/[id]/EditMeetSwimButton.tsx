@@ -156,7 +156,7 @@ export default function EditMeetSwimButton({
               type="button"
               onClick={handleDelete}
               disabled={loading}
-              className="bg-background rounded-lg border border-border border-red-200 px-4 py-2.5 text-sm font-medium text-error hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-950/30 disabled:opacity-50"
+              className="bg-background rounded-lg border border-border border-error-border px-4 py-2.5 text-sm font-medium text-error hover:bg-error-bg disabled:opacity-50"
             >
               Delete
             </button>
@@ -180,7 +180,7 @@ export default function EditMeetSwimButton({
       >
         <div>
           <label className="block text-xs font-medium text-foreground-secondary mb-1">
-            Athlete <span className="text-red-500">*</span>
+            Athlete <span className="text-error">*</span>
           </label>
           <select
             required
@@ -230,7 +230,7 @@ export default function EditMeetSwimButton({
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-medium text-foreground-secondary mb-1">
-              Time <span className="text-red-500">*</span>
+              Time <span className="text-error">*</span>
             </label>
             <input
               required
@@ -243,7 +243,7 @@ export default function EditMeetSwimButton({
           </div>
           <div>
             <label className="block text-xs font-medium text-foreground-secondary mb-1">
-              Date <span className="text-red-500">*</span>
+              Date <span className="text-error">*</span>
             </label>
             <DatePicker
               value={form.date}

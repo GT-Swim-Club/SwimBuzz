@@ -67,6 +67,7 @@ export default async function Nav() {
           body: true,
           href: true,
           readAt: true,
+          seenAt: true,
           createdAt: true}})
     : []
 
@@ -80,7 +81,7 @@ export default async function Nav() {
   const headerBrand = (
     <Link
       href="/"
-      className="inline-flex items-center gap-2.5 font-semibold text-base tracking-tight text-primary-active transition-opacity hover:opacity-90 dark:text-primary-hover"
+      className="inline-flex items-center gap-2.5 font-semibold text-base tracking-tight text-accent transition-opacity hover:opacity-90"
     >
       <Image src="/swimbuzz-logo.png" alt="" width={32} height={32} className="h-8 w-8 rounded-md" priority />
       <span className="truncate">SwimBuzz</span>
@@ -104,6 +105,7 @@ export default async function Nav() {
         initialNotifications={notifications.map((notification) => ({
           ...notification,
           readAt: notification.readAt?.toISOString() ?? null,
+          seenAt: notification.seenAt?.toISOString() ?? null,
           createdAt: notification.createdAt.toISOString(),
         }))}
       />
@@ -126,7 +128,7 @@ export default async function Nav() {
   )
 
   return (
-    <nav className="relative z-40 flex shrink-0 items-center justify-between gap-2 border-b border-zinc-200 bg-background px-6 py-4 dark:border-zinc-800">
+    <nav className="relative z-40 flex shrink-0 items-center justify-between gap-2 border-b border-border bg-background px-6 py-4 ">
       {session ? (
         <AdaptiveHeaderLayout
           brand={headerBrand}

@@ -116,7 +116,7 @@ export default function AddAthleteButton() {
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label className="block text-xs font-medium text-foreground-secondary dark:text-foreground-secondary mb-1">
-                    First name <span className="text-red-500">*</span>
+                    First name <span className="text-error">*</span>
                   </label>
                   <input
                     required
@@ -127,7 +127,7 @@ export default function AddAthleteButton() {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-foreground-secondary dark:text-foreground-secondary mb-1">
-                    Last name <span className="text-red-500">*</span>
+                    Last name <span className="text-error">*</span>
                   </label>
                   <input
                     required
@@ -152,7 +152,7 @@ export default function AddAthleteButton() {
 
               <div>
                   <label className="block text-xs font-medium text-foreground-secondary dark:text-foreground-secondary mb-1">
-                  Email <span className="text-red-500">*</span>
+                  Email <span className="text-error">*</span>
                 </label>
                 <input
                   required
@@ -174,7 +174,7 @@ export default function AddAthleteButton() {
               </div>
 
         {error && (
-          <p className="text-sm text-error dark:text-error">{error}</p>
+          <p className="text-sm text-error">{error}</p>
         )}
       </Modal>
     </>

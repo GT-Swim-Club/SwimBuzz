@@ -25,7 +25,7 @@ async function QualifiersContent({
   userId: string
   role: string
 }) {
-  const [isCoach, currentAthleteId, { set, qualifiers }, seasons] = await Promise.all([
+  const [isCoach, currentAthleteId, { set, qualifiers, standards }, seasons] = await Promise.all([
     isStaffUi(role),
     resolveViewerAthleteId(userId),
     // Every gender: the gender filter, grouping and search apply client-side
@@ -44,6 +44,7 @@ async function QualifiersContent({
       seasons={seasons}
       standards={set ? { yearLabel: set.yearLabel, sourceUrl: set.sourceUrl, course: set.course } : null}
       qualifiers={qualifiers}
+      standardsTable={standards}
       eventRank={eventRank}
       currentAthleteId={currentAthleteId}
       isCoach={isCoach}

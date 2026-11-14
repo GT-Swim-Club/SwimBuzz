@@ -1,41 +1,85 @@
 import { zonedDayKey } from "./timezone"
 
-export type NotificationPreferenceKey =
-  | "practicePublished"
-  | "meetRosterInfo"
-  | "practiceComments"
-  | "profileChanges"
+/**
+ * Notification toggles, one per kind of notification. Each covers both the in-app list and push.
+ * The server (`/api/notifications/preferences`, the web settings action) accepts exactly these keys.
+ */
+export const NOTIFICATION_PREFERENCE_KEYS = [
+  "practicePublished",
+  "meetSheets",
+  "meetRosterInfo",
+  "relayLineups",
+  "nationalCuts",
+  "teamRecords",
+  "practiceComments",
+  "profileChanges",
+] as const
+
+export type NotificationPreferenceKey = (typeof NOTIFICATION_PREFERENCE_KEYS)[number]
 
 export type NotificationPreferences = Record<NotificationPreferenceKey, boolean>
 
 export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
   practicePublished: true,
+  meetSheets: true,
   meetRosterInfo: true,
+  relayLineups: true,
+  nationalCuts: true,
+  teamRecords: true,
   practiceComments: true,
   profileChanges: true,
+}
+
+export function isNotificationPreferenceKey(value: unknown): value is NotificationPreferenceKey {
+  return typeof value === "string" && (NOTIFICATION_PREFERENCE_KEYS as readonly string[]).includes(value)
 }
 
 export const NOTIFICATION_PREFERENCE_META: {
   key: NotificationPreferenceKey
   label: string
   description: string
+  /** Shown instead of `description` to someone with an athlete profile. */
   athleteDescription?: string
-  meetDirectorsOnly?: boolean
+  /** Only sent to people with an athlete profile (staff who swim included). */
   athletesOnly?: boolean
+  /** Only sent to coaches and exec. */
   staffOnly?: boolean
 }[] = [
   {
     key: "practicePublished",
     label: "New practices",
-    description: "When a coach publishes a practice",
+    description: "When a coach publishes a team practice",
+    athletesOnly: true,
+  },
+  {
+    key: "meetSheets",
+    label: "Psych & heat sheets",
+    description: "When the entries, psych sheet, or heat sheets are posted for a meet you're on",
+    athletesOnly: true,
   },
   {
     key: "meetRosterInfo",
-    label: "Meet updates",
-    description: "When new meet info is posted for a meet you're entered in",
-    athleteDescription:
-      "When psych sheets, heat sheets, results, or other meet info is posted for a meet you're on",
+    label: "Meet info",
+    description: "When the meet packet, results, live stream, or travel info is posted for a meet you're on",
     athletesOnly: true,
+  },
+  {
+    key: "relayLineups",
+    label: "Relay lineups",
+    description: "When a relay you're on is published or changed",
+    athletesOnly: true,
+  },
+  {
+    key: "nationalCuts",
+    label: "National cuts",
+    description: "When you make a national cut in an event for the first time this season",
+    athletesOnly: true,
+  },
+  {
+    key: "teamRecords",
+    label: "Team records",
+    description: "When a team record is broken",
+    athleteDescription: "When you set a team record",
   },
   {
     key: "practiceComments",
@@ -50,6 +94,28 @@ export const NOTIFICATION_PREFERENCE_META: {
     staffOnly: true,
   },
 ]
+
+/** Stored preferences (any JSON) with every key filled in; unknown keys are ignored. */
+export function parseNotificationPreferences(raw: unknown): NotificationPreferences {
+  const prefs = { ...DEFAULT_NOTIFICATION_PREFERENCES }
+  if (raw == null || typeof raw !== "object" || Array.isArray(raw)) return prefs
+  const obj = raw as Record<string, unknown>
+  for (const key of NOTIFICATION_PREFERENCE_KEYS) {
+    if (typeof obj[key] === "boolean") prefs[key] = obj[key] as boolean
+  }
+  return prefs
+}
+
+export function mergeNotificationPreferences(
+  current: unknown,
+  patch: Partial<NotificationPreferences>
+): NotificationPreferences {
+  const prefs = parseNotificationPreferences(current)
+  for (const key of NOTIFICATION_PREFERENCE_KEYS) {
+    if (typeof patch[key] === "boolean") prefs[key] = patch[key]
+  }
+  return prefs
+}
 
 /**
  * Compact date range with no redundant month/year repetition: "Sep 4–24, 2026" when

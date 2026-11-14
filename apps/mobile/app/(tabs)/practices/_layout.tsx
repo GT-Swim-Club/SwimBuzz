@@ -10,6 +10,7 @@ export default function PracticesStackLayout() {
       backScreens={[
         { name: "[id]", fallbackHref: "/practices" },
         { name: "new", fallbackHref: "/practices" },
+        { name: "attendance", fallbackHref: "/practices" },
       ]}
     />
   )

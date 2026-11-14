@@ -2,7 +2,9 @@ import type { Prisma, RecordGender, TeamRecord } from "@prisma/client"
 import {
   athletePreferredName,
   currentSeason,
+  isRecordEditable,
   isRecordGender,
+  LOCKED_RECORD_MESSAGE,
   parseRecordTime,
   recordEventDef,
   RECORD_EVENTS,
@@ -20,7 +22,8 @@ export class RecordInputError extends Error {}
 const MAX_NAME_LENGTH = 80
 const MAX_MEET_NAME_LENGTH = 120
 
-async function recordLinks(rows: TeamRecord[]): Promise<RecordLinks> {
+/** Profile and meet slugs for the athletes and meets that records (or top times) point at. */
+export async function recordLinks(rows: Array<{ swimmers: unknown; meetId: string | null }>): Promise<RecordLinks> {
   const athleteIds = [
     ...new Set(rows.flatMap((row) => readRecordSwimmers(row.swimmers).map((s) => s.athleteId).filter((id): id is string => !!id))),
   ]
@@ -63,7 +66,7 @@ export async function listTeamRecords(): Promise<TeamRecordsResponse> {
   return { rows: out, season: currentSeason() }
 }
 
-function requireEvent(gender: unknown, event: unknown): { gender: RecordGender; event: string } {
+export function requireEvent(gender: unknown, event: unknown): { gender: RecordGender; event: string } {
   if (!isRecordGender(gender) || typeof event !== "string" || !recordEventDef(event, gender)) {
     throw new RecordInputError("Unknown record event")
   }
@@ -153,7 +156,8 @@ function setDay(record: { year: number; date: Date | null }): number {
 /**
  * Staff edit of an event's record. A later date than the current record's makes a new record (the
  * old one moves to history); otherwise it corrects the current record in place, which then stays as
- * staff set it. A faster imported swim still takes over on the sync that follows.
+ * staff set it. A faster imported swim still takes over on the sync that follows. An event whose
+ * current record is from imported meet results or the records sheet can't be edited.
  */
 export async function editTeamRecord(input: TeamRecordEditInput, userId: string): Promise<void> {
   const edit = await validateEdit(input)
@@ -170,6 +174,7 @@ export async function editTeamRecord(input: TeamRecordEditInput, userId: string)
   const current = currentRecordRow(
     await prisma.teamRecord.findMany({ where: { course: "SCY", gender: edit.gender, event: edit.event } })
   )
+  if (current && !isRecordEditable(current)) throw new RecordInputError(LOCKED_RECORD_MESSAGE)
   if (current && setDay(edit) <= setDay(current)) {
     // Keep swimId/relayKey so the sync doesn't promote that same swim over the correction.
     await prisma.teamRecord.update({
@@ -182,13 +187,15 @@ export async function editTeamRecord(input: TeamRecordEditInput, userId: string)
   await syncTeamRecords()
 }
 
-/** Take a record row out: rows tied to an imported swim are only hidden, so the sync won't add them back. */
+/**
+ * Take a staff-set row out for good, so it counts toward nothing (records, history,
+ * top 10, meet highlights). A staff correction of an imported swim is deleted too, not hidden: the
+ * swim is the truth again, and the sync makes it the record if it's still fastest. Rows from imported
+ * results or the records sheet can't be removed; `dismissed` is only on rows cleared before that rule, and still hides them.
+ */
 async function removeRow(row: TeamRecord): Promise<void> {
-  if (row.swimId || row.relayKey) {
-    await prisma.teamRecord.update({ where: { id: row.id }, data: { dismissed: true } })
-  } else {
-    await prisma.teamRecord.delete({ where: { id: row.id } })
-  }
+  if (!isRecordEditable(row)) throw new RecordInputError(LOCKED_RECORD_MESSAGE)
+  await prisma.teamRecord.delete({ where: { id: row.id } })
 }
 
 /** Clear an event's current record; the one before it (or the fastest imported swim) takes its place. */
@@ -200,7 +207,7 @@ export async function clearTeamRecord(gender: unknown, event: unknown): Promise<
   await syncTeamRecords()
 }
 
-/** Remove one record (current or past) from an event's history. */
+/** Remove one staff-set record (current or past) from an event's history. */
 export async function removeTeamRecord(id: string): Promise<boolean> {
   const row = await prisma.teamRecord.findUnique({ where: { id } })
   if (!row || row.dismissed) return false

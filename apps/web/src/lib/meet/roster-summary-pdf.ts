@@ -1,6 +1,7 @@
 import { jsPDF } from "jspdf"
 import {
   MEET_HEADER,
+  RELAY_LEG_SUB_SPLITS_MAX,
   ROSTER_SUMMARY_PDF_LIMITS,
   coerceMeetHighlights,
   coerceMeetRecords,
@@ -9,6 +10,7 @@ import {
   highlightTileRows,
   isDropCounterValue,
   meetFileName,
+  relayLegSubSplitsText,
   rosterNameFirstLast,
   rosterNamePreferred,
   rosterSummaryExportSections,
@@ -230,20 +232,31 @@ function parseSplits(value: unknown): RosterSummaryPdfSplit[] | undefined {
   return splits.length > 1 ? splits : undefined
 }
 
+/** A relay leg's sub-splits: formatted times only, a few at most, [] for none. */
+function parseLegSubSplits(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return value
+    .slice(0, RELAY_LEG_SUB_SPLITS_MAX)
+    .map(text)
+    .filter((time): time is string => time != null && /\d/.test(time))
+}
+
 function parseRow(value: unknown): RosterSummaryPdfRow | null {
   const r = (value ?? {}) as Record<string, unknown>
   const label = text(r.label)
   if (!label) return null
   // Legs and their splits stay paired, so a leg without a name drops its split with it.
   const splits = Array.isArray(r.legSplits) ? r.legSplits : []
+  const subSplits = Array.isArray(r.legSubSplits) ? r.legSubSplits : []
   const pairs = Array.isArray(r.legs)
     ? r.legs
         .slice(0, ROSTER_SUMMARY_PDF_LIMITS.legs)
-        .map((leg, i) => ({ name: text(leg), split: text(splits[i]) ?? "" }))
-        .filter((pair): pair is { name: string; split: string } => Boolean(pair.name))
+        .map((leg, i) => ({ name: text(leg), split: text(splits[i]) ?? "", subSplits: parseLegSubSplits(subSplits[i]) }))
+        .filter((pair): pair is { name: string; split: string; subSplits: string[] } => Boolean(pair.name))
     : []
   const legs = pairs.map((pair) => pair.name)
   const legSplits = pairs.some((pair) => pair.split) ? pairs.map((pair) => pair.split) : undefined
+  const legSubSplits = pairs.some((pair) => pair.subSplits.length) ? pairs.map((pair) => pair.subSplits) : undefined
   // A subsection's heading is only its label.
   if (r.subheading === true) return { subheading: true, label }
   return {
@@ -257,6 +270,7 @@ function parseRow(value: unknown): RosterSummaryPdfRow | null {
     startTime: text(r.startTime),
     legs: legs.length ? legs : undefined,
     legSplits,
+    legSubSplits,
     splits: parseSplits(r.splits),
     result: r.result == null ? undefined : parseResult(r.result),
   }
@@ -545,9 +559,17 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
     return size
   }
 
-  /** Lines the relay legs take: two legs to a line. */
+  /**
+   * Lines a pair of relay legs takes: the names, then — when any leg on the relay has sub-splits
+   * (400/800 relays) — a line of them under the names, so every pair of the relay lines up alike.
+   */
+  function linesPerLegPair(row: RosterSummaryPdfRow): number {
+    return row.legSubSplits?.some((times) => times.length) ? 2 : 1
+  }
+
+  /** Lines the relay legs take: two legs to a line (or two lines, with sub-splits). */
   function legsLineCount(row: RosterSummaryPdfRow): number {
-    return Math.ceil((row.legs?.length ?? 0) / 2)
+    return Math.ceil((row.legs?.length ?? 0) / 2) * linesPerLegPair(row)
   }
 
   /**
@@ -558,9 +580,22 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
     const legs = row.legs ?? []
     const tags = medleyRows.has(row) && legs.length === MEDLEY_STROKES.length ? MEDLEY_STROKES : null
     const cellWidth = width / 2
+    const pairLines = linesPerLegPair(row)
     legs.forEach((leg, i) => {
       const cellLeft = x + (i % 2) * cellWidth
-      const baseline = centeredBaseline(top + Math.floor(i / 2) * M.metaLh, M.metaLh, M.metaSize)
+      const lineTop = top + Math.floor(i / 2) * pairLines * M.metaLh
+      const baseline = centeredBaseline(lineTop, M.metaLh, M.metaSize)
+      // The leg's own 50s on the line under its name, muted like its split.
+      const subSplits = relayLegSubSplitsText(row.legSubSplits?.[i])
+      if (subSplits) {
+        setType("normal", M.metaSize, INK_TERTIARY)
+        const subLeft = cellLeft + M.legTagWidth
+        doc.text(
+          fit(subSplits, cellWidth - M.legTagWidth - px(8)),
+          subLeft,
+          centeredBaseline(lineTop + M.metaLh, M.metaLh, M.metaSize)
+        )
+      }
       setType("bold", M.seedTagSize, INK_TERTIARY)
       doc.text(tags?.[i] ?? String(i + 1), cellLeft, baseline, { charSpace: px(0.5) })
       const nameLeft = cellLeft + M.legTagWidth

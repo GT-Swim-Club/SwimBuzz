@@ -26,7 +26,7 @@ export default function ScrollToHash() {
 
       const hashes = hash.split("#").filter(Boolean)
       if (hashes.length > 1) {
-        window.history.replaceState(null, "", `${window.location.pathname}#${targetId}`)
+        window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#${targetId}`)
       }
 
       let attempts = 0
@@ -34,7 +34,8 @@ export default function ScrollToHash() {
         const el = document.getElementById(targetId)
         if (el) {
           el.scrollIntoView({ behavior: "smooth", block: "center" })
-          window.history.replaceState(null, "", window.location.pathname)
+          // Keep the query: the roster summary's view lives there.
+          window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`)
           clearTimers()
           return
         }

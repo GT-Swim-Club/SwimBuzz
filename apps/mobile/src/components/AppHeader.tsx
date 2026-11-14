@@ -15,6 +15,7 @@ import { usePalette } from "@swimbuzz/ui"
 import { api } from "../lib/api"
 import { useThemePreference } from "../lib/theme"
 import { Icon } from "./Icon"
+import { isUnseenNotification } from "@swimbuzz/shared"
 
 type AlertAnchor = { x: number; y: number; width: number; height: number }
 
@@ -43,7 +44,7 @@ function makeStyles(c: ColorPalette) {
     brand: { alignItems: "center", flexDirection: "row", gap: spacing.xs },
     logo: { borderRadius: 6, height: 32, width: 32 },
     brandName: {
-      color: c.primary,
+      color: c.accent,
       fontSize: 17,
       fontWeight: "700",
       letterSpacing: -0.2,
@@ -94,7 +95,8 @@ export function UnreadAlertsChrome({ children }: { children: ReactNode }) {
     queryKey: ["notifications"],
     queryFn: () => api.listNotifications(),
   })
-  const count = data?.notifications.filter((item) => !item.readAt).length ?? 0
+  // New since the list was last opened; opening it clears the badge.
+  const count = data?.notifications.filter(isUnseenNotification).length ?? 0
 
   const value = useMemo(() => ({ count, setAnchor }), [count])
 
@@ -167,7 +169,7 @@ export function HeaderAlertsButton() {
         accessibilityRole="button"
         accessibilityLabel={
           alerts && alerts.count > 0
-            ? `Open notifications, ${alerts.count} unread`
+            ? `Open notifications, ${alerts.count} new`
             : "Open notifications"
         }
         hitSlop={8}

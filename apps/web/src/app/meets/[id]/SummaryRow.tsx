@@ -44,9 +44,9 @@ export type RowDisplay = {
 }
 
 export const PODIUM_PILL: Record<number, string> = {
-  1: "bg-amber-500/15 text-amber-700 dark:bg-amber-400/15 dark:text-amber-400",
-  2: "bg-slate-500/15 text-slate-600 dark:bg-slate-300/15 dark:text-slate-300",
-  3: "bg-orange-500/15 text-orange-700 dark:bg-orange-400/15 dark:text-orange-400",
+  1: "bg-medal-gold/15 text-medal-gold",
+  2: "bg-medal-silver/15 text-medal-silver",
+  3: "bg-medal-bronze/15 text-medal-bronze",
 }
 
 /**
@@ -194,7 +194,7 @@ export function SummaryRowResult({
         <span
           style={timeWidth}
           className={`text-right font-mono font-semibold ${compact ? "text-[13px]" : "text-sm"} ${
-            result.time ? "text-foreground" : "text-amber-700 dark:text-amber-400"
+            result.time ? "text-foreground" : "text-warning-text"
           }`}
         >
           {result.time ? formatDisplayTime(result.time) : result.status ?? "—"}
@@ -294,6 +294,7 @@ export default function SummaryRow({
   editLabel,
   onEditHeatLane,
   heatLaneLabel,
+  highlighted = false,
 }: {
   id?: string
   display: RowDisplay
@@ -315,7 +316,10 @@ export default function SummaryRow({
   heatLane?: string | null
   /** The heat's start time, under the heat & lane. */
   startTime?: string | null
-  /** Relay swimmers in a two-up grid under the label, each after its leg number or stroke. */
+  /**
+   * Relay swimmers in a two-up grid under the label, each after its leg number or stroke, with the
+   * leg's split and, on a line under the name, its sub-splits (the 50s of a 100 leg).
+   */
   legs?: { tag: string; name: string; split?: string }[]
   note?: string
   result: RowResult
@@ -327,6 +331,8 @@ export default function SummaryRow({
   /** Coach heat & lane action, also offered from the detail modal. */
   onEditHeatLane?: () => void
   heatLaneLabel?: string
+  /** The viewer's own row, tinted gold (by event, where it isn't in their pinned section). */
+  highlighted?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const compact = display.density === "compact"
@@ -428,19 +434,16 @@ export default function SummaryRow({
         ],
         12
       )
-      // ...and the relay swimmers, two to a row in columns up to 15rem wide.
+      // ...and the relay swimmers, two to a row in columns up to 15rem wide. A cell is its leg line
+      // (tag, name, split).
       const legCells = [...(legsRef.current?.children ?? [])] as HTMLElement[]
       const columnMax = 15 * parseFloat(getComputedStyle(document.documentElement).fontSize)
+      const legCellWidth = (cell: HTMLElement) => {
+        const legLine = cell.firstElementChild
+        return legLine ? sum([...legLine.children].map((part) => width(part as HTMLElement)), 6) : 0
+      }
       const legColumns = [0, 1].map((col) =>
-        Math.min(
-          columnMax,
-          Math.max(
-            0,
-            ...legCells
-              .filter((_, i) => i % 2 === col)
-              .map((cell) => sum([...cell.children].map((part) => width(part as HTMLElement)), 6))
-          )
-        )
+        Math.min(columnMax, Math.max(0, ...legCells.filter((_, i) => i % 2 === col).map(legCellWidth)))
       )
       const wantsFlow = !fits(line2Width, line.clientWidth) || !fits(sum(legColumns, 16), line.clientWidth)
 
@@ -527,7 +530,7 @@ export default function SummaryRow({
       </span>
     ) : null,
     note ? (
-      <span ref={noteRef} className="min-w-0 truncate text-info">
+      <span ref={noteRef} className="min-w-0 truncate text-accent">
         {note}
       </span>
     ) : null,
@@ -589,12 +592,14 @@ export default function SummaryRow({
           }`}
         >
           {legs.map((leg, i) => (
-            <span key={`${i}-${leg.name}`} className="flex min-w-0 items-baseline gap-1.5">
-              <span className="w-4 shrink-0 text-[9px] font-semibold tracking-[0.05em] text-foreground-tertiary">
-                {leg.tag}
+            <span key={`${i}-${leg.name}`} className="flex min-w-0 flex-col">
+              <span className="flex min-w-0 items-baseline gap-1.5">
+                <span className="w-4 shrink-0 text-[9px] font-semibold tracking-[0.05em] text-foreground-tertiary">
+                  {leg.tag}
+                </span>
+                <span className="truncate">{leg.name}</span>
+                {leg.split ? <span className="shrink-0 tabular-nums text-foreground-tertiary">{leg.split}</span> : null}
               </span>
-              <span className="truncate">{leg.name}</span>
-              {leg.split ? <span className="shrink-0 tabular-nums text-foreground-tertiary">{leg.split}</span> : null}
             </span>
           ))}
         </span>
@@ -646,9 +651,9 @@ export default function SummaryRow({
           }
         }}
         ref={rowRef}
-        className={`flex cursor-pointer items-center border-t border-border-subtle leading-[1.3] text-foreground outline-none transition-colors duration-200 first:border-t-0 hover:text-accent focus-visible:bg-fill-secondary ${
+        className={`flex cursor-pointer items-center border-t border-border-subtle leading-[1.3] text-foreground outline-none transition-colors duration-200 first:border-t-0 hover:bg-background-hover hover:text-accent focus-visible:bg-fill-secondary ${
           compact ? "py-[5px] text-[13px]" : "py-2.5 text-sm"
-        }`}
+        } ${highlighted ? "bg-accent/[0.06]" : ""}`}
         style={{
           paddingLeft: SUMMARY_INSET,
           paddingRight: compact ? fluidLength(8, 14) : fluidLength(10, 14),

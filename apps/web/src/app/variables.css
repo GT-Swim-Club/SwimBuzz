@@ -8,17 +8,21 @@
     --brand-color-primary-active: #8c6b38;
     --brand-color-primary-text: #402b13;
     /* Text and icons on a solid primary (gold) fill. */
-    --brand-color-primary-contrast: #e0dcd2;
+    --brand-color-primary-contrast: #ffffff;
     --brand-color-success: #22C55E;
     --brand-color-success-bg: #f6ffed;
     --brand-color-success-border: #b6eb8f;
     --brand-color-success-hover: #72d13d;
     --brand-color-success-active: #389e0d;
+    /* Success as text (times, drops, "running"): 5.02:1 on white. */
+    --brand-color-success-text: #15803d;
     --brand-color-warning: #faad14;
     --brand-color-warning-bg: #fffbe6;
     --brand-color-warning-border: #ffe58f;
     --brand-color-warning-hover: #ffc53d;
     --brand-color-warning-active: #d48806;
+    /* Warning as text (countdowns, hints, "editing"): 5.02:1 on white. */
+    --brand-color-warning-text: #b45309;
     --brand-color-error: #dc2626;
     --brand-color-error-bg: #fff2f0;
     --brand-color-error-border: #ffccc7;
@@ -33,7 +37,7 @@
     --brand-color-link-active: #c48800;
     --brand-color-text: #1f1f1f;
     --brand-color-text-secondary: #595959;
-    --brand-color-text-tertiary: #8c8c8c;
+    --brand-color-text-tertiary: #737373;
     --brand-color-text-quaternary: #bfbfbf;
     --brand-color-fill: #d9d9d9;
     --brand-color-fill-secondary: #f0f0f0;
@@ -43,7 +47,7 @@
     --brand-color-bg-container: #ffffff;
     --brand-color-bg-elevated: #ffffff;
     /* Hover wash for clickable rows/cards on a container background. */
-    --brand-color-bg-hover: #f7f7f7;
+    --brand-color-bg-hover: #f2f2f2;
     /* Stronger hover wash for whole clickable cards (e.g. the relays summary). */
     --brand-color-bg-hover-strong: #f0f0f0;
     --brand-color-switch-thumb: #ffffff;
@@ -52,6 +56,12 @@
     --brand-color-border-secondary: #e8e8e8;
     --brand-color-border-subtle: #e4e4e7;
     --brand-color-accent: #8c6b38;
+    /* Gold text over photos and their dark scrims — the same in both themes (6.89:1 on black). */
+    --brand-color-accent-on-image: #b58d4f;
+    /* 1st / 2nd / 3rd place (podium finishes, team-score places). */
+    --brand-color-medal-gold: #d97706;
+    --brand-color-medal-silver: #64748b;
+    --brand-color-medal-bronze: #ea580c;
     --brand-font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     --brand-font-family-code: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
     --brand-font-size: 14px;
@@ -234,7 +244,7 @@
     --brand-color-primary: #856939;
     --brand-color-primary-bg: #262119;
     --brand-color-primary-bg-hover: #3c3323;
-    --brand-color-primary-border: #ffffff;
+    --brand-color-primary-border: #474031;
     --brand-color-primary-border-hover: #615640;
     --brand-color-primary-hover: #A48043;
     --brand-color-primary-active: #837453;
@@ -245,11 +255,13 @@
     --brand-color-success-border: #304d20;
     --brand-color-success-hover: #87ca5c;
     --brand-color-success-active: #518f2f;
+    --brand-color-success-text: #22C55E;
     --brand-color-warning: #dcaa37;
     --brand-color-warning-bg: #312512;
     --brand-color-warning-border: #5b4920;
     --brand-color-warning-hover: #e8c35e;
     --brand-color-warning-active: #ad872f;
+    --brand-color-warning-text: #dcaa37;
     --brand-color-error: #ef4444;
     --brand-color-error-bg: #32191a;
     --brand-color-error-border: #5b3231;
@@ -281,6 +293,10 @@
     --brand-color-border-secondary: #252525;
     --brand-color-border-subtle: #1e1e1e;
     --brand-color-accent: #b58d4f;
+    --brand-color-accent-on-image: #b58d4f;
+    --brand-color-medal-gold: #fbbf24;
+    --brand-color-medal-silver: #cbd5e1;
+    --brand-color-medal-bronze: #fb923c;
     --brand-font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     --brand-font-family-code: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
     --brand-font-size: 14px;

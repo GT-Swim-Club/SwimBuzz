@@ -124,7 +124,7 @@ export async function updateMeet(
     // Records show the meet's name and only count SCY meets.
     if (meet.name !== existing.name || meet.course !== existing.course) await syncTeamRecordsSafely()
 
-    void notifyMeetRosterOfInfoDrops({
+    notifyMeetRosterOfInfoDrops({
       meetId: meet.id,
       meetName: meet.name,
       drops: [...sheetDrops, ...resourceDrops]})

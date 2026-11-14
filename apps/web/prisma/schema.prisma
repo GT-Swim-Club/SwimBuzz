@@ -67,9 +67,16 @@ enum ScraperJobType {
 
 enum NotificationType {
   PRACTICE_PUBLISHED
-  MEET_SIGNUP_OPEN
+  /// Packet, results, live stream or travel info posted for a meet the athlete is on.
   MEET_ROSTER_INFO
-  MEET_SIGNUP_DROPPED
+  /// Psych sheet, heat sheet or entries posted for a meet the athlete is on.
+  MEET_SHEET_POSTED
+  /// A published relay lineup the athlete swims in was posted or changed.
+  RELAY_LINEUP
+  /// A new team record (to its holders and staff).
+  TEAM_RECORD
+  /// An athlete's first national cut in an event this season.
+  NATIONAL_CUT
   PRACTICE_COMMENT
   TIMES_IMPORT_REQUEST
 }
@@ -84,7 +91,7 @@ model User {
   role          Role      @default(ATHLETE)
   /// Specific coach/exec title; null for plain athletes. Drives permissions (via role) and the UI badge.
   staffTitle    StaffTitle?
-  /// Per-type in-app notification toggles: { practicePublished?, meetSignupOpen?, practiceComments?, profileChanges? }
+  /// Per-type notification toggles (in-app and push), keyed by NOTIFICATION_PREFERENCE_KEYS in @swimbuzz/shared.
   notificationPreferences Json?
   /// Chime when an import needs attention (Cloudflare check, SwimPhone verification) and the tab isn't in view.
   alertSound    Boolean   @default(false)
@@ -120,7 +127,12 @@ model Athlete {
   swimCloudIds Int[]   @default([])
   gtid         String?
   dob          DateTime?
+  /// Legacy single academic year. Kept in step with the newest season's entry in yearBySeason so
+  /// older app builds still read something; new code reads yearBySeason (athleteYearForSeason).
   year         String?
+  /// Academic year per season the athlete is on, as imported or typed: { "2025-2026": "3" }.
+  /// Values are free text ("1"…"5", "2nd Year", "FR"/"Sophomore", "Masters", "PhD").
+  yearBySeason Json    @default("{}")
   timesSyncedAt DateTime?
   /// SwimCloud meets already imported from the athlete's profiles, so a times sync only reads new ones.
   /// Cleared when a SwimCloud profile is added, so its meets are all read once.
@@ -130,6 +142,7 @@ model Athlete {
   meetRoomPreferences MeetRoomPreference[]
   meetRoomAssignments MeetRoomAssignment[]
   practiceAttendance  PracticeAttendance[]
+  clearances          AthleteClearance[]
 
   @@index([gtid])
   @@index([seasons], type: Gin)
@@ -194,6 +207,10 @@ model Meet {
   /// Relay builder drafts, one per relay event: { drafts: [{ gender, event, teams, savedAt, savedBy }] }.
   /// Staff only — published lineups live in relayResultsSummary.
   relayDrafts Json?
+  /// Relay builder "Prelims & finals" choices per relay event: { events: { "<event key>": boolean } }.
+  /// Key = relayEventKey (Women's and Men's share it), "X|<key>" for mixed. Absent = decided from
+  /// the meet's sheets and results (see lib/meet/relay-rounds.ts).
+  relayPrelimsFinals Json?
   resultStatusesSummary Json?
   /// Team standings from the results PDF: { importedAt, source: "pdf" | "computed",
   /// women, men, combined: [{ place, team, points, ours? }] }.
@@ -463,6 +480,29 @@ model PracticeAttendance {
   @@index([athleteId])
 }
 
+/// Whether an athlete has a physical on file and has done their concussion baseline test,
+/// per season. Cleared status and dates only — never anything medical. Visible only to staff
+/// and the athlete themself (lib/athlete/athlete-clearance.ts); never in roster payloads.
+model AthleteClearance {
+  id                String    @id @default(cuid())
+  athleteId         String
+  athlete           Athlete   @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  season            String
+  physicalCleared   Boolean   @default(false)
+  /// Calendar date (UTC midnight) the physical was done/cleared, when known.
+  physicalDate      DateTime?
+  concussionCleared Boolean   @default(false)
+  /// Calendar date (UTC midnight) of the concussion baseline test, when known.
+  concussionDate    DateTime?
+  /// IMPORT (sheet/CSV) or MANUAL (staff corrected it by hand) — whichever wrote last.
+  source            String    @default("IMPORT")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([athleteId, season])
+  @@index([season])
+}
+
 model PracticeComment {
   id         String    @id @default(cuid())
   practiceId String
@@ -534,14 +574,21 @@ model Notification {
   title     String
   body      String           @default("")
   href      String?
-  /// Athlete this notification relates to (e.g. profile change request).
+  /// Athlete this notification relates to (times-import request, national cut).
   athleteId String?
+  /// What it is about, so it can be de-duplicated and removed with its subject:
+  /// "practice:<id>", "meet:<id>", "meet:<id>|nqt|<event>", "record:<gender>|<event>|<timeMs>".
+  refKey    String?
+  /// Tapped (or "Mark all read"); unread items stay highlighted.
   readAt    DateTime?
+  /// The list was opened while it was there — clears the badge, not the highlight.
+  seenAt    DateTime?
   createdAt DateTime         @default(now())
 
   @@index([userId, createdAt])
   @@index([userId, readAt])
   @@index([athleteId, type])
+  @@index([refKey])
 }
 
 model ScraperPairing {

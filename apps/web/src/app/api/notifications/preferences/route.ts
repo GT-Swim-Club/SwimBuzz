@@ -1,19 +1,13 @@
 import { NextResponse } from "next/server"
 import { Prisma } from "@prisma/client"
 import {
+  NOTIFICATION_PREFERENCE_KEYS,
   mergeNotificationPreferences,
   parseNotificationPreferences,
-  type NotificationPreferenceKey,
-  type NotificationPreferences } from "@/lib/notifications/notification-preferences"
+  type NotificationPreferences,
+} from "@/lib/notifications/notification-preferences"
 import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/auth/session"
-
-const PATCH_KEYS: NotificationPreferenceKey[] = [
-  "practicePublished",
-  "meetRosterInfo",
-  "practiceComments",
-  "profileChanges",
-]
 
 export async function GET() {
   const session = await getSession()
@@ -41,7 +35,7 @@ export async function PATCH(req: Request) {
   }
 
   const patch: Partial<NotificationPreferences> = {}
-  for (const key of PATCH_KEYS) {
+  for (const key of NOTIFICATION_PREFERENCE_KEYS) {
     if (key in body) {
       if (typeof (body as Record<string, unknown>)[key] !== "boolean") {
         return NextResponse.json(

@@ -8,9 +8,10 @@ import {
 } from "@/lib/meet/meet-import-validate"
 import { parseMeetPdf } from "@/lib/meet/pdf-parser-client"
 import { prisma } from "@/lib/prisma"
-import { isStoredMeetFileUrl } from "@/lib/meet/meet-files"
-import { deleteStoredMeetFile, uploadMeetFile } from "@/lib/meet/meet-storage"
+import { PARSE_TMP_FOLDER, meetFileFolder } from "@/lib/meet/meet-files"
+import { deleteUnreferencedStoredFiles, uploadMeetFile } from "@/lib/meet/meet-storage"
 import { notifyMeetRosterOfInfoDrops } from "@/lib/meet/meet-roster-notify"
+import { notifyNewNationalCuts } from "@/lib/notifications/national-cut-notify"
 import { parseSeason } from "@/lib/season"
 import { coerceParsedRelayResults } from "@/lib/meet/relay-results"
 import { isClientDisconnected, throwIfDisconnected } from "@/lib/client-disconnect"
@@ -95,9 +96,6 @@ async function applyParsedMeetPdf(input: {
 
   if (meet?.id && !pairOnly && resultsPdfUrl) {
     try {
-      if (meet.resultsUrl && isStoredMeetFileUrl(meet.resultsUrl)) {
-        await deleteStoredMeetFile(meet.resultsUrl)
-      }
       const teamScores = coerceTeamScores(parsed.team_scores)
       await prisma.meet.update({
         where: { id: meet.id },
@@ -108,12 +106,18 @@ async function applyParsedMeetPdf(input: {
             : Prisma.DbNull,
         },
       })
+      // The replaced results PDF — after the update, and never the PDF just saved
+      // (re-importing from the stored results URL used to delete it).
+      if (meet.resultsUrl && meet.resultsUrl.trim() !== resultsPdfUrl.trim()) {
+        await deleteUnreferencedStoredFiles([meet.resultsUrl])
+      }
       if (summary.imported > 0) {
-        void notifyMeetRosterOfInfoDrops({
+        notifyMeetRosterOfInfoDrops({
           meetId: meet.id,
           meetName: meet.name,
           drops: ["results"],
         })
+        notifyNewNationalCuts(meet.id)
       }
     } catch (err) {
       console.error("Failed to save results PDF as meet resource:", err)
@@ -256,10 +260,18 @@ export async function POST(req: Request) {
   }
 
   let resultsPdfUrl = pdfUrl
+  /** A copy uploaded here; deleted at the end unless the meet saved it as its results PDF. */
+  let uploadedUrl: string | null = null
   if (!resultsPdfUrl && fileBytes) {
     try {
-      const { url } = await uploadMeetFile(Buffer.from(fileBytes), fileName, fileType)
+      const { url } = await uploadMeetFile(
+        Buffer.from(fileBytes),
+        fileName,
+        fileType,
+        meet ? meetFileFolder(meet.id) : PARSE_TMP_FOLDER
+      )
       resultsPdfUrl = url
+      uploadedUrl = url
     } catch (err) {
       console.error("Failed to upload meet PDF before parsing:", err)
     }
@@ -301,5 +313,8 @@ export async function POST(req: Request) {
     }
     const message = err instanceof Error ? err.message : "Failed to parse PDF"
     return NextResponse.json({ error: message }, { status: 502 })
+  } finally {
+    // Reference-checked, so it stays when the meet now points at it.
+    if (uploadedUrl) await deleteUnreferencedStoredFiles([uploadedUrl])
   }
 }

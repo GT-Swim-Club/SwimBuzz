@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState, type ElementRef } from "react"
 import { Alert, Image, View } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
@@ -186,11 +186,86 @@ function travelIconName(label: string): IconName {
   return "fileText"
 }
 
+/** "3 imported", "2 files": a step's status, or null when it isn't done. */
+type EmptyStep = { label: string; done: boolean; status?: string }
+
+/**
+ * Where the roster summary goes before there's anything in it: what athletes will see here and when,
+ * and for staff the steps that fill it in (done on the web app, which has the imports).
+ */
+function RosterSummaryEmpty({ meet, isStaff }: { meet: Record<string, unknown>; isStaff: boolean }) {
+  const c = usePalette()
+  const ended = Boolean(meet.meetHasEnded)
+  if (!isStaff) {
+    return (
+      <Section title="Roster Summary">
+        <Muted>
+          {ended
+            ? "No results have been posted for this meet yet. Times, places and splits show here once the coaches import them."
+            : "Entries aren't posted yet. Your events, heats, lanes and seed times show here once the coaches import the sign-ups or the psych and heat sheets."}
+        </Muted>
+      </Section>
+    )
+  }
+  const signups = asRecord(meet.signupRelayPreferences)
+  const signupCount = Array.isArray(signups?.athletes) ? signups.athletes.length : null
+  const roster = asRecord(meet.finalRoster)
+  const rosterCount = Array.isArray(roster?.athleteIds) ? roster.athleteIds.length : null
+  const hasSheets =
+    Boolean(meet.entriesSheetUrl || meet.psychSheetUrl || meet.heatSheetUrl) ||
+    (Array.isArray(meet.heatSheetUrls) && meet.heatSheetUrls.length > 0) ||
+    (Array.isArray(meet.finalsHeatSheetUrls) && meet.finalsHeatSheetUrls.length > 0)
+  const hasResults = Boolean(meet.resultsUrl || meet.swimphoneUrl)
+  const steps: EmptyStep[] = [
+    ...(ended
+      ? []
+      : [
+          {
+            label: "Import sign-ups",
+            done: signupCount != null,
+            status: signupCount != null ? `${signupCount} imported` : undefined,
+          },
+          {
+            label: "Import the final roster",
+            done: rosterCount != null,
+            status: rosterCount != null ? `${rosterCount} on roster` : undefined,
+          },
+        ]),
+    ended
+      ? { label: "Upload the results", done: hasResults }
+      : { label: "Upload the psych or heat sheets", done: hasSheets },
+  ]
+  return (
+    <Section title="Roster Summary">
+      <Muted style={{ marginBottom: spacing.sm }}>
+        Nothing here yet. Athletes see their events here as soon as it has any — fill it in from the
+        meet page on the web app:
+      </Muted>
+      {steps.map((step) => (
+        <ListRow
+          key={step.label}
+          left={
+            <Icon
+              color={step.done ? c.accent : c.textTertiary}
+              name={step.done ? "check" : "chevronRight"}
+              size={16}
+            />
+          }
+          title={step.label}
+          subtitle={step.status ?? (step.done ? "Done" : "Not yet")}
+        />
+      ))}
+    </Section>
+  )
+}
+
 export default function MeetDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
   const c = usePalette()
   const tabBarPad = useTabBarScrollPadding()
+  /** The screen's scroll view, which the roster summary's jump bar scrolls to a section. */
+  const scrollRef = useRef<ElementRef<typeof ScrollView>>(null)
   const [hotel, setHotel] = useState("")
   const [packingList, setPackingList] = useState("")
   const [itinerary, setItinerary] = useState("")
@@ -208,6 +283,9 @@ export default function MeetDetailScreen() {
   const [relayLoading, setRelayLoading] = useState(false)
   const [savingRelayKey, setSavingRelayKey] = useState<string | null>(null)
   const [previewLink, setPreviewLink] = useState<ResourceLink | null>(null)
+  // Staff-only forms stay folded until opened, so the roster summary isn't buried under them.
+  const [travelOpen, setTravelOpen] = useState(false)
+  const [scoringOpen, setScoringOpen] = useState(false)
 
   const queryClient = useQueryClient()
   const meetQueryKey = ["meet", id] as const
@@ -469,7 +547,7 @@ export default function MeetDetailScreen() {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ paddingBottom: tabBarPad }}>
+      <ScrollView ref={scrollRef} contentContainerStyle={{ paddingBottom: tabBarPad }}>
         <View
           style={{
             flexDirection: "row",
@@ -530,6 +608,38 @@ export default function MeetDetailScreen() {
           {school ? <MetaRow label="School" value={school} /> : null}
         </Section>
 
+        {rosterEntries.length > 0 ? (
+          <RosterSummarySection
+            meetId={id}
+            meetName={name}
+            entries={rosterEntries as RosterSummaryEntry[]}
+            eventOrder={isEventOrder(meet.eventOrder) ? meet.eventOrder : null}
+            details={meetHeaderDetails({ location, school, startsAt, endsAt, timeZone })}
+            iconUrl={iconUrl}
+            hasHeatSheet={Boolean(
+              asRecord(meet.heatSheetSummary) || asRecord(meet.finalsHeatSheetSummary)
+            )}
+            viewerAthleteId={
+              viewer?.athleteId ? String(viewer.athleteId) : null
+            }
+            canEdit={isStaff}
+            onHeatLaneSaved={() => void load()}
+            scrollRef={scrollRef}
+          />
+        ) : (
+          <RosterSummaryEmpty meet={meet} isStaff={isStaff} />
+        )}
+
+        {relayLineupCount > 0 ? (
+          <Section title="Relays">
+            <ListRow
+              title={`${relayLineupCount} relay${relayLineupCount === 1 ? "" : "s"}`}
+              subtitle="See every relay lineup for this meet"
+              onPress={() => router.push(`/meets/relays/${id}`)}
+            />
+          </Section>
+        ) : null}
+
         {resources.length > 0 ? (
           <Section title="Resources">
             <View style={{ gap: spacing.sm }}>
@@ -566,6 +676,18 @@ export default function MeetDetailScreen() {
 
         {isStaff ? (
           <Section title="Travel (staff)">
+            <ListRow
+              title={travelOpen ? "Hide travel info" : "Edit travel info"}
+              subtitle={
+                travelPresent.length + travelLinks.length > 0
+                  ? [...travelPresent.map(([label]) => label), ...travelLinks.map((link) => link.label)].join(" · ")
+                  : "Nothing added yet"
+              }
+              accessory={<Icon color={c.textTertiary} name={travelOpen ? "chevronDown" : "chevronRight"} size={16} />}
+              onPress={() => setTravelOpen((open) => !open)}
+            />
+            {travelOpen ? (
+            <>
             <TextField
               label="Hotel"
               value={hotel}
@@ -604,6 +726,8 @@ export default function MeetDetailScreen() {
               loading={savingTravel}
               onPress={() => void saveTravel()}
             />
+            </>
+            ) : null}
           </Section>
         ) : travelPresent.length > 0 || travelLinks.length > 0 ? (
           <Section title="Travel">
@@ -633,6 +757,18 @@ export default function MeetDetailScreen() {
 
         {isStaff ? (
           <Section title="Scoring (staff)">
+            <ListRow
+              title={scoringOpen ? "Hide points by place" : "Edit points by place"}
+              subtitle={
+                coerceScoringTable(meet.scoringTable)
+                  ? "Scoring table set"
+                  : "Not set — results' own points only"
+              }
+              accessory={<Icon color={c.textTertiary} name={scoringOpen ? "chevronDown" : "chevronRight"} size={16} />}
+              onPress={() => setScoringOpen((open) => !open)}
+            />
+            {scoringOpen ? (
+            <>
             <Muted style={{ marginBottom: spacing.sm }}>
               Scores finals and timed finals by place when the results don&apos;t list points. Past
               8th, B and C finals score by overall place.
@@ -667,35 +803,8 @@ export default function MeetDetailScreen() {
                 onPress={() => void saveScoring()}
               />
             </View>
-          </Section>
-        ) : null}
-
-        {rosterEntries.length > 0 ? (
-          <RosterSummarySection
-            meetId={id}
-            meetName={name}
-            entries={rosterEntries as RosterSummaryEntry[]}
-            eventOrder={isEventOrder(meet.eventOrder) ? meet.eventOrder : null}
-            details={meetHeaderDetails({ location, school, startsAt, endsAt, timeZone })}
-            iconUrl={iconUrl}
-            hasHeatSheet={Boolean(
-              asRecord(meet.heatSheetSummary) || asRecord(meet.finalsHeatSheetSummary)
-            )}
-            viewerAthleteId={
-              viewer?.athleteId ? String(viewer.athleteId) : null
-            }
-            canEdit={isStaff}
-            onHeatLaneSaved={() => void load()}
-          />
-        ) : null}
-
-        {relayLineupCount > 0 ? (
-          <Section title="Relays">
-            <ListRow
-              title={`${relayLineupCount} relay${relayLineupCount === 1 ? "" : "s"}`}
-              subtitle="See every relay lineup for this meet"
-              onPress={() => router.push(`/meets/relays/${id}`)}
-            />
+            </>
+            ) : null}
           </Section>
         ) : null}
 

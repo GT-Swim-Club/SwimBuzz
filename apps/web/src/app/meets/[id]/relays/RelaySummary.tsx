@@ -23,8 +23,7 @@ export type RelaySummaryCard = {
   legs: { key: string; name: string; me: boolean }[]
 }
 
-/** `editing`: another coach (or another tab) has the event open in the relay builder. */
-export type RelaySummaryPill = { label: string; tone: "published" | "draft" | "suggested" | "editing" }
+export type RelaySummaryPill = { label: string; tone: "published" | "draft" | "suggested" }
 
 export type RelaySummaryEvent = {
   slug: string
@@ -35,6 +34,8 @@ export type RelaySummaryEvent = {
   /** Opens the builder for this event (staff only). */
   href?: string
   pills: RelaySummaryPill[]
+  /** Who has the event open in the relay builder ("Jane Doe is editing"), when someone else does. */
+  editor?: string | null
   state: "cards" | "loading" | "empty"
   /** Shown in place of cards when `state` is "empty". */
   emptyText?: string
@@ -45,7 +46,6 @@ const PILL_TONES: Record<RelaySummaryPill["tone"], string> = {
   published: "border-primary/30 bg-primary/10 text-accent",
   draft: "border-border text-foreground-secondary",
   suggested: "border-dashed border-border text-foreground-secondary",
-  editing: "border-warning-border bg-warning-bg text-warning",
 }
 
 /**
@@ -81,6 +81,16 @@ export function EventHeader({ event }: { event: RelaySummaryEvent }) {
         />
       ) : null}
     </div>
+  )
+}
+
+/** "Jane Doe is editing" under an event's header — its own line, so a long name never crowds the header. */
+export function EditorLine({ editor }: { editor: string }) {
+  return (
+    <p role="status" className="-mt-1.5 flex min-w-0 items-center gap-1.5 text-xs font-medium text-accent">
+      <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+      <span className="truncate">{editor}</span>
+    </p>
   )
 }
 
@@ -210,6 +220,7 @@ export default function RelaySummary({
         const content = (
           <>
             <EventHeader event={event} />
+            {event.editor ? <EditorLine editor={event.editor} /> : null}
             {event.state === "loading" ? (
               <>
                 <RelaySummaryCardSkeleton />
@@ -251,7 +262,7 @@ export default function RelaySummary({
                   e.preventDefault()
                   onOpen(event.slug)
                 }}
-                aria-label={`${event.pills.some((p) => p.tone === "published") ? "Edit" : "Build"} ${event.name} Relay`}
+                aria-label={`${event.pills.some((p) => p.tone === "published") ? "Edit" : "Build"} ${event.name} Relay${event.editor ? ` (${event.editor})` : ""}`}
                 // Padded out into the grid gap so the hover fills the header, cards and gaps as one card.
                 className="group -m-2 flex flex-col gap-2 rounded-xl p-2 transition-colors hover:bg-background-hover-strong focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/35"
               >
@@ -290,7 +301,7 @@ export function publishedSummaryCards(
 }
 
 /** Dashed summary cards for an unpublished lineup (a draft or a suggestion). */
-export function lineupSummaryCards(slug: string, teams: LineupTeam[]): RelaySummaryCard[] {
+export function lineupSummaryCards(slug: string, teams: LineupTeam[], round?: string): RelaySummaryCard[] {
   return teams.map((team) => {
     const times = team.legs.map((leg) => leg.timeMs ?? null)
     const total = times.every((t) => t != null)
@@ -298,7 +309,7 @@ export function lineupSummaryCards(slug: string, teams: LineupTeam[]): RelaySumm
       : null
     return {
       key: `${slug}-${team.letter}`,
-      title: `${team.letter} Relay`,
+      title: `${team.letter} Relay${round ? ` · ${round}` : ""}`,
       total: formatLegTime(total),
       dashed: true,
       mine: false,

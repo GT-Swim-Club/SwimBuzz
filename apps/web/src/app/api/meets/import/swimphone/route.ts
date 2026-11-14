@@ -16,6 +16,7 @@ import { parseSeason } from "@/lib/season"
 import { coerceParsedRelayResults } from "@/lib/meet/relay-results"
 import { ScraperJobStatus, ScraperJobType } from "@prisma/client"
 import { notifyMeetRosterOfInfoDrops } from "@/lib/meet/meet-roster-notify"
+import { notifyNewNationalCuts } from "@/lib/notifications/national-cut-notify"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
 
@@ -218,11 +219,12 @@ export async function applySwimphoneImportJob(
       data: { swimphoneUrl: ctx.meetUrl },
     })
     if (summary.imported > 0) {
-      void notifyMeetRosterOfInfoDrops({
+      notifyMeetRosterOfInfoDrops({
         meetId: meet.id,
         meetName: meet.name,
         drops: ["results"],
       })
+      notifyNewNationalCuts(meet.id)
     }
   }
 

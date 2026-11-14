@@ -301,12 +301,12 @@ export default function RunScraperModal({
 const textLinkClass =
   "shrink-0 text-xs font-medium text-foreground-secondary transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
 
-function StatusPill({ loading, connected }: { loading: boolean; connected: boolean }) {
+export function StatusPill({ loading, connected }: { loading: boolean; connected: boolean }) {
   const [label, pillClass, dotClass] = loading
     ? ["Checking…", "bg-fill-secondary text-foreground-secondary", "bg-foreground-tertiary"]
     : connected
-      ? ["Running", "bg-success-bg text-success", "bg-success motion-safe:animate-pulse"]
-      : ["Not running", "bg-warning-bg text-warning", "bg-warning"]
+      ? ["Running", "bg-success-bg text-success-text", "bg-success motion-safe:animate-pulse"]
+      : ["Not running", "bg-warning-bg text-warning-text", "bg-warning"]
   return (
     <span
       className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-[3px] text-xs font-medium leading-[18px] ${pillClass}`}

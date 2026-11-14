@@ -4,6 +4,7 @@ import { useRouter } from "expo-router"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   formatRecordTime,
+  isRecordEditable,
   parseRecordTime,
   recordSetLabel,
   recordSwimmerLabel,
@@ -12,10 +13,12 @@ import {
   type TeamRecordItem,
   type TeamRecordSource,
   type TeamRecordsResponse,
+  type TopTimesMode,
 } from "@swimbuzz/shared"
 import { BottomSheet, Button, ErrorBlock, LoadingBlock, Muted, ScrollView, TextField, usePalette } from "@swimbuzz/ui"
 import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
 import { api } from "../lib/api"
+import { SegmentedOption, SegmentedToggle } from "./SegmentedToggle"
 
 /** One gender's record in one event — what a sheet acts on. */
 export type RecordTarget = { def: RecordEventDef; gender: RecordGender; record: TeamRecordItem | undefined }
@@ -55,6 +58,7 @@ export function RecordEditSheet({ target, onClose }: { target: RecordTarget; onC
   function done(next: TeamRecordsResponse) {
     queryClient.setQueryData(["records"], next)
     void queryClient.invalidateQueries({ queryKey: ["records", "history"] })
+    void queryClient.invalidateQueries({ queryKey: ["records", "top"] })
     onClose()
   }
 
@@ -163,14 +167,31 @@ export function RecordEditSheet({ target, onClose }: { target: RecordTarget; onC
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <View style={styles.actions}>
           <Button label="Save" loading={busy} disabled={busy} onPress={save} />
-          {record ? <Button label="Clear record" variant="danger" disabled={busy} onPress={confirmClear} /> : null}
+          {record && isRecordEditable(record) ? (
+            <Button label="Clear record" variant="danger" disabled={busy} onPress={confirmClear} />
+          ) : null}
         </View>
       </ScrollView>
     </BottomSheet>
   )
 }
 
-/** An event's history as its own sheet (tapping a record outside edit mode). */
+type SheetView = "history" | "top"
+
+const VIEWS: Array<{ value: SheetView; label: string }> = [
+  { value: "history", label: "History" },
+  { value: "top", label: "Top 10" },
+]
+
+const MODES: Array<{ value: TopTimesMode; label: string }> = [
+  { value: "performers", label: "Performers" },
+  { value: "performances", label: "Performances" },
+]
+
+/**
+ * An event's history and top 10 as its own sheet (tapping a record outside edit mode). Top 10 shows
+ * each swimmer's best (performers) or the fastest swims (performances); relays only the latter.
+ */
 export function RecordHistorySheet({
   target,
   canEdit,
@@ -180,14 +201,124 @@ export function RecordHistorySheet({
   canEdit: boolean
   onClose: () => void
 }) {
+  const c = usePalette()
+  const styles = useMemo(() => makeStyles(c), [c])
+  const [view, setView] = useState<SheetView>("history")
+  const [mode, setMode] = useState<TopTimesMode>("performers")
   return (
-    <BottomSheet visible onClose={onClose} title={`${recordTitle(target)} history`}>
-      <RecordHistoryList target={target} canEdit={canEdit} onNavigate={onClose} />
+    <BottomSheet visible onClose={onClose} title={recordTitle(target)}>
+      <View style={styles.toggles}>
+        <SegmentedToggle selectedIndex={VIEWS.findIndex((v) => v.value === view)} fill>
+          {VIEWS.map((v) => (
+            <SegmentedOption
+              key={v.value}
+              flex
+              selected={v.value === view}
+              accessibilityLabel={v.label}
+              onPress={() => setView(v.value)}
+            >
+              <Text style={[styles.toggleText, v.value === view && styles.toggleTextOn]}>{v.label}</Text>
+            </SegmentedOption>
+          ))}
+        </SegmentedToggle>
+        {view === "top" && !target.def.relay ? (
+          <SegmentedToggle selectedIndex={MODES.findIndex((m) => m.value === mode)} fill>
+            {MODES.map((m) => (
+              <SegmentedOption
+                key={m.value}
+                flex
+                selected={m.value === mode}
+                accessibilityLabel={m.label}
+                onPress={() => setMode(m.value)}
+              >
+                <Text style={[styles.toggleText, m.value === mode && styles.toggleTextOn]}>{m.label}</Text>
+              </SegmentedOption>
+            ))}
+          </SegmentedToggle>
+        ) : null}
+      </View>
+      {view === "history" ? (
+        <RecordHistoryList target={target} canEdit={canEdit} onNavigate={onClose} />
+      ) : (
+        <RecordTopTimesList target={target} mode={mode} onNavigate={onClose} />
+      )}
     </BottomSheet>
   )
 }
 
-/** An event's records, newest first; staff can remove one (the record before it takes its place). */
+/** An event's top 10 for one gender; ties share a rank ("T3"), so the list can run past ten. */
+function RecordTopTimesList({
+  target,
+  mode,
+  onNavigate,
+}: {
+  target: Pick<RecordTarget, "def" | "gender">
+  mode: TopTimesMode
+  /** Close the sheet before leaving for an athlete's profile. */
+  onNavigate: () => void
+}) {
+  const c = usePalette()
+  const styles = useMemo(() => makeStyles(c), [c])
+  const router = useRouter()
+  const { def, gender } = target
+  const shownMode: TopTimesMode = def.relay ? "performances" : mode
+  const { data, isPending, error } = useQuery({
+    queryKey: ["records", "top", gender, def.event, shownMode],
+    queryFn: () => api.getRecordTopTimes(gender, def.event, shownMode),
+  })
+
+  return (
+    <ScrollView style={styles.sheetScroll}>
+      {error ? <ErrorBlock message={recordsErrorMessage(error, "Couldn't load the top 10")} /> : null}
+      {isPending ? <LoadingBlock /> : null}
+      {data && data.times.length === 0 ? <Muted>No swims yet.</Muted> : null}
+      {data && data.times.length > 0 ? (
+        <View style={styles.historyList}>
+          {data.times.map((time, index) => {
+            const tied = data.times[index - 1]?.rank === time.rank || data.times[index + 1]?.rank === time.rank
+            return (
+              <View key={time.key} style={[styles.historyRow, index > 0 && styles.historyDivider]}>
+                <Text style={styles.rank} accessibilityLabel={tied ? `Tied ${time.rank}` : String(time.rank)}>
+                  {tied ? `T${time.rank}` : time.rank}
+                </Text>
+                <View style={styles.historyMain}>
+                  {time.swimmers.map((swimmer, i) =>
+                    swimmer.athleteSlug ? (
+                      <Pressable
+                        key={i}
+                        accessibilityRole="link"
+                        onPress={() => {
+                          onNavigate()
+                          router.push(`/roster/${swimmer.athleteSlug}`)
+                        }}
+                      >
+                        <Text style={[styles.historyName, styles.historyLink]}>{recordSwimmerLabel(time, swimmer)}</Text>
+                      </Pressable>
+                    ) : (
+                      <Text key={i} style={styles.historyName}>
+                        {recordSwimmerLabel(time, swimmer)}
+                      </Text>
+                    )
+                  )}
+                  <Text style={styles.historyMeta}>{recordSetLabel(time)}</Text>
+                  {time.isRecord ? <Text style={styles.recordTag}>RECORD</Text> : null}
+                </View>
+                <Text style={[styles.historyTime, time.isThisSeason && styles.thisSeason]}>
+                  {formatRecordTime(time.timeMs)}
+                </Text>
+              </View>
+            )
+          })}
+        </View>
+      ) : null}
+    </ScrollView>
+  )
+}
+
+/**
+ * An event's records, newest first; staff can remove a staff-set one (the record
+ * before it takes its place). Ones from imported meet results or the records sheet stay.
+ */
 function RecordHistoryList({
   target,
   canEdit,
@@ -221,6 +352,7 @@ function RecordHistoryList({
             setRemoveError(null)
             await Promise.all([
               queryClient.invalidateQueries({ queryKey: ["records", "history", gender, def.event] }),
+              queryClient.invalidateQueries({ queryKey: ["records", "top", gender, def.event] }),
               queryClient.invalidateQueries({ queryKey: ["records"], exact: true }),
             ])
           } catch (err) {
@@ -270,7 +402,7 @@ function RecordHistoryList({
                 <Text style={[styles.historyTime, record.isThisSeason && styles.thisSeason]}>
                   {formatRecordTime(record.timeMs)}
                 </Text>
-                {canEdit ? (
+                {canEdit && isRecordEditable(record) ? (
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel="Remove record"
@@ -324,5 +456,17 @@ function makeStyles(c: ColorPalette) {
     historyTime: { color: c.text, fontSize: 15, fontVariant: ["tabular-nums"], fontWeight: "700" },
     thisSeason: { color: c.accent, fontWeight: "800" },
     removeText: { color: c.error, fontSize: 13, fontWeight: "600" },
+    toggles: { gap: spacing.xs, marginBottom: spacing.sm },
+    toggleText: { color: c.textSecondary, fontSize: 14, fontWeight: "700" },
+    toggleTextOn: { color: c.primaryContrast },
+    rank: {
+      color: c.textTertiary,
+      fontSize: 15,
+      fontVariant: ["tabular-nums"],
+      fontWeight: "700",
+      minWidth: 28,
+      textAlign: "right",
+    },
+    recordTag: { color: c.accent, fontSize: 11, fontWeight: "800", letterSpacing: 1, marginTop: 2 },
   })
 }

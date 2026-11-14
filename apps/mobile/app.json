@@ -61,6 +61,14 @@
           "savePhotosPermission": "Allow SwimBuzz to save practice images to your photo library.",
           "isAccessMediaLocationEnabled": false
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow SwimBuzz to choose a photo from your library for your profile picture.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
       ]
     ],
     "experiments": {

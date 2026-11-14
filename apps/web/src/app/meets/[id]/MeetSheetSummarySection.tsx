@@ -13,6 +13,8 @@ import {
   rosterSummaryScopeLabel,
   rosterSummarySessions,
   rosterSummaryTitle,
+  relayLegLabel,
+  relayLegSubSplitTimes,
   sessionIncludes,
   SUMMARY_ROUNDS,
   type SummaryRoundKind,
@@ -34,7 +36,6 @@ import {
   importedRowHeatLane,
 } from "@/lib/meet/heat-lane-overrides"
 import {
-  applyRosterNames,
   compareIndividualEntries,
   dropSeedOnlyAfterResults,
   displaySeedRank,
@@ -46,7 +47,6 @@ import {
   inferResultHeatTotals,
   isTimedFinalsEntry,
   isTimedFinalsRound,
-  mergeSheetSummaries,
   uniqueRelayTeams,
 } from "@/lib/meet/meet-sheet-summary"
 import { canonicalizeStrokeEvent, compareRelayEvents, normalizeEventName } from "@/lib/swim/swim-parse"
@@ -76,10 +76,18 @@ import RemoveRosterOnlyButton from "./RemoveRosterOnlyButton"
 import { EditRelayButton } from "./MeetRelayEditor"
 import MeetAddMenu from "./MeetAddMenu"
 import ShareRosterSummaryButton from "./ShareRosterSummaryButton"
+import SummaryJumpNav, { summaryJumpId, summaryJumpLetter, type SummaryJumpTarget } from "./SummaryJumpNav"
 import { MenuDivider, MenuItem, MenuSubmenu, menuPanel } from "./MeetMenu"
 import SummaryRow, { EventBadge, SUMMARY_INSET, SummaryRowFold, type RowDisplay, type RowDensity, type RowResult } from "./SummaryRow"
 import type { DetailRound, SwimDetail } from "./SwimDetailModal"
 import { useEscapeToClose } from "@/lib/use-escape-to-close"
+import { buildRosterSummary, rosterSummaryHasResults } from "@/lib/meet/roster-summary-display"
+import {
+  DEFAULT_SUMMARY_VIEW,
+  summaryViewSearch,
+  type SummaryViewMode,
+  type SummaryViewState,
+} from "@/lib/meet/roster-summary-view"
 
 /** Card headers inset like the rows below them, so badges and avatars line up. */
 const summaryHeaderInset = { paddingLeft: SUMMARY_INSET, paddingRight: SUMMARY_INSET }
@@ -642,7 +650,10 @@ function summaryRowView(
       : undefined
   const split = sanitizeRelaySplitTime(swimmer?.splitTime)
   const legSplit = split ? formatDisplayTime(split) : null
-  const relayLeg = swimmer ? `Leg ${swimmer.leg}${legSplit ? ` - ${legSplit}` : ""}` : undefined
+  // The leg's own 50s, when the results time them (relay-splits.ts notes where they come from).
+  // Only the exports show them ("Leg 2 - 49.20 (23.83 · 25.37)"); on screen it's "Leg 2 - 49.20".
+  const legSubSplits = relayLegSubSplitTimes(swimmer?.splits, formatDisplayTime)
+  const relayLeg = swimmer ? (relayLegLabel(swimmer.leg, legSplit) ?? undefined) : undefined
 
   const heat = formatHeat(entry)
   const lane = isRelay ? relayLane(entry) : individualLane(entry)
@@ -682,6 +693,7 @@ function summaryRowView(
     relayLeg,
     relayLegNumber: swimmer?.leg,
     legSplit,
+    legSubSplits,
     heat,
     lane,
     heatLane,
@@ -707,17 +719,30 @@ function summaryRowView(
 /** Medley relay legs in swim order. */
 const MEDLEY_STROKES = ["BK", "BR", "FL", "FR"]
 
+/** One relay leg as the summary and its exports list it under an event. */
+type RelayLegView = {
+  name: string
+  /** The leg's split ("" when there isn't one). */
+  split: string
+  /** The leg's own interval splits (the 50s of a 100 leg), [] when the results don't time them. */
+  subSplits: string[]
+}
+
 /**
- * A relay's swimmers in leg order, each with their split ("" when there isn't one), leaving out
- * "Leg 1"-style placeholders for an unknown roster.
+ * A relay's swimmers in leg order, each with their split and sub-splits, leaving out "Leg 1"-style
+ * placeholders for an unknown roster.
  */
-function relayLegs(entry: SummaryEntry): { name: string; split: string }[] {
+function relayLegs(entry: SummaryEntry): RelayLegView[] {
   return [...(entry.relaySwimmers ?? [])]
     .filter((s) => isRealRelaySwimmerName(s.name))
     .sort((a, b) => a.leg - b.leg)
     .map((s) => {
       const split = sanitizeRelaySplitTime(s.splitTime)
-      return { name: s.name, split: split ? formatDisplayTime(split) : "" }
+      return {
+        name: s.name,
+        split: split ? formatDisplayTime(split) : "",
+        subSplits: relayLegSubSplitTimes(s.splits, formatDisplayTime),
+      }
     })
 }
 
@@ -747,14 +772,9 @@ function summaryRowPdf(
   const relayFullName = eventView ? undefined : `${relayEvent} Relay ${relayLetter}`
   const startTime = (display.showHeatLane && entry.startTime) || undefined
   // The round rides beside the name (then any result tags); the line below has a relay athlete's
-  // leg and split ("Leg 4 - 20.05").
-  const meta = view.isRelay
-    ? view.relayLegNumber
-      ? `Leg ${view.relayLegNumber}${view.legSplit ? ` - ${view.legSplit}` : ""}`
-      : view.legSplit
-        ? `Split ${view.legSplit}`
-        : null
-    : null
+  // leg, split and sub-splits ("Leg 4 - 20.05", "Leg 2 - 49.20 (23.83 · 25.37)").
+  const meta = view.isRelay ? relayLegLabel(view.relayLegNumber, view.legSplit, view.legSubSplits) : null
+  const legs = view.isRelay ? relayLegs(entry) : []
   const heatLane = display.showHeatLane ? view.heatLane : null
   return {
     eventNumber: view.badgeNumber,
@@ -769,8 +789,9 @@ function summaryRowPdf(
     meta: meta || undefined,
     heatLane: heatLane || undefined,
     startTime,
-    legs: view.isRelay ? relayLegs(entry).map((leg) => leg.name) : undefined,
-    legSplits: view.isRelay ? relayLegs(entry).map((leg) => leg.split) : undefined,
+    legs: view.isRelay ? legs.map((leg) => leg.name) : undefined,
+    legSplits: view.isRelay ? legs.map((leg) => leg.split) : undefined,
+    legSubSplits: legs.some((leg) => leg.subSplits.length) ? legs.map((leg) => leg.subSplits) : undefined,
     splits: view.isRelay ? undefined : swimSplits(entry),
     result: view.result,
   }
@@ -790,6 +811,7 @@ function SummaryEntryRow({
   eventNumberOptions,
   eventView = false,
   athleteId,
+  mine = false,
 }: {
   entry: SummaryEntry
   display: RowDisplay
@@ -806,6 +828,8 @@ function SummaryEntryRow({
   eventView?: boolean
   /** The athlete whose section the row sits in (by-athlete view). */
   athleteId?: string
+  /** The viewer's own row (by event), tinted so they can find it. */
+  mine?: boolean
 }) {
   const [editOpen, setEditOpen] = useState(false)
   const [heatLaneOpen, setHeatLaneOpen] = useState(false)
@@ -1000,6 +1024,7 @@ function SummaryEntryRow({
       <SummaryRow
         id={anchorSwimId ? `swim-${anchorSwimId}` : undefined}
         display={display}
+        highlighted={mine}
         eventNumber={view.badgeNumber}
         avatar={
           eventView && !isRelay ? (
@@ -1042,11 +1067,14 @@ function SummaryEntryRow({
 }
 
 /** The settings menu's flyouts. */
-type SettingsSubmenu = "view" | "group" | "session" | "rounds" | "gender" | "rows" | "show"
+type SettingsSubmenu = "session" | "rounds" | "gender" | "rows" | "show"
 
 const DENSITY_KEY = "swimbuzz-summary-row-density"
 const ROWINFO_KEY = "swimbuzz-summary-row-info"
-/** Per meet: the view, grouping and filters, kept across reloads for a while (not for good). */
+/**
+ * Per meet: the view, grouping and filters, kept for a while (not for good) — the fallback when the
+ * meet's URL names no view (the URL is where the view lives; see roster-summary-view.ts).
+ */
 const VIEW_KEY_PREFIX = "swimbuzz-summary-view:"
 const VIEW_TTL_MS = 12 * 60 * 60 * 1000
 
@@ -1057,6 +1085,7 @@ type SavedView = {
   gender: "all" | "F" | "M"
   session: string | null
   hiddenRounds: SummaryRoundKind[]
+  mine?: boolean
 }
 
 /** The meet's saved view when it's recent and well-formed, else null. */
@@ -1073,10 +1102,66 @@ function readSavedView(key: string): SavedView | null {
       hiddenRounds: Array.isArray(v.hiddenRounds)
         ? v.hiddenRounds.filter((k): k is SummaryRoundKind => k === "P" || k === "F" || k === "T")
         : [],
+      mine: v.mine === true,
     }
   } catch {
     return null
   }
+}
+
+/** The page was opened on one swim (`#swim-<id>` from an athlete page), which a saved filter could hide. */
+function linkedToSwim(): boolean {
+  return /#swim-/.test(window.location.hash)
+}
+
+/** A filter that's on, as a removable chip under the toolbar. */
+type ActiveFilter = { key: string; label: string; clear: () => void }
+
+const VIEW_OPTIONS: { value: SummaryViewMode; label: string; icon: "user" | "numberedList" | "list" }[] = [
+  { value: "athlete", label: "Athletes", icon: "user" },
+  { value: "event", label: "Events", icon: "numberedList" },
+  { value: "roster", label: "Roster", icon: "list" },
+]
+
+/**
+ * The summary's three views side by side — by athlete, by event, the roster — as one segmented
+ * control at the start of the toolbar (its own full-width line when the summary is narrow).
+ */
+function SummaryViewSwitch({
+  value,
+  onChange,
+}: {
+  value: SummaryViewMode
+  onChange: (next: SummaryViewMode) => void
+}) {
+  return (
+    <div
+      role="radiogroup"
+      aria-label="View"
+      className="flex h-[38px] w-full shrink-0 rounded-lg border border-border bg-background p-0.5 @[560px]:w-auto"
+    >
+      {VIEW_OPTIONS.map((option) => {
+        const selected = option.value === value
+        return (
+          <button
+            key={option.value}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            onClick={() => onChange(option.value)}
+            className={`inline-flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md px-3 text-sm transition-colors @[560px]:flex-none ${
+              selected
+                ? "bg-fill font-medium text-foreground"
+                : "text-foreground-secondary hover:bg-background-hover hover:text-foreground"
+            }`}
+          >
+            <LedgerIcon name={option.icon} className="h-4 w-4 shrink-0" />
+            {option.label}
+          </button>
+        )
+      })}
+    </div>
+  )
 }
 
 const toolbarButton =
@@ -1104,6 +1189,8 @@ export default function MeetSheetSummarySection({
   eventOrder = null,
   details,
   iconUrl = null,
+  initialView = DEFAULT_SUMMARY_VIEW,
+  viewFromUrl = false,
 }: {
   psychSummary?: SheetSummary | null
   heatSummary?: SheetSummary | null
@@ -1135,15 +1222,25 @@ export default function MeetSheetSummarySection({
   /** Date and location for the PNG export's header. */
   details?: MeetHeaderDetails
   iconUrl?: string | null
+  /** The view and filters the page's URL names (server-parsed, so the first paint shows them). */
+  initialView?: SummaryViewState
+  /** The URL names a view; else the meet's saved view (if recent) is restored after mount. */
+  viewFromUrl?: boolean
 }) {
   const editableSeedKeySet = new Set(editableSeedKeys)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [viewByEvent, setViewByEvent] = useState(false)
-  const [viewMode, setViewMode] = useState<"summary" | "roster">("summary")
-  const [genderFilter, setGenderFilter] = useState<"all" | "F" | "M">("all")
+  const [searchQuery, setSearchQuery] = useState(initialView.q)
+  const [viewByEvent, setViewByEvent] = useState(initialView.view === "event")
+  const [viewMode, setViewMode] = useState<"summary" | "roster">(
+    initialView.view === "roster" ? "roster" : "summary"
+  )
+  const [genderFilter, setGenderFilter] = useState<"all" | "F" | "M">(initialView.gender)
   /** A packet session's label, or null for every session. */
-  const [sessionFilter, setSessionFilter] = useState<string | null>(null)
-  const [hiddenRounds, setHiddenRounds] = useState<ReadonlySet<SummaryRoundKind>>(new Set())
+  const [sessionFilter, setSessionFilter] = useState<string | null>(initialView.session)
+  const [hiddenRounds, setHiddenRounds] = useState<ReadonlySet<SummaryRoundKind>>(
+    () => new Set(initialView.hiddenRounds)
+  )
+  /** Only the viewer's own events (needs a linked athlete). */
+  const [mineOnly, setMineOnly] = useState(initialView.mine)
   const [density, setDensity] = useState<RowDensity>("cozy")
   const [showRound, setShowRound] = useState(true)
   const [showHeatLane, setShowHeatLane] = useState(true)
@@ -1159,10 +1256,14 @@ export default function MeetSheetSummarySection({
   const viewKey = `${VIEW_KEY_PREFIX}${meetId ?? ""}`
   // Saving waits until the saved view is restored, so the defaults don't overwrite it first.
   const [viewRestored, setViewRestored] = useState(false)
+  /** Roster mode came from the sign-ups card's "N on roster" link — shown, but not saved for later. */
+  const rosterJumpRef = useRef(false)
 
   useEffect(() => {
     let saved: { density?: RowDensity; round?: boolean; hl?: boolean } = {}
-    const view = readSavedView(viewKey)
+    // The URL's view wins; without one, the saved view — unless the page was opened on one swim,
+    // which a saved filter or the roster view would hide (its row opens from the URL hash).
+    const view = viewFromUrl || linkedToSwim() ? null : readSavedView(viewKey)
     try {
       const d = window.localStorage.getItem(DENSITY_KEY)
       const info = JSON.parse(window.localStorage.getItem(ROWINFO_KEY) || "null")
@@ -1182,14 +1283,35 @@ export default function MeetSheetSummarySection({
         setGenderFilter(view.gender)
         setSessionFilter(view.session)
         setHiddenRounds(new Set(view.hiddenRounds))
+        setMineOnly(view.mine === true)
       }
       setViewRestored(true)
     })
     return () => cancelAnimationFrame(frame)
-  }, [viewKey])
+  }, [viewKey, viewFromUrl])
+
+  // The view lives in the URL (replaced in place: no history entry, no server round trip), so a
+  // reload, back/forward or a shared link shows it; the saved copy is only the fallback.
+  useEffect(() => {
+    if (!viewRestored) return
+    const state: SummaryViewState = {
+      view: viewMode === "roster" ? "roster" : viewByEvent ? "event" : "athlete",
+      gender: genderFilter,
+      session: sessionFilter,
+      hiddenRounds: [...hiddenRounds],
+      mine: mineOnly,
+      q: searchQuery,
+    }
+    const search = summaryViewSearch(state, window.location.search)
+    if (search !== window.location.search) {
+      window.history.replaceState(null, "", `${window.location.pathname}${search}${window.location.hash}`)
+    }
+  }, [viewRestored, viewMode, viewByEvent, genderFilter, sessionFilter, hiddenRounds, mineOnly, searchQuery])
 
   useEffect(() => {
     if (!viewRestored) return
+    if (viewMode !== "roster") rosterJumpRef.current = false
+    if (rosterJumpRef.current) return
     const view: SavedView = {
       savedAt: Date.now(),
       viewMode,
@@ -1197,17 +1319,19 @@ export default function MeetSheetSummarySection({
       gender: genderFilter,
       session: sessionFilter,
       hiddenRounds: [...hiddenRounds],
+      mine: mineOnly,
     }
     try {
       window.localStorage.setItem(viewKey, JSON.stringify(view))
     } catch {}
-  }, [viewRestored, viewKey, viewMode, viewByEvent, genderFilter, sessionFilter, hiddenRounds])
+  }, [viewRestored, viewKey, viewMode, viewByEvent, genderFilter, sessionFilter, hiddenRounds, mineOnly])
 
   useEscapeToClose(settingsOpen, () => setSettingsOpen(false))
 
   const sectionRef = useRef<HTMLElement>(null)
   useEffect(() => {
     const show = () => {
+      rosterJumpRef.current = true
       setViewMode("roster")
       setSearchQuery("")
       setGenderFilter("all")
@@ -1253,39 +1377,23 @@ export default function MeetSheetSummarySection({
   )
   const athleteNames = new Map(athletes.map((a) => [a.id, a.name]))
 
-  const summary = applyRosterNames(
-    attachCoachHeatLanes(
-      mergeSheetSummaries(
-        psychSummary,
-        heatSummary,
-        results ?? [],
-        relayResults,
-        entriesSummary,
-        finalsHeatSummary
-      ),
-      heatLaneOverrides,
-      athleteGenders
-    ),
-    athleteNames
-  )
+  // Built and cleaned like mobile's payload (roster-summary-display.ts), so both list the same rows.
+  const summarySources = {
+    psychSummary,
+    heatSummary,
+    finalsHeatSummary,
+    entriesSummary,
+    results,
+    relayResults,
+    heatLaneOverrides,
+  }
+  const summary = buildRosterSummary(summarySources, athleteGenders, athleteNames)
   const relays = summary
     ? attachCoachHeatLanes(uniqueRelayTeams(summary.entries, athleteGenders), heatLaneOverrides, athleteGenders).map(
         applyCoachHeatLane
       )
     : []
-  const hasImportedResults = Boolean(
-    (results?.length ?? 0) > 0 ||
-      (relayResults ?? []).some((e) =>
-        Boolean(
-          e.resultTime ||
-            e.finalTime ||
-            e.prelimTime ||
-            e.resultStatus ||
-            e.prelimStatus ||
-            e.finalStatus
-        )
-      )
-  )
+  const hasImportedResults = rosterSummaryHasResults(summarySources)
   // A relay leadoff shows on its relay's row (as that athlete's leg 1 split), not as a row of its own.
   const displayEntries = summary
     ? dropSeedOnlyAfterResults(
@@ -1391,34 +1499,42 @@ export default function MeetSheetSummarySection({
     }
     return (entry.gender ?? athleteGenders.get(entry.athleteId)) === genderFilter
   }
+  /** "My events" is on (and means something: the viewer has a linked athlete). */
+  const mineActive = mineOnly && Boolean(viewerAthleteId) && viewMode === "summary"
+  /** The viewer's own row: their individual swim, or a relay they're on. */
+  const isMine = (entry: SummaryEntry) =>
+    Boolean(viewerAthleteId) &&
+    (entry.entryType === "relay_team"
+      ? Boolean(entry.relaySwimmers?.some((s) => s.athleteId === viewerAthleteId))
+      : entry.athleteId === viewerAthleteId)
+  /**
+   * Search under an athlete, alike for the viewer's pinned section and everyone else's: the athlete's
+   * name keeps all their rows, else only the rows whose event matches ("Fly" lists fly swims).
+   */
+  const matchesAthleteSearch = (name: string, entry: SummaryEntry) =>
+    !q || name.toLowerCase().includes(q) || entry.event.toLowerCase().includes(q)
+  const viewerName = viewerAthleteId ? athleteNames.get(viewerAthleteId) ?? "" : ""
   const filteredMyEntries = myEntries.filter(
-    (entry) =>
-      matchesFilters(entry) &&
-      (!q ||
-        entry.athleteName.toLowerCase().includes(q) ||
-        entry.event.toLowerCase().includes(q))
+    (entry) => matchesFilters(entry) && matchesAthleteSearch(viewerName, entry)
   )
   const filterAthleteGroups = (groups: typeof grouped) =>
     groups
       .map((athleteGroup) => ({
         ...athleteGroup,
-        entries: athleteGroup.entries.filter(matchesFilters),
+        entries: athleteGroup.entries.filter(
+          (entry) => matchesFilters(entry) && matchesAthleteSearch(athleteGroup.name, entry)
+        ),
       }))
-      .filter(
-        (athleteGroup) =>
-          athleteGroup.entries.length > 0 &&
-          (!q ||
-            athleteGroup.name.toLowerCase().includes(q) ||
-            athleteGroup.entries.some((entry) => entry.event.toLowerCase().includes(q)))
-      )
-  const filteredOtherGrouped = filterAthleteGroups(otherGrouped)
+      .filter((athleteGroup) => athleteGroup.entries.length > 0)
+  const filteredOtherGrouped = mineActive ? [] : filterAthleteGroups(otherGrouped)
 
   // For the "by event" view: use the de-duped relay list (the same relays the by-athlete sections use)
-  // so that seed rows from the heat sheet don't appear as duplicates alongside result rows.
+  // so that seed rows from the heat sheet don't appear as duplicates alongside result rows. Roster-only
+  // "Attending" rows aren't an event, so they stay out of it (the Roster view lists who's attending).
   const deduplicatedByEventEntries: SummaryEntry[] = [
-    ...displayEntries.filter((entry) => entry.entryType !== "relay_team"),
+    ...displayEntries.filter((entry) => entry.entryType !== "relay_team" && !entry.rosterOnly),
     ...relays,
-  ].filter(matchesFilters)
+  ].filter((entry) => matchesFilters(entry) && (!mineActive || isMine(entry)))
 
   const rawGroupedEvents = deduplicatedByEventEntries.reduce((acc, entry) => {
     const gender =
@@ -1454,9 +1570,7 @@ export default function MeetSheetSummarySection({
           grouped.filter((g) => g.entries.some(matchesFilters)).length,
           "athlete"
         )} and ${plural(
-          [...rawGroupedEvents.values()].filter((g) =>
-            g.entries.some((e) => !e.rosterOnly && matchesFilters(e))
-          ).length,
+          [...rawGroupedEvents.values()].filter((g) => g.entries.some(matchesFilters)).length,
           "event"
         )}${scope ? ` in ${scope}` : ""}${genderSuffix}…`
 
@@ -1501,6 +1615,31 @@ export default function MeetSheetSummarySection({
         ? sortedEventGroups.length > 0
         : hasSummaryContent
 
+  // Jump bar (SummaryJumpNav): by athlete a letter per first letter of the names listed, by event a
+  // number per numbered event, each pointing at the first card it names (`jumpIds`: card key → id).
+  const jumpIds = new Map<string, string>()
+  const jumpTargets: SummaryJumpTarget[] = []
+  if (viewMode === "summary" && hasContent) {
+    const addTarget = (cardKey: string, key: string, label: string, ariaLabel: string) => {
+      if (jumpTargets.some((t) => t.key === key)) return
+      const targetId = summaryJumpId(`${viewByEvent ? "event" : "athlete"}-${cardKey}`)
+      jumpIds.set(cardKey, targetId)
+      jumpTargets.push({ key, label, ariaLabel, targetId })
+    }
+    if (viewByEvent) {
+      for (const group of sortedEventGroups) {
+        if (group.eventNumber <= 0) continue
+        const number = String(group.eventNumber)
+        addTarget(group.key, number, number, `Event ${number}, ${group.title}`)
+      }
+    } else {
+      for (const athleteGroup of filteredOtherGrouped) {
+        const letter = summaryJumpLetter(athleteGroup.name)
+        addTarget(athleteGroup.athleteId, letter, letter, `Athletes starting with ${letter}`)
+      }
+    }
+  }
+
   const eventCountByAthlete = new Map<string, number>()
   for (const entry of displayEntries) {
     if (entry.entryType === "relay_team" || entry.rosterOnly) continue
@@ -1530,6 +1669,33 @@ export default function MeetSheetSummarySection({
   const viewerRecord = viewerAthleteId ? athletes.find((a) => a.id === viewerAthleteId) : undefined
   const addMenuVisible = canEdit && meetId
 
+  const currentView: SummaryViewMode = viewMode === "roster" ? "roster" : viewByEvent ? "event" : "athlete"
+  function pickView(next: SummaryViewMode) {
+    setViewMode(next === "roster" ? "roster" : "summary")
+    if (next !== "roster") setViewByEvent(next === "event")
+  }
+
+  // The filters in effect, as chips under the toolbar (the ones the view in use applies).
+  const roundsShown = roundFilterOn ? roundFilterLabel(hiddenRounds, availableRounds) : null
+  const activeFilters: ActiveFilter[] = [
+    ...(mineActive ? [{ key: "mine", label: "My events", clear: () => setMineOnly(false) }] : []),
+    ...(viewMode === "summary" && activeSession
+      ? [{ key: "session", label: activeSession, clear: () => setSessionFilter(null) }]
+      : []),
+    ...(viewMode === "summary" && roundsShown
+      ? [{ key: "rounds", label: roundsShown, clear: () => setHiddenRounds(new Set()) }]
+      : []),
+    ...(genderFilter !== "all"
+      ? [{ key: "gender", label: genderFilter === "F" ? "Women" : "Men", clear: () => setGenderFilter("all") }]
+      : []),
+  ]
+  function clearFilters() {
+    setMineOnly(false)
+    setSessionFilter(null)
+    setHiddenRounds(new Set())
+    setGenderFilter("all")
+  }
+
   /**
    * The view as it's shown — same mode, filters, search, order and row toggles — for the PDF export,
    * minus the viewer's pinned section: they're listed in their usual place like everyone else.
@@ -1548,6 +1714,7 @@ export default function MeetSheetSummarySection({
       viewMode === "roster" ? "Roster" : `${title} by ${viewByEvent ? "Event" : "Athlete"}`,
       viewMode === "summary" ? scope : null,
       genderFilter === "F" ? "Women" : genderFilter === "M" ? "Men" : null,
+      mineActive ? "My events" : null,
       q ? `“${searchQuery.trim()}”` : null,
     ]
       .filter(Boolean)
@@ -1615,7 +1782,10 @@ export default function MeetSheetSummarySection({
       })
       return { heading, sections, splitSections: true, ...orderOfEvents }
     } else {
-      for (const athleteGroup of filterAthleteGroups(grouped)) {
+      const exported = filterAthleteGroups(grouped).filter(
+        (athleteGroup) => !mineActive || athleteGroup.athleteId === viewerAthleteId
+      )
+      for (const athleteGroup of exported) {
         sections.push({
           title: athleteGroup.name,
           // Under an athlete, a relay is just the event — no list of its swimmers.
@@ -1625,6 +1795,7 @@ export default function MeetSheetSummarySection({
               ...toRow(entry, false, athleteGroup.athleteId),
               legs: undefined,
               legSplits: undefined,
+              legSubSplits: undefined,
             })),
         })
       }
@@ -1636,14 +1807,15 @@ export default function MeetSheetSummarySection({
     // Every row of the summary lays out alike, however much room its own label needs.
     <SummaryRowFold>
       <section ref={sectionRef} className="@container/summary scroll-mt-4">
-        <div className="mb-3 flex items-center gap-2 pb-1">
+        <div className="mb-3 flex flex-wrap items-center gap-2 pb-1">
+          <SummaryViewSwitch value={currentView} onChange={pickView} />
           <input
             type="search"
             aria-label={viewMode === "roster" ? "Search athletes" : "Search athletes or events"}
             placeholder={searchPlaceholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/35"
+            className="h-[38px] min-w-0 flex-1 basis-32 rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/35"
           />
 
           {addMenuVisible ? (
@@ -1672,15 +1844,15 @@ export default function MeetSheetSummarySection({
           <div className="relative shrink-0">
             <button
               type="button"
-              aria-label="View settings"
-              title="View settings"
+              aria-label="Filters and display"
+              title="Filters and display"
               aria-haspopup="menu"
               aria-expanded={settingsOpen}
               onClick={() => {
                 setSettingsOpen(!settingsOpen)
                 setSubmenu(null)
               }}
-              className={toolbarButton}
+              className={`${toolbarButton} ${activeFilters.length > 0 ? "text-accent" : ""}`}
             >
               <LedgerIcon name="settings" className="h-[18px] w-[18px] shrink-0" />
             </button>
@@ -1688,59 +1860,18 @@ export default function MeetSheetSummarySection({
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setSettingsOpen(false)} />
                 <div role="menu" className={menuPanel}>
-                  <MenuSubmenu
-                    icon={viewMode === "summary" ? "grid" : "list"}
-                    label="View"
-                    value={viewMode === "summary" ? "Summary" : "Roster"}
-                    {...submenuProps("view")}
-                  >
+                  {viewMode === "summary" && viewerAthleteId ? (
                     <MenuItem
-                      icon="grid"
-                      label="Summary"
-                      selected={viewMode === "summary"}
+                      role="menuitemcheckbox"
+                      icon="user"
+                      label="My events only"
+                      selected={mineOnly}
                       onClick={() => {
-                        setViewMode("summary")
+                        setMineOnly((on) => !on)
                         setSettingsOpen(false)
                       }}
                     />
-                    <MenuItem
-                      icon="list"
-                      label="Roster"
-                      selected={viewMode === "roster"}
-                      onClick={() => {
-                        setViewMode("roster")
-                        setSettingsOpen(false)
-                      }}
-                    />
-                  </MenuSubmenu>
-                  {viewMode === "summary" ? (
-                    <MenuSubmenu
-                      icon={viewByEvent ? "numberedList" : "user"}
-                      label="Group by"
-                      value={viewByEvent ? "Event" : "Athlete"}
-                      {...submenuProps("group")}
-                    >
-                      <MenuItem
-                        icon="user"
-                        label="By athlete"
-                        selected={!viewByEvent}
-                        onClick={() => {
-                          setViewByEvent(false)
-                          setSettingsOpen(false)
-                        }}
-                      />
-                      <MenuItem
-                        icon="numberedList"
-                        label="By event"
-                        selected={viewByEvent}
-                        onClick={() => {
-                          setViewByEvent(true)
-                          setSettingsOpen(false)
-                        }}
-                      />
-                    </MenuSubmenu>
                   ) : null}
-                  <MenuDivider />
                   {viewMode === "summary" && sessions.length > 0 ? (
                     <MenuSubmenu
                       icon="calendar"
@@ -1871,11 +2002,60 @@ export default function MeetSheetSummarySection({
           </div>
         </div>
 
+        {activeFilters.length > 0 ? (
+          <div role="group" aria-label="Filters on" className="mb-3 flex flex-wrap items-center gap-1.5">
+            {activeFilters.map((filter) => (
+              <button
+                key={filter.key}
+                type="button"
+                onClick={filter.clear}
+                aria-label={`Remove filter: ${filter.label}`}
+                className="inline-flex h-7 cursor-pointer items-center gap-1 rounded-full border border-accent/45 bg-accent/10 pl-2.5 pr-2 text-xs font-medium text-accent transition-colors hover:bg-accent/15"
+              >
+                {filter.label}
+                <span aria-hidden className="text-sm leading-none">
+                  ×
+                </span>
+              </button>
+            ))}
+            {activeFilters.length > 1 ? (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="h-7 cursor-pointer px-1.5 text-xs font-medium text-foreground-secondary transition-colors hover:text-primary"
+              >
+                Clear all
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+
+        <SummaryJumpNav
+          label={viewByEvent ? "Jump to event" : "Jump to athletes by letter"}
+          targets={jumpTargets}
+        />
+
         {!hasContent ? (
-          <div className="rounded-xl border border-border bg-background px-4 py-10 text-center text-sm text-foreground-secondary">
-            {viewMode === "roster"
-              ? "No athletes on the roster match these filters."
-              : "No entries match these filters."}
+          <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-background px-4 py-10 text-center text-sm text-foreground-secondary">
+            <span>
+              {viewMode === "roster"
+                ? "No athletes on the roster match these filters."
+                : mineActive && !q
+                  ? "You have no events here with these filters."
+                  : "No entries match these filters."}
+            </span>
+            {activeFilters.length > 0 || q ? (
+              <button
+                type="button"
+                onClick={() => {
+                  clearFilters()
+                  setSearchQuery("")
+                }}
+                className="inline-flex h-8 cursor-pointer items-center rounded-lg border border-border bg-background px-3 text-sm font-medium text-foreground transition-colors hover:bg-background-hover"
+              >
+                {q ? "Clear search and filters" : "Clear filters"}
+              </button>
+            ) : null}
           </div>
         ) : viewMode === "roster" ? (
           <div className="overflow-hidden rounded-xl border border-border bg-background">
@@ -1890,7 +2070,7 @@ export default function MeetSheetSummarySection({
                   <li key={athlete.id} className="border-t border-border">
                     <Link
                       href={athletePath(athlete.slug ?? athlete.id)}
-                      className={`grid grid-cols-[1fr_96px_72px] items-center px-4 py-3 text-sm text-foreground transition-colors hover:bg-fill hover:text-primary ${
+                      className={`grid grid-cols-[1fr_96px_72px] items-center px-4 py-3 text-sm text-foreground transition-colors hover:bg-background-hover hover:text-primary ${
                         isMe ? "bg-accent/5" : ""
                       }`}
                     >
@@ -1927,6 +2107,7 @@ export default function MeetSheetSummarySection({
             {sortedEventGroups.map((group) => (
               <div
                 key={group.key}
+                id={jumpIds.get(group.key)}
                 className="overflow-hidden rounded-xl border border-border-secondary bg-background"
               >
                 <div
@@ -1944,6 +2125,7 @@ export default function MeetSheetSummarySection({
                       key={`event-${entryRowKey(entry, j, athleteGenders)}`}
                       entry={entry}
                       eventView
+                      mine={isMine(entry)}
                       {...rowProps}
                     />
                   ))}
@@ -1988,6 +2170,7 @@ export default function MeetSheetSummarySection({
               return (
                 <div
                   key={athleteGroup.athleteId}
+                  id={jumpIds.get(athleteGroup.athleteId)}
                   className="overflow-hidden rounded-xl border border-border bg-background"
                 >
                   <Link

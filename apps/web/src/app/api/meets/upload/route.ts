@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { uploadMeetFile, deleteStoredMeetFile } from "@/lib/meet/meet-storage"
-import { isStoredMeetFileUrl } from "@/lib/meet/meet-files"
+import { PENDING_MEET_FILE_FOLDER, isStoredMeetFileUrl, meetFileFolder } from "@/lib/meet/meet-files"
+import { prisma } from "@/lib/prisma"
 import sharp from "sharp"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
@@ -41,6 +42,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "File is required" }, { status: 400 })
   }
 
+  // Files go in their meet's folder; uploads made before the meet exists wait in
+  // pending/ until the create saves them into the new meet's folder.
+  const meetId = String(formData.get("meetId") ?? "").trim()
+  let folder = PENDING_MEET_FILE_FOLDER
+  if (meetId) {
+    const meet = await prisma.meet.findUnique({ where: { id: meetId }, select: { id: true } })
+    if (!meet) return NextResponse.json({ error: "Meet not found" }, { status: 404 })
+    folder = meetFileFolder(meet.id)
+  }
+
   const ext = resolvedFileExt(file, ALLOWED_EXT, MIME)
   if (!ext) {
     return NextResponse.json(
@@ -55,7 +66,7 @@ export async function POST(req: Request) {
   }
 
   let finalBytes = bytes
-  let finalContentType = file.type || MIME[ext] || "application/octet-stream"
+  const finalContentType = file.type || MIME[ext] || "application/octet-stream"
 
   const isImage = [".png", ".jpg", ".jpeg", ".webp", ".gif"].includes(ext)
   if (isImage) {
@@ -85,7 +96,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { url } = await uploadMeetFile(finalBytes, file.name, finalContentType)
+    const { url } = await uploadMeetFile(finalBytes, file.name, finalContentType, folder)
     return NextResponse.json({ url, name: file.name })
   } catch (err) {
     const message = err instanceof Error ? err.message : "Upload failed"
@@ -106,6 +117,7 @@ export async function DELETE(req: Request) {
   }
 
   try {
+    // Only unsaved uploads go away here: a file any meet still points at is kept.
     await deleteStoredMeetFile(url)
     return NextResponse.json({ ok: true })
   } catch (err) {

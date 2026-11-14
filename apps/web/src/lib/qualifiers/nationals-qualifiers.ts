@@ -65,6 +65,24 @@ export type StandardsTableRow = {
   men: string
 }
 
+/** One stored cut of the standards set, in swim order (individual events, then relays; women first). */
+export type NationalsCutRow = {
+  event: string
+  gender: Gender
+  timeMs: number
+  note: string | null
+  isRelay: boolean
+}
+
+function sortCutRows(cuts: NationalsCutRow[]): NationalsCutRow[] {
+  return [...cuts].sort((a, b) => {
+    if (a.isRelay !== b.isRelay) return a.isRelay ? 1 : -1
+    const byEvent = a.isRelay ? compareRelayEvents(a.event, b.event) : compareSwimEvents(a.event, b.event)
+    if (byEvent !== 0) return byEvent
+    return a.gender === b.gender ? 0 : a.gender === "F" ? -1 : 1
+  })
+}
+
 export function isNqtTable(value: unknown): value is NqtTableRow[] {
   if (!Array.isArray(value)) return false
   return value.every(
@@ -219,22 +237,22 @@ export const computeNationalsQualifiers = cache(async function computeNationalsQ
   qualifierCount: number
   eventCount: number
   standards: StandardsTableRow[]
+  /** Every stored cut of the set (both genders, relays included), with times. */
+  cuts: NationalsCutRow[]
+  /** Courses that have standards this season — lets clients offer a course switch only when it matters. */
+  courses: Course[]
 }> {
-  const setWhere: Prisma.NationalsStandardSetWhereInput = { season: opts.season }
-  if (opts.course) setWhere.course = opts.course
-
   const sets = await prisma.nationalsStandardSet.findMany({
-    where: setWhere,
+    where: { season: opts.season },
     include: { cuts: true },
     orderBy: { course: "asc" },
   })
+  const courses = sets.map((s) => s.course)
 
-  // Prefer SCY when multiple courses and none specified.
-  const set =
-    (opts.course ? sets.find((s) => s.course === opts.course) : null) ??
-    sets.find((s) => s.course === Course.SCY) ??
-    sets[0] ??
-    null
+  // A requested course shows only that course; otherwise prefer SCY.
+  const set = opts.course
+    ? (sets.find((s) => s.course === opts.course) ?? null)
+    : (sets.find((s) => s.course === Course.SCY) ?? sets[0] ?? null)
 
   if (!set) {
     return {
@@ -243,10 +261,15 @@ export const computeNationalsQualifiers = cache(async function computeNationalsQ
       qualifierCount: 0,
       eventCount: 0,
       standards: [],
+      cuts: [],
+      courses,
     }
   }
 
   const standards = buildStandardsTable(set.table, set.cuts)
+  const allCuts = sortCutRows(
+    set.cuts.map((c) => ({ event: c.event, gender: c.gender, timeMs: c.timeMs, note: c.note, isRelay: c.isRelay }))
+  )
 
   const cuts = set.cuts.filter((c) => {
     if (!opts.includeRelays && c.isRelay) return false
@@ -282,6 +305,8 @@ export const computeNationalsQualifiers = cache(async function computeNationalsQ
       qualifierCount: 0,
       eventCount: 0,
       standards,
+      cuts: allCuts,
+      courses,
     }
   }
 
@@ -412,6 +437,8 @@ export const computeNationalsQualifiers = cache(async function computeNationalsQ
     qualifierCount: qualifiers.length,
     eventCount: eventsQualified.size,
     standards,
+    cuts: allCuts,
+    courses,
   }
 })
 

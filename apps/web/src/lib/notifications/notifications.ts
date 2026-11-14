@@ -3,14 +3,27 @@ import {
   parseNotificationPreferences,
   type NotificationPreferenceKey,
 } from "@/lib/notifications/notification-preferences"
-import { collectMeetRosterAthleteIds } from "@/lib/meet/meet-sheet-summary"
 import { prisma } from "@/lib/prisma"
 import { formatRelativeTime } from "@/lib/utils"
-import { formatZonedInstant } from "@swimbuzz/shared"
+import { currentSeason, formatZonedInstant, seasonFromDate, zonedDayKey } from "@swimbuzz/shared"
 import { athleteHrefForId, meetHrefForId, practiceHrefForId } from "@/lib/slug"
-import { sendExpoPushToUsers } from "@/lib/notifications/push"
+import { sendExpoPushPerUser } from "@/lib/notifications/push"
+import { meetAudienceAthleteIds } from "@/lib/notifications/meet-audience"
+import { meetRefKey, practiceRefKey } from "@/lib/notifications/notification-refs"
 
-async function userIdsWithPreference(
+/** One notification for one user; pushed to their devices with the same title, body and link. */
+export type NotificationDraft = {
+  userId: string
+  type: NotificationType
+  title: string
+  body: string
+  href: string | null
+  athleteId?: string | null
+  refKey?: string | null
+}
+
+/** Users (signed in at least once) among `userIds` who keep `key` on. */
+export async function userIdsWithPreference(
   userIds: string[],
   key: NotificationPreferenceKey
 ): Promise<string[]> {
@@ -27,6 +40,46 @@ async function userIdsWithPreference(
     .map((u) => u.id)
 }
 
+/** Users behind the given athletes who keep `key` on. */
+export async function athleteUserIdsWithPreference(
+  athleteIds: string[],
+  key: NotificationPreferenceKey
+): Promise<{ userId: string; athleteId: string }[]> {
+  if (athleteIds.length === 0) return []
+  const athletes = await prisma.athlete.findMany({
+    where: { id: { in: [...new Set(athleteIds)] } },
+    select: { id: true, userId: true },
+  })
+  const allowed = new Set(await userIdsWithPreference(athletes.map((a) => a.userId), key))
+  return athletes.filter((a) => allowed.has(a.userId)).map((a) => ({ userId: a.userId, athleteId: a.id }))
+}
+
+/** Coaches and exec who keep `key` on. */
+export async function staffUserIdsWithPreference(key: NotificationPreferenceKey): Promise<string[]> {
+  const staff = await prisma.user.findMany({
+    where: { role: { in: [Role.COACH, Role.EXEC] } },
+    select: { id: true },
+  })
+  return userIdsWithPreference(staff.map((u) => u.id), key)
+}
+
+/** Store the notifications and push each to its user's devices. */
+export async function deliverNotifications(drafts: NotificationDraft[]): Promise<void> {
+  if (drafts.length === 0) return
+  await prisma.notification.createMany({
+    data: drafts.map((d) => ({
+      userId: d.userId,
+      type: d.type,
+      title: d.title,
+      body: d.body,
+      href: d.href,
+      athleteId: d.athleteId ?? null,
+      refKey: d.refKey ?? null,
+    })),
+  })
+  await sendExpoPushPerUser(drafts.map((d) => ({ userId: d.userId, title: d.title, body: d.body, href: d.href })))
+}
+
 export async function notifyPracticePublished(input: {
   practiceId: string
   title: string
@@ -35,19 +88,28 @@ export async function notifyPracticePublished(input: {
   focus: string | null
   excludeUserId?: string | null
 }): Promise<void> {
-  const athletes = await prisma.user.findMany({
-    where: {
-      role: Role.ATHLETE,
-      ...(input.excludeUserId ? { id: { not: input.excludeUserId } } : {}),
-      OR: [{ emailVerified: { not: null } }, { accounts: { some: {} } }],
-    },
-    select: { id: true, notificationPreferences: true },
+  // Athletes on the practice's season roster (staff who swim included) — not alumni or athletes
+  // taken off the season.
+  const season = input.startsAt
+    ? seasonFromDate(zonedDayKey(input.startsAt, input.timeZone))
+    : currentSeason()
+  const athletes = await prisma.athlete.findMany({
+    where: { seasons: { has: season } },
+    select: { userId: true },
   })
-  const recipients = athletes
-    .filter((u) =>
-      parseNotificationPreferences(u.notificationPreferences).practicePublished
-    )
-    .map((u) => u.id)
+  const refKey = practiceRefKey(input.practiceId)
+  // Unpublishing and publishing again doesn't announce the practice twice.
+  const alreadyTold = new Set(
+    (
+      await prisma.notification.findMany({
+        where: { type: NotificationType.PRACTICE_PUBLISHED, refKey },
+        select: { userId: true },
+      })
+    ).map((n) => n.userId)
+  )
+  const recipients = (
+    await userIdsWithPreference(athletes.map((a) => a.userId), "practicePublished")
+  ).filter((id) => id !== input.excludeUserId && !alreadyTold.has(id))
   if (recipients.length === 0) return
 
   const details = [
@@ -55,80 +117,75 @@ export async function notifyPracticePublished(input: {
     input.focus?.trim() || null,
   ].filter(Boolean)
   const body = details.length > 0 ? details.join(" · ") : "A new practice is available."
-
-  const practiceHref = await practiceHrefForId(input.practiceId)
+  const href = await practiceHrefForId(input.practiceId)
   const title = `Practice published: ${input.title}`
 
-  await prisma.notification.createMany({
-    data: recipients.map((userId) => ({
+  await deliverNotifications(
+    recipients.map((userId) => ({
       userId,
       type: NotificationType.PRACTICE_PUBLISHED,
       title,
       body,
-      href: practiceHref,
-    })),
-  })
-  void sendExpoPushToUsers(recipients, { title, body, href: practiceHref })
+      href,
+      refKey,
+    }))
+  )
 }
 
-export async function notifyMeetRosterInfoDropped(input: {
+/**
+ * Something new was posted for a meet: sheets (entries, psych, heat sheets) go out as one
+ * "posted" notice under the sheets toggle; the packet, results, live stream and travel info as
+ * another under the meet-info toggle. Sent to the athletes on the meet (`meetAudienceAthleteIds`).
+ */
+export async function notifyMeetInfoPosted(input: {
   meetId: string
   meetName: string
-  infoLabel: string
-  body?: string
+  sheetLabels: string[]
+  infoLabels: string[]
+  excludeUserId?: string | null
 }): Promise<void> {
-  const meet = await prisma.meet.findUnique({
-    where: { id: input.meetId },
-    select: {
-      psychSheetSummary: true,
-      heatSheetSummary: true,
-      finalsHeatSheetSummary: true,
-      entriesSheetSummary: true,
-      relayResultsSummary: true,
-      resultStatusesSummary: true,
-      swims: { select: { athleteId: true }, distinct: ["athleteId"] },
-    },
-  })
-  if (!meet) return
-
-  const athleteIds = collectMeetRosterAthleteIds({
-    psychSheetSummary: meet.psychSheetSummary,
-    heatSheetSummary: meet.heatSheetSummary,
-    finalsHeatSheetSummary: meet.finalsHeatSheetSummary,
-    entriesSheetSummary: meet.entriesSheetSummary,
-    relayResultsSummary: meet.relayResultsSummary,
-    resultStatusesSummary: meet.resultStatusesSummary,
-    swimAthleteIds: meet.swims.map((s) => s.athleteId),
-  })
+  if (input.sheetLabels.length === 0 && input.infoLabels.length === 0) return
+  const athleteIds = await meetAudienceAthleteIds(input.meetId)
   if (athleteIds.length === 0) return
+  const href = await meetHrefForId(input.meetId)
+  const refKey = meetRefKey(input.meetId)
+  const drafts: NotificationDraft[] = []
 
-  const athletes = await prisma.athlete.findMany({
-    where: { id: { in: athleteIds } },
-    select: { userId: true },
-  })
-  const recipients = await userIdsWithPreference(
-    athletes.map((a) => a.userId),
-    "meetRosterInfo"
-  )
-  if (recipients.length === 0) return
-
-  const body =
-    input.body?.trim() ||
-    `New ${input.infoLabel.toLowerCase()} is available for this meet.`
-
-  const meetHref = await meetHrefForId(input.meetId)
-  const title = `${input.infoLabel}: ${input.meetName}`
-
-  await prisma.notification.createMany({
-    data: recipients.map((userId) => ({
-      userId,
+  const groups = [
+    {
+      labels: input.sheetLabels,
+      key: "meetSheets" as const,
+      type: NotificationType.MEET_SHEET_POSTED,
+      body: "See your events, seeds, heats and lanes.",
+    },
+    {
+      labels: input.infoLabels,
+      key: "meetRosterInfo" as const,
       type: NotificationType.MEET_ROSTER_INFO,
-      title,
-      body,
-      href: meetHref,
-    })),
-  })
-  void sendExpoPushToUsers(recipients, { title, body, href: meetHref })
+      body: null,
+    },
+  ]
+  for (const group of groups) {
+    if (group.labels.length === 0) continue
+    const recipients = (await athleteUserIdsWithPreference(athleteIds, group.key)).filter(
+      (r) => r.userId !== input.excludeUserId
+    )
+    const what = joinLabels(group.labels)
+    const title = `${what} posted: ${input.meetName}`
+    const body = group.body ?? `New ${what.toLowerCase()} for this meet.`
+    for (const r of recipients) {
+      drafts.push({ userId: r.userId, type: group.type, title, body, href, refKey })
+    }
+  }
+  await deliverNotifications(drafts)
+}
+
+/** "Psych sheet", "Psych sheet & heat sheet", "Packet, results & travel info". */
+function joinLabels(labels: string[]): string {
+  const unique = [...new Set(labels)]
+  const [first, ...rest] = unique.map((label, i) => (i === 0 ? label : label.toLowerCase()))
+  if (rest.length === 0) return first
+  return `${[first, ...rest.slice(0, -1)].join(", ")} & ${rest.at(-1)}`
 }
 
 export async function notifyPracticeComment(input: {
@@ -151,38 +208,29 @@ export async function notifyPracticeComment(input: {
   }
   candidateIds.delete(input.authorId)
 
-  const recipients = await userIdsWithPreference(
-    [...candidateIds],
-    "practiceComments"
-  )
+  const recipients = await userIdsWithPreference([...candidateIds], "practiceComments")
   if (recipients.length === 0) return
 
   const snippet =
-    input.commentBody.length > 120
-      ? `${input.commentBody.slice(0, 117)}…`
-      : input.commentBody
+    input.commentBody.length > 120 ? `${input.commentBody.slice(0, 117)}…` : input.commentBody
   const title = input.isReply
     ? `${input.authorName} replied to your comment`
     : `${input.authorName} commented on ${input.practiceTitle}`
+  const href = await practiceHrefForId(input.practiceId)
 
-  const practiceHref = await practiceHrefForId(input.practiceId)
-
-  await prisma.notification.createMany({
-    data: recipients.map((userId) => ({
+  await deliverNotifications(
+    recipients.map((userId) => ({
       userId,
       type: NotificationType.PRACTICE_COMMENT,
       title,
       body: snippet,
-      href: practiceHref,
-    })),
-  })
-  void sendExpoPushToUsers(recipients, {
-    title,
-    body: snippet,
-    href: practiceHref,
-  })
+      href,
+      refKey: practiceRefKey(input.practiceId),
+    }))
+  )
 }
 
+/** Clear staff's "requested a times import" notices for athletes whose times were just imported. */
 export async function dismissTimesImportRequestNotifications(
   athleteIds: string | string[]
 ): Promise<void> {
@@ -196,6 +244,21 @@ export async function dismissTimesImportRequestNotifications(
   })
 }
 
+/** How long an athlete waits between times-import requests. */
+export const TIMES_IMPORT_REQUEST_COOLDOWN_MS = 12 * 60 * 60 * 1000
+
+/** When the athlete may ask again, or null if they can ask now (no open request in the cooldown). */
+export async function timesImportRequestRetryAt(athleteId: string): Promise<Date | null> {
+  const latest = await prisma.notification.findFirst({
+    where: { athleteId, type: NotificationType.TIMES_IMPORT_REQUEST },
+    orderBy: { createdAt: "desc" },
+    select: { createdAt: true },
+  })
+  if (!latest) return null
+  const retryAt = new Date(latest.createdAt.getTime() + TIMES_IMPORT_REQUEST_COOLDOWN_MS)
+  return retryAt.getTime() > Date.now() ? retryAt : null
+}
+
 export async function notifyTimesImportRequest(input: {
   athleteId: string
   firstName: string
@@ -205,37 +268,24 @@ export async function notifyTimesImportRequest(input: {
 }): Promise<void> {
   await dismissTimesImportRequestNotifications(input.athleteId)
 
-  const staff = await prisma.user.findMany({
-    where: {
-      role: { in: [Role.COACH, Role.EXEC] },
-      OR: [{ emailVerified: { not: null } }, { accounts: { some: {} } }],
-    },
-    select: { id: true, notificationPreferences: true },
-  })
-  const recipients = staff
-    .filter((u) =>
-      parseNotificationPreferences(u.notificationPreferences).profileChanges
-    )
-    .map((u) => u.id)
+  const recipients = await staffUserIdsWithPreference("profileChanges")
   if (recipients.length === 0) return
 
   const ids = `SwimCloud ID${input.swimCloudIds.length > 1 ? "s" : ""} ${input.swimCloudIds.join(", ")}`
   const body = input.timesSyncedAt
     ? `${ids} · last imported ${formatRelativeTime(input.timesSyncedAt)}`
     : `${ids} · never imported`
-
   const href = await athleteHrefForId(input.athleteId)
   const title = `${input.firstName} ${input.lastName} requested a times import`
 
-  await prisma.notification.createMany({
-    data: recipients.map((userId) => ({
+  await deliverNotifications(
+    recipients.map((userId) => ({
       userId,
       type: NotificationType.TIMES_IMPORT_REQUEST,
       title,
       body,
       href,
       athleteId: input.athleteId,
-    })),
-  })
-  void sendExpoPushToUsers(recipients, { title, body, href })
+    }))
+  )
 }

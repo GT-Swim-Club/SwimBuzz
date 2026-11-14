@@ -1,4 +1,4 @@
-import { formatClockTime } from "@swimbuzz/shared"
+import { formatAcademicYear, formatClockTime } from "@swimbuzz/shared"
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
@@ -22,11 +22,11 @@ export function formatOrdinal(n: number): string {
 export function podiumPlaceClass(place: number): string {
   switch (place) {
     case 1:
-      return "text-amber-600 dark:text-amber-400 font-semibold"
+      return "text-medal-gold font-semibold"
     case 2:
-      return "text-slate-500 dark:text-slate-300 font-semibold"
+      return "text-medal-silver font-semibold"
     case 3:
-      return "text-orange-600 dark:text-orange-400 font-semibold"
+      return "text-medal-bronze font-semibold"
     default:
       return "text-foreground-tertiary dark:text-foreground-tertiary"
   }
@@ -150,13 +150,8 @@ export function toTitleCase(str: string): string {
     .replace(/(^|\s)\S/g, (match) => match.toUpperCase())
 }
 
-export function formatAcademicYear(year: string): string {
-  if (year.toLowerCase().includes("phd")) return "PhD"
-  if (year.toLowerCase().includes("master")) return "Masters"
-  const num = parseInt(year)
-  if (isNaN(num)) return year
-  return `${formatOrdinal(num)} Year`
-}
+/** Shared with mobile so both clients label a year the same way. */
+export { formatAcademicYear }
 
 export function athleteAge(dob: Date | string | null | undefined): number | null {
   if (!dob) return null

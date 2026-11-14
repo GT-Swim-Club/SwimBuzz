@@ -328,7 +328,7 @@ export async function attachSheetSummaries(
         allSheetNames.push(...sheetNames)
         if (cachedParse) cachedSheetParses.psych = cachedParse
         sheetImported = true
-        sheetDrops.push("psych_sheet")
+        if (next !== existing.psychSheetUrl) sheetDrops.push("psych_sheet")
       } catch (err) {
         rethrowImportValidation(err)
         console.error("Psych sheet parse failed:", err)
@@ -348,7 +348,7 @@ export async function attachSheetSummaries(
       allSheetNames.push(...sheetNames)
       if (cachedParse) cachedSheetParses.psych = cachedParse
       sheetImported = true
-      sheetDrops.push("psych_sheet")
+      // Re-read for a new team code: nothing new was posted, so no notice.
     } catch (err) {
       rethrowImportValidation(err)
       console.error("Psych sheet parse failed:", err)
@@ -378,7 +378,7 @@ export async function attachSheetSummaries(
         cachedSheetParses.heat = cachedParses
       }
       sheetImported = true
-      sheetDrops.push("heat_sheet")
+      if (sheetUrlsChanged(existingHeatLinks, nextHeatLinks)) sheetDrops.push("heat_sheet")
     } catch (err) {
       rethrowImportValidation(err)
       console.error("Heat sheet parse failed:", err)
@@ -405,7 +405,7 @@ export async function attachSheetSummaries(
         cachedSheetParses.finals = cachedParses
       }
       sheetImported = true
-      sheetDrops.push("finals_heat_sheet")
+      if (sheetUrlsChanged(existingFinalsLinks, nextFinalsLinks)) sheetDrops.push("finals_heat_sheet")
     } catch (err) {
       rethrowImportValidation(err)
       console.error("Finals heat sheet parse failed:", err)
@@ -433,7 +433,7 @@ export async function attachSheetSummaries(
         allSheetNames.push(...sheetNames)
         if (cachedParse) cachedSheetParses.entries = cachedParse
         sheetImported = true
-        sheetDrops.push("entries_sheet")
+        if (next !== existing.entriesSheetUrl) sheetDrops.push("entries_sheet")
       } catch (err) {
         rethrowImportValidation(err)
         console.error("Entries sheet parse failed:", err)
@@ -453,7 +453,7 @@ export async function attachSheetSummaries(
       allSheetNames.push(...sheetNames)
       if (cachedParse) cachedSheetParses.entries = cachedParse
       sheetImported = true
-      sheetDrops.push("entries_sheet")
+      // Re-read for a new team code: nothing new was posted, so no notice.
     } catch (err) {
       rethrowImportValidation(err)
       console.error("Entries sheet parse failed:", err)

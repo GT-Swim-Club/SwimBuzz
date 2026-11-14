@@ -5,8 +5,9 @@ import { getSession } from "@/lib/auth/session"
 import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete/athlete-view-server"
 import { isCuid, practicePath } from "@/lib/slug"
 import { seasonFromDate } from "@/lib/season"
-import { zonedDayKey, isStaffRole } from "@swimbuzz/shared"
+import { athleteYearForSeason, zonedDayKey, isStaffRole } from "@swimbuzz/shared"
 import { serializeAttendance } from "@/lib/practice/practice-attendance"
+import { missingClearanceByAthlete, withAttendanceClearance } from "@/lib/athlete/athlete-clearance"
 import AttendanceManager from "./AttendanceManager"
 import AttendanceList from "./AttendanceList"
 
@@ -46,6 +47,8 @@ export default async function PracticeAttendancePage({
               lastName: true,
               gender: true,
               year: true,
+              yearBySeason: true,
+              seasons: true,
               user: { select: { staffTitle: true } },
             },
           },
@@ -99,16 +102,21 @@ export default async function PracticeAttendancePage({
   const season = seasonFromDate(zonedDayKey(startsAt, practice.timeZone))
   const seasonRoster = await prisma.athlete.findMany({
     where: { seasons: { has: season } },
-    select: { id: true, slug: true, firstName: true, lastName: true, preferredName: true, gender: true, year: true },
+    select: { id: true, slug: true, firstName: true, lastName: true, preferredName: true, gender: true, year: true, yearBySeason: true, seasons: true },
     orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
   })
   const roster =
     seasonRoster.length > 0
       ? seasonRoster
       : await prisma.athlete.findMany({
-          select: { id: true, slug: true, firstName: true, lastName: true, preferredName: true, gender: true, year: true },
+          select: { id: true, slug: true, firstName: true, lastName: true, preferredName: true, gender: true, year: true, yearBySeason: true, seasons: true },
           orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
         })
+  // Staff only: flag athletes without a physical or concussion test for this season.
+  const [flaggedAttendance, missingClearance] = await Promise.all([
+    withAttendanceClearance(initialAttendance, season),
+    missingClearanceByAthlete(season, roster.map((a) => a.id)),
+  ])
 
   return (
     <main className="mx-auto w-full max-w-4xl">
@@ -126,14 +134,16 @@ export default async function PracticeAttendancePage({
         endsAt={endsAt.toISOString()}
         timeZone={practice.timeZone}
         location={practice.location}
-        initialAttendance={initialAttendance}
+        initialAttendance={flaggedAttendance}
+        season={season}
         roster={roster.map((a) => ({
+          uncleared: missingClearance.get(a.id) ?? [],
           id: a.id,
           slug: a.slug,
           name: `${a.firstName} ${a.lastName}`.trim(),
           preferredName: a.preferredName,
           gender: a.gender === "F" ? "F" : "M",
-          year: a.year,
+          year: athleteYearForSeason(a, season),
         }))}
           />
         </div>

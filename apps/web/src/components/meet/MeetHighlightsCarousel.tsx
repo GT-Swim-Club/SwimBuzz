@@ -2,9 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import {
+  highlightCounterList,
+  highlightLists,
   meetHighlightsExportRequest,
   paginateHighlights,
   TEAM_SCORE_SECTIONS,
+  type HighlightListKey,
   type MeetHeaderDetails,
   type MeetHighlights,
   type StatCounter,
@@ -12,8 +15,8 @@ import {
 } from "@swimbuzz/shared"
 import { LedgerIcon, LedgerPanel, LedgerStatTile } from "./Ledger"
 import TeamScoresModal from "./TeamScoresModal"
+import HighlightListsModal, { medalTextClass } from "./HighlightListsModal"
 import ShareRosterSummaryButton from "@/app/meets/[id]/ShareRosterSummaryButton"
-import { podiumPlaceClass } from "@/lib/utils"
 
 const AUTOPLAY_MS = 6000
 
@@ -71,15 +74,16 @@ function HighlightTile({ counter, interactive }: { counter: StatCounter; interac
         )
       }
       valueClassName={
-        counter.place != null && counter.place <= 3
-          ? podiumPlaceClass(counter.place)
-          : isDropValue(counter.value)
-            ? "text-emerald-600 dark:text-emerald-400"
-            : "text-foreground"
+        medalTextClass(counter.place) ??
+        (isDropValue(counter.value) ? "text-success-text" : "text-foreground")
       }
     />
   )
 }
+
+/** Icon buttons in the header: 24px with a mouse, at least 32px on touch. */
+const ICON_BUTTON =
+  "inline-flex h-6 w-6 items-center justify-center rounded-md text-foreground-secondary transition-colors hover:bg-fill hover:text-foreground pointer-coarse:h-8 pointer-coarse:w-8"
 
 export default function MeetHighlightsCarousel({
   highlights,
@@ -97,110 +101,150 @@ export default function MeetHighlightsCarousel({
 }) {
   const pages = paginateHighlights(highlights.counters)
   const teamScores = highlights.teamScores ?? null
+  const lists = highlightLists(highlights)
   const [scoresSection, setScoresSection] = useState<TeamScoresSection | null>(null)
+  const [openList, setOpenList] = useState<HighlightListKey | null>(null)
   const [index, setIndex] = useState(0)
   const [reduced, setReduced] = useState(false)
-  const pausedRef = useRef(false)
-  const timerRef = useRef<number | null>(null)
+  // Any arrow, dot, swipe, tile tap or share stops autoplay for good.
+  const [stopped, setStopped] = useState(false)
+  const hoverRef = useRef(false)
+  const focusRef = useRef(false)
+  const indexRef = useRef(0)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const settleRef = useRef<number | null>(null)
   const pageCount = pages.length
-
-  const restart = useCallback(() => {
-    if (timerRef.current != null) window.clearInterval(timerRef.current)
-    if (pageCount <= 1) return
-    timerRef.current = window.setInterval(() => {
-      if (!pausedRef.current && !document.hidden) {
-        setIndex((i) => (i + 1) % pageCount)
-      }
-    }, AUTOPLAY_MS)
-  }, [pageCount])
+  const popupOpen = scoresSection != null || openList != null
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => setReduced(prefersReducedMotion()))
-    restart()
     return () => {
       cancelAnimationFrame(frame)
-      if (timerRef.current != null) window.clearInterval(timerRef.current)
+      if (settleRef.current != null) window.clearTimeout(settleRef.current)
     }
-  }, [restart])
+  }, [])
+
+  const scrollToPage = useCallback(
+    (next: number) => {
+      if (pageCount === 0) return
+      const target = (next + pageCount) % pageCount
+      const track = trackRef.current
+      if (track) track.scrollTo({ left: target * track.clientWidth, behavior: reduced ? "auto" : "smooth" })
+      indexRef.current = target
+      setIndex(target)
+    },
+    [pageCount, reduced]
+  )
+
+  useEffect(() => {
+    if (pageCount <= 1 || stopped || popupOpen) return
+    const timer = window.setInterval(() => {
+      // The meet page mounts this card once per breakpoint; the copy hidden by CSS has no width and stays put.
+      if (!trackRef.current?.clientWidth) return
+      if (!hoverRef.current && !focusRef.current && !document.hidden) scrollToPage(indexRef.current + 1)
+    }, AUTOPLAY_MS)
+    return () => window.clearInterval(timer)
+  }, [pageCount, stopped, popupOpen, scrollToPage])
 
   if (pageCount === 0) return null
-  const current = index % pageCount
+  const current = Math.min(index, pageCount - 1)
 
   const go = (next: number) => {
-    setIndex((next + pageCount) % pageCount)
-    restart()
+    setStopped(true)
+    scrollToPage(next)
   }
 
+  // The page follows the track once a swipe (or a programmatic scroll) settles on one.
+  const onTrackScroll = () => {
+    if (settleRef.current != null) window.clearTimeout(settleRef.current)
+    settleRef.current = window.setTimeout(() => {
+      const track = trackRef.current
+      if (!track || track.clientWidth === 0) return
+      const settled = Math.min(pageCount - 1, Math.max(0, Math.round(track.scrollLeft / track.clientWidth)))
+      indexRef.current = settled
+      setIndex(settled)
+    }, 120)
+  }
+
+  const dotButtons = (touch: boolean) =>
+    pages.map((_, i) => (
+      <button
+        key={i}
+        type="button"
+        aria-label={`Show highlights ${i + 1} of ${pageCount}`}
+        aria-current={i === current ? "true" : undefined}
+        onClick={() => go(i)}
+        className={`inline-flex items-center justify-center ${touch ? "h-8 w-8" : "h-1.5 w-1.5"}`}
+      >
+        <span
+          className={`h-1.5 w-1.5 rounded-full transition-colors ${
+            i === current ? "bg-accent" : "bg-fill dark:bg-foreground-quaternary"
+          }`}
+        />
+      </button>
+    ))
+
   return (
-    <LedgerPanel
-      label="Highlights"
-      onMouseEnter={() => (pausedRef.current = true)}
-      onMouseLeave={() => (pausedRef.current = false)}
-      labelExtra={
-        pageCount > 1 ? (
-          <div className="flex items-center gap-[5px]">
-            {pages.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                aria-label={`Show highlights ${i + 1} of ${pageCount}`}
-                onClick={() => go(i)}
-                className={`h-1.5 w-1.5 rounded-full transition-colors ${
-                  i === current ? "bg-accent" : "bg-fill dark:bg-foreground-quaternary"
-                }`}
-              />
-            ))}
-          </div>
-        ) : null
-      }
-      aside={
-        <div className="flex items-center gap-1">
-          <ShareRosterSummaryButton
-            meetId={meetId}
-            meetName={meetName}
-            details={details}
-            iconUrl={iconUrl}
-            buildRequest={() => meetHighlightsExportRequest(highlights)}
-            label="Share highlights"
-            copyText={false}
-            compact
-          />
-          {pageCount > 1 ? (
-            <>
-              <button
-                type="button"
-                aria-label="Previous highlights"
-                onClick={() => go(current - 1)}
-                className="inline-flex h-6 w-6 items-center justify-center rounded-md text-foreground-secondary transition-colors hover:bg-fill hover:text-foreground"
-              >
-                <LedgerIcon name="chevronLeft" />
-              </button>
-              <button
-                type="button"
-                aria-label="Next highlights"
-                onClick={() => go(current + 1)}
-                className="inline-flex h-6 w-6 items-center justify-center rounded-md text-foreground-secondary transition-colors hover:bg-fill hover:text-foreground"
-              >
-                <LedgerIcon name="chevronRight" />
-              </button>
-            </>
-          ) : null}
-        </div>
-      }
+    <div
+      onFocus={() => (focusRef.current = true)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) focusRef.current = false
+      }}
     >
-      <div className="overflow-hidden">
+      <LedgerPanel
+        label="Highlights"
+        onMouseEnter={() => (hoverRef.current = true)}
+        onMouseLeave={() => (hoverRef.current = false)}
+        labelExtra={
+          pageCount > 1 ? (
+            // With a mouse the dots sit by the label; on touch they move under the tiles, where
+            // there's room for 32px targets.
+            <div className="flex items-center gap-[5px] pointer-coarse:hidden">{dotButtons(false)}</div>
+          ) : null
+        }
+        aside={
+          <div className="flex items-center gap-1">
+            <ShareRosterSummaryButton
+              meetId={meetId}
+              meetName={meetName}
+              details={details}
+              iconUrl={iconUrl}
+              buildRequest={() => meetHighlightsExportRequest(highlights)}
+              onOpen={() => setStopped(true)}
+              label="Share highlights"
+              copyText={false}
+              compact
+            />
+            {pageCount > 1 ? (
+              <>
+                <button type="button" aria-label="Previous highlights" onClick={() => go(current - 1)} className={ICON_BUTTON}>
+                  <LedgerIcon name="chevronLeft" />
+                </button>
+                <button type="button" aria-label="Next highlights" onClick={() => go(current + 1)} className={ICON_BUTTON}>
+                  <LedgerIcon name="chevronRight" />
+                </button>
+              </>
+            ) : null}
+          </div>
+        }
+      >
         <div
-          className="flex"
-          style={{
-            transform: `translateX(-${current * 100}%)`,
-            transition: reduced ? "none" : "transform 300ms cubic-bezier(0.32,0.72,0,1)",
+          ref={trackRef}
+          onScroll={onTrackScroll}
+          onTouchStart={() => setStopped(true)}
+          onWheel={(e) => {
+            if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) setStopped(true)
           }}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowLeft" || e.key === "ArrowRight") setStopped(true)
+          }}
+          className="flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {pages.map((page, i) => (
             <div
               key={i}
               aria-hidden={i !== current}
-              className="grid min-w-0 flex-[0_0_100%] gap-2"
+              className="grid min-w-0 flex-[0_0_100%] snap-start snap-always gap-2"
               style={{ gridTemplateColumns: `repeat(${page.counters.length}, minmax(0, 1fr))` }}
             >
               {page.counters.map((c) => {
@@ -208,13 +252,24 @@ export default function MeetHighlightsCarousel({
                   page.kind === "teamScores"
                     ? TEAM_SCORE_SECTIONS.find((s) => s.label === c.label)?.key
                     : undefined
-                return teamScores && section ? (
+                const listKey = highlightCounterList(c)
+                const list = listKey ? lists.find((l) => l.key === listKey) : undefined
+                const open =
+                  teamScores && section
+                    ? { label: `${c.label} team scores: ${c.value}, ${c.hint ?? ""}`, run: () => setScoresSection(section) }
+                    : list
+                      ? { label: `${c.label}: ${c.value}. Show ${list.title}`, run: () => setOpenList(list.key) }
+                      : null
+                return open ? (
                   <button
                     key={c.label}
                     type="button"
                     tabIndex={i === current ? 0 : -1}
-                    aria-label={`${c.label} team scores: ${c.value}, ${c.hint ?? ""}`}
-                    onClick={() => setScoresSection(section)}
+                    aria-label={open.label}
+                    onClick={() => {
+                      setStopped(true)
+                      open.run()
+                    }}
                     className="group flex min-w-0 flex-col rounded-lg focus-visible:outline-2 focus-visible:outline-primary [&>div]:flex-1"
                   >
                     <HighlightTile counter={c} interactive />
@@ -226,16 +281,28 @@ export default function MeetHighlightsCarousel({
             </div>
           ))}
         </div>
-      </div>
-      {teamScores ? (
-        <TeamScoresModal
-          teamScores={teamScores}
-          section={scoresSection ?? "combined"}
-          onSectionChange={setScoresSection}
-          open={scoresSection != null}
-          onClose={() => setScoresSection(null)}
-        />
-      ) : null}
-    </LedgerPanel>
+        {pageCount > 1 ? (
+          <div className="-my-2 hidden justify-center pointer-coarse:flex">{dotButtons(true)}</div>
+        ) : null}
+        {teamScores ? (
+          <TeamScoresModal
+            teamScores={teamScores}
+            section={scoresSection ?? "combined"}
+            onSectionChange={setScoresSection}
+            open={scoresSection != null}
+            onClose={() => setScoresSection(null)}
+          />
+        ) : null}
+        {lists.length > 0 ? (
+          <HighlightListsModal
+            lists={lists}
+            list={openList ?? lists[0].key}
+            onListChange={setOpenList}
+            open={openList != null}
+            onClose={() => setOpenList(null)}
+          />
+        ) : null}
+      </LedgerPanel>
+    </div>
   )
 }

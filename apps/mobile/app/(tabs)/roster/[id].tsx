@@ -1,15 +1,24 @@
 import { useMemo, useState } from "react"
 import { Alert, View } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   athleteDisplayName,
+  athleteSeasonInView,
+  currentSeason,
+  effectiveYearBySeason,
+  formatAcademicYear,
   formatMonthYear,
+  formatSeasonLabel,
   formatTime,
   isStaffRole,
   type StaffTitle,
 } from "@swimbuzz/shared"
 import { StaffBadge } from "../../../src/components/StaffBadge"
+import { RemoveSeasonsSheet } from "../../../src/components/RemoveSeasonsSheet"
+import { AthleteClearanceSection } from "../../../src/components/AthleteClearanceSection"
+import { AthleteYearsSheet } from "../../../src/components/AthleteYearsSheet"
+import { ProgressionSection } from "../../../src/components/ProgressionSection"
 import {
   Body,
   Button,
@@ -94,6 +103,12 @@ export default function AthleteDetailScreen() {
   const tabBarPad = useTabBarScrollPadding()
   const [importing, setImporting] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [seasonSheetOpen, setSeasonSheetOpen] = useState(false)
+  const [seasonsToRemove, setSeasonsToRemove] = useState<Set<string>>(new Set())
+  const [removingSeasons, setRemovingSeasons] = useState(false)
+  const [yearsSheetOpen, setYearsSheetOpen] = useState(false)
+  const [savingYears, setSavingYears] = useState(false)
+  const queryClient = useQueryClient()
   const [swimEvent, setSwimEvent] = useState("")
   const [swimCourse, setSwimCourse] = useState<(typeof COURSES)[number]>("SCY")
   const [swimTime, setSwimTime] = useState("")
@@ -212,6 +227,31 @@ export default function AthleteDetailScreen() {
   const isStaff = !!user && isStaffRole(user.role)
   const canManage = isOwn || isStaff
   const swimCloudIds = Array.isArray(athlete.swimCloudIds) ? athlete.swimCloudIds : []
+  // The year for the running season, else their newest; a past season's year names the season.
+  const yearBySeason = effectiveYearBySeason({
+    yearBySeason: athlete.yearBySeason,
+    year: typeof athlete.year === "string" ? athlete.year : null,
+    seasons,
+  })
+  const yearSeason = athleteSeasonInView(seasons)
+  const yearInView = yearSeason ? yearBySeason[yearSeason] : undefined
+  const yearLabel = yearInView
+    ? `${formatAcademicYear(yearInView)}${yearSeason !== currentSeason() ? ` (${formatSeasonLabel(yearSeason!)})` : ""}`
+    : null
+
+  async function saveYears(next: Record<string, string | null>) {
+    if (!id) return
+    setSavingYears(true)
+    try {
+      await api.updateAthlete(id, { yearBySeason: next })
+      setYearsSheetOpen(false)
+      await Promise.all([refetch(), queryClient.invalidateQueries({ queryKey: ["athletes"] })])
+    } catch (err) {
+      Alert.alert("Could not save year", err instanceof Error ? err.message : "Something went wrong")
+    } finally {
+      setSavingYears(false)
+    }
+  }
 
   async function requestImport() {
     if (!id) return
@@ -266,11 +306,41 @@ export default function AthleteDetailScreen() {
     }
   }
 
+  /** On more than one season, first offer taking them off some; otherwise straight to delete. */
+  function startRemoveAthlete() {
+    if (seasons.length > 1) {
+      setSeasonsToRemove(new Set())
+      setSeasonSheetOpen(true)
+    } else {
+      confirmDeleteAthlete()
+    }
+  }
+
+  async function removeSeasons() {
+    if (!id || seasonsToRemove.size === 0) return
+    setRemovingSeasons(true)
+    try {
+      await api.removeAthleteSeasons(id, [...seasonsToRemove])
+      setSeasonSheetOpen(false)
+      await Promise.all([refetch(), queryClient.invalidateQueries({ queryKey: ["athletes"] })])
+    } catch (err) {
+      Alert.alert(
+        "Could not remove from season",
+        err instanceof Error ? err.message : "Something went wrong"
+      )
+    } finally {
+      setRemovingSeasons(false)
+    }
+  }
+
   function confirmDeleteAthlete() {
     if (!id) return
+    // From the season sheet, the alert shows over it, so Cancel goes back to picking seasons.
     Alert.alert(
       "Delete athlete?",
-      "This permanently removes the athlete and their swims.",
+      seasons.length > 1
+        ? "This permanently removes the athlete and their swims from every season."
+        : "This permanently removes the athlete and their swims.",
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -287,6 +357,7 @@ export default function AthleteDetailScreen() {
     setDeleting(true)
     try {
       await api.deleteAthlete(id)
+      setSeasonSheetOpen(false)
       router.replace("/roster")
     } catch (err) {
       Alert.alert(
@@ -317,9 +388,7 @@ export default function AthleteDetailScreen() {
         ) : null}
 
         <Section title="Profile">
-          {athlete.year ? (
-            <MetaRow label="Year" value={String(athlete.year)} />
-          ) : null}
+          {yearLabel ? <MetaRow label="Year" value={yearLabel} /> : null}
           {athlete.gender ? (
             <MetaRow label="Gender" value={genderLabel(athlete.gender) ?? ""} />
           ) : null}
@@ -334,6 +403,9 @@ export default function AthleteDetailScreen() {
           ) : null}
         </Section>
 
+        {/* Physical & concussion clearance: staff and the athlete themself only. */}
+        {canManage ? <AthleteClearanceSection athleteId={id} canEdit={isStaff} /> : null}
+
         {swims.length > 0 ? (
           <Section title="Highlights">
             <MetaRow label="Personal bests" value={String(personalBests.length)} />
@@ -345,6 +417,12 @@ export default function AthleteDetailScreen() {
               />
             ) : null}
           </Section>
+        ) : null}
+
+        {isStaff && seasons.length > 0 ? (
+          <View style={{ marginBottom: spacing.sm }}>
+            <Button label="Edit year by season" variant="secondary" onPress={() => setYearsSheetOpen(true)} />
+          </View>
         ) : null}
 
         {canManage ? (
@@ -423,6 +501,8 @@ export default function AthleteDetailScreen() {
           )}
         </Section>
 
+        <ProgressionSection swims={swims} relaySplits={relaySplits} />
+
         <Section title="Swim history">
           {historyRows.length === 0 ? (
             <Muted>No swim history.</Muted>
@@ -467,14 +547,37 @@ export default function AthleteDetailScreen() {
         {isStaff ? (
           <View style={{ marginTop: spacing.lg }}>
             <Button
-              label="Delete athlete"
+              label={seasons.length > 1 ? "Remove athlete" : "Delete athlete"}
               variant="danger"
               loading={deleting}
-              onPress={confirmDeleteAthlete}
+              onPress={startRemoveAthlete}
             />
           </View>
         ) : null}
       </ScrollView>
+      {isStaff ? (
+        <AthleteYearsSheet
+          visible={yearsSheetOpen}
+          onClose={() => setYearsSheetOpen(false)}
+          seasons={seasons}
+          yearBySeason={yearBySeason}
+          saving={savingYears}
+          onSave={(next) => void saveYears(next)}
+        />
+      ) : null}
+      {isStaff ? (
+        <RemoveSeasonsSheet
+          visible={seasonSheetOpen}
+          onClose={() => setSeasonSheetOpen(false)}
+          name={name}
+          seasons={seasons}
+          picked={seasonsToRemove}
+          onPickedChange={setSeasonsToRemove}
+          removing={removingSeasons}
+          onRemove={() => void removeSeasons()}
+          onDeletePermanently={confirmDeleteAthlete}
+        />
+      ) : null}
     </Screen>
   )
 }

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { withDeleted } from "../../../soft-delete-policy"
 import { deleteAllMeetFiles } from "@/lib/meet/meet-storage"
 import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
+import { deleteNotificationsFor } from "@/lib/notifications/notification-refs"
 import { RECOVERY_RETENTION_DAYS } from "@swimbuzz/shared"
 
 export type RecoveryKind = "practice" | "meet"
@@ -12,18 +13,26 @@ function deletionDates() {
 }
 export async function softDeletePractice(id: string) {
   const dates = deletionDates()
-  return prisma.practice.update({ where: { id }, data: {
+  const practice = await prisma.practice.update({ where: { id }, data: {
     ...dates, editLockedById: null, editLockedAt: null, editLockExpiresAt: null, editLockToken: null,
   } })
+  // Its notifications would only lead to a missing practice.
+  await deleteNotificationsFor("practice", id)
+  return practice
 }
 /** Private practices hard-delete: staff-only Recently Deleted can't show them, and it frees the space now. */
 export async function removePractice(id: string, practice: { visibility: string }) {
-  if (practice.visibility === "PRIVATE") return prisma.practice.delete({ where: { id } })
+  if (practice.visibility === "PRIVATE") {
+    const deleted = await prisma.practice.delete({ where: { id } })
+    await deleteNotificationsFor("practice", id)
+    return deleted
+  }
   return softDeletePractice(id)
 }
 export async function softDeleteMeet(id: string, deleteSwims: boolean) {
   const dates = deletionDates()
   const meet = await prisma.meet.update({ where: { id }, data: { ...dates, deleteSwimsOnPurge: deleteSwims } })
+  await deleteNotificationsFor("meet", id)
   // Records set at a deleted meet fall back to the ones before them.
   await syncTeamRecordsSafely()
   return meet

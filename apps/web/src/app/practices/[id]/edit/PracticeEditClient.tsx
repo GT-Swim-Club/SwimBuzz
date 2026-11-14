@@ -191,7 +191,7 @@ export default function PracticeEditClient({
             </>
           )}
         </p>
-        {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
+        {error && <p className="mt-3 text-sm text-error">{error}</p>}
       </Modal>
       <Modal
         open={state === "lost"}

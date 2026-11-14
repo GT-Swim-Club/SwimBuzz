@@ -3,8 +3,8 @@ import { spawn } from "child_process"
 import fs from "fs"
 import path from "path"
 import { fetchMeetFileBytes } from "@/lib/meet/meet-file-fetch"
-import { uploadMeetFile } from "@/lib/meet/meet-storage"
-import { MEET_FILE_BUCKET } from "@/lib/meet/meet-files"
+import { deleteTemporaryMeetFile, uploadMeetFile } from "@/lib/meet/meet-storage"
+import { MEET_FILE_BUCKET, PARSE_TMP_FOLDER } from "@/lib/meet/meet-files"
 
 /**
  * Parses meet PDFs server-side (`api/parse-pdf.py` in production, a local
@@ -51,16 +51,19 @@ function isSupabaseStorageUrl(url: string): boolean {
 
 /** The parser function only fetches from an allowlisted Supabase host — mirror
  * any other URL (a pasted external link, Drive/Dropbox, local dev path) into
- * Supabase Storage first so it has something safe to fetch. */
-async function ensureAllowlistedUrl(url: string): Promise<string> {
-  if (isSupabaseStorageUrl(url)) return url
+ * Supabase Storage first so it has something safe to fetch. The mirror is
+ * temporary (`parse-tmp/`): `temporary` is set so the caller deletes it after
+ * the parse — these copies used to pile up in the bucket forever. */
+async function ensureAllowlistedUrl(url: string): Promise<{ url: string; temporary: boolean }> {
+  if (isSupabaseStorageUrl(url)) return { url, temporary: false }
   const bytes = await fetchMeetFileBytes(url)
   const { url: uploaded } = await uploadMeetFile(
     bytes,
     `pdf-parse-${randomUUID()}.pdf`,
-    "application/pdf"
+    "application/pdf",
+    PARSE_TMP_FOLDER
   )
-  return uploaded
+  return { url: uploaded, temporary: true }
 }
 
 function runLocalParserCli<T>(
@@ -107,34 +110,37 @@ async function callParser<T>(
 ): Promise<T> {
   const parserUrl = process.env.PDF_PARSER_URL
   if (parserUrl) {
-    const safeUrl = await ensureAllowlistedUrl(url)
     const secret = process.env.PDF_PARSER_SECRET
     if (!secret) throw new Error("PDF_PARSER_SECRET is not configured")
-
-    // api/parse-pdf.py reads snake_case keys (course, team, sheet_type) —
-    // send those, not the camelCase ParserOptions shape, so a deployed sheet
-    // parse actually receives sheetType instead of silently running with
-    // sheet_type=None while local dev (which passes --sheet-type) works fine.
-    const res = await fetch(parserUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Parser-Secret": secret },
-      body: JSON.stringify({
-        kind,
-        url: safeUrl,
-        course: options.course,
-        team: options.team,
-        sheet_type: options.sheetType,
-      }),
-    })
-    const data = await res.json().catch(() => ({}))
-    if (!res.ok) {
-      const message =
-        typeof (data as { error?: unknown }).error === "string"
-          ? (data as { error: string }).error
-          : `PDF parser failed (${res.status})`
-      throw new Error(message)
+    const { url: safeUrl, temporary } = await ensureAllowlistedUrl(url)
+    try {
+      // api/parse-pdf.py reads snake_case keys (course, team, sheet_type) —
+      // send those, not the camelCase ParserOptions shape, so a deployed sheet
+      // parse actually receives sheetType instead of silently running with
+      // sheet_type=None while local dev (which passes --sheet-type) works fine.
+      const res = await fetch(parserUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Parser-Secret": secret },
+        body: JSON.stringify({
+          kind,
+          url: safeUrl,
+          course: options.course,
+          team: options.team,
+          sheet_type: options.sheetType,
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        const message =
+          typeof (data as { error?: unknown }).error === "string"
+            ? (data as { error: string }).error
+            : `PDF parser failed (${res.status})`
+        throw new Error(message)
+      }
+      return data as T
+    } finally {
+      if (temporary) await deleteTemporaryMeetFile(safeUrl)
     }
-    return data as T
   }
 
   const fetchStart = Date.now()

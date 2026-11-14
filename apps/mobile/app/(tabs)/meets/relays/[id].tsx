@@ -428,7 +428,7 @@ export default function MeetRelaysScreen() {
           style={{ position: "absolute", left: 0, right: 0, bottom: tabBarPad, alignItems: "center" }}
         >
           <View style={styles.toast}>
-            <Icon name="check" size={16} color={c.primaryActive} />
+            <Icon name="check" size={16} color={c.accent} />
             <Body style={{ fontWeight: "600" }}>Saved to Photos</Body>
           </View>
         </View>
@@ -452,7 +452,7 @@ function makeStyles(c: ColorPalette) {
       borderWidth: 1,
     },
     eyebrow: {
-      color: c.primaryActive,
+      color: c.accent,
       fontSize: 12,
       fontWeight: "800",
       letterSpacing: 1,
@@ -461,7 +461,7 @@ function makeStyles(c: ColorPalette) {
     },
     genderGroup: { marginBottom: spacing.lg },
     genderLabel: {
-      color: c.primaryActive,
+      color: c.accent,
       fontSize: 12,
       fontWeight: "800",
       letterSpacing: 1,
@@ -501,7 +501,7 @@ function makeStyles(c: ColorPalette) {
       paddingHorizontal: spacing.xs,
       paddingVertical: 2,
     },
-    pillMine: { backgroundColor: c.primaryBg, borderColor: c.primaryBorder, color: c.primaryActive },
+    pillMine: { backgroundColor: c.primaryBg, borderColor: c.primaryBorder, color: c.accent },
     time: { color: c.text, fontSize: 14, fontVariant: ["tabular-nums"], fontWeight: "600" },
     timeLabel: { color: c.textSecondary, fontSize: 12, fontWeight: "400" },
     legRow: {
@@ -522,10 +522,10 @@ function makeStyles(c: ColorPalette) {
       justifyContent: "center",
       width: 24,
     },
-    legBadgeText: { color: c.primaryActive, fontSize: 12, fontWeight: "600" },
+    legBadgeText: { color: c.accent, fontSize: 12, fontWeight: "600" },
     legName: { color: c.text, flex: 1, fontSize: 14, fontWeight: "500" },
     legNameMuted: { color: c.textSecondary },
-    legNameMine: { color: c.primaryActive, fontWeight: "700" },
+    legNameMine: { color: c.accent, fontWeight: "700" },
     legStroke: { color: c.textSecondary, fontSize: 12 },
     noLineup: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
     cardFooter: {

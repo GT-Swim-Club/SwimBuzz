@@ -33,7 +33,7 @@ export default function AthleteViewToggle({
     })
   }
 
-  const activeClass = "bg-primary-bg text-primary"
+  const activeClass = "bg-primary-bg text-accent"
   const inactiveClass = "text-foreground-tertiary hover:bg-fill-secondary hover:text-foreground"
 
   return (

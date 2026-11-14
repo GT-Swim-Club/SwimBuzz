@@ -898,7 +898,7 @@ function makeStyles(c: ColorPalette) {
       color: c.primaryContrast,
     },
     buttonLabelDanger: {
-      color: "#fff",
+      color: c.errorContrast,
     },
     actionSheetOverlay: {
       flex: 1,

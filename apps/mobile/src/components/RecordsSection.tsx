@@ -5,6 +5,7 @@ import * as Sharing from "expo-sharing"
 import { File, Paths } from "expo-file-system"
 import {
   formatRecordTime,
+  isRecordEditable,
   isStaffRole,
   recordsAsOfLabel,
   recordsExportFilename,
@@ -44,7 +45,7 @@ async function recordsPdfFile(): Promise<File> {
 
 /**
  * Team records (SCY) in the Nationals tab: one gender at a time, an event per row, grouped by stroke.
- * Tapping a record shows its history; staff switch on Edit to change one instead. Share saves the
+ * Tapping a record shows its history and top 10; staff switch on Edit to change one instead. Share saves the
  * whole sheet (both genders) to Photos or shares it as a PDF.
  */
 export function RecordsSection() {
@@ -179,7 +180,9 @@ export function RecordsSection() {
           </Pressable>
         ) : null}
       </View>
-      {editing ? <Text style={styles.editHint}>Tap a record to change it.</Text> : null}
+      {editing ? (
+        <Text style={styles.editHint}>Tap a record to change it. Records from meet results can't be changed.</Text>
+      ) : null}
 
       {error ? <ErrorBlock message={recordsErrorMessage(error, "Couldn't load records")} /> : null}
       {isPending ? (
@@ -198,16 +201,19 @@ export function RecordsSection() {
               const record = row.records[recordGender]
               const target: RecordTarget = { def: row, gender: recordGender, record }
               const season = record?.isThisSeason ? styles.thisSeason : null
+              // Records from imported meet results or the records sheet are fixed; tapping one while editing shows its history.
+              const editable = editing && (!record || isRecordEditable(record))
               return (
                 <Pressable
                   key={`${row.genders.join("")}|${row.event}`}
                   accessibilityRole="button"
-                  accessibilityLabel={editing ? `Edit ${recordTitle(target)}` : `${recordTitle(target)} history`}
-                  onPress={() => (editing ? setEditTarget(target) : setHistoryTarget(target))}
+                  accessibilityLabel={editable ? `Edit ${recordTitle(target)}` : `${recordTitle(target)} history and top 10`}
+                  onPress={() => (editable ? setEditTarget(target) : setHistoryTarget(target))}
                   style={({ pressed }) => [styles.row, index > 0 && styles.rowDivider, pressed && styles.rowPressed]}
                 >
                   <View style={styles.rowMain}>
                     <Text style={styles.event}>{row.label}</Text>
+                    {editing && !editable ? <Text style={styles.lockedNote}>From meet results</Text> : null}
                     {record ? (
                       record.swimmers.map((swimmer, i) => (
                         <Text key={i} numberOfLines={1} style={[styles.name, season]}>
@@ -222,7 +228,7 @@ export function RecordsSection() {
                     <Text style={[styles.time, season]}>{record ? formatRecordTime(record.timeMs) : "—"}</Text>
                     {record ? <Text style={[styles.year, season]}>{record.year}</Text> : null}
                   </View>
-                  {editing ? <Text style={styles.chevron}>›</Text> : null}
+                  {editable ? <Text style={styles.chevron}>›</Text> : null}
                 </Pressable>
               )
             })}
@@ -330,5 +336,6 @@ function makeStyles(c: ColorPalette) {
     thisSeason: { color: c.accent, fontWeight: "800" },
     offscreen: { position: "absolute", top: 0, left: -10000 },
     chevron: { color: c.textTertiary, fontSize: 25, fontWeight: "300" },
+    lockedNote: { color: c.textTertiary, fontSize: 12 },
   })
 }

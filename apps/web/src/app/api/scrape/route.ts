@@ -1,3 +1,4 @@
+import { dismissTimesImportRequestNotifications } from "@/lib/notifications/notifications"
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { ScraperJobStatus, ScraperJobType } from "@prisma/client"
@@ -119,6 +120,8 @@ export async function applyAthleteScrapeJob(jobId: string, userId: string) {
     where: { id: ctx.athleteId },
     data: { timesSyncedAt: syncedAt },
   })
+  // The athlete's "requested a times import" notice is done with.
+  await dismissTimesImportRequestNotifications(ctx.athleteId)
 
   const summary = {
     imported,

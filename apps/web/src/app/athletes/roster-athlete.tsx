@@ -38,7 +38,7 @@ export function athleteMeta(athlete: RosterAthlete, showGender: boolean) {
 export function AthleteAvatar({ athlete, className }: { athlete: RosterAthlete; className: string }) {
   return (
     <div
-      className={`flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-primary/30 bg-primary/20 font-medium text-primary ${className}`}
+      className={`flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-primary/30 bg-primary/20 font-medium text-accent ${className}`}
     >
       {athlete.user?.image ? (
         <img src={athlete.user.image} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" />

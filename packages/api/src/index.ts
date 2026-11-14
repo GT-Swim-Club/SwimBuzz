@@ -1,9 +1,16 @@
 import type {
+  AthleteClearanceResponse,
+  AthleteClearanceStatus,
   AthleteSummary,
   AuthTokens,
+  ClearanceListResponse,
+  UpdateAthleteClearanceInput,
   MeetSummary,
   NotificationItem,
   NotificationPreferences,
+  PracticeAttendanceResponse,
+  PracticeCheckInInput,
+  PracticeCheckInResponse,
   PracticeScope,
   PracticeSummary,
   PracticeVisibility,
@@ -13,6 +20,8 @@ import type {
   TeamRecordEditInput,
   TeamRecordHistoryResponse,
   TeamRecordsResponse,
+  TeamTopTimesResponse,
+  TopTimesMode,
 } from "@swimbuzz/shared"
 
 export type DeletedItem = {
@@ -169,22 +178,63 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * How long the sign-in calls wait before giving up. They answer in a second or
+ * two, so a request still pending after this means the API is unreachable
+ * (e.g. a dev build pointed at a stale LAN IP, where fetch can hang forever).
+ * Not applied to other calls: imports and sheet parsing legitimately run for
+ * minutes.
+ */
+const AUTH_TIMEOUT_MS = 20_000
+
+type RequestOptions = RequestInit & {
+  /**
+   * Abort if no full response arrives in time. With this set, a timeout or a
+   * failed connection throws an ApiError (status 0) with a readable message.
+   */
+  timeoutMs?: number
+}
+
 export function createApiClient(options: ApiClientOptions = {}) {
   const base = (options.baseUrl ?? "").replace(/\/$/, "")
 
   async function request<T>(
     path: string,
-    init: RequestInit = {}
+    { timeoutMs, ...init }: RequestOptions = {}
   ): Promise<T> {
     const headers = new Headers(init.headers)
-    if (!headers.has("Content-Type") && init.body) {
+    // Multipart bodies set their own boundary Content-Type.
+    const isFormData = typeof FormData !== "undefined" && init.body instanceof FormData
+    if (!headers.has("Content-Type") && init.body && !isFormData) {
       headers.set("Content-Type", "application/json")
     }
     const token = await options.getAccessToken?.()
     if (token) headers.set("Authorization", `Bearer ${token}`)
 
-    const res = await fetch(`${base}${path}`, { ...init, headers })
-    const text = await res.text()
+    const controller = timeoutMs ? new AbortController() : null
+    const timer = controller ? setTimeout(() => controller.abort(), timeoutMs) : null
+    let res: Response
+    let text: string
+    try {
+      res = await fetch(`${base}${path}`, {
+        ...init,
+        headers,
+        signal: controller?.signal ?? init.signal,
+      })
+      text = await res.text()
+    } catch (err) {
+      // Timed out, or the connection failed outright ("Network request failed").
+      if (controller) {
+        throw new ApiError(
+          "Couldn't reach SwimBuzz. Check your connection and try again.",
+          0,
+          null
+        )
+      }
+      throw err
+    } finally {
+      if (timer) clearTimeout(timer)
+    }
     let data: unknown = null
     if (text) {
       try {
@@ -221,6 +271,7 @@ export function createApiClient(options: ApiClientOptions = {}) {
     requestEmailCode(email: string) {
       return request<{ ok: true } | { error: string }>("/api/auth/email/request", {
         method: "POST",
+        timeoutMs: AUTH_TIMEOUT_MS,
         body: JSON.stringify({ email }),
       })
     },
@@ -228,6 +279,7 @@ export function createApiClient(options: ApiClientOptions = {}) {
     mobileEmailLogin(email: string, code: string) {
       return request<AuthTokens>("/api/auth/mobile/email", {
         method: "POST",
+        timeoutMs: AUTH_TIMEOUT_MS,
         body: JSON.stringify({ email, code }),
       })
     },
@@ -238,6 +290,7 @@ export function createApiClient(options: ApiClientOptions = {}) {
         "/api/auth/mobile/staff/verify",
         {
           method: "POST",
+          timeoutMs: AUTH_TIMEOUT_MS,
           body: JSON.stringify({ email, code }),
         }
       )
@@ -251,6 +304,7 @@ export function createApiClient(options: ApiClientOptions = {}) {
     mobileGoogleLogin(idToken: string, staffLinkToken?: string) {
       return request<AuthTokens>("/api/auth/mobile/google", {
         method: "POST",
+        timeoutMs: AUTH_TIMEOUT_MS,
         body: JSON.stringify({ idToken, staffLinkToken }),
       })
     },
@@ -324,6 +378,27 @@ export function createApiClient(options: ApiClientOptions = {}) {
       )
     },
 
+    /** Who's checked in to a team practice; staff records carry `uncleared`. */
+    getPracticeAttendance(practiceId: string) {
+      return request<PracticeAttendanceResponse>(`/api/practices/${practiceId}/attendance`)
+    },
+
+    /** Staff: check an athlete in by id (by name) or by a scanned/typed GTID. */
+    checkInPracticeAttendance(practiceId: string, input: PracticeCheckInInput) {
+      return request<PracticeCheckInResponse>(`/api/practices/${practiceId}/attendance`, {
+        method: "POST",
+        body: JSON.stringify(input),
+      })
+    },
+
+    /** Staff: remove an athlete's check-in. */
+    removePracticeAttendance(practiceId: string, athleteId: string) {
+      return request<{ ok: true }>(
+        `/api/practices/${practiceId}/attendance?athleteId=${encodeURIComponent(athleteId)}`,
+        { method: "DELETE" }
+      )
+    },
+
     createPractice(body: CreatePracticeBody) {
       return request<PracticeSummary>("/api/practices", {
         method: "POST",
@@ -340,6 +415,17 @@ export function createApiClient(options: ApiClientOptions = {}) {
 
     deletePractice(id: string) {
       return request(`/api/practices/${id}`, { method: "DELETE" })
+    },
+
+    /**
+     * Select mode's bulk delete. Practices the caller can't edit, or that someone is
+     * editing, come back in `skipped` instead of failing the whole request.
+     */
+    deletePractices(ids: string[]) {
+      return request<{ deletedIds: string[]; skipped: Array<{ id: string; reason: string }> }>(
+        "/api/practices/delete",
+        { method: "POST", body: JSON.stringify({ ids }) }
+      )
     },
 
     postPracticeComment(practiceId: string, body: string, parentId?: string) {
@@ -388,6 +474,32 @@ export function createApiClient(options: ApiClientOptions = {}) {
       return request(`/api/athletes/${id}`, { method: "DELETE" })
     },
 
+    /** Take an athlete off seasons' rosters (at least one must stay); returns the seasons left. */
+    removeAthleteSeasons(id: string, seasons: string[]) {
+      return request<{ seasons: string[] }>(`/api/athletes/${id}/seasons`, {
+        method: "PATCH",
+        body: JSON.stringify({ remove: seasons }),
+      })
+    },
+
+    /** Physical & concussion clearance per season — staff or the athlete themself. */
+    getAthleteClearance(id: string) {
+      return request<AthleteClearanceResponse>(`/api/athletes/${id}/clearance`)
+    },
+
+    /** Staff: correct one athlete's clearance for a season by hand. */
+    updateAthleteClearance(id: string, input: UpdateAthleteClearanceInput) {
+      return request<{ clearance: AthleteClearanceStatus }>(`/api/athletes/${id}/clearance`, {
+        method: "PUT",
+        body: JSON.stringify(input),
+      })
+    },
+
+    /** Staff: the season roster with each athlete's clearance. */
+    listClearance(season: string) {
+      return request<ClearanceListResponse>(`/api/clearance?season=${encodeURIComponent(season)}`)
+    },
+
     requestTimesImport(athleteId: string) {
       return request(`/api/athletes/${athleteId}/request-times-import`, {
         method: "POST",
@@ -414,6 +526,10 @@ export function createApiClient(options: ApiClientOptions = {}) {
         qualifiers?: Array<Record<string, unknown>>
         qualifierCount?: number
         standards?: Array<{ event: string; women: string; men: string }>
+        /** Courses this season has standards in. */
+        courses?: string[]
+        /** The signed-in user's athlete, when they have one. */
+        viewerAthleteId?: string | null
       }>(`/api/qualifiers?${sp}`)
     },
 
@@ -424,6 +540,12 @@ export function createApiClient(options: ApiClientOptions = {}) {
     getRecordHistory(gender: RecordGender, event: string) {
       const sp = new URLSearchParams({ gender, event })
       return request<TeamRecordHistoryResponse>(`/api/records/history?${sp}`)
+    },
+
+    /** An event's top 10 (SCY): performers (each swimmer's best) or performances; relays are performances only. */
+    getRecordTopTimes(gender: RecordGender, event: string, mode: TopTimesMode) {
+      const sp = new URLSearchParams({ gender, event, mode })
+      return request<TeamTopTimesResponse>(`/api/records/top?${sp}`)
     },
 
     /** Staff: set an event's record; returns the updated table. */
@@ -465,6 +587,14 @@ export function createApiClient(options: ApiClientOptions = {}) {
       })
     },
 
+    /** The list was opened: clears the badge; items stay unread until tapped. */
+    markNotificationsSeen() {
+      return request<{ ok: true }>("/api/notifications", {
+        method: "PATCH",
+        body: JSON.stringify({ seen: true }),
+      })
+    },
+
     getViewPreference() {
       return request<{
         defaultView: "gallery" | "list"
@@ -484,6 +614,18 @@ export function createApiClient(options: ApiClientOptions = {}) {
         method: "PATCH",
         body: JSON.stringify(body),
       })
+    },
+
+    /** Multipart body with a `file` field: a square JPEG/PNG/WebP, 256 KB at most. */
+    uploadProfileAvatar(form: FormData) {
+      return request<{ image: string | null }>("/api/profile/avatar", {
+        method: "POST",
+        body: form,
+      })
+    },
+
+    removeProfileAvatar() {
+      return request<{ image: null }>("/api/profile/avatar", { method: "DELETE" })
     },
 
     getNotificationPreferences() {

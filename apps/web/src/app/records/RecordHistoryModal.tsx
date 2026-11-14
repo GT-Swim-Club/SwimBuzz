@@ -5,12 +5,14 @@ import { useEffect, useState } from "react"
 import { createApiClient } from "@swimbuzz/api"
 import {
   formatRecordTime,
+  isRecordEditable,
   recordSetLabel,
   recordSwimmerLabel,
   type RecordEventDef,
   type RecordGender,
   type TeamRecordItem,
   type TeamRecordSource,
+  type TopTimesMode,
 } from "@swimbuzz/shared"
 import { AppIcon } from "@/components/ui/AppIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
@@ -18,6 +20,7 @@ import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/ui/SegmentedToggle"
 import { athletePath, meetPath } from "@/lib/slug"
+import RecordTopTimes, { topTimesDescription } from "./RecordTopTimes"
 
 const api = createApiClient({})
 
@@ -31,7 +34,23 @@ function genderTitle(gender: RecordGender): string {
   return gender === "F" ? "Women's" : gender === "M" ? "Men's" : ""
 }
 
-/** An event's records, newest first; staff can remove one (the record before it takes its place). */
+type View = "history" | "top"
+
+const VIEWS: Array<{ value: View; label: string }> = [
+  { value: "history", label: "History" },
+  { value: "top", label: "Top 10" },
+]
+
+const MODES: Array<{ value: TopTimesMode; label: string }> = [
+  { value: "performers", label: "Performers" },
+  { value: "performances", label: "Performances" },
+]
+
+/**
+ * An event's records, newest first (staff can remove a staff-set one; the record
+ * before it takes its place — ones from imported meet results or the records sheet stay),
+ * and its top 10 — each swimmer's best (performers) or the fastest swims (performances).
+ */
 export default function RecordHistoryModal({
   def,
   gender: initialGender,
@@ -46,6 +65,9 @@ export default function RecordHistoryModal({
   onChanged: () => void
 }) {
   const [gender, setGender] = useState(initialGender)
+  const [view, setView] = useState<View>("history")
+  const [mode, setMode] = useState<TopTimesMode>("performers")
+  const showModes = view === "top" && !def.relay
   const [records, setRecords] = useState<TeamRecordItem[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [confirming, setConfirming] = useState<string | null>(null)
@@ -87,7 +109,26 @@ export default function RecordHistoryModal({
       open
       onClose={onClose}
       title={`${genderTitle(gender)} ${def.label}`.trim()}
-      description="Record history, newest first"
+      description={view === "history" ? "Record history, newest first" : topTimesDescription(def, mode)}
+      header={
+        <SegmentedToggle
+          selectedIndex={VIEWS.findIndex((v) => v.value === view)}
+          fullWidth
+          className="mt-3 rounded-lg border border-border bg-background"
+        >
+          {VIEWS.map((v) => (
+            <button
+              key={v.value}
+              type="button"
+              aria-pressed={v.value === view}
+              onClick={() => setView(v.value)}
+              className={segmentedOptionClass(v.value === view)}
+            >
+              {v.label}
+            </button>
+          ))}
+        </SegmentedToggle>
+      }
       maxWidth="md"
       footer={
         <ModalFooter>
@@ -101,33 +142,58 @@ export default function RecordHistoryModal({
         </ModalFooter>
       }
     >
-      {def.genders.length > 1 ? (
-        <SegmentedToggle
-          selectedIndex={def.genders.indexOf(gender)}
-          fullWidth
-          className="rounded-lg border border-border bg-background"
-        >
-          {def.genders.map((g) => (
-            <button
-              key={g}
-              type="button"
-              aria-pressed={g === gender}
-              onClick={() => changeGender(g)}
-              className={segmentedOptionClass(g === gender)}
+      {showModes || def.genders.length > 1 ? (
+        <div className={showModes && def.genders.length > 1 ? "grid gap-3 sm:grid-cols-2" : ""}>
+          {def.genders.length > 1 ? (
+            <SegmentedToggle
+              selectedIndex={def.genders.indexOf(gender)}
+              fullWidth
+              className="rounded-lg border border-border bg-background"
             >
-              {g === "F" ? "Women" : "Men"}
-            </button>
-          ))}
-        </SegmentedToggle>
+              {def.genders.map((g) => (
+                <button
+                  key={g}
+                  type="button"
+                  aria-pressed={g === gender}
+                  onClick={() => changeGender(g)}
+                  className={segmentedOptionClass(g === gender)}
+                >
+                  {g === "F" ? "Women" : "Men"}
+                </button>
+              ))}
+            </SegmentedToggle>
+          ) : null}
+          {showModes ? (
+            <SegmentedToggle
+              selectedIndex={MODES.findIndex((m) => m.value === mode)}
+              fullWidth
+              className="rounded-lg border border-border bg-background"
+            >
+              {MODES.map((m) => (
+                <button
+                  key={m.value}
+                  type="button"
+                  aria-pressed={m.value === mode}
+                  onClick={() => setMode(m.value)}
+                  className={segmentedOptionClass(m.value === mode)}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </SegmentedToggle>
+          ) : null}
+        </div>
       ) : null}
 
-      {error ? (
+      {view === "top" ? <RecordTopTimes def={def} gender={gender} mode={mode} /> : null}
+
+      {view === "history" && error ? (
         <p role="alert" className="text-sm text-error">
           {error}
         </p>
       ) : null}
 
-      {records === null && !error ? (
+      {view === "history" && records === null && !error ? (
         <ul className="divide-y divide-border rounded-xl border border-border-secondary">
           {["w-32", "w-40", "w-28"].map((w, i) => (
             <li key={i} className="flex items-center justify-between gap-3 px-3.5 py-3">
@@ -141,11 +207,11 @@ export default function RecordHistoryModal({
         </ul>
       ) : null}
 
-      {records?.length === 0 ? (
+      {view === "history" && records?.length === 0 ? (
         <p className="text-sm text-foreground-secondary">No record yet.</p>
       ) : null}
 
-      {records && records.length > 0 ? (
+      {view === "history" && records && records.length > 0 ? (
         <ol className="divide-y divide-border rounded-xl border border-border">
           {records.map((record, index) => (
             <li key={record.id} className="flex items-start justify-between gap-3 px-3.5 py-3">
@@ -190,7 +256,7 @@ export default function RecordHistoryModal({
                 <span className={`font-mono text-sm tabular-nums ${record.isThisSeason ? "font-semibold text-accent" : "text-foreground"}`}>
                   {formatRecordTime(record.timeMs)}
                 </span>
-                {canEdit ? (
+                {canEdit && isRecordEditable(record) ? (
                   confirming === record.id ? (
                     <span className="flex items-center gap-1 text-xs">
                       <button

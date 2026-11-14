@@ -17,7 +17,7 @@ function clampPct(n: number) {
  * Two-column meet layout used before any sheets/results exist (no roster summary):
  * the ledger cards split across a left and right column with a draggable divider.
  * The split is a percentage, persisted per browser. Stacks into one column below 900px.
- * With only one non-empty side, that side renders alone (no divider).
+ * With only one non-empty side, that side renders alone (no divider); with none, nothing.
  */
 export default function MeetPreSheetsLayout({
   left,
@@ -74,6 +74,7 @@ export default function MeetPreSheetsLayout({
     save(next)
   }
 
+  if (left.length === 0 && right.length === 0) return null
   const single = left.length === 0 || right.length === 0
 
   if (single) {

@@ -52,7 +52,7 @@ export default function ShareRosterSummaryButton({
   label?: string
   /** Offer Copy as text. */
   copyText?: boolean
-  /** A small icon button, for a panel header beside its other controls. */
+  /** A small icon button, for a panel header beside its other controls (32px on touch). */
   compact?: boolean
 }) {
   const [open, setOpen] = useState(false)
@@ -80,6 +80,13 @@ export default function ShareRosterSummaryButton({
     }
   }, [])
 
+  // An export error shows for a few seconds, then gets out of the way of the content under it.
+  useEffect(() => {
+    if (!error) return
+    const timeout = setTimeout(() => setError(null), 4000)
+    return () => clearTimeout(timeout)
+  }, [error])
+
   async function capturePngBlob(): Promise<Blob> {
     const node = captureRef.current
     if (!node) throw new Error("Nothing to capture")
@@ -87,7 +94,7 @@ export default function ShareRosterSummaryButton({
     const dataUrl = await toPng(node, {
       pixelRatio: 3,
       cacheBust: true,
-      backgroundColor: getComputedStyle(document.body).backgroundColor || undefined,
+      backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--brand-color-bg-container").trim() || undefined,
       imagePlaceholder: IMAGE_PLACEHOLDER,
       width: node.scrollWidth,
       height: node.scrollHeight,
@@ -168,7 +175,7 @@ export default function ShareRosterSummaryButton({
         aria-label={shareLabel}
         className={
           compact
-            ? "group relative inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-foreground-secondary transition-colors hover:bg-fill hover:text-foreground disabled:opacity-40"
+            ? "group relative inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-foreground-secondary transition-colors hover:bg-fill hover:text-foreground disabled:opacity-40 pointer-coarse:h-8 pointer-coarse:w-8"
             : "group relative inline-flex h-[38px] w-[38px] cursor-pointer items-center justify-center rounded-lg border border-border bg-background text-foreground transition-colors hover:bg-fill disabled:opacity-40"
         }
       >
@@ -197,7 +204,12 @@ export default function ShareRosterSummaryButton({
         </div>
       )}
       {error && (
-        <p className="absolute right-0 top-full mt-1 whitespace-nowrap text-xs text-error">{error}</p>
+        <p
+          role="alert"
+          className="absolute right-0 top-full z-30 mt-1 whitespace-nowrap rounded-md border border-border bg-background-elevated px-2 py-1 text-xs text-error shadow-md"
+        >
+          {error}
+        </p>
       )}
       {/* Mounted while the menu is open (and through an export) so Download PNG can capture at once. */}
       {(open || busy === "png") && request ? (

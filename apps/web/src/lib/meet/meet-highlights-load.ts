@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import type { Course } from "@prisma/client"
 import type { MeetResultEntry, SheetEntry } from "@/lib/meet/meet-sheet-summary"
 import {
   buildAthletePbMap,
@@ -58,10 +59,23 @@ export async function loadMeetHighlights({
       ),
     ]),
   ]
-  const [pbSwims, nationalsCuts, namedAthletes, records] = await Promise.all([
-    athleteIds.length > 0
+  // "Before this meet" = other meets' swims dated before this meet's first swim. PBs, season bests
+  // and new cuts are all judged against that window, so a later meet never changes this one's.
+  const firstMeetSwimMs = meet.swims.reduce(
+    (min, s) => Math.min(min, s.date.getTime()),
+    meet.startsAt.getTime()
+  )
+  // Only this meet's swimmers, in the course(s) they swam here, are compared with earlier swims.
+  const swimAthleteIds = [...new Set(meet.swims.map((s) => s.athlete.id))]
+  const swimCourses = [...new Set(meet.swims.map((s) => s.course))]
+  const [earlierSwims, nationalsCuts, namedAthletes, records] = await Promise.all([
+    swimAthleteIds.length > 0
       ? prisma.swim.findMany({
-          where: { athleteId: { in: athleteIds } },
+          where: {
+            athleteId: { in: swimAthleteIds },
+            course: { in: swimCourses as Course[] },
+            date: { lt: new Date(firstMeetSwimMs) },
+          },
           select: {
             athleteId: true,
             event: true,
@@ -86,14 +100,7 @@ export async function loadMeetHighlights({
       : [],
     loadMeetRecords(meet.id),
   ])
-  // "Before this meet" = other meets' swims dated before this meet's first swim.
-  const firstMeetSwimMs = meet.swims.reduce(
-    (min, s) => Math.min(min, s.date.getTime()),
-    meet.startsAt.getTime()
-  )
-  const priorSwims = pbSwims.filter(
-    (s) => s.meetId !== meet.id && s.date.getTime() < firstMeetSwimMs
-  )
+  const priorSwims = earlierSwims.filter((s) => s.meetId !== meet.id)
   const priorSeasonSwims = priorSwims.filter((s) => s.meetRef?.season === meet.season)
 
   const highlights = computeMeetResultHighlights({
@@ -109,7 +116,7 @@ export async function loadMeetHighlights({
       tags: s.tags,
       points: s.points,
     })),
-    pbMap: buildAthletePbMap(pbSwims),
+    priorBestMap: buildAthletePbMap(priorSwims),
     nationalsCuts: nationalsCuts.map((c) => ({
       event: c.event,
       gender: c.gender,

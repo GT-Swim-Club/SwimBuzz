@@ -3,6 +3,7 @@
 import { removePractice } from "@/lib/recovery/recovery"
 import { revalidatePath } from "next/cache"
 import { notifyPracticePublished } from "@/lib/notifications/notifications"
+import { runAfterResponse } from "@/lib/notifications/after-response"
 import { prisma } from "@/lib/prisma"
 import { buildPracticeData, PracticeInputError, practiceSetSelect } from "@/lib/practice/practice-input"
 import {
@@ -120,13 +121,15 @@ export async function setPracticePublished(
     })
 
     if (!existing.published && practice.published) {
-      await notifyPracticePublished({
+      runAfterResponse("practice published notification", () =>
+        notifyPracticePublished({
         practiceId: practice.id,
         title: practice.title,
         startsAt: practice.startsAt,
         timeZone: practice.timeZone,
         focus: practice.focus,
         excludeUserId: session.user.id})
+      )
     }
 
     revalidatePath("/practices/[id]", "page")

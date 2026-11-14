@@ -9,6 +9,10 @@ import {
   normalizeGtid,
   serializeAttendance,
 } from "@/lib/practice/practice-attendance"
+import { practiceSeason, withAttendanceClearance } from "@/lib/athlete/athlete-clearance"
+import { canViewPractice, practiceAccessSelect, practiceViewer } from "@/lib/practice/practice-access"
+
+const practiceSeasonSelect = { id: true, startsAt: true, createdAt: true, timeZone: true } as const
 
 const attendanceInclude = {
   athlete: {
@@ -18,6 +22,8 @@ const attendanceInclude = {
       lastName: true,
       gender: true,
       year: true,
+      yearBySeason: true,
+      seasons: true,
       user: { select: { staffTitle: true } },
     },
   },
@@ -32,20 +38,35 @@ async function requireStaff() {
   return { session }
 }
 
+/**
+ * Who's checked in. Staff and athletes alike may read a team practice they can view (the
+ * same rule as the web attendance page); only staff records carry `uncleared`, the
+ * clearance checks the athlete is missing for the practice's season.
+ */
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireStaff()
-  if (auth.error) return auth.error
+  const session = await getSession()
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
-  const records = await prisma.practiceAttendance.findMany({
-    where: { practiceId: id },
-    include: attendanceInclude,
-    orderBy: { recordedAt: "desc" },
-  })
-  return NextResponse.json({ attendance: records.map(serializeAttendance) })
+  const [practice, records] = await Promise.all([
+    prisma.practice.findUnique({ where: { id }, select: { ...practiceSeasonSelect, ...practiceAccessSelect } }),
+    prisma.practiceAttendance.findMany({
+      where: { practiceId: id },
+      include: attendanceInclude,
+      orderBy: { recordedAt: "desc" },
+    }),
+  ])
+  // Private practices have no attendance; athletes see only published team practices.
+  if (!practice || practice.visibility !== "TEAM" || !canViewPractice(practice, practiceViewer(session))) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 })
+  }
+  const season = practiceSeason(practice)
+  const attendance = records.map(serializeAttendance)
+  if (!isStaffRole(session.user.role)) return NextResponse.json({ attendance, season })
+  return NextResponse.json({ attendance: await withAttendanceClearance(attendance, season), season })
 }
 
 export async function POST(
@@ -70,7 +91,7 @@ export async function POST(
   // Practice and athlete lookups are independent — run them concurrently
   // instead of one-after-another to keep check-in feeling instant.
   const [practice, athlete] = await Promise.all([
-    prisma.practice.findUnique({ where: { id, visibility: "TEAM" }, select: { id: true } }),
+    prisma.practice.findUnique({ where: { id, visibility: "TEAM" }, select: practiceSeasonSelect }),
     rawAthleteId
       ? prisma.athlete.findUnique({
           where: { id: rawAthleteId },
@@ -92,6 +113,12 @@ export async function POST(
     )
   }
 
+  // Check-in never waits on clearance — it's looked up alongside the write and only flags the
+  // record (and scan result) so staff see an athlete without a physical or concussion test.
+  const season = practiceSeason(practice)
+  const flag = async (record: ReturnType<typeof serializeAttendance>) =>
+    (await withAttendanceClearance([record], season))[0]!
+
   // Attempt the write directly and let the unique constraint catch
   // duplicates, instead of a separate existence check first — halves the
   // round trips on the common (non-duplicate) path.
@@ -106,7 +133,7 @@ export async function POST(
       include: attendanceInclude,
     })
     return NextResponse.json(
-      { duplicate: false, record: serializeAttendance(created) },
+      { duplicate: false, record: await flag(serializeAttendance(created)) },
       { status: 201 }
     )
   } catch (err) {
@@ -118,7 +145,7 @@ export async function POST(
       if (existing) {
         return NextResponse.json({
           duplicate: true,
-          record: serializeAttendance(existing),
+          record: await flag(serializeAttendance(existing)),
           message: `${attendanceDisplayName(athlete)} is already checked in.`,
         })
       }

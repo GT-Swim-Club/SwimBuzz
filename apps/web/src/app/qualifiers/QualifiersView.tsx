@@ -1,37 +1,42 @@
 "use client"
 
+import type { ReactNode } from "react"
 import { useOptimistic, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { formatSeasonLabel } from "@swimbuzz/shared"
 import FluidToolbar from "@/components/ui/FluidToolbar"
 import ToolbarSelect from "@/components/ui/ToolbarSelect"
 import { ListLayoutToggle, useListLayout } from "@/components/ui/ListLayout"
-import type { QualifierAthlete } from "@/lib/qualifiers/nationals-qualifiers"
+import { ledgerHeaderClass } from "@/components/meet/Ledger"
+import type { QualifierAthlete, StandardsTableRow } from "@/lib/qualifiers/nationals-qualifiers"
 import { groupQualifiersByEvent } from "@/lib/qualifiers/qualifier-events"
 import StandardsTableModal from "./StandardsTableModal"
 import UploadStandardsButton from "./UploadStandardsButton"
 import QualifiersList from "./QualifiersList"
 import QualifierGalleryCard from "./QualifierGalleryCard"
-import QualifierEventList from "./QualifierEventList"
+import QualifierEventList, { qualifierCountLabel } from "./QualifierEventList"
 import QualifierEventCard from "./QualifierEventCard"
+import StandardsSheet from "./StandardsSheet"
 
 type Gender = "all" | "M" | "F"
 
 const GENDER_LABELS: Record<Gender, string> = { all: "All", M: "Men", F: "Women" }
 const galleryGridClass = "grid grid-cols-[repeat(auto-fill,minmax(max(220px,calc((100%-36px)/4)),1fr))] gap-3"
 
-function EmptyState({ title, message }: { title: string; message: string }) {
+function EmptyState({ title, message, action }: { title: string; message: string; action?: ReactNode }) {
   return (
     <div className="rounded-xl border border-dashed border-border-secondary bg-background px-5 py-7 text-center">
       <p className="text-sm font-medium text-foreground">{title}</p>
       <p className="mx-auto mt-1 max-w-md text-sm leading-6 text-foreground-secondary">{message}</p>
+      {action ? <div className="mt-4 flex justify-center">{action}</div> : null}
     </div>
   )
 }
 
 /**
- * The Nationals page below the nav: toolbar, then qualifiers by athlete or by
- * event in the gallery or list layout. The server loads one season (every
+ * The Nationals page below the nav: toolbar, a line naming the standards and
+ * counts, then qualifiers by athlete or by event in the gallery or list
+ * layout, then the standards themselves. The server loads one season (every
  * gender); gender, grouping and search live in the URL but update it in place
  * and filter here, so changing them is instant. Season changes refetch.
  */
@@ -40,6 +45,7 @@ export default function QualifiersView({
   seasons,
   standards,
   qualifiers,
+  standardsTable,
   eventRank,
   currentAthleteId,
   isCoach,
@@ -48,6 +54,7 @@ export default function QualifiersView({
   seasons: string[]
   standards: { yearLabel: string | null; sourceUrl: string | null; course: string } | null
   qualifiers: QualifierAthlete[]
+  standardsTable: StandardsTableRow[]
   eventRank: Record<string, number>
   currentAthleteId: string | null
   isCoach: boolean
@@ -88,52 +95,68 @@ export default function QualifiersView({
     )
   const eventMatches = (event: string) => event.toLowerCase().includes(needle)
 
+  // Alphabetical from the server, with you first — the same order in both layouts.
   const athletes = base
     .filter((athlete) => !needle || nameMatches(athlete) || athlete.events.some((e) => eventMatches(e.event)))
-    // You first in the list; the gallery stays alphabetical.
     .sort((a, b) => Number(b.athleteId === currentAthleteId) - Number(a.athleteId === currentAthleteId))
-  const galleryAthletes = [...athletes].sort(
-    (a, b) => a.lastName.localeCompare(b.lastName) || a.firstName.localeCompare(b.firstName)
-  )
   const eventGroups = byEvent
     ? groupQualifiersByEvent(base, eventRank, {
         splitGender: gender === "all",
         includeSwim: ({ athlete, swim }) => !needle || nameMatches(athlete) || eventMatches(swim.event),
       })
     : []
+  // A search narrows the standards to matching events; a name search hides them.
+  const standardRows = needle ? standardsTable.filter((row) => eventMatches(row.event)) : standardsTable
 
   const genderNoun = gender === "F" ? "women " : gender === "M" ? "men " : ""
   const placeholder = `Search ${base.length} ${genderNoun}qualifier${base.length === 1 ? "" : "s"}…`
   const isEmpty = byEvent ? eventGroups.length === 0 : athletes.length === 0
+  const showGender = gender === "all"
+
+  const standardsTitle = `${standards?.yearLabel ? `${standards.yearLabel} ` : ""}Nationals Standards`
+  const cutCount = base.reduce((sum, athlete) => sum + athlete.events.length, 0)
+  const summary = standards
+    ? [
+        `${standardsTitle} · ${standards.course}`,
+        qualifierCountLabel(base.length),
+        `${cutCount} ${cutCount === 1 ? "cut" : "cuts"}`,
+      ].join(" · ")
+    : null
 
   let content
   if (!standards) {
-    content = (
+    content = isCoach ? (
       <EmptyState
         title={`No standards for ${seasonLabel}`}
-        message="The qualifying-times PDF hasn't been uploaded yet."
+        message="Upload the Nationals qualifying-times PDF to see who has made a cut."
+        action={<UploadStandardsButton season={season} variant="text" />}
+      />
+    ) : (
+      <EmptyState
+        title={`No standards for ${seasonLabel}`}
+        message={`Coaches haven't uploaded the Nationals qualifying times for ${seasonLabel} yet.`}
       />
     )
   } else if (isEmpty) {
     content = query ? (
-      <EmptyState title="No matches" message={`No qualifiers match “${query}”.`} />
+      <EmptyState title="No matching qualifiers" message={`No qualifiers match “${query}”.`} />
     ) : (
       <EmptyState
         title="No qualifying athletes yet"
-        message="No athletes have an individual Nationals cut in this season yet."
+        message={`No ${genderNoun}athletes have an individual Nationals cut in ${seasonLabel} yet. The standards are below.`}
       />
     )
   } else if (byEvent) {
     content =
       layout === "list" ? (
-        <QualifierEventList groups={eventGroups} splitGender={gender === "all"} currentAthleteId={currentAthleteId} />
+        <QualifierEventList groups={eventGroups} splitGender={showGender} currentAthleteId={currentAthleteId} />
       ) : (
         <div className={galleryGridClass}>
           {eventGroups.map((group) => (
             <QualifierEventCard
               key={group.key}
               group={group}
-              splitGender={gender === "all"}
+              splitGender={showGender}
               currentAthleteId={currentAthleteId}
             />
           ))}
@@ -142,14 +165,15 @@ export default function QualifiersView({
   } else {
     content =
       layout === "list" ? (
-        <QualifiersList qualifiers={athletes} currentAthleteId={currentAthleteId} />
+        <QualifiersList qualifiers={athletes} currentAthleteId={currentAthleteId} showGender={showGender} />
       ) : (
         <div className={galleryGridClass}>
-          {galleryAthletes.map((athlete) => (
+          {athletes.map((athlete) => (
             <QualifierGalleryCard
               key={athlete.athleteId}
               athlete={athlete}
               isMe={athlete.athleteId === currentAthleteId}
+              showGender={showGender}
             />
           ))}
         </div>
@@ -210,7 +234,11 @@ export default function QualifiersView({
           </>
         }
       />
+      {summary ? <p className={`-mb-1 px-1 ${ledgerHeaderClass}`}>{summary}</p> : null}
       {content}
+      {standards && standardRows.length > 0 ? (
+        <StandardsSheet rows={standardRows} gender={gender} title={standardsTitle} />
+      ) : null}
     </>
   )
 }

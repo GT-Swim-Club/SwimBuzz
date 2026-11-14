@@ -81,8 +81,16 @@ export type NotificationItem = {
   body: string
   href?: string | null
   athleteId?: string | null
+  /** Tapped; unread items stay highlighted. */
   readAt?: string | null
+  /** The list was opened while it was there; unseen and unread items count toward the badge. */
+  seenAt?: string | null
   createdAt: string
+}
+
+/** Counts toward the bell badge: neither seen in the open list nor read. */
+export function isUnseenNotification(item: Pick<NotificationItem, "readAt" | "seenAt">): boolean {
+  return !item.readAt && !item.seenAt
 }
 
 export type AuthTokens = {

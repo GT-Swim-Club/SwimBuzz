@@ -416,7 +416,7 @@ export function LedgerStatusPill({ open, label }: { open: boolean; label: string
       className={
         "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium " +
         (open
-          ? "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-400"
+          ? "border-success-border bg-success-bg text-success-text"
           : "border-border text-foreground-tertiary")
       }
     >

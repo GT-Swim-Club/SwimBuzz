@@ -93,7 +93,7 @@ export default function RequestTimesImportButton({
             Your profile isn&apos;t linked to SwimCloud yet. Ask a coach to add your SwimCloud ID.
           </p>
         )}
-        {sent && <p className="text-[13px] text-info">Import requested. A coach will run it soon.</p>}
+        {sent && <p className="text-[13px] text-accent">Import requested. A coach will run it soon.</p>}
         {error && <p className="text-[13px] text-error">{error}</p>}
       </Modal>
     </>

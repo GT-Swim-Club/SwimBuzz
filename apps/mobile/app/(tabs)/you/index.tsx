@@ -67,14 +67,14 @@ export default function YouScreen() {
           style: "destructive",
           onPress: async () => {
             await signOut()
-            router.replace("/welcome")
+            router.replace("/sign-in")
           },
         },
       ]
     )
   }
 
-  if (!loading && !user) return <Redirect href="/welcome" />
+  if (!loading && !user) return <Redirect href="/sign-in" />
   if (loading || !user || !profileReady) {
     return (
       <Screen style={{ paddingBottom: 0 }}>

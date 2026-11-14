@@ -30,12 +30,15 @@ export function PracticeTagFilter({
   canManage,
   onChangeTags,
   onChangeSelected,
+  renderTrigger,
 }: {
   tags: PracticeTag[]
   selected: string[]
   canManage: boolean
   onChangeTags: (tags: PracticeTag[]) => void
   onChangeSelected: (tags: string[]) => void
+  /** Replaces the default "All tags ›" row, e.g. with the Practices toolbar's icon button. */
+  renderTrigger?: (open: () => void) => ReactNode
 }) {
   const c = usePalette()
   const insets = useSafeAreaInsets()
@@ -118,21 +121,25 @@ export function PracticeTagFilter({
   }
 
   return (
-    <View style={styles.triggerWrap}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`Filter by tags, ${triggerLabel}`}
-        onPress={() => setOpen(true)}
-        style={styles.trigger}
-      >
-        <Text
-          numberOfLines={1}
-          style={[styles.triggerLabel, noneSelected && styles.triggerPlaceholder]}
+    <View style={renderTrigger ? undefined : styles.triggerWrap}>
+      {renderTrigger ? (
+        renderTrigger(() => setOpen(true))
+      ) : (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Filter by tags, ${triggerLabel}`}
+          onPress={() => setOpen(true)}
+          style={styles.trigger}
         >
-          {triggerLabel}
-        </Text>
-        <Icon color={brandColor} name="chevronRight" size={16} />
-      </Pressable>
+          <Text
+            numberOfLines={1}
+            style={[styles.triggerLabel, noneSelected && styles.triggerPlaceholder]}
+          >
+            {triggerLabel}
+          </Text>
+          <Icon color={brandColor} name="chevronRight" size={16} />
+        </Pressable>
+      )}
       <Modal
         animationType="slide"
         onRequestClose={close}

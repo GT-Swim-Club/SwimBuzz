@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { isStaffRole } from "@swimbuzz/shared"
-import { notifyTimesImportRequest } from "@/lib/notifications/notifications"
+import { notifyTimesImportRequest, timesImportRequestRetryAt } from "@/lib/notifications/notifications"
+import { runAfterResponse } from "@/lib/notifications/after-response"
 import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/auth/session"
 
@@ -45,12 +46,29 @@ export async function POST(
     )
   }
 
-  await notifyTimesImportRequest({
-    athleteId: athlete.id,
-    firstName: athlete.firstName,
-    lastName: athlete.lastName,
-    swimCloudIds,
-    timesSyncedAt: athlete.timesSyncedAt})
+  // One open request at a time: staff are notified (and pushed) again only after the cooldown,
+  // or once the requested import has run.
+  const retryAt = await timesImportRequestRetryAt(athlete.id)
+  if (retryAt) {
+    const retryAfterSeconds = Math.max(1, Math.ceil((retryAt.getTime() - Date.now()) / 1000))
+    const hours = Math.ceil(retryAfterSeconds / 3600)
+    return NextResponse.json(
+      {
+        error: `You already asked for a times import. You can ask again in ${hours} hour${hours === 1 ? "" : "s"}.`,
+      },
+      { status: 429, headers: { "Retry-After": String(retryAfterSeconds) } }
+    )
+  }
+
+  runAfterResponse("times import request notification", () =>
+    notifyTimesImportRequest({
+      athleteId: athlete.id,
+      firstName: athlete.firstName,
+      lastName: athlete.lastName,
+      swimCloudIds,
+      timesSyncedAt: athlete.timesSyncedAt,
+    })
+  )
 
   return NextResponse.json({ ok: true })
 }

@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, type LayoutChangeEvent } from "react-native"
 import {
   formatOrdinal,
   highlightTileRows,
+  relayLegSubSplitsText,
   rosterNameFirstLast,
   rosterNamePreferred,
   rosterSummaryExportSections,
@@ -54,7 +55,7 @@ function CaptureHighlights({ counters }: { counters: StatCounter[] }) {
       {rows.map(({ counters: row, perRow }, i) => (
         <View key={i} style={styles.tileRow}>
           {row.map((counter) => (
-            <HighlightTile key={counter.label} counter={counter} hintBesideLabel />
+            <HighlightTile key={counter.label} counter={counter} hintBesideLabel medalPlaces />
           ))}
           {/* A short row keeps its tiles the width of a full row's. */}
           {Array.from({ length: perRow - row.length }, (_, k) => (
@@ -135,12 +136,20 @@ export const RosterSummaryExportCapture = forwardRef<
           {legs.length > 0 && !measuring ? (
             <View style={styles.legs}>
               {legs.map((leg, i) => (
-                <View key={`${i}-${leg}`} style={styles.leg}>
-                  <Text style={styles.legTag}>{tags?.[i] ?? String(i + 1)}</Text>
-                  <Text style={styles.legName} numberOfLines={1}>
-                    {rosterNameFirstLast(rosterNamePreferred(leg))}
-                  </Text>
-                  {row.legSplits?.[i] ? <Text style={styles.legSplit}>{row.legSplits[i]}</Text> : null}
+                // The leg line, then any sub-splits (the leg's own 50s) under the name.
+                <View key={`${i}-${leg}`} style={styles.legCell}>
+                  <View style={styles.leg}>
+                    <Text style={styles.legTag}>{tags?.[i] ?? String(i + 1)}</Text>
+                    <Text style={styles.legName} numberOfLines={1}>
+                      {rosterNameFirstLast(rosterNamePreferred(leg))}
+                    </Text>
+                    {row.legSplits?.[i] ? <Text style={styles.legSplit}>{row.legSplits[i]}</Text> : null}
+                  </View>
+                  {row.legSubSplits?.[i]?.length ? (
+                    <Text style={[styles.legSplit, styles.legSubSplits]} numberOfLines={1}>
+                      {relayLegSubSplitsText(row.legSubSplits[i])}
+                    </Text>
+                  ) : null}
                 </View>
               ))}
             </View>
@@ -148,7 +157,7 @@ export const RosterSummaryExportCapture = forwardRef<
           {row.cuts?.map((cut) => (
             <View key={cut.event} style={styles.cut}>
               <Text style={[styles.cutEvent, !measuring && styles.cutEventFill]}>{cut.event}</Text>
-              <Text style={[styles.cutDelta, { color: cut.delta.startsWith("-") ? c.success : c.error }]}>
+              <Text style={[styles.cutDelta, { color: cut.delta.startsWith("-") ? c.successText : c.error }]}>
                 {cut.delta.replace(/^-/, "−")}
               </Text>
               <Text style={styles.cutTime}>{cut.time}</Text>
@@ -273,7 +282,7 @@ function makeStyles(c: ColorPalette) {
       paddingHorizontal: 4,
       borderRadius: 11,
       borderWidth: 1,
-      // Dark mode's primaryBorder is white; the web badge is gold-outlined.
+      // Gold-outlined, like the web badge.
       borderColor: c.accent,
       backgroundColor: c.primaryBg,
     },
@@ -303,7 +312,10 @@ function makeStyles(c: ColorPalette) {
     sub: { color: c.textTertiary, fontSize: 12, fontWeight: "400" },
     meta: { color: c.textTertiary, fontSize: 12 },
     legs: { flexDirection: "row", flexWrap: "wrap", rowGap: 1 },
-    leg: { width: "50%", flexDirection: "row", alignItems: "baseline", gap: 5, paddingRight: spacing.xs },
+    legCell: { width: "50%", paddingRight: spacing.xs },
+    leg: { flexDirection: "row", alignItems: "baseline", gap: 5 },
+    /** Under the name: the leg tag's width plus the gap. */
+    legSubSplits: { paddingLeft: 21 },
     legTag: { width: 16, color: c.textTertiary, fontSize: 9, fontWeight: "700" },
     legName: { flexShrink: 1, color: c.textSecondary, fontSize: 12 },
     legSplit: { color: c.textTertiary, fontSize: 12, fontVariant: ["tabular-nums"] },

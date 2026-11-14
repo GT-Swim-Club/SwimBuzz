@@ -252,7 +252,7 @@ export default function MeetCountdown({
         <div
           className={`flex w-full flex-col gap-3 rounded-2xl border border-border bg-fill-secondary/60 px-4 py-3.5 shadow-sm dark:bg-fill-secondary/40 ${className}`.trim()}
         >
-          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">
             Starts in
           </span>
           <CountdownUnits parts={parts} size="md" expand />

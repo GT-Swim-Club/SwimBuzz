@@ -97,7 +97,7 @@ export default function AddIndividualEntryButton({
 
       startTransition(async () => {
         try {
-          await upsertRelayEntry(meetId, {
+          const saved = await upsertRelayEntry(meetId, {
             event: form.relayForm.event,
             relayLetter: "A",
             relayRound: "",
@@ -108,6 +108,11 @@ export default function AddIndividualEntryButton({
             })),
             resultTime: form.seedTime === "NT" ? undefined : form.seedTime,
           })
+          // A relay being edited in the relay builder comes back as an error, not a throw.
+          if (!saved.ok) {
+            setError(saved.error)
+            return
+          }
           setOpen(false)
         } catch (err) {
           setError(err instanceof Error ? err.message : "Failed to save relay")
@@ -177,7 +182,7 @@ export default function AddIndividualEntryButton({
           <>
             <div>
               <label className="block text-xs font-medium text-foreground-secondary mb-1">
-                Athlete <span className="text-red-500">*</span>
+                Athlete <span className="text-error">*</span>
               </label>
               <select
                 required
@@ -196,7 +201,7 @@ export default function AddIndividualEntryButton({
             <div className="grid grid-cols-2 gap-3 mt-3">
               <div>
                 <label className="block text-xs font-medium text-foreground-secondary mb-1">
-                  Event <span className="text-red-500">*</span>
+                  Event <span className="text-error">*</span>
                 </label>
                 <input
                   required
@@ -253,7 +258,7 @@ export default function AddIndividualEntryButton({
             </div>
             
             <div className="space-y-2 mt-3">
-              <label className="block text-xs font-medium text-foreground-secondary">Athletes <span className="text-red-500">*</span></label>
+              <label className="block text-xs font-medium text-foreground-secondary">Athletes <span className="text-error">*</span></label>
               {[0, 1, 2, 3].map(i => (
                 <select
                   key={i}

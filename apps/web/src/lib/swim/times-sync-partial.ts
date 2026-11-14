@@ -1,3 +1,4 @@
+import { dismissTimesImportRequestNotifications } from "@/lib/notifications/notifications"
 import { Prisma, ScraperJobStatus, ScraperJobType } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { assignSwimOccurrences } from "@/lib/swim/swim-dedup"
@@ -125,6 +126,7 @@ export async function saveStreamedSwimmerTimes(
   } else {
     const imported = await saveSwimCloudTimes(swimsFromSwimCloudTimes(times, athlete.id))
     await prisma.athlete.update({ where: { id: athlete.id }, data: { timesSyncedAt: new Date() } })
+    await dismissTimesImportRequestNotifications(athlete.id)
     next = {
       ...saved,
       imported: saved.imported + imported,
