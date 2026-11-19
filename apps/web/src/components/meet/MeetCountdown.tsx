@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { LedgerPanel, LedgerStatTile } from "./Ledger"
+import { eventDaysAhead, useTodayKey, wholeWeeks } from "@/components/ui/RelativeDate"
 
 type Parts = { days: number; hours: number; minutes: number; seconds: number }
 
@@ -195,10 +196,13 @@ export default function MeetCountdown({
   startsAt,
   upcoming = true,
   variant = "pill",
+  timeZone,
   className = "",
 }: {
   /** The meet's start instant (already resolved from the meet's own time zone). */
   startsAt: Date | string
+  /** The meet's time zone. With it, the ledger heading's weeks count calendar days like the meets list. */
+  timeZone?: string
   /** When true and countdown isn't active, show the Upcoming pill (pill variant only). */
   upcoming?: boolean
   variant?: Variant
@@ -208,6 +212,7 @@ export default function MeetCountdown({
   const targetMs = Number.isNaN(target.getTime()) ? null : target.getTime()
   // null until mounted to avoid SSR/client clock hydration mismatches
   const [now, setNow] = useState<number | null>(null)
+  const todayKey = useTodayKey()
 
   useEffect(() => {
     if (targetMs == null) return
@@ -232,8 +237,14 @@ export default function MeetCountdown({
         { value: pad(parts.minutes), label: "min" },
         { value: pad(parts.seconds), label: "sec" },
       ]
+      // A week or more out, the heading gives the weeks too ("Starts in 13 weeks"), rounded down
+      // from calendar days as the meets list counts them, so the two always agree.
+      const weeks = wholeWeeks(
+        (timeZone ? eventDaysAhead(startsAt, timeZone, todayKey) : null) ?? parts.days
+      )
+      const label = weeks >= 1 ? `Starts in ${weeks} ${weeks === 1 ? "week" : "weeks"}` : "Starts in"
       return (
-        <LedgerPanel label="Starts in">
+        <LedgerPanel label={label}>
           <div className="grid grid-cols-4 gap-2">
             {units.map((u) => (
               <LedgerStatTile

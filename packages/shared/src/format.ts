@@ -6,7 +6,6 @@ import { zonedDayKey } from "./timezone"
  */
 export const NOTIFICATION_PREFERENCE_KEYS = [
   "practicePublished",
-  "meetSheets",
   "meetRosterInfo",
   "relayLineups",
   "nationalCuts",
@@ -21,7 +20,6 @@ export type NotificationPreferences = Record<NotificationPreferenceKey, boolean>
 
 export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
   practicePublished: true,
-  meetSheets: true,
   meetRosterInfo: true,
   relayLineups: true,
   nationalCuts: true,
@@ -47,49 +45,43 @@ export const NOTIFICATION_PREFERENCE_META: {
 }[] = [
   {
     key: "practicePublished",
-    label: "New practices",
+    label: "New Practices",
     description: "When a coach publishes a team practice",
     athletesOnly: true,
   },
   {
-    key: "meetSheets",
-    label: "Psych & heat sheets",
-    description: "When the entries, psych sheet, or heat sheets are posted for a meet you're on",
-    athletesOnly: true,
-  },
-  {
     key: "meetRosterInfo",
-    label: "Meet info",
-    description: "When the meet packet, results, live stream, or travel info is posted for a meet you're on",
+    label: "Meet Info & Results",
+    description: "When sheets, results, or other info is posted for a meet you're on",
     athletesOnly: true,
   },
   {
     key: "relayLineups",
-    label: "Relay lineups",
-    description: "When a relay you're on is published or changed",
+    label: "Relay Lineups",
+    description: "When a relay you're on is published or changed, or you're taken off one",
     athletesOnly: true,
   },
   {
     key: "nationalCuts",
-    label: "National cuts",
-    description: "When you make a national cut in an event for the first time this season",
+    label: "National Cuts",
+    description: "When you get a new Nationals cut",
     athletesOnly: true,
   },
   {
     key: "teamRecords",
-    label: "Team records",
+    label: "Team Records",
     description: "When a team record is broken",
     athleteDescription: "When you set a team record",
   },
   {
     key: "practiceComments",
-    label: "Practice comments",
+    label: "Practice Comments",
     description: "When someone comments on your practice or replies to you",
     athleteDescription: "When someone replies to your comment",
   },
   {
     key: "profileChanges",
-    label: "Athlete requests",
+    label: "Athlete Requests",
     description: "When an athlete requests a times import",
     staffOnly: true,
   },

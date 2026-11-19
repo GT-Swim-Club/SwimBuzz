@@ -92,16 +92,26 @@ export function progressionDotRadius(plotWidthPx: number, pointCount: number): n
 
 /**
  * For swims oldest first: which were a best when swum (the first swim counts), and each
- * swim's time against the best before it (negative = faster; null for the first).
+ * swim's time against the best from before its meet (negative = faster; null when the event
+ * has no earlier meet). `meetKey` groups a meet's swims, so a prelims and finals swim both
+ * compare to the pre-meet best rather than to each other; without it each swim is its own meet.
  */
 export function progressionBests<T extends { id: string; timeMs: number }>(
-  chrono: T[]
+  chrono: T[],
+  meetKey?: (swim: T) => string
 ): { pbAtTime: Set<string>; improvement: Map<string, number | null> } {
   const pbAtTime = new Set<string>()
   const improvement = new Map<string, number | null>()
+  const baselineByMeet = new Map<string, number | null>()
   let best: number | null = null
   for (const swim of chrono) {
-    improvement.set(swim.id, best == null ? null : swim.timeMs - best)
+    const key = meetKey?.(swim)
+    let baseline = best
+    if (key != null) {
+      if (baselineByMeet.has(key)) baseline = baselineByMeet.get(key)!
+      else baselineByMeet.set(key, best)
+    }
+    improvement.set(swim.id, baseline == null ? null : swim.timeMs - baseline)
     if (best == null || swim.timeMs < best) {
       pbAtTime.add(swim.id)
       best = swim.timeMs

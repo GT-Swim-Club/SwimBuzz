@@ -134,8 +134,8 @@ export async function notifyPracticePublished(input: {
 
 /**
  * Something new was posted for a meet: sheets (entries, psych, heat sheets) go out as one
- * "posted" notice under the sheets toggle; the packet, results, live stream and travel info as
- * another under the meet-info toggle. Sent to the athletes on the meet (`meetAudienceAthleteIds`).
+ * "posted" notice; the packet, results, live stream and travel info as another. Both fall under
+ * the one Meet Info & Results toggle. Sent to the athletes on the meet (`meetAudienceAthleteIds`).
  */
 export async function notifyMeetInfoPosted(input: {
   meetId: string
@@ -154,7 +154,7 @@ export async function notifyMeetInfoPosted(input: {
   const groups = [
     {
       labels: input.sheetLabels,
-      key: "meetSheets" as const,
+      key: "meetRosterInfo" as const,
       type: NotificationType.MEET_SHEET_POSTED,
       body: "See your events, seeds, heats and lanes.",
     },
@@ -273,7 +273,7 @@ export async function notifyTimesImportRequest(input: {
 
   const ids = `SwimCloud ID${input.swimCloudIds.length > 1 ? "s" : ""} ${input.swimCloudIds.join(", ")}`
   const body = input.timesSyncedAt
-    ? `${ids} · last imported ${formatRelativeTime(input.timesSyncedAt)}`
+    ? `${ids} · last imported ${formatRelativeTime(input.timesSyncedAt).replace(/^(Just Now|Yesterday|Tomorrow)/, (w) => w.toLowerCase())}`
     : `${ids} · never imported`
   const href = await athleteHrefForId(input.athleteId)
   const title = `${input.firstName} ${input.lastName} requested a times import`

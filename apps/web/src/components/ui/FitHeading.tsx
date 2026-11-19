@@ -27,16 +27,32 @@ export default function FitHeading({
       el.style.fontSize = ""
       el.style.whiteSpace = "nowrap"
       const maxPx = parseFloat(getComputedStyle(el).fontSize)
-      const ratio = el.clientWidth / el.scrollWidth
-      if (ratio >= 1) return
-      el.style.fontSize = `${Math.max(minPx, Math.floor(maxPx * ratio * 10) / 10)}px`
+      if (el.scrollWidth <= el.clientWidth) return
+      // Text width doesn't scale exactly with font size, so one scaled guess can still overflow by
+      // a hair — and wrap at nearly full size, flipping between one and two lines while the window
+      // resizes. Keep shrinking (a little more each pass) until it fits or reaches `minPx`.
+      let size = maxPx
+      for (let pass = 0; pass < 8 && size > minPx && el.scrollWidth > el.clientWidth; pass++) {
+        const scaled = Math.floor(size * (el.clientWidth / el.scrollWidth) * 10) / 10
+        size = Math.max(minPx, Math.min(scaled, size - 0.2))
+        el.style.fontSize = `${size}px`
+      }
       if (el.scrollWidth > el.clientWidth) el.style.whiteSpace = "normal"
     }
 
     fit()
-    // Watch the parent: the heading's own height changes as it refits.
-    const observer = new ResizeObserver(fit)
+    // Refit when the room changes: the parent resizing, or a sibling (like staff-only edit buttons
+    // appearing after a role switch) narrowing the heading inside it. Only widths count — the
+    // heading's own height changes as it refits.
+    let lastWidths = `${box.clientWidth}:${el.clientWidth}`
+    const observer = new ResizeObserver(() => {
+      const widths = `${box.clientWidth}:${el.clientWidth}`
+      if (widths === lastWidths) return
+      lastWidths = widths
+      fit()
+    })
     observer.observe(box)
+    observer.observe(el)
     // Web fonts swapping in change the text's width.
     void document.fonts?.ready.then(fit)
     return () => observer.disconnect()

@@ -2,15 +2,18 @@
 
 import {
   useCallback,
-  useRef,
   useState,
   useTransition,
   type ComponentType,
 } from "react"
 import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import EasyCropper, { type Area } from "react-easy-crop"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { FileDropzone } from "@/components/ui/FileDropzone"
+import HoverDetail from "@/components/ui/HoverDetail"
+import SettingsRowLabel from "@/components/settings/SettingsRowLabel"
+import { AppIcon } from "@/components/ui/AppIcon"
 import { removeProfileAvatar, uploadProfileAvatar } from "./ProfilePictureSettings.actions"
 
 // react-easy-crop is a class component; React 19's JSX types need this cast.
@@ -28,6 +31,15 @@ const Cropper = EasyCropper as unknown as ComponentType<{
 
 const AVATAR_MAX_EDGE = 192
 const AVATAR_JPEG_QUALITY = 0.82
+
+function PencilIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden>
+      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+      <path d="m15 5 4 4" />
+    </svg>
+  )
+}
 
 function initialsFromName(name?: string | null, email?: string | null) {
   const parts = (name ?? "").trim().split(/\s+/).filter(Boolean)
@@ -116,7 +128,7 @@ export default function ProfilePictureSettings({
   canEdit?: boolean
 }) {
   const { update } = useSession()
-  const inputRef = useRef<HTMLInputElement>(null)
+  const router = useRouter()
   const [image, setImage] = useState(initialImage ?? null)
   const [isPending, startTransition] = useTransition()
   const loading = isPending
@@ -142,9 +154,7 @@ export default function ProfilePictureSettings({
     setCroppedAreaPixels(pixels)
   }, [])
 
-  async function onFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    event.target.value = ""
+  async function onFileSelected(file: File | undefined) {
     if (!file) return
 
     if (!isAllowedImageFile(file)) {
@@ -190,6 +200,9 @@ export default function ProfilePictureSettings({
         setImage(data.image ?? null)
         closeCropper()
         await update()
+        // The action re-rendered the header before the session cookie had the new
+        // picture; re-render server components now that it does.
+        router.refresh()
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong")
       }
@@ -203,6 +216,7 @@ export default function ProfilePictureSettings({
         await removeProfileAvatar()
         setImage(null)
         await update()
+        router.refresh()
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong")
       }
@@ -211,70 +225,73 @@ export default function ProfilePictureSettings({
 
   const busy = loading || preparing
 
-return (
+  const avatarContent = image ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={image}
+      alt=""
+      className="h-full w-full object-cover"
+      referrerPolicy="no-referrer"
+    />
+  ) : (
+    <span aria-hidden>{initials}</span>
+  )
+
+  return (
     <div className="flex items-center justify-between gap-4 px-4 py-3">
-      <div className="min-w-0">
-        <p className="text-sm text-foreground">
-          Profile picture
-        </p>
+      <SettingsRowLabel icon="image" title="Profile Picture">
         {canEdit && error ? (
           <p className="mt-1 text-xs text-error">{error}</p>
         ) : null}
-      </div>
+      </SettingsRowLabel>
 
       <div className="flex shrink-0 items-center gap-2">
-        <FileDropzone
-          onFilesSelected={(files) => onFileChange({ target: { files: files as any } } as any)}
-          accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif,image/*"
-          disabled={busy || !canEdit}
-          className="flex items-center gap-2"
-        >
-          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-border bg-primary/10 text-sm font-medium text-accent">
-            {image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={image}
-                alt=""
-                className="h-full w-full object-cover"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <span aria-hidden>{initials}</span>
-            )}
-          </div>
+        {canEdit && image ? (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={removePhoto}
+            aria-label="Remove profile picture"
+            className="group relative inline-flex size-7 shrink-0 items-center justify-center rounded-md text-foreground-secondary transition-colors hover:bg-fill-secondary hover:text-error disabled:opacity-50"
+          >
+            <AppIcon name="trash" className="h-4 w-4" />
+            <HoverDetail label="Remove profile picture" />
+          </button>
+        ) : null}
 
-          {canEdit ? (
-            <>
-              <button
-                type="button"
-                disabled={busy}
-                className="rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground-secondary hover:bg-fill-secondary disabled:opacity-50"
-              >
-                {preparing
-                  ? "Opening…"
-                  : loading
-                    ? "Saving…"
-                    : image
-                      ? "Change"
-                      : "Upload"}
-              </button>
-
-              {image ? (
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removePhoto();
-                  }}
-                  className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-foreground-secondary hover:text-error disabled:opacity-50"
+        {canEdit ? (
+          <FileDropzone
+            onFilesSelected={(files) => onFileSelected(files[0])}
+            accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif,image/*"
+            disabled={busy}
+            className="flex items-center gap-2"
+          >
+            <button
+              type="button"
+              disabled={busy}
+              aria-label={image ? "Change profile picture" : "Upload profile picture"}
+              className="group relative inline-flex size-7 shrink-0 items-center justify-center rounded-md text-foreground-secondary transition-colors hover:bg-fill-secondary hover:text-primary disabled:opacity-50"
+            >
+              <PencilIcon />
+              <HoverDetail label={image ? "Change profile picture" : "Upload profile picture"} />
+            </button>
+            <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-border bg-primary/10 text-sm font-medium text-accent">
+              {avatarContent}
+              {busy ? (
+                <span
+                  aria-hidden
+                  className="absolute inset-0 flex items-center justify-center bg-background/60"
                 >
-                  Remove
-                </button>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
+                </span>
               ) : null}
-            </>
-          ) : null}
-        </FileDropzone>
+            </div>
+          </FileDropzone>
+        ) : (
+          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-border bg-primary/10 text-sm font-medium text-accent">
+            {avatarContent}
+          </div>
+        )}
       </div>
 
       {canEdit ? (
@@ -284,7 +301,7 @@ return (
             if (!loading) closeCropper()
           }}
           closeDisabled={loading}
-          title="Crop photo"
+          title="Crop Photo"
           description="Drag to reposition and use the slider to zoom."
           maxWidth="sm"
           bodyClassName="!overflow-hidden"

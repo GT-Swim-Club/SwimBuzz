@@ -20,6 +20,25 @@ export type IconPrimitive =
   | { tag: "line"; x1: number; y1: number; x2: number; y2: number }
 
 export const ICONS = {
+  mail: [
+    { tag: "rect", x: 2, y: 4, width: 20, height: 16, rx: 2 },
+    { tag: "path", d: "m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" },
+  ],
+  messageCircle: [{ tag: "path", d: "M7.9 20A9 9 0 1 0 4 16.1L2 22Z" }],
+  volume: [
+    {
+      tag: "path",
+      d: "M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z",
+    },
+    { tag: "path", d: "M16 9a5 5 0 0 1 0 6" },
+    { tag: "path", d: "M19.364 18.364a9 9 0 0 0 0-12.728" },
+  ],
+  activity: [
+    {
+      tag: "path",
+      d: "M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2",
+    },
+  ],
   home: [
     { tag: "path", d: "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" },
     {

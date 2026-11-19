@@ -74,6 +74,7 @@ export default function RelayCompareView({
   onLoadRight,
   onClose,
   loadDisabled = false,
+  relayTitle = (letter) => `${letter} Relay`,
 }: {
   left: CompareSide
   right: CompareSide
@@ -82,8 +83,14 @@ export default function RelayCompareView({
   onLoadRight: () => void
   onClose: () => void
   loadDisabled?: boolean
+  /** A card's title from its key — e.g. "A-P" → "A Relay · Prelims" when both rounds are compared. */
+  relayTitle?: (letter: string) => string
 }) {
-  const letters = [...new Set([...left.teams, ...right.teams].map((team) => team.letter))].sort()
+  // Keys sort by letter, then prelims ("-P") before finals ("-F").
+  const sortKey = (letter: string) => letter.replace(/-F$/, "-Q")
+  const letters = [...new Set([...left.teams, ...right.teams].map((team) => team.letter))].sort((a, b) =>
+    sortKey(a).localeCompare(sortKey(b))
+  )
   /** Both sides' settings are known and differ: they're highlighted, as their times aren't like for like. */
   const settingsDiffer = left.settings != null && right.settings != null && left.settings !== right.settings
 
@@ -125,7 +132,7 @@ export default function RelayCompareView({
           return (
             <div key={letter} className="min-w-0 rounded-lg border border-border bg-background">
               <div className="flex items-baseline justify-between gap-2 border-b border-border px-3.5 py-2.5 text-[15px] font-medium text-foreground">
-                <span>{letter} Relay</span>
+                <span>{relayTitle(letter)}</span>
                 {diff != null && diff !== 0 ? (
                   <span
                     title={`${right.label} against ${left.label}`}

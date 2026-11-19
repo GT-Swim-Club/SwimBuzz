@@ -1,7 +1,7 @@
 "use client"
 
-import { currentSeason, formatMeetDateRange, formatSeasonLabel, zonedDayKey } from "@swimbuzz/shared"
-import { RelativeDateRange, useTodayKey } from "@/components/ui/RelativeDate"
+import { currentSeason, formatMeetDateRange, formatSeasonLabel } from "@swimbuzz/shared"
+import { RelativeDateRange, eventDaysAhead, useTodayKey, wholeWeeks } from "@/components/ui/RelativeDate"
 import MeetGalleryCard, { MeetCardRows } from "./MeetGalleryCard"
 import MeetListTable, { type MeetListRow } from "./MeetListTable"
 import EditMeetButton from "./EditMeetButton"
@@ -58,17 +58,11 @@ function meetFormInitial(m: MeetListItem): MeetFormState {
   }
 }
 
-function dayDiff(dayKey: string, todayKey: string) {
-  return Math.round(
-    (new Date(`${dayKey}T00:00:00Z`).getTime() - new Date(`${todayKey}T00:00:00Z`).getTime()) / 86_400_000
-  )
-}
-
 function relativeAhead(days: number) {
   if (days <= 0) return "Today"
   if (days === 1) return "Tomorrow"
   if (days < 14) return `in ${days} days`
-  return `in ${Math.round(days / 7)} weeks`
+  return `in ${wholeWeeks(days)} weeks`
 }
 
 function relativeAgo(days: number) {
@@ -85,7 +79,7 @@ function relativeAgo(days: number) {
 /** "Upcoming · in 10 days" / "Last meet · 2 weeks ago" — relative part is client-only (viewer's day). */
 function CardEyebrow({ meet, past }: { meet: MeetListItem; past: boolean }) {
   const todayKey = useTodayKey()
-  const days = todayKey ? dayDiff(zonedDayKey(meet.startsAt, meet.timeZone), todayKey) : null
+  const days = eventDaysAhead(meet.startsAt, meet.timeZone, todayKey)
   const label = past ? "Last meet" : "Upcoming"
   const relative = days === null ? null : past ? relativeAgo(-days) : relativeAhead(days)
   return (
@@ -99,9 +93,9 @@ function CardEyebrow({ meet, past }: { meet: MeetListItem; past: boolean }) {
 
 /** "in 10 days" for a list row's meta line — client-only, like CardEyebrow. */
 function RowCountdown({ meet }: { meet: MeetListItem }) {
-  const todayKey = useTodayKey()
-  if (!todayKey) return null
-  return <span className="text-accent">{relativeAhead(dayDiff(zonedDayKey(meet.startsAt, meet.timeZone), todayKey))}</span>
+  const days = eventDaysAhead(meet.startsAt, meet.timeZone, useTodayKey())
+  if (days === null) return null
+  return <span className="text-accent">{relativeAhead(days)}</span>
 }
 
 type CardKind = "upcoming" | "past" | "last"

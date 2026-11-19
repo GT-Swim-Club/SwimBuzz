@@ -5,8 +5,9 @@ import AlertSoundSettings from "@/components/settings/AlertSoundSettings"
 import AppearanceSettings from "@/components/settings/AppearanceSettings"
 import NotificationPreferencesSettings from "@/components/settings/NotificationPreferencesSettings"
 import ScraperSettings from "@/components/settings/ScraperSettings"
+import SettingsRowLabel from "@/components/settings/SettingsRowLabel"
 import ProfilePictureSettings from "@/components/athlete/ProfilePictureSettings"
-import { STAFF_TITLE_LABELS, formatRoleLabel, isStaffRole } from "@swimbuzz/shared"
+import { STAFF_TITLE_LABELS, formatRoleLabel, isStaffRole, type IconName } from "@swimbuzz/shared"
 import { parseNotificationPreferences } from "@/lib/notifications/notification-preferences"
 import { prisma } from "@/lib/prisma"
 import { athletePath } from "@/lib/slug"
@@ -47,10 +48,10 @@ function SettingsSection({
   )
 }
 
-function InfoRow({ label, children }: { label: string; children: ReactNode }) {
+function InfoRow({ icon, label, children }: { icon: IconName; label: string; children: ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-4 px-4 py-3">
-      <p className="text-sm text-foreground-secondary">{label}</p>
+      <SettingsRowLabel icon={icon} title={label} muted />
       <p className="truncate text-sm font-medium text-foreground">{children}</p>
     </div>
   )
@@ -75,18 +76,7 @@ export default async function SettingsPage() {
   const isStaff = isStaffRole(session.user.role)
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-8">
-      <header>
-        <h1 className="text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
-          Settings
-        </h1>
-        <p className="mt-2 text-sm text-foreground-secondary sm:text-base">
-          {isStaff
-            ? "Manage your account, notifications, scraper, sounds, and appearance."
-            : "Manage your account, notifications, and appearance."}
-        </p>
-      </header>
-
+    <div className="mx-auto flex max-w-2xl flex-col gap-6">
       <SettingsSection
         title="Account"
         aside={
@@ -105,16 +95,16 @@ export default async function SettingsPage() {
           name={session.user.name}
           email={session.user.email}
         />
-        <InfoRow label="Name">{session.user.name || "—"}</InfoRow>
-        <InfoRow label="Email">{session.user.email || "—"}</InfoRow>
-        <InfoRow label="Role">
+        <InfoRow icon="user" label="Name">{session.user.name || "—"}</InfoRow>
+        <InfoRow icon="mail" label="Email">{session.user.email || "—"}</InfoRow>
+        <InfoRow icon="idCard" label="Role">
           {session.user.staffTitle
             ? STAFF_TITLE_LABELS[session.user.staffTitle]
             : formatRoleLabel(session.user.role)}
         </InfoRow>
       </SettingsSection>
 
-      <SettingsSection title="Notifications" description="Choose which alerts you get, in the app and as push notifications">
+      <SettingsSection title="Notifications">
         <NotificationPreferencesSettings
           initialPreferences={notificationPreferences}
           viewer={{
@@ -125,23 +115,20 @@ export default async function SettingsPage() {
       </SettingsSection>
 
       {isStaff ? (
-        <>
-          <SettingsSection
-            title="Desktop scraper"
-            description="Runs SwimCloud and SwimPhone imports from your computer"
-          >
-            <ScraperSettings />
-          </SettingsSection>
-
-          <SettingsSection title="Sounds">
-            <AlertSoundSettings initialEnabled={user?.alertSound ?? false} />
-          </SettingsSection>
-        </>
+        <SettingsSection title="Sounds">
+          <AlertSoundSettings initialEnabled={user?.alertSound ?? false} />
+        </SettingsSection>
       ) : null}
 
       <SettingsSection title="Appearance">
         <AppearanceSettings />
       </SettingsSection>
+
+      {isStaff ? (
+        <SettingsSection title="Desktop Scraper">
+          <ScraperSettings />
+        </SettingsSection>
+      ) : null}
     </div>
   )
 }

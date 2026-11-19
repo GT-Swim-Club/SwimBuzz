@@ -186,79 +186,6 @@ function travelIconName(label: string): IconName {
   return "fileText"
 }
 
-/** "3 imported", "2 files": a step's status, or null when it isn't done. */
-type EmptyStep = { label: string; done: boolean; status?: string }
-
-/**
- * Where the roster summary goes before there's anything in it: what athletes will see here and when,
- * and for staff the steps that fill it in (done on the web app, which has the imports).
- */
-function RosterSummaryEmpty({ meet, isStaff }: { meet: Record<string, unknown>; isStaff: boolean }) {
-  const c = usePalette()
-  const ended = Boolean(meet.meetHasEnded)
-  if (!isStaff) {
-    return (
-      <Section title="Roster Summary">
-        <Muted>
-          {ended
-            ? "No results have been posted for this meet yet. Times, places and splits show here once the coaches import them."
-            : "Entries aren't posted yet. Your events, heats, lanes and seed times show here once the coaches import the sign-ups or the psych and heat sheets."}
-        </Muted>
-      </Section>
-    )
-  }
-  const signups = asRecord(meet.signupRelayPreferences)
-  const signupCount = Array.isArray(signups?.athletes) ? signups.athletes.length : null
-  const roster = asRecord(meet.finalRoster)
-  const rosterCount = Array.isArray(roster?.athleteIds) ? roster.athleteIds.length : null
-  const hasSheets =
-    Boolean(meet.entriesSheetUrl || meet.psychSheetUrl || meet.heatSheetUrl) ||
-    (Array.isArray(meet.heatSheetUrls) && meet.heatSheetUrls.length > 0) ||
-    (Array.isArray(meet.finalsHeatSheetUrls) && meet.finalsHeatSheetUrls.length > 0)
-  const hasResults = Boolean(meet.resultsUrl || meet.swimphoneUrl)
-  const steps: EmptyStep[] = [
-    ...(ended
-      ? []
-      : [
-          {
-            label: "Import sign-ups",
-            done: signupCount != null,
-            status: signupCount != null ? `${signupCount} imported` : undefined,
-          },
-          {
-            label: "Import the final roster",
-            done: rosterCount != null,
-            status: rosterCount != null ? `${rosterCount} on roster` : undefined,
-          },
-        ]),
-    ended
-      ? { label: "Upload the results", done: hasResults }
-      : { label: "Upload the psych or heat sheets", done: hasSheets },
-  ]
-  return (
-    <Section title="Roster Summary">
-      <Muted style={{ marginBottom: spacing.sm }}>
-        Nothing here yet. Athletes see their events here as soon as it has any — fill it in from the
-        meet page on the web app:
-      </Muted>
-      {steps.map((step) => (
-        <ListRow
-          key={step.label}
-          left={
-            <Icon
-              color={step.done ? c.accent : c.textTertiary}
-              name={step.done ? "check" : "chevronRight"}
-              size={16}
-            />
-          }
-          title={step.label}
-          subtitle={step.status ?? (step.done ? "Done" : "Not yet")}
-        />
-      ))}
-    </Section>
-  )
-}
-
 export default function MeetDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
@@ -626,9 +553,7 @@ export default function MeetDetailScreen() {
             onHeatLaneSaved={() => void load()}
             scrollRef={scrollRef}
           />
-        ) : (
-          <RosterSummaryEmpty meet={meet} isStaff={isStaff} />
-        )}
+        ) : null}
 
         {relayLineupCount > 0 ? (
           <Section title="Relays">

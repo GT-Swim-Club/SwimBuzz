@@ -16,6 +16,8 @@ export type RelaySummaryCard = {
   key: string
   title: string
   total: string
+  /** `total` is the seed time (no result yet) — set lighter than a result time. */
+  seed?: boolean
   /** Not published yet (a draft or a suggestion) — dashed and muted. */
   dashed: boolean
   /** The viewing athlete swims on this relay. */
@@ -114,7 +116,13 @@ export function SummaryCard({ card, clickable }: { card: RelaySummaryCard; click
         }
       >
         <span className="truncate">{card.title}</span>
-        <span className="shrink-0 font-mono tabular-nums">{card.total}</span>
+        <span
+          className={
+            "shrink-0 font-mono tabular-nums" + (card.seed ? " font-normal text-foreground-secondary" : "")
+          }
+        >
+          {card.total}
+        </span>
       </div>
       <ol>
         {card.legs.map((leg) => (
@@ -289,6 +297,7 @@ export function publishedSummaryCards(
       key: relay.key,
       title: `${relay.letter} Relay${round ? ` · ${round}` : ""}`,
       total: relay.resultTime ?? relay.seedTime ?? "—",
+      seed: !relay.resultTime && Boolean(relay.seedTime),
       dashed: false,
       mine: relayLineupHasAthlete(relay, viewerAthleteId),
       legs: relay.legs.map((leg) => ({

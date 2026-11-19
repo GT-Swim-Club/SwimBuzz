@@ -191,6 +191,66 @@ export function appendRelayDraftVersion(history: RelayDraftVersion[], version: R
   return next.filter((v) => !dropped.has(v))
 }
 
+function sameTeams(a: RelayDraftTeam[] | undefined, b: RelayDraftTeam[] | undefined): boolean {
+  if (!a || !b) return a === b
+  return (
+    a.length === b.length &&
+    a.every(
+      (team, t) =>
+        team.letter === b[t].letter &&
+        team.legs.length === b[t].legs.length &&
+        team.legs.every((leg, i) => {
+          const other = b[t].legs[i]
+          return leg.athleteId === other.athleteId && leg.timeMs === other.timeMs && !!leg.custom === !!other.custom
+        })
+    )
+  )
+}
+
+function sameIds(a: string[], b: string[]): boolean {
+  const set = new Set(a)
+  return set.size === new Set(b).size && b.every((id) => set.has(id))
+}
+
+function sameSettings(a: BuildSettings | undefined, b: BuildSettings | undefined): boolean {
+  if (!a || !b) return a === b
+  return (
+    a.limitDays === b.limitDays &&
+    a.withinDays === b.withinDays &&
+    a.signupPool === b.signupPool &&
+    (a.legOrder ?? null) === (b.legOrder ?? null) &&
+    sameIds(a.excludedIds, b.excludedIds) &&
+    sameIds(a.addedIds, b.addedIds)
+  )
+}
+
+/** Same lineups, settings, rounds choice and kind of save (draft or publish). */
+function sameVersionContent(a: RelayDraftVersion, b: RelayDraftVersion): boolean {
+  return (
+    sameTeams(a.teams, b.teams) &&
+    sameTeams(a.finalsTeams, b.finalsTeams) &&
+    sameSettings(a.settings, b.settings) &&
+    a.prelimsFinals === b.prelimsFinals &&
+    !!a.published === !!b.published
+  )
+}
+
+/**
+ * Record a save in the history: a save exactly like the event's latest version doesn't add another
+ * — that version just takes the new save's time and author — otherwise it's appended.
+ */
+export function recordRelayDraftVersion(history: RelayDraftVersion[], version: RelayDraftVersion): RelayDraftVersion[] {
+  const latest = history.findLast((v) => sameRelay(v, version.gender, version.event))
+  if (latest && sameVersionContent(latest, version)) {
+    return history.map((v) =>
+      v === latest
+        ? { ...v, savedAt: version.savedAt, ...(version.savedBy ? { savedBy: version.savedBy } : {}) }
+        : v
+    )
+  }
+  return appendRelayDraftVersion(history, version)
+}
+
 /** The stored summary with new drafts, keeping the version history. */
 export function withRelayDrafts(value: unknown, drafts: RelayDraft[], history?: RelayDraftVersion[]): RelayDraftsSummary {
   return { drafts, history: history ?? relayDraftHistoryOf(value) }

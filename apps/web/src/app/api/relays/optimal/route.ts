@@ -40,17 +40,18 @@ const SLOT_ORDERS = permutations([0, 1, 2, 3])
 
 /**
  * The best relay from `candidates` when some legs may go NT: fewest NT legs, then the fastest
- * timed legs. `slotMs(id, slot)` is a swimmer's time on that leg, undefined when they have none.
+ * timed legs. `slotMs(id, slot)` is a swimmer's time on that leg, undefined when they have none;
+ * `allowed(order)` vets a lineup, legs 1–4 in order.
  */
 function bestPartialTeam(
   candidates: string[],
   slotMs: (id: string, slot: number) => number | undefined,
-  allowed: (combo: string[]) => boolean
+  allowed: (order: string[]) => boolean
 ): { order: string[]; totalMs: number | null } | null {
   let best: { order: string[]; nt: number; timedMs: number } | null = null
   for (const combo of combinations(candidates, 4)) {
-    if (!allowed(combo)) continue
     for (const perm of SLOT_ORDERS) {
+      if (!allowed(perm.map((i) => combo[i]))) continue
       let nt = 0
       let timedMs = 0
       for (let slot = 0; slot < 4; slot++) {
@@ -355,6 +356,9 @@ export async function POST(req: Request) {
   })
 
   const mixedRelay = gender === "X"
+  /** Mixed free relays swim men on legs 1–2 and women on legs 3–4. */
+  const isMMFF = (order: string[]) =>
+    order.length === 4 && order.every((id, leg) => athleteMap[id]?.gender === (leg < 2 ? Gender.M : Gender.F))
   const hasMixedSplit = (combo: string[]) =>
     combo.filter((id) => athleteMap[id]?.gender === Gender.M).length === 2 &&
     combo.filter((id) => athleteMap[id]?.gender === Gender.F).length === 2
@@ -421,11 +425,16 @@ export async function POST(req: Request) {
 
     const times = await strokeBests([eventName], eligibleIds)
     const strokeTimes = await buildStrokeTimes(strokeTimeRows(times, eventName, "free"))
+    /** Legs 2–4 fastest first — in a mixed relay, the other man, then the women (MMFF). */
+    const orderRest = (legs: BuiltLeg[]) =>
+      mixed
+        ? [Gender.M, Gender.F].flatMap((g) => legs.filter((leg) => athleteMap[leg.athleteId]?.gender === g).sort(byLegTime))
+        : [...legs].sort(byLegTime)
     const rollMs = (id: string) => rollingPick(times.get(id))!.timeMs
     const leadMs = (id: string) => times.get(id)?.leadoff?.timeMs
 
     // Best four in the pool: three swim their legs 2–4 time (a relay split when faster) and one
-    // leads off from a flat start — whoever loses the least by leading off.
+    // leads off from a flat start — whoever loses the least by leading off (a man, in a mixed relay).
     const bestFreeFromPool = (available: Set<string>) => {
       const pools = mixed
         ? [Gender.M, Gender.F].map((g) => [...available].filter((id) => athleteMap[id]?.gender === g))
@@ -450,6 +459,7 @@ export async function POST(req: Request) {
         let leadoff: string | null = null
         let leadoffCost = Infinity
         for (const id of combo) {
+          if (mixed && athleteMap[id]?.gender !== Gender.M) continue
           const lead = leadMs(id)
           if (lead == null) continue
           if (lead - rollMs(id) < leadoffCost) {
@@ -475,9 +485,7 @@ export async function POST(req: Request) {
       for (const id of found.rest) available.delete(id)
       const legs = await attachSourceDates([
         legOf(found.leadoff, eventName, times.get(found.leadoff)!.leadoff!),
-        ...found.rest
-          .map((id) => legOf(id, eventName, rollingPick(times.get(id))))
-          .sort(byLegTime),
+        ...orderRest(found.rest.map((id) => legOf(id, eventName, rollingPick(times.get(id))))),
       ])
       teams.push({ letter: RELAY_LETTERS[t] ?? String(t + 1), totalMs: found.total, legs })
     }
@@ -489,14 +497,14 @@ export async function POST(req: Request) {
       const found = bestPartialTeam(
         fillCandidates(used, [leadMs, rollingMs]),
         (id, slot) => (slot === 0 ? leadMs(id) : rollingMs(id)),
-        mixed ? hasMixedSplit : () => true
+        mixed ? isMMFF : () => true
       )
       if (!found) break
       for (const id of found.order) used.add(id)
       const [leadoff, ...rest] = found.order
       const legs = await attachSourceDates([
         legOf(leadoff, eventName, times.get(leadoff)?.leadoff),
-        ...rest.map((id) => legOf(id, eventName, rollingPick(times.get(id)))).sort(byLegTime),
+        ...orderRest(rest.map((id) => legOf(id, eventName, rollingPick(times.get(id))))),
       ])
       teams.push({ letter: RELAY_LETTERS[teams.length] ?? String(teams.length + 1), totalMs: found.totalMs, legs })
     }

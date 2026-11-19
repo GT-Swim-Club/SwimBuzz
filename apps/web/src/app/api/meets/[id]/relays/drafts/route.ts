@@ -8,7 +8,7 @@ import { normalizeEventName } from "@/lib/swim/swim-parse"
 import { meetHasEnded } from "@/lib/meet/meet-ended"
 import { randomUUID } from "node:crypto"
 import {
-  appendRelayDraftVersion,
+  recordRelayDraftVersion,
   isRelayDraftFor,
   parseRelayDraftGender,
   parseRelayDraftSettings,
@@ -88,8 +88,9 @@ export async function PUT(
     ...(settings ? { settings } : {}),
     ...(published ? { published: true } : {}),
   })
-  // Every draft and publish is also a version the builder can load again (the last few per event).
-  const history = appendRelayDraftVersion(relayDraftHistoryOf(meet.relayDrafts), {
+  // Every draft and publish is also a version the builder can load again (the last few per event);
+  // a save exactly like the latest version updates that version rather than adding another.
+  const history = recordRelayDraftVersion(relayDraftHistoryOf(meet.relayDrafts), {
     id: randomUUID(),
     gender,
     event,

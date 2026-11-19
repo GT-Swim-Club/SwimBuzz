@@ -66,11 +66,11 @@ export function formatDateTime(date: Date | string): string {
   return `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}, ${formatTimeOfDay(d)}`
 }
 
-// "just now" if <45s, same day → "3:04 PM", yesterday → "Yesterday at 3:04 PM", else date + time
+// "Just Now" if <45s, same day → "3:04 PM", yesterday → "Yesterday at 3:04 PM", else date + time
 export function formatRelativeTime(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date
   const diffMs = Date.now() - d.getTime()
-  if (Math.round(diffMs / 1000) < 45) return "just now"
+  if (Math.round(diffMs / 1000) < 45) return "Just Now"
 
   const now = new Date()
   const dayDiff = Math.round(

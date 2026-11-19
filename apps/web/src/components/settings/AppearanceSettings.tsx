@@ -4,6 +4,7 @@ import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
 import HoverDetail from "@/components/ui/HoverDetail"
 import { AppIcon } from "@/components/ui/AppIcon"
+import SettingsRowLabel from "@/components/settings/SettingsRowLabel"
 import { SegmentedToggle, segmentedIconOptionClass } from "@/components/ui/SegmentedToggle"
 import type { IconName } from "@swimbuzz/shared"
 
@@ -27,12 +28,7 @@ export default function AppearanceSettings() {
 
   return (
     <div className="flex items-center justify-between gap-4 px-4 py-3">
-      <div>
-        <p className="text-sm text-foreground">Theme</p>
-        <p className="text-xs text-foreground-secondary">
-          Light, dark, or match your device
-        </p>
-      </div>
+      <SettingsRowLabel icon="palette" title="Theme" description="Light, dark, or match your device" />
       <SegmentedToggle
         selectedIndex={Math.max(
           0,

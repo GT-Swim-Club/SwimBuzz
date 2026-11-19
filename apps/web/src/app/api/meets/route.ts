@@ -69,7 +69,10 @@ export async function POST(req: Request) {
       { packetParsed }
     )
 
-    const slug = await uniqueMeetSlug(data.name as string)
+    const slug = await uniqueMeetSlug(data.name as string, {
+      startsAt: data.startsAt as Date | null | undefined,
+      timeZone: data.timeZone as string | undefined,
+    })
     const images = await nameMeetImages(data)
     if (req.signal.aborted) {
       await images.rollback()

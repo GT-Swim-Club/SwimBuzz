@@ -67,7 +67,7 @@ export function PushNotificationsRow() {
 
   return (
     <ListRow
-      title="Push notifications"
+      title="Push Notifications"
       subtitle={
         permission === "never-asked"
           ? "Tap to allow alerts on this device"

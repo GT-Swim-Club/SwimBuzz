@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, type ReactNode } from "react"
+import { useMemo, useRef, useState, type ReactNode } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { daysAgoLabel, formatDateTime, formatSeasonLabel } from "@swimbuzz/shared"
@@ -164,7 +164,9 @@ export default function RosterView({
             : `No athletes found for this ${showGender ? "season" : "gender and season"}.`}
         </div>
       ) : (
-        <div className="flex items-start gap-3">
+        // The A–Z rail sits beside the list, or out in the page's right margin once that's wide
+        // enough to hold it (see LetterRail) — keep in step with RosterSkeleton.
+        <div className="relative flex items-start gap-1 min-[1040px]:block">
           <div className="min-w-0 flex-1">
             {layout === "list" ? (
               <RosterTable rows={rows} showGender={showGender} staffColumns={staffColumns} />
@@ -289,9 +291,16 @@ function LastImport({ at, hasSwimCloud }: { at: string | Date | null; hasSwimClo
 /**
  * Sticky A–Z jump list. Every letter is clickable; a letter with no athletes
  * jumps to the next letter that has some (or the last one, past the end).
+ * Pressing and dragging along the rail scrubs through the letters, jumping as
+ * the pointer crosses each one (like the iOS contacts index).
  */
 function LetterRail({ letters }: { letters: Set<string> }) {
-  const jumpTo = (index: number) => {
+  const navRef = useRef<HTMLElement>(null)
+  // Letter under the pointer while pressing/dragging (highlighted), or null.
+  const [scrubIndex, setScrubIndex] = useState<number | null>(null)
+  const scrubIndexRef = useRef<number | null>(null)
+
+  const jumpTo = (index: number, behavior: ScrollBehavior = "smooth") => {
     const target =
       LETTERS.slice(index).find((l) => letters.has(l)) ?? LETTERS.slice(0, index).findLast((l) => letters.has(l))
     const el = target ? document.getElementById(target) : null
@@ -301,21 +310,72 @@ function LetterRail({ letters }: { letters: Set<string> }) {
     // when a late letter can't reach the top, pushing the nav off screen.
     const margin = parseFloat(getComputedStyle(el).scrollMarginTop) || 0
     const top = el.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - margin
-    scroller.scrollTo({ top, behavior: "smooth" })
+    scroller.scrollTo({ top, behavior })
+  }
+
+  /** The letter at a pointer's height, clamped to A/Z above or below the rail. */
+  const indexAt = (clientY: number) => {
+    const buttons = navRef.current?.querySelectorAll<HTMLElement>("button")
+    if (!buttons?.length) return null
+    for (let i = 0; i < buttons.length; i++) {
+      if (clientY < buttons[i].getBoundingClientRect().bottom) return i
+    }
+    return buttons.length - 1
+  }
+
+  const scrubTo = (clientY: number, behavior: ScrollBehavior) => {
+    const index = indexAt(clientY)
+    if (index == null || index === scrubIndexRef.current) return
+    scrubIndexRef.current = index
+    setScrubIndex(index)
+    jumpTo(index, behavior)
+  }
+
+  const endScrub = () => {
+    scrubIndexRef.current = null
+    setScrubIndex(null)
   }
 
   return (
-    <nav aria-label="Jump to letter" className="sticky top-2 flex shrink-0 flex-col items-center py-1">
-      {LETTERS.map((letter, index) => (
-        <button
-          key={letter}
-          type="button"
-          onClick={() => jumpTo(index)}
-          className="w-5 cursor-pointer rounded py-px text-center text-[11px] font-semibold leading-4 text-foreground-secondary transition-colors hover:text-primary"
-        >
-          {letter}
-        </button>
-      ))}
-    </nav>
+    // The slot stretches to the list's height so the nav inside can stick while scrolling. From
+    // 1040px wide the page gutter (--page-gutter-x) is 38px+, room for the rail and its 12px gap,
+    // so it moves out into the right margin, just beside the list, instead of narrowing it.
+    <div className="shrink-0 self-stretch min-[1040px]:absolute min-[1040px]:inset-y-0 min-[1040px]:left-full min-[1040px]:ml-3">
+      <nav
+        ref={navRef}
+        aria-label="Jump to letter"
+        // touch-none so a finger drag scrubs the letters instead of scrolling the page.
+        className="sticky top-2 flex touch-none select-none flex-col items-center py-1"
+        onPointerDown={(e) => {
+          if (e.button !== 0) return
+          // Keep receiving moves when the pointer drifts off the rail mid-drag.
+          e.currentTarget.setPointerCapture(e.pointerId)
+          scrubTo(e.clientY, "smooth")
+        }}
+        onPointerMove={(e) => {
+          // Jump instantly while dragging so the list keeps up with the pointer.
+          if (scrubIndexRef.current != null) scrubTo(e.clientY, "auto")
+        }}
+        onPointerUp={endScrub}
+        onPointerCancel={endScrub}
+        onLostPointerCapture={endScrub}
+      >
+        {LETTERS.map((letter, index) => (
+          <button
+            key={letter}
+            type="button"
+            // Pointer presses are handled by the rail's scrub above; this covers the keyboard.
+            onClick={(e) => {
+              if (e.detail === 0) jumpTo(index)
+            }}
+            className={`w-4 cursor-pointer rounded py-px min-[1040px]:w-5 text-center text-[11px] font-semibold leading-4 transition-colors hover:text-primary ${
+              scrubIndex === index ? "text-primary" : "text-foreground-secondary"
+            }`}
+          >
+            {letter}
+          </button>
+        ))}
+      </nav>
+    </div>
   )
 }

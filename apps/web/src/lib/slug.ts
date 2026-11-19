@@ -1,6 +1,6 @@
 // import { withDeleted } from "../../soft-delete-policy"
 // import { prisma } from "@/lib/prisma"
-import { zonedDayKey } from "@swimbuzz/shared"
+import { DEFAULT_TIME_ZONE, zonedDayKey } from "@swimbuzz/shared"
 
 const CUID_RE = /^c[a-z0-9]{24}$/i
 
@@ -97,21 +97,35 @@ export async function uniqueAthleteSlug(
   return slug
 }
 
-export async function uniqueMeetSlug(name: string, excludeId?: string): Promise<string> {
+/** The meet's start year in its own time zone ("2027"), or null with no start date. */
+function meetSlugYear(startsAt: Date | null | undefined, timeZone: string | null | undefined): string | null {
+  return startsAt ? zonedDayKey(startsAt, timeZone || DEFAULT_TIME_ZONE).slice(0, 4) : null
+}
+
+/**
+ * A free slug for a meet: its name then its start year ("sting-em-classic-2027"), or just the name
+ * when it already ends in that year or the meet has no start date. One taken by another meet
+ * (deleted ones included) gets a counter ("…-2027-2").
+ */
+export async function uniqueMeetSlug(
+  name: string,
+  opts: { startsAt?: Date | null; timeZone?: string | null; excludeId?: string } = {}
+): Promise<string> {
   const { withDeleted } = await import("../../soft-delete-policy")
   const { prisma } = await import("@/lib/prisma")
-  const base = meetSlugBase(name)
+  const { startsAt, timeZone, excludeId } = opts
+  const taken = (slug: string) =>
+    withDeleted(() =>
+      prisma.meet.findFirst({
+        where: { slug, ...(excludeId ? { id: { not: excludeId } } : {}) },
+        select: { id: true },
+      })
+    )
+  const nameSlug = meetSlugBase(name)
+  const year = meetSlugYear(startsAt, timeZone)
+  const base = year && !nameSlug.endsWith(`-${year}`) ? `${nameSlug}-${year}` : nameSlug
   let slug = base
-  let n = 2
-  while (
-    await withDeleted(() => prisma.meet.findFirst({
-      where: { slug, ...(excludeId ? { id: { not: excludeId } } : {}) },
-      select: { id: true },
-    }))
-  ) {
-    slug = `${base}-${n}`
-    n++
-  }
+  for (let n = 2; await taken(slug); n++) slug = `${base}-${n}`
   return slug
 }
 

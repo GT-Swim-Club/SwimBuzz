@@ -49,7 +49,7 @@ async function backfillAthletes() {
 async function backfillMeets() {
   const meets = await prisma.meet.findMany({
     where: { slug: null },
-    select: { id: true, name: true },
+    select: { id: true, name: true, startsAt: true, timeZone: true },
     orderBy: { id: "asc" },
   })
   const used = new Set(
@@ -59,7 +59,12 @@ async function backfillMeets() {
   )
 
   for (const meet of meets) {
-    const base = slugify(meet.name)
+    // Name then start year (in the meet's time zone), as uniqueMeetSlug in src/lib/slug.ts does.
+    const nameSlug = slugify(meet.name)
+    const year = meet.startsAt
+      ? new Intl.DateTimeFormat("en-CA", { timeZone: meet.timeZone || "America/New_York", year: "numeric" }).format(meet.startsAt)
+      : null
+    const base = year && !nameSlug.endsWith(`-${year}`) ? `${nameSlug}-${year}` : nameSlug
     let slug = base
     let n = 2
     while (used.has(slug)) {

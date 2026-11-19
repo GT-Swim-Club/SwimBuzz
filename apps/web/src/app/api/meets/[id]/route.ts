@@ -214,8 +214,14 @@ export async function PATCH(
       { nameMappings, rejectedNames, cachedSheetParses }
     )
 
-    if (typeof data.name === "string" && data.name !== existing.name) {
-      data.slug = await uniqueMeetSlug(data.name, id)
+    // The slug is the name plus the start year, so a rename or a new date can change it.
+    if ((typeof data.name === "string" && data.name !== existing.name) || "startsAt" in data) {
+      const slug = await uniqueMeetSlug(typeof data.name === "string" ? data.name : existing.name, {
+        startsAt: (data.startsAt as Date | undefined) ?? existing.startsAt,
+        timeZone: (data.timeZone as string | undefined) ?? existing.timeZone,
+        excludeId: id,
+      })
+      if (slug !== existing.slug) data.slug = slug
     }
 
     const resourceDrops = detectMeetResourceDrops(existing, data, { packetParsed })

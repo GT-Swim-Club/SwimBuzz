@@ -1,3 +1,4 @@
+import { progressionBests } from "@swimbuzz/shared"
 import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
 import { meetPath, meetSwimPath } from "@/lib/slug"
 import type { SwimDayRange } from "@/lib/swim/swim-dedup"
@@ -49,7 +50,7 @@ export type SwimMarks = {
   currentPb: Set<string>
   /** Swims that were a PB when they were swum (includes the current PBs). */
   pbAtTime: Set<string>
-  /** Time vs. the best time before this swim (negative = faster); null for an event's first swim. */
+  /** Time vs. the best from before this swim's meet (negative = faster); null when the event has no earlier meet. */
   improvement: Map<string, number | null>
 }
 
@@ -62,29 +63,27 @@ export function computeSwimMarks(swims: AthleteSwim[]): SwimMarks {
     else byKey.set(key, [swim])
   }
 
+  const linked = swims.filter((s) => s.meetId)
   const currentPb = new Set<string>()
   const pbAtTime = new Set<string>()
   const improvement = new Map<string, number | null>()
 
   for (const list of byKey.values()) {
-    let best: AthleteSwim | null = null
-    for (const swim of [...list].sort(compareSwimsChronologically)) {
-      if (!best) {
-        improvement.set(swim.id, null)
-        pbAtTime.add(swim.id)
-        best = swim
-        continue
-      }
-      improvement.set(swim.id, swim.timeMs - best.timeMs)
-      if (swim.timeMs < best.timeMs) {
-        pbAtTime.add(swim.id)
-        best = swim
-      }
-    }
+    const chrono = [...list].sort(compareSwimsChronologically)
+    const bests = progressionBests(chrono, (swim) => swimMeetKey(swim, linked))
+    for (const id of bests.pbAtTime) pbAtTime.add(id)
+    for (const [id, delta] of bests.improvement) improvement.set(id, delta)
+    const best = chrono.reduce<AthleteSwim | null>((b, s) => (!b || s.timeMs < b.timeMs ? s : b), null)
     if (best) currentPb.add(best.id)
   }
 
   return { currentPb, pbAtTime, improvement }
+}
+
+/** The meet a swim belongs to: its linked meet, else the linked meet on its day, else its meet name or day. */
+function swimMeetKey(swim: AthleteSwim, linked: AthleteSwim[]): string {
+  const anchor = swim.meetId ? swim : (linkedSwimOnDay(swim, linked) ?? swim)
+  return anchor.meetId ?? (swim.meet ? `name:${swim.meet}` : `day:${swim.date.slice(0, 10)}`)
 }
 
 /** SwimCloud provenance flags, which ride alongside the round letters. */

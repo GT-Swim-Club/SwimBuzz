@@ -38,6 +38,8 @@ export type SwimDetail = {
   subLine: string
   /** One round, or prelims + finals for a combined individual view. */
   rounds: DetailRound[]
+  /** The round whose time, delta, place and points lead the header (the row opened); the last by default. */
+  headline?: number
   /** `splits` are the leg's interval 50s (distance within the leg) for legs longer than 50. */
   relaySwimmers?: Array<{ name: string; split?: string; splits?: ResultSplit[] }>
 }
@@ -386,7 +388,8 @@ export default function SwimDetailModal({
   const combined = detail.kind === "individual" && detail.rounds.length > 1
   const last = detail.rounds[detail.rounds.length - 1]
   const first = detail.rounds[0]
-  const headDelta = roundDelta(last)
+  const head = detail.rounds[detail.headline ?? -1] ?? last
+  const headDelta = roundDelta(head)
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => setMounted(true))
@@ -731,14 +734,14 @@ export default function SwimDetailModal({
                   ) : null}
                 </div>
               </div>
-              {last.time || last.status ? (
+              {head.time || head.status ? (
                 <div className="shrink-0 text-right">
                   <div className="font-mono text-2xl font-semibold leading-[1.1] tabular-nums">
-                    {last.time ? formatDisplayTime(last.time) : (
-                      <span className="text-warning-text">{last.status}</span>
+                    {head.time ? formatDisplayTime(head.time) : (
+                      <span className="text-warning-text">{head.status}</span>
                     )}
                   </div>
-                  {(headDelta || last.place != null || last.points != null) && (
+                  {(headDelta || head.place != null || head.points != null) && (
                     <div className="mt-1.5 flex items-center justify-end gap-2">
                       {headDelta ? (
                         <span
@@ -747,10 +750,10 @@ export default function SwimDetailModal({
                           {formatDelta(headDelta)}
                         </span>
                       ) : null}
-                      {last.place != null ? <PlaceText round={last} /> : null}
-                      {last.points != null ? (
+                      {head.place != null ? <PlaceText round={head} /> : null}
+                      {head.points != null ? (
                         <span className="text-sm tabular-nums text-foreground-tertiary">
-                          {formatPoints(last.points)} pts
+                          {formatPoints(head.points)} pts
                         </span>
                       ) : null}
                     </div>

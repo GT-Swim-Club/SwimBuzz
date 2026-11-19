@@ -54,6 +54,7 @@ export default function Modal({
   portal = true,
   onSubmit,
   panelClassName = "",
+  headerClassName = "",
   bodyClassName = "",
   overlayClassName = "",
   presentation = "dialog",
@@ -73,6 +74,8 @@ export default function Modal({
   portal?: boolean
   onSubmit?: (e: FormEvent) => void
   panelClassName?: string
+  /** Extra classes for the title/description block (e.g. less space under a lone title). */
+  headerClassName?: string
   bodyClassName?: string
   overlayClassName?: string
   /** Render the form surface inline on a route instead of as an overlay. */
@@ -114,7 +117,7 @@ export default function Modal({
     >
       {top}
       {(title || description || header) && (
-        <div className={`shrink-0 px-4 pt-4 sm:px-6 sm:pt-6 ${hasBody ? "pb-2" : "pb-4"}`}>
+        <div className={`shrink-0 px-4 pt-4 sm:px-6 sm:pt-6 ${hasBody ? "pb-2" : "pb-4"} ${headerClassName}`}>
           {title ? (
             <h2 className="text-lg font-medium text-foreground">{title}</h2>
           ) : null}

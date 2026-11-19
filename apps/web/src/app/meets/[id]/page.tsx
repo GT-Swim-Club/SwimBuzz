@@ -33,7 +33,7 @@ import { type TravelInfoKind } from "@/components/ui/TravelInfoIcon"
 import { type TravelInfoItem } from "./TravelInfoButtons"
 import MeetCountdown from "@/components/meet/MeetCountdown"
 import MeetHighlightsCarousel from "@/components/meet/MeetHighlightsCarousel"
-import MeetPreSheetsLayout from "./MeetPreSheetsLayout"
+import MeetPreSheetsColumn from "./MeetPreSheetsColumn"
 import MeetLedgerLayout from "./MeetLedgerLayout"
 import {
   MeetCompetitionCard,
@@ -64,7 +64,6 @@ import {
   type CourseCode,
 } from "@swimbuzz/shared"
 import LoadingComponent from "./loading"
-import MeetSummaryEmptyCard from "./MeetSummaryEmptyCard"
 import { parseSummaryView, searchParamsString } from "@/lib/meet/roster-summary-view"
 
 type SearchParams = Record<string, string | string[] | undefined>
@@ -463,6 +462,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
     isUpcomingMeet && meet.hasStartTime ? (
       <MeetCountdown
         startsAt={meetStartsAt}
+        timeZone={meet.timeZone}
         upcoming={false}
         variant="ledger"
       />
@@ -515,49 +515,16 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
     />
   ) : null
 
-  // Before any sheets exist: where the roster summary will be (what's coming for athletes, the
-  // steps that fill it in for staff — which covers the sign-ups & roster card), then meet timing
-  // cards on the left and logistics on the right. If one side is empty (e.g. a past meet), move a
-  // card over so the page doesn't render a blank half.
-  const summaryEmptyCard = (
-    <MeetSummaryEmptyCard
-      isCoach={isCoach}
-      meetId={meet.id}
-      meetName={meet.name}
-      meetHasEnded={meetHasEnded}
-      hasEventOrder={eventOrder !== null}
-      importedSignups={
-        isSignupRelayPreferences(meet.signupRelayPreferences)
-          ? meet.signupRelayPreferences.athletes.length
-          : null
-      }
-      rosterCount={isMeetFinalRoster(meet.finalRoster) ? meet.finalRoster.athleteIds.length : null}
-      hasSheets={Boolean(
-        meet.entriesSheetUrl || meet.psychSheetUrl || heatSheetLinks.length > 0 || finalsHeatSheetLinks.length > 0
-      )}
-      hasResults={Boolean(meet.resultsUrl || meet.swimphoneUrl)}
-      season={meet.season}
-      course={meet.course}
-      defaultDate={toDateInput(meet.startsAt, meet.timeZone)}
-      resourceInitial={resourceInitial}
-      athletes={rosterAthletes}
-    />
-  )
-  const preSheetsLeft: ReactNode[] = [
+  // Before any sheets exist (no roster summary yet): every card stacked in one column.
+  const preSheetsCompetition = renderCompetitionCard()
+  const preSheetsCards: ReactNode[] = [
     countdownCard && <Fragment key="countdown">{countdownCard}</Fragment>,
     highlightsCard && <Fragment key="highlights">{highlightsCard}</Fragment>,
-  ].filter(Boolean)
-  const preSheetsCompetition = renderCompetitionCard()
-  const preSheetsRight: ReactNode[] = [
+    signupCard && <Fragment key="signup">{signupCard}</Fragment>,
     preSheetsCompetition && <Fragment key="competition">{preSheetsCompetition}</Fragment>,
     travelCard && <Fragment key="travel">{travelCard}</Fragment>,
     photosCard && <Fragment key="photos">{photosCard}</Fragment>,
   ].filter(Boolean)
-  if (preSheetsLeft.length === 0 && preSheetsRight.length > 1) {
-    preSheetsLeft.push(preSheetsRight.shift())
-  } else if (preSheetsRight.length === 0 && preSheetsLeft.length > 1) {
-    preSheetsRight.unshift(preSheetsLeft.pop())
-  }
 
   return (
     <div className="relative">
@@ -583,10 +550,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
               {summarySection}
             </MeetLedgerLayout>
           ) : (
-            <div className="flex flex-col gap-4">
-              {summaryEmptyCard}
-              <MeetPreSheetsLayout left={preSheetsLeft} right={preSheetsRight} />
-            </div>
+            <MeetPreSheetsColumn>{preSheetsCards}</MeetPreSheetsColumn>
           )}
         </div>
       </main>

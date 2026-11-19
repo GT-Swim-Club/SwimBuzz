@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useId, useMemo, useRef, useState, type DragEvent, type ReactNode } from "react"
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type DragEvent, type ReactNode } from "react"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/Skeleton"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
@@ -13,11 +13,11 @@ import { parseSwimTime } from "@/lib/swim/swim-parse"
 import {
   ALTERNATES_SHOWN,
   DEFAULT_RELAY_COUNT,
-  LEG_ORDER_PRESETS,
   RELAY_LETTERS,
   TIME_WINDOWS,
   timeWindowTag,
   alternateGroups,
+  alternateStroke,
   appendTeams,
   applyLegOrder,
   defaultBuildSettings,
@@ -32,7 +32,6 @@ import {
   formatLegTime,
   initialLineup,
   isMedleyRelay,
-  legOrderLabel,
   legStroke,
   lineupKey,
   lineupTeamsOf,
@@ -81,10 +80,34 @@ type BuildRequest = {
   source: Source | null
   /** A settings change re-timing the lineup on screen: what it was loaded with stays the baseline. */
   retime?: boolean
+  /** The earlier save this build loads, so the load menu can check it while it builds. */
+  versionId?: string
 }
 
-/** The lineup last loaded (draft, published or optimal), and the settings it was loaded with. */
-type LoadedLineup = { source: Source; key: string; settings: string }
+/** The lineup the builder's edits are compared against, for the cards' time differences. */
+const BASELINE_TEXT: Record<Source, { relay: string }> = {
+  published: { relay: "published relay" },
+  draft: { relay: "saved draft" },
+  optimal: { relay: "optimal relay" },
+}
+
+/**
+ * The lineup last loaded (draft, published or optimal) and the settings it was loaded with —
+ * `finalsKey` is finals' own lineup as loaded (null = finals followed prelims).
+ */
+type LoadedLineup = { source: Source; key: string; finalsKey: string | null; settings: string }
+
+/** A lineup with a finals lineup of its own (null = finals follows prelims). */
+type RoundLineups = { prelims: LineupTeam[]; finals: LineupTeam[] | null }
+
+const ROUND_NAME: Record<BuilderRound, string> = { P: "Prelims", F: "Finals" }
+
+/** A relay or alternate row, in the round whose lineup it belongs to. */
+type RoundLoc = { round: BuilderRound; loc: RowLoc }
+
+function roundLocKey({ round, loc }: RoundLoc): string {
+  return `${round}:${locKey(loc)}`
+}
 
 /** Swim date under a time (marked when it's a relay split); red when outside the preferred range. */
 function SourceDate({ leg }: { leg: Leg }) {
@@ -348,8 +371,249 @@ function HelpButton({ label, onClick }: { label: string; onClick: () => void }) 
   )
 }
 
-const RANK_LABELS = ["Fastest swimmer", "2nd fastest", "3rd fastest", "Slowest"]
-const LEG_NAMES = ["Leg 1 (lead-off)", "Leg 2", "Leg 3", "Leg 4 (anchor)"]
+const RANK_NAMES = ["Fastest", "2nd Fastest", "3rd Fastest", "4th Fastest"]
+const RANK_SHORT = ["1st", "2nd", "3rd", "4th"]
+const LEG_NAMES = ["Leg 1", "Leg 2", "Leg 3", "Leg 4"]
+/** Fastest leads off through slowest anchors — where a custom order starts. */
+const DEFAULT_CUSTOM_ORDER: LegOrder = [0, 1, 2, 3]
+
+const menuPanelClass =
+  "rounded-xl border border-border bg-background p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.4)]"
+
+/**
+ * Leg order's dropdown: Auto, or Custom — hovering (or tapping) Custom opens the custom order in a
+ * flyout beside the menu, where legs 1–4 with the swimmer (by speed) on each are dragged into
+ * order. Changing the order picks Custom. On a narrow screen there's
+ * no room beside the menu, so the order opens under the row instead.
+ */
+function LegOrderDropdown({
+  order,
+  open,
+  onOpenChange,
+  orderDisabled,
+  mixed,
+  onChange,
+}: {
+  /** The custom order; null = Auto. */
+  order: LegOrder | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  /** The order can't be changed (it can still be looked at). */
+  orderDisabled: boolean
+  /** A mixed relay, which Auto swims men, men, women, women. */
+  mixed: boolean
+  onChange: (order: LegOrder | null) => void
+}) {
+  const autoHelp = [
+    "Leadoff has least difference between flat & relay start time",
+    ...(mixed ? ["Mixed relays ensure Man, Man, Woman, Woman"] : []),
+  ]
+  const [flyoutOpen, setFlyoutOpen] = useState(false)
+  const [flyoutLeft, setFlyoutLeft] = useState(false)
+  const [dragFrom, setDragFrom] = useState<number | null>(null)
+  const [dragOver, setDragOver] = useState<number | null>(null)
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  /** A row is being dragged (a ref: the drag's pointer events come before a re-render). */
+  const dragging = useRef(false)
+  const customRowRef = useRef<HTMLDivElement>(null)
+  const flyoutRef = useRef<HTMLDivElement>(null)
+  useEffect(() => () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current)
+  }, [])
+
+  function close() {
+    if (closeTimer.current) clearTimeout(closeTimer.current)
+    setFlyoutOpen(false)
+    onOpenChange(false)
+  }
+  useEscapeToClose(open, close)
+
+  // Beside the menu on the right, or on the left when there isn't room.
+  useLayoutEffect(() => {
+    if (!flyoutOpen) return
+    const row = customRowRef.current
+    if (!row) return
+    const width = flyoutRef.current?.offsetWidth ?? 224
+    setFlyoutLeft(row.getBoundingClientRect().right + 12 + width > window.innerWidth - 8)
+  }, [flyoutOpen])
+
+  function showFlyout() {
+    if (closeTimer.current) clearTimeout(closeTimer.current)
+    setFlyoutOpen(true)
+  }
+  function scheduleFlyoutClose() {
+    if (closeTimer.current) clearTimeout(closeTimer.current)
+    // A drag cancels the pointer, which reads as leaving — keep the order open while dragging.
+    if (dragging.current) return
+    closeTimer.current = setTimeout(() => setFlyoutOpen(false), 150)
+  }
+
+  const shown = order ?? DEFAULT_CUSTOM_ORDER
+  /** The speed rank swimming each leg (`order` is the leg for each rank). */
+  const ranks = [0, 1, 2, 3].map((leg) => shown.indexOf(leg))
+  const ranksLabel = ranks.map((r) => RANK_SHORT[r]).join(" · ")
+
+  function move(from: number, to: number) {
+    if (orderDisabled || from === to || to < 0 || to > 3) return
+    const next = [...ranks]
+    const [rank] = next.splice(from, 1)
+    next.splice(to, 0, rank)
+    const nextOrder: LegOrder = [0, 0, 0, 0]
+    next.forEach((r, leg) => {
+      nextOrder[r] = leg
+    })
+    onChange(nextOrder)
+  }
+
+  function endDrag() {
+    dragging.current = false
+    setDragFrom(null)
+    setDragOver(null)
+  }
+
+  const rowClass = (selected: boolean) =>
+    `flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-fill ${
+      selected ? "text-accent" : "text-foreground"
+    }`
+  return (
+    <span className="relative">
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={order ? `Leg order: Custom, ${ranks.map((r) => RANK_SHORT[r]).join(", ")}` : "Leg order: Auto"}
+        onClick={() => (open ? close() : onOpenChange(true))}
+        className="inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-background px-3 text-sm text-foreground transition-colors hover:border-border-secondary"
+      >
+        <span>{order ? "Custom" : "Auto"}</span>
+        {order ? <span className="text-foreground-secondary">{ranksLabel}</span> : null}
+        <AppIcon name="chevronDown" className="h-3.5 w-3.5 shrink-0 text-foreground-secondary" />
+      </button>
+      {open ? (
+        <>
+          <div className="fixed inset-0 z-40" onClick={close} />
+          <div
+            role="menu"
+            aria-label="Leg order"
+            className={`absolute left-0 top-[calc(100%+6px)] z-[41] flex min-w-[180px] flex-col gap-0.5 ${menuPanelClass}`}
+          >
+            {/* The whole row picks Auto; the "?" sits over it (a button can't hold another). */}
+            <div
+              className={`relative ${rowClass(order == null)}`}
+              onPointerEnter={(e) => {
+                if (e.pointerType === "mouse") scheduleFlyoutClose()
+              }}
+            >
+              <button
+                type="button"
+                role="menuitemradio"
+                aria-checked={order == null}
+                aria-label="Auto"
+                onClick={() => {
+                  onChange(null)
+                  close()
+                }}
+                className="absolute inset-0 rounded-lg"
+              />
+              <span>Auto</span>
+              <button
+                type="button"
+                aria-label={`What does Auto do? ${autoHelp.join(" ")}`}
+                className="relative inline-grid h-4 w-4 place-items-center rounded-full border border-border text-[10px] font-semibold leading-none text-foreground-secondary transition-colors hover:bg-fill hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/35"
+              >
+                ?
+                <HoverDetail label={autoHelp} />
+              </button>
+              <span className="flex-1" />
+              {order == null ? <LedgerIcon name="check" className="h-4 w-4 shrink-0" /> : null}
+            </div>
+            <div
+              ref={customRowRef}
+              className="relative"
+              // Mouse only: a touch "hover" would open it just before the tap's click toggled it shut.
+              onPointerEnter={(e) => {
+                if (e.pointerType === "mouse") showFlyout()
+              }}
+              onPointerLeave={(e) => {
+                if (e.pointerType === "mouse") scheduleFlyoutClose()
+              }}
+              onDragEnter={showFlyout}
+            >
+              <button
+                type="button"
+                role="menuitemradio"
+                aria-checked={order != null}
+                aria-haspopup="dialog"
+                aria-expanded={flyoutOpen}
+                onClick={() => {
+                  if (!order) {
+                    onChange(DEFAULT_CUSTOM_ORDER)
+                    showFlyout()
+                  } else if (flyoutOpen) setFlyoutOpen(false)
+                  else showFlyout()
+                }}
+                className={`${rowClass(order != null)} ${flyoutOpen ? "bg-fill" : ""}`}
+              >
+                <span className="flex-1">Custom</span>
+                {order ? <LedgerIcon name="check" className="h-4 w-4 shrink-0" /> : null}
+                <LedgerIcon name="chevronRight" className="h-4 w-4 shrink-0 text-foreground-tertiary max-[560px]:rotate-90" />
+              </button>
+              {flyoutOpen ? (
+                <div
+                  ref={flyoutRef}
+                  role="dialog"
+                  aria-label="Custom leg order"
+                  className={`absolute top-[-6px] z-[42] w-56 ${
+                    flyoutLeft ? "right-[calc(100%+12px)]" : "left-[calc(100%+12px)]"
+                  } ${menuPanelClass} max-[560px]:static max-[560px]:mt-0.5 max-[560px]:w-auto max-[560px]:rounded-lg max-[560px]:border-0 max-[560px]:bg-fill-secondary max-[560px]:p-1 max-[560px]:shadow-none`}
+                >
+                  <ol>
+                    {ranks.map((rank, leg) => (
+                      <li
+                        key={rank}
+                        draggable={!orderDisabled}
+                        onDragStart={(e) => {
+                          dragging.current = true
+                          setDragFrom(leg)
+                          e.dataTransfer.effectAllowed = "move"
+                          e.dataTransfer.setData("text/plain", String(leg))
+                        }}
+                        onDragOver={(e) => {
+                          if (dragFrom == null) return
+                          e.preventDefault()
+                          e.dataTransfer.dropEffect = "move"
+                          setDragOver(leg)
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault()
+                          if (dragFrom != null) move(dragFrom, leg)
+                          endDrag()
+                        }}
+                        onDragEnd={endDrag}
+                        className={
+                          "flex items-center gap-2 rounded-lg py-1.5 pl-1.5 pr-2.5 text-sm transition-colors " +
+                          (orderDisabled ? "" : "cursor-grab active:cursor-grabbing ") +
+                          (dragFrom === leg ? "opacity-40 " : "") +
+                          (dragOver === leg && dragFrom !== leg ? "bg-primary/10" : "hover:bg-background-hover")
+                        }
+                      >
+                        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden className="h-4 w-4 shrink-0 text-foreground-tertiary">
+                          {[4, 8, 12].flatMap((y) => [6, 10].map((x) => <circle key={`${x}-${y}`} cx={x} cy={y} r="1.1" />))}
+                        </svg>
+                        <span className="w-14 shrink-0 text-foreground">{LEG_NAMES[leg]}</span>
+                        <span className="min-w-0 flex-1 truncate text-foreground-secondary">{RANK_NAMES[rank]}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </>
+      ) : null}
+    </span>
+  )
+}
 
 /**
  * A row of the builder's status menu: load the lineup, plus an icon-only delete when it can be
@@ -509,6 +773,11 @@ const RELAY_GRID_COLS: Record<number, string> = {
   4: "sm:grid-cols-2 xl:grid-cols-4",
 }
 
+/** Grid columns for `count` relay cards, up to four across. */
+function relayGridCols(count: number): string {
+  return RELAY_GRID_COLS[Math.min(Math.max(count, 1), 4)]
+}
+
 /** Relay lineup builder for one relay event (gender + event). */
 export default function MeetRelayBuilder({
   meetId,
@@ -637,22 +906,33 @@ export default function MeetRelayBuilder({
   const restored = restore != null
   /** Finals' own lineup when the builder opens; null = finals follows prelims. */
   const initialFinals = start.finals
-  // With prelims swum, open on finals — the round left to set — when its lineup is known.
-  const [round, setRound] = useState<BuilderRound>(() =>
-    splitRounds && rounds.swum.P && !rounds.swum.F && (initialFinals == null || start.prelims != null)
-      ? "F"
-      : "P"
+  /**
+   * Finals' own lineup, shown in the finals cards beside prelims; null while finals follows
+   * prelims (its cards mirror the prelims ones until one is edited).
+   */
+  const [finalsTeams, setFinalsTeams] = useState<LineupTeam[] | null>(initialFinals)
+  /** Read by builds, which also time finals' swimmers. */
+  const finalsTeamsRef = useRef(finalsTeams)
+  useEffect(() => {
+    finalsTeamsRef.current = finalsTeams
+  })
+  const prelimsArg = splitRounds ? ("P" as const) : undefined
+  const publishedTeams = useMemo(() => publishedLineup(data, prelimsArg), [data, prelimsArg])
+  /** Finals' own published lineup; null when it's the prelims one (or there are no rounds). */
+  const publishedFinals = useMemo(
+    () => (splitRounds ? independentFinals(publishedTeams, publishedLineup(data, "F")) : null),
+    [data, splitRounds, publishedTeams]
   )
-  const roundArg = splitRounds ? round : undefined
-  const [finalsFollows, setFinalsFollows] = useState(initialFinals == null)
-  const publishedTeams = useMemo(() => publishedLineup(data, roundArg), [data, roundArg])
   /** What saving a draft takes down: a coach-published lineup athletes can see now; null when none. */
   const takenDownByDraft = unpublishedLineupPhrase(data.published, savedSplit)
   /** Something is published for the event — from the builder or imported from a sheet. */
   const hasPublishedLineup = publishedTeams.length > 0
   /** Publishing adds seeds: blocked once results are in — at a finals meet, once both rounds are swum. */
   const canPublish = rounds.finalsSession ? !(rounds.swum.P && rounds.swum.F) : !hasImportedResults
-  const draftTeams = draftTeamsFor(pendingDraft(data), roundArg)
+  const draftTeams = draftTeamsFor(pendingDraft(data), prelimsArg)
+  /** The saved draft's own finals lineup; null when it follows prelims. */
+  const draftFinals =
+    splitRounds && draftTeams ? independentFinals(draftTeams, pendingDraft(data)?.finalsTeams) : null
 
   const defaultSettings = defaultBuildSettings(hasSignups)
   // Settings are saved with the draft, and publishing saves the published lineup's as one. A draft
@@ -661,29 +941,9 @@ export default function MeetRelayBuilder({
   const settingsSource: Source = data.draft?.published ? "published" : "draft"
   const [request, setRequest] = useState<BuildRequest>(() => {
     // Open on the draft, else what's published, else optimal — with the saved settings.
-    const { source, prelims } = start
-    const fixed = round === "F" && initialFinals ? initialFinals : prelims
+    const { source, prelims: fixed } = start
     const settings = start.settings ?? savedSettings
     return { id: 0, settings, fixed, count: fixed ? fixed.length : DEFAULT_RELAY_COUNT, source }
-  })
-  /**
-   * The round not on screen, with what it was loaded as: finals while prelims shows (null while
-   * finals follows prelims), prelims while finals shows (null while finals follows them).
-   */
-  const [offscreen, setOffscreen] = useState<{ teams: LineupTeam[]; loaded: LoadedLineup | null } | null>(() => {
-    if (!initialFinals) return null
-    const { source, prelims } = start
-    const other = round === "F" ? prelims : initialFinals
-    if (!other) return null
-    return {
-      teams: other,
-      loaded: { source: source === "optimal" ? "published" : source, key: lineupKey(other), settings: settingsKey(savedSettings) },
-    }
-  })
-  /** Read by builds, which also time the other round's swimmers. */
-  const offscreenRef = useRef(offscreen)
-  useEffect(() => {
-    offscreenRef.current = offscreen
   })
   const settings = request.settings
   /** The summary's build was made at the settings the builder opens with, so it can be reused. */
@@ -716,7 +976,12 @@ export default function MeetRelayBuilder({
   )
   const [loaded, setLoaded] = useState<LoadedLineup | null>(() =>
     initial && request.source
-      ? { source: request.source, key: lineupKey(lineupTeamsOf(initial)), settings: settingsKey(request.settings) }
+      ? {
+          source: request.source,
+          key: lineupKey(lineupTeamsOf(initial)),
+          finalsKey: initialFinals ? lineupKey(initialFinals) : null,
+          settings: settingsKey(request.settings),
+        }
       : null
   )
   /** The optimal lineup at the current settings and relay count, to compare against; null = unknown. */
@@ -749,7 +1014,7 @@ export default function MeetRelayBuilder({
   const [legOrderOpen, setLegOrderOpen] = useState(false)
   const [athleteQuery, setAthleteQuery] = useState("")
   const [athletePoolOpen, setAthletePoolOpen] = useState(false)
-  const [dragFrom, setDragFrom] = useState<RowLoc | null>(null)
+  const [dragFrom, setDragFrom] = useState<RoundLoc | null>(null)
   const [dropTarget, setDropTarget] = useState<string | null>(null)
   /** Relay leg whose name or time is being edited inline. */
   const [editing, setEditing] = useState<{ key: string; field: "name" | "time" } | null>(null)
@@ -795,7 +1060,7 @@ export default function MeetRelayBuilder({
         ? [
             ...new Set([
               ...poolIds,
-              ...[...(fixed ?? []), ...(offscreenRef.current?.teams ?? [])].flatMap((t) => t.legs.map((l) => l.athleteId)),
+              ...[...(fixed ?? []), ...(finalsTeamsRef.current ?? [])].flatMap((t) => t.legs.map((l) => l.athleteId)),
             ]),
           ]
         : null
@@ -843,9 +1108,11 @@ export default function MeetRelayBuilder({
         )
         if (next && source) {
           const key = lineupKey(lineupTeamsOf(next))
+          const finals = finalsTeamsRef.current
           setLoaded((prev) => ({
             source,
             key,
+            finalsKey: retime && prev?.source === source ? prev.finalsKey : finals ? lineupKey(finals) : null,
             settings: retime && prev?.source === source ? prev.settings : settingsKey(s),
           }))
         }
@@ -867,14 +1134,13 @@ export default function MeetRelayBuilder({
   const settingsChanged = settingsKey(settings) !== settingsKey(savedSettings)
   /** "Prelims & finals" was turned on or off. */
   const splitChanged = splitRounds !== savedSplit
-  /**
-   * The round off screen changed since it was loaded, finals started or stopped following
-   * prelims, or "Prelims & finals" changed.
-   */
-  const otherRoundChanged =
-    (offscreen?.loaded != null && lineupKey(offscreen.teams) !== offscreen.loaded.key) ||
-    finalsFollows !== (initialFinals == null) ||
-    splitChanged
+  /** Finals' lineup changed since it was loaded, or finals started or stopped following prelims. */
+  const finalsChanged =
+    splitRounds &&
+    (finalsTeams ? lineupKey(finalsTeams) : null) !==
+      (loaded ? loaded.finalsKey : initialFinals ? lineupKey(initialFinals) : null)
+  /** Finals changed, or "Prelims & finals" was turned on or off. */
+  const otherRoundChanged = finalsChanged || splitChanged
   const dirty = restored || changed || settingsChanged || otherRoundChanged
   const teamCount = result?.teams.length ?? request.count
   const guard = useUnsavedChangesGuard(dirty)
@@ -908,46 +1174,50 @@ export default function MeetRelayBuilder({
     }))
   }
 
-  /** `teams` on screen, timed and with alternates from the current build. */
-  function lineupResult(base: RelayResult, teams: LineupTeam[]): RelayResult {
-    return withPoolAthletes(applyLineupTeams(base, teams, genderOf), poolPeople(includedAthletes))
-  }
-
-  /** Show the other round's lineup; finals that follows prelims shows the prelims lineup. */
-  function switchRound(next: BuilderRound) {
-    setCompare(null)
-    if (next === round || !result) return
-    setEditing(null)
-    const current = { teams: lineupTeamsOf(result), loaded }
-    if (finalsFollows) {
-      // One lineup for both rounds: nothing to swap.
-      setOffscreen(null)
-    } else if (offscreen) {
-      setResult(lineupResult(result, offscreen.teams))
-      setLoaded(offscreen.loaded)
-      setOffscreen(current)
+  /**
+   * Finals' lineup as shown: its own, timed by the current build, else null while finals follows
+   * prelims (its cards show the prelims result).
+   */
+  const finalsResult = useMemo(() => {
+    if (!splitRounds || !result || !finalsTeams) return null
+    // A saved lineup shown before its build: its saved times, like the prelims cards.
+    if (Object.keys(result.strokeTimes ?? {}).length === 0) {
+      return provisionalLineupResult(event, course, finalsTeams, genderOf)
     }
-    setRound(next)
+    return withPoolAthletes(applyLineupTeams(result, finalsTeams, genderOf), poolPeople(includedAthletes))
+  }, [splitRounds, result, finalsTeams, event, course, genderOf, includedAthletes])
+
+  /** A round's lineup as shown — finals that follows prelims shows the prelims one. */
+  function roundResult(r: BuilderRound): RelayResult | null {
+    return r === "F" && splitRounds ? (finalsResult ?? result) : result
   }
 
   /**
-   * About to change the lineup on screen: on finals that still follows prelims, this makes finals
-   * its own lineup, and prelims keeps the lineup as it is now.
+   * Change one round's lineup. Changing finals while it follows prelims makes it a lineup of its
+   * own; custom times it sets are shared with prelims, like the rest of the swimmers' times.
    */
-  function editingLineup() {
-    if (round !== "F" || !finalsFollows || !result) return
-    setOffscreen({ teams: lineupTeamsOf(result), loaded })
-    setFinalsFollows(false)
+  function updateRound(r: BuilderRound, change: (current: RelayResult) => RelayResult) {
+    if (r === "P" || !splitRounds) {
+      setResult((current) => (current ? change(current) : current))
+      return
+    }
+    const current = finalsResult ?? result
+    if (!current) return
+    const next = change(current)
+    if (next === current) return
+    setFinalsTeams(lineupTeamsOf(next))
+    if (next.strokeTimes !== current.strokeTimes) {
+      setResult((prelims) => (prelims ? { ...prelims, strokeTimes: next.strokeTimes } : prelims))
+    }
   }
 
-  /** Finals goes back to following prelims (their lineup replaces finals'). */
+  /** Results are in for this round, so its cards are locked (publishing leaves it as it is). */
+  const roundSwum = (r: BuilderRound) => splitRounds && rounds.swum[r]
+
+  /** Finals goes back to following prelims. */
   function followPrelims() {
-    if (round !== "F" || finalsFollows || !offscreen || !result) return
     setEditing(null)
-    setResult(lineupResult(result, offscreen.teams))
-    setLoaded(offscreen.loaded)
-    setOffscreen(null)
-    setFinalsFollows(true)
+    setFinalsTeams(null)
   }
 
   /**
@@ -956,40 +1226,32 @@ export default function MeetRelayBuilder({
    */
   function requestPrelimsFinals(next: boolean) {
     setCompare(null)
-    if (next === splitRounds || rounds.locked || !result) return
+    // Changeable while a lineup is still building (no result yet) — the build doesn't depend on it.
+    if (next === splitRounds || rounds.locked || (!result && !loading)) return
     if (next) {
       setSplitRounds(true)
-      setRound("P")
-      setFinalsFollows(true)
-      setOffscreen(null)
+      setFinalsTeams(null)
       return
     }
-    if (!finalsFollows || siblingFinals) setConfirmTimedFinal(true)
+    if (finalsTeams || siblingFinals) setConfirmTimedFinal(true)
     else makeTimedFinal()
   }
 
   /** "Prelims & finals" off: the prelims lineup becomes the event's one lineup. */
   function makeTimedFinal() {
     setConfirmTimedFinal(false)
-    if (!result) return
     setEditing(null)
-    if (round === "F" && !finalsFollows && offscreen) {
-      setResult(lineupResult(result, offscreen.teams))
-      setLoaded(offscreen.loaded)
-    }
-    setOffscreen(null)
-    setFinalsFollows(true)
-    setRound("P")
+    setFinalsTeams(null)
     setSplitRounds(false)
   }
 
   /** Both rounds' lineups to save: `finalsTeams` null while finals follows prelims. */
   function roundLineups(current: RelayResult): { teams: LineupTeam[]; finalsTeams: LineupTeam[] | null } {
     const shown = lineupTeamsOf(current)
-    if (!splitRounds || finalsFollows || !offscreen) return { teams: shown, finalsTeams: null }
+    if (!splitRounds || !finalsTeams) return { teams: shown, finalsTeams: null }
     // Re-timed, as a lineup loaded from what's published carries no times.
-    const other = lineupTeamsOf(applyLineupTeams(current, offscreen.teams, genderOf))
-    return round === "P" ? { teams: shown, finalsTeams: other } : { teams: other, finalsTeams: shown }
+    const finals = finalsResult ?? applyLineupTeams(current, finalsTeams, genderOf)
+    return { teams: shown, finalsTeams: lineupTeamsOf(finals) }
   }
 
   /** What a save commits besides the build: both rounds' lineups and a "Prelims & finals" change. */
@@ -997,10 +1259,12 @@ export default function MeetRelayBuilder({
     return { ...roundLineups(current), ...(splitChanged ? { prelimsFinals: splitRounds } : {}) }
   }
 
+  /** Load a lineup — both rounds: a saved lineup as saved, optimal with finals following prelims. */
   function load(source: Source) {
-    editingLineup()
     setLoadOpen(false)
+    setEditing(null)
     const fixed = source === "draft" ? draftTeams : source === "published" ? publishedTeams : null
+    setFinalsTeams(source === "draft" ? draftFinals : source === "published" ? publishedFinals : null)
     setRequest((r) => ({
       id: r.id + 1,
       settings: source === settingsSource && data.draft?.settings ? data.draft.settings : r.settings,
@@ -1014,9 +1278,9 @@ export default function MeetRelayBuilder({
     const on = index < teamCount
     const next = Math.max(1, on ? index : index + 1)
     if (next === teamCount || !result) return
-    editingLineup()
     if (next < result.teams.length) {
       setResult(truncateTeams(result, next))
+      setFinalsTeams((teams) => teams?.slice(0, next) ?? null)
       // Relays are built fastest-first, so fewer optimal relays are the first ones.
       setOptimalTeams((teams) => teams?.slice(0, next) ?? null)
       return
@@ -1024,13 +1288,24 @@ export default function MeetRelayBuilder({
     addRelays(result, next - result.teams.length)
   }
 
-  /** Build `extra` more relays from swimmers not already on one, leaving the current relays alone. */
+  /**
+   * Build `extra` more relays from swimmers not already on one, leaving the current relays alone —
+   * for finals too when it has a lineup of its own (from swimmers not on a finals relay).
+   */
   function addRelays(current: RelayResult, extra: number) {
-    const used = new Set(current.teams.flatMap((team) => team.legs.map((leg) => leg.athleteId)))
-    const ids = includedAthletes.map((a) => a.id).filter((id) => !used.has(id))
+    const finals = splitRounds && finalsTeams ? finalsResult : null
     const nextLetter = RELAY_LETTERS[current.teams.length]
-    if (ids.length < 4) {
-      setError(`Not enough swimmers left in the pool for a ${nextLetter} relay.`)
+    const unused = (lineup: RelayResult) => {
+      const used = new Set(lineup.teams.flatMap((team) => team.legs.map((leg) => leg.athleteId)))
+      return includedAthletes.map((a) => a.id).filter((id) => !used.has(id))
+    }
+    const builds = [{ round: "P" as BuilderRound, ids: unused(current) }]
+    if (finals) builds.push({ round: "F", ids: unused(finals) })
+    const short = builds.find((build) => build.ids.length < 4)
+    if (short) {
+      setError(
+        `Not enough swimmers left in the pool for a ${nextLetter} ${builds.length > 1 ? `${ROUND_NAME[short.round].toLowerCase()} ` : ""}relay.`
+      )
       return
     }
     addAbortRef.current?.abort()
@@ -1038,26 +1313,36 @@ export default function MeetRelayBuilder({
     addAbortRef.current = controller
     setAdding(extra)
     setError("")
-    fetchOptimalRelay(
-      {
-        meetId,
-        event,
-        course,
-        gender,
-        relayCount: extra,
-        withinDays: settings.withinDays,
-        limitDays: settings.limitDays,
-        athleteIds: ids,
-      },
-      controller.signal
+    Promise.all(
+      builds.map((build) =>
+        fetchOptimalRelay(
+          {
+            meetId,
+            event,
+            course,
+            gender,
+            relayCount: extra,
+            withinDays: settings.withinDays,
+            limitDays: settings.limitDays,
+            athleteIds: build.ids,
+          },
+          controller.signal
+        )
+      )
     )
-      .then((res) => {
+      .then(([prelimsRes, finalsRes]) => {
         if (controller.signal.aborted) return
-        if (!res.ok || res.result.teams.length === 0) {
-          setError(res.ok ? `Not enough swimmers left for a ${nextLetter} relay.` : res.error)
-          return
+        for (const res of [prelimsRes, finalsRes]) {
+          if (res && (!res.ok || res.result.teams.length === 0)) {
+            setError(res.ok ? `Not enough swimmers left for a ${nextLetter} relay.` : res.error)
+            return
+          }
         }
-        setResult((cur) => (cur ? appendTeams(cur, applyLegOrder(res.result, settings.legOrder)) : cur))
+        if (!prelimsRes.ok) return
+        setResult((cur) => (cur ? appendTeams(cur, applyLegOrder(prelimsRes.result, settings.legOrder)) : cur))
+        if (finals && finalsRes?.ok) {
+          setFinalsTeams(lineupTeamsOf(appendTeams(finals, applyLegOrder(finalsRes.result, settings.legOrder))))
+        }
         // The optimal lineup for the new count isn't known without a full rebuild.
         setOptimalTeams(null)
       })
@@ -1077,50 +1362,47 @@ export default function MeetRelayBuilder({
     updateSettings(poolIdSet.has(id) ? { excludedIds: toggle(settings.excludedIds) } : { addedIds: toggle(settings.addedIds) })
   }
 
-  /** Pool athletes who could take this leg, fastest first, with where they are now. */
-  function legCandidates(letter: string, index: number): LegCandidate[] {
-    if (!result) return []
-    const outgoing = result.teams.find((team) => team.letter === letter)?.legs[index]
+  /** Pool athletes who could take this leg, fastest first, with where they are now in its round. */
+  function legCandidates(r: BuilderRound, letter: string, index: number): LegCandidate[] {
+    const lineup = roundResult(r)
+    if (!lineup) return []
+    const outgoing = lineup.teams.find((team) => team.letter === letter)?.legs[index]
     if (!outgoing) return []
     const places = new Map<string, string>()
-    for (const alt of result.alternates ?? []) places.set(alt.athleteId, "Alternate")
-    for (const team of result.teams) {
+    for (const alt of lineup.alternates ?? []) places.set(alt.athleteId, "Alternate")
+    for (const team of lineup.teams) {
       team.legs.forEach((leg, i) => {
-        places.set(leg.athleteId, result.teams.length > 1 ? `${team.letter} · Leg ${i + 1}` : `Leg ${i + 1}`)
+        places.set(leg.athleteId, lineup.teams.length > 1 ? `${team.letter} · Leg ${i + 1}` : `Leg ${i + 1}`)
       })
     }
-    const stroke = legStroke(result.relay, index)
+    const stroke = legStroke(lineup.relay, index)
     return includedAthletes
       // Mixed relays swap like-for-like so the lineup stays two men and two women.
       .filter((a) => a.id !== outgoing.athleteId && (!mixed || a.gender === outgoing.gender))
       .map((athlete) => ({
         athlete,
-        timeMs: slotTime(result.strokeTimes?.[athlete.id], stroke, index)?.timeMs ?? null,
+        timeMs: slotTime(lineup.strokeTimes?.[athlete.id], stroke, index)?.timeMs ?? null,
         place: places.get(athlete.id) ?? null,
       }))
       .sort((a, b) => (a.timeMs ?? Infinity) - (b.timeMs ?? Infinity) || 0)
   }
 
-  function pickLegAthlete(letter: string, index: number, athlete: AthleteOption) {
+  function pickLegAthlete(r: BuilderRound, letter: string, index: number, athlete: AthleteOption) {
     setEditing(null)
-    editingLineup()
     const previousPositions = captureRelayRowPositions()
-    setResult((current) =>
-      current
-        ? replaceLeg(current, letter, index, {
-            athleteId: athlete.id,
-            name: athleteName(athlete),
-            gender: athlete.gender,
-          })
-        : current
+    updateRound(r, (current) =>
+      replaceLeg(current, letter, index, {
+        athleteId: athlete.id,
+        name: athleteName(athlete),
+        gender: athlete.gender,
+      })
     )
     animateRelayRowSwap(previousPositions)
   }
 
-  function saveLegTime(letter: string, index: number, timeMs: number) {
+  function saveLegTime(r: BuilderRound, letter: string, index: number, timeMs: number) {
     setEditing(null)
-    editingLineup()
-    setResult((current) => (current ? setLegTime(current, letter, index, timeMs) : current))
+    updateRound(r, (current) => setLegTime(current, letter, index, timeMs))
   }
 
   function captureRelayRowPositions(): Map<string, DOMRect> {
@@ -1158,47 +1440,119 @@ export default function MeetRelayBuilder({
     setDropTarget(null)
   }
 
-  function handleRowDragStart(e: DragEvent<HTMLElement>, loc: RowLoc) {
-    setDragFrom(loc)
+  function handleRowDragStart(e: DragEvent<HTMLElement>, from: RoundLoc) {
+    setDragFrom(from)
     e.dataTransfer.effectAllowed = "move"
-    e.dataTransfer.setData("text/plain", locKey(loc))
+    e.dataTransfer.setData("text/plain", roundLocKey(from))
   }
 
-  function handleRowDragOver(e: DragEvent<HTMLElement>, loc: RowLoc) {
-    if (result && dragFrom && !canDropOnSlot(result, dragFrom, loc, mixed)) {
+  /**
+   * A row as a row of round `r`'s lineup: relay rows only in their own round; an alternate (the
+   * one list, indexed like prelims' alternates) as the same swimmer and stroke in finals' list.
+   */
+  function locInRound(at: RoundLoc, r: BuilderRound): RowLoc | null {
+    if (at.loc.list === "team") return at.round === r ? at.loc : null
+    // Finals following prelims shares prelims' alternates.
+    if (r === "P" || !finalsResult) return at.loc
+    const alt = result?.alternates?.[at.loc.index]
+    if (!alt) return null
+    const index = (finalsResult.alternates ?? []).findIndex(
+      (other) => other.athleteId === alt.athleteId && alternateStroke(other) === alternateStroke(alt)
+    )
+    return index >= 0 ? { list: "alt", index } : null
+  }
+
+  /**
+   * What a drag from `from` to `to` changes, or null when it can't drop there: a swap inside one
+   * round (both rows in that round's lineup), or a relay swimmer dropped on the other round's relay
+   * when they aren't swimming that round — they replace the swimmer there (who becomes an
+   * alternate) and stay on their own round's relay.
+   */
+  function resolveDrop(
+    from: RoundLoc,
+    to: RoundLoc
+  ):
+    | { kind: "swap"; round: BuilderRound; from: RowLoc; to: RowLoc }
+    | { kind: "replace"; round: BuilderRound; letter: string; index: number; person: Leg }
+    | null {
+    const fromRow = from.loc
+    const toRow = to.loc
+    if (fromRow.list === "team" && toRow.list === "team" && from.round !== to.round) {
+      if (roundSwum(to.round)) return null
+      const person = roundResult(from.round)?.teams.find((t) => t.letter === fromRow.letter)?.legs[fromRow.index]
+      const target = roundResult(to.round)
+      const outgoing = target?.teams.find((t) => t.letter === toRow.letter)?.legs[toRow.index]
+      if (!person || !target || !outgoing) return null
+      // Already swimming the other round: that's a swap there, not a replacement.
+      if (target.teams.some((t) => t.legs.some((leg) => leg.athleteId === person.athleteId))) return null
+      // Mixed relays stay two men and two women.
+      if (mixed && person.gender !== outgoing.gender) return null
+      return { kind: "replace", round: to.round, letter: toRow.letter, index: toRow.index, person }
+    }
+    const team = from.loc.list === "team" ? from : to.loc.list === "team" ? to : null
+    if (!team || roundSwum(team.round)) return null
+    const r = team.round
+    const fromLoc = locInRound(from, r)
+    const toLoc = locInRound(to, r)
+    const lineup = roundResult(r)
+    if (!fromLoc || !toLoc || !lineup || !canDropOnSlot(lineup, fromLoc, toLoc, mixed)) return null
+    return { kind: "swap", round: r, from: fromLoc, to: toLoc }
+  }
+
+  function handleRowDragOver(e: DragEvent<HTMLElement>, to: RoundLoc) {
+    if (dragFrom && !resolveDrop(dragFrom, to)) {
       e.dataTransfer.dropEffect = "none"
       setDropTarget(null)
       return
     }
     e.preventDefault()
     e.dataTransfer.dropEffect = "move"
-    setDropTarget(locKey(loc))
+    setDropTarget(roundLocKey(to))
   }
 
-  function handleRowDragLeave(e: DragEvent<HTMLElement>, loc: RowLoc) {
+  function handleRowDragLeave(e: DragEvent<HTMLElement>, to: RoundLoc) {
     if (e.currentTarget.contains(e.relatedTarget as Node)) return
-    setDropTarget((current) => (current === locKey(loc) ? null : current))
+    setDropTarget((current) => (current === roundLocKey(to) ? null : current))
   }
 
-  function handleRowDrop(e: DragEvent<HTMLElement>, to: RowLoc) {
+  function handleRowDrop(e: DragEvent<HTMLElement>, to: RoundLoc) {
     e.preventDefault()
-    if (dragFrom && result && canDropOnSlot(result, dragFrom, to, mixed)) {
-      editingLineup()
+    const drop = dragFrom ? resolveDrop(dragFrom, to) : null
+    if (drop) {
       const previousPositions = captureRelayRowPositions()
-      setResult((current) => (current ? moveRelayRow(current, dragFrom, to, mixed) : current))
+      updateRound(drop.round, (current) =>
+        drop.kind === "swap"
+          ? moveRelayRow(current, drop.from, drop.to, mixed)
+          : replaceLeg(current, drop.letter, drop.index, drop.person)
+      )
       animateRelayRowSwap(previousPositions)
     }
     endDrag()
   }
 
-  function dragStateClass(loc: RowLoc, enabled: boolean) {
-    const key = locKey(loc)
-    const isDragging = dragFrom != null && locKey(dragFrom) === key
+  function dragStateClass(at: RoundLoc, enabled: boolean) {
+    const key = roundLocKey(at)
+    const isDragging = dragFrom != null && roundLocKey(dragFrom) === key
     return (
       (enabled ? "cursor-grab active:cursor-grabbing " : "") +
       (isDragging ? "opacity-40 " : "") +
       (dropTarget === key && !isDragging ? "bg-primary/10 " : "")
     )
+  }
+
+  /** Each lineup to load, with finals' own lineup (null = finals follows prelims). */
+  const sourceLineups: Record<Source, RoundLineups | null> = {
+    optimal: optimalTeams ? { prelims: optimalTeams, finals: null } : null,
+    published: publishedTeams.length > 0 ? { prelims: publishedTeams, finals: publishedFinals } : null,
+    draft: draftTeams ? { prelims: draftTeams, finals: draftFinals } : null,
+  }
+
+  /** The lineups on screen — both rounds — have the same swimmers (and custom times) as `lineup`. */
+  function showsLineup(lineup: RoundLineups | null): boolean {
+    if (!lineup || !result || result.teams.length === 0) return false
+    const prelims = lineupTeamsOf(result)
+    if (lineupKey(prelims) !== lineupKey(lineup.prelims)) return false
+    return !splitRounds || lineupKey(finalsTeams ?? prelims) === lineupKey(lineup.finals ?? lineup.prelims)
   }
 
   /**
@@ -1208,8 +1562,7 @@ export default function MeetRelayBuilder({
   const showsPublishedLineup =
     hasPublishedLineup &&
     result != null &&
-    ((loaded?.source === "published" && !changed) ||
-      lineupKey(lineupTeamsOf(result)) === lineupKey(publishedTeams))
+    ((loaded?.source === "published" && !changed && !finalsChanged) || showsLineup(sourceLineups.published))
   /** Opened as published, and neither the lineup nor its settings changed since. */
   const publishedUnchanged =
     showsPublishedLineup &&
@@ -1284,7 +1637,7 @@ export default function MeetRelayBuilder({
       window.clearTimeout(end)
       setIdleDeadline(null)
     }
-  }, [result, settings, idlePaused, idleRestarts])
+  }, [result, finalsTeams, settings, idlePaused, idleRestarts])
 
   function requestPublish() {
     if (!canPublish || !result) return
@@ -1327,10 +1680,10 @@ export default function MeetRelayBuilder({
 
   /** Who saved the event's draft (or published lineup) and when. */
   const draftByLine = data.draft ? savedByLine(data.draft.savedBy, data.draft.savedAt) : null
-  /** The "Times from" window the optimal lineup is built with: "(1Y)". */
-  const windowTag = `(${timeWindowTag(settings.limitDays)})`
+  /** Optimal with the "Times from" window it's built with: "Optimal (1Y)"; all time is plain. */
+  const optimalLabel = settings.limitDays == null ? "Optimal" : `Optimal (${timeWindowTag(settings.limitDays)})`
   const loadItems: { source: Source; label: string; detail?: string | null }[] = [
-    { source: "optimal", label: `Optimal ${windowTag}` },
+    { source: "optimal", label: optimalLabel },
     ...(publishedTeams.length > 0
       ? [{ source: "published" as const, label: "Published", detail: data.draft?.published ? draftByLine : null }]
       : []),
@@ -1343,10 +1696,13 @@ export default function MeetRelayBuilder({
   const previousVersions = (data.versions ?? []).filter(
     (version, i) => !(i === 0 && data.draft && version.savedAt === data.draft.savedAt)
   )
-  /** A version's lineup is the one on screen (for the round shown). */
-  const versionLoaded = (version: RelaySlotVersion) =>
-    currentKey != null &&
-    lineupKey(round === "F" && splitRounds && version.finalsTeams ? version.finalsTeams : version.teams) === currentKey
+  /** A version's lineups (both rounds), finals' own one null while it followed prelims. */
+  const versionLineups = (version: RelaySlotVersion): RoundLineups => ({
+    prelims: version.teams,
+    finals: splitRounds ? independentFinals(version.teams, version.finalsTeams) : null,
+  })
+  /** A version's lineup is the one on screen. */
+  const versionLoaded = (version: RelaySlotVersion) => showsLineup(versionLineups(version))
 
   /**
    * Load an earlier save — both rounds' lineups and its settings — as unsaved changes. Results can
@@ -1357,45 +1713,47 @@ export default function MeetRelayBuilder({
     setEditing(null)
     const split = rounds.locked ? splitRounds : (version.prelimsFinals ?? (version.finalsTeams != null || splitRounds))
     setSplitRounds(split)
-    setRound("P")
-    if (split && version.finalsTeams) {
-      setFinalsFollows(false)
-      // Never matches, so finals counts as changed until saved.
-      setOffscreen({ teams: version.finalsTeams, loaded: { source: "draft", key: "", settings: "" } })
-    } else {
-      setFinalsFollows(true)
-      setOffscreen(null)
-    }
+    setFinalsTeams(split ? independentFinals(version.teams, version.finalsTeams) : null)
     setRequest((r) => ({
       id: r.id + 1,
       settings: version.settings ?? r.settings,
       fixed: version.teams,
       count: version.teams.length,
       source: null,
+      versionId: version.id,
     }))
   }
   const saveDraftLabel = takenDownByDraft ? "Save as draft and unpublish" : "Save as draft"
+  /** What the edits are compared against: the lineup last loaded, else the published one. */
+  const baselineSource: Source | null = loaded?.source ?? (publishedTeams.length > 0 ? "published" : null)
+  const baseline = baselineSource ? sourceLineups[baselineSource] : null
+  const finalsShown = splitRounds ? (finalsResult ?? result) : null
+  /**
+   * Editing a loaded lineup: that lineup, re-timed like the working one, to compare — per round
+   * (finals against the loaded finals lineup). Null for a round that matches it.
+   */
+  const comparison = useMemo(() => {
+    if (!baselineSource || !baseline || !result || result.teams.length === 0) return null
+    const against = (shown: RelayResult, teams: LineupTeam[]) => {
+      if (teams.length === 0 || lineupKey(lineupTeamsOf(shown)) === lineupKey(teams)) return null
+      const published = applyLineupTeams(shown, teams, genderOf).teams
+      return { published, byLetter: compareWithPublished(shown.teams, published) }
+    }
+    const P = against(result, baseline.prelims)
+    const F = finalsShown ? against(finalsShown, baseline.finals ?? baseline.prelims) : null
+    return P || F ? { source: baselineSource, P, F } : null
+  }, [baselineSource, baseline, result, finalsShown, genderOf])
   // An option counts as loaded whenever the lineup on screen matches it — e.g. a saved draft that
   // is also the optimal lineup marks both.
-  const currentKey = result && result.teams.length > 0 ? lineupKey(lineupTeamsOf(result)) : null
-  /** Editing a published relay: the published lineup, re-timed like the working one, to compare. */
-  const comparison = useMemo(() => {
-    if (!result || result.teams.length === 0 || publishedTeams.length === 0) return null
-    if (lineupKey(lineupTeamsOf(result)) === lineupKey(publishedTeams)) return null
-    const published = applyLineupTeams(result, publishedTeams, genderOf).teams
-    return { published, byLetter: compareWithPublished(result.teams, published) }
-  }, [result, publishedTeams, genderOf])
-  const sourceTeams: Record<Source, LineupTeam[] | null> = {
-    optimal: optimalTeams,
-    published: publishedTeams.length > 0 ? publishedTeams : null,
-    draft: draftTeams,
-  }
-  const isLoaded = (source: Source) => {
-    const teams = sourceTeams[source]
-    if (currentKey == null || teams == null || lineupKey(teams) !== currentKey) return false
+  const isLoaded = (source: Source) =>
     // Saved lineups also hold their settings, so changing one leaves something to save either way.
-    return source === "optimal" || !settingsChanged
-  }
+    showsLineup(sourceLineups[source]) && (source === "optimal" || !settingsChanged)
+  /** A lineup picked from the load menu that's still building: the menu checks it right away. */
+  const pendingPick = loading && (request.source != null || request.versionId != null) ? request : null
+  /** The load menu's check: the lineup being loaded, else whichever the lineup on screen matches. */
+  const menuChecked = (source: Source) => (pendingPick ? pendingPick.source === source : isLoaded(source))
+  const menuVersionChecked = (version: RelaySlotVersion) =>
+    pendingPick ? pendingPick.versionId === version.id : versionLoaded(version)
   const poolIsCustom = settings.excludedIds.length > 0 || settings.addedIds.length > 0
   const editable = adding === 0
   const canAct = result != null && result.teams.length > 0 && !loading && editable && locked
@@ -1428,6 +1786,46 @@ export default function MeetRelayBuilder({
     </label>
   )
 
+  /** Timed Finals or Prelim/Final, beside the event; results lock it. */
+  /** Changeable while a lineup is still loading. */
+  const roundsDisabled = !editable || rounds.locked != null || compare != null
+  const roundsLabel = splitRounds ? "Prelim/Final" : "Timed Finals"
+  const roundsPicker = (
+    <label
+      title={
+        rounds.locked === "rounds"
+          ? "Results are split by round"
+          : rounds.locked
+            ? "Results are a timed final"
+            : compare
+              ? "Close the comparison to change this"
+              : undefined
+      }
+      className={`relative inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 transition-colors focus-within:ring-[3px] focus-within:ring-primary/35 ${
+        roundsDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-fill"
+      }`}
+    >
+      <select
+        aria-label="Rounds"
+        value={splitRounds ? "rounds" : "timed"}
+        disabled={roundsDisabled}
+        onChange={(e) => requestPrelimsFinals(e.target.value === "rounds")}
+        className="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+      >
+        <option value="timed" className="bg-background text-foreground">
+          Timed Finals
+        </option>
+        <option value="rounds" className="bg-background text-foreground">
+          Prelim/Final
+        </option>
+      </select>
+      <span className={relayEyebrowClass} aria-hidden>
+        {roundsLabel}
+      </span>
+      <AppIcon name="chevronDown" strokeWidth={2.5} className="h-3.5 w-3.5 shrink-0 text-accent" />
+    </label>
+  )
+
   /** What's on screen — the round shown, at a finals meet — and whether it has unsaved changes. */
   const draftStatus = (() => {
     const draft = pendingDraft(data)
@@ -1441,7 +1839,7 @@ export default function MeetRelayBuilder({
   const loadingStatus = (() => {
     if (restored) return "Not saved"
     const source = request.source ?? loaded?.source ?? "optimal"
-    return source === "draft" ? draftStatus : source === "published" ? "Published" : `Optimal ${windowTag}`
+    return source === "draft" ? draftStatus : source === "published" ? "Published" : optimalLabel
   })()
   const lineupStatus = (() => {
     if (loading && !retiming) return loadingStatus
@@ -1449,7 +1847,7 @@ export default function MeetRelayBuilder({
     if (restored) return "Not saved"
     if (showsPublishedLineup) return "Published"
     if (draftTeams && isLoaded("draft")) return draftStatus
-    if (isLoaded("optimal")) return `Optimal ${windowTag}`
+    if (isLoaded("optimal")) return optimalLabel
     return "Edited"
   })()
   /**
@@ -1502,15 +1900,29 @@ export default function MeetRelayBuilder({
     const parts = [`Times ${timeWindowTag(s.limitDays)}`]
     if (windowDays(s.withinDays) < windowDays(s.limitDays)) parts.push(`prefer ${timeWindowTag(s.withinDays)}`)
     parts.push(`${count} ${count === 1 ? "athlete" : "athletes"}`)
-    if (!isMedleyRelay(event) && s.legOrder) parts.push(`${legOrderLabel(s.legOrder)} order`)
+    if (!isMedleyRelay(event) && s.legOrder) parts.push("Custom leg order")
     return parts.join(" · ")
   }
 
-  /** Compare the lineup on screen with `side` (from the status menu), side by side. */
-  function openCompare(side: CompareSide, loadSide: () => void) {
+  /**
+   * Both rounds' relays as one list for a comparison — "A-P", "A-F", … — finals following prelims
+   * shown as the prelims lineup. Just the lineup without rounds.
+   */
+  function compareTeams(lineup: RoundLineups, timed: (teams: LineupTeam[]) => LineupTeam[]): LineupTeam[] {
+    const prelims = timed(lineup.prelims)
+    if (!splitRounds) return prelims
+    const finals = lineup.finals ? timed(lineup.finals) : prelims
+    return [
+      ...prelims.map((team) => ({ ...team, letter: `${team.letter}-P` })),
+      ...finals.map((team) => ({ ...team, letter: `${team.letter}-F` })),
+    ]
+  }
+
+  /** Compare the lineups on screen with `side`'s (from the status menu), side by side. */
+  function openCompare(side: Omit<CompareSide, "teams">, lineup: RoundLineups, loadSide: () => void) {
     setLoadOpen(false)
     setEditing(null)
-    setCompare({ side: { ...side, teams: withTimes(side.teams) }, load: loadSide })
+    setCompare({ side: { ...side, teams: compareTeams(lineup, withTimes) }, load: loadSide })
   }
 
   /** The status, which opens the lineups to load and deleting the saved draft. */
@@ -1549,10 +1961,10 @@ export default function MeetRelayBuilder({
                     key={item.source}
                     label={item.label}
                     detail={item.detail}
-                    loaded={isLoaded(item.source)}
+                    loaded={menuChecked(item.source)}
                     onLoad={() => load(item.source)}
                     onCompare={
-                      isLoaded(item.source) || !sourceTeams[item.source] || !result
+                      menuChecked(item.source) || !sourceLineups[item.source] || !result
                         ? undefined
                         : () =>
                             openCompare(
@@ -1567,8 +1979,8 @@ export default function MeetRelayBuilder({
                                       ? data.draft?.settings
                                       : null
                                 ),
-                                teams: sourceTeams[item.source] ?? [],
                               },
+                              sourceLineups[item.source] ?? { prelims: [], finals: null },
                               () => load(item.source)
                             )
                     }
@@ -1589,10 +2001,10 @@ export default function MeetRelayBuilder({
                       key={version.id}
                       label={version.published ? "Published" : "Draft"}
                       detail={savedByLine(version.savedBy, version.savedAt)}
-                      loaded={versionLoaded(version)}
+                      loaded={menuVersionChecked(version)}
                       onLoad={() => loadVersion(version)}
                       onCompare={
-                        versionLoaded(version) || !result
+                        menuVersionChecked(version) || !result
                           ? undefined
                           : () =>
                               openCompare(
@@ -1600,9 +2012,8 @@ export default function MeetRelayBuilder({
                                   label: version.published ? "Published" : "Draft",
                                   detail: savedByLine(version.savedBy, version.savedAt),
                                   settings: settingsSummary(version.settings),
-                                  teams:
-                                    round === "F" && splitRounds && version.finalsTeams ? version.finalsTeams : version.teams,
                                 },
+                                versionLineups(version),
                                 () => loadVersion(version)
                               )
                       }
@@ -1621,12 +2032,6 @@ export default function MeetRelayBuilder({
           </>
         ) : null}
       </span>
-      {dirty && locked ? (
-        <span className="inline-flex shrink-0 items-center gap-1.5 text-xs font-medium text-accent">
-          <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-primary" />
-          Unsaved changes
-        </span>
-      ) : null}
     </span>
   )
 
@@ -1658,19 +2063,46 @@ export default function MeetRelayBuilder({
   )
 
   const medley = isMedleyRelay(event)
-  const alternates = result?.alternates ?? []
   // Every unused swimmer is kept as an alternate; each list shows a few until "Show more" reveals all.
   const shown = ALTERNATES_SHOWN[medley ? "medley" : "free"]
   const strokeLabels = new Map(medleyStrokeGroups(event).map((g) => [g.stroke, g.label]))
-  const groups = alternateGroups(
-    alternates,
-    medley,
-    mixed,
-    (key) => (expandedAlternates[key] ? Infinity : shown)
-  ).map((group) => ({
-    ...group,
-    label: strokeLabels.get(group.key) ?? group.key,
-  }))
+  const roundsShown: BuilderRound[] = splitRounds ? ["P", "F"] : ["P"]
+  /**
+   * The relay cards: each letter's prelims card then its finals card (finals following prelims
+   * shows the prelims relays), or one card per relay without rounds.
+   */
+  const relayCards = (() => {
+    if (!result) return []
+    const lineups = roundsShown.map((r) => ({ round: r, teams: roundResult(r)?.teams ?? [] }))
+    const letters = RELAY_LETTERS.filter((letter) =>
+      lineups.some(({ teams }) => teams.some((team) => team.letter === letter))
+    )
+    return letters.flatMap((letter) =>
+      lineups.map(({ round: r, teams }) => ({ round: r, letter, team: teams.find((t) => t.letter === letter) ?? null }))
+    )
+  })()
+  /** Cards and placeholders while building. */
+  const skeletonCount = Math.min(Math.max(teamCount, 1), 4) * roundsShown.length
+  /**
+   * Alternates: one list of swimmers on no relay in either round (prelims' alternates, less anyone
+   * on a finals relay), indexed like prelims' list. Dropping one on a card swaps them into that
+   * card's round only.
+   */
+  const finalsUsed = new Set(finalsResult?.teams.flatMap((team) => team.legs.map((leg) => leg.athleteId)) ?? [])
+  const alternateRows = (result?.alternates ?? [])
+    .map((alt, index) => ({ alt, index }))
+    .filter(({ alt }) => !finalsUsed.has(alt.athleteId))
+  const alternates = alternateRows.map(({ alt }) => alt)
+  const groups = alternateGroups(alternates, medley, mixed, (key) => (expandedAlternates[key] ? Infinity : shown)).map(
+    (group) => ({
+      ...group,
+      label: strokeLabels.get(group.key) ?? group.key,
+      // Back to indexes in prelims' alternates.
+      rows: group.rows.map(({ alt, index }) => ({ alt, index: alternateRows[index].index })),
+    })
+  )
+  /** A swimmer can still swap into a round without results. */
+  const alternatesDraggable = editable && !(roundSwum("P") && roundSwum("F"))
 
   return (
     <main className="w-full flex flex-col gap-6 py-2 sm:py-4">
@@ -1694,6 +2126,7 @@ export default function MeetRelayBuilder({
         eyebrow={
           <>
             {eventPicker}
+            {roundsPicker}
             {statusMenu}
           </>
         }
@@ -1729,61 +2162,6 @@ export default function MeetRelayBuilder({
           title={compare ? "Close the comparison to change settings" : undefined}
           className="m-0 flex min-w-0 flex-wrap items-end gap-x-3 gap-y-2 border-0 p-0 pb-1 transition-opacity disabled:opacity-50"
         >
-          <SettingsField label="Prelims & finals">
-            <div className="inline-flex h-9 items-center gap-2">
-              <button
-                type="button"
-                role="switch"
-                aria-checked={splitRounds}
-                aria-label="Prelims & finals"
-                disabled={loading || !editable || rounds.locked != null}
-                onClick={() => requestPrelimsFinals(!splitRounds)}
-                className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-                  splitRounds ? "bg-primary" : "bg-fill-secondary"
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full shadow transition-transform ${
-                    splitRounds ? "translate-x-5" : "translate-x-0"
-                  }`}
-                />
-              </button>
-              {rounds.locked ? (
-                <span className="text-xs text-foreground-secondary">
-                  {rounds.locked === "rounds" ? "Results are split by round" : "Results are a timed final"}
-                </span>
-              ) : null}
-            </div>
-          </SettingsField>
-
-          {splitRounds ? (
-            <SettingsField label="Round">
-              <div
-                role="group"
-                aria-label="Round"
-                className="inline-flex h-9 items-center gap-1 rounded-lg border border-border bg-background px-[3px]"
-              >
-                {(["P", "F"] as const).map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    aria-pressed={round === r}
-                    disabled={loading || !editable}
-                    onClick={() => switchRound(r)}
-                    className={
-                      "h-7 rounded-md px-2.5 text-[13px] font-medium transition-colors disabled:cursor-not-allowed " +
-                      (round === r
-                        ? "bg-primary text-primary-contrast"
-                        : "text-foreground-secondary hover:bg-fill hover:text-foreground")
-                    }
-                  >
-                    {r === "P" ? "Prelims" : "Finals"}
-                  </button>
-                ))}
-              </div>
-            </SettingsField>
-          ) : null}
-
           <SettingsField label="Relays">
             <div
               role="group"
@@ -1880,20 +2258,15 @@ export default function MeetRelayBuilder({
           </SettingsField>
 
           {!isMedleyRelay(event) ? (
-            <SettingsField
-              label="Leg order"
-              help={<HelpButton label="What does Leg order do?" onClick={() => setHelpOpen(true)} />}
-            >
-              <button
-                type="button"
-                aria-haspopup="dialog"
-                aria-label={`Leg order, ${legOrderLabel(settings.legOrder)}`}
-                disabled={!editable}
-                onClick={() => setLegOrderOpen(true)}
-                className="inline-flex h-9 max-w-[16rem] items-center rounded-lg border border-border bg-background px-3 text-sm text-foreground transition-colors hover:border-border-secondary disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <span className="truncate">{legOrderLabel(settings.legOrder)}</span>
-              </button>
+            <SettingsField label="Leg order">
+              <LegOrderDropdown
+                order={settings.legOrder ?? null}
+                open={legOrderOpen}
+                onOpenChange={setLegOrderOpen}
+                orderDisabled={!editable}
+                mixed={mixed}
+                onChange={(legOrder) => updateSettings({ legOrder })}
+              />
             </SettingsField>
           ) : null}
 
@@ -1948,32 +2321,17 @@ export default function MeetRelayBuilder({
           </span>
         </fieldset>
 
-        {splitRounds ? (
+        {splitRounds && finalsTeams ? (
           <p className="-mt-2 text-xs text-foreground-secondary">
-            {rounds.swum[round]
-              ? `${round === "P" ? "Prelims" : "Finals"} results are in, so publishing leaves this round as it is. `
-              : null}
-            {round === "F" ? (
-              finalsFollows ? (
-                "Finals uses the prelims lineup until you change it here."
-              ) : (
-                <>
-                  Finals has its own lineup.{" "}
-                  <button
-                    type="button"
-                    onClick={followPrelims}
-                    disabled={loading || !editable}
-                    className="font-medium text-accent hover:underline disabled:opacity-50"
-                  >
-                    Use the prelims lineup
-                  </button>
-                </>
-              )
-            ) : finalsFollows ? (
-              "Finals uses this lineup until you change it on Finals."
-            ) : (
-              "Finals has its own lineup."
-            )}
+            Finals has its own lineup.{" "}
+            <button
+              type="button"
+              onClick={followPrelims}
+              disabled={loading || !editable || roundSwum("F")}
+              className="font-medium text-accent hover:underline disabled:opacity-50"
+            >
+              Use the prelims lineup
+            </button>
           </p>
         ) : null}
 
@@ -1981,8 +2339,21 @@ export default function MeetRelayBuilder({
 
         {compare && result && result.teams.length > 0 ? (
           <RelayCompareView
-            left={{ label: lineupStatus, detail: "On screen", settings: settingsSummary(settings), teams: lineupTeamsOf(result) }}
+            left={{
+              label: "Current Version",
+              // Where the lineup came from (Published, Draft, Optimal…); a hand-edited one needs no note.
+              detail: lineupStatus === "Edited" ? null : lineupStatus,
+              settings: settingsSummary(settings),
+              teams: compareTeams(
+                { prelims: lineupTeamsOf(result), finals: finalsResult ? lineupTeamsOf(finalsResult) : null },
+                (teams) => teams
+              ),
+            }}
             right={compare.side}
+            relayTitle={(key) => {
+              const [letter, r] = key.split("-")
+              return `${letter} Relay${r === "P" || r === "F" ? ` · ${ROUND_NAME[r]}` : ""}`
+            }}
             legLabels={result.teams[0]?.legs.map((leg) => leg.event) ?? []}
             loadDisabled={!editable}
             onLoadRight={() => {
@@ -1994,8 +2365,8 @@ export default function MeetRelayBuilder({
         ) : loading && !retiming ? (
           <div role="status" aria-live="polite" aria-label="Building relay teams" className="flex flex-col gap-4">
             <span className="sr-only">Building relay teams</span>
-            <div className={`grid items-start gap-3 ${RELAY_GRID_COLS[Math.min(Math.max(teamCount, 1), 4)]}`}>
-              {Array.from({ length: Math.min(Math.max(teamCount, 1), 4) }, (_, t) => (
+            <div className={`grid items-start gap-3 ${relayGridCols(skeletonCount)}`}>
+              {Array.from({ length: skeletonCount }, (_, t) => (
                 <RelayCardSkeleton key={t} />
               ))}
             </div>
@@ -2015,181 +2386,149 @@ export default function MeetRelayBuilder({
           <>
             <div
               aria-busy={retiming}
-              className={`grid items-start gap-3 ${RELAY_GRID_COLS[Math.min(result.teams.length + adding, 4)]} ${retimingClass}`}
+              className={`grid items-start gap-3 ${relayGridCols(relayCards.length + adding * roundsShown.length)} ${retimingClass}`}
             >
-              {result.teams.map((team) => (
-                <div key={team.letter} className="min-w-0 rounded-lg border border-border bg-background">
-                  <div className="flex items-baseline justify-between gap-2 border-b border-border px-3.5 py-2.5 text-[15px] font-medium text-foreground">
-                    <span>{team.letter} Relay</span>
-                    <span className="flex items-baseline gap-2">
-                      {(() => {
-                        const diffMs = comparison?.byLetter.get(team.letter)?.diffMs
-                        if (diffMs == null) return null
-                        return (
+              {relayCards.map(({ round: r, letter, team }) => {
+                const title = `${letter} Relay${splitRounds ? ` · ${ROUND_NAME[r]}` : ""}`
+                if (!team) {
+                  // Keeps the rounds paired when one round has a relay the other doesn't.
+                  return (
+                    <p
+                      key={`${r}-${letter}`}
+                      className="rounded-lg border border-dashed border-border px-3.5 py-2.5 text-sm text-foreground-secondary"
+                    >
+                      No {letter} {ROUND_NAME[r].toLowerCase()} relay
+                    </p>
+                  )
+                }
+                const following = splitRounds && r === "F" && !finalsTeams
+                const swum = roundSwum(r)
+                const cardEditable = editable && !swum
+                const compared = comparison?.[r]?.byLetter.get(team.letter)
+                // A finals card following prelims is dashed; its header has no room to say so.
+                const tag = swum ? "Results in" : null
+                return (
+                  <div
+                    key={`${r}-${team.letter}`}
+                    title={following ? "Same as prelims until you change it" : undefined}
+                    className={`min-w-0 rounded-lg border border-border bg-background ${following ? "border-dashed" : ""}`}
+                  >
+                    <div className="flex items-baseline justify-between gap-2 border-b border-border px-3.5 py-2.5 text-[15px] font-medium text-foreground">
+                      <span className="flex min-w-0 items-baseline gap-2">
+                        <span className="shrink-0">{title}</span>
+                        {tag ? (
+                          <span title={tag} className="truncate text-[11px] font-normal text-foreground-secondary">
+                            {tag}
+                          </span>
+                        ) : null}
+                      </span>
+                      <span className="flex shrink-0 items-baseline gap-2">
+                        {compared?.diffMs != null && comparison ? (
                           <span
-                            title="Projected difference from the published relay"
+                            title={`Projected difference from the ${BASELINE_TEXT[comparison.source].relay}`}
                             className={
                               "font-mono text-xs tabular-nums " +
-                              (diffMs < 0 ? "text-success-text" : diffMs > 0 ? "text-error" : "text-foreground-secondary")
+                              (compared.diffMs < 0
+                                ? "text-success-text"
+                                : compared.diffMs > 0
+                                  ? "text-error"
+                                  : "text-foreground-secondary")
                             }
                           >
-                            {formatTimeDiff(diffMs)}
+                            {formatTimeDiff(compared.diffMs)}
                           </span>
-                        )
-                      })()}
-                      <span className="font-mono tabular-nums">{formatLegTime(team.totalMs)}</span>
-                    </span>
-                  </div>
-                  <div>
-                    {team.legs.map((leg, i) => {
-                      const loc: RowLoc = { list: "team", letter: team.letter, index: i }
-                      const key = locKey(loc)
-                      const editingField = editing?.key === key ? editing.field : null
-                      const draggable = editable && editingField == null
-                      const compared = comparison?.byLetter.get(team.letter)
-                      const changedLeg = compared?.changedLegs.includes(i) === true
-                      const replaced = changedLeg ? compared?.published?.legs[i]?.name : undefined
-                      return (
-                        <div
-                          key={leg.athleteId || key}
-                          ref={(element) => {
-                            if (element) relayRowRefs.current.set(leg.athleteId, element)
-                            else relayRowRefs.current.delete(leg.athleteId)
-                          }}
-                          draggable={draggable}
-                          onDragStart={(e) => handleRowDragStart(e, loc)}
-                          onDragOver={(e) => handleRowDragOver(e, loc)}
-                          onDragLeave={(e) => handleRowDragLeave(e, loc)}
-                          onDrop={(e) => handleRowDrop(e, loc)}
-                          onDragEnd={endDrag}
-                          className={`flex items-center justify-between gap-2.5 border-t border-border px-3 py-1.5 first:border-t-0 last:rounded-b-lg ${changedLeg ? "border-l-2 border-l-primary " : ""}${dragStateClass(loc, draggable)}`}
-                        >
-                          <div className="flex min-w-0 items-center gap-2.5">
-                            <div className="min-w-0">
-                              <div className="flex min-w-0 items-center gap-1.5 text-sm font-medium text-foreground">
-                                {editingField === "name" ? (
-                                  <LegNameEditor
-                                    initialName={leg.name}
-                                    candidates={legCandidates(team.letter, i)}
-                                    onPick={(athlete) => pickLegAthlete(team.letter, i, athlete)}
-                                    onCancel={() => setEditing(null)}
-                                  />
-                                ) : (
-                                  <button
-                                    type="button"
-                                    onClick={() => setEditing({ key, field: "name" })}
-                                    disabled={!editable}
-                                    title="Change swimmer"
-                                    className="-mx-1 min-w-0 cursor-text! truncate rounded px-1 text-left transition-colors hover:bg-background-hover disabled:cursor-default!"
-                                  >
-                                    {leg.name}
-                                  </button>
-                                )}
-                                {mixed ? <GenderTag gender={leg.gender} /> : null}
+                        ) : null}
+                        <span className="font-mono tabular-nums">{formatLegTime(team.totalMs)}</span>
+                      </span>
+                    </div>
+                    <div>
+                      {team.legs.map((leg, i) => {
+                        const at: RoundLoc = { round: r, loc: { list: "team", letter: team.letter, index: i } }
+                        const key = roundLocKey(at)
+                        const editingField = editing?.key === key ? editing.field : null
+                        const draggable = cardEditable && editingField == null
+                        const changedLeg = compared?.changedLegs.includes(i) === true
+                        const replaced = changedLeg ? compared?.published?.legs[i]?.name : undefined
+                        return (
+                          <div
+                            key={leg.athleteId || key}
+                            ref={(element) => {
+                              if (element) relayRowRefs.current.set(`${r}:${leg.athleteId}`, element)
+                              else relayRowRefs.current.delete(`${r}:${leg.athleteId}`)
+                            }}
+                            draggable={draggable}
+                            onDragStart={(e) => handleRowDragStart(e, at)}
+                            onDragOver={(e) => handleRowDragOver(e, at)}
+                            onDragLeave={(e) => handleRowDragLeave(e, at)}
+                            onDrop={(e) => handleRowDrop(e, at)}
+                            onDragEnd={endDrag}
+                            className={`flex items-center justify-between gap-2.5 border-t border-border px-3 py-1.5 first:border-t-0 last:rounded-b-lg ${changedLeg ? "border-l-2 border-l-primary " : ""}${dragStateClass(at, draggable)}`}
+                          >
+                            <div className="flex min-w-0 items-center gap-2.5">
+                              <div className="min-w-0">
+                                <div className="flex min-w-0 items-center gap-1.5 text-sm font-medium text-foreground">
+                                  {editingField === "name" ? (
+                                    <LegNameEditor
+                                      initialName={leg.name}
+                                      candidates={legCandidates(r, team.letter, i)}
+                                      onPick={(athlete) => pickLegAthlete(r, team.letter, i, athlete)}
+                                      onCancel={() => setEditing(null)}
+                                    />
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() => setEditing({ key, field: "name" })}
+                                      disabled={!cardEditable}
+                                      title={cardEditable ? "Change swimmer" : undefined}
+                                      className="-mx-1 min-w-0 cursor-text! truncate rounded px-1 text-left transition-colors hover:bg-background-hover disabled:cursor-default! disabled:hover:bg-transparent"
+                                    >
+                                      {leg.name}
+                                    </button>
+                                  )}
+                                  {mixed ? <GenderTag gender={leg.gender} /> : null}
+                                </div>
+                                <p className="text-xs text-foreground-secondary">
+                                  {leg.event}
+                                  {replaced ? <span className="text-accent">{` · was ${replaced}`}</span> : null}
+                                </p>
                               </div>
-                              <p className="text-xs text-foreground-secondary">
-                                {leg.event}
-                                {replaced ? <span className="text-accent">{` · was ${replaced}`}</span> : null}
-                              </p>
+                            </div>
+                            <div className="flex shrink-0 flex-col items-end text-right leading-tight">
+                              {editingField === "time" ? (
+                                <LegTimeEditor
+                                  timeMs={leg.timeMs}
+                                  onSave={(timeMs) => saveLegTime(r, team.letter, i, timeMs)}
+                                  onCancel={() => setEditing(null)}
+                                />
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => setEditing({ key, field: "time" })}
+                                  disabled={!cardEditable}
+                                  title={cardEditable ? "Enter a custom time" : undefined}
+                                  className={
+                                    "-mx-1 cursor-text! rounded px-1 font-mono text-[13px] tabular-nums transition-colors hover:bg-background-hover disabled:cursor-default! disabled:hover:bg-transparent " +
+                                    (leg.timeMs == null ? "text-error" : "text-foreground")
+                                  }
+                                >
+                                  {formatLegTime(leg.timeMs)}
+                                </button>
+                              )}
+                              <SourceDate leg={leg} />
                             </div>
                           </div>
-                          <div className="flex shrink-0 flex-col items-end text-right leading-tight">
-                            {editingField === "time" ? (
-                              <LegTimeEditor
-                                timeMs={leg.timeMs}
-                                onSave={(timeMs) => saveLegTime(team.letter, i, timeMs)}
-                                onCancel={() => setEditing(null)}
-                              />
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => setEditing({ key, field: "time" })}
-                                disabled={!editable}
-                                title="Enter a custom time"
-                                className={
-                                   "-mx-1 cursor-text! rounded px-1 font-mono text-[13px] tabular-nums transition-colors hover:bg-background-hover disabled:cursor-default! " +
-                                  (leg.timeMs == null ? "text-error" : "text-foreground")
-                                }
-                              >
-                                {formatLegTime(leg.timeMs)}
-                              </button>
-                            )}
-                            <SourceDate leg={leg} />
-                          </div>
-                        </div>
-                      )
-                    })}
+                        )
+                      })}
+                    </div>
                   </div>
-                </div>
-              ))}
-              {Array.from({ length: adding }, (_, t) => (
+                )
+              })}
+              {Array.from({ length: adding * roundsShown.length }, (_, t) => (
                 <RelayCardSkeleton key={`adding-${t}`} />
               ))}
             </div>
 
-            {comparison ? (
-              <section aria-label="Published lineup" className={retimingClass}>
-                <h4 className="mb-2 text-xs font-medium uppercase tracking-wide text-foreground-secondary">
-                  Published{splitRounds ? (round === "F" ? " finals" : " prelims") : ""} lineup
-                </h4>
-                <div className={`grid items-start gap-3 ${RELAY_GRID_COLS[Math.min(result.teams.length + adding, 4)]}`}>
-                  {result.teams.map((team) => {
-                    const compared = comparison.byLetter.get(team.letter)
-                    const published = compared?.published
-                    if (!published) {
-                      return (
-                        <p
-                          key={team.letter}
-                          className="rounded-lg border border-dashed border-border px-3.5 py-2.5 text-sm text-foreground-secondary"
-                        >
-                          No {team.letter} relay published
-                        </p>
-                      )
-                    }
-                    return (
-                      <div key={team.letter} className="min-w-0 rounded-lg border border-dashed border-border">
-                        <div className="flex items-baseline justify-between gap-2 border-b border-border px-3.5 py-2 text-sm font-medium text-foreground-secondary">
-                          <span>{published.letter} Relay</span>
-                          <span className="font-mono tabular-nums">{formatLegTime(published.totalMs)}</span>
-                        </div>
-                        {published.legs.map((leg, i) => {
-                          const changedLeg = compared.changedLegs.includes(i)
-                          return (
-                            <div
-                              key={`${leg.athleteId}-${i}`}
-                              className="flex items-center justify-between gap-2.5 border-t border-border px-3 py-1.5 text-sm first:border-t-0"
-                            >
-                              <span
-                                className={
-                                  "min-w-0 truncate " +
-                                  (changedLeg ? "text-foreground-tertiary line-through" : "text-foreground-secondary")
-                                }
-                              >
-                                {leg.name}
-                              </span>
-                              <span className="shrink-0 font-mono text-[13px] tabular-nums text-foreground-secondary">
-                                {formatLegTime(leg.timeMs)}
-                              </span>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    )
-                  })}
-                </div>
-                {(() => {
-                  const working = new Set(result.teams.map((team) => team.letter))
-                  const dropped = comparison.published.filter((team) => !working.has(team.letter))
-                  return dropped.length > 0 ? (
-                    <p className="mt-2 text-xs text-foreground-secondary">
-                      Also published: {dropped.map((team) => `${team.letter} relay`).join(", ")} — dropped from this lineup.
-                    </p>
-                  ) : null
-                })()}
-              </section>
-            ) : null}
-
-            {retiming && alternates.length === 0 ? (
+            {retiming && (result.alternates ?? []).length === 0 ? (
               // A saved lineup shown before its build: alternates arrive with the build.
               <div aria-hidden>
                 <Skeleton className="mb-2 h-3 w-20" />
@@ -2222,21 +2561,22 @@ export default function MeetRelayBuilder({
                       ) : null}
                       <div>
                         {group.rows.map(({ alt, index }) => {
-                          const loc: RowLoc = { list: "alt", index }
+                          const at: RoundLoc = { round: "P", loc: { list: "alt", index } }
                           return (
                             <div
                               key={`${alt.athleteId}-${alt.event}-${index}`}
                               ref={(element) => {
-                                if (element) relayRowRefs.current.set(alt.athleteId, element)
-                                else relayRowRefs.current.delete(alt.athleteId)
+                                // Keyed like a prelims relay row, so a swap into prelims animates across.
+                                if (element) relayRowRefs.current.set(`P:${alt.athleteId}`, element)
+                                else relayRowRefs.current.delete(`P:${alt.athleteId}`)
                               }}
-                              draggable={editable}
-                              onDragStart={(e) => handleRowDragStart(e, loc)}
-                              onDragOver={(e) => handleRowDragOver(e, loc)}
-                              onDragLeave={(e) => handleRowDragLeave(e, loc)}
-                              onDrop={(e) => handleRowDrop(e, loc)}
+                              draggable={alternatesDraggable}
+                              onDragStart={(e) => handleRowDragStart(e, at)}
+                              onDragOver={(e) => handleRowDragOver(e, at)}
+                              onDragLeave={(e) => handleRowDragLeave(e, at)}
+                              onDrop={(e) => handleRowDrop(e, at)}
                               onDragEnd={endDrag}
-                              className={`flex items-center justify-between gap-3 border-t border-border px-3 py-2 first:border-t-0 ${dragStateClass(loc, editable)}`}
+                              className={`flex items-center justify-between gap-3 border-t border-border px-3 py-2 first:border-t-0 ${dragStateClass(at, alternatesDraggable)}`}
                             >
                               <div className="min-w-0">
                                 <p className="flex min-w-0 items-center gap-1.5 text-sm text-foreground-secondary">
@@ -2286,9 +2626,48 @@ export default function MeetRelayBuilder({
           setAthletePoolOpen(false)
           setAthleteQuery("")
         }}
-        title="Filter athletes"
-        description="Choose the swimmers to consider when building this relay lineup."
         maxWidth="lg"
+        // Title with the count under it, and Include all / Exclude all centered beside both — in the
+        // header, so they stay put while the list scrolls.
+        header={
+          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+            <div className="min-w-0">
+              <h2 className="text-lg font-medium text-foreground">Filter athletes</h2>
+              <p className="text-xs text-foreground-secondary">
+                {includedAthletes.length} of {poolAthletes.length} included
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  updateSettings({
+                    excludedIds: [],
+                    addedIds: poolAthletes.filter((a) => !poolIdSet.has(a.id)).map((a) => a.id),
+                  })
+                }
+                disabled={includedAthletes.length === poolAthletes.length}
+                className="rounded-lg border border-border px-3 py-1.5 text-xs hover:bg-fill-secondary disabled:opacity-40"
+              >
+                Include all
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  updateSettings({
+                    excludedIds: poolAthletes.filter((a) => poolIdSet.has(a.id)).map((a) => a.id),
+                    addedIds: [],
+                  })
+                }
+                disabled={includedAthletes.length === 0}
+                className="rounded-lg border border-border px-3 py-1.5 text-xs hover:bg-fill-secondary disabled:opacity-40"
+              >
+                Exclude all
+              </button>
+            </div>
+          </div>
+        }
+        headerClassName="pb-0!"
         footer={
           <ModalFooter>
             <button
@@ -2304,40 +2683,6 @@ export default function MeetRelayBuilder({
           </ModalFooter>
         }
       >
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs text-foreground-secondary">
-            {includedAthletes.length} of {poolAthletes.length} included
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() =>
-                updateSettings({
-                  excludedIds: [],
-                  addedIds: poolAthletes.filter((a) => !poolIdSet.has(a.id)).map((a) => a.id),
-                })
-              }
-              disabled={includedAthletes.length === poolAthletes.length}
-              className="rounded-lg border border-border px-3 py-1.5 text-xs hover:bg-fill-secondary disabled:opacity-40"
-            >
-              Include all
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                updateSettings({
-                  excludedIds: poolAthletes.filter((a) => poolIdSet.has(a.id)).map((a) => a.id),
-                  addedIds: [],
-                })
-              }
-              disabled={includedAthletes.length === 0}
-              className="rounded-lg border border-border px-3 py-1.5 text-xs hover:bg-fill-secondary disabled:opacity-40"
-            >
-              Exclude all
-            </button>
-          </div>
-        </div>
-
         <input
           type="search"
           value={athleteQuery}
@@ -2359,7 +2704,7 @@ export default function MeetRelayBuilder({
                 <li key={athlete.id}>
                   <label
                     className={
-                      "flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition-colors " +
+                      "flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-1.5 transition-colors " +
                       (included
                         ? "border-primary/50 bg-primary/10"
                         : "border-border-secondary bg-background hover:bg-fill-secondary")
@@ -2378,15 +2723,14 @@ export default function MeetRelayBuilder({
                         </svg>
                       </span>
                     </span>
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-medium text-accent">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-medium text-accent">
                       {name.charAt(0)}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-foreground">{name}</p>
-                      <p className="text-xs text-foreground-secondary">
-                        {included ? "Included" : "Excluded"}
-                        {mixed && athlete.gender ? ` · ${athlete.gender}` : ""}
-                      </p>
+                      {mixed && athlete.gender ? (
+                        <p className="text-xs text-foreground-secondary">{athlete.gender}</p>
+                      ) : null}
                     </div>
                   </label>
                 </li>
@@ -2424,85 +2768,6 @@ export default function MeetRelayBuilder({
             Swims inside this time window are used first. If a swimmer has no time in it, an older swim is used
             and its date is shown in red.
           </p>
-        </div>
-        {!isMedleyRelay(event) ? (
-          <div className="flex flex-col gap-1">
-            <p className="text-sm font-medium text-foreground">Leg order</p>
-            <p className="text-sm text-foreground-secondary">
-              Which leg each swimmer takes, ranked by speed. Auto puts the swimmer who loses the least time
-              leading off, then the rest fastest first. Medley relays are set by stroke.
-            </p>
-          </div>
-        ) : null}
-      </Modal>
-
-      <Modal
-        open={legOrderOpen}
-        onClose={() => setLegOrderOpen(false)}
-        title="Leg order"
-        description="Choose which leg each swimmer takes, ranked by their speed on legs 2–4."
-        maxWidth="md"
-        footer={
-          <ModalFooter>
-            <button
-              type="button"
-              onClick={() => setLegOrderOpen(false)}
-              className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm hover:bg-fill-secondary"
-            >
-              Done
-            </button>
-          </ModalFooter>
-        }
-      >
-        <div className="flex flex-col gap-1.5">
-          {[{ label: "Auto", order: null as LegOrder | null }, ...LEG_ORDER_PRESETS].map((preset) => {
-            const selected = legOrderLabel(settings.legOrder) === preset.label
-            return (
-              <button
-                key={preset.label}
-                type="button"
-                aria-pressed={selected}
-                onClick={() => updateSettings({ legOrder: preset.order })}
-                className={
-                  "rounded-lg border px-3 py-2 text-left text-sm transition-colors " +
-                  (selected
-                    ? "border-primary/50 bg-primary/10 text-foreground"
-                    : "border-border-secondary bg-background text-foreground hover:bg-background-hover")
-                }
-              >
-                {preset.label}
-              </button>
-            )
-          })}
-        </div>
-        <div className="flex flex-col gap-2">
-          <p className={fieldLabelClass}>Custom</p>
-          {RANK_LABELS.map((rankLabel, rank) => {
-            const order = settings.legOrder ?? LEG_ORDER_PRESETS[2].order
-            return (
-              <div key={rankLabel} className="flex items-center justify-between gap-3">
-                <span className="text-sm text-foreground">{rankLabel}</span>
-                <SelectControl
-                  label={`${rankLabel} swims`}
-                  value={String(order[rank])}
-                  onChange={(value) => {
-                    // Keep it a permutation: whoever held that leg takes this rank's old one.
-                    const leg = Number(value)
-                    const next = [...order]
-                    next[next.indexOf(leg)] = order[rank]
-                    next[rank] = leg
-                    updateSettings({ legOrder: next })
-                  }}
-                >
-                  {[0, 1, 2, 3].map((leg) => (
-                    <option key={leg} value={leg}>
-                      {LEG_NAMES[leg]}
-                    </option>
-                  ))}
-                </SelectControl>
-              </div>
-            )
-          })}
         </div>
       </Modal>
 
@@ -2645,7 +2910,7 @@ export default function MeetRelayBuilder({
         title={`Make ${slot.label.replace(/^(Women's|Men's) /, "")} a timed final?`}
         description={(() => {
           const lineups = [
-            ...(!finalsFollows ? [`the ${slot.label} finals lineup`] : []),
+            ...(finalsTeams ? [`the ${slot.label} finals lineup`] : []),
             ...(siblingFinals ? [`the ${siblingFinals} finals lineup`] : []),
           ]
           return `The prelims lineup becomes the only lineup, and ${lineups.join(" and ")} will be deleted when you save.`

@@ -161,7 +161,7 @@ export function ProgressionSection({
     () => splits.filter((s) => s.event === event && s.course === course),
     [splits, event, course]
   )
-  const bests = useMemo(() => progressionBests(sel), [sel])
+  const bests = useMemo(() => progressionBests(sel, (s) => s.meet || s.date.slice(0, 10)), [sel])
 
   if (!course || !event || sel.length === 0) return null
 

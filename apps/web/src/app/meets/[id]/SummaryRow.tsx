@@ -651,9 +651,15 @@ export default function SummaryRow({
           }
         }}
         ref={rowRef}
-        className={`flex cursor-pointer items-center border-t border-border-subtle leading-[1.3] text-foreground outline-none transition-colors duration-200 first:border-t-0 hover:bg-background-hover hover:text-accent focus-visible:bg-fill-secondary ${
+        // The hover wash is opaque, so a gold-tinted row (highlighted, or in a pinned section that sets
+        // `--row-hover`) hovers to the wash with that tint mixed in — one color, so it fades smoothly.
+        className={`flex cursor-pointer items-center border-t border-border-subtle leading-[1.3] text-foreground outline-none transition-colors duration-200 first:border-t-0 hover:bg-[var(--row-hover,var(--color-background-hover))] focus-visible:bg-fill-secondary ${
           compact ? "py-[5px] text-[13px]" : "py-2.5 text-sm"
-        } ${highlighted ? "bg-accent/[0.06]" : ""}`}
+        } ${
+          highlighted
+            ? "bg-accent/[0.06] [--row-hover:color-mix(in_oklab,var(--color-accent)_6%,var(--color-background-hover))]"
+            : ""
+        }`}
         style={{
           paddingLeft: SUMMARY_INSET,
           paddingRight: compact ? fluidLength(8, 14) : fluidLength(10, 14),

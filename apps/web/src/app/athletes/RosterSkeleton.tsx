@@ -39,7 +39,7 @@ export default function RosterSkeleton({ layout }: { layout: ListLayout }) {
         </div>
       </div>
 
-      <div className="flex items-start gap-3">
+      <div className="relative flex items-start gap-1 min-[1040px]:block">
         <div className="min-w-0 flex-1">
           {layout === "list" ? (
             <div className="overflow-hidden rounded-xl border border-border bg-background">
@@ -83,10 +83,13 @@ export default function RosterSkeleton({ layout }: { layout: ListLayout }) {
             </div>
           )}
         </div>
-        <div className="flex shrink-0 flex-col items-center gap-[7px] py-[5px]">
-          {Array.from({ length: 26 }, (_, i) => (
-            <Skeleton key={i} className="h-2.5 w-2.5 rounded-sm" />
-          ))}
+        {/* Same slot as RosterView's LetterRail: beside the list, just outside it in the right margin when wide. */}
+        <div className="shrink-0 self-stretch min-[1040px]:absolute min-[1040px]:inset-y-0 min-[1040px]:left-full min-[1040px]:ml-3">
+          <div className="flex flex-col items-center gap-[7px] py-[5px]">
+            {Array.from({ length: 26 }, (_, i) => (
+              <Skeleton key={i} className="h-2.5 w-2.5 rounded-sm" />
+            ))}
+          </div>
         </div>
       </div>
     </>

@@ -17,6 +17,7 @@ import {
   defaultBuildSettings,
   relayRoundSwum,
   relayShareEvent,
+  timeWindowTag,
   type AthleteOption,
   type RelayResult,
   type RelaySlotData,
@@ -1014,6 +1015,9 @@ export default function MeetRelaysWorkspace({
     }
     // While saving, the status pill itself reads "Saving…" / "Publishing…".
     const isSaving = saving.includes(slot.slug)
+    // Optimal's "Times from" window, as the builder opens with it: "Optimal (1Y)"; all time is plain.
+    const limitDays = (data.draft?.settings ?? defaultBuildSettings(hasSignups)).limitDays
+    const optimalLabel = limitDays == null ? "Optimal" : `Optimal (${timeWindowTag(limitDays)})`
     // One status per event: a draft (saving one unpublishes the event), else what's published.
     if (draft) {
       // A draft reads "Optimal" rather than "Draft" from the flag saved with it.
@@ -1024,7 +1028,7 @@ export default function MeetRelaysWorkspace({
           isSaving
             ? { label: "Saving…", tone: isOptimal ? ("suggested" as const) : ("draft" as const) }
             : isOptimal
-              ? { label: "Optimal", tone: "suggested" as const }
+              ? { label: optimalLabel, tone: "suggested" as const }
               : { label: "Draft", tone: "draft" as const },
         ],
         state: "cards" as const,
@@ -1052,14 +1056,14 @@ export default function MeetRelaysWorkspace({
     if (suggestion?.status === "ok") {
       return {
         ...base,
-        pills: [{ label: "Optimal", tone: "suggested" as const }],
+        pills: [{ label: optimalLabel, tone: "suggested" as const }],
         state: "cards" as const,
         cards: lineupSummaryCards(slot.slug, lineupTeamsOf(suggestion.result)),
       }
     }
     return {
       ...base,
-      pills: [{ label: "Optimal", tone: "suggested" as const }],
+      pills: [{ label: optimalLabel, tone: "suggested" as const }],
       state: suggestion?.status === "error" ? ("empty" as const) : ("loading" as const),
       emptyText: suggestion?.status === "error" ? suggestion.error : undefined,
       cards: [],

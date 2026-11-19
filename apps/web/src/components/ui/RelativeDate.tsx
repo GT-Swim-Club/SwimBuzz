@@ -35,6 +35,22 @@ export function useTodayKey(): string {
 }
 
 /**
+ * Calendar days from the viewer's today to the event's day (in the event's own time zone):
+ * 0 today, 1 tomorrow, negative once past. Null before the client knows the viewer's day.
+ */
+export function eventDaysAhead(startsAt: string | Date, timeZone: string, todayKey: string): number | null {
+  if (!todayKey) return null
+  const eventDay = new Date(`${zonedDayKey(startsAt, timeZone)}T00:00:00Z`).getTime()
+  const today = new Date(`${todayKey}T00:00:00Z`).getTime()
+  return Math.round((eventDay - today) / 86_400_000)
+}
+
+/** Whole weeks in `days`, rounded down — so "13 weeks" means at least 13 full weeks to go. */
+export function wholeWeeks(days: number): number {
+  return Math.floor(days / 7)
+}
+
+/**
  * Displays a Practice/Meet `startsAt` instant as "Yesterday"/"Today"/"Tomorrow" when
  * within a day of the viewer's current date (evaluated in the record's own `timeZone`),
  * with a hover tooltip showing the absolute date. Falls back to plain absolute text —

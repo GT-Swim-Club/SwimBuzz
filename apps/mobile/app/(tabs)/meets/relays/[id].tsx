@@ -262,11 +262,8 @@ export default function MeetRelaysScreen() {
                     const mine = relayLineupHasAthlete(relay, viewerAthleteId)
                     const roundLabel = relayLineupRoundLabel(relay.round)
                     const time = relay.resultTime ?? relay.seedTime
-                    const timeLabel = relay.resultTime
-                      ? relay.place != null
-                        ? `#${relay.place}`
-                        : "Final"
-                      : "Seed"
+                    // A seed time (no result yet) is set lighter than a result time.
+                    const isSeed = !relay.resultTime
                     return (
                       <View key={relay.key} style={[styles.card, mine && styles.cardMine]}>
                         <View style={styles.cardHeader}>
@@ -278,10 +275,7 @@ export default function MeetRelaysScreen() {
                             ) : null}
                           </View>
                           {time ? (
-                            <Text style={styles.time}>
-                              <Text style={styles.timeLabel}>{`${timeLabel}  `}</Text>
-                              {time}
-                            </Text>
+                            <Text style={[styles.time, isSeed && styles.timeSeed]}>{time}</Text>
                           ) : null}
                         </View>
                         {relay.legs.length > 0 ? (
@@ -503,7 +497,7 @@ function makeStyles(c: ColorPalette) {
     },
     pillMine: { backgroundColor: c.primaryBg, borderColor: c.primaryBorder, color: c.accent },
     time: { color: c.text, fontSize: 14, fontVariant: ["tabular-nums"], fontWeight: "600" },
-    timeLabel: { color: c.textSecondary, fontSize: 12, fontWeight: "400" },
+    timeSeed: { color: c.textSecondary, fontWeight: "400" },
     legRow: {
       alignItems: "center",
       flexDirection: "row",

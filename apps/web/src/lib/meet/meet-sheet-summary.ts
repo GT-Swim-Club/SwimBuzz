@@ -33,6 +33,12 @@ export type SheetEntry = {
   finalsSheetSeedTime?: string
   /** Rank of that finals heat-sheet seed among all seeds in the event. */
   finalsSheetSeedRank?: number
+  /**
+   * A split finals row's prelims seed (psych/prelims sheet), kept since its seedTime/seedRank hold
+   * the finals seed.
+   */
+  prelimSeedTime?: string
+  prelimSeedRank?: number
   heat?: number
   heatTotal?: number
   lane?: number
@@ -1582,6 +1588,8 @@ export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] 
           heatTotal: finalPlacement.heatTotal,
           seedTime: entry.finalsSheetSeedTime,
           seedRank: entry.finalsSheetSeedRank,
+          prelimSeedTime: entry.seedTime,
+          prelimSeedRank: entry.seedRank,
         },
         "F"
       )

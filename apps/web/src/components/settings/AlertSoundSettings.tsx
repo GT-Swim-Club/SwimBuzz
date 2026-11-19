@@ -3,6 +3,7 @@
 import { useRef, useState } from "react"
 import { playAttentionChime } from "@/lib/attention-chime"
 import { updateAlertSound } from "./settings.actions"
+import SettingsRowLabel from "@/components/settings/SettingsRowLabel"
 
 export default function AlertSoundSettings({ initialEnabled }: { initialEnabled: boolean }) {
   const [enabled, setEnabled] = useState(initialEnabled)
@@ -34,17 +35,16 @@ export default function AlertSoundSettings({ initialEnabled }: { initialEnabled:
   return (
     <div>
       <div className="flex items-center justify-between gap-4 px-4 py-3">
-        <div>
-          <p className="text-sm text-foreground">Cloudflare check sound</p>
-          <p className="text-xs text-foreground-secondary">
-            Play a chime when an import needs a Cloudflare check or verification and you’re in another tab
-          </p>
-        </div>
+        <SettingsRowLabel
+          icon="volume"
+          title="Cloudflare Verification"
+          description="Play a chime when an import needs a Cloudflare verification and you’re in another window"
+        />
         <button
           type="button"
           role="switch"
           aria-checked={enabled}
-          aria-label="Cloudflare check sound"
+          aria-label="Cloudflare Verification"
           onClick={toggle}
           className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
             enabled ? "bg-primary" : "bg-fill-secondary"

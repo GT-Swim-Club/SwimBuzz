@@ -68,6 +68,8 @@ import { displayMeetResultTags } from "@/lib/swim/swim-tags"
 import { formatDisplayTime, formatSeedTimeDelta, parseTime } from "@/lib/utils"
 import { athletePath } from "@/lib/slug"
 import { LedgerIcon } from "@/components/meet/Ledger"
+import HoverDetail from "@/components/ui/HoverDetail"
+import { SegmentedToggle, segmentedIconOptionClass } from "@/components/ui/SegmentedToggle"
 import RosterName from "@/components/athlete/RosterName"
 import EditMeetSwimButton from "./EditMeetSwimButton"
 import EditSheetSeedButton from "./EditSheetSeedButton"
@@ -399,8 +401,10 @@ function buildIndividualRounds(entry: SheetEntry, allEntries?: SummaryEntry[]): 
       heat: prelimHeat,
       lane: entry.prelimLane ?? (entry.resultRound === "P" ? individualLane(entry) : undefined),
       splits: entry.prelimSplits ?? (entry.resultRound === "P" ? entry.splits : undefined) ?? [],
-      seedTime: entry.seedTime,
-      seedRank: entry.seedRank,
+      // From the finals row, seedTime/seedRank are the finals seed; the prelims seed is kept aside.
+      ...(entry.resultRound === "F"
+        ? { seedTime: entry.prelimSeedTime, seedRank: entry.prelimSeedRank }
+        : { seedTime: entry.seedTime, seedRank: entry.seedRank }),
     })
   }
 
@@ -904,15 +908,18 @@ function SummaryEntryRow({
       splits: entryDisplaySplits(entry),
     }
     const detailRounds = rounds.length > 0 ? rounds : [fallback]
+    // The header leads with the round of the row opened: the prelims row its prelims swim.
+    const prelimsIndex = entry.resultRound === "P" ? detailRounds.findIndex((r) => r.label === "Prelims") : -1
+    const headline = prelimsIndex >= 0 ? prelimsIndex : detailRounds.length - 1
     detail = {
       kind: "individual",
       eventNumber: eventNumber || undefined,
       athleteName: entry.athleteName,
       athleteHref: athletePath(athleteRecord?.slug ?? entry.athleteId),
       title: detailTitle,
-      subLine:
-        detailRounds.length > 1 ? detailRounds.map((r) => r.label).join(" · ") : detailRounds[0].label,
+      subLine: detailRounds[headline].label,
       rounds: detailRounds,
+      headline,
     }
   }
 
@@ -1124,8 +1131,9 @@ const VIEW_OPTIONS: { value: SummaryViewMode; label: string; icon: "user" | "num
 ]
 
 /**
- * The summary's three views side by side — by athlete, by event, the roster — as one segmented
- * control at the start of the toolbar (its own full-width line when the summary is narrow).
+ * The summary's three views side by side — by athlete, by event, the roster — as one icon-only
+ * segmented control after the search box, styled like the List/Gallery toggle (gold sliding pill)
+ * but sized to this toolbar's 38px controls; each view is named in its hover detail.
  */
 function SummaryViewSwitch({
   value,
@@ -1134,11 +1142,11 @@ function SummaryViewSwitch({
   value: SummaryViewMode
   onChange: (next: SummaryViewMode) => void
 }) {
+  const selectedIndex = Math.max(0, VIEW_OPTIONS.findIndex((option) => option.value === value))
   return (
-    <div
-      role="radiogroup"
-      aria-label="View"
-      className="flex h-[38px] w-full shrink-0 rounded-lg border border-border bg-background p-0.5 @[560px]:w-auto"
+    <SegmentedToggle
+      selectedIndex={selectedIndex}
+      className="h-[38px] shrink-0 rounded-lg border border-border bg-background"
     >
       {VIEW_OPTIONS.map((option) => {
         const selected = option.value === value
@@ -1146,21 +1154,17 @@ function SummaryViewSwitch({
           <button
             key={option.value}
             type="button"
-            role="radio"
-            aria-checked={selected}
+            aria-label={option.label}
+            aria-pressed={selected}
             onClick={() => onChange(option.value)}
-            className={`inline-flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md px-3 text-sm transition-colors @[560px]:flex-none ${
-              selected
-                ? "bg-fill font-medium text-foreground"
-                : "text-foreground-secondary hover:bg-background-hover hover:text-foreground"
-            }`}
+            className={"group relative size-7! cursor-pointer " + segmentedIconOptionClass(selected)}
           >
             <LedgerIcon name={option.icon} className="h-4 w-4 shrink-0" />
-            {option.label}
+            <HoverDetail label={option.label} />
           </button>
         )
       })}
-    </div>
+    </SegmentedToggle>
   )
 }
 
@@ -1808,7 +1812,6 @@ export default function MeetSheetSummarySection({
     <SummaryRowFold>
       <section ref={sectionRef} className="@container/summary scroll-mt-4">
         <div className="mb-3 flex flex-wrap items-center gap-2 pb-1">
-          <SummaryViewSwitch value={currentView} onChange={pickView} />
           <input
             type="search"
             aria-label={viewMode === "roster" ? "Search athletes" : "Search athletes or events"}
@@ -1818,28 +1821,7 @@ export default function MeetSheetSummarySection({
             className="h-[38px] min-w-0 flex-1 basis-32 rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/35"
           />
 
-          {addMenuVisible ? (
-            <MeetAddMenu
-              meetId={meetId}
-              meetName={meetName ?? ""}
-              defaultCourse={defaultCourse ?? "SCY"}
-              defaultDate={defaultDate ?? ""}
-              athletes={athletes}
-              rosterSummaryEntries={entriesSummary?.entries ?? []}
-              onOpen={() => setSettingsOpen(false)}
-            />
-          ) : null}
-
-          {meetId ? (
-            <ShareRosterSummaryButton
-              meetId={meetId}
-              meetName={meetName ?? ""}
-              details={details ?? { date: "", location: null }}
-              iconUrl={iconUrl}
-              buildRequest={buildPdfRequest}
-              onOpen={() => setSettingsOpen(false)}
-            />
-          ) : null}
+          <SummaryViewSwitch value={currentView} onChange={pickView} />
 
           <div className="relative shrink-0">
             <button
@@ -2000,6 +1982,29 @@ export default function MeetSheetSummarySection({
               </>
             ) : null}
           </div>
+
+          {meetId ? (
+            <ShareRosterSummaryButton
+              meetId={meetId}
+              meetName={meetName ?? ""}
+              details={details ?? { date: "", location: null }}
+              iconUrl={iconUrl}
+              buildRequest={buildPdfRequest}
+              onOpen={() => setSettingsOpen(false)}
+            />
+          ) : null}
+
+          {addMenuVisible ? (
+            <MeetAddMenu
+              meetId={meetId}
+              meetName={meetName ?? ""}
+              defaultCourse={defaultCourse ?? "SCY"}
+              defaultDate={defaultDate ?? ""}
+              athletes={athletes}
+              rosterSummaryEntries={entriesSummary?.entries ?? []}
+              onOpen={() => setSettingsOpen(false)}
+            />
+          ) : null}
         </div>
 
         {activeFilters.length > 0 ? (
@@ -2137,8 +2142,9 @@ export default function MeetSheetSummarySection({
           <div className="flex flex-col gap-3">
             {filteredMyEntries.length > 0 ? (
               <div className="overflow-hidden rounded-xl border border-primary bg-background shadow-sm">
-                {/* Tint layered over the opaque base so the meet background doesn't show through. */}
-                <div className="bg-accent/[0.04]">
+                {/* Tint layered over the opaque base so the meet background doesn't show through;
+                    `--row-hover` keeps the tint in the rows' hover wash. */}
+                <div className="bg-accent/[0.04] [--row-hover:color-mix(in_oklab,var(--color-accent)_4%,var(--color-background-hover))]">
                   <div
                     className="flex items-center gap-2 py-2 text-sm font-medium text-accent"
                     style={summaryHeaderInset}

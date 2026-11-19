@@ -1,5 +1,6 @@
 "use client"
 
+import SettingsRowLabel from "@/components/settings/SettingsRowLabel"
 import { useRef, useState } from "react"
 import {
   NOTIFICATION_PREFERENCE_META,
@@ -9,9 +10,22 @@ import {
 import {
   notificationPreferenceDescription,
   visibleNotificationPreferences,
+  type IconName,
   type NotificationSettingsViewer,
 } from "@swimbuzz/shared"
 import { updateNotificationPreference } from "./settings.actions"
+
+
+/** Matches the nav where there's a page for it: Practices, Meets, Nationals, Records. */
+const PREFERENCE_ICONS: Record<NotificationPreferenceKey, IconName> = {
+  practicePublished: "fileText",
+  meetRosterInfo: "calendar",
+  relayLineups: "waves",
+  nationalCuts: "trophy",
+  teamRecords: "medal",
+  practiceComments: "messageCircle",
+  profileChanges: "import",
+}
 
 export default function NotificationPreferencesSettings({
   initialPreferences,
@@ -54,12 +68,11 @@ export default function NotificationPreferencesSettings({
         return (
           <div key={key}>
             <div className="flex items-center justify-between gap-4 px-4 py-3">
-              <div>
-                <p className="text-sm text-foreground">{label}</p>
-                <p className="text-xs text-foreground-secondary">
-                  {notificationPreferenceDescription(item, viewer)}
-                </p>
-              </div>
+              <SettingsRowLabel
+                icon={PREFERENCE_ICONS[key]}
+                title={label}
+                description={notificationPreferenceDescription(item, viewer)}
+              />
               <button
                 type="button"
                 role="switch"
