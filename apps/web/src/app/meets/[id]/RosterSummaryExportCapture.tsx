@@ -63,7 +63,13 @@ function CaptureRow({ row, medley }: { row: RosterSummaryPdfRow; medley: boolean
       ) : null}
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="flex min-w-0 items-baseline gap-2">
-          <span className="truncate font-medium tracking-[-0.005em]">{rosterNamePreferred(row.label)}</span>
+          <span className="truncate font-medium tracking-[-0.005em]">
+            {rosterNamePreferred(row.label)}
+            {/* " (Leg 4)", lighter — as a preferred name's parentheses on the page. */}
+            {row.labelNote ? (
+              <span className="font-normal text-foreground-secondary"> ({row.labelNote})</span>
+            ) : null}
+          </span>
           {row.round ? <CaptureRound round={row.round} /> : null}
           {row.sub ? (
             <span className="shrink-0 whitespace-nowrap text-xs text-foreground-tertiary">{row.sub}</span>
@@ -126,7 +132,7 @@ function CaptureRow({ row, medley }: { row: RosterSummaryPdfRow; medley: boolean
           {row.result.text}
         </span>
       ) : row.result ? (
-        <SummaryRowResult result={row.result} compact={false} />
+        <SummaryRowResult result={row.result} compact={false} note={row.resultNote} />
       ) : null}
     </li>
   )

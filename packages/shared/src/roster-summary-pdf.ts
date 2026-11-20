@@ -46,6 +46,8 @@ export type RosterSummaryPdfRow = {
    * the line with the sub — as it does with no heat & lane crowding it.
    */
   fullLabel?: string
+  /** Set after the label in parentheses and lighter type: a relay athlete's leg ("Leg 4" → "(Leg 4)"). */
+  labelNote?: string
   /** The round, right after the label ("Finals") — the PDF and PNG set it in gold caps. */
   round?: string
   /** Small text right after the label and round (result tags, badges). */
@@ -72,6 +74,8 @@ export type RosterSummaryPdfRow = {
   cuts?: RosterSummaryPdfCut[]
   /** Right-hand column; left out, the row has none (mobile rows are just a title and subtitle). */
   result?: RosterSummaryPdfResult
+  /** A line under the result's time, right-aligned with it: a relay athlete's split ("20.05"). */
+  resultNote?: string
 }
 
 export type RosterSummaryPdfSection = {

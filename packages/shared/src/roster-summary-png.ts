@@ -19,13 +19,15 @@ const HEADER_ROWS = 5.5
 const HIGHLIGHT_TILE_ROWS = 2.2
 
 /**
- * A row's height in label lines: the label, then a line each for meta / start time, per two legs
- * and per new Nationals cut.
+ * A row's height in label lines: the label, then a line each for meta / start time / a note under
+ * the time, per two legs and per new Nationals cut.
  */
 function rowWeight(row: RosterSummaryPdfRow): number {
   if (row.subheading) return 0.9
   const below =
-    (row.meta || row.startTime ? 1 : 0) + Math.ceil((row.legs?.length ?? 0) / 2) + (row.cuts?.length ?? 0)
+    (row.meta || row.startTime || row.resultNote ? 1 : 0) +
+    Math.ceil((row.legs?.length ?? 0) / 2) +
+    (row.cuts?.length ?? 0)
   return 1 + below * 0.7
 }
 

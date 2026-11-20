@@ -14,6 +14,7 @@ import {
   rosterSummarySessions,
   rosterSummaryTitle,
   relayLegLabel,
+  relayLegSubSplitsText,
   relayLegSubSplitTimes,
   sessionIncludes,
   SUMMARY_ROUNDS,
@@ -78,7 +79,7 @@ import RemoveRosterOnlyButton from "./RemoveRosterOnlyButton"
 import { EditRelayButton } from "./MeetRelayEditor"
 import MeetAddMenu from "./MeetAddMenu"
 import ShareRosterSummaryButton from "./ShareRosterSummaryButton"
-import SummaryJumpNav, { summaryJumpId, summaryJumpLetter, type SummaryJumpTarget } from "./SummaryJumpNav"
+import JumpRail, { JUMP_RAIL_LAYOUT_CLASS, JUMP_RAIL_LETTERS, type JumpRailItem } from "@/components/ui/JumpRail"
 import { MenuDivider, MenuItem, MenuSubmenu, menuPanel } from "./MeetMenu"
 import SummaryRow, { EventBadge, SUMMARY_INSET, SummaryRowFold, type RowDisplay, type RowDensity, type RowResult } from "./SummaryRow"
 import type { DetailRound, SwimDetail } from "./SwimDetailModal"
@@ -451,9 +452,13 @@ function buildIndividualRounds(entry: SheetEntry, allEntries?: SummaryEntry[]): 
     })
   }
 
-  // The entry carries one heat start time; with both rounds shown, it only goes on the
-  // round this row is known to be.
-  const startTime = entry.startTime || undefined
+  // With both rounds' heat sheets, each round has its own start time. Otherwise the entry carries
+  // one; with both rounds shown, it only goes on the round this row is known to be.
+  const prelimsRound = rounds.find((r) => r.label === "Prelims")
+  const finalsRound = rounds.find((r) => r.label === "Finals")
+  if (prelimsRound && entry.prelimStartTime) prelimsRound.startTime = entry.prelimStartTime
+  if (finalsRound && entry.finalStartTime) finalsRound.startTime = entry.finalStartTime
+  const startTime = entry.prelimStartTime || entry.finalStartTime ? undefined : entry.startTime || undefined
   if (startTime) {
     const round =
       rounds.length === 1
@@ -658,6 +663,9 @@ function summaryRowView(
   // Only the exports show them ("Leg 2 - 49.20 (23.83 · 25.37)"); on screen it's "Leg 2 - 49.20".
   const legSubSplits = relayLegSubSplitTimes(swimmer?.splits, formatDisplayTime)
   const relayLeg = swimmer ? (relayLegLabel(swimmer.leg, legSplit) ?? undefined) : undefined
+  // On screen the leg goes after the relay's name, "200 Free Relay A (Leg 2)", and the split under
+  // its time.
+  const legNumber = swimmer?.leg && swimmer.leg > 0 ? swimmer.leg : undefined
 
   const heat = formatHeat(entry)
   const lane = isRelay ? relayLane(entry) : individualLane(entry)
@@ -715,7 +723,8 @@ function summaryRowView(
       : isRelay
         ? `${eventName} ${displayRelayLetter(entry.relayLetter)}`
         : eventName,
-    team: !eventView && isRelay ? relayLeg : undefined,
+    team: !eventView && isRelay && swimmer ? (legSplit ?? undefined) : undefined,
+    legNumber: !eventView && isRelay ? legNumber : undefined,
     round: entry.rosterOnly ? null : res.label,
   }
 }
@@ -775,15 +784,18 @@ function summaryRowPdf(
   const relayName = eventView ? view.label : `${relayEvent} ${relayLetter}`
   const relayFullName = eventView ? undefined : `${relayEvent} Relay ${relayLetter}`
   const startTime = (display.showHeatLane && entry.startTime) || undefined
-  // The round rides beside the name (then any result tags); the line below has a relay athlete's
-  // leg, split and sub-splits ("Leg 4 - 20.05", "Leg 2 - 49.20 (23.83 · 25.37)").
-  const meta = view.isRelay ? relayLegLabel(view.relayLegNumber, view.legSplit, view.legSubSplits) : null
+  // As on screen, a relay athlete's leg follows the name ("200 Medley A (Leg 4)") and their split
+  // sits under the time; the round rides beside the name (then any result tags). The line below
+  // has the leg's own 50s when the results time them ("23.83 · 25.37").
+  const meta = view.isRelay && view.team ? relayLegSubSplitsText(view.legSubSplits) : null
   const legs = view.isRelay ? relayLegs(entry) : []
   const heatLane = display.showHeatLane ? view.heatLane : null
   return {
     eventNumber: view.badgeNumber,
     label: (view.isRelay ? relayName : view.label) ?? "",
     fullLabel: view.isRelay ? relayFullName : undefined,
+    labelNote: view.legNumber != null ? `Leg ${view.legNumber}` : undefined,
+    resultNote: view.team,
     // By event the round is its own gold tag; by athlete it leads the grey text after the label.
     round: (eventView && display.showRound && view.round) || undefined,
     sub:
@@ -1026,6 +1038,12 @@ function SummaryEntryRow({
       />
     ) : null
 
+  // The leg an athlete swam, after the relay's name and styled like a preferred name: "(Leg 2)".
+  const legSuffix =
+    view.legNumber != null ? (
+      <span className="font-normal text-foreground-secondary"> (Leg {view.legNumber})</span>
+    ) : null
+
   return (
     <>
       <SummaryRow
@@ -1038,12 +1056,31 @@ function SummaryEntryRow({
             <AthleteAvatar image={athleteRecord?.image} name={entry.athleteName} compact={compact} />
           ) : undefined
         }
-        label={eventView && !isRelay ? <RosterName name={entry.athleteName} /> : view.label}
+        label={
+          eventView && !isRelay ? (
+            <RosterName name={entry.athleteName} />
+          ) : legSuffix ? (
+            <>
+              {view.label}
+              {legSuffix}
+            </>
+          ) : (
+            view.label
+          )
+        }
         shortLabel={
           // "400 Free A" when "400 Free Relay A" doesn't fit on its line; "Tumanova, Katya" for
           // "Tumanova, Ekaterina (Katya)" once any athlete's name would wrap.
-          !eventView && isRelay
-            ? `${view.eventName.replace(/\s+Relay$/i, "")} ${displayRelayLetter(entry.relayLetter)}`
+          !eventView && isRelay ? (
+            legSuffix ? (
+              <>
+                {`${view.eventName.replace(/\s+Relay$/i, "")} ${displayRelayLetter(entry.relayLetter)}`}
+                {legSuffix}
+              </>
+            ) : (
+              `${view.eventName.replace(/\s+Relay$/i, "")} ${displayRelayLetter(entry.relayLetter)}`
+            )
+          )
             : eventView && !isRelay && splitRosterName(entry.athleteName).preferred
               ? rosterNamePreferred(entry.athleteName)
               : undefined
@@ -1619,27 +1656,55 @@ export default function MeetSheetSummarySection({
         ? sortedEventGroups.length > 0
         : hasSummaryContent
 
-  // Jump bar (SummaryJumpNav): by athlete a letter per first letter of the names listed, by event a
-  // number per numbered event, each pointing at the first card it names (`jumpIds`: card key → id).
+  // Jump rail (JumpRail) down the side: by athlete and in the roster A–Z, each letter pointing at
+  // the first card/row whose name starts with it (the viewer's own, pinned at the top, aside); by
+  // event a number per numbered event listed. `jumpIds`: card/row key → id.
   const jumpIds = new Map<string, string>()
-  const jumpTargets: SummaryJumpTarget[] = []
-  if (viewMode === "summary" && hasContent) {
-    const addTarget = (cardKey: string, key: string, label: string, ariaLabel: string) => {
-      if (jumpTargets.some((t) => t.key === key)) return
-      const targetId = summaryJumpId(`${viewByEvent ? "event" : "athlete"}-${cardKey}`)
-      jumpIds.set(cardKey, targetId)
-      jumpTargets.push({ key, label, ariaLabel, targetId })
-    }
-    if (viewByEvent) {
+  const railItems: JumpRailItem[] = []
+  if (hasContent) {
+    const prefix = viewMode === "roster" ? "roster" : viewByEvent ? "event" : "athlete"
+    const cardId = (cardKey: string) =>
+      `summary-jump-${prefix}-${cardKey}`.toLowerCase().replace(/[^a-z0-9-]+/g, "-")
+    if (viewMode === "summary" && viewByEvent) {
       for (const group of sortedEventGroups) {
         if (group.eventNumber <= 0) continue
         const number = String(group.eventNumber)
-        addTarget(group.key, number, number, `Event ${number}, ${group.title}`)
+        if (railItems.some((item) => item.key === number)) continue
+        const targetId = cardId(group.key)
+        jumpIds.set(group.key, targetId)
+        railItems.push({
+          key: number,
+          label: number,
+          ariaLabel: `Event ${number}, ${group.title}`,
+          hoverLabel: group.title,
+          targetId,
+        })
       }
     } else {
-      for (const athleteGroup of filteredOtherGrouped) {
-        const letter = summaryJumpLetter(athleteGroup.name)
-        addTarget(athleteGroup.athleteId, letter, letter, `Athletes starting with ${letter}`)
+      // "Last, First" → "A"–"Z", or "#" when it doesn't start with a letter.
+      const named =
+        viewMode === "roster"
+          ? filteredRosterAthletes
+              .filter((athlete) => athlete.id !== viewerAthleteId)
+              .map((athlete) => ({ key: athlete.id, name: athlete.name }))
+          : filteredOtherGrouped.map((group) => ({ key: group.athleteId, name: group.name }))
+      const letterTargets = new Map<string, string>()
+      for (const { key, name } of named) {
+        const first = name.trim().charAt(0).toUpperCase()
+        const letter = /[A-Z]/.test(first) ? first : "#"
+        if (letterTargets.has(letter)) continue
+        const targetId = cardId(key)
+        jumpIds.set(key, targetId)
+        letterTargets.set(letter, targetId)
+      }
+      const letters = letterTargets.has("#") ? [...JUMP_RAIL_LETTERS, "#"] : JUMP_RAIL_LETTERS
+      for (const letter of letters) {
+        railItems.push({
+          key: letter,
+          label: letter,
+          ariaLabel: letter === "#" ? "Other athletes" : `Athletes starting with ${letter}`,
+          targetId: letterTargets.get(letter),
+        })
       }
     }
   }
@@ -2035,11 +2100,6 @@ export default function MeetSheetSummarySection({
           </div>
         ) : null}
 
-        <SummaryJumpNav
-          label={viewByEvent ? "Jump to event" : "Jump to athletes by letter"}
-          targets={jumpTargets}
-        />
-
         {!hasContent ? (
           <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-background px-4 py-10 text-center text-sm text-foreground-secondary">
             <span>
@@ -2062,146 +2122,158 @@ export default function MeetSheetSummarySection({
               </button>
             ) : null}
           </div>
-        ) : viewMode === "roster" ? (
-          <div className="overflow-hidden rounded-xl border border-border bg-background">
-            <div className="py-2.5 text-sm font-medium text-foreground" style={summaryHeaderInset}>
-              {filteredRosterAthletes.length} athlete{filteredRosterAthletes.length === 1 ? "" : "s"}
-            </div>
-            <ul>
-              {filteredRosterAthletes.map((athlete) => {
-                const isMe = athlete.id === viewerAthleteId
-                const count = eventCountByAthlete.get(athlete.id) ?? 0
-                return (
-                  <li key={athlete.id} className="border-t border-border">
-                    <Link
-                      href={athletePath(athlete.slug ?? athlete.id)}
-                      className={`grid grid-cols-[1fr_96px_72px] items-center px-4 py-3 text-sm text-foreground transition-colors hover:bg-background-hover hover:text-primary ${
-                        isMe ? "bg-accent/5" : ""
-                      }`}
-                    >
-                      <span className="flex min-w-0 items-center gap-2">
-                        <AthleteAvatar image={athlete.image} name={athlete.name} />
-                        <span className={`truncate font-medium ${isMe ? "text-accent" : ""}`}>
-                          <RosterName name={athlete.name} />
-                        </span>
-                        {athlete.missingSwimCloud ? (
-                          <span className="shrink-0 rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-accent">
-                            No SwimCloud
-                          </span>
-                        ) : null}
-                        {athlete.timesNeverImported ? (
-                          <span className="shrink-0 rounded-full bg-fill px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-foreground-secondary">
-                            Never imported
-                          </span>
-                        ) : null}
-                      </span>
-                      <span className="text-right text-xs text-foreground-secondary">
-                        {count} event{count === 1 ? "" : "s"}
-                      </span>
-                      <span className="text-right text-xs text-foreground-secondary">
-                        {athlete.gender === "F" ? "Women" : athlete.gender === "M" ? "Men" : ""}
-                      </span>
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-        ) : viewByEvent ? (
-          <div className="flex flex-col gap-4">
-            {sortedEventGroups.map((group) => (
-              <div
-                key={group.key}
-                id={jumpIds.get(group.key)}
-                className="overflow-hidden rounded-xl border border-border-secondary bg-background"
-              >
-                <div
-                  className="flex items-center gap-2.5 py-2.5 text-sm font-medium text-foreground"
-                  style={summaryHeaderInset}
-                >
-                  {group.eventNumber > 0 ? (
-                    <EventBadge number={group.eventNumber} compact={false} />
-                  ) : null}
-                  <span>{group.title}</span>
-                </div>
-                <ul className="border-t border-border-subtle">
-                  {sortEventEntries(group.entries, displayEntries).map((entry, j) => (
-                    <SummaryEntryRow
-                      key={`event-${entryRowKey(entry, j, athleteGenders)}`}
-                      entry={entry}
-                      eventView
-                      mine={isMine(entry)}
-                      {...rowProps}
-                    />
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
         ) : (
-          <div className="flex flex-col gap-3">
-            {filteredMyEntries.length > 0 ? (
-              <div className="overflow-hidden rounded-xl border border-primary bg-background shadow-sm">
-                {/* Tint layered over the opaque base so the meet background doesn't show through;
-                    `--row-hover` keeps the tint in the rows' hover wash. */}
-                <div className="bg-accent/[0.04] [--row-hover:color-mix(in_oklab,var(--color-accent)_4%,var(--color-background-hover))]">
-                  <div
-                    className="flex items-center gap-2 py-2 text-sm font-medium text-accent"
-                    style={summaryHeaderInset}
-                  >
-                    <AthleteAvatar
-                      image={viewerRecord?.image}
-                      name={athleteNames.get(viewerAthleteId!) || "My Profile"}
-                    />
-                    <span>
-                      <RosterName name={athleteNames.get(viewerAthleteId!) ?? ""} />
-                    </span>
+          // The jump rail sits beside the cards, or out in the page's right margin when it's wide
+          // enough (see JumpRail).
+          <div className={JUMP_RAIL_LAYOUT_CLASS}>
+            <div className="min-w-0 flex-1">
+              {viewMode === "roster" ? (
+                <div className="overflow-hidden rounded-xl border border-border bg-background">
+                  <div className="py-2.5 text-sm font-medium text-foreground" style={summaryHeaderInset}>
+                    {filteredRosterAthletes.length} athlete{filteredRosterAthletes.length === 1 ? "" : "s"}
                   </div>
-                  <ul className="border-t border-border-subtle">
-                    {filteredMyEntries.map((entry, i) => (
-                      <SummaryEntryRow
-                        key={`mine-${entryRowKey(entry, i, athleteGenders)}`}
-                        entry={entry}
-                        athleteId={viewerAthleteId ?? undefined}
-                        {...rowProps}
-                      />
-                    ))}
+                  <ul>
+                    {filteredRosterAthletes.map((athlete) => {
+                      const isMe = athlete.id === viewerAthleteId
+                      const count = eventCountByAthlete.get(athlete.id) ?? 0
+                      return (
+                        <li key={athlete.id} id={jumpIds.get(athlete.id)} className="scroll-mt-3 border-t border-border">
+                          <Link
+                            href={athletePath(athlete.slug ?? athlete.id)}
+                            className={`grid grid-cols-[1fr_96px_72px] items-center px-4 py-3 text-sm text-foreground transition-colors hover:bg-background-hover hover:text-primary ${
+                              isMe ? "bg-accent/5" : ""
+                            }`}
+                          >
+                            <span className="flex min-w-0 items-center gap-2">
+                              <AthleteAvatar image={athlete.image} name={athlete.name} />
+                              <span className={`truncate font-medium ${isMe ? "text-accent" : ""}`}>
+                                <RosterName name={athlete.name} />
+                              </span>
+                              {athlete.missingSwimCloud ? (
+                                <span className="shrink-0 rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-accent">
+                                  No SwimCloud
+                                </span>
+                              ) : null}
+                              {athlete.timesNeverImported ? (
+                                <span className="shrink-0 rounded-full bg-fill px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-foreground-secondary">
+                                  Never imported
+                                </span>
+                              ) : null}
+                            </span>
+                            <span className="text-right text-xs text-foreground-secondary">
+                              {count} event{count === 1 ? "" : "s"}
+                            </span>
+                            <span className="text-right text-xs text-foreground-secondary">
+                              {athlete.gender === "F" ? "Women" : athlete.gender === "M" ? "Men" : ""}
+                            </span>
+                          </Link>
+                        </li>
+                      )
+                    })}
                   </ul>
                 </div>
-              </div>
-            ) : null}
-            {filteredOtherGrouped.map((athleteGroup) => {
-              const events = [...athleteGroup.entries].sort(compareMyEntries)
-              const athleteData = athletes.find((a) => a.id === athleteGroup.athleteId)
-              return (
-                <div
-                  key={athleteGroup.athleteId}
-                  id={jumpIds.get(athleteGroup.athleteId)}
-                  className="overflow-hidden rounded-xl border border-border bg-background"
-                >
-                  <Link
-                    href={athletePath(athleteData?.slug ?? athleteGroup.athleteId)}
-                    className="flex items-center gap-2 py-2 text-sm font-medium text-foreground transition-colors hover:text-primary"
-                    style={summaryHeaderInset}
-                  >
-                    <AthleteAvatar image={athleteData?.image} name={athleteGroup.name} />
-                    <span>
-                      <RosterName name={athleteGroup.name} />
-                    </span>
-                  </Link>
-                  <ul className="border-t border-border-subtle">
-                    {events.map((entry, i) => (
-                      <SummaryEntryRow
-                        key={`${athleteGroup.athleteId}-${entryRowKey(entry, i, athleteGenders)}`}
-                        entry={entry}
-                        athleteId={athleteGroup.athleteId}
-                        {...rowProps}
-                      />
-                    ))}
-                  </ul>
+              ) : viewByEvent ? (
+                <div className="flex flex-col gap-4">
+                  {sortedEventGroups.map((group) => (
+                    <div
+                      key={group.key}
+                      id={jumpIds.get(group.key)}
+                      className="scroll-mt-3 overflow-hidden rounded-xl border border-border-secondary bg-background"
+                    >
+                      <div
+                        className="flex items-center gap-2.5 py-2.5 text-sm font-medium text-foreground"
+                        style={summaryHeaderInset}
+                      >
+                        {group.eventNumber > 0 ? (
+                          <EventBadge number={group.eventNumber} compact={false} />
+                        ) : null}
+                        <span>{group.title}</span>
+                      </div>
+                      <ul className="border-t border-border-subtle">
+                        {sortEventEntries(group.entries, displayEntries).map((entry, j) => (
+                          <SummaryEntryRow
+                            key={`event-${entryRowKey(entry, j, athleteGenders)}`}
+                            entry={entry}
+                            eventView
+                            mine={isMine(entry)}
+                            {...rowProps}
+                          />
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
                 </div>
-              )
-            })}
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {filteredMyEntries.length > 0 ? (
+                    <div className="overflow-hidden rounded-xl border border-primary bg-background shadow-sm">
+                      {/* Tint layered over the opaque base so the meet background doesn't show through;
+                          `--row-hover` keeps the tint in the rows' hover wash. */}
+                      <div className="bg-accent/[0.04] [--row-hover:color-mix(in_oklab,var(--color-accent)_4%,var(--color-background-hover))]">
+                        <div
+                          className="flex items-center gap-2 py-2 text-sm font-medium text-accent"
+                          style={summaryHeaderInset}
+                        >
+                          <AthleteAvatar
+                            image={viewerRecord?.image}
+                            name={athleteNames.get(viewerAthleteId!) || "My Profile"}
+                          />
+                          <span>
+                            <RosterName name={athleteNames.get(viewerAthleteId!) ?? ""} />
+                          </span>
+                        </div>
+                        <ul className="border-t border-border-subtle">
+                          {filteredMyEntries.map((entry, i) => (
+                            <SummaryEntryRow
+                              key={`mine-${entryRowKey(entry, i, athleteGenders)}`}
+                              entry={entry}
+                              athleteId={viewerAthleteId ?? undefined}
+                              {...rowProps}
+                            />
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  ) : null}
+                  {filteredOtherGrouped.map((athleteGroup) => {
+                    const events = [...athleteGroup.entries].sort(compareMyEntries)
+                    const athleteData = athletes.find((a) => a.id === athleteGroup.athleteId)
+                    return (
+                      <div
+                        key={athleteGroup.athleteId}
+                        id={jumpIds.get(athleteGroup.athleteId)}
+                        className="scroll-mt-3 overflow-hidden rounded-xl border border-border bg-background"
+                      >
+                        <Link
+                          href={athletePath(athleteData?.slug ?? athleteGroup.athleteId)}
+                          className="flex items-center gap-2 py-2 text-sm font-medium text-foreground transition-colors hover:text-primary"
+                          style={summaryHeaderInset}
+                        >
+                          <AthleteAvatar image={athleteData?.image} name={athleteGroup.name} />
+                          <span>
+                            <RosterName name={athleteGroup.name} />
+                          </span>
+                        </Link>
+                        <ul className="border-t border-border-subtle">
+                          {events.map((entry, i) => (
+                            <SummaryEntryRow
+                              key={`${athleteGroup.athleteId}-${entryRowKey(entry, i, athleteGenders)}`}
+                              entry={entry}
+                              athleteId={athleteGroup.athleteId}
+                              {...rowProps}
+                            />
+                          ))}
+                        </ul>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+            <JumpRail
+              label={viewMode === "summary" && viewByEvent ? "Jump to event" : "Jump to athletes by letter"}
+              items={railItems}
+            />
           </div>
         )}
       </section>

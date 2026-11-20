@@ -263,6 +263,7 @@ function parseRow(value: unknown): RosterSummaryPdfRow | null {
     eventNumber: positiveInt(r.eventNumber),
     label,
     fullLabel: text(r.fullLabel),
+    labelNote: text(r.labelNote),
     round: text(r.round),
     sub: text(r.sub),
     meta: text(r.meta),
@@ -273,6 +274,7 @@ function parseRow(value: unknown): RosterSummaryPdfRow | null {
     legSubSplits,
     splits: parseSplits(r.splits),
     result: r.result == null ? undefined : parseResult(r.result),
+    resultNote: text(r.resultNote),
   }
 }
 
@@ -673,11 +675,36 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
     return row.place ? left + M.leadPlaceWidth + M.badgeGap : left
   }
 
-  /** Where `label` (and the row's sub) end, in the label line's fonts. */
+  /** The label note as drawn after the label (" (Leg 4)"), or "" for none. */
+  function labelNoteText(row: RosterSummaryPdfRow): string {
+    return row.labelNote ? pdfText(` (${row.labelNote})`) : ""
+  }
+
+  /** The label note's width, in the label's size. */
+  function labelNoteWidth(row: RosterSummaryPdfRow): number {
+    const note = labelNoteText(row)
+    if (!note) return 0
+    setType("normal", M.labelSize)
+    return doc.getTextWidth(note)
+  }
+
+  /**
+   * Whether `label` and the label note fit uncut before the heat & lane / result (labelEndWith caps
+   * the label at that room, so it can't tell).
+   */
+  function labelFitsWhole(row: RosterSummaryPdfRow, label: string): boolean {
+    const noteWidth = labelNoteWidth(row)
+    setType("normal", M.labelSize)
+    return rowTextLeft(row) + doc.getTextWidth(pdfText(label)) + noteWidth <= textRight(row)
+  }
+
+  /** Where `label` (and the row's label note and sub) end, in the label line's fonts. */
   function labelEndWith(row: RosterSummaryPdfRow, label: string): number {
     const textLeft = rowTextLeft(row)
+    const noteWidth = labelNoteWidth(row)
     setType("normal", M.labelSize)
-    let end = textLeft + Math.min(doc.getTextWidth(pdfText(label)), textRight(row) - textLeft)
+    let end =
+      textLeft + Math.min(doc.getTextWidth(pdfText(label)) + noteWidth, textRight(row) - textLeft)
     if (row.round) end += M.roundGap + roundWidth(row.round)
     if (row.sub) {
       setType("normal", M.subSize)
@@ -703,7 +730,7 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
 
   /** Whether the meta fits whole on the label line after `label`. */
   function metaFitsWith(row: RosterSummaryPdfRow, label: string): boolean {
-    if (!row.meta || row.startTime) return false
+    if (!row.meta || row.startTime || row.resultNote) return false
     const end = labelEndWith(row, label)
     setType("normal", M.metaSize)
     return end + M.inlineMetaGap + doc.getTextWidth(pdfText(row.meta)) <= textRight(row, true)
@@ -715,7 +742,9 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
    * "400 Free Relay B" over "Leg 4").
    */
   function rowLabel(row: RosterSummaryPdfRow): string {
-    if (!row.fullLabel || labelEndWith(row, row.fullLabel) > textRight(row)) return row.label
+    if (!row.fullLabel || labelEndWith(row, row.fullLabel) > textRight(row) || !labelFitsWhole(row, row.fullLabel)) {
+      return row.label
+    }
     if (row.meta && !metaFitsWith(row, row.fullLabel) && metaFitsWith(row, row.label)) return row.label
     return row.fullLabel
   }
@@ -727,21 +756,21 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
 
   /**
    * The meta line rides on the label line when it fits there whole, else gets its own line — as it
-   * always does beside a start time, which makes a second line anyway.
+   * always does beside a start time or a note under the time, which make a second line anyway.
    */
   function metaInline(row: RosterSummaryPdfRow): boolean {
     return metaFitsWith(row, rowLabel(row))
   }
 
   /**
-   * The meta when it gets lines of its own, flush with the label. Beside the start time it stops
-   * short of the heat & lane column and wraps onto a second line rather than lose its end (a relay
-   * leg's split); otherwise it runs to the column edge on one line.
+   * The meta when it gets lines of its own, flush with the label. Beside the start time (or a note
+   * under the time) it stops short of that column and wraps onto a second line rather than lose its
+   * end; otherwise it runs to the column edge on one line.
    */
   function metaLines(row: RosterSummaryPdfRow): string[] {
     if (!row.meta || metaInline(row)) return []
     const textLeft = rowTextLeft(row)
-    if (!row.startTime) return [fit(row.meta, right - textLeft)]
+    if (!row.startTime && !row.resultNote) return [fit(row.meta, right - textLeft)]
     const width = textRight(row) - textLeft
     // Wrap between the " | " parts ("Timed Finals" / "Leg 2 · 25.31"), not inside one.
     const lines: string[] = []
@@ -755,13 +784,18 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
       : [fit(lines[0], width), fit(lines.slice(1).join(" | "), width)]
   }
 
+  /** Whether the right-hand columns have a second line: a start time, or a note under the time. */
+  function secondLine(row: RosterSummaryPdfRow): boolean {
+    return Boolean(row.startTime || (row.resultNote && row.result))
+  }
+
   /**
    * Lines under the label: the meta (whose first line the start time shares), then the relay legs,
    * the swim's splits or the athlete's new Nationals cuts.
    */
   function linesBelow(row: RosterSummaryPdfRow): number {
     return (
-      Math.max(metaLines(row).length, row.startTime ? 1 : 0) +
+      Math.max(metaLines(row).length, secondLine(row) ? 1 : 0) +
       legsLineCount(row) +
       splitsLineCount(row) +
       cutsLineCount(row)
@@ -774,11 +808,26 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
     return M.rowPadY * 2 + M.labelLh + linesBelow(row) * M.metaLh + cutsLineCount(row) * (M.cutLh - M.metaLh)
   }
 
-  function drawResult(result: RosterSummaryPdfResult, baseline: number) {
+  /**
+   * The result on `baseline`. With a note under the time (a relay athlete's split), the time moves up
+   * to `note.timeBaseline` and the note goes under it, the two centered together on the row, while
+   * the delta and place stay on `baseline`.
+   */
+  function drawResult(
+    result: RosterSummaryPdfResult,
+    baseline: number,
+    note?: { text: string; timeBaseline: number; noteBaseline: number }
+  ) {
     // Without a place column the time runs to the edge.
     const placeWidth = result.kind === "done" && result.placeless ? 0 : M.placeWidth
     const deltaRight = right - placeWidth - M.timeWidth
     const timeRight = right - placeWidth
+    const hasNote = Boolean(note) && (result.kind === "done" || result.kind === "seed")
+    const timeBaseline = hasNote && note ? note.timeBaseline : baseline
+    if (hasNote && note) {
+      setType("normal", M.metaSize, INK_TERTIARY)
+      doc.text(pdfText(note.text), timeRight, note.noteBaseline, { align: "right" })
+    }
     if (result.kind === "done") {
       if (result.delta) {
         const faster = result.delta.startsWith("-")
@@ -787,10 +836,10 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
       }
       if (result.time) {
         setType("normal", M.timeSize)
-        semiboldText(doc, pdfText(formatDisplayTime(result.time)), timeRight, baseline, "right")
+        semiboldText(doc, pdfText(formatDisplayTime(result.time)), timeRight, timeBaseline, "right")
       } else {
         setType("normal", M.timeSize, STATUS)
-        semiboldText(doc, pdfText(result.status ?? "—"), timeRight, baseline, "right")
+        semiboldText(doc, pdfText(result.status ?? "—"), timeRight, timeBaseline, "right")
       }
       if (result.place != null) {
         const podium = result.podium && result.place <= 3 ? PODIUM[result.place] : undefined
@@ -802,7 +851,7 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
       doc.text("SEED", deltaRight, baseline, { align: "right", charSpace: px(1) })
       setType("normal", M.timeSize, INK_SECONDARY)
       const seed = result.seed === "NT" ? "NT" : formatDisplayTime(result.seed)
-      doc.text(pdfText(seed), timeRight, baseline, { align: "right" })
+      doc.text(pdfText(seed), timeRight, timeBaseline, { align: "right" })
       if (result.seedRank != null) {
         setType("normal", M.smallSize, INK_TERTIARY)
         doc.text(formatOrdinal(result.seedRank), right, baseline, { align: "right" })
@@ -837,15 +886,16 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
     // With nothing under it but the start time (in the heat & lane column), the label line — label,
     // sub, result — centers on the row like the event badge.
     const centered =
-      Boolean(row.startTime) &&
+      secondLine(row) &&
       metaLines(row).length === 0 &&
       legsLineCount(row) === 0 &&
       splitsLineCount(row) === 0 &&
       cutsLineCount(row) === 0
-    // The result centers on the label line and the start time's line either way, like the badge.
+    // The result centers on the label line and the second line (the start time's, or the split's
+    // under the time) either way, like the badge.
     const twoLineBaseline = centeredBaseline(labelTop, M.labelLh + M.metaLh, M.labelSize)
     const baseline = centered ? twoLineBaseline : topBaseline
-    const resultBaseline = row.startTime ? twoLineBaseline : baseline
+    const resultBaseline = secondLine(row) ? twoLineBaseline : baseline
     if (row.eventNumber) {
       // Centered on the label and the line under it when there is one; on the label otherwise.
       const twoLines = linesBelow(row) > 0
@@ -857,20 +907,33 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
       doc.text(formatOrdinal(row.place), left, besideLabel(baseline, M.smallSize))
     }
     const shownLabel = rowLabel(row)
+    const note = labelNoteText(row)
+    const noteWidth = labelNoteWidth(row)
     setType("normal", M.labelSize)
-    const label = fit(shownLabel, maxText)
+    const label = fit(shownLabel, Math.max(0, maxText - noteWidth))
     doc.text(label, textLeft, baseline)
     let labelEndX = textLeft + doc.getTextWidth(label)
+    if (note) {
+      // " (Leg 4)" in the label's size, lighter — as a preferred name's parentheses on the page.
+      setType("normal", M.labelSize, INK_SECONDARY)
+      doc.text(note, labelEndX, baseline)
+      labelEndX += noteWidth
+    }
     if (row.round) labelEndX = drawRound(row.round, labelEndX + M.roundGap, baseline)
     if (row.sub) {
       setType("normal", M.subSize, INK_TERTIARY)
       const subLeft = labelEndX + px(6)
       doc.text(fit(row.sub, textRight(row) - subLeft), subLeft, besideLabel(baseline, M.subSize))
     }
-    if (row.result) drawResult(row.result, resultBaseline)
-
     let lineTop = labelTop + M.labelLh
     const metaBaseline = centeredBaseline(lineTop, M.metaLh, M.metaSize)
+    if (row.result) {
+      drawResult(
+        row.result,
+        resultBaseline,
+        row.resultNote ? { text: row.resultNote, timeBaseline: topBaseline, noteBaseline: metaBaseline } : undefined
+      )
+    }
     if (row.heatLane) {
       setType("normal", M.metaSize, INK_SECONDARY)
       doc.text(pdfText(row.heatLane), resultLeft(row), topBaseline, { align: "right" })
@@ -890,7 +953,7 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
     lines.forEach((line, i) => {
       doc.text(line, textLeft, centeredBaseline(lineTop + i * M.metaLh, M.metaLh, M.metaSize))
     })
-    lineTop += Math.max(lines.length, row.startTime ? 1 : 0) * M.metaLh
+    lineTop += Math.max(lines.length, secondLine(row) ? 1 : 0) * M.metaLh
     drawLegs(row, textLeft, lineTop, maxBelow)
     drawSplits(row, textLeft, lineTop + legsLineCount(row) * M.metaLh, maxBelow)
     drawCuts(row, textLeft, lineTop + (legsLineCount(row) + splitsLineCount(row)) * M.metaLh)
@@ -1464,6 +1527,12 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
   setColumn(0)
   for (const section of request.sections) {
     for (const row of section.rows) {
+      // Likewise a label note ("(Leg 4)") that would cut the label itself short leads that line,
+      // so the name stays whole.
+      if (row.labelNote && !labelFitsWhole(row, row.label)) {
+        row.meta = [row.labelNote, row.meta].filter(Boolean).join(" | ")
+        row.labelNote = undefined
+      }
       if (row.sub && labelEnd(row) > textRight(row, true)) {
         row.meta = [row.sub, row.meta].filter(Boolean).join(" | ")
         row.sub = undefined

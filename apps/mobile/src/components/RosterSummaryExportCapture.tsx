@@ -126,6 +126,8 @@ export const RosterSummaryExportCapture = forwardRef<
         <View style={measuring ? styles.rowTextNatural : styles.rowText}>
           <Text style={styles.label} numberOfLines={1}>
             {rosterNamePreferred(row.label)}
+            {/* " (Leg 4)", lighter — like a preferred name's parentheses. */}
+            {row.labelNote ? <Text style={styles.labelNote}>{` (${row.labelNote})`}</Text> : null}
             {row.sub ? <Text style={styles.sub}>{`  ${row.sub}`}</Text> : null}
           </Text>
           {row.meta ? (
@@ -172,7 +174,13 @@ export const RosterSummaryExportCapture = forwardRef<
             {row.startTime ? <Text style={styles.startTime}>{row.startTime}</Text> : null}
           </View>
         ) : null}
-        {result ? <Text style={styles.result}>{result}</Text> : null}
+        {result ? (
+          // A relay athlete's split under the result, the two centered together on the row.
+          <View style={styles.resultColumn}>
+            <Text style={styles.result}>{result}</Text>
+            {row.resultNote ? <Text style={styles.resultNote}>{row.resultNote}</Text> : null}
+          </View>
+        ) : null}
       </View>
     )
   }
@@ -329,5 +337,8 @@ function makeStyles(c: ColorPalette) {
     heatLaneText: { color: c.textSecondary, fontSize: 12, fontVariant: ["tabular-nums"] },
     startTime: { color: c.textTertiary, fontSize: 12, fontVariant: ["tabular-nums"] },
     result: { color: c.text, fontSize: 13, fontWeight: "600", fontVariant: ["tabular-nums"] },
+    resultColumn: { alignItems: "flex-end" },
+    resultNote: { color: c.textTertiary, fontSize: 12, fontVariant: ["tabular-nums"] },
+    labelNote: { color: c.textSecondary, fontWeight: "400" },
   })
 }

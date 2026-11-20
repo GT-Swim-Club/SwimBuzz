@@ -88,22 +88,32 @@ export default function Loading() {
               <Skeleton className="h-[38px] w-[38px] shrink-0 rounded-lg" />
               <Skeleton className="h-[38px] w-[38px] shrink-0 rounded-lg" />
             </div>
-            <div className="overflow-hidden rounded-xl border border-border bg-background">
-              <div className="px-4 py-3">
-                <Skeleton className="h-4 w-16" />
-              </div>
-              {summaryRows.map((width, i) => (
-                <div key={i} className="flex items-center gap-3 border-t border-border px-4 py-3">
-                  <Skeleton className="h-7 w-7 shrink-0 rounded-full" />
-                  <div className="min-w-0 flex-1 space-y-1.5">
-                    <Skeleton className={`h-4 ${width} max-w-full`} />
-                    <Skeleton className="h-3 w-24" />
-                  </div>
-                  <Skeleton className="hidden h-5 w-12 rounded-full sm:block" />
-                  <Skeleton className="h-5 w-16" />
-                  <Skeleton className="h-5 w-9 rounded-full" />
+            <div className="relative flex items-start gap-1 min-[1040px]:block">
+              <div className="min-w-0 flex-1 overflow-hidden rounded-xl border border-border bg-background">
+                <div className="px-4 py-3">
+                  <Skeleton className="h-4 w-16" />
                 </div>
-              ))}
+                {summaryRows.map((width, i) => (
+                  <div key={i} className="flex items-center gap-3 border-t border-border px-4 py-3">
+                    <Skeleton className="h-7 w-7 shrink-0 rounded-full" />
+                    <div className="min-w-0 flex-1 space-y-1.5">
+                      <Skeleton className={`h-4 ${width} max-w-full`} />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                    <Skeleton className="hidden h-5 w-12 rounded-full sm:block" />
+                    <Skeleton className="h-5 w-16" />
+                    <Skeleton className="h-5 w-9 rounded-full" />
+                  </div>
+                ))}
+              </div>
+              {/* Same slot as the summary's JumpRail: beside the cards, out in the right margin when wide. */}
+              <div className="shrink-0 self-stretch min-[1040px]:absolute min-[1040px]:inset-y-0 min-[1040px]:left-full min-[1040px]:ml-3">
+                <div className="flex flex-col items-center gap-[7px] py-[5px]">
+                  {Array.from({ length: 26 }, (_, i) => (
+                    <Skeleton key={i} className="h-2.5 w-2.5 rounded-sm" />
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>

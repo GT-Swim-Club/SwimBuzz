@@ -8,6 +8,7 @@ import {
   formatPoints,
   eventGenderWord,
   relayLegLabel,
+  relayLegSubSplitsText,
   relayLegSubSplitTimes,
   roundFilterIncludes,
   roundFilterLabel,
@@ -129,6 +130,9 @@ export type RosterSummaryEntry = {
   finalLane?: number
   /** The heat's start time from the heat sheet ("03:19 PM"). */
   startTime?: string | null
+  /** Each round's start time once the entry holds both rounds' heats (then `startTime` is unset). */
+  prelimStartTime?: string | null
+  finalStartTime?: string | null
   /** Coach-added heat & lane per round, shown only where no import has that field. */
   coachHeatLane?: CoachHeatLane
   /** Heat-sheet round text ("Timed Finals"). */
@@ -212,11 +216,17 @@ export function importedHeatLaneFor(entry: RosterSummaryEntry, round?: SessionRo
       : round === "P"
         ? entry.prelimLane ?? entry.lane
         : entry.lane ?? entry.finalLane ?? entry.prelimLane
+  const startTime =
+    round === "F"
+      ? entry.finalStartTime || entry.startTime
+      : round === "P"
+        ? entry.prelimStartTime || entry.startTime
+        : entry.startTime || entry.finalStartTime || entry.prelimStartTime
   return {
     heat: heat != null && heat > 0 ? heat : undefined,
     heatTotal: heatTotal ?? undefined,
     lane: lane ?? undefined,
-    startTime: entry.startTime || undefined,
+    startTime: startTime || undefined,
   }
 }
 
@@ -264,10 +274,13 @@ function heatLaneRow(entry: RosterSummaryEntry): Omit<SetHeatLaneInput, "slot"> 
     : { kind: "individual", athleteId: entry.athleteId, event: entry.event }
 }
 
-/** The heat's start time, the coach's when no heat sheet has one. */
+/**
+ * The heat's start time — that round's when the view names one, picked like the heat & lane — or
+ * the coach's when no heat sheet has one.
+ */
 function startTimeFor(entry: RosterSummaryEntry, round?: SessionRound | null): string | undefined {
   if (entry.alternate) return undefined
-  return entry.startTime || coachHeatLaneFor(entry, round).startTime || undefined
+  return importedHeatLaneFor(entry, round).startTime || coachHeatLaneFor(entry, round).startTime || undefined
 }
 
 /** The entry's place — in that round when the view is filtered to a prelims or finals session. */
@@ -483,6 +496,7 @@ function pdfRow(
     isRelay && athleteId ? entry.relaySwimmers?.find((s) => s.athleteId === athleteId) : undefined
   const legNumber = swimmer?.leg
   const split = swimmer?.splitTime?.trim()
+  const legSplit = split && /\d/.test(split) ? split : undefined
   const legSubSplits = isRelay ? relayLegSubSplits(entry) : []
   const relayTitleFrom = (event: string) =>
     [event, entry.relayLetter, entry.relayRound ? `(${entry.relayRound})` : null]
@@ -493,10 +507,13 @@ function pdfRow(
     label: isRelay ? relayTitleFrom(relayEvent) : title,
     // Spelled out ("200 Medley Relay A (P)") where the line has room.
     fullLabel: isRelay ? relayTitleFrom(`${relayEvent} Relay`) : undefined,
+    // As on the web summary: the leg after the relay's name ("200 Medley A (Leg 4)"), the split under
+    // the time, and the leg's own 50s (when the results time them) on the line below.
+    labelNote: legNumber && legNumber > 0 ? `Leg ${legNumber}` : undefined,
+    resultNote: legSplit,
     meta:
       [
-        // "Leg 4 - 20.05": the leg, then its split (and its 50s: "Leg 2 - 49.20 (23.83 · 25.37)").
-        relayLegLabel(legNumber, split && /\d/.test(split) ? split : null, relayLegSubSplitTimes(swimmer?.splits)),
+        legSplit ? relayLegSubSplitsText(relayLegSubSplitTimes(swimmer?.splits)) : null,
         entrySubtitle(entry, "athlete", false, undefined, false),
       ]
         .filter(Boolean)

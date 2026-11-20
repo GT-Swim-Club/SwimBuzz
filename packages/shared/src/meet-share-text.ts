@@ -55,13 +55,16 @@ function rosterRowLines(row: RosterSummaryPdfRow): string[] {
   // A subsection's heading ("Finals:") over its rows.
   if (row.subheading) return [`  ${row.label}:`]
   const line = [
-    rosterNamePreferred(row.label),
+    // A relay athlete's leg after the name: "200 Medley A (Leg 4)".
+    `${rosterNamePreferred(row.label)}${row.labelNote ? ` (${row.labelNote})` : ""}`,
     row.round,
     row.sub,
     row.meta?.replace(/\s+\|\s+/g, " · "),
     row.heatLane,
     row.startTime,
     resultText(row.result),
+    // Their split, which the PDF and PNG set under the time.
+    row.resultNote ? `Split ${displayTime(row.resultNote)}` : null,
   ]
     .filter(Boolean)
     .join(" · ")

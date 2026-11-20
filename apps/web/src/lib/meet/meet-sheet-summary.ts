@@ -53,7 +53,15 @@ export type SheetEntry = {
   round?: string
   /** When prelims/finals are split into separate display rows. */
   resultRound?: "P" | "F" | ""
+  /**
+   * The heat's start time. Once an entry holds both rounds' heats (prelimHeat and finalHeat), only
+   * a start time from a sheet that names no round stays here; each round's is in its own field.
+   */
   startTime?: string | null
+  /** Start time from the prelims heat sheet, kept apart like prelimHeat. */
+  prelimStartTime?: string | null
+  /** Start time from the finals heat sheet, kept apart like finalHeat. */
+  finalStartTime?: string | null
   /** Coach-added heat & lane per round, shown only where no import has that field. */
   coachHeatLane?: CoachHeatLane
   /** The heat & lane fields a displayed row shows from coachHeatLane rather than an import. */
@@ -1347,6 +1355,10 @@ function asTimedFinalsRow(entry: SheetEntry): SheetEntry {
       lane: prelim.lane ?? entry.lane ?? entryFinalHeatLane(entry).lane,
       heatTotal:
         entry.prelimHeatTotal ?? entry.heatTotal ?? entry.finalHeatTotal,
+      // The start time of the heat shown, preferring prelims like the heat & lane.
+      startTime: prelim.heat != null
+        ? entry.prelimStartTime ?? entry.startTime ?? entry.finalStartTime
+        : entry.startTime ?? entry.finalStartTime ?? entry.prelimStartTime,
       alternate: undefined,
     },
     ""
@@ -1367,6 +1379,18 @@ function withRoundSplits(
     ...entry,
     ...(splits?.length ? { splits } : { splits: undefined }),
   }
+}
+
+/**
+ * A prelims or finals row's heat start time: its round's own, else the entry's single one when
+ * it's this round's — one from a sheet naming no round counts as prelims, like its heat & lane.
+ */
+export function startTimeForRound(entry: SheetEntry, round: "P" | "F"): string | undefined {
+  const own = round === "P" ? entry.prelimStartTime : entry.finalStartTime
+  if (own) return own
+  if (!entry.startTime) return undefined
+  const finals = isFinalsRound(entry.round) || entry.relayRound === "F"
+  return (round === "F") === finals ? entry.startTime : undefined
 }
 
 /** Split combined prelim+final entries into separate roster rows. */
@@ -1569,6 +1593,7 @@ export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] 
           heat: entry.prelimHeat ?? entry.heat,
           lane: entry.prelimLane ?? entry.lane,
           heatTotal: entry.prelimHeatTotal ?? entry.heatTotal,
+          startTime: startTimeForRound(entry, "P"),
         },
         "P"
       )
@@ -1586,6 +1611,7 @@ export function expandIndividualResultRows(entries: SheetEntry[]): SheetEntry[] 
           heat: finalPlacement.heat,
           lane: finalPlacement.lane,
           heatTotal: finalPlacement.heatTotal,
+          startTime: startTimeForRound(entry, "F"),
           seedTime: entry.finalsSheetSeedTime,
           seedRank: entry.finalsSheetSeedRank,
           prelimSeedTime: entry.seedTime,
@@ -2553,6 +2579,16 @@ function mergeHeatFields(a: SheetEntry, b: SheetEntry): Partial<SheetEntry> {
     if (side.finalHeatTotal != null && patch.finalHeatTotal == null) {
       patch.finalHeatTotal = side.finalHeatTotal
     }
+    // Start times go to their round the same way, so a finals sheet's never lands on prelims.
+    if (side.prelimStartTime && patch.prelimStartTime == null) patch.prelimStartTime = side.prelimStartTime
+    if (side.finalStartTime && patch.finalStartTime == null) patch.finalStartTime = side.finalStartTime
+    if (side.startTime) {
+      if (isFinalsRound(side.round) || side.relayRound === "F") {
+        if (patch.finalStartTime == null) patch.finalStartTime = side.startTime
+      } else if (isPrelimsRound(side.round) || side.relayRound === "P") {
+        if (patch.prelimStartTime == null) patch.prelimStartTime = side.startTime
+      }
+    }
 
     const sideHeat = validHeat(side.heat)
     if (sideHeat == null && side.lane == null) continue
@@ -2663,8 +2699,17 @@ function mergeEntries(a: SheetEntry, b: SheetEntry): SheetEntry {
     round: bothRoundHeats
       ? undefined
       : heatSide?.round ?? primary.round ?? secondary.round,
+    // With both rounds, each round's start time is in prelimStartTime/finalStartTime (heatPatch);
+    // only one from a sheet naming no round stays generic.
     startTime: bothRoundHeats
-      ? primary.startTime ?? secondary.startTime
+      ? [primary, secondary].find(
+          (side) =>
+            side.startTime &&
+            !isFinalsRound(side.round) &&
+            !isPrelimsRound(side.round) &&
+            side.relayRound !== "F" &&
+            side.relayRound !== "P"
+        )?.startTime
       : heatSide?.startTime ?? primary.startTime ?? secondary.startTime,
     relayLetter:
       normalizeRelayLetter(primary.relayLetter) ?? normalizeRelayLetter(secondary.relayLetter),

@@ -151,6 +151,7 @@ export function SummaryRowResult({
   compact,
   fluid = false,
   showPoints = false,
+  note,
 }: {
   result: RowResult
   compact: boolean
@@ -158,6 +159,8 @@ export function SummaryRowResult({
   fluid?: boolean
   /** A points column after place — blank on rows that didn't score, so columns line up. */
   showPoints?: boolean
+  /** A line under the time (a relay athlete's split, "20.05"), the two centered together on the row. */
+  note?: string
 }) {
   const pill = compact ? "h-[18px] px-1.5 text-[10px]" : "h-5 px-[7px] text-[11px]"
   const width = (narrow: number, wide: number) => ({ width: fluid ? fluidLength(narrow, wide) : wide })
@@ -174,6 +177,20 @@ export function SummaryRowResult({
         {points != null ? `${formatPoints(points)} pts` : null}
       </span>
     ) : null
+  // The time's column: the time, with the note under it when there is one — the two centered
+  // together on the row, beside the delta, place and points, which stay centered on their own.
+  const timeColumn = (time: ReactNode) => (
+    <span style={timeWidth} className="flex shrink-0 flex-col items-end">
+      {time}
+      {note ? (
+        <span
+          className={`whitespace-nowrap leading-[1.4] tabular-nums text-foreground-tertiary ${compact ? "text-[11px]" : "text-xs"}`}
+        >
+          {note}
+        </span>
+      ) : null}
+    </span>
+  )
 
   if (result.kind === "done") {
     const podium =
@@ -191,14 +208,15 @@ export function SummaryRowResult({
             </span>
           ) : null}
         </span>
-        <span
-          style={timeWidth}
-          className={`text-right font-mono font-semibold ${compact ? "text-[13px]" : "text-sm"} ${
-            result.time ? "text-foreground" : "text-warning-text"
-          }`}
-        >
-          {result.time ? formatDisplayTime(result.time) : result.status ?? "—"}
-        </span>
+        {timeColumn(
+          <span
+            className={`text-right font-mono font-semibold ${compact ? "text-[13px]" : "text-sm"} ${
+              result.time ? "text-foreground" : "text-warning-text"
+            }`}
+          >
+            {result.time ? formatDisplayTime(result.time) : result.status ?? "—"}
+          </span>
+        )}
         {result.placeless ? null : (
           <span
             style={placeWidth}
@@ -233,12 +251,13 @@ export function SummaryRowResult({
             Seed
           </span>
         </span>
-        <span
-          style={timeWidth}
-          className={`text-right font-mono font-normal text-foreground-secondary ${compact ? "text-[13px]" : "text-sm"}`}
-        >
-          {result.seed === "NT" ? "NT" : formatDisplayTime(result.seed)}
-        </span>
+        {timeColumn(
+          <span
+            className={`text-right font-mono font-normal text-foreground-secondary ${compact ? "text-[13px]" : "text-sm"}`}
+          >
+            {result.seed === "NT" ? "NT" : formatDisplayTime(result.seed)}
+          </span>
+        )}
         <span
           style={placeWidth}
           className={`flex items-center justify-end text-foreground-tertiary ${compact ? "text-[11px]" : "text-xs"}`}
@@ -309,7 +328,7 @@ export default function SummaryRow({
    */
   shareShortLabel?: boolean
   sub?: string
-  /** Relay letter shown at the start of line two. */
+  /** A relay athlete's split ("20.05"), shown under the time. */
   team?: string
   round?: string | null
   /** Heat & lane, compact ("H2 of 4 · L5"), in a column before the result. */
@@ -336,12 +355,9 @@ export default function SummaryRow({
 }) {
   const [open, setOpen] = useState(false)
   const compact = display.density === "compact"
-  // Beside the label rides the round, or (like the PDF) a relay leg & split when there's no round to
-  // show; with a round, the leg & split go on the line below.
-  const roundShown = display.showRound && Boolean(round)
-  const besideLabel = roundShown ? round : team
+  // Beside the label rides the round; a relay leg & split goes under the time (SummaryRowResult).
+  const besideLabel = display.showRound && round ? round : undefined
   const showRound = Boolean(besideLabel)
-  const teamBelow = roundShown ? team : undefined
   const showHL = display.showHeatLane && Boolean(heatLane || startTime)
   // How much of the row's detail has moved under the label (see RowFold): what this row needs to
   // keep its label whole, measured since it depends on the row's width (a phone has little room
@@ -367,7 +383,6 @@ export default function SummaryRow({
   const subRef = useRef<HTMLSpanElement>(null)
   const heatLaneRef = useRef<HTMLSpanElement>(null)
   const startTimeRef = useRef<HTMLSpanElement>(null)
-  const teamRef = useRef<HTMLSpanElement>(null)
   const noteRef = useRef<HTMLSpanElement>(null)
   const legsRef = useRef<HTMLSpanElement>(null)
   const report = shared?.report
@@ -429,7 +444,6 @@ export default function SummaryRow({
         [
           at === 2 && showRound ? width(roundRef.current) : 0,
           at >= 1 && showHL ? sum([hlWidth(heatLaneRef.current), hlWidth(startTimeRef.current)], 8) : 0,
-          width(teamRef.current),
           width(noteRef.current),
         ],
         12
@@ -515,18 +529,13 @@ export default function SummaryRow({
     </span>
   )
 
-  // The line below the label: the round (or leg & split) if it didn't fit beside the label, the heat
-  // & lane, a leg & split under a round, a note. It wraps between them if it must.
+  // The line below the label: the round if it didn't fit beside the label, the heat & lane, a note.
+  // It wraps between them if it must.
   const line2 = [
     roundBelow ? roundEl : null,
     hlBelow ? (
       <span className={`flex flex-wrap gap-x-2 tabular-nums ${hlSize}`}>
         {hlText}
-      </span>
-    ) : null,
-    teamBelow ? (
-      <span ref={teamRef} className="shrink-0 whitespace-nowrap">
-        {team}
       </span>
     ) : null,
     note ? (
@@ -613,7 +622,7 @@ export default function SummaryRow({
           {hlText}
         </span>
       ) : null}
-      <SummaryRowResult result={result} compact={compact} fluid showPoints={display.showPoints} />
+      <SummaryRowResult result={result} compact={compact} fluid showPoints={display.showPoints} note={team} />
       {trailing ? (
         <span
           className="-ml-1 flex shrink-0 items-center"

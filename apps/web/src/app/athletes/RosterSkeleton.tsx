@@ -83,7 +83,7 @@ export default function RosterSkeleton({ layout }: { layout: ListLayout }) {
             </div>
           )}
         </div>
-        {/* Same slot as RosterView's LetterRail: beside the list, just outside it in the right margin when wide. */}
+        {/* Same slot as RosterView's JumpRail: beside the list, just outside it in the right margin when wide. */}
         <div className="shrink-0 self-stretch min-[1040px]:absolute min-[1040px]:inset-y-0 min-[1040px]:left-full min-[1040px]:ml-3">
           <div className="flex flex-col items-center gap-[7px] py-[5px]">
             {Array.from({ length: 26 }, (_, i) => (
