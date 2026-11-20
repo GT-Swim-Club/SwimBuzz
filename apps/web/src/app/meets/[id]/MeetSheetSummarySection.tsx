@@ -9,12 +9,14 @@ import {
   rosterNamePreferred,
   splitRosterName,
   roundFilterIncludes,
+  roundFilterChips,
   roundFilterLabel,
   rosterSummaryScopeLabel,
   rosterSummarySessions,
   rosterSummaryTitle,
   relayLegLabel,
-  relayLegSubSplitsText,
+  relayLegOrdinal,
+  relayLegSubSplitList,
   relayLegSubSplitTimes,
   sessionIncludes,
   SUMMARY_ROUNDS,
@@ -217,6 +219,8 @@ type RoundResult = {
   place?: number
   points?: number
   seed?: string
+  /** What the row's delta measures against when it isn't `seed`: a finals swim's prelims seed. */
+  deltaSeed?: string
 }
 
 const ROUND_LABELS: Record<SummaryRoundKind, string> = { P: "Prelims", F: "Finals", T: "Timed Finals" }
@@ -257,8 +261,12 @@ function rowRoundResult(entry: SummaryEntry, allEntries?: SummaryEntry[], coach 
   if (entry.entryType === "relay_team") {
     const round = effectiveRelayRound(entry)
     const time = relayTeamTime(entry) ?? undefined
+    // A timed final seeded only on a finals heat sheet (an event swum in the finals session) keeps
+    // that sheet's seed once its results read as timed finals rather than finals.
     const seed =
-      round === "F" ? entry.finalsSheetSeedTime : entry.seedTime || entry.prelimTime || nt
+      round === "F"
+        ? entry.finalsSheetSeedTime
+        : entry.seedTime || entry.prelimTime || entry.finalsSheetSeedTime || nt
     const label =
       round === "P"
         ? "Prelims"
@@ -275,6 +283,7 @@ function rowRoundResult(entry: SummaryEntry, allEntries?: SummaryEntry[], coach 
       place: time ? relayTeamPlace(entry) : undefined,
       points: time ? entry.resultPoints : undefined,
       seed,
+      deltaSeed: round === "F" ? entry.prelimSeedTime : undefined,
     }
   }
 
@@ -311,6 +320,8 @@ function rowRoundResult(entry: SummaryEntry, allEntries?: SummaryEntry[], coach 
       place: entry.finalPlace,
       points: entry.finalPoints,
       seed,
+      // The drop is from the prelims seed; the finals seed (the prelims time) stays in the detail's table.
+      deltaSeed: entry.prelimSeedTime,
     }
   }
 
@@ -429,6 +440,12 @@ function buildIndividualRounds(entry: SheetEntry, allEntries?: SummaryEntry[]): 
       splits: entry.finalSplits ?? (entry.resultRound === "F" ? entry.splits : undefined) ?? [],
       seedTime: timed ? entry.seedTime : entry.finalsSheetSeedTime,
       seedRank: timed ? entry.seedRank : finalsSeedRank(entry),
+      // The header measures a finals swim against the prelims seed; the table, the finals seed.
+      headSeedTime: timed
+        ? undefined
+        : entry.resultRound === "F"
+          ? entry.prelimSeedTime
+          : entry.seedTime || undefined,
     })
   }
 
@@ -660,10 +677,10 @@ function summaryRowView(
   const split = sanitizeRelaySplitTime(swimmer?.splitTime)
   const legSplit = split ? formatDisplayTime(split) : null
   // The leg's own 50s, when the results time them (relay-splits.ts notes where they come from).
-  // Only the exports show them ("Leg 2 - 49.20 (23.83 · 25.37)"); on screen it's "Leg 2 - 49.20".
-  const legSubSplits = relayLegSubSplitTimes(swimmer?.splits, formatDisplayTime)
+  // Only the exports show them — the PDF in split columns, like an individual swim's.
+  const legSubSplits = relayLegSubSplitList(swimmer?.splits, formatDisplayTime)
   const relayLeg = swimmer ? (relayLegLabel(swimmer.leg, legSplit) ?? undefined) : undefined
-  // On screen the leg goes after the relay's name, "200 Free Relay A (Leg 2)", and the split under
+  // On screen the leg goes after the relay's name, "200 Free Relay A (2nd)", and the split under
   // its time.
   const legNumber = swimmer?.leg && swimmer.leg > 0 ? swimmer.leg : undefined
 
@@ -683,10 +700,10 @@ function summaryRowView(
           kind: "done",
           time: res.time,
           status: res.status,
-          delta:
-            res.seed && res.time && res.seed !== "NT"
-              ? formatSeedTimeDelta(res.seed, res.time)
-              : null,
+          delta: (() => {
+            const seed = res.deltaSeed && res.deltaSeed !== "NT" ? res.deltaSeed : res.seed
+            return seed && res.time && seed !== "NT" ? formatSeedTimeDelta(seed, res.time) : null
+          })(),
           place: res.place,
           points: res.points,
           podium: podiumPlace != null && podiumPlace === res.place,
@@ -784,17 +801,16 @@ function summaryRowPdf(
   const relayName = eventView ? view.label : `${relayEvent} ${relayLetter}`
   const relayFullName = eventView ? undefined : `${relayEvent} Relay ${relayLetter}`
   const startTime = (display.showHeatLane && entry.startTime) || undefined
-  // As on screen, a relay athlete's leg follows the name ("200 Medley A (Leg 4)") and their split
-  // sits under the time; the round rides beside the name (then any result tags). The line below
-  // has the leg's own 50s when the results time them ("23.83 · 25.37").
-  const meta = view.isRelay && view.team ? relayLegSubSplitsText(view.legSubSplits) : null
+  // As on screen, a relay athlete's leg follows the name ("200 Medley A (4th)") and their split
+  // sits under the time; the round rides beside the name (then any result tags). Under the name go
+  // the leg's own 50s when the results time them, in columns like an individual swim's splits.
   const legs = view.isRelay ? relayLegs(entry) : []
   const heatLane = display.showHeatLane ? view.heatLane : null
   return {
     eventNumber: view.badgeNumber,
     label: (view.isRelay ? relayName : view.label) ?? "",
     fullLabel: view.isRelay ? relayFullName : undefined,
-    labelNote: view.legNumber != null ? `Leg ${view.legNumber}` : undefined,
+    labelNote: view.legNumber != null ? relayLegOrdinal(view.legNumber) : undefined,
     resultNote: view.team,
     // By event the round is its own gold tag; by athlete it leads the grey text after the label.
     round: (eventView && display.showRound && view.round) || undefined,
@@ -802,13 +818,12 @@ function summaryRowPdf(
       [!eventView && display.showRound ? view.round : null, view.isRelay ? null : view.sub]
         .filter(Boolean)
         .join(" · ") || undefined,
-    meta: meta || undefined,
     heatLane: heatLane || undefined,
     startTime,
     legs: view.isRelay ? legs.map((leg) => leg.name) : undefined,
     legSplits: view.isRelay ? legs.map((leg) => leg.split) : undefined,
     legSubSplits: legs.some((leg) => leg.subSplits.length) ? legs.map((leg) => leg.subSplits) : undefined,
-    splits: view.isRelay ? undefined : swimSplits(entry),
+    splits: view.isRelay ? (view.team && view.legSubSplits.length ? view.legSubSplits : undefined) : swimSplits(entry),
     result: view.result,
   }
 }
@@ -892,6 +907,7 @@ function SummaryEntryRow({
           points: res.points,
           podium: effectiveRelayRound(entry) !== "P",
           seedTime: res.seed && res.seed !== "NT" ? res.seed : undefined,
+          headSeedTime: res.deltaSeed && res.deltaSeed !== "NT" ? res.deltaSeed : undefined,
           seedRank: displaySeedRank(entry),
           heat: formatHeatNumber(heat),
           startTime: entry.startTime || undefined,
@@ -1038,10 +1054,10 @@ function SummaryEntryRow({
       />
     ) : null
 
-  // The leg an athlete swam, after the relay's name and styled like a preferred name: "(Leg 2)".
+  // The leg an athlete swam, after the relay's name and styled like a preferred name: "(2nd)".
   const legSuffix =
     view.legNumber != null ? (
-      <span className="font-normal text-foreground-secondary"> (Leg {view.legNumber})</span>
+      <span className="font-normal text-foreground-secondary"> ({relayLegOrdinal(view.legNumber)})</span>
     ) : null
 
   return (
@@ -1404,12 +1420,8 @@ export default function MeetSheetSummarySection({
     persist(ROWINFO_KEY, JSON.stringify({ round, hl }))
   }
 
-  // A points column, lined up across every row, once there are points (the results PDF's, or the
-  // meet's scoring table's).
-  const showPoints =
-    (results ?? []).some((r) => r.resultPoints != null || r.finalPoints != null || r.prelimPoints != null) ||
-    (relayResults ?? []).some((r) => r.resultPoints != null || r.finalPoints != null)
-  const display: RowDisplay = { density, showRound, showHeatLane, showPoints }
+  // Points stay off the rows; the swim's detail modal shows them.
+  const display: RowDisplay = { density, showRound, showHeatLane }
 
   const athleteGenders = new Map(
     athletes
@@ -1745,14 +1757,19 @@ export default function MeetSheetSummarySection({
   }
 
   // The filters in effect, as chips under the toolbar (the ones the view in use applies).
-  const roundsShown = roundFilterOn ? roundFilterLabel(hiddenRounds, availableRounds) : null
+  // One chip per shown round, each hiding just its own.
+  const roundChips = roundFilterOn ? roundFilterChips(hiddenRounds, availableRounds) : []
   const activeFilters: ActiveFilter[] = [
     ...(mineActive ? [{ key: "mine", label: "My events", clear: () => setMineOnly(false) }] : []),
     ...(viewMode === "summary" && activeSession
       ? [{ key: "session", label: activeSession, clear: () => setSessionFilter(null) }]
       : []),
-    ...(viewMode === "summary" && roundsShown
-      ? [{ key: "rounds", label: roundsShown, clear: () => setHiddenRounds(new Set()) }]
+    ...(viewMode === "summary"
+      ? roundChips.map((chip) => ({
+          key: `round-${chip.kind ?? "none"}`,
+          label: chip.label,
+          clear: () => setHiddenRounds(chip.hide),
+        }))
       : []),
     ...(genderFilter !== "all"
       ? [{ key: "gender", label: genderFilter === "F" ? "Women" : "Men", clear: () => setGenderFilter("all") }]
@@ -2140,7 +2157,7 @@ export default function MeetSheetSummarySection({
                         <li key={athlete.id} id={jumpIds.get(athlete.id)} className="scroll-mt-3 border-t border-border">
                           <Link
                             href={athletePath(athlete.slug ?? athlete.id)}
-                            className={`grid grid-cols-[1fr_96px_72px] items-center px-4 py-3 text-sm text-foreground transition-colors hover:bg-background-hover hover:text-primary ${
+                            className={`grid grid-cols-[1fr_96px_72px] items-center px-4 py-3 text-sm text-foreground transition-colors duration-200 hover:bg-background-hover ${
                               isMe ? "bg-accent/5" : ""
                             }`}
                           >
@@ -2210,8 +2227,9 @@ export default function MeetSheetSummarySection({
                       {/* Tint layered over the opaque base so the meet background doesn't show through;
                           `--row-hover` keeps the tint in the rows' hover wash. */}
                       <div className="bg-accent/[0.04] [--row-hover:color-mix(in_oklab,var(--color-accent)_4%,var(--color-background-hover))]">
-                        <div
-                          className="flex items-center gap-2 py-2 text-sm font-medium text-accent"
+                        <Link
+                          href={athletePath(viewerRecord?.slug ?? viewerAthleteId!)}
+                          className="flex items-center gap-2 py-2 text-sm font-medium text-accent transition-colors duration-200 hover:bg-[var(--row-hover,var(--color-background-hover))]"
                           style={summaryHeaderInset}
                         >
                           <AthleteAvatar
@@ -2221,7 +2239,7 @@ export default function MeetSheetSummarySection({
                           <span>
                             <RosterName name={athleteNames.get(viewerAthleteId!) ?? ""} />
                           </span>
-                        </div>
+                        </Link>
                         <ul className="border-t border-border-subtle">
                           {filteredMyEntries.map((entry, i) => (
                             <SummaryEntryRow
@@ -2246,7 +2264,7 @@ export default function MeetSheetSummarySection({
                       >
                         <Link
                           href={athletePath(athleteData?.slug ?? athleteGroup.athleteId)}
-                          className="flex items-center gap-2 py-2 text-sm font-medium text-foreground transition-colors hover:text-primary"
+                          className="flex items-center gap-2 py-2 text-sm font-medium text-foreground transition-colors duration-200 hover:bg-background-hover"
                           style={summaryHeaderInset}
                         >
                           <AthleteAvatar image={athleteData?.image} name={athleteGroup.name} />

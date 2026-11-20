@@ -10,7 +10,6 @@ import {
   highlightTileRows,
   isDropCounterValue,
   meetFileName,
-  relayLegSubSplitsText,
   rosterNameFirstLast,
   rosterNamePreferred,
   rosterSummaryExportSections,
@@ -162,8 +161,12 @@ const RIGHT_WIDTH = M.deltaWidth + M.timeWidth + M.placeWidth
 /** Medley relay legs in swim order. */
 const MEDLEY_STROKES = ["BK", "BR", "FL", "FR"]
 
-/** An individual swim's splits go four to a line, where relay legs go two. */
+/**
+ * An individual swim's splits (and a relay athlete's leg 50s) go four to a line; under an event,
+ * each relay leg's 50s go two to a line beneath its swimmer, in their half of the row.
+ */
 const SPLITS_PER_LINE = 4
+const LEG_SPLITS_PER_LINE = 2
 /** The first split column's indent under the name, and the gap between a column and the next. */
 const SPLIT_INDENT = px(12)
 const SPLIT_GAP = px(18)
@@ -362,7 +365,7 @@ export function parseRosterSummaryPdfRequest(body: unknown): RosterSummaryPdfReq
  * jsPDF's built-in Helvetica only covers WinAnsi: keep Latin-1 and the few typographic marks it has,
  * fold accented letters outside it to their base letter, and drop anything else.
  */
-function pdfText(value: string): string {
+export function pdfText(value: string): string {
   const winAnsiExtras = "“”‘’–—…•€™"
   let out = ""
   for (const ch of value.replace(/[−‐‑]/g, "-")) {
@@ -563,10 +566,12 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
 
   /**
    * Lines a pair of relay legs takes: the names, then — when any leg on the relay has sub-splits
-   * (400/800 relays) — a line of them under the names, so every pair of the relay lines up alike.
+   * (400/800 relays) — their split columns under the names, two to a line, as many lines as the
+   * longest leg needs, so every pair of the relay lines up alike.
    */
   function linesPerLegPair(row: RosterSummaryPdfRow): number {
-    return row.legSubSplits?.some((times) => times.length) ? 2 : 1
+    const most = Math.max(0, ...(row.legSubSplits ?? []).map((times) => times.length))
+    return 1 + Math.ceil(most / LEG_SPLITS_PER_LINE)
   }
 
   /** Lines the relay legs take: two legs to a line (or two lines, with sub-splits). */
@@ -587,17 +592,14 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
       const cellLeft = x + (i % 2) * cellWidth
       const lineTop = top + Math.floor(i / 2) * pairLines * M.metaLh
       const baseline = centeredBaseline(lineTop, M.metaLh, M.metaSize)
-      // The leg's own 50s on the line under its name, muted like its split.
-      const subSplits = relayLegSubSplitsText(row.legSubSplits?.[i])
-      if (subSplits) {
-        setType("normal", M.metaSize, INK_TERTIARY)
-        const subLeft = cellLeft + M.legTagWidth
-        doc.text(
-          fit(subSplits, cellWidth - M.legTagWidth - px(8)),
-          subLeft,
-          centeredBaseline(lineTop + M.metaLh, M.metaLh, M.metaSize)
-        )
-      }
+      // The leg's own 50s under its name, in split columns like an individual swim's, two to a line.
+      drawSplitColumns(
+        (row.legSubSplits?.[i] ?? []).map((time) => pdfText(time)),
+        cellLeft + M.legTagWidth,
+        lineTop + M.metaLh,
+        cellWidth - M.legTagWidth - px(8),
+        LEG_SPLITS_PER_LINE
+      )
       setType("bold", M.seedTagSize, INK_TERTIARY)
       doc.text(tags?.[i] ?? String(i + 1), cellLeft, baseline, { charSpace: px(0.5) })
       const nameLeft = cellLeft + M.legTagWidth
@@ -628,16 +630,58 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
    */
   function drawSplits(row: RosterSummaryPdfRow, x: number, top: number, width: number) {
     const times = (row.splits ?? []).map((split) => pdfText(formatDisplayTime(split.time)))
+    drawSplitColumns(times, x, top, width, SPLITS_PER_LINE)
+  }
+
+  /**
+   * Where split columns end on the right, `perLine` to a line from `x` (see drawSplitColumns).
+   * Measures without disturbing the current font, like resultWidth.
+   */
+  function splitColumnsRight(x: number, width: number, perLine: number): number {
+    const font = doc.getFont()
+    const size = doc.getFontSize()
+    doc.setFont("helvetica", "normal")
+    doc.setFontSize(M.metaSize)
+    const columnWidth = doc.getTextWidth("1:00.00")
+    doc.setFont(font.fontName, font.fontStyle)
+    doc.setFontSize(size)
+    const firstRight = x + SPLIT_INDENT + columnWidth
+    const pitch = Math.min(columnWidth + SPLIT_GAP, (x + width - firstRight) / Math.max(1, perLine - 1))
+    return firstRight + (perLine - 1) * pitch
+  }
+
+  /**
+   * How far right the second line's text may run: up to the start time's column, or — with only a
+   * note under the time — up to that note (the delta beside the time is on the label line only).
+   */
+  function secondLineTextRight(row: RosterSummaryPdfRow): number {
+    if (row.startTime || !row.resultNote || !row.result) return textRight(row)
+    const placeless = row.result.kind === "done" && row.result.placeless
+    const font = doc.getFont()
+    const size = doc.getFontSize()
+    doc.setFont("helvetica", "normal")
+    doc.setFontSize(M.metaSize)
+    const noteWidth = doc.getTextWidth(pdfText(row.resultNote))
+    doc.setFont(font.fontName, font.fontStyle)
+    doc.setFontSize(size)
+    return right - (placeless ? 0 : M.placeWidth) - noteWidth
+  }
+
+  /**
+   * Times in columns, `perLine` to a line, each right-aligned at an even, compact spacing so the
+   * decimals line up down the columns — the first a little in from `x`.
+   */
+  function drawSplitColumns(times: string[], x: number, top: number, width: number, perLine: number) {
     if (times.length === 0) return
     setType("normal", M.metaSize, INK_TERTIARY)
     // Columns sit where a minute-long split would fit, so they line up from row to row, and never
     // spread past the row's edge.
     const columnWidth = doc.getTextWidth("1:00.00")
     const firstRight = x + SPLIT_INDENT + columnWidth
-    const pitch = Math.min(columnWidth + SPLIT_GAP, (x + width - firstRight) / (SPLITS_PER_LINE - 1))
+    const pitch = Math.min(columnWidth + SPLIT_GAP, (x + width - firstRight) / Math.max(1, perLine - 1))
     times.forEach((time, i) => {
-      const baseline = centeredBaseline(top + Math.floor(i / SPLITS_PER_LINE) * M.metaLh, M.metaLh, M.metaSize)
-      doc.text(time, firstRight + (i % SPLITS_PER_LINE) * pitch, baseline, { align: "right" })
+      const baseline = centeredBaseline(top + Math.floor(i / perLine) * M.metaLh, M.metaLh, M.metaSize)
+      doc.text(time, firstRight + (i % perLine) * pitch, baseline, { align: "right" })
     })
   }
 
@@ -675,7 +719,7 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
     return row.place ? left + M.leadPlaceWidth + M.badgeGap : left
   }
 
-  /** The label note as drawn after the label (" (Leg 4)"), or "" for none. */
+  /** The label note as drawn after the label (" (4th)"), or "" for none. */
   function labelNoteText(row: RosterSummaryPdfRow): string {
     return row.labelNote ? pdfText(` (${row.labelNote})`) : ""
   }
@@ -790,12 +834,25 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
   }
 
   /**
+   * Whether the second line needs a line of its own under the label. Split columns straight under
+   * the label share it instead (a relay athlete's 50s beside their split under the time), when they
+   * stop short of the right-hand columns.
+   */
+  function secondLineReserved(row: RosterSummaryPdfRow): boolean {
+    if (!secondLine(row)) return false
+    if (metaLines(row).length > 0 || legsLineCount(row) > 0 || splitsLineCount(row) === 0) return true
+    const textLeft = rowTextLeft(row)
+    const perLine = Math.min(SPLITS_PER_LINE, row.splits?.length ?? 0)
+    return splitColumnsRight(textLeft, right - textLeft, perLine) > secondLineTextRight(row) - px(12)
+  }
+
+  /**
    * Lines under the label: the meta (whose first line the start time shares), then the relay legs,
    * the swim's splits or the athlete's new Nationals cuts.
    */
   function linesBelow(row: RosterSummaryPdfRow): number {
     return (
-      Math.max(metaLines(row).length, secondLine(row) ? 1 : 0) +
+      Math.max(metaLines(row).length, secondLineReserved(row) ? 1 : 0) +
       legsLineCount(row) +
       splitsLineCount(row) +
       cutsLineCount(row)
@@ -914,7 +971,7 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
     doc.text(label, textLeft, baseline)
     let labelEndX = textLeft + doc.getTextWidth(label)
     if (note) {
-      // " (Leg 4)" in the label's size, lighter — as a preferred name's parentheses on the page.
+      // " (4th)" in the label's size, lighter — as a preferred name's parentheses on the page.
       setType("normal", M.labelSize, INK_SECONDARY)
       doc.text(note, labelEndX, baseline)
       labelEndX += noteWidth
@@ -953,7 +1010,7 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
     lines.forEach((line, i) => {
       doc.text(line, textLeft, centeredBaseline(lineTop + i * M.metaLh, M.metaLh, M.metaSize))
     })
-    lineTop += Math.max(lines.length, secondLine(row) ? 1 : 0) * M.metaLh
+    lineTop += Math.max(lines.length, secondLineReserved(row) ? 1 : 0) * M.metaLh
     drawLegs(row, textLeft, lineTop, maxBelow)
     drawSplits(row, textLeft, lineTop + legsLineCount(row) * M.metaLh, maxBelow)
     drawCuts(row, textLeft, lineTop + (legsLineCount(row) + splitsLineCount(row)) * M.metaLh)
@@ -1527,7 +1584,7 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
   setColumn(0)
   for (const section of request.sections) {
     for (const row of section.rows) {
-      // Likewise a label note ("(Leg 4)") that would cut the label itself short leads that line,
+      // Likewise a label note ("(4th)") that would cut the label itself short leads that line,
       // so the name stays whole.
       if (row.labelNote && !labelFitsWhole(row, row.label)) {
         row.meta = [row.labelNote, row.meta].filter(Boolean).join(" | ")

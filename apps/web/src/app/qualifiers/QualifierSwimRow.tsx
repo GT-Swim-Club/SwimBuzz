@@ -50,7 +50,7 @@ export function QualifierSwimRow({
     <Link
       href={href}
       aria-label={ariaLabel}
-      className={`${className} hover:bg-background-hover ${highlight ? meTintClass : ""}`}
+      className={`${className} hover:bg-[var(--qualifier-row-hover,var(--brand-color-bg-hover))] ${highlight ? meTintClass : ""}`}
     >
       {children}
     </Link>
@@ -64,7 +64,7 @@ export function QualifierSwimRow({
 /** A qualifying time with how far under the cut it is, for the compact gallery rows. */
 export function GallerySwimTime({ swim }: { swim: QualifierRow }) {
   return (
-    <span className="shrink-0 whitespace-nowrap font-mono text-sm font-semibold tabular-nums text-foreground transition-colors group-hover:text-primary">
+    <span className="shrink-0 whitespace-nowrap font-mono text-sm font-semibold tabular-nums text-foreground">
       {swim.time}
       <span className="ml-1.5 text-xs font-medium text-success-text">{qualifierMarginLabel(swim)}</span>
     </span>

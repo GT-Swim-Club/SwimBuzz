@@ -130,7 +130,7 @@ export function MeetCompetitionCard({
       {visibleEventOrder ? (
         <EventOrderButton
           order={visibleEventOrder}
-          trigger={(open) => <LedgerRow icon="listOrdered" label="Order of events" onClick={open} />}
+          trigger={(open) => <LedgerRow icon="listOrdered" label="Order of Events" onClick={open} />}
         />
       ) : null}
       {visibleAfterOrder.map(renderLink)}
@@ -158,7 +158,7 @@ export function MeetSignupCard({
         trigger={(open) => (
           <LedgerRow
             icon="import"
-            label="Import sign-ups"
+            label="Import Sign-Ups"
             onClick={open}
             trailing={
               importedSignups != null ? (
@@ -179,21 +179,21 @@ export function MeetSignupCard({
               <button
                 type="button"
                 onClick={open}
-                className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 py-[11px] pl-4 text-left transition-colors hover:text-primary"
+                className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 py-[11px] pl-4 text-left transition-colors duration-200 hover:bg-background-hover"
               >
                 <LedgerIcon name="import" className="h-4 w-4 shrink-0 text-foreground-tertiary" />
-                <span className="truncate">Import roster</span>
+                <span className="truncate">Import Roster</span>
               </button>
               <button
                 type="button"
                 onClick={() => window.dispatchEvent(new Event(SHOW_ROSTER_EVENT))}
-                className="shrink-0 cursor-pointer py-[11px] pl-3 pr-4 text-xs text-foreground-secondary transition-colors hover:text-primary"
+                className="shrink-0 cursor-pointer py-[11px] pl-3 pr-4 text-xs text-foreground-secondary transition-colors duration-200 hover:bg-background-hover"
               >
                 {rosterCount} on roster
               </button>
             </div>
           ) : (
-            <LedgerRow icon="import" label="Import roster" onClick={open} />
+            <LedgerRow icon="import" label="Import Roster" onClick={open} />
           )
         }
       />
@@ -260,7 +260,7 @@ export function MeetPhotosCard({
   const hasAny = photos.length > 0 || count > 0
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-border bg-background px-4 pb-4 pt-2">
+    <div className="flex flex-col gap-3 overflow-hidden rounded-xl border border-border bg-background px-4 pb-4 pt-2">
       <div className="flex min-h-7 items-center justify-between gap-2">
         <span className={ledgerHeaderClass}>Photos</span>
         {isCoach ? (

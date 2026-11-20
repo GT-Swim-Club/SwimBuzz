@@ -310,7 +310,7 @@ export function LedgerCard({
 }
 
 export const ledgerRowClass =
-  "flex w-full items-center justify-between gap-3 border-t border-border px-4 py-[11px] text-left text-sm text-foreground transition-colors hover:text-primary"
+  "flex w-full items-center justify-between gap-3 border-t border-border px-4 py-[11px] text-left text-sm text-foreground transition-colors duration-200 hover:bg-background-hover"
 
 export function LedgerRowBody({ icon, label, trailing }: { icon: LedgerIconName; label: ReactNode; trailing?: ReactNode }) {
   return (

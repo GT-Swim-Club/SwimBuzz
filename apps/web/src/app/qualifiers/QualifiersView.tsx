@@ -7,21 +7,23 @@ import { formatSeasonLabel } from "@swimbuzz/shared"
 import FluidToolbar from "@/components/ui/FluidToolbar"
 import ToolbarSelect from "@/components/ui/ToolbarSelect"
 import { ListLayoutToggle, useListLayout } from "@/components/ui/ListLayout"
-import { ledgerHeaderClass } from "@/components/meet/Ledger"
-import type { QualifierAthlete, StandardsTableRow } from "@/lib/qualifiers/nationals-qualifiers"
-import { groupQualifiersByEvent } from "@/lib/qualifiers/qualifier-events"
+import JumpRail, { JUMP_RAIL_LAYOUT_CLASS, JUMP_RAIL_LETTERS } from "@/components/ui/JumpRail"
+import type { QualifierAthlete } from "@/lib/qualifiers/nationals-qualifiers"
+import {
+  parseQualifierGender,
+  selectQualifierView,
+  type QualifierGenderFilter,
+} from "@/lib/qualifiers/qualifier-events"
 import StandardsTableModal from "./StandardsTableModal"
+import DownloadQualifiersPdfButton from "./DownloadQualifiersPdfButton"
 import UploadStandardsButton from "./UploadStandardsButton"
 import QualifiersList from "./QualifiersList"
 import QualifierGalleryCard from "./QualifierGalleryCard"
-import QualifierEventList, { qualifierCountLabel } from "./QualifierEventList"
+import QualifierEventList from "./QualifierEventList"
 import QualifierEventCard from "./QualifierEventCard"
-import StandardsSheet from "./StandardsSheet"
 
-type Gender = "all" | "M" | "F"
-
-const GENDER_LABELS: Record<Gender, string> = { all: "All", M: "Men", F: "Women" }
-const galleryGridClass = "grid grid-cols-[repeat(auto-fill,minmax(max(220px,calc((100%-36px)/4)),1fr))] gap-3"
+const GENDER_LABELS: Record<QualifierGenderFilter, string> = { all: "All", M: "Men", F: "Women" }
+const galleryGridClass = "grid grid-cols-[repeat(auto-fill,minmax(max(min(300px,100%),calc((100%-36px)/4)),1fr))] gap-3"
 
 function EmptyState({ title, message, action }: { title: string; message: string; action?: ReactNode }) {
   return (
@@ -34,9 +36,8 @@ function EmptyState({ title, message, action }: { title: string; message: string
 }
 
 /**
- * The Nationals page below the nav: toolbar, a line naming the standards and
- * counts, then qualifiers by athlete or by event in the gallery or list
- * layout, then the standards themselves. The server loads one season (every
+ * The Nationals page below the nav: toolbar, then qualifiers by athlete or by
+ * event in the gallery or list layout. The server loads one season (every
  * gender); gender, grouping and search live in the URL but update it in place
  * and filter here, so changing them is instant. Season changes refetch.
  */
@@ -45,7 +46,6 @@ export default function QualifiersView({
   seasons,
   standards,
   qualifiers,
-  standardsTable,
   eventRank,
   currentAthleteId,
   isCoach,
@@ -54,7 +54,6 @@ export default function QualifiersView({
   seasons: string[]
   standards: { yearLabel: string | null; sourceUrl: string | null; course: string } | null
   qualifiers: QualifierAthlete[]
-  standardsTable: StandardsTableRow[]
   eventRank: Record<string, number>
   currentAthleteId: string | null
   isCoach: boolean
@@ -65,8 +64,7 @@ export default function QualifiersView({
   const [, startTransition] = useTransition()
   const [shownSeason, setShownSeason] = useOptimistic(season)
 
-  const genderParam = searchParams.get("gender")
-  const gender: Gender = genderParam === "M" || genderParam === "F" ? genderParam : "all"
+  const gender = parseQualifierGender(searchParams.get("gender"))
   const byEvent = searchParams.get("group") === "event"
   const query = searchParams.get("q")?.trim() ?? ""
   const seasonLabel = formatSeasonLabel(season)
@@ -87,41 +85,35 @@ export default function QualifiersView({
     })
   }
 
-  const base = gender === "all" ? qualifiers : qualifiers.filter((athlete) => athlete.gender === gender)
-  const needle = query.toLowerCase()
-  const nameMatches = (athlete: QualifierAthlete) =>
-    [athlete.firstName, athlete.lastName, athlete.preferredName ?? ""].some((name) =>
-      name.toLowerCase().includes(needle)
-    )
-  const eventMatches = (event: string) => event.toLowerCase().includes(needle)
-
+  const view = selectQualifierView(qualifiers, { gender, query, byEvent, eventRank })
+  const { base, eventGroups } = view
   // Alphabetical from the server, with you first — the same order in both layouts.
-  const athletes = base
-    .filter((athlete) => !needle || nameMatches(athlete) || athlete.events.some((e) => eventMatches(e.event)))
-    .sort((a, b) => Number(b.athleteId === currentAthleteId) - Number(a.athleteId === currentAthleteId))
-  const eventGroups = byEvent
-    ? groupQualifiersByEvent(base, eventRank, {
-        splitGender: gender === "all",
-        includeSwim: ({ athlete, swim }) => !needle || nameMatches(athlete) || eventMatches(swim.event),
-      })
-    : []
-  // A search narrows the standards to matching events; a name search hides them.
-  const standardRows = needle ? standardsTable.filter((row) => eventMatches(row.event)) : standardsTable
+  const athletes = [...view.athletes].sort(
+    (a, b) => Number(b.athleteId === currentAthleteId) - Number(a.athleteId === currentAthleteId)
+  )
+
+  // The A–Z rail (by athlete): the first athlete under each last-name letter is its target. You lead
+  // the list out of order, so you're never one.
+  const anchorIds = new Map<string, string>()
+  for (const athlete of athletes) {
+    if (athlete.athleteId === currentAthleteId) continue
+    const letter = athlete.lastName.trim()[0]?.toUpperCase()
+    if (!letter || !JUMP_RAIL_LETTERS.includes(letter)) continue
+    const id = `qualifiers-${letter}`
+    if (![...anchorIds.values()].includes(id)) anchorIds.set(athlete.athleteId, id)
+  }
+  const railTargets = new Set(anchorIds.values())
+  const railItems = JUMP_RAIL_LETTERS.map((letter) => ({
+    key: letter,
+    label: letter,
+    targetId: railTargets.has(`qualifiers-${letter}`) ? `qualifiers-${letter}` : undefined,
+  }))
 
   const genderNoun = gender === "F" ? "women " : gender === "M" ? "men " : ""
   const placeholder = `Search ${base.length} ${genderNoun}qualifier${base.length === 1 ? "" : "s"}…`
   const isEmpty = byEvent ? eventGroups.length === 0 : athletes.length === 0
   const showGender = gender === "all"
 
-  const standardsTitle = `${standards?.yearLabel ? `${standards.yearLabel} ` : ""}Nationals Standards`
-  const cutCount = base.reduce((sum, athlete) => sum + athlete.events.length, 0)
-  const summary = standards
-    ? [
-        `${standardsTitle} · ${standards.course}`,
-        qualifierCountLabel(base.length),
-        `${cutCount} ${cutCount === 1 ? "cut" : "cuts"}`,
-      ].join(" · ")
-    : null
 
   let content
   if (!standards) {
@@ -165,7 +157,12 @@ export default function QualifiersView({
   } else {
     content =
       layout === "list" ? (
-        <QualifiersList qualifiers={athletes} currentAthleteId={currentAthleteId} showGender={showGender} />
+        <QualifiersList
+          qualifiers={athletes}
+          currentAthleteId={currentAthleteId}
+          showGender={showGender}
+          anchorIds={anchorIds}
+        />
       ) : (
         <div className={galleryGridClass}>
           {athletes.map((athlete) => (
@@ -174,6 +171,7 @@ export default function QualifiersView({
               athlete={athlete}
               isMe={athlete.athleteId === currentAthleteId}
               showGender={showGender}
+              anchorId={anchorIds.get(athlete.athleteId)}
             />
           ))}
         </div>
@@ -230,15 +228,23 @@ export default function QualifiersView({
               <option value="event">By event</option>
             </ToolbarSelect>
             <ListLayoutToggle />
+            {standards ? (
+              <DownloadQualifiersPdfButton season={season} gender={gender} byEvent={byEvent} query={query} />
+            ) : null}
             {isCoach ? <UploadStandardsButton season={season} course={standards?.course ?? "SCY"} /> : null}
           </>
         }
       />
-      {summary ? <p className={`-mb-1 px-1 ${ledgerHeaderClass}`}>{summary}</p> : null}
-      {content}
-      {standards && standardRows.length > 0 ? (
-        <StandardsSheet rows={standardRows} gender={gender} title={standardsTitle} />
-      ) : null}
+      {standards && !isEmpty && !byEvent ? (
+        // The A–Z rail sits beside the qualifiers, or out in the page's right margin once that's wide
+        // enough (see JumpRail), as on the roster — keep in step with QualifiersSkeleton.
+        <div className={JUMP_RAIL_LAYOUT_CLASS}>
+          <div className="min-w-0 flex-1">{content}</div>
+          <JumpRail label="Jump to letter" items={railItems} />
+        </div>
+      ) : (
+        content
+      )}
     </>
   )
 }

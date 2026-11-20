@@ -14,7 +14,6 @@ import {
 } from "react"
 import { flushSync } from "react-dom"
 import { formatDisplayTime, formatOrdinal } from "@/lib/utils"
-import { formatPoints } from "@swimbuzz/shared"
 import SwimDetailModal, { deltaPillClass, formatDelta, type SwimDetail } from "./SwimDetailModal"
 
 export type RowDensity = "cozy" | "compact"
@@ -39,8 +38,6 @@ export type RowDisplay = {
   density: RowDensity
   showRound: boolean
   showHeatLane: boolean
-  /** A points column after place (the results PDF scored this meet). */
-  showPoints?: boolean
 }
 
 export const PODIUM_PILL: Record<number, string> = {
@@ -150,15 +147,12 @@ export function SummaryRowResult({
   result,
   compact,
   fluid = false,
-  showPoints = false,
   note,
 }: {
   result: RowResult
   compact: boolean
   /** Columns narrowing with the roster summary (see fluidLength); fixed at full width otherwise. */
   fluid?: boolean
-  /** A points column after place — blank on rows that didn't score, so columns line up. */
-  showPoints?: boolean
   /** A line under the time (a relay athlete's split, "20.05"), the two centered together on the row. */
   note?: string
 }) {
@@ -167,24 +161,19 @@ export function SummaryRowResult({
   const deltaWidth = compact ? width(52, 58) : width(56, 64)
   const timeWidth = compact ? width(64, 70) : width(68, 76)
   const placeWidth = compact ? width(36, 44) : width(40, 48)
-  const pointsWidth = compact ? width(38, 44) : width(42, 48)
-  const pointsColumn = (points?: number) =>
-    showPoints ? (
-      <span
-        style={pointsWidth}
-        className={`shrink-0 whitespace-nowrap text-right text-foreground-tertiary ${compact ? "text-[11px]" : "text-xs"}`}
-      >
-        {points != null ? `${formatPoints(points)} pts` : null}
-      </span>
-    ) : null
   // The time's column: the time, with the note under it when there is one — the two centered
-  // together on the row, beside the delta, place and points, which stay centered on their own.
+  // together on the row, beside the delta and place, which stay centered on their own.
+  // With a note the column takes no height of its own (the pair spills evenly into the row's
+  // padding), so the row stays as tall as one without.
   const timeColumn = (time: ReactNode) => (
-    <span style={timeWidth} className="flex shrink-0 flex-col items-end">
+    <span
+      style={timeWidth}
+      className={`flex shrink-0 flex-col items-end ${note ? "h-0 justify-center leading-[1.15]" : ""}`}
+    >
       {time}
       {note ? (
         <span
-          className={`whitespace-nowrap leading-[1.4] tabular-nums text-foreground-tertiary ${compact ? "text-[11px]" : "text-xs"}`}
+          className={`whitespace-nowrap leading-[1.15] tabular-nums text-foreground-secondary ${compact ? "text-[11px]" : "text-xs"}`}
         >
           {note}
         </span>
@@ -235,7 +224,6 @@ export function SummaryRowResult({
             ) : null}
           </span>
         )}
-        {pointsColumn(result.points)}
       </span>
     )
   }
@@ -266,20 +254,16 @@ export function SummaryRowResult({
             <span className={compact ? "pr-1.5" : "pr-[7px]"}>{formatOrdinal(result.seedRank)}</span>
           ) : null}
         </span>
-        {pointsColumn()}
       </span>
     )
   }
   return (
-    <>
-      <span
-        style={compact ? width(152, 172) : width(164, 188)}
-        className={`shrink-0 text-right font-mono text-foreground-tertiary ${compact ? "text-[13px]" : "text-sm"}`}
-      >
-        —
-      </span>
-      {pointsColumn()}
-    </>
+    <span
+      style={compact ? width(152, 172) : width(164, 188)}
+      className={`shrink-0 text-right font-mono text-foreground-tertiary ${compact ? "text-[13px]" : "text-sm"}`}
+    >
+      —
+    </span>
   )
 }
 
@@ -622,7 +606,7 @@ export default function SummaryRow({
           {hlText}
         </span>
       ) : null}
-      <SummaryRowResult result={result} compact={compact} fluid showPoints={display.showPoints} note={team} />
+      <SummaryRowResult result={result} compact={compact} fluid note={team} />
       {trailing ? (
         <span
           className="-ml-1 flex shrink-0 items-center"

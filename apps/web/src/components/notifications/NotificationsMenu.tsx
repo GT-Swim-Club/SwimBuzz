@@ -33,6 +33,9 @@ export default function NotificationsMenu({
   // immediately and refresh it in the background.
   const [loaded, setLoaded] = useState(false)
   const [prevInitial, setPrevInitial] = useState(initialNotifications)
+  // What was unread when the menu opened: shown as new for as long as it stays open, though
+  // opening marks everything read.
+  const [newIds, setNewIds] = useState<ReadonlySet<string>>(() => new Set())
   const rootRef = useRef<HTMLDivElement>(null)
 
   // Only resync when the server actually sends a new list; reads are local +
@@ -42,10 +45,18 @@ export default function NotificationsMenu({
     setNotifications(initialNotifications)
   }
 
-  // The badge counts what arrived since the list was last opened; opening it
-  // clears the badge, while each item stays highlighted until it's tapped.
+  // The badge counts what arrived since the list was last opened. Opening it marks everything
+  // read (clearing the badge), while what was new stays highlighted until the menu closes.
   const unseenCount = notifications.filter(isUnseenNotification).length
-  const unreadCount = notifications.filter((n) => !n.readAt).length
+
+  function unreadIds(list: NotificationItem[]) {
+    return list.filter((n) => !n.readAt).map((n) => n.id)
+  }
+
+  function openMenu() {
+    setNewIds(new Set(unreadIds(notifications)))
+    setOpen(true)
+  }
 
   function closeMenu() {
     setOpen(false)
@@ -53,15 +64,15 @@ export default function NotificationsMenu({
 
   useEscapeToClose(open, closeMenu)
 
-  const refresh = useCallback(async (): Promise<boolean> => {
+  const refresh = useCallback(async (): Promise<NotificationItem[] | null> => {
     try {
       const res = await fetch("/api/notifications", { cache: "no-store" })
-      if (!res.ok) return false
+      if (!res.ok) return null
       const data: { notifications: NotificationItem[] } = await res.json()
       setNotifications(data.notifications)
-      return true
+      return data.notifications
     } catch {
-      return false
+      return null
     }
   }, [])
 
@@ -88,10 +99,19 @@ export default function NotificationsMenu({
     let cancelled = false
 
     async function syncNotifications() {
-      const now = new Date().toISOString()
-      await Promise.all([refresh(), patchNotifications({ seen: true }).catch(() => null)])
+      // Fetch first so anything that arrived since the last poll is highlighted too, then mark
+      // the whole list read.
+      const fresh = await refresh()
       if (cancelled) return
-      setNotifications((prev) => prev.map((n) => ({ ...n, seenAt: n.seenAt ?? now })))
+      if (fresh) setNewIds((prev) => new Set([...prev, ...unreadIds(fresh)]))
+      const ok = await patchNotifications({ all: true })
+        .then((res) => res.ok)
+        .catch(() => false)
+      if (cancelled || !ok) return
+      const now = new Date().toISOString()
+      setNotifications((prev) =>
+        prev.map((n) => ({ ...n, readAt: n.readAt ?? now, seenAt: n.seenAt ?? now }))
+      )
     }
     void syncNotifications().finally(() => {
       if (!cancelled) setLoaded(true)
@@ -110,29 +130,11 @@ export default function NotificationsMenu({
     }
   }, [open, refresh])
 
-  async function markRead(id?: string) {
-    try {
-      const res = await patchNotifications(id ? { id } : { all: true })
-      if (!res.ok) return
-    } catch {
-      return
-    }
-
-    const now = new Date().toISOString()
-    setNotifications((prev) =>
-      prev.map((n) =>
-        !id || n.id === id
-          ? { ...n, readAt: n.readAt ?? now, seenAt: n.seenAt ?? now }
-          : n
-      )
-    )
-  }
-
   return (
     <div ref={rootRef} className="relative">
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => (open ? closeMenu() : openMenu())}
         aria-expanded={open}
         aria-haspopup="menu"
         aria-label={
@@ -161,15 +163,6 @@ export default function NotificationsMenu({
               <p className="text-sm font-medium text-foreground">
                 Notifications
               </p>
-              {loaded && unreadCount > 0 ? (
-                <button
-                  type="button"
-                  onClick={() => void markRead()}
-                  className="text-xs text-accent hover:text-primary"
-                >
-                  Mark all read
-                </button>
-              ) : null}
             </div>
             {!loaded ? (
               <div
@@ -186,7 +179,7 @@ export default function NotificationsMenu({
             ) : (
               <ul className="max-h-80 overflow-y-auto py-1">
                 {notifications.map((n) => {
-                  const unread = !n.readAt
+                  const unread = newIds.has(n.id)
                   const content = (
                     <div className="flex gap-2">
                       <span
@@ -201,7 +194,7 @@ export default function NotificationsMenu({
                               : "font-normal text-foreground-secondary"
                           }`}
                         >
-                          {unread ? <span className="sr-only">Unread: </span> : null}
+                          {unread ? <span className="sr-only">New: </span> : null}
                           {n.title}
                         </p>
                         {n.body ? (
@@ -227,10 +220,7 @@ export default function NotificationsMenu({
                         <Link
                           href={n.href}
                           role="menuitem"
-                          onClick={() => {
-                            void markRead(n.id)
-                            closeMenu()
-                          }}
+                          onClick={closeMenu}
                           className={className}
                         >
                           {content}
@@ -239,10 +229,7 @@ export default function NotificationsMenu({
                         <button
                           type="button"
                           role="menuitem"
-                          onClick={() => {
-                            void markRead(n.id)
-                            closeMenu()
-                          }}
+                          onClick={closeMenu}
                           className={`w-full text-left ${className}`}
                         >
                           {content}
@@ -260,7 +247,7 @@ export default function NotificationsMenu({
   )
 }
 
-function patchNotifications(body: { seen: true } | { all: true } | { id: string }) {
+function patchNotifications(body: { all: true }) {
   return fetch("/api/notifications", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },

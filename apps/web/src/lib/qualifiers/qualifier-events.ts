@@ -14,6 +14,15 @@ export type QualifierEventGroup = {
   swims: QualifierSwim[]
 }
 
+/** "Women 50 Free" when both genders are shown, else just the event. */
+export function eventGroupTitle(group: Pick<QualifierEventGroup, "gender" | "event">, splitGender: boolean) {
+  return splitGender ? `${group.gender === "F" ? "Women" : "Men"} ${group.event}` : group.event
+}
+
+export function qualifierCountLabel(count: number) {
+  return `${count} qualifier${count === 1 ? "" : "s"}`
+}
+
 /** The qualifying swim's spot on its meet page, or null for swims without a meet. */
 export function qualifierSwimHref(swim: QualifierRow): string | null {
   if (!swim.meetId) return null
@@ -59,4 +68,44 @@ export function groupQualifiersByEvent(
       (eventRank[a.event] ?? Number.MAX_SAFE_INTEGER) - (eventRank[b.event] ?? Number.MAX_SAFE_INTEGER) ||
       (a.gender === b.gender ? 0 : a.gender === "F" ? -1 : 1)
   )
+}
+
+export type QualifierGenderFilter = "all" | "M" | "F"
+
+export function parseQualifierGender(value: string | null | undefined): QualifierGenderFilter {
+  return value === "M" || value === "F" ? value : "all"
+}
+
+/**
+ * What the Nationals page shows for a gender filter and search: `base` (the gender's qualifiers,
+ * which the search placeholder counts), the athletes a search matches (by name or event,
+ * alphabetical from the server), and — grouped by event — the matching swims per event. Shared by
+ * the page and its PDF export so both list the same swims.
+ */
+export function selectQualifierView(
+  qualifiers: QualifierAthlete[],
+  {
+    gender,
+    query,
+    byEvent,
+    eventRank,
+  }: { gender: QualifierGenderFilter; query: string; byEvent: boolean; eventRank: Record<string, number> }
+) {
+  const base = gender === "all" ? qualifiers : qualifiers.filter((athlete) => athlete.gender === gender)
+  const needle = query.trim().toLowerCase()
+  const nameMatches = (athlete: QualifierAthlete) =>
+    [athlete.firstName, athlete.lastName, athlete.preferredName ?? ""].some((name) =>
+      name.toLowerCase().includes(needle)
+    )
+  const eventMatches = (event: string) => event.toLowerCase().includes(needle)
+  const athletes = base.filter(
+    (athlete) => !needle || nameMatches(athlete) || athlete.events.some((e) => eventMatches(e.event))
+  )
+  const eventGroups = byEvent
+    ? groupQualifiersByEvent(base, eventRank, {
+        splitGender: gender === "all",
+        includeSwim: ({ athlete, swim }) => !needle || nameMatches(athlete) || eventMatches(swim.event),
+      })
+    : []
+  return { base, athletes, eventGroups }
 }

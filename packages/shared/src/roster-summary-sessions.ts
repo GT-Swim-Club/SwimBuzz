@@ -120,6 +120,25 @@ export function roundFilterIncludes(
   return own.length === 0 || own.some((kind) => !hidden.has(kind))
 }
 
+/**
+ * The round filter as chips, one per shown round ("Finals", "Timed Finals"), or [] when every round
+ * shows. `hide` is the hidden set with that chip's round hidden too — or empty, clearing the filter,
+ * once no round would be left — and with nothing shown at all there's one "No rounds" chip that clears it.
+ */
+export function roundFilterChips(
+  hidden: ReadonlySet<SummaryRoundKind>,
+  available: SummaryRoundKind[]
+): { kind: SummaryRoundKind | null; label: string; hide: Set<SummaryRoundKind> }[] {
+  const shown = SUMMARY_ROUNDS.filter((r) => available.includes(r.kind) && !hidden.has(r.kind))
+  if (shown.length === available.length) return []
+  if (shown.length === 0) return [{ kind: null, label: "No rounds", hide: new Set() }]
+  return shown.map((r) => ({
+    kind: r.kind,
+    label: r.label,
+    hide: shown.length === 1 ? new Set<SummaryRoundKind>() : new Set([...hidden, r.kind]),
+  }))
+}
+
 /** The shown rounds for the export heading ("Finals", "Prelims & Timed Finals"), or null when all are. */
 export function roundFilterLabel(
   hidden: ReadonlySet<SummaryRoundKind>,

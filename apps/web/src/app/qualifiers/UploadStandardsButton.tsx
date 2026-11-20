@@ -104,7 +104,7 @@ export default function UploadStandardsButton({
           aria-label="Upload standards"
           className="group relative inline-flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg bg-primary text-primary-contrast transition-colors hover:bg-primary-hover"
         >
-          <AppIcon name="upload" className="h-4 w-4 shrink-0" />
+          <AppIcon name="plus" className="h-[18px] w-[18px] shrink-0" />
           <HoverDetail label="Upload standards" />
         </button>
       )}

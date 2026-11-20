@@ -22,6 +22,11 @@ export type DetailRound = {
   podium?: boolean
   seedTime?: string
   seedRank?: number | string
+  /**
+   * The seed the header's delta measures this round against when it isn't `seedTime`: a finals
+   * swim's prelims seed, while the table's delta stays against the finals seed.
+   */
+  headSeedTime?: string
   heat?: string
   /** The heat's scheduled start time from the heat sheet. */
   startTime?: string
@@ -103,9 +108,10 @@ function sortedSplits(splits: ResultSplit[]) {
     .map((s) => ({ label: String(s.distance), time: sanitizeRelaySplitTime(s.splitTime) }))
 }
 
-function roundDelta(round?: DetailRound) {
-  if (!round?.seedTime || !round.time) return null
-  return formatSeedTimeDelta(round.seedTime, round.time)
+function roundDelta(round?: DetailRound, header = false) {
+  const seed = (header ? round?.headSeedTime : undefined) || round?.seedTime
+  if (!seed || !round?.time) return null
+  return formatSeedTimeDelta(seed, round.time)
 }
 
 function PlaceText({ round, className = "text-sm" }: { round: DetailRound; className?: string }) {
@@ -389,7 +395,7 @@ export default function SwimDetailModal({
   const last = detail.rounds[detail.rounds.length - 1]
   const first = detail.rounds[0]
   const head = detail.rounds[detail.headline ?? -1] ?? last
-  const headDelta = roundDelta(head)
+  const headDelta = roundDelta(head, true)
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => setMounted(true))

@@ -5,6 +5,7 @@ import {
   highlightTileRows,
   isDropCounterValue,
   relayLegSubSplitsText,
+  rosterSummaryRowLegSubSplitsText,
   rosterNameFirstLast,
   rosterNamePreferred,
   rosterSummaryPngColumns,
@@ -46,6 +47,8 @@ function CaptureRow({ row, medley }: { row: RosterSummaryPdfRow; medley: boolean
     )
   }
   const legs = row.legs ?? []
+  // A relay athlete's leg 50s lead the line under the label (the PDF sets them in split columns).
+  const meta = [rosterSummaryRowLegSubSplitsText(row), row.meta].filter(Boolean).join(" · ")
   const tags = medley && legs.length === MEDLEY_STROKES.length ? MEDLEY_STROKES : null
   return (
     <li className="flex items-center gap-2.5 border-t border-border-subtle py-2 text-sm leading-[1.3] first:border-t-0">
@@ -65,7 +68,7 @@ function CaptureRow({ row, medley }: { row: RosterSummaryPdfRow; medley: boolean
         <span className="flex min-w-0 items-baseline gap-2">
           <span className="truncate font-medium tracking-[-0.005em]">
             {rosterNamePreferred(row.label)}
-            {/* " (Leg 4)", lighter — as a preferred name's parentheses on the page. */}
+            {/* " (4th)", lighter — as a preferred name's parentheses on the page. */}
             {row.labelNote ? (
               <span className="font-normal text-foreground-secondary"> ({row.labelNote})</span>
             ) : null}
@@ -75,9 +78,7 @@ function CaptureRow({ row, medley }: { row: RosterSummaryPdfRow; medley: boolean
             <span className="shrink-0 whitespace-nowrap text-xs text-foreground-tertiary">{row.sub}</span>
           ) : null}
         </span>
-        {row.meta ? (
-          <span className="truncate text-xs leading-[1.4] text-foreground-tertiary">{row.meta}</span>
-        ) : null}
+        {meta ? <span className="truncate text-xs leading-[1.4] text-foreground-tertiary">{meta}</span> : null}
         {legs.length > 0 ? (
           <span className="grid grid-cols-2 gap-x-3 text-xs leading-[1.4] text-foreground-secondary">
             {legs.map((leg, i) => (

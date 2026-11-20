@@ -133,9 +133,10 @@ export async function notifyPracticePublished(input: {
 }
 
 /**
- * Something new was posted for a meet: sheets (entries, psych, heat sheets) go out as one
- * "posted" notice; the packet, results, live stream and travel info as another. Both fall under
- * the one Meet Info & Results toggle. Sent to the athletes on the meet (`meetAudienceAthleteIds`).
+ * Something new was posted for a meet: sheets (entries, psych, heat sheets) go out as one notice;
+ * the packet, results, live stream and travel info as another — each just a title, "New Results:
+ * Iron Goggles Invitational". Both fall under the one Meet Info & Results toggle. Sent to the
+ * athletes on the meet (`meetAudienceAthleteIds`).
  */
 export async function notifyMeetInfoPosted(input: {
   meetId: string
@@ -156,13 +157,11 @@ export async function notifyMeetInfoPosted(input: {
       labels: input.sheetLabels,
       key: "meetRosterInfo" as const,
       type: NotificationType.MEET_SHEET_POSTED,
-      body: "See your events, seeds, heats and lanes.",
     },
     {
       labels: input.infoLabels,
       key: "meetRosterInfo" as const,
       type: NotificationType.MEET_ROSTER_INFO,
-      body: null,
     },
   ]
   for (const group of groups) {
@@ -170,22 +169,19 @@ export async function notifyMeetInfoPosted(input: {
     const recipients = (await athleteUserIdsWithPreference(athleteIds, group.key)).filter(
       (r) => r.userId !== input.excludeUserId
     )
-    const what = joinLabels(group.labels)
-    const title = `${what} posted: ${input.meetName}`
-    const body = group.body ?? `New ${what.toLowerCase()} for this meet.`
+    const title = `New ${joinLabels(group.labels)}: ${input.meetName}`
     for (const r of recipients) {
-      drafts.push({ userId: r.userId, type: group.type, title, body, href, refKey })
+      drafts.push({ userId: r.userId, type: group.type, title, body: "", href, refKey })
     }
   }
   await deliverNotifications(drafts)
 }
 
-/** "Psych sheet", "Psych sheet & heat sheet", "Packet, results & travel info". */
+/** "Psych Sheet", "Psych Sheet & Heat Sheet", "Meet Packet, Results & Travel Info". */
 function joinLabels(labels: string[]): string {
   const unique = [...new Set(labels)]
-  const [first, ...rest] = unique.map((label, i) => (i === 0 ? label : label.toLowerCase()))
-  if (rest.length === 0) return first
-  return `${[first, ...rest.slice(0, -1)].join(", ")} & ${rest.at(-1)}`
+  if (unique.length === 1) return unique[0]
+  return `${unique.slice(0, -1).join(", ")} & ${unique.at(-1)}`
 }
 
 export async function notifyPracticeComment(input: {

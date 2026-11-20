@@ -2,14 +2,14 @@ import { notifyMeetInfoPosted } from "@/lib/notifications/notifications"
 import { runAfterResponse } from "@/lib/notifications/after-response"
 
 export const MEET_INFO_LABELS = {
-  psych_sheet: "Psych sheet",
-  heat_sheet: "Heat sheet",
-  finals_heat_sheet: "Finals heat sheet",
-  entries_sheet: "Entries sheet",
-  packet: "Meet packet",
+  psych_sheet: "Psych Sheet",
+  heat_sheet: "Heat Sheet",
+  finals_heat_sheet: "Finals Heat Sheet",
+  entries_sheet: "Entries Sheet",
+  packet: "Meet Packet",
   results: "Results",
-  live_stream: "Live stream",
-  travel: "Travel info",
+  live_stream: "Live Stream",
+  travel: "Travel Info",
 } as const
 
 export type MeetInfoDropKind = keyof typeof MEET_INFO_LABELS

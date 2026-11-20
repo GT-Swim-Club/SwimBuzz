@@ -27,10 +27,10 @@ export type TravelInfoForm = {
 type TravelKey = keyof TravelInfoForm
 
 const TRAVEL_ROWS: { key: TravelKey; label: string; icon: TravelInfoKind; link?: boolean }[] = [
-  { key: "rideSignUpsUrl", label: "Ride sign-ups", icon: "rideSignUps", link: true },
+  { key: "rideSignUpsUrl", label: "Ride Sign-Ups", icon: "rideSignUps", link: true },
   { key: "roomsUrl", label: "Rooms", icon: "rooms", link: true },
   { key: "hotel", label: "Hotel", icon: "hotel" },
-  { key: "packingList", label: "Packing list", icon: "packingList" },
+  { key: "packingList", label: "Packing List", icon: "packingList" },
   { key: "itinerary", label: "Itinerary", icon: "itinerary" },
 ]
 
@@ -151,7 +151,7 @@ export default function AddTravelInfoButton({
         busy={loading}
         header={
           <ResourceModalHeader
-            title={hasTravelInfo ? "Edit travel info" : "Add travel info"}
+            title={hasTravelInfo ? "Edit Travel Info" : "Add Travel Info"}
             count={`${addedCount} of ${TRAVEL_ROWS.length} added`}
           />
         }

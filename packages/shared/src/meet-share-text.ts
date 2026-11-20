@@ -55,7 +55,7 @@ function rosterRowLines(row: RosterSummaryPdfRow): string[] {
   // A subsection's heading ("Finals:") over its rows.
   if (row.subheading) return [`  ${row.label}:`]
   const line = [
-    // A relay athlete's leg after the name: "200 Medley A (Leg 4)".
+    // A relay athlete's leg after the name: "200 Medley A (4th)".
     `${rosterNamePreferred(row.label)}${row.labelNote ? ` (${row.labelNote})` : ""}`,
     row.round,
     row.sub,

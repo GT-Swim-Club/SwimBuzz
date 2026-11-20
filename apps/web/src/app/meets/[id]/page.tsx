@@ -406,18 +406,18 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
     base: string
   ) => link.name?.trim() || (count > 1 ? `${base} ${index + 1}` : base)
   const linksBeforeOrder: CompetitionLink[] = meet.packetUrl
-    ? [{ key: "packet", label: "Meet packet", url: meet.packetUrl, icon: "file", forcePdf: true, downloadName: fileName("Meet Packet") }]
+    ? [{ key: "packet", label: "Meet Packet", url: meet.packetUrl, icon: "file", forcePdf: true, downloadName: fileName("Meet Packet") }]
     : []
   const linksAfterOrder: CompetitionLink[] = [
     ...(meet.entriesSheetUrl
       ? [{ key: "entries", label: "Entries", url: meet.entriesSheetUrl, icon: "fileList", forcePdf: true, downloadName: fileName("Entries") } as const]
       : []),
     ...(meet.psychSheetUrl
-      ? [{ key: "psych", label: "Psych sheet", url: meet.psychSheetUrl, icon: "chart", forcePdf: true, downloadName: fileName("Psych Sheet") } as const]
+      ? [{ key: "psych", label: "Psych Sheet", url: meet.psychSheetUrl, icon: "chart", forcePdf: true, downloadName: fileName("Psych Sheet") } as const]
       : []),
     ...heatSheetLinks.map((link, index) => ({
       key: `heat-${index}-${link.url}`,
-      label: heatLinkLabel(link, index, heatSheetLinks.length, "Heat sheet"),
+      label: heatLinkLabel(link, index, heatSheetLinks.length, "Heat Sheet"),
       url: link.url,
       icon: "lanes" as const,
       forcePdf: true,
@@ -425,7 +425,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
     })),
     ...finalsHeatSheetLinks.map((link, index) => ({
       key: `finals-${index}-${link.url}`,
-      label: heatLinkLabel(link, index, finalsHeatSheetLinks.length, "Finals heat sheet"),
+      label: heatLinkLabel(link, index, finalsHeatSheetLinks.length, "Finals Heat Sheet"),
       url: link.url,
       icon: "lanes" as const,
       forcePdf: true,
@@ -440,7 +440,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       ? [{ key: "swimphone", label: "SwimPhone", url: meet.swimphoneUrl, icon: "trophy", external: true } as const]
       : []),
     ...(meet.liveStreamUrl
-      ? [{ key: "live", label: "Live stream", url: meet.liveStreamUrl, icon: "broadcast" } as const]
+      ? [{ key: "live", label: "Live Stream", url: meet.liveStreamUrl, icon: "broadcast" } as const]
       : []),
   ]
   // Staff build relays until the meet ends; once any relay exists everyone can view the lineups.

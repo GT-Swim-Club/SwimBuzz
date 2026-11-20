@@ -8,9 +8,11 @@ import {
   formatPoints,
   eventGenderWord,
   relayLegLabel,
-  relayLegSubSplitsText,
+  relayLegOrdinal,
+  relayLegSubSplitList,
   relayLegSubSplitTimes,
   roundFilterIncludes,
+  roundFilterChips,
   roundFilterLabel,
   rosterSummaryScopeLabel,
   rosterSummaryText,
@@ -432,7 +434,7 @@ function swimSplits(entry: RosterSummaryEntry, round?: SessionRound | null) {
 }
 
 /**
- * The leg an athlete swam on a relay with their split, e.g. "Leg 1 - 25.31". The leg's own 50s are
+ * The leg an athlete swam on a relay with their split, e.g. "1st - 25.31". The leg's own 50s are
  * left to the exports.
  */
 function athleteLegLabel(entry: RosterSummaryEntry, athleteId: string | undefined): string | null {
@@ -507,23 +509,17 @@ function pdfRow(
     label: isRelay ? relayTitleFrom(relayEvent) : title,
     // Spelled out ("200 Medley Relay A (P)") where the line has room.
     fullLabel: isRelay ? relayTitleFrom(`${relayEvent} Relay`) : undefined,
-    // As on the web summary: the leg after the relay's name ("200 Medley A (Leg 4)"), the split under
-    // the time, and the leg's own 50s (when the results time them) on the line below.
-    labelNote: legNumber && legNumber > 0 ? `Leg ${legNumber}` : undefined,
+    // As on the web summary: the leg after the relay's name ("200 Medley A (4th)"), the split under
+    // the time, and the leg's own 50s (when the results time them) in split columns below.
+    labelNote: legNumber && legNumber > 0 ? relayLegOrdinal(legNumber) : undefined,
     resultNote: legSplit,
-    meta:
-      [
-        legSplit ? relayLegSubSplitsText(relayLegSubSplitTimes(swimmer?.splits)) : null,
-        entrySubtitle(entry, "athlete", false, undefined, false),
-      ]
-        .filter(Boolean)
-        .join(" · ") || undefined,
+    meta: entrySubtitle(entry, "athlete", false, undefined, false) || undefined,
     heatLane: formatHeatLane(entry, round)?.replace("/", " of ") ?? undefined,
     startTime: startTimeFor(entry, round),
     legs: isRelay ? relayLegNames(entry) : undefined,
     legSplits: isRelay ? relayLegSplits(entry) : undefined,
     legSubSplits: legSubSplits.some((times) => times.length) ? legSubSplits : undefined,
-    splits: swimSplits(entry, round),
+    splits: isRelay ? (legSplit ? relayLegSubSplitList(swimmer?.splits) : undefined) : swimSplits(entry, round),
   }
 }
 
@@ -937,11 +933,16 @@ export function RosterSummarySection({
   }
 
   // The filters in effect, as chips under the search field.
-  const roundsShown = roundFilterOn ? roundFilterLabel(hiddenRounds, availableRounds) : null
+  // One chip per shown round, each hiding just its own.
+  const roundChips = roundFilterOn ? roundFilterChips(hiddenRounds, availableRounds) : []
   const activeFilters: ActiveFilter[] = [
     ...(mineOnly && viewerAthleteId ? [{ key: "mine", label: "My events", clear: () => setMineOnly(false) }] : []),
     ...(activeSession ? [{ key: "session", label: activeSession, clear: () => setSessionFilter(null) }] : []),
-    ...(roundsShown ? [{ key: "rounds", label: roundsShown, clear: () => setHiddenRounds(new Set()) }] : []),
+    ...roundChips.map((chip) => ({
+      key: `round-${chip.kind ?? "none"}`,
+      label: chip.label,
+      clear: () => setHiddenRounds(chip.hide),
+    })),
     ...(genderFilter !== "all"
       ? [{ key: "gender", label: genderFilter === "F" ? "Women" : "Men", clear: () => setGenderFilter("all") }]
       : []),

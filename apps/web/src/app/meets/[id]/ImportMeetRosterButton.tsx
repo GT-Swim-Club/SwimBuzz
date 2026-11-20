@@ -92,7 +92,7 @@ export default function ImportMeetRosterButton({
                   onClick={() => clearRoster(close)}
                   className="text-xs font-medium text-foreground-secondary hover:text-foreground"
                 >
-                  Clear roster
+                  Clear Roster
                 </button>
               </div>
             )

@@ -1746,12 +1746,14 @@ function relayPrelimPairKey(entry: SheetEntry, includeGender = true): string {
 
 function relayPrelimSeedFromEntry(
   entry: SheetEntry
-): { time?: string; place?: number } {
+): { time?: string; place?: number; seedTime?: string; seedRank?: number } {
   const time = entry.prelimTime || entry.resultTime || undefined
   const place = entry.prelimPlace ?? entry.resultPlace
   return {
     time,
     place: place != null && place > 0 ? place : undefined,
+    seedTime: entry.seedTime || undefined,
+    seedRank: entry.seedRank,
   }
 }
 
@@ -1760,8 +1762,9 @@ function relayPrelimSeedFromEntry(
  * and place onto the finals row so seed time / rank match individuals.
  */
 function applyPrelimSeedToRelayFinals(entries: SheetEntry[]): SheetEntry[] {
-  const byExact = new Map<string, { time?: string; place?: number }>()
-  const byLetter = new Map<string, { time?: string; place?: number }>()
+  type PrelimSeed = ReturnType<typeof relayPrelimSeedFromEntry>
+  const byExact = new Map<string, PrelimSeed>()
+  const byLetter = new Map<string, PrelimSeed>()
 
   for (const entry of entries) {
     if (entry.entryType !== "relay_team") continue
@@ -1786,6 +1789,9 @@ function applyPrelimSeedToRelayFinals(entries: SheetEntry[]): SheetEntry[] {
       ...entry,
       prelimTime: entry.prelimTime ?? time,
       prelimPlace: entry.prelimPlace ?? place,
+      // Kept for the finals row's delta, which measures against the prelims seed.
+      prelimSeedTime: entry.prelimSeedTime ?? sibling?.seedTime,
+      prelimSeedRank: entry.prelimSeedRank ?? sibling?.seedRank,
       seedTime: entry.finalsSheetSeedTime,
       seedRank: entry.finalsSheetSeedRank,
     }

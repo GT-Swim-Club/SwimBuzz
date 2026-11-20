@@ -4,6 +4,7 @@ import {
   formatOrdinal,
   highlightTileRows,
   relayLegSubSplitsText,
+  rosterSummaryRowLegSubSplitsText,
   rosterNameFirstLast,
   rosterNamePreferred,
   rosterSummaryExportSections,
@@ -105,6 +106,8 @@ export const RosterSummaryExportCapture = forwardRef<
     previous?: RosterSummaryPdfRow
   ) => {
     const legs = row.legs ?? []
+    // A relay athlete's leg 50s lead the line under the label (the PDF sets them in split columns).
+    const meta = [rosterSummaryRowLegSubSplitsText(row), row.meta].filter(Boolean).join(" · ")
     const tags = medley && legs.length === MEDLEY_STROKES.length ? MEDLEY_STROKES : null
     const result = resultText(row.result)
     if (row.subheading) {
@@ -126,13 +129,13 @@ export const RosterSummaryExportCapture = forwardRef<
         <View style={measuring ? styles.rowTextNatural : styles.rowText}>
           <Text style={styles.label} numberOfLines={1}>
             {rosterNamePreferred(row.label)}
-            {/* " (Leg 4)", lighter — like a preferred name's parentheses. */}
+            {/* " (4th)", lighter — like a preferred name's parentheses. */}
             {row.labelNote ? <Text style={styles.labelNote}>{` (${row.labelNote})`}</Text> : null}
             {row.sub ? <Text style={styles.sub}>{`  ${row.sub}`}</Text> : null}
           </Text>
-          {row.meta ? (
+          {meta ? (
             <Text style={styles.meta} numberOfLines={1}>
-              {row.meta}
+              {meta}
             </Text>
           ) : null}
           {legs.length > 0 && !measuring ? (

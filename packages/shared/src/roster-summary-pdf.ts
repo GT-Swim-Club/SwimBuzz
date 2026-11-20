@@ -7,6 +7,7 @@
 import { meetFileName } from "./format"
 import type { IconName } from "./icons"
 import type { MeetHighlights, MeetRecord, MeetWin, NewNationalsCut, StatCounter, TopScorer } from "./meet-highlights"
+import { formatOrdinal } from "./team-scores"
 
 export type RosterSummaryPdfResult =
   | {
@@ -46,7 +47,7 @@ export type RosterSummaryPdfRow = {
    * the line with the sub — as it does with no heat & lane crowding it.
    */
   fullLabel?: string
-  /** Set after the label in parentheses and lighter type: a relay athlete's leg ("Leg 4" → "(Leg 4)"). */
+  /** Set after the label in parentheses and lighter type: a relay athlete's leg ("4th" → "(4th)"). */
   labelNote?: string
   /** The round, right after the label ("Finals") — the PDF and PNG set it in gold caps. */
   round?: string
@@ -68,7 +69,10 @@ export type RosterSummaryPdfRow = {
    * Only results that time every 50 of a longer leg carry them (400/800 relays).
    */
   legSubSplits?: string[][]
-  /** An individual swim's interval splits, drawn as aligned columns of times under the row. */
+  /**
+   * An individual swim's interval splits — or, on a relay athlete's row, their leg's own 50s —
+   * drawn as aligned columns of times under the row.
+   */
   splits?: RosterSummaryPdfSplit[]
   /** An athlete's new Nationals cuts, a line each under their name (the cuts sections only). */
   cuts?: RosterSummaryPdfCut[]
@@ -151,7 +155,7 @@ export function rosterSummaryTitle({
 
 // ---- relay leg sub-splits ----------------------------------------------------
 // Shared by the web and mobile roster summaries and their PNG/PDF exports, so a relay leg reads the
-// same everywhere: "Leg 2 - 49.20 (23.83 · 25.37)" under an athlete, and the times alone on a line
+// same everywhere: "2nd - 49.20 (23.83 · 25.37)" under an athlete, and the times alone on a line
 // under the swimmer's name in an event's list of legs.
 
 /** Sub-splits drawn per leg, at most (an 800 relay's 200 leg has four 50s). */
@@ -166,12 +170,32 @@ export function relayLegSubSplitTimes(
   splits: ReadonlyArray<{ distance: number; splitTime?: string | null }> | null | undefined,
   format: (time: string) => string = (time) => time
 ): string[] {
-  const times = [...(splits ?? [])]
+  return relayLegSubSplitList(splits, format).map((s) => s.time)
+}
+
+/**
+ * The same sub-splits with their distances, as a row's `splits` carries them — so a relay
+ * athlete's leg sets its 50s in the PDF's split columns like an individual swim's.
+ */
+export function relayLegSubSplitList(
+  splits: ReadonlyArray<{ distance: number; splitTime?: string | null }> | null | undefined,
+  format: (time: string) => string = (time) => time
+): RosterSummaryPdfSplit[] {
+  const list = [...(splits ?? [])]
     .filter((s) => Number.isFinite(s.distance) && s.distance > 0 && /\d/.test(s.splitTime ?? ""))
     .sort((a, b) => a.distance - b.distance)
     .slice(0, RELAY_LEG_SUB_SPLITS_MAX)
-    .map((s) => format(String(s.splitTime).trim()))
-  return times.length > 1 ? times : []
+    .map((s) => ({ distance: s.distance, time: format(String(s.splitTime).trim()) }))
+  return list.length > 1 ? list : []
+}
+
+/**
+ * A relay athlete's leg sub-splits as the PNG sets them, one run on the line under the label
+ * ("23.83 · 25.37"); "" for any other row (the PNG leaves an individual swim's splits out).
+ */
+export function rosterSummaryRowLegSubSplitsText(row: RosterSummaryPdfRow): string {
+  if (!row.labelNote || row.legs?.length) return ""
+  return relayLegSubSplitsText((row.splits ?? []).map((s) => s.time))
 }
 
 /** A leg's sub-splits as one run of times: "23.83 · 25.37" ("" without any). */
@@ -179,9 +203,14 @@ export function relayLegSubSplitsText(times: readonly string[] | null | undefine
   return (times ?? []).filter(Boolean).join(" · ")
 }
 
+/** A relay leg as an ordinal: 1 → "1st", 4 → "4th". */
+export function relayLegOrdinal(leg: number): string {
+  return formatOrdinal(leg)
+}
+
 /**
  * The leg an athlete swam on a relay with its split and, when the results time every 50 of the
- * leg, its sub-splits: "Leg 2 - 49.20 (23.83 · 25.37)", "Leg 4 - 20.05", "Leg 1"; or "Split 20.05"
+ * leg, its sub-splits: "2nd - 49.20 (23.83 · 25.37)", "4th - 20.05", "1st"; or "Split 20.05"
  * when the leg number is unknown.
  */
 export function relayLegLabel(
@@ -191,7 +220,7 @@ export function relayLegLabel(
 ): string | null {
   const sub = split ? relayLegSubSplitsText(subSplits) : ""
   const time = split ? `${split}${sub ? ` (${sub})` : ""}` : ""
-  if (leg) return `Leg ${leg}${time ? ` - ${time}` : ""}`
+  if (leg) return `${relayLegOrdinal(leg)}${time ? ` - ${time}` : ""}`
   return time ? `Split ${time}` : null
 }
 

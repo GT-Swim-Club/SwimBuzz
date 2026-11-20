@@ -5,7 +5,7 @@ type PushPayload = { title: string; body: string; href?: string | null }
 type ExpoPushMessage = {
   to: string
   title: string
-  body: string
+  body?: string
   data?: Record<string, unknown>
   sound?: "default" | null
 }
@@ -40,7 +40,8 @@ export async function sendExpoPushPerUser(items: (PushPayload & { userId: string
     return {
       to: d.token,
       title: payload.title,
-      body: payload.body,
+      // A title-only notice ("New Results for …") sends no body line.
+      ...(payload.body ? { body: payload.body } : {}),
       sound: "default",
       data: payload.href ? { href: payload.href } : undefined,
     }

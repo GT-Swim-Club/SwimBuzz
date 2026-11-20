@@ -1,17 +1,21 @@
 import { useMemo, useState } from "react"
-import { Pressable, RefreshControl, StyleSheet, Text, View } from "react-native"
+import { ActivityIndicator, Alert, Pressable, RefreshControl, StyleSheet, Text, View } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { useQuery } from "@tanstack/react-query"
+import * as Sharing from "expo-sharing"
+import { File, Paths } from "expo-file-system"
 import {
   athletePreferredInitials,
   athletePreferredName,
   defaultSeason,
   formatSeasonLabel,
   formatTime,
+  nationalsQualifiersPdfFilename,
 } from "@swimbuzz/shared"
 import { Chip, EmptyState, ErrorBlock, LoadingBlock, Screen, ScrollView, TextField, usePalette } from "@swimbuzz/ui"
 import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
-import { api } from "../../../src/lib/api"
+import { api, API_URL, getAccessToken } from "../../../src/lib/api"
+import { Icon } from "../../../src/components/Icon"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 import { GalleryTile } from "../../../src/components/GalleryTile"
 import { RecordsSection } from "../../../src/components/RecordsSection"
@@ -78,6 +82,26 @@ function isBlankCut(value: string | undefined) {
   return !value || value === "--"
 }
 
+/**
+ * The qualifiers as the tab shows them (season, course, gender, search), laid out as a PDF by the API
+ * (like the web's Download PDF), ready for the share sheet.
+ */
+async function qualifiersPdfFile(params: { season: string; course: string; gender: GenderFilter; query: string }) {
+  const sp = new URLSearchParams({ season: params.season, course: params.course })
+  if (params.gender !== "all") sp.set("gender", params.gender)
+  if (params.query.trim()) sp.set("q", params.query.trim())
+  const token = await getAccessToken()
+  const res = await fetch(`${API_URL}/api/qualifiers/pdf?${sp.toString()}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  })
+  if (!res.ok) throw new Error("Could not create PDF")
+  const bytes = new Uint8Array(await res.arrayBuffer())
+  const file = new File(Paths.cache, nationalsQualifiersPdfFilename(params.season))
+  if (file.exists) file.delete()
+  file.write(bytes)
+  return file
+}
+
 export default function NationalsScreen() {
   const router = useRouter()
   const c = usePalette()
@@ -89,6 +113,7 @@ export default function NationalsScreen() {
   const [course, setCourse] = useState("SCY")
   const [gender, setGender] = useState<GenderFilter>("all")
   const [query, setQuery] = useState("")
+  const [sharing, setSharing] = useState(false)
   // A "team record" notification opens this tab with ?view=records.
   const { view: viewParam } = useLocalSearchParams<{ view?: string }>()
   const [view, setView] = useState<TabView>(viewParam === "records" ? "records" : "nationals")
@@ -176,6 +201,23 @@ export default function NationalsScreen() {
 
   const cutCount = genderQualifiers.reduce((sum, athlete) => sum + athlete.events.length, 0)
   const showGender = gender === "all"
+  async function sharePdf() {
+    if (!season) return
+    setSharing(true)
+    try {
+      const file = await qualifiersPdfFile({ season, course, gender, query })
+      if (!(await Sharing.isAvailableAsync())) {
+        Alert.alert("Sharing unavailable", "This device can't open the share sheet.")
+        return
+      }
+      await Sharing.shareAsync(file.uri, { mimeType: "application/pdf", UTI: "com.adobe.pdf" })
+    } catch (err) {
+      Alert.alert("Could not share PDF", err instanceof Error ? err.message : "Something went wrong")
+    } finally {
+      setSharing(false)
+    }
+  }
+
   const openAthlete = (athlete: QualifierAthlete) => router.push(`/roster/${athlete.athleteSlug || athlete.athleteId}`)
 
   const viewSwitch = (
@@ -376,6 +418,23 @@ export default function NationalsScreen() {
             ))}
           </SegmentedToggle>
           <GalleryViewToggle value={galleryView} onChange={setGalleryView} />
+          {season && hasStandards ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Share PDF of qualifiers"
+              accessibilityState={{ busy: sharing }}
+              disabled={sharing}
+              hitSlop={6}
+              onPress={() => void sharePdf()}
+              style={({ pressed }) => [styles.shareButton, pressed && styles.pressed]}
+            >
+              {sharing ? (
+                <ActivityIndicator size="small" color={c.textSecondary} />
+              ) : (
+                <Icon name="share" size={18} color={c.textSecondary} />
+              )}
+            </Pressable>
+          ) : null}
         </View>
 
         <TextField
@@ -450,6 +509,8 @@ function makeStyles(c: ColorPalette) {
       marginBottom: spacing.sm,
     },
     genderSwitch: { flex: 1, minWidth: 0 },
+    shareButton: { alignItems: "center", borderRadius: radii.md, height: 36, justifyContent: "center", width: 36 },
+    pressed: { opacity: 0.72 },
     toggleText: { color: c.textSecondary, fontSize: 14, fontWeight: "700" },
     toggleTextOn: { color: c.primaryContrast },
     chipRow: {

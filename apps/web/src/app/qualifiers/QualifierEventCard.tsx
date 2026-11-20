@@ -2,10 +2,14 @@
 
 import { useState } from "react"
 import { athletePreferredName } from "@swimbuzz/shared"
-import { qualifierMarginLabel, type QualifierEventGroup } from "@/lib/qualifiers/qualifier-events"
+import {
+  eventGroupTitle,
+  qualifierCountLabel,
+  qualifierMarginLabel,
+  type QualifierEventGroup,
+} from "@/lib/qualifiers/qualifier-events"
 import { GallerySwimTime, QualifierSwimRow, SwimDetailPanel } from "./QualifierSwimRow"
 import { galleryCardClass, galleryRowClass, moreButtonClass } from "./QualifierGalleryCard"
-import { eventGroupTitle, qualifierCountLabel } from "./QualifierEventList"
 
 const VISIBLE_SWIMS = 4
 
@@ -29,7 +33,7 @@ export default function QualifierEventCard({
           {eventGroupTitle(group, splitGender)}
         </h3>
         <p className="shrink-0 whitespace-nowrap text-right text-xs text-foreground-secondary">
-          Cut {group.cut} · {qualifierCountLabel(group.swims.length)}
+          {group.cut} · {qualifierCountLabel(group.swims.length)}
         </p>
       </div>
 
@@ -43,9 +47,9 @@ export default function QualifierEventCard({
               swim={swim}
               highlight={isMe}
               className={galleryRowClass}
-              ariaLabel={`${name}${isMe ? " (you)" : ""}, ${swim.time}, ${qualifierMarginLabel(swim)} under the cut, ${swim.meetName || "qualifying swim"}, ${swim.date || "date unavailable"}`}
+              ariaLabel={`${name}${isMe ? " (you)" : ""}, ${swim.time}, margin ${qualifierMarginLabel(swim)}, ${swim.meetName || "qualifying swim"}, ${swim.date || "date unavailable"}`}
             >
-              <span className="min-w-0 truncate text-sm font-medium text-foreground-secondary transition-colors group-hover:text-primary">
+              <span className="min-w-0 truncate text-sm font-medium text-foreground-secondary">
                 {name}
               </span>
               <GallerySwimTime swim={swim} />
@@ -56,7 +60,7 @@ export default function QualifierEventCard({
                   ["Date", swim.date || "—"],
                   ["Time", swim.time || "—"],
                   ["Standard", swim.cut || "—"],
-                  ["Under the cut", qualifierMarginLabel(swim)],
+                  ["Margin", qualifierMarginLabel(swim)],
                 ]}
               />
             </QualifierSwimRow>

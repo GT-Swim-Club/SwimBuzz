@@ -49,11 +49,11 @@ type RowDef =
   | { key: LinkKey; kind: "link"; label: string; icon: ReactNode; placeholder: string }
 
 const ROWS: RowDef[] = [
-  { key: "packetUrl", kind: "single", label: "Meet packet", icon: <MeetResourceIcon kind="packet" /> },
+  { key: "packetUrl", kind: "single", label: "Meet Packet", icon: <MeetResourceIcon kind="packet" /> },
   { key: "entriesSheetUrl", kind: "single", label: "Entries", icon: <MeetResourceIcon kind="entries" /> },
-  { key: "psychSheetUrl", kind: "single", label: "Psych sheet", icon: <MeetResourceIcon kind="psych" /> },
-  { key: "heatSheetUrls", kind: "multi", label: "Heat sheets", icon: <MeetResourceIcon kind="heat" /> },
-  { key: "finalsHeatSheetUrls", kind: "multi", label: "Finals heat sheets", icon: <MeetResourceIcon kind="heat" /> },
+  { key: "psychSheetUrl", kind: "single", label: "Psych Sheet", icon: <MeetResourceIcon kind="psych" /> },
+  { key: "heatSheetUrls", kind: "multi", label: "Heat Sheets", icon: <MeetResourceIcon kind="heat" /> },
+  { key: "finalsHeatSheetUrls", kind: "multi", label: "Finals Heat Sheets", icon: <MeetResourceIcon kind="heat" /> },
   {
     key: "resultsUrl",
     kind: "single",
@@ -69,7 +69,7 @@ const ROWS: RowDef[] = [
     icon: <AppIcon name="link" />,
     placeholder: "https://www.swimphone.com/meets/...",
   },
-  { key: "liveStreamUrl", kind: "link", label: "Live stream", icon: <MeetResourceIcon kind="liveStream" />, placeholder: "https://…" },
+  { key: "liveStreamUrl", kind: "link", label: "Live Stream", icon: <MeetResourceIcon kind="liveStream" />, placeholder: "https://…" },
 ]
 
 type SaveResourcesResponse = {
@@ -563,7 +563,7 @@ export default function ImportMeetResourcesButton({
       title="Entries and results for this team are parsed from uploaded files."
       className="flex h-[25px] shrink-0 items-center gap-1.5 whitespace-nowrap text-xs leading-4 text-foreground-tertiary"
     >
-      <span>Team code:</span>
+      <span>Team Code:</span>
       {showTeamInput ? (
         <>
           <input

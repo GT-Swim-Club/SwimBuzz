@@ -225,7 +225,7 @@ export default function ManagePhotosButton({
         busy={loading}
         header={
           <ResourceModalHeader
-            title={hasPhotos ? "Edit photos" : "Add photos"}
+            title={hasPhotos ? "Edit Photos" : "Add Photos"}
             count={`${addedCount} of 2 added`}
           />
         }
@@ -253,13 +253,13 @@ export default function ManagePhotosButton({
         <ResourceList>
           <ResourceRow
             icon={<AppIcon name="link" />}
-            label="Photo albums"
+            label="Photo Albums"
             filled={albumCount > 0}
             expanded={expanded === "albums"}
             summary={`${albumCount} album${albumCount === 1 ? "" : "s"}`}
             onToggle={toggleAlbums}
             onClear={() => setForm((f) => ({ ...f, photos: [] }))}
-            clearLabel="Remove all"
+            clearLabel="Remove All"
           >
             {form.photos.map((photo, index) => (
               <div key={index} className="flex items-center gap-2">
@@ -293,7 +293,7 @@ export default function ManagePhotosButton({
                   onClick={() => setForm((f) => ({ ...f, photos: [...f.photos, { name: "", url: "" }] }))}
                   className="text-[13px] font-medium text-accent transition-colors hover:text-primary"
                 >
-                  + Add another album
+                  + Add Another Album
                 </button>
               </div>
             ) : null}
@@ -301,7 +301,7 @@ export default function ManagePhotosButton({
 
           <ResourceRow
             icon={<AppIcon name="image" />}
-            label="Gallery photos"
+            label="Gallery Photos"
             filled={previewCount > 0}
             expanded={expanded === "gallery"}
             summary={`${previewCount} photo${previewCount === 1 ? "" : "s"}`}
@@ -310,7 +310,7 @@ export default function ManagePhotosButton({
               setExpanded(expanded === "gallery" ? null : "gallery")
             }}
             onClear={() => setForm((f) => ({ ...f, previews: [] }))}
-            clearLabel="Remove all"
+            clearLabel="Remove All"
           >
             <span className="text-xs text-foreground-tertiary tabular-nums">
               {previewCount} / {MAX_PREVIEWS} · Drag to reorder.

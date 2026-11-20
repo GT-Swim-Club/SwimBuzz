@@ -175,6 +175,17 @@ export function formatSeasonLabel(season: string): string {
   return season.replace(/^(\d{4})-(\d{4})$/, "$1–$2")
 }
 
+/** "2027 Nationals Qualifiers" for the 2026-2027 season: Nationals is always in the season's second calendar year. */
+export function nationalsQualifiersTitle(season: string): string {
+  const year = /^\d{4}-(\d{4})$/.exec(season)?.[1]
+  return year ? `${year} Nationals Qualifiers` : "Nationals Qualifiers"
+}
+
+/** "2027 Nationals Qualifiers - Georgia Tech Swim Club.pdf" */
+export function nationalsQualifiersPdfFilename(season: string): string {
+  return meetFileName(nationalsQualifiersTitle(season), "Georgia Tech Swim Club", "pdf")
+}
+
 const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 /** "Oct 2026" for a calendar date (a swim's date), read in UTC so it never shifts a day. */

@@ -43,7 +43,7 @@ export default function ImportSignupsButton({
   return (
     <SheetImportButton<SignupImportResult>
       endpoint={`/api/meets/${meetId}/signup-import`}
-      title="Import Sign-ups"
+      title="Import Sign-Ups"
       description="Adds each response's events and entry times to the roster summary, replacing the last sign-up import."
       hint={
         <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5">
