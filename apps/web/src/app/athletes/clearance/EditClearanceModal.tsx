@@ -4,30 +4,33 @@ import { useState } from "react"
 import {
   athleteDisplayName,
   CLEARANCE_CHECKS,
-  formatSeasonLabel,
   type ClearanceCheck,
   type ClearanceListAthlete,
 } from "@swimbuzz/shared"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 
-type Draft = Record<ClearanceCheck, { cleared: boolean; date: string }>
+type Draft = Record<ClearanceCheck, boolean>
 
-function draftFor(athlete: ClearanceListAthlete | null): Draft {
+function draftFor(athlete: ClearanceEditTarget | null): Draft {
   return {
-    physical: { cleared: athlete?.physical.cleared ?? false, date: athlete?.physical.date ?? "" },
-    concussion: { cleared: athlete?.concussion.cleared ?? false, date: athlete?.concussion.date ?? "" },
+    physical: athlete?.physical.cleared ?? false,
+    concussion: athlete?.concussion.cleared ?? false,
   }
 }
 
-/** Staff correct one athlete's clearance by hand. */
+/** Who the modal edits: the list row, or the athlete page's heading. */
+export type ClearanceEditTarget = Pick<
+  ClearanceListAthlete,
+  "athleteId" | "firstName" | "lastName" | "preferredName" | "physical" | "concussion"
+>
+
+/** Staff correct one athlete's clearance (one-and-done) by hand. */
 export default function EditClearanceModal({
   athlete,
-  season,
   onClose,
   onSaved,
 }: {
-  athlete: ClearanceListAthlete | null
-  season: string
+  athlete: ClearanceEditTarget | null
   onClose: () => void
   onSaved: () => void
 }) {
@@ -53,9 +56,8 @@ export default function EditClearanceModal({
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          season,
-          physical: { cleared: draft.physical.cleared, date: draft.physical.date || null },
-          concussion: { cleared: draft.concussion.cleared, date: draft.concussion.date || null },
+          physical: { cleared: draft.physical },
+          concussion: { cleared: draft.concussion },
         }),
       })
       const data = await res.json().catch(() => ({}))
@@ -74,7 +76,7 @@ export default function EditClearanceModal({
       onClose={onClose}
       closeDisabled={saving}
       title="Edit Clearance"
-      description={athlete ? `${athleteDisplayName(athlete)} · ${formatSeasonLabel(season)}` : undefined}
+      description={athlete ? athleteDisplayName(athlete) : undefined}
       maxWidth="md"
       onSubmit={handleSubmit}
       footer={
@@ -103,28 +105,16 @@ export default function EditClearanceModal({
             <label className="flex items-center gap-2.5 text-sm font-medium text-foreground">
               <input
                 type="checkbox"
-                checked={draft[check].cleared}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, [check]: { ...d[check], cleared: e.target.checked } }))
-                }
+                checked={draft[check]}
+                onChange={(e) => setDraft((d) => ({ ...d, [check]: e.target.checked }))}
                 className="h-4 w-4 accent-[var(--brand-color-primary)]"
               />
-              {check === "physical" ? "Physical on file" : "Concussion baseline test done"}
-            </label>
-            <label className="mt-2 flex items-center gap-3 pl-6">
-              <span className="shrink-0 text-sm text-foreground-secondary">Date</span>
-              <input
-                type="date"
-                value={draft[check].date}
-                disabled={!draft[check].cleared}
-                onChange={(e) => setDraft((d) => ({ ...d, [check]: { ...d[check], date: e.target.value } }))}
-                className="min-w-0 flex-1 rounded-lg border border-border-secondary bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:border-border disabled:opacity-50"
-              />
+              {check === "physical" ? "Physical complete" : "Concussion baseline test complete"}
             </label>
           </div>
         ))}
         <p className="text-xs text-foreground-tertiary">
-          Only whether each is done and when is stored — no medical details.
+          Each is done once, not every season. Only whether it&apos;s done is stored — no dates or medical details.
         </p>
       </div>
       {error && <p className="text-sm text-error">{error}</p>}

@@ -13,7 +13,7 @@ export type PracticeAttendanceRecord = {
   method: "SCAN" | "MANUAL"
   recordedAt: string
   staffTitle: StaffTitle | null
-  /** Staff responses only: clearance checks missing for the practice's season. */
+  /** Staff responses only: clearance checks the athlete is missing. */
   uncleared?: ClearanceCheck[]
 }
 

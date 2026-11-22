@@ -20,7 +20,7 @@ type AttendanceRecord = {
   year: string | null
   method: "SCAN" | "MANUAL"
   recordedAt: string
-  /** Clearance checks missing for this practice's season (physical / concussion test). */
+  /** Clearance checks the athlete is missing (physical / concussion test). */
   uncleared?: ClearanceCheck[]
 }
 

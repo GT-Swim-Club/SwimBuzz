@@ -3,13 +3,10 @@
 import { useMemo, type ReactNode } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { daysAgoLabel, formatDateTime, formatSeasonLabel } from "@swimbuzz/shared"
+import { formatSeasonLabel } from "@swimbuzz/shared"
 import FluidToolbar from "@/components/ui/FluidToolbar"
 import ToolbarSelect from "@/components/ui/ToolbarSelect"
-import { AppIcon } from "@/components/ui/AppIcon"
-import HoverDetail from "@/components/ui/HoverDetail"
 import JumpRail, { JUMP_RAIL_LAYOUT_CLASS, JUMP_RAIL_LETTERS } from "@/components/ui/JumpRail"
-import { useTodayKey } from "@/components/ui/RelativeDate"
 import { ListLayoutToggle, useListLayout } from "@/components/ui/ListLayout"
 import { athletePath } from "@/lib/slug"
 import { athleteAge } from "@/lib/utils"
@@ -26,21 +23,12 @@ import {
 type Gender = "all" | "M" | "F"
 
 /**
- * Header and rows share these tracks; below md only the Athlete column (and
- * the staff-only SwimCloud column) shows.
+ * Header and rows share these tracks; below md only the Athlete column shows. Clearance and
+ * SwimCloud status are icons beside each name (see AthleteName), not columns.
  */
 const LIST_COLS = {
   withGender: "grid-cols-[minmax(0,1fr)] md:grid-cols-[minmax(0,2.5fr)_minmax(5.5rem,0.7fr)_minmax(6rem,0.55fr)_minmax(3.5rem,0.5fr)]",
   withoutGender: "grid-cols-[minmax(0,1fr)] md:grid-cols-[minmax(0,2.5fr)_minmax(6rem,0.55fr)_minmax(3.5rem,0.5fr)]",
-  staffWithGender:
-    "grid-cols-[minmax(0,1fr)_auto] md:grid-cols-[minmax(0,2.5fr)_minmax(5.5rem,0.7fr)_minmax(6rem,0.55fr)_minmax(3.5rem,0.5fr)_minmax(7rem,0.7fr)_minmax(7.5rem,0.6fr)]",
-  staffWithoutGender:
-    "grid-cols-[minmax(0,1fr)_auto] md:grid-cols-[minmax(0,2.5fr)_minmax(6rem,0.55fr)_minmax(3.5rem,0.5fr)_minmax(7rem,0.7fr)_minmax(7.5rem,0.6fr)]",
-}
-
-function listCols(showGender: boolean, staffColumns: boolean) {
-  if (staffColumns) return showGender ? LIST_COLS.staffWithGender : LIST_COLS.staffWithoutGender
-  return showGender ? LIST_COLS.withGender : LIST_COLS.withoutGender
 }
 
 type Row = { athlete: RosterAthlete; isYou: boolean; anchor?: string }
@@ -55,7 +43,7 @@ export default function RosterView({
   seasons,
   season,
   viewerAthleteId,
-  staffColumns,
+  showStatus,
   actions,
 }: {
   /** Sorted by last name, then first name. */
@@ -63,8 +51,8 @@ export default function RosterView({
   seasons: string[]
   season: string
   viewerAthleteId: string | null
-  /** Staff-only list columns: SwimCloud profile and when times were last imported. */
-  staffColumns: boolean
+  /** Staff: clearance & SwimCloud status icons beside each name. */
+  showStatus: boolean
   /** Staff-only import/add buttons. */
   actions?: ReactNode
 }) {
@@ -175,7 +163,7 @@ export default function RosterView({
         <div className={JUMP_RAIL_LAYOUT_CLASS}>
           <div className="min-w-0 flex-1">
             {layout === "list" ? (
-              <RosterTable rows={rows} showGender={showGender} staffColumns={staffColumns} />
+              <RosterTable rows={rows} showGender={showGender} showStatus={showStatus} />
             ) : (
               <div className="grid grid-cols-[repeat(auto-fill,minmax(max(240px,calc((100%_-_2.25rem)/4)),1fr))] gap-3">
                 {rows.map((r) => (
@@ -185,6 +173,7 @@ export default function RosterView({
                     showGender={showGender}
                     isYou={r.isYou}
                     anchor={r.anchor}
+                    showStatus={showStatus}
                   />
                 ))}
               </div>
@@ -197,16 +186,8 @@ export default function RosterView({
   )
 }
 
-function RosterTable({
-  rows,
-  showGender,
-  staffColumns,
-}: {
-  rows: Row[]
-  showGender: boolean
-  staffColumns: boolean
-}) {
-  const cols = listCols(showGender, staffColumns)
+function RosterTable({ rows, showGender, showStatus }: { rows: Row[]; showGender: boolean; showStatus: boolean }) {
+  const cols = showGender ? LIST_COLS.withGender : LIST_COLS.withoutGender
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-background">
       <div
@@ -216,8 +197,6 @@ function RosterTable({
         {showGender && <span className="hidden md:block">Gender</span>}
         <span className="hidden md:block">Year</span>
         <span className="hidden text-center md:block">Age</span>
-        {staffColumns && <span className="text-center">SwimCloud</span>}
-        {staffColumns && <span className="hidden md:block">Last import</span>}
       </div>
       {rows.map(({ athlete, isYou, anchor }) => {
         const age = athleteAge(athlete.dob)
@@ -227,14 +206,14 @@ function RosterTable({
             key={athlete.id}
             id={anchor}
             href={athletePath(athlete.slug ?? athlete.id)}
-            className={`grid scroll-mt-32 items-center gap-4 border-t border-border px-4 py-2.5 text-base leading-[22px] text-foreground-secondary transition-colors hover:bg-background-hover sm:px-6 ${cols} ${
+            className={`group grid scroll-mt-32 items-center gap-4 border-t border-border px-4 py-2.5 text-base leading-[22px] text-foreground-secondary transition-colors hover:bg-background-hover sm:px-6 ${cols} ${
               isYou ? "bg-primary/5" : ""
             }`}
           >
             <div className="flex min-w-0 items-center gap-3">
               <AthleteAvatar athlete={athlete} className="h-9 w-9 text-[13px]" />
               <div className="flex min-w-0 flex-col">
-                <AthleteName athlete={athlete} className="text-[17px] leading-6" />
+                <AthleteName athlete={athlete} className="text-[17px] leading-6" showStatus={showStatus} />
                 {meta && (
                   <p className="truncate text-[13px] leading-[18px] tabular-nums md:hidden">{meta}</p>
                 )}
@@ -243,53 +222,9 @@ function RosterTable({
             {showGender && <span className="hidden md:block">{genderLabel(athlete.gender)}</span>}
             <span className="hidden truncate md:block">{athleteYear(athlete) ?? "—"}</span>
             <span className="hidden text-center tabular-nums md:block">{age ?? "—"}</span>
-            {staffColumns &&
-              (athlete.swimCloudIds.length > 0 ? (
-                <span className="flex justify-center text-success-text">
-                  <AppIcon name="check" className="h-5 w-5" />
-                  <span className="sr-only">Has SwimCloud</span>
-                </span>
-              ) : (
-                <span className="text-center text-foreground-tertiary">
-                  <span aria-hidden>—</span>
-                  <span className="sr-only">No SwimCloud</span>
-                </span>
-              ))}
-            {staffColumns && (
-              <LastImport at={athlete.timesSyncedAt} hasSwimCloud={athlete.swimCloudIds.length > 0} />
-            )}
           </Link>
         )
       })}
     </div>
-  )
-}
-
-/**
- * "3 days ago" (absolute date on hover), "Never", or a dash for athletes with no SwimCloud to
- * import from; blank until the viewer's day is known (SSR).
- */
-function LastImport({ at, hasSwimCloud }: { at: string | Date | null; hasSwimCloud: boolean }) {
-  const todayKey = useTodayKey()
-  if (!at && !hasSwimCloud) {
-    return (
-      <span className="hidden text-foreground-tertiary md:block">
-        <span aria-hidden>—</span>
-        <span className="sr-only">No SwimCloud</span>
-      </span>
-    )
-  }
-  const label = at ? daysAgoLabel(at, todayKey) : "Never"
-  return (
-    <span className={`hidden truncate md:block ${at ? "" : "text-foreground-tertiary"}`}>
-      {at && label ? (
-        <span className="group relative inline-block">
-          {label}
-          <HoverDetail label={formatDateTime(at)} />
-        </span>
-      ) : (
-        label
-      )}
-    </span>
   )
 }

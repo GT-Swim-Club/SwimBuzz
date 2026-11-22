@@ -41,7 +41,7 @@ async function requireStaff() {
 /**
  * Who's checked in. Staff and athletes alike may read a team practice they can view (the
  * same rule as the web attendance page); only staff records carry `uncleared`, the
- * clearance checks the athlete is missing for the practice's season.
+ * clearance checks the athlete is missing (clearance is one-and-done, not per season).
  */
 export async function GET(
   _req: Request,
@@ -66,7 +66,7 @@ export async function GET(
   const season = practiceSeason(practice)
   const attendance = records.map(serializeAttendance)
   if (!isStaffRole(session.user.role)) return NextResponse.json({ attendance, season })
-  return NextResponse.json({ attendance: await withAttendanceClearance(attendance, season), season })
+  return NextResponse.json({ attendance: await withAttendanceClearance(attendance), season })
 }
 
 export async function POST(
@@ -115,9 +115,8 @@ export async function POST(
 
   // Check-in never waits on clearance — it's looked up alongside the write and only flags the
   // record (and scan result) so staff see an athlete without a physical or concussion test.
-  const season = practiceSeason(practice)
   const flag = async (record: ReturnType<typeof serializeAttendance>) =>
-    (await withAttendanceClearance([record], season))[0]!
+    (await withAttendanceClearance([record]))[0]!
 
   // Attempt the write directly and let the unique constraint catch
   // duplicates, instead of a separate existence check first — halves the

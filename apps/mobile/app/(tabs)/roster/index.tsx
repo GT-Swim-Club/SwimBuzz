@@ -2,17 +2,15 @@ import { useMemo, useState } from "react"
 import {
   Alert,
   RefreshControl,
-  Text,
   View,
 } from "react-native"
 import { useRouter } from "expo-router"
 import { useQuery } from "@tanstack/react-query"
 import {
   athleteDisplayName,
-  daysAgoLabel,
   formatSeasonLabel,
   isStaffRole,
-  localDayKey,
+  type AthleteSummary,
 } from "@swimbuzz/shared"
 import {
   Button,
@@ -26,15 +24,14 @@ import {
   Screen,
   Section,
   TextField,
-  usePalette,
 } from "@swimbuzz/ui"
 import { spacing } from "@swimbuzz/tokens"
 import { api } from "../../../src/lib/api"
 import { useAuth } from "../../../src/lib/auth"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 import { GalleryTile } from "../../../src/components/GalleryTile"
-import { Icon } from "../../../src/components/Icon"
 import { StaffBadge } from "../../../src/components/StaffBadge"
+import { AthleteStatusRowIcons } from "../../../src/components/AthleteStatusIcons"
 import { useGalleryView } from "../../../src/lib/view-preferences"
 import { GalleryViewToggle } from "../../../src/components/GalleryViewToggle"
 
@@ -44,8 +41,6 @@ export default function RosterScreen() {
   const router = useRouter()
   const { user } = useAuth()
   const isStaff = !!user && isStaffRole(user.role)
-  const c = usePalette()
-  const todayKey = localDayKey(new Date())
   const [galleryView, setGalleryView] = useGalleryView("roster")
   const tabBarPad = useTabBarScrollPadding()
   const gallery = galleryView === "gallery"
@@ -255,39 +250,17 @@ export default function RosterScreen() {
             gallery ? (
               <GalleryTile
                 title={athleteDisplayName(item)}
-                titleAdornment={
-                  item.user?.staffTitle ? <StaffBadge title={item.user.staffTitle} /> : undefined
-                }
+                titleAdornment={<NameAdornment athlete={item} showStatus={isStaff} />}
                 subtitle={[item.gender, item.seasons?.[0] && formatSeasonLabel(item.seasons[0])].filter(Boolean).join(" · ")}
                 onPress={() => router.push(`/roster/${item.id}`)}
               />
             ) : (
               <ListRow
                 title={athleteDisplayName(item)}
-                titleAdornment={
-                  item.user?.staffTitle ? <StaffBadge title={item.user.staffTitle} /> : undefined
-                }
-                subtitle={[
-                  item.gender,
-                  item.seasons?.[0] && formatSeasonLabel(item.seasons[0]),
-                  isStaff &&
-                    (item.timesSyncedAt
-                      ? `Imported ${daysAgoLabel(item.timesSyncedAt, todayKey)?.toLowerCase()}`
-                      : "Never imported"),
-                ]
+                titleAdornment={<NameAdornment athlete={item} showStatus={isStaff} />}
+                subtitle={[item.gender, item.seasons?.[0] && formatSeasonLabel(item.seasons[0])]
                   .filter(Boolean)
                   .join(" · ")}
-                accessory={
-                  isStaff ? (
-                    item.swimCloudIds?.length ? (
-                      <Icon name="check" size={18} color={c.successText} accessibilityLabel="Has SwimCloud" />
-                    ) : (
-                      <Text style={{ color: c.textTertiary }} accessibilityLabel="No SwimCloud">
-                        —
-                      </Text>
-                    )
-                  ) : undefined
-                }
                 onPress={() => router.push(`/roster/${item.id}`)}
               />
             )
@@ -295,5 +268,21 @@ export default function RosterScreen() {
         />
       )}
     </Screen>
+  )
+}
+
+/** Staff badge, then — for staff viewers — physical / concussion test / SwimCloud times status icons. */
+function NameAdornment({ athlete, showStatus }: { athlete: AthleteSummary; showStatus: boolean }) {
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+      {athlete.user?.staffTitle ? <StaffBadge title={athlete.user.staffTitle} /> : null}
+      {showStatus ? (
+        <AthleteStatusRowIcons
+          clearance={athlete.clearance}
+          swimCloudIds={athlete.swimCloudIds}
+          timesSyncedAt={athlete.timesSyncedAt ?? null}
+        />
+      ) : null}
+    </View>
   )
 }

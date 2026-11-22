@@ -16,7 +16,7 @@ import {
 } from "@swimbuzz/shared"
 import { StaffBadge } from "../../../src/components/StaffBadge"
 import { RemoveSeasonsSheet } from "../../../src/components/RemoveSeasonsSheet"
-import { AthleteClearanceSection } from "../../../src/components/AthleteClearanceSection"
+import { AthleteStatusIcons } from "../../../src/components/AthleteStatusIcons"
 import { AthleteYearsSheet } from "../../../src/components/AthleteYearsSheet"
 import { ProgressionSection } from "../../../src/components/ProgressionSection"
 import {
@@ -373,11 +373,22 @@ export default function AthleteDetailScreen() {
       <ScrollView contentContainerStyle={{ paddingBottom: tabBarPad }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
           <Title>{name}</Title>
-          {(athlete.user as { staffTitle?: StaffTitle | null } | undefined)?.staffTitle ? (
-            <StaffBadge
-              title={(athlete.user as { staffTitle: StaffTitle }).staffTitle}
-            />
-          ) : null}
+          {/* Staff badge, then physical / concussion test / SwimCloud times status (staff only). */}
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+            {(athlete.user as { staffTitle?: StaffTitle | null } | undefined)?.staffTitle ? (
+              <View style={{ padding: 2 }}>
+                <StaffBadge title={(athlete.user as { staffTitle: StaffTitle }).staffTitle} size={20} />
+              </View>
+            ) : null}
+            {isStaff ? (
+              <AthleteStatusIcons
+                athleteId={id}
+                swimCloudIds={swimCloudIds}
+                timesSyncedAt={typeof athlete.timesSyncedAt === "string" ? athlete.timesSyncedAt : null}
+                onRequestImport={() => void requestImport()}
+              />
+            ) : null}
+          </View>
         </View>
         <Muted style={{ marginBottom: spacing.md }}>
           {[genderLabel(athlete.gender), ...seasons].filter(Boolean).join(" · ")}
@@ -402,9 +413,6 @@ export default function AthleteDetailScreen() {
             />
           ) : null}
         </Section>
-
-        {/* Physical & concussion clearance: staff and the athlete themself only. */}
-        {canManage ? <AthleteClearanceSection athleteId={id} canEdit={isStaff} /> : null}
 
         {swims.length > 0 ? (
           <Section title="Highlights">

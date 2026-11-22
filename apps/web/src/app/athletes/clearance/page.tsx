@@ -10,7 +10,7 @@ import ClearanceView from "./ClearanceView"
 
 export const dynamic = "force-dynamic"
 
-/** Staff: who has a physical on file and a concussion baseline test for the season. */
+/** Staff: who on a season's roster has completed the physical and concussion baseline test. */
 export default async function ClearancePage(props: { searchParams: Promise<{ season?: string }> }) {
   const { season: seasonParam } = await props.searchParams
   const session = await getSession()

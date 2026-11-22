@@ -1,6 +1,7 @@
-import type { StaffTitle } from "@swimbuzz/shared"
+import { athleteStatusIcons, type AthleteClearanceSummary, type StaffTitle } from "@swimbuzz/shared"
 import { athleteAge, formatAcademicYear } from "@/lib/utils"
 import StaffBadge from "@/components/ui/StaffBadge"
+import { AthleteStatusIcons } from "@/components/athlete/StatusIcon"
 
 /** The roster page's athlete row, as selected in page.tsx. */
 export type RosterAthlete = {
@@ -16,6 +17,8 @@ export type RosterAthlete = {
   swimCloudIds: number[]
   /** When SwimCloud times were last imported; null if never. */
   timesSyncedAt: string | Date | null
+  /** Physical & concussion test completion — staff viewers only (null for everyone else). */
+  clearance: AthleteClearanceSummary | null
   user: { image: string | null; staffTitle: StaffTitle | null } | null
 }
 
@@ -52,8 +55,20 @@ export function AthleteAvatar({ athlete, className }: { athlete: RosterAthlete; 
   )
 }
 
-/** "First (Preferred) Last" with the staff badge kept outside the truncated text so its tooltip isn't clipped. */
-export function AthleteName({ athlete, className }: { athlete: RosterAthlete; className: string }) {
+/**
+ * "First (Preferred) Last", then the staff badge and — for staff viewers (`showStatus`) — the
+ * status icons (physical, concussion test, SwimCloud times), kept outside the truncated text so
+ * their tooltips aren't clipped.
+ */
+export function AthleteName({
+  athlete,
+  className,
+  showStatus = false,
+}: {
+  athlete: RosterAthlete
+  className: string
+  showStatus?: boolean
+}) {
   return (
     <p className={`flex min-w-0 items-center font-medium text-foreground ${className}`}>
       <span className="truncate">
@@ -64,6 +79,7 @@ export function AthleteName({ athlete, className }: { athlete: RosterAthlete; cl
         {athlete.lastName}
       </span>
       {athlete.user?.staffTitle && <StaffBadge title={athlete.user.staffTitle} className="shrink-0" />}
+      {showStatus && <AthleteStatusIcons items={athleteStatusIcons(athlete)} className="ml-1.5" />}
     </p>
   )
 }

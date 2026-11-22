@@ -13,6 +13,7 @@ import { isCuid, uniqueAthleteSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
 import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
 import { redactAthleteForViewer } from "@/lib/athlete/athlete-privacy"
+import { clearanceSummary, clearanceSummarySelect } from "@/lib/athlete/athlete-clearance"
 import { loadRelaySplits } from "@/lib/meet/relay-splits"
 import { AthleteYearError, applyYearEdits } from "@/lib/athlete/athlete-year"
 
@@ -28,6 +29,7 @@ export async function GET(
     where: isCuid(param) ? { OR: [{ id: param }, { slug: param }] } : { slug: param },
     include: {
       user: { select: { name: true, email: true, image: true, staffTitle: true } },
+      clearance: { select: clearanceSummarySelect },
       swims: {
         orderBy: { date: "desc" },
         include: {
@@ -37,6 +39,7 @@ export async function GET(
     },
   })
   if (!athlete) return NextResponse.json({ error: "Not found" }, { status: 404 })
+  const { clearance, ...rest } = athlete
 
   // Relay leg 2–4 splits: extra PB rows + history entries, never counted as swims.
   const relaySplits = (await loadRelaySplits({ athleteIds: [athlete.id] })).map((split) => ({
@@ -52,7 +55,9 @@ export async function GET(
   }))
 
   return NextResponse.json({
-    ...withLegacySwimCloudId(redactAthleteForViewer(athlete, session)),
+    ...withLegacySwimCloudId(redactAthleteForViewer(rest, session)),
+    // Completion only (status icons beside the name) — staff only.
+    ...(isStaffRole(session.user.role) ? { clearance: clearanceSummary(clearance) } : {}),
     relaySplits,
   })
 }

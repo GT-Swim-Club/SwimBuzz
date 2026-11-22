@@ -12,17 +12,22 @@ export default function StaffBadge({
   title,
   className = "",
   placement = "auto",
+  size = "sm",
 }: {
   title: StaffTitle
   className?: string
   placement?: "auto" | "above" | "below"
+  /** "lg" matches the clearance icons beside a profile heading (20px icon in a 32px box, no margin). */
+  size?: "sm" | "lg"
 }) {
   const label = STAFF_TITLE_LABELS[title]
+  const box =
+    size === "lg"
+      ? "inline-flex h-8 w-8 items-center justify-center"
+      : "ml-1.5 inline-flex translate-y-[1px] items-center"
   return (
-    <span
-      className={`group relative ml-1.5 inline-flex translate-y-[1px] items-center text-accent ${className}`}
-    >
-      <AppIcon name={staffBadgeIcon(title)} className="h-3.5 w-3.5 shrink-0" />
+    <span className={`group relative text-accent ${box} ${className}`}>
+      <AppIcon name={staffBadgeIcon(title)} className={`${size === "lg" ? "h-5 w-5" : "h-3.5 w-3.5"} shrink-0`} />
       <span className="sr-only">{label}</span>
       <HoverDetail
         label={label}

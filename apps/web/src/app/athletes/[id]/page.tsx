@@ -11,7 +11,8 @@ import type { AthleteSwim } from "@/lib/athlete/swim-history"
 import { meetDayRange } from "@/lib/swim/swim-dedup"
 import AthleteActions from "./AthleteActions"
 import AthleteSwimsWorkspace from "./AthleteSwimsWorkspace"
-import AthleteClearance from "./AthleteClearance"
+import AthleteHeaderIcons from "./AthleteHeaderIcons"
+import { clearanceSummary, clearanceSummarySelect } from "@/lib/athlete/athlete-clearance"
 import { ICON_BUTTON, SwimCloudProfileLinks } from "./AthleteIconButton"
 import { isStaffUi } from "@/lib/athlete/athlete-view-server"
 import {
@@ -40,6 +41,7 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
         where: isCuid(param) ? { OR: [{ id: param }, { slug: param }] } : { slug: param },
         include: {
           user: { select: { name: true, email: true, image: true, staffTitle: true } },
+          clearance: { select: clearanceSummarySelect },
           swims: {
             orderBy: { date: "desc" },
             include: {
@@ -147,7 +149,23 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
                     {" "}({athlete.preferredName})
                   </span>
                 )}
-                {athlete.user?.staffTitle && <StaffBadge title={athlete.user.staffTitle} />}
+                {/* Staff badge, then physical / concussion test / SwimCloud times status (staff only). */}
+                <span className="ml-0.5 inline-flex items-center -space-x-1 align-middle">
+                  {athlete.user?.staffTitle && <StaffBadge title={athlete.user.staffTitle} size="lg" />}
+                  {isCoach && (
+                    <AthleteHeaderIcons
+                      athlete={{
+                        id: athlete.id,
+                        firstName: athlete.firstName,
+                        lastName: athlete.lastName,
+                        preferredName: athlete.preferredName,
+                      }}
+                      clearance={clearanceSummary(athlete.clearance)}
+                      swimCloudIds={athlete.swimCloudIds}
+                      timesSyncedAt={athlete.timesSyncedAt?.toISOString() ?? null}
+                    />
+                  )}
+                </span>
               </h1>
               {meta.length > 0 && (
                 <p className="mt-1 truncate text-[15px] leading-[22px] text-foreground-secondary sm:text-base">
@@ -189,11 +207,6 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
           )}
         </div>
       </div>
-
-      {/* Physical & concussion clearance: staff and the athlete themself only. */}
-      {(isCoach || isOwnProfile) && (
-        <AthleteClearance athleteId={athlete.id} seasons={athlete.seasons} canEdit={isCoach} />
-      )}
 
       <AthleteSwimsWorkspace
         swims={swims}

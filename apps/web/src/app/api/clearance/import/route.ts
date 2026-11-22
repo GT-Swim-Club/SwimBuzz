@@ -25,11 +25,12 @@ import { parseSeason } from "@/lib/season"
 export const runtime = "nodejs"
 
 /**
- * Import physical & concussion clearance for `?season=` from a Google Sheet or CSV.
+ * Import physical & concussion clearance from a Google Sheet or CSV, matching rows to the
+ * `?season=` roster. Clearance itself is one-and-done, not per season.
  * 1. No `fields.columns`: returns the detected header row and column mapping for staff to confirm.
  * 2. With the confirmed `fields.columns` (+ `fields.headerRow`): matches rows by GTID, email,
  *    then name. When names need pairing nothing is saved until the re-run with `paired: true`.
- * Only status and dates are stored; every other column is ignored.
+ * Only completion status is stored; every other column (and any date) is ignored.
  */
 export async function POST(req: Request) {
   const session = await getSession()
@@ -122,11 +123,11 @@ export async function POST(req: Request) {
   const updates = [...resolved.updates.entries()]
   if (updates.length > 0) {
     await prisma.$transaction(
-      updates.map(([athleteId, update]) => upsertClearanceQuery(athleteId, season, update, "IMPORT"))
+      updates.map(([athleteId, update]) => upsertClearanceQuery(athleteId, update, "IMPORT"))
     )
   }
 
-  const missing = await missingClearanceByAthlete(season, roster.map((a) => a.id))
+  const missing = await missingClearanceByAthlete(roster.map((a) => a.id))
   return NextResponse.json({
     season,
     imported: updates.length,

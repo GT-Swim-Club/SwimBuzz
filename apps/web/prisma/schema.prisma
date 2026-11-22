@@ -142,7 +142,7 @@ model Athlete {
   meetRoomPreferences MeetRoomPreference[]
   meetRoomAssignments MeetRoomAssignment[]
   practiceAttendance  PracticeAttendance[]
-  clearances          AthleteClearance[]
+  clearance           AthleteClearance?
 
   @@index([gtid])
   @@index([seasons], type: Gin)
@@ -484,23 +484,17 @@ model PracticeAttendance {
 /// per season. Cleared status and dates only — never anything medical. Visible only to staff
 /// and the athlete themself (lib/athlete/athlete-clearance.ts); never in roster payloads.
 model AthleteClearance {
-  id                String    @id @default(cuid())
-  athleteId         String
-  athlete           Athlete   @relation(fields: [athleteId], references: [id], onDelete: Cascade)
-  season            String
-  physicalCleared   Boolean   @default(false)
-  /// Calendar date (UTC midnight) the physical was done/cleared, when known.
-  physicalDate      DateTime?
-  concussionCleared Boolean   @default(false)
-  /// Calendar date (UTC midnight) of the concussion baseline test, when known.
-  concussionDate    DateTime?
+  id                String   @id @default(cuid())
+  /// One row per athlete: the physical and concussion baseline test are done once, not per season.
+  athleteId         String   @unique
+  athlete           Athlete  @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  /// Completion status only — no dates and nothing medical.
+  physicalCleared   Boolean  @default(false)
+  concussionCleared Boolean  @default(false)
   /// IMPORT (sheet/CSV) or MANUAL (staff corrected it by hand) — whichever wrote last.
-  source            String    @default("IMPORT")
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  @@unique([athleteId, season])
-  @@index([season])
+  source            String   @default("IMPORT")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model PracticeComment {

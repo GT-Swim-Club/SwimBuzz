@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation"
 import {
   athleteDisplayName,
   CLEARANCE_CHECK_LABEL,
-  formatClearanceDate,
   formatSeasonLabel,
   missingClearance,
   type ClearanceItem,
@@ -31,7 +30,8 @@ function CheckStatus({ item, label }: { item: ClearanceItem; label: string }) {
       <span className="inline-flex items-center gap-1.5 text-sm text-warning-text">
         <WarningGlyph className="h-3.5 w-3.5 shrink-0" />
         <span>
-          <span className="md:hidden">{label}: </span>Not on file
+          <span className="md:hidden">{label} incomplete</span>
+          <span className="hidden md:inline">Incomplete</span>
         </span>
       </span>
     )
@@ -40,16 +40,16 @@ function CheckStatus({ item, label }: { item: ClearanceItem; label: string }) {
     <span className="inline-flex items-center gap-1.5 text-sm text-foreground">
       <ActionIcon kind="check" className="h-3.5 w-3.5 shrink-0 text-success-text" />
       <span>
-        <span className="md:hidden">{label}: </span>
-        {formatClearanceDate(item.date) ?? "Cleared"}
+        <span className="md:hidden">{label} complete</span>
+        <span className="hidden md:inline">Complete</span>
       </span>
     </span>
   )
 }
 
 /**
- * Staff clearance list for a season: who has a physical on file and has done the
- * concussion baseline test. Defaults to the athletes still missing one; staff can
+ * Staff clearance list for a season's roster: who has completed the physical and the
+ * concussion baseline test (both one-and-done — the season only picks the roster). Defaults to the athletes still missing one; staff can
  * import a sheet or correct one athlete by hand.
  */
 export default function ClearanceView({
@@ -104,7 +104,7 @@ export default function ClearanceView({
       <header>
         <h1 className="text-3xl font-semibold leading-tight text-foreground sm:text-4xl">Clearance</h1>
         <p className="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-accent">
-          Physical &amp; concussion test · {formatSeasonLabel(season)}
+          Physical &amp; concussion test · {formatSeasonLabel(season)} roster
         </p>
         <p className="mt-2 text-sm text-foreground-secondary sm:text-base">
           {athletes.length === 0
@@ -219,7 +219,6 @@ export default function ClearanceView({
 
       <EditClearanceModal
         athlete={editing}
-        season={season}
         onClose={() => setEditing(null)}
         onSaved={() => {
           setEditing(null)

@@ -482,12 +482,12 @@ export function createApiClient(options: ApiClientOptions = {}) {
       })
     },
 
-    /** Physical & concussion clearance per season — staff or the athlete themself. */
+    /** Physical & concussion clearance (one-and-done) — staff or the athlete themself. */
     getAthleteClearance(id: string) {
       return request<AthleteClearanceResponse>(`/api/athletes/${id}/clearance`)
     },
 
-    /** Staff: correct one athlete's clearance for a season by hand. */
+    /** Staff: correct one athlete's clearance by hand. */
     updateAthleteClearance(id: string, input: UpdateAthleteClearanceInput) {
       return request<{ clearance: AthleteClearanceStatus }>(`/api/athletes/${id}/clearance`, {
         method: "PUT",
@@ -495,7 +495,7 @@ export function createApiClient(options: ApiClientOptions = {}) {
       })
     },
 
-    /** Staff: the season roster with each athlete's clearance. */
+    /** Staff: a season's roster with each athlete's clearance (not per season). */
     listClearance(season: string) {
       return request<ClearanceListResponse>(`/api/clearance?season=${encodeURIComponent(season)}`)
     },

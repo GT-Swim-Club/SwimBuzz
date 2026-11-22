@@ -114,8 +114,8 @@ export default async function PracticeAttendancePage({
         })
   // Staff only: flag athletes without a physical or concussion test for this season.
   const [flaggedAttendance, missingClearance] = await Promise.all([
-    withAttendanceClearance(initialAttendance, season),
-    missingClearanceByAthlete(season, roster.map((a) => a.id)),
+    withAttendanceClearance(initialAttendance),
+    missingClearanceByAthlete(roster.map((a) => a.id)),
   ])
 
   return (

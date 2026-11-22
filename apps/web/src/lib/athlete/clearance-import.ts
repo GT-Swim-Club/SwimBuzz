@@ -4,13 +4,14 @@ import {
   matchAthleteIdFast,
   type RosterAthlete,
 } from "@/lib/athlete/athlete-match"
-import { dayKeyToDate, type ClearanceUpdate } from "@/lib/athlete/athlete-clearance"
+import type { ClearanceUpdate } from "@/lib/athlete/athlete-clearance"
 import { normalizeGtid } from "@/lib/practice/practice-attendance"
 
 /**
  * Physical & concussion clearance import (Google Sheet / CSV). Column layout is
  * unknown, so headers are auto-detected and staff confirm the mapping before
- * anything is matched or saved. Cells may hold dates or yes/no values.
+ * anything is matched or saved. Cells may hold yes/no values or a date (a dated
+ * check counts as done). Only completion status is saved — never the date.
  */
 
 export const CLEARANCE_COLUMN_ROLES = [
@@ -20,9 +21,7 @@ export const CLEARANCE_COLUMN_ROLES = [
   "firstName",
   "lastName",
   "physical",
-  "physicalDate",
   "concussion",
-  "concussionDate",
 ] as const
 
 export type ClearanceColumnRole = (typeof CLEARANCE_COLUMN_ROLES)[number]
@@ -38,11 +37,10 @@ function headerRole(h: string): ClearanceColumnRole | null {
   if (!h || /\btimestamp\b/.test(h)) return null
   const physical = /\bphysicals?\b|pre ?participation|\bppe\b|medical (clearance|form|exam)/.test(h)
   const concussion = /concussion|impact test|\bimpact\b|baseline/.test(h)
-  const dated = /\bdate\b|\bwhen\b/.test(h)
   // A column naming both checks is ambiguous — staff map it themselves.
   if (physical && concussion) return null
-  if (concussion) return dated ? "concussionDate" : "concussion"
-  if (physical) return dated ? "physicalDate" : "physical"
+  if (concussion) return "concussion"
+  if (physical) return "physical"
   if (/\bgt ?id\b|\bgtid\b|student (id|number)|\bgt ?#|buzz ?card/.test(h)) return "gtid"
   if (/e ?mail/.test(h)) return "email"
   if (/^(first|first name|firstname|given name|preferred first name|legal first name)$/.test(h)) return "firstName"
@@ -65,7 +63,7 @@ export function detectClearanceColumns(headers: string[]): ClearanceColumns {
 
 function detectedScore(columns: ClearanceColumns): number {
   const ids = ["gtid", "email", "fullName", "firstName", "lastName"].filter((r) => columns[r as ClearanceColumnRole] != null).length
-  const checks = ["physical", "physicalDate", "concussion", "concussionDate"].filter((r) => columns[r as ClearanceColumnRole] != null).length
+  const checks = ["physical", "concussion"].filter((r) => columns[r as ClearanceColumnRole] != null).length
   return ids > 0 && checks > 0 ? ids + checks * 2 : ids + checks
 }
 
@@ -96,11 +94,7 @@ export function clearanceColumnsProblem(columns: ClearanceColumns): string | nul
     columns.firstName != null ||
     columns.lastName != null
   if (!hasId) return "Choose a GTID, email or name column to match athletes by"
-  const hasCheck =
-    columns.physical != null ||
-    columns.physicalDate != null ||
-    columns.concussion != null ||
-    columns.concussionDate != null
+  const hasCheck = columns.physical != null || columns.concussion != null
   if (!hasCheck) return "Choose a physical or concussion test column"
   return null
 }
@@ -123,8 +117,9 @@ const MONTHS: Record<string, number> = {
 }
 
 function dayKey(y: number, m: number, d: number): string | null {
-  const key = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`
-  return dayKeyToDate(key) ? key : null
+  const date = new Date(Date.UTC(y, m - 1, d))
+  if (date.getUTCFullYear() !== y || date.getUTCMonth() !== m - 1 || date.getUTCDate() !== d) return null
+  return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`
 }
 
 /** Find a calendar date in a cell ("2026-08-15", "8/15/2026", "8/15/26", "Aug 15, 2026", "15 Aug 2026"). */
@@ -153,26 +148,23 @@ const BLANK_RE = /^(-+|—|–|n\/?a|tbd|\?)$/
 
 export type ClearanceCell =
   | { kind: "blank" }
-  | { kind: "value"; cleared: boolean; date: string | null }
+  | { kind: "value"; cleared: boolean }
   | { kind: "unknown"; raw: string }
 
-/** Read a status cell: yes/no words, checkmarks, or a date (cleared on that date). */
+/** Read a status cell: yes/no words, checkmarks, or a date (done; the date itself isn't kept). */
 export function parseClearanceCell(raw: string): ClearanceCell {
   const value = raw.trim()
   const lower = value.toLowerCase().replace(/[.!]+$/, "").replace(/\s+/g, " ")
   if (!lower || BLANK_RE.test(lower)) return { kind: "blank" }
-  if (NO_RE.test(lower) || /^(no|not)\b/.test(lower)) return { kind: "value", cleared: false, date: null }
-  const date = parseClearanceDate(value)
-  if (date) return { kind: "value", cleared: true, date }
-  if (YES_RE.test(lower) || /^(yes|done|complete|cleared)\b/.test(lower)) {
-    return { kind: "value", cleared: true, date: null }
-  }
+  if (NO_RE.test(lower) || /^(no|not)\b/.test(lower)) return { kind: "value", cleared: false }
+  if (parseClearanceDate(value)) return { kind: "value", cleared: true }
+  if (YES_RE.test(lower) || /^(yes|done|complete|cleared)\b/.test(lower)) return { kind: "value", cleared: true }
   return { kind: "unknown", raw: value }
 }
 
 // ── Rows ─────────────────────────────────────────────────────────────────────
 
-export type ClearanceRowItem = { cleared: boolean; date: string | null }
+export type ClearanceRowItem = { cleared: boolean }
 
 export type ParsedClearanceRow = {
   rowNumber: number
@@ -192,26 +184,16 @@ function cellAt(row: string[], index: number | undefined): string {
 function readCheck(
   row: string[],
   statusIndex: number | undefined,
-  dateIndex: number | undefined,
   label: string,
   who: string,
   warnings: string[]
 ): ClearanceRowItem | null {
-  const status = statusIndex != null ? parseClearanceCell(cellAt(row, statusIndex)) : ({ kind: "blank" } as const)
-  const dateRaw = cellAt(row, dateIndex)
-  const date = dateRaw ? parseClearanceDate(dateRaw) : null
-  if (dateRaw && !date && dateIndex !== statusIndex) {
-    warnings.push(`${who}: "${dateRaw}" isn't a date for the ${label} — ignored`)
-  }
+  if (statusIndex == null) return null
+  const status = parseClearanceCell(cellAt(row, statusIndex))
   if (status.kind === "unknown") {
     warnings.push(`${who}: "${status.raw}" isn't yes/no or a date for the ${label} — left as it was`)
   }
-  if (status.kind === "value") {
-    return status.cleared ? { cleared: true, date: status.date ?? date } : { cleared: false, date: null }
-  }
-  // Only a date column, or a blank status beside a date: a dated check counts as done.
-  if (date) return { cleared: true, date }
-  return null
+  return status.kind === "value" ? { cleared: status.cleared } : null
 }
 
 function rowLabel(row: Pick<ParsedClearanceRow, "name" | "gtid" | "email" | "rowNumber">): string {
@@ -242,8 +224,8 @@ export function parseClearanceRows(
     const who = rowLabel(base)
     rows.push({
       ...base,
-      physical: readCheck(row, columns.physical, columns.physicalDate, "physical", who, warnings),
-      concussion: readCheck(row, columns.concussion, columns.concussionDate, "concussion test", who, warnings),
+      physical: readCheck(row, columns.physical, "physical", who, warnings),
+      concussion: readCheck(row, columns.concussion, "concussion test", who, warnings),
     })
   })
   return { rows, warnings }
@@ -305,10 +287,8 @@ export function resolveClearanceImport(
     }
     // Later rows for the same athlete win, check by check.
     const update = updates.get(athleteId) ?? {}
-    if (row.physical) update.physical = { cleared: row.physical.cleared, date: dayKeyToDate(row.physical.date) }
-    if (row.concussion) {
-      update.concussion = { cleared: row.concussion.cleared, date: dayKeyToDate(row.concussion.date) }
-    }
+    if (row.physical) update.physical = { cleared: row.physical.cleared }
+    if (row.concussion) update.concussion = { cleared: row.concussion.cleared }
     updates.set(athleteId, update)
   }
 

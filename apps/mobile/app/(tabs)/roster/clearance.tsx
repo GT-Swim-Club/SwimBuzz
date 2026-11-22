@@ -4,10 +4,9 @@ import { useLocalSearchParams, useRouter } from "expo-router"
 import { useQuery } from "@tanstack/react-query"
 import {
   athleteDisplayName,
-  CLEARANCE_CHECK_LABEL,
   CLEARANCE_CHECKS,
+  clearanceStatusLine,
   defaultSeason,
-  formatClearanceDate,
   formatSeasonLabel,
   isStaffRole,
   missingClearance,
@@ -34,15 +33,11 @@ import { ClearanceBadge } from "../../../src/components/ClearanceBadge"
 type Show = "uncleared" | "all"
 
 function checksSummary(a: ClearanceListAthlete): string {
-  return CLEARANCE_CHECKS.map((check) => {
-    const item = a[check]
-    const value = item.cleared ? (formatClearanceDate(item.date) ?? "on file") : "not on file"
-    return `${CLEARANCE_CHECK_LABEL[check]}: ${value}`
-  }).join(" · ")
+  return CLEARANCE_CHECKS.map((check) => clearanceStatusLine(check, a[check])).join(" · ")
 }
 
 /**
- * Staff: physical & concussion clearance for a season's roster — defaults to the
+ * Staff: physical & concussion clearance (one-and-done) for a season's roster — defaults to the
  * athletes still missing one. Corrections happen on the athlete's screen; the
  * sheet import is on the web roster (Clearance → Import).
  */
@@ -88,7 +83,7 @@ export default function ClearanceScreen() {
     <Screen style={{ paddingBottom: 0 }}>
       <Muted style={{ marginBottom: spacing.sm }}>
         {athletes.length === 0
-          ? "Physical on file and concussion baseline test, per season."
+          ? "Physical and concussion baseline test — each completed once."
           : uncleared.length === 0
             ? `All ${athletes.length} athletes are cleared.`
             : `${uncleared.length} of ${athletes.length} not cleared. Import the clearance sheet from the web roster.`}

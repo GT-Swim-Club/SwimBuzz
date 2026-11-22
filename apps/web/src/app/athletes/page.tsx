@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+import { clearanceSummary, clearanceSummarySelect } from "@/lib/athlete/athlete-clearance"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import ImportRosterButton from "./ImportRosterButton"
@@ -49,6 +50,7 @@ async function RosterContent({ searchParams, layout }: { searchParams: Promise<R
           dob: true,
           swimCloudIds: true,
           timesSyncedAt: true,
+          clearance: { select: clearanceSummarySelect },
           user: { select: { image: true, staffTitle: true } }},
         orderBy: [{ lastName: "asc" }, { firstName: "asc" }]}),
       resolveViewerAthleteId(session.user.id),
@@ -56,8 +58,10 @@ async function RosterContent({ searchParams, layout }: { searchParams: Promise<R
     ])
 
     // The year each athlete was in the season on screen, not their latest.
-    const athletes = rows.map(({ yearBySeason, seasons: athleteSeasons, ...athlete }) => ({
+    const athletes = rows.map(({ yearBySeason, seasons: athleteSeasons, clearance, ...athlete }) => ({
       ...athlete,
+      // Clearance & SwimCloud status icons are staff only — never send clearance to others.
+      clearance: isCoach ? clearanceSummary(clearance) : null,
       year: athleteYearForSeason({ yearBySeason, year: athlete.year, seasons: athleteSeasons }, season),
     }))
 
@@ -71,7 +75,7 @@ async function RosterContent({ searchParams, layout }: { searchParams: Promise<R
                 seasons={seasons}
                 season={season}
                 viewerAthleteId={viewerAthleteId}
-                staffColumns={isCoach}
+                showStatus={isCoach}
                 actions={
                     isCoach ? (
                         <>

@@ -18,12 +18,15 @@ export default function AthleteGalleryCard({
   showGender,
   isYou,
   anchor,
+  showStatus,
 }: {
   athlete: RosterAthlete
   showGender: boolean
   isYou: boolean
   /** Last-name initial when this is the first card of its letter (A–Z rail target). */
   anchor?: string
+  /** Staff: clearance & SwimCloud status icons beside the name. */
+  showStatus: boolean
 }) {
   const meta = athleteMeta(athlete, showGender)
 
@@ -31,7 +34,7 @@ export default function AthleteGalleryCard({
     <Link
       id={anchor}
       href={athletePath(athlete.slug ?? athlete.id)}
-      className={`@container block min-w-0 scroll-mt-32 rounded-xl border shadow-sm transition-[background-color,box-shadow] hover:bg-background-hover hover:shadow-md ${
+      className={`group @container block min-w-0 scroll-mt-32 rounded-xl border shadow-sm transition-[background-color,box-shadow] hover:bg-background-hover hover:shadow-md ${
         isYou ? "border-primary bg-primary/5" : "border-border bg-background"
       }`}
     >
@@ -40,6 +43,7 @@ export default function AthleteGalleryCard({
         <div className="flex min-w-0 flex-col xl:@[290px]:gap-0.5">
           <AthleteName
             athlete={athlete}
+            showStatus={showStatus}
             className="text-[15px] leading-[22px] xl:@[290px]:text-[17px] xl:@[290px]:leading-6 xl:@[350px]:text-lg"
           />
           {meta && (

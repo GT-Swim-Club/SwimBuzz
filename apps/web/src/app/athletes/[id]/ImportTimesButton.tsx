@@ -65,15 +65,20 @@ function athleteImportProgress(job: ScraperJobStatusPayload): ImportTaskProgress
   }
 }
 
-/** History toolbar button: pull an athlete's new swims from SwimCloud via the desktop scraper. */
+/**
+ * History toolbar button: pull an athlete's new swims from SwimCloud via the desktop scraper.
+ * `trigger` swaps the toolbar button for another opener (the SwimCloud status icon by the name).
+ */
 export default function ImportTimesButton({
   athleteId,
   swimCloudIds,
   timesSyncedAt,
+  trigger,
 }: {
   athleteId: string
   swimCloudIds: number[]
   timesSyncedAt: string | null
+  trigger?: (open: () => void) => ReactNode
 }) {
   const router = useRouter()
   const { requireScraper } = useScraperUi()
@@ -133,16 +138,20 @@ export default function ImportTimesButton({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        disabled={loading}
-        aria-label="Import times from SwimCloud"
-        className={`${ICON_BUTTON} h-[34px] w-[34px]`}
-      >
-        <AppIcon name="import" className="h-[18px] w-[18px]" />
-        <HoverDetail label={loading ? "Importing times…" : "Import times from SwimCloud"} />
-      </button>
+      {trigger ? (
+        trigger(() => setOpen(true))
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          disabled={loading}
+          aria-label="Import times from SwimCloud"
+          className={`${ICON_BUTTON} h-[34px] w-[34px]`}
+        >
+          <AppIcon name="import" className="h-[18px] w-[18px]" />
+          <HoverDetail label={loading ? "Importing times…" : "Import times from SwimCloud"} />
+        </button>
+      )}
 
       <Modal
         open={open}

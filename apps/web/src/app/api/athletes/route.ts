@@ -13,6 +13,7 @@ import { uniqueAthleteSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
 import { redactAthleteForViewer } from "@/lib/athlete/athlete-privacy"
+import { clearanceSummary, clearanceSummarySelect } from "@/lib/athlete/athlete-clearance"
 
 export async function GET() {
   const session = await getSession()
@@ -22,11 +23,16 @@ export async function GET() {
   // a per-parent `take`) but never consumed by any client of this route.
   const athletes = await prisma.athlete.findMany({
     include: {
-      user: { select: { name: true, email: true, image: true, staffTitle: true } }},
+      user: { select: { name: true, email: true, image: true, staffTitle: true } },
+      clearance: { select: clearanceSummarySelect }},
     orderBy: { lastName: "asc" }})
 
   return NextResponse.json(
-    athletes.map((athlete) => withLegacySwimCloudId(redactAthleteForViewer(athlete, session))),
+    athletes.map(({ clearance, ...athlete }) => ({
+      ...withLegacySwimCloudId(redactAthleteForViewer(athlete, session)),
+      // Completion only (status icons beside the name) — staff only.
+      ...(isStaffRole(session.user.role) ? { clearance: clearanceSummary(clearance) } : {}),
+    })),
     {
       headers: { "Cache-Control": "private, max-age=30, stale-while-revalidate=300" }}
   )

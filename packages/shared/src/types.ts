@@ -1,4 +1,5 @@
 import type { AppRole, StaffTitle } from "./roles"
+import type { AthleteClearanceSummary } from "./athlete-status"
 
 export type SessionUser = {
   id: string
@@ -66,6 +67,8 @@ export type AthleteSummary = {
   swimCloudIds: number[]
   /** When SwimCloud times were last imported; null if never. */
   timesSyncedAt?: string | null
+  /** Physical & concussion test completion (status icons beside the name) — staff responses only. */
+  clearance?: AthleteClearanceSummary
   user: {
     name?: string | null
     email?: string | null

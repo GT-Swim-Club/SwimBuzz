@@ -53,17 +53,10 @@ const ROLE_GROUPS: Array<{ title: string; roles: Array<[ClearanceColumnRole, str
     ],
   },
   {
-    title: "Physical",
+    title: "Checks",
     roles: [
-      ["physical", "Status (yes/no or date)"],
-      ["physicalDate", "Date"],
-    ],
-  },
-  {
-    title: "Concussion test",
-    roles: [
-      ["concussion", "Status (yes/no or date)"],
-      ["concussionDate", "Date"],
+      ["physical", "Physical"],
+      ["concussion", "Concussion test"],
     ],
   },
 ]
@@ -77,7 +70,7 @@ function columnLabel(headers: string[], index: number): string {
 function mappingProblem(columns: ClearanceColumns): string | null {
   const hasId = (["gtid", "email", "fullName", "firstName", "lastName"] as const).some((r) => columns[r] != null)
   if (!hasId) return "Choose a GTID, email or name column to match athletes by."
-  const hasCheck = (["physical", "physicalDate", "concussion", "concussionDate"] as const).some((r) => columns[r] != null)
+  const hasCheck = (["physical", "concussion"] as const).some((r) => columns[r] != null)
   if (!hasCheck) return "Choose a physical or concussion test column."
   return null
 }
@@ -170,10 +163,10 @@ export default function ImportClearanceButton({ season }: { season: string }) {
             <dd className="text-foreground-secondary">GTID, email, or name (first &amp; last, or full name)</dd>
             <dt className="font-medium text-foreground">Checks</dt>
             <dd className="text-foreground-secondary">
-              Physical and concussion test columns — yes/no, ✓, or the date it was done
+              Physical and concussion test columns — yes/no, ✓, or a date (counts as done)
             </dd>
             <dt className="font-medium text-foreground">Ignored</dt>
-            <dd className="text-foreground-secondary">Every other column — only cleared status and dates are saved</dd>
+            <dd className="text-foreground-secondary">Every other column — only whether each is done is saved</dd>
           </dl>
         }
         trigger={(open) => (
@@ -267,8 +260,8 @@ export default function ImportClearanceButton({ season }: { season: string }) {
               </fieldset>
             ))}
             <p className="text-xs text-foreground-tertiary">
-              A status cell can say yes/no, ✓, “done”, or hold the date it was done. A blank cell leaves that
-              athlete&apos;s check as it is.
+              A cell can say yes/no, ✓, “done”, or hold a date (counts as done; the date isn&apos;t saved). A
+              blank cell leaves that athlete&apos;s check as it is.
             </p>
           </div>
         )}

@@ -4,7 +4,7 @@ import { getSession } from "@/lib/auth/session"
 import { listSeasonClearance } from "@/lib/athlete/athlete-clearance"
 import { currentSeason, parseSeason } from "@/lib/season"
 
-/** Staff: every athlete on a season's roster with their physical & concussion clearance. */
+/** Staff: every athlete on a season's roster with their physical & concussion clearance (not per season). */
 export async function GET(req: Request) {
   const session = await getSession()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
