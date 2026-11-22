@@ -131,7 +131,23 @@ export default function RosterView({
                 </option>
               ))}
             </ToolbarSelect>
-            <RosterFilterMenu filters={filters} staff={showStatus} onChange={(key, v) => setParam(key, v, false)} />
+            {/* Athletes only filter by gender, so they keep the plain dropdown; staff get the Filters menu. */}
+            {showStatus ? (
+              <RosterFilterMenu filters={filters} staff onChange={(key, v) => setParam(key, v, false)} />
+            ) : (
+              <ToolbarSelect
+                label="Gender"
+                icon="roster"
+                current={gender === "all" ? "All" : genderLabel(gender)}
+                active={gender !== "all"}
+                value={gender}
+                onChange={(v) => setParam("gender", v, false)}
+              >
+                <option value="all">All</option>
+                <option value="M">Men</option>
+                <option value="F">Women</option>
+              </ToolbarSelect>
+            )}
             <ListLayoutToggle />
             <DownloadRosterPdfButton season={season} filters={filters} query={query} />
             {actions && <div className="flex shrink-0 items-center gap-3">{actions}</div>}

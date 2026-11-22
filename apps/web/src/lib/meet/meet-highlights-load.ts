@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma"
-import type { Course } from "@prisma/client"
+import type { Course, Prisma } from "@prisma/client"
 import type { MeetResultEntry, SheetEntry } from "@/lib/meet/meet-sheet-summary"
 import {
   buildAthletePbMap,
@@ -68,26 +68,30 @@ export async function loadMeetHighlights({
   // Only this meet's swimmers, in the course(s) they swam here, are compared with earlier swims.
   const swimAthleteIds = [...new Set(meet.swims.map((s) => s.athlete.id))]
   const swimCourses = [...new Set(meet.swims.map((s) => s.course))]
-  const [earlierSwims, nationalsCuts, namedAthletes, records] = await Promise.all([
+  // Highlights only compare against each athlete × event × course's fastest earlier time, so let
+  // Postgres return just those minimums — not every earlier swim (thousands of SwimCloud rows per
+  // athlete), which made meet pages the bulk of the database's egress.
+  const priorWhere = {
+    athleteId: { in: swimAthleteIds },
+    course: { in: swimCourses as Course[] },
+    date: { lt: new Date(firstMeetSwimMs) },
+    timeMs: { gt: 0 },
+    // Not this meet's own swims; SwimCloud copies have no meet and always count.
+    OR: [{ meetId: null }, { meetId: { not: meet.id } }],
+  } satisfies Prisma.SwimWhereInput
+  const priorSeasonWhere = {
+    ...priorWhere,
+    meetRef: { is: { season: meet.season } },
+  } satisfies Prisma.SwimWhereInput
+  const fastestBy = (where: Prisma.SwimWhereInput) =>
     swimAthleteIds.length > 0
-      ? prisma.swim.findMany({
-          where: {
-            athleteId: { in: swimAthleteIds },
-            course: { in: swimCourses as Course[] },
-            date: { lt: new Date(firstMeetSwimMs) },
-          },
-          select: {
-            athleteId: true,
-            event: true,
-            course: true,
-            timeMs: true,
-            date: true,
-            meetId: true,
-            tags: true,
-            meetRef: { select: { season: true } },
-          },
-        })
-      : [],
+      ? prisma.swim.groupBy({ by: ["athleteId", "event", "course"], where, _min: { timeMs: true } })
+      : Promise.resolve([])
+  const [priorBests, priorSeasonBests, priorSeasonCutBests, nationalsCuts, namedAthletes, records] = await Promise.all([
+    fastestBy(priorWhere),
+    fastestBy(priorSeasonWhere),
+    // Relay leadoffs never make a cut (isRelayLeadoffSwimTag).
+    fastestBy({ ...priorSeasonWhere, NOT: [{ tags: "R" }, { tags: { startsWith: "R|" } }] }),
     prisma.nationalsCut.findMany({
       where: { isRelay: false, set: { season: meet.season } },
       select: { event: true, gender: true, timeMs: true, set: { select: { course: true } } },
@@ -100,8 +104,12 @@ export async function loadMeetHighlights({
       : [],
     loadMeetRecords(meet.id),
   ])
-  const priorSwims = earlierSwims.filter((s) => s.meetId !== meet.id)
-  const priorSeasonSwims = priorSwims.filter((s) => s.meetRef?.season === meet.season)
+  const fastest = (rows: typeof priorBests) =>
+    rows.flatMap((row) =>
+      row._min.timeMs == null
+        ? []
+        : [{ athleteId: row.athleteId, event: row.event, course: row.course, timeMs: row._min.timeMs }]
+    )
 
   const highlights = computeMeetResultHighlights({
     results,
@@ -116,14 +124,15 @@ export async function loadMeetHighlights({
       tags: s.tags,
       points: s.points,
     })),
-    priorBestMap: buildAthletePbMap(priorSwims),
+    priorBestMap: buildAthletePbMap(fastest(priorBests)),
     nationalsCuts: nationalsCuts.map((c) => ({
       event: c.event,
       gender: c.gender,
       course: c.set.course,
       timeMs: c.timeMs,
     })),
-    priorSeasonSwims,
+    priorSeasonBestMap: buildAthletePbMap(fastest(priorSeasonBests)),
+    priorSeasonCutSwims: fastest(priorSeasonCutBests),
     athleteHrefById,
     relayResults,
     teamScores,

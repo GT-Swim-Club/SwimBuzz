@@ -75,7 +75,7 @@ export default function QualifiersView({
       if (value) params.set(key, value)
       else params.delete(key)
     }
-    return `/qualifiers?${params.toString()}`
+    return `/nationals-qualifiers?${params.toString()}`
   }
 
   function changeSeason(next: string) {
@@ -181,7 +181,7 @@ export default function QualifiersView({
   return (
     <>
       <FluidToolbar
-        pathname="/qualifiers"
+        pathname="/nationals-qualifiers"
         placeholder={placeholder}
         searchLabel="Search qualifiers"
         shallow

@@ -72,7 +72,7 @@ export default function UploadStandardsButton({
         if (!res.ok) {
           throw new Error(typeof data.error === "string" ? data.error : "Upload failed")
         }
-        router.push(`/qualifiers?season=${encodeURIComponent(season)}`)
+        router.push(`/nationals-qualifiers?season=${encodeURIComponent(season)}`)
         router.refresh()
         return "Standards uploaded successfully"
       })()

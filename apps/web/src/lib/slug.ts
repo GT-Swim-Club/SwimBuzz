@@ -41,6 +41,18 @@ export function meetSwimPath(meetSlug: string, swimId: string): string {
   return `${meetPath(meetSlug)}#swim-${swimId}`
 }
 
+/**
+ * A relay team's anchor on its meet page, from its team key (relayTeamKey: event | letter | round |
+ * gender): "400 Free Relay|A|F|M" → "relay-400-free-relay-a-f-m". Its row opens from it.
+ */
+export function relayAnchorId(teamKey: string): string {
+  return `relay-${teamKey.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}`
+}
+
+export function meetRelayPath(meetSlug: string, teamKey: string): string {
+  return `${meetPath(meetSlug)}#${relayAnchorId(teamKey)}`
+}
+
 export function practiceSlugBase(startsAt: Date | null, timeZone: string): string {
   if (!startsAt) return "undated"
   return zonedDayKey(startsAt, timeZone)

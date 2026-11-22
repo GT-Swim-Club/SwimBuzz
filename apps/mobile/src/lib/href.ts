@@ -24,7 +24,7 @@ export function resolveAppHref(href: string | null | undefined): Href | null {
   const qs = query ? `?${query}` : ""
 
   if (pathname === "/" || pathname === "") return "/(tabs)/practices"
-  if (pathname === "/qualifiers" || pathname.startsWith("/qualifiers/")) {
+  if (pathname === "/nationals-qualifiers" || pathname.startsWith("/nationals-qualifiers/")) {
     return `/(tabs)/nationals${qs}` as Href
   }
   if (pathname === "/meets" || pathname === "/meets/") {

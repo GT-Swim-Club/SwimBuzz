@@ -106,9 +106,19 @@ export type HighlightsPage = { kind: StatCounterPage | "stats"; counters: StatCo
 const PAGE_ORDER: StatCounterPage[] = ["teamScores", "topScorers"]
 const COUNTER_ROWS: StatCounterRow[] = ["results", "swims"]
 
+/** A tie this many names long ("Ann Lee, Bo Kim, Cy Diaz, & Di Fox") gets a carousel page to itself. */
+const OWN_PAGE_NAMES = 4
+
+/** How many names a counter's value lists ("Ann Lee, Bo Kim, & Cy Diaz" is 3; a number or time is 1). */
+function counterNameCount(value: string | number): number {
+  if (typeof value !== "string") return 1
+  return value.split(/,\s*&\s+|,\s+|\s+&\s+/).length
+}
+
 /**
  * The highlights carousel's pages: team scores, then top scorers, then plain counters
- * three-up and counters with a hint line two-up (they need more room).
+ * three-up and counters with a hint line two-up (they need more room). A long tie (Most PBs
+ * shared by four or more) takes a page alone rather than squeezing beside another counter.
  */
 export function paginateHighlights(counters: StatCounter[]): HighlightsPage[] {
   const pages: HighlightsPage[] = []
@@ -120,7 +130,19 @@ export function paginateHighlights(counters: StatCounter[]): HighlightsPage[] {
   const plain = rest.filter((c) => !c.hint)
   const hinted = rest.filter((c) => c.hint)
   for (let i = 0; i < plain.length; i += 3) pages.push({ kind: "stats", counters: plain.slice(i, i + 3) })
-  for (let i = 0; i < hinted.length; i += 2) pages.push({ kind: "stats", counters: hinted.slice(i, i + 2) })
+  let pair: StatCounter[] = []
+  for (const counter of hinted) {
+    if (counterNameCount(counter.value) >= OWN_PAGE_NAMES) {
+      pages.push({ kind: "stats", counters: [counter] })
+      continue
+    }
+    pair.push(counter)
+    if (pair.length === 2) {
+      pages.push({ kind: "stats", counters: pair })
+      pair = []
+    }
+  }
+  if (pair.length) pages.push({ kind: "stats", counters: pair })
   return pages
 }
 

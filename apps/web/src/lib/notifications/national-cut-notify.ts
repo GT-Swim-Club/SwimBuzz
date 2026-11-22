@@ -107,7 +107,7 @@ export function notifyNewNationalCuts(meetId: string): void {
         type: NotificationType.NATIONAL_CUT,
         title: `National cut: ${cut.event}`,
         body: `${displayTime(cut.timeMs)} at ${meet.name} (cut ${displayTime(cut.cutMs)})`,
-        href: "/qualifiers",
+        href: "/nationals-qualifiers",
         athleteId: cut.athleteId,
         refKey,
       })

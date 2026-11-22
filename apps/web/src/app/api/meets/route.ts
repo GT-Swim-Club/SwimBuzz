@@ -19,9 +19,24 @@ export async function GET() {
   const session = await getSession()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
+  // MeetSummary only — not the sheet summaries, relay drafts and other JSON the list never shows.
   const meets = await prisma.meet.findMany({
     orderBy: { startsAt: "desc" },
-    include: { _count: { select: { swims: true } }}})
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      location: true,
+      startsAt: true,
+      endsAt: true,
+      hasStartTime: true,
+      timeZone: true,
+      course: true,
+      season: true,
+      iconUrl: true,
+      bannerUrl: true,
+      _count: { select: { swims: true } },
+    }})
 
   return NextResponse.json(meets, {
     headers: { "Cache-Control": "private, max-age=30, stale-while-revalidate=300" }})

@@ -2,6 +2,7 @@ import Link from "next/link"
 import type { CSSProperties } from "react"
 import { AppIcon } from "@/components/ui/AppIcon"
 import { Skeleton } from "@/components/ui/Skeleton"
+import SpinnerScreen from "@/components/ui/SpinnerScreen"
 import BalancedGrid from "@/components/ui/BalancedGrid"
 import {
   relayLineupHasAthlete,
@@ -185,7 +186,11 @@ function minColumnWidth(events: RelaySummaryEvent[]): number {
   return Math.ceil(Math.min(260, Math.max(160, width)))
 }
 
-/** Every relay event at a glance: published lineups solid, drafts and suggestions dashed. */
+/**
+ * Every relay event at a glance: published lineups solid, drafts and suggestions dashed. Events
+ * still waiting on their optimal suggestion (they all arrive in one batch) sit behind a single
+ * spinner panel rather than a spinner each, and take their places in the grid once it lands.
+ */
 export default function RelaySummary({
   events,
   onOpen,
@@ -201,6 +206,27 @@ export default function RelaySummary({
       </p>
     )
   }
+  const waiting = events.filter((event) => event.state === "loading").length
+  if (waiting === 0) return <RelaySummaryGrid events={events} onOpen={onOpen} />
+  const ready = events.filter((event) => event.state !== "loading")
+  return (
+    <div className="flex flex-col gap-5">
+      {ready.length > 0 ? <RelaySummaryGrid events={ready} onOpen={onOpen} /> : null}
+      <SpinnerScreen
+        label={`Building optimal relays for ${waiting} ${waiting === 1 ? "event" : "events"}…`}
+        className="min-h-56 rounded-xl border border-dashed border-border"
+      />
+    </div>
+  )
+}
+
+function RelaySummaryGrid({
+  events,
+  onOpen,
+}: {
+  events: RelaySummaryEvent[]
+  onOpen?: (slug: string) => void
+}) {
   // Past a few events: women's row, then men's, event types in shared columns, and each mixed
   // relay in a column of its own centered between both rows.
   const { rows, spanning } = relayShareLayout(events)
@@ -229,12 +255,7 @@ export default function RelaySummary({
           <>
             <EventHeader event={event} />
             {event.editor ? <EditorLine editor={event.editor} /> : null}
-            {event.state === "loading" ? (
-              <>
-                <RelaySummaryCardSkeleton />
-                <RelaySummaryCardSkeleton />
-              </>
-            ) : event.state === "empty" ? (
+            {event.state === "empty" ? (
               <div
                 className={
                   "flex flex-col items-start gap-2 rounded-lg border border-dashed border-border px-3 py-3.5 " +

@@ -214,8 +214,13 @@ export function computeMeetResultHighlights(opts: {
   athleteHrefById?: Map<string, string>
   /** Individual Nationals cuts for the meet's season. */
   nationalsCuts?: NationalsCutForStats[]
-  /** Swims from earlier meets this season — a cut made there isn't new here. */
-  priorSeasonSwims?: { athleteId: string; event: string; course: string; timeMs: number; tags?: string }[]
+  /** Each athlete × event × course's best from earlier meets this season (relay leadoffs included). */
+  priorSeasonBestMap?: AthletePbMap
+  /**
+   * Each athlete × event × course's fastest earlier swim this season, relay leadoffs excluded — a cut
+   * made there isn't new here. The fastest is enough: if it missed the cut, every slower one did too.
+   */
+  priorSeasonCutSwims?: { athleteId: string; event: string; course: string; timeMs: number }[]
   /** Relay team results — used for busiest-swimmer (each leg counts). */
   relayResults?: SheetEntry[] | null
   /** Team standings from the results PDF — the carousel's first page. */
@@ -234,7 +239,8 @@ export function computeMeetResultHighlights(opts: {
     meetSwims,
     priorBestMap,
     nationalsCuts,
-    priorSeasonSwims,
+    priorSeasonBestMap,
+    priorSeasonCutSwims,
     athleteHrefById,
     relayResults,
     teamScores,
@@ -459,11 +465,10 @@ export function computeMeetResultHighlights(opts: {
 
   // Season bests — the same fastest swims, when it's the athlete's first of the season in that
   // event or beats every earlier one this season
-  if (priorSeasonSwims) {
-    const priorSeasonBest = buildAthletePbMap(priorSeasonSwims)
+  if (priorSeasonBestMap) {
     let seasonBestCount = 0
     for (const [key, s] of fastestHere) {
-      const prior = priorSeasonBest.get(key)
+      const prior = priorSeasonBestMap.get(key)
       if (prior == null || s.timeMs < prior) seasonBestCount += 1
     }
     if (seasonBestCount > 0) {
@@ -499,7 +504,7 @@ export function computeMeetResultHighlights(opts: {
     for (const s of meetSwims) if (s.gender) genderByAthlete.set(s.athleteId, s.gender)
     // Athlete × course × event cuts already made earlier this season.
     const priorCuts = new Set<string>()
-    for (const s of priorSeasonSwims ?? []) {
+    for (const s of priorSeasonCutSwims ?? []) {
       const gender = genderByAthlete.get(s.athleteId)
       const made = gender ? cutMade(s, gender) : null
       if (made) priorCuts.add(`${s.athleteId}|${made.key}`)

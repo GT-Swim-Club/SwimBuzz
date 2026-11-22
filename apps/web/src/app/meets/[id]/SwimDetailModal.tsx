@@ -458,7 +458,8 @@ export default function SwimDetailModal({
   if (combined) {
     const a = sortedSplits(first.splits)
     const b = sortedSplits(last.splits)
-    if (a.length > 0 || b.length > 0) {
+    // A lone split (a 50's) is just the time, so splits show only when a round has several.
+    if (a.length > 1 || b.length > 1) {
       const ia = validSeries(a.map((x) => x.time)) ? toIntervalSplits(a) : null
       const ib = validSeries(b.map((x) => x.time)) ? toIntervalSplits(b) : null
       // Offer only intervals that work for every round that has a full set of splits.
@@ -651,7 +652,8 @@ export default function SwimDetailModal({
     }
   } else {
     const rows = sortedSplits(last.splits)
-    if (rows.length > 0) {
+    // A lone split (a 50's) is just the time, so splits show only when there are several.
+    if (rows.length > 1) {
       const splits = validSeries(rows.map((r) => r.time)) ? toIntervalSplits(rows) : null
       const options = splits ? splitStepOptions(splits) : []
       // No interval fits (irregular split distances) → plot the raw splits, no toggle.

@@ -100,10 +100,16 @@ function ListSkeleton() {
   )
 }
 
-/** Mirrors the records page: the sheet table (lg+) or the per-gender list, with the share button. */
+/** Mirrors the records page: the Records | Top 10 toggle, then the sheet table (lg+) or the per-gender list. */
 export default function RecordsSkeleton() {
   return (
     <>
+      <div className="flex h-[42px] w-full items-center gap-1 rounded-lg border border-border-secondary bg-background p-1 sm:w-56">
+        <Skeleton className="h-full flex-1 rounded-md" />
+        <div className="flex flex-1 justify-center">
+          <Skeleton className="h-3.5 w-12" />
+        </div>
+      </div>
       <TableSkeleton />
       <ListSkeleton />
     </>

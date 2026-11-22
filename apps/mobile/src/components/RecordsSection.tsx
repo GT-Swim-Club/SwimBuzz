@@ -8,9 +8,11 @@ import {
   recordsAsOfLabel,
   recordsExportFilename,
   recordSwimmerLabel,
+  topTimesExportFilename,
   type RecordGender,
   type RecordGroup,
   type TeamRecordRow,
+  type TopTimesMode,
 } from "@swimbuzz/shared"
 import { ActionSheet, EmptyState, ErrorBlock, LoadingBlock, usePalette, type ActionSheetItem } from "@swimbuzz/ui"
 import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
@@ -20,21 +22,43 @@ import { Icon } from "./Icon"
 import { SegmentedOption, SegmentedToggle } from "./SegmentedToggle"
 import { RecordsExportCapture } from "./RecordsExportCapture"
 import { RecordHistorySheet, recordsErrorMessage, recordTitle, type RecordTarget } from "./RecordSheets"
+import { RecordTopTimesBoard } from "./RecordTopTimesBoard"
 
 const GENDERS = [
   { value: "F", label: "Women" },
   { value: "M", label: "Men" },
 ] as const
 
-/** The records sheet laid out as a PDF by the API (like the web's Download PDF), ready for the share sheet. */
-async function recordsPdfFile(): Promise<File> {
+type SectionView = "records" | "top"
+
+const VIEWS: Array<{ value: SectionView; label: string }> = [
+  { value: "records", label: "Records" },
+  { value: "top", label: "Top 10" },
+]
+
+const MODES: Array<{ value: TopTimesMode; label: string }> = [
+  { value: "performers", label: "Performers" },
+  { value: "performances", label: "Performances" },
+]
+
+/**
+ * A PDF laid out by the API (like the web's Download PDF), ready for the share sheet: the records
+ * sheet, or with `topTimes` that gender's top 10 in that mode.
+ */
+async function recordsPdfFile(topTimes?: { gender: "F" | "M"; mode: TopTimesMode }): Promise<File> {
   const token = await getAccessToken()
-  const res = await fetch(`${API_URL}/api/records/pdf`, {
+  const path = topTimes
+    ? `/api/records/top/pdf?${new URLSearchParams({ gender: topTimes.gender, mode: topTimes.mode })}`
+    : "/api/records/pdf"
+  const res = await fetch(`${API_URL}${path}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   })
   if (!res.ok) throw new Error("Could not create PDF")
   const bytes = new Uint8Array(await res.arrayBuffer())
-  const file = new File(Paths.cache, recordsExportFilename("pdf"))
+  const file = new File(
+    Paths.cache,
+    topTimes ? topTimesExportFilename(topTimes.gender, topTimes.mode) : recordsExportFilename("pdf")
+  )
   if (file.exists) file.delete()
   file.write(bytes)
   return file
@@ -43,14 +67,17 @@ async function recordsPdfFile(): Promise<File> {
 /**
  * Team records (SCY) in the Nationals tab: one gender at a time, an event per row, grouped by stroke.
  * Read-only: records come from imported meet results and the records sheet. Tapping a record shows its
- * history and top 10. Share saves the whole sheet (both genders) to Photos or shares it as a PDF.
+ * history. Share saves the whole sheet (both genders) to Photos or shares it as a PDF.
+ * Top 10 shows every event's top 10 for the gender (performers or performances), shared as a PDF.
  */
 export function RecordsSection() {
   const c = usePalette()
   const styles = useMemo(() => makeStyles(c), [c])
   const { data, isPending, error } = useQuery({ queryKey: ["records"], queryFn: () => api.getRecords() })
+  const [view, setView] = useState<SectionView>("records")
   const [gender, setGender] = useState<"F" | "M">("F")
-  const [historyTarget, setHistoryTarget] = useState<RecordTarget | null>(null)
+  const [mode, setMode] = useState<TopTimesMode>("performers")
+  const [historyTarget, setHistoryTarget] = useState<Pick<RecordTarget, "def" | "gender"> | null>(null)
   const [shareOpen, setShareOpen] = useState(false)
   const [shareBusy, setShareBusy] = useState<"photos" | "pdf" | null>(null)
   const [saved, setSaved] = useState(false)
@@ -103,7 +130,7 @@ export function RecordsSection() {
   async function sharePdf() {
     setShareBusy("pdf")
     try {
-      const file = await recordsPdfFile()
+      const file = await recordsPdfFile(view === "top" ? { gender, mode } : undefined)
       if (!(await Sharing.isAvailableAsync())) {
         Alert.alert("Sharing unavailable", "This device can't open the share sheet.")
         return
@@ -128,8 +155,31 @@ export function RecordsSection() {
     }, [])
   }, [data, gender])
 
+  const shareTitle = view === "top" ? "Share top 10" : "Share records"
+  const pdfItem: ActionSheetItem = {
+    key: "pdf",
+    label: "Share PDF",
+    icon: <Icon name="fileText" size={20} color={c.text} />,
+    busy: shareBusy === "pdf",
+    disabled: Boolean(shareBusy) && shareBusy !== "pdf",
+    onPress: () => void sharePdf(),
+  }
+
   return (
     <View>
+      <SegmentedToggle selectedIndex={VIEWS.findIndex((v) => v.value === view)} fill style={styles.viewToggle}>
+        {VIEWS.map((v) => (
+          <SegmentedOption
+            key={v.value}
+            flex
+            selected={v.value === view}
+            accessibilityLabel={v.label}
+            onPress={() => setView(v.value)}
+          >
+            <Text style={[styles.toggleText, v.value === view && styles.toggleTextOn]}>{v.label}</Text>
+          </SegmentedOption>
+        ))}
+      </SegmentedToggle>
       <View style={styles.header}>
         <View style={styles.toggleWrap}>
           <SegmentedToggle selectedIndex={GENDERS.findIndex((g) => g.value === gender)} fill style={styles.toggle}>
@@ -149,7 +199,7 @@ export function RecordsSection() {
         {data ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Share records"
+            accessibilityLabel={shareTitle}
             hitSlop={6}
             onPress={() => {
               setAsOf(recordsAsOfLabel())
@@ -162,15 +212,34 @@ export function RecordsSection() {
         ) : null}
       </View>
 
-      {error ? <ErrorBlock message={recordsErrorMessage(error, "Couldn't load records")} /> : null}
-      {isPending ? (
+      {view === "top" ? (
+        <>
+          <SegmentedToggle selectedIndex={MODES.findIndex((m) => m.value === mode)} fill style={styles.modeToggle}>
+            {MODES.map((m) => (
+              <SegmentedOption
+                key={m.value}
+                flex
+                selected={m.value === mode}
+                accessibilityLabel={m.label}
+                onPress={() => setMode(m.value)}
+              >
+                <Text style={[styles.toggleText, m.value === mode && styles.toggleTextOn]}>{m.label}</Text>
+              </SegmentedOption>
+            ))}
+          </SegmentedToggle>
+          <RecordTopTimesBoard gender={gender} mode={mode} />
+        </>
+      ) : null}
+
+      {view === "records" && error ? <ErrorBlock message={recordsErrorMessage(error, "Couldn't load records")} /> : null}
+      {view === "records" && isPending ? (
         <View style={styles.card}>
           <LoadingBlock />
         </View>
       ) : null}
-      {data && groups.length === 0 ? <EmptyState title="No records yet" /> : null}
+      {view === "records" && data && groups.length === 0 ? <EmptyState title="No records yet" /> : null}
 
-      {groups.map(({ group, rows }) => (
+      {(view === "records" ? groups : []).map(({ group, rows }) => (
         <View key={group} style={styles.group}>
           <Text style={styles.groupTitle}>{group.toUpperCase()}</Text>
           <View style={styles.card}>
@@ -183,8 +252,8 @@ export function RecordsSection() {
                 <Pressable
                   key={`${row.genders.join("")}|${row.event}`}
                   accessibilityRole="button"
-                  accessibilityLabel={`${recordTitle(target)} history and top 10`}
-                  onPress={() => setHistoryTarget(target)}
+                  accessibilityLabel={`${recordTitle(target)} history`}
+                  onPress={() => setHistoryTarget({ def: row, gender: recordGender })}
                   style={({ pressed }) => [styles.row, index > 0 && styles.rowDivider, pressed && styles.rowPressed]}
                 >
                   <View style={styles.rowMain}>
@@ -214,31 +283,26 @@ export function RecordsSection() {
         visible={shareOpen}
         onClose={() => setShareOpen(false)}
         onDismiss={() => shareSheetDismissRef.current?.()}
-        title="Share records"
+        title={shareTitle}
         groups={[
-          [
-            {
-              key: "photos",
-              label: saved ? "Saved to Photos" : "Save to Photos",
-              icon: <Icon name={saved ? "check" : "image"} size={20} color={c.text} />,
-              busy: shareBusy === "photos",
-              disabled: Boolean(shareBusy) && shareBusy !== "photos",
-              onPress: () => void saveToPhotos(),
-            },
-            {
-              key: "pdf",
-              label: "Share PDF",
-              icon: <Icon name="fileText" size={20} color={c.text} />,
-              busy: shareBusy === "pdf",
-              disabled: Boolean(shareBusy) && shareBusy !== "pdf",
-              onPress: () => void sharePdf(),
-            },
-          ] satisfies ActionSheetItem[],
+          view === "top"
+            ? [pdfItem]
+            : [
+                {
+                  key: "photos",
+                  label: saved ? "Saved to Photos" : "Save to Photos",
+                  icon: <Icon name={saved ? "check" : "image"} size={20} color={c.text} />,
+                  busy: shareBusy === "photos",
+                  disabled: Boolean(shareBusy) && shareBusy !== "photos",
+                  onPress: () => void saveToPhotos(),
+                },
+                pdfItem,
+              ],
         ]}
       />
 
       {/* Off-screen sheet captured to PNG — never shown in the layout. */}
-      {data && shareOpen ? (
+      {data && shareOpen && view === "records" ? (
         <View pointerEvents="none" style={styles.offscreen}>
           <RecordsExportCapture ref={captureRef} rows={data.rows} asOf={asOf} />
         </View>
@@ -260,6 +324,8 @@ function makeStyles(c: ColorPalette) {
       marginBottom: spacing.md,
     },
     toggleWrap: { flex: 1, minWidth: 0 },
+    viewToggle: { alignSelf: "stretch", marginBottom: spacing.sm },
+    modeToggle: { alignSelf: "stretch", marginBottom: spacing.md },
     toggle: { alignSelf: "stretch" },
     iconButton: {
       alignItems: "center",

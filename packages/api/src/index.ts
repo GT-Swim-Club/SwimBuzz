@@ -17,6 +17,7 @@ import type {
   RecordGender,
   SetHeatLaneInput,
   SessionUser,
+  TeamAllTopTimesResponse,
   TeamRecordHistoryResponse,
   TeamRecordsResponse,
   TeamTopTimesResponse,
@@ -545,6 +546,12 @@ export function createApiClient(options: ApiClientOptions = {}) {
     getRecordTopTimes(gender: RecordGender, event: string, mode: TopTimesMode) {
       const sp = new URLSearchParams({ gender, event, mode })
       return request<TeamTopTimesResponse>(`/api/records/top?${sp}`)
+    },
+
+    /** Every record event's top 10 (SCY) for women or men, the mixed relay included. */
+    getAllRecordTopTimes(gender: "F" | "M", mode: TopTimesMode) {
+      const sp = new URLSearchParams({ gender, mode })
+      return request<TeamAllTopTimesResponse>(`/api/records/top/all?${sp}`)
     },
 
     listNotifications() {

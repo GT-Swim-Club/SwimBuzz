@@ -68,13 +68,17 @@ import {
   effectiveRelayGender,
   effectiveRelayRound,
   isRealRelaySwimmerName,
+  leadoffSwimTags,
+  relaySplitSwimTags,
+  relayTeamKey,
   relayTeamPlace,
   relayTeamTime,
   sanitizeRelaySplitTime,
 } from "@/lib/meet/relay-results"
+import type { RelayLegSwim } from "@/lib/meet/relay-splits"
 import { displayMeetResultTags } from "@/lib/swim/swim-tags"
 import { formatDisplayTime, formatSeedTimeDelta, parseTime } from "@/lib/utils"
-import { athletePath } from "@/lib/slug"
+import { athletePath, relayAnchorId } from "@/lib/slug"
 import { LedgerIcon } from "@/components/meet/Ledger"
 import HoverDetail from "@/components/ui/HoverDetail"
 import { SegmentedToggle, segmentedIconOptionClass } from "@/components/ui/SegmentedToggle"
@@ -835,6 +839,39 @@ function summaryRowPdf(
   }
 }
 
+/**
+ * A relay row's anchors (relayAnchorId of its team key, and `swim-<id>` of its leadoff and split
+ * swims), which open it from a link. Under an event the one row carries them all; under athletes,
+ * each copy carries its own swimmer's leg, and the team's goes on the first leg's copy.
+ */
+function relayRowAnchors(
+  entry: SummaryEntry,
+  legSwims: RelayLegSwim[],
+  athleteGenders: Map<string, "M" | "F"> | undefined,
+  sectionAthleteId: string | undefined,
+  eventView: boolean
+): string[] {
+  const round = effectiveRelayRound(entry)
+  const legs = (entry.relaySwimmers ?? []).filter((s) => s.leg > 0)
+  const owns = (leg: (typeof legs)[number]) => eventView || (!!leg.athleteId && leg.athleteId === sectionAthleteId)
+  const anchors: string[] = []
+  const firstLeg = [...legs].filter((s) => s.athleteId).sort((a, b) => a.leg - b.leg)[0]
+  if (eventView || (firstLeg && firstLeg.athleteId === sectionAthleteId)) {
+    const gender = effectiveRelayGender(entry, athleteGenders) ?? ""
+    anchors.push(relayAnchorId(relayTeamKey(entry.event, entry.relayLetter, round, gender)))
+  }
+  for (const leg of legs) {
+    if (!leg.athleteId || !owns(leg)) continue
+    const tags =
+      leg.leg === 1
+        ? [leadoffSwimTags(entry.event, round), leadoffSwimTags(entry.event)]
+        : [relaySplitSwimTags(entry.event, leg.leg, round)]
+    const swim = legSwims.find((s) => s.athleteId === leg.athleteId && tags.includes(s.tags))
+    if (swim) anchors.push(`swim-${swim.id}`)
+  }
+  return anchors
+}
+
 function SummaryEntryRow({
   entry,
   display,
@@ -852,7 +889,10 @@ function SummaryEntryRow({
   mine = false,
   onHeatLaneSaving,
   heatLaneEditable = true,
+  relayLegSwims = [],
 }: {
+  /** The meet's relay leadoff and split swims, anchored on their relays' rows. */
+  relayLegSwims?: RelayLegSwim[]
   entry: SummaryEntry
   display: RowDisplay
   canEdit?: boolean
@@ -890,6 +930,12 @@ function SummaryEntryRow({
   // ids. Used for the `#swim-<id>` anchor that athlete-profile links scroll to and open.
   const anchorSwimId =
     entry.swimId ?? entry.resultSwimId ?? entry.finalSwimId ?? entry.prelimSwimId
+  // A relay opens from its team's anchor and its legs' swims (a leadoff or split on an athlete page).
+  const rowAnchors = isRelay
+    ? relayRowAnchors(entry, relayLegSwims, athleteGenders, athleteId, eventView)
+    : anchorSwimId
+      ? [`swim-${anchorSwimId}`]
+      : []
   const detailTitle = entry.rosterOnly
     ? eventName
     : detailEventTitle(
@@ -1070,7 +1116,8 @@ function SummaryEntryRow({
   return (
     <>
       <SummaryRow
-        id={anchorSwimId ? `swim-${anchorSwimId}` : undefined}
+        id={rowAnchors[0]}
+        aliasIds={rowAnchors.slice(1)}
         display={display}
         highlighted={mine}
         eventNumber={view.badgeNumber}
@@ -1174,9 +1221,12 @@ function readSavedView(key: string): SavedView | null {
   }
 }
 
-/** The page was opened on one swim (`#swim-<id>` from an athlete page), which a saved filter could hide. */
+/**
+ * The page was opened on one swim or relay (`#swim-<id>` / `#relay-…` from an athlete page or the
+ * records' Top 10), which a saved filter could hide.
+ */
 function linkedToSwim(): boolean {
-  return /#swim-/.test(window.location.hash)
+  return /#(swim|relay)-/.test(window.location.hash)
 }
 
 /** A filter that's on, as a removable chip under the toolbar. */
@@ -1236,6 +1286,7 @@ export default function MeetSheetSummarySection({
   entriesSummary,
   results,
   relayResults,
+  relayLegSwims = [],
   heatLaneOverrides = null,
   heatLaneEditable = true,
   meetId,
@@ -1261,6 +1312,8 @@ export default function MeetSheetSummarySection({
   entriesSummary?: SheetSummary | null
   results?: MeetResultEntry[] | null
   relayResults?: SheetSummary["entries"] | null
+  /** The meet's relay leadoff and split swims, which open their relays' rows from `#swim-<id>`. */
+  relayLegSwims?: RelayLegSwim[]
   /** Meet.heatLaneOverrides — coach heat & lane, shown where no import has it. */
   heatLaneOverrides?: unknown
   /** Coaches can fill in heat & lane until the meet is over. */
@@ -1767,6 +1820,7 @@ export default function MeetSheetSummarySection({
     eventNumberOptions,
     onHeatLaneSaving: showHeatLaneSaving,
     heatLaneEditable,
+    relayLegSwims,
   }
 
   const viewerRecord = viewerAthleteId ? athletes.find((a) => a.id === viewerAthleteId) : undefined

@@ -7,6 +7,7 @@ import PageLabelRegistrar from "@/components/nav/PageLabelRegistrar"
 import { RelativeDateRangeTime } from "@/components/ui/RelativeDate"
 import MeetActions from "./MeetActions"
 import MeetPageBackground from "./MeetPageBackground"
+import { loadMeetRelaySplitSwims, type RelayLegSwim } from "@/lib/meet/relay-splits"
 import MeetSheetSummarySection from "./MeetSheetSummarySection"
 import ScrollToHash from "./ScrollToHash"
 import type { MeetFormState } from "../MeetFields"
@@ -19,7 +20,7 @@ import {
   swimsToMeetResults,
   isResultStatusesSummary,
   collectMeetRosterAthleteIds } from "@/lib/meet/meet-sheet-summary"
-import { isRelayResultsSummary } from "@/lib/meet/relay-results"
+import { isRelayLeadoffSwimTag, isRelayResultsSummary } from "@/lib/meet/relay-results"
 import { buildRelayLineups } from "@/lib/meet/relay-lineups"
 import { deleteEndedMeetRelayDrafts } from "@/lib/meet/relay-drafts-expiry"
 import {
@@ -271,6 +272,13 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       user: { select: { image: true, staffTitle: true } }
     }})
   const relayLineupCount = buildRelayLineups(meet, seasonRoster).length
+  // Relay leadoff and split swims have no rows of their own: they anchor on their relay's row.
+  const relayLegSwims: RelayLegSwim[] = [
+    ...meet.swims
+      .filter((s) => isRelayLeadoffSwimTag(s.tags))
+      .map((s) => ({ id: s.id, athleteId: s.athleteId, tags: s.tags })),
+    ...(await loadMeetRelaySplitSwims(meet.id)),
+  ]
   const rosterAthletes = seasonRoster.map((a) => ({
     id: a.id,
     slug: a.slug ?? a.id,
@@ -374,6 +382,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       entriesSummary={entriesSummary}
       results={results}
       relayResults={relayResults}
+      relayLegSwims={relayLegSwims}
       heatLaneOverrides={meet.heatLaneOverrides}
       heatLaneEditable={!(HEAT_LANE_LOCKS_AFTER_MEET && meetHasEndedInZone(meet))}
       meetId={meet.id}

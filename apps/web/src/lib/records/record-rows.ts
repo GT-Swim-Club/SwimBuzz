@@ -4,7 +4,6 @@ import {
   seasonFromDate,
   utcDayKey,
   type TeamRecordItem,
-  type TeamRecordSource,
   type TeamRecordSwimmer,
 } from "@swimbuzz/shared"
 
@@ -53,7 +52,6 @@ export function toRecordItem(row: TeamRecord, links: RecordLinks): TeamRecordIte
     meetName: row.meetName,
     meetId: row.meetId,
     meetSlug: row.meetId ? (links.meetSlugs.get(row.meetId) ?? null) : null,
-    source: row.source as TeamRecordSource,
     isThisSeason: !!row.date && seasonFromDate(utcDayKey(row.date)) === season,
   }
 }

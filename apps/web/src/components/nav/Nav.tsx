@@ -33,7 +33,7 @@ export default async function Nav() {
       prefetch: false,
       icon: <AppIcon key="practices" name="fileText" className={navIconClass} />},
     {
-      href: "/qualifiers",
+      href: "/nationals-qualifiers",
       label: "Nationals",
       prefetch: false,
       icon: <AppIcon key="nationals" name="trophy" className={navIconClass} />},

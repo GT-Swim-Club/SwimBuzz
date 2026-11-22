@@ -18,6 +18,7 @@ import type { SheetEntry } from "@/lib/meet/meet-sheet-summary"
 import { SWIMCLOUD_SOURCE } from "@/lib/swim/swimcloud-import"
 import { parseSwimTime } from "@/lib/swim/swim-parse"
 import { readRecordSwimmers, recordKey } from "@/lib/records/record-rows"
+import { expireTopTimesCache } from "@/lib/records/top-times-cache"
 import { notifyTeamRecordsBroken, type NewTeamRecord } from "@/lib/notifications/record-notify"
 
 /** A swim or relay from an imported SCY meet that could hold a record. */
@@ -274,6 +275,8 @@ export async function syncTeamRecords(): Promise<void> {
     },
     { timeout: 30_000, maxWait: 10_000 }
   )
+  // The Top 10 lists are built from the same swims, relays and athletes.
+  expireTopTimesCache()
   notifyTeamRecordsBroken(newRecords)
 }
 

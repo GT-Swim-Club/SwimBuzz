@@ -53,9 +53,6 @@ export type TeamRecordSwimmer = {
   athleteSlug?: string | null
 }
 
-/** "manual" is a record staff typed in before records became read-only; such rows still show. */
-export type TeamRecordSource = "meet" | "manual" | "seed"
-
 export type TeamRecordItem = {
   id: string
   gender: RecordGender
@@ -72,7 +69,6 @@ export type TeamRecordItem = {
   meetId: string | null
   /** Slug (or id) of the imported meet, for a link. */
   meetSlug: string | null
-  source: TeamRecordSource
   /** Swum in the current season (dated records only). */
   isThisSeason: boolean
 }
@@ -115,6 +111,10 @@ export type TeamTopTime = {
   leadoff: boolean
   meetName: string | null
   meetSlug: string | null
+  /** The imported swim behind it (individual events only), whose detail opens from the row. */
+  swimId: string | null
+  /** A relay's team key in its meet (event | letter | round | gender), whose detail opens from the row. */
+  relayKey: string | null
   /** Was a team record when swum (current or past). */
   isRecord: boolean
   isThisSeason: boolean
@@ -124,6 +124,48 @@ export type TeamTopTimesResponse = {
   /** Relays are always "performances". */
   mode: TopTimesMode
   times: TeamTopTime[]
+}
+
+/** One event's top 10 in the all-events view. */
+export type TeamTopTimesEvent = Pick<RecordEventDef, "event" | "label" | "group" | "relay"> & {
+  /** The gender this list is for: the page's, or "X" for the mixed relay. */
+  gender: RecordGender
+  /** Relays are always "performances". */
+  mode: TopTimesMode
+  times: TeamTopTime[]
+}
+
+/** Every record event's top 10 for one gender (the mixed relay included), in records-table order. */
+export type TeamAllTopTimesResponse = {
+  gender: "F" | "M"
+  mode: TopTimesMode
+  events: TeamTopTimesEvent[]
+}
+
+/** The events shown in a gender's top 10 view: its own, plus the mixed relay (both teams' event). */
+export function topTimesEventDefs(gender: "F" | "M"): Array<RecordEventDef & { gender: RecordGender }> {
+  return RECORD_EVENTS.flatMap((def): Array<RecordEventDef & { gender: RecordGender }> =>
+    def.genders.includes(gender) ? [{ ...def, gender }] : def.genders.includes("X") ? [{ ...def, gender: "X" }] : []
+  )
+}
+
+/** "Women's Top 10" */
+export function topTimesTitle(gender: "F" | "M"): string {
+  return `${gender === "F" ? "Women's" : "Men's"} Top 10`
+}
+
+/** The top 10 view's mode as a line under its title: "Performers · each swimmer at their best". */
+export function topTimesModeLabel(mode: TopTimesMode): string {
+  return mode === "performers" ? "Performers · each swimmer at their best" : "Performances · the fastest swims"
+}
+
+/** "Women's Top 10 Performers - Georgia Tech Swim Club.pdf" */
+export function topTimesExportFilename(gender: "F" | "M", mode: TopTimesMode): string {
+  return meetFileName(
+    `${topTimesTitle(gender)} ${mode === "performers" ? "Performers" : "Performances"}`,
+    RECORDS_EXPORT.eyebrow,
+    "pdf"
+  )
 }
 
 /** Parse a typed record time ("1:38.65", "22.29", "16:43.1") to ms, or null when it isn't one. */

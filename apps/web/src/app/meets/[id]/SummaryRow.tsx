@@ -278,6 +278,7 @@ function nowrapParts(text: string): string {
 
 export default function SummaryRow({
   id,
+  aliasIds,
   display,
   eventNumber,
   avatar,
@@ -300,6 +301,11 @@ export default function SummaryRow({
   highlighted = false,
 }: {
   id?: string
+  /**
+   * More anchors that scroll to and open this row: a relay's leadoff and split swims
+   * (`swim-<id>` from an athlete page or the Top 10), which have no rows of their own.
+   */
+  aliasIds?: string[]
   display: RowDisplay
   eventNumber?: number
   avatar?: ReactNode
@@ -618,15 +624,17 @@ export default function SummaryRow({
     </>
   )
 
+  const anchorKey = [id, ...(aliasIds ?? [])].filter(Boolean).join(" ")
   useEffect(() => {
-    if (!id) return
+    if (!anchorKey) return
+    const anchors = anchorKey.split(" ")
     const openIfHash = () => {
-      if (hashMatchesId(id)) setOpen(true)
+      if (anchors.some(hashMatchesId)) setOpen(true)
     }
     openIfHash()
     window.addEventListener("hashchange", openIfHash)
     return () => window.removeEventListener("hashchange", openIfHash)
-  }, [id])
+  }, [anchorKey])
 
   return (
     <>
@@ -658,6 +666,11 @@ export default function SummaryRow({
           columnGap,
         }}
       >
+        {/* Zero-size targets in the row (absolute, so they take no flex gap) for ScrollToHash, which
+            scrolls to an anchor by its element id. */}
+        {aliasIds?.map((alias) => (
+          <span key={alias} id={alias} aria-hidden className="pointer-events-none absolute h-0 w-0" />
+        ))}
         {eventNumber ? <EventBadge number={eventNumber} compact={compact} /> : null}
         {avatar}
         {flow ? (

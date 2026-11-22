@@ -63,7 +63,6 @@ function HighlightTile({ counter, interactive }: { counter: StatCounter; interac
     <LedgerStatTile
       label={counter.label}
       sub={counter.hint}
-      detail={counter.detail}
       fit={isText && counter.page !== "teamScores"}
       interactive={interactive}
       value={

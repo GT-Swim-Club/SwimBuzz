@@ -7,7 +7,11 @@ type ScraperStatus = {
   lastSeenAt: string | null
 }
 
-export function useScraperStatus(pollMs = 4000) {
+/**
+ * The desktop scraper's connection, polled every `pollMs` while the tab is visible. Off (no
+ * requests) when `enabled` is false — the status route is staff-only.
+ */
+export function useScraperStatus(pollMs = 4000, enabled = true) {
   const [status, setStatus] = useState<ScraperStatus>({ connected: false, lastSeenAt: null })
   const [loading, setLoading] = useState(true)
 
@@ -32,10 +36,19 @@ export function useScraperStatus(pollMs = 4000) {
   }, [])
 
   useEffect(() => {
+    if (!enabled) return
     void refresh().finally(() => setLoading(false))
-    const id = window.setInterval(() => void refresh(), pollMs)
-    return () => window.clearInterval(id)
-  }, [pollMs, refresh])
+    // Each check hits the database, so skip them in a hidden tab and catch up when it's shown again.
+    const tick = () => {
+      if (document.visibilityState === "visible") void refresh()
+    }
+    const id = window.setInterval(tick, pollMs)
+    document.addEventListener("visibilitychange", tick)
+    return () => {
+      window.clearInterval(id)
+      document.removeEventListener("visibilitychange", tick)
+    }
+  }, [enabled, pollMs, refresh])
 
-  return { ...status, loading, refresh }
+  return { ...status, loading: enabled && loading, refresh }
 }

@@ -138,10 +138,11 @@ export function isDeletableSwim(swim: AthleteSwim): boolean {
   return swim.source === "manual" && !isRelayLeadoffSwimTag(swim.tags)
 }
 
-/** Link to the swim on its meet page (scrolls to it and opens its detail), or null for unlinked swims. */
+/**
+ * Link to the swim on its meet page (scrolls to it and opens its detail), or null for unlinked swims.
+ * A relay leadoff or split has no row of its own there: it opens its relay's row.
+ */
 export function swimMeetHref(swim: AthleteSwim): string | null {
-  // Relay splits aren't swims on the meet page; link the meet itself.
-  if (swim.relaySplit) return swim.meetSlug ? meetPath(swim.meetSlug) : swim.meetId ? `/meets/${swim.meetId}` : null
   if (swim.meetSlug) return meetSwimPath(swim.meetSlug, swim.id)
   if (swim.meetId) return `/meets/${swim.meetId}#swim-${swim.id}`
   return null

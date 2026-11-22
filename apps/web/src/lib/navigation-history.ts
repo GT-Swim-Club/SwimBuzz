@@ -133,7 +133,7 @@ export function formatBackLabel(
     case "practices":
       if (segments[1] === "new") return "New practice"
       return segments.length === 1 ? "Practices" : "Practice"
-    case "qualifiers":
+    case "nationals-qualifiers":
       return "Nationals"
     case "settings":
       return "Settings"

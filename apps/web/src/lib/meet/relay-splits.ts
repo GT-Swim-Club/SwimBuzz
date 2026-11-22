@@ -99,3 +99,19 @@ export async function loadRelaySplits({
   }
   return splits
 }
+
+/** A relay leg's own swim, as the meet page anchors it on its relay's row. */
+export type RelayLegSwim = { id: string; athleteId: string; tags: string }
+
+/**
+ * A meet's relay split swims (legs 2–4): just enough for the meet page to anchor each on its relay's
+ * row, so an athlete page's `#swim-<id>` link to one opens that relay.
+ */
+export async function loadMeetRelaySplitSwims(meetId: string): Promise<RelayLegSwim[]> {
+  return withRelaySplitSwims(() =>
+    prisma.swim.findMany({
+      where: { meetId, tags: { startsWith: RELAY_SPLIT_TAG_PREFIX } },
+      select: { id: true, athleteId: true, tags: true },
+    })
+  )
+}

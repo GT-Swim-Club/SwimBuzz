@@ -2,6 +2,7 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type DragEvent, type ReactNode } from "react"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/Skeleton"
+import SpinnerScreen from "@/components/ui/SpinnerScreen"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import HoverDetail from "@/components/ui/HoverDetail"
 import ActionIcon from "@/components/ui/ActionIcon"
@@ -730,28 +731,6 @@ function MenuRow({
 
 const iconButtonClass =
   "relative inline-grid h-9 w-9 place-items-center rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-
-function RelayCardSkeleton() {
-  return (
-    <div className="rounded-lg border border-border bg-background">
-      <div className="flex items-center justify-between border-b border-border px-3.5 py-3">
-        <Skeleton className="h-4 w-16" />
-        <Skeleton className="h-4 w-14" />
-      </div>
-      {[0, 1, 2, 3].map((i) => (
-        <div key={i} className="flex items-center justify-between border-t border-border px-3 py-2 first:border-t-0">
-          <div className="flex items-center gap-2.5">
-            <div className="space-y-1.5">
-              <Skeleton className="h-3.5 w-28" />
-              <Skeleton className="h-3 w-14" />
-            </div>
-          </div>
-          <Skeleton className="h-3.5 w-12" />
-        </div>
-      ))}
-    </div>
-  )
-}
 
 /** "0:42" until `deadline`, ticking each second. */
 function IdleCountdown({ deadline }: { deadline: number }) {
@@ -2081,8 +2060,6 @@ export default function MeetRelayBuilder({
       lineups.map(({ round: r, teams }) => ({ round: r, letter, team: teams.find((t) => t.letter === letter) ?? null }))
     )
   })()
-  /** Cards and placeholders while building. */
-  const skeletonCount = Math.min(Math.max(teamCount, 1), 4) * roundsShown.length
   /**
    * Alternates: one list of swimmers on no relay in either round (prelims' alternates, less anyone
    * on a finals relay), indexed like prelims' list. Dropping one on a card swaps them into that
@@ -2363,25 +2340,8 @@ export default function MeetRelayBuilder({
             onClose={() => setCompare(null)}
           />
         ) : loading && !retiming ? (
-          <div role="status" aria-live="polite" aria-label="Building relay teams" className="flex flex-col gap-4">
-            <span className="sr-only">Building relay teams</span>
-            <div className={`grid items-start gap-3 ${relayGridCols(skeletonCount)}`}>
-              {Array.from({ length: skeletonCount }, (_, t) => (
-                <RelayCardSkeleton key={t} />
-              ))}
-            </div>
-            <div>
-              <Skeleton className="mb-2 h-3 w-20" />
-              <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
-                {[0, 1, 2, 3].map((i) => (
-                  <div key={i} className="space-y-2">
-                    <Skeleton className="h-3.5 w-16" />
-                    <Skeleton className="h-10 w-full" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          // Solving can take a while, so a spinner rather than skeleton cards.
+          <SpinnerScreen label="Building relay teams…" className="min-h-72 rounded-lg border border-border bg-background" />
         ) : result && result.teams.length > 0 ? (
           <>
             <div
@@ -2531,23 +2491,17 @@ export default function MeetRelayBuilder({
                 )
               })}
               {Array.from({ length: adding * roundsShown.length }, (_, t) => (
-                <RelayCardSkeleton key={`adding-${t}`} />
+                <SpinnerScreen
+                  key={`adding-${t}`}
+                  label="Adding relay…"
+                  className="min-h-52 rounded-lg border border-border bg-background"
+                />
               ))}
             </div>
 
             {retiming && (result.alternates ?? []).length === 0 ? (
               // A saved lineup shown before its build: alternates arrive with the build.
-              <div aria-hidden>
-                <Skeleton className="mb-2 h-3 w-20" />
-                <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
-                  {[0, 1, 2, 3].map((i) => (
-                    <div key={i} className="space-y-2">
-                      <Skeleton className="h-3.5 w-16" />
-                      <Skeleton className="h-10 w-full" />
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <SpinnerScreen label="Finding alternates…" className="min-h-24 py-4" />
             ) : null}
 
             {alternates.length > 0 ? (

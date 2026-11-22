@@ -7,6 +7,8 @@ import {
   useState,
   type ReactNode,
 } from "react"
+import { useSession } from "next-auth/react"
+import { isStaffRole } from "@swimbuzz/shared"
 import RunScraperModal from "@/components/scraper/RunScraperModal"
 import { useScraperStatus } from "@/lib/scraper/use-scraper-status"
 
@@ -37,7 +39,10 @@ export function useScraperUi() {
 }
 
 export default function ScraperUiProvider({ children }: { children: ReactNode }) {
-  const { connected, lastSeenAt, loading, refresh } = useScraperStatus()
+  const { data: session } = useSession()
+  // Only staff run the scraper (the status route is staff-only), so athletes never poll it.
+  const isStaff = !!session && isStaffRole(session.user.role)
+  const { connected, lastSeenAt, loading, refresh } = useScraperStatus(undefined, isStaff)
   const [runOpen, setRunOpen] = useState(false)
   const [pending, setPending] = useState<PendingAction | null>(null)
 
