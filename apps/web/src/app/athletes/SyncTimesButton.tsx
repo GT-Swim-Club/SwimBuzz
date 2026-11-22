@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useState, type KeyboardEvent } from "react"
+import { useEffect, useState, type KeyboardEvent, type ReactNode } from "react"
+import { createPortal } from "react-dom"
 import { useRouter, useSearchParams } from "next/navigation"
 import { formatDateTime } from "@/lib/utils"
 import { currentSeason, parseSeason } from "@/lib/season"
@@ -261,7 +262,12 @@ function RosterListSkeleton() {
   )
 }
 
-export default function SyncTimesButton() {
+export default function SyncTimesButton({
+  trigger,
+}: {
+  /** Custom trigger (e.g. a menu item); receives the function that opens the dialog. */
+  trigger?: (open: () => void) => ReactNode
+} = {}) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const rawGender = searchParams.get("gender")
@@ -442,18 +448,23 @@ export default function SyncTimesButton() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => requireScraper(openModal, { continueLabel: "Continue to import" })}
-        aria-label="Import times"
-        className={toolbarButtonClass}
-      >
-        <ImportIcon />
-        Times
-        <HoverDetail label="Import times" />
-      </button>
+      {trigger ? (
+        trigger(() => requireScraper(openModal, { continueLabel: "Continue to import" }))
+      ) : (
+        <button
+          type="button"
+          onClick={() => requireScraper(openModal, { continueLabel: "Continue to import" })}
+          aria-label="Import times"
+          className={toolbarButtonClass}
+        >
+          <ImportIcon />
+          Times
+          <HoverDetail label="Import times" />
+        </button>
+      )}
 
-      {open && (
+      {/* Portaled so it still shows when the trigger sits in a closed menu. */}
+      {open && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <button
             type="button"
@@ -662,7 +673,8 @@ export default function SyncTimesButton() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )

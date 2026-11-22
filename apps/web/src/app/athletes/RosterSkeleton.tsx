@@ -6,8 +6,8 @@ import { GALLERY_CARD_AVATAR, GALLERY_CARD_BODY } from "./AthleteGalleryCard"
 const NAME_WIDTHS = ["w-40", "w-32", "w-44", "w-28", "w-36", "w-48", "w-32", "w-40", "w-36", "w-28", "w-44", "w-32"]
 
 /**
- * Mirrors the roster toolbar (search box, Gender and Season selects, the
- * List/Gallery toggle) and RosterView's results in the saved layout, with the
+ * Mirrors the roster toolbar (search box, Season select, Filters menu, the
+ * List/Gallery toggle, Download PDF) and RosterView's results in the saved layout, with the
  * A–Z rail beside them. Phones get FluidToolbar's collapsed search button.
  */
 export default function RosterSkeleton({ layout }: { layout: ListLayout }) {
@@ -21,20 +21,21 @@ export default function RosterSkeleton({ layout }: { layout: ListLayout }) {
           <div className="mr-auto flex h-[42px] w-[42px] items-center justify-center rounded-lg border border-border-secondary bg-background sm:hidden">
             <Skeleton className="h-4 w-4" />
           </div>
-          {["w-8", "w-20"].map((w) => (
-            <div
-              key={w}
-              className="flex h-[42px] items-center gap-3 rounded-lg border border-border-secondary bg-background px-3"
-            >
-              <Skeleton className={`h-3.5 ${w}`} />
-              <Skeleton className="h-3 w-3" />
-            </div>
-          ))}
+          <div className="flex h-[42px] items-center gap-3 rounded-lg border border-border-secondary bg-background px-3">
+            <Skeleton className="h-3.5 w-20" />
+            <Skeleton className="h-3 w-3" />
+          </div>
+          <div className="flex h-[42px] w-[42px] items-center justify-center rounded-lg border border-border-secondary bg-background">
+            <Skeleton className="h-[18px] w-[18px]" />
+          </div>
           <div className="flex h-[42px] items-center gap-1 rounded-lg border border-border-secondary bg-background p-1">
             <Skeleton className="h-8 w-8 rounded-md" />
             <div className="flex h-8 w-8 items-center justify-center">
               <Skeleton className="h-4 w-4" />
             </div>
+          </div>
+          <div className="flex h-[42px] w-[42px] items-center justify-center rounded-lg border border-border-secondary bg-background">
+            <Skeleton className="h-4 w-4" />
           </div>
         </div>
       </div>

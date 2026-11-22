@@ -1,18 +1,10 @@
 "use client"
 
-import { useContext, type ReactNode } from "react"
-import type { RecordGender, RecordGroup, TeamRecordRow } from "@swimbuzz/shared"
+import type { ReactNode } from "react"
+import type { RecordEventDef, RecordGender, RecordGroup, TeamRecordRow } from "@swimbuzz/shared"
 import { ledgerHeaderClass } from "@/components/meet/Ledger"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/ui/SegmentedToggle"
-import {
-  RecordActions,
-  RecordNames,
-  RecordsEditingContext,
-  RecordSide,
-  RecordTime,
-  RecordYear,
-  type SideProps,
-} from "./RecordCells"
+import { RecordNames, RecordTime, RecordYear, type SideProps } from "./RecordCells"
 
 const GENDERS = [
   { value: "F", label: "Women" },
@@ -25,13 +17,14 @@ export default function RecordsList({
   gender,
   onGenderChange,
   action,
+  onOpenHistory,
 }: {
   rows: TeamRecordRow[]
   gender: "F" | "M"
   onGenderChange: (gender: "F" | "M") => void
   action?: ReactNode
+  onOpenHistory: (def: RecordEventDef, gender: RecordGender) => void
 }) {
-  const editing = useContext(RecordsEditingContext)!
   // The mixed relay is both teams' record, so it shows under either.
   const shown = rows.filter((row) => row.genders.includes(gender) || row.genders.includes("X"))
   const groups = shown.reduce<Array<{ group: RecordGroup; rows: TeamRecordRow[] }>>((out, row) => {
@@ -74,25 +67,18 @@ export default function RecordsList({
               return (
                 <div
                   key={`${row.genders.join("")}|${row.event}`}
-                  className={`grid items-start gap-x-3 gap-y-1 px-4 py-2.5 text-[15px] ${
-                    editing.editing ? "grid-cols-[minmax(0,1fr)_5.5rem_auto]" : "grid-cols-[minmax(0,1fr)_auto]"
-                  }`}
+                  className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1 px-4 py-2.5 text-[15px]"
                 >
-                  <RecordSide {...side}>
-                    <button
-                      type="button"
-                      onClick={() => editing.openHistory(row, recordGender)}
-                      className="justify-self-start text-left font-medium text-foreground transition-colors hover:text-primary"
-                    >
-                      {row.label}
-                    </button>
-                    <RecordTime {...side} className="justify-self-end text-right" />
-                    {editing.editing ? (
-                      <RecordActions {...side} className="row-span-2 self-center" />
-                    ) : null}
-                    <RecordNames {...side} align="start" />
-                    <RecordYear {...side} className="justify-self-end text-right" />
-                  </RecordSide>
+                  <button
+                    type="button"
+                    onClick={() => onOpenHistory(row, recordGender)}
+                    className="justify-self-start text-left font-medium text-foreground transition-colors hover:text-primary"
+                  >
+                    {row.label}
+                  </button>
+                  <RecordTime {...side} className="justify-self-end text-right" />
+                  <RecordNames {...side} align="start" />
+                  <RecordYear {...side} className="justify-self-end text-right" />
                 </div>
               )
             })}

@@ -5,8 +5,6 @@ import * as Sharing from "expo-sharing"
 import { File, Paths } from "expo-file-system"
 import {
   formatRecordTime,
-  isRecordEditable,
-  isStaffRole,
   recordsAsOfLabel,
   recordsExportFilename,
   recordSwimmerLabel,
@@ -17,12 +15,11 @@ import {
 import { ActionSheet, EmptyState, ErrorBlock, LoadingBlock, usePalette, type ActionSheetItem } from "@swimbuzz/ui"
 import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
 import { api, API_URL, getAccessToken } from "../lib/api"
-import { useAuth } from "../lib/auth"
 import { saveCaptureToPhotos } from "../lib/roster-summary-share"
 import { Icon } from "./Icon"
 import { SegmentedOption, SegmentedToggle } from "./SegmentedToggle"
 import { RecordsExportCapture } from "./RecordsExportCapture"
-import { RecordEditSheet, RecordHistorySheet, recordsErrorMessage, recordTitle, type RecordTarget } from "./RecordSheets"
+import { RecordHistorySheet, recordsErrorMessage, recordTitle, type RecordTarget } from "./RecordSheets"
 
 const GENDERS = [
   { value: "F", label: "Women" },
@@ -45,18 +42,14 @@ async function recordsPdfFile(): Promise<File> {
 
 /**
  * Team records (SCY) in the Nationals tab: one gender at a time, an event per row, grouped by stroke.
- * Tapping a record shows its history and top 10; staff switch on Edit to change one instead. Share saves the
- * whole sheet (both genders) to Photos or shares it as a PDF.
+ * Read-only: records come from imported meet results and the records sheet. Tapping a record shows its
+ * history and top 10. Share saves the whole sheet (both genders) to Photos or shares it as a PDF.
  */
 export function RecordsSection() {
   const c = usePalette()
   const styles = useMemo(() => makeStyles(c), [c])
-  const { user } = useAuth()
-  const canEdit = !!user && isStaffRole(user.role)
   const { data, isPending, error } = useQuery({ queryKey: ["records"], queryFn: () => api.getRecords() })
   const [gender, setGender] = useState<"F" | "M">("F")
-  const [editing, setEditing] = useState(false)
-  const [editTarget, setEditTarget] = useState<RecordTarget | null>(null)
   const [historyTarget, setHistoryTarget] = useState<RecordTarget | null>(null)
   const [shareOpen, setShareOpen] = useState(false)
   const [shareBusy, setShareBusy] = useState<"photos" | "pdf" | null>(null)
@@ -153,7 +146,7 @@ export function RecordsSection() {
             ))}
           </SegmentedToggle>
         </View>
-        {data && !editing ? (
+        {data ? (
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Share records"
@@ -162,27 +155,12 @@ export function RecordsSection() {
               setAsOf(recordsAsOfLabel())
               setShareOpen(true)
             }}
-            style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
+            style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
           >
             <Icon name="share" size={18} color={c.textSecondary} />
           </Pressable>
         ) : null}
-        {canEdit ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={editing ? "Done editing" : "Edit records"}
-            accessibilityState={{ selected: editing }}
-            hitSlop={6}
-            onPress={() => setEditing((value) => !value)}
-            style={({ pressed }) => [styles.editButton, editing && styles.editButtonOn, pressed && styles.pressed]}
-          >
-            <Icon name={editing ? "check" : "pencil"} size={18} color={editing ? c.primaryContrast : c.textSecondary} />
-          </Pressable>
-        ) : null}
       </View>
-      {editing ? (
-        <Text style={styles.editHint}>Tap a record to change it. Records from meet results can't be changed.</Text>
-      ) : null}
 
       {error ? <ErrorBlock message={recordsErrorMessage(error, "Couldn't load records")} /> : null}
       {isPending ? (
@@ -201,19 +179,16 @@ export function RecordsSection() {
               const record = row.records[recordGender]
               const target: RecordTarget = { def: row, gender: recordGender, record }
               const season = record?.isThisSeason ? styles.thisSeason : null
-              // Records from imported meet results or the records sheet are fixed; tapping one while editing shows its history.
-              const editable = editing && (!record || isRecordEditable(record))
               return (
                 <Pressable
                   key={`${row.genders.join("")}|${row.event}`}
                   accessibilityRole="button"
-                  accessibilityLabel={editable ? `Edit ${recordTitle(target)}` : `${recordTitle(target)} history and top 10`}
-                  onPress={() => (editable ? setEditTarget(target) : setHistoryTarget(target))}
+                  accessibilityLabel={`${recordTitle(target)} history and top 10`}
+                  onPress={() => setHistoryTarget(target)}
                   style={({ pressed }) => [styles.row, index > 0 && styles.rowDivider, pressed && styles.rowPressed]}
                 >
                   <View style={styles.rowMain}>
                     <Text style={styles.event}>{row.label}</Text>
-                    {editing && !editable ? <Text style={styles.lockedNote}>From meet results</Text> : null}
                     {record ? (
                       record.swimmers.map((swimmer, i) => (
                         <Text key={i} numberOfLines={1} style={[styles.name, season]}>
@@ -228,7 +203,6 @@ export function RecordsSection() {
                     <Text style={[styles.time, season]}>{record ? formatRecordTime(record.timeMs) : "—"}</Text>
                     {record ? <Text style={[styles.year, season]}>{record.year}</Text> : null}
                   </View>
-                  {editable ? <Text style={styles.chevron}>›</Text> : null}
                 </Pressable>
               )
             })}
@@ -270,9 +244,8 @@ export function RecordsSection() {
         </View>
       ) : null}
 
-      {editTarget ? <RecordEditSheet target={editTarget} onClose={() => setEditTarget(null)} /> : null}
       {historyTarget ? (
-        <RecordHistorySheet target={historyTarget} canEdit={canEdit} onClose={() => setHistoryTarget(null)} />
+        <RecordHistorySheet target={historyTarget} onClose={() => setHistoryTarget(null)} />
       ) : null}
     </View>
   )
@@ -288,15 +261,13 @@ function makeStyles(c: ColorPalette) {
     },
     toggleWrap: { flex: 1, minWidth: 0 },
     toggle: { alignSelf: "stretch" },
-    editButton: {
+    iconButton: {
       alignItems: "center",
       borderRadius: radii.md,
       height: 36,
       justifyContent: "center",
       width: 36,
     },
-    editButtonOn: { backgroundColor: c.primary },
-    editHint: { color: c.textTertiary, fontSize: 12, marginBottom: spacing.sm, marginTop: -spacing.xs },
     pressed: { opacity: 0.72 },
     toggleText: { color: c.textSecondary, fontSize: 14, fontWeight: "700" },
     toggleTextOn: { color: c.primaryContrast },
@@ -335,7 +306,5 @@ function makeStyles(c: ColorPalette) {
     year: { color: c.textSecondary, fontSize: 13, fontVariant: ["tabular-nums"] },
     thisSeason: { color: c.accent, fontWeight: "800" },
     offscreen: { position: "absolute", top: 0, left: -10000 },
-    chevron: { color: c.textTertiary, fontSize: 25, fontWeight: "300" },
-    lockedNote: { color: c.textTertiary, fontSize: 12 },
   })
 }

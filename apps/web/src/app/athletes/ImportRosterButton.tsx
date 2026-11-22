@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, type ReactNode } from "react"
 import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
 import { currentSeason, parseSeason } from "@/lib/season"
@@ -40,7 +40,12 @@ function formatRosterReplaceResult(data: RosterReplaceResult) {
   return parts.join(" · ")
 }
 
-export default function ImportRosterButton() {
+export default function ImportRosterButton({
+  trigger,
+}: {
+  /** Custom trigger (e.g. a menu item); receives the function that opens the dialog. */
+  trigger?: (open: () => void) => ReactNode
+} = {}) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -159,19 +164,26 @@ export default function ImportRosterButton() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => {
+      {trigger ? (
+        trigger(() => {
           resetForm()
           setOpen(true)
-        }}
-        aria-label="Import roster"
-        className={toolbarButtonClass}
-      >
-        <ImportIcon />
-        Roster
-        <HoverDetail label="Import roster" />
-      </button>
+        })
+      ) : (
+        <button
+          type="button"
+          onClick={() => {
+            resetForm()
+            setOpen(true)
+          }}
+          aria-label="Import roster"
+          className={toolbarButtonClass}
+        >
+          <ImportIcon />
+          Roster
+          <HoverDetail label="Import roster" />
+        </button>
+      )}
 
       <Modal
         open={open}

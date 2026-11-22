@@ -26,7 +26,7 @@ function SideSkeleton({ row, mirrored, relay }: { row: number; mirrored: boolean
   return <>{mirrored ? cells.reverse() : cells}</>
 }
 
-function TableSkeleton({ canEdit }: { canEdit: boolean }) {
+function TableSkeleton() {
   let row = 0
   return (
     <div className="hidden overflow-hidden rounded-xl border border-border-secondary bg-background lg:block">
@@ -39,7 +39,7 @@ function TableSkeleton({ canEdit }: { canEdit: boolean }) {
         </div>
         <div className="relative col-span-3 flex justify-center py-3.5">
           <Skeleton className="h-3 w-28" />
-          {canEdit ? <Skeleton className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 rounded-md" /> : null}
+          <Skeleton className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 rounded-md" />
         </div>
       </div>
       <div className={`grid ${COLS} border-b border-border-secondary`}>
@@ -67,7 +67,7 @@ function TableSkeleton({ canEdit }: { canEdit: boolean }) {
   )
 }
 
-function ListSkeleton({ canEdit }: { canEdit: boolean }) {
+function ListSkeleton() {
   return (
     <div className="flex flex-col gap-4 lg:hidden">
       <div className="flex items-center gap-2">
@@ -77,7 +77,7 @@ function ListSkeleton({ canEdit }: { canEdit: boolean }) {
             <Skeleton className="h-3.5 w-10" />
           </div>
         </div>
-        {canEdit ? <Skeleton className="ml-auto h-8 w-8 rounded-md" /> : null}
+        <Skeleton className="ml-auto h-8 w-8 rounded-md" />
       </div>
       {GROUPS.map((count, g) => (
         <div key={g} className="overflow-hidden rounded-xl border border-border-secondary bg-background">
@@ -100,12 +100,12 @@ function ListSkeleton({ canEdit }: { canEdit: boolean }) {
   )
 }
 
-/** Mirrors the records page: the sheet table (lg+) or the per-gender list, with staff's edit button. */
-export default function RecordsSkeleton({ canEdit = false }: { canEdit?: boolean }) {
+/** Mirrors the records page: the sheet table (lg+) or the per-gender list, with the share button. */
+export default function RecordsSkeleton() {
   return (
     <>
-      <TableSkeleton canEdit={canEdit} />
-      <ListSkeleton canEdit={canEdit} />
+      <TableSkeleton />
+      <ListSkeleton />
     </>
   )
 }

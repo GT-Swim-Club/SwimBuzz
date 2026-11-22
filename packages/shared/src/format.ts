@@ -186,6 +186,16 @@ export function nationalsQualifiersPdfFilename(season: string): string {
   return meetFileName(nationalsQualifiersTitle(season), "Georgia Tech Swim Club", "pdf")
 }
 
+/** "2026–2027 Roster", or "Roster" across every season. */
+export function rosterPdfTitle(season: string | null): string {
+  return season ? `${formatSeasonLabel(season)} Roster` : "Roster"
+}
+
+/** "2026–2027 Roster - Georgia Tech Swim Club.pdf" */
+export function rosterPdfFilename(season: string | null): string {
+  return meetFileName(rosterPdfTitle(season), "Georgia Tech Swim Club", "pdf")
+}
+
 const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 /** "Oct 2026" for a calendar date (a swim's date), read in UTC so it never shifts a day. */
@@ -325,9 +335,10 @@ function preferredFirstName(athlete: AthleteNameParts): string | null {
   return athlete.preferredName?.trim() || null
 }
 
+/** Legal name with the preferred name in parentheses: "Bradley (Brad) Bohannan". */
 export function athleteDisplayName(athlete: AthleteNameParts): string {
   const preferred = preferredFirstName(athlete)
-  if (preferred) return `${athlete.firstName} "${preferred}" ${athlete.lastName}`
+  if (preferred) return `${athlete.firstName} (${preferred}) ${athlete.lastName}`
   return `${athlete.firstName} ${athlete.lastName}`
 }
 

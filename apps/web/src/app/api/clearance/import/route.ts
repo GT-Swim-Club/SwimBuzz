@@ -9,14 +9,12 @@ import {
   normalizeNameMappings,
   normalizeRejectedNames,
 } from "@/lib/athlete/athlete-match"
-import { missingClearanceByAthlete, upsertClearanceQuery } from "@/lib/athlete/athlete-clearance"
+import { upsertClearanceQuery } from "@/lib/athlete/athlete-clearance"
 import {
-  clearanceColumnsProblem,
-  detectClearanceColumns,
-  findClearanceHeaderRow,
-  nonEmptyRecords,
-  normalizeClearanceColumns,
-  parseClearanceRows,
+  clearanceImportHeaderError,
+  findClearanceImportHeader,
+  parseClearanceImportKind,
+  parseClearanceImportRows,
   resolveClearanceImport,
   type ClearanceRosterAthlete,
 } from "@/lib/athlete/clearance-import"
@@ -25,12 +23,13 @@ import { parseSeason } from "@/lib/season"
 export const runtime = "nodejs"
 
 /**
- * Import physical & concussion clearance from a Google Sheet or CSV, matching rows to the
- * `?season=` roster. Clearance itself is one-and-done, not per season.
- * 1. No `fields.columns`: returns the detected header row and column mapping for staff to confirm.
- * 2. With the confirmed `fields.columns` (+ `fields.headerRow`): matches rows by GTID, email,
- *    then name. When names need pairing nothing is saved until the re-run with `paired: true`.
- * Only completion status is stored; every other column (and any date) is ignored.
+ * Import one clearance check for the `?season=` roster from a CSV (`?kind=`):
+ * - `physical` (default): Ideal Logic's medical clearance CSV (the "Incomplete" members list).
+ *   Listed members are incomplete; everyone else on the roster is complete.
+ * - `concussion`: the SWAY tracker. "Complete" is done; anything else, or not listed, isn't.
+ * Names are matched to the roster; when some need pairing nothing is saved until the re-run with
+ * `paired: true`. The SWAY tracker covers the whole club, so only names with a likely roster match
+ * are offered for pairing there. Clearance itself is one-and-done, not per season.
  */
 export async function POST(req: Request) {
   const session = await getSession()
@@ -38,45 +37,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
-  const season = parseSeason(new URL(req.url).searchParams.get("season"))
+  const params = new URL(req.url).searchParams
+  const season = parseSeason(params.get("season"))
   if (!season) return NextResponse.json({ error: "Invalid season" }, { status: 400 })
+  const kind = parseClearanceImportKind(params.get("kind"))
+  if (!kind) return NextResponse.json({ error: "Invalid import kind" }, { status: 400 })
 
+  if (!(req.headers.get("content-type") ?? "").includes("multipart/form-data")) {
+    return NextResponse.json({ error: "Upload a CSV file" }, { status: 400 })
+  }
   const source = await readSheetImportSource(req)
   if ("error" in source) return NextResponse.json({ error: source.error }, { status: source.status })
 
-  // Keep blank rows so row numbers match the sheet; only the emptiness check skips them.
-  const records = source.values
-  if (nonEmptyRecords(records).length < 2) {
-    return NextResponse.json({ error: "The sheet has no rows to import" }, { status: 400 })
-  }
-
-  const fields = (source.fields && typeof source.fields === "object" ? source.fields : {}) as Record<string, unknown>
-  const width = records.reduce((max, r) => Math.max(max, r.length), 0)
-
-  if (fields.columns == null) {
-    const headerRow = findClearanceHeaderRow(records)
-    return NextResponse.json({
-      step: "mapping",
-      headerRow,
-      headers: Array.from({ length: width }, (_, i) => (records[headerRow]?.[i] ?? "").trim()),
-      detected: detectClearanceColumns(records[headerRow] ?? []),
-      sample: nonEmptyRecords(records.slice(headerRow + 1)).slice(0, 3),
-      rowCount: nonEmptyRecords(records.slice(headerRow + 1)).length,
-    })
-  }
-
-  const headerRow =
-    typeof fields.headerRow === "number" && Number.isInteger(fields.headerRow) && fields.headerRow >= 0
-      ? Math.min(fields.headerRow, records.length - 1)
-      : findClearanceHeaderRow(records)
-  const columns = normalizeClearanceColumns(fields.columns, width)
-  const problem = columns ? clearanceColumnsProblem(columns) : "Invalid column mapping"
-  if (!columns || problem) return NextResponse.json({ error: problem }, { status: 400 })
-
-  const { rows, warnings } = parseClearanceRows(records, headerRow, columns)
-  if (rows.length === 0) {
-    return NextResponse.json({ error: "No rows with a GTID, email or name under the header" }, { status: 400 })
-  }
+  const header = findClearanceImportHeader(kind, source.values)
+  if (!header) return NextResponse.json({ error: clearanceImportHeaderError(kind) }, { status: 400 })
+  const { rows, warnings } = parseClearanceImportRows(kind, source.values, header.headerRow, header.columns)
 
   const athletes = await prisma.athlete.findMany({
     where: { seasons: { has: season } },
@@ -85,30 +60,32 @@ export async function POST(req: Request) {
       firstName: true,
       lastName: true,
       preferredName: true,
-      gtid: true,
-      user: { select: { email: true } },
+      clearance: { select: { physicalCleared: true, concussionCleared: true } },
     },
   })
+  if (athletes.length === 0) {
+    return NextResponse.json({ error: "No athletes are on this season's roster" }, { status: 400 })
+  }
   const roster: ClearanceRosterAthlete[] = athletes.map((a) => ({
     id: a.id,
     firstName: a.firstName,
     lastName: a.lastName,
     preferredName: a.preferredName,
-    gtid: a.gtid,
-    email: a.user?.email ?? null,
   }))
 
   const nameMappings = normalizeNameMappings(source.nameMappings)
   const rejectedNames = normalizeRejectedNames(source.rejectedNames)
-  const resolved = resolveClearanceImport(rows, roster, nameMappings, rejectedNames)
+  const resolved = resolveClearanceImport(kind, rows, roster, nameMappings, rejectedNames)
 
-  const nameConfirmations = collectNameConfirmations(
+  const allConfirmations = collectNameConfirmations(
     resolved.unmatchedNames,
     roster,
     buildAthleteLookup(roster),
     nameMappings,
     rejectedNames
   )
+  const nameConfirmations =
+    kind === "concussion" ? allConfirmations.filter((c) => c.athleteId) : allConfirmations
   if (nameConfirmations.length > 0 && !source.paired) {
     return NextResponse.json({
       pending: true,
@@ -120,20 +97,27 @@ export async function POST(req: Request) {
   }
 
   if (req.signal.aborted) return new NextResponse(null, { status: 499 })
-  const updates = [...resolved.updates.entries()]
-  if (updates.length > 0) {
-    await prisma.$transaction(
-      updates.map(([athleteId, update]) => upsertClearanceQuery(athleteId, update, "IMPORT"))
-    )
+  // Only write athletes whose check changes (no record = incomplete).
+  const current = new Map(
+    athletes.map((a) => [
+      a.id,
+      kind === "physical" ? (a.clearance?.physicalCleared ?? false) : (a.clearance?.concussionCleared ?? false),
+    ])
+  )
+  const changes = [...resolved.updates.entries()].filter(
+    ([athleteId, update]) => update[kind] && update[kind].cleared !== current.get(athleteId)
+  )
+  if (changes.length > 0) {
+    await prisma.$transaction(changes.map(([athleteId, update]) => upsertClearanceQuery(athleteId, update, "IMPORT")))
   }
 
-  const missing = await missingClearanceByAthlete(roster.map((a) => a.id))
   return NextResponse.json({
     season,
-    imported: updates.length,
-    noData: resolved.noData,
+    kind,
+    changed: changes.length,
+    incomplete: resolved.incomplete,
+    complete: resolved.complete,
     unmatched: resolved.unmatchedRows,
-    uncleared: [...missing.values()].filter((m) => m.length > 0).length,
     rosterSize: roster.length,
     warnings,
   })

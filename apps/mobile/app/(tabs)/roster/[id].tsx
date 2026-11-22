@@ -373,15 +373,16 @@ export default function AthleteDetailScreen() {
       <ScrollView contentContainerStyle={{ paddingBottom: tabBarPad }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
           <Title>{name}</Title>
-          {/* Staff badge, then physical / concussion test / SwimCloud times status (staff only). */}
+          {/* Staff badge, then physical / concussion test / SwimCloud times status (staff, or your own). */}
           <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
             {(athlete.user as { staffTitle?: StaffTitle | null } | undefined)?.staffTitle ? (
               <View style={{ padding: 2 }}>
                 <StaffBadge title={(athlete.user as { staffTitle: StaffTitle }).staffTitle} size={20} />
               </View>
             ) : null}
-            {isStaff ? (
+            {isStaff || isOwn ? (
               <AthleteStatusIcons
+                canEdit={isStaff}
                 athleteId={id}
                 swimCloudIds={swimCloudIds}
                 timesSyncedAt={typeof athlete.timesSyncedAt === "string" ? athlete.timesSyncedAt : null}

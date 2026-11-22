@@ -4,20 +4,22 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { athleteStatusIcons, type AthleteClearanceSummary } from "@swimbuzz/shared"
 import StatusIcon from "@/components/athlete/StatusIcon"
-import EditClearanceModal from "../clearance/EditClearanceModal"
+import EditClearanceModal from "@/components/athlete/EditClearanceModal"
 import ImportTimesButton from "./ImportTimesButton"
 
 /**
- * Staff only: status icons beside the athlete's name — physical, concussion test, SwimCloud
- * times — green / yellow / red. Click a clearance icon to correct it and the stopwatch to
- * import times.
+ * Status icons beside the athlete's name — physical, concussion test, SwimCloud times — green /
+ * yellow / red, for staff and the athlete themself. Staff (`editable`) click a clearance icon to
+ * correct it and the stopwatch to import times; the athlete just sees them.
  */
 export default function AthleteHeaderIcons({
+  editable,
   athlete,
   clearance,
   swimCloudIds,
   timesSyncedAt,
 }: {
+  editable: boolean
   athlete: { id: string; firstName: string; lastName: string; preferredName: string | null }
   clearance: AthleteClearanceSummary
   swimCloudIds: number[]
@@ -26,6 +28,16 @@ export default function AthleteHeaderIcons({
   const router = useRouter()
   const [editing, setEditing] = useState(false)
   const items = athleteStatusIcons({ clearance, swimCloudIds, timesSyncedAt })
+
+  if (!editable) {
+    return (
+      <span className="inline-flex items-center -space-x-1">
+        {items.map((item) => (
+          <StatusIcon key={item.key} item={item} size="lg" />
+        ))}
+      </span>
+    )
+  }
 
   return (
     <span className="inline-flex items-center -space-x-1">

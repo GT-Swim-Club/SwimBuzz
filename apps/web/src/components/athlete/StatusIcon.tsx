@@ -55,32 +55,21 @@ export default function StatusIcon({
 }
 
 /**
- * Display-only status icons for roster rows and gallery cards: bare icons tightly stacked,
- * the first over the second over the third, that fan apart (no overlap) while the pointer is
- * over them. Each draws a thick stroke in the row's background color under itself (a halo,
- * invisible against the row — it follows the row's `group` hover wash) so it cuts the icon
- * beneath it cleanly; hover any one for its status.
+ * Display-only status icons for roster rows and gallery cards: bare icons side by side; hover
+ * any one for its status.
  */
 export function AthleteStatusIcons({ items, className = "" }: { items: AthleteStatusIcon[]; className?: string }) {
   if (items.length === 0) return null
   return (
-    <span className={`group/status inline-flex shrink-0 items-center ${className}`}>
-      {items.map((item, index) => (
+    <span className={`inline-flex shrink-0 items-center gap-1.5 ${className}`}>
+      {items.map((item) => (
         <span
           key={item.key}
           role="img"
           aria-label={item.label}
-          style={{ zIndex: items.length - index }}
-          className={`relative inline-flex h-4 w-4 shrink-0 items-center justify-center transition-[margin] duration-200 ease-out ${
-            index > 0 ? "-ml-2.5 group-hover/status:ml-1.5" : ""
-          }`}
+          className="relative inline-flex h-4 w-4 shrink-0 items-center justify-center"
         >
-          <AppIcon
-            name={item.icon}
-            strokeWidth={4.5}
-            className="absolute inset-0 h-4 w-4 overflow-visible text-background transition-colors group-hover:text-background-hover"
-          />
-          <AppIcon name={item.icon} className={`relative h-4 w-4 overflow-visible ${TONE_CLASS[item.tone]}`} />
+          <AppIcon name={item.icon} className={`h-4 w-4 overflow-visible ${TONE_CLASS[item.tone]}`} />
           <HoverDetail label={item.label} />
         </span>
       ))}

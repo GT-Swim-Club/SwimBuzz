@@ -6,6 +6,9 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { formatSeasonLabel } from "@swimbuzz/shared"
 import FluidToolbar from "@/components/ui/FluidToolbar"
 import ToolbarSelect from "@/components/ui/ToolbarSelect"
+import RosterFilterMenu from "./RosterFilterMenu"
+import DownloadRosterPdfButton from "./DownloadRosterPdfButton"
+import { matchesRosterFilters, matchesRosterSearch, readRosterFilters, rosterFiltersActive } from "@/lib/roster/roster-filters"
 import JumpRail, { JUMP_RAIL_LAYOUT_CLASS, JUMP_RAIL_LETTERS } from "@/components/ui/JumpRail"
 import { ListLayoutToggle, useListLayout } from "@/components/ui/ListLayout"
 import { athletePath } from "@/lib/slug"
@@ -20,8 +23,6 @@ import {
   type RosterAthlete,
 } from "./roster-athlete"
 
-type Gender = "all" | "M" | "F"
-
 /**
  * Header and rows share these tracks; below md only the Athlete column shows. Clearance and
  * SwimCloud status are icons beside each name (see AthleteName), not columns.
@@ -35,8 +36,9 @@ type Row = { athlete: RosterAthlete; isYou: boolean; anchor?: string }
 
 /**
  * Roster toolbar and results. The page loads the whole season (all genders),
- * so the gender filter and search are applied here and only rewrite the URL
- * in place; changing season navigates for a fresh server query.
+ * so the filters (gender; staff: clearance and SwimCloud status) and search are
+ * applied here and only rewrite the URL in place; changing season navigates for
+ * a fresh server query.
  */
 export default function RosterView({
   athletes,
@@ -51,7 +53,7 @@ export default function RosterView({
   seasons: string[]
   season: string
   viewerAthleteId: string | null
-  /** Staff: clearance & SwimCloud status icons beside each name. */
+  /** Staff: clearance & SwimCloud status icons beside each name (everyone sees their own). */
   showStatus: boolean
   /** Staff-only import/add buttons. */
   actions?: ReactNode
@@ -60,34 +62,30 @@ export default function RosterView({
   const searchParams = useSearchParams()
   const { layout } = useListLayout()
 
-  const rawGender = searchParams.get("gender")
-  const gender: Gender = rawGender === "F" || rawGender === "M" ? rawGender : "all"
+  const filters = readRosterFilters(searchParams, showStatus)
+  const { gender, clearance, swimcloud } = filters
+  const filtering = rosterFiltersActive(filters)
   const query = searchParams.get("q")?.trim() ?? ""
   const showGender = gender === "all"
 
   function setParam(key: string, value: string, navigate: boolean) {
     const params = new URLSearchParams(searchParams.toString())
     params.delete("year")
-    params.set(key, value)
+    // Filters drop out of the URL when back to "all".
+    if (value === "all" && key !== "season") params.delete(key)
+    else params.set(key, value)
     const href = `/athletes?${params.toString()}`
     if (navigate) router.push(href)
     else window.history.replaceState(null, "", href)
   }
 
   const pool = useMemo(
-    () => (gender === "all" ? athletes : athletes.filter((a) => a.gender === gender)),
-    [athletes, gender]
+    () => athletes.filter((a) => matchesRosterFilters(a, { gender, clearance, swimcloud })),
+    [athletes, gender, clearance, swimcloud]
   )
 
   const rows = useMemo<Row[]>(() => {
-    const needle = query.toLowerCase()
-    const matches = !needle
-      ? pool
-      : pool.filter(
-          (a) =>
-            `${a.firstName} ${a.lastName}`.toLowerCase().includes(needle) ||
-            !!a.preferredName?.toLowerCase().includes(needle)
-        )
+    const matches = pool.filter((a) => matchesRosterSearch(a, query))
     const viewer = matches.find((a) => a.id === viewerAthleteId)
     let prev: string | null = null
     const others = matches
@@ -120,18 +118,6 @@ export default function RosterView({
         controls={
           <>
             <ToolbarSelect
-              label="Gender"
-              icon="roster"
-              current={gender === "all" ? "All" : genderLabel(gender)}
-              active={gender !== "all"}
-              value={gender}
-              onChange={(v) => setParam("gender", v, false)}
-            >
-              <option value="all">All</option>
-              <option value="M">Men</option>
-              <option value="F">Women</option>
-            </ToolbarSelect>
-            <ToolbarSelect
               label="Season"
               icon="calendar"
               current={formatSeasonLabel(season)}
@@ -145,7 +131,9 @@ export default function RosterView({
                 </option>
               ))}
             </ToolbarSelect>
+            <RosterFilterMenu filters={filters} staff={showStatus} onChange={(key, v) => setParam(key, v, false)} />
             <ListLayoutToggle />
+            <DownloadRosterPdfButton season={season} filters={filters} query={query} />
             {actions && <div className="flex shrink-0 items-center gap-3">{actions}</div>}
           </>
         }
@@ -155,7 +143,9 @@ export default function RosterView({
         <div className="rounded-xl border border-border-secondary bg-background px-4 py-12 text-center text-sm text-foreground-secondary">
           {query
             ? `No athletes matching “${query}”.`
-            : `No athletes found for this ${showGender ? "season" : "gender and season"}.`}
+            : filtering
+              ? "No athletes match these filters."
+              : "No athletes found for this season."}
         </div>
       ) : (
         // The A–Z rail sits beside the list, or out in the page's right margin once that's wide
@@ -173,7 +163,7 @@ export default function RosterView({
                     showGender={showGender}
                     isYou={r.isYou}
                     anchor={r.anchor}
-                    showStatus={showStatus}
+                    showStatus={showStatus || r.isYou}
                   />
                 ))}
               </div>
@@ -213,7 +203,7 @@ function RosterTable({ rows, showGender, showStatus }: { rows: Row[]; showGender
             <div className="flex min-w-0 items-center gap-3">
               <AthleteAvatar athlete={athlete} className="h-9 w-9 text-[13px]" />
               <div className="flex min-w-0 flex-col">
-                <AthleteName athlete={athlete} className="text-[17px] leading-6" showStatus={showStatus} />
+                <AthleteName athlete={athlete} className="text-[17px] leading-6" showStatus={showStatus || isYou} />
                 {meta && (
                   <p className="truncate text-[13px] leading-[18px] tabular-nums md:hidden">{meta}</p>
                 )}

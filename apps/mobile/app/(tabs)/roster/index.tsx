@@ -1,15 +1,20 @@
 import { useMemo, useState } from "react"
 import {
+  ActivityIndicator,
   Alert,
+  Pressable,
   RefreshControl,
   View,
 } from "react-native"
 import { useRouter } from "expo-router"
 import { useQuery } from "@tanstack/react-query"
+import * as Sharing from "expo-sharing"
+import { File, Paths } from "expo-file-system"
 import {
   athleteDisplayName,
   formatSeasonLabel,
   isStaffRole,
+  rosterPdfFilename,
   type AthleteSummary,
 } from "@swimbuzz/shared"
 import {
@@ -24,9 +29,11 @@ import {
   Screen,
   Section,
   TextField,
+  usePalette,
 } from "@swimbuzz/ui"
-import { spacing } from "@swimbuzz/tokens"
-import { api } from "../../../src/lib/api"
+import { radii, spacing } from "@swimbuzz/tokens"
+import { api, API_URL, getAccessToken } from "../../../src/lib/api"
+import { Icon } from "../../../src/components/Icon"
 import { useAuth } from "../../../src/lib/auth"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 import { GalleryTile } from "../../../src/components/GalleryTile"
@@ -36,6 +43,27 @@ import { useGalleryView } from "../../../src/lib/view-preferences"
 import { GalleryViewToggle } from "../../../src/components/GalleryViewToggle"
 
 type GenderFilter = "ALL" | "M" | "F"
+
+/**
+ * The roster as the tab shows it (season, gender, search), laid out as a PDF by the API (like the
+ * web's Download PDF), ready for the share sheet. No season = every season.
+ */
+async function rosterPdfFile(params: { season: string | null; gender: GenderFilter; query: string }) {
+  const sp = new URLSearchParams()
+  if (params.season) sp.set("season", params.season)
+  if (params.gender !== "ALL") sp.set("gender", params.gender)
+  if (params.query.trim()) sp.set("q", params.query.trim())
+  const token = await getAccessToken()
+  const res = await fetch(`${API_URL}/api/roster/pdf?${sp.toString()}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  })
+  if (!res.ok) throw new Error("Could not create PDF")
+  const bytes = new Uint8Array(await res.arrayBuffer())
+  const file = new File(Paths.cache, rosterPdfFilename(params.season))
+  if (file.exists) file.delete()
+  file.write(bytes)
+  return file
+}
 
 export default function RosterScreen() {
   const router = useRouter()
@@ -48,6 +76,8 @@ export default function RosterScreen() {
   const [gender, setGender] = useState<GenderFilter>("ALL")
   const [query, setQuery] = useState("")
   const [syncing, setSyncing] = useState(false)
+  const [sharing, setSharing] = useState(false)
+  const c = usePalette()
 
   const {
     data: athletes = [],
@@ -123,6 +153,22 @@ export default function RosterScreen() {
     }
   }
 
+  async function sharePdf() {
+    setSharing(true)
+    try {
+      const file = await rosterPdfFile({ season, gender, query })
+      if (!(await Sharing.isAvailableAsync())) {
+        Alert.alert("Sharing unavailable", "This device can't open the share sheet.")
+        return
+      }
+      await Sharing.shareAsync(file.uri, { mimeType: "application/pdf", UTI: "com.adobe.pdf" })
+    } catch (err) {
+      Alert.alert("Could not share PDF", err instanceof Error ? err.message : "Something went wrong")
+    } finally {
+      setSharing(false)
+    }
+  }
+
   return (
     <Screen style={{ paddingBottom: 0 }}>
       {isStaff ? (
@@ -167,8 +213,30 @@ export default function RosterScreen() {
             clearButtonMode="while-editing"
           />
         </View>
-        <View style={{ height: 44, justifyContent: "center", marginBottom: spacing.sm }}>
+        <View style={{ height: 44, flexDirection: "row", alignItems: "center", gap: spacing.xs, marginBottom: spacing.sm }}>
           <GalleryViewToggle value={galleryView} onChange={setGalleryView} />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Share PDF of roster"
+            accessibilityState={{ busy: sharing }}
+            disabled={sharing}
+            hitSlop={6}
+            onPress={() => void sharePdf()}
+            style={({ pressed }) => ({
+              alignItems: "center",
+              borderRadius: radii.md,
+              height: 36,
+              justifyContent: "center",
+              width: 36,
+              opacity: pressed ? 0.72 : 1,
+            })}
+          >
+            {sharing ? (
+              <ActivityIndicator size="small" color={c.textSecondary} />
+            ) : (
+              <Icon name="share" size={18} color={c.textSecondary} />
+            )}
+          </Pressable>
         </View>
       </View>
       <Section title="Gender">
@@ -250,14 +318,14 @@ export default function RosterScreen() {
             gallery ? (
               <GalleryTile
                 title={athleteDisplayName(item)}
-                titleAdornment={<NameAdornment athlete={item} showStatus={isStaff} />}
+                titleAdornment={<NameAdornment athlete={item} showStatus={isStaff || (!!user && item.userId === user.id)} />}
                 subtitle={[item.gender, item.seasons?.[0] && formatSeasonLabel(item.seasons[0])].filter(Boolean).join(" · ")}
                 onPress={() => router.push(`/roster/${item.id}`)}
               />
             ) : (
               <ListRow
                 title={athleteDisplayName(item)}
-                titleAdornment={<NameAdornment athlete={item} showStatus={isStaff} />}
+                titleAdornment={<NameAdornment athlete={item} showStatus={isStaff || (!!user && item.userId === user.id)} />}
                 subtitle={[item.gender, item.seasons?.[0] && formatSeasonLabel(item.seasons[0])]
                   .filter(Boolean)
                   .join(" · ")}
@@ -271,7 +339,7 @@ export default function RosterScreen() {
   )
 }
 
-/** Staff badge, then — for staff viewers — physical / concussion test / SwimCloud times status icons. */
+/** Staff badge, then — for staff, or on your own row — physical / concussion test / SwimCloud times status icons. */
 function NameAdornment({ athlete, showStatus }: { athlete: AthleteSummary; showStatus: boolean }) {
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>

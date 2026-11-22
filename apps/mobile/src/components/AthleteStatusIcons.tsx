@@ -41,11 +41,14 @@ export function AthleteStatusIcons({
   swimCloudIds,
   timesSyncedAt,
   onRequestImport,
+  canEdit = true,
 }: {
   athleteId: string
   swimCloudIds: readonly unknown[]
   timesSyncedAt: string | null
   onRequestImport?: () => void
+  /** Staff: tap a clearance icon to correct it. Otherwise it just shows its status. */
+  canEdit?: boolean
 }) {
   const c = usePalette()
   const queryClient = useQueryClient()
@@ -69,6 +72,10 @@ export function AthleteStatusIcons({
       } else {
         Alert.alert("SwimCloud times", linked ? item.label : `${item.label}. A coach can add a SwimCloud ID.`)
       }
+      return
+    }
+    if (!canEdit) {
+      Alert.alert(item.key === "physical" ? "Physical" : "Concussion test", item.label)
       return
     }
     if (status) setDraft(draftFrom(status))
@@ -150,9 +157,7 @@ export function AthleteStatusIcons({
 
 /**
  * Staff only: compact, display-only status icons for a roster row or tile (the row itself opens the
- * athlete): bare icons tightly stacked first over second over third. Each draws a thick stroke in
- * the row's background color under itself (an invisible halo) so it cuts the icon beneath it
- * cleanly. Status is in the accessibility label since there's no hover on touch.
+ * athlete): bare icons side by side. Status is in the accessibility label since there's no hover on touch.
  */
 export function AthleteStatusRowIcons({
   clearance,
@@ -167,13 +172,8 @@ export function AthleteStatusRowIcons({
   const items = athleteStatusIcons({ clearance, swimCloudIds, timesSyncedAt })
   return (
     <View style={styles.rowIcons} accessible accessibilityLabel={items.map((i) => i.label).join(", ")}>
-      {items.map((item, index) => (
-        <View key={item.key} style={{ zIndex: items.length - index, marginLeft: index === 0 ? 0 : -9 }}>
-          <View style={StyleSheet.absoluteFill}>
-            <Icon name={item.icon} size={15} color={c.bgContainer} strokeWidth={4.5} />
-          </View>
-          <Icon name={item.icon} size={15} color={toneColor(c, item.tone)} />
-        </View>
+      {items.map((item) => (
+        <Icon key={item.key} name={item.icon} size={15} color={toneColor(c, item.tone)} />
       ))}
     </View>
   )
@@ -192,6 +192,7 @@ const styles = StyleSheet.create({
   rowIcons: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 6,
   },
   actions: {
     flexDirection: "row",

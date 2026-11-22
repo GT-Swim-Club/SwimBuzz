@@ -67,7 +67,9 @@ export type AthleteSummary = {
   swimCloudIds: number[]
   /** When SwimCloud times were last imported; null if never. */
   timesSyncedAt?: string | null
-  /** Physical & concussion test completion (status icons beside the name) — staff responses only. */
+  /** The linked user's id. */
+  userId?: string | null
+  /** Physical & concussion test completion (status icons beside the name) — for staff, or the athlete themself. */
   clearance?: AthleteClearanceSummary
   user: {
     name?: string | null

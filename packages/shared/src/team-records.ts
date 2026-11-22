@@ -53,18 +53,8 @@ export type TeamRecordSwimmer = {
   athleteSlug?: string | null
 }
 
+/** "manual" is a record staff typed in before records became read-only; such rows still show. */
 export type TeamRecordSource = "meet" | "manual" | "seed"
-
-/**
- * Whether staff may change or clear a record: only one staff entered by hand. One from imported meet
- * results follows its swim or relay, and one from the club's records sheet (seed) is the record of
- * note; both are fixed.
- */
-export function isRecordEditable(record: { source: string }): boolean {
-  return record.source === "manual"
-}
-
-export const LOCKED_RECORD_MESSAGE = "Only records entered by hand can be changed"
 
 export type TeamRecordItem = {
   id: string
@@ -134,20 +124,6 @@ export type TeamTopTimesResponse = {
   /** Relays are always "performances". */
   mode: TopTimesMode
   times: TeamTopTime[]
-}
-
-/** Staff edit of an event's record (see lib/records/record-edit.ts for how it's applied). */
-export type TeamRecordEditInput = {
-  gender: RecordGender
-  event: string
-  /** "1:38.65" or "22.29". */
-  time: string
-  year: number
-  /** "YYYY-MM-DD", or null for year-only. */
-  date?: string | null
-  swimmers: Array<{ name: string; athleteId?: string | null }>
-  leadoff?: boolean
-  meetName?: string | null
 }
 
 /** Parse a typed record time ("1:38.65", "22.29", "16:43.1") to ms, or null when it isn't one. */

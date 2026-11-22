@@ -9,18 +9,20 @@ import {
   upsertClearanceQuery,
 } from "@/lib/athlete/athlete-clearance"
 
-/** Staff: an athlete's clearance (done once, not per season). */
+/** Staff, or the athlete themself: an athlete's clearance (done once, not per season). */
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  if (!isStaffRole(session.user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 
   const { id } = await params
   const athlete = await prisma.athlete.findUnique({
     where: { id },
-    select: { id: true },
+    select: { id: true, userId: true },
   })
   if (!athlete) return NextResponse.json({ error: "Not found" }, { status: 404 })
+  if (!isStaffRole(session.user.role) && athlete.userId !== session.user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  }
   return NextResponse.json({ clearance: await athleteClearance(athlete.id) })
 }
 

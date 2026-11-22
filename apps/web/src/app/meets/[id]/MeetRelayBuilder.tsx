@@ -2438,7 +2438,12 @@ export default function MeetRelayBuilder({
                             {formatTimeDiff(compared.diffMs)}
                           </span>
                         ) : null}
-                        <span className="font-mono tabular-nums">{formatLegTime(team.totalMs)}</span>
+                        {/* Still timing (a saved lineup shown before its build): no "NT" until it's known. */}
+                        {retiming && team.totalMs == null ? (
+                          <Skeleton className="h-4 w-14 self-center" />
+                        ) : (
+                          <span className="font-mono tabular-nums">{formatLegTime(team.totalMs)}</span>
+                        )}
                       </span>
                     </div>
                     <div>
@@ -2494,7 +2499,9 @@ export default function MeetRelayBuilder({
                               </div>
                             </div>
                             <div className="flex shrink-0 flex-col items-end text-right leading-tight">
-                              {editingField === "time" ? (
+                              {retiming && leg.timeMs == null && editingField !== "time" ? (
+                                <Skeleton className="my-0.5 h-3.5 w-12" />
+                              ) : editingField === "time" ? (
                                 <LegTimeEditor
                                   timeMs={leg.timeMs}
                                   onSave={(timeMs) => saveLegTime(r, team.letter, i, timeMs)}

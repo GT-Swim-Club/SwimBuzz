@@ -149,11 +149,12 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
                     {" "}({athlete.preferredName})
                   </span>
                 )}
-                {/* Staff badge, then physical / concussion test / SwimCloud times status (staff only). */}
+                {/* Staff badge, then physical / concussion test / SwimCloud times status (staff, or your own). */}
                 <span className="ml-0.5 inline-flex items-center -space-x-1 align-middle">
                   {athlete.user?.staffTitle && <StaffBadge title={athlete.user.staffTitle} size="lg" />}
-                  {isCoach && (
+                  {(isCoach || isOwnProfile) && (
                     <AthleteHeaderIcons
+                      editable={isCoach}
                       athlete={{
                         id: athlete.id,
                         firstName: athlete.firstName,

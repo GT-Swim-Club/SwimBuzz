@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, type ReactNode } from "react"
 import { useSearchParams } from "next/navigation"
 import { currentSeason, parseSeason } from "@/lib/season"
 import { formatSeasonLabel } from "@swimbuzz/shared"
@@ -9,7 +9,12 @@ import HoverDetail from "@/components/ui/HoverDetail"
 import SwimCloudIdsInput, { useSwimCloudIdsField } from "@/components/athlete/SwimCloudIdsInput"
 import { addAthlete } from "./AddAthleteButton.actions"
 
-export default function AddAthleteButton() {
+export default function AddAthleteButton({
+  trigger,
+}: {
+  /** Custom trigger (e.g. a menu item); receives the function that opens the dialog. */
+  trigger?: (open: () => void) => ReactNode
+} = {}) {
   const searchParams = useSearchParams()
 
   const gender = searchParams.get("gender") === "F" ? "F" : "M"
@@ -62,28 +67,30 @@ export default function AddAthleteButton() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={openModal}
-        aria-label="Add athlete"
-        className="group relative inline-flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg bg-primary text-primary-contrast transition-colors hover:bg-primary-hover"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-4 w-4 shrink-0"
-          aria-hidden="true"
+      {trigger ? trigger(openModal) : (
+        <button
+          type="button"
+          onClick={openModal}
+          aria-label="Add athlete"
+          className="group relative inline-flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg bg-primary text-primary-contrast transition-colors hover:bg-primary-hover"
         >
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-        <HoverDetail label="Add athlete" />
-      </button>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-4 w-4 shrink-0"
+            aria-hidden="true"
+          >
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          <HoverDetail label="Add athlete" />
+        </button>
+      )}
 
       <Modal
         open={open}

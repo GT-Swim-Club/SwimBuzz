@@ -415,7 +415,7 @@ export default function AttendanceManager({
             <WarningGlyph className="h-3.5 w-3.5 shrink-0 text-warning-text" />
             {unclearedCount} checked in {unclearedCount === 1 ? "isn't" : "aren't"} cleared (physical or concussion test).
             <Link
-              href={`/athletes/clearance?season=${encodeURIComponent(season)}`}
+              href={`/athletes?season=${encodeURIComponent(season)}&clearance=uncleared`}
               className="font-medium text-foreground transition-colors hover:text-primary"
             >
               Clearance list

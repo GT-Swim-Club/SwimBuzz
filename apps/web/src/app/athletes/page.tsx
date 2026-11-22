@@ -2,10 +2,7 @@ import { Suspense } from "react"
 import { clearanceSummary, clearanceSummarySelect } from "@/lib/athlete/athlete-clearance"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
-import ImportRosterButton from "./ImportRosterButton"
-import SyncTimesButton from "./SyncTimesButton"
-import AddAthleteButton from "./AddAthleteButton"
-import ClearanceLinkButton from "./ClearanceLinkButton"
+import RosterAddMenu from "./RosterAddMenu"
 import RosterView from "./RosterView"
 import RosterSkeleton from "./RosterSkeleton"
 import { parseSeason, resolveListedSeason } from "@/lib/season"
@@ -60,8 +57,8 @@ async function RosterContent({ searchParams, layout }: { searchParams: Promise<R
     // The year each athlete was in the season on screen, not their latest.
     const athletes = rows.map(({ yearBySeason, seasons: athleteSeasons, clearance, ...athlete }) => ({
       ...athlete,
-      // Clearance & SwimCloud status icons are staff only — never send clearance to others.
-      clearance: isCoach ? clearanceSummary(clearance) : null,
+      // Clearance & SwimCloud status icons: staff see everyone's, an athlete only their own.
+      clearance: isCoach || athlete.id === viewerAthleteId ? clearanceSummary(clearance) : null,
       year: athleteYearForSeason({ yearBySeason, year: athlete.year, seasons: athleteSeasons }, season),
     }))
 
@@ -77,14 +74,7 @@ async function RosterContent({ searchParams, layout }: { searchParams: Promise<R
                 viewerAthleteId={viewerAthleteId}
                 showStatus={isCoach}
                 actions={
-                    isCoach ? (
-                        <>
-                            <ImportRosterButton />
-                            <SyncTimesButton />
-                            <ClearanceLinkButton season={season} />
-                            <AddAthleteButton />
-                        </>
-                    ) : null
+                    isCoach ? <RosterAddMenu season={season} /> : null
                 }
             />
         </ListLayoutProvider>

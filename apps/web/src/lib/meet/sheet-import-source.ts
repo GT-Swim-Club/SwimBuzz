@@ -39,6 +39,15 @@ export type SheetImportSource =
     }
   | { error: string; status: number }
 
+/** UTF-8, or Windows-1252 for an Excel-saved CSV that isn't valid UTF-8 ("Ríos" saved as one byte). */
+function decodeCsv(bytes: ArrayBuffer): string {
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes)
+  } catch {
+    return new TextDecoder("windows-1252").decode(bytes)
+  }
+}
+
 /** Read the grid from a CSV upload (multipart) or a picked Google Sheet (JSON). */
 export async function readSheetImportSource(req: Request): Promise<SheetImportSource> {
   if ((req.headers.get("content-type") ?? "").includes("multipart/form-data")) {
@@ -48,7 +57,7 @@ export async function readSheetImportSource(req: Request): Promise<SheetImportSo
     const name = file instanceof File && file.name ? file.name : "import.csv"
     if (!name.toLowerCase().endsWith(".csv")) return { error: "File must be a .csv", status: 400 }
     return {
-      values: parseCsvRecords(new TextDecoder().decode(await file.arrayBuffer())),
+      values: parseCsvRecords(decodeCsv(await file.arrayBuffer())),
       nameMappings: parseJsonField(form.get("nameMappings")),
       rejectedNames: parseJsonField(form.get("rejectedNames")),
       paired: form.get("paired") === "true",

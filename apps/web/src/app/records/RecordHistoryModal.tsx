@@ -5,7 +5,6 @@ import { useEffect, useState } from "react"
 import { createApiClient } from "@swimbuzz/api"
 import {
   formatRecordTime,
-  isRecordEditable,
   recordSetLabel,
   recordSwimmerLabel,
   type RecordEventDef,
@@ -14,8 +13,6 @@ import {
   type TeamRecordSource,
   type TopTimesMode,
 } from "@swimbuzz/shared"
-import { AppIcon } from "@/components/ui/AppIcon"
-import HoverDetail from "@/components/ui/HoverDetail"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/ui/SegmentedToggle"
@@ -47,22 +44,17 @@ const MODES: Array<{ value: TopTimesMode; label: string }> = [
 ]
 
 /**
- * An event's records, newest first (staff can remove a staff-set one; the record
- * before it takes its place — ones from imported meet results or the records sheet stay),
- * and its top 10 — each swimmer's best (performers) or the fastest swims (performances).
+ * An event's records, newest first, and its top 10 — each swimmer's best (performers) or the
+ * fastest swims (performances). Read-only: records come from imported meet results and the records sheet.
  */
 export default function RecordHistoryModal({
   def,
   gender: initialGender,
-  canEdit,
   onClose,
-  onChanged,
 }: {
   def: RecordEventDef
   gender: RecordGender
-  canEdit: boolean
   onClose: () => void
-  onChanged: () => void
 }) {
   const [gender, setGender] = useState(initialGender)
   const [view, setView] = useState<View>("history")
@@ -70,8 +62,6 @@ export default function RecordHistoryModal({
   const showModes = view === "top" && !def.relay
   const [records, setRecords] = useState<TeamRecordItem[] | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [confirming, setConfirming] = useState<string | null>(null)
-  const [removing, setRemoving] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -88,20 +78,6 @@ export default function RecordHistoryModal({
     setGender(next)
     setRecords(null)
     setError(null)
-  }
-
-  async function remove(id: string) {
-    setRemoving(true)
-    try {
-      await api.removeRecord(id)
-      setRecords((await api.getRecordHistory(gender, def.event)).records)
-      onChanged()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't remove the record")
-    } finally {
-      setRemoving(false)
-      setConfirming(null)
-    }
   }
 
   return (
@@ -252,43 +228,11 @@ export default function RecordHistoryModal({
                 </p>
                 <p className="text-xs text-foreground-tertiary">{SOURCE_LABELS[record.source]}</p>
               </div>
-              <div className="flex shrink-0 items-center gap-1">
-                <span className={`font-mono text-sm tabular-nums ${record.isThisSeason ? "font-semibold text-accent" : "text-foreground"}`}>
-                  {formatRecordTime(record.timeMs)}
-                </span>
-                {canEdit && isRecordEditable(record) ? (
-                  confirming === record.id ? (
-                    <span className="flex items-center gap-1 text-xs">
-                      <button
-                        type="button"
-                        disabled={removing}
-                        onClick={() => remove(record.id)}
-                        className="rounded-md bg-error px-2 py-1 font-medium text-error-contrast hover:bg-error-hover disabled:opacity-50"
-                      >
-                        Remove
-                      </button>
-                      <button
-                        type="button"
-                        disabled={removing}
-                        onClick={() => setConfirming(null)}
-                        className="rounded-md px-2 py-1 text-foreground-secondary hover:bg-fill-secondary hover:text-foreground"
-                      >
-                        Cancel
-                      </button>
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      aria-label="Remove record"
-                      onClick={() => setConfirming(record.id)}
-                      className="group relative inline-flex size-7 items-center justify-center rounded-md text-foreground-secondary transition-colors hover:bg-fill-secondary hover:text-error"
-                    >
-                      <AppIcon name="trash" className="h-4 w-4" />
-                      <HoverDetail label="Remove record" />
-                    </button>
-                  )
-                ) : null}
-              </div>
+              <span
+                className={`shrink-0 font-mono text-sm tabular-nums ${record.isThisSeason ? "font-semibold text-accent" : "text-foreground"}`}
+              >
+                {formatRecordTime(record.timeMs)}
+              </span>
             </li>
           ))}
         </ol>

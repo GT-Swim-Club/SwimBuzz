@@ -36,6 +36,7 @@ export default function SheetImportButton<T>({
   status,
   trigger,
   onImport,
+  csvOnly = false,
 }: {
   endpoint: string
   title: string
@@ -46,9 +47,11 @@ export default function SheetImportButton<T>({
   status?: (close: () => void) => ReactNode
   trigger: (open: () => void) => ReactNode
   onImport: (run: SheetImportRun<T>, sourceLabel: string) => void
+  /** Only take a CSV upload (no Google Sheets option). */
+  csvOnly?: boolean
 }) {
   const [open, setOpen] = useState(false)
-  const [source, setSource] = useState<ImportSource>("sheets")
+  const [source, setSource] = useState<ImportSource>(csvOnly ? "csv" : "sheets")
   const [error, setError] = useState<string | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [picked, setPicked] = useState<PickedSpreadsheet | null>(null)
@@ -57,7 +60,7 @@ export default function SheetImportButton<T>({
   const [picking, setPicking] = useState(false)
 
   function openDialog() {
-    setSource("sheets")
+    setSource(csvOnly ? "csv" : "sheets")
     setError(null)
     setSelectedFile(null)
     setPicked(null)
@@ -153,6 +156,7 @@ export default function SheetImportButton<T>({
         maxWidth="xl"
         description={description}
         header={
+          csvOnly ? undefined : (
           <SegmentedToggle
             selectedIndex={source === "csv" ? 1 : 0}
             fullWidth
@@ -198,6 +202,7 @@ export default function SheetImportButton<T>({
               </button>
             ))}
           </SegmentedToggle>
+          )
         }
         onSubmit={handleSubmit}
         footer={

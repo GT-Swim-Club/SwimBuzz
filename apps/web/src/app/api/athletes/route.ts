@@ -30,8 +30,10 @@ export async function GET() {
   return NextResponse.json(
     athletes.map(({ clearance, ...athlete }) => ({
       ...withLegacySwimCloudId(redactAthleteForViewer(athlete, session)),
-      // Completion only (status icons beside the name) — staff only.
-      ...(isStaffRole(session.user.role) ? { clearance: clearanceSummary(clearance) } : {}),
+      // Completion only (status icons beside the name) — staff, or the athlete themself.
+      ...(isStaffRole(session.user.role) || athlete.userId === session.user.id
+        ? { clearance: clearanceSummary(clearance) }
+        : {}),
     })),
     {
       headers: { "Cache-Control": "private, max-age=30, stale-while-revalidate=300" }}

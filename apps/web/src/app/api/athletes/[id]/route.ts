@@ -56,8 +56,10 @@ export async function GET(
 
   return NextResponse.json({
     ...withLegacySwimCloudId(redactAthleteForViewer(rest, session)),
-    // Completion only (status icons beside the name) — staff only.
-    ...(isStaffRole(session.user.role) ? { clearance: clearanceSummary(clearance) } : {}),
+    // Completion only (status icons beside the name) — staff, or the athlete themself.
+    ...(isStaffRole(session.user.role) || athlete.userId === session.user.id
+      ? { clearance: clearanceSummary(clearance) }
+      : {}),
     relaySplits,
   })
 }

@@ -1,26 +1,18 @@
-import type { Prisma, RecordGender, TeamRecord } from "@prisma/client"
+import type { RecordGender, TeamRecord } from "@prisma/client"
 import {
   athletePreferredName,
   currentSeason,
-  isRecordEditable,
   isRecordGender,
-  LOCKED_RECORD_MESSAGE,
-  parseRecordTime,
   recordEventDef,
   RECORD_EVENTS,
-  type TeamRecordEditInput,
   type TeamRecordHistoryResponse,
   type TeamRecordRow,
   type TeamRecordsResponse,
 } from "@swimbuzz/shared"
 import { prisma } from "@/lib/prisma"
 import { currentRecordRow, readRecordSwimmers, recordKey, toRecordItem, type RecordLinks } from "@/lib/records/record-rows"
-import { syncTeamRecords } from "@/lib/records/record-sync"
 
 export class RecordInputError extends Error {}
-
-const MAX_NAME_LENGTH = 80
-const MAX_MEET_NAME_LENGTH = 120
 
 /** Profile and meet slugs for the athletes and meets that records (or top times) point at. */
 export async function recordLinks(rows: Array<{ swimmers: unknown; meetId: string | null }>): Promise<RecordLinks> {
@@ -85,7 +77,7 @@ export async function teamRecordHistory(gender: unknown, event: unknown): Promis
 }
 
 /**
- * Link typed names to roster athletes: a given athleteId must exist, and an unlinked name links when
+ * Link record holders' names (e.g. from the records sheet seed) to roster athletes: a given athleteId must exist, and an unlinked name links when
  * exactly one athlete (of the record's gender, for a women's or men's record) goes by it.
  */
 export async function linkRecordSwimmers(swimmers: Array<{ name: string; athleteId?: string }>, gender: RecordGender) {
@@ -104,114 +96,4 @@ export async function linkRecordSwimmers(swimmers: Array<{ name: string; athlete
     )
     if (matches.length === 1) swimmer.athleteId = matches[0]!.id
   }
-}
-
-type ValidEdit = {
-  gender: RecordGender
-  event: string
-  timeMs: number
-  year: number
-  date: Date | null
-  swimmers: Array<{ name: string; athleteId?: string }>
-  leadoff: boolean
-  meetName: string | null
-}
-
-async function validateEdit(input: TeamRecordEditInput): Promise<ValidEdit> {
-  const { gender, event } = requireEvent(input?.gender, input?.event)
-  const def = recordEventDef(event, gender)!
-
-  const timeMs = parseRecordTime(String(input.time ?? ""))
-  if (!timeMs) throw new RecordInputError("Enter a time like 1:38.65 or 22.29")
-
-  let date: Date | null = null
-  if (input.date) {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(input.date)) throw new RecordInputError("Invalid date")
-    date = new Date(`${input.date}T00:00:00.000Z`)
-    if (isNaN(date.getTime())) throw new RecordInputError("Invalid date")
-  }
-  const year = date ? date.getUTCFullYear() : Number(input.year)
-  const latestYear = new Date().getUTCFullYear() + 1
-  if (!Number.isInteger(year) || year < 1900 || year > latestYear) throw new RecordInputError("Enter a valid year")
-
-  const legs = def.relay ? 4 : 1
-  const raw = Array.isArray(input.swimmers) ? input.swimmers : []
-  const swimmers = Array.from({ length: legs }, (_, i) => {
-    const name = String(raw[i]?.name ?? "").trim().slice(0, MAX_NAME_LENGTH)
-    const athleteId = typeof raw[i]?.athleteId === "string" ? raw[i]!.athleteId! : undefined
-    return athleteId ? { name, athleteId } : { name }
-  })
-  await linkRecordSwimmers(swimmers, gender)
-  if (!def.relay && !swimmers[0]!.name) throw new RecordInputError("Enter the swimmer's name")
-
-  const meetName = typeof input.meetName === "string" ? input.meetName.trim().slice(0, MAX_MEET_NAME_LENGTH) || null : null
-  return { gender, event, timeMs, year, date, swimmers, leadoff: !def.relay && !!input.leadoff, meetName }
-}
-
-/** Day a record was set, for ordering an edit against it; a year-only record counts as 1 January. */
-function setDay(record: { year: number; date: Date | null }): number {
-  return record.date?.getTime() ?? Date.UTC(record.year, 0, 1)
-}
-
-/**
- * Staff edit of an event's record. A later date than the current record's makes a new record (the
- * old one moves to history); otherwise it corrects the current record in place, which then stays as
- * staff set it. A faster imported swim still takes over on the sync that follows. An event whose
- * current record is from imported meet results or the records sheet can't be edited.
- */
-export async function editTeamRecord(input: TeamRecordEditInput, userId: string): Promise<void> {
-  const edit = await validateEdit(input)
-  const data = {
-    timeMs: edit.timeMs,
-    year: edit.year,
-    date: edit.date,
-    swimmers: edit.swimmers as Prisma.InputJsonValue,
-    leadoff: edit.leadoff,
-    meetName: edit.meetName,
-    source: "manual",
-    updatedById: userId,
-  }
-  const current = currentRecordRow(
-    await prisma.teamRecord.findMany({ where: { course: "SCY", gender: edit.gender, event: edit.event } })
-  )
-  if (current && !isRecordEditable(current)) throw new RecordInputError(LOCKED_RECORD_MESSAGE)
-  if (current && setDay(edit) <= setDay(current)) {
-    // Keep swimId/relayKey so the sync doesn't promote that same swim over the correction.
-    await prisma.teamRecord.update({
-      where: { id: current.id },
-      data: { ...data, meetId: edit.meetName === current.meetName ? current.meetId : null },
-    })
-  } else {
-    await prisma.teamRecord.create({ data: { course: "SCY", gender: edit.gender, event: edit.event, ...data } })
-  }
-  await syncTeamRecords()
-}
-
-/**
- * Take a staff-set row out for good, so it counts toward nothing (records, history,
- * top 10, meet highlights). A staff correction of an imported swim is deleted too, not hidden: the
- * swim is the truth again, and the sync makes it the record if it's still fastest. Rows from imported
- * results or the records sheet can't be removed; `dismissed` is only on rows cleared before that rule, and still hides them.
- */
-async function removeRow(row: TeamRecord): Promise<void> {
-  if (!isRecordEditable(row)) throw new RecordInputError(LOCKED_RECORD_MESSAGE)
-  await prisma.teamRecord.delete({ where: { id: row.id } })
-}
-
-/** Clear an event's current record; the one before it (or the fastest imported swim) takes its place. */
-export async function clearTeamRecord(gender: unknown, event: unknown): Promise<void> {
-  const key = requireEvent(gender, event)
-  const current = currentRecordRow(await prisma.teamRecord.findMany({ where: { course: "SCY", ...key } }))
-  if (!current) return
-  await removeRow(current)
-  await syncTeamRecords()
-}
-
-/** Remove one staff-set record (current or past) from an event's history. */
-export async function removeTeamRecord(id: string): Promise<boolean> {
-  const row = await prisma.teamRecord.findUnique({ where: { id } })
-  if (!row || row.dismissed) return false
-  await removeRow(row)
-  await syncTeamRecords()
-  return true
 }
