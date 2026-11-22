@@ -29,14 +29,13 @@ export default function QualifierEventList({
           <QualifierSectionHeader meta={`${group.cut} · ${qualifierCountLabel(group.swims.length)}`}>
             <span className="truncate text-base font-semibold text-foreground">{eventGroupTitle(group, splitGender)}</span>
           </QualifierSectionHeader>
-          <div className="border-t border-border-subtle">
+          <div>
             {group.swims.map(({ athlete, swim }) => {
               const isMe = athlete.athleteId === currentAthleteId
               return (
                 <QualifierSwimRow
                   key={swim.id}
                   swim={swim}
-                  highlight={isMe}
                   className={swimRowClass(EVENT_LIST_COLS)}
                 >
                   <span className={`flex items-center gap-2 ${swimLeadCellClass}`}>

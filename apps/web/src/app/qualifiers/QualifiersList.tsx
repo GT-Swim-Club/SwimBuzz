@@ -5,11 +5,16 @@ import type { QualifierAthlete, QualifierRow } from "@/lib/qualifiers/nationals-
 import { qualifierMarginLabel } from "@/lib/qualifiers/qualifier-events"
 import { athletePath } from "@/lib/slug"
 import { QualifierSwimRow } from "./QualifierSwimRow"
-import { athleteCutsLabel, meTintClass, qualifierListAvatarClass, youPillClass } from "./qualifier-styles"
+import {
+  athleteCutsLabel,
+  qualifierHeaderBgClass,
+  qualifierListAvatarClass,
+  youPillClass,
+} from "./qualifier-styles"
 
 /**
- * The list layout: one card with the roster summary's border, background and dividers — a header
- * row per athlete (or event), a full divider between sections and a subtle one between swims.
+ * The list layout: one card with the roster summary's border, background and dividers — a shaded
+ * header row per athlete (or event), a full divider between sections and a subtle one between swims.
  */
 export const qualifierListClass = "overflow-hidden rounded-xl border border-border bg-background"
 /** A section: a full divider above each but the first. */
@@ -62,7 +67,7 @@ export function SwimCells({ swim }: { swim: QualifierRow }) {
 }
 
 /** A section's header row: avatar and name (or the event) on the left, its meta on the right. */
-const sectionHeaderClass = "flex min-h-12 items-center gap-2.5 px-4 py-2 max-sm:px-3"
+const sectionHeaderClass = `flex min-h-12 items-center gap-2.5 px-4 py-2 max-sm:px-3 ${qualifierHeaderBgClass}`
 
 export function QualifierSectionHeader({
   href,
@@ -82,7 +87,7 @@ export function QualifierSectionHeader({
   return href ? (
     <Link
       href={href}
-      className={`${sectionHeaderClass} transition-colors duration-200 hover:bg-[var(--qualifier-row-hover,var(--brand-color-bg-hover))]`}
+      className={`${sectionHeaderClass} transition-colors duration-200 hover:bg-background-hover-strong`}
     >
       {content}
     </Link>
@@ -112,7 +117,7 @@ export default function QualifiersList({
           <section
             key={athlete.athleteId}
             id={anchorIds.get(athlete.athleteId)}
-            className={`${qualifierSectionClass} ${isMe ? meTintClass : ""}`}
+            className={qualifierSectionClass}
           >
             <QualifierSectionHeader
               href={athletePath(athlete.athleteSlug ?? athlete.athleteId)}
@@ -122,7 +127,7 @@ export default function QualifiersList({
               <span className="truncate text-base font-semibold text-foreground">{athletePreferredName(athlete)}</span>
               {isMe ? <span className={youPillClass}>You</span> : null}
             </QualifierSectionHeader>
-            <div className="border-t border-border-subtle">
+            <div>
               {athlete.events.map((event) => (
                 <QualifierSwimRow key={event.id} swim={event} className={swimRowClass(QUALIFIER_LIST_COLS)}>
                   <span className={swimLeadCellClass}>{event.event}</span>

@@ -98,12 +98,23 @@ export function swimFlagLabel(tags: string): string {
     .join(" · ")
 }
 
+const RELAY_LEADOFF_LABEL = "Relay lead-off"
+
+/** A relay's leg-1 swim. SwimCloud combines flags ("XR"), so look for the letter rather than an exact "R". */
+function isRelayLeadoff(tags: string): boolean {
+  return isRelayLeadoffSwimTag(tags) || displaySwimTags(tags).includes("R")
+}
+
+/** "Relay lead-off" plus provenance flags, for the event table (which shows no other round). */
+export function swimLeadoffFlagLabel(tags: string): string {
+  return [isRelayLeadoff(tags) ? RELAY_LEADOFF_LABEL : "", swimFlagLabel(tags)].filter(Boolean).join(" · ")
+}
+
 /** Round plus provenance flags shown beside the event in History, when the swim's tags say. */
 export function swimRoundLabel(tags: string): string {
-  // SwimCloud combines flags ("XR"), so look for the letter rather than an exact "R".
   const letters = displaySwimTags(tags)
-  const round = isRelayLeadoffSwimTag(tags) || letters.includes("R")
-    ? "Relay lead-off"
+  const round = isRelayLeadoff(tags)
+    ? RELAY_LEADOFF_LABEL
     : letters.includes("S")
       ? "Swim-off"
       : letters.includes("P")

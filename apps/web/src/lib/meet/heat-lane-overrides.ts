@@ -1,4 +1,5 @@
 import {
+  HEAT_LANE_EDITS_OVERRIDE_IMPORTS,
   HEAT_LANE_MAX,
   normalizeHeatStartTime,
   type CoachHeatLane,
@@ -167,10 +168,17 @@ export function applyCoachHeatLane(row: SheetEntry): SheetEntry {
     if (slot === "P") patch[`prelim${field[0].toUpperCase()}${field.slice(1)}` as "prelimHeat"] = value
     if (slot === "F") patch[`final${field[0].toUpperCase()}${field.slice(1)}` as "finalHeat"] = value
   }
-  if (imported.heat == null && coach.heat != null) set("heat", coach.heat)
-  if (imported.heatTotal == null && coach.heatTotal != null) set("heatTotal", coach.heatTotal)
-  if (imported.lane == null && coach.lane != null) set("lane", coach.lane)
-  if (!imported.startTime && coach.startTime) patch.startTime = coach.startTime
+  // Normally imports win and the coach only fills gaps; while testing, the coach's value wins.
+  const override = HEAT_LANE_EDITS_OVERRIDE_IMPORTS
+  if ((override || imported.heat == null) && coach.heat != null) set("heat", coach.heat)
+  if ((override || imported.heatTotal == null) && coach.heatTotal != null) set("heatTotal", coach.heatTotal)
+  if ((override || imported.lane == null) && coach.lane != null) set("lane", coach.lane)
+  if ((override || !imported.startTime) && coach.startTime) {
+    patch.startTime = coach.startTime
+    // The round's own start time too, which the prelims + finals detail reads first.
+    if (override && slot === "P") patch.prelimStartTime = coach.startTime
+    if (override && slot === "F") patch.finalStartTime = coach.startTime
+  }
   const filled = FIELDS.filter((f) => f in patch)
   return filled.length > 0 ? { ...row, ...patch, coachHeatLaneFilled: filled } : row
 }

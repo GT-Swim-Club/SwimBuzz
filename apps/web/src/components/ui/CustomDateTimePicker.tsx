@@ -45,6 +45,10 @@ type TimePickerProps = {
   min?: string
   /** When true with `min`, the min time itself is not selectable. */
   minExclusive?: boolean
+  /** A short field (28px, like an inline number input) for tight spots. */
+  compact?: boolean
+  /** Open the picker when the field takes focus; when false, only a click opens it. */
+  openOnFocus?: boolean
 }
 
 type Period = "AM" | "PM"
@@ -363,10 +367,12 @@ function PickerTrigger({
   onTextKeyDown,
   onFieldClick,
   onPickerClick,
+  compact = false,
 }: {
   fieldRef: RefObject<HTMLDivElement | null>
   label: string
   icon: PickerToggleIconKind
+  compact?: boolean
   textValue: string
   placeholder: string
   open: boolean
@@ -391,7 +397,9 @@ function PickerTrigger({
           inputRef.current?.focus()
         }
       }}
-      className={`flex min-h-0 w-full items-center gap-1 rounded-lg border bg-background px-3 py-2 text-sm transition focus-within:ring-2 ${
+      className={`flex min-h-0 w-full items-center border bg-background text-sm transition focus-within:ring-2 ${
+        compact ? "h-7 gap-0.5 rounded-md pl-1.5 pr-0.5" : "gap-1 rounded-lg px-3 py-2"
+      } ${
         invalid
           ? "border-error focus-within:border-error focus-within:ring-error/10"
           : "border-border focus-within:border-primary focus-within:ring-primary/10"
@@ -421,7 +429,7 @@ function PickerTrigger({
           onPickerClick()
           inputRef.current?.focus()
         }}
-        className="grid h-6 w-6 shrink-0 place-items-center rounded text-foreground-tertiary transition hover:bg-fill-secondary hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/45 disabled:cursor-not-allowed disabled:opacity-50"
+        className={`grid ${compact ? "h-5 w-5 [&_svg]:h-3.5 [&_svg]:w-3.5" : "h-6 w-6"} shrink-0 place-items-center rounded text-foreground-tertiary transition hover:bg-fill-secondary hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/45 disabled:cursor-not-allowed disabled:opacity-50`}
       >
         <PickerToggleIcon icon={icon} />
       </button>
@@ -665,6 +673,8 @@ export function TimePicker({
   hasError = false,
   min,
   minExclusive = false,
+  compact = false,
+  openOnFocus = true,
 }: TimePickerProps) {
   const initial = parseTime(value) ?? roundedNow()
   const [hour, setHour] = useState(initial.hour)
@@ -781,13 +791,14 @@ export function TimePicker({
         fieldRef={floating.fieldRef}
         label={ariaLabel}
         icon="clock"
+        compact={compact}
         textValue={textValue}
         placeholder={placeholder}
         open={floating.open}
         invalid={invalid || hasError}
         disabled={disabled}
         onTextChange={handleTextChange}
-        onTextFocus={openForInput}
+        onTextFocus={openOnFocus ? openForInput : () => {}}
         onTextBlur={commitTypedTime}
         onTextKeyDown={handleTextKeyDown}
         onFieldClick={openForInput}

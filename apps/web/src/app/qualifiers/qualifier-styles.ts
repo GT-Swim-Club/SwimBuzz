@@ -3,10 +3,17 @@
 /**
  * The viewer's own rows and card, tinted like the "You" section of a meet's roster summary: 4% gold
  * over the card background (mixed solid, so it's the same on every surface), and the swim rows inside
- * it (QualifierSwimRow) hover to the same 4% gold over the hover wash.
+ * it (QualifierSwimRow) hover to the same 4% gold over the hover wash. Only the gallery layout uses
+ * it — the list layout leaves the viewer's rows untinted, marked by the "You" pill alone.
  */
 export const meTintClass =
   "bg-[color-mix(in_oklab,var(--color-accent)_4%,var(--color-background))] [--qualifier-row-hover:color-mix(in_oklab,var(--color-accent)_4%,var(--color-background-hover))]"
+
+/**
+ * A list section's header row fill: the page background, a shade off the card, so the headers stand
+ * apart from the swim rows without a divider under them.
+ */
+export const qualifierHeaderBgClass = "bg-background-layout"
 
 /** The initials avatar beside an athlete, in both layouts — styled like the header's profile menu avatar. */
 export const qualifierAvatarClass =

@@ -77,6 +77,24 @@ export default function PracticeListRail({
             className="flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors"
             active={selected}
             selection={cardSelection(selection, practice.id)}
+            trailing={
+              <>
+                {practice.isPrivate ? (
+                  <PrivateBadge compact />
+                ) : (
+                  !practice.published && (
+                    <span className="rounded-full bg-primary/20 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-accent dark:bg-primary/30">
+                      Draft
+                    </span>
+                  )
+                )}
+                {practice.totalDistance > 0 && (
+                  <span className="text-xs tabular-nums text-foreground-tertiary">
+                    {formatPracticeDistance(practice.totalDistance, practice.course)}
+                  </span>
+                )}
+              </>
+            }
           >
             <div className="w-10 shrink-0 text-center">
               <div className="text-[11px] font-medium uppercase tracking-wide text-foreground-tertiary">
@@ -93,22 +111,6 @@ export default function PracticeListRail({
                     : formatZonedInstantRange(practice.startsAt, practice.endsAt, practice.timeZone).time}
                 </p>
               </div>
-            </div>
-            <div className="flex shrink-0 flex-col items-end gap-1">
-              {practice.isPrivate ? (
-                <PrivateBadge compact />
-              ) : (
-                !practice.published && (
-                  <span className="rounded-full bg-primary/20 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-accent dark:bg-primary/30">
-                    Draft
-                  </span>
-                )
-              )}
-              {practice.totalDistance > 0 && (
-                <span className="text-xs tabular-nums text-foreground-tertiary">
-                  {formatPracticeDistance(practice.totalDistance, practice.course)}
-                </span>
-              )}
             </div>
           </SelectableRailCard>
         )

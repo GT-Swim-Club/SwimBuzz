@@ -166,7 +166,7 @@ export default function MeetHighlightsCarousel({
     }, 120)
   }
 
-  const dotButtons = (touch: boolean) =>
+  const dotButtons = () =>
     pages.map((_, i) => (
       <button
         key={i}
@@ -174,7 +174,8 @@ export default function MeetHighlightsCarousel({
         aria-label={`Show highlights ${i + 1} of ${pageCount}`}
         aria-current={i === current ? "true" : undefined}
         onClick={() => go(i)}
-        className={`inline-flex items-center justify-center ${touch ? "h-8 w-8" : "h-1.5 w-1.5"}`}
+        // 6px dots with a mouse; on touch each gets a wider, header-tall tap target.
+        className="inline-flex h-1.5 w-1.5 items-center justify-center pointer-coarse:h-8 pointer-coarse:w-4"
       >
         <span
           className={`h-1.5 w-1.5 rounded-full transition-colors ${
@@ -197,9 +198,8 @@ export default function MeetHighlightsCarousel({
         onMouseLeave={() => (hoverRef.current = false)}
         labelExtra={
           pageCount > 1 ? (
-            // With a mouse the dots sit by the label; on touch they move under the tiles, where
-            // there's room for 32px targets.
-            <div className="flex items-center gap-[5px] pointer-coarse:hidden">{dotButtons(false)}</div>
+            // The dots always sit by the label, even in narrow windows and on touch.
+            <div className="flex items-center gap-[5px] pointer-coarse:gap-0">{dotButtons()}</div>
           ) : null
         }
         aside={
@@ -281,9 +281,6 @@ export default function MeetHighlightsCarousel({
             </div>
           ))}
         </div>
-        {pageCount > 1 ? (
-          <div className="-my-2 hidden justify-center pointer-coarse:flex">{dotButtons(true)}</div>
-        ) : null}
         {teamScores ? (
           <TeamScoresModal
             teamScores={teamScores}

@@ -1,6 +1,18 @@
 import type { SummaryRoundKind } from "./roster-summary-sessions"
 
 /** A roster summary row's heat & lane (and round): what a coach can fill in where no import has it. */
+/**
+ * Whether coach heat & lane lock once a meet is over (web, mobile and the save itself).
+ * Set to false to edit past meets while testing.
+ */
+export const HEAT_LANE_LOCKS_AFTER_MEET = true
+
+/**
+ * Whether a coach's heat & lane can replace imported (heat sheet / results) values, rather than
+ * only filling in what no import has. Set to true to edit imported values while testing.
+ */
+export const HEAT_LANE_EDITS_OVERRIDE_IMPORTS = false
+
 export type HeatLaneFields = {
   heat?: number
   /** Heats in the event's round ("Heat 2 of 4"). */

@@ -15,6 +15,7 @@ import {
 import { flushSync } from "react-dom"
 import { formatDisplayTime, formatOrdinal } from "@/lib/utils"
 import SwimDetailModal, { deltaPillClass, formatDelta, type SwimDetail } from "./SwimDetailModal"
+import type { HeatLaneEdit } from "./HeatLaneInlineEdit"
 
 export type RowDensity = "cozy" | "compact"
 
@@ -295,8 +296,7 @@ export default function SummaryRow({
   trailing,
   onEdit,
   editLabel,
-  onEditHeatLane,
-  heatLaneLabel,
+  heatLaneEdit,
   highlighted = false,
 }: {
   id?: string
@@ -331,9 +331,8 @@ export default function SummaryRow({
   /** Coach edit action, offered from the detail modal instead of a row button. */
   onEdit?: () => void
   editLabel?: string
-  /** Coach heat & lane action, also offered from the detail modal. */
-  onEditHeatLane?: () => void
-  heatLaneLabel?: string
+  /** Coach round, heat & lane, filled in inline in the detail modal. */
+  heatLaneEdit?: HeatLaneEdit
   /** The viewer's own row, tinted gold (by event, where it isn't in their pinned section). */
   highlighted?: boolean
 }) {
@@ -694,15 +693,7 @@ export default function SummaryRow({
                 }
               : undefined
           }
-          heatLaneLabel={heatLaneLabel}
-          onEditHeatLane={
-            onEditHeatLane
-              ? () => {
-                  setOpen(false)
-                  onEditHeatLane()
-                }
-              : undefined
-          }
+          heatLaneEdit={heatLaneEdit}
         />
       ) : null}
     </>

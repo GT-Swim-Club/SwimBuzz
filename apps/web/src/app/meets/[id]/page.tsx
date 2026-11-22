@@ -58,6 +58,8 @@ import {
   coerceScoringTable,
   formatScoringValues,
   meetFileName,
+  HEAT_LANE_LOCKS_AFTER_MEET,
+  meetHasEnded as meetHasEndedInZone,
   meetHeaderDetails,
   utcDayKey,
   COURSE_LABELS,
@@ -373,6 +375,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       results={results}
       relayResults={relayResults}
       heatLaneOverrides={meet.heatLaneOverrides}
+      heatLaneEditable={!(HEAT_LANE_LOCKS_AFTER_MEET && meetHasEndedInZone(meet))}
       meetId={meet.id}
       meetName={meet.name}
       athletes={rosterAthletes}

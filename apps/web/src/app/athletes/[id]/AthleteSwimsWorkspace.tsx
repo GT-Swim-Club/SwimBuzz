@@ -202,14 +202,11 @@ export default function AthleteSwimsWorkspace({
         <div ref={mainRef} className="flex scroll-mt-4 flex-col gap-4">
           {selected ? (
             <EventDrilldown
-              // Fresh chart state (hover, full history) per view.
-              key={selected.splits ? "splits" : "flat"}
               event={selected.event}
               course={selected.course}
               swims={selected.splits ? relaySplits : swims}
               marks={selected.splits ? splitMarks : marks}
               splits={selected.splits}
-              relaySplits={relaySplits}
               onViewChange={
                 has(swims, selected.event, selected.course) && has(relaySplits, selected.event, selected.course)
                   ? (splits) => navigate({ ...selected, splits }, "replace")

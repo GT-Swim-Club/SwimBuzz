@@ -10,7 +10,7 @@ import {
   formatTimeDelta,
   isDeletableSwim,
   relaySplitLegLabel,
-  swimFlagLabel,
+  swimLeadoffFlagLabel,
   swimMeetHref,
   type AthleteSwim,
   type SwimMarks,
@@ -52,11 +52,11 @@ function ViewSwitch({ splits, onChange }: { splits: boolean; onChange: (splits: 
     <div
       role="group"
       aria-label="Times shown"
-      className="relative grid h-9 w-[248px] max-w-full grid-cols-2 rounded-lg border border-border-secondary bg-fill-secondary p-0.5"
+      className="relative inline-grid h-8 grid-cols-[1fr_1fr] rounded-md border border-border-secondary bg-fill-secondary p-0.5"
     >
       <span
         aria-hidden
-        className="absolute bottom-0.5 left-0.5 top-0.5 w-[calc((100%-4px)/2)] rounded-md bg-primary-bg shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--brand-color-primary)_25%,transparent)] transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none"
+        className="absolute bottom-0.5 left-0.5 top-0.5 w-[calc((100%-4px)/2)] rounded bg-primary-bg shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--brand-color-primary)_25%,transparent)] transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none"
         style={{ transform: `translateX(${splits ? 100 : 0}%)` }}
       />
       {VIEWS.map((view) => {
@@ -67,7 +67,7 @@ function ViewSwitch({ splits, onChange }: { splits: boolean; onChange: (splits: 
             type="button"
             onClick={() => onChange(view.splits)}
             aria-pressed={on}
-            className={`relative z-[1] rounded-md text-[13px] font-medium transition-colors ${
+            className={`relative z-[1] rounded px-3 text-[13px] font-medium transition-colors ${
               on ? "text-accent" : "text-foreground-secondary hover:text-foreground"
             }`}
           >
@@ -86,7 +86,6 @@ export default function EventDrilldown({
   swims,
   marks,
   splits = false,
-  relaySplits = [],
   onViewChange,
   isCoach,
   onBack,
@@ -98,8 +97,6 @@ export default function EventDrilldown({
   marks: SwimMarks
   /** Show the event's relay splits (legs 2–4) rather than its flat-start swims. */
   splits?: boolean
-  /** The athlete's relay splits, which the flat-start chart can show alongside its swims. */
-  relaySplits?: AthleteSwim[]
   /** Set when the athlete has both views of this event, to switch between them. */
   onViewChange?: (splits: boolean) => void
   isCoach: boolean
@@ -108,10 +105,6 @@ export default function EventDrilldown({
   const sel = useMemo(
     () => swims.filter((s) => s.event === event && s.course === course),
     [swims, event, course]
-  )
-  const overlaySel = useMemo(
-    () => (splits ? [] : relaySplits.filter((s) => s.event === event && s.course === course)),
-    [splits, relaySplits, event, course]
   )
   const chrono = useMemo(() => [...sel].sort(compareSwimsChronologically), [sel])
   const rows = useMemo(() => [...sel].sort(compareSwimsNewestFirst), [sel])
@@ -145,11 +138,6 @@ export default function EventDrilldown({
         aria-label="Selected event"
         className="rounded-xl border border-border-secondary bg-background px-6 pb-4 pt-5 shadow-xs"
       >
-        {onViewChange && (
-          <div className="mb-4">
-            <ViewSwitch splits={splits} onChange={onViewChange} />
-          </div>
-        )}
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <h2 className="text-xs font-medium uppercase leading-4 tracking-wide text-foreground-secondary">
@@ -174,16 +162,20 @@ export default function EventDrilldown({
               )}
             </p>
           </div>
-          <div className="flex gap-7 text-right max-[600px]:gap-5 max-[600px]:text-left">
-            <Stat label={splits ? "Splits" : "Swims"} value={String(sel.length)} />
-            <Stat label={`${shortSeason(season)} best`} value={seasonBest == null ? "—" : formatTime(seasonBest)} />
-            <Stat label="Dropped" value={drop > 0 ? `−${formatTimeDelta(drop)}` : "—"} />
+          <div className="flex flex-col items-end justify-between gap-3 self-stretch max-[600px]:items-start">
+            <div className="flex gap-7 text-right max-[600px]:gap-5 max-[600px]:text-left">
+              <Stat label={splits ? "Splits" : "Swims"} value={String(sel.length)} />
+              <Stat label={`${shortSeason(season)} best`} value={seasonBest == null ? "—" : formatTime(seasonBest)} />
+              <Stat label="Dropped" value={drop > 0 ? `−${formatTimeDelta(drop)}` : "—"} />
+            </div>
+            {onViewChange && <ViewSwitch splits={splits} onChange={onViewChange} />}
           </div>
         </div>
 
         <ProgressionChart
+          // Fresh chart state (hover, full history) per view.
+          key={splits ? "splits" : "flat"}
           swims={sel}
-          overlay={overlaySel}
           marks={marks}
           pbId={pb.id}
           splits={splits}
@@ -210,7 +202,7 @@ export default function EventDrilldown({
             const isCurrentPb = marks.currentPb.has(swim.id)
             const wasPb = marks.pbAtTime.has(swim.id)
             const time = formatTime(swim.timeMs)
-            const flags = swim.relaySplit ? relaySplitLegLabel(swim.relaySplit) : swimFlagLabel(swim.tags)
+            const flags = swim.relaySplit ? relaySplitLegLabel(swim.relaySplit) : swimLeadoffFlagLabel(swim.tags)
             return (
               <div
                 key={swim.id}

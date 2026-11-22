@@ -22,6 +22,7 @@ import {
   sessionRound,
   splitRosterName,
   SUMMARY_ROUNDS,
+  HEAT_LANE_EDITS_OVERRIDE_IMPORTS,
   type CoachHeatLane,
   type HeatLaneFields,
   type MeetHeaderDetails,
@@ -191,10 +192,12 @@ function formatHeatLane(entry: RosterSummaryEntry, round?: SessionRound | null):
 function heatLaneFor(entry: RosterSummaryEntry, round?: SessionRound | null) {
   const imported = importedHeatLaneFor(entry, round)
   const coach = coachHeatLaneFor(entry, round)
+  // Imports win, unless coach values may replace them (testing).
+  const [first, second] = HEAT_LANE_EDITS_OVERRIDE_IMPORTS ? [coach, imported] : [imported, coach]
   return {
-    heat: imported.heat ?? coach.heat ?? null,
-    heatTotal: imported.heatTotal ?? coach.heatTotal,
-    lane: imported.lane ?? coach.lane ?? null,
+    heat: first.heat ?? second.heat ?? null,
+    heatTotal: first.heatTotal ?? second.heatTotal,
+    lane: first.lane ?? second.lane ?? null,
   }
 }
 
@@ -263,6 +266,7 @@ function heatLaneSlots(entry: RosterSummaryEntry, round?: SessionRound | null): 
     }))
   const missing = slots.some(
     (s) =>
+      HEAT_LANE_EDITS_OVERRIDE_IMPORTS ||
       s.roundEditable ||
       (["heat", "heatTotal", "lane", "startTime"] as const).some((f) => s.imported[f] == null)
   )
@@ -282,7 +286,9 @@ function heatLaneRow(entry: RosterSummaryEntry): Omit<SetHeatLaneInput, "slot"> 
  */
 function startTimeFor(entry: RosterSummaryEntry, round?: SessionRound | null): string | undefined {
   if (entry.alternate) return undefined
-  return importedHeatLaneFor(entry, round).startTime || coachHeatLaneFor(entry, round).startTime || undefined
+  const imported = importedHeatLaneFor(entry, round).startTime
+  const coach = coachHeatLaneFor(entry, round).startTime
+  return (HEAT_LANE_EDITS_OVERRIDE_IMPORTS ? coach || imported : imported || coach) || undefined
 }
 
 /** The entry's place — in that round when the view is filtered to a prelims or finals session. */

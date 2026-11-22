@@ -1,22 +1,33 @@
 "use client"
 
 import Link from "next/link"
-import { useState, type ReactNode } from "react"
+import { useEffect, useRef, useState, type MouseEvent, type PointerEvent, type ReactNode } from "react"
 import ActionIcon from "@/components/ui/ActionIcon"
+import HoverDetail from "@/components/ui/HoverDetail"
 import { downloadBlob } from "@/components/ui/export-menu"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
-import { deletePractices, type DeletePracticesResult } from "./PracticeSelection.actions"
+import type { DeletePracticesResult } from "@/lib/practice/practice-bulk-delete"
+import { deletePractices } from "./PracticeSelection.actions"
 import { MONTH_SHORT_NAMES, type PracticeRailItem } from "./workspace-params"
 
-/** The sidebar's select-mode state, passed down to the rails; null when not selecting. */
-export type RailSelection = { selectedIds: ReadonlySet<string>; onToggle: (id: string) => void } | null
+/** The sidebar's selection state, passed down to the rails. */
+export type RailSelection = {
+  /** Select mode is on: clicking anywhere on a card toggles it instead of opening it. */
+  selecting: boolean
+  selectedIds: ReadonlySet<string>
+  /** Toggles a practice; outside select mode it starts select mode with that practice. */
+  onToggle: (id: string) => void
+}
 
-/** Per-card selection state while the sidebar is in select mode; null when it isn't. */
-export type RailCardSelection = { checked: boolean; onToggle: () => void } | null
+/** One card's slice of the selection state. */
+export type RailCardSelection = { selecting: boolean; checked: boolean; onToggle: () => void }
 
 export function cardSelection(selection: RailSelection, id: string): RailCardSelection {
-  if (!selection) return null
-  return { checked: selection.selectedIds.has(id), onToggle: () => selection.onToggle(id) }
+  return {
+    selecting: selection.selecting,
+    checked: selection.selectedIds.has(id),
+    onToggle: () => selection.onToggle(id),
+  }
 }
 
 function SelectCheckbox({ checked }: { checked: boolean }) {
@@ -25,7 +36,7 @@ function SelectCheckbox({ checked }: { checked: boolean }) {
       aria-hidden
       className={
         "flex h-5 w-5 shrink-0 items-center justify-center rounded-[3px] border transition-colors " +
-        (checked ? "border-primary bg-primary" : "border-border-secondary bg-background")
+        (checked ? "border-primary bg-primary" : "border-foreground-tertiary/50 bg-background group-hover/check:border-primary")
       }
     >
       {checked && (
@@ -37,45 +48,163 @@ function SelectCheckbox({ checked }: { checked: boolean }) {
   )
 }
 
+const LONG_PRESS_MS = 500
+// A finger drifting further than this (px) is scrolling, not long-pressing.
+const LONG_PRESS_SLOP = 10
+
 /**
- * A practice card in the sidebar rails: a link to the practice normally, or a checkbox toggle
- * (with the checked state taking over the card's highlight) while the sidebar is in select mode.
+ * Long-press on touch (where there's no hover checkbox): calls onLongPress after LONG_PRESS_MS,
+ * and swallows the click that follows so the card's link doesn't also open.
+ */
+function useLongPress(onLongPress: () => void) {
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const start = useRef<{ x: number; y: number } | null>(null)
+  const fired = useRef(false)
+
+  const cancel = () => {
+    if (timer.current) clearTimeout(timer.current)
+    timer.current = null
+    start.current = null
+  }
+  useEffect(() => cancel, [])
+
+  return {
+    onPointerDown(e: PointerEvent) {
+      fired.current = false
+      if (e.pointerType !== "touch") return
+      start.current = { x: e.clientX, y: e.clientY }
+      timer.current = setTimeout(() => {
+        fired.current = true
+        cancel()
+        navigator.vibrate?.(10)
+        onLongPress()
+      }, LONG_PRESS_MS)
+    },
+    onPointerMove(e: PointerEvent) {
+      if (!start.current) return
+      if (Math.hypot(e.clientX - start.current.x, e.clientY - start.current.y) > LONG_PRESS_SLOP) cancel()
+    },
+    onPointerUp: cancel,
+    onPointerCancel: cancel,
+    onClick(e: MouseEvent) {
+      if (fired.current) {
+        e.preventDefault()
+        fired.current = false
+      }
+    },
+    // Keep the browser's link-preview / context menu from opening on the same long press.
+    onContextMenu(e: MouseEvent) {
+      if (timer.current || fired.current) e.preventDefault()
+    },
+  }
+}
+
+/**
+ * A practice card in the sidebar rails. Normally a link to the practice; hovering the card's
+ * right-hand column (badges, distance) swaps it for a checkbox — ticking it starts select mode.
+ * In select mode the whole card toggles its practice, the checkbox stays in that spot on every
+ * card, and the checked state takes over the card's highlight. On touch screens a long press does
+ * what the checkbox does.
  */
 export function SelectableRailCard({
   href,
   className,
+  wrapperClassName = "",
   active,
   selection,
+  trailing,
   children,
 }: {
   href: string
   className: string
+  /** Layout classes for the outer wrapper (e.g. flex-1 to fill a week-rail day). */
+  wrapperClassName?: string
   active: boolean
   selection: RailCardSelection
+  /** The card's right-hand column, hidden while the checkbox shows in its place. */
+  trailing: ReactNode
   children: ReactNode
 }) {
-  const stateClass = (on: boolean) =>
-    on ? "border-primary bg-primary/5" : "border-border-secondary hover:bg-background-hover"
+  const { selecting, checked, onToggle } = selection
+  const longPress = useLongPress(onToggle)
+  const highlighted = selecting ? checked : active
+  const cardClass =
+    className +
+    " w-full " +
+    (highlighted ? "border-primary bg-primary/5" : "border-border-secondary group-hover:bg-background-hover")
 
-  if (selection) {
-    return (
-      <button
-        type="button"
-        role="checkbox"
-        aria-checked={selection.checked}
-        onClick={selection.onToggle}
-        className={className + " " + stateClass(selection.checked)}
+  // min-w-5 keeps room for the checkbox on cards with nothing on the right. Outside select mode
+  // the column fades (rather than going invisible) so it keeps receiving the hover that shows the
+  // checkbox over it.
+  const content = (
+    <>
+      {children}
+      <div
+        data-rail-trailing
+        className={
+          "flex min-w-5 shrink-0 flex-col items-end gap-1 self-stretch justify-center " +
+          (selecting
+            ? "invisible"
+            : "group-has-[[data-rail-trailing]:hover]:opacity-0 group-has-[[data-rail-check]:hover]:opacity-0 group-has-[[data-rail-check]:focus-visible]:opacity-0")
+        }
       >
-        <SelectCheckbox checked={selection.checked} />
-        {children}
-      </button>
+        {trailing}
+      </div>
+    </>
+  )
+  // Over the right-hand column: a 32px hit target centered on the box, which lines up with the
+  // card's px-3 padding.
+  const checkboxSlot = "absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center"
+
+  if (selecting) {
+    return (
+      <div className={"group relative flex " + wrapperClassName}>
+        <button type="button" role="checkbox" aria-checked={checked} onClick={onToggle} className={cardClass}>
+          {content}
+        </button>
+        <span className={"pointer-events-none " + checkboxSlot}>
+          <SelectCheckbox checked={checked} />
+        </span>
+      </div>
     )
   }
 
   return (
-    <Link href={href} className={className + " " + stateClass(active)}>
-      {children}
-    </Link>
+    <div className={"group relative flex " + wrapperClassName}>
+      <Link
+        href={href}
+        {...longPress}
+        className={cardClass + " select-none [-webkit-touch-callout:none]"}
+      >
+        {content}
+      </Link>
+      <button
+        type="button"
+        role="checkbox"
+        aria-checked={false}
+        aria-label="Select practice"
+        data-rail-check
+        onClick={onToggle}
+        className={
+          "group/check rounded-md opacity-0 outline-none hover:opacity-100 focus-visible:opacity-100 group-has-[[data-rail-trailing]:hover]:opacity-100 " +
+          checkboxSlot
+        }
+      >
+        <SelectCheckbox checked={false} />
+      </button>
+    </div>
+  )
+}
+
+const barButtonClass =
+  "relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+
+function SelectAllIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
+      <path d="M21 10.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.5" />
+      <path d="m9 11 3 3L22 4" />
+    </svg>
   )
 }
 
@@ -93,9 +222,8 @@ function filenameFromDisposition(header: string | null): string {
 export function PracticeSelectionBar({
   selected,
   canDelete,
-  allVisibleSelected,
   canSelectAll,
-  onToggleAll,
+  onSelectAll,
   onCancel,
   onExported,
   onDeleted,
@@ -103,9 +231,9 @@ export function PracticeSelectionBar({
   /** Selected practices, oldest first. */
   selected: PracticeRailItem[]
   canDelete: boolean
-  allVisibleSelected: boolean
+  /** Some of the practices on screen aren't selected yet (Cancel covers clearing). */
   canSelectAll: boolean
-  onToggleAll: () => void
+  onSelectAll: () => void
   onCancel: () => void
   onExported: () => void
   /** Called after a bulk delete with what was actually moved to Trash. */
@@ -162,30 +290,22 @@ export function PracticeSelectionBar({
   }
 
   return (
-    <div className="flex shrink-0 flex-col gap-2 rounded-xl border border-border-secondary bg-background p-2">
-      <div className="flex items-center gap-2 pl-1">
-        <p className="min-w-0 truncate text-sm font-medium text-foreground">
+    <div className="flex shrink-0 flex-col gap-1">
+      <div className="flex items-center gap-2">
+        <p className="min-w-0 flex-1 truncate pl-1 text-sm font-medium text-foreground">
           {count === 0 ? "Select practices" : `${count} selected`}
         </p>
         {canSelectAll && (
           <button
             type="button"
-            onClick={onToggleAll}
-            className="shrink-0 text-xs text-foreground-secondary transition-colors hover:text-primary"
+            onClick={onSelectAll}
+            aria-label="Select all"
+            className={barButtonClass + " border-border-secondary text-foreground hover:bg-fill-secondary"}
           >
-            {allVisibleSelected ? "Deselect all" : "Select all"}
+            <SelectAllIcon />
+            <HoverDetail label="Select all" />
           </button>
         )}
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={busy != null}
-          className="ml-auto shrink-0 rounded-md px-2 py-1 text-[13px] font-medium text-foreground-secondary transition-colors hover:bg-fill-secondary hover:text-foreground disabled:opacity-50"
-        >
-          Cancel
-        </button>
-      </div>
-      <div className="flex items-center gap-2">
         {canDelete && (
           <button
             type="button"
@@ -194,19 +314,37 @@ export function PracticeSelectionBar({
               setConfirmDelete(true)
             }}
             disabled={count === 0 || busy != null}
-            className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border border-error-border bg-background text-[13px] font-medium text-error transition-colors hover:bg-error-bg disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label={deleteLabel}
+            className={barButtonClass + " border-error-border text-error hover:bg-error-bg"}
           >
             <ActionIcon kind="delete" className="h-4 w-4" />
-            {deleteLabel}
+            <HoverDetail label={deleteLabel} />
           </button>
         )}
         <button
           type="button"
           onClick={exportPdf}
           disabled={count === 0 || busy != null}
-          className="h-9 flex-1 rounded-lg bg-primary px-3 text-[13px] font-medium text-primary-contrast transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+          aria-label={busy === "pdf" ? "Exporting PDF" : "Export PDF"}
+          aria-busy={busy === "pdf"}
+          className={
+            barButtonClass +
+            " border-transparent bg-primary text-primary-contrast hover:bg-primary-hover" +
+            (busy === "pdf" ? " animate-pulse" : "")
+          }
         >
-          {busy === "pdf" ? "Exporting…" : "Export PDF"}
+          <ActionIcon kind="share" className="h-4 w-4" />
+          <HoverDetail label={busy === "pdf" ? "Exporting PDF…" : "Export PDF"} />
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={busy != null}
+          aria-label="Cancel"
+          className={barButtonClass + " border-border-secondary text-foreground-secondary hover:bg-fill-secondary hover:text-foreground"}
+        >
+          <ActionIcon kind="close" className="h-4 w-4" />
+          <HoverDetail label="Cancel" />
         </button>
       </div>
       {error && !confirmDelete && <p className="px-1 text-xs text-error">{error}</p>}

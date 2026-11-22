@@ -501,7 +501,7 @@ export default function AthleteDetailScreen() {
           )}
         </Section>
 
-        <ProgressionSection swims={swims} relaySplits={relaySplits} />
+        <ProgressionSection swims={swims} />
 
         <Section title="Swim history">
           {historyRows.length === 0 ? (

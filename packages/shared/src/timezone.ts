@@ -158,6 +158,15 @@ export function zonedDayKey(instant: Date | string, timeZone: string): string {
   return utcToZonedParts(date, timeZone).dateStr
 }
 
+/** Whether a meet is over: its last day (in the meet's time zone) is before today. */
+export function meetHasEnded(
+  meet: { startsAt: Date | string; endsAt?: Date | string | null; timeZone?: string | null },
+  now: Date = new Date()
+): boolean {
+  const timeZone = meet.timeZone || DEFAULT_TIME_ZONE
+  return zonedDayKey(meet.endsAt ?? meet.startsAt, timeZone) < zonedDayKey(now, timeZone)
+}
+
 function zonedDateLabel(instant: Date, timeZone: string, month: "long" | "short" = "long"): string {
   return instant.toLocaleDateString("en-US", {
     month,

@@ -18,7 +18,7 @@ import WeekRail from "./WeekRail"
 import PracticeListRail from "./PracticeListRail"
 import DeletedPracticeListRail from "./DeletedPracticeListRail"
 import { PracticeSelectionBar, type RailSelection } from "./PracticeSelection"
-import type { DeletePracticesResult } from "./PracticeSelection.actions"
+import type { DeletePracticesResult } from "@/lib/practice/practice-bulk-delete"
 import PracticeViewSkeleton from "./[id]/PracticeViewSkeleton"
 import {
   addUtcDays,
@@ -386,14 +386,23 @@ export default function PracticesSidebar({
   // tags sync above) rather than in an effect.
   if (selecting && prefs.view === "deleted") exitSelecting()
 
-  const toggleSelected = useCallback((id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev)
+  // Ticking a card's hover checkbox starts select mode with that practice; unticking the last
+  // selected card leaves it again.
+  const toggleSelected = useCallback(
+    (id: string) => {
+      if (!selecting) {
+        setSelecting(true)
+        setSelectedIds(new Set([id]))
+        return
+      }
+      const next = new Set(selectedIds)
       if (next.has(id)) next.delete(id)
       else next.add(id)
-      return next
-    })
-  }, [])
+      if (next.size === 0) exitSelecting()
+      else setSelectedIds(next)
+    },
+    [selecting, selectedIds, exitSelecting]
+  )
 
   // "Select all" covers whatever the active rail is showing: every listed practice in list view,
   // or the displayed week's practices (minus Fri–Sun when Mon–Thu only is on) in week view.
@@ -405,20 +414,13 @@ export default function PracticesSidebar({
       .flatMap((date) => (practicesByDay[formatDayParam(date)] ?? []).map((p) => p.id))
   }, [prefs.view, prefs.monThuOnly, filteredPractices, practicesByDay, week])
 
-  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id))
+  const allVisibleSelected = visibleIds.every((id) => selectedIds.has(id))
 
-  function toggleAllVisible() {
-    setSelectedIds((prev) => {
-      const next = new Set(prev)
-      for (const id of visibleIds) {
-        if (allVisibleSelected) next.delete(id)
-        else next.add(id)
-      }
-      return next
-    })
+  function selectAllVisible() {
+    setSelectedIds((prev) => new Set([...prev, ...visibleIds]))
   }
 
-  const selection: RailSelection = selecting ? { selectedIds, onToggle: toggleSelected } : null
+  const selection: RailSelection = { selecting, selectedIds, onToggle: toggleSelected }
 
   // Resolved against the live list, so practices that disappear (e.g. deleted elsewhere) drop
   // out of the selection on their own. Oldest first, matching the exported PDF's order.
@@ -535,17 +537,30 @@ export default function PracticesSidebar({
   function renderSidebarContent(width: number) {
     return (
       <>
-        <PracticesToolbar
-          isCoach={isCoach}
-          managedTags={managedTags}
-          prefs={prefs}
-          q={query}
-          onQueryChange={setQuery}
-          tags={tags}
-          onTagsChange={updateTags}
-          selecting={selecting}
-          onSelectingChange={(next) => (next ? setSelecting(true) : exitSelecting())}
-        />
+        {/* While selecting, the selection bar takes the toolbar's place at the top. */}
+        {selecting ? (
+          <PracticeSelectionBar
+            selected={selectedPractices}
+            canDelete={
+              isCoach || (selectedPractices.length > 0 && selectedPractices.every((p) => p.isPrivate))
+            }
+            canSelectAll={!allVisibleSelected}
+            onSelectAll={selectAllVisible}
+            onCancel={exitSelecting}
+            onExported={exitSelecting}
+            onDeleted={handleBulkDeleted}
+          />
+        ) : (
+          <PracticesToolbar
+            isCoach={isCoach}
+            managedTags={managedTags}
+            prefs={prefs}
+            q={query}
+            onQueryChange={setQuery}
+            tags={tags}
+            onTagsChange={updateTags}
+          />
+        )}
         {prefs.view === "week" ? (
           <WeekRail
             weekParam={week}
@@ -576,20 +591,6 @@ export default function PracticesSidebar({
             cardLabel={prefs.cardLabel}
             emptyMessage={emptyListMessage}
             selection={selection}
-          />
-        )}
-        {selecting && (
-          <PracticeSelectionBar
-            selected={selectedPractices}
-            canDelete={
-              isCoach || (selectedPractices.length > 0 && selectedPractices.every((p) => p.isPrivate))
-            }
-            allVisibleSelected={allVisibleSelected}
-            canSelectAll={visibleIds.length > 0}
-            onToggleAll={toggleAllVisible}
-            onCancel={exitSelecting}
-            onExported={exitSelecting}
-            onDeleted={handleBulkDeleted}
           />
         )}
       </>

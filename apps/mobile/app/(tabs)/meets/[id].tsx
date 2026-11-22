@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ElementRef } from "react"
 import { Alert, Image, View } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { coerceMeetHighlights, coerceScoringTable, DEFAULT_TIME_ZONE, doubledScoringValues, formatScoringValues, parseScoringValues, formatFullDate, formatMeetDateRange, formatTime, isHtmlEmpty, meetHeaderDetails, zonedDayKey, type IconName } from "@swimbuzz/shared"
+import { coerceMeetHighlights, coerceScoringTable, DEFAULT_TIME_ZONE, doubledScoringValues, formatScoringValues, parseScoringValues, formatFullDate, formatMeetDateRange, formatTime, isHtmlEmpty, HEAT_LANE_LOCKS_AFTER_MEET, meetHasEnded, meetHeaderDetails, zonedDayKey, type IconName } from "@swimbuzz/shared"
 import {
   Body,
   Button,
@@ -549,7 +549,8 @@ export default function MeetDetailScreen() {
             viewerAthleteId={
               viewer?.athleteId ? String(viewer.athleteId) : null
             }
-            canEdit={isStaff}
+            // Heat & lane can be filled in until the meet is over.
+            canEdit={isStaff && !(HEAT_LANE_LOCKS_AFTER_MEET && startsAt && meetHasEnded({ startsAt, endsAt, timeZone }))}
             onHeatLaneSaved={() => void load()}
             scrollRef={scrollRef}
           />

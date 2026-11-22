@@ -318,8 +318,27 @@ function WeekRailRow({
     <SelectableRailCard
       href={buildWorkspaceHref(practicePath(practice.slug ?? practice.id), { tags })}
       className="flex flex-1 items-center gap-3 rounded-lg border px-3 py-3 text-left transition-colors"
+      wrapperClassName="flex-1"
       active={selected}
       selection={cardSelection(selection, practice.id)}
+      trailing={
+        <>
+          {practice.isPrivate ? (
+            <PrivateBadge compact />
+          ) : (
+            !practice.published && (
+              <span className="rounded-full bg-primary/20 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-accent dark:bg-primary/30">
+                Draft
+              </span>
+            )
+          )}
+          {practice.totalDistance > 0 && sidebarWidth >= 300 && (
+            <span className="text-xs tabular-nums text-foreground-tertiary">
+              {formatPracticeDistance(practice.totalDistance, practice.course)}
+            </span>
+          )}
+        </>
+      }
     >
       <DateColumn weekday={weekday} dateNumber={dateNumber} isToday={isToday} dimmed={false} selected={selected} />
       <div className="min-w-0 flex-1">
@@ -331,22 +350,6 @@ function WeekRailRow({
               : formatZonedInstantRange(practice.startsAt, practice.endsAt, practice.timeZone).time}
           </p>
         </div>
-      </div>
-      <div className="flex shrink-0 flex-col items-end gap-1">
-        {practice.isPrivate ? (
-          <PrivateBadge compact />
-        ) : (
-          !practice.published && (
-            <span className="rounded-full bg-primary/20 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-accent dark:bg-primary/30">
-              Draft
-            </span>
-          )
-        )}
-        {practice.totalDistance > 0 && sidebarWidth >= 300 && (
-          <span className="text-xs tabular-nums text-foreground-tertiary">
-            {formatPracticeDistance(practice.totalDistance, practice.course)}
-          </span>
-        )}
       </div>
     </SelectableRailCard>
   )

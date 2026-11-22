@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { View } from "react-native"
 import {
+  HEAT_LANE_EDITS_OVERRIDE_IMPORTS,
   HEAT_LANE_MAX,
   normalizeHeatStartTime,
   SUMMARY_ROUNDS,
@@ -34,7 +35,13 @@ function formFrom(fields: HeatLaneFields): Form {
   }
 }
 
-const isLocked = (s: HeatLaneSlot, field: Field) => s.imported[field] != null && s.imported[field] !== ""
+// Imported values are read-only, unless coach values may replace them (testing).
+const isLocked = (s: HeatLaneSlot, field: Field) =>
+  !HEAT_LANE_EDITS_OVERRIDE_IMPORTS && s.imported[field] != null && s.imported[field] !== ""
+
+/** The form a round opens with: the coach's values, or (when imports can be replaced) what's shown. */
+const startingForm = (s: HeatLaneSlot) =>
+  formFrom(HEAT_LANE_EDITS_OVERRIDE_IMPORTS ? { ...s.imported, ...s.coach } : s.coach)
 
 /** The input for one round, or an error message. */
 function slotInput(
@@ -58,8 +65,12 @@ function slotInput(
   for (const v of [heat, heatTotal, lane]) if (typeof v === "string") return v
   const startTime = isLocked(s, "startTime") ? (s.coach.startTime ?? "") : normalizeHeatStartTime(form.startTime)
   if (startTime == null) return "Enter a start time like 9:30 AM"
-  const h = s.imported.heat ?? (heat as number | null)
-  const total = s.imported.heatTotal ?? (heatTotal as number | null)
+  const h = HEAT_LANE_EDITS_OVERRIDE_IMPORTS
+    ? ((heat as number | null) ?? s.imported.heat)
+    : (s.imported.heat ?? (heat as number | null))
+  const total = HEAT_LANE_EDITS_OVERRIDE_IMPORTS
+    ? ((heatTotal as number | null) ?? s.imported.heatTotal)
+    : (s.imported.heatTotal ?? (heatTotal as number | null))
   if (h != null && total != null && h > total) return "Heat can't be more than the heats in the event"
   return {
     ...row,
@@ -104,7 +115,7 @@ export function HeatLaneSheet({
   if (visible !== wasVisible) {
     setWasVisible(visible)
     if (visible) {
-      setForms(slots.map((s) => formFrom(s.coach)))
+      setForms(slots.map(startingForm))
       setError(null)
     }
   }
@@ -149,7 +160,7 @@ export function HeatLaneSheet({
     >
       <Body style={{ fontWeight: "700", marginBottom: spacing.sm }}>{title}</Body>
       {slots.map((s, i) => {
-        const form = forms[i] ?? formFrom(s.coach)
+        const form = forms[i] ?? startingForm(s)
         const shown = formFrom(s.imported)
         const field = (key: Field, label: string, placeholder?: string) => (
           <View style={{ flex: key === "startTime" ? undefined : 1 }}>

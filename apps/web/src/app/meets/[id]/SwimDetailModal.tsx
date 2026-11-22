@@ -10,6 +10,16 @@ import { formatDisplayTime, formatOrdinal, formatSeedTimeDelta, parseTime } from
 import { useCanScrollDown } from "@/lib/use-can-scroll-down"
 import { useEscapeToClose } from "@/lib/use-escape-to-close"
 import { formatPoints } from "@swimbuzz/shared"
+import {
+  HeatInputs,
+  HeatLaneActions,
+  HeatLaneEditable,
+  HeatLanePencil,
+  LaneInput,
+  RoundSelect,
+  useHeatLaneEditor,
+  type HeatLaneEdit,
+} from "./HeatLaneInlineEdit"
 
 export type DetailRound = {
   label: string
@@ -41,6 +51,8 @@ export type SwimDetail = {
   athleteHref?: string
   title: string
   subLine: string
+  /** The subtitle's lead before its round ("Relay A"), kept while a coach picks the round. */
+  subLineLead?: string
   /** One round, or prelims + finals for a combined individual view. */
   rounds: DetailRound[]
   /** The round whose time, delta, place and points lead the header (the row opened); the last by default. */
@@ -376,17 +388,15 @@ export default function SwimDetailModal({
   onClose,
   onEdit,
   editLabel = "Edit",
-  onEditHeatLane,
-  heatLaneLabel = "Heat & lane",
+  heatLaneEdit,
 }: {
   detail: SwimDetail
   onClose: () => void
   /** Shown as the footer's primary action for coaches who can edit this row. */
   onEdit?: () => void
   editLabel?: string
-  /** For coaches: add the heat & lane no import has given this row. */
-  onEditHeatLane?: () => void
-  heatLaneLabel?: string
+  /** For coaches: fill in, inline, the round, heat & lane no import has given this row. */
+  heatLaneEdit?: HeatLaneEdit
 }) {
   const [mounted, setMounted] = useState(false)
   const [chosenStep, setChosenStep] = useState<number | null>(null)
@@ -396,6 +406,13 @@ export default function SwimDetailModal({
   const first = detail.rounds[0]
   const head = detail.rounds[detail.headline ?? -1] ?? last
   const headDelta = roundDelta(head, true)
+  const heatLane = useHeatLaneEditor(heatLaneEdit)
+  // The round the row's heat & lane belongs to: in the prelims + finals view, its own column.
+  const editRound = heatLaneEdit
+    ? combined && heatLaneEdit.row.slot === "P"
+      ? detail.rounds.find((r) => r.label === "Prelims")
+      : last
+    : undefined
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => setMounted(true))
@@ -688,6 +705,7 @@ export default function SwimDetailModal({
       {r.seedRank != null ? <span className="text-foreground-tertiary">#{r.seedRank}</span> : null}
     </>
   )
+  const laneText = (r: DetailRound) => (r.lane != null ? String(r.lane) : "—")
   const heatCell = (r: DetailRound) => (
     <span className="whitespace-nowrap">
       {r.heat ?? (r.startTime ? null : "—")}
@@ -735,8 +753,17 @@ export default function SwimDetailModal({
                   >
                     {detail.title}
                   </h2>
-                  {detail.subLine ? (
-                    <div className="text-sm text-foreground-secondary">{detail.subLine}</div>
+                  {heatLane.editing === "round" ? (
+                    <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-sm text-foreground-secondary">
+                      {detail.subLineLead ? <span>{detail.subLineLead} ·</span> : null}
+                      <RoundSelect editor={heatLane} />
+                      <HeatLaneActions editor={heatLane} />
+                    </div>
+                  ) : detail.subLine || heatLane.can("round") ? (
+                    <div className="flex items-center gap-1.5 text-sm text-foreground-secondary">
+                      {detail.subLine}
+                      <HeatLanePencil editor={heatLane} group="round" />
+                    </div>
                   ) : null}
                 </div>
               </div>
@@ -816,13 +843,29 @@ export default function SwimDetailModal({
                         key={r.label}
                         className="border-l border-border px-3 py-2 font-mono tabular-nums"
                       >
-                        {label === "Seed"
-                          ? seedCell(r)
-                          : label === "Heat"
-                            ? heatCell(r)
-                            : r.lane != null
-                              ? String(r.lane)
-                              : "—"}
+                        {label === "Seed" ? (
+                          seedCell(r)
+                        ) : r !== editRound ? (
+                          label === "Heat" ? (
+                            heatCell(r)
+                          ) : (
+                            laneText(r)
+                          )
+                        ) : label === "Heat" ? (
+                          <HeatLaneEditable
+                            editor={heatLane}
+                            group="heat"
+                            value={heatCell(r)}
+                            inputs={<HeatInputs editor={heatLane} />}
+                          />
+                        ) : (
+                          <HeatLaneEditable
+                            editor={heatLane}
+                            group="lane"
+                            value={laneText(r)}
+                            inputs={<LaneInput editor={heatLane} />}
+                          />
+                        )}
                       </span>
                     ))}
                   </div>
@@ -835,17 +878,46 @@ export default function SwimDetailModal({
                   <div className="font-mono text-sm tabular-nums">{seedCell(last)}</div>
                 </div>
                 <div className="border-r border-border px-3 py-2">
-                  <div className={cellLabel}>Heat</div>
-                  <div className="font-mono text-sm tabular-nums">{heatCell(last)}</div>
+                  <div className="flex h-4 items-center justify-between gap-1">
+                    <span className={cellLabel}>Heat</span>
+                    {heatLane.editing === "heat" ? (
+                      <HeatLaneActions editor={heatLane} />
+                    ) : (
+                      <HeatLanePencil editor={heatLane} group="heat" />
+                    )}
+                  </div>
+                  <div className="font-mono text-sm tabular-nums">
+                    {heatLane.editing === "heat" ? (
+                      <div className="mt-1">
+                        <HeatInputs editor={heatLane} />
+                      </div>
+                    ) : (
+                      heatCell(last)
+                    )}
+                  </div>
                 </div>
                 <div className="px-3 py-2">
-                  <div className={cellLabel}>Lane</div>
+                  <div className="flex h-4 items-center justify-between gap-1">
+                    <span className={cellLabel}>Lane</span>
+                    {heatLane.editing === "lane" ? (
+                      <HeatLaneActions editor={heatLane} />
+                    ) : (
+                      <HeatLanePencil editor={heatLane} group="lane" />
+                    )}
+                  </div>
                   <div className="font-mono text-sm tabular-nums">
-                    {last.lane != null ? String(last.lane) : "—"}
+                    {heatLane.editing === "lane" ? (
+                      <div className="mt-1">
+                        <LaneInput editor={heatLane} />
+                      </div>
+                    ) : (
+                      laneText(last)
+                    )}
                   </div>
                 </div>
               </div>
             )}
+            {heatLane.error ? <p className="mt-2 text-sm text-error">{heatLane.error}</p> : null}
           </div>
 
           {splitTable ? (
@@ -896,15 +968,6 @@ export default function SwimDetailModal({
                 <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
               </svg>
               {editLabel}
-            </button>
-          ) : null}
-          {onEditHeatLane ? (
-            <button
-              type="button"
-              onClick={onEditHeatLane}
-              className="flex-1 whitespace-nowrap rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-fill"
-            >
-              {heatLaneLabel}
             </button>
           ) : null}
           <button

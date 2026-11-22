@@ -33,70 +33,20 @@ const YEAR_LABEL_GAP_PX = 44
 /** Room (px) the month-year labels at either end of the x-axis take. */
 const END_LABEL_PX = 72
 
-type Point = { swim: AthleteSwim; x: number; y: number; overlay: boolean }
-
-/** "Relay splits" on/off, beside the chart. */
-function SplitsSwitch({ on, onChange }: { on: boolean; onChange: (on: boolean) => void }) {
-  return (
-    <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-foreground-secondary">
-      Relay splits
-      <button
-        type="button"
-        role="switch"
-        aria-checked={on}
-        onClick={() => onChange(!on)}
-        className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${on ? "bg-primary" : "bg-fill"}`}
-      >
-        <span
-          className={`absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-background shadow-sm transition-transform ${
-            on ? "translate-x-4" : "translate-x-0"
-          }`}
-        />
-      </button>
-    </label>
-  )
-}
-
-/** Legend glyphs, drawn like the chart's marks. */
-function LegendSwims() {
-  return (
-    <span className="flex items-center gap-1.5">
-      <svg width="18" height="10" aria-hidden>
-        <line x1="1" y1="5" x2="17" y2="5" stroke="var(--brand-color-primary)" strokeWidth="2" strokeLinecap="round" />
-        <circle cx="9" cy="5" r="3" fill="var(--brand-color-text-tertiary)" stroke="var(--brand-color-bg-container)" strokeWidth="1.5" />
-      </svg>
-      Flat start
-    </span>
-  )
-}
-
-function LegendSplits() {
-  return (
-    <span className="flex items-center gap-1.5">
-      <svg width="10" height="10" aria-hidden>
-        <circle cx="5" cy="5" r="3.5" fill="var(--brand-color-bg-container)" stroke="var(--brand-color-text-secondary)" strokeWidth="1.5" />
-      </svg>
-      Relay split (flying start)
-    </span>
-  )
-}
+type Point = { swim: AthleteSwim; x: number; y: number }
 
 /**
  * Time-over-date chart for one event + course: faster times plot higher, dates to scale.
- * Opens on the last 5 years (the full history keeps that scale and scrolls). `overlay`
- * relay splits can be switched on as hollow points beside the flat-start swims.
+ * Opens on the last 5 years (the full history keeps that scale and scrolls).
  */
 export default function ProgressionChart({
   swims,
-  overlay = [],
   marks,
   pbId,
   splits,
 }: {
   /** The event's swims (or relay splits, when `splits`), in any order. */
   swims: AthleteSwim[]
-  /** The event's relay splits, offered as a switchable layer over flat-start swims. */
-  overlay?: AthleteSwim[]
   marks: SwimMarks
   pbId: string
   /** The plotted swims are relay splits. */
@@ -105,24 +55,17 @@ export default function ProgressionChart({
   // Read the clock once, not on every render.
   const [windowStart] = useState(() => Date.now() - PROGRESSION_WINDOW_MS)
   const [showFullHistory, setShowFullHistory] = useState(false)
-  const [showOverlay, setShowOverlay] = useState(false)
   /** The hovered (or tapped) point, with the scroll offset it was picked at. */
   const [hover, setHover] = useState<{ id: string; scrollLeft: number } | null>(null)
   const [frameW, setFrameW] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const chrono = useMemo(() => [...swims].sort(compareSwimsChronologically), [swims])
-  const overlayChrono = useMemo(() => [...overlay].sort(compareSwimsChronologically), [overlay])
   const windowed = progressionWindowed(chrono, windowStart)
   const useWindow = windowed.hasOlder && !showFullHistory
   const plotted = useWindow ? windowed.plotted : chrono
-  const plottedOverlay = showOverlay
-    ? useWindow
-      ? overlayChrono.filter((s) => Date.parse(s.date) >= windowStart)
-      : overlayChrono
-    : []
 
-  const all = [...plotted, ...plottedOverlay]
+  const all = plotted
   const dates = all.map((s) => Date.parse(s.date))
   const firstMs = dates.length ? Math.min(...dates) : 0
   const lastMs = dates.length ? Math.max(...dates) : 0
@@ -134,20 +77,15 @@ export default function ProgressionChart({
 
   // The full history keeps the 5-year view's scale, so it grows wider than the card and scrolls.
   const widthRatio = useWindow || !windowed.hasOlder ? 1 : Math.max(1, spanMs / PROGRESSION_WINDOW_MS)
-  const plotW = Math.round(frameW * widthRatio)
+  const plotW = Math.floor(frameW * widthRatio)
+  /** Only the full history outgrows the card; the 5-year view always fits. */
+  const scrolls = widthRatio > 1
   const xAt = (ms: number) => (spanMs === 0 ? plotW / 2 : PAD_X + ((ms - firstMs) / spanMs) * (plotW - 2 * PAD_X))
   const yAt = (ms: number) => PAD_TOP + ((ms - axis.min) / (axis.max - axis.min)) * (PLOT_H - PAD_TOP - PAD_BOTTOM)
-  const toPoint = (swim: AthleteSwim, isOverlay: boolean): Point => ({
-    swim,
-    x: xAt(Date.parse(swim.date)),
-    y: yAt(swim.timeMs),
-    overlay: isOverlay,
-  })
-  const points = plotted.map((s) => toPoint(s, false))
-  const overlayPoints = plottedOverlay.map((s) => toPoint(s, true))
-  const hovered = [...points, ...overlayPoints].find((p) => p.swim.id === hover?.id) ?? null
+  const points: Point[] = plotted.map((swim) => ({ swim, x: xAt(Date.parse(swim.date)), y: yAt(swim.timeMs) }))
+  const hovered = points.find((p) => p.swim.id === hover?.id) ?? null
   const pbPoint = points.find((p) => p.swim.id === pbId) ?? null
-  const r = progressionDotRadius(plotW - 2 * PAD_X, points.length + overlayPoints.length)
+  const r = progressionDotRadius(plotW - 2 * PAD_X, points.length)
 
   // A faint line at each Jan 1; a year label wherever it clears the end labels and the last year.
   const yearLines = progressionYearTicks(firstMs, lastMs).map((tick) => ({ year: tick.year, x: xAt(tick.ms) }))
@@ -161,13 +99,14 @@ export default function ProgressionChart({
   const fastestMs = all.length ? Math.min(...all.map((s) => s.timeMs)) : 0
 
   // One swim shows no progression; that state says so rather than draw a lone dot.
-  const charted = chrono.length > 1 || overlayPoints.length > 0
+  const charted = chrono.length > 1
 
   // Track the card's width; the chart is drawn in pixels so dots stay round.
   useLayoutEffect(() => {
     const el = scrollRef.current
     if (!el) return
-    const measure = () => setFrameW(el.clientWidth)
+    // Rounded down: clientWidth can round a fractional width up and overflow by a hair.
+    const measure = () => setFrameW(Math.floor(el.getBoundingClientRect().width))
     measure()
     const observer = new ResizeObserver(measure)
     observer.observe(el)
@@ -177,8 +116,8 @@ export default function ProgressionChart({
   // Open on the newest swims when the chart is wider than its card.
   useLayoutEffect(() => {
     const el = scrollRef.current
-    if (el) el.scrollLeft = el.scrollWidth
-  }, [showFullHistory, plotW])
+    if (el) el.scrollLeft = scrolls ? el.scrollWidth : 0
+  }, [showFullHistory, plotW, scrolls])
 
   /** Snap to the nearest point to the pointer. */
   function pick(e: PointerEvent<SVGSVGElement>) {
@@ -187,7 +126,7 @@ export default function ProgressionChart({
     const py = e.clientY - rect.top
     let best: Point | null = null
     let bestD = Infinity
-    for (const p of [...points, ...overlayPoints]) {
+    for (const p of points) {
       const d = (p.x - px) ** 2 + (p.y - py) ** 2
       if (d < bestD) {
         bestD = d
@@ -199,7 +138,6 @@ export default function ProgressionChart({
   }
 
   const noun = splits ? "splits" : "swims"
-  const toggles = overlay.length > 0 && !splits
 
   if (chrono.length === 0) {
     return <p className="mt-5 text-sm text-foreground-tertiary">No {noun} to chart yet.</p>
@@ -208,11 +146,6 @@ export default function ProgressionChart({
   if (!charted) {
     return (
       <div className="mt-5">
-        {toggles && (
-          <div className="mb-3 flex justify-end">
-            <SplitsSwitch on={showOverlay} onChange={setShowOverlay} />
-          </div>
-        )}
         <div className="flex h-[88px] items-center justify-center rounded-lg border border-dashed border-border px-4 text-center text-sm text-foreground-tertiary">
           {splits
             ? "One relay split so far. The chart starts with the second."
@@ -223,39 +156,15 @@ export default function ProgressionChart({
   }
 
   const tipX = hovered ? Y_AXIS_W + Y_AXIS_GAP + hovered.x - (hover?.scrollLeft ?? 0) : 0
-  const improvement = hovered && !hovered.overlay ? (marks.improvement.get(hovered.swim.id) ?? null) : null
+  const improvement = hovered ? (marks.improvement.get(hovered.swim.id) ?? null) : null
   const roundLabel = hovered && !hovered.swim.relaySplit ? swimRoundLabel(hovered.swim.tags) : ""
 
   return (
     <div className="mt-5">
-      {(toggles || showOverlay) && (
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-[11px] text-foreground-tertiary">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-            {showOverlay && (
-              <>
-                <LegendSwims />
-                <LegendSplits />
-              </>
-            )}
-          </div>
-          {toggles && (
-            <SplitsSwitch
-              on={showOverlay}
-              onChange={(on) => {
-                setHover(null)
-                setShowOverlay(on)
-              }}
-            />
-          )}
-        </div>
-      )}
-
       <div
         className="relative"
         role="img"
-        aria-label={`Progression of ${points.length} ${noun}${
-          overlayPoints.length ? ` and ${overlayPoints.length} relay splits` : ""
-        } from ${formatMonthYear(new Date(firstMs))} to ${formatMonthYear(new Date(lastMs))}, ${formatTime(fastestMs)} fastest`}
+        aria-label={`Progression of ${points.length} ${noun} from ${formatMonthYear(new Date(firstMs))} to ${formatMonthYear(new Date(lastMs))}, ${formatTime(fastestMs)} fastest`}
       >
         <div className="flex" style={{ gap: Y_AXIS_GAP }}>
           <div aria-hidden className="relative shrink-0 text-[11px] text-foreground-tertiary" style={{ width: Y_AXIS_W, height: PLOT_H }}>
@@ -272,7 +181,7 @@ export default function ProgressionChart({
           <div
             ref={scrollRef}
             onScroll={() => setHover(null)}
-            className="min-w-0 flex-1 overflow-x-auto overflow-y-hidden"
+            className={`min-w-0 flex-1 overflow-y-hidden ${scrolls ? "overflow-x-auto" : "overflow-x-hidden"}`}
           >
             {plotW > 0 && (
               <div style={{ width: plotW }}>
@@ -333,17 +242,6 @@ export default function ProgressionChart({
                       strokeLinecap="round"
                     />
                   )}
-                  {overlayPoints.map((p) => (
-                    <circle
-                      key={p.swim.id}
-                      cx={p.x}
-                      cy={p.y}
-                      r={r + 0.5}
-                      fill="var(--brand-color-bg-container)"
-                      stroke="var(--brand-color-text-secondary)"
-                      strokeWidth={1.5}
-                    />
-                  ))}
                   {points.map((p) => {
                     const isPb = p.swim.id === pbId
                     const wasPb = marks.pbAtTime.has(p.swim.id)
@@ -365,7 +263,7 @@ export default function ProgressionChart({
                       cy={hovered.y}
                       r={(hovered.swim.id === pbId ? r + 1.5 : r) + 3.5}
                       fill="none"
-                      stroke={hovered.overlay ? "var(--brand-color-text-secondary)" : "var(--brand-color-primary)"}
+                      stroke="var(--brand-color-primary)"
                       strokeWidth={1.5}
                     />
                   )}
@@ -420,15 +318,11 @@ export default function ProgressionChart({
           >
             <div className="flex items-center gap-2">
               <span className="font-mono text-sm font-semibold tabular-nums">{formatTime(hovered.swim.timeMs)}</span>
-              {!hovered.overlay && hovered.swim.id === pbId ? (
+              {hovered.swim.id === pbId && (
                 <span className="rounded-md bg-primary-bg px-1.5 text-[11px] font-bold leading-[18px] tracking-[0.04em] text-accent">
                   PB
                 </span>
-              ) : !hovered.overlay && marks.pbAtTime.has(hovered.swim.id) ? (
-                <span className="rounded-md border border-border px-1.5 text-[11px] font-semibold leading-4 tracking-[0.04em] text-foreground-tertiary">
-                  PB at the time
-                </span>
-              ) : null}
+              )}
               {improvement != null && <DeltaPill delta={improvement} />}
             </div>
             <p className="mt-1 text-xs text-foreground-secondary">{formatSwimDate(hovered.swim.date)}</p>

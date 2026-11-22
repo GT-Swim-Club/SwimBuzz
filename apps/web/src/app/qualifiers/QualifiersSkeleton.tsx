@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/Skeleton"
 import type { ListLayout } from "@/lib/list-layout"
+import { qualifierHeaderBgClass } from "./qualifier-styles"
 
 const boxClass = "flex h-[42px] items-center rounded-lg border border-border-secondary bg-background"
 const galleryGridClass = "grid grid-cols-[repeat(auto-fill,minmax(max(min(300px,100%),calc((100%-36px)/4)),1fr))] gap-3"
@@ -73,12 +74,12 @@ function ListSkeleton({ byEvent }: { byEvent: boolean }) {
     <div className="overflow-hidden rounded-xl border border-border-secondary bg-background">
       {NAME_WIDTHS.map((name, i) => (
         <div key={i} className="border-t border-border-secondary first:border-t-0">
-          <div className="flex min-h-12 items-center gap-2.5 px-4 py-2 max-sm:px-3">
+          <div className={`flex min-h-12 items-center gap-2.5 px-4 py-2 max-sm:px-3 ${qualifierHeaderBgClass}`}>
             {byEvent ? null : <Skeleton className="h-8 w-8 shrink-0 rounded-full" />}
             <Skeleton className={`h-4 ${byEvent ? "w-28" : name}`} />
             <Skeleton className="ml-auto h-3 w-20" />
           </div>
-          <div className="border-t border-border-subtle">
+          <div>
             {Array.from({ length: LINE_COUNTS[i] }, (_, j) => (
               <SwimLineSkeleton
                 key={j}

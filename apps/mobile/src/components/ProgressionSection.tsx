@@ -3,7 +3,6 @@ import {
   Pressable,
   ScrollView as HScrollView,
   StyleSheet,
-  Switch,
   Text,
   View,
   type LayoutChangeEvent,
@@ -24,7 +23,7 @@ import {
 import { Chip, Muted, Section, usePalette } from "@swimbuzz/ui"
 import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
 
-/** A swim or relay split as the athlete payload carries it (`relayEvent` set on a split). */
+/** A swim as the athlete payload carries it. */
 export type ProgressionSwimRow = {
   id?: string
   event?: string
@@ -33,8 +32,6 @@ export type ProgressionSwimRow = {
   date?: string
   meet?: string
   meetRef?: { name?: string } | null
-  relayEvent?: string
-  leg?: number | null
 }
 
 type Swim = {
@@ -44,11 +41,9 @@ type Swim = {
   timeMs: number
   date: string
   meet: string
-  relayEvent: string | null
-  leg: number | null
 }
 
-type Point = { swim: Swim; x: number; y: number; overlay: boolean }
+type Point = { swim: Swim; x: number; y: number }
 
 const COURSE_ORDER = ["SCY", "LCM", "SCM"]
 const STROKE_ORDER = ["Free", "Back", "Breast", "Fly", "IM"]
@@ -71,8 +66,6 @@ function toSwim(row: ProgressionSwimRow, index: number): Swim | null {
     timeMs: row.timeMs,
     date: row.date,
     meet: row.meetRef?.name || row.meet || "",
-    relayEvent: row.relayEvent ?? null,
-    leg: row.leg ?? null,
   }
 }
 
@@ -109,27 +102,16 @@ function formatDelta(ms: number): string {
 
 /**
  * Progression chart for one event + course, picked from chips: faster times plot higher,
- * dates to scale. Opens on the last 5 years; relay splits can be shown as hollow points.
+ * dates to scale. Opens on the last 5 years.
  */
-export function ProgressionSection({
-  swims: swimRows,
-  relaySplits: splitRows,
-}: {
-  swims: ProgressionSwimRow[]
-  relaySplits: ProgressionSwimRow[]
-}) {
+export function ProgressionSection({ swims: swimRows }: { swims: ProgressionSwimRow[] }) {
   const c = usePalette()
   const styles = useMemo(() => makeStyles(c), [c])
   const swims = useMemo(
     () => swimRows.map(toSwim).filter((s): s is Swim => s != null).sort(chronological),
     [swimRows]
   )
-  const splits = useMemo(
-    () => splitRows.map(toSwim).filter((s): s is Swim => s != null).sort(chronological),
-    [splitRows]
-  )
 
-  // Courses and events with flat-start swims; splits only add to an event that has them.
   const courses = useMemo(
     () => COURSE_ORDER.filter((course) => swims.some((s) => s.course === course)),
     [swims]
@@ -152,15 +134,10 @@ export function ProgressionSection({
 
   const [windowStart] = useState(() => Date.now() - PROGRESSION_WINDOW_MS)
   const [showFullHistory, setShowFullHistory] = useState(false)
-  const [showSplits, setShowSplits] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [width, setWidth] = useState(0)
 
   const sel = useMemo(() => swims.filter((s) => s.event === event && s.course === course), [swims, event, course])
-  const selSplits = useMemo(
-    () => splits.filter((s) => s.event === event && s.course === course),
-    [splits, event, course]
-  )
   const bests = useMemo(() => progressionBests(sel, (s) => s.meet || s.date.slice(0, 10)), [sel])
 
   if (!course || !event || sel.length === 0) return null
@@ -169,12 +146,7 @@ export function ProgressionSection({
   const windowed = progressionWindowed(sel, windowStart)
   const useWindow = windowed.hasOlder && !showFullHistory
   const plotted = useWindow ? windowed.plotted : sel
-  const plottedSplits = showSplits
-    ? useWindow
-      ? selSplits.filter((s) => Date.parse(s.date) >= windowStart)
-      : selSplits
-    : []
-  const all = [...plotted, ...plottedSplits]
+  const all = plotted
   const dates = all.map((s) => Date.parse(s.date))
   const firstMs = Math.min(...dates)
   const lastMs = Math.max(...dates)
@@ -185,15 +157,9 @@ export function ProgressionSection({
   const xAt = (ms: number) =>
     Y_AXIS_W + (spanMs === 0 ? plotW / 2 : PAD_X + ((ms - firstMs) / spanMs) * (plotW - 2 * PAD_X))
   const yAt = (ms: number) => PAD_TOP + ((ms - axis.min) / (axis.max - axis.min)) * (PLOT_H - PAD_TOP - PAD_BOTTOM)
-  const points: Point[] = plotted.map((s) => ({ swim: s, x: xAt(Date.parse(s.date)), y: yAt(s.timeMs), overlay: false }))
-  const splitPoints: Point[] = plottedSplits.map((s) => ({
-    swim: s,
-    x: xAt(Date.parse(s.date)),
-    y: yAt(s.timeMs),
-    overlay: true,
-  }))
-  const r = progressionDotRadius(plotW - 2 * PAD_X, points.length + splitPoints.length)
-  const selected = [...points, ...splitPoints].find((p) => p.swim.id === selectedId) ?? null
+  const points: Point[] = plotted.map((s) => ({ swim: s, x: xAt(Date.parse(s.date)), y: yAt(s.timeMs) }))
+  const r = progressionDotRadius(plotW - 2 * PAD_X, points.length)
+  const selected = points.find((p) => p.swim.id === selectedId) ?? null
   const pbPoint = points.find((p) => p.swim.id === pb.id) ?? null
 
   const yearLines = progressionYearTicks(firstMs, lastMs).map((t) => ({ year: t.year, x: xAt(t.ms) }))
@@ -205,7 +171,7 @@ export function ProgressionSection({
     yearLabels.push(tick)
   }
 
-  const charted = sel.length > 1 || splitPoints.length > 0
+  const charted = sel.length > 1
 
   function onLayout(e: LayoutChangeEvent) {
     setWidth(Math.round(e.nativeEvent.layout.width))
@@ -215,7 +181,7 @@ export function ProgressionSection({
     const { locationX, locationY } = e.nativeEvent
     let best: Point | null = null
     let bestD = Infinity
-    for (const p of [...points, ...splitPoints]) {
+    for (const p of points) {
       const d = (p.x - locationX) ** 2 + (p.y - locationY) ** 2
       if (d < bestD) {
         bestD = d
@@ -238,7 +204,7 @@ export function ProgressionSection({
     setShowFullHistory(false)
   }
 
-  const improvement = selected && !selected.overlay ? bests.improvement.get(selected.swim.id) ?? null : null
+  const improvement = selected ? bests.improvement.get(selected.swim.id) ?? null : null
   const noun = sel.length === 1 ? "swim" : "swims"
 
   return (
@@ -265,21 +231,6 @@ export function ProgressionSection({
           </Text>
           <Text style={styles.pbTime}>{formatTime(pb.timeMs)}</Text>
         </View>
-        {selSplits.length > 0 ? (
-          <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Relay splits</Text>
-            <Switch
-              value={showSplits}
-              onValueChange={(on) => {
-                setShowSplits(on)
-                setSelectedId(null)
-              }}
-              trackColor={{ false: c.switchTrack, true: c.primary }}
-              thumbColor={c.switchThumb}
-              accessibilityLabel="Show relay splits"
-            />
-          </View>
-        ) : null}
       </View>
 
       {!charted ? (
@@ -288,31 +239,12 @@ export function ProgressionSection({
         </View>
       ) : (
         <>
-          {showSplits ? (
-            <View style={styles.legend}>
-              <View style={styles.legendItem}>
-                <Svg width={18} height={10}>
-                  <Line x1={1} y1={5} x2={17} y2={5} stroke={c.primary} strokeWidth={2} strokeLinecap="round" />
-                  <Circle cx={9} cy={5} r={3} fill={c.textTertiary} stroke={c.bgContainer} strokeWidth={1.5} />
-                </Svg>
-                <Text style={styles.legendText}>Flat start</Text>
-              </View>
-              <View style={styles.legendItem}>
-                <Svg width={10} height={10}>
-                  <Circle cx={5} cy={5} r={3.5} fill={c.bgContainer} stroke={c.textSecondary} strokeWidth={1.5} />
-                </Svg>
-                <Text style={styles.legendText}>Relay split (flying start)</Text>
-              </View>
-            </View>
-          ) : null}
           <Pressable
             onLayout={onLayout}
             onPress={onPress}
             style={{ height: PLOT_H + X_AXIS_H }}
             accessibilityRole="image"
-            accessibilityLabel={`${event} ${course} progression: ${points.length} ${noun}${
-              splitPoints.length ? ` and ${splitPoints.length} relay splits` : ""
-            } from ${formatMonthYear(new Date(firstMs))} to ${formatMonthYear(new Date(lastMs))}. Personal best ${formatTime(pb.timeMs)}.`}
+            accessibilityLabel={`${event} ${course} progression: ${points.length} ${noun} from ${formatMonthYear(new Date(firstMs))} to ${formatMonthYear(new Date(lastMs))}. Personal best ${formatTime(pb.timeMs)}.`}
           >
             {width > 0 ? (
               // Not a touch target itself, so a press's location is relative to the Pressable.
@@ -372,17 +304,6 @@ export function ProgressionSection({
                     strokeLinecap="round"
                   />
                 ) : null}
-                {splitPoints.map((p) => (
-                  <Circle
-                    key={p.swim.id}
-                    cx={p.x}
-                    cy={p.y}
-                    r={r + 0.5}
-                    fill={c.bgContainer}
-                    stroke={c.textSecondary}
-                    strokeWidth={1.5}
-                  />
-                ))}
                 {points.map((p) => {
                   const isPb = p.swim.id === pb.id
                   const wasPb = bests.pbAtTime.has(p.swim.id)
@@ -404,7 +325,7 @@ export function ProgressionSection({
                     cy={selected.y}
                     r={(selected.swim.id === pb.id ? r + 1.5 : r) + 3.5}
                     fill="none"
-                    stroke={selected.overlay ? c.textSecondary : c.primary}
+                    stroke={c.primary}
                     strokeWidth={1.5}
                   />
                 ) : null}
@@ -456,11 +377,7 @@ export function ProgressionSection({
               <>
                 <View style={styles.detailTop}>
                   <Text style={styles.detailTime}>{formatTime(selected.swim.timeMs)}</Text>
-                  {!selected.overlay && selected.swim.id === pb.id ? (
-                    <Text style={styles.pbBadge}>PB</Text>
-                  ) : !selected.overlay && bests.pbAtTime.has(selected.swim.id) ? (
-                    <Text style={styles.pbBadgeOutline}>PB at the time</Text>
-                  ) : null}
+                  {selected.swim.id === pb.id ? <Text style={styles.pbBadge}>PB</Text> : null}
                   {improvement != null ? (
                     <Text style={[styles.delta, { color: improvement < 0 ? c.successText : c.error }]}>
                       {formatDelta(improvement)}
@@ -468,13 +385,7 @@ export function ProgressionSection({
                   ) : null}
                 </View>
                 <Text style={styles.detailMeta} numberOfLines={2}>
-                  {[
-                    formatDay(selected.swim.date),
-                    selected.swim.meet || null,
-                    selected.swim.relayEvent
-                      ? `${selected.swim.relayEvent} · ${selected.swim.leg ? `Leg ${selected.swim.leg}` : "Split"} · Flying start`
-                      : null,
-                  ]
+                  {[formatDay(selected.swim.date), selected.swim.meet || null]
                     .filter(Boolean)
                     .join(" · ")}
                 </Text>
@@ -517,8 +428,6 @@ function makeStyles(c: ColorPalette) {
     },
     eyebrow: { fontSize: 11, fontWeight: "600", letterSpacing: 0.4, textTransform: "uppercase", color: c.accent },
     pbTime: { marginTop: 2, fontSize: 28, fontWeight: "600", color: c.text, fontVariant: ["tabular-nums"] },
-    switchRow: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
-    switchLabel: { fontSize: 13, fontWeight: "500", color: c.textSecondary },
     single: {
       height: 88,
       alignItems: "center",
@@ -529,9 +438,6 @@ function makeStyles(c: ColorPalette) {
       borderStyle: "dashed",
       borderColor: c.border,
     },
-    legend: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm, marginBottom: spacing.xs },
-    legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
-    legendText: { fontSize: 11, color: c.textTertiary },
     detail: { minHeight: 44, marginTop: spacing.xs, justifyContent: "center" },
     detailTop: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
     detailTime: { fontSize: 15, fontWeight: "600", color: c.text, fontVariant: ["tabular-nums"] },
@@ -544,15 +450,6 @@ function makeStyles(c: ColorPalette) {
       fontWeight: "700",
       color: c.accent,
       backgroundColor: c.primaryBg,
-    },
-    pbBadgeOutline: {
-      borderRadius: radii.sm,
-      borderWidth: 1,
-      borderColor: c.border,
-      paddingHorizontal: 6,
-      fontSize: 11,
-      fontWeight: "600",
-      color: c.textTertiary,
     },
     delta: { fontSize: 13, fontWeight: "600", fontVariant: ["tabular-nums"] },
     detailMeta: { marginTop: 2, fontSize: 13, color: c.textSecondary },

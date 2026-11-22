@@ -204,6 +204,7 @@ const LEDGER_ICONS = {
     </>
   ),
   check: <path d="M20 6 9 17l-5-5" />,
+  x: <path d="M18 6 6 18M6 6l12 12" />,
   grid: (
     <>
       <rect x="3" y="3" width="7" height="7" />

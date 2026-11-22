@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState, Fragment, type ReactNode } from "react"
+import { useEffect, useOptimistic, useRef, useState, Fragment, type ReactNode } from "react"
 import Link from "next/link"
 import {
   alternateLabel,
@@ -26,6 +26,8 @@ import {
   type RosterSummaryPdfRequest,
   type RosterSummaryPdfRow,
   type RosterSummaryPdfSection,
+  type SetHeatLaneInput,
+  HEAT_LANE_EDITS_OVERRIDE_IMPORTS,
 } from "@swimbuzz/shared"
 import type { MeetResultEntry, SheetEntry, SheetSummary } from "@/lib/meet/meet-sheet-summary"
 import {
@@ -37,6 +39,9 @@ import {
   heatLaneRowIdentity,
   heatLaneSlot,
   importedRowHeatLane,
+  isHeatLaneOverridesSummary,
+  parseSetHeatLaneInput,
+  upsertHeatLaneOverride,
 } from "@/lib/meet/heat-lane-overrides"
 import {
   compareIndividualEntries,
@@ -76,7 +81,7 @@ import { SegmentedToggle, segmentedIconOptionClass } from "@/components/ui/Segme
 import RosterName from "@/components/athlete/RosterName"
 import EditMeetSwimButton from "./EditMeetSwimButton"
 import EditSheetSeedButton from "./EditSheetSeedButton"
-import EditHeatLaneModal from "./EditHeatLaneModal"
+import type { HeatLaneEdit } from "./HeatLaneInlineEdit"
 import RemoveRosterOnlyButton from "./RemoveRosterOnlyButton"
 import { EditRelayButton } from "./MeetRelayEditor"
 import MeetAddMenu from "./MeetAddMenu"
@@ -411,6 +416,7 @@ function buildIndividualRounds(entry: SheetEntry, allEntries?: SummaryEntry[]): 
       points: entry.prelimPoints,
       status: entry.prelimStatus,
       heat: prelimHeat,
+      startTime: entry.prelimStartTime || (entry.resultRound === "P" ? entry.startTime : undefined) || undefined,
       lane: entry.prelimLane ?? (entry.resultRound === "P" ? individualLane(entry) : undefined),
       splits: entry.prelimSplits ?? (entry.resultRound === "P" ? entry.splits : undefined) ?? [],
       // From the finals row, seedTime/seedRank are the finals seed; the prelims seed is kept aside.
@@ -436,6 +442,7 @@ function buildIndividualRounds(entry: SheetEntry, allEntries?: SummaryEntry[]): 
       podium: true,
       status: entry.finalStatus === "NS" ? undefined : entry.finalStatus,
       heat: finalHeat,
+      startTime: entry.finalStartTime || (entry.resultRound === "F" ? entry.startTime : undefined) || undefined,
       lane: entry.finalLane,
       splits: entry.finalSplits ?? (entry.resultRound === "F" ? entry.splits : undefined) ?? [],
       seedTime: timed ? entry.seedTime : entry.finalsSheetSeedTime,
@@ -843,6 +850,8 @@ function SummaryEntryRow({
   eventView = false,
   athleteId,
   mine = false,
+  onHeatLaneSaving,
+  heatLaneEditable = true,
 }: {
   entry: SummaryEntry
   display: RowDisplay
@@ -861,9 +870,12 @@ function SummaryEntryRow({
   athleteId?: string
   /** The viewer's own row (by event), tinted so they can find it. */
   mine?: boolean
+  /** Show a coach's heat & lane on the page while it saves (call inside the save's transition). */
+  onHeatLaneSaving?: (input: SetHeatLaneInput) => void
+  /** False once the meet is over: heat & lane are then read-only. */
+  heatLaneEditable?: boolean
 }) {
   const [editOpen, setEditOpen] = useState(false)
-  const [heatLaneOpen, setHeatLaneOpen] = useState(false)
   const athleteRecord = athletes?.find((a) => a.id === entry.athleteId)
   const compact = display.density === "compact"
   const view = summaryRowView(
@@ -899,6 +911,7 @@ function SummaryEntryRow({
       eventNumber: eventNumber || undefined,
       title: detailTitle,
       subLine: [relayLetter, res.label].filter(Boolean).join(" · "),
+      subLineLead: relayLetter || undefined,
       rounds: [
         {
           label: res.label ?? "Relay",
@@ -1022,7 +1035,8 @@ function SummaryEntryRow({
   }
 
   // Coaches fill in what no import has given this row's round; imported values always win.
-  const heatLaneIdentity = canEdit && meetId && canEditHeatLane(entry) ? heatLaneRowIdentity(entry, athleteGenders) : null
+  const heatLaneIdentity =
+    canEdit && heatLaneEditable && meetId && canEditHeatLane(entry) ? heatLaneRowIdentity(entry, athleteGenders) : null
   const heatLaneImported = importedRowHeatLane(entry)
   const heatLaneCoach = coachRowHeatLane(entry)
   // A row no import has given a round can take the coach's (they're all on the T round).
@@ -1032,27 +1046,20 @@ function SummaryEntryRow({
     rowRoundResult(entry, allEntries, false).label == null
   const canAddHeatLane =
     heatLaneIdentity != null &&
-    (roundEditable ||
+    (HEAT_LANE_EDITS_OVERRIDE_IMPORTS ||
+      roundEditable ||
       (["heat", "heatTotal", "lane", "startTime"] as const).some((f) => heatLaneImported[f] == null))
-  const heatLaneEditor =
-    canAddHeatLane && meetId ? (
-      <EditHeatLaneModal
-        meetId={meetId}
-        row={{ ...heatLaneIdentity, slot: heatLaneSlot(entry) }}
-        description={[
-          isRelay ? `${entry.event} ${displayRelayLetter(entry.relayLetter)}` : entry.athleteName,
-          isRelay ? null : entry.event,
-          res.label,
-        ]
-          .filter(Boolean)
-          .join(" · ")}
-        imported={heatLaneImported}
-        coach={heatLaneCoach}
-        roundEditable={roundEditable}
-        open={heatLaneOpen}
-        onOpenChange={setHeatLaneOpen}
-      />
-    ) : null
+  const heatLaneEdit: HeatLaneEdit | undefined =
+    canAddHeatLane && meetId
+      ? {
+          meetId,
+          row: { ...heatLaneIdentity, slot: heatLaneSlot(entry) },
+          imported: heatLaneImported,
+          coach: heatLaneCoach,
+          roundEditable,
+          onSaving: onHeatLaneSaving,
+        }
+      : undefined
 
   // The leg an athlete swam, after the relay's name and styled like a preferred name: "(2nd)".
   const legSuffix =
@@ -1117,11 +1124,9 @@ function SummaryEntryRow({
         trailing={removeButton}
         onEdit={editor ? () => setEditOpen(true) : undefined}
         editLabel={isRelay ? "Edit relay" : "Edit"}
-        onEditHeatLane={heatLaneEditor ? () => setHeatLaneOpen(true) : undefined}
-        heatLaneLabel={roundEditable ? "Round, heat & lane" : "Heat & lane"}
+        heatLaneEdit={heatLaneEdit}
       />
       {editor}
-      {heatLaneEditor}
     </>
   )
 }
@@ -1232,6 +1237,7 @@ export default function MeetSheetSummarySection({
   results,
   relayResults,
   heatLaneOverrides = null,
+  heatLaneEditable = true,
   meetId,
   meetName,
   defaultCourse,
@@ -1257,6 +1263,8 @@ export default function MeetSheetSummarySection({
   relayResults?: SheetSummary["entries"] | null
   /** Meet.heatLaneOverrides — coach heat & lane, shown where no import has it. */
   heatLaneOverrides?: unknown
+  /** Coaches can fill in heat & lane until the meet is over. */
+  heatLaneEditable?: boolean
   meetId?: string
   meetName?: string
   /** Defaults for the coach "Add swim" dialog. */
@@ -1430,6 +1438,19 @@ export default function MeetSheetSummarySection({
   )
   const athleteNames = new Map(athletes.map((a) => [a.id, a.name]))
 
+  // A coach's heat & lane shows at once while it saves; the refreshed page then takes over.
+  const [shownHeatLaneOverrides, showHeatLaneSaving] = useOptimistic(
+    heatLaneOverrides,
+    (current: unknown, input: SetHeatLaneInput) => {
+      try {
+        const entries = isHeatLaneOverridesSummary(current) ? current.entries : []
+        return { entries: upsertHeatLaneOverride(entries, parseSetHeatLaneInput(input)) }
+      } catch {
+        return current
+      }
+    }
+  )
+
   // Built and cleaned like mobile's payload (roster-summary-display.ts), so both list the same rows.
   const summarySources = {
     psychSummary,
@@ -1438,11 +1459,11 @@ export default function MeetSheetSummarySection({
     entriesSummary,
     results,
     relayResults,
-    heatLaneOverrides,
+    heatLaneOverrides: shownHeatLaneOverrides,
   }
   const summary = buildRosterSummary(summarySources, athleteGenders, athleteNames)
   const relays = summary
-    ? attachCoachHeatLanes(uniqueRelayTeams(summary.entries, athleteGenders), heatLaneOverrides, athleteGenders).map(
+    ? attachCoachHeatLanes(uniqueRelayTeams(summary.entries, athleteGenders), shownHeatLaneOverrides, athleteGenders).map(
         applyCoachHeatLane
       )
     : []
@@ -1744,8 +1765,9 @@ export default function MeetSheetSummarySection({
     individualEventOptions,
     editableSeedKeys: editableSeedKeySet,
     eventNumberOptions,
+    onHeatLaneSaving: showHeatLaneSaving,
+    heatLaneEditable,
   }
-
 
   const viewerRecord = viewerAthleteId ? athletes.find((a) => a.id === viewerAthleteId) : undefined
   const addMenuVisible = canEdit && meetId
