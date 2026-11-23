@@ -136,6 +136,8 @@ export function MeetListThumb({
 /** A list row's name size, and the smallest it shrinks to before truncating. */
 const NAME_PX = 18
 const NAME_MIN_PX = 14
+/** Between the name and a pill after it (gap-2). */
+const NAME_AFTER_GAP = 8
 
 /**
  * A list row's meet name: one line at 18px, scaled down to exactly fit its
@@ -143,15 +145,20 @@ const NAME_MIN_PX = 14
  * an ellipsis. The size is computed continuously (column width ÷ the name's
  * natural width at 18px), so it tracks a window resize smoothly instead of
  * stepping. Line height is fixed so a scaled name doesn't change the row's
- * height. Its width comes from the column, never its font size, so fitting
- * can't retrigger the observer.
+ * height. Its room comes from the column, never its font size, so fitting
+ * can't retrigger the observer. `after` (an unofficial meet's pill) sits right
+ * after the name on its line, and the name fits to what's left beside it.
  */
-export function MeetListName({ children }: { children: string }) {
+export function MeetListName({ children, after }: { children: string; after?: ReactNode }) {
   const ref = useRef<HTMLParagraphElement>(null)
+  const boxRef = useRef<HTMLDivElement>(null)
+  const afterRef = useRef<HTMLSpanElement>(null)
+  const hasAfter = !!after
 
   useLayoutEffect(() => {
     const el = ref.current
-    if (!el) return
+    const box = boxRef.current
+    if (!el || !box) return
     let natural = 0
     const measure = () => {
       el.style.fontSize = `${NAME_PX}px`
@@ -163,8 +170,10 @@ export function MeetListName({ children }: { children: string }) {
     }
     const fit = () => {
       if (!natural) return
+      const afterWidth = afterRef.current ? afterRef.current.offsetWidth + NAME_AFTER_GAP : 0
+      const room = box.clientWidth - afterWidth
       // 1px of slack so sub-pixel rounding never trips the ellipsis.
-      let px = Math.max(NAME_MIN_PX, Math.min(NAME_PX, (NAME_PX * (el.clientWidth - 1)) / natural))
+      let px = Math.max(NAME_MIN_PX, Math.min(NAME_PX, (NAME_PX * (room - 1)) / natural))
       el.style.fontSize = `${px}px`
       // Glyph widths don't scale perfectly linearly (hinting, kerning), so
       // nudge down if the proportional size still overflows — rarely more
@@ -183,22 +192,30 @@ export function MeetListName({ children }: { children: string }) {
       measure()
       fit()
     })
+    // The box spans the column; the name itself is only as wide as its text.
     const observer = new ResizeObserver(fit)
-    observer.observe(el)
+    observer.observe(box)
     return () => {
       cancelled = true
       observer.disconnect()
     }
-  }, [children])
+  }, [children, hasAfter])
 
   return (
-    <p
-      ref={ref}
-      style={{ fontSize: NAME_PX }}
-      className="truncate font-semibold leading-[26px] text-foreground"
-    >
-      {children}
-    </p>
+    <div ref={boxRef} className="flex min-w-0 items-center" style={{ gap: NAME_AFTER_GAP }}>
+      <p
+        ref={ref}
+        style={{ fontSize: NAME_PX }}
+        className="min-w-0 truncate font-semibold leading-[26px] text-foreground"
+      >
+        {children}
+      </p>
+      {after ? (
+        <span ref={afterRef} className="flex shrink-0">
+          {after}
+        </span>
+      ) : null}
+    </div>
   )
 }
 

@@ -7,7 +7,7 @@ import { formatSeasonLabel } from "@swimbuzz/shared"
 import FluidToolbar from "@/components/ui/FluidToolbar"
 import ToolbarSelect from "@/components/ui/ToolbarSelect"
 import RosterFilterMenu from "./RosterFilterMenu"
-import DownloadRosterPdfButton from "./DownloadRosterPdfButton"
+import ShareRosterButton from "./ShareRosterButton"
 import { matchesRosterFilters, matchesRosterSearch, readRosterFilters, rosterFiltersActive } from "@/lib/roster/roster-filters"
 import JumpRail, { JUMP_RAIL_LAYOUT_CLASS, JUMP_RAIL_LETTERS } from "@/components/ui/JumpRail"
 import { ListLayoutToggle, useListLayout } from "@/components/ui/ListLayout"
@@ -149,7 +149,7 @@ export default function RosterView({
               </ToolbarSelect>
             )}
             <ListLayoutToggle />
-            <DownloadRosterPdfButton season={season} filters={filters} query={query} />
+            <ShareRosterButton season={season} filters={filters} query={query} />
             {actions && <div className="flex shrink-0 items-center gap-3">{actions}</div>}
           </>
         }

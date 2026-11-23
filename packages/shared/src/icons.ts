@@ -65,6 +65,14 @@ export const ICONS = {
     { tag: "path", d: "M8 17h8" },
     { tag: "path", d: "M8 9h2" },
   ],
+  /** A sheet with a table on it — CSV exports. */
+  fileSpreadsheet: [
+    { tag: "path", d: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" },
+    { tag: "path", d: "M14 2v6h6" },
+    { tag: "path", d: "M8 13h8" },
+    { tag: "path", d: "M8 17h8" },
+    { tag: "path", d: "M12 13v6" },
+  ],
   trophy: [
     { tag: "path", d: "M6 9H4.5a2.5 2.5 0 0 1 0-5H6" },
     { tag: "path", d: "M18 9h1.5a2.5 2.5 0 0 0 0-5H18" },

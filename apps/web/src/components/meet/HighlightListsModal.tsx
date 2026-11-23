@@ -103,12 +103,15 @@ export default function HighlightListsModal({
   onListChange,
   open,
   onClose,
+  team,
 }: {
   lists: HighlightList[]
   list: HighlightListKey
   onListChange: (list: HighlightListKey) => void
   open: boolean
   onClose: () => void
+  /** The team whose lists these are ("Gold"), at a meet split by team. */
+  team?: string
 }) {
   const current = lists.find((l) => l.key === list) ?? lists[0]
   if (!current) return null
@@ -117,7 +120,7 @@ export default function HighlightListsModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={current.title}
+      title={team ? `${team} · ${current.title}` : current.title}
       maxWidth="md"
       footer={
         <ModalFooter>

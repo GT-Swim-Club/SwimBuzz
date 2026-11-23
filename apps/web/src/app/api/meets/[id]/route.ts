@@ -31,12 +31,14 @@ import {
   swimsToMeetResults,
 } from "@/lib/meet/meet-sheet-summary"
 import { buildRosterSummary, rosterSummaryDisplayEntries } from "@/lib/meet/roster-summary-display"
+import { isMixedIndividualEvent, resolveEntryEventNumber } from "@/lib/meet/event-number"
+import { resolveSignupEventOptions } from "@/lib/meet/meet-signup"
 import { isRelayResultsSummary } from "@/lib/meet/relay-results"
 import { buildRelayLineups } from "@/lib/meet/relay-lineups"
 import { loadMeetHighlights } from "@/lib/meet/meet-highlights-load"
 import { scoreMeetSwims, scoreRelayResults } from "@/lib/meet/meet-scoring"
 import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
-import { athleteRosterNameLastFirst, utcDayKey, isStaffRole } from "@swimbuzz/shared"
+import { athleteRosterNameLastFirst, athleteTeamSides, utcDayKey, isStaffRole } from "@swimbuzz/shared"
 
 export const runtime = "nodejs"
 export const maxDuration = 300
@@ -126,8 +128,26 @@ export async function GET(
     rosterGenders,
     new Map(seasonRoster.map((a) => [a.id, athleteRosterNameLastFirst(a)]))
   )
+  // Rows without a sheet's event number take the meet's order of events (packet or results).
+  const eventOptions = resolveSignupEventOptions(meet.eventOrder)
   const rosterSummary = applyRosterGenders(
-    merged ? { ...merged, entries: rosterSummaryDisplayEntries(merged, summarySources, rosterGenders) } : null,
+    merged
+      ? {
+          ...merged,
+          entries: rosterSummaryDisplayEntries(merged, summarySources, rosterGenders).map((entry) => ({
+            ...entry,
+            ...(entry.eventNumber > 0
+              ? {}
+              : { eventNumber: resolveEntryEventNumber(entry, rosterGenders, eventOptions) }),
+            // A combined event lists as one "Mixed" event; `gender` stays the athlete's (filters).
+            ...(!meet.scoreByGender &&
+            entry.entryType !== "relay_team" &&
+            isMixedIndividualEvent(entry.event, eventOptions)
+              ? { eventGender: "X" as const }
+              : {}),
+          })),
+        }
+      : null,
     rosterGenders
   )
 
@@ -138,12 +158,15 @@ export async function GET(
     hasImportedResults: meetHasImportedResults({ individualResults: results, relayResults }),
   })
 
-  const { swims: _swims, ...meetRow } = meet
+  // Each swimmer's team goes out as the summary's short side names ("Gold"), not as imported.
+  const { swims: _swims, resultTeams, ...meetRow } = meet
 
   return NextResponse.json({
     ...meetRow,
     eventOrder: isEventOrder(meet.eventOrder) ? meet.eventOrder : null,
     rosterSummary,
+    // Each athlete's team at a meet whose results name several of ours (an intrasquad's sides).
+    athleteTeams: athleteTeamSides(resultTeams),
     highlights,
     relayLineups: buildRelayLineups(meet, seasonRoster),
     meetHasEnded: ended,
@@ -238,8 +261,14 @@ export async function PATCH(
       })
     await images.commit()
     await deleteRemovedMeetFiles(existing as MeetStoredFiles, data)
-    // Records show the meet's name and only count SCY meets.
-    if (meet.name !== existing.name || meet.course !== existing.course) await syncTeamRecordsSafely()
+    // Records show the meet's name, only count SCY meets, and count only 25s from unofficial ones.
+    if (
+      meet.name !== existing.name ||
+      meet.course !== existing.course ||
+      meet.unofficial !== existing.unofficial
+    ) {
+      await syncTeamRecordsSafely()
+    }
 
     notifyMeetRosterOfInfoDrops({
       meetId: meet.id,

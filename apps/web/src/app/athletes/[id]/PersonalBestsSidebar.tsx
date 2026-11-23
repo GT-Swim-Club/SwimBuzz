@@ -8,6 +8,7 @@ import {
   STROKE_LABELS,
 } from "@/lib/swim/swim-parse"
 import { RELAY_SPLIT_LABEL, type AthleteSwim } from "@/lib/athlete/swim-history"
+import UnofficialMark from "@/components/ui/UnofficialMark"
 
 type Selected = { event: string; course: string; splits: boolean } | null
 
@@ -36,12 +37,13 @@ export default function PersonalBestsSidebar({
   onSelectEvent: (event: string, splits: boolean) => void
 }) {
   const strokeGroups = useMemo(() => {
+    // The best swim, not just its time: an unofficial (intrasquad) best still counts, marked "*".
     const bestIn = (list: AthleteSwim[]) => {
-      const best = new Map<string, number>()
+      const best = new Map<string, AthleteSwim>()
       for (const s of list) {
         if (s.course !== course) continue
         const prev = best.get(s.event)
-        if (prev == null || s.timeMs < prev) best.set(s.event, s.timeMs)
+        if (prev == null || s.timeMs < prev.timeMs) best.set(s.event, s)
       }
       return best
     }
@@ -60,14 +62,23 @@ export default function PersonalBestsSidebar({
       .map((g) => ({
         ...g,
         events: g.events.map((event) => {
-          const timeMs = best.get(event) ?? null
-          const splitMs = bestSplit.get(event) ?? null
-          return { event, timeMs, splitMs: splitMs != null && (timeMs == null || splitMs < timeMs) ? splitMs : null }
+          const flat = best.get(event) ?? null
+          const split = bestSplit.get(event) ?? null
+          const timeMs = flat?.timeMs ?? null
+          const showSplit = split != null && (timeMs == null || split.timeMs < timeMs)
+          return {
+            event,
+            timeMs,
+            flat,
+            splitMs: showSplit ? split.timeMs : null,
+            split: showSplit ? split : null,
+          }
         }),
       }))
   }, [swims, relaySplits, course])
 
   const courseIndex = Math.max(0, courses.indexOf(course))
+  const mark = (swim: AthleteSwim | null) => <UnofficialMark unofficial={swim?.unofficial} meetName={swim?.meet} />
 
   return (
     <div>
@@ -122,7 +133,7 @@ export default function PersonalBestsSidebar({
             <div key={group.stroke} className="pt-[3px]">
               {gi > 0 && <span aria-hidden className="mx-3 mb-[3px] block h-px bg-border-secondary" />}
               <div role="group" aria-label={group.stroke}>
-                {group.events.map(({ event, timeMs, splitMs }) => {
+                {group.events.map(({ event, timeMs, flat, splitMs, split }) => {
                   const eventOn = selected?.event === event && selected.course === course
                   // Viewing splits whose row isn't listed (slower than the flat start) marks the event's row.
                   const on = eventOn && (!selected.splits || splitMs == null)
@@ -146,6 +157,7 @@ export default function PersonalBestsSidebar({
                               on ? "text-foreground" : "text-foreground-secondary"
                             }`}
                           >
+                            {mark(flat)}
                             {formatTime(timeMs)}
                           </span>
                         </button>
@@ -176,6 +188,7 @@ export default function PersonalBestsSidebar({
                               splitOn ? "text-foreground" : "text-foreground-secondary"
                             }`}
                           >
+                            {mark(split)}
                             {formatTime(splitMs)}
                           </span>
                         </button>

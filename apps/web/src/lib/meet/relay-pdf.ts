@@ -10,7 +10,14 @@ import {
   type RelayShareEvent,
   type MeetHeaderDetails,
 } from "@swimbuzz/shared"
-import { HELVETICA_CAP_HEIGHT, drawMeetPdfDetails, semiboldText } from "@/lib/meet/meet-pdf-details"
+import {
+  HELVETICA_CAP_HEIGHT,
+  drawMeetPdfDetails,
+  drawUnofficialPdfBadge,
+  semiboldText,
+  splitMeetPdfTitle,
+  unofficialPdfBadgeReserve,
+} from "@/lib/meet/meet-pdf-details"
 
 export type RelaysPdfInput = {
   meetName: string
@@ -228,7 +235,10 @@ function drawRelaysPdf(
     (titleLineCount - 1) * titleLh +
     titleGapBelow +
     detailsSize * HELVETICA_CAP_HEIGHT
-  const splitTitle = (left: number) => doc.splitTextToSize(input.meetName, pageWidth - margin - left) as string[]
+  // An unofficial meet's pill follows the name, on its last line.
+  const badgeReserve = input.details.unofficial ? unofficialPdfBadgeReserve(doc, titleSize) : 0
+  const splitTitle = (left: number) =>
+    splitMeetPdfTitle(doc, input.meetName, pageWidth - margin - left, badgeReserve)
   const iconOvershoot = titleSize * MEET_HEADER.iconOvershoot
   let iconSize = 0
   let titleLines: string[] = []
@@ -260,6 +270,9 @@ function drawRelaysPdf(
     if (index > 0) baseline += titleLh
     doc.text(line, textX, baseline)
   })
+  if (input.details.unofficial) {
+    drawUnofficialPdfBadge(doc, titleLines[titleLines.length - 1] ?? "", textX, baseline, titleSize)
+  }
   baseline += titleGapBelow + detailsSize * HELVETICA_CAP_HEIGHT
   drawMeetPdfDetails(doc, input.details, textX, baseline, pageWidth - margin - textX, detailsSize, INK_SECONDARY)
   const gridTop = baseline + headerGap

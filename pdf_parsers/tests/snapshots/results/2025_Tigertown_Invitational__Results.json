@@ -1,6 +1,85 @@
 {
   "course": "SCY",
   "detectedSheetType": "results",
+  "event_order": {
+    "sessions": [
+      {
+        "label": "Order of Events",
+        "rows": [
+          {
+            "event": "200 Free Relay",
+            "men": 2,
+            "women": 1
+          },
+          {
+            "event": "100 Breast",
+            "men": 4,
+            "women": 3
+          },
+          {
+            "event": "50 Fly",
+            "men": 6,
+            "women": 5
+          },
+          {
+            "event": "500 Free",
+            "men": 8,
+            "women": 7
+          },
+          {
+            "event": "100 IM",
+            "men": 10,
+            "women": 9
+          },
+          {
+            "event": "50 Back",
+            "men": 12,
+            "women": 11
+          },
+          {
+            "event": "100 Free",
+            "men": 14,
+            "women": 13
+          },
+          {
+            "event": "200 Medley Relay",
+            "men": 16,
+            "women": 15
+          },
+          {
+            "event": "200 Free",
+            "men": 18,
+            "women": 17
+          },
+          {
+            "event": "50 Breast",
+            "men": 20,
+            "women": 19
+          },
+          {
+            "event": "100 Back",
+            "men": 22,
+            "women": 21
+          },
+          {
+            "event": "100 Fly",
+            "men": 24,
+            "women": 23
+          },
+          {
+            "event": "200 IM",
+            "men": 26,
+            "women": 25
+          },
+          {
+            "event": "50 Free",
+            "men": 28,
+            "women": 27
+          }
+        ]
+      }
+    ]
+  },
   "meet_date": "2025-11-15",
   "meet_name": "2025 Tiger Town Invitational Fall",
   "relay_results": [
@@ -2312,6 +2391,7 @@
       "name": "Miller, Lorelai",
       "place": 1,
       "points": 20.0,
+      "seedTime": "1:12.56",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:10.43"
@@ -2323,6 +2403,7 @@
       "name": "Kim, Catherine",
       "place": 2,
       "points": 17.0,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:12.58"
@@ -2334,6 +2415,7 @@
       "name": "Donnick, Addy",
       "place": 3,
       "points": 16.0,
+      "seedTime": "1:10.23",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:13.08"
@@ -2345,6 +2427,7 @@
       "name": "Low, Grace-Marie",
       "place": 4,
       "points": 15.0,
+      "seedTime": "1:13.55",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:13.19"
@@ -2367,6 +2450,7 @@
       "name": "Weld, Claire",
       "place": 6,
       "points": 13.0,
+      "seedTime": "1:15.99",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:14.99"
@@ -2378,6 +2462,7 @@
       "name": "Elvambuena, Ella",
       "place": 7,
       "points": 12.0,
+      "seedTime": "1:14.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:15.66"
@@ -2389,6 +2474,7 @@
       "name": "Edwards, Emma",
       "place": 8,
       "points": 11.0,
+      "seedTime": "1:16.00",
       "tags": "",
       "team": "Gamecock Club Swimming-SC",
       "time": "1:15.95"
@@ -2400,6 +2486,7 @@
       "name": "Bal, Anna",
       "place": 9,
       "points": 9.0,
+      "seedTime": "1:16.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:16.58"
@@ -2411,6 +2498,7 @@
       "name": "Bach, Caroline",
       "place": 10,
       "points": 7.0,
+      "seedTime": "1:15.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:16.61"
@@ -2422,6 +2510,7 @@
       "name": "Comesky, Olivia",
       "place": 11,
       "points": 6.0,
+      "seedTime": "1:20.25",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:17.27"
@@ -2433,6 +2522,7 @@
       "name": "Prassad, Geya",
       "place": 12,
       "points": 5.0,
+      "seedTime": "1:20.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:17.74"
@@ -2444,6 +2534,7 @@
       "name": "Weems, Kylie",
       "place": 13,
       "points": 4.0,
+      "seedTime": "1:18.62",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:18.07"
@@ -2455,6 +2546,7 @@
       "name": "Rasmussen, Charlotte",
       "place": 14,
       "points": 3.0,
+      "seedTime": "1:12.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:18.50"
@@ -2466,6 +2558,7 @@
       "name": "Kolotev, Julia",
       "place": 15,
       "points": 2.0,
+      "seedTime": "1:21.65",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:20.27"
@@ -2477,6 +2570,7 @@
       "name": "Dyer, Claire",
       "place": 16,
       "points": 1.0,
+      "seedTime": "1:20.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "1:21.38"
@@ -2497,6 +2591,7 @@
       "gender": "F",
       "name": "Layton, Tori",
       "place": 19,
+      "seedTime": "1:21.00",
       "tags": "",
       "team": "Elon University Club Swim-NC",
       "time": "1:22.23"
@@ -2537,6 +2632,7 @@
       "gender": "F",
       "name": "Irvin, Blakely",
       "place": 23,
+      "seedTime": "1:22.77",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:23.39"
@@ -2547,6 +2643,7 @@
       "gender": "F",
       "name": "Berned, Brooke",
       "place": 24,
+      "seedTime": "1:17.00",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:23.49"
@@ -2557,6 +2654,7 @@
       "gender": "F",
       "name": "Hinson, Sarah",
       "place": 25,
+      "seedTime": "1:20.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:24.42"
@@ -2567,6 +2665,7 @@
       "gender": "F",
       "name": "Dawick, Caitlin",
       "place": 26,
+      "seedTime": "1:22.55",
       "tags": "",
       "team": "High Point Club Swimming-NC",
       "time": "1:24.61"
@@ -2597,6 +2696,7 @@
       "gender": "F",
       "name": "Everett, Kiera",
       "place": 29,
+      "seedTime": "1:21.10",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "1:26.29"
@@ -2617,6 +2717,7 @@
       "gender": "F",
       "name": "Cooper, Shannon",
       "place": 31,
+      "seedTime": "1:32.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:28.59"
@@ -2638,6 +2739,7 @@
       "name": "Trujillo, Sebastian",
       "place": 1,
       "points": 20.0,
+      "seedTime": "59.90",
       "tags": "",
       "team": null,
       "time": "1:00.40"
@@ -2649,6 +2751,7 @@
       "name": "Zamudio, Jack",
       "place": 2,
       "points": 17.0,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:00.69"
@@ -2660,6 +2763,7 @@
       "name": "Zhang, Jeffrey",
       "place": 3,
       "points": 16.0,
+      "seedTime": "1:03.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:02.37"
@@ -2671,6 +2775,7 @@
       "name": "Long, Carter",
       "place": 4,
       "points": 15.0,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:03.53"
@@ -2715,6 +2820,7 @@
       "name": "Skidmore, Billy",
       "place": 7,
       "points": 11.5,
+      "seedTime": "1:10.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:04.89"
@@ -2726,6 +2832,7 @@
       "name": "Padget, Avery",
       "place": 9,
       "points": 8.0,
+      "seedTime": "1:15.50",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "1:05.27"
@@ -2737,6 +2844,7 @@
       "name": "Ryberg, Matthew",
       "place": 9,
       "points": 8.0,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:05.27"
@@ -2748,6 +2856,7 @@
       "name": "Benedict, William",
       "place": 11,
       "points": 6.0,
+      "seedTime": "1:03.80",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "1:05.35"
@@ -2759,6 +2868,7 @@
       "name": "Gray, Matthew",
       "place": 12,
       "points": 5.0,
+      "seedTime": "1:01.80",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:06.25"
@@ -2770,6 +2880,7 @@
       "name": "Heath, Zachary",
       "place": 13,
       "points": 3.5,
+      "seedTime": "1:12.00",
       "tags": "",
       "team": "Elon University Club Swim-NC",
       "time": "1:07.16"
@@ -2792,6 +2903,7 @@
       "name": "Allin, John",
       "place": 15,
       "points": 2.0,
+      "seedTime": "1:04.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:09.68"
@@ -2802,6 +2914,7 @@
       "gender": "M",
       "name": "Bartlett, Jack",
       "place": 16,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "1:12.43"
@@ -2812,6 +2925,7 @@
       "gender": "M",
       "name": "Sem, Kevin",
       "place": 16,
+      "seedTime": "1:20.00",
       "tags": "",
       "team": null,
       "time": "1:12.43"
@@ -2822,6 +2936,7 @@
       "gender": "M",
       "name": "Cubarney, Connor",
       "place": 18,
+      "seedTime": "1:15.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:13.35"
@@ -2842,6 +2957,7 @@
       "gender": "M",
       "name": "Waterval, Brendan",
       "place": 19,
+      "seedTime": "1:12.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:14.73"
@@ -2863,6 +2979,7 @@
       "name": "Dunham, Julia",
       "place": 1,
       "points": 20.0,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "27.74"
@@ -2874,6 +2991,7 @@
       "name": "Miller, Lorelai",
       "place": 2,
       "points": 17.0,
+      "seedTime": "28.76",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "27.88"
@@ -2885,6 +3003,7 @@
       "name": "Fields, Colby",
       "place": 3,
       "points": 16.0,
+      "seedTime": "28.50",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "28.19"
@@ -2907,6 +3026,7 @@
       "name": "Aghjayan, Hannah",
       "place": 5,
       "points": 14.0,
+      "seedTime": "28.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "28.38"
@@ -2918,6 +3038,7 @@
       "name": "Armstrong, Clara",
       "place": 6,
       "points": 13.0,
+      "seedTime": "28.51",
       "tags": "",
       "team": "Emory Club Swim",
       "time": "28.47"
@@ -2929,6 +3050,7 @@
       "name": "Swoger, Lily",
       "place": 7,
       "points": 12.0,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "28.51"
@@ -2940,6 +3062,7 @@
       "name": "Sterchele, Ashley",
       "place": 8,
       "points": 11.0,
+      "seedTime": "28.00",
       "tags": "",
       "team": null,
       "time": "28.79"
@@ -2951,6 +3074,7 @@
       "name": "Lane, Megan",
       "place": 9,
       "points": 9.0,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "28.87"
@@ -2962,6 +3086,7 @@
       "name": "McCall, Cara",
       "place": 10,
       "points": 7.0,
+      "seedTime": "29.12",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "28.91"
@@ -2973,6 +3098,7 @@
       "name": "Brusseau, Charlotte",
       "place": 11,
       "points": 6.0,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "29.02"
@@ -2984,6 +3110,7 @@
       "name": "Roberts, Lauren",
       "place": 12,
       "points": 5.0,
+      "seedTime": "29.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "29.04"
@@ -2995,6 +3122,7 @@
       "name": "Haun, Sydney",
       "place": 13,
       "points": 4.0,
+      "seedTime": "29.67",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "29.05"
@@ -3006,6 +3134,7 @@
       "name": "Forrer, Therese",
       "place": 14,
       "points": 2.5,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "29.10"
@@ -3017,6 +3146,7 @@
       "name": "Tumanova, Katya",
       "place": 14,
       "points": 2.5,
+      "seedTime": "27.80",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "29.10"
@@ -3038,6 +3168,7 @@
       "gender": "F",
       "name": "Elvambuena, Ella",
       "place": 17,
+      "seedTime": "29.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "29.21"
@@ -3048,6 +3179,7 @@
       "gender": "F",
       "name": "Speilman, Mackenzie",
       "place": 18,
+      "seedTime": "27.92",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "29.22"
@@ -3058,6 +3190,7 @@
       "gender": "F",
       "name": "Wright, Morgan",
       "place": 18,
+      "seedTime": "27.55",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "29.22"
@@ -3068,6 +3201,7 @@
       "gender": "F",
       "name": "Qian, Shakira",
       "place": 20,
+      "seedTime": "30.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "29.25"
@@ -3078,6 +3212,7 @@
       "gender": "F",
       "name": "Allibone, Jessica",
       "place": 21,
+      "seedTime": "28.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "29.36"
@@ -3088,6 +3223,7 @@
       "gender": "F",
       "name": "Walsh, Kelly",
       "place": 22,
+      "seedTime": "28.80",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "29.44"
@@ -3098,6 +3234,7 @@
       "gender": "F",
       "name": "Dunnigan, Caitlyn",
       "place": 24,
+      "seedTime": "29.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "29.47"
@@ -3108,6 +3245,7 @@
       "gender": "F",
       "name": "Carle, Juliana",
       "place": 26,
+      "seedTime": "29.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "29.64"
@@ -3118,6 +3256,7 @@
       "gender": "F",
       "name": "Robinette, Allison",
       "place": 27,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "29.66"
@@ -3128,6 +3267,7 @@
       "gender": "F",
       "name": "Spaulding, Alice",
       "place": 28,
+      "seedTime": "30.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "29.69"
@@ -3138,6 +3278,7 @@
       "gender": "F",
       "name": "McCoy, Mia",
       "place": 29,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "29.75"
@@ -3148,6 +3289,7 @@
       "gender": "F",
       "name": "Maley, Quincy",
       "place": 30,
+      "seedTime": "29.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "29.76"
@@ -3158,6 +3300,7 @@
       "gender": "F",
       "name": "Vu, Celina",
       "place": 34,
+      "seedTime": "29.50",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "30.04"
@@ -3168,6 +3311,7 @@
       "gender": "F",
       "name": "Chapman, Morgan",
       "place": 36,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "30.15"
@@ -3178,6 +3322,7 @@
       "gender": "F",
       "name": "Reinhold, Jenna",
       "place": 38,
+      "seedTime": "29.50",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "30.33"
@@ -3188,6 +3333,7 @@
       "gender": "F",
       "name": "Canny, Isabella",
       "place": 39,
+      "seedTime": "30.50",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "30.35"
@@ -3198,6 +3344,7 @@
       "gender": "F",
       "name": "Benway, Kayley",
       "place": 40,
+      "seedTime": "30.50",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "30.49"
@@ -3208,6 +3355,7 @@
       "gender": "F",
       "name": "Haberacker, Scarlett",
       "place": 41,
+      "seedTime": "29.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "30.57"
@@ -3218,6 +3366,7 @@
       "gender": "F",
       "name": "Pechuekonis, Nikole",
       "place": 43,
+      "seedTime": "32.23",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "30.85"
@@ -3228,6 +3377,7 @@
       "gender": "F",
       "name": "Ryan, Gracie",
       "place": 44,
+      "seedTime": "30.20",
       "tags": "",
       "team": "Furman University Club Swim",
       "time": "30.86"
@@ -3238,6 +3388,7 @@
       "gender": "F",
       "name": "Springer, Gabriella",
       "place": 45,
+      "seedTime": "31.50",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "30.94"
@@ -3248,6 +3399,7 @@
       "gender": "F",
       "name": "Kraft, Amanda",
       "place": 46,
+      "seedTime": "31.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "31.01"
@@ -3258,6 +3410,7 @@
       "gender": "F",
       "name": "Sostak, Sydney",
       "place": 48,
+      "seedTime": "31.15",
       "tags": "",
       "team": null,
       "time": "31.02"
@@ -3268,6 +3421,7 @@
       "gender": "F",
       "name": "Jager, Artemisa",
       "place": null,
+      "seedTime": "32.00",
       "tags": "",
       "team": null,
       "time": "31.66"
@@ -3278,6 +3432,7 @@
       "gender": "F",
       "name": "Gasper, Maren",
       "place": 55,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "31.85"
@@ -3288,6 +3443,7 @@
       "gender": "F",
       "name": "Speilman, Madison",
       "place": 56,
+      "seedTime": "30.98",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "31.90"
@@ -3298,6 +3454,7 @@
       "gender": "F",
       "name": "Chen, Zoe",
       "place": 57,
+      "seedTime": "36.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "32.07"
@@ -3308,6 +3465,7 @@
       "gender": "F",
       "name": "White, Logan",
       "place": 58,
+      "seedTime": "31.49",
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "32.16"
@@ -3318,6 +3476,7 @@
       "gender": "F",
       "name": "Yang, Amy",
       "place": 59,
+      "seedTime": "31.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "32.29"
@@ -3328,6 +3487,7 @@
       "gender": "F",
       "name": "Outlaw, Lizzie",
       "place": 60,
+      "seedTime": "32.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "32.45"
@@ -3338,6 +3498,7 @@
       "gender": "F",
       "name": "Wurtzbacher, Leilan",
       "place": 61,
+      "seedTime": "31.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "32.70"
@@ -3348,6 +3509,7 @@
       "gender": "F",
       "name": "Brown, Avery",
       "place": 62,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "32.71"
@@ -3358,6 +3520,7 @@
       "gender": "F",
       "name": "Sutton, Jennifer",
       "place": 63,
+      "seedTime": "33.14",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "32.75"
@@ -3368,6 +3531,7 @@
       "gender": "F",
       "name": "Crain, Anna",
       "place": 64,
+      "seedTime": "32.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "32.80"
@@ -3378,6 +3542,7 @@
       "gender": "F",
       "name": "Hair, Chloe",
       "place": 67,
+      "seedTime": "32.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "33.34"
@@ -3388,6 +3553,7 @@
       "gender": "F",
       "name": "Hwang, Gabrielle",
       "place": 68,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "33.37"
@@ -3398,6 +3564,7 @@
       "gender": "F",
       "name": "Natali, Carrion",
       "place": 70,
+      "seedTime": "32.20",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "33.51"
@@ -3408,6 +3575,7 @@
       "gender": "F",
       "name": "Waddle, Jennifer",
       "place": 71,
+      "seedTime": "35.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "33.57"
@@ -3418,6 +3586,7 @@
       "gender": "F",
       "name": "Watson, Abby",
       "place": 73,
+      "seedTime": "32.71",
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "33.95"
@@ -3428,6 +3597,7 @@
       "gender": "F",
       "name": "Ivancich, Emily",
       "place": 76,
+      "seedTime": "31.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "34.01"
@@ -3438,6 +3608,7 @@
       "gender": "F",
       "name": "Roehrborn, Sophie",
       "place": 77,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "34.08"
@@ -3448,6 +3619,7 @@
       "gender": "F",
       "name": "Webster, Taylor",
       "place": 78,
+      "seedTime": "32.50",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "34.30"
@@ -3458,6 +3630,7 @@
       "gender": "F",
       "name": "Trujillo, Audrey",
       "place": 85,
+      "seedTime": "1:04.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "59.86"
@@ -3468,6 +3641,7 @@
       "gender": "F",
       "name": "Gaines, Jocelyn",
       "place": 86,
+      "seedTime": "1:11.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:05.02"
@@ -3479,6 +3653,7 @@
       "name": "Bennison, James",
       "place": 1,
       "points": 20.0,
+      "seedTime": "23.27",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "23.53"
@@ -3490,6 +3665,7 @@
       "name": "Hall, Logan",
       "place": 2,
       "points": 17.0,
+      "seedTime": "23.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "23.57"
@@ -3501,6 +3677,7 @@
       "name": "Lancellotti, Mason",
       "place": 3,
       "points": 16.0,
+      "seedTime": "24.90",
       "tags": "",
       "team": "Emory Club Swim",
       "time": "23.88"
@@ -3512,6 +3689,7 @@
       "name": "Kretzing, Dominic",
       "place": 4,
       "points": 15.0,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "24.03"
@@ -3523,6 +3701,7 @@
       "name": "Chan, Connor",
       "place": 5,
       "points": 14.0,
+      "seedTime": "25.69",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "24.12"
@@ -3534,6 +3713,7 @@
       "name": "Roberts, Topher",
       "place": 6,
       "points": 13.0,
+      "seedTime": "24.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "24.13"
@@ -3545,6 +3725,7 @@
       "name": "Rosenhein, Drew",
       "place": 7,
       "points": 12.0,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "24.34"
@@ -3556,6 +3737,7 @@
       "name": "Holmlund, Ezra",
       "place": 8,
       "points": 11.0,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "24.39"
@@ -3567,6 +3749,7 @@
       "name": "Mercado, Micheal",
       "place": 9,
       "points": 9.0,
+      "seedTime": "24.88",
       "tags": "",
       "team": null,
       "time": "24.40"
@@ -3578,6 +3761,7 @@
       "name": "Santiago, Nathan",
       "place": 10,
       "points": 7.0,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "24.52"
@@ -3589,6 +3773,7 @@
       "name": "Warner, Rider",
       "place": 11,
       "points": 6.0,
+      "seedTime": "24.32",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "24.56"
@@ -3600,6 +3785,7 @@
       "name": "Altera, Ryan",
       "place": 12,
       "points": 5.0,
+      "seedTime": "25.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "24.57"
@@ -3633,6 +3819,7 @@
       "name": "Ivan, David",
       "place": 15,
       "points": 1.5,
+      "seedTime": "24.47",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "24.76"
@@ -3644,6 +3831,7 @@
       "name": "Sleptsov, Alex",
       "place": 15,
       "points": 1.5,
+      "seedTime": "26.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "24.76"
@@ -3654,6 +3842,7 @@
       "gender": "M",
       "name": "Vargas, Jack",
       "place": 17,
+      "seedTime": "24.30",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "24.81"
@@ -3664,6 +3853,7 @@
       "gender": "M",
       "name": "Freeman, Jacob",
       "place": 19,
+      "seedTime": "24.69",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "24.88"
@@ -3674,6 +3864,7 @@
       "gender": "M",
       "name": "Bledsoe, Sam",
       "place": 20,
+      "seedTime": "24.70",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "24.90"
@@ -3684,6 +3875,7 @@
       "gender": "M",
       "name": "Ogle, James",
       "place": 22,
+      "seedTime": "26.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "24.92"
@@ -3694,6 +3886,7 @@
       "gender": "M",
       "name": "Simpkins, Ben",
       "place": 22,
+      "seedTime": "24.80",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "24.92"
@@ -3704,6 +3897,7 @@
       "gender": "M",
       "name": "Drake, Tyler",
       "place": 24,
+      "seedTime": "24.60",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "24.94"
@@ -3714,6 +3908,7 @@
       "gender": "M",
       "name": "Otten, Evan",
       "place": 27,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Elon University Club Swim-NC",
       "time": "25.08"
@@ -3724,6 +3919,7 @@
       "gender": "M",
       "name": "Bataillon, Daniel",
       "place": 28,
+      "seedTime": "28.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "25.10"
@@ -3734,6 +3930,7 @@
       "gender": "M",
       "name": "Conaton, William",
       "place": 30,
+      "seedTime": "24.20",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "25.32"
@@ -3744,6 +3941,7 @@
       "gender": "M",
       "name": "Reiniche, Ryan",
       "place": 31,
+      "seedTime": "25.50",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "25.45"
@@ -3754,6 +3952,7 @@
       "gender": "M",
       "name": "Marra-Ulfe, Kyle",
       "place": 34,
+      "seedTime": "26.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "25.54"
@@ -3764,6 +3963,7 @@
       "gender": "M",
       "name": "Ly, Jonathan",
       "place": 35,
+      "seedTime": "26.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "25.70"
@@ -3774,6 +3974,7 @@
       "gender": "M",
       "name": "Jordan, Cole",
       "place": 37,
+      "seedTime": "24.48",
       "tags": "",
       "team": null,
       "time": "25.90"
@@ -3784,6 +3985,7 @@
       "gender": "M",
       "name": "Steadman, Spencer",
       "place": 38,
+      "seedTime": "25.87",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "25.91"
@@ -3794,6 +3996,7 @@
       "gender": "M",
       "name": "Webster, Andrew",
       "place": 39,
+      "seedTime": "26.30",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "25.94"
@@ -3804,6 +4007,7 @@
       "gender": "M",
       "name": "Foeri, Tyler",
       "place": 40,
+      "seedTime": "24.38",
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "26.03"
@@ -3814,6 +4018,7 @@
       "gender": "M",
       "name": "Zang, Eric",
       "place": 41,
+      "seedTime": "25.24",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "26.04"
@@ -3824,6 +4029,7 @@
       "gender": "M",
       "name": "Hite, Alex",
       "place": 43,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "26.11"
@@ -3834,6 +4040,7 @@
       "gender": "M",
       "name": "Herr, Jack",
       "place": 46,
+      "seedTime": "26.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "26.38"
@@ -3844,6 +4051,7 @@
       "gender": "M",
       "name": "Joe, Alexander",
       "place": 47,
+      "seedTime": "26.56",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "26.39"
@@ -3854,6 +4062,7 @@
       "gender": "M",
       "name": "Powell, Henry",
       "place": 48,
+      "seedTime": "26.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "26.46"
@@ -3864,6 +4073,7 @@
       "gender": "M",
       "name": "Mitchell, Daniel",
       "place": 49,
+      "seedTime": "30.47",
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "26.48"
@@ -3874,6 +4084,7 @@
       "gender": "M",
       "name": "Keleher, Hayes",
       "place": 51,
+      "seedTime": "26.99",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "26.63"
@@ -3884,6 +4095,7 @@
       "gender": "M",
       "name": "Harris, John",
       "place": 52,
+      "seedTime": "23.57",
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "26.68"
@@ -3894,6 +4106,7 @@
       "gender": "M",
       "name": "Peck, Teagan",
       "place": 53,
+      "seedTime": "27.00",
       "tags": "",
       "team": null,
       "time": "26.69"
@@ -3904,6 +4117,7 @@
       "gender": "M",
       "name": "Bock, Matthew",
       "place": 54,
+      "seedTime": "30.67",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "26.88"
@@ -3914,6 +4128,7 @@
       "gender": "M",
       "name": "Haden, Reuther",
       "place": 55,
+      "seedTime": "26.50",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "26.98"
@@ -3924,6 +4139,7 @@
       "gender": "M",
       "name": "Sangimino, Frank",
       "place": 56,
+      "seedTime": "26.56",
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "27.20"
@@ -3934,6 +4150,7 @@
       "gender": "M",
       "name": "Tlalka, Kevin",
       "place": 57,
+      "seedTime": "27.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "27.30"
@@ -3944,6 +4161,7 @@
       "gender": "M",
       "name": "Graham, Zachary",
       "place": 58,
+      "seedTime": "24.81",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "27.39"
@@ -3954,6 +4172,7 @@
       "gender": "M",
       "name": "Campbell, Simon",
       "place": 59,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "27.53"
@@ -3964,6 +4183,7 @@
       "gender": "M",
       "name": "Hinckley, Casey",
       "place": 61,
+      "seedTime": "27.50",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "27.76"
@@ -3974,6 +4194,7 @@
       "gender": "M",
       "name": "Reed, Jack",
       "place": 62,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "27.83"
@@ -3984,6 +4205,7 @@
       "gender": "M",
       "name": "Sass, Elliott",
       "place": 63,
+      "seedTime": "27.62",
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "27.88"
@@ -3994,6 +4216,7 @@
       "gender": "M",
       "name": "Liu, Johnny",
       "place": 64,
+      "seedTime": "29.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "27.91"
@@ -4004,6 +4227,7 @@
       "gender": "M",
       "name": "Manley, Adam",
       "place": 66,
+      "seedTime": "35.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "28.07"
@@ -4014,6 +4238,7 @@
       "gender": "M",
       "name": "Manale, Liam",
       "place": 68,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "28.16"
@@ -4024,6 +4249,7 @@
       "gender": "M",
       "name": "Kahwajy, Andrew",
       "place": 69,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "28.17"
@@ -4034,6 +4260,7 @@
       "gender": "M",
       "name": "Negrete, Alex",
       "place": 70,
+      "seedTime": "28.51",
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "28.29"
@@ -4044,6 +4271,7 @@
       "gender": "M",
       "name": "Flores, Christien",
       "place": 72,
+      "seedTime": "27.69",
       "tags": "",
       "team": null,
       "time": "28.43"
@@ -4054,6 +4282,7 @@
       "gender": "M",
       "name": "Languell, Cole",
       "place": 73,
+      "seedTime": "27.88",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "28.63"
@@ -4064,6 +4293,7 @@
       "gender": "M",
       "name": "Davidson, Devin",
       "place": 74,
+      "seedTime": "29.06",
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "29.41"
@@ -4074,6 +4304,7 @@
       "gender": "M",
       "name": "Baker, Mayes",
       "place": 77,
+      "seedTime": "30.00",
       "tags": "",
       "team": "High Point Club Swimming-NC",
       "time": "29.98"
@@ -4084,6 +4315,7 @@
       "gender": "M",
       "name": "Keatts, Caleb",
       "place": 81,
+      "seedTime": "30.98",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "30.54"
@@ -4094,6 +4326,7 @@
       "gender": "M",
       "name": "Mendoza, Benjiro",
       "place": 85,
+      "seedTime": "33.62",
       "tags": "",
       "team": "High Point Club Swimming-NC",
       "time": "33.02"
@@ -4105,6 +4338,7 @@
       "name": "Ristad, Sabine",
       "place": 1,
       "points": 20.0,
+      "seedTime": "5:40.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "5:29.81"
@@ -4116,6 +4350,7 @@
       "name": "Maley, Ellie",
       "place": 2,
       "points": 17.0,
+      "seedTime": "5:35.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "5:33.05"
@@ -4127,6 +4362,7 @@
       "name": "Sterchele, Ashley",
       "place": 3,
       "points": 16.0,
+      "seedTime": "5:48.00",
       "tags": "",
       "team": null,
       "time": "5:44.18"
@@ -4138,6 +4374,7 @@
       "name": "Witthoff, Mia",
       "place": 4,
       "points": 15.0,
+      "seedTime": "6:00.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "6:15.31"
@@ -4149,6 +4386,7 @@
       "name": "Kreel, Gwen",
       "place": 5,
       "points": 14.0,
+      "seedTime": "5:50.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "6:20.28"
@@ -4171,6 +4409,7 @@
       "name": "Prokopik, Jamison",
       "place": 7,
       "points": 12.0,
+      "seedTime": "6:17.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "6:46.72"
@@ -4204,6 +4443,7 @@
       "name": "Larson, Sydney",
       "place": 10,
       "points": 7.0,
+      "seedTime": "7:03.36",
       "tags": "",
       "team": "Furman University Club Swim",
       "time": "6:59.43"
@@ -4237,6 +4477,7 @@
       "name": "Skidmore, Billy",
       "place": 1,
       "points": 20.0,
+      "seedTime": "5:10.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "5:02.88"
@@ -4248,6 +4489,7 @@
       "name": "Polak, Filip",
       "place": 2,
       "points": 17.0,
+      "seedTime": "4:55.93",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "5:05.56"
@@ -4259,6 +4501,7 @@
       "name": "Rice, Thomas",
       "place": 3,
       "points": 16.0,
+      "seedTime": "5:20.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "5:15.94"
@@ -4270,6 +4513,7 @@
       "name": "Smith, Adney",
       "place": 4,
       "points": 15.0,
+      "seedTime": "5:13.52",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "5:20.93"
@@ -4292,6 +4536,7 @@
       "name": "Zdilla, Noah",
       "place": 6,
       "points": 13.0,
+      "seedTime": "5:30.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "5:25.57"
@@ -4303,6 +4548,7 @@
       "name": "Patrick, Kristopher",
       "place": 7,
       "points": 12.0,
+      "seedTime": "5:45.00",
       "tags": "",
       "team": null,
       "time": "5:37.23"
@@ -4314,6 +4560,7 @@
       "name": "Butler, Aiden",
       "place": 8,
       "points": 11.0,
+      "seedTime": "6:00.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "5:40.73"
@@ -4325,6 +4572,7 @@
       "name": "Graham, Zachary",
       "place": 9,
       "points": 9.0,
+      "seedTime": "5:38.33",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "5:40.81"
@@ -4336,6 +4584,7 @@
       "name": "Padget, Avery",
       "place": 10,
       "points": 7.0,
+      "seedTime": "5:30.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "5:45.70"
@@ -4369,6 +4618,7 @@
       "name": "Yamomato, Taro",
       "place": 13,
       "points": 4.0,
+      "seedTime": "6:00.69",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "6:13.10"
@@ -4391,6 +4641,7 @@
       "name": "Ryan, Christopher",
       "place": 15,
       "points": 2.0,
+      "seedTime": "6:30.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "6:19.93"
@@ -4412,6 +4663,7 @@
       "gender": "M",
       "name": "Babbitt, Matthew",
       "place": 17,
+      "seedTime": "6:44.14",
       "tags": "",
       "team": null,
       "time": "6:41.01"
@@ -4423,6 +4675,7 @@
       "name": "Kim, Catherine",
       "place": 1,
       "points": 20.0,
+      "seedTime": "1:03.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:03.42"
@@ -4434,6 +4687,7 @@
       "name": "Miller, Lorelai",
       "place": 2,
       "points": 17.0,
+      "seedTime": "1:06.69",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:04.13"
@@ -4445,6 +4699,7 @@
       "name": "Patton, Ellie",
       "place": 3,
       "points": 16.0,
+      "seedTime": "1:06.89",
       "tags": "",
       "team": "Elon University Club Swim-NC",
       "time": "1:05.05"
@@ -4456,6 +4711,7 @@
       "name": "Munger, Audrey",
       "place": 4,
       "points": 15.0,
+      "seedTime": "1:04.50",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:05.52"
@@ -4478,6 +4734,7 @@
       "name": "Brezinsky, Natalie",
       "place": 6,
       "points": 13.0,
+      "seedTime": "1:06.06",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:06.20"
@@ -4489,6 +4746,7 @@
       "name": "Spaulding, Alice",
       "place": 7,
       "points": 11.5,
+      "seedTime": "1:07.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:06.25"
@@ -4500,6 +4758,7 @@
       "name": "Dunham, Julia",
       "place": 7,
       "points": 11.5,
+      "seedTime": "1:07.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:06.25"
@@ -4511,6 +4770,7 @@
       "name": "Low, Grace-Marie",
       "place": 9,
       "points": 9.0,
+      "seedTime": "1:06.07",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:06.28"
@@ -4533,6 +4793,7 @@
       "name": "Lane, Megan",
       "place": 11,
       "points": 6.0,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:06.46"
@@ -4544,6 +4805,7 @@
       "name": "Edwards, Emma",
       "place": 12,
       "points": 5.0,
+      "seedTime": "1:06.00",
       "tags": "",
       "team": "Gamecock Club Swimming-SC",
       "time": "1:06.94"
@@ -4555,6 +4817,7 @@
       "name": "Brusseau, Charlotte",
       "place": 13,
       "points": 4.0,
+      "seedTime": "1:30.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "1:07.40"
@@ -4588,6 +4851,7 @@
       "name": "Allibone, Jessica",
       "place": 16,
       "points": 1.0,
+      "seedTime": "1:06.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:08.17"
@@ -4608,6 +4872,7 @@
       "gender": "F",
       "name": "McKinley, Tess",
       "place": 18,
+      "seedTime": "1:08.50",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:08.23"
@@ -4618,6 +4883,7 @@
       "gender": "F",
       "name": "Carson, Clara",
       "place": 19,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:08.58"
@@ -4628,6 +4894,7 @@
       "gender": "F",
       "name": "Haun, Sydney",
       "place": 19,
+      "seedTime": "1:10.67",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:08.58"
@@ -4638,6 +4905,7 @@
       "gender": "F",
       "name": "Carle, Juliana",
       "place": 21,
+      "seedTime": "1:07.50",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:09.43"
@@ -4648,6 +4916,7 @@
       "gender": "F",
       "name": "Weems, Kylie",
       "place": 22,
+      "seedTime": "1:11.47",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:09.69"
@@ -4658,6 +4927,7 @@
       "gender": "F",
       "name": "Mounts, Emery",
       "place": 23,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:09.78"
@@ -4678,6 +4948,7 @@
       "gender": "F",
       "name": "McCall, Cara",
       "place": 25,
+      "seedTime": "1:08.23",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:09.92"
@@ -4688,6 +4959,7 @@
       "gender": "F",
       "name": "Bal, Anna",
       "place": 26,
+      "seedTime": "1:09.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:10.02"
@@ -4698,6 +4970,7 @@
       "gender": "F",
       "name": "Baraceros, Kamille",
       "place": 27,
+      "seedTime": "1:09.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:10.13"
@@ -4708,6 +4981,7 @@
       "gender": "F",
       "name": "Benway, Kayley",
       "place": 28,
+      "seedTime": "1:10.78",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:10.21"
@@ -4728,6 +5002,7 @@
       "gender": "F",
       "name": "Springer, Gabriella",
       "place": 30,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:10.40"
@@ -4748,6 +5023,7 @@
       "gender": "F",
       "name": "Laws, Jessica",
       "place": 32,
+      "seedTime": "1:20.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:10.74"
@@ -4758,6 +5034,7 @@
       "gender": "F",
       "name": "Tadder, Emerson",
       "place": 33,
+      "seedTime": "1:16.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:12.13"
@@ -4778,6 +5055,7 @@
       "gender": "F",
       "name": "Crain, Anna",
       "place": 35,
+      "seedTime": "1:12.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:12.98"
@@ -4788,6 +5066,7 @@
       "gender": "F",
       "name": "Jager, Artemisa",
       "place": null,
+      "seedTime": "1:16.50",
       "tags": "",
       "team": null,
       "time": "1:13.00"
@@ -4798,6 +5077,7 @@
       "gender": "F",
       "name": "White, Logan",
       "place": 37,
+      "seedTime": "1:13.20",
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "1:13.31"
@@ -4818,6 +5098,7 @@
       "gender": "F",
       "name": "Wurtzbacher, Leilan",
       "place": 39,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:13.76"
@@ -4838,6 +5119,7 @@
       "gender": "F",
       "name": "Pugh, Kat",
       "place": 41,
+      "seedTime": "1:15.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:14.33"
@@ -4858,6 +5140,7 @@
       "gender": "F",
       "name": "Lyons, McKenna",
       "place": 43,
+      "seedTime": "1:25.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:14.63"
@@ -4868,6 +5151,7 @@
       "gender": "F",
       "name": "Berned, Brooke",
       "place": 44,
+      "seedTime": "1:13.00",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:14.71"
@@ -4878,6 +5162,7 @@
       "gender": "F",
       "name": "Rasmussen, Charlotte",
       "place": 45,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:14.99"
@@ -4888,6 +5173,7 @@
       "gender": "F",
       "name": "Webster, Taylor",
       "place": 46,
+      "seedTime": "1:15.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "1:15.20"
@@ -4898,6 +5184,7 @@
       "gender": "F",
       "name": "Brown, Avery",
       "place": 47,
+      "seedTime": "1:14.00",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:15.51"
@@ -4918,6 +5205,7 @@
       "gender": "F",
       "name": "Spahn, Mia",
       "place": 49,
+      "seedTime": "1:12.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:15.68"
@@ -4938,6 +5226,7 @@
       "gender": "F",
       "name": "Prassad, Geya",
       "place": 51,
+      "seedTime": "1:20.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:16.61"
@@ -4948,6 +5237,7 @@
       "gender": "F",
       "name": "Ivancich, Emily",
       "place": 52,
+      "seedTime": "1:15.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:17.48"
@@ -4968,6 +5258,7 @@
       "gender": "F",
       "name": "McKernan, Meaghan",
       "place": 54,
+      "seedTime": "1:25.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:17.59"
@@ -5008,6 +5299,7 @@
       "gender": "F",
       "name": "Irvin, Blakely",
       "place": 58,
+      "seedTime": "1:17.27",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:19.27"
@@ -5018,6 +5310,7 @@
       "gender": "F",
       "name": "Reed, Izzy",
       "place": 59,
+      "seedTime": "1:25.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:19.62"
@@ -5028,6 +5321,7 @@
       "gender": "F",
       "name": "Kiefner, Jane",
       "place": 60,
+      "seedTime": "1:20.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:20.13"
@@ -5068,6 +5362,7 @@
       "gender": "F",
       "name": "Clark, Taylor",
       "place": 64,
+      "seedTime": "1:22.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:23.22"
@@ -5098,6 +5393,7 @@
       "gender": "F",
       "name": "Lewis, Abigail",
       "place": 67,
+      "seedTime": "1:23.39",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:24.57"
@@ -5108,6 +5404,7 @@
       "gender": "F",
       "name": "Wilderson, Breanna",
       "place": 68,
+      "seedTime": "1:26.04",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:26.85"
@@ -5118,6 +5415,7 @@
       "gender": "F",
       "name": "Miller, Julia",
       "place": 69,
+      "seedTime": "1:30.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:30.85"
@@ -5128,6 +5426,7 @@
       "gender": "F",
       "name": "Magierski, Avery",
       "place": 70,
+      "seedTime": "1:42.54",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:47.74"
@@ -5139,6 +5438,7 @@
       "name": "Hartvig, Asger",
       "place": 1,
       "points": 20.0,
+      "seedTime": "55.31",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "54.91"
@@ -5150,6 +5450,7 @@
       "name": "Trujillo, Sebastian",
       "place": 2,
       "points": 17.0,
+      "seedTime": "56.00",
       "tags": "",
       "team": null,
       "time": "55.88"
@@ -5161,6 +5462,7 @@
       "name": "Bacani, Brandon",
       "place": 3,
       "points": 16.0,
+      "seedTime": "58.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "56.28"
@@ -5172,6 +5474,7 @@
       "name": "Healy, Chase",
       "place": 4,
       "points": 15.0,
+      "seedTime": "57.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "56.32"
@@ -5183,6 +5486,7 @@
       "name": "Lee, Christian",
       "place": 5,
       "points": 14.0,
+      "seedTime": "55.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "56.35"
@@ -5194,6 +5498,7 @@
       "name": "Chan, Connor",
       "place": 6,
       "points": 13.0,
+      "seedTime": "55.69",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "56.66"
@@ -5205,6 +5510,7 @@
       "name": "Freeman, Jacob",
       "place": 7,
       "points": 12.0,
+      "seedTime": "56.57",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "56.77"
@@ -5216,6 +5522,7 @@
       "name": "Smith, Matthew",
       "place": 8,
       "points": 11.0,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "56.88"
@@ -5227,6 +5534,7 @@
       "name": "Robinson, Nick",
       "place": 9,
       "points": 9.0,
+      "seedTime": "56.70",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "57.03"
@@ -5238,6 +5546,7 @@
       "name": "Hall, Nathan",
       "place": 10,
       "points": 7.0,
+      "seedTime": "56.83",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "57.04"
@@ -5249,6 +5558,7 @@
       "name": "Rojo, Fabio",
       "place": 11,
       "points": 6.0,
+      "seedTime": "54.30",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "57.45"
@@ -5260,6 +5570,7 @@
       "name": "Smith, Ben",
       "place": 12,
       "points": 5.0,
+      "seedTime": "1:00.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "57.47"
@@ -5271,6 +5582,7 @@
       "name": "Roberts, Nicholas",
       "place": 13,
       "points": 4.0,
+      "seedTime": "55.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "57.64"
@@ -5282,6 +5594,7 @@
       "name": "Kretzing, Dominic",
       "place": 14,
       "points": 3.0,
+      "seedTime": "59.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "57.68"
@@ -5293,6 +5606,7 @@
       "name": "Sleptsov, Alex",
       "place": 15,
       "points": 2.0,
+      "seedTime": "59.99",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "58.09"
@@ -5304,6 +5618,7 @@
       "name": "Bataillon, Daniel",
       "place": 16,
       "points": 1.0,
+      "seedTime": "55.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "58.15"
@@ -5314,6 +5629,7 @@
       "gender": "M",
       "name": "Gibbs, Thomas",
       "place": 17,
+      "seedTime": "58.07",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "58.24"
@@ -5324,6 +5640,7 @@
       "gender": "M",
       "name": "Benedict, William",
       "place": 19,
+      "seedTime": "58.90",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "58.54"
@@ -5334,6 +5651,7 @@
       "gender": "M",
       "name": "Long, Carter",
       "place": 21,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "58.68"
@@ -5344,6 +5662,7 @@
       "gender": "M",
       "name": "Lauchengco, Ethan",
       "place": 23,
+      "seedTime": "1:01.66",
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "59.71"
@@ -5354,6 +5673,7 @@
       "gender": "M",
       "name": "Smith, Nicholas",
       "place": 24,
+      "seedTime": "58.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "59.82"
@@ -5364,6 +5684,7 @@
       "gender": "M",
       "name": "Powell, Henry",
       "place": 25,
+      "seedTime": "58.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:00.57"
@@ -5374,6 +5695,7 @@
       "gender": "M",
       "name": "Fauss, Eli",
       "place": 26,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": null,
       "time": "1:01.13"
@@ -5384,6 +5706,7 @@
       "gender": "M",
       "name": "Piani, Rylan",
       "place": 27,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:01.21"
@@ -5404,6 +5727,7 @@
       "gender": "M",
       "name": "King, Alex",
       "place": 29,
+      "seedTime": "1:02.00",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:01.59"
@@ -5414,6 +5738,7 @@
       "gender": "M",
       "name": "Rimsa, Thomas",
       "place": 30,
+      "seedTime": "1:00.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:02.52"
@@ -5424,6 +5749,7 @@
       "gender": "M",
       "name": "Sem, Kevin",
       "place": 31,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": null,
       "time": "1:02.71"
@@ -5434,6 +5760,7 @@
       "gender": "M",
       "name": "Cubarney, Connor",
       "place": 32,
+      "seedTime": "1:06.06",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:02.89"
@@ -5454,6 +5781,7 @@
       "gender": "M",
       "name": "Martinez, Matthew",
       "place": 33,
+      "seedTime": "1:27.32",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:02.90"
@@ -5504,6 +5832,7 @@
       "gender": "M",
       "name": "Flores, Christien",
       "place": 39,
+      "seedTime": "1:04.73",
       "tags": "",
       "team": null,
       "time": "1:06.52"
@@ -5524,6 +5853,7 @@
       "gender": "M",
       "name": "Earl, Tyler",
       "place": 41,
+      "seedTime": "1:07.65",
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "1:06.91"
@@ -5544,6 +5874,7 @@
       "gender": "M",
       "name": "Haden, Reuther",
       "place": 43,
+      "seedTime": "1:12.79",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:07.85"
@@ -5554,6 +5885,7 @@
       "gender": "M",
       "name": "Page, Chris",
       "place": 44,
+      "seedTime": "1:03.50",
       "tags": "",
       "team": null,
       "time": "1:08.08"
@@ -5564,6 +5896,7 @@
       "gender": "M",
       "name": "Hale, Matthew",
       "place": 45,
+      "seedTime": "1:18.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:09.16"
@@ -5574,6 +5907,7 @@
       "gender": "M",
       "name": "Winick, Zev",
       "place": 46,
+      "seedTime": "1:15.92",
       "tags": "",
       "team": "Elon University Club Swim-NC",
       "time": "1:09.28"
@@ -5604,6 +5938,7 @@
       "gender": "M",
       "name": "Facey, Alexander",
       "place": 49,
+      "seedTime": "1:12.91",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:11.58"
@@ -5635,6 +5970,7 @@
       "name": "Dirkzwager, Ariana",
       "place": 1,
       "points": 20.0,
+      "seedTime": "29.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "28.64"
@@ -5646,6 +5982,7 @@
       "name": "Ristad, Sabine",
       "place": 2,
       "points": 17.0,
+      "seedTime": "29.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "29.03"
@@ -5657,6 +5994,7 @@
       "name": "Roberts, Lauren",
       "place": 3,
       "points": 16.0,
+      "seedTime": "30.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "30.01"
@@ -5679,6 +6017,7 @@
       "name": "Padgett, Ava",
       "place": 5,
       "points": 14.0,
+      "seedTime": "31.58",
       "tags": "",
       "team": "Furman University Club Swim",
       "time": "30.13"
@@ -5701,6 +6040,7 @@
       "name": "Levine, Lauren",
       "place": 7,
       "points": 12.0,
+      "seedTime": "30.50",
       "tags": "",
       "team": "Gamecock Club Swimming-SC",
       "time": "31.01"
@@ -5712,6 +6052,7 @@
       "name": "Qian, Shakira",
       "place": 8,
       "points": 10.0,
+      "seedTime": "31.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "31.09"
@@ -5723,6 +6064,7 @@
       "name": "Speilman, Mackenzie",
       "place": 8,
       "points": 10.0,
+      "seedTime": "29.21",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "31.09"
@@ -5733,6 +6075,7 @@
       "gender": "F",
       "name": "Flores, Sophia",
       "place": 10,
+      "seedTime": "31.15",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "6.50"
@@ -5744,6 +6087,7 @@
       "name": "Edwards, Emma",
       "place": 10,
       "points": 6.5,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Gamecock Club Swimming-SC",
       "time": "31.15"
@@ -5755,6 +6099,7 @@
       "name": "Youngquist, Teagan",
       "place": 12,
       "points": 5.0,
+      "seedTime": "33.00",
       "tags": "",
       "team": null,
       "time": "31.20"
@@ -5766,6 +6111,7 @@
       "name": "Pechuekonis, Nikole",
       "place": 13,
       "points": 4.0,
+      "seedTime": "32.13",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "31.56"
@@ -5777,6 +6123,7 @@
       "name": "Kinnear, Emily",
       "place": 14,
       "points": 3.0,
+      "seedTime": "34.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "31.76"
@@ -5788,6 +6135,7 @@
       "name": "Canny, Isabella",
       "place": 15,
       "points": 2.0,
+      "seedTime": "32.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "31.87"
@@ -5799,6 +6147,7 @@
       "name": "Berge, Isabel",
       "place": 16,
       "points": 1.0,
+      "seedTime": "31.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "31.91"
@@ -5809,6 +6158,7 @@
       "gender": "F",
       "name": "Kraft, Amanda",
       "place": 17,
+      "seedTime": "32.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "32.08"
@@ -5819,6 +6169,7 @@
       "gender": "F",
       "name": "Rodas, Jaydenne",
       "place": 21,
+      "seedTime": "31.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "32.27"
@@ -5829,6 +6180,7 @@
       "gender": "F",
       "name": "Chapman, Morgan",
       "place": 22,
+      "seedTime": "31.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "32.34"
@@ -5839,6 +6191,7 @@
       "gender": "F",
       "name": "Carraway, Leslie",
       "place": 24,
+      "seedTime": "30.00",
       "tags": "",
       "team": null,
       "time": "32.93"
@@ -5849,6 +6202,7 @@
       "gender": "F",
       "name": "Crosby, Lilly",
       "place": 25,
+      "seedTime": "34.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "32.94"
@@ -5859,6 +6213,7 @@
       "gender": "F",
       "name": "Estrada, Brianna",
       "place": 26,
+      "seedTime": "32.50",
       "tags": "",
       "team": null,
       "time": "33.11"
@@ -5869,6 +6224,7 @@
       "gender": "F",
       "name": "Reinhold, Jenna",
       "place": 28,
+      "seedTime": "32.50",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "33.18"
@@ -5879,6 +6235,7 @@
       "gender": "F",
       "name": "Baraceros, Kamille",
       "place": 29,
+      "seedTime": "34.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "33.22"
@@ -5889,6 +6246,7 @@
       "gender": "F",
       "name": "Speilman, Madison",
       "place": 30,
+      "seedTime": "32.44",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "33.28"
@@ -5899,6 +6257,7 @@
       "gender": "F",
       "name": "Piccone, Gigi",
       "place": 31,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "33.34"
@@ -5909,6 +6268,7 @@
       "gender": "F",
       "name": "Salmon, Imani",
       "place": 31,
+      "seedTime": "34.00",
       "tags": "",
       "team": null,
       "time": "33.34"
@@ -5919,6 +6279,7 @@
       "gender": "F",
       "name": "Harper, Isabel",
       "place": 33,
+      "seedTime": "31.20",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "33.36"
@@ -5929,6 +6290,7 @@
       "gender": "F",
       "name": "Spahn, Mia",
       "place": 35,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "33.53"
@@ -5939,6 +6301,7 @@
       "gender": "F",
       "name": "Fowler, Macon",
       "place": 37,
+      "seedTime": "34.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "33.94"
@@ -5949,6 +6312,7 @@
       "gender": "F",
       "name": "Jarrett, Audrey",
       "place": 38,
+      "seedTime": "36.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "34.37"
@@ -5959,6 +6323,7 @@
       "gender": "F",
       "name": "Musman, Chloe",
       "place": 41,
+      "seedTime": "44.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "35.18"
@@ -5969,6 +6334,7 @@
       "gender": "F",
       "name": "Pugh, Kat",
       "place": 42,
+      "seedTime": "34.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "35.44"
@@ -5979,6 +6345,7 @@
       "gender": "F",
       "name": "Hair, Chloe",
       "place": 43,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "35.48"
@@ -5989,6 +6356,7 @@
       "gender": "F",
       "name": "Simerson, Kynley",
       "place": 45,
+      "seedTime": "39.17",
       "tags": "",
       "team": "High Point Club Swimming-NC",
       "time": "35.77"
@@ -5999,6 +6367,7 @@
       "gender": "F",
       "name": "Paroly, Sarah",
       "place": 46,
+      "seedTime": "35.02",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "35.90"
@@ -6009,6 +6378,7 @@
       "gender": "F",
       "name": "Roehrborn, Sophie",
       "place": 48,
+      "seedTime": "34.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "36.10"
@@ -6019,6 +6389,7 @@
       "gender": "F",
       "name": "Quinn, Chelsea",
       "place": 49,
+      "seedTime": "37.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "36.23"
@@ -6029,6 +6400,7 @@
       "gender": "F",
       "name": "Lewis, Abigail",
       "place": 52,
+      "seedTime": "35.83",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "37.10"
@@ -6039,6 +6411,7 @@
       "gender": "F",
       "name": "Wilderson, Breanna",
       "place": 57,
+      "seedTime": "42.26",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "40.17"
@@ -6049,6 +6422,7 @@
       "gender": "F",
       "name": "Shuttles, Lauren",
       "place": 61,
+      "seedTime": "46.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "43.94"
@@ -6059,6 +6433,7 @@
       "gender": "F",
       "name": "Magierski, Avery",
       "place": 62,
+      "seedTime": "45.95",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "50.00"
@@ -6069,6 +6444,7 @@
       "gender": "F",
       "name": "Gaines, Jocelyn",
       "place": 65,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "59.04"
@@ -6080,6 +6456,7 @@
       "name": "Bennison, James",
       "place": 1,
       "points": 20.0,
+      "seedTime": "22.30",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "23.11"
@@ -6091,6 +6468,7 @@
       "name": "Hall, Logan",
       "place": 2,
       "points": 17.0,
+      "seedTime": "23.50",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "25.45"
@@ -6102,6 +6480,7 @@
       "name": "Bledsoe, Sam",
       "place": 3,
       "points": 16.0,
+      "seedTime": "24.30",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "25.48"
@@ -6113,6 +6492,7 @@
       "name": "Dunbar, Jack",
       "place": 4,
       "points": 15.0,
+      "seedTime": "24.25",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "25.49"
@@ -6124,6 +6504,7 @@
       "name": "Ly, Jonathan",
       "place": 5,
       "points": 14.0,
+      "seedTime": "26.50",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "26.11"
@@ -6135,6 +6516,7 @@
       "name": "Warner, Rider",
       "place": 6,
       "points": 13.0,
+      "seedTime": "24.76",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "26.22"
@@ -6157,6 +6539,7 @@
       "name": "Baumann, Matthew",
       "place": 8,
       "points": 11.0,
+      "seedTime": "25.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "26.59"
@@ -6168,6 +6551,7 @@
       "name": "Webster, Andrew",
       "place": 9,
       "points": 9.0,
+      "seedTime": "26.30",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "26.61"
@@ -6190,6 +6574,7 @@
       "name": "Conaton, William",
       "place": 11,
       "points": 6.0,
+      "seedTime": "25.90",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "26.86"
@@ -6201,6 +6586,7 @@
       "name": "Ryberg, Matthew",
       "place": 12,
       "points": 5.0,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "27.26"
@@ -6223,6 +6609,7 @@
       "name": "Marra-Ulfe, Kyle",
       "place": 14,
       "points": 3.0,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "27.35"
@@ -6234,6 +6621,7 @@
       "name": "Bustard, Logan",
       "place": 15,
       "points": 2.0,
+      "seedTime": "27.50",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "27.40"
@@ -6245,6 +6633,7 @@
       "name": "Otten, Evan",
       "place": 16,
       "points": 1.0,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Elon University Club Swim-NC",
       "time": "28.04"
@@ -6255,6 +6644,7 @@
       "gender": "M",
       "name": "Patterson, Gavin",
       "place": 17,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "28.18"
@@ -6265,6 +6655,7 @@
       "gender": "M",
       "name": "Rodriguez, Ethan",
       "place": 18,
+      "seedTime": "28.81",
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "28.29"
@@ -6275,6 +6666,7 @@
       "gender": "M",
       "name": "Hite, Alex",
       "place": 20,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "28.70"
@@ -6285,6 +6677,7 @@
       "gender": "M",
       "name": "Harris, John",
       "place": 21,
+      "seedTime": "25.70",
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "28.78"
@@ -6295,6 +6688,7 @@
       "gender": "M",
       "name": "Manley, Adam",
       "place": 25,
+      "seedTime": "35.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "29.86"
@@ -6305,6 +6699,7 @@
       "gender": "M",
       "name": "Grutter, Maxwell",
       "place": 26,
+      "seedTime": "32.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "30.24"
@@ -6315,6 +6710,7 @@
       "gender": "M",
       "name": "Facey, Alexander",
       "place": 29,
+      "seedTime": "32.19",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "32.09"
@@ -6326,6 +6722,7 @@
       "name": "Dirkzwager, Ariana",
       "place": 1,
       "points": 20.0,
+      "seedTime": "56.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "55.94"
@@ -6337,6 +6734,7 @@
       "name": "Armstrong, Clara",
       "place": 2,
       "points": 17.0,
+      "seedTime": "56.80",
       "tags": "",
       "team": "Emory Club Swim",
       "time": "56.32"
@@ -6348,6 +6746,7 @@
       "name": "Neira, Addy",
       "place": 3,
       "points": 16.0,
+      "seedTime": "52.43",
       "tags": "",
       "team": "Elon University Club Swim-NC",
       "time": "56.47"
@@ -6359,6 +6758,7 @@
       "name": "Schneider, Jennifer",
       "place": 4,
       "points": 15.0,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "56.70"
@@ -6370,6 +6770,7 @@
       "name": "Aghjayan, Hannah",
       "place": 5,
       "points": 14.0,
+      "seedTime": "57.50",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "57.18"
@@ -6381,6 +6782,7 @@
       "name": "Buehler, Taylor",
       "place": 6,
       "points": 13.0,
+      "seedTime": "59.75",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "57.26"
@@ -6392,6 +6794,7 @@
       "name": "Barrett, Sophia",
       "place": 7,
       "points": 12.0,
+      "seedTime": "1:03.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "57.32"
@@ -6403,6 +6806,7 @@
       "name": "Li, Olivia",
       "place": 8,
       "points": 11.0,
+      "seedTime": "58.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "57.33"
@@ -6414,6 +6818,7 @@
       "name": "Maley, Quincy",
       "place": 9,
       "points": 9.0,
+      "seedTime": "57.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "57.34"
@@ -6425,6 +6830,7 @@
       "name": "Dobie, Lauren",
       "place": 10,
       "points": 7.0,
+      "seedTime": "58.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "57.83"
@@ -6436,6 +6842,7 @@
       "name": "Powers, Alexis",
       "place": 11,
       "points": 6.0,
+      "seedTime": "56.50",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "57.97"
@@ -6447,6 +6854,7 @@
       "name": "Swoger, Lily",
       "place": 12,
       "points": 4.5,
+      "seedTime": "56.80",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "58.35"
@@ -6469,6 +6877,7 @@
       "name": "Wright, Morgan",
       "place": 14,
       "points": 3.0,
+      "seedTime": "53.69",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "58.41"
@@ -6480,6 +6889,7 @@
       "name": "Sterchele, Ashley",
       "place": 15,
       "points": 2.0,
+      "seedTime": "57.00",
       "tags": "",
       "team": null,
       "time": "58.63"
@@ -6491,6 +6901,7 @@
       "name": "Kinnear, Emily",
       "place": 16,
       "points": 1.0,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "58.91"
@@ -6501,6 +6912,7 @@
       "gender": "F",
       "name": "Forrer, Therese",
       "place": 17,
+      "seedTime": "57.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "59.01"
@@ -6511,6 +6923,7 @@
       "gender": "F",
       "name": "Heil, Emily",
       "place": 18,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "59.03"
@@ -6521,6 +6934,7 @@
       "gender": "F",
       "name": "Tumanova, Katya",
       "place": 19,
+      "seedTime": "55.71",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "59.82"
@@ -6531,6 +6945,7 @@
       "gender": "F",
       "name": "Robinette, Allison",
       "place": 20,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "59.93"
@@ -6541,6 +6956,7 @@
       "gender": "F",
       "name": "Fields, Colby",
       "place": 21,
+      "seedTime": "58.80",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "59.98"
@@ -6551,6 +6967,7 @@
       "gender": "F",
       "name": "Byther, Jamie",
       "place": 22,
+      "seedTime": "1:03.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:00.30"
@@ -6571,6 +6988,7 @@
       "gender": "F",
       "name": "Weingarten, Catie",
       "place": 24,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:00.46"
@@ -6581,6 +6999,7 @@
       "gender": "F",
       "name": "DeOrsey, Madison",
       "place": 25,
+      "seedTime": "57.00",
       "tags": "",
       "team": null,
       "time": "1:00.76"
@@ -6591,6 +7010,7 @@
       "gender": "F",
       "name": "Ryan, Gracie",
       "place": 26,
+      "seedTime": "1:00.80",
       "tags": "",
       "team": "Furman University Club Swim",
       "time": "1:00.88"
@@ -6601,6 +7021,7 @@
       "gender": "F",
       "name": "Berge, Isabel",
       "place": 27,
+      "seedTime": "59.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:00.98"
@@ -6611,6 +7032,7 @@
       "gender": "F",
       "name": "Vu, Celina",
       "place": 28,
+      "seedTime": "1:00.30",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:01.03"
@@ -6631,6 +7053,7 @@
       "gender": "F",
       "name": "Mounts, Emery",
       "place": 30,
+      "seedTime": "59.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:01.89"
@@ -6661,6 +7084,7 @@
       "gender": "F",
       "name": "Todd, Kelly",
       "place": 33,
+      "seedTime": "1:02.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "1:02.96"
@@ -6671,6 +7095,7 @@
       "gender": "F",
       "name": "Pechuekonis, Nikole",
       "place": 34,
+      "seedTime": "1:03.58",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:03.26"
@@ -6681,6 +7106,7 @@
       "gender": "F",
       "name": "Crain, Anna",
       "place": 34,
+      "seedTime": "1:04.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:03.26"
@@ -6711,6 +7137,7 @@
       "gender": "F",
       "name": "Sostak, Sydney",
       "place": 38,
+      "seedTime": "1:04.00",
       "tags": "",
       "team": null,
       "time": "1:04.05"
@@ -6731,6 +7158,7 @@
       "gender": "F",
       "name": "Dyer, Claire",
       "place": 40,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "1:04.45"
@@ -6741,6 +7169,7 @@
       "gender": "F",
       "name": "May, Alex",
       "place": 41,
+      "seedTime": "59.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:04.52"
@@ -6751,6 +7180,7 @@
       "gender": "F",
       "name": "Chen, Zoe",
       "place": 42,
+      "seedTime": "1:08.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:04.88"
@@ -6761,6 +7191,7 @@
       "gender": "F",
       "name": "Prokopik, Jamison",
       "place": 43,
+      "seedTime": "1:04.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:05.46"
@@ -6771,6 +7202,7 @@
       "gender": "F",
       "name": "Carraway, Leslie",
       "place": 44,
+      "seedTime": "1:07.14",
       "tags": "",
       "team": null,
       "time": "1:05.82"
@@ -6791,6 +7223,7 @@
       "gender": "F",
       "name": "Muras, Norah",
       "place": 46,
+      "seedTime": "1:04.60",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:05.86"
@@ -6821,6 +7254,7 @@
       "gender": "F",
       "name": "Ellington, Campbell",
       "place": 49,
+      "seedTime": "1:04.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:06.79"
@@ -6841,6 +7275,7 @@
       "gender": "F",
       "name": "Lyons, McKenna",
       "place": 51,
+      "seedTime": "1:06.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:07.31"
@@ -6851,6 +7286,7 @@
       "gender": "F",
       "name": "Rutig, Lily",
       "place": 53,
+      "seedTime": "1:01.02",
       "tags": "",
       "team": "High Point Club Swimming-NC",
       "time": "1:08.42"
@@ -6861,6 +7297,7 @@
       "gender": "F",
       "name": "Paroly, Sarah",
       "place": 54,
+      "seedTime": "1:07.99",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:09.20"
@@ -6881,6 +7318,7 @@
       "gender": "F",
       "name": "Larson, Sydney",
       "place": 56,
+      "seedTime": "1:08.26",
       "tags": "",
       "team": "Furman University Club Swim",
       "time": "1:09.38"
@@ -6891,6 +7329,7 @@
       "gender": "F",
       "name": "Garcia, Auria",
       "place": 57,
+      "seedTime": "1:07.00",
       "tags": "",
       "team": null,
       "time": "1:09.99"
@@ -6901,6 +7340,7 @@
       "gender": "F",
       "name": "Reed, Izzy",
       "place": 58,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:10.52"
@@ -6921,6 +7361,7 @@
       "gender": "F",
       "name": "McClease, Aalysah",
       "place": 60,
+      "seedTime": "1:10.62",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:10.74"
@@ -6941,6 +7382,7 @@
       "gender": "F",
       "name": "Wilderson, Breanna",
       "place": 62,
+      "seedTime": "1:13.91",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:13.16"
@@ -6961,6 +7403,7 @@
       "gender": "F",
       "name": "Clark, Taylor",
       "place": 64,
+      "seedTime": "1:12.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:15.77"
@@ -7002,6 +7445,7 @@
       "name": "Abrams, Jack",
       "place": 1,
       "points": 20.0,
+      "seedTime": "48.67",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "48.34"
@@ -7013,6 +7457,7 @@
       "name": "Rosenhein, Drew",
       "place": 2,
       "points": 17.0,
+      "seedTime": "51.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "49.02"
@@ -7024,6 +7469,7 @@
       "name": "Horchani, Lucas",
       "place": 3,
       "points": 16.0,
+      "seedTime": "50.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "49.31"
@@ -7035,6 +7481,7 @@
       "name": "Altera, Ryan",
       "place": 4,
       "points": 15.0,
+      "seedTime": "50.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "49.40"
@@ -7046,6 +7493,7 @@
       "name": "Krom, Tyler",
       "place": 5,
       "points": 14.0,
+      "seedTime": "48.21",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "49.54"
@@ -7057,6 +7505,7 @@
       "name": "Ivan, David",
       "place": 6,
       "points": 13.0,
+      "seedTime": "49.70",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "49.64"
@@ -7068,6 +7517,7 @@
       "name": "Mocchetti, Giacomo",
       "place": 7,
       "points": 12.0,
+      "seedTime": "49.00",
       "tags": "",
       "team": "Emory Club Swim",
       "time": "49.83"
@@ -7079,6 +7529,7 @@
       "name": "Bacani, Brandon",
       "place": 8,
       "points": 11.0,
+      "seedTime": "49.80",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "49.86"
@@ -7090,6 +7541,7 @@
       "name": "Steadman, Spencer",
       "place": 9,
       "points": 9.0,
+      "seedTime": "50.69",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "50.19"
@@ -7101,6 +7553,7 @@
       "name": "Owen, Michael",
       "place": 10,
       "points": 7.0,
+      "seedTime": "51.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "50.37"
@@ -7112,6 +7565,7 @@
       "name": "Ogle, James",
       "place": 11,
       "points": 6.0,
+      "seedTime": "54.50",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "50.40"
@@ -7123,6 +7577,7 @@
       "name": "Kretzing, Pierson",
       "place": 12,
       "points": 5.0,
+      "seedTime": "53.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "50.52"
@@ -7134,6 +7589,7 @@
       "name": "Keleher, Hayes",
       "place": 13,
       "points": 4.0,
+      "seedTime": "51.57",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "50.74"
@@ -7156,6 +7612,7 @@
       "name": "Gibbs, Thomas",
       "place": 15,
       "points": 2.0,
+      "seedTime": "50.81",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "50.87"
@@ -7167,6 +7624,7 @@
       "name": "Fauss, Eli",
       "place": 16,
       "points": 1.0,
+      "seedTime": "51.05",
       "tags": "",
       "team": null,
       "time": "51.83"
@@ -7177,6 +7635,7 @@
       "gender": "M",
       "name": "Ruth, Cole",
       "place": 18,
+      "seedTime": "49.80",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "52.93"
@@ -7187,6 +7646,7 @@
       "gender": "M",
       "name": "Paiz, Josue",
       "place": 19,
+      "seedTime": "52.38",
       "tags": "",
       "team": null,
       "time": "53.14"
@@ -7197,6 +7657,7 @@
       "gender": "M",
       "name": "Hite, Alex",
       "place": 20,
+      "seedTime": "52.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "53.16"
@@ -7207,6 +7668,7 @@
       "gender": "M",
       "name": "Sem, Kevin",
       "place": 23,
+      "seedTime": "56.00",
       "tags": "",
       "team": null,
       "time": "53.59"
@@ -7217,6 +7679,7 @@
       "gender": "M",
       "name": "Zang, Eric",
       "place": 25,
+      "seedTime": "50.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "54.06"
@@ -7227,6 +7690,7 @@
       "gender": "M",
       "name": "Smith, Nicholas",
       "place": 27,
+      "seedTime": "51.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "54.23"
@@ -7237,6 +7701,7 @@
       "gender": "M",
       "name": "Curtiss, Jacob",
       "place": 28,
+      "seedTime": "55.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "54.25"
@@ -7247,6 +7712,7 @@
       "gender": "M",
       "name": "Ward, Henry",
       "place": 29,
+      "seedTime": "51.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "54.54"
@@ -7257,6 +7723,7 @@
       "gender": "M",
       "name": "Williams, Mayon",
       "place": 30,
+      "seedTime": "56.09",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "54.74"
@@ -7267,6 +7734,7 @@
       "gender": "M",
       "name": "Smith, Adney",
       "place": 31,
+      "seedTime": "53.18",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "55.10"
@@ -7277,6 +7745,7 @@
       "gender": "M",
       "name": "Will, Samuel",
       "place": 34,
+      "seedTime": "56.04",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "55.54"
@@ -7287,6 +7756,7 @@
       "gender": "M",
       "name": "Kahwajy, Andrew",
       "place": 35,
+      "seedTime": "56.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "56.15"
@@ -7297,6 +7767,7 @@
       "gender": "M",
       "name": "Jordan, Cole",
       "place": 39,
+      "seedTime": "49.00",
       "tags": "",
       "team": null,
       "time": "58.07"
@@ -7307,6 +7778,7 @@
       "gender": "M",
       "name": "Negrete, Alex",
       "place": 40,
+      "seedTime": "58.17",
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "58.56"
@@ -7317,6 +7789,7 @@
       "gender": "M",
       "name": "Ferlauto, Lucas",
       "place": 42,
+      "seedTime": "58.64",
       "tags": "",
       "team": "Furman University Club Swim",
       "time": "59.03"
@@ -7327,6 +7800,7 @@
       "gender": "M",
       "name": "Grace, Patrick",
       "place": 43,
+      "seedTime": "1:01.00",
       "tags": "",
       "team": null,
       "time": "1:00.96"
@@ -7337,6 +7811,7 @@
       "gender": "M",
       "name": "Babbitt, Matthew",
       "place": 44,
+      "seedTime": "1:05.65",
       "tags": "",
       "team": null,
       "time": "1:01.54"
@@ -7347,6 +7822,7 @@
       "gender": "M",
       "name": "Landers, Alejandro",
       "place": 45,
+      "seedTime": "1:03.50",
       "tags": "",
       "team": "Elon University Club Swim-NC",
       "time": "1:01.74"
@@ -7357,6 +7833,7 @@
       "gender": "M",
       "name": "Offhaus, Carter",
       "place": 46,
+      "seedTime": "1:03.30",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:02.72"
@@ -7367,6 +7844,7 @@
       "gender": "M",
       "name": "Davidson, Devin",
       "place": 47,
+      "seedTime": "1:01.23",
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "1:03.30"
@@ -7377,6 +7855,7 @@
       "gender": "M",
       "name": "Santiago, Nathan",
       "place": 48,
+      "seedTime": "1:06.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:05.30"
@@ -7397,6 +7876,7 @@
       "gender": "M",
       "name": "Russo, Giacomo",
       "place": 50,
+      "seedTime": "1:06.25",
       "tags": "",
       "team": "High Point Club Swimming-NC",
       "time": "1:10.84"
@@ -7408,6 +7888,7 @@
       "name": "Carson, Clara",
       "place": 1,
       "points": 20.0,
+      "seedTime": "2:02.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "2:03.59"
@@ -7430,6 +7911,7 @@
       "name": "Comesky, Olivia",
       "place": 3,
       "points": 16.0,
+      "seedTime": "2:09.81",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "2:05.05"
@@ -7441,6 +7923,7 @@
       "name": "Buehler, Taylor",
       "place": 4,
       "points": 15.0,
+      "seedTime": "2:09.66",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "2:06.31"
@@ -7452,6 +7935,7 @@
       "name": "Laws, Jessica",
       "place": 5,
       "points": 14.0,
+      "seedTime": "2:10.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "2:07.60"
@@ -7463,6 +7947,7 @@
       "name": "Maley, Ellie",
       "place": 6,
       "points": 13.0,
+      "seedTime": "2:07.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:08.02"
@@ -7474,6 +7959,7 @@
       "name": "Wright, Morgan",
       "place": 7,
       "points": 12.0,
+      "seedTime": "1:57.61",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "2:09.30"
@@ -7485,6 +7971,7 @@
       "name": "Dunnigan, Caitlyn",
       "place": 8,
       "points": 11.0,
+      "seedTime": "2:07.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "2:10.39"
@@ -7496,6 +7983,7 @@
       "name": "Bohinc, Kaylee",
       "place": 9,
       "points": 9.0,
+      "seedTime": "2:11.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "2:11.72"
@@ -7507,6 +7995,7 @@
       "name": "Newman, Molly",
       "place": 10,
       "points": 7.0,
+      "seedTime": "2:06.24",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "2:15.98"
@@ -7529,6 +8018,7 @@
       "name": "Everett, Kiera",
       "place": 12,
       "points": 5.0,
+      "seedTime": "2:11.68",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "2:21.81"
@@ -7540,6 +8030,7 @@
       "name": "Yang, Amy",
       "place": 13,
       "points": 4.0,
+      "seedTime": "2:18.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:22.09"
@@ -7562,6 +8053,7 @@
       "name": "Jager, Artemisa",
       "place": null,
       "points": 2.0,
+      "seedTime": "2:23.00",
       "tags": "",
       "team": null,
       "time": "2:23.83"
@@ -7583,6 +8075,7 @@
       "gender": "F",
       "name": "Ellington, Campbell",
       "place": 17,
+      "seedTime": "2:15.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "2:33.67"
@@ -7604,6 +8097,7 @@
       "name": "Skidmore, Billy",
       "place": 1,
       "points": 20.0,
+      "seedTime": "2:00.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:49.13"
@@ -7615,6 +8109,7 @@
       "name": "Polak, Filip",
       "place": 2,
       "points": 17.0,
+      "seedTime": "1:49.25",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:50.72"
@@ -7626,6 +8121,7 @@
       "name": "Warner, Rider",
       "place": 3,
       "points": 16.0,
+      "seedTime": "1:53.10",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:53.00"
@@ -7637,6 +8133,7 @@
       "name": "Benedict, William",
       "place": 4,
       "points": 15.0,
+      "seedTime": "1:54.82",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "1:55.02"
@@ -7659,6 +8156,7 @@
       "name": "Rice, Thomas",
       "place": 6,
       "points": 13.0,
+      "seedTime": "1:58.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:57.15"
@@ -7670,6 +8168,7 @@
       "name": "Patrick, Kristopher",
       "place": 7,
       "points": 12.0,
+      "seedTime": "1:57.30",
       "tags": "",
       "team": null,
       "time": "1:57.58"
@@ -7692,6 +8191,7 @@
       "name": "Zdilla, Noah",
       "place": 9,
       "points": 9.0,
+      "seedTime": "2:01.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:59.91"
@@ -7703,6 +8203,7 @@
       "name": "Tlalka, Kevin",
       "place": 10,
       "points": 7.0,
+      "seedTime": "1:57.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:59.96"
@@ -7714,6 +8215,7 @@
       "name": "Mitchell, Daniel",
       "place": 11,
       "points": 6.0,
+      "seedTime": "1:58.88",
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "2:00.54"
@@ -7736,6 +8238,7 @@
       "name": "Williams, Mayon",
       "place": 13,
       "points": 4.0,
+      "seedTime": "1:56.09",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:04.45"
@@ -7747,6 +8250,7 @@
       "name": "Ruth, Cole",
       "place": 14,
       "points": 3.0,
+      "seedTime": "1:49.82",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "2:05.88"
@@ -7758,6 +8262,7 @@
       "name": "Graham, Zachary",
       "place": 15,
       "points": 2.0,
+      "seedTime": "2:00.07",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "2:08.02"
@@ -7769,6 +8274,7 @@
       "name": "Keatts, Caleb",
       "place": 16,
       "points": 1.0,
+      "seedTime": "2:08.08",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "2:09.93"
@@ -7779,6 +8285,7 @@
       "gender": "M",
       "name": "Weitzel, Logan",
       "place": 17,
+      "seedTime": "2:05.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:11.98"
@@ -7789,6 +8296,7 @@
       "gender": "M",
       "name": "Horchani, Lucas",
       "place": null,
+      "seedTime": "1:48.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "DQ"
@@ -7800,6 +8308,7 @@
       "name": "Barrett, Sophia",
       "place": 1,
       "points": 20.0,
+      "seedTime": "34.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "33.42"
@@ -7811,6 +8320,7 @@
       "name": "Bach, Caroline",
       "place": 2,
       "points": 17.0,
+      "seedTime": "36.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "34.39"
@@ -7822,6 +8332,7 @@
       "name": "Weld, Claire",
       "place": 3,
       "points": 16.0,
+      "seedTime": "35.05",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "34.41"
@@ -7855,6 +8366,7 @@
       "name": "Weems, Kylie",
       "place": 6,
       "points": 13.0,
+      "seedTime": "34.52",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "34.86"
@@ -7877,6 +8389,7 @@
       "name": "White, Logan",
       "place": 8,
       "points": 11.0,
+      "seedTime": "35.00",
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "35.12"
@@ -7888,6 +8401,7 @@
       "name": "Bal, Anna",
       "place": 9,
       "points": 9.0,
+      "seedTime": "35.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "35.46"
@@ -7899,6 +8413,7 @@
       "name": "Hinson, Sarah",
       "place": 10,
       "points": 7.0,
+      "seedTime": "36.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "35.69"
@@ -7910,6 +8425,7 @@
       "name": "Qian, Shakira",
       "place": 11,
       "points": 6.0,
+      "seedTime": "35.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "35.75"
@@ -7921,6 +8437,7 @@
       "name": "Kolotev, Julia",
       "place": 12,
       "points": 5.0,
+      "seedTime": "37.28",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "35.89"
@@ -7932,6 +8449,7 @@
       "name": "Springer, Gabriella",
       "place": 13,
       "points": 4.0,
+      "seedTime": "36.60",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "35.99"
@@ -7943,6 +8461,7 @@
       "name": "Rasmussen, Charlotte",
       "place": 14,
       "points": 3.0,
+      "seedTime": "34.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "36.16"
@@ -7954,6 +8473,7 @@
       "name": "Elvambuena, Ella",
       "place": 15,
       "points": 2.0,
+      "seedTime": "36.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "36.18"
@@ -7975,6 +8495,7 @@
       "gender": "F",
       "name": "Prassad, Geya",
       "place": 17,
+      "seedTime": "38.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "36.90"
@@ -7985,6 +8506,7 @@
       "gender": "F",
       "name": "Tadder, Emerson",
       "place": 20,
+      "seedTime": "38.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "37.22"
@@ -7995,6 +8517,7 @@
       "gender": "F",
       "name": "McClease, Aalysah",
       "place": 21,
+      "seedTime": "38.07",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "37.24"
@@ -8005,6 +8528,7 @@
       "gender": "F",
       "name": "Warren, Halla",
       "place": 23,
+      "seedTime": "36.82",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "37.37"
@@ -8015,6 +8539,7 @@
       "gender": "F",
       "name": "McCann, Caroline",
       "place": 24,
+      "seedTime": "36.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "37.74"
@@ -8025,6 +8550,7 @@
       "gender": "F",
       "name": "Dyer, Claire",
       "place": 25,
+      "seedTime": "36.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "37.83"
@@ -8035,6 +8561,7 @@
       "gender": "F",
       "name": "Witthoff, Mia",
       "place": 26,
+      "seedTime": "36.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "38.08"
@@ -8045,6 +8572,7 @@
       "gender": "F",
       "name": "Quinn, Chelsea",
       "place": 27,
+      "seedTime": "38.50",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "38.23"
@@ -8055,6 +8583,7 @@
       "gender": "F",
       "name": "Fowler, Macon",
       "place": 28,
+      "seedTime": "38.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "38.28"
@@ -8065,6 +8594,7 @@
       "gender": "F",
       "name": "Dawick, Caitlin",
       "place": 30,
+      "seedTime": "41.27",
       "tags": "",
       "team": "High Point Club Swimming-NC",
       "time": "38.35"
@@ -8075,6 +8605,7 @@
       "gender": "F",
       "name": "Berned, Brooke",
       "place": 32,
+      "seedTime": "35.00",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "38.45"
@@ -8085,6 +8616,7 @@
       "gender": "F",
       "name": "Pugh, Kat",
       "place": 34,
+      "seedTime": "38.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "38.76"
@@ -8095,6 +8627,7 @@
       "gender": "F",
       "name": "Anderson, Rilie",
       "place": 35,
+      "seedTime": "41.42",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "39.02"
@@ -8105,6 +8638,7 @@
       "gender": "F",
       "name": "Irvin, Blakely",
       "place": 36,
+      "seedTime": "38.68",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "39.16"
@@ -8115,6 +8649,7 @@
       "gender": "F",
       "name": "Cheek, Katy",
       "place": 38,
+      "seedTime": "36.91",
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "39.29"
@@ -8125,6 +8660,7 @@
       "gender": "F",
       "name": "Outlaw, Lizzie",
       "place": 39,
+      "seedTime": "38.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "39.35"
@@ -8135,6 +8671,7 @@
       "gender": "F",
       "name": "McKernan, Meaghan",
       "place": 40,
+      "seedTime": "37.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "39.38"
@@ -8145,6 +8682,7 @@
       "gender": "F",
       "name": "Schmid, Sarah",
       "place": 45,
+      "seedTime": "40.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "40.70"
@@ -8155,6 +8693,7 @@
       "gender": "F",
       "name": "Reed, Izzy",
       "place": 47,
+      "seedTime": "42.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "41.32"
@@ -8165,6 +8704,7 @@
       "gender": "F",
       "name": "Rutig, Lily",
       "place": 48,
+      "seedTime": "44.44",
       "tags": "",
       "team": "High Point Club Swimming-NC",
       "time": "41.47"
@@ -8175,6 +8715,7 @@
       "gender": "F",
       "name": "Musman, Chloe",
       "place": 49,
+      "seedTime": "47.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "42.20"
@@ -8185,6 +8726,7 @@
       "gender": "F",
       "name": "Algeo, Kaitlyn",
       "place": 51,
+      "seedTime": "40.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "43.58"
@@ -8195,6 +8737,7 @@
       "gender": "F",
       "name": "Reed, Zoe",
       "place": 55,
+      "seedTime": "50.22",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "52.69"
@@ -8205,6 +8748,7 @@
       "gender": "F",
       "name": "Thomas, Sanaa",
       "place": 56,
+      "seedTime": "55.53",
       "tags": "",
       "team": "High Point Club Swimming-NC",
       "time": "1:03.25"
@@ -8216,6 +8760,7 @@
       "name": "Zamudio, Jack",
       "place": 1,
       "points": 20.0,
+      "seedTime": "27.50",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "27.15"
@@ -8227,6 +8772,7 @@
       "name": "Trinidad, Josua",
       "place": 2,
       "points": 17.0,
+      "seedTime": "29.75",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "27.29"
@@ -8238,6 +8784,7 @@
       "name": "Trujillo, Sebastian",
       "place": 3,
       "points": 16.0,
+      "seedTime": "27.70",
       "tags": "",
       "team": null,
       "time": "27.42"
@@ -8249,6 +8796,7 @@
       "name": "Zhang, Jeffrey",
       "place": 4,
       "points": 15.0,
+      "seedTime": "28.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "28.28"
@@ -8271,6 +8819,7 @@
       "name": "Ellis, Colton",
       "place": 6,
       "points": 13.0,
+      "seedTime": "28.50",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "29.16"
@@ -8282,6 +8831,7 @@
       "name": "Conaton, William",
       "place": 7,
       "points": 12.0,
+      "seedTime": "28.31",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "29.52"
@@ -8293,6 +8843,7 @@
       "name": "Hinckley, Casey",
       "place": 8,
       "points": 11.0,
+      "seedTime": "29.50",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "29.55"
@@ -8304,6 +8855,7 @@
       "name": "Ryberg, Matthew",
       "place": 9,
       "points": 9.0,
+      "seedTime": "29.50",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "29.59"
@@ -8326,6 +8878,7 @@
       "name": "Murphy, Nate",
       "place": 11,
       "points": 6.0,
+      "seedTime": "29.30",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "29.68"
@@ -8348,6 +8901,7 @@
       "name": "Flores, Christien",
       "place": 13,
       "points": 4.0,
+      "seedTime": "29.72",
       "tags": "",
       "team": null,
       "time": "29.78"
@@ -8359,6 +8913,7 @@
       "name": "Healy, Chase",
       "place": 14,
       "points": 3.0,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "30.28"
@@ -8381,6 +8936,7 @@
       "name": "Simpkins, Ben",
       "place": 16,
       "points": 1.0,
+      "seedTime": "29.90",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "30.38"
@@ -8391,6 +8947,7 @@
       "gender": "M",
       "name": "Heath, Zachary",
       "place": 17,
+      "seedTime": "30.50",
       "tags": "",
       "team": "Elon University Club Swim-NC",
       "time": "30.41"
@@ -8401,6 +8958,7 @@
       "gender": "M",
       "name": "Ward, Henry",
       "place": 17,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "30.41"
@@ -8411,6 +8969,7 @@
       "gender": "M",
       "name": "Page, Chris",
       "place": 20,
+      "seedTime": "31.50",
       "tags": "",
       "team": null,
       "time": "31.04"
@@ -8421,6 +8980,7 @@
       "gender": "M",
       "name": "Young, Hatcher",
       "place": 21,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "31.46"
@@ -8431,6 +8991,7 @@
       "gender": "M",
       "name": "Ryan, Christopher",
       "place": 22,
+      "seedTime": "32.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "31.90"
@@ -8441,6 +9002,7 @@
       "gender": "M",
       "name": "Waterval, Brendan",
       "place": 24,
+      "seedTime": "33.87",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "33.30"
@@ -8451,6 +9013,7 @@
       "gender": "M",
       "name": "Kahwajy, Andrew",
       "place": 25,
+      "seedTime": "32.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "33.36"
@@ -8461,6 +9024,7 @@
       "gender": "M",
       "name": "Ferlauto, Lucas",
       "place": 26,
+      "seedTime": "34.89",
       "tags": "",
       "team": "Furman University Club Swim",
       "time": "33.59"
@@ -8471,6 +9035,7 @@
       "gender": "M",
       "name": "Bartlett, Jack",
       "place": 27,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "33.97"
@@ -8481,6 +9046,7 @@
       "gender": "M",
       "name": "Chavez, Nolan",
       "place": 28,
+      "seedTime": "31.50",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "33.99"
@@ -8491,6 +9057,7 @@
       "gender": "M",
       "name": "Fernandez, Charles",
       "place": 29,
+      "seedTime": "34.48",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "34.07"
@@ -8501,6 +9068,7 @@
       "gender": "M",
       "name": "Laber, Brady",
       "place": 30,
+      "seedTime": "35.62",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "35.22"
@@ -8511,6 +9079,7 @@
       "gender": "M",
       "name": "Hernandez, Joshua",
       "place": 32,
+      "seedTime": "35.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "36.14"
@@ -8521,6 +9090,7 @@
       "gender": "M",
       "name": "Randle, Jonas",
       "place": 34,
+      "seedTime": "37.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "37.11"
@@ -8531,6 +9101,7 @@
       "gender": "M",
       "name": "Mendoza, Benjiro",
       "place": 38,
+      "seedTime": "48.33",
       "tags": "",
       "team": "High Point Club Swimming-NC",
       "time": "43.13"
@@ -8541,6 +9112,7 @@
       "gender": "M",
       "name": "Appel, David",
       "place": 39,
+      "seedTime": "49.42",
       "tags": "",
       "team": "High Point Club Swimming-NC",
       "time": "44.11"
@@ -8551,6 +9123,7 @@
       "gender": "M",
       "name": "Reich, Benjamin",
       "place": null,
+      "seedTime": "48.85",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "DQ"
@@ -8573,6 +9146,7 @@
       "name": "Schneider, Jennifer",
       "place": 2,
       "points": 17.0,
+      "seedTime": "1:08.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:04.97"
@@ -8595,6 +9169,7 @@
       "name": "Padgett, Ava",
       "place": 4,
       "points": 15.0,
+      "seedTime": "1:06.11",
       "tags": "",
       "team": "Furman University Club Swim",
       "time": "1:06.41"
@@ -8617,6 +9192,7 @@
       "name": "Hanson, Grace",
       "place": 6,
       "points": 13.0,
+      "seedTime": "1:03.00",
       "tags": "",
       "team": null,
       "time": "1:08.81"
@@ -8628,6 +9204,7 @@
       "name": "Vu, Celina",
       "place": 7,
       "points": 12.0,
+      "seedTime": "1:06.45",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:09.09"
@@ -8639,6 +9216,7 @@
       "name": "Haun, Sydney",
       "place": 8,
       "points": 11.0,
+      "seedTime": "1:07.93",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:09.10"
@@ -8650,6 +9228,7 @@
       "name": "Canny, Isabella",
       "place": 9,
       "points": 9.0,
+      "seedTime": "1:09.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:10.14"
@@ -8661,6 +9240,7 @@
       "name": "DeOrsey, Madison",
       "place": 10,
       "points": 7.0,
+      "seedTime": "1:08.00",
       "tags": "",
       "team": null,
       "time": "1:11.59"
@@ -8672,6 +9252,7 @@
       "name": "Harper, Isabel",
       "place": 11,
       "points": 6.0,
+      "seedTime": "1:05.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:12.85"
@@ -8683,6 +9264,7 @@
       "name": "Estrada, Brianna",
       "place": 12,
       "points": 5.0,
+      "seedTime": "1:11.00",
       "tags": "",
       "team": null,
       "time": "1:13.21"
@@ -8694,6 +9276,7 @@
       "name": "Piccone, Gigi",
       "place": 13,
       "points": 4.0,
+      "seedTime": "1:14.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "1:13.23"
@@ -8705,6 +9288,7 @@
       "name": "Carraway, Leslie",
       "place": 14,
       "points": 3.0,
+      "seedTime": "1:14.25",
       "tags": "",
       "team": null,
       "time": "1:13.96"
@@ -8716,6 +9300,7 @@
       "name": "Lyons, McKenna",
       "place": 15,
       "points": 2.0,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:15.25"
@@ -8727,6 +9312,7 @@
       "name": "Hair, Chloe",
       "place": 16,
       "points": 1.0,
+      "seedTime": "1:14.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:15.78"
@@ -8737,6 +9323,7 @@
       "gender": "F",
       "name": "Rutig, Lily",
       "place": 17,
+      "seedTime": "1:18.36",
       "tags": "",
       "team": "High Point Club Swimming-NC",
       "time": "1:22.03"
@@ -8747,6 +9334,7 @@
       "gender": "F",
       "name": "Garcia, Auria",
       "place": 18,
+      "seedTime": "1:20.00",
       "tags": "",
       "team": null,
       "time": "1:22.04"
@@ -8757,6 +9345,7 @@
       "gender": "F",
       "name": "Clark, Taylor",
       "place": 19,
+      "seedTime": "1:19.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:22.76"
@@ -8787,6 +9376,7 @@
       "gender": "F",
       "name": "Miller, Julia",
       "place": 22,
+      "seedTime": "1:20.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:31.04"
@@ -8798,6 +9388,7 @@
       "name": "Bennison, James",
       "place": 1,
       "points": 20.0,
+      "seedTime": "49.51",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "50.63"
@@ -8809,6 +9400,7 @@
       "name": "Smith, Matthew",
       "place": 2,
       "points": 17.0,
+      "seedTime": "59.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "55.82"
@@ -8820,6 +9412,7 @@
       "name": "Dunbar, Jack",
       "place": 3,
       "points": 15.5,
+      "seedTime": "54.50",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "57.29"
@@ -8831,6 +9424,7 @@
       "name": "Baumann, Matthew",
       "place": 3,
       "points": 15.5,
+      "seedTime": "56.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "57.29"
@@ -8842,6 +9436,7 @@
       "name": "Marra-Ulfe, Kyle",
       "place": 5,
       "points": 14.0,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "57.57"
@@ -8864,6 +9459,7 @@
       "name": "Bataillon, Daniel",
       "place": 7,
       "points": 12.0,
+      "seedTime": "55.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "57.97"
@@ -8886,6 +9482,7 @@
       "name": "Smith, Ben",
       "place": 9,
       "points": 9.0,
+      "seedTime": "1:00.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "59.16"
@@ -8908,6 +9505,7 @@
       "name": "Bustard, Logan",
       "place": 11,
       "points": 6.0,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:00.97"
@@ -8919,6 +9517,7 @@
       "name": "Martinez, Matthew",
       "place": 12,
       "points": 5.0,
+      "seedTime": "59.20",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:01.09"
@@ -8952,6 +9551,7 @@
       "name": "Patterson, Gavin",
       "place": 15,
       "points": 2.0,
+      "seedTime": "1:02.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "1:03.28"
@@ -8963,6 +9563,7 @@
       "name": "Cubarney, Connor",
       "place": 16,
       "points": 1.0,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:03.67"
@@ -8973,6 +9574,7 @@
       "gender": "M",
       "name": "Padget, Avery",
       "place": 17,
+      "seedTime": "1:03.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "1:03.92"
@@ -8983,6 +9585,7 @@
       "gender": "M",
       "name": "Will, Samuel",
       "place": 18,
+      "seedTime": "1:04.11",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:04.95"
@@ -9003,6 +9606,7 @@
       "gender": "M",
       "name": "Winick, Zev",
       "place": 20,
+      "seedTime": "1:13.61",
       "tags": "",
       "team": "Elon University Club Swim-NC",
       "time": "1:10.80"
@@ -9013,6 +9617,7 @@
       "gender": "M",
       "name": "Facey, Alexander",
       "place": 21,
+      "seedTime": "1:11.97",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:13.51"
@@ -9023,6 +9628,7 @@
       "gender": "M",
       "name": "Landers, Alejandro",
       "place": 22,
+      "seedTime": "1:20.90",
       "tags": "",
       "team": "Elon University Club Swim-NC",
       "time": "1:15.23"
@@ -9045,6 +9651,7 @@
       "name": "Donnick, Addy",
       "place": 2,
       "points": 17.0,
+      "seedTime": "58.01",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:03.04"
@@ -9056,6 +9663,7 @@
       "name": "Fields, Colby",
       "place": 3,
       "points": 16.0,
+      "seedTime": "1:04.50",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:03.33"
@@ -9067,6 +9675,7 @@
       "name": "Ristad, Sabine",
       "place": 4,
       "points": 15.0,
+      "seedTime": "1:08.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:04.33"
@@ -9078,6 +9687,7 @@
       "name": "Aghjayan, Hannah",
       "place": 5,
       "points": 14.0,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:04.67"
@@ -9089,6 +9699,7 @@
       "name": "Tumanova, Katya",
       "place": 6,
       "points": 13.0,
+      "seedTime": "58.98",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:04.69"
@@ -9111,6 +9722,7 @@
       "name": "Lane, Megan",
       "place": 8,
       "points": 11.0,
+      "seedTime": "1:07.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:04.79"
@@ -9122,6 +9734,7 @@
       "name": "Carle, Juliana",
       "place": 9,
       "points": 9.0,
+      "seedTime": "1:07.50",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:05.41"
@@ -9144,6 +9757,7 @@
       "name": "Allibone, Jessica",
       "place": 11,
       "points": 6.0,
+      "seedTime": "1:05.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:06.92"
@@ -9155,6 +9769,7 @@
       "name": "Maley, Quincy",
       "place": 12,
       "points": 5.0,
+      "seedTime": "1:04.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:07.03"
@@ -9166,6 +9781,7 @@
       "name": "Dobie, Lauren",
       "place": 13,
       "points": 4.0,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:07.77"
@@ -9188,6 +9804,7 @@
       "name": "Brown, Avery",
       "place": 15,
       "points": 2.0,
+      "seedTime": "1:12.00",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "1:13.67"
@@ -9199,6 +9816,7 @@
       "name": "Lee, Christian",
       "place": 1,
       "points": 20.0,
+      "seedTime": "53.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "54.00"
@@ -9210,6 +9828,7 @@
       "name": "Hall, Nathan",
       "place": 2,
       "points": 17.0,
+      "seedTime": "54.46",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "54.11"
@@ -9221,6 +9840,7 @@
       "name": "Vargas, Jack",
       "place": 3,
       "points": 16.0,
+      "seedTime": "54.50",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "54.74"
@@ -9232,6 +9852,7 @@
       "name": "Kretzing, Dominic",
       "place": 4,
       "points": 15.0,
+      "seedTime": "58.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "55.16"
@@ -9243,6 +9864,7 @@
       "name": "Drake, Tyler",
       "place": 5,
       "points": 14.0,
+      "seedTime": "57.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "55.67"
@@ -9254,6 +9876,7 @@
       "name": "Slater, Landon",
       "place": 6,
       "points": 13.0,
+      "seedTime": "55.03",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "55.83"
@@ -9265,6 +9888,7 @@
       "name": "Robinson, Nick",
       "place": 7,
       "points": 12.0,
+      "seedTime": "54.80",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "55.88"
@@ -9276,6 +9900,7 @@
       "name": "Gray, Matthew",
       "place": 8,
       "points": 11.0,
+      "seedTime": "55.54",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "56.63"
@@ -9298,6 +9923,7 @@
       "name": "Rice, Thomas",
       "place": 10,
       "points": 7.0,
+      "seedTime": "59.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "58.63"
@@ -9309,6 +9935,7 @@
       "name": "King, Alex",
       "place": 11,
       "points": 6.0,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "58.87"
@@ -9320,6 +9947,7 @@
       "name": "Joe, Alexander",
       "place": 12,
       "points": 5.0,
+      "seedTime": "58.86",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "59.52"
@@ -9331,6 +9959,7 @@
       "name": "Sem, Kevin",
       "place": 13,
       "points": 4.0,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": null,
       "time": "59.56"
@@ -9342,6 +9971,7 @@
       "name": "Long, Carter",
       "place": 14,
       "points": 3.0,
+      "seedTime": "58.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "59.83"
@@ -9353,6 +9983,7 @@
       "name": "Herr, Jack",
       "place": 15,
       "points": 2.0,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "1:00.43"
@@ -9364,6 +9995,7 @@
       "name": "Butler, Aiden",
       "place": 16,
       "points": 1.0,
+      "seedTime": "58.87",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "1:00.52"
@@ -9374,6 +10006,7 @@
       "gender": "M",
       "name": "Ruth, Cole",
       "place": 17,
+      "seedTime": "56.87",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "1:02.10"
@@ -9384,6 +10017,7 @@
       "gender": "M",
       "name": "Langerfield, Bobby",
       "place": 18,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "1:02.95"
@@ -9394,6 +10028,7 @@
       "gender": "M",
       "name": "Mercado, Micheal",
       "place": 19,
+      "seedTime": "57.18",
       "tags": "",
       "team": null,
       "time": "1:06.58"
@@ -9404,6 +10039,7 @@
       "gender": "M",
       "name": "Reed, Jack",
       "place": 20,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "1:08.85"
@@ -9414,6 +10050,7 @@
       "gender": "M",
       "name": "Keatts, Caleb",
       "place": 21,
+      "seedTime": "1:10.87",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "1:09.71"
@@ -9425,6 +10062,7 @@
       "name": "Kim, Catherine",
       "place": 1,
       "points": 20.0,
+      "seedTime": "2:20.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "2:18.38"
@@ -9436,6 +10074,7 @@
       "name": "Munger, Audrey",
       "place": 2,
       "points": 17.0,
+      "seedTime": "2:24.50",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:19.50"
@@ -9447,6 +10086,7 @@
       "name": "Patton, Ellie",
       "place": 3,
       "points": 16.0,
+      "seedTime": "2:19.88",
       "tags": "",
       "team": "Elon University Club Swim-NC",
       "time": "2:23.30"
@@ -9458,6 +10098,7 @@
       "name": "Comesky, Olivia",
       "place": 4,
       "points": 15.0,
+      "seedTime": "2:29.06",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "2:25.24"
@@ -9469,6 +10110,7 @@
       "name": "Li, Olivia",
       "place": 5,
       "points": 14.0,
+      "seedTime": "2:20.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "2:25.86"
@@ -9480,6 +10122,7 @@
       "name": "Coha, Leona",
       "place": 6,
       "points": 13.0,
+      "seedTime": "2:30.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "2:25.97"
@@ -9491,6 +10134,7 @@
       "name": "Spaulding, Alice",
       "place": 7,
       "points": 12.0,
+      "seedTime": "2:30.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:30.45"
@@ -9502,6 +10146,7 @@
       "name": "McKinley, Tess",
       "place": 8,
       "points": 11.0,
+      "seedTime": "2:31.50",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "2:33.99"
@@ -9513,6 +10158,7 @@
       "name": "Everett, Kiera",
       "place": 9,
       "points": 9.0,
+      "seedTime": "2:36.61",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "2:39.36"
@@ -9524,6 +10170,7 @@
       "name": "Hall, Logan",
       "place": 1,
       "points": 20.0,
+      "seedTime": "2:05.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "2:00.40"
@@ -9535,6 +10182,7 @@
       "name": "Trujillo, Sebastian",
       "place": 2,
       "points": 17.0,
+      "seedTime": "1:59.50",
       "tags": "",
       "team": null,
       "time": "2:01.69"
@@ -9546,6 +10194,7 @@
       "name": "Altera, Ryan",
       "place": 3,
       "points": 16.0,
+      "seedTime": "1:57.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:02.56"
@@ -9557,6 +10206,7 @@
       "name": "Gray, Matthew",
       "place": 4,
       "points": 15.0,
+      "seedTime": "1:59.07",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:06.25"
@@ -9568,6 +10218,7 @@
       "name": "Sleptsov, Alex",
       "place": 5,
       "points": 14.0,
+      "seedTime": "2:12.65",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "2:06.86"
@@ -9579,6 +10230,7 @@
       "name": "Ogle, James",
       "place": 6,
       "points": 13.0,
+      "seedTime": "2:20.00",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "2:13.75"
@@ -9590,6 +10242,7 @@
       "name": "Tlalka, Kevin",
       "place": 7,
       "points": 12.0,
+      "seedTime": "2:10.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "2:14.07"
@@ -9601,6 +10254,7 @@
       "name": "Smith, Adney",
       "place": 8,
       "points": 11.0,
+      "seedTime": "2:12.01",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:14.91"
@@ -9612,6 +10266,7 @@
       "name": "Bartlett, Jack",
       "place": 9,
       "points": 9.0,
+      "seedTime": "2:21.54",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "2:22.61"
@@ -9656,6 +10311,7 @@
       "name": "Barrett, Sophia",
       "place": 1,
       "points": 20.0,
+      "seedTime": "26.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "25.61"
@@ -9667,6 +10323,7 @@
       "name": "Roberts, Lauren",
       "place": 2,
       "points": 17.0,
+      "seedTime": "25.50",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "25.65"
@@ -9678,6 +10335,7 @@
       "name": "Schneider, Jennifer",
       "place": 3,
       "points": 15.5,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "25.74"
@@ -9689,6 +10347,7 @@
       "name": "Donnick, Addy",
       "place": 3,
       "points": 15.5,
+      "seedTime": "25.14",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "25.74"
@@ -9700,6 +10359,7 @@
       "name": "Powers, Alexis",
       "place": 5,
       "points": 14.0,
+      "seedTime": "25.49",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "25.77"
@@ -9711,6 +10371,7 @@
       "name": "Neira, Addy",
       "place": 6,
       "points": 13.0,
+      "seedTime": "24.29",
       "tags": "",
       "team": "Elon University Club Swim-NC",
       "time": "26.07"
@@ -9722,6 +10383,7 @@
       "name": "Low, Grace-Marie",
       "place": 7,
       "points": 12.0,
+      "seedTime": "26.17",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "26.09"
@@ -9733,6 +10395,7 @@
       "name": "Swoger, Lily",
       "place": 8,
       "points": 11.0,
+      "seedTime": "26.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "26.22"
@@ -9744,6 +10407,7 @@
       "name": "Dobie, Lauren",
       "place": 9,
       "points": 9.0,
+      "seedTime": "26.50",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "26.28"
@@ -9755,6 +10419,7 @@
       "name": "Munger, Audrey",
       "place": 10,
       "points": 7.0,
+      "seedTime": "25.80",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "26.39"
@@ -9766,6 +10431,7 @@
       "name": "Armstrong, Clara",
       "place": 11,
       "points": 6.0,
+      "seedTime": "26.66",
       "tags": "",
       "team": "Emory Club Swim",
       "time": "26.53"
@@ -9777,6 +10443,7 @@
       "name": "Maley, Ellie",
       "place": 12,
       "points": 5.0,
+      "seedTime": "28.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "26.74"
@@ -9788,6 +10455,7 @@
       "name": "Buehler, Taylor",
       "place": 13,
       "points": 4.0,
+      "seedTime": "27.87",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "26.80"
@@ -9799,6 +10467,7 @@
       "name": "Sterchele, Ashley",
       "place": 14,
       "points": 3.0,
+      "seedTime": "25.00",
       "tags": "",
       "team": null,
       "time": "26.96"
@@ -9810,6 +10479,7 @@
       "name": "Case, Charlotte",
       "place": 15,
       "points": 2.0,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "27.02"
@@ -9821,6 +10491,7 @@
       "name": "Dunnigan, Caitlyn",
       "place": 16,
       "points": 1.0,
+      "seedTime": "26.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "27.06"
@@ -9831,6 +10502,7 @@
       "gender": "F",
       "name": "Padgett, Ava",
       "place": 18,
+      "seedTime": "26.77",
       "tags": "",
       "team": "Furman University Club Swim",
       "time": "27.16"
@@ -9841,6 +10513,7 @@
       "gender": "F",
       "name": "Walsh, Kelly",
       "place": 19,
+      "seedTime": "26.28",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "27.43"
@@ -9851,6 +10524,7 @@
       "gender": "F",
       "name": "Byther, Jamie",
       "place": 20,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "27.46"
@@ -9861,6 +10535,7 @@
       "gender": "F",
       "name": "Bohinc, Kaylee",
       "place": 20,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "27.46"
@@ -9871,6 +10546,7 @@
       "gender": "F",
       "name": "Ryan, Gracie",
       "place": 20,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Furman University Club Swim",
       "time": "27.46"
@@ -9881,6 +10557,7 @@
       "gender": "F",
       "name": "Berge, Isabel",
       "place": 23,
+      "seedTime": "29.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "27.58"
@@ -9891,6 +10568,7 @@
       "gender": "F",
       "name": "Robinette, Allison",
       "place": 24,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "27.80"
@@ -9901,6 +10579,7 @@
       "gender": "F",
       "name": "Estrada, Brianna",
       "place": 24,
+      "seedTime": "26.90",
       "tags": "",
       "team": null,
       "time": "27.80"
@@ -9911,6 +10590,7 @@
       "gender": "F",
       "name": "Kinnear, Emily",
       "place": 26,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "27.85"
@@ -9921,6 +10601,7 @@
       "gender": "F",
       "name": "Chapman, Morgan",
       "place": 27,
+      "seedTime": "26.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "27.93"
@@ -9931,6 +10612,7 @@
       "gender": "F",
       "name": "Rodas, Jaydenne",
       "place": 28,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "28.37"
@@ -9941,6 +10623,7 @@
       "gender": "F",
       "name": "Warren, Halla",
       "place": 29,
+      "seedTime": "27.52",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "28.41"
@@ -9951,6 +10634,7 @@
       "gender": "F",
       "name": "Salmon, Imani",
       "place": 31,
+      "seedTime": "29.00",
       "tags": "",
       "team": null,
       "time": "28.51"
@@ -9961,6 +10645,7 @@
       "gender": "F",
       "name": "Reinhold, Jenna",
       "place": 32,
+      "seedTime": "27.50",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "28.55"
@@ -9971,6 +10656,7 @@
       "gender": "F",
       "name": "Sostak, Sydney",
       "place": 34,
+      "seedTime": "28.82",
       "tags": "",
       "team": null,
       "time": "28.75"
@@ -9981,6 +10667,7 @@
       "gender": "F",
       "name": "Riolo, Lexi",
       "place": 38,
+      "seedTime": "28.70",
       "tags": "",
       "team": "Elon University Club Swim-NC",
       "time": "29.10"
@@ -9991,6 +10678,7 @@
       "gender": "F",
       "name": "Muras, Norah",
       "place": 40,
+      "seedTime": "29.45",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "29.12"
@@ -10001,6 +10689,7 @@
       "gender": "F",
       "name": "Wurtzbacher, Leilan",
       "place": 41,
+      "seedTime": "29.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "29.18"
@@ -10011,6 +10700,7 @@
       "gender": "F",
       "name": "Outlaw, Lizzie",
       "place": 42,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "29.23"
@@ -10021,6 +10711,7 @@
       "gender": "F",
       "name": "Chen, Zoe",
       "place": 44,
+      "seedTime": "31.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "29.44"
@@ -10031,6 +10722,7 @@
       "gender": "F",
       "name": "Kiefner, Jane",
       "place": 46,
+      "seedTime": "29.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "29.58"
@@ -10041,6 +10733,7 @@
       "gender": "F",
       "name": "Tadder, Emerson",
       "place": 47,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "29.65"
@@ -10051,6 +10744,7 @@
       "gender": "F",
       "name": "Waddle, Jennifer",
       "place": 48,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "29.79"
@@ -10061,6 +10755,7 @@
       "gender": "F",
       "name": "Harper, Isabel",
       "place": 48,
+      "seedTime": "27.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "29.79"
@@ -10071,6 +10766,7 @@
       "gender": "F",
       "name": "Prokopik, Jamison",
       "place": 50,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "29.89"
@@ -10081,6 +10777,7 @@
       "gender": "F",
       "name": "Bach, Caroline",
       "place": 52,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "30.03"
@@ -10091,6 +10788,7 @@
       "gender": "F",
       "name": "Jarrett, Audrey",
       "place": 53,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "30.12"
@@ -10101,6 +10799,7 @@
       "gender": "F",
       "name": "Cooper, Shannon",
       "place": 54,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "30.21"
@@ -10111,6 +10810,7 @@
       "gender": "F",
       "name": "Gasper, Maren",
       "place": 55,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "30.27"
@@ -10121,6 +10821,7 @@
       "gender": "F",
       "name": "Hwang, Gabrielle",
       "place": 57,
+      "seedTime": "29.24",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "30.46"
@@ -10131,6 +10832,7 @@
       "gender": "F",
       "name": "Natali, Carrion",
       "place": 58,
+      "seedTime": "28.50",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "30.47"
@@ -10141,6 +10843,7 @@
       "gender": "F",
       "name": "Musman, Chloe",
       "place": 59,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "30.59"
@@ -10151,6 +10854,7 @@
       "gender": "F",
       "name": "Simerson, Kynley",
       "place": 62,
+      "seedTime": "31.93",
       "tags": "",
       "team": "High Point Club Swimming-NC",
       "time": "30.93"
@@ -10161,6 +10865,7 @@
       "gender": "F",
       "name": "Schmid, Sarah",
       "place": 63,
+      "seedTime": "29.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "30.98"
@@ -10171,6 +10876,7 @@
       "gender": "F",
       "name": "Hauser, Lillian",
       "place": 64,
+      "seedTime": "35.00",
       "tags": "",
       "team": "Furman University Club Swim",
       "time": "31.03"
@@ -10181,6 +10887,7 @@
       "gender": "F",
       "name": "Brown, Miya",
       "place": 68,
+      "seedTime": "32.00",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "33.00"
@@ -10191,6 +10898,7 @@
       "gender": "F",
       "name": "Algeo, Kaitlyn",
       "place": 73,
+      "seedTime": "31.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "34.08"
@@ -10201,6 +10909,7 @@
       "gender": "F",
       "name": "Miller, Julia",
       "place": 75,
+      "seedTime": "32.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "34.94"
@@ -10211,6 +10920,7 @@
       "gender": "F",
       "name": "Thomas, Sanaa",
       "place": 80,
+      "seedTime": "46.49",
       "tags": "",
       "team": "High Point Club Swimming-NC",
       "time": "45.11"
@@ -10221,6 +10931,7 @@
       "gender": "F",
       "name": "Gaines, Jocelyn",
       "place": 81,
+      "seedTime": "58.70",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "51.13"
@@ -10231,6 +10942,7 @@
       "gender": "F",
       "name": "Trujillo, Audrey",
       "place": 82,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "52.88"
@@ -10242,6 +10954,7 @@
       "name": "Horchani, Lucas",
       "place": 1,
       "points": 20.0,
+      "seedTime": "22.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "21.95"
@@ -10253,6 +10966,7 @@
       "name": "Krom, Tyler",
       "place": 2,
       "points": 17.0,
+      "seedTime": "21.95",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "22.18"
@@ -10264,6 +10978,7 @@
       "name": "Jordan, Cole",
       "place": 3,
       "points": 16.0,
+      "seedTime": "21.73",
       "tags": "",
       "team": null,
       "time": "22.26"
@@ -10275,6 +10990,7 @@
       "name": "Steadman, Spencer",
       "place": 4,
       "points": 15.0,
+      "seedTime": "22.34",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "22.29"
@@ -10286,6 +11002,7 @@
       "name": "Bledsoe, Sam",
       "place": 5,
       "points": 14.0,
+      "seedTime": "22.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "22.38"
@@ -10297,6 +11014,7 @@
       "name": "Lancellotti, Mason",
       "place": 6,
       "points": 13.0,
+      "seedTime": "22.60",
       "tags": "",
       "team": "Emory Club Swim",
       "time": "22.55"
@@ -10308,6 +11026,7 @@
       "name": "Holmlund, Ezra",
       "place": 7,
       "points": 11.5,
+      "seedTime": "22.09",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "22.56"
@@ -10319,6 +11038,7 @@
       "name": "Rosenhein, Drew",
       "place": 7,
       "points": 11.5,
+      "seedTime": "23.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "22.56"
@@ -10330,6 +11050,7 @@
       "name": "Kretzing, Pierson",
       "place": 9,
       "points": 9.0,
+      "seedTime": "23.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "22.57"
@@ -10341,6 +11062,7 @@
       "name": "Gibbs, Thomas",
       "place": 10,
       "points": 7.0,
+      "seedTime": "22.74",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "22.79"
@@ -10352,6 +11074,7 @@
       "name": "Simpkins, Ben",
       "place": 11,
       "points": 6.0,
+      "seedTime": "22.70",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "22.87"
@@ -10363,6 +11086,7 @@
       "name": "Lee, Christian",
       "place": 12,
       "points": 5.0,
+      "seedTime": "22.50",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "22.92"
@@ -10374,6 +11098,7 @@
       "name": "Ivan, David",
       "place": 13,
       "points": 4.0,
+      "seedTime": "22.42",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "22.93"
@@ -10385,6 +11110,7 @@
       "name": "Bacani, Brandon",
       "place": 14,
       "points": 3.0,
+      "seedTime": "22.60",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "22.94"
@@ -10396,6 +11122,7 @@
       "name": "Zang, Eric",
       "place": 15,
       "points": 2.0,
+      "seedTime": "22.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "22.95"
@@ -10407,6 +11134,7 @@
       "name": "Reiniche, Ryan",
       "place": 16,
       "points": 1.0,
+      "seedTime": "22.30",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "22.96"
@@ -10417,6 +11145,7 @@
       "gender": "M",
       "name": "Owen, Michael",
       "place": 17,
+      "seedTime": "23.49",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "23.04"
@@ -10427,6 +11156,7 @@
       "gender": "M",
       "name": "Piani, Rylan",
       "place": 17,
+      "seedTime": "23.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "23.04"
@@ -10437,6 +11167,7 @@
       "gender": "M",
       "name": "Mocchetti, Giacomo",
       "place": 20,
+      "seedTime": "22.70",
       "tags": "",
       "team": "Emory Club Swim",
       "time": "23.13"
@@ -10447,6 +11178,7 @@
       "gender": "M",
       "name": "Hall, Nathan",
       "place": 21,
+      "seedTime": "22.58",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "23.22"
@@ -10457,6 +11189,7 @@
       "gender": "M",
       "name": "Keleher, Hayes",
       "place": 22,
+      "seedTime": "22.97",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "23.30"
@@ -10467,6 +11200,7 @@
       "gender": "M",
       "name": "Fauss, Eli",
       "place": 23,
+      "seedTime": "23.06",
       "tags": "",
       "team": null,
       "time": "23.36"
@@ -10477,6 +11211,7 @@
       "gender": "M",
       "name": "Curtiss, Jacob",
       "place": 24,
+      "seedTime": "23.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "23.59"
@@ -10487,6 +11222,7 @@
       "gender": "M",
       "name": "Grace, Robert",
       "place": 25,
+      "seedTime": "23.50",
       "tags": "",
       "team": null,
       "time": "23.61"
@@ -10497,6 +11233,7 @@
       "gender": "M",
       "name": "Ly, Jonathan",
       "place": 27,
+      "seedTime": "23.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "23.80"
@@ -10507,6 +11244,7 @@
       "gender": "M",
       "name": "Ward, Henry",
       "place": 27,
+      "seedTime": "23.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "23.80"
@@ -10517,6 +11255,7 @@
       "gender": "M",
       "name": "Bustard, Logan",
       "place": 29,
+      "seedTime": "23.50",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "23.81"
@@ -10527,6 +11266,7 @@
       "gender": "M",
       "name": "Ellis, Colton",
       "place": 30,
+      "seedTime": "23.50",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "23.82"
@@ -10537,6 +11277,7 @@
       "gender": "M",
       "name": "Smith, Nicholas",
       "place": 31,
+      "seedTime": "23.50",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "23.88"
@@ -10547,6 +11288,7 @@
       "gender": "M",
       "name": "Otten, Evan",
       "place": 33,
+      "seedTime": "23.50",
       "tags": "",
       "team": "Elon University Club Swim-NC",
       "time": "23.94"
@@ -10557,6 +11299,7 @@
       "gender": "M",
       "name": "Haden, Reuther",
       "place": 34,
+      "seedTime": "23.94",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "24.06"
@@ -10567,6 +11310,7 @@
       "gender": "M",
       "name": "Baumann, Matthew",
       "place": 35,
+      "seedTime": "23.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "24.19"
@@ -10577,6 +11321,7 @@
       "gender": "M",
       "name": "Allin, John",
       "place": 36,
+      "seedTime": "23.02",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "24.20"
@@ -10587,6 +11332,7 @@
       "gender": "M",
       "name": "Liu, Johnny",
       "place": 37,
+      "seedTime": "26.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "24.22"
@@ -10597,6 +11343,7 @@
       "gender": "M",
       "name": "Patrick, Kristopher",
       "place": 38,
+      "seedTime": "23.94",
       "tags": "",
       "team": null,
       "time": "24.35"
@@ -10607,6 +11354,7 @@
       "gender": "M",
       "name": "Peck, Teagan",
       "place": 39,
+      "seedTime": "25.00",
       "tags": "",
       "team": null,
       "time": "24.36"
@@ -10617,6 +11365,7 @@
       "gender": "M",
       "name": "Murphy, Nate",
       "place": 40,
+      "seedTime": "23.50",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "24.41"
@@ -10627,6 +11376,7 @@
       "gender": "M",
       "name": "Lakeman, Michael",
       "place": 41,
+      "seedTime": "31.73",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "24.42"
@@ -10637,6 +11387,7 @@
       "gender": "M",
       "name": "Joe, Alexander",
       "place": 43,
+      "seedTime": "24.23",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "24.50"
@@ -10647,6 +11398,7 @@
       "gender": "M",
       "name": "Heath, Zachary",
       "place": 45,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Elon University Club Swim-NC",
       "time": "24.83"
@@ -10657,6 +11409,7 @@
       "gender": "M",
       "name": "Powell, Henry",
       "place": 46,
+      "seedTime": "24.50",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "25.00"
@@ -10667,6 +11420,7 @@
       "gender": "M",
       "name": "Butler, Aiden",
       "place": 47,
+      "seedTime": "24.21",
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "25.11"
@@ -10677,6 +11431,7 @@
       "gender": "M",
       "name": "King, Alex",
       "place": 48,
+      "seedTime": "25.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "25.19"
@@ -10687,6 +11442,7 @@
       "gender": "M",
       "name": "Herr, Jack",
       "place": 49,
+      "seedTime": "24.50",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "25.20"
@@ -10697,6 +11453,7 @@
       "gender": "M",
       "name": "Grutter, Maxwell",
       "place": 50,
+      "seedTime": "27.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "25.22"
@@ -10707,6 +11464,7 @@
       "gender": "M",
       "name": "Hale, Matthew",
       "place": 51,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "25.26"
@@ -10717,6 +11475,7 @@
       "gender": "M",
       "name": "Will, Samuel",
       "place": 53,
+      "seedTime": "26.73",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "25.42"
@@ -10727,6 +11486,7 @@
       "gender": "M",
       "name": "Chavez, Nolan",
       "place": 55,
+      "seedTime": "24.20",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "25.58"
@@ -10737,6 +11497,7 @@
       "gender": "M",
       "name": "Hinckley, Casey",
       "place": 56,
+      "seedTime": "25.90",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "25.59"
@@ -10747,6 +11508,7 @@
       "gender": "M",
       "name": "Chhablani, Yash",
       "place": 57,
+      "seedTime": "26.50",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "25.88"
@@ -10757,6 +11519,7 @@
       "gender": "M",
       "name": "Zdilla, Noah",
       "place": 58,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "26.10"
@@ -10767,6 +11530,7 @@
       "gender": "M",
       "name": "Grace, Patrick",
       "place": 59,
+      "seedTime": "27.00",
       "tags": "",
       "team": null,
       "time": "26.55"
@@ -10777,6 +11541,7 @@
       "gender": "M",
       "name": "Ferlauto, Lucas",
       "place": 60,
+      "seedTime": "25.89",
       "tags": "",
       "team": "Furman University Club Swim",
       "time": "26.76"
@@ -10787,6 +11552,7 @@
       "gender": "M",
       "name": "Humann, Brent",
       "place": 62,
+      "seedTime": "26.61",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "27.34"
@@ -10797,6 +11563,7 @@
       "gender": "M",
       "name": "Offhaus, Carter",
       "place": 63,
+      "seedTime": "28.50",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "27.42"
@@ -10807,6 +11574,7 @@
       "gender": "M",
       "name": "Landers, Alejandro",
       "place": 64,
+      "seedTime": "28.37",
       "tags": "",
       "team": "Elon University Club Swim-NC",
       "time": "27.54"
@@ -10817,6 +11585,7 @@
       "gender": "M",
       "name": "Ryan, Christopher",
       "place": 68,
+      "seedTime": "26.05",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "28.02"
@@ -10827,6 +11596,7 @@
       "gender": "M",
       "name": "Santiago, Nathan",
       "place": 69,
+      "seedTime": "27.95",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "28.19"
@@ -10837,6 +11607,7 @@
       "gender": "M",
       "name": "White, Declan",
       "place": 71,
+      "seedTime": "27.10",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "28.48"
@@ -10847,6 +11618,7 @@
       "gender": "M",
       "name": "Randle, Jonas",
       "place": 72,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "28.68"
@@ -10857,6 +11629,7 @@
       "gender": "M",
       "name": "Babbitt, Matthew",
       "place": 73,
+      "seedTime": "28.70",
       "tags": "",
       "team": null,
       "time": "29.05"
@@ -10867,6 +11640,7 @@
       "gender": "M",
       "name": "Baker, Mayes",
       "place": 75,
+      "seedTime": "28.54",
       "tags": "",
       "team": "High Point Club Swimming-NC",
       "time": "29.27"
@@ -10877,6 +11651,7 @@
       "gender": "M",
       "name": "Hernandez, Joshua",
       "place": 78,
+      "seedTime": "26.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "30.63"
@@ -10887,6 +11662,7 @@
       "gender": "M",
       "name": "Russo, Giacomo",
       "place": 79,
+      "seedTime": "32.00",
       "tags": "",
       "team": "High Point Club Swimming-NC",
       "time": "31.00"
@@ -10897,6 +11673,7 @@
       "gender": "M",
       "name": "Appel, David",
       "place": 80,
+      "seedTime": "32.99",
       "tags": "",
       "team": "High Point Club Swimming-NC",
       "time": "33.21"
@@ -10907,6 +11684,7 @@
       "gender": "M",
       "name": "Reich, Benjamin",
       "place": 81,
+      "seedTime": "35.40",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "35.98"

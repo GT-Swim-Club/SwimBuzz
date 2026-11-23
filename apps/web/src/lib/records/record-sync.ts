@@ -1,5 +1,5 @@
 import type { Prisma, RecordGender, TeamRecord } from "@prisma/client"
-import { athletePreferredName, recordEventDef, RECORD_EVENTS, type TeamRecordSwimmer } from "@swimbuzz/shared"
+import { athletePreferredName, countsForRecords, recordEventDef, RECORD_EVENTS, type TeamRecordSwimmer } from "@swimbuzz/shared"
 import { prisma } from "@/lib/prisma"
 import {
   effectiveRelayGender,
@@ -75,13 +75,15 @@ async function individualCandidates(): Promise<Candidate[]> {
       date: true,
       tags: true,
       meetId: true,
-      meetRef: { select: { name: true } },
+      meetRef: { select: { name: true, unofficial: true } },
       athlete: { select: { id: true, firstName: true, lastName: true, preferredName: true, gender: true } },
     },
   })
   return swims.flatMap((swim): Candidate[] => {
     if (!swim.meetId || !swim.meetRef || swim.timeMs <= 0) return []
     if (!recordEventDef(swim.event, swim.athlete.gender)) return []
+    // Unofficial meets only set records in 25s.
+    if (!countsForRecords({ event: swim.event, unofficial: swim.meetRef.unofficial })) return []
     return [
       {
         gender: swim.athlete.gender,
@@ -106,7 +108,7 @@ async function individualCandidates(): Promise<Candidate[]> {
 export async function relayCandidates(athletes: Map<string, AthleteName>): Promise<Candidate[]> {
   const meets = await prisma.meet.findMany({
     where: { course: "SCY", deletedAt: null },
-    select: { id: true, name: true, startsAt: true, relayResultsSummary: true },
+    select: { id: true, name: true, startsAt: true, unofficial: true, relayResultsSummary: true },
   })
   const withRelays = meets.filter((meet) => isRelayResultsSummary(meet.relayResultsSummary))
   if (withRelays.length === 0) return []
@@ -127,6 +129,8 @@ export async function relayCandidates(athletes: Map<string, AthleteName>): Promi
       if (!gender) continue
       const event = relayEventKey(entry.event)
       if (!recordEventDef(event, gender)) continue
+      // Unofficial meets set no relay records (only 25s count).
+      if (!countsForRecords({ event, unofficial: meet.unofficial })) continue
       const timeMs = parseSwimTime(relayTeamTime(entry) ?? "")
       if (!timeMs || relayRoundStatus(entry)?.trim()) continue
       const round = effectiveRelayRound(entry)

@@ -21,6 +21,8 @@ export type AthleteSwim = {
   /** ISO instant. */
   date: string
   source: string
+  /** Swum at an unofficial meet (intrasquad): counts as a PB, shown "*22.31". */
+  unofficial?: boolean
   /**
    * Set on a relay split (leg 2–4 of a relay): never a flat-start PB; it has its own view on the
    * event page. `leg` is null when SwimCloud only says "Split" (leg 2 or 3) and the sync couldn't

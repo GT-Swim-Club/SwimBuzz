@@ -11,6 +11,8 @@ import {
   formatMonthYear,
   formatSeasonLabel,
   formatTime,
+  markUnofficial,
+  UNOFFICIAL_FOOTNOTE,
   isStaffRole,
   type StaffTitle,
 } from "@swimbuzz/shared"
@@ -47,7 +49,7 @@ type SwimRow = {
   timeMs?: number
   date?: string
   meet?: string
-  meetRef?: { id?: string; name?: string; slug?: string; season?: string } | null
+  meetRef?: { id?: string; name?: string; slug?: string; season?: string; unofficial?: boolean } | null
   /** Set on a relay split (leg 2–4 of a relay) — shown in history and as an extra PB row only. */
   relayEvent?: string
 }
@@ -422,7 +424,7 @@ export default function AthleteDetailScreen() {
             {highlightBest && typeof highlightBest.timeMs === "number" ? (
               <MetaRow
                 label="Fastest PB"
-                value={`${formatTime(highlightBest.timeMs)} · ${highlightBest.event ?? "Event"} ${highlightBest.course ?? ""}`.trim()}
+                value={`${markUnofficial(formatTime(highlightBest.timeMs), highlightBest.meetRef?.unofficial)} · ${highlightBest.event ?? "Event"} ${highlightBest.course ?? ""}`.trim()}
               />
             ) : null}
           </Section>
@@ -502,12 +504,18 @@ export default function AthleteDetailScreen() {
                 title={[swim.event, swim.course, swim.relayEvent ? RELAY_SPLIT_LABEL : null]
                   .filter(Boolean)
                   .join(" · ")}
-                subtitle={[swim.date ? formatMonthYear(swim.date) : null, formatTime(swim.timeMs as number)]
+                subtitle={[
+                  swim.date ? formatMonthYear(swim.date) : null,
+                  markUnofficial(formatTime(swim.timeMs as number), swim.meetRef?.unofficial),
+                ]
                   .filter(Boolean)
                   .join(" · ")}
               />
             ))
           )}
+          {personalBestRows.some((swim) => swim.meetRef?.unofficial) ? (
+            <Muted style={{ marginTop: spacing.xs }}>{UNOFFICIAL_FOOTNOTE}</Muted>
+          ) : null}
         </Section>
 
         <ProgressionSection swims={swims} />
@@ -525,14 +533,16 @@ export default function AthleteDetailScreen() {
                 ? new Date(String(swim.date)).toLocaleDateString()
                 : "—"
               const timeLabel =
-                typeof swim.timeMs === "number" ? formatTime(swim.timeMs) : "—"
+                typeof swim.timeMs === "number"
+                  ? markUnofficial(formatTime(swim.timeMs), swim.meetRef?.unofficial)
+                  : "—"
               return (
                 <ListRow
                   key={swim.id ?? `${index}-${swim.event}-${swim.timeMs}`}
                   title={[dateLabel, swim.event ?? "Event", swim.relayEvent ? RELAY_SPLIT_LABEL : null]
                     .filter(Boolean)
                     .join(" · ")}
-                  subtitle={[swim.course, timeLabel, meetName]
+                  subtitle={[swim.course, timeLabel, meetName, swim.meetRef?.unofficial ? "Unofficial" : null]
                     .filter(Boolean)
                     .join(" · ")}
                 />

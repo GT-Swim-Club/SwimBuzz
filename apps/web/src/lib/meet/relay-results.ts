@@ -38,6 +38,8 @@ export type ParsedRelayResult = {
   lane?: number
   heatTotal?: number
   seedTime?: string
+  /** The team the results print the relay under ("GTSC Gold"). */
+  team?: string
 }
 
 function rosterName(athleteId: string, roster: RosterAthlete[]): string {
@@ -100,10 +102,25 @@ export function relayGenderLabel(gender: RelayGender): string {
   return ""
 }
 
-/** Valid relay team letter, or null when missing / not A–D. */
+/** An intrasquad relay's side + letter ("White A", "Gold C"). */
+const SIDE_RELAY_LETTER = /^([A-Za-z][A-Za-z'&.\- ]{0,23}?)\s+([A-D])$/i
+const NOT_A_SIDE = new Set(["relay", "team"])
+
+/**
+ * Valid relay team letter, or null when missing / not A–D. Intrasquad relays keep their side
+ * ("White A", "Gold A") so two sides' A relays in one event stay separate teams.
+ */
 export function normalizeRelayLetter(relayLetter: string | null | undefined): string | null {
-  const letter = (relayLetter ?? "").trim().toUpperCase()
+  const raw = (relayLetter ?? "").trim()
+  const letter = raw.toUpperCase()
   if (letter === "A" || letter === "B" || letter === "C" || letter === "D") return letter
+  const sided = raw.match(SIDE_RELAY_LETTER)
+  if (sided) {
+    const side = sided[1].trim().replace(/\s+/g, " ")
+    if (NOT_A_SIDE.has(side.toLowerCase())) return sided[2].toUpperCase()
+    const titled = side.toLowerCase().replace(/(^|[\s\-'])([a-z])/g, (_, sep: string, c: string) => sep + c.toUpperCase())
+    return `${titled} ${sided[2].toUpperCase()}`
+  }
   return null
 }
 
@@ -415,6 +432,7 @@ export function coerceParsedRelayResults(raw: unknown): ParsedRelayResult[] {
     const seedTime = String(r.seedTime ?? "").trim() || undefined
     const points =
       typeof r.points === "number" && Number.isFinite(r.points) ? r.points : undefined
+    const team = typeof r.team === "string" ? r.team.trim() : ""
     out.push({
       entryType: "relay_team",
       event,
@@ -430,6 +448,7 @@ export function coerceParsedRelayResults(raw: unknown): ParsedRelayResult[] {
       ...(lane != null ? { lane } : {}),
       ...(heatTotal != null ? { heatTotal } : {}),
       ...(seedTime ? { seedTime } : {}),
+      ...(team ? { team } : {}),
     })
   }
   return out

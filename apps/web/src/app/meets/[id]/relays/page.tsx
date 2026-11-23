@@ -63,6 +63,7 @@ export default async function MeetRelaysPage({
       startsAt: true,
       endsAt: true,
       timeZone: true,
+      unofficial: true,
       location: true,
       school: true,
       eventOrder: true,

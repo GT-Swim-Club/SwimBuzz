@@ -127,8 +127,14 @@ export async function updateMeet(
       })
     await images.commit()
     await deleteRemovedMeetFiles(existing as MeetStoredFiles, data)
-    // Records show the meet's name and only count SCY meets.
-    if (meet.name !== existing.name || meet.course !== existing.course) await syncTeamRecordsSafely()
+    // Records show the meet's name, only count SCY meets, and count only 25s from unofficial ones.
+    if (
+      meet.name !== existing.name ||
+      meet.course !== existing.course ||
+      meet.unofficial !== existing.unofficial
+    ) {
+      await syncTeamRecordsSafely()
+    }
 
     notifyMeetRosterOfInfoDrops({
       meetId: meet.id,

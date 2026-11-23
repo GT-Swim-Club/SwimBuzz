@@ -20,6 +20,7 @@ export async function loadRelaysPdfInput(idOrSlug: string): Promise<RelaysPdfInp
       startsAt: true,
       endsAt: true,
       timeZone: true,
+      unofficial: true,
       iconUrl: true,
       season: true,
       eventOrder: true,

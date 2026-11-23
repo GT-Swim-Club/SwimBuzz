@@ -186,6 +186,8 @@ export function buildMeetData(body: Record<string, unknown>, opts: BuildOptions 
     }
     data.scoringTable = individual.length > 0 || relay.length > 0 ? { individual, relay } : null
   }
+  if ("unofficial" in body) data.unofficial = body.unofficial === true || body.unofficial === "true"
+  if ("scoreByGender" in body) data.scoreByGender = body.scoreByGender === true || body.scoreByGender === "true"
   if ("location" in body) data.location = optionalString(body.location)
   if ("school" in body) data.school = optionalString(body.school)
   if ("iconUrl" in body) data.iconUrl = optionalString(body.iconUrl)

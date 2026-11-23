@@ -1,6 +1,5 @@
 import type { MeetHighlights, StatCounter } from "./meet-highlights"
 import {
-  meetHighlightsExportRequest,
   rosterSummaryHighlightSections,
   type RosterSummaryHighlights,
   type RosterSummaryPdfRow,
@@ -41,18 +40,19 @@ export function highlightCounterList(counter: StatCounter): HighlightListKey | n
  * export's own section builder fed one list at a time, so the two never drift apart. Lists with no
  * rows are left out.
  */
-export function highlightLists(highlights: MeetHighlights): HighlightList[] {
-  const all = meetHighlightsExportRequest(highlights)
+export function highlightLists(
+  highlights: Pick<MeetHighlights, "topScorers" | "wins" | "records" | "newNationalsCuts">
+): HighlightList[] {
   const none: RosterSummaryHighlights = { counters: [], newNationalsCuts: [], topScorers: [], wins: [], records: [] }
   const only: Record<HighlightListKey, Partial<RosterSummaryHighlights>> = {
-    topScorers: { topScorers: all.highlights?.topScorers ?? [] },
-    wins: { wins: all.highlights?.wins ?? [] },
-    records: { records: all.highlights?.records ?? [] },
-    cuts: { newNationalsCuts: all.highlights?.newNationalsCuts ?? [] },
+    topScorers: { topScorers: highlights.topScorers ?? [] },
+    wins: { wins: highlights.wins ?? [] },
+    records: { records: highlights.records ?? [] },
+    cuts: { newNationalsCuts: highlights.newNationalsCuts ?? [] },
   }
   const lists: HighlightList[] = []
   for (const key of ["topScorers", "wins", "records", "cuts"] as const) {
-    const [section] = rosterSummaryHighlightSections({ ...all, highlights: { ...none, ...only[key] } })
+    const [section] = rosterSummaryHighlightSections({ sections: [], highlights: { ...none, ...only[key] } })
     if (section && section.rows.length > 0) {
       lists.push({ key, tab: LIST_TABS[key], title: section.title, rows: section.rows })
     }

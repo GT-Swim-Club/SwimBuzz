@@ -9,15 +9,11 @@ import { DatePicker } from "@/components/ui/CustomDateTimePicker"
 import { normalizeEventName } from "@/lib/swim/swim-parse"
 import { addMeetSwim } from "./meet-swims.actions"
 import { upsertRelayEntry } from "./meet-entries.actions"
+import { INDIVIDUAL_SWIM_EVENTS, RELAY_SWIM_EVENTS } from "@swimbuzz/shared"
 
-const INDIVIDUAL_EVENTS = [
-  "50 Free", "100 Free", "200 Free", "400 Free", "500 Free", "1000 Free", "1650 Free",
-  "100 Back", "200 Back", "100 Breast", "200 Breast", "100 Fly", "200 Fly", "200 IM", "400 IM"
-]
+const INDIVIDUAL_EVENTS = INDIVIDUAL_SWIM_EVENTS
 
-const RELAY_EVENTS = [
-  "200 Medley Relay", "200 Free Relay", "400 Free Relay", "800 Free Relay", "400 Medley Relay"
-]
+const RELAY_EVENTS = RELAY_SWIM_EVENTS
 
 type AthleteOption = { id: string; name: string; gender?: "M" | "F" }
 

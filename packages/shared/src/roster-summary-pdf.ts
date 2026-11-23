@@ -8,6 +8,7 @@ import { meetFileName } from "./format"
 import type { IconName } from "./icons"
 import type { MeetHighlights, MeetRecord, MeetWin, NewNationalsCut, StatCounter, TopScorer } from "./meet-highlights"
 import { formatOrdinal } from "./team-scores"
+import type { TeamPillTone } from "./result-teams"
 
 export type RosterSummaryPdfResult =
   | {
@@ -18,6 +19,8 @@ export type RosterSummaryPdfResult =
       /** Result minus seed, e.g. "-1.23". */
       delta?: string | null
       place?: number
+      /** Points scored, in a column after the place ("20") when any row in the export has them. */
+      points?: number
       /** Top-three finals finish — drawn as a medal-tinted place. */
       podium?: boolean
       /** No place column: the time runs to the row's edge (the place leads the row instead). */
@@ -49,6 +52,10 @@ export type RosterSummaryPdfRow = {
   fullLabel?: string
   /** Set after the label in parentheses and lighter type: a relay athlete's leg ("4th" → "(4th)"). */
   labelNote?: string
+  /** A small caps pill after the label (and its note): the athlete's or relay's team ("Gold"). */
+  team?: string
+  /** The team pill's color. */
+  teamTone?: TeamPillTone
   /** The round, right after the label ("Finals") — the PDF and PNG set it in gold caps. */
   round?: string
   /** Small text right after the label and round (result tags, badges). */
@@ -84,6 +91,10 @@ export type RosterSummaryPdfRow = {
 
 export type RosterSummaryPdfSection = {
   title: string
+  /** A small caps pill after the title: the athlete's team ("Gold"), by athlete. */
+  team?: string
+  /** The team pill's color. */
+  teamTone?: TeamPillTone
   /** An event's only round after its title ("Timed Finals"), named once for its rows — in gold caps like a row's. */
   sub?: string
   eventNumber?: number
@@ -122,7 +133,15 @@ export type RosterSummaryHighlights = {
   topScorers: TopScorer[]
   wins: MeetWin[]
   records: MeetRecord[]
+  /**
+   * At a meet with several of our teams (an intrasquad), each team's tiles and lists, drawn as a
+   * section per team under the team score tiles in `counters` (the lists above are then empty).
+   */
+  teams?: RosterSummaryTeamHighlights[]
 }
+
+/** One team's part of a highlights export: a heading ("GOLD"), its tiles, then its lists. */
+export type RosterSummaryTeamHighlights = Omit<RosterSummaryHighlights, "teams"> & { team: string }
 
 export const ROSTER_SUMMARY_PDF_LIMITS = {
   sections: 500,
@@ -136,6 +155,8 @@ export const ROSTER_SUMMARY_PDF_LIMITS = {
   topScorers: 20,
   wins: 300,
   records: 60,
+  /** Our teams at one meet (an intrasquad's sides). */
+  teams: 4,
 } as const
 
 /**
@@ -246,17 +267,36 @@ export function rosterSummaryPdfFilename(
  * "Highlights" heading, without the full standings.
  */
 export function meetHighlightsExportRequest(highlights: MeetHighlights): RosterSummaryPdfRequest {
+  const teams = highlights.teams ?? []
   return {
     heading: "Highlights",
     sections: [],
     fitOnePage: true,
-    highlights: {
-      counters: highlights.counters,
-      newNationalsCuts: highlights.newNationalsCuts ?? [],
-      topScorers: highlights.topScorers ?? [],
-      wins: highlights.wins ?? [],
-      records: highlights.records ?? [],
-    },
+    highlights:
+      teams.length > 1
+        ? {
+            // The team score cards stay meet-wide; everything else is each team's.
+            counters: highlights.counters.filter((c) => c.page === "teamScores"),
+            newNationalsCuts: [],
+            topScorers: [],
+            wins: [],
+            records: [],
+            teams: teams.map((team) => ({
+              team: team.team,
+              counters: team.counters,
+              newNationalsCuts: team.newNationalsCuts,
+              topScorers: team.topScorers,
+              wins: team.wins,
+              records: team.records,
+            })),
+          }
+        : {
+            counters: highlights.counters,
+            newNationalsCuts: highlights.newNationalsCuts ?? [],
+            topScorers: highlights.topScorers ?? [],
+            wins: highlights.wins ?? [],
+            records: highlights.records ?? [],
+          },
   }
 }
 
@@ -365,6 +405,11 @@ export function rosterSummaryHighlightSections(request: RosterSummaryPdfRequest)
     ...recordsSection(request),
     ...rosterSummaryCutsSections(request),
   ]
+}
+
+/** One team's list sections in a highlights export, like rosterSummaryHighlightSections for the meet. */
+export function rosterSummaryTeamHighlightSections(team: RosterSummaryTeamHighlights): RosterSummaryPdfSection[] {
+  return rosterSummaryHighlightSections({ sections: [], highlights: team })
 }
 
 /** The sections an image or PDF of the request draws: any highlight sections, then the rest. */

@@ -128,6 +128,10 @@ type MeetWriteFields = {
   /** e.g. "2025-2026". */
   season?: string
   teamCode?: string
+  /** Intrasquad or other unofficial meet: its times are marked unofficial everywhere. */
+  unofficial?: boolean
+  /** Mixed individual events are placed and scored for women and men separately. */
+  scoreByGender?: boolean
   location?: string | null
   school?: string | null
   iconUrl?: string | null

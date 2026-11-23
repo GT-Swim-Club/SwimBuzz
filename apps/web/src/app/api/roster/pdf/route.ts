@@ -9,20 +9,10 @@ import {
   swimCloudTimesStatus,
   type AthleteClearanceSummary,
 } from "@swimbuzz/shared"
-import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/auth/session"
-import { isStaffUi } from "@/lib/athlete/athlete-view-server"
-import { clearanceSummary, clearanceSummarySelect } from "@/lib/athlete/athlete-clearance"
-import { parseSeason } from "@/lib/season"
 import { athleteAge } from "@/lib/utils"
-import {
-  CLEARANCE_OPTIONS,
-  matchesRosterFilters,
-  matchesRosterSearch,
-  readRosterFilters,
-  rosterFilterLabel,
-  SWIMCLOUD_OPTIONS,
-} from "@/lib/roster/roster-filters"
+import { CLEARANCE_OPTIONS, rosterFilterLabel, SWIMCLOUD_OPTIONS } from "@/lib/roster/roster-filters"
+import { loadRosterExportAthletes, readRosterExportScope } from "@/lib/roster/roster-export"
 import { buildRosterPdf, type RosterPdfCell, type RosterPdfColumn } from "@/lib/roster/roster-pdf"
 
 export const runtime = "nodejs"
@@ -49,35 +39,10 @@ export async function GET(req: Request) {
   const session = await getSession()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const url = new URL(req.url)
-  const rawSeason = url.searchParams.get("season")
-  const season = rawSeason ? parseSeason(rawSeason) : null
-  if (rawSeason && !season) return NextResponse.json({ error: "Invalid season" }, { status: 400 })
-  const staff = await isStaffUi(session.user.role)
-  const filters = readRosterFilters(url.searchParams, staff)
-  const query = url.searchParams.get("q")?.trim() ?? ""
-
-  const rows = await prisma.athlete.findMany({
-    where: season ? { seasons: { has: season } } : undefined,
-    select: {
-      firstName: true,
-      lastName: true,
-      preferredName: true,
-      gender: true,
-      year: true,
-      yearBySeason: true,
-      seasons: true,
-      dob: true,
-      swimCloudIds: true,
-      timesSyncedAt: true,
-      clearance: { select: clearanceSummarySelect },
-    },
-    orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
-  })
-
-  const athletes = rows
-    .map((a) => ({ ...a, clearance: clearanceSummary(a.clearance) }))
-    .filter((a) => matchesRosterFilters(a, filters) && matchesRosterSearch(a, query))
+  const scope = await readRosterExportScope(new URL(req.url).searchParams, session.user.role)
+  if ("error" in scope) return NextResponse.json({ error: scope.error }, { status: 400 })
+  const { season, staff, filters, query } = scope
+  const athletes = await loadRosterExportAthletes(scope)
 
   const showGender = filters.gender === "all"
   const columns: RosterPdfColumn[] = [

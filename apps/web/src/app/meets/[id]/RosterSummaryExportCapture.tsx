@@ -1,6 +1,6 @@
 "use client"
 
-import { Fragment, useLayoutEffect, useRef } from "react"
+import { Fragment, useLayoutEffect, useMemo, useRef } from "react"
 import {
   highlightTileRows,
   isDropCounterValue,
@@ -14,8 +14,11 @@ import {
   type RosterSummaryPdfRequest,
   type RosterSummaryPdfRow,
   type RosterSummaryPdfSection,
+  type RosterSummaryTeamHighlights,
 } from "@swimbuzz/shared"
 import MeetExportHeader from "@/components/meet/MeetExportHeader"
+import TeamPill, { teamPillColumnWidth } from "@/components/meet/TeamPill"
+import { relayEyebrowClass } from "./relays/RelayPageHeader"
 import { LedgerStatTile } from "@/components/meet/Ledger"
 import { AppIcon } from "@/components/ui/AppIcon"
 import { podiumPlaceClass } from "@/lib/utils"
@@ -38,7 +41,8 @@ function CaptureRound({ round }: { round: string }) {
   )
 }
 
-function CaptureRow({ row, medley }: { row: RosterSummaryPdfRow; medley: boolean }) {
+/** `teamWidth`: the team pill column's width, the same for every row (none when no row has a team). */
+function CaptureRow({ row, medley, teamWidth }: { row: RosterSummaryPdfRow; medley: boolean; teamWidth?: string }) {
   if (row.subheading) {
     return (
       <li className="pb-1 pt-3 text-[11px] [&+li]:border-t-0 font-semibold uppercase leading-none tracking-[0.12em] text-accent">
@@ -118,6 +122,12 @@ function CaptureRow({ row, medley }: { row: RosterSummaryPdfRow; medley: boolean
           </span>
         ) : null}
       </div>
+      {teamWidth ? (
+        // The team pills in a column of their own, before the heat & lane and result.
+        <span className="flex shrink-0 items-center text-[10px]" style={{ width: teamWidth }}>
+          {row.team ? <TeamPill team={row.team} tone={row.teamTone} className="" /> : null}
+        </span>
+      ) : null}
       {row.heatLane || row.startTime ? (
         <span className="flex shrink-0 flex-col items-end text-xs leading-[1.4]" style={{ paddingLeft: NAME_GAP_PX }}>
           {row.heatLane ? <span className="text-foreground-secondary">{row.heatLane}</span> : null}
@@ -139,7 +149,7 @@ function CaptureRow({ row, medley }: { row: RosterSummaryPdfRow; medley: boolean
   )
 }
 
-function CaptureSection({ section }: { section: RosterSummaryPdfSection }) {
+function CaptureSection({ section, teamWidth }: { section: RosterSummaryPdfSection; teamWidth?: string }) {
   return (
     <section className="w-full overflow-hidden rounded-xl border border-border-secondary bg-background">
       <div className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-foreground">
@@ -148,7 +158,10 @@ function CaptureSection({ section }: { section: RosterSummaryPdfSection }) {
         ) : section.icon ? (
           <AppIcon name={section.icon} className="h-[18px] w-[18px] shrink-0 text-accent" />
         ) : null}
-        <span>{rosterNamePreferred(section.title)}</span>
+        <span>
+          {rosterNamePreferred(section.title)}
+          {section.team ? <TeamPill team={section.team} tone={section.teamTone} /> : null}
+        </span>
         {section.sub ? <CaptureRound round={section.sub} /> : null}
       </div>
       <ul className="border-t border-border-subtle px-4">
@@ -156,6 +169,7 @@ function CaptureSection({ section }: { section: RosterSummaryPdfSection }) {
           <CaptureRow
             key={i}
             row={row}
+            teamWidth={teamWidth}
             medley={/\bmedley\b/i.test(`${section.title} ${row.label}`)}
           />
         ))}
@@ -199,9 +213,52 @@ function CaptureHighlights({ counters }: { counters: StatCounter[] }) {
   )
 }
 
+/** Sections in balanced columns, each as wide as the widest column's content. */
+function CaptureColumns({ columns }: { columns: RosterSummaryPdfSection[][] }) {
+  const gridRef = useRef<HTMLDivElement>(null)
+  // One team pill column width for every row, from the longest team named on any of them.
+  const teams = columns.flatMap((column) => column.flatMap((section) => section.rows.flatMap((row) => row.team ?? [])))
+  const teamWidth = teams.length > 0 ? teamPillColumnWidth(teams) : undefined
+
+  // Columns as wide as their content: lay them out at their natural width, then pin every column
+  // to the widest so they line up. Set on the element (not in render) since it depends on layout.
+  useLayoutEffect(() => {
+    const grid = gridRef.current
+    if (!grid) return
+    grid.style.gridTemplateColumns = `repeat(${columns.length}, max-content)`
+    const width = Math.max(...[...grid.children].map((column) => Math.ceil(column.getBoundingClientRect().width)))
+    grid.style.gridTemplateColumns = `repeat(${columns.length}, ${width}px)`
+  }, [columns])
+
+  return (
+    <div ref={gridRef} className="grid w-fit items-start gap-4">
+      {columns.map((column, i) => (
+        <div key={i} className="flex min-w-0 flex-col gap-4">
+          {column.map((section, j) => (
+            <CaptureSection key={j} section={section} teamWidth={teamWidth} />
+          ))}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/** One team's part of a highlights export split by team: its name in gold caps, its tiles, its lists. */
+function CaptureTeam({ team }: { team: RosterSummaryTeamHighlights }) {
+  const columns = useMemo(() => rosterSummaryPngColumns({ sections: [], highlights: team }), [team])
+  return (
+    <div className="flex flex-col gap-4">
+      <p className={`${relayEyebrowClass} text-sm`}>{team.team}</p>
+      <CaptureHighlights counters={team.counters} />
+      {columns.length > 0 ? <CaptureColumns columns={columns} /> : null}
+    </div>
+  )
+}
+
 /**
  * Off-screen copy of the roster summary for PNG export, from the same request as the PDF: the meet
- * header, then the sections in balanced columns. Not shown in the page layout.
+ * header, then the sections in balanced columns — at a meet split by team, each team's section in
+ * turn under the team scores. Not shown in the page layout.
  */
 export default function RosterSummaryExportCapture({
   meetName,
@@ -214,18 +271,8 @@ export default function RosterSummaryExportCapture({
   iconUrl: string | null
   request: RosterSummaryPdfRequest
 }) {
-  const columns = rosterSummaryPngColumns(request)
-  const gridRef = useRef<HTMLDivElement>(null)
-
-  // Columns as wide as their content: lay them out at their natural width, then pin every column
-  // to the widest so they line up. Set on the element (not in render) since it depends on layout.
-  useLayoutEffect(() => {
-    const grid = gridRef.current
-    if (!grid) return
-    grid.style.gridTemplateColumns = `repeat(${columns.length}, max-content)`
-    const width = Math.max(...[...grid.children].map((column) => Math.ceil(column.getBoundingClientRect().width)))
-    grid.style.gridTemplateColumns = `repeat(${columns.length}, ${width}px)`
-  }, [request, columns.length])
+  const columns = useMemo(() => rosterSummaryPngColumns(request), [request])
+  const teams = request.highlights?.teams ?? []
 
   return (
     <div className="flex w-fit flex-col gap-6 bg-background p-8 text-foreground">
@@ -236,18 +283,13 @@ export default function RosterSummaryExportCapture({
         iconUrl={iconUrl}
       />
       {request.highlights ? <CaptureHighlights counters={request.highlights.counters} /> : null}
+      {teams.map((team) => (
+        <CaptureTeam key={team.team} team={team} />
+      ))}
       {columns.length === 0 ? (
         request.highlights ? null : <p className="text-sm text-foreground-tertiary">No entries match these filters.</p>
       ) : (
-        <div ref={gridRef} className="grid w-fit items-start gap-4">
-          {columns.map((column, i) => (
-            <div key={i} className="flex min-w-0 flex-col gap-4">
-              {column.map((section, j) => (
-                <CaptureSection key={j} section={section} />
-              ))}
-            </div>
-          ))}
-        </div>
+        <CaptureColumns columns={columns} />
       )}
     </div>
   )

@@ -94,6 +94,12 @@ export function normalizeMeetNameForMatch(name: string): string {
     .replace(/&/g, " and ")
     .replace(/\b(19|20)\d{2}\b/g, " ")
     .replace(/^\d{1,2}-\d{1,2}-\d{2,4}\s+/, "")
+    // Dates like years: "Intrasquad Nov 18" ↔ "GTSC Intrasquad Meet", "… 11/18".
+    .replace(
+      /\b(jan(uary)?|feb(ruary)?|mar(ch)?|apr(il)?|june?|july?|aug(ust)?|sept?(ember)?|oct(ober)?|nov(ember)?|dec(ember)?)\.?(\s+\d{1,2}(st|nd|rd|th)?\b)?/g,
+      " "
+    )
+    .replace(/\b\d{1,2}\/\d{1,2}(\/\d{0,4})?/g, " ")
     .replace(/[^a-z0-9\s]/g, " ")
     .replace(/\s+/g, " ")
     .trim()

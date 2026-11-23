@@ -6,24 +6,9 @@ import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { DatePicker } from "@/components/ui/CustomDateTimePicker"
 import ActionIcon from "@/components/ui/ActionIcon"
 import { deleteMeetSwim, editMeetSwim } from "./meet-swims.actions"
+import { INDIVIDUAL_SWIM_EVENTS } from "@swimbuzz/shared"
 
-const EVENTS = [
-  "50 Free",
-  "100 Free",
-  "200 Free",
-  "400 Free",
-  "500 Free",
-  "1000 Free",
-  "1650 Free",
-  "100 Back",
-  "200 Back",
-  "100 Breast",
-  "200 Breast",
-  "100 Fly",
-  "200 Fly",
-  "200 IM",
-  "400 IM",
-]
+const EVENTS = INDIVIDUAL_SWIM_EVENTS
 
 type AthleteOption = { id: string; name: string }
 

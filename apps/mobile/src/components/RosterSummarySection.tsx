@@ -32,6 +32,10 @@ import {
   type SessionRound,
   type SetHeatLaneInput,
   type SummaryRoundKind,
+  relayDisplayName,
+  relayLetterTeam,
+  teamOfAthletes,
+  teamPillTones,
 } from "@swimbuzz/shared"
 import {
   ActionSheet,
@@ -55,6 +59,7 @@ import { Icon } from "./Icon"
 import { RosterSummaryExportCapture } from "./RosterSummaryExportCapture"
 import { RosterSummaryJumpBar, rosterSummaryJumpLetter, type RosterSummaryJumpTarget } from "./RosterSummaryJumpBar"
 import { SegmentedOption, SegmentedToggle } from "./SegmentedToggle"
+import { TeamPill, teamPillColumnWidth } from "./TeamPill"
 
 /** Per meet: the list's view and filters, kept for a while (like the web's saved view), not for good. */
 const VIEW_KEY_PREFIX = "swimbuzz.summaryView:"
@@ -120,6 +125,8 @@ export type RosterSummaryEntry = {
   athleteName: string
   event: string
   eventNumber?: number
+  /** "X" for a combined (mixed) individual event, listed as one "Mixed" event. */
+  eventGender?: "X"
   entryType?: "individual" | "relay_team"
   seedTime?: string
   heat?: number
@@ -350,7 +357,8 @@ function importedRoundKinds(entry: RosterSummaryEntry): SummaryRoundKind[] {
   if (round === "F" || entry.finalTime || entry.finalPlace != null || entry.finalHeat != null) {
     kinds.push("F")
   }
-  if (kinds.length === 0 && (/timed/i.test(entry.round ?? "") || entry.resultTime)) kinds.push("T")
+  // A result with no round (a time, or a status like NS) is a timed final.
+  if (kinds.length === 0 && (/timed/i.test(entry.round ?? "") || entry.resultTime || entry.resultStatus)) kinds.push("T")
   return kinds
 }
 
@@ -386,12 +394,12 @@ function formatEntryPoints(entry: RosterSummaryEntry): string | null {
 
 function entryTitle(entry: RosterSummaryEntry): string {
   if (entry.entryType === "relay_team") {
-    const letter = entry.relayLetter ? ` ${entry.relayLetter}` : ""
     // A relay no import has given a round shows the coach's prelims or finals.
     const coachRound = entry.coachHeatLane?.T?.round
     const relayRound = entry.relayRound || (coachRound === "P" || coachRound === "F" ? coachRound : "")
     const round = relayRound ? ` (${relayRound})` : ""
-    return `${entry.event}${letter}${round}`
+    // Our team's side goes before "Relay": "200 Free White Relay A".
+    return `${relayDisplayName(entry.event, entry.relayLetter)}${round}`
   }
   return entry.event
 }
@@ -492,6 +500,11 @@ function RosterNameText({ name, mutedColor }: { name: string; mutedColor: string
  * column. The subtitle leaves out the athlete's name, which the label (or section title) already
  * carries. Relay titles are compact, with the letter folded in: "200 Medley A (P)".
  */
+/** Women, then men, then mixed, then unknown — the order a shared event number's groups list in. */
+function genderOrder(gender: string): number {
+  return gender === "F" ? 0 : gender === "M" ? 1 : gender === "X" ? 2 : 3
+}
+
 function pdfRow(
   entry: RosterSummaryEntry,
   title: string,
@@ -506,15 +519,15 @@ function pdfRow(
   const split = swimmer?.splitTime?.trim()
   const legSplit = split && /\d/.test(split) ? split : undefined
   const legSubSplits = isRelay ? relayLegSubSplits(entry) : []
-  const relayTitleFrom = (event: string) =>
-    [event, entry.relayLetter, entry.relayRound ? `(${entry.relayRound})` : null]
+  // Compact ("200 Medley White A (P)") or spelled out ("200 Medley White Relay A (P)").
+  const relayTitle = (compact: boolean) =>
+    [relayDisplayName(entry.event, entry.relayLetter, compact), entry.relayRound ? `(${entry.relayRound})` : null]
       .filter(Boolean)
       .join(" ")
-  const relayEvent = entry.event.replace(/\s+Relay$/i, "")
   return {
-    label: isRelay ? relayTitleFrom(relayEvent) : title,
-    // Spelled out ("200 Medley Relay A (P)") where the line has room.
-    fullLabel: isRelay ? relayTitleFrom(`${relayEvent} Relay`) : undefined,
+    label: isRelay ? relayTitle(true) : title,
+    // Spelled out where the line has room.
+    fullLabel: isRelay ? relayTitle(false) : undefined,
     // As on the web summary: the leg after the relay's name ("200 Medley A (4th)"), the split under
     // the time, and the leg's own 50s (when the results time them) in split columns below.
     labelNote: legNumber && legNumber > 0 ? relayLegOrdinal(legNumber) : undefined,
@@ -541,6 +554,7 @@ export function RosterSummarySection({
   canEdit = false,
   onHeatLaneSaved,
   scrollRef,
+  athleteTeams = {},
 }: {
   entries: RosterSummaryEntry[]
   viewerAthleteId?: string | null
@@ -559,8 +573,29 @@ export function RosterSummarySection({
   onHeatLaneSaved?: () => void
   /** The screen's scroll view, for the jump bar to scroll to a group (no jump bar without it). */
   scrollRef?: RefObject<Pick<ScrollView, "scrollTo"> | null>
+  /**
+   * Each athlete's team ("Gold") at a meet whose results name several of ours — a pill after their
+   * name by athlete, and after each athlete or relay by event, here and in the exports.
+   */
+  athleteTeams?: Record<string, string>
 }) {
   const c = usePalette()
+  const teamTones = teamPillTones(Object.values(athleteTeams))
+  const teamColumnWidth = Object.keys(athleteTeams).length > 0 ? teamPillColumnWidth(Object.values(athleteTeams)) : 0
+  const teamNames = Object.values(athleteTeams)
+  /** The team a relay's letter names ("White A" is White's), swimmers listed or not. */
+  const letterTeam = (entry: RosterSummaryEntry) =>
+    entry.entryType === "relay_team" ? relayLetterTeam(entry.relayLetter, teamNames) : null
+  /**
+   * A row's team by event: the athlete's, or a relay's — the one its letter names, else the one
+   * most of its swimmers are on.
+   */
+  const entryTeam = (entry: RosterSummaryEntry) =>
+    entry.entryType === "relay_team"
+      ? (letterTeam(entry)?.team ??
+        teamOfAthletes((entry.relaySwimmers ?? []).map((s) => s.athleteId), athleteTeams))
+      : athleteTeams[entry.athleteId]
+  const teamFields = (team: string | undefined) => (team ? { team, teamTone: teamTones[team] } : {})
   // "Entries" → "Heats" once a heat sheet is in → "Results" once results are posted.
   const title = rosterSummaryTitle({
     hasHeatSheet,
@@ -713,7 +748,8 @@ export function RosterSummarySection({
     for (const entry of filtered) {
       // Roster-only "Attending" rows aren't an event.
       if (entry.rosterOnly) continue
-      const key = `${entry.event}|${entry.gender ?? ""}|${entry.entryType ?? "individual"}`
+      // A combined (mixed) individual event is one group, whatever the swimmers' genders.
+      const key = `${entry.event}|${entry.eventGender ?? entry.gender ?? ""}|${entry.entryType ?? "individual"}`
       if (!map.has(key)) map.set(key, [])
       map.get(key)!.push(entry)
     }
@@ -723,11 +759,18 @@ export function RosterSummarySection({
       .map(([key, list]) => ({
         key,
         // "Women 200 Medley Relay"
-        title: list[0] ? `${eventGenderWord(list[0].gender) ?? ""} ${list[0].event}`.trim() : key,
+        title: list[0] ? `${eventGenderWord(list[0].eventGender ?? list[0].gender) ?? ""} ${list[0].event}`.trim() : key,
         eventNumber: list.find((entry) => entry.eventNumber != null && entry.eventNumber > 0)?.eventNumber,
+        gender: list[0]?.eventGender ?? list[0]?.gender ?? "",
         entries: sortEventEntries(list, activeRound),
       }))
-      .sort((a, b) => number(a.eventNumber) - number(b.eventNumber) || a.title.localeCompare(b.title))
+      // Women before men under the same event number (a mixed event scored by gender).
+      .sort(
+        (a, b) =>
+          number(a.eventNumber) - number(b.eventNumber) ||
+          genderOrder(a.gender) - genderOrder(b.gender) ||
+          a.title.localeCompare(b.title)
+      )
   }, [filtered, activeRound])
 
   // Jump bar: by athlete a letter per first letter of the names listed, by event a number per
@@ -801,6 +844,7 @@ export function RosterSummarySection({
       mode === "athlete"
         ? athleteGroups.map((group) => ({
             title: group.name,
+            ...teamFields(athleteTeams[group.athleteId]),
             // Under an athlete, a relay is just the event — no list of its swimmers.
             rows: group.entries.map((entry) => ({
               ...pdfRow(entry, entryTitle(entry), group.athleteId, activeRound),
@@ -811,14 +855,15 @@ export function RosterSummarySection({
           }))
         : eventGroups.map((group) => ({
             title: group.title,
-            rows: group.entries.map((entry) =>
-              pdfRow(
+            rows: group.entries.map((entry) => ({
+              ...pdfRow(
                 entry,
                 entry.entryType === "relay_team" ? entryTitle(entry) : entry.athleteName,
                 undefined,
                 activeRound
-              )
-            ),
+              ),
+              ...teamFields(entryTeam(entry)),
+            })),
           }))
     return { heading, sections, splitSections: mode !== "athlete", ...orderOfEvents }
   }
@@ -1085,15 +1130,20 @@ export function RosterSummarySection({
       ) : mode === "athlete" ? (
         athleteGroups.map((group) => (
           <View key={group.athleteId} ref={groupViewRef(group.athleteId)} collapsable={false} style={{ marginBottom: spacing.md }}>
-            <Body
-              style={{
-                fontWeight: "700",
-                marginBottom: spacing.xs,
-                color: viewerAthleteId && group.athleteId === viewerAthleteId ? c.accent : undefined,
-              }}
-            >
-              <RosterNameText name={group.name} mutedColor={c.textSecondary} />
-            </Body>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: spacing.xs }}>
+              <Body
+                style={{
+                  flexShrink: 1,
+                  fontWeight: "700",
+                  color: viewerAthleteId && group.athleteId === viewerAthleteId ? c.accent : undefined,
+                }}
+              >
+                <RosterNameText name={group.name} mutedColor={c.textSecondary} />
+              </Body>
+              {athleteTeams[group.athleteId] ? (
+                <TeamPill team={athleteTeams[group.athleteId]} tone={teamTones[athleteTeams[group.athleteId]]} />
+              ) : null}
+            </View>
             {group.entries.map((entry, index) => (
               <ListRow
                 key={`${entry.athleteId}-${entry.event}-${entry.relayLetter ?? ""}-${index}`}
@@ -1110,7 +1160,11 @@ export function RosterSummarySection({
             <Body style={{ fontWeight: "700", marginBottom: spacing.xs }}>
               {group.title}
             </Body>
-            {group.entries.map((entry, index) => (
+            {group.entries.map((entry, index) => {
+              const preferred =
+                entry.entryType !== "relay_team" ? splitRosterName(entry.athleteName).preferred : null
+              const team = entryTeam(entry)
+              return (
               <ListRow
                 key={`${group.key}-${entry.athleteId}-${index}`}
                 title={
@@ -1119,17 +1173,23 @@ export function RosterSummarySection({
                     : splitRosterName(entry.athleteName).name
                 }
                 titleAdornment={
-                  entry.entryType !== "relay_team" &&
-                  splitRosterName(entry.athleteName).preferred ? (
-                    <Text style={{ fontSize: 16, color: c.textSecondary }}>
-                      ({splitRosterName(entry.athleteName).preferred})
-                    </Text>
+                  preferred ? (
+                    <Text style={{ fontSize: 16, color: c.textSecondary }}>({preferred})</Text>
+                  ) : undefined
+                }
+                // The team pills in a column of their own at the row's right, lined up row to row.
+                accessory={
+                  teamColumnWidth ? (
+                    <View style={{ width: teamColumnWidth, alignItems: "flex-start", marginLeft: spacing.xs }}>
+                      {team ? <TeamPill team={team} tone={teamTones[team]} /> : null}
+                    </View>
                   ) : undefined
                 }
                 subtitle={entrySubtitle(entry, "event", true, undefined, true, activeRound)}
                 onPress={heatLanePress(entry)}
               />
-            ))}
+              )
+            })}
           </View>
         ))
       )}

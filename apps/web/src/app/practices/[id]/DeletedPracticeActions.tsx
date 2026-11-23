@@ -28,32 +28,33 @@ export default function DeletedPracticeActions({
   canRestore: boolean
 }) {
   const router = useRouter()
-  const [busy, setBusy] = useState(false)
+  const [action, setAction] = useState<"restore" | "purge" | null>(null)
+  const busy = action !== null
   const [error, setError] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const countdown = recoveryCountdown(purgeAfter)
 
   async function restore() {
-    setBusy(true)
+    setAction("restore")
     setError(null)
     try {
       await api.restoreDeleted("practice", practiceId)
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong")
-      setBusy(false)
+      setAction(null)
     }
   }
 
   async function purge() {
-    setBusy(true)
+    setAction("purge")
     setError(null)
     try {
       await api.purgeDeleted("practice", practiceId)
       router.push("/practices")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong")
-      setBusy(false)
+      setAction(null)
     }
   }
 
@@ -69,7 +70,7 @@ export default function DeletedPracticeActions({
           className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center border border-border rounded-lg bg-background hover:bg-fill transition-colors disabled:opacity-40"
         >
           <ActionIcon kind="restore" className="h-5 w-5" />
-          <HoverDetail label={busy ? "Restoring…" : "Restore"} />
+          <HoverDetail label={action === "restore" ? "Restoring…" : "Restore"} />
         </button>
         <button
           type="button"
@@ -107,7 +108,7 @@ export default function DeletedPracticeActions({
               disabled={busy}
               className="flex-1 rounded-lg bg-error px-4 py-2.5 text-sm font-medium text-error-contrast hover:bg-error-hover disabled:opacity-50"
             >
-              {busy ? "Deleting…" : "Delete permanently"}
+              {action === "purge" ? "Deleting…" : "Delete permanently"}
             </button>
           </ModalFooter>
         }

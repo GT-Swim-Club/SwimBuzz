@@ -14,6 +14,8 @@ export type MeetListRow = {
   location: string
   /** Short status ending the meta line under the name ("in 6 days", "12 days left"). */
   status?: ReactNode
+  /** A pill right after the name on its line (an unofficial meet's). */
+  nameBadge?: ReactNode
   actions?: ReactNode
 }
 
@@ -46,7 +48,7 @@ function Row({ row, cols }: { row: MeetListRow; cols: string }) {
         <MeetListThumb iconUrl={row.iconUrl} bannerUrl={row.bannerUrl} />
         {/* flex-1 so the meta line measures the full width it has to fit into. */}
         <div className="flex min-w-0 flex-1 flex-col">
-          <MeetListName>{row.name}</MeetListName>
+          <MeetListName after={row.nameBadge}>{row.name}</MeetListName>
           <MeetListMeta date={row.date} location={row.location} status={row.status} />
         </div>
       </div>

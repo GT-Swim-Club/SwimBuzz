@@ -20,7 +20,7 @@ import {
   highlightLists,
   isDropCounterValue,
   meetHighlightsExportRequest,
-  paginateHighlights,
+  paginateMeetHighlights,
   TEAM_SCORE_SECTIONS,
   teamPlaceLabel,
   type HighlightList,
@@ -354,6 +354,7 @@ function HighlightListsSheet({
   visible,
   onListChange,
   onClose,
+  team,
 }: {
   lists: HighlightList[]
   /** The list shown — kept while the sheet slides closed. */
@@ -361,11 +362,17 @@ function HighlightListsSheet({
   visible: boolean
   onListChange: (list: HighlightListKey) => void
   onClose: () => void
+  /** The team whose lists these are ("Gold"), at a meet split by team. */
+  team?: string
 }) {
   const { height } = useWindowDimensions()
   const shown = lists.find((l) => l.key === list) ?? lists[0]
   return (
-    <BottomSheet visible={visible} onClose={onClose} title={shown?.title}>
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      title={shown?.title && team ? `${team} · ${shown.title}` : shown?.title}
+    >
       {lists.length > 1 ? (
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.xs, marginBottom: spacing.sm }}>
           {lists.map((l) => (
@@ -497,9 +504,15 @@ export function MeetHighlightsCarousel({
 }) {
   const c = usePalette()
   const share = useHighlightsShare(meetId, meetName, highlights)
-  const pages = paginateHighlights(highlights.counters)
+  // At a meet split by team (an intrasquad), the team score cards, then each team's pages.
+  const pages = paginateMeetHighlights(highlights)
   const teamScores = highlights.teamScores ?? null
-  const lists = highlightLists(highlights)
+  /** The lists a page's tiles open: its team's, or the meet's. */
+  const listsFor = (team: string | undefined) =>
+    highlightLists(highlights.teams?.find((t) => t.team === team) ?? highlights)
+  // The team whose lists the list sheet shows.
+  const [listTeam, setListTeam] = useState<string | undefined>(undefined)
+  const lists = listsFor(listTeam)
   const scrollRef = useRef<RNScrollView>(null)
   const [width, setWidth] = useState(0)
   const [index, setIndex] = useState(0)
@@ -574,7 +587,7 @@ export function MeetHighlightsCarousel({
   return (
     <Section>
       <SectionHeader
-        title="Highlights"
+        title={pages[index]?.team ? `Highlights · ${pages[index].team}` : "Highlights"}
         right={
           <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
             {dots}
@@ -618,10 +631,10 @@ export function MeetHighlightsCarousel({
                   {page.counters.map((counter) => {
                     const section =
                       page.kind === "teamScores"
-                        ? TEAM_SCORE_SECTIONS.find((s) => s.label === counter.label)?.key
+                        ? counter.section ?? TEAM_SCORE_SECTIONS.find((s) => s.label === counter.label)?.key
                         : undefined
                     const listKey = highlightCounterList(counter)
-                    const list = listKey ? lists.find((l) => l.key === listKey) : undefined
+                    const list = listKey ? listsFor(page.team).find((l) => l.key === listKey) : undefined
                     const open =
                       teamScores && section
                         ? {
@@ -630,8 +643,9 @@ export function MeetHighlightsCarousel({
                           }
                         : list
                           ? {
-                              label: `${counter.label}: ${counter.value}. Show ${list.title}`,
+                              label: `${page.team ? `${page.team} ` : ""}${counter.label}: ${counter.value}. Show ${list.title}`,
                               run: () => {
+                                setListTeam(page.team)
                                 setOpenList(list.key)
                                 setListVisible(true)
                               },
@@ -674,6 +688,7 @@ export function MeetHighlightsCarousel({
           visible={listVisible}
           onListChange={setOpenList}
           onClose={() => setListVisible(false)}
+          team={listTeam}
         />
       ) : null}
       <ActionSheet

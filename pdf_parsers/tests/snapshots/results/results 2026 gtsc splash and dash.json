@@ -1,6 +1,110 @@
 {
   "course": "SCY",
   "detectedSheetType": "results",
+  "event_order": {
+    "sessions": [
+      {
+        "label": "Order of Events",
+        "rows": [
+          {
+            "event": "200 Medley Relay",
+            "men": 2,
+            "women": 1
+          },
+          {
+            "event": "200 Free",
+            "men": 4,
+            "women": 3
+          },
+          {
+            "event": "200 IM",
+            "men": 6,
+            "women": 5
+          },
+          {
+            "event": "50 Back",
+            "men": 8,
+            "women": 7
+          },
+          {
+            "event": "200 Breast",
+            "men": 10,
+            "women": 9
+          },
+          {
+            "event": "50 Free",
+            "men": 12,
+            "women": 11
+          },
+          {
+            "event": "100 Fly",
+            "men": 14,
+            "women": 13
+          },
+          {
+            "event": "200 Back",
+            "men": 16,
+            "women": 15
+          },
+          {
+            "event": "400 IM",
+            "men": 18,
+            "women": 17
+          },
+          {
+            "event": "200 Free Relay",
+            "men": 20,
+            "women": 19
+          },
+          {
+            "event": "50 Fly",
+            "men": 22,
+            "women": 21
+          },
+          {
+            "event": "100 Breast",
+            "men": 24,
+            "women": 23
+          },
+          {
+            "event": "100 IM",
+            "men": 26,
+            "women": 25
+          },
+          {
+            "event": "100 Free",
+            "men": 28,
+            "women": 27
+          },
+          {
+            "event": "200 Fly",
+            "men": 30,
+            "women": 29
+          },
+          {
+            "event": "100 Back",
+            "men": 32,
+            "women": 31
+          },
+          {
+            "event": "50 Breast",
+            "men": 34,
+            "women": 33
+          },
+          {
+            "event": "500 Free",
+            "men": 36,
+            "women": 35
+          },
+          {
+            "event": "400 Free Relay",
+            "men": 38,
+            "women": 37
+          }
+        ]
+      }
+    ]
+  },
   "meet_date": "2026-09-26",
   "meet_name": "GTSC Ramblin Splash & Dash",
   "relay_results": [

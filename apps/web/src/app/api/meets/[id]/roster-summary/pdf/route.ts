@@ -31,6 +31,7 @@ export async function POST(
       startsAt: true,
       endsAt: true,
       timeZone: true,
+      unofficial: true,
       iconUrl: true,
       eventOrder: true,
       heatSheetSummary: true,

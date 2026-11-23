@@ -33,6 +33,10 @@ export type MeetFormState = {
   course: string
   season: string
   school: string
+  /** Intrasquad or other unofficial meet: its times are marked unofficial everywhere. */
+  unofficial: boolean
+  /** Mixed individual events are placed and scored for women and men separately. */
+  scoreByGender: boolean
   iconUrl: string
   bannerUrl: string
   packetUrl: string
@@ -57,6 +61,8 @@ export const emptyMeetForm: MeetFormState = {
   course: "SCY",
   season: "",
   school: "",
+  unofficial: false,
+  scoreByGender: false,
   iconUrl: "",
   bannerUrl: "",
   packetUrl: "",
@@ -845,7 +851,58 @@ export default function MeetFields({
         </div>
       </div>
 
+      <MeetSwitch
+        label="Unofficial meet"
+        description="Intrasquads and time trials. Times are marked with * and count toward records and Top 10s only in 25s."
+        on={form.unofficial}
+        onChange={(on) => set("unofficial", on)}
+      />
+      <MeetSwitch
+        label="Score women and men separately"
+        description="Mixed individual events are placed and scored within each gender (mixed relays stay mixed). Applies when results are imported."
+        on={form.scoreByGender}
+        onChange={(on) => set("scoreByGender", on)}
+      />
+
       {form.scoringIndividual != null ? <ScoringFields form={form} set={set} /> : null}
+    </div>
+  )
+}
+
+/** A labeled on/off switch for a meet setting. */
+function MeetSwitch({
+  label,
+  description,
+  on,
+  onChange,
+}: {
+  label: string
+  description: string
+  on: boolean
+  onChange: (on: boolean) => void
+}) {
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-foreground">{label}</p>
+        <p className="text-xs text-foreground-secondary">{description}</p>
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        aria-label={label}
+        onClick={() => onChange(!on)}
+        className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full transition-colors ${
+          on ? "bg-primary" : "bg-fill-secondary"
+        }`}
+      >
+        <span
+          className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full shadow transition-transform ${
+            on ? "bg-background translate-x-5" : "bg-primary translate-x-0"
+          }`}
+        />
+      </button>
     </div>
   )
 }

@@ -3,19 +3,24 @@ import {
   MEET_HEADER,
   RELAY_LEG_SUB_SPLITS_MAX,
   ROSTER_SUMMARY_PDF_LIMITS,
-  coerceMeetHighlights,
+  coerceNewNationalsCuts,
+  coerceStatCounters,
   coerceMeetRecords,
   coerceMeetWins,
+  coerceTeamPillTone,
   coerceTopScorers,
+  formatPoints,
   highlightTileRows,
   isDropCounterValue,
   meetFileName,
   rosterNameFirstLast,
   rosterNamePreferred,
   rosterSummaryExportSections,
+  rosterSummaryTeamHighlightSections,
   rosterSummaryPdfLabel,
   type IconName,
   type RosterSummaryHighlights,
+  type RosterSummaryTeamHighlights,
   type RosterSummaryPdfRequest,
   type RosterSummaryPdfResult,
   type RosterSummaryPdfRow,
@@ -23,9 +28,18 @@ import {
   type RosterSummaryPdfSplit,
   type MeetHeaderDetails,
   type StatCounter,
+  type TeamPillTone,
 } from "@swimbuzz/shared"
 import { formatDisplayTime, formatOrdinal } from "@/lib/utils"
-import { HELVETICA_CAP_HEIGHT, SEMIBOLD_CHAR_SPACE, drawMeetPdfDetails, semiboldText } from "@/lib/meet/meet-pdf-details"
+import {
+  HELVETICA_CAP_HEIGHT,
+  SEMIBOLD_CHAR_SPACE,
+  drawMeetPdfDetails,
+  drawUnofficialPdfBadge,
+  semiboldText,
+  splitMeetPdfTitle,
+  unofficialPdfBadgeReserve,
+} from "@/lib/meet/meet-pdf-details"
 import { drawPdfIcon } from "@/lib/meet/pdf-icon"
 import { cleanEventName } from "@/lib/meet/meet-event-order"
 import type { EventOrderWithHeats } from "@/lib/meet/event-heats"
@@ -53,6 +67,17 @@ const INK_TERTIARY: RGB = [140, 140, 140]
 const BORDER: RGB = [234, 234, 234]
 const BORDER_SUBTLE: RGB = [228, 228, 231]
 const WHITE: RGB = [255, 255, 255]
+/** Team pills' colors ("GOLD" after a name): the light theme's `--brand-color-team-<tone>-*`. */
+const TEAM_PILL_COLORS: Record<TeamPillTone, { fill: RGB; text: RGB; border: RGB }> = {
+  gold: { fill: [242, 239, 228], text: [140, 107, 56], border: [217, 213, 202] },
+  white: { fill: [240, 240, 240], text: [89, 89, 89], border: [217, 217, 217] },
+  black: { fill: [31, 31, 31], text: [255, 255, 255], border: [31, 31, 31] },
+  blue: { fill: [230, 244, 255], text: [9, 88, 217], border: [145, 202, 255] },
+  green: { fill: [246, 255, 237], text: [56, 158, 13], border: [182, 235, 143] },
+  red: { fill: [255, 241, 240], text: [207, 19, 35], border: [255, 163, 158] },
+  purple: { fill: [249, 240, 255], text: [83, 29, 171], border: [212, 173, 247] },
+  orange: { fill: [255, 247, 230], text: [212, 107, 8], border: [255, 213, 145] },
+}
 const FASTER: RGB = [56, 158, 13]
 const SLOWER: RGB = [220, 38, 38]
 // The roster summary's status and podium pill colors (SummaryRow).
@@ -90,10 +115,22 @@ const M = {
   subheadingPadBottom: px(6),
   subheadingSize: px(10),
   subheadingCharSpace: px(1),
+  // A team's heading in a highlights export split by team ("GOLD"): its caps, then room to its tiles.
+  teamHeadingSize: px(13),
+  teamHeadingCharSpace: px(1.5),
+  teamHeadingHeight: px(26),
+  /** The smallest a tile's hint or detail shrinks to fit its line before it's cut short. */
+  tileHintMinSize: px(8),
   // A row's round after its label ("FINALS"), the subheading's gold caps a little smaller.
   roundSize: px(9),
   roundCharSpace: px(0.8),
   roundGap: px(7),
+  // A team's pill after a name ("GOLD"), in small caps like the round.
+  pillSize: px(8),
+  pillCharSpace: px(0.8),
+  pillPadX: px(5),
+  pillHeight: px(13),
+  pillGap: px(6),
   // Every event circle is the same size, here and in the relays PDF and PNG.
   badgeSize: px(21),
   badgeTextSize: px(10.5),
@@ -120,6 +157,8 @@ const M = {
   deltaWidth: px(40),
   timeWidth: px(66),
   placeWidth: px(32),
+  /** The gap between the place and the points after it ("1st  20"), when any row in the export scored. */
+  pointsGap: px(10),
   rightGap: px(10),
   // Heat & lane ("H2 of 4 · L5" over the start time), right-aligned just left of the result block.
   heatLaneGap: px(8),
@@ -206,6 +245,9 @@ function parseResult(value: unknown): RosterSummaryPdfResult {
       status: text(r.status),
       delta: text(r.delta) ?? null,
       place: positiveInt(r.place),
+      ...(typeof r.points === "number" && Number.isFinite(r.points) && r.points > 0 && r.points < 10000
+        ? { points: r.points }
+        : {}),
       podium: r.podium === true,
     }
   }
@@ -267,6 +309,8 @@ function parseRow(value: unknown): RosterSummaryPdfRow | null {
     label,
     fullLabel: text(r.fullLabel),
     labelNote: text(r.labelNote),
+    team: text(r.team),
+    teamTone: coerceTeamPillTone(r.teamTone),
     round: text(r.round),
     sub: text(r.sub),
     meta: text(r.meta),
@@ -281,22 +325,37 @@ function parseRow(value: unknown): RosterSummaryPdfRow | null {
   }
 }
 
-/** The meet's highlights a Results export carries, trimmed to the limits, or undefined for none. */
+/**
+ * The meet's highlights a Results export carries, trimmed to the limits, or undefined for none —
+ * with each team's part at a meet split by team.
+ */
 function parseHighlights(value: unknown): RosterSummaryHighlights | undefined {
   const raw = (value ?? {}) as Record<string, unknown>
-  const highlights = coerceMeetHighlights({
-    counters: Array.isArray(raw.counters) ? raw.counters.slice(0, ROSTER_SUMMARY_PDF_LIMITS.counters) : null,
-    newNationalsCuts: Array.isArray(raw.newNationalsCuts)
-      ? raw.newNationalsCuts.slice(0, ROSTER_SUMMARY_PDF_LIMITS.newNationalsCuts)
-      : null,
-  })
-  if (!highlights) return undefined
-  const counters = highlights.counters.flatMap((c) => {
+  const highlights = parseHighlightBlock(raw)
+  const teams = (Array.isArray(raw.teams) ? raw.teams.slice(0, ROSTER_SUMMARY_PDF_LIMITS.teams) : []).flatMap(
+    (item): RosterSummaryTeamHighlights[] => {
+      const t = (item ?? {}) as Record<string, unknown>
+      const team = text(t.team)
+      const block = parseHighlightBlock(t)
+      return team && block.counters.length > 0 ? [{ team, ...block }] : []
+    }
+  )
+  if (teams.length > 1) return { ...highlights, teams }
+  return highlights.counters.length > 0 ? highlights : undefined
+}
+
+/** One block of highlights (the meet's, or a team's): its tiles and lists, trimmed to the limits. */
+function parseHighlightBlock(raw: Record<string, unknown>): Omit<RosterSummaryHighlights, "teams"> {
+  const counters = coerceStatCounters(
+    Array.isArray(raw.counters) ? raw.counters.slice(0, ROSTER_SUMMARY_PDF_LIMITS.counters) : null
+  ).flatMap((c) => {
     const label = text(c.label)
     const value = text(String(c.value))
     return label && value ? [{ ...c, label, value, hint: text(c.hint), detail: text(c.detail) }] : []
   })
-  const newNationalsCuts = (highlights.newNationalsCuts ?? []).flatMap((c) => {
+  const newNationalsCuts = coerceNewNationalsCuts(
+    Array.isArray(raw.newNationalsCuts) ? raw.newNationalsCuts.slice(0, ROSTER_SUMMARY_PDF_LIMITS.newNationalsCuts) : null
+  ).flatMap((c) => {
     const [athleteName, event, time, cut, delta] = [c.athleteName, c.event, c.time, c.cut, c.delta].map(text)
     return athleteName && event && time && cut && delta
       ? [{ athleteId: text(c.athleteId), athleteName, gender: c.gender, event, time, cut, delta }]
@@ -328,7 +387,7 @@ function parseHighlights(value: unknown): RosterSummaryHighlights | undefined {
       : undefined
     return event && time ? [{ gender: r.gender, event, swimmers, leadoff: r.leadoff, time, previous }] : []
   })
-  return counters.length > 0 ? { counters, newNationalsCuts, topScorers, wins, records } : undefined
+  return { counters, newNationalsCuts, topScorers, wins, records }
 }
 
 /** The client's view as a PDF request, or null when it isn't one (or is over the size limits). */
@@ -345,7 +404,7 @@ export function parseRosterSummaryPdfRequest(body: unknown): RosterSummaryPdfReq
     if (rowCount > ROSTER_SUMMARY_PDF_LIMITS.rows) return null
     const rows = s.rows.map(parseRow).filter((row): row is RosterSummaryPdfRow => row != null)
     if (rows.length === 0) continue
-    sections.push({ title, sub: text(s.sub), eventNumber: positiveInt(s.eventNumber), rows })
+    sections.push({ title, team: text(s.team), teamTone: coerceTeamPillTone(s.teamTone), sub: text(s.sub), eventNumber: positiveInt(s.eventNumber), rows })
   }
   const order = b.orderOfEvents && typeof b.orderOfEvents === "object" ? (b.orderOfEvents as Record<string, unknown>) : null
   const highlights = parseHighlights(b.highlights)
@@ -432,19 +491,38 @@ export function buildRosterSummaryPdf(input: RosterSummaryPdfInput): jsPDF {
 function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): jsPDF {
   // A highlights export's top scorers, top performances and new Nationals cuts lead the sections.
   const request = withPreferredNames({ ...input.request, sections: rosterSummaryExportSections(input.request) })
+  // At a meet split by team, each team's tiles and lists, drawn in turn under the team scores.
+  const teamBlocks = (request.highlights?.teams ?? []).map((team) => ({
+    name: team.team,
+    counters: team.counters,
+    sections: withPreferredNames({ sections: rosterSummaryTeamHighlightSections(team) }).sections,
+  }))
+  const allSections = [...request.sections, ...teamBlocks.flatMap((block) => block.sections)]
   // Medley relay rows, by their own label ("200 Medley A") or their event's title ("Relay A").
   const medleyRows = new Set(
-    request.sections.flatMap((section) =>
+    allSections.flatMap((section) =>
       section.rows.filter((row) => /\bmedley\b/i.test(`${section.title} ${row.label}`))
     )
   )
   const highlightsExport = Boolean(request.highlights)
+  // Every swim's points in the export, for the points column after the place (none, no column).
+  const pointLabels = allSections.flatMap((section) =>
+    section.rows.flatMap((row) =>
+      row.result?.kind === "done" && row.result.points != null ? [formatPoints(row.result.points)] : []
+    )
+  )
   const sectionGap = highlightsExport ? M.highlightsSectionGap : M.sectionGap
   const doc = new jsPDF({
     unit: "pt",
     format: scale === 1 ? "letter" : [LETTER_WIDTH * scale, LETTER_HEIGHT * scale],
     orientation: "portrait",
   })
+  // The points column is as wide as its widest number ("16.5") and a small gap after the place.
+  doc.setFont("helvetica", "normal")
+  doc.setFontSize(M.smallSize)
+  const pointsWidth =
+    pointLabels.length > 0 ? M.pointsGap + Math.max(...pointLabels.map((label) => doc.getTextWidth(label))) : 0
+  const rightWidth = RIGHT_WIDTH + pointsWidth
   const pageWidth = doc.internal.pageSize.getWidth()
   const pageHeight = doc.internal.pageSize.getHeight()
   const pageLeft = M.margin
@@ -464,7 +542,7 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
    * Measures without disturbing the current font, since callers measure around it.
    */
   function resultWidth(result: RosterSummaryPdfResult): number {
-    if (result.kind !== "text") return RIGHT_WIDTH
+    if (result.kind !== "text") return rightWidth
     const font = doc.getFont()
     const size = doc.getFontSize()
     doc.setFont("helvetica", "normal")
@@ -474,7 +552,7 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
     const width = doc.getTextWidth(value) + (result.strong ? Math.max(0, value.length - 1) * SEMIBOLD_CHAR_SPACE : 0)
     doc.setFont(font.fontName, font.fontStyle)
     doc.setFontSize(size)
-    return Math.min(RIGHT_WIDTH, width)
+    return Math.min(rightWidth, width)
   }
   /**
    * The heat & lane column's width: as wide as the row's heat & lane or start time, whichever is
@@ -500,8 +578,27 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
    */
   function textRight(row: RosterSummaryPdfRow, fullResult = false): number {
     const heatLane = heatLaneWidth(row)
-    const left = fullResult && row.result ? right - RIGHT_WIDTH - M.rightGap : resultLeft(row)
-    return left - (heatLane > 0 ? heatLane + M.heatLaneGap : 0)
+    const left = fullResult && row.result ? right - rightWidth - M.rightGap : resultLeft(row)
+    return left - (heatLane > 0 ? heatLane + M.heatLaneGap : 0) - (row.team ? teamColumnWidth() : 0)
+  }
+
+  /**
+   * The team pills' column, just left of the heat & lane (or the result): as wide as the export's
+   * widest pill, with its gap before it — so every row's pill lines up. 0 when no row has a team.
+   */
+  let teamColumn: number | null = null
+  function teamColumnWidth(): number {
+    if (teamColumn == null) {
+      const font = doc.getFont()
+      const size = doc.getFontSize()
+      const widths = allSections.flatMap((section) => section.rows.map((row) => teamPillWidth(row.team)))
+      // The widest pill (its gap before it included), then the same gap before the next column.
+      const widest = Math.max(0, ...widths)
+      teamColumn = widest > 0 ? widest + M.pillGap : 0
+      doc.setFont(font.fontName, font.fontStyle)
+      doc.setFontSize(size)
+    }
+    return teamColumn
   }
 
   function setType(style: "normal" | "bold", size: number, color: RGB = INK) {
@@ -664,7 +761,7 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
     const noteWidth = doc.getTextWidth(pdfText(row.resultNote))
     doc.setFont(font.fontName, font.fontStyle)
     doc.setFontSize(size)
-    return right - (placeless ? 0 : M.placeWidth) - noteWidth
+    return right - pointsWidth - (placeless ? 0 : M.placeWidth) - noteWidth
   }
 
   /**
@@ -732,9 +829,36 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
     return doc.getTextWidth(note)
   }
 
+  /** A team pill's width ("GOLD"), with its gap before it; 0 without a team. */
+  function teamPillWidth(team: string | undefined): number {
+    if (!team) return 0
+    const caps = pdfText(team.toUpperCase())
+    setType("bold", M.pillSize)
+    return M.pillGap + doc.getTextWidth(caps) + caps.length * M.pillCharSpace + M.pillPadX * 2
+  }
+
   /**
-   * Whether `label` and the label note fit uncut before the heat & lane / result (labelEndWith caps
-   * the label at that room, so it can't tell).
+   * A team pill in its color after text ending at `x`, centered on the capitals of that text (set at
+   * `size` on `baseline`); returns where it ends.
+   */
+  function drawTeamPill(team: string, tone: TeamPillTone | undefined, x: number, baseline: number, size: number): number {
+    const caps = pdfText(team.toUpperCase())
+    const colors = TEAM_PILL_COLORS[tone ?? "gold"]
+    const left = x + M.pillGap
+    const width = teamPillWidth(team) - M.pillGap
+    const center = baseline - (size * HELVETICA_CAP_HEIGHT) / 2
+    doc.setFillColor(...colors.fill)
+    doc.setDrawColor(...colors.border)
+    doc.setLineWidth(0.75)
+    doc.roundedRect(left, center - M.pillHeight / 2, width, M.pillHeight, M.pillHeight / 2, M.pillHeight / 2, "FD")
+    setType("bold", M.pillSize, colors.text)
+    doc.text(caps, left + M.pillPadX, center + (M.pillSize * HELVETICA_CAP_HEIGHT) / 2, { charSpace: M.pillCharSpace })
+    return left + width
+  }
+
+  /**
+   * Whether `label` and the label note fit uncut before the team pill / heat & lane / result
+   * (labelEndWith caps the label at that room, so it can't tell).
    */
   function labelFitsWhole(row: RosterSummaryPdfRow, label: string): boolean {
     const noteWidth = labelNoteWidth(row)
@@ -777,7 +901,10 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
     if (!row.meta || row.startTime || row.resultNote) return false
     const end = labelEndWith(row, label)
     setType("normal", M.metaSize)
-    return end + M.inlineMetaGap + doc.getTextWidth(pdfText(row.meta)) <= textRight(row, true)
+    // Beside a plain-text result ("40 pts") the meta has room up to that text, not the full time /
+    // delta / place block — so "2 scoring events" stays beside any name it fits after.
+    const limit = textRight(row, row.result?.kind !== "text")
+    return end + M.inlineMetaGap + doc.getTextWidth(pdfText(row.meta)) <= limit
   }
 
   /**
@@ -875,10 +1002,11 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
     baseline: number,
     note?: { text: string; timeBaseline: number; noteBaseline: number }
   ) {
-    // Without a place column the time runs to the edge.
+    // Without a place column the time runs to the edge (or the points column).
     const placeWidth = result.kind === "done" && result.placeless ? 0 : M.placeWidth
-    const deltaRight = right - placeWidth - M.timeWidth
-    const timeRight = right - placeWidth
+    const placeRight = right - pointsWidth
+    const deltaRight = placeRight - placeWidth - M.timeWidth
+    const timeRight = placeRight - placeWidth
     const hasNote = Boolean(note) && (result.kind === "done" || result.kind === "seed")
     const timeBaseline = hasNote && note ? note.timeBaseline : baseline
     if (hasNote && note) {
@@ -901,7 +1029,11 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
       if (result.place != null) {
         const podium = result.podium && result.place <= 3 ? PODIUM[result.place] : undefined
         setType(podium ? "bold" : "normal", M.smallSize, podium ?? INK_SECONDARY)
-        doc.text(formatOrdinal(result.place), right, baseline, { align: "right" })
+        doc.text(formatOrdinal(result.place), placeRight, baseline, { align: "right" })
+      }
+      if (result.points != null && pointsWidth > 0) {
+        setType("normal", M.smallSize, INK_SECONDARY)
+        doc.text(formatPoints(result.points), right, baseline, { align: "right" })
       }
     } else if (result.kind === "seed") {
       setType("bold", M.seedTagSize, INK_TERTIARY)
@@ -911,15 +1043,15 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
       doc.text(pdfText(seed), timeRight, timeBaseline, { align: "right" })
       if (result.seedRank != null) {
         setType("normal", M.smallSize, INK_TERTIARY)
-        doc.text(formatOrdinal(result.seedRank), right, baseline, { align: "right" })
+        doc.text(formatOrdinal(result.seedRank), placeRight, baseline, { align: "right" })
       }
     } else if (result.kind === "text") {
       if (result.strong) {
         setType("normal", M.timeSize)
-        semiboldText(doc, fit(result.text, RIGHT_WIDTH), right, baseline, "right")
+        semiboldText(doc, fit(result.text, rightWidth), right, baseline, "right")
       } else {
         setType("normal", M.smallSize, INK_SECONDARY)
-        doc.text(fit(result.text, RIGHT_WIDTH), right, baseline, { align: "right" })
+        doc.text(fit(result.text, rightWidth), right, baseline, { align: "right" })
       }
     } else {
       setType("normal", M.timeSize, INK_TERTIARY)
@@ -976,6 +1108,8 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
       doc.text(note, labelEndX, baseline)
       labelEndX += noteWidth
     }
+    // The team pill in its own column, left of the heat & lane / result, on the label line.
+    if (row.team) drawTeamPill(row.team, row.teamTone, textRight(row), baseline, M.labelSize)
     if (row.round) labelEndX = drawRound(row.round, labelEndX + M.roundGap, baseline)
     if (row.sub) {
       setType("normal", M.subSize, INK_TERTIARY)
@@ -1027,7 +1161,10 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
     setType("normal", M.sectionTitleSize)
     const baseline = centeredBaseline(top, M.sectionHeaderHeight, M.sectionTitleSize)
     const suffix = continued ? " (cont.)" : ""
-    const title = fit(`${section.title}${suffix}`, right - x, MEDIUM_CHAR_SPACE)
+    // The athlete's team pill after their name (and any "(cont.)").
+    const pillWidth = teamPillWidth(section.team)
+    setType("normal", M.sectionTitleSize)
+    const title = fit(`${section.title}${suffix}`, right - x - pillWidth, MEDIUM_CHAR_SPACE)
     let titleEnd = x + mediumTextWidth(title)
     if (suffix && title === pdfText(`${section.title}${suffix}`)) {
       const name = pdfText(section.title)
@@ -1038,6 +1175,7 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
     } else {
       mediumText(title, x, baseline)
     }
+    if (section.team) titleEnd = drawTeamPill(section.team, section.teamTone, titleEnd, baseline, M.sectionTitleSize)
     // The round after the title in gold caps, like a row's after its label, when it fits whole.
     if (section.sub && titleEnd + M.roundGap + roundWidth(section.sub) <= right) {
       drawRound(section.sub, titleEnd + M.roundGap, baseline)
@@ -1065,7 +1203,10 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
     (titleLineCount - 1) * M.titleLh +
     M.titleGapBelow +
     M.detailsSize * HELVETICA_CAP_HEIGHT
-  const splitTitle = (left: number) => doc.splitTextToSize(pdfText(input.meetName), pageRight - left) as string[]
+  // An unofficial meet's pill follows the name, on its last line.
+  const badgeReserve = input.details.unofficial ? unofficialPdfBadgeReserve(doc, M.titleSize) : 0
+  const splitTitle = (left: number) =>
+    splitMeetPdfTitle(doc, pdfText(input.meetName), pageRight - left, badgeReserve)
   let iconSize = 0
   let titleLines: string[] = []
   if (input.iconPng) {
@@ -1098,10 +1239,14 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
     if (index > 0) baseline += M.titleLh
     doc.text(line, headerX, baseline)
   })
+  if (input.details.unofficial) {
+    drawUnofficialPdfBadge(doc, titleLines[titleLines.length - 1] ?? "", headerX, baseline, M.titleSize)
+  }
   baseline += M.titleGapBelow + M.detailsSize * HELVETICA_CAP_HEIGHT
   const details = {
     date: pdfText(input.details.date),
     location: input.details.location && pdfText(input.details.location),
+    unofficial: input.details.unofficial,
   }
   drawMeetPdfDetails(doc, details, headerX, baseline, pageRight - headerX, M.detailsSize, INK_SECONDARY)
   let y = baseline + M.meetHeaderGap
@@ -1244,8 +1389,11 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
     setType("bold", M.tileValueSize)
     const natural = doc.getTextWidth(value)
     if (natural <= room) return { size: M.tileValueSize, lines: [value] }
-    const size = Math.max(M.tileValueMinSize, (M.tileValueSize * room) / natural)
+    // Shrunk just past an exact fit, so rounding can't push it onto a second line.
+    const size = Math.max(M.tileValueMinSize, (M.tileValueSize * room * 0.99) / natural)
     setType("bold", size)
+    // At that size it fits on one line ("Jack Dunbar") unless the floor stopped the shrinking.
+    if (doc.getTextWidth(value) <= room) return { size, lines: [value] }
     const greedy = doc.splitTextToSize(value, room) as string[]
     // As many lines as wrapping needs, but even: broken between names ("Ann Lee, Bo Kim," over
     // "Cy Diaz, & Di Fox") when that fits, else between words — never before a serial comma's "&".
@@ -1346,6 +1494,22 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
   }
 
   /** One tile: the value (a drop in green), its caps label, then hint and detail (on one line when they fit). */
+  /**
+   * A tile's hint or detail line centered in `room`: its usual size when it fits, else smaller until
+   * it does ("Brandon Choi · 100 Free" whole rather than "Brandon Choi · 100…"), cut short only
+   * past the smallest size.
+   */
+  function shrinkLine(value: string, room: number, cx: number, lineTop: number, color: RGB) {
+    const t = pdfText(value)
+    let size = M.metaSize
+    setType("normal", size, color)
+    while (size > M.tileHintMinSize && doc.getTextWidth(t) > room) {
+      size = Math.max(M.tileHintMinSize, size - 0.25)
+      setType("normal", size, color)
+    }
+    centeredText(fit(t, room), cx, centeredBaseline(lineTop, M.metaLh, size))
+  }
+
   function drawTile(counter: StatCounter, x: number, top: number, width: number, height: number) {
     doc.setFillColor(...WHITE)
     doc.setDrawColor(...BORDER)
@@ -1380,8 +1544,7 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
       doc.text(pdfText(`${LABEL_HINT_SEPARATOR}${counter.hint}`), left + beside.label, centeredBaseline(lineTop, M.tileLabelLh, M.metaSize))
       lineTop += M.tileLabelLh
       if (counter.detail) {
-        setType("normal", M.metaSize, INK_TERTIARY)
-        centeredText(fit(counter.detail, room), cx, centeredBaseline(lineTop, M.metaLh, M.metaSize))
+        shrinkLine(counter.detail, room, cx, lineTop, INK_TERTIARY)
       }
       return
     }
@@ -1407,13 +1570,11 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
       return
     }
     if (counter.hint) {
-      setType("normal", M.metaSize, INK_SECONDARY)
-      centeredText(fit(counter.hint, room), cx, centeredBaseline(lineTop, M.metaLh, M.metaSize))
+      shrinkLine(counter.hint, room, cx, lineTop, INK_SECONDARY)
       lineTop += M.metaLh
     }
     if (counter.detail) {
-      setType("normal", M.metaSize, INK_TERTIARY)
-      centeredText(fit(counter.detail, room), cx, centeredBaseline(lineTop, M.metaLh, M.metaSize))
+      shrinkLine(counter.detail, room, cx, lineTop, INK_TERTIARY)
     }
   }
 
@@ -1439,7 +1600,7 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
 
   if (request.highlights) y = drawHighlights(request.highlights.counters, y)
 
-  if (request.sections.length === 0 && !request.highlights) {
+  if (allSections.length === 0 && !request.highlights) {
     setType("normal", M.labelSize, INK_TERTIARY)
     doc.text("No entries match these filters.", pageLeft, y + M.labelSize)
   }
@@ -1582,7 +1743,7 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
   // rather than being cut off. Every column is as wide as the first, so measuring there holds for
   // all; rows change in place so the medley set and height cache still know them.
   setColumn(0)
-  for (const section of request.sections) {
+  for (const section of allSections) {
     for (const row of section.rows) {
       // Likewise a label note ("(4th)") that would cut the label itself short leads that line,
       // so the name stays whole.
@@ -1599,6 +1760,18 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
         row.round = undefined
       }
     }
+  }
+
+  // Each team in turn: its name in gold caps, its tiles, then its lists.
+  for (const [i, block] of teamBlocks.entries()) {
+    if (i > 0) y += M.highlightsSectionGap - M.headerGap
+    setType("bold", M.teamHeadingSize, ACCENT)
+    doc.text(fit(pdfText(block.name).toUpperCase(), pageRight - pageLeft, M.teamHeadingCharSpace), pageLeft, y + M.teamHeadingSize * HELVETICA_CAP_HEIGHT, {
+      charSpace: M.teamHeadingCharSpace,
+    })
+    y += M.teamHeadingHeight
+    y = drawHighlights(block.counters, y)
+    if (block.sections.length > 0) y = flowColumns(block.sections, y) + M.headerGap
   }
 
   y = flowColumns(request.sections, y)

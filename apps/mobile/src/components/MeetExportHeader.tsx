@@ -18,12 +18,15 @@ const GAP_BELOW_TITLE = TITLE_SIZE * MEET_HEADER.gapBelowTitle
 const CAP_TOP = 0.24
 const DESCENT = 0.24
 const ICON_OVERSHOOT = TITLE_SIZE * MEET_HEADER.iconOvershoot
+// An unofficial meet's "UNOFFICIAL" pill after the name, in the proportions the PDFs' share.
+const BADGE_TEXT_SIZE = TITLE_SIZE * MEET_HEADER.badgeTextSize
 /** As small as a long meet name shrinks to stay on one line across the export's width. */
 const TITLE_MIN_SCALE = 0.6
 
 /**
  * A PNG export's meet header, beside the meet icon as tall as its three rows. A long meet name
- * shrinks to fit the export's width rather than wrapping.
+ * shrinks to fit the export's width rather than wrapping. An unofficial meet's name is followed by
+ * an "Unofficial" pill.
  */
 export function MeetExportHeader({
   eyebrow,
@@ -57,9 +60,16 @@ export function MeetExportHeader({
       ) : null}
       <View style={{ flexShrink: 1 }} onLayout={(e) => setHeaderTextHeight(e.nativeEvent.layout.height)}>
         <Text style={styles.eyebrow}>{eyebrow.toUpperCase()}</Text>
-        <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={TITLE_MIN_SCALE}>
-          {meetName}
-        </Text>
+        <View style={styles.titleRow}>
+          <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={TITLE_MIN_SCALE}>
+            {meetName}
+          </Text>
+          {details.unofficial ? (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>UNOFFICIAL</Text>
+            </View>
+          ) : null}
+        </View>
         <View style={styles.details}>
           <View style={styles.detailsItem}>
             <Icon name="calendar" size={DETAILS_SIZE} color={c.textSecondary} />
@@ -90,12 +100,35 @@ function makeStyles(c: ColorPalette) {
       letterSpacing: 2,
       includeFontPadding: false,
     },
+    titleRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: TITLE_SIZE * MEET_HEADER.badgeGap,
+      marginTop: GAP_ABOVE_TITLE - EYEBROW_SIZE * DESCENT - TITLE_SIZE * CAP_TOP,
+    },
     title: {
+      flexShrink: 1,
       color: c.text,
       fontSize: TITLE_SIZE,
       fontWeight: "700",
       includeFontPadding: false,
-      marginTop: GAP_ABOVE_TITLE - EYEBROW_SIZE * DESCENT - TITLE_SIZE * CAP_TOP,
+    },
+    badge: {
+      flexShrink: 0,
+      justifyContent: "center",
+      height: TITLE_SIZE * MEET_HEADER.badgeHeight,
+      paddingHorizontal: TITLE_SIZE * MEET_HEADER.badgePadX,
+      borderRadius: 999,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: c.primaryBorder,
+      backgroundColor: c.primaryBg,
+    },
+    badgeText: {
+      color: c.accent,
+      fontSize: BADGE_TEXT_SIZE,
+      fontWeight: "600",
+      letterSpacing: BADGE_TEXT_SIZE * MEET_HEADER.badgeTracking,
+      includeFontPadding: false,
     },
     details: {
       flexDirection: "row",

@@ -2,6 +2,7 @@ import type { Prisma, RecordGender, TeamRecord } from "@prisma/client"
 import { unstable_cache } from "next/cache"
 import {
   athletePreferredName,
+  countsForRecords,
   currentSeason,
   isTopTimesMode,
   recordEventDef,
@@ -227,13 +228,20 @@ async function loadIndividualSwims(
       select: SWIM_SELECT,
       orderBy: SWIM_ORDER,
     }),
-    prisma.meet.findMany({ where: { course: "SCY", deletedAt: null }, select: { id: true, name: true } }),
+    prisma.meet.findMany({
+      where: { course: "SCY", deletedAt: null },
+      select: { id: true, name: true, unofficial: true },
+    }),
   ])
   const meetNames = new Map(meets.map((meet) => [meet.id, meet.name]))
+  const unofficialMeets = new Set(meets.filter((meet) => meet.unofficial).map((meet) => meet.id))
   const byEvent = new Map<string, SwimRow[]>()
   for (const swim of swims) {
     const athlete = athletes.get(swim.athleteId)
     if (!athlete) continue
+    // Unofficial meets only count in 25s.
+    const unofficial = !!swim.meetId && unofficialMeets.has(swim.meetId)
+    if (!countsForRecords({ event: swim.event, unofficial })) continue
     const meetName = swim.meetId ? meetNames.get(swim.meetId) : undefined
     const row: SwimRow = { ...swim, athlete, meetRef: meetName ? { name: meetName } : null }
     byEvent.set(swim.event, [...(byEvent.get(swim.event) ?? []), row])
@@ -387,7 +395,7 @@ export async function teamAllTopTimes(gender: unknown, mode: unknown): Promise<T
  * PDF. A day at most, so "this season" turns over with the season.
  */
 /** Bump when TeamAllTopTimesResponse's shape changes: cached entries outlive deploys. */
-const TOP_TIMES_CACHE_VERSION = "2"
+const TOP_TIMES_CACHE_VERSION = "3"
 
 const cachedAllTopTimes = unstable_cache(
   (gender: "F" | "M", mode: TopTimesMode) => teamAllTopTimes(gender, mode),

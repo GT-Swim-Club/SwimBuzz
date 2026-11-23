@@ -5,6 +5,8 @@ import { canonicalizeStrokeEvent, relaySignupKey } from "@/lib/swim/swim-parse"
 // Pure relay builder lineup logic shared by the relays summary and the builder (client-safe).
 
 export const FALLBACK_RELAY_EVENTS = [
+  "100 Free Relay",
+  "100 Medley Relay",
   "200 Free Relay",
   "400 Free Relay",
   "800 Free Relay",
@@ -102,6 +104,8 @@ export type Leg = {
   custom?: boolean
   /** Timed from a relay split (legs 2–4 only) rather than a flat-start swim. */
   relaySplit?: boolean
+  /** The time is from an unofficial meet (intrasquad): shown "*22.31". */
+  unofficial?: boolean
 }
 
 export type RelayTeam = {
@@ -118,6 +122,7 @@ type StrokeTime = {
   outsideWindow?: boolean
   custom?: boolean
   relaySplit?: boolean
+  unofficial?: boolean
 }
 
 export type StrokeTimes = Record<
@@ -938,6 +943,7 @@ function legFor(result: RelayResult, person: LegAthlete, index: number): Leg {
     outsideWindow: time?.outsideWindow ?? false,
     custom: time?.custom ?? false,
     relaySplit: time?.relaySplit ?? false,
+    unofficial: time?.unofficial ?? false,
     ...(isMedleyRelay(result.relay) ? { leg: stroke } : {}),
   }
 }
@@ -981,7 +987,15 @@ export function setLegTime(result: RelayResult, letter: string, index: number, t
   if (!team || !leg) return result
 
   const stroke = legStroke(result.relay, index)
-  team.legs[index] = { ...leg, timeMs, sourceDate: null, outsideWindow: false, custom: true, relaySplit: false }
+  team.legs[index] = {
+    ...leg,
+    timeMs,
+    sourceDate: null,
+    outsideWindow: false,
+    custom: true,
+    relaySplit: false,
+    unofficial: false,
+  }
   const prior = result.strokeTimes?.[leg.athleteId]
   return {
     ...result,

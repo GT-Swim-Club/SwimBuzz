@@ -5,7 +5,7 @@ import {
   highlightCounterList,
   highlightLists,
   meetHighlightsExportRequest,
-  paginateHighlights,
+  paginateMeetHighlights,
   TEAM_SCORE_SECTIONS,
   type HighlightListKey,
   type MeetHeaderDetails,
@@ -98,11 +98,17 @@ export default function MeetHighlightsCarousel({
   details: MeetHeaderDetails
   iconUrl: string | null
 }) {
-  const pages = paginateHighlights(highlights.counters)
+  // At a meet split by team (an intrasquad), the team score cards, then each team's pages.
+  const pages = paginateMeetHighlights(highlights)
   const teamScores = highlights.teamScores ?? null
-  const lists = highlightLists(highlights)
+  /** The lists a page's tiles open: its team's, or the meet's. */
+  const listsFor = (team: string | undefined) =>
+    highlightLists(highlights.teams?.find((t) => t.team === team) ?? highlights)
   const [scoresSection, setScoresSection] = useState<TeamScoresSection | null>(null)
   const [openList, setOpenList] = useState<HighlightListKey | null>(null)
+  // The team whose lists the open list modal shows.
+  const [listTeam, setListTeam] = useState<string | undefined>(undefined)
+  const lists = listsFor(listTeam)
   const [index, setIndex] = useState(0)
   const [reduced, setReduced] = useState(false)
   // Any arrow, dot, swipe, tile tap or share stops autoplay for good.
@@ -147,6 +153,7 @@ export default function MeetHighlightsCarousel({
 
   if (pageCount === 0) return null
   const current = Math.min(index, pageCount - 1)
+  const currentTeam = pages[current]?.team
 
   const go = (next: number) => {
     setStopped(true)
@@ -192,7 +199,7 @@ export default function MeetHighlightsCarousel({
       }}
     >
       <LedgerPanel
-        label="Highlights"
+        label={currentTeam ? `Highlights · ${currentTeam}` : "Highlights"}
         onMouseEnter={() => (hoverRef.current = true)}
         onMouseLeave={() => (hoverRef.current = false)}
         labelExtra={
@@ -239,7 +246,9 @@ export default function MeetHighlightsCarousel({
           }}
           className="flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          {pages.map((page, i) => (
+          {pages.map((page, i) => {
+            const pageLists = listsFor(page.team)
+            return (
             <div
               key={i}
               aria-hidden={i !== current}
@@ -249,15 +258,21 @@ export default function MeetHighlightsCarousel({
               {page.counters.map((c) => {
                 const section =
                   page.kind === "teamScores"
-                    ? TEAM_SCORE_SECTIONS.find((s) => s.label === c.label)?.key
+                    ? c.section ?? TEAM_SCORE_SECTIONS.find((s) => s.label === c.label)?.key
                     : undefined
                 const listKey = highlightCounterList(c)
-                const list = listKey ? lists.find((l) => l.key === listKey) : undefined
+                const list = listKey ? pageLists.find((l) => l.key === listKey) : undefined
                 const open =
                   teamScores && section
                     ? { label: `${c.label} team scores: ${c.value}, ${c.hint ?? ""}`, run: () => setScoresSection(section) }
                     : list
-                      ? { label: `${c.label}: ${c.value}. Show ${list.title}`, run: () => setOpenList(list.key) }
+                      ? {
+                          label: `${page.team ? `${page.team} ` : ""}${c.label}: ${c.value}. Show ${list.title}`,
+                          run: () => {
+                            setListTeam(page.team)
+                            setOpenList(list.key)
+                          },
+                        }
                       : null
                 return open ? (
                   <button
@@ -278,7 +293,8 @@ export default function MeetHighlightsCarousel({
                 )
               })}
             </div>
-          ))}
+            )
+          })}
         </div>
         {teamScores ? (
           <TeamScoresModal
@@ -296,6 +312,7 @@ export default function MeetHighlightsCarousel({
             onListChange={setOpenList}
             open={openList != null}
             onClose={() => setOpenList(null)}
+            team={listTeam}
           />
         ) : null}
       </LedgerPanel>

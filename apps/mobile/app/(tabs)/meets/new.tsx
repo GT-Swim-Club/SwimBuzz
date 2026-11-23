@@ -14,6 +14,7 @@ import { DateSelector, TimeSelector, TimeZoneSelector } from "../../../src/compo
 import { defaultSeason, formatSeasonLabel, getViewerTimeZone } from "@swimbuzz/shared"
 import { api } from "../../../src/lib/api"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
+import { UnofficialMeetSwitch } from "../../../src/components/UnofficialMeetSwitch"
 
 const COURSES = ["SCY", "LCM"] as const
 
@@ -28,6 +29,7 @@ export default function NewMeetScreen() {
   const [timeZone, setTimeZone] = useState(() => getViewerTimeZone())
   const [course, setCourse] = useState<(typeof COURSES)[number]>("SCY")
   const [season, setSeason] = useState("")
+  const [unofficial, setUnofficial] = useState(false)
   const [seasons, setSeasons] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
 
@@ -76,6 +78,7 @@ export default function NewMeetScreen() {
         startDate: startDate.trim(),
         timeZone,
         course,
+        unofficial,
       }
       if (startTime.trim()) body.startTime = startTime.trim()
       if (endDate.trim()) body.endDate = endDate.trim()
@@ -174,6 +177,7 @@ export default function NewMeetScreen() {
             ))}
           </View>
         ) : null}
+        <UnofficialMeetSwitch value={unofficial} onChange={setUnofficial} />
         <Button label="Create meet" loading={saving} onPress={() => void onCreate()} />
       </ScrollView>
     </Screen>

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ElementRef } from "react"
-import { Alert, Image, View } from "react-native"
+import { Alert, Image, Text, View } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { coerceMeetHighlights, coerceScoringTable, DEFAULT_TIME_ZONE, doubledScoringValues, formatScoringValues, parseScoringValues, formatFullDate, formatMeetDateRange, formatTime, isHtmlEmpty, HEAT_LANE_LOCKS_AFTER_MEET, meetHasEnded, meetHeaderDetails, zonedDayKey, type IconName } from "@swimbuzz/shared"
@@ -32,6 +32,7 @@ import {
 import { FilePreviewModal } from "../../../src/components/FilePreviewModal"
 import { MeetHighlightsCarousel } from "../../../src/components/MeetHighlightsCarousel"
 import { api } from "../../../src/lib/api"
+import { UnofficialMeetSwitch } from "../../../src/components/UnofficialMeetSwitch"
 import { useTabBarScrollPadding } from "../../../src/lib/tab-bar"
 import { FormattedText } from "../../../src/components/FormattedText"
 import { Icon } from "../../../src/components/Icon"
@@ -45,6 +46,15 @@ function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object"
     ? (value as Record<string, unknown>)
     : null
+}
+
+/** A string-to-string map from the API (each athlete's team), dropping anything else. */
+function asStringRecord(value: unknown): Record<string, string> {
+  const record = asRecord(value)
+  if (!record || Array.isArray(value)) return {}
+  return Object.fromEntries(
+    Object.entries(record).filter((entry): entry is [string, string] => typeof entry[1] === "string")
+  )
 }
 
 function photoLinksFromMeet(meet: Record<string, unknown>): ResourceLink[] {
@@ -228,6 +238,7 @@ export default function MeetDetailScreen() {
     enabled: Boolean(id),
   })
   const load = refetch
+  const [savingUnofficial, setSavingUnofficial] = useState(false)
 
   const viewer = asRecord(meet?.viewer)
   const isStaff = Boolean(viewer?.isStaff)
@@ -276,6 +287,7 @@ export default function MeetDetailScreen() {
   const location = meet.location ? String(meet.location) : null
   const course = meet.course ? String(meet.course) : null
   const school = meet.school ? String(meet.school) : null
+  const unofficial = meet.unofficial === true
   const dateRangeAbsolute = formatMeetDateRange(startsAt, endsAt, timeZone)
   // Only a single-day meet collapses to "Today" — a multi-day range always stays
   // absolute, since a relative label would silently drop the end date.
@@ -302,9 +314,19 @@ export default function MeetDetailScreen() {
   const photoLinks = photoLinksFromMeet(meet)
   const highlights = coerceMeetHighlights(meet.highlights)
   const rosterSummary = asRecord(meet.rosterSummary)
-  const rosterEntries = Array.isArray(rosterSummary?.entries)
+  const rawRosterEntries: Array<Record<string, unknown>> = Array.isArray(rosterSummary?.entries)
     ? rosterSummary.entries
     : []
+  // An unofficial meet's times are all marked "*22.31" (the times are display-only here).
+  const markTime = (value: unknown) => (typeof value === "string" && /\d/.test(value) ? `*${value}` : value)
+  const rosterEntries = unofficial
+    ? rawRosterEntries.map((entry) => ({
+        ...entry,
+        resultTime: markTime(entry.resultTime),
+        prelimTime: markTime(entry.prelimTime),
+        finalTime: markTime(entry.finalTime),
+      }))
+    : rawRosterEntries
   const rideSignUpsUrl =
     typeof meet.rideSignUpsUrl === "string" ? meet.rideSignUpsUrl.trim() : ""
   const roomsUrl = typeof meet.roomsUrl === "string" ? meet.roomsUrl.trim() : ""
@@ -344,6 +366,22 @@ export default function MeetDetailScreen() {
       )
     } finally {
       setSavingTravel(false)
+    }
+  }
+
+  async function saveUnofficial(next: { unofficial?: boolean; scoreByGender?: boolean }) {
+    if (!id) return
+    setSavingUnofficial(true)
+    try {
+      await api.updateMeet(id, next)
+      await load()
+    } catch (err) {
+      Alert.alert(
+        "Could not update meet",
+        err instanceof Error ? err.message : "Something went wrong"
+      )
+    } finally {
+      setSavingUnofficial(false)
     }
   }
 
@@ -502,6 +540,9 @@ export default function MeetDetailScreen() {
                   location,
                   course,
                   school,
+                  unofficial ? (
+                    <Text style={{ fontSize: 14, color: c.accent, fontWeight: "600" }}>Unofficial</Text>
+                  ) : null,
                 ]}
               />
             </View>
@@ -517,7 +558,7 @@ export default function MeetDetailScreen() {
             highlights={highlights}
             meetId={id}
             meetName={name}
-            details={meetHeaderDetails({ location, school, startsAt, endsAt, timeZone })}
+            details={meetHeaderDetails({ location, school, startsAt, endsAt, timeZone, unofficial })}
             iconUrl={iconUrl}
           />
         ) : null}
@@ -541,7 +582,7 @@ export default function MeetDetailScreen() {
             meetName={name}
             entries={rosterEntries as RosterSummaryEntry[]}
             eventOrder={isEventOrder(meet.eventOrder) ? meet.eventOrder : null}
-            details={meetHeaderDetails({ location, school, startsAt, endsAt, timeZone })}
+            details={meetHeaderDetails({ location, school, startsAt, endsAt, timeZone, unofficial })}
             iconUrl={iconUrl}
             hasHeatSheet={Boolean(
               asRecord(meet.heatSheetSummary) || asRecord(meet.finalsHeatSheetSummary)
@@ -553,6 +594,7 @@ export default function MeetDetailScreen() {
             canEdit={isStaff && !(HEAT_LANE_LOCKS_AFTER_MEET && startsAt && meetHasEnded({ startsAt, endsAt, timeZone }))}
             onHeatLaneSaved={() => void load()}
             scrollRef={scrollRef}
+            athleteTeams={asStringRecord(meet.athleteTeams)}
           />
         ) : null}
 
@@ -682,6 +724,23 @@ export default function MeetDetailScreen() {
         ) : null}
 
         {isStaff ? (
+          <Section title="Meet type (staff)">
+            <UnofficialMeetSwitch
+              value={unofficial}
+              disabled={savingUnofficial}
+              onChange={(next) => void saveUnofficial({ unofficial: next })}
+            />
+            <UnofficialMeetSwitch
+              label="Score women and men separately"
+              description="Mixed individual events are placed and scored within each gender (mixed relays stay mixed). Applies when results are imported."
+              value={meet.scoreByGender === true}
+              disabled={savingUnofficial}
+              onChange={(next) => void saveUnofficial({ scoreByGender: next })}
+            />
+          </Section>
+        ) : null}
+
+        {isStaff ? (
           <Section title="Scoring (staff)">
             <ListRow
               title={scoringOpen ? "Hide points by place" : "Edit points by place"}
@@ -783,7 +842,11 @@ export default function MeetDetailScreen() {
                     subtitle={[
                       totalMs != null ? formatTime(totalMs) : null,
                       legs
-                        .map((leg) => String(leg.name ?? leg.athleteId ?? ""))
+                        .map((leg) => {
+                          const legName = String(leg.name ?? leg.athleteId ?? "")
+                          // An unofficial (intrasquad) leg time is marked "*", before it.
+                          return legName && leg.unofficial === true ? `*${legName}` : legName
+                        })
                         .filter(Boolean)
                         .join(" · "),
                     ]

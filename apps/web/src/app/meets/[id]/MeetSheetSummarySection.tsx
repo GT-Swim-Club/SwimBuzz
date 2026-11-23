@@ -1,5 +1,6 @@
 "use client"
 
+import { isMixedIndividualEvent, resolveEntryEventNumber } from "@/lib/meet/event-number"
 import { useEffect, useOptimistic, useRef, useState, Fragment, type ReactNode } from "react"
 import Link from "next/link"
 import {
@@ -28,6 +29,11 @@ import {
   type RosterSummaryPdfSection,
   type SetHeatLaneInput,
   HEAT_LANE_EDITS_OVERRIDE_IMPORTS,
+  relayDisplayName,
+  relayLetterTeam,
+  teamOfAthletes,
+  teamPillTones,
+  type TeamPillTone,
 } from "@swimbuzz/shared"
 import type { MeetResultEntry, SheetEntry, SheetSummary } from "@/lib/meet/meet-sheet-summary"
 import {
@@ -59,7 +65,6 @@ import {
 } from "@/lib/meet/meet-sheet-summary"
 import { canonicalizeStrokeEvent, compareRelayEvents, normalizeEventName } from "@/lib/swim/swim-parse"
 import {
-  eventNumberForGender,
   isRosterOnlySheetEntry,
   type MeetSignupEventOption,
 } from "@/lib/meet/meet-signup"
@@ -83,6 +88,7 @@ import { LedgerIcon } from "@/components/meet/Ledger"
 import HoverDetail from "@/components/ui/HoverDetail"
 import { SegmentedToggle, segmentedIconOptionClass } from "@/components/ui/SegmentedToggle"
 import RosterName from "@/components/athlete/RosterName"
+import TeamPill, { teamPillColumnWidth } from "@/components/meet/TeamPill"
 import EditMeetSwimButton from "./EditMeetSwimButton"
 import EditSheetSeedButton from "./EditSheetSeedButton"
 import type { HeatLaneEdit } from "./HeatLaneInlineEdit"
@@ -205,20 +211,7 @@ function resolveDisplayEventNumber(
   athleteGenders?: Map<string, "M" | "F">,
   eventOptions?: MeetSignupEventOption[]
 ): number {
-  if (entry.eventNumber > 0) return entry.eventNumber
-  if (!eventOptions?.length) return 0
-  // Packet names spell strokes out ("50 Butterfly"); results use "50 Fly".
-  const key = canonicalizeStrokeEvent(entry.event)
-  const opt = eventOptions.find((o) => canonicalizeStrokeEvent(o.event) === key)
-  if (!opt) return 0
-  const gender =
-    entry.entryType === "relay_team"
-      ? effectiveRelayGender(entry, athleteGenders)
-      : athleteGenders?.get(entry.athleteId)
-  if (gender === "F" || gender === "M") {
-    return eventNumberForGender(opt, gender) ?? 0
-  }
-  return opt.women ?? opt.men ?? 0
+  return resolveEntryEventNumber(entry, athleteGenders, eventOptions)
 }
 
 type RoundResult = {
@@ -633,6 +626,11 @@ function AthleteAvatar({
   )
 }
 
+/** Women, then men, then mixed, then unknown — the order a shared event number's groups list in. */
+function genderOrder(gender: string): number {
+  return gender === "F" ? 0 : gender === "M" ? 1 : gender === "X" ? 2 : 3
+}
+
 /** Detail-modal title in one format: "Men 200 Free Relay", "Women 100 Fly", "Mixed 200 Medley Relay". */
 function detailEventTitle(event: string, gender: string | null | undefined): string {
   const name = canonicalizeStrokeEvent(event)
@@ -661,6 +659,10 @@ type RowContext = {
   athleteGenders?: Map<string, "M" | "F">
   allEntries?: SummaryEntry[]
   eventNumberOptions?: MeetSignupEventOption[]
+  /** Each athlete's team at a meet whose results name several of ours ("Gold"); empty otherwise. */
+  athleteTeams?: Record<string, string>
+  /** Each of those teams' pill color. */
+  teamTones?: Record<string, TeamPillTone>
 }
 
 /**
@@ -673,12 +675,22 @@ function summaryRowView(
   eventView: boolean,
   athleteId?: string
 ) {
-  const { athleteGenders, allEntries, eventNumberOptions } = ctx
+  const { athleteGenders, allEntries, eventNumberOptions, athleteTeams = {}, teamTones = {} } = ctx
   const isRelay = entry.entryType === "relay_team"
+  // A relay whose letter names one of our teams ("White A") is that team's, swimmers listed or not.
+  const letterTeam = isRelay ? relayLetterTeam(displayRelayLetter(entry.relayLetter), Object.values(athleteTeams)) : null
+  // By event, each row names its team (a relay, the one its letter names, else the one most of its
+  // swimmers are on); by athlete, the athlete's header does.
+  const teamPill = eventView
+    ? isRelay
+      ? (letterTeam?.team ?? teamOfAthletes((entry.relaySwimmers ?? []).map((s) => s.athleteId), athleteTeams))
+      : athleteTeams[entry.athleteId]
+    : undefined
   const eventNumber = resolveDisplayEventNumber(entry, athleteGenders, eventNumberOptions)
   const res = rowRoundResult(entry, allEntries)
   const podiumPlace = finalsPodiumPlace(entry)
-  const relayLetter = isRelay ? `Relay ${displayRelayLetter(entry.relayLetter)}` : undefined
+  // "Relay A", or with our team's side before "Relay": "White Relay A".
+  const relayLetter = isRelay ? relayDisplayName("", displayRelayLetter(entry.relayLetter)) : undefined
   // Under an athlete, a relay also shows the leg they swam and their split (a leg 1 split is
   // their leadoff time, so leadoffs don't get rows of their own).
   const swimmer =
@@ -749,9 +761,11 @@ function summaryRowView(
         ? relayLetter
         : entry.athleteName
       : isRelay
-        ? `${eventName} ${displayRelayLetter(entry.relayLetter)}`
+        ? relayDisplayName(eventName, displayRelayLetter(entry.relayLetter))
         : eventName,
     team: !eventView && isRelay && swimmer ? (legSplit ?? undefined) : undefined,
+    teamPill,
+    teamTone: teamPill ? teamTones[teamPill] : undefined,
     legNumber: !eventView && isRelay ? legNumber : undefined,
     round: entry.rosterOnly ? null : res.label,
   }
@@ -807,10 +821,9 @@ function summaryRowPdf(
   // Relay names are compact: "200 Medley A" (or "Relay A" under an event title), with the
   // letter folded in rather than repeated in the meta — spelled out ("200 Medley Relay A") where
   // the line has room.
-  const relayEvent = entry.event.replace(/\s+Relay$/i, "")
   const relayLetter = displayRelayLetter(entry.relayLetter)
-  const relayName = eventView ? view.label : `${relayEvent} ${relayLetter}`
-  const relayFullName = eventView ? undefined : `${relayEvent} Relay ${relayLetter}`
+  const relayName = eventView ? view.label : relayDisplayName(entry.event, relayLetter, true)
+  const relayFullName = eventView ? undefined : relayDisplayName(entry.event, relayLetter)
   const startTime = (display.showHeatLane && entry.startTime) || undefined
   // As on screen, a relay athlete's leg follows the name ("200 Medley A (4th)") and their split
   // sits under the time; the round rides beside the name (then any result tags). Under the name go
@@ -822,6 +835,8 @@ function summaryRowPdf(
     label: (view.isRelay ? relayName : view.label) ?? "",
     fullLabel: view.isRelay ? relayFullName : undefined,
     labelNote: view.legNumber != null ? relayLegOrdinal(view.legNumber) : undefined,
+    team: view.teamPill,
+    teamTone: view.teamTone,
     resultNote: view.team,
     // By event the round is its own gold tag; by athlete it leads the grey text after the label.
     round: (eventView && display.showRound && view.round) || undefined,
@@ -890,9 +905,15 @@ function SummaryEntryRow({
   onHeatLaneSaving,
   heatLaneEditable = true,
   relayLegSwims = [],
+  athleteTeams,
+  teamTones,
 }: {
   /** The meet's relay leadoff and split swims, anchored on their relays' rows. */
   relayLegSwims?: RelayLegSwim[]
+  /** Each athlete's team at a meet whose results name several of ours; by event, rows show it. */
+  athleteTeams?: Record<string, string>
+  /** Each of those teams' pill color. */
+  teamTones?: Record<string, TeamPillTone>
   entry: SummaryEntry
   display: RowDisplay
   canEdit?: boolean
@@ -920,7 +941,7 @@ function SummaryEntryRow({
   const compact = display.density === "compact"
   const view = summaryRowView(
     entry,
-    { athleteGenders, allEntries, eventNumberOptions },
+    { athleteGenders, allEntries, eventNumberOptions, athleteTeams, teamTones },
     eventView,
     athleteId
   )
@@ -1107,6 +1128,15 @@ function SummaryEntryRow({
         }
       : undefined
 
+  // The athlete's or relay's team by event at a meet split by team ("GOLD"), in a column of its own
+  // as wide as the longest team's pill.
+  const teamColumn =
+    view.teamPill && athleteTeams
+      ? {
+          pill: <TeamPill team={view.teamPill} tone={view.teamTone} className="" />,
+          width: teamPillColumnWidth(Object.values(athleteTeams)),
+        }
+      : undefined
   // The leg an athlete swam, after the relay's name and styled like a preferred name: "(2nd)".
   const legSuffix =
     view.legNumber != null ? (
@@ -1144,11 +1174,11 @@ function SummaryEntryRow({
           !eventView && isRelay ? (
             legSuffix ? (
               <>
-                {`${view.eventName.replace(/\s+Relay$/i, "")} ${displayRelayLetter(entry.relayLetter)}`}
+                {relayDisplayName(view.eventName, displayRelayLetter(entry.relayLetter), true)}
                 {legSuffix}
               </>
             ) : (
-              `${view.eventName.replace(/\s+Relay$/i, "")} ${displayRelayLetter(entry.relayLetter)}`
+              relayDisplayName(view.eventName, displayRelayLetter(entry.relayLetter), true)
             )
           )
             : eventView && !isRelay && splitRosterName(entry.athleteName).preferred
@@ -1158,6 +1188,7 @@ function SummaryEntryRow({
         shareShortLabel={eventView && !isRelay}
         sub={sub || undefined}
         team={view.team}
+        teamColumn={teamColumn}
         round={view.round}
         heatLane={heatLane}
         startTime={view.startTime}
@@ -1301,10 +1332,12 @@ export default function MeetSheetSummarySection({
   editableSeedKeys = [],
   eventNumberOptions = [],
   eventOrder = null,
+  scoreByGender = false,
   details,
   iconUrl = null,
   initialView = DEFAULT_SUMMARY_VIEW,
   viewFromUrl = false,
+  athleteTeams = {},
 }: {
   psychSummary?: SheetSummary | null
   heatSummary?: SheetSummary | null
@@ -1337,6 +1370,8 @@ export default function MeetSheetSummarySection({
   eventNumberOptions?: MeetSignupEventOption[]
   /** Meet packet order of events, whose sessions ("Sunday Finals") the view can filter to. */
   eventOrder?: MeetSessionOrder | null
+  /** Women and men are scored separately, so a combined event still lists as Women's and Men's. */
+  scoreByGender?: boolean
   /** Date and location for the PNG export's header. */
   details?: MeetHeaderDetails
   iconUrl?: string | null
@@ -1344,8 +1379,19 @@ export default function MeetSheetSummarySection({
   initialView?: SummaryViewState
   /** The URL names a view; else the meet's saved view (if recent) is restored after mount. */
   viewFromUrl?: boolean
+  /**
+   * Each athlete's team ("Gold") at a meet whose results name several of ours — a pill after their
+   * name in every view and export. Empty otherwise.
+   */
+  athleteTeams?: Record<string, string>
 }) {
   const editableSeedKeySet = new Set(editableSeedKeys)
+  const teamTones = teamPillTones(Object.values(athleteTeams))
+  // The roster view's columns: name, then (at a meet split by team) the team pills, events, gender.
+  const teamColumnWidth = Object.keys(athleteTeams).length > 0 ? teamPillColumnWidth(Object.values(athleteTeams)) : null
+  const rosterColumns = teamColumnWidth
+    ? `minmax(0,1fr) calc(${teamColumnWidth.replace("em", "")} * 10px) 96px 72px`
+    : "minmax(0,1fr) 96px 72px"
   const [searchQuery, setSearchQuery] = useState(initialView.q)
   const [viewByEvent, setViewByEvent] = useState(initialView.view === "event")
   const [viewMode, setViewMode] = useState<"summary" | "roster">(
@@ -1667,17 +1713,19 @@ export default function MeetSheetSummarySection({
     const gender =
       entry.entryType === "relay_team"
         ? effectiveRelayGender(entry, athleteGenders) || entry.gender || "U"
-        : entry.gender || athleteGenders.get(entry.athleteId) || "U"
+        : !scoreByGender && isMixedIndividualEvent(entry.event, eventNumberOptions)
+          ? "X"
+          : entry.gender || athleteGenders.get(entry.athleteId) || "U"
     const eventNumber = resolveDisplayEventNumber(entry, athleteGenders, eventNumberOptions)
     const title = `${eventGenderWord(gender) ?? ""} ${entry.event}`.trim()
     // Use the eventNumber, gender, and event name for unique grouping
     const key = `${eventNumber}|${title}`
     if (!acc.has(key)) {
-      acc.set(key, { key, title, eventNumber, entries: [] })
+      acc.set(key, { key, title, eventNumber, gender, entries: [] })
     }
     acc.get(key)!.entries.push(entry)
     return acc
-  }, new Map<string, { key: string; title: string; eventNumber: number; entries: SummaryEntry[] }>())
+  }, new Map<string, { key: string; title: string; eventNumber: number; gender: string; entries: SummaryEntry[] }>())
 
   // Placeholder counts follow the gender, session and round filters but not the search query.
   const plural = (n: number, noun: string) => `${n} ${noun}${n === 1 ? "" : "s"}`
@@ -1721,7 +1769,8 @@ export default function MeetSheetSummarySection({
         if (b.eventNumber === 0) return -1
         return a.eventNumber - b.eventNumber
       }
-      return a.title.localeCompare(b.title)
+      // Women before men under the same event number (a mixed event scored by gender).
+      return genderOrder(a.gender) - genderOrder(b.gender) || a.title.localeCompare(b.title)
     })
 
   const hasSummaryContent =
@@ -1821,6 +1870,8 @@ export default function MeetSheetSummarySection({
     onHeatLaneSaving: showHeatLaneSaving,
     heatLaneEditable,
     relayLegSwims,
+    athleteTeams,
+    teamTones,
   }
 
   const viewerRecord = viewerAthleteId ? athletes.find((a) => a.id === viewerAthleteId) : undefined
@@ -1863,7 +1914,7 @@ export default function MeetSheetSummarySection({
    * minus the viewer's pinned section: they're listed in their usual place like everyone else.
    */
   function buildPdfRequest(): RosterSummaryPdfRequest {
-    const rowCtx = { athleteGenders, allEntries: displayEntries, eventNumberOptions }
+    const rowCtx = { athleteGenders, allEntries: displayEntries, eventNumberOptions, athleteTeams, teamTones }
     const toRow = (entry: SummaryEntry, eventView = false, athleteId?: string, showRound = display.showRound) =>
       summaryRowPdf(entry, rowCtx, { ...display, showRound }, eventView, athleteId)
     // "Entries" → "Heats" once a heat sheet is in → "Results" once results are posted.
@@ -1901,6 +1952,8 @@ export default function MeetSheetSummarySection({
         ].filter(Boolean)
         return {
           label: athlete.name,
+          team: athleteTeams[athlete.id],
+          teamTone: teamTones[athleteTeams[athlete.id] ?? ""],
           sub: badges.join(" · ") || undefined,
           result: {
             kind: "text",
@@ -1950,6 +2003,8 @@ export default function MeetSheetSummarySection({
       for (const athleteGroup of exported) {
         sections.push({
           title: athleteGroup.name,
+          team: athleteTeams[athleteGroup.athleteId],
+          teamTone: teamTones[athleteTeams[athleteGroup.athleteId] ?? ""],
           // Under an athlete, a relay is just the event — no list of its swimmers.
           rows: [...athleteGroup.entries]
             .sort(compareMyEntries)
@@ -2145,7 +2200,7 @@ export default function MeetSheetSummarySection({
             <ShareRosterSummaryButton
               meetId={meetId}
               meetName={meetName ?? ""}
-              details={details ?? { date: "", location: null }}
+              details={details ?? { date: "", location: null, unofficial: false }}
               iconUrl={iconUrl}
               buildRequest={buildPdfRequest}
               onOpen={() => setSettingsOpen(false)}
@@ -2233,9 +2288,11 @@ export default function MeetSheetSummarySection({
                         <li key={athlete.id} id={jumpIds.get(athlete.id)} className="scroll-mt-3 border-t border-border">
                           <Link
                             href={athletePath(athlete.slug ?? athlete.id)}
-                            className={`grid grid-cols-[1fr_96px_72px] items-center px-4 py-3 text-sm text-foreground transition-colors duration-200 hover:bg-background-hover ${
+                            className={`grid items-center px-4 py-3 text-sm text-foreground transition-colors duration-200 hover:bg-background-hover ${
                               isMe ? "bg-accent/5" : ""
                             }`}
+                            // At a meet split by team, the team pills get a column of their own.
+                            style={{ gridTemplateColumns: rosterColumns }}
                           >
                             <span className="flex min-w-0 items-center gap-2">
                               <AthleteAvatar image={athlete.image} name={athlete.name} />
@@ -2253,6 +2310,17 @@ export default function MeetSheetSummarySection({
                                 </span>
                               ) : null}
                             </span>
+                            {teamColumnWidth ? (
+                              <span className="flex items-center text-[10px]">
+                                {athleteTeams[athlete.id] ? (
+                                  <TeamPill
+                                    team={athleteTeams[athlete.id]}
+                                    tone={teamTones[athleteTeams[athlete.id]]}
+                                    className=""
+                                  />
+                                ) : null}
+                              </span>
+                            ) : null}
                             <span className="text-right text-xs text-foreground-secondary">
                               {count} event{count === 1 ? "" : "s"}
                             </span>
@@ -2314,6 +2382,12 @@ export default function MeetSheetSummarySection({
                           />
                           <span>
                             <RosterName name={athleteNames.get(viewerAthleteId!) ?? ""} />
+                            {athleteTeams[viewerAthleteId!] ? (
+                              <TeamPill
+                                team={athleteTeams[viewerAthleteId!]}
+                                tone={teamTones[athleteTeams[viewerAthleteId!]]}
+                              />
+                            ) : null}
                           </span>
                         </Link>
                         <ul className="border-t border-border-subtle">
@@ -2346,6 +2420,12 @@ export default function MeetSheetSummarySection({
                           <AthleteAvatar image={athleteData?.image} name={athleteGroup.name} />
                           <span>
                             <RosterName name={athleteGroup.name} />
+                            {athleteTeams[athleteGroup.athleteId] ? (
+                              <TeamPill
+                                team={athleteTeams[athleteGroup.athleteId]}
+                                tone={teamTones[athleteTeams[athleteGroup.athleteId]]}
+                              />
+                            ) : null}
                           </span>
                         </Link>
                         <ul className="border-t border-border-subtle">

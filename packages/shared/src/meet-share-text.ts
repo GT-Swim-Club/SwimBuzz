@@ -57,6 +57,8 @@ function rosterRowLines(row: RosterSummaryPdfRow): string[] {
   const line = [
     // A relay athlete's leg after the name: "200 Medley A (4th)".
     `${rosterNamePreferred(row.label)}${row.labelNote ? ` (${row.labelNote})` : ""}`,
+    // The athlete's or relay's team at a meet split by team.
+    row.team,
     row.round,
     row.sub,
     row.meta?.replace(/\s+\|\s+/g, " · "),
@@ -83,7 +85,7 @@ export function rosterSummaryText({
 }): string {
   const sections = request.sections.map((section) =>
     [
-      `${section.eventNumber ? `#${section.eventNumber} ` : ""}${rosterNamePreferred(section.title)}${section.sub ? ` · ${section.sub}` : ""}`,
+      `${section.eventNumber ? `#${section.eventNumber} ` : ""}${rosterNamePreferred(section.title)}${section.team ? ` · ${section.team}` : ""}${section.sub ? ` · ${section.sub}` : ""}`,
       ...section.rows.flatMap(rosterRowLines),
     ].join("\n")
   )

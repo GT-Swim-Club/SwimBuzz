@@ -1,5 +1,7 @@
 "use client"
 
+import UnofficialMark from "@/components/ui/UnofficialMark"
+import { useMeetUnofficial } from "@/components/meet/MeetUnofficialContext"
 import {
   createContext,
   useCallback,
@@ -157,6 +159,7 @@ export function SummaryRowResult({
   /** A line under the time (a relay athlete's split, "20.05"), the two centered together on the row. */
   note?: string
 }) {
+  const meetUnofficial = useMeetUnofficial()
   const pill = compact ? "h-[18px] px-1.5 text-[10px]" : "h-5 px-[7px] text-[11px]"
   const width = (narrow: number, wide: number) => ({ width: fluid ? fluidLength(narrow, wide) : wide })
   const deltaWidth = compact ? width(52, 58) : width(56, 64)
@@ -204,6 +207,7 @@ export function SummaryRowResult({
               result.time ? "text-foreground" : "text-warning-text"
             }`}
           >
+            {result.time ? <UnofficialMark unofficial={meetUnofficial.unofficial} meetName={meetUnofficial.meetName} /> : null}
             {result.time ? formatDisplayTime(result.time) : result.status ?? "—"}
           </span>
         )}
@@ -299,6 +303,7 @@ export default function SummaryRow({
   editLabel,
   heatLaneEdit,
   highlighted = false,
+  teamColumn,
 }: {
   id?: string
   /**
@@ -339,6 +344,11 @@ export default function SummaryRow({
   editLabel?: string
   /** Coach round, heat & lane, filled in inline in the detail modal. */
   heatLaneEdit?: HeatLaneEdit
+  /**
+   * The row's team pill in a column of its own before the heat & lane and result, `width` wide (the
+   * same for every row in the list, so the pills line up).
+   */
+  teamColumn?: { pill: ReactNode; width: string }
   /** The viewer's own row, tinted gold (by event, where it isn't in their pinned section). */
   highlighted?: boolean
 }) {
@@ -606,6 +616,11 @@ export default function SummaryRow({
   )
   const rightColumns = (
     <>
+      {teamColumn ? (
+        <span className="flex shrink-0 items-center text-[10px]" style={{ width: teamColumn.width }}>
+          {teamColumn.pill}
+        </span>
+      ) : null}
       {hlInColumn ? (
         <span className={`flex shrink-0 flex-col items-end whitespace-nowrap leading-[1.35] tabular-nums ${hlSize}`}>
           {hlText}

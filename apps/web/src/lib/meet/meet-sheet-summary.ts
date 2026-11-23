@@ -1306,7 +1306,8 @@ export function isTimedFinalsEntry(
 
   if (entry.prelimTime) return false
   if (entry.finalTime) return timedFinalsEvent
-  return Boolean(entry.resultTime)
+  // A result with no round — a time, or a status like NS/DQ — is the event's only swim.
+  return Boolean(entry.resultTime || entry.resultStatus)
 }
 
 /** Hide psych/heat seed rows for events with no imported result once results exist. */

@@ -63,6 +63,8 @@ async function MeetsListSection({
         course: true,
         season: true,
         school: true,
+        unofficial: true,
+        scoreByGender: true,
         iconUrl: true,
         bannerUrl: true,
         packetUrl: true,

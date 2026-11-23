@@ -280,6 +280,9 @@ def parse_meet_header(lines: list[str]) -> tuple[str | None, str | None]:
             continue
         if low.startswith("results") or low.startswith("meet "):
             continue
+        # A licensed banner without the Hy-Tek name: "<Venue> <Club> - Results Page 1".
+        if re.search(r"\bpage\s+\d+\s*$", low):
+            continue
 
         # First plausible title line wins.
         found = _find_date(line)
@@ -604,6 +607,18 @@ def club_matches(club: str, team_norm: str) -> bool:
     if club_norm.split("-")[0] == team_norm.split("-")[0]:
         return True
 
+    # Intrasquad relay teams print as "<club> <side>" ("GTSC White", "GTSC Gold"): a short
+    # team name whose club code or side is the requested code.
+    club_side_words = re.sub(r"[^a-z0-9\s]", " ", club_norm.split("-")[0]).split()
+    team_code_base = team_norm.split("-")[0].strip()
+    if (
+        2 <= len(club_side_words) <= 3
+        and len(team_code_base) >= 3
+        and " " not in team_code_base
+        and team_code_base in club_side_words
+    ):
+        return True
+
     # Strategy 3: check club words for known keyword sequences.
     # Build a keyword from the team base (first component before '-').
     team_base = team_norm.split("-")[0]
@@ -760,6 +775,74 @@ def filter_results_by_team(rows: list[dict[str, Any]], team: str | None) -> list
             if any(club_matches(str(row_team), team_code) for team_code in team_codes):
                 filtered.append(row)
     return filtered
+
+
+# A results table's column header ("Name  Team  Seed Time  Finals Time"). Intrasquad and
+# other small-meet results print no Age/Yr column, so the team follows the name directly.
+RESULTS_COLUMN_HEADER = re.compile(r"^\s*(?:Name|Place\s+Name)\b.*\bTeam\b", re.I)
+AGE_COLUMN = re.compile(r"\b(?:Age|Yr|Year|Class)\b", re.I)
+
+
+def is_seed_then_finals_header(line: str) -> bool:
+    """A timed-finals results header with a seed column: "… Seed Time  Finals Time" (no prelims)."""
+    return bool(
+        RESULTS_COLUMN_HEADER.search(line)
+        and re.search(r"\bseed\b", line, re.I)
+        and not re.search(r"\bprelim", line, re.I)
+    )
+
+
+def timed_final_seed(line: str, final_time: str | None = None) -> str | None:
+    """The seed on a "Seed Time  Finals Time" row: the token just before the finals time
+    ("23.30 24.53" → 23.30), or just before the status on a scratch ("47.07 NS"). An "NT"
+    seed (or none) has no time."""
+    cleaned = re.sub(r"\([^)]*\)", " ", line)
+    end: int | None = None
+    if final_time:
+        hits = [m for m in re.finditer(rf"(?<![\d.:])[xXJ]?{re.escape(final_time)}(?![\d])", cleaned)]
+        if hits:
+            end = hits[-1].start()
+    else:
+        status = SCRATCH_MARKER.search(cleaned)
+        if status:
+            end = status.start()
+    if end is None:
+        return None
+    before = re.findall(rf"(?<![\d.:])(?:NT|NS|{TIME_TOKEN_PATTERN})(?![\d])", cleaned[:end])
+    if not before or before[-1] in ("NT", "NS"):
+        return None
+    return before[-1]
+
+
+def is_ageless_column_header(line: str) -> bool | None:
+    """True/False for a results column header without/with an age column; None otherwise."""
+    if not RESULTS_COLUMN_HEADER.search(line):
+        return None
+    return not AGE_COLUMN.search(line)
+
+
+def parse_team_after_name(line: str) -> str | None:
+    """Team on a row with no age column: everything between the name and the first time.
+
+    "1 Smith, Christian Gold 23.30 24.53 12" → "Gold"; "--- Garcia Alvarez, Alvaro White NT NS"
+    → "White". A middle initial ("Smith, John A Gold") is skipped.
+    """
+    name_match = re.search(
+        r"([A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*),\s*([A-Z][A-Za-z'\-]+)", line
+    )
+    if not name_match:
+        return None
+    rest = line[name_match.end():]
+    team_match = re.match(
+        r"(?:\s+[A-Z]\.?(?=\s))?"
+        r"\s+((?:(?!(?:" + INVALID_TIME_PATTERN + r")\b)[A-Za-z][A-Za-z&.'\-]*\s*){1,6}?)"
+        r"\s+(?:" + INVALID_TIME_PATTERN + r"|[xX]?(?:" + TIME_TOKEN_PATTERN + r"))\b",
+        rest,
+    )
+    if not team_match:
+        return None
+    team = team_match.group(1).strip()
+    return team or None
 
 
 def parse_place_from_line(line: str) -> int | None:
@@ -1114,6 +1197,10 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
     last_result_indices: list[int] = []
     in_relay_section: bool = False
     in_swim_off: bool = False
+    # The current table's columns have no Age/Yr ("Name  Team  Seed Time  Finals Time").
+    ageless_columns: bool = False
+    # The table prints "Seed Time  Finals Time": a row's first time is its seed.
+    seed_then_finals: bool = False
     # Hy-Tek wraps long races (400+) onto multiple split-only lines; collect
     # consecutive ones before mapping distances (same idea as relay _split_parts).
     pending_split_tokens: list[str] = []
@@ -1136,6 +1223,12 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
     for line in lines:
         stripped = line.strip()
         if not stripped:
+            continue
+
+        ageless = is_ageless_column_header(stripped)
+        if ageless is not None:
+            ageless_columns = ageless
+            seed_then_finals = is_seed_then_finals_header(stripped)
             continue
 
         round_tag = parse_round_section(stripped)
@@ -1207,7 +1300,9 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
         if not name:
             continue
 
-        team = parse_team_from_line(stripped)
+        team = (parse_team_after_name(stripped) if ageless_columns else None) or parse_team_from_line(
+            stripped
+        )
         last_result_indices = []
 
         scratch = SCRATCH_MARKER.search(stripped)
@@ -1222,6 +1317,9 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
                 "team": team,
                 "gender": current_gender,
             }
+            scratch_seed = timed_final_seed(stripped) if seed_then_finals else None
+            if scratch_seed:
+                row["seedTime"] = scratch_seed
             results.append(row)
             last_result_indices = [len(results) - 1]
             continue
@@ -1230,7 +1328,11 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
         if not rounds:
             continue
 
-        seed_time = pick_seed_time(stripped, current_event)
+        seed_time = pick_seed_time(stripped, current_event) or (
+            timed_final_seed(stripped, rounds[0].get("time"))
+            if seed_then_finals and len(rounds) == 1 and rounds[0].get("time")
+            else None
+        )
         paren_splits = extract_parenthetical_split_tokens(stripped)
         for round_time in rounds:
             row = {
@@ -2019,9 +2121,21 @@ def _mark_our_team(
     standings: list[dict[str, Any]], team: str | None, our_points: float
 ) -> None:
     """Flag our team's entry: the one whose name matches a team code, or —
-    when none or several do — the one whose points equal our rows' points."""
+    when none or several do — the one whose points equal our rows' points.
+
+    Several codes naming one team each ("White, Gold" at an intrasquad: "GTSC White",
+    "GTSC Gold") flag every one of those teams."""
     codes = [t.strip().lower() for t in (team or "").split(",") if t.strip()]
     if not codes or not standings:
+        return
+    named: list[dict[str, Any]] = []
+    for code in codes:
+        hits = [e for e in standings if club_matches(e["team"], code)]
+        if len(hits) == 1 and not any(hits[0] is e for e in named):
+            named.append(hits[0])
+    if len(named) > 1:
+        for entry in named:
+            entry["ours"] = True
         return
     matches = [e for e in standings if any(club_matches(e["team"], c) for c in codes)]
     if len(matches) != 1:
@@ -2063,6 +2177,67 @@ def build_team_scores(
         "men": scores.get("men", []),
         "combined": scores.get("combined", []),
     }
+
+
+# "Event 13B Mixed 200 Yard Breaststroke" / "#7 Women 100 Yard Fly": the event's number.
+EVENT_NUMBER_HEADER = re.compile(r"^\s*\(?\s*(?:Event|#)\s*(\d{1,3})[A-Z]?\b", re.I)
+
+
+def parse_event_order(lines: list[str]) -> dict[str, Any] | None:
+    """The meet's order of events, from the results' own event headers — the meet page's
+    event numbers when no meet packet is imported. One row per event: its women's and men's
+    numbers (a mixed event's number is both); "Event 13B" counts as 13."""
+    rows: dict[str, dict[str, Any]] = {}
+    for line in lines:
+        stripped = line.strip()
+        match = EVENT_NUMBER_HEADER.match(stripped)
+        if not match or len(stripped) >= 120:
+            continue
+        if LEAD_OFF_EVENT_HEADER.search(stripped) or SWIM_OFF_HEADER.search(stripped):
+            continue
+        event = relay_event_from_header(stripped) if relay_header_match(stripped) else parse_event_from_line(stripped)
+        if not event:
+            continue
+        number = int(match.group(1))
+        gender = relay_gender_from_header(stripped)
+        row = rows.setdefault(event, {"women": None, "event": event, "men": None})
+        if gender in ("F", "X", "") and row["women"] is None:
+            row["women"] = number
+        if gender in ("M", "X", "") and row["men"] is None:
+            row["men"] = number
+    if not rows:
+        return None
+    ordered = sorted(
+        rows.values(),
+        key=lambda r: min(n for n in (r["women"], r["men"]) if n is not None),
+    )
+    return {"sessions": [{"label": "Order of Events", "rows": ordered}]}
+
+
+def label_relay_sides(relays: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Intrasquad relays: prefix each letter with the relay's side ("White A", "Gold A").
+
+    Only when our relays print under more than one team name ("GTSC White" / "GTSC Gold");
+    the side is what's left after the words every name shares. A regular meet's relays all
+    share one team name and keep their bare letters.
+    """
+    names = {str(r.get("team") or "").strip() for r in relays if r.get("team")}
+    if len(names) < 2:
+        return relays
+    word_lists = {name: name.split() for name in names}
+    shared = set.intersection(*(set(w.upper() for w in words) for words in word_lists.values()))
+    sides: dict[str, str] = {}
+    for name, words in word_lists.items():
+        side = " ".join(w for w in words if w.upper() not in shared).strip()
+        if not side:
+            return relays
+        sides[name] = side.title()
+    out: list[dict[str, Any]] = []
+    for relay in relays:
+        side = sides.get(str(relay.get("team") or "").strip())
+        letter = str(relay.get("relayLetter") or "A").strip().upper()
+        out.append({**relay, "relayLetter": f"{side} {letter}"} if side else relay)
+    return out
 
 
 def parse_meet_pdf_bytes(
@@ -2139,12 +2314,15 @@ def parse_meet_pdf_bytes(
     all_relay_results = parse_relay_results(all_text, course)
     results = filter_results_by_team(all_results, team)
     relay_results = filter_results_by_team(all_relay_results, team)
+    if team:
+        relay_results = label_relay_sides(relay_results)
 
     return {
         "course": course,
         "meet_name": meet_name,
         "meet_date": meet_date,
         "detectedSheetType": detected,
+        "event_order": parse_event_order(all_text),
         "results": dedupe_results(results),
         "relay_results": relay_results,
         "team_scores": build_team_scores(

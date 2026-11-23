@@ -7,14 +7,9 @@ import { DatePicker } from "@/components/ui/CustomDateTimePicker"
 import { COURSE_LABELS } from "@/lib/swim/swim-parse"
 import { parseTime } from "@/lib/utils"
 import { addAthleteSwim } from "./athlete.actions"
+import { INDIVIDUAL_SWIM_EVENTS } from "@swimbuzz/shared"
 
-const EVENTS = [
-  "50 Free", "100 Free", "200 Free", "400 Free", "500 Free", "1000 Free", "1650 Free",
-  "50 Back", "100 Back", "200 Back",
-  "50 Breast", "100 Breast", "200 Breast",
-  "50 Fly", "100 Fly", "200 Fly",
-  "100 IM", "200 IM", "400 IM",
-]
+const EVENTS = INDIVIDUAL_SWIM_EVENTS
 
 const INPUT =
   "w-full rounded-lg border border-border-secondary bg-background px-3 py-2 text-sm text-foreground"

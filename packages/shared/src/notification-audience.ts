@@ -9,7 +9,10 @@ import { isStaffRole } from "./roles"
 export type NotificationPreferenceAudience = {
   key: string
   description: string
-  /** Shown instead of `description` to athletes (staff who swim included). */
+  /**
+   * Shown instead of `description` to athletes. Staff who swim see `description`: they're sent the
+   * staff notices too (every team record, comments on their practices), which it describes.
+   */
   athleteDescription?: string
   /** Shown to anyone with an Athlete record (and to athlete-role users). */
   athletesOnly?: boolean
@@ -41,7 +44,7 @@ export function notificationPreferenceDescription(
   item: NotificationPreferenceAudience,
   viewer: NotificationSettingsViewer
 ): string {
-  return seesAthleteNotificationToggles(viewer) && item.athleteDescription
+  return !isStaffRole(viewer.role) && seesAthleteNotificationToggles(viewer) && item.athleteDescription
     ? item.athleteDescription
     : item.description
 }

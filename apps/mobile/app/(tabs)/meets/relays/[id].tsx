@@ -86,6 +86,7 @@ export default function MeetRelaysScreen() {
         startsAt: String(meet?.startsAt ?? ""),
         endsAt: meet?.endsAt ? String(meet.endsAt) : null,
         timeZone: typeof meet?.timeZone === "string" && meet.timeZone ? meet.timeZone : DEFAULT_TIME_ZONE,
+        unofficial: meet?.unofficial === true,
       }),
     [meet]
   )

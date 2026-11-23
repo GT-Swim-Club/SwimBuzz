@@ -70,8 +70,7 @@ export const NOTIFICATION_PREFERENCE_META: {
   {
     key: "teamRecords",
     label: "Team Records",
-    description: "When a team record is broken",
-    athleteDescription: "When you set a team record",
+    description: "When anyone sets a team record",
   },
   {
     key: "practiceComments",
@@ -194,6 +193,11 @@ export function rosterPdfTitle(season: string | null): string {
 /** "2026–2027 Roster - Georgia Tech Swim Club.pdf" */
 export function rosterPdfFilename(season: string | null): string {
   return meetFileName(rosterPdfTitle(season), "Georgia Tech Swim Club", "pdf")
+}
+
+/** "2026–2027 Roster - Georgia Tech Swim Club.csv" */
+export function rosterCsvFilename(season: string | null): string {
+  return meetFileName(rosterPdfTitle(season), "Georgia Tech Swim Club", "csv")
 }
 
 const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]

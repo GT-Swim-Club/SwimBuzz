@@ -23,9 +23,10 @@ export function notifyNewNationalCuts(meetId: string): void {
   runAfterResponse("national cut notification", async () => {
     const meet = await prisma.meet.findUnique({
       where: { id: meetId },
-      select: { id: true, name: true, season: true, course: true },
+      select: { id: true, name: true, season: true, course: true, unofficial: true },
     })
-    if (!meet) return
+    // Unofficial meets (intrasquads) never count toward nationals cuts.
+    if (!meet || meet.unofficial) return
     const set = await prisma.nationalsStandardSet.findUnique({
       where: { season_course: { season: meet.season, course: meet.course } },
       include: { cuts: { where: { isRelay: false } } },
@@ -74,7 +75,7 @@ export function notifyNewNationalCuts(meetId: string): void {
         athleteId: { in: [...new Set([...made.values()].map((m) => m.athleteId))] },
         course: meet.course,
         meetId: { not: meet.id },
-        meetRef: { is: { season: meet.season } },
+        meetRef: { is: { season: meet.season, unofficial: false } },
       },
       select: { athleteId: true, event: true, timeMs: true, tags: true },
     })

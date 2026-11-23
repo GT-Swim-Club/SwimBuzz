@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import Link from "next/link"
 import HoverDetail from "@/components/ui/HoverDetail"
 import { formatDateRange, formatSwimDate, formatTime } from "@/lib/utils"
+import UnofficialMark from "@/components/ui/UnofficialMark"
 import { AppIcon } from "@/components/ui/AppIcon"
 import {
   compareSwimsNewestFirst,
@@ -198,6 +199,7 @@ export default function SwimHistory({
                     <span className="flex items-center justify-end gap-2.5 font-mono font-medium tabular-nums text-foreground">
                       <DeltaPill delta={marks.improvement.get(swim.id) ?? null} />
                       <span className="w-20 shrink-0 text-right">
+                        <UnofficialMark unofficial={swim.unofficial} meetName={swim.meet} />
                         {href ? (
                           // Stretched over the whole row; the event name, badges and delete sit above it.
                           <Link

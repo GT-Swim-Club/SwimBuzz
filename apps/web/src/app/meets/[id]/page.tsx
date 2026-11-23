@@ -1,4 +1,5 @@
 import { Fragment, Suspense, type ReactNode } from "react"
+import { MeetUnofficialProvider, UnofficialMeetBadge } from "@/components/meet/MeetUnofficialContext"
 import FitHeading from "@/components/ui/FitHeading"
 import { prisma } from "@/lib/prisma"
 import { notFound, redirect } from "next/navigation"
@@ -62,6 +63,7 @@ import {
   HEAT_LANE_LOCKS_AFTER_MEET,
   meetHasEnded as meetHasEndedInZone,
   meetHeaderDetails,
+  athleteTeamSides,
   utcDayKey,
   COURSE_LABELS,
   type CourseCode,
@@ -156,6 +158,8 @@ async function MeetPageContent({
     course: meet.course,
     season: meet.season,
     school: meet.school ?? "",
+    unofficial: meet.unofficial,
+    scoreByGender: meet.scoreByGender,
     iconUrl: meet.iconUrl ?? "",
     bannerUrl: meet.bannerUrl ?? "",
     packetUrl: meet.packetUrl ?? "",
@@ -334,7 +338,11 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
             )}
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-3">
-                <FitHeading className="min-w-0 flex-1 text-4xl font-semibold text-foreground sm:text-5xl">{meet.name}</FitHeading>
+                {/* The heading takes only its text's width, so an unofficial meet's pill sits right after the name. */}
+                <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
+                  <FitHeading className="min-w-0 text-4xl font-semibold text-foreground sm:text-5xl">{meet.name}</FitHeading>
+                  {meet.unofficial ? <UnofficialMeetBadge meetName={meet.name} className="shrink-0" /> : null}
+                </div>
                 {isCoach && (
                   <MeetActions
                     meetId={meet.id}
@@ -395,12 +403,14 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       editableSeedKeys={editableSeedKeys}
       eventNumberOptions={signupEventOptions}
       eventOrder={eventOrder}
+      scoreByGender={meet.scoreByGender}
       details={meetHeaderDetails(meet)}
       iconUrl={meet.iconUrl}
       defaultCourse={meet.course}
       defaultDate={toDateInput(meet.startsAt, meet.timeZone)}
       initialView={summaryView.state}
       viewFromUrl={summaryView.fromUrl}
+      athleteTeams={athleteTeamSides(meet.resultTeams)}
     />
   )
 
@@ -544,6 +554,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
         <MeetPageBackground bannerUrl={meet.bannerUrl} />
       )}
       <main className="relative">
+        <MeetUnofficialProvider unofficial={meet.unofficial} meetName={meet.name}>
         <div className="relative z-10 flex flex-col gap-8">
           <div className="flex flex-col gap-4">{header}</div>
           {hasRosterSummaryContent ? (
@@ -565,6 +576,7 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
             <MeetPreSheetsColumn>{preSheetsCards}</MeetPreSheetsColumn>
           )}
         </div>
+        </MeetUnofficialProvider>
       </main>
     </div>
   )

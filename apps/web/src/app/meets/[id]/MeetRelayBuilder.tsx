@@ -2,6 +2,7 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type DragEvent, type ReactNode } from "react"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/Skeleton"
+import UnofficialMark from "@/components/ui/UnofficialMark"
 import SpinnerScreen from "@/components/ui/SpinnerScreen"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import HoverDetail from "@/components/ui/HoverDetail"
@@ -124,7 +125,7 @@ function SourceDate({ leg }: { leg: Leg }) {
       }
       title={leg.outsideWindow ? "Outside the preferred date range" : undefined}
     >
-      {[leg.relaySplit && "Relay split", leg.sourceDate && formatSwimDate(leg.sourceDate)]
+      {[leg.relaySplit && "Relay split", leg.unofficial && "Unofficial", leg.sourceDate && formatSwimDate(leg.sourceDate)]
         .filter(Boolean)
         .join(" · ")}
     </span>
@@ -2478,6 +2479,7 @@ export default function MeetRelayBuilder({
                                     (leg.timeMs == null ? "text-error" : "text-foreground")
                                   }
                                 >
+                                  <UnofficialMark unofficial={leg.unofficial && !leg.custom} />
                                   {formatLegTime(leg.timeMs)}
                                 </button>
                               )}
@@ -2550,6 +2552,7 @@ export default function MeetRelayBuilder({
                               </div>
                               <div className="flex shrink-0 flex-col items-end leading-tight">
                                 <span className="font-mono text-sm tabular-nums text-foreground-secondary">
+                                  <UnofficialMark unofficial={alt.unofficial && !alt.custom} />
                                   {formatLegTime(alt.timeMs)}
                                 </span>
                                 <SourceDate leg={alt} />

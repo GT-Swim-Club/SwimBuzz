@@ -33,7 +33,7 @@ export async function GET(
       swims: {
         orderBy: { date: "desc" },
         include: {
-          meetRef: { select: { id: true, slug: true, season: true, name: true } },
+          meetRef: { select: { id: true, slug: true, season: true, name: true, unofficial: true } },
         },
       },
     },
@@ -51,7 +51,9 @@ export async function GET(
     relayEvent: split.relayEvent,
     leg: split.leg,
     meet: split.meetName,
-    meetRef: split.meet ? { id: split.meet.id, slug: split.meet.slug, name: split.meet.name } : null,
+    meetRef: split.meet
+      ? { id: split.meet.id, slug: split.meet.slug, name: split.meet.name, unofficial: split.meet.unofficial }
+      : null,
   }))
 
   return NextResponse.json({

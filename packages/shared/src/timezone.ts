@@ -318,6 +318,11 @@ export function describeZones(
  * at the end of the range, e.g. "September 4, 2026 2:32 PM – September 24, 2026 EDT". One
  * line per zone block (source, plus the viewer's when it differs), each ending in the zone
  * abbreviation.
+ *
+ * Only the start *time* converts between zones (and the start date with it). The end is a
+ * plain calendar date with no clock time, so every line shows the meet's own end date —
+ * converting it would roll a midnight-stored end back a day in zones west of the meet. A
+ * meet with no start time has a plain start date too, so it stays in the meet's zone.
  */
 export function describeMeetSchedule(
   startsAt: Date | string,
@@ -328,14 +333,15 @@ export function describeMeetSchedule(
 ): string[] {
   const zones = sourceTimeZone === viewerTimeZone ? [sourceTimeZone] : [sourceTimeZone, viewerTimeZone]
   const startDate = startsAt instanceof Date ? startsAt : new Date(startsAt)
+  const sourceStartLabel = formatFullDate(startsAt, sourceTimeZone)
+  const sourceEndLabel = endsAt ? formatFullDate(endsAt, sourceTimeZone) : null
+  const multiDay = !!sourceEndLabel && sourceEndLabel !== sourceStartLabel
   return zones.map((zone) => {
     const abbrev = zoneAbbreviation(zone, startDate)
-    const startLabel = formatFullDate(startsAt, zone)
     const startLabelWithTime = hasStartTime
-      ? `${startLabel}, ${formatZonedInstant(startsAt, zone).time}`
-      : startLabel
-    const endLabel = endsAt ? formatFullDate(endsAt, zone) : null
-    if (!endLabel || endLabel === startLabel) return `${startLabelWithTime} ${abbrev}`
-    return `${startLabelWithTime} – ${endLabel} ${abbrev}`
+      ? formatZonedInstant(startsAt, zone).dateTime
+      : sourceStartLabel
+    if (!multiDay) return `${startLabelWithTime} ${abbrev}`
+    return `${startLabelWithTime} – ${sourceEndLabel} ${abbrev}`
   })
 }

@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef, useState } from "react"
 import { MEET_HEADER, type MeetHeaderDetails } from "@swimbuzz/shared"
 import InfoIcon from "@/components/ui/InfoIcon"
+import { UnofficialMeetBadge } from "@/components/meet/MeetUnofficialContext"
 import { relayEyebrowClass } from "@/app/meets/[id]/relays/RelayPageHeader"
 
 /** Trims a line's box to its capitals and baseline, so margins between lines are the visible gaps. */
@@ -21,6 +22,14 @@ const MEET_NAME_MIN_PX = 26
  * the icon grows to its height, and the text gets narrower still.
  */
 const ICON_MAX_WIDTH_FRACTION = 0.3
+/** An unofficial meet's pill after the name, in the proportions the PDFs' share. */
+const BADGE_GAP_PX = TITLE_PX * MEET_HEADER.badgeGap
+const BADGE_STYLE = {
+  fontSize: TITLE_PX * MEET_HEADER.badgeTextSize,
+  height: TITLE_PX * MEET_HEADER.badgeHeight,
+  padding: `0 ${TITLE_PX * MEET_HEADER.badgePadX}px`,
+  lineHeight: 1,
+}
 /** Details icons at the text size, pulled in to the text's capitals so they don't widen the gaps. */
 const DETAILS_ICON_STYLE = { width: DETAILS_PX, height: DETAILS_PX, margin: `${-DETAILS_PX * 0.15}px 0` }
 
@@ -28,7 +37,8 @@ const DETAILS_ICON_STYLE = { width: DETAILS_PX, height: DETAILS_PX, margin: `${-
  * A PNG export's meet header, like the PDFs': gold eyebrow, meet name, then date & location, each
  * row trimmed to its capitals and baseline so the gaps between them are the gaps you see, beside
  * the meet icon as tall as all three. It takes the export's width from the content below rather
- * than widening it: a long meet name shrinks to fit, then wraps.
+ * than widening it: a long meet name shrinks to fit, then wraps. An unofficial meet's name is
+ * followed by an "Unofficial" pill.
  */
 export default function MeetExportHeader({
   eyebrow,
@@ -67,6 +77,7 @@ export default function MeetExportHeader({
   // The meet name on one line at its full size when it fits, else as much smaller as it needs (down
   // to MEET_NAME_MIN_PX), else wrapped. Set on the element since it depends on the measured width.
   const titleRef = useRef<HTMLHeadingElement>(null)
+  const badgeRef = useRef<HTMLSpanElement>(null)
   useLayoutEffect(() => {
     const title = titleRef.current
     const box = headerTextRef.current
@@ -75,7 +86,9 @@ export default function MeetExportHeader({
       title.style.whiteSpace = "nowrap"
       let size = MEET_NAME_PX
       title.style.fontSize = `${size}px`
-      const available = box.clientWidth
+      // The name shares its row with the unofficial pill.
+      const badge = badgeRef.current
+      const available = box.clientWidth - (badge ? badge.offsetWidth + BADGE_GAP_PX : 0)
       if (available <= 0) return
       // Start from the proportional size, then step down until it truly fits (text doesn't scale
       // exactly linearly, and widths round).
@@ -93,7 +106,7 @@ export default function MeetExportHeader({
     const observer = new ResizeObserver(fit)
     observer.observe(box)
     return () => observer.disconnect()
-  }, [meetName])
+  }, [meetName, details.unofficial])
 
   return (
     // Width 0 growing to the container's: the content below sets the export's width, not the header.
@@ -112,13 +125,17 @@ export default function MeetExportHeader({
         <p className={`${relayEyebrowClass} ${TRIM_TO_CAPS}`} style={{ fontSize: EYEBROW_PX, whiteSpace: "normal" }}>
           {eyebrow}
         </p>
-        <h1
-          ref={titleRef}
-          className={`font-semibold leading-tight text-foreground ${TRIM_TO_CAPS}`}
-          style={{ marginTop: TITLE_PX * MEET_HEADER.gapAboveTitle }}
+        <div
+          className="flex items-center"
+          style={{ gap: BADGE_GAP_PX, marginTop: TITLE_PX * MEET_HEADER.gapAboveTitle }}
         >
-          {meetName}
-        </h1>
+          <h1 ref={titleRef} className={`min-w-0 font-semibold leading-tight text-foreground ${TRIM_TO_CAPS}`}>
+            {meetName}
+          </h1>
+          {details.unofficial ? (
+            <UnofficialMeetBadge ref={badgeRef} meetName={meetName} className="shrink-0" style={BADGE_STYLE} />
+          ) : null}
+        </div>
         <div
           className="flex flex-wrap items-center gap-x-5 gap-y-2 text-foreground-secondary"
           style={{ fontSize: DETAILS_PX, marginTop: TITLE_PX * MEET_HEADER.gapBelowTitle }}

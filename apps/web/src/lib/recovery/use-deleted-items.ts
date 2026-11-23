@@ -10,7 +10,8 @@ const api = createApiClient({})
 export function useDeletedItems(kind: "practice" | "meet") {
   const [items, setItems] = useState<DeletedItem[] | null>(null)
   const [error, setError] = useState("")
-  const [busy, setBusy] = useState<string | null>(null)
+  // Which item is being restored or permanently deleted, so only a restore reads "Restoring…".
+  const [busy, setBusy] = useState<{ id: string; action: "restore" | "purge" } | null>(null)
   const router = useRouter()
 
   const load = useCallback(async () => {
@@ -28,7 +29,7 @@ export function useDeletedItems(kind: "practice" | "meet") {
   }, [load])
 
   async function restore(item: DeletedItem) {
-    setBusy(item.id)
+    setBusy({ id: item.id, action: "restore" })
     try {
       await api.restoreDeleted(item.kind, item.id)
       // The page's own list (e.g. /meets, rendered on the server) was fetched
@@ -43,7 +44,7 @@ export function useDeletedItems(kind: "practice" | "meet") {
   }
 
   async function purge(item: DeletedItem) {
-    setBusy(item.id)
+    setBusy({ id: item.id, action: "purge" })
     try {
       await api.purgeDeleted(item.kind, item.id)
       await load()

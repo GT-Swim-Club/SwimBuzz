@@ -14,6 +14,7 @@ import {
   TEAM_SCORE_SECTIONS,
   teamPlaceLabel,
   teamScoreGap,
+  ourTeamSides,
   type MeetHighlights,
   type MeetWin,
   type NewNationalsCut,
@@ -327,18 +328,22 @@ export function computeMeetResultHighlights(opts: {
   let spotlight: StatSpotlight | null = null
 
   // Team scores — our place, points and margin in each standings list
+  // — one card per team when the team codes name several (an intrasquad's Gold and White).
   for (const { key, label } of TEAM_SCORE_SECTIONS) {
     const standings = teamScores?.[key] ?? []
-    const ours = standings.find((s) => s.ours)
-    if (!ours) continue
-    counters.push({
-      page: "teamScores",
-      label,
-      value: teamPlaceLabel(ours, standings),
-      hint: `${formatPoints(ours.points)} pts`,
-      detail: teamScoreGap(standings) ?? undefined,
-      place: ours.place,
-    })
+    const ours = standings.filter((s) => s.ours)
+    const sides = ourTeamSides(ours.map((s) => s.team))
+    for (const team of ours) {
+      counters.push({
+        page: "teamScores",
+        section: key,
+        label: ours.length > 1 ? `${sides.get(team.team) ?? team.team} · ${label}` : label,
+        value: teamPlaceLabel(team, standings),
+        hint: `${formatPoints(team.points)} pts`,
+        detail: teamScoreGap(standings, team) ?? undefined,
+        place: team.place,
+      })
+    }
   }
 
   // Top scorers — individual swims only; relay points stay with the relay

@@ -1,0 +1,1316 @@
+{
+  "course": "SCY",
+  "detectedSheetType": "results",
+  "event_order": {
+    "sessions": [
+      {
+        "label": "Order of Events",
+        "rows": [
+          {
+            "event": "50 Back",
+            "men": 1,
+            "women": 1
+          },
+          {
+            "event": "25 Fly",
+            "men": 2,
+            "women": 2
+          },
+          {
+            "event": "25 Breast",
+            "men": 3,
+            "women": 3
+          },
+          {
+            "event": "100 Free",
+            "men": 4,
+            "women": 4
+          },
+          {
+            "event": "100 Fly",
+            "men": 5,
+            "women": 5
+          },
+          {
+            "event": "25 Back",
+            "men": 6,
+            "women": 6
+          },
+          {
+            "event": "100 IM",
+            "men": 7,
+            "women": 7
+          },
+          {
+            "event": "25 Free",
+            "men": 8,
+            "women": 8
+          },
+          {
+            "event": "100 Back",
+            "men": 9,
+            "women": 9
+          },
+          {
+            "event": "100 Breast",
+            "men": 10,
+            "women": 10
+          },
+          {
+            "event": "50 Free",
+            "men": 11,
+            "women": 11
+          },
+          {
+            "event": "50 Breast",
+            "men": 12,
+            "women": 12
+          },
+          {
+            "event": "200 Free",
+            "men": 13,
+            "women": 13
+          },
+          {
+            "event": "200 Breast",
+            "men": 13,
+            "women": 13
+          },
+          {
+            "event": "50 Fly",
+            "men": 14,
+            "women": 14
+          },
+          {
+            "event": "100 Free Relay",
+            "men": 15,
+            "women": 15
+          }
+        ]
+      }
+    ]
+  },
+  "meet_date": "2026-11-18",
+  "meet_name": "GTSC Intrasquad Meet - Gold vs. White",
+  "relay_results": [
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "100 Free Relay",
+      "gender": "X",
+      "place": 1,
+      "points": 24.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Dunbar, Jack"
+        },
+        {
+          "leg": 2,
+          "name": "Wisehart, Carson"
+        },
+        {
+          "leg": 3,
+          "name": "Gupta, Tanay"
+        },
+        {
+          "leg": 4,
+          "name": "Chimidkhorloo, Sarnai"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC WHITE",
+      "time": "42.55"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "100 Free Relay",
+      "gender": "X",
+      "place": 2,
+      "points": 22.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Smith, Christian"
+        },
+        {
+          "leg": 2,
+          "name": "Tu, Ethan"
+        },
+        {
+          "leg": 3,
+          "name": "Hernandez, Joshua"
+        },
+        {
+          "leg": 4,
+          "name": "Ukic, Sara"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC GOLD",
+      "time": "43.53"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "100 Free Relay",
+      "gender": "X",
+      "place": 3,
+      "points": 20.0,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Luken, Joe"
+        },
+        {
+          "leg": 2,
+          "name": "Swanson, Ian"
+        },
+        {
+          "leg": 3,
+          "name": "Foeri, Zach"
+        },
+        {
+          "leg": 4,
+          "name": "LaVigne, Mia"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC GOLD",
+      "time": "44.87"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "100 Free Relay",
+      "gender": "X",
+      "place": 4,
+      "points": 18.0,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "GTSC WHITE",
+      "time": "45.16"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "100 Free Relay",
+      "gender": "X",
+      "place": 5,
+      "points": 16.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Fritsch, Augustin"
+        },
+        {
+          "leg": 2,
+          "name": "Six, Alexandre"
+        },
+        {
+          "leg": 3,
+          "name": "Ganne, Axel"
+        },
+        {
+          "leg": 4,
+          "name": "Trouve, Antoine"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC GOLD",
+      "time": "48.38"
+    }
+  ],
+  "results": [
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "X",
+      "name": "Smith, Christian",
+      "place": 1,
+      "points": 12.0,
+      "seedTime": "23.30",
+      "tags": "",
+      "team": "Gold",
+      "time": "24.53"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "X",
+      "name": "Regalado, Elise",
+      "place": 2,
+      "points": 11.0,
+      "seedTime": "31.00",
+      "tags": "",
+      "team": "White",
+      "time": "31.97"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Fly",
+      "gender": "X",
+      "name": "Tu, Ethan",
+      "place": 1,
+      "points": 12.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "10.34"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Fly",
+      "gender": "X",
+      "name": "Gupta, Tanay",
+      "place": 2,
+      "points": 11.0,
+      "tags": "",
+      "team": "White",
+      "time": "10.51"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Fly",
+      "gender": "X",
+      "name": "Dunbar, Jack",
+      "place": 3,
+      "points": 10.0,
+      "tags": "",
+      "team": "White",
+      "time": "10.54"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Fly",
+      "gender": "X",
+      "name": "Smith, Christian",
+      "place": 4,
+      "points": 9.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "11.27"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Fly",
+      "gender": "X",
+      "name": "Ukic, Sara",
+      "place": 5,
+      "points": 8.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "11.90"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Fly",
+      "gender": "X",
+      "name": "Hernandez, Joshua",
+      "place": 6,
+      "points": 8.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "12.16"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Fly",
+      "gender": "X",
+      "name": "LaVigne, Mia",
+      "place": 7,
+      "points": 7.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "13.50"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Fly",
+      "gender": "X",
+      "name": "Glasrud, Gwen",
+      "place": 8,
+      "points": 7.0,
+      "tags": "",
+      "team": "White",
+      "time": "13.75"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Breast",
+      "gender": "X",
+      "name": "Tu, Ethan",
+      "place": 1,
+      "points": 12.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "12.15"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Breast",
+      "gender": "X",
+      "name": "Sung, Roy",
+      "place": 2,
+      "points": 11.0,
+      "tags": "",
+      "team": "White",
+      "time": "13.35"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Breast",
+      "gender": "X",
+      "name": "LaVigne, Mia",
+      "place": 3,
+      "points": 10.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "16.31"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Breast",
+      "gender": "X",
+      "name": "Dunbar, Jack",
+      "place": 4,
+      "points": 9.0,
+      "tags": "",
+      "team": "White",
+      "time": "16.81"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Smith, Christian",
+      "place": 1,
+      "points": 12.0,
+      "seedTime": "48.00",
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "22.86"
+        },
+        {
+          "distance": 100,
+          "splitTime": "24.97"
+        }
+      ],
+      "tags": "",
+      "team": "Gold",
+      "time": "47.83"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Purdy, Hudson",
+      "place": 2,
+      "points": 11.0,
+      "seedTime": "52.00",
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "23.95"
+        },
+        {
+          "distance": 100,
+          "splitTime": "27.86"
+        }
+      ],
+      "tags": "",
+      "team": "White",
+      "time": "51.81"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Williams, Mayon",
+      "place": 3,
+      "points": 10.0,
+      "seedTime": "56.50",
+      "tags": "",
+      "team": "White",
+      "time": "57.29"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Hernandez, Joshua",
+      "place": 4,
+      "points": 9.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "58.92"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Bennett, Andrew",
+      "place": 5,
+      "points": 8.0,
+      "seedTime": "1:01.10",
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.70"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.33"
+        }
+      ],
+      "tags": "",
+      "team": "White",
+      "time": "1:03.03"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Choi, Brandon",
+      "place": 6,
+      "points": 8.0,
+      "seedTime": "1:10.91",
+      "tags": "",
+      "team": "White",
+      "time": "1:05.47"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Kang, Daniel",
+      "place": 7,
+      "points": 7.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "1:39.25"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Ferrara, Eli",
+      "place": null,
+      "seedTime": "47.07",
+      "tags": "",
+      "team": "White",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Ganne, Axel",
+      "place": null,
+      "seedTime": "1:00.50",
+      "tags": "",
+      "team": "Gold",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "X",
+      "name": "Yakes, James",
+      "place": 1,
+      "points": 12.0,
+      "seedTime": "59.13",
+      "tags": "",
+      "team": "Gold",
+      "time": "57.13"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "X",
+      "name": "Sung, Roy",
+      "place": 2,
+      "points": 11.0,
+      "seedTime": "53.63",
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "26.76"
+        },
+        {
+          "distance": 100,
+          "splitTime": "30.63"
+        }
+      ],
+      "tags": "",
+      "team": "White",
+      "time": "57.39"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "X",
+      "name": "Dunbar, Jack",
+      "place": null,
+      "seedTime": "51.00",
+      "tags": "",
+      "team": "White",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Back",
+      "gender": "X",
+      "name": "Smith, Christian",
+      "place": 1,
+      "points": 12.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "11.34"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Back",
+      "gender": "X",
+      "name": "Gupta, Tanay",
+      "place": 2,
+      "points": 11.0,
+      "tags": "",
+      "team": "White",
+      "time": "11.35"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Back",
+      "gender": "X",
+      "name": "Dunbar, Jack",
+      "place": 3,
+      "points": 10.0,
+      "tags": "",
+      "team": "White",
+      "time": "12.24"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Back",
+      "gender": "X",
+      "name": "Luken, Joe",
+      "place": 4,
+      "points": 9.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "12.65"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Back",
+      "gender": "X",
+      "name": "Regalado, Elise",
+      "place": 5,
+      "points": 8.0,
+      "tags": "",
+      "team": "White",
+      "time": "13.83"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Back",
+      "gender": "X",
+      "name": "Tu, Ethan",
+      "place": 6,
+      "points": 8.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "20.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "X",
+      "name": "Wisehart, Carson",
+      "place": 1,
+      "points": 12.0,
+      "tags": "",
+      "team": "White",
+      "time": "56.25"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "X",
+      "name": "Garcia Alvarez, Alvaro",
+      "place": null,
+      "tags": "",
+      "team": "White",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "X",
+      "name": "Kirkley, River",
+      "place": null,
+      "seedTime": "1:05.00",
+      "tags": "",
+      "team": "White",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "X",
+      "name": "Saigal, Roshan",
+      "place": null,
+      "seedTime": "1:30.00",
+      "tags": "",
+      "team": "White",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Free",
+      "gender": "X",
+      "name": "Gupta, Tanay",
+      "place": 1,
+      "points": 12.0,
+      "tags": "",
+      "team": "White",
+      "time": "9.48"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Free",
+      "gender": "X",
+      "name": "Smith, Christian",
+      "place": 2,
+      "points": 11.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "10.00"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Free",
+      "gender": "X",
+      "name": "Tu, Ethan",
+      "place": 3,
+      "points": 10.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "10.06"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Free",
+      "gender": "X",
+      "name": "Swanson, Ian",
+      "place": 4,
+      "points": 9.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "10.12"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Free",
+      "gender": "X",
+      "name": "Dunbar, Jack",
+      "place": 5,
+      "points": 8.0,
+      "tags": "",
+      "team": "White",
+      "time": "10.33"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Free",
+      "gender": "X",
+      "name": "Sung, Roy",
+      "place": 6,
+      "points": 8.0,
+      "tags": "",
+      "team": "White",
+      "time": "10.81"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Free",
+      "gender": "X",
+      "name": "Luken, Joe",
+      "place": 7,
+      "points": 7.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "10.82"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Free",
+      "gender": "X",
+      "name": "Hernandez, Joshua",
+      "place": 8,
+      "points": 7.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "12.06"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Free",
+      "gender": "X",
+      "name": "Glasrud, Gwen",
+      "place": 9,
+      "points": 6.0,
+      "tags": "",
+      "team": "White",
+      "time": "12.28"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Free",
+      "gender": "X",
+      "name": "LaVigne, Mia",
+      "place": 10,
+      "points": 6.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "13.05"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Free",
+      "gender": "X",
+      "name": "Ulie, Marissa",
+      "place": 11,
+      "points": 5.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "15.78"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Free",
+      "gender": "X",
+      "name": "Rohovit, Hunter",
+      "place": null,
+      "seedTime": "12.69",
+      "tags": "",
+      "team": "Gold",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "25 Free",
+      "gender": "X",
+      "name": "Kang, Daniel",
+      "place": null,
+      "tags": "",
+      "team": "Gold",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "X",
+      "name": "Luken, Joe",
+      "place": 1,
+      "points": 12.0,
+      "seedTime": "57.38",
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "27.83"
+        },
+        {
+          "distance": 100,
+          "splitTime": "30.30"
+        }
+      ],
+      "tags": "",
+      "team": "Gold",
+      "time": "58.13"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "X",
+      "name": "Swanson, Ian",
+      "place": 2,
+      "points": 11.0,
+      "seedTime": "54.21",
+      "tags": "",
+      "team": "Gold",
+      "time": "1:00.08"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "X",
+      "name": "Chimidkhorloo, Sarnai",
+      "place": 3,
+      "points": 10.0,
+      "seedTime": "1:00.01",
+      "tags": "",
+      "team": "White",
+      "time": "1:02.31"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "X",
+      "name": "Ukic, Sara",
+      "place": 4,
+      "points": 9.0,
+      "seedTime": "1:00.00",
+      "tags": "",
+      "team": "Gold",
+      "time": "1:05.26"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "X",
+      "name": "Skidmore, Billy",
+      "place": 1,
+      "points": 12.0,
+      "tags": "",
+      "team": "White",
+      "time": "1:04.72"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "X",
+      "name": "Sung, Roy",
+      "place": 2,
+      "points": 11.0,
+      "seedTime": "1:00.70",
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.40"
+        },
+        {
+          "distance": 100,
+          "splitTime": "36.54"
+        }
+      ],
+      "tags": "",
+      "team": "White",
+      "time": "1:07.94"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "X",
+      "name": "Crouchley, John",
+      "place": 3,
+      "points": 10.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "1:08.82"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "X",
+      "name": "Glasrud, Gwen",
+      "place": 4,
+      "points": 9.0,
+      "seedTime": "1:20.99",
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "35.98"
+        },
+        {
+          "distance": 100,
+          "splitTime": "41.71"
+        }
+      ],
+      "tags": "",
+      "team": "White",
+      "time": "1:17.69"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Ferrara, Eli",
+      "place": 1,
+      "points": 12.0,
+      "seedTime": "21.69",
+      "tags": "",
+      "team": "White",
+      "time": "22.32"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Tu, Ethan",
+      "place": 2,
+      "points": 11.0,
+      "seedTime": "22.05",
+      "tags": "",
+      "team": "Gold",
+      "time": "22.53"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Elwell, Colin",
+      "place": 3,
+      "points": 10.0,
+      "seedTime": "22.40",
+      "tags": "",
+      "team": "Gold",
+      "time": "22.78"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Dunbar, Jack",
+      "place": 4,
+      "points": 9.0,
+      "seedTime": "21.00",
+      "tags": "",
+      "team": "White",
+      "time": "22.81"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Purdy, Hudson",
+      "place": 5,
+      "points": 8.0,
+      "seedTime": "22.90",
+      "tags": "",
+      "team": "White",
+      "time": "23.42"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Foeri, Zach",
+      "place": 6,
+      "points": 8.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "23.44"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Swanson, Ian",
+      "place": 7,
+      "points": 7.0,
+      "seedTime": "21.88",
+      "tags": "",
+      "team": "Gold",
+      "time": "24.37"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Kumar, Arjun",
+      "place": 8,
+      "points": 7.0,
+      "seedTime": "24.49",
+      "tags": "",
+      "team": "White",
+      "time": "24.56"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Six, Alexandre",
+      "place": 9,
+      "points": 6.0,
+      "seedTime": "28.00",
+      "tags": "",
+      "team": "Gold",
+      "time": "25.47"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Crouchley, John",
+      "place": 10,
+      "points": 6.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "25.78"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Bennett, Andrew",
+      "place": 11,
+      "points": 5.0,
+      "seedTime": "25.90",
+      "tags": "",
+      "team": "White",
+      "time": "26.36"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Fritsch, Augustin",
+      "place": 12,
+      "points": 4.0,
+      "seedTime": "28.00",
+      "tags": "",
+      "team": "Gold",
+      "time": "26.55"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Ukic, Sara",
+      "place": 13,
+      "points": 4.0,
+      "seedTime": "24.50",
+      "tags": "",
+      "team": "Gold",
+      "time": "26.60"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Choi, Brandon",
+      "place": 14,
+      "points": 3.0,
+      "seedTime": "29.65",
+      "tags": "",
+      "team": "White",
+      "time": "28.23"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Kang, Daniel",
+      "place": 15,
+      "points": 3.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "34.94"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Ulie, Marissa",
+      "place": 16,
+      "points": 2.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "37.42"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Kirkley, River",
+      "place": null,
+      "seedTime": "26.00",
+      "tags": "",
+      "team": "White",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Regalado, Elise",
+      "place": null,
+      "seedTime": "27.00",
+      "tags": "",
+      "team": "White",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Cotter, Paul",
+      "place": null,
+      "tags": "",
+      "team": "White",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "X",
+      "name": "Wisehart, Carson",
+      "place": 1,
+      "points": 12.0,
+      "tags": "",
+      "team": "White",
+      "time": "28.75"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "X",
+      "name": "Kumar, Arjun",
+      "place": 2,
+      "points": 11.0,
+      "seedTime": "30.49",
+      "tags": "",
+      "team": "White",
+      "time": "30.99"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "X",
+      "name": "Trouve, Antoine",
+      "place": 3,
+      "points": 10.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "33.87"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "X",
+      "name": "Slorahn, Piper",
+      "place": 4,
+      "points": 9.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "34.75"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "X",
+      "name": "Glasrud, Gwen",
+      "place": 1,
+      "points": 12.0,
+      "seedTime": "2:07.99",
+      "tags": "",
+      "team": "White",
+      "time": "2:09.37"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Breast",
+      "gender": "X",
+      "name": "Skidmore, Billy",
+      "place": 1,
+      "points": 12.0,
+      "tags": "",
+      "team": "White",
+      "time": "2:25.83"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Tu, Ethan",
+      "place": 1,
+      "points": 12.0,
+      "seedTime": "19.99",
+      "tags": "",
+      "team": "Gold",
+      "time": "24.03"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Elwell, Colin",
+      "place": 2,
+      "points": 11.0,
+      "seedTime": "25.80",
+      "tags": "",
+      "team": "Gold",
+      "time": "24.66"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Yakes, James",
+      "place": 3,
+      "points": 10.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "26.75"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Williams, Mayon",
+      "place": 4,
+      "points": 9.0,
+      "seedTime": "26.50",
+      "tags": "",
+      "team": "White",
+      "time": "28.64"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Slorahn, Piper",
+      "place": 5,
+      "points": 8.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "29.67"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Zang, Eric",
+      "place": null,
+      "seedTime": "26.69",
+      "tags": "",
+      "team": "Gold",
+      "time": "NS"
+    }
+  ],
+  "team_scores": {
+    "combined": [
+      {
+        "place": 1,
+        "points": 423.0,
+        "team": "GTSC Gold"
+      },
+      {
+        "place": 2,
+        "points": 366.0,
+        "team": "GTSC White"
+      }
+    ],
+    "men": [],
+    "source": "pdf",
+    "women": []
+  }
+}

@@ -9,6 +9,13 @@ import { readRecordSwimmers, recordKey } from "@/lib/records/record-rows"
  * and the record from before this meet.
  */
 export async function loadMeetRecords(meetId: string): Promise<MeetRecord[]> {
+  return (await loadMeetRecordsWithHolders(meetId)).map(({ record }) => record)
+}
+
+/** loadMeetRecords, each record with its holders' athlete ids (a relay's swimmers) — to split them by team. */
+export async function loadMeetRecordsWithHolders(
+  meetId: string
+): Promise<{ record: MeetRecord; athleteIds: string[] }[]> {
   const setHere = await prisma.teamRecord.findMany({
     where: { meetId, course: "SCY", dismissed: false },
     select: { gender: true, event: true },
@@ -26,7 +33,7 @@ export async function loadMeetRecords(meetId: string): Promise<MeetRecord[]> {
     byKey.set(key, [...(byKey.get(key) ?? []), row])
   }
 
-  const out: MeetRecord[] = []
+  const out: { record: MeetRecord; athleteIds: string[] }[] = []
   for (const gender of ["F", "M", "X"] as const) {
     for (const def of RECORD_EVENTS) {
       if (!def.genders.includes(gender)) continue
@@ -35,9 +42,10 @@ export async function loadMeetRecords(meetId: string): Promise<MeetRecord[]> {
       if (first < 0) continue
       const latest = history.findLast((r) => r.meetId === meetId)!
       const previous = history[first - 1]
-      const swimmers = readRecordSwimmers(latest.swimmers).map((s) => s.name)
+      const holders = readRecordSwimmers(latest.swimmers)
+      const swimmers = holders.map((s) => s.name)
       const previousHolder = previous && !def.relay ? readRecordSwimmers(previous.swimmers)[0] : undefined
-      out.push({
+      const record: MeetRecord = {
         gender,
         event: def.event,
         swimmers,
@@ -52,7 +60,8 @@ export async function loadMeetRecords(meetId: string): Promise<MeetRecord[]> {
               },
             }
           : {}),
-      })
+      }
+      out.push({ record, athleteIds: holders.flatMap((s) => (s.athleteId ? [s.athleteId] : [])) })
     }
   }
   return out

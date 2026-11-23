@@ -1,5 +1,6 @@
 "use client"
 
+import { useMeetUnofficial } from "@/components/meet/MeetUnofficialContext"
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import Link from "next/link"
@@ -398,6 +399,7 @@ export default function SwimDetailModal({
   /** For coaches: fill in, inline, the round, heat & lane no import has given this row. */
   heatLaneEdit?: HeatLaneEdit
 }) {
+  const meetUnofficial = useMeetUnofficial()
   const [mounted, setMounted] = useState(false)
   const [chosenStep, setChosenStep] = useState<number | null>(null)
   const titleRef = useRef<HTMLHeadingElement>(null)
@@ -776,6 +778,10 @@ export default function SwimDetailModal({
                       <span className="text-warning-text">{head.status}</span>
                     )}
                   </div>
+                  {/* The label marks the whole detail as unofficial, so its times carry no "*". */}
+                  {head.time && meetUnofficial.unofficial ? (
+                    <div className="mt-0.5 text-xs font-medium text-accent">Unofficial</div>
+                  ) : null}
                   {(headDelta || head.place != null || head.points != null) && (
                     <div className="mt-1.5 flex items-center justify-end gap-2">
                       {headDelta ? (

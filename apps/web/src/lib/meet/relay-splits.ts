@@ -33,6 +33,8 @@ export type RelaySplit = {
     startsAt: Date
     endsAt: Date | null
     timeZone: string
+    /** Intrasquad or other unofficial meet. */
+    unofficial: boolean
   } | null
   source: string
 }
@@ -48,7 +50,16 @@ const splitSelect = {
   meet: true,
   source: true,
   meetRef: {
-    select: { id: true, slug: true, name: true, iconUrl: true, startsAt: true, endsAt: true, timeZone: true },
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      iconUrl: true,
+      startsAt: true,
+      endsAt: true,
+      timeZone: true,
+      unofficial: true,
+    },
   },
 } satisfies Prisma.SwimSelect
 

@@ -1,4 +1,4 @@
-import { coerceTeamScores, type TeamScores } from "./team-scores"
+import { coerceTeamScores, type TeamScores, type TeamScoresSection } from "./team-scores"
 
 /** Carousel pages that hold their own counters, ahead of the counters paged by shape. */
 export type StatCounterPage = "teamScores" | "topScorers"
@@ -11,6 +11,8 @@ export type StatCounter = {
   detail?: string
   /** Our team's place, on a team score — 1st to 3rd are tinted like a podium finish. */
   place?: number
+  /** The standings a team score is from (opens them); older payloads match on the label instead. */
+  section?: TeamScoresSection
   page?: StatCounterPage
   /** The export row it shares with its group: results (swimmers, records, places) or swims (PBs, cuts, standouts). */
   row?: StatCounterRow
@@ -99,9 +101,31 @@ export type MeetHighlights = {
   wins?: MeetWin[]
   /** GTSC records set here — the "GTSC Records" counter and the Results exports' section. */
   records?: MeetRecord[]
+  /**
+   * At a meet with several of our teams (an intrasquad's Gold and White), each team's own
+   * highlights, in standings order. The counters above stay meet-wide (older app builds show them);
+   * when this is set, clients show the team score cards above, then each team's section.
+   */
+  teams?: MeetTeamHighlights[]
 }
 
-export type HighlightsPage = { kind: StatCounterPage | "stats"; counters: StatCounter[] }
+/** One of our teams' highlights at a meet with several (no team score cards: those stay meet-wide). */
+export type MeetTeamHighlights = {
+  /** The team's side ("Gold"), its section's heading. */
+  team: string
+  counters: StatCounter[]
+  newNationalsCuts: NewNationalsCut[]
+  topScorers: TopScorer[]
+  wins: MeetWin[]
+  records: MeetRecord[]
+}
+
+export type HighlightsPage = {
+  kind: StatCounterPage | "stats"
+  counters: StatCounter[]
+  /** The team whose highlights the page shows ("Gold"), at a meet split by team. */
+  team?: string
+}
 
 const PAGE_ORDER: StatCounterPage[] = ["teamScores", "topScorers"]
 const COUNTER_ROWS: StatCounterRow[] = ["results", "swims"]
@@ -146,6 +170,21 @@ export function paginateHighlights(counters: StatCounter[]): HighlightsPage[] {
   return pages
 }
 
+/**
+ * The carousel's pages for a meet's highlights: as paginateHighlights, or at a meet split by team,
+ * the team score cards first, then each team's pages (top scorers, then stats) tagged with the team.
+ */
+export function paginateMeetHighlights(highlights: MeetHighlights): HighlightsPage[] {
+  const teams = highlights.teams ?? []
+  if (teams.length < 2) return paginateHighlights(highlights.counters)
+  return [
+    ...paginateHighlights(highlights.counters.filter((c) => c.page === "teamScores")),
+    ...teams.flatMap((team) =>
+      paginateHighlights(team.counters.filter((c) => c.page !== "teamScores")).map((page) => ({ ...page, team: team.team }))
+    ),
+  ]
+}
+
 /** A row of highlight tiles, each `1 / perRow` of the row's width (a short row leaves room after it). */
 export type HighlightTileRow = { counters: StatCounter[]; perRow: number }
 
@@ -161,7 +200,7 @@ export function highlightTileRows(counters: StatCounter[], plainPerRow = 4): Hig
   const chunk = (list: StatCounter[], perRow: number) => {
     for (let i = 0; i < list.length; i += perRow) rows.push({ counters: list.slice(i, i + perRow), perRow })
   }
-  chunk(counters.filter((c) => c.page === "teamScores"), 3)
+  rows.push(...teamScoreTileRows(counters.filter((c) => c.page === "teamScores")))
   const rest = counters.filter((c) => !c.page)
   for (const row of COUNTER_ROWS) {
     const grouped = rest.filter((c) => c.row === row)
@@ -171,6 +210,35 @@ export function highlightTileRows(counters: StatCounter[], plainPerRow = 4): Hig
   chunk(ungrouped.filter((c) => !c.hint), plainPerRow)
   chunk(ungrouped.filter((c) => c.hint), 3)
   return rows
+}
+
+const TEAM_SCORE_COLUMNS: TeamScoresSection[] = ["women", "men", "combined"]
+
+/**
+ * Team score tiles as rows: Women, Men and Combined as columns. With several of our teams (an
+ * intrasquad's "Gold · Women", "White · Women", …) each team gets a row, in its combined standings
+ * order (else the order its tiles first come in), so a column reads one standings list. Tiles without
+ * a known section, or one team's alone, go three to a row as they come.
+ */
+function teamScoreTileRows(scores: StatCounter[]): HighlightTileRow[] {
+  const sectioned = scores.every((c) => c.section != null)
+  const teamOf = (c: StatCounter) => (c.label.includes(" · ") ? c.label.split(" · ")[0]!.trim() : "")
+  const teams: string[] = []
+  const firstIn = (list: StatCounter[]) => {
+    for (const c of list) if (!teams.includes(teamOf(c))) teams.push(teamOf(c))
+  }
+  firstIn(scores.filter((c) => c.section === "combined"))
+  firstIn(scores)
+  if (!sectioned || teams.length < 2) {
+    const rows: HighlightTileRow[] = []
+    for (let i = 0; i < scores.length; i += 3) rows.push({ counters: scores.slice(i, i + 3), perRow: 3 })
+    return rows
+  }
+  const columns = TEAM_SCORE_COLUMNS.filter((section) => scores.some((c) => c.section === section))
+  return teams.map((team) => ({
+    counters: columns.flatMap((section) => scores.filter((c) => c.section === section && teamOf(c) === team)),
+    perRow: columns.length,
+  }))
 }
 
 /** A counter's value reads as a time drop ("-1.23", "-4.2%"), shown in green. */
@@ -185,8 +253,45 @@ export function coerceMeetHighlights(raw: unknown): MeetHighlights | null {
   if (!raw || typeof raw !== "object") return null
   const r = raw as Record<string, unknown>
   if (!Array.isArray(r.counters)) return null
+  const counters = coerceStatCounters(r.counters)
+  if (counters.length === 0) return null
+  const teams = coerceMeetTeamHighlights(r.teams)
+  return {
+    counters,
+    teamScores: coerceTeamScores(r.teamScores),
+    newNationalsCuts: coerceNewNationalsCuts(r.newNationalsCuts),
+    topScorers: coerceTopScorers(r.topScorers),
+    wins: coerceMeetWins(r.wins),
+    records: coerceMeetRecords(r.records),
+    ...(teams.length > 1 ? { teams } : {}),
+  }
+}
+
+/** Each team's highlights from an API response or export request, dropping any malformed one. */
+export function coerceMeetTeamHighlights(raw: unknown): MeetTeamHighlights[] {
+  if (!Array.isArray(raw)) return []
+  const teams: MeetTeamHighlights[] = []
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue
+    const t = item as Record<string, unknown>
+    if (typeof t.team !== "string" || !t.team.trim()) continue
+    teams.push({
+      team: t.team.trim(),
+      counters: coerceStatCounters(t.counters),
+      newNationalsCuts: coerceNewNationalsCuts(t.newNationalsCuts),
+      topScorers: coerceTopScorers(t.topScorers),
+      wins: coerceMeetWins(t.wins),
+      records: coerceMeetRecords(t.records),
+    })
+  }
+  return teams
+}
+
+/** Counters from an API response or export request, dropping any malformed one. */
+export function coerceStatCounters(raw: unknown): StatCounter[] {
+  if (!Array.isArray(raw)) return []
   const counters: StatCounter[] = []
-  for (const item of r.counters) {
+  for (const item of raw) {
     if (!item || typeof item !== "object") continue
     const c = item as Record<string, unknown>
     if (typeof c.label !== "string") continue
@@ -197,6 +302,7 @@ export function coerceMeetHighlights(raw: unknown): MeetHighlights | null {
       ...(typeof c.hint === "string" ? { hint: c.hint } : {}),
       ...(typeof c.detail === "string" ? { detail: c.detail } : {}),
       ...(typeof c.place === "number" && Number.isInteger(c.place) && c.place > 0 ? { place: c.place } : {}),
+      ...(c.section === "women" || c.section === "men" || c.section === "combined" ? { section: c.section } : {}),
       ...(typeof c.page === "string" && COUNTER_PAGES.has(c.page)
         ? { page: c.page as StatCounterPage }
         : {}),
@@ -204,15 +310,7 @@ export function coerceMeetHighlights(raw: unknown): MeetHighlights | null {
       ...(c.hintBesideLabel === true ? { hintBesideLabel: true } : {}),
     })
   }
-  if (counters.length === 0) return null
-  return {
-    counters,
-    teamScores: coerceTeamScores(r.teamScores),
-    newNationalsCuts: coerceNewNationalsCuts(r.newNationalsCuts),
-    topScorers: coerceTopScorers(r.topScorers),
-    wins: coerceMeetWins(r.wins),
-    records: coerceMeetRecords(r.records),
-  }
+  return counters
 }
 
 const isString = (value: unknown): value is string => typeof value === "string"

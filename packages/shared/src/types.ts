@@ -21,6 +21,8 @@ export type MeetSummary = {
   timeZone: string
   course: string
   season: string
+  /** Intrasquad or other unofficial meet: its times are marked unofficial everywhere. */
+  unofficial?: boolean
   iconUrl?: string | null
   bannerUrl?: string | null
   _count?: { swims: number }

@@ -46,7 +46,16 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
             orderBy: { date: "desc" },
             include: {
               meetRef: {
-                select: { slug: true, season: true, name: true, startsAt: true, endsAt: true, timeZone: true, iconUrl: true },
+                select: {
+                  slug: true,
+                  season: true,
+                  name: true,
+                  startsAt: true,
+                  endsAt: true,
+                  timeZone: true,
+                  iconUrl: true,
+                  unofficial: true,
+                },
               },
             }}}})
 
@@ -69,7 +78,8 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
     meetIconUrl: swim.meetRef?.iconUrl ?? null,
     meetDays: swim.meetRef ? meetDayRange(swim.meetRef) : null,
     date: swim.date.toISOString(),
-    source: swim.source}))
+    source: swim.source,
+    unofficial: swim.meetRef?.unofficial ?? false}))
 
   const relaySplits: AthleteSwim[] = (await loadRelaySplits({ athleteIds: [athlete.id] })).map((split) => ({
     id: `relay-split:${split.id}`,
@@ -84,6 +94,7 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
     meetDays: split.meet ? meetDayRange(split.meet) : null,
     date: split.date.toISOString(),
     source: split.source,
+    unofficial: split.meet?.unofficial ?? false,
     relaySplit: { relayEvent: split.relayEvent, leg: split.leg }}))
 
   const athleteHighlights = SHOW_SEASON_HIGHLIGHTS && computeAthleteHighlights(

@@ -7,14 +7,9 @@ import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/ui/SegmentedToggle"
 import { normalizeEventName } from "@/lib/swim/swim-parse"
 import { addIndividualSheetEntry, upsertRelayEntry } from "./meet-entries.actions"
+import { RELAY_SWIM_EVENTS } from "@swimbuzz/shared"
 
-const RELAY_EVENTS = [
-  "200 Medley Relay",
-  "200 Free Relay",
-  "400 Free Relay",
-  "800 Free Relay",
-  "400 Medley Relay",
-]
+const RELAY_EVENTS = RELAY_SWIM_EVENTS
 
 type AthleteOption = { id: string; name: string; gender?: "M" | "F" }
 

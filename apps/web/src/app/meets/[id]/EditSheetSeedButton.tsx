@@ -4,24 +4,9 @@ import { useState, useTransition } from "react"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import ActionIcon from "@/components/ui/ActionIcon"
 import { deleteSheetSeed, editSheetSeed } from "./meet-entries.actions"
+import { INDIVIDUAL_SWIM_EVENTS } from "@swimbuzz/shared"
 
-const FALLBACK_EVENTS = [
-  "50 Free",
-  "100 Free",
-  "200 Free",
-  "400 Free",
-  "500 Free",
-  "1000 Free",
-  "1650 Free",
-  "100 Back",
-  "200 Back",
-  "100 Breast",
-  "200 Breast",
-  "100 Fly",
-  "200 Fly",
-  "200 IM",
-  "400 IM",
-]
+const FALLBACK_EVENTS = INDIVIDUAL_SWIM_EVENTS
 
 type EditSheetSeedButtonProps = {
   meetId: string

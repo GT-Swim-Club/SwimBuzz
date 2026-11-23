@@ -1,5 +1,6 @@
 "use client"
 
+import { UnofficialMeetBadge } from "@/components/meet/MeetUnofficialContext"
 import { currentSeason, formatMeetDateRange, formatSeasonLabel } from "@swimbuzz/shared"
 import { RelativeDateRange, eventDaysAhead, useTodayKey, wholeWeeks } from "@/components/ui/RelativeDate"
 import MeetGalleryCard, { MeetCardRows } from "./MeetGalleryCard"
@@ -18,6 +19,9 @@ export type MeetListItem = {
   name: string
   location: string | null
   school: string | null
+  /** Intrasquad or other unofficial meet. */
+  unofficial: boolean
+  scoreByGender: boolean
   startsAt: Date
   endsAt: Date | null
   hasStartTime: boolean
@@ -49,6 +53,8 @@ function meetFormInitial(m: MeetListItem): MeetFormState {
     course: m.course,
     season: m.season,
     school: m.school ?? "",
+    unofficial: m.unofficial,
+    scoreByGender: m.scoreByGender,
     iconUrl: m.iconUrl ?? "",
     bannerUrl: m.bannerUrl ?? "",
     packetUrl: m.packetUrl ?? "",
@@ -177,7 +183,7 @@ export default function MeetsClientWrapper({
             <RelativeDateRange startsAt={m.startsAt} endsAt={m.endsAt} timeZone={m.timeZone} />
           )
         }
-        location={[m.location, m.school].filter(Boolean).join(" · ")}
+        location={[m.location, m.school, m.unofficial ? "Unofficial" : null].filter(Boolean).join(" · ")}
         stackMeta={rowSize >= 3}
         badge={kind === "upcoming" && m.hasStartTime ? <MeetCountdown startsAt={m.startsAt} variant="glass" /> : null}
         actions={
@@ -206,6 +212,7 @@ export default function MeetsClientWrapper({
       date: formatMeetDateRange(m.startsAt, m.endsAt, m.timeZone),
       location: [m.location, m.school].filter(Boolean).join(" · "),
       status: m.upcoming ? <RowCountdown meet={m} /> : undefined,
+      nameBadge: m.unofficial ? <UnofficialMeetBadge meetName={m.name} /> : undefined,
       actions: isCoach && (
         <EditMeetButton meetId={m.id} initial={meetFormInitial(m)} seasons={seasonOptions} hasSwims={m.hasSwims} />
       ),

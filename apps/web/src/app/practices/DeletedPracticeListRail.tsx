@@ -45,13 +45,14 @@ export default function DeletedPracticeListRail({
   emptyMessage: string
 }) {
   const router = useRouter()
-  const [busy, setBusy] = useState<string | null>(null)
+  // Which practice is being restored or permanently deleted, so only a restore reads "Restoring…".
+  const [busy, setBusy] = useState<{ id: string; action: "restore" | "purge" } | null>(null)
   const [error, setError] = useState("")
   const [confirmDelete, setConfirmDelete] = useState<DeletedPracticeRailItem | null>(null)
   const sorted = sortPractices(practices, sort)
 
   async function restore(item: DeletedPracticeRailItem) {
-    setBusy(item.id)
+    setBusy({ id: item.id, action: "restore" })
     setError("")
     try {
       await api.restoreDeleted("practice", item.id)
@@ -64,7 +65,7 @@ export default function DeletedPracticeListRail({
   }
 
   async function purge(item: DeletedPracticeRailItem) {
-    setBusy(item.id)
+    setBusy({ id: item.id, action: "purge" })
     setError("")
     try {
       await api.purgeDeleted("practice", item.id)
@@ -138,7 +139,7 @@ export default function DeletedPracticeListRail({
                 className="group relative shrink-0 rounded-md p-1.5 hover:bg-fill-secondary disabled:opacity-50"
               >
                 <ActionIcon kind="restore" className="h-4 w-4" />
-                <HoverDetail label={busy === practice.id ? "Restoring…" : "Restore"} />
+                <HoverDetail label={busy?.action === "restore" && busy.id === practice.id ? "Restoring…" : "Restore"} />
               </button>
               <button
                 type="button"

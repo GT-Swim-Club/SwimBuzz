@@ -1,6 +1,60 @@
 {
   "course": "SCY",
   "detectedSheetType": "results",
+  "event_order": {
+    "sessions": [
+      {
+        "label": "Order of Events",
+        "rows": [
+          {
+            "event": "200 Medley Relay",
+            "men": 2,
+            "women": 1
+          },
+          {
+            "event": "400 IM",
+            "men": 4,
+            "women": 3
+          },
+          {
+            "event": "50 Fly",
+            "men": 6,
+            "women": 5
+          },
+          {
+            "event": "100 Back",
+            "men": 8,
+            "women": 7
+          },
+          {
+            "event": "200 Free",
+            "men": 10,
+            "women": 9
+          },
+          {
+            "event": "100 IM",
+            "men": 12,
+            "women": 11
+          },
+          {
+            "event": "200 Fly",
+            "men": 14,
+            "women": 13
+          },
+          {
+            "event": "50 Free",
+            "men": 16,
+            "women": 15
+          },
+          {
+            "event": "100 Breast",
+            "men": 18,
+            "women": 17
+          }
+        ]
+      }
+    ]
+  },
   "meet_date": "2024-11-16",
   "meet_name": "2024 Raleighwood Invitational",
   "relay_results": [

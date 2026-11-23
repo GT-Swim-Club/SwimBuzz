@@ -6,9 +6,11 @@ import {
   athleteUserIdsWithPreference,
   deliverNotifications,
   staffUserIdsWithPreference,
+  userIdsWithPreference,
   type NotificationDraft,
 } from "@/lib/notifications/notifications"
 import { meetRefKey } from "@/lib/notifications/notification-refs"
+import { currentSeason } from "@/lib/season"
 
 /** A record the sync just set from an imported swim or relay. */
 export type NewTeamRecord = {
@@ -30,12 +32,23 @@ const RECENT_MS = 14 * 24 * 60 * 60 * 1000
 
 const GENDER_LABELS: Record<RecordGender, string> = { F: "Women's", M: "Men's", X: "Mixed" }
 
-/** Tell the new holders and staff about records just set. Runs once the response is sent. */
+/**
+ * Tell the team about records just set: the new holders ("You set the team record…") and everyone
+ * else — staff and the current season's roster — who keeps team records on. Runs once the response
+ * is sent.
+ */
 export function notifyTeamRecordsBroken(records: NewTeamRecord[]): void {
   const recent = records.filter((r) => Date.now() - r.date.getTime() <= RECENT_MS)
   if (recent.length === 0) return
   runAfterResponse("team record notification", async () => {
-    const staff = await staffUserIdsWithPreference("teamRecords")
+    const roster = await prisma.athlete.findMany({
+      where: { seasons: { has: currentSeason() } },
+      select: { userId: true },
+    })
+    const team = new Set([
+      ...(await staffUserIdsWithPreference("teamRecords")),
+      ...(await userIdsWithPreference(roster.map((a) => a.userId), "teamRecords")),
+    ])
     const drafts: NotificationDraft[] = []
     for (const record of recent) {
       // The meet's key first, so the notice goes when its meet is deleted.
@@ -61,7 +74,7 @@ export function notifyTeamRecordsBroken(records: NewTeamRecord[]): void {
         if (told.has(userId)) continue
         drafts.push({ ...base, userId, title: `You set the team record in the ${eventLabel}` })
       }
-      for (const userId of staff) {
+      for (const userId of team) {
         if (told.has(userId) || holderUserIds.has(userId)) continue
         drafts.push({ ...base, userId, title: `New team record: ${eventLabel}` })
       }

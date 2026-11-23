@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore, useTransition } from "react"
 import { createPortal } from "react-dom"
-import { eventGenderWord } from "@swimbuzz/shared"
+import { eventGenderWord, RELAY_SWIM_EVENTS } from "@swimbuzz/shared"
 import { deleteRelayTeam, saveRelayTeam } from "./meet-relay.actions"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import type { SheetEntry } from "@/lib/meet/meet-sheet-summary"
@@ -22,13 +22,7 @@ import { useCanScrollDown } from "@/lib/use-can-scroll-down"
 import { useEscapeToClose } from "@/lib/use-escape-to-close"
 import { DetailEventBadge } from "./SwimDetailModal"
 
-const RELAY_EVENTS = [
-  "200 Medley Relay",
-  "200 Free Relay",
-  "400 Free Relay",
-  "800 Free Relay",
-  "400 Medley Relay",
-]
+const RELAY_EVENTS = RELAY_SWIM_EVENTS
 
 const RELAY_LETTERS = ["A", "B", "C", "D"]
 

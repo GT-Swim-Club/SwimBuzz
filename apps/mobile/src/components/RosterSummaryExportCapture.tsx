@@ -16,6 +16,7 @@ import {
   type RosterSummaryPdfRow,
 } from "@swimbuzz/shared"
 import { usePalette } from "@swimbuzz/ui"
+import { TeamPill, teamPillColumnWidth } from "./TeamPill"
 import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
 import { MeetExportHeader } from "./MeetExportHeader"
 import { HighlightTile } from "./MeetHighlightsCarousel"
@@ -80,10 +81,20 @@ export const RosterSummaryExportCapture = forwardRef<
 >(function RosterSummaryExportCapture({ meetName, details, iconUrl, request }, ref) {
   const c = usePalette()
   const styles = makeStyles(c)
-  const sections = rosterSummaryExportSections(request)
   const columns = rosterSummaryPngColumns(request)
+  // At a meet split by team, each team's tiles and lists in turn under the team scores.
+  const teams = request.highlights?.teams ?? []
+  const teamColumns = teams.map((team) => rosterSummaryPngColumns({ sections: [], highlights: team }))
+  // Every section (the meet's and each team's) is measured, so all columns share one width.
+  const sections = [
+    ...rosterSummaryExportSections(request),
+    ...teams.flatMap((team) => rosterSummaryExportSections({ sections: [], highlights: team })),
+  ]
   const [columnWidth, setColumnWidth] = useState<number | null>(null)
   const measured = useRef(new Map<number, number>())
+  // One team pill column width for every row, from the longest team named on any of them.
+  const rowTeams = sections.flatMap((section) => section.rows.flatMap((row) => row.team ?? []))
+  const teamWidth = rowTeams.length > 0 ? teamPillColumnWidth(rowTeams) : 0
 
   useEffect(() => {
     measured.current.clear()
@@ -171,6 +182,12 @@ export const RosterSummaryExportCapture = forwardRef<
             </View>
           ))}
         </View>
+        {teamWidth ? (
+          // The team pills in a column of their own, before the heat & lane and result.
+          <View style={[styles.teamColumn, { width: teamWidth }]}>
+            {row.team ? <TeamPill team={row.team} tone={row.teamTone} /> : null}
+          </View>
+        ) : null}
         {row.heatLane || row.startTime ? (
           <View style={styles.heatLane}>
             {row.heatLane ? <Text style={styles.heatLaneText}>{row.heatLane}</Text> : null}
@@ -201,6 +218,7 @@ export const RosterSummaryExportCapture = forwardRef<
         <Text style={styles.cardTitle} numberOfLines={1}>
           {rosterNamePreferred(section.title)}
         </Text>
+        {section.team ? <TeamPill team={section.team} tone={section.teamTone} /> : null}
       </View>
       {section.rows.map((row, k) =>
         renderRow(row, /\bmedley\b/i.test(`${section.title} ${row.label}`), k, measuring, section.rows[k - 1])
@@ -208,7 +226,7 @@ export const RosterSummaryExportCapture = forwardRef<
     </>
   )
 
-  if (columns.length > 0 && columnWidth == null) {
+  if (sections.length > 0 && columnWidth == null) {
     // Measuring pass: each section at its natural width.
     return (
       <View ref={ref} style={[styles.root, { width: MEASURE_WIDTH, alignItems: "flex-start" }]} collapsable={false}>
@@ -222,7 +240,22 @@ export const RosterSummaryExportCapture = forwardRef<
   }
 
   const width = columnWidth ?? 0
-  const gridWidth = columns.length * width + COLUMN_GAP * Math.max(0, columns.length - 1)
+  const columnCount = Math.max(columns.length, ...teamColumns.map((team) => team.length))
+  const gridWidth = columnCount * width + COLUMN_GAP * Math.max(0, columnCount - 1)
+
+  const renderGrid = (gridColumns: RosterSummaryPdfRequest["sections"][]) => (
+    <View style={styles.grid}>
+      {gridColumns.map((column, i) => (
+        <View key={i} style={[styles.column, { width }]}>
+          {column.map((section, j) => (
+            <View key={j} style={styles.card}>
+              {renderSection(section)}
+            </View>
+          ))}
+        </View>
+      ))}
+    </View>
+  )
 
   return (
     <View
@@ -237,20 +270,17 @@ export const RosterSummaryExportCapture = forwardRef<
         iconUrl={iconUrl}
       />
       {request.highlights ? <CaptureHighlights counters={request.highlights.counters} /> : null}
+      {teams.map((team, i) => (
+        <View key={team.team} style={styles.team}>
+          <Text style={styles.teamHeading}>{team.team.toUpperCase()}</Text>
+          <CaptureHighlights counters={team.counters} />
+          {teamColumns[i].length > 0 ? renderGrid(teamColumns[i]) : null}
+        </View>
+      ))}
       {columns.length === 0 ? (
         request.highlights ? null : <Text style={styles.meta}>No entries match these filters.</Text>
       ) : (
-        <View style={styles.grid}>
-          {columns.map((column, i) => (
-            <View key={i} style={[styles.column, { width }]}>
-              {column.map((section, j) => (
-                <View key={j} style={styles.card}>
-                  {renderSection(section)}
-                </View>
-              ))}
-            </View>
-          ))}
-        </View>
+        renderGrid(columns)
       )}
     </View>
   )
@@ -264,6 +294,8 @@ function makeStyles(c: ColorPalette) {
       backgroundColor: c.bgLayout,
     },
     highlights: { gap: spacing.xs },
+    team: { gap: spacing.md },
+    teamHeading: { color: c.accent, fontSize: 14, fontWeight: "700", letterSpacing: 2 },
     tileRow: { flexDirection: "row", gap: spacing.xs },
     tileSpacer: { flex: 1 },
     grid: { flexDirection: "row", alignItems: "flex-start", columnGap: COLUMN_GAP },
@@ -343,5 +375,6 @@ function makeStyles(c: ColorPalette) {
     resultColumn: { alignItems: "flex-end" },
     resultNote: { color: c.textTertiary, fontSize: 12, fontVariant: ["tabular-nums"] },
     labelNote: { color: c.textSecondary, fontWeight: "400" },
+    teamColumn: { alignItems: "flex-start", marginLeft: NAME_GAP },
   })
 }

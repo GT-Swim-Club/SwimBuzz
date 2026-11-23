@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   Pressable,
   RefreshControl,
   View,
@@ -14,10 +15,12 @@ import {
   athleteDisplayName,
   formatSeasonLabel,
   isStaffRole,
+  rosterCsvFilename,
   rosterPdfFilename,
   type AthleteSummary,
 } from "@swimbuzz/shared"
 import {
+  ActionSheet,
   Button,
   CardSkeleton,
   Chip,
@@ -30,6 +33,7 @@ import {
   Section,
   TextField,
   usePalette,
+  type ActionSheetItem,
 } from "@swimbuzz/ui"
 import { radii, spacing } from "@swimbuzz/tokens"
 import { api, API_URL, getAccessToken } from "../../../src/lib/api"
@@ -44,22 +48,33 @@ import { GalleryViewToggle } from "../../../src/components/GalleryViewToggle"
 
 type GenderFilter = "ALL" | "M" | "F"
 
+type ExportFormat = "pdf" | "csv"
+
+const EXPORT_TYPES: Record<ExportFormat, { mimeType: string; UTI: string; label: string }> = {
+  pdf: { mimeType: "application/pdf", UTI: "com.adobe.pdf", label: "PDF" },
+  csv: { mimeType: "text/csv", UTI: "public.comma-separated-values-text", label: "CSV" },
+}
+
 /**
- * The roster as the tab shows it (season, gender, search), laid out as a PDF by the API (like the
- * web's Download PDF), ready for the share sheet. No season = every season.
+ * The roster as the tab shows it (season, gender, search), built by the API as a PDF or CSV (like
+ * the web's Download PDF / Download CSV), ready for the share sheet. No season = every season.
  */
-async function rosterPdfFile(params: { season: string | null; gender: GenderFilter; query: string }) {
+async function rosterExportFile(
+  format: ExportFormat,
+  params: { season: string | null; gender: GenderFilter; query: string }
+) {
   const sp = new URLSearchParams()
   if (params.season) sp.set("season", params.season)
   if (params.gender !== "ALL") sp.set("gender", params.gender)
   if (params.query.trim()) sp.set("q", params.query.trim())
   const token = await getAccessToken()
-  const res = await fetch(`${API_URL}/api/roster/pdf?${sp.toString()}`, {
+  const res = await fetch(`${API_URL}/api/roster/${format}?${sp.toString()}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   })
-  if (!res.ok) throw new Error("Could not create PDF")
+  if (!res.ok) throw new Error(`Could not create ${EXPORT_TYPES[format].label}`)
   const bytes = new Uint8Array(await res.arrayBuffer())
-  const file = new File(Paths.cache, rosterPdfFilename(params.season))
+  const filename = format === "pdf" ? rosterPdfFilename(params.season) : rosterCsvFilename(params.season)
+  const file = new File(Paths.cache, filename)
   if (file.exists) file.delete()
   file.write(bytes)
   return file
@@ -76,7 +91,9 @@ export default function RosterScreen() {
   const [gender, setGender] = useState<GenderFilter>("ALL")
   const [query, setQuery] = useState("")
   const [syncing, setSyncing] = useState(false)
-  const [sharing, setSharing] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
+  const [shareBusy, setShareBusy] = useState<ExportFormat | null>(null)
+  const shareSheetDismissRef = useRef<(() => void) | null>(null)
   const c = usePalette()
 
   const {
@@ -153,21 +170,47 @@ export default function RosterScreen() {
     }
   }
 
-  async function sharePdf() {
-    setSharing(true)
+  /** Close the share options and wait for iOS to finish dismissing them before the share sheet opens. */
+  function closeShareSheetAndWait(): Promise<void> {
+    setShareOpen(false)
+    if (Platform.OS !== "ios") return Promise.resolve()
+    return new Promise((resolve) => {
+      const finish = () => {
+        shareSheetDismissRef.current = null
+        clearTimeout(fallback)
+        resolve()
+      }
+      const fallback = setTimeout(finish, 600)
+      shareSheetDismissRef.current = finish
+    })
+  }
+
+  async function shareExport(format: ExportFormat) {
+    const type = EXPORT_TYPES[format]
+    setShareBusy(format)
     try {
-      const file = await rosterPdfFile({ season, gender, query })
+      const file = await rosterExportFile(format, { season, gender, query })
       if (!(await Sharing.isAvailableAsync())) {
         Alert.alert("Sharing unavailable", "This device can't open the share sheet.")
         return
       }
-      await Sharing.shareAsync(file.uri, { mimeType: "application/pdf", UTI: "com.adobe.pdf" })
+      await closeShareSheetAndWait()
+      await Sharing.shareAsync(file.uri, { mimeType: type.mimeType, UTI: type.UTI })
     } catch (err) {
-      Alert.alert("Could not share PDF", err instanceof Error ? err.message : "Something went wrong")
+      Alert.alert(`Could not share ${type.label}`, err instanceof Error ? err.message : "Something went wrong")
     } finally {
-      setSharing(false)
+      setShareBusy(null)
     }
   }
+
+  const shareItems: ActionSheetItem[] = (["pdf", "csv"] as const).map((format) => ({
+    key: format,
+    label: `Share ${EXPORT_TYPES[format].label}`,
+    icon: <Icon name={format === "pdf" ? "fileText" : "fileSpreadsheet"} size={20} color={c.text} />,
+    busy: shareBusy === format,
+    disabled: Boolean(shareBusy) && shareBusy !== format,
+    onPress: () => void shareExport(format),
+  }))
 
   return (
     <Screen style={{ paddingBottom: 0 }}>
@@ -217,11 +260,11 @@ export default function RosterScreen() {
           <GalleryViewToggle value={galleryView} onChange={setGalleryView} />
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Share PDF of roster"
-            accessibilityState={{ busy: sharing }}
-            disabled={sharing}
+            accessibilityLabel="Share roster"
+            accessibilityState={{ busy: shareBusy != null }}
+            disabled={shareBusy != null}
             hitSlop={6}
-            onPress={() => void sharePdf()}
+            onPress={() => setShareOpen(true)}
             style={({ pressed }) => ({
               alignItems: "center",
               borderRadius: radii.md,
@@ -231,7 +274,7 @@ export default function RosterScreen() {
               opacity: pressed ? 0.72 : 1,
             })}
           >
-            {sharing ? (
+            {shareBusy ? (
               <ActivityIndicator size="small" color={c.textSecondary} />
             ) : (
               <Icon name="share" size={18} color={c.textSecondary} />
@@ -335,6 +378,13 @@ export default function RosterScreen() {
           }
         />
       )}
+      <ActionSheet
+        visible={shareOpen}
+        onClose={() => setShareOpen(false)}
+        onDismiss={() => shareSheetDismissRef.current?.()}
+        title="Share roster"
+        groups={[shareItems]}
+      />
     </Screen>
   )
 }

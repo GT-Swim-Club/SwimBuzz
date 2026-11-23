@@ -9,6 +9,7 @@ import {
   progressionTimeAxis,
   progressionWindowed,
   progressionYearTicks,
+  UNOFFICIAL_MARK,
 } from "@swimbuzz/shared"
 import { formatSwimDate, formatTime } from "@/lib/utils"
 import {
@@ -245,13 +246,25 @@ export default function ProgressionChart({
                   {points.map((p) => {
                     const isPb = p.swim.id === pbId
                     const wasPb = marks.pbAtTime.has(p.swim.id)
-                    return (
+                    const color = isPb || wasPb ? "var(--brand-color-primary)" : "var(--brand-color-text-tertiary)"
+                    // An unofficial (intrasquad) swim is a hollow ring in the same color.
+                    return p.swim.unofficial ? (
+                      <circle
+                        key={p.swim.id}
+                        cx={p.x}
+                        cy={p.y}
+                        r={(isPb ? r + 1.5 : r) - 0.75}
+                        fill="var(--brand-color-bg-container)"
+                        stroke={color}
+                        strokeWidth={1.5}
+                      />
+                    ) : (
                       <circle
                         key={p.swim.id}
                         cx={p.x}
                         cy={p.y}
                         r={isPb ? r + 1.5 : r}
-                        fill={isPb || wasPb ? "var(--brand-color-primary)" : "var(--brand-color-text-tertiary)"}
+                        fill={color}
                         stroke="var(--brand-color-bg-container)"
                         strokeWidth={isPb ? 2 : 1.5}
                       />
@@ -278,7 +291,7 @@ export default function ProgressionChart({
                       letterSpacing="0.06em"
                       className="pointer-events-none select-none"
                     >
-                      PB
+                      {pbPoint.swim.unofficial ? "*PB" : "PB"}
                     </text>
                   )}
                 </svg>
@@ -317,7 +330,10 @@ export default function ProgressionChart({
             }}
           >
             <div className="flex items-center gap-2">
-              <span className="font-mono text-sm font-semibold tabular-nums">{formatTime(hovered.swim.timeMs)}</span>
+              <span className="font-mono text-sm font-semibold tabular-nums">
+                {hovered.swim.unofficial ? <span className="text-accent">{UNOFFICIAL_MARK}</span> : null}
+                {formatTime(hovered.swim.timeMs)}
+              </span>
               {hovered.swim.id === pbId && (
                 <span className="rounded-md bg-primary-bg px-1.5 text-[11px] font-bold leading-[18px] tracking-[0.04em] text-accent">
                   PB
@@ -327,6 +343,7 @@ export default function ProgressionChart({
             </div>
             <p className="mt-1 text-xs text-foreground-secondary">{formatSwimDate(hovered.swim.date)}</p>
             <p className="truncate text-xs text-foreground-tertiary">{hovered.swim.meet || "—"}</p>
+            {hovered.swim.unofficial ? <p className="text-xs text-accent">Unofficial</p> : null}
             {hovered.swim.relaySplit ? (
               <p className="truncate text-xs text-foreground-tertiary">
                 {relaySplitLegLabel(hovered.swim.relaySplit)} · Flying start

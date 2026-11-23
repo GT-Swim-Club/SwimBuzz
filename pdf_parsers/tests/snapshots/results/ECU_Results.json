@@ -1,6 +1,90 @@
 {
   "course": "SCY",
   "detectedSheetType": "results",
+  "event_order": {
+    "sessions": [
+      {
+        "label": "Order of Events",
+        "rows": [
+          {
+            "event": "200 Medley Relay",
+            "men": 2,
+            "women": 1
+          },
+          {
+            "event": "100 IM",
+            "men": 4,
+            "women": 3
+          },
+          {
+            "event": "100 Back",
+            "men": 6,
+            "women": 5
+          },
+          {
+            "event": "50 Free",
+            "men": 8,
+            "women": 7
+          },
+          {
+            "event": "100 Breast",
+            "men": null,
+            "women": 9
+          },
+          {
+            "event": "100 Fly",
+            "men": 12,
+            "women": 11
+          },
+          {
+            "event": "50 Back",
+            "men": 14,
+            "women": 13
+          },
+          {
+            "event": "500 Free",
+            "men": 16,
+            "women": 15
+          },
+          {
+            "event": "200 Free Relay",
+            "men": 18,
+            "women": 17
+          },
+          {
+            "event": "50 Breast",
+            "men": 20,
+            "women": 19
+          },
+          {
+            "event": "200 Free",
+            "men": 22,
+            "women": 21
+          },
+          {
+            "event": "50 Fly",
+            "men": 24,
+            "women": 23
+          },
+          {
+            "event": "200 IM",
+            "men": 26,
+            "women": 25
+          },
+          {
+            "event": "100 Free",
+            "men": 28,
+            "women": 27
+          },
+          {
+            "event": "100 Free Relay",
+            "men": 29,
+            "women": 29
+          }
+        ]
+      }
+    ]
+  },
   "meet_date": "2025-01-19",
   "meet_name": "2025 G-Vegas Winter Classic",
   "relay_results": [
@@ -251,6 +335,7 @@
       "name": "Carle, Juliana",
       "place": 1,
       "points": 20.0,
+      "seedTime": "1:10.99",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:06.50"
@@ -262,6 +347,7 @@
       "name": "Allibone, Jessica",
       "place": 2,
       "points": 17.0,
+      "seedTime": "1:06.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:07.75"
@@ -273,6 +359,7 @@
       "name": "Wang, Mingqi",
       "place": 3,
       "points": 16.0,
+      "seedTime": "1:07.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:10.54"
@@ -284,6 +371,7 @@
       "name": "McCall, Cara",
       "place": 4,
       "points": 15.0,
+      "seedTime": "1:08.23",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:10.81"
@@ -295,6 +383,7 @@
       "name": "Benway, Kayley",
       "place": 5,
       "points": 14.0,
+      "seedTime": "1:10.78",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:11.24"
@@ -317,6 +406,7 @@
       "name": "Witthoff, Mia",
       "place": 7,
       "points": 12.0,
+      "seedTime": "1:09.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:12.02"
@@ -328,6 +418,7 @@
       "name": "Hewitt, Kaila",
       "place": 8,
       "points": 11.0,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:13.51"
@@ -339,6 +430,7 @@
       "name": "Godoy, Tyler",
       "place": 9,
       "points": 9.0,
+      "seedTime": "1:15.00",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:15.71"
@@ -350,6 +442,7 @@
       "name": "Miller, Charli",
       "place": 10,
       "points": 7.0,
+      "seedTime": "1:20.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:16.99"
@@ -416,6 +509,7 @@
       "name": "Rimsa, Thomas",
       "place": 2,
       "points": 17.0,
+      "seedTime": "1:03.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:01.39"
@@ -427,6 +521,7 @@
       "name": "Vlady, George",
       "place": 3,
       "points": 16.0,
+      "seedTime": "1:00.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:01.81"
@@ -438,6 +533,7 @@
       "name": "Witham, Noah",
       "place": 4,
       "points": 15.0,
+      "seedTime": "1:05.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:02.94"
@@ -449,6 +545,7 @@
       "name": "Townsend, Matthew",
       "place": 5,
       "points": 14.0,
+      "seedTime": "1:03.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:03.62"
@@ -471,6 +568,7 @@
       "name": "Klingenberg, Brennan",
       "place": 7,
       "points": 12.0,
+      "seedTime": "1:01.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:09.01"
@@ -493,6 +591,7 @@
       "name": "Carlton, Delaney",
       "place": 1,
       "points": 20.0,
+      "seedTime": "57.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:00.54"
@@ -504,6 +603,7 @@
       "name": "Munger, Audrey",
       "place": 2,
       "points": 17.0,
+      "seedTime": "1:04.00",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:03.55"
@@ -515,6 +615,7 @@
       "name": "Ricci, Emily",
       "place": 3,
       "points": 16.0,
+      "seedTime": "1:12.78",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:12.82"
@@ -537,6 +638,7 @@
       "name": "Rice, Thomas",
       "place": 1,
       "points": 20.0,
+      "seedTime": "1:00.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:00.93"
@@ -548,6 +650,7 @@
       "name": "Spaulding, Alice",
       "place": 1,
       "points": 20.0,
+      "seedTime": "26.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "26.27"
@@ -559,6 +662,7 @@
       "name": "Powers, Alexis",
       "place": 2,
       "points": 17.0,
+      "seedTime": "25.49",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "26.92"
@@ -570,6 +674,7 @@
       "name": "Faust, Amelia",
       "place": 3,
       "points": 16.0,
+      "seedTime": "26.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "26.95"
@@ -603,6 +708,7 @@
       "name": "Sutton, Jennifer",
       "place": 6,
       "points": 13.0,
+      "seedTime": "28.70",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "29.23"
@@ -647,6 +753,7 @@
       "name": "Paroly, Sarah",
       "place": 10,
       "points": 7.0,
+      "seedTime": "30.58",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "30.25"
@@ -669,6 +776,7 @@
       "name": "Yie, Emiley",
       "place": 12,
       "points": 5.0,
+      "seedTime": "40.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "34.26"
@@ -691,6 +799,7 @@
       "name": "Richardson, Haley",
       "place": 14,
       "points": 3.0,
+      "seedTime": "38.22",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "37.26"
@@ -702,6 +811,7 @@
       "name": "Lamb, Grayce",
       "place": 15,
       "points": 2.0,
+      "seedTime": "38.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "38.08"
@@ -713,6 +823,7 @@
       "name": "Compton, Keira",
       "place": 16,
       "points": 1.0,
+      "seedTime": "37.98",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "38.43"
@@ -724,6 +835,7 @@
       "name": "White, Keller",
       "place": 1,
       "points": 20.0,
+      "seedTime": "20.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "21.66"
@@ -735,6 +847,7 @@
       "name": "Gossmann, Christopher",
       "place": 2,
       "points": 17.0,
+      "seedTime": "22.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "22.66"
@@ -746,6 +859,7 @@
       "name": "Skidmore, Billy",
       "place": 3,
       "points": 16.0,
+      "seedTime": "25.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "23.33"
@@ -779,6 +893,7 @@
       "name": "Oglesby, Dayton",
       "place": 6,
       "points": 13.0,
+      "seedTime": "23.25",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "24.16"
@@ -790,6 +905,7 @@
       "name": "Townsend, Matthew",
       "place": 7,
       "points": 12.0,
+      "seedTime": "23.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "24.56"
@@ -801,6 +917,7 @@
       "name": "Witham, Noah",
       "place": 8,
       "points": 11.0,
+      "seedTime": "22.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "24.93"
@@ -812,6 +929,7 @@
       "name": "Hernandez, Joshua",
       "place": 9,
       "points": 9.0,
+      "seedTime": "24.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "24.97"
@@ -823,6 +941,7 @@
       "name": "Weitzel, Logan",
       "place": 10,
       "points": 7.0,
+      "seedTime": "25.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "24.98"
@@ -845,6 +964,7 @@
       "name": "Smith, Logan",
       "place": 12,
       "points": 5.0,
+      "seedTime": "26.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "26.51"
@@ -856,6 +976,7 @@
       "name": "Humann, Brent",
       "place": 13,
       "points": 4.0,
+      "seedTime": "27.43",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "26.61"
@@ -878,6 +999,7 @@
       "name": "Vlady, Richard",
       "place": 15,
       "points": 2.0,
+      "seedTime": "30.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "27.07"
@@ -889,6 +1011,7 @@
       "name": "Fernandez, Charles",
       "place": 16,
       "points": 1.0,
+      "seedTime": "27.34",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "27.70"
@@ -899,6 +1022,7 @@
       "gender": "M",
       "name": "Chaney, Ethan",
       "place": 17,
+      "seedTime": "28.12",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "28.24"
@@ -909,6 +1033,7 @@
       "gender": "M",
       "name": "Dail, Joshua",
       "place": 18,
+      "seedTime": "27.99",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "29.17"
@@ -919,6 +1044,7 @@
       "gender": "M",
       "name": "Vlady, George",
       "place": 19,
+      "seedTime": "22.70",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "31.21"
@@ -930,6 +1056,7 @@
       "name": "Elvambuena, Ella",
       "place": 1,
       "points": 20.0,
+      "seedTime": "1:15.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:16.82"
@@ -952,6 +1079,7 @@
       "name": "Faust, Amelia",
       "place": 3,
       "points": 16.0,
+      "seedTime": "1:19.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:24.76"
@@ -963,6 +1091,7 @@
       "name": "Lamb, Grayce",
       "place": 4,
       "points": 15.0,
+      "seedTime": "1:40.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:50.65"
@@ -974,6 +1103,7 @@
       "name": "Carle, Juliana",
       "place": 1,
       "points": 20.0,
+      "seedTime": "1:10.99",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:04.35"
@@ -985,6 +1115,7 @@
       "name": "Gossmann, Christopher",
       "place": 1,
       "points": 20.0,
+      "seedTime": "50.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "55.32"
@@ -1039,6 +1170,7 @@
       "name": "Duffy, Anya",
       "place": 1,
       "points": 20.0,
+      "seedTime": "31.70",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "32.53"
@@ -1050,6 +1182,7 @@
       "name": "Hewitt, Kaila",
       "place": 2,
       "points": 17.0,
+      "seedTime": "35.50",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "32.54"
@@ -1072,6 +1205,7 @@
       "name": "Ricci, Emily",
       "place": 4,
       "points": 15.0,
+      "seedTime": "32.05",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "34.13"
@@ -1116,6 +1250,7 @@
       "name": "Richardson, Haley",
       "place": 8,
       "points": 11.0,
+      "seedTime": "43.21",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "43.19"
@@ -1138,6 +1273,7 @@
       "name": "Oglesby, Dayton",
       "place": 1,
       "points": 20.0,
+      "seedTime": "27.56",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "28.68"
@@ -1149,6 +1285,7 @@
       "name": "Rice, Thomas",
       "place": 2,
       "points": 17.0,
+      "seedTime": "28.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "28.96"
@@ -1160,6 +1297,7 @@
       "name": "Smith, Logan",
       "place": 3,
       "points": 16.0,
+      "seedTime": "30.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "32.56"
@@ -1171,6 +1309,7 @@
       "name": "Vlady, Richard",
       "place": 4,
       "points": 15.0,
+      "seedTime": "35.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "32.66"
@@ -1182,6 +1321,7 @@
       "name": "Carlton, Delaney",
       "place": 1,
       "points": 20.0,
+      "seedTime": "5:29.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "5:24.72"
@@ -1193,6 +1333,7 @@
       "name": "Wang, Mingqi",
       "place": 2,
       "points": 17.0,
+      "seedTime": "6:00.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "6:06.36"
@@ -1215,6 +1356,7 @@
       "name": "Weitzel, Logan",
       "place": 1,
       "points": 20.0,
+      "seedTime": "5:57.90",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "6:07.61"
@@ -1237,6 +1379,7 @@
       "name": "Hernandez, Joshua",
       "place": 3,
       "points": 16.0,
+      "seedTime": "10:00.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "6:53.24"
@@ -1259,6 +1402,7 @@
       "name": "Dail, Joshua",
       "place": 5,
       "points": 14.0,
+      "seedTime": "6:34.40",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "7:14.22"
@@ -1281,6 +1425,7 @@
       "name": "Benway, Kayley",
       "place": 2,
       "points": 17.0,
+      "seedTime": "35.76",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "35.58"
@@ -1292,6 +1437,7 @@
       "name": "Elvambuena, Ella",
       "place": 3,
       "points": 16.0,
+      "seedTime": "36.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "36.35"
@@ -1325,6 +1471,7 @@
       "name": "Godoy, Tyler",
       "place": 6,
       "points": 13.0,
+      "seedTime": "38.00",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "40.05"
@@ -1391,6 +1538,7 @@
       "name": "Skidmore, Billy",
       "place": 2,
       "points": 17.0,
+      "seedTime": "30.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "31.28"
@@ -1402,6 +1550,7 @@
       "name": "Vlady, Richard",
       "place": 3,
       "points": 16.0,
+      "seedTime": "40.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "35.11"
@@ -1413,6 +1562,7 @@
       "name": "Fernandez, Charles",
       "place": 4,
       "points": 15.0,
+      "seedTime": "34.48",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "35.33"
@@ -1424,6 +1574,7 @@
       "name": "Kulas, Saline",
       "place": 1,
       "points": 20.0,
+      "seedTime": "2:20.10",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "2:20.76"
@@ -1435,6 +1586,7 @@
       "name": "Townsend, Matthew",
       "place": 1,
       "points": 20.0,
+      "seedTime": "1:53.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:56.62"
@@ -1446,6 +1598,7 @@
       "name": "Weitzel, Logan",
       "place": 2,
       "points": 17.0,
+      "seedTime": "2:07.74",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:14.97"
@@ -1457,6 +1610,7 @@
       "name": "McCall, Cara",
       "place": 1,
       "points": 20.0,
+      "seedTime": "29.18",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "29.12"
@@ -1468,6 +1622,7 @@
       "name": "Allibone, Jessica",
       "place": 2,
       "points": 17.0,
+      "seedTime": "28.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "29.20"
@@ -1479,6 +1634,7 @@
       "name": "Faust, Amelia",
       "place": 3,
       "points": 16.0,
+      "seedTime": "29.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "29.65"
@@ -1490,6 +1646,7 @@
       "name": "Elvambuena, Ella",
       "place": 4,
       "points": 15.0,
+      "seedTime": "31.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "30.27"
@@ -1501,6 +1658,7 @@
       "name": "Hicks, Erin",
       "place": 5,
       "points": 14.0,
+      "seedTime": "29.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "30.64"
@@ -1512,6 +1670,7 @@
       "name": "Duffy, Anya",
       "place": 6,
       "points": 13.0,
+      "seedTime": "30.21",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "31.41"
@@ -1534,6 +1693,7 @@
       "name": "Godoy, Tyler",
       "place": 8,
       "points": 11.0,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "32.12"
@@ -1556,6 +1716,7 @@
       "name": "Miller, Charli",
       "place": 10,
       "points": 7.0,
+      "seedTime": "34.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "35.05"
@@ -1589,6 +1750,7 @@
       "name": "Rice, Thomas",
       "place": 2,
       "points": 17.0,
+      "seedTime": "27.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "27.19"
@@ -1600,6 +1762,7 @@
       "name": "Languell, Cole",
       "place": 3,
       "points": 16.0,
+      "seedTime": "27.88",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "28.51"
@@ -1611,6 +1774,7 @@
       "name": "Munger, Audrey",
       "place": 1,
       "points": 20.0,
+      "seedTime": "2:21.00",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:21.85"
@@ -1622,6 +1786,7 @@
       "name": "Spaulding, Alice",
       "place": 2,
       "points": 17.0,
+      "seedTime": "2:25.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:23.45"
@@ -1633,6 +1798,7 @@
       "name": "Carle, Juliana",
       "place": 3,
       "points": 16.0,
+      "seedTime": "2:40.99",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:26.95"
@@ -1644,6 +1810,7 @@
       "name": "Witthoff, Mia",
       "place": 4,
       "points": 15.0,
+      "seedTime": "2:35.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:41.73"
@@ -1677,6 +1844,7 @@
       "name": "Carlton, Delaney",
       "place": 1,
       "points": 20.0,
+      "seedTime": "52.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "53.00"
@@ -1688,6 +1856,7 @@
       "name": "Wang, Mingqi",
       "place": 2,
       "points": 17.0,
+      "seedTime": "58.50",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:00.33"
@@ -1699,6 +1868,7 @@
       "name": "Kulas, Saline",
       "place": 3,
       "points": 16.0,
+      "seedTime": "1:03.17",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:03.87"
@@ -1710,6 +1880,7 @@
       "name": "Randall, Lydia",
       "place": 4,
       "points": 15.0,
+      "seedTime": "1:03.64",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:07.34"
@@ -1732,6 +1903,7 @@
       "name": "Lamb, Grayce",
       "place": 6,
       "points": 13.0,
+      "seedTime": "1:25.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:30.51"
@@ -1743,6 +1915,7 @@
       "name": "Compton, Keira",
       "place": 7,
       "points": 12.0,
+      "seedTime": "1:31.34",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "1:31.59"
@@ -1754,6 +1927,7 @@
       "name": "White, Keller",
       "place": 1,
       "points": 20.0,
+      "seedTime": "44.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "49.71"
@@ -1765,6 +1939,7 @@
       "name": "Gossmann, Christopher",
       "place": 2,
       "points": 17.0,
+      "seedTime": "47.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "49.95"
@@ -1776,6 +1951,7 @@
       "name": "Bullard, Collin",
       "place": 3,
       "points": 16.0,
+      "seedTime": "52.32",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "50.93"
@@ -1787,6 +1963,7 @@
       "name": "Vlady, George",
       "place": 4,
       "points": 15.0,
+      "seedTime": "50.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "53.86"
@@ -1798,6 +1975,7 @@
       "name": "Klingenberg, Brennan",
       "place": 5,
       "points": 14.0,
+      "seedTime": "50.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "54.34"
@@ -1820,6 +1998,7 @@
       "name": "Will, Samuel",
       "place": 7,
       "points": 12.0,
+      "seedTime": "57.45",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "56.04"
@@ -1831,6 +2010,7 @@
       "name": "Smith, Logan",
       "place": 8,
       "points": 11.0,
+      "seedTime": "59.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:02.23"

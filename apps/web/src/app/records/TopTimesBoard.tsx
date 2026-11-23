@@ -14,6 +14,7 @@ import {
 } from "@swimbuzz/shared"
 import HoverDetail from "@/components/ui/HoverDetail"
 import SpinnerScreen from "@/components/ui/SpinnerScreen"
+import { Skeleton } from "@/components/ui/Skeleton"
 import { athletePath, meetRelayPath, meetSwimPath } from "@/lib/slug"
 
 const api = createApiClient({})
@@ -140,6 +141,37 @@ export function useAllTopTimes(gender: "F" | "M", mode: TopTimesMode, enabled: b
   return { key, data, error: error?.key === key && !data ? error.message : null }
 }
 
+/** How long a load waits before the skeleton gives way to the spinner (a cached list is well inside it). */
+const SPINNER_AFTER_MS = 700
+
+/** Name widths per line, varied so the cards don't look stamped. */
+const NAME_WIDTHS = ["w-28", "w-32", "w-24", "w-36", "w-28", "w-20", "w-32", "w-24", "w-28", "w-32"]
+
+/** Mirrors the board: a grid of event cards, each a title band over ten rank · name · year · time lines. */
+function TopTimesSkeleton() {
+  return (
+    <div aria-busy className={GRID}>
+      {Array.from({ length: 6 }, (_, card) => (
+        <div key={card} className="overflow-hidden rounded-xl border border-border-secondary bg-background">
+          <div className="border-b border-border-secondary bg-fill-secondary/60 px-3.5 py-3">
+            <Skeleton className="h-4 w-28" />
+          </div>
+          <div className="divide-y divide-border-secondary">
+            {NAME_WIDTHS.map((_, line) => (
+              <div key={line} className="flex items-center gap-2.5 px-3.5 py-2.5">
+                <Skeleton className="h-3.5 w-5" />
+                <Skeleton className={`h-3.5 ${NAME_WIDTHS[(line + card * 3) % NAME_WIDTHS.length]}`} />
+                <Skeleton className="ml-auto h-3.5 w-9" />
+                <Skeleton className="h-3.5 w-12" />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 /** Every record event's top 10 for one gender as one grid of cards, in records-table order. */
 export default function TopTimesBoard({
   gender,
@@ -153,6 +185,13 @@ export default function TopTimesBoard({
   error: string | null
 }) {
   const key = `${gender}|${mode}`
+  const [slowKey, setSlowKey] = useState<string | null>(null)
+  const slow = slowKey === key
+  useEffect(() => {
+    if (data) return
+    const timer = setTimeout(() => setSlowKey(key), SPINNER_AFTER_MS)
+    return () => clearTimeout(timer)
+  }, [data, key])
 
   if (error) {
     return (
@@ -162,6 +201,9 @@ export default function TopTimesBoard({
     )
   }
   if (!data) {
+    // A cached list arrives at once: skeleton cards. Still loading after a moment means the server
+    // is computing it fresh (first view after a records sync): the spinner says what's happening.
+    if (!slow) return <TopTimesSkeleton />
     return (
       // Keyed so each gender/mode switch replays the fade, and the label names what's loading.
       <SpinnerScreen

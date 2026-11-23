@@ -1,5 +1,5 @@
 import type { jsPDF } from "jspdf"
-import type { MeetHeaderDetails } from "@swimbuzz/shared"
+import { MEET_HEADER, type MeetHeaderDetails } from "@swimbuzz/shared"
 
 type RGB = [number, number, number]
 
@@ -25,6 +25,76 @@ export function semiboldText(doc: jsPDF, value: string, x: number, baseline: num
 
 /** Helvetica's cap height, as a fraction of the font size: where capitals visibly top out. */
 export const HELVETICA_CAP_HEIGHT = 0.718
+
+// An unofficial meet's pill (UnofficialMeetBadge) in light-theme tokens: the PDFs print on white.
+const BADGE_TEXT: RGB = [140, 107, 56]
+const BADGE_BORDER: RGB = [203, 188, 165]
+const BADGE_FILL: RGB = [244, 240, 235]
+const BADGE_LABEL = "UNOFFICIAL"
+
+function badgeMetrics(titleSize: number) {
+  const textSize = titleSize * MEET_HEADER.badgeTextSize
+  return {
+    textSize,
+    charSpace: textSize * MEET_HEADER.badgeTracking,
+    height: titleSize * MEET_HEADER.badgeHeight,
+    padX: titleSize * MEET_HEADER.badgePadX,
+    gap: titleSize * MEET_HEADER.badgeGap,
+  }
+}
+
+/** Width of the label in the pill's font, leaving the document's font as it was. */
+function badgeLabelWidth(doc: jsPDF, textSize: number, charSpace: number): number {
+  const font = doc.getFont()
+  const fontSize = doc.getFontSize()
+  doc.setFont("helvetica", "bold")
+  doc.setFontSize(textSize)
+  const width = doc.getTextWidth(BADGE_LABEL) + (BADGE_LABEL.length - 1) * charSpace
+  doc.setFont(font.fontName, font.fontStyle)
+  doc.setFontSize(fontSize)
+  return width
+}
+
+/** Room the "Unofficial" pill takes after a meet name of `titleSize`, its gap included. */
+export function unofficialPdfBadgeReserve(doc: jsPDF, titleSize: number): number {
+  const m = badgeMetrics(titleSize)
+  return m.gap + badgeLabelWidth(doc, m.textSize, m.charSpace) + m.padX * 2
+}
+
+/**
+ * A meet name's lines within `maxWidth` in the current font, leaving room after the last line for
+ * the "Unofficial" pill when `reserve` (from unofficialPdfBadgeReserve) is set.
+ */
+export function splitMeetPdfTitle(doc: jsPDF, name: string, maxWidth: number, reserve: number): string[] {
+  const lines = doc.splitTextToSize(name, maxWidth) as string[]
+  if (!reserve || doc.getTextWidth(lines[lines.length - 1] ?? "") + reserve <= maxWidth) return lines
+  return doc.splitTextToSize(name, Math.max(maxWidth / 2, maxWidth - reserve)) as string[]
+}
+
+/**
+ * The "UNOFFICIAL" pill after a meet name's last line (`lastLine` drawn from `x` on `baseline`, in
+ * the current font), centered on the name's capitals. Leaves the pill's font set.
+ */
+export function drawUnofficialPdfBadge(
+  doc: jsPDF,
+  lastLine: string,
+  x: number,
+  baseline: number,
+  titleSize: number
+) {
+  const m = badgeMetrics(titleSize)
+  const left = x + doc.getTextWidth(lastLine) + m.gap
+  const width = badgeLabelWidth(doc, m.textSize, m.charSpace) + m.padX * 2
+  const center = baseline - (titleSize * HELVETICA_CAP_HEIGHT) / 2
+  doc.setFillColor(...BADGE_FILL)
+  doc.setDrawColor(...BADGE_BORDER)
+  doc.setLineWidth(0.75)
+  doc.roundedRect(left, center - m.height / 2, width, m.height, m.height / 2, m.height / 2, "FD")
+  doc.setFont("helvetica", "bold")
+  doc.setFontSize(m.textSize)
+  doc.setTextColor(...BADGE_TEXT)
+  doc.text(BADGE_LABEL, left + m.padX, center + (m.textSize * HELVETICA_CAP_HEIGHT) / 2, { charSpace: m.charSpace })
+}
 
 // Spacing relative to the text size, like the meet page's gap-1.5 icon gap and gap-x-5 item gap.
 const ICON_GAP = 0.35

@@ -170,6 +170,13 @@ model Meet {
   course        Course    @default(SCY)
   season        String
   teamCode      String    @default("GTSC")
+  /// Intrasquads and other unofficial meets: their times count for PBs, relays and highlights
+  /// (marked unofficial everywhere), but toward records and Top 10s only in 25s / 4x25 relays,
+  /// and never toward Nationals qualifiers.
+  unofficial    Boolean   @default(false)
+  /// Mixed individual events (an intrasquad's) are placed and scored for women and men separately
+  /// when results are imported; mixed relays stay mixed.
+  scoreByGender Boolean   @default(false)
   school        String?
   iconUrl       String?
   bannerUrl     String?
@@ -215,6 +222,10 @@ model Meet {
   /// Team standings from the results PDF: { importedAt, source: "pdf" | "computed",
   /// women, men, combined: [{ place, team, points, ours? }] }.
   teamScores Json?
+  /// Each swimmer's team from the last results PDF import, by athlete id ({ "<athleteId>": "GTSC Gold" }),
+  /// kept only when the results name several of our teams (an intrasquad's team codes "GTSC Gold, GTSC
+  /// White") — the meet's highlights split per team. Null otherwise.
+  resultTeams Json?
   /// Coach-added heat/lane/start time for roster summary rows: { entries: HeatLaneOverride[] }.
   /// Only shown where no import supplies that field; survives re-imports.
   heatLaneOverrides Json?

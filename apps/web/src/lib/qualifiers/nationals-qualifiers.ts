@@ -317,7 +317,8 @@ export const computeNationalsQualifiers = cache(async function computeNationalsQ
     where: {
       athleteId: { in: athleteIds },
       course: set.course,
-      meetRef: { season: opts.season },
+      // Unofficial meets (intrasquads) never count toward nationals cuts.
+      meetRef: { season: opts.season, unofficial: false },
     },
     select: {
       athleteId: true,

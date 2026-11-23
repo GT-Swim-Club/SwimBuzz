@@ -103,16 +103,37 @@ export function shortTeamName(team: string): string {
 }
 
 /**
- * Our margin in a standings list: "+619 on FSU" over the next team when we lead, else
- * "−92.5 to UGA" behind the team one place ahead. Null without our line or a rival.
+ * Our teams' names with the words they all share dropped — an intrasquad's "GTSC Gold" / "GTSC
+ * White" read "Gold" / "White". One team keeps its full name.
  */
-export function teamScoreGap(standings: TeamStanding[]): string | null {
-  const index = standings.findIndex((s) => s.ours)
+export function ourTeamSides(teams: string[]): Map<string, string> {
+  const words = teams.map((team) => team.trim().split(/\s+/))
+  const shared =
+    teams.length > 1
+      ? words.reduce((common, list) => common.filter((w) => list.some((x) => x.toLowerCase() === w.toLowerCase())), words[0]!)
+      : []
+  const sharedLower = new Set(shared.map((w) => w.toLowerCase()))
+  return new Map(
+    teams.map((team, i) => {
+      const side = words[i]!.filter((w) => !sharedLower.has(w.toLowerCase())).join(" ")
+      return [team, side || team.trim()]
+    })
+  )
+}
+
+/**
+ * Our margin in a standings list: "+619 on FSU" over the next team when we lead, else
+ * "−92.5 to UGA" behind the team one place ahead — or just "+48" / "−48" (and "Tied") when the
+ * list has only the two teams, where the rival goes without saying. Null without our line or a rival.
+ */
+export function teamScoreGap(standings: TeamStanding[], team?: TeamStanding): string | null {
+  const index = team ? standings.indexOf(team) : standings.findIndex((s) => s.ours)
   if (index < 0) return null
   const ours = standings[index]
   const rival = index === 0 ? standings[1] : standings[index - 1]
   if (!rival) return null
   const margin = formatPoints(Math.abs(ours.points - rival.points))
+  if (standings.length === 2) return margin === "0" ? "Tied" : `${index === 0 ? "+" : "−"}${margin}`
   if (margin === "0") return `Tied with ${shortTeamName(rival.team)}`
   return index === 0
     ? `+${margin} on ${shortTeamName(rival.team)}`

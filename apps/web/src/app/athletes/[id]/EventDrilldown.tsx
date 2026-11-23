@@ -4,6 +4,7 @@ import { useMemo, type CSSProperties } from "react"
 import Link from "next/link"
 import { currentSeason, seasonFromDate } from "@swimbuzz/shared"
 import { formatSwimDate, formatTime } from "@/lib/utils"
+import UnofficialMark from "@/components/ui/UnofficialMark"
 import {
   compareSwimsChronologically,
   compareSwimsNewestFirst,
@@ -144,6 +145,7 @@ export default function EventDrilldown({
               {event} · {course} · {splits ? "Relay split best" : "Personal best"}
             </h2>
             <p className="mt-1.5 font-mono text-[44px] font-semibold leading-[48px] tracking-[-0.02em] tabular-nums">
+              {pb.unofficial ? <UnofficialMark unofficial meetName={pb.meet} className="!-ml-6 !w-6 text-[28px]" /> : null}
               {formatTime(pb.timeMs)}
             </p>
             <p className="mt-1 truncate text-sm text-foreground-secondary">
@@ -210,7 +212,10 @@ export default function EventDrilldown({
                   i > 0 ? "border-t border-border-secondary" : ""
                 } ${href ? "transition-colors hover:bg-background-hover" : ""}`}
               >
-                <span className="text-right font-mono font-medium tabular-nums text-foreground">{time}</span>
+                <span className="text-right font-mono font-medium tabular-nums text-foreground">
+                  <UnofficialMark unofficial={swim.unofficial} meetName={swim.meet} />
+                  {time}
+                </span>
                 <span className="flex justify-center">
                   {(isCurrentPb || wasPb) && <PbBadge current={isCurrentPb} />}
                 </span>

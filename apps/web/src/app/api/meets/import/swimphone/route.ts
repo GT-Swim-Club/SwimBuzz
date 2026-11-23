@@ -189,7 +189,8 @@ export async function applySwimphoneImportJob(
   }
 
   const relayResults = coerceParsedRelayResults(scraped.relay_results)
-  const summary = await importMeetResults({
+  // SwimPhone results carry no teams, so the meet's per-team split (resultTeams) stays as it was.
+  const { athleteTeams, ...summary } = await importMeetResults({
     season: ctx.season,
     meetName,
     meetDate,
@@ -204,6 +205,7 @@ export async function applySwimphoneImportJob(
     allResults: pairing ? (scraped.results ?? []) : null,
     allRelayResults: pairing ? relayResults : null,
   })
+  void athleteTeams
 
   if (pairing) {
     return {

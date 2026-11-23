@@ -10,10 +10,10 @@ import { loadRelaySplits } from "@/lib/meet/relay-splits"
 
 // medley leg → individual event name in DB
 const MEDLEY_LEG_EVENTS: Record<string, string[]> = {
-  back: ["100 Back", "50 Back"],
-  breast: ["100 Breast", "50 Breast"],
-  fly: ["100 Fly", "50 Fly"],
-  free: ["100 Free", "50 Free"],
+  back: ["100 Back", "50 Back", "25 Back"],
+  breast: ["100 Breast", "50 Breast", "25 Breast"],
+  fly: ["100 Fly", "50 Fly", "25 Fly"],
+  free: ["100 Free", "50 Free", "25 Free"],
 }
 
 const RELAY_LETTERS = ["A", "B", "C", "D"] as const
@@ -81,7 +81,13 @@ function fullName(
 }
 
 /** A time on record for one swimmer and stroke; relay splits only count after the lead-off. */
-type TimePick = { timeMs: number; relaySplit: boolean; sourceDate: Date | null }
+type TimePick = {
+  timeMs: number
+  relaySplit: boolean
+  sourceDate: Date | null
+  /** A relay split swum at an unofficial meet (flat-start picks learn theirs in attachSourceDates). */
+  unofficial?: boolean
+}
 
 /** `leadoff`: flat-start best (leg 1). `rolling`: a relay split, set only when it beats leadoff for legs 2–4. */
 type AthleteTimes = { leadoff?: TimePick; rolling?: TimePick }
@@ -99,6 +105,8 @@ type BuiltLeg = {
   leg?: string
   /** Timed from a relay split (legs 2–4 only) rather than a flat-start swim. */
   relaySplit?: boolean
+  /** The time is from an unofficial meet (intrasquad): shown "*22.31". */
+  unofficial?: boolean
 }
 
 type StrokeTime = {
@@ -107,6 +115,7 @@ type StrokeTime = {
   sourceDate: Date | null
   outsideWindow: boolean
   relaySplit?: boolean
+  unofficial?: boolean
 }
 
 type StrokeTimes = Record<
@@ -219,7 +228,12 @@ export async function POST(req: Request) {
     const splitWindow = new Map<string, TimePick>()
     for (const split of relaySplits) {
       if (!idSet.has(split.athleteId) || !events.includes(split.event)) continue
-      const pick = { timeMs: split.timeMs, relaySplit: true, sourceDate: split.date }
+      const pick = {
+        timeMs: split.timeMs,
+        relaySplit: true,
+        sourceDate: split.date,
+        unofficial: split.meet?.unofficial ?? false,
+      }
       splitAny.set(split.athleteId, faster(splitAny.get(split.athleteId), pick)!)
       if (windowStart && split.date >= windowStart) {
         splitWindow.set(split.athleteId, faster(splitWindow.get(split.athleteId), pick)!)
@@ -258,22 +272,31 @@ export async function POST(req: Request) {
               timeMs: leg.timeMs,
             })),
           },
-          select: { athleteId: true, event: true, timeMs: true, date: true },
+          select: {
+            athleteId: true,
+            event: true,
+            timeMs: true,
+            date: true,
+            meetRef: { select: { unofficial: true } },
+          },
           orderBy: { date: "desc" },
         })
       : []
-    const sourceDates = new Map<string, Date | null>()
+    const sources = new Map<string, { date: Date; unofficial: boolean }>()
     for (const swim of sourceSwims) {
       const key = sourceKey(swim)
-      if (!sourceDates.has(key)) sourceDates.set(key, swim.date)
+      if (!sources.has(key)) sources.set(key, { date: swim.date, unofficial: swim.meetRef?.unofficial ?? false })
     }
     return legs.map((leg) => {
       if (leg.timeMs == null) return { ...leg, sourceDate: null, outsideWindow: false }
-      const sourceDate = leg.relaySplit ? (leg.sourceDate ?? null) : (sourceDates.get(sourceKey(leg)) ?? null)
+      const source = leg.relaySplit ? null : sources.get(sourceKey(leg))
+      const sourceDate = leg.relaySplit ? (leg.sourceDate ?? null) : (source?.date ?? null)
+      const unofficial = leg.relaySplit ? leg.unofficial === true : source?.unofficial === true
       return {
         ...leg,
         sourceDate,
         outsideWindow: sinceDate != null && (sourceDate == null || sourceDate < sinceDate),
+        ...(unofficial ? { unofficial: true } : {}),
       }
     })
   }
@@ -337,6 +360,7 @@ export async function POST(req: Request) {
         sourceDate: row.sourceDate ?? null,
         outsideWindow: row.outsideWindow ?? false,
         ...(row.relaySplit ? { relaySplit: true } : {}),
+        ...(row.unofficial ? { unofficial: true } : {}),
       }
       if (row.relaySplit) (entry.splitTimes ??= {})[row.leg] = time
       else entry.times[row.leg] = time
@@ -351,7 +375,9 @@ export async function POST(req: Request) {
     gender: athleteMap[athleteId]?.gender,
     event,
     timeMs: pick?.timeMs ?? null,
-    ...(pick?.relaySplit ? { relaySplit: true, sourceDate: pick.sourceDate } : {}),
+    ...(pick?.relaySplit
+      ? { relaySplit: true, sourceDate: pick.sourceDate, ...(pick.unofficial ? { unofficial: true } : {}) }
+      : {}),
     ...(leg ? { leg } : {}),
   })
 

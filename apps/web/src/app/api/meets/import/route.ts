@@ -14,6 +14,9 @@ import { notifyMeetRosterOfInfoDrops } from "@/lib/meet/meet-roster-notify"
 import { notifyNewNationalCuts } from "@/lib/notifications/national-cut-notify"
 import { parseSeason } from "@/lib/season"
 import { coerceParsedRelayResults } from "@/lib/meet/relay-results"
+import { canonicalResultTeams, coerceResultTeams } from "@/lib/meet/result-teams"
+import { isEventOrder } from "@/lib/meet/meet-event-order"
+import { rescoreResultsByGender } from "@/lib/meet/gender-scoring"
 import { isClientDisconnected, throwIfDisconnected } from "@/lib/client-disconnect"
 import { getSession } from "@/lib/auth/session"
 import { coerceTeamScores, isStaffRole } from "@swimbuzz/shared"
@@ -31,6 +34,8 @@ type ParsedResult = {
   tags?: string
   place?: number
   points?: number
+  /** The team the results print the swim under ("GTSC Gold"). */
+  team?: string | null
 }
 
 const MAX_BYTES = 20 * 1024 * 1024
@@ -56,15 +61,28 @@ async function applyParsedMeetPdf(input: {
     results: ParsedResult[]
     relay_results?: unknown[]
     team_scores?: unknown
+    /** The results' own order of events ("Event 1 …" headers). */
+    event_order?: unknown
   }
   season: string
   courseDefault: string
-  meet: { id: string; name: string; startsAt: Date | null; resultsUrl: string | null } | null
+  meet: {
+    id: string
+    name: string
+    startsAt: Date | null
+    resultsUrl: string | null
+    packetUrl: string | null
+    /** Place and score women and men separately in mixed individual events. */
+    scoreByGender: boolean
+    scoringTable: Prisma.JsonValue
+  } | null
   nameMappings: ReturnType<typeof normalizeNameMappings>
   rejectedNames: ReturnType<typeof normalizeRejectedNames>
   pairOnly: boolean
   resultsPdfUrl: string | null
   fileName: string
+  /** The import's team codes ("White, Gold"), naming each swimmer's team. */
+  teamCodes: string | null
 }) {
   const { parsed, season, courseDefault, meet, nameMappings, rejectedNames, pairOnly, resultsPdfUrl, fileName } =
     input
@@ -78,11 +96,24 @@ async function applyParsedMeetPdf(input: {
     meet?.name ?? ((parsed.meet_name ?? "").trim() || fileName.replace(/\.pdf$/i, ""))
   const meetDate = meet?.startsAt ?? resolveMeetDate(parsed.meet_date) ?? new Date()
 
-  const summary = await importMeetResults({
+  // Women and men scored separately: the results' combined places and points are recomputed.
+  const byGender = meet?.scoreByGender
+    ? await rescoreResultsByGender({
+        results: parsed.results ?? [],
+        relays: coerceParsedRelayResults(parsed.relay_results),
+        season,
+        nameMappings,
+        scoringTable: meet.scoringTable,
+        printedTeamScores: coerceTeamScores(parsed.team_scores),
+      })
+    : null
+  const results = byGender?.results ?? parsed.results ?? []
+
+  const { athleteTeams: printedTeams, ...summary } = await importMeetResults({
     season,
     meetName,
     meetDate,
-    results: parsed.results ?? [],
+    results,
     relayResults: coerceParsedRelayResults(parsed.relay_results),
     source: "meet_pdf",
     courseDefault: parsed.course || courseDefault,
@@ -90,20 +121,44 @@ async function applyParsedMeetPdf(input: {
     nameMappings,
     rejectedNames,
     pairOnly,
-    allResults: parsed.results ?? [],
+    allResults: results,
     allRelayResults: coerceParsedRelayResults(parsed.relay_results),
+    rescored: byGender != null,
   })
+
+  const athleteTeams = canonicalResultTeams(printedTeams, input.teamCodes)
+  // Each swimmer's team, when the results name several of ours (an intrasquad's Gold and White):
+  // splits the meet's highlights per team. A full import replaces it; pairing a few names adds them.
+  if (meet?.id && pairOnly && Object.keys(athleteTeams).length > 0) {
+    try {
+      const current = await prisma.meet.findUnique({ where: { id: meet.id }, select: { resultTeams: true } })
+      const merged = { ...coerceResultTeams(current?.resultTeams), ...athleteTeams }
+      if (new Set(Object.values(merged)).size > 1) {
+        await prisma.meet.update({ where: { id: meet.id }, data: { resultTeams: merged } })
+      }
+    } catch (err) {
+      console.error("Failed to save paired swimmers' teams:", err)
+    }
+  }
 
   if (meet?.id && !pairOnly && resultsPdfUrl) {
     try {
-      const teamScores = coerceTeamScores(parsed.team_scores)
+      const teamScores = byGender ? byGender.teamScores : coerceTeamScores(parsed.team_scores)
       await prisma.meet.update({
         where: { id: meet.id },
         data: {
           resultsUrl: resultsPdfUrl,
+          resultTeams:
+            new Set(Object.values(athleteTeams)).size > 1
+              ? (athleteTeams as Prisma.InputJsonValue)
+              : Prisma.DbNull,
           teamScores: teamScores
             ? ({ ...teamScores, importedAt: new Date().toISOString() } as Prisma.InputJsonValue)
             : Prisma.DbNull,
+          // Without a meet packet, the results' event numbers are the meet's order of events.
+          ...(!meet.packetUrl && isEventOrder(parsed.event_order)
+            ? { eventOrder: parsed.event_order as unknown as Prisma.InputJsonValue }
+            : {}),
         },
       })
       // The replaced results PDF — after the update, and never the PDF just saved
@@ -248,6 +303,7 @@ export async function POST(req: Request) {
         pairOnly,
         resultsPdfUrl: pdfUrl,
         fileName,
+        teamCodes: team,
       })
       return NextResponse.json(summary)
     } catch (err) {
@@ -291,6 +347,7 @@ export async function POST(req: Request) {
       results: ParsedResult[]
       relay_results?: unknown[]
       team_scores?: unknown
+      event_order?: unknown
     }>(session.user.id, resultsPdfUrl, { course: courseDefault, team, fileName })
 
     throwIfDisconnected(req.signal)
@@ -304,6 +361,7 @@ export async function POST(req: Request) {
       pairOnly: false,
       resultsPdfUrl,
       fileName,
+      teamCodes: team,
     })
     return NextResponse.json(summary)
   } catch (err) {

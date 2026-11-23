@@ -56,6 +56,8 @@ export type ParsedMeetResult = {
   heatTotal?: number
   seedTime?: string
   splits?: Array<{ distance: number; splitTime: string }>
+  /** The team the results print the swim under ("GTSC Gold"). */
+  team?: string | null
 }
 
 export type NameConfirmation = {
@@ -85,6 +87,11 @@ export type MeetImportSummary = {
   nameConfirmations: NameConfirmation[]
   /** Season roster for the coach pairing UI (only when confirmations exist). */
   rosterForPairing: RosterPairingOption[]
+  /**
+   * Each matched swimmer's team, by athlete id, from the rows imported (individual swims and relay
+   * legs) — the meet's resultTeams when they name several teams.
+   */
+  athleteTeams: Record<string, string>
 }
 
 export function collectNameConfirmations(
@@ -136,6 +143,7 @@ export async function importMeetResults({
   pairOnly = false,
   allResults = null,
   allRelayResults = null,
+  rescored = false,
 }: {
   season: string
   meetName: string
@@ -154,6 +162,11 @@ export async function importMeetResults({
   /** Full parsed result set for unmatched-name detection when pairOnly. */
   allResults?: ParsedMeetResult[] | null
   allRelayResults?: ParsedRelayResult[] | null
+  /**
+   * Places and points were recomputed (women and men scored separately): a re-import writes them
+   * onto existing swims even when cleared, rather than keeping the old ones.
+   */
+  rescored?: boolean
 }): Promise<MeetImportSummary> {
   const roster = await prisma.athlete.findMany({
     where: { seasons: { has: season } },
@@ -225,6 +238,7 @@ export async function importMeetResults({
     ? await prisma.meet.findUnique({
         where: { id: meetId },
         select: {
+          psychSheetSummary: true,
           heatSheetSummary: true,
           finalsHeatSheetSummary: true,
           resultStatusesSummary: true,
@@ -239,6 +253,9 @@ export async function importMeetResults({
   const finalsHeatSheetSummary = isSheetSummary(meetRecord?.finalsHeatSheetSummary)
     ? meetRecord.finalsHeatSheetSummary
     : null
+  // The results' seed column is only the meet's seeds while no psych or heat sheet gave them.
+  const takeResultSeeds =
+    !heatSheetSummary && !finalsHeatSheetSummary && !isSheetSummary(meetRecord?.psychSheetSummary)
   const heatSheetLookup = buildHeatSheetLookup(
     heatSheetSummary && finalsHeatSheetSummary
       ? {
@@ -312,11 +329,24 @@ export async function importMeetResults({
     placementRows.push(row)
   }
 
+  // Each matched swimmer's team, from their individual rows and the relays they swam on.
+  const athleteTeams: Record<string, string> = {}
+  for (const relay of activeRelayResults) {
+    const team = relay.team?.trim()
+    if (!team) continue
+    for (const leg of relay.relaySwimmers ?? []) {
+      const legAthleteId = isRealRelaySwimmerName(leg.name) ? matchAthleteIdFast(leg.name, lookup, nameMappings) : null
+      if (legAthleteId) athleteTeams[legAthleteId] = team
+    }
+  }
+
   for (const row of activeResults) {
     // Relay leadoffs are synced from leg-1 relay splits, not individual result rows.
     if (isRelayLeadoffSwimTag(row.tags ?? "")) continue
 
     const athleteId = matchAthleteIdFast(row.name, lookup, nameMappings)
+    const rowTeam = typeof row.team === "string" ? row.team.trim() : ""
+    if (athleteId && rowTeam) athleteTeams[athleteId] = rowTeam
     const event = normalizeEventName(row.event)
     const timeMs = parseSwimTime(row.time)
     const status = parseSwimStatus(row.time)
@@ -332,7 +362,7 @@ export async function importMeetResults({
     }
 
     const seedTime = row.seedTime?.trim()
-    if (seedTime && parseSwimTime(seedTime)) {
+    if (takeResultSeeds && seedTime && parseSwimTime(seedTime)) {
       seedRows.push({
         athleteId,
         athleteName: athleteById.get(athleteId) ?? row.name,
@@ -437,7 +467,7 @@ export async function importMeetResults({
 
   // Re-imports skip duplicate rows — still refresh finish place and points when provided.
   const swimsWithPlace = swimsToInsert.filter(
-    (s) => (s.place != null && s.place > 0) || s.points != null
+    (s) => rescored || (s.place != null && s.place > 0) || s.points != null
   )
   if (swimsWithPlace.length > 0 && result.count < swimsToInsert.length) {
     const PLACE_UPDATE_BATCH = 5
@@ -455,10 +485,12 @@ export async function importMeetResults({
               tags: swim.tags,
               occurrence: swim.occurrence,
             },
-            data: {
-              ...(swim.place != null && swim.place > 0 ? { place: swim.place } : {}),
-              ...(swim.points != null ? { points: swim.points } : {}),
-            },
+            data: rescored
+              ? { place: swim.place != null && swim.place > 0 ? swim.place : null, points: swim.points }
+              : {
+                  ...(swim.place != null && swim.place > 0 ? { place: swim.place } : {}),
+                  ...(swim.points != null ? { points: swim.points } : {}),
+                },
           })
         )
       )
@@ -663,6 +695,7 @@ export async function importMeetResults({
     statusesMatched: statusEntries.length,
     nameConfirmations,
     rosterForPairing,
+    athleteTeams,
   }
 }
 

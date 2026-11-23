@@ -14,6 +14,7 @@ import {
   formatMonthYear,
   formatProgressionAxisTime,
   formatTime,
+  markUnofficial,
   progressionBests,
   progressionDotRadius,
   progressionTimeAxis,
@@ -31,7 +32,7 @@ export type ProgressionSwimRow = {
   timeMs?: number
   date?: string
   meet?: string
-  meetRef?: { name?: string } | null
+  meetRef?: { name?: string; unofficial?: boolean } | null
 }
 
 type Swim = {
@@ -41,6 +42,8 @@ type Swim = {
   timeMs: number
   date: string
   meet: string
+  /** Swum at an unofficial meet (intrasquad): a hollow dot and "*22.31". */
+  unofficial: boolean
 }
 
 type Point = { swim: Swim; x: number; y: number }
@@ -66,6 +69,7 @@ function toSwim(row: ProgressionSwimRow, index: number): Swim | null {
     timeMs: row.timeMs,
     date: row.date,
     meet: row.meetRef?.name || row.meet || "",
+    unofficial: row.meetRef?.unofficial === true,
   }
 }
 
@@ -229,7 +233,7 @@ export function ProgressionSection({ swims: swimRows }: { swims: ProgressionSwim
           <Text style={styles.eyebrow}>
             {event} · {course} · Personal best
           </Text>
-          <Text style={styles.pbTime}>{formatTime(pb.timeMs)}</Text>
+          <Text style={styles.pbTime}>{markUnofficial(formatTime(pb.timeMs), pb.unofficial)}</Text>
         </View>
       </View>
 
@@ -307,13 +311,25 @@ export function ProgressionSection({ swims: swimRows }: { swims: ProgressionSwim
                 {points.map((p) => {
                   const isPb = p.swim.id === pb.id
                   const wasPb = bests.pbAtTime.has(p.swim.id)
-                  return (
+                  const color = isPb || wasPb ? c.primary : c.textTertiary
+                  // An unofficial (intrasquad) swim is a hollow ring in the same color.
+                  return p.swim.unofficial ? (
+                    <Circle
+                      key={p.swim.id}
+                      cx={p.x}
+                      cy={p.y}
+                      r={(isPb ? r + 1.5 : r) - 0.75}
+                      fill={c.bgContainer}
+                      stroke={color}
+                      strokeWidth={1.5}
+                    />
+                  ) : (
                     <Circle
                       key={p.swim.id}
                       cx={p.x}
                       cy={p.y}
                       r={isPb ? r + 1.5 : r}
-                      fill={isPb || wasPb ? c.primary : c.textTertiary}
+                      fill={color}
                       stroke={c.bgContainer}
                       strokeWidth={isPb ? 2 : 1.5}
                     />
@@ -338,7 +354,7 @@ export function ProgressionSection({ swims: swimRows }: { swims: ProgressionSwim
                     fontWeight="600"
                     fill={c.accent}
                   >
-                    PB
+                    {pbPoint.swim.unofficial ? "*PB" : "PB"}
                   </SvgText>
                 ) : null}
                 {spanMs === 0 ? (
@@ -376,7 +392,9 @@ export function ProgressionSection({ swims: swimRows }: { swims: ProgressionSwim
             {selected ? (
               <>
                 <View style={styles.detailTop}>
-                  <Text style={styles.detailTime}>{formatTime(selected.swim.timeMs)}</Text>
+                  <Text style={styles.detailTime}>
+                    {markUnofficial(formatTime(selected.swim.timeMs), selected.swim.unofficial)}
+                  </Text>
                   {selected.swim.id === pb.id ? <Text style={styles.pbBadge}>PB</Text> : null}
                   {improvement != null ? (
                     <Text style={[styles.delta, { color: improvement < 0 ? c.successText : c.error }]}>
@@ -385,7 +403,7 @@ export function ProgressionSection({ swims: swimRows }: { swims: ProgressionSwim
                   ) : null}
                 </View>
                 <Text style={styles.detailMeta} numberOfLines={2}>
-                  {[formatDay(selected.swim.date), selected.swim.meet || null]
+                  {[formatDay(selected.swim.date), selected.swim.meet || null, selected.swim.unofficial ? "Unofficial" : null]
                     .filter(Boolean)
                     .join(" · ")}
                 </Text>
