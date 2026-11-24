@@ -1,0 +1,5036 @@
+{
+  "course": "SCY",
+  "detectedSheetType": "results",
+  "event_order": {
+    "sessions": [
+      {
+        "label": "Order of Events",
+        "rows": [
+          {
+            "event": "200 Free Relay",
+            "men": 2,
+            "women": 1
+          },
+          {
+            "event": "100 IM",
+            "men": 4,
+            "women": 3
+          },
+          {
+            "event": "50 Back",
+            "men": 6,
+            "women": 5
+          },
+          {
+            "event": "100 Free",
+            "men": 8,
+            "women": 7
+          },
+          {
+            "event": "50 Breast",
+            "men": 10,
+            "women": 9
+          },
+          {
+            "event": "200 Free",
+            "men": 12,
+            "women": 11
+          },
+          {
+            "event": "100 Fly",
+            "men": 14,
+            "women": 13
+          },
+          {
+            "event": "100 Back",
+            "men": 16,
+            "women": 15
+          },
+          {
+            "event": "50 Free",
+            "men": 18,
+            "women": 17
+          },
+          {
+            "event": "100 Breast",
+            "men": 20,
+            "women": 19
+          },
+          {
+            "event": "50 Fly",
+            "men": 22,
+            "women": 21
+          },
+          {
+            "event": "500 Free",
+            "men": 23,
+            "women": 23
+          },
+          {
+            "event": "200 Medley Relay",
+            "men": 25,
+            "women": 24
+          }
+        ]
+      }
+    ]
+  },
+  "meet_date": "2022-01-23",
+  "meet_name": "GT Auburn Dual Meet",
+  "relay_results": [
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 1,
+      "points": 40.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "26.34"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "26.75"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "25.55"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "26.24"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:44.88"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 2,
+      "points": 34.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": null,
+          "leg": 1,
+          "name": "Tarrh, Sydney",
+          "splitTime": "29.47"
+        },
+        {
+          "age": null,
+          "leg": 2,
+          "name": "Milstead, McKenzie",
+          "splitTime": "28.31"
+        },
+        {
+          "age": null,
+          "leg": 3,
+          "name": "Han, Erica",
+          "splitTime": "25.28"
+        },
+        {
+          "age": null,
+          "leg": 4,
+          "name": "Palenapa, Grace",
+          "splitTime": "27.19"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:50.25"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 3,
+      "points": 32.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "28.16"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "28.07"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "27.29"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "27.55"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:51.07"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 4,
+      "points": 30.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "age": null,
+          "leg": 1,
+          "name": "Krings, Jewel",
+          "splitTime": "26.94"
+        },
+        {
+          "age": null,
+          "leg": 2,
+          "name": "Amis, Abby",
+          "splitTime": "31.03"
+        },
+        {
+          "age": null,
+          "leg": 3,
+          "name": "Rossel, Chella",
+          "splitTime": "29.79"
+        },
+        {
+          "age": null,
+          "leg": 4,
+          "name": "Hubbard, Katie",
+          "splitTime": "28.55"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:56.31"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 5,
+      "points": 28.0,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "30.26"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "30.54"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "31.01"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "27.62"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:59.43"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "C",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 1,
+      "points": 40.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "22.45"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "21.24"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "21.99"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "23.54"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:29.22"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 2,
+      "points": 34.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "24.23"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "22.94"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "23.18"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "23.69"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:34.04"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 3,
+      "points": 32.0,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "24.35"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "23.41"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "23.60"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "22.72"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:34.08"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 4,
+      "points": 30.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "age": null,
+          "leg": 1,
+          "name": "Taylor, Jack",
+          "splitTime": "25.63"
+        },
+        {
+          "age": null,
+          "leg": 2,
+          "name": "Devine, Will",
+          "splitTime": "22.60"
+        },
+        {
+          "age": null,
+          "leg": 3,
+          "name": "Murray, Matthew",
+          "splitTime": "23.25"
+        },
+        {
+          "age": null,
+          "leg": 4,
+          "name": "Kassels, Mike",
+          "splitTime": "22.67"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:34.15"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 5,
+      "points": 28.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": null,
+          "leg": 1,
+          "name": "Miranda, Austin",
+          "splitTime": "24.47"
+        },
+        {
+          "age": null,
+          "leg": 2,
+          "name": "Stone, Charles",
+          "splitTime": "23.28"
+        },
+        {
+          "age": null,
+          "leg": 3,
+          "name": "Stallworth, Drake",
+          "splitTime": "23.00"
+        },
+        {
+          "age": null,
+          "leg": 4,
+          "name": "Johnson, Aidan",
+          "splitTime": "23.54"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:34.29"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 6,
+      "points": 26.0,
+      "relayLetter": "D",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "24.01"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "28.42"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "26.50"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "23.83"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:42.76"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 7,
+      "points": 24.0,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "age": null,
+          "leg": 1,
+          "name": "Foran, Gavin",
+          "splitTime": "25.71"
+        },
+        {
+          "age": null,
+          "leg": 2,
+          "name": "Dickey, Enrick",
+          "splitTime": "25.44"
+        },
+        {
+          "age": null,
+          "leg": 3,
+          "name": "Deakins, Lucas",
+          "splitTime": "28.15"
+        },
+        {
+          "age": null,
+          "leg": 4,
+          "name": "Fraccaro, Alex",
+          "splitTime": "24.42"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:43.72"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 1,
+      "points": 40.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "30.43"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "33.33"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "27.23"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "26.64"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:57.63"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 2,
+      "points": 34.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": null,
+          "leg": 1,
+          "name": "Palenapa, Grace",
+          "splitTime": "31.50"
+        },
+        {
+          "age": null,
+          "leg": 2,
+          "name": "Krings, Jewel",
+          "splitTime": "32.98"
+        },
+        {
+          "age": null,
+          "leg": 3,
+          "name": "Han, Erica",
+          "splitTime": "27.51"
+        },
+        {
+          "age": null,
+          "leg": 4,
+          "name": "Hubbard, Katie",
+          "splitTime": "28.71"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "2:00.70"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 3,
+      "points": 32.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "31.44"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "33.17"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "33.22"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "26.79"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "2:04.62"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 4,
+      "points": 30.0,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "31.69"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "35.50"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "33.16"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "27.72"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "2:08.07"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 5,
+      "points": 28.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "age": null,
+          "leg": 1,
+          "name": "Milstead, McKenzie",
+          "splitTime": "33.58"
+        },
+        {
+          "age": null,
+          "leg": 2,
+          "name": "Halstead, Sophia",
+          "splitTime": "39.56"
+        },
+        {
+          "age": null,
+          "leg": 3,
+          "name": "Tarrh, Sydney",
+          "splitTime": "32.28"
+        },
+        {
+          "age": null,
+          "leg": 4,
+          "name": "Stewart, Lily",
+          "splitTime": "34.62"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "2:20.04"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 1,
+      "points": 40.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "24.70"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "29.20"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "23.74"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "23.31"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:40.95"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 2,
+      "points": 34.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "26.25"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "29.92"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "24.54"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "24.39"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:45.10"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 3,
+      "points": 32.0,
+      "relayLetter": "D",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "28.32"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "29.11"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "25.55"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "23.74"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:46.72"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 4,
+      "points": 30.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "age": null,
+          "leg": 1,
+          "name": "Stone, Charles",
+          "splitTime": "25.69"
+        },
+        {
+          "age": null,
+          "leg": 2,
+          "name": "Murray, Matthew",
+          "splitTime": "30.95"
+        },
+        {
+          "age": null,
+          "leg": 3,
+          "name": "Johnson, Aidan",
+          "splitTime": "26.70"
+        },
+        {
+          "age": null,
+          "leg": 4,
+          "name": "Miranda, Austin",
+          "splitTime": "23.65"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:46.99"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 5,
+      "points": 28.0,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "27.18"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "28.68"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "29.92"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "25.80"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:51.58"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 6,
+      "points": 26.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": null,
+          "leg": 1,
+          "name": "Fraccaro, Alex",
+          "splitTime": "30.18"
+        },
+        {
+          "age": null,
+          "leg": 2,
+          "name": "Devine, Will",
+          "splitTime": "32.00"
+        },
+        {
+          "age": null,
+          "leg": 3,
+          "name": "Stallworth, Drake",
+          "splitTime": "25.51"
+        },
+        {
+          "age": null,
+          "leg": 4,
+          "name": "Kassels, Mike",
+          "splitTime": "25.12"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:52.81"
+    }
+  ],
+  "results": [
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Hicks, Taylor",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.23"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.73"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:02.96"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Yie, Emiley",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.22"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.83"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:03.05"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Gallmeier, Esther",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.75"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.30"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:07.05"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Krings, Jewel",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.47"
+        },
+        {
+          "distance": 100,
+          "splitTime": "36.50"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:07.97"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Sundius, Sarah",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.42"
+        },
+        {
+          "distance": 100,
+          "splitTime": "37.72"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:09.14"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Palenapa, Grace",
+      "place": 6,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.97"
+        },
+        {
+          "distance": 100,
+          "splitTime": "37.78"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:09.75"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Wojack, Emma",
+      "place": 7,
+      "points": 12.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.57"
+        },
+        {
+          "distance": 100,
+          "splitTime": "37.88"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:10.45"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Rossel, Chella",
+      "place": 8,
+      "points": 11.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.24"
+        },
+        {
+          "distance": 100,
+          "splitTime": "41.61"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:15.85"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Halstead, Sophia",
+      "place": 9,
+      "points": 9.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "35.94"
+        },
+        {
+          "distance": 100,
+          "splitTime": "42.98"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:18.92"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Stewart, Lily",
+      "place": 10,
+      "points": 7.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "38.61"
+        },
+        {
+          "distance": 100,
+          "splitTime": "47.39"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:26.00"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Manley, Caitlin",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Nguyen, Britney",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Holmes, Lindsey",
+      "place": null,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "How, Summer",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Meier, Christopher",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "25.38"
+        },
+        {
+          "distance": 100,
+          "splitTime": "29.39"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "54.77"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Xue, Anthony",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "25.91"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.89"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "58.80"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Wong, Justin",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "27.55"
+        },
+        {
+          "distance": 100,
+          "splitTime": "31.36"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "58.91"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Miao, Nathan",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.38"
+        },
+        {
+          "distance": 100,
+          "splitTime": "31.01"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "59.39"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Donahoe, John",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.33"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.27"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:00.60"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Vlady, George",
+      "place": 6,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.02"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.12"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:01.14"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Keith, Jackson",
+      "place": 7,
+      "points": 12.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.02"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.55"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:01.57"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Fraccaro, Alex",
+      "place": 8,
+      "points": 11.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.08"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.63"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:01.71"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Murray, Matthew",
+      "place": 9,
+      "points": 9.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.66"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.30"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:01.96"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Walpole, Zac",
+      "place": 10,
+      "points": 7.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.82"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.95"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:04.77"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Taylor, Jack",
+      "place": 11,
+      "points": 6.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.04"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.56"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:10.60"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Sheinberg, Ryan",
+      "place": 12,
+      "points": 5.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.55"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.78"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:11.33"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Gonzalez, Brian",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Frost, Joshua",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Kang, Jason",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Riddell, Allie",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "29.33"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Heeren, Rachel",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "30.68"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Burge, Alison",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "31.67"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Hatch, Holly",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "32.91"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Edmond, Shani",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "34.18"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Pawlik, Veronica",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "35.30"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Genin, Isabelle",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "36.10"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Halstead, Sophia",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "37.48"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Meyers, Madison",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "37.98"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Corley, Catherine",
+      "place": null,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Cardot, Louis",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "24.94"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Barnes, Luke",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "27.42"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Geller, Maxim",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "27.60"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Liu, Benjamin",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "27.79"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Armentrout, Will",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "28.52"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Hack, Brian",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "28.98"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Garcia, Leopoldo",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "33.53"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Kaye, Nathanael",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "39.49"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Congiusta, Matthew",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Britten, Stephen",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Han, Erica",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "27.10"
+        },
+        {
+          "distance": 100,
+          "splitTime": "30.50"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "57.60"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Meckley, Irelyn",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.79"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.86"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:02.65"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Hubbard, Katie",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.72"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.57"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:05.29"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Wharton, Angela",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.16"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.98"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:06.14"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Edwards, Taryn",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.85"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.61"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:06.46"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Tarrh, Sydney",
+      "place": 6,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.06"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.32"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:07.38"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Schmersal, MK",
+      "place": 7,
+      "points": 12.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.08"
+        },
+        {
+          "distance": 100,
+          "splitTime": "36.88"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:10.96"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Amis, Abby",
+      "place": 8,
+      "points": 11.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.28"
+        },
+        {
+          "distance": 100,
+          "splitTime": "37.44"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:11.72"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Graham, Melanie",
+      "place": 9,
+      "points": 9.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "38.09"
+        },
+        {
+          "distance": 100,
+          "splitTime": "41.83"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:19.92"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Corley, Catherine",
+      "place": null,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Hsiao, Ellen",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "White, Keller",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "23.70"
+        },
+        {
+          "distance": 100,
+          "splitTime": "24.71"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "48.41"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Goeckel, Philip",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "23.29"
+        },
+        {
+          "distance": 100,
+          "splitTime": "25.68"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "48.97"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Kassels, Mike",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "24.99"
+        },
+        {
+          "distance": 100,
+          "splitTime": "27.16"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "52.15"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Miranda, Austin",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "25.17"
+        },
+        {
+          "distance": 100,
+          "splitTime": "27.42"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "52.59"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Choudhury, Sumit",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "25.70"
+        },
+        {
+          "distance": 100,
+          "splitTime": "27.55"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "53.25"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Chen, Aidan",
+      "place": 6,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "25.79"
+        },
+        {
+          "distance": 100,
+          "splitTime": "27.58"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "53.37"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Rondinella, Matthew",
+      "place": 7,
+      "points": 12.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "25.49"
+        },
+        {
+          "distance": 100,
+          "splitTime": "28.00"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "53.49"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Redford, Will",
+      "place": 8,
+      "points": 11.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "26.07"
+        },
+        {
+          "distance": 100,
+          "splitTime": "27.71"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "53.78"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Yu, Caleb",
+      "place": 9,
+      "points": 9.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "24.66"
+        },
+        {
+          "distance": 100,
+          "splitTime": "29.63"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "54.29"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Keith, Jackson",
+      "place": 10,
+      "points": 7.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "26.19"
+        },
+        {
+          "distance": 100,
+          "splitTime": "29.25"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "55.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Gomez del Campo, Benjamin",
+      "place": 11,
+      "points": 6.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "27.08"
+        },
+        {
+          "distance": 100,
+          "splitTime": "29.77"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "56.85"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Walpole, Zac",
+      "place": 12,
+      "points": 5.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "26.48"
+        },
+        {
+          "distance": 100,
+          "splitTime": "31.54"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "58.02"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Teuscher, Noah",
+      "place": 13,
+      "points": 4.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.10"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.44"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:01.54"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Hack, Brian",
+      "place": 14,
+      "points": 3.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "27.94"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.84"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:01.78"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Taylor, Jack",
+      "place": 15,
+      "points": 2.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.94"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.68"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:02.62"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Giles, David",
+      "place": 16,
+      "points": 1.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.13"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.96"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:03.09"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Greene, Walker",
+      "place": 17,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.42"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.04"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:03.46"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Foran, Gavin",
+      "place": 18,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.24"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.93"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:04.17"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Vlady, George",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Quesada, Jorge",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Roman, Ethan",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Krings, Jewel",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "32.62"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Steiner, Amelia",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "32.64"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Sundius, Sarah",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "33.54"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Gallmeier, Esther",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "34.65"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Pawlik, Veronica",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "37.19"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Nielsen, Mari",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "37.43"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Butkus, Camille",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "38.55"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Rossel, Chella",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "39.21"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Halstead, Sophia",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "39.66"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Holmes, Lindsey",
+      "place": null,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "DeRonja, Josie",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Nguyen, Britney",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Rohweder, Andrew",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "28.76"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Liu, Alex",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "30.14"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Wong, Justin",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "30.39"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Devine, Will",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "30.43"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Murray, Matthew",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "31.19"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Dodge, Grant",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "31.62"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Ragoowansi, Evan",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "31.64"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Jubes, Antoni",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "31.74"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Cheung, Christopher",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "32.63"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Dickey, Enrick",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "33.69"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Deakins, Lucas",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "36.11"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Kaye, Nathanael",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "36.22"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Sheinberg, Ryan",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "36.35"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Garcia, Leopoldo",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "38.97"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Cline, Wes",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Quesada, Jorge",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Frost, Joshua",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Beuchel, Katherine",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.69"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.74"
+        },
+        {
+          "distance": 150,
+          "splitTime": "33.08"
+        },
+        {
+          "distance": 200,
+          "splitTime": "32.00"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "2:07.51"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Riddell, Allie",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.56"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.10"
+        },
+        {
+          "distance": 150,
+          "splitTime": "34.05"
+        },
+        {
+          "distance": 200,
+          "splitTime": "33.29"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "2:08.00"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Holshouser, Audrey",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.50"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.07"
+        },
+        {
+          "distance": 150,
+          "splitTime": "34.57"
+        },
+        {
+          "distance": 200,
+          "splitTime": "35.43"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "2:10.57"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Plantamura, Natalie",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.35"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.31"
+        },
+        {
+          "distance": 150,
+          "splitTime": "33.56"
+        },
+        {
+          "distance": 200,
+          "splitTime": "34.29"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "2:11.51"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Milstead, McKenzie",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.26"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.41"
+        },
+        {
+          "distance": 150,
+          "splitTime": "36.35"
+        },
+        {
+          "distance": 200,
+          "splitTime": "36.42"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "2:18.44"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Wharton, Angela",
+      "place": 6,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.64"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.88"
+        },
+        {
+          "distance": 150,
+          "splitTime": "37.99"
+        },
+        {
+          "distance": 200,
+          "splitTime": "38.66"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "2:24.17"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Ramsey, Ari",
+      "place": 7,
+      "points": 12.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.43"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.56"
+        },
+        {
+          "distance": 150,
+          "splitTime": "39.72"
+        },
+        {
+          "distance": 200,
+          "splitTime": "40.66"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "2:25.37"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Ortega, Claudia",
+      "place": 8,
+      "points": 11.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.43"
+        },
+        {
+          "distance": 100,
+          "splitTime": "36.64"
+        },
+        {
+          "distance": 150,
+          "splitTime": "40.44"
+        },
+        {
+          "distance": 200,
+          "splitTime": "40.30"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "2:30.81"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Cardot, Louis",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "25.12"
+        },
+        {
+          "distance": 100,
+          "splitTime": "28.12"
+        },
+        {
+          "distance": 150,
+          "splitTime": "28.86"
+        },
+        {
+          "distance": 200,
+          "splitTime": "28.42"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:50.52"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Donahoe, John",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.28"
+        },
+        {
+          "distance": 100,
+          "splitTime": "31.17"
+        },
+        {
+          "distance": 150,
+          "splitTime": "31.11"
+        },
+        {
+          "distance": 200,
+          "splitTime": "30.73"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "2:01.29"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Miao, Nathan",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.17"
+        },
+        {
+          "distance": 100,
+          "splitTime": "31.17"
+        },
+        {
+          "distance": 150,
+          "splitTime": "31.62"
+        },
+        {
+          "distance": 200,
+          "splitTime": "32.60"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "2:03.56"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Fraccaro, Alex",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.51"
+        },
+        {
+          "distance": 100,
+          "splitTime": "31.21"
+        },
+        {
+          "distance": 150,
+          "splitTime": "32.47"
+        },
+        {
+          "distance": 200,
+          "splitTime": "31.72"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "2:03.91"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Kassels, Mike",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.26"
+        },
+        {
+          "distance": 100,
+          "splitTime": "31.47"
+        },
+        {
+          "distance": 150,
+          "splitTime": "33.02"
+        },
+        {
+          "distance": 200,
+          "splitTime": "33.68"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "2:06.43"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Plaskon, Dean",
+      "place": 6,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.00"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.40"
+        },
+        {
+          "distance": 150,
+          "splitTime": "33.45"
+        },
+        {
+          "distance": 200,
+          "splitTime": "33.63"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "2:07.48"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Wharton, Angela",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "41.68"
+        },
+        {
+          "distance": 100,
+          "splitTime": "46.67"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:28.35"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Stone, Charles",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "25.40"
+        },
+        {
+          "distance": 100,
+          "splitTime": "29.60"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "55.00"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Stallworth, Drake",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "26.13"
+        },
+        {
+          "distance": 100,
+          "splitTime": "30.06"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "56.19"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Armentrout, Will",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "26.57"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.49"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "59.06"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Dallas, Cole",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "27.14"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.56"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:00.70"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Keith, Jackson",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.55"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.21"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:03.76"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Gomez del Campo, Benjamin",
+      "place": 6,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.81"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.20"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:08.01"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Gonzalez, Brian",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Hicks, Taylor",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.67"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.37"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:03.04"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Riddell, Allie",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.33"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.99"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:05.32"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Heeren, Rachel",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.91"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.22"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:06.13"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Paikeday, Ava",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.97"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.09"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:08.06"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Palenapa, Grace",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.84"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.93"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:08.77"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Burge, Alison",
+      "place": 6,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.36"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.05"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:11.41"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Hatch, Holly",
+      "place": 7,
+      "points": 12.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.81"
+        },
+        {
+          "distance": 100,
+          "splitTime": "39.70"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:14.51"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Genin, Isabelle",
+      "place": 8,
+      "points": 11.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "37.32"
+        },
+        {
+          "distance": 100,
+          "splitTime": "42.20"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:19.52"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Stewart, Lily",
+      "place": 9,
+      "points": 9.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "41.60"
+        },
+        {
+          "distance": 100,
+          "splitTime": "41.99"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:23.59"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Corley, Catherine",
+      "place": null,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Butkus, Camille",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Xue, Anthony",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "27.44"
+        },
+        {
+          "distance": 100,
+          "splitTime": "28.79"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "56.23"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Barnes, Luke",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.42"
+        },
+        {
+          "distance": 100,
+          "splitTime": "31.58"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:00.00"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Liu, Alex",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.84"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.91"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:03.75"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Fraccaro, Alex",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.00"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.45"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:09.45"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Han, Erica",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "25.57"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Beuchel, Katherine",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "26.35"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Wojack, Emma",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "27.31"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Plantamura, Natalie",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "28.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Meckley, Irelyn",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "28.33"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Edwards, Taryn",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "28.69"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Milstead, McKenzie",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "28.96"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Tarrh, Sydney",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "29.18"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Hubbard, Katie",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "29.23"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Ortega, Claudia",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "30.27"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Genin, Isabelle",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "33.35"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Meyers, Madison",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "33.84"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Graham, Melanie",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "35.49"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Hsiao, Ellen",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "37.69"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Nielsen, Mari",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "29.73"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Nguyen, Britney",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Manley, Caitlin",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "DeRonja, Josie",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "How, Summer",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Ramsey, Ari",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "White, Keller",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "21.65"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Goeckel, Philip",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "21.97"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Redford, Will",
+      "place": 3,
+      "points": 15.5,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "22.59"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Nichols, John",
+      "place": 3,
+      "points": 15.5,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "22.59"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Britten, Stephen",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "23.52"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Vlady, George",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "23.69"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Ralph, Sterling",
+      "place": 7,
+      "points": 11.5,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "23.74"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Yu, Caleb",
+      "place": 7,
+      "points": 11.5,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "23.74"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Dodge, Grant",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "23.85"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Duncan, Will",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "23.90"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Choudhury, Sumit",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "24.01"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Quesada, Jorge",
+      "place": 12,
+      "points": 4.5,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "24.44"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Stone, Charles",
+      "place": 12,
+      "points": 4.5,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "24.44"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Hack, Brian",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "24.64"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Plaskon, Dean",
+      "place": 15,
+      "points": 2.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "25.01"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Stallworth, Drake",
+      "place": 16,
+      "points": 1.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "25.21"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Armentrout, Will",
+      "place": 17,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "25.31"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Cheung, Christopher",
+      "place": 18,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "25.66"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Foran, Gavin",
+      "place": 19,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "25.86"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Teuscher, Noah",
+      "place": 20,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "26.40"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Bouzekri, Mehdi",
+      "place": 21,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "26.41"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Kaye, Nathanael",
+      "place": 22,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "27.69"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Garcia, Leopoldo",
+      "place": 23,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "27.70"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Greene, Walker",
+      "place": 24,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "28.29"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Deakins, Lucas",
+      "place": 25,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "28.33"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Giles, David",
+      "place": 26,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "28.56"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Kang, Jason",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Rondinella, Matthew",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Congiusta, Matthew",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Frost, Joshua",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Krings, Jewel",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.81"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.08"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:11.89"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Steiner, Amelia",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.27"
+        },
+        {
+          "distance": 100,
+          "splitTime": "37.64"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:11.91"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Sundius, Sarah",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.35"
+        },
+        {
+          "distance": 100,
+          "splitTime": "40.60"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:14.95"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Beuchel, Katherine",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "36.01"
+        },
+        {
+          "distance": 100,
+          "splitTime": "39.76"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:15.77"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Nielsen, Mari",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "39.70"
+        },
+        {
+          "distance": 100,
+          "splitTime": "43.20"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:22.90"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Butkus, Camille",
+      "place": 6,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "38.83"
+        },
+        {
+          "distance": 100,
+          "splitTime": "44.87"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:23.70"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Miao, Nathan",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.46"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.12"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:02.58"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Rohweder, Andrew",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.78"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.13"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:02.91"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Chen, Aidan",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.36"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.62"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:05.98"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Donahoe, John",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.15"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.94"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:06.09"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Miranda, Austin",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.65"
+        },
+        {
+          "distance": 100,
+          "splitTime": "37.51"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:10.16"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Jubes, Antoni",
+      "place": 6,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.28"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.21"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:12.49"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Ragoowansi, Evan",
+      "place": 7,
+      "points": 12.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.60"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.39"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:12.99"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Dickey, Enrick",
+      "place": 8,
+      "points": 11.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.48"
+        },
+        {
+          "distance": 100,
+          "splitTime": "45.98"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:20.46"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Deakins, Lucas",
+      "place": 9,
+      "points": 9.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "37.67"
+        },
+        {
+          "distance": 100,
+          "splitTime": "43.81"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "1:21.48"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Roman, Ethan",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Han, Erica",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "27.76"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Holshouser, Audrey",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "28.28"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Heeren, Rachel",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "28.78"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Yie, Emiley",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "29.02"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Wojack, Emma",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "30.69"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Burge, Alison",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "30.70"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Edwards, Taryn",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "31.88"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Tarrh, Sydney",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "32.12"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Ortega, Claudia",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "32.29"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Paikeday, Ava",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "32.54"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Edmond, Shani",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "32.61"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Rossel, Chella",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "32.72"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Amis, Abby",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "37.23"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Nichols, John",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "24.32"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "White, Keller",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "24.56"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Redford, Will",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "24.57"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Meier, Christopher",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "25.05"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Geller, Maxim",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "25.16"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Murray, Matthew",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "25.62"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Stallworth, Drake",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "25.87"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Liu, Alex",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "25.91"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Britten, Stephen",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "26.03"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Johnson, Aidan",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "26.17"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Wong, Justin",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "26.30"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Yu, Caleb",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "26.31"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Choudhury, Sumit",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "26.36"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Ralph, Sterling",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "26.50"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Dallas, Cole",
+      "place": 15,
+      "points": 2.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "26.86"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Barnes, Luke",
+      "place": 16,
+      "points": 1.0,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "28.03"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Taylor, Jack",
+      "place": 17,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "28.65"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Sheinberg, Ryan",
+      "place": 18,
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "29.64"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Bouzekri, Mehdi",
+      "place": 19,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "30.92"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Giles, David",
+      "place": 20,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "33.46"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Cline, Wes",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Xue, Anthony",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Congiusta, Matthew",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "X",
+      "name": "Liu, Benjamin",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "27.72"
+        },
+        {
+          "distance": 100,
+          "splitTime": "30.58"
+        },
+        {
+          "distance": 150,
+          "splitTime": "31.62"
+        },
+        {
+          "distance": 200,
+          "splitTime": "31.70"
+        },
+        {
+          "distance": 250,
+          "splitTime": "32.13"
+        },
+        {
+          "distance": 300,
+          "splitTime": "32.33"
+        },
+        {
+          "distance": 350,
+          "splitTime": "32.40"
+        },
+        {
+          "distance": 400,
+          "splitTime": "32.69"
+        },
+        {
+          "distance": 450,
+          "splitTime": "31.83"
+        },
+        {
+          "distance": 500,
+          "splitTime": "31.10"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "5:14.10"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "X",
+      "name": "Schmersal, MK",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.70"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.17"
+        },
+        {
+          "distance": 150,
+          "splitTime": "36.09"
+        },
+        {
+          "distance": 200,
+          "splitTime": "36.10"
+        },
+        {
+          "distance": 250,
+          "splitTime": "35.71"
+        },
+        {
+          "distance": 300,
+          "splitTime": "35.75"
+        },
+        {
+          "distance": 350,
+          "splitTime": "35.49"
+        },
+        {
+          "distance": 400,
+          "splitTime": "35.83"
+        },
+        {
+          "distance": 450,
+          "splitTime": "35.32"
+        },
+        {
+          "distance": 500,
+          "splitTime": "34.87"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "5:52.03"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "X",
+      "name": "Devine, Will",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.58"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.29"
+        },
+        {
+          "distance": 150,
+          "splitTime": "35.86"
+        },
+        {
+          "distance": 200,
+          "splitTime": "35.83"
+        },
+        {
+          "distance": 250,
+          "splitTime": "36.62"
+        },
+        {
+          "distance": 300,
+          "splitTime": "37.04"
+        },
+        {
+          "distance": 350,
+          "splitTime": "37.23"
+        },
+        {
+          "distance": 400,
+          "splitTime": "37.35"
+        },
+        {
+          "distance": 450,
+          "splitTime": "37.18"
+        },
+        {
+          "distance": 500,
+          "splitTime": "35.07"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "5:57.05"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "X",
+      "name": "Kassels, Mike",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 71,
+          "splitTime": "31.39"
+        },
+        {
+          "distance": 142,
+          "splitTime": "35.01"
+        },
+        {
+          "distance": 213,
+          "splitTime": "1:13.61"
+        },
+        {
+          "distance": 284,
+          "splitTime": "38.32"
+        },
+        {
+          "distance": 355,
+          "splitTime": "38.55"
+        },
+        {
+          "distance": 426,
+          "splitTime": "1:18.91"
+        },
+        {
+          "distance": 497,
+          "splitTime": "1:19.14"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "6:14.93"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "X",
+      "name": "Montes, Gabriel",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.54"
+        },
+        {
+          "distance": 100,
+          "splitTime": "36.16"
+        },
+        {
+          "distance": 150,
+          "splitTime": "39.36"
+        },
+        {
+          "distance": 200,
+          "splitTime": "39.57"
+        },
+        {
+          "distance": 250,
+          "splitTime": "40.50"
+        },
+        {
+          "distance": 300,
+          "splitTime": "44.48"
+        },
+        {
+          "distance": 350,
+          "splitTime": "44.44"
+        },
+        {
+          "distance": 400,
+          "splitTime": "43.69"
+        },
+        {
+          "distance": 450,
+          "splitTime": "41.32"
+        },
+        {
+          "distance": 500,
+          "splitTime": "39.35"
+        }
+      ],
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "6:38.41"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "X",
+      "name": "Hatch, Holly",
+      "place": 6,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "35.43"
+        },
+        {
+          "distance": 100,
+          "splitTime": "40.77"
+        },
+        {
+          "distance": 150,
+          "splitTime": "43.57"
+        },
+        {
+          "distance": 200,
+          "splitTime": "44.26"
+        },
+        {
+          "distance": 250,
+          "splitTime": "43.88"
+        },
+        {
+          "distance": 300,
+          "splitTime": "45.49"
+        },
+        {
+          "distance": 350,
+          "splitTime": "44.62"
+        },
+        {
+          "distance": 400,
+          "splitTime": "44.75"
+        },
+        {
+          "distance": 450,
+          "splitTime": "44.47"
+        },
+        {
+          "distance": 500,
+          "splitTime": "43.14"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "7:10.38"
+    }
+  ],
+  "team_scores": {
+    "combined": [
+      {
+        "place": 1,
+        "points": 2263.5,
+        "team": "Georgia Tech Swim Club"
+      },
+      {
+        "place": 2,
+        "points": 1004.5,
+        "team": "Auburn University Club Swim"
+      }
+    ],
+    "men": [
+      {
+        "place": 1,
+        "points": 1273.5,
+        "team": "Georgia Tech Swim Club"
+      },
+      {
+        "place": 2,
+        "points": 460.5,
+        "team": "Auburn University Club Swim"
+      }
+    ],
+    "source": "pdf",
+    "women": [
+      {
+        "place": 1,
+        "points": 990.0,
+        "team": "Georgia Tech Swim Club"
+      },
+      {
+        "place": 2,
+        "points": 544.0,
+        "team": "Auburn University Club Swim"
+      }
+    ]
+  }
+}

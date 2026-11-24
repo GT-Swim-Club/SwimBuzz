@@ -1,7 +1,7 @@
 import type { TeamRecord } from "@prisma/client"
 import { formatRecordTime, RECORD_EVENTS, recordSwimmerLabel, type MeetRecord } from "@swimbuzz/shared"
 import { prisma } from "@/lib/prisma"
-import { readRecordSwimmers, recordKey } from "@/lib/records/record-rows"
+import { compareRecordRows, readRecordSwimmers, recordKey } from "@/lib/records/record-rows"
 
 /**
  * GTSC records set at a meet, one per event in records-table order, each with the record it broke.
@@ -25,8 +25,9 @@ export async function loadMeetRecordsWithHolders(
   const keys = [...new Map(setHere.map((r) => [recordKey(r.gender, r.event), r])).values()]
   const rows = await prisma.teamRecord.findMany({
     where: { course: "SCY", dismissed: false, OR: keys.map(({ gender, event }) => ({ gender, event })) },
-    orderBy: { createdAt: "asc" },
   })
+  // Oldest first: each record beat the one before it, so slowest first.
+  rows.sort((a, b) => compareRecordRows(b, a))
   const byKey = new Map<string, TeamRecord[]>()
   for (const row of rows) {
     const key = recordKey(row.gender, row.event)

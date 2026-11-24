@@ -81,7 +81,7 @@ export default function ShareRecordsButton({
     try {
       if (topTimes?.data) {
         const { buildTopTimesPdf } = await import("@/lib/records/top-times-pdf")
-        const doc = buildTopTimesPdf({ data: topTimes.data, asOf: recordsAsOfLabel() })
+        const doc = buildTopTimesPdf({ data: topTimes.data })
         downloadBlob(doc.output("blob"), topTimesExportFilename(topTimes.gender, topTimes.mode))
         return
       }

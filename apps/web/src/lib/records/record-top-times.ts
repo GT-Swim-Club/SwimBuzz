@@ -1,7 +1,6 @@
 import type { Prisma, RecordGender, TeamRecord } from "@prisma/client"
 import { unstable_cache } from "next/cache"
 import {
-  athletePreferredName,
   countsForRecords,
   currentSeason,
   isTopTimesMode,
@@ -19,7 +18,15 @@ import {
 } from "@swimbuzz/shared"
 import { prisma } from "@/lib/prisma"
 import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
-import { readRecordSwimmers, type RecordLinks } from "@/lib/records/record-rows"
+import {
+  holderNamed,
+  isManualRecord,
+  isRecordedRelay,
+  isRecordedSwim,
+  readRecordSwimmers,
+  relayKeyInMeet,
+  type RecordLinks,
+} from "@/lib/records/record-rows"
 import { RECORD_SWIM_WHERE, relayCandidates, swimmerOf, type AthleteName, type Candidate } from "@/lib/records/record-sync"
 import { RecordInputError, recordLinks, requireEvent } from "@/lib/records/records"
 import { TOP_TIMES_CACHE_TAG } from "@/lib/records/top-times-cache"
@@ -41,6 +48,8 @@ type Entry = {
   /** Our relay result behind it ("meetId|team key", as Candidate.relayKey), for opening its detail. */
   relayKey: string | null
   isRecord: boolean
+  /** A record row nothing imported backs (typed in from the records sheet). */
+  manual: boolean
 }
 
 /** Only small columns: names come from the athlete and meet lists, loaded once (keeps egress down). */
@@ -106,6 +115,7 @@ function recordEntry(row: TeamRecord): Entry {
     swimId: row.swimId,
     relayKey: row.relayKey,
     isRecord: true,
+    manual: isManualRecord(row),
   }
 }
 
@@ -123,6 +133,7 @@ function swimEntry(swim: SwimRow): Entry {
     swimId: swim.id,
     relayKey: null,
     isRecord: false,
+    manual: false,
   }
 }
 
@@ -140,20 +151,8 @@ function relayEntry(candidate: Candidate): Entry {
     swimId: null,
     relayKey: candidate.relayKey,
     isRecord: false,
+    manual: false,
   }
-}
-
-function holderNamed(name: string | undefined, athlete: SwimRow["athlete"]): boolean {
-  const typed = name?.trim().toLowerCase()
-  if (!typed) return false
-  return typed === athletePreferredName(athlete).toLowerCase() || typed === `${athlete.firstName} ${athlete.lastName}`.toLowerCase()
-}
-
-/** A record row typed or seeded without its swim's link is that swim when time, year and holder agree. */
-function isRecordedSwim(row: TeamRecord, swim: SwimRow): boolean {
-  if (row.timeMs !== swim.timeMs || row.year !== swim.date.getUTCFullYear()) return false
-  const holder = readRecordSwimmers(row.swimmers)[0]
-  return holder?.athleteId ? holder.athleteId === swim.athleteId : holderNamed(holder?.name, swim.athlete)
 }
 
 /**
@@ -265,9 +264,7 @@ function relayPerformances(
       // A linked record's relay is ours only while that result still exists.
       if (row.relayKey && !candidates.some((c) => c.relayKey === row.relayKey)) entry.relayKey = null
       if (!row.relayKey) {
-        const match = candidates.find(
-          (c) => !used.has(c.relayKey!) && c.timeMs === row.timeMs && c.date.getUTCFullYear() === row.year
-        )
+        const match = candidates.find((c) => !used.has(c.relayKey!) && isRecordedRelay(row, c))
         if (match) {
           used.add(match.relayKey!)
           entry.relayKey = match.relayKey
@@ -309,18 +306,17 @@ function toTopTimes(top: RankedEntry[], links: RecordLinks, season: string): Tea
     date: entry.date?.toISOString() ?? null,
     swimmers: entry.swimmers.map((swimmer) => ({
       ...swimmer,
+      name: (swimmer.athleteId && links.athleteNames.get(swimmer.athleteId)) || swimmer.name,
       athleteSlug: swimmer.athleteId ? (links.athleteSlugs.get(swimmer.athleteId) ?? null) : null,
     })),
     leadoff: entry.leadoff,
     meetName: entry.meetName,
     meetSlug: entry.meetId ? (links.meetSlugs.get(entry.meetId) ?? null) : null,
     swimId: entry.swimId,
-    // Without the meet id prefix: the row already carries the meet.
-    relayKey: entry.relayKey && entry.meetId && entry.relayKey.startsWith(`${entry.meetId}|`)
-      ? entry.relayKey.slice(entry.meetId.length + 1)
-      : null,
+    relayKey: relayKeyInMeet(entry.relayKey, entry.meetId),
     isRecord: entry.isRecord,
     isThisSeason: !!entry.date && seasonFromDate(utcDayKey(entry.date)) === season,
+    manual: entry.manual,
   }))
 }
 
@@ -355,9 +351,15 @@ export async function teamAllTopTimes(gender: unknown, mode: unknown): Promise<T
   const defs = topTimesEventDefs(gender)
   const individualEvents = defs.filter((def) => !def.relay).map((def) => def.event)
   // A few loads in all, whatever the number of events: record rows, athletes, swims, relay results.
-  const [rows, athletes] = await Promise.all([
+  const [rows, athletes, earliestMeet] = await Promise.all([
     prisma.teamRecord.findMany({ where: { course: "SCY", gender: { in: [gender, "X"] } } }),
     loadAthletes(),
+    // The earliest imported meet the top 10s draw from: the export's "Nov 1, 2017 – …" span.
+    prisma.meet.findFirst({
+      where: { course: "SCY", deletedAt: null, swims: { some: RECORD_SWIM_WHERE } },
+      orderBy: { startsAt: "asc" },
+      select: { startsAt: true },
+    }),
   ])
   const [swims, relays] = await Promise.all([
     loadIndividualSwims(gender, individualEvents, athletes),
@@ -386,6 +388,7 @@ export async function teamAllTopTimes(gender: unknown, mode: unknown): Promise<T
       mode: def.relay ? "performances" : shownMode,
       times: toTopTimes(tops[i]!, links, season),
     })),
+    since: earliestMeet?.startsAt.toISOString() ?? null,
   }
 }
 
@@ -395,7 +398,7 @@ export async function teamAllTopTimes(gender: unknown, mode: unknown): Promise<T
  * PDF. A day at most, so "this season" turns over with the season.
  */
 /** Bump when TeamAllTopTimesResponse's shape changes: cached entries outlive deploys. */
-const TOP_TIMES_CACHE_VERSION = "3"
+const TOP_TIMES_CACHE_VERSION = "6"
 
 const cachedAllTopTimes = unstable_cache(
   (gender: "F" | "M", mode: TopTimesMode) => teamAllTopTimes(gender, mode),

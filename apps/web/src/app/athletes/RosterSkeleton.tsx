@@ -40,59 +40,69 @@ export default function RosterSkeleton({ layout }: { layout: ListLayout }) {
         </div>
       </div>
 
-      <div className="relative flex items-start gap-1 min-[1040px]:block">
-        <div className="min-w-0 flex-1">
-          {layout === "list" ? (
-            <div className="overflow-hidden rounded-xl border border-border bg-background">
-              <div className="grid grid-cols-[minmax(0,1fr)] gap-4 px-4 py-3.5 sm:px-6 md:grid-cols-[minmax(0,2.5fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.6fr)]">
-                <Skeleton className="h-2.5 w-16" />
-                <Skeleton className="hidden h-2.5 w-14 md:block" />
-                <Skeleton className="hidden h-2.5 w-10 md:block" />
-                <Skeleton className="hidden h-2.5 w-8 md:block" />
+      <RosterResultsSkeleton layout={layout} />
+    </>
+  )
+}
+
+/**
+ * RosterView's results in `layout` — the list or gallery with the A–Z rail beside it. Also shown
+ * under the live toolbar while another season's roster loads.
+ */
+export function RosterResultsSkeleton({ layout }: { layout: ListLayout }) {
+  return (
+    <div className="relative flex items-start gap-1 min-[1040px]:block">
+      <div className="min-w-0 flex-1">
+        {layout === "list" ? (
+          <div className="overflow-hidden rounded-xl border border-border bg-background">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 px-4 py-3.5 sm:px-6 md:grid-cols-[minmax(0,2.5fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.6fr)]">
+              <Skeleton className="h-2.5 w-16" />
+              <Skeleton className="hidden h-2.5 w-14 md:block" />
+              <Skeleton className="hidden h-2.5 w-10 md:block" />
+              <Skeleton className="hidden h-2.5 w-8 md:block" />
+            </div>
+            {NAME_WIDTHS.map((w, i) => (
+              <div
+                key={i}
+                className="grid grid-cols-[minmax(0,1fr)] items-center gap-4 border-t border-border px-4 py-2.5 sm:px-6 md:grid-cols-[minmax(0,2.5fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.6fr)]"
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
+                  <div className="flex min-w-0 flex-col gap-1.5">
+                    <Skeleton className={`h-4 max-w-full ${w}`} />
+                    <Skeleton className="h-3 w-28 md:hidden" />
+                  </div>
+                </div>
+                <Skeleton className="hidden h-3.5 w-12 md:block" />
+                <Skeleton className="hidden h-3.5 w-16 md:block" />
+                <Skeleton className="hidden h-3.5 w-6 md:block" />
               </div>
-              {NAME_WIDTHS.map((w, i) => (
-                <div
-                  key={i}
-                  className="grid grid-cols-[minmax(0,1fr)] items-center gap-4 border-t border-border px-4 py-2.5 sm:px-6 md:grid-cols-[minmax(0,2.5fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.6fr)]"
-                >
-                  <div className="flex min-w-0 items-center gap-3">
-                    <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
-                    <div className="flex min-w-0 flex-col gap-1.5">
-                      <Skeleton className={`h-4 max-w-full ${w}`} />
-                      <Skeleton className="h-3 w-28 md:hidden" />
-                    </div>
-                  </div>
-                  <Skeleton className="hidden h-3.5 w-12 md:block" />
-                  <Skeleton className="hidden h-3.5 w-16 md:block" />
-                  <Skeleton className="hidden h-3.5 w-6 md:block" />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(max(240px,calc((100%_-_2.25rem)/4)),1fr))] gap-3">
-              {NAME_WIDTHS.map((w, i) => (
-                <div key={i} className="@container rounded-xl border border-border bg-background shadow-sm">
-                  <div className={GALLERY_CARD_BODY}>
-                    <Skeleton className={`shrink-0 rounded-full ${GALLERY_CARD_AVATAR}`} />
-                    <div className="flex min-w-0 flex-1 flex-col gap-1.5 xl:@[290px]:gap-2">
-                      <Skeleton className={`h-4 max-w-full xl:@[290px]:h-5 ${w}`} />
-                      <Skeleton className="h-3 w-28 max-w-full xl:@[290px]:h-3.5 xl:@[290px]:w-32" />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        {/* Same slot as RosterView's JumpRail: beside the list, just outside it in the right margin when wide. */}
-        <div className="shrink-0 self-stretch min-[1040px]:absolute min-[1040px]:inset-y-0 min-[1040px]:left-full min-[1040px]:ml-3">
-          <div className="flex flex-col items-center gap-[7px] py-[5px]">
-            {Array.from({ length: 26 }, (_, i) => (
-              <Skeleton key={i} className="h-2.5 w-2.5 rounded-sm" />
             ))}
           </div>
+        ) : (
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(max(240px,calc((100%_-_2.25rem)/4)),1fr))] gap-3">
+            {NAME_WIDTHS.map((w, i) => (
+              <div key={i} className="@container rounded-xl border border-border bg-background shadow-sm">
+                <div className={GALLERY_CARD_BODY}>
+                  <Skeleton className={`shrink-0 rounded-full ${GALLERY_CARD_AVATAR}`} />
+                  <div className="flex min-w-0 flex-1 flex-col gap-1.5 xl:@[290px]:gap-2">
+                    <Skeleton className={`h-4 max-w-full xl:@[290px]:h-5 ${w}`} />
+                    <Skeleton className="h-3 w-28 max-w-full xl:@[290px]:h-3.5 xl:@[290px]:w-32" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      {/* Same slot as RosterView's JumpRail: beside the list, just outside it in the right margin when wide. */}
+      <div className="shrink-0 self-stretch min-[1040px]:absolute min-[1040px]:inset-y-0 min-[1040px]:left-full min-[1040px]:ml-3">
+        <div className="flex flex-col items-center gap-[7px] py-[5px]">
+          {Array.from({ length: 26 }, (_, i) => (
+            <Skeleton key={i} className="h-2.5 w-2.5 rounded-sm" />
+          ))}
         </div>
       </div>
-    </>
+    </div>
   )
 }

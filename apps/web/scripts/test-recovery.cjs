@@ -25,7 +25,9 @@ function loadTS(relative, mocks) {
   return mod.exports
 }
 async function main() {
-  fs.symlinkSync(path.join(web, "node_modules"), path.join(tmp, "node_modules"), "dir")
+  // The node_modules that holds @prisma/client (hoisted to the repo root by pnpm), for the generated client.
+  const prismaModules = path.resolve(path.dirname(require.resolve("@prisma/client/package.json", { paths: [web] })), "../..")
+  fs.symlinkSync(prismaModules, path.join(tmp, "node_modules"), "dir")
   let schema = fs.readFileSync(path.join(web, "prisma/schema.prisma"), "utf8")
   const enums = [...schema.matchAll(/enum (\w+) \{[^}]+\}/g)].map(m => m[1])
   schema = schema.replace(/enum \w+ \{[^}]+\}/g, "")
@@ -50,7 +52,9 @@ async function main() {
   const prisma = installSoftDeletePolicy(new PrismaClient())
   let storageFailure = false
   let storageAttempts = 0
+  const slug = loadTS("src/lib/slug.ts", { "@/lib/prisma": { prisma }, "../../soft-delete-policy": { withDeleted }, "@swimbuzz/shared": { zonedDayKey: () => "reserved-practice" } })
   const service = loadTS("src/lib/recovery/recovery.ts", {
+    "@/lib/slug": slug,
     "@/lib/prisma": { prisma },
     "../../../soft-delete-policy": { withDeleted },
     "@/lib/meet/meet-storage": { deleteAllMeetFiles: async (_meet, options) => {
@@ -79,7 +83,6 @@ async function main() {
     await assert.rejects(prisma.practiceComment.create({ data: { practiceId: practice.id, authorName: "Coach", body: "Stale comment" } }))
     const snapshot = await service.listRecentlyDeleted()
     assert.equal(snapshot.items[0].canRestore, true)
-    const slug = loadTS("src/lib/slug.ts", { "@/lib/prisma": { prisma }, "../../soft-delete-policy": { withDeleted }, "@swimbuzz/shared": { zonedDayKey: () => "reserved-practice" } })
     assert.equal(await slug.uniquePracticeSlug(now, "UTC"), "reserved-practice-2")
     // A bypass in one asynchronous operation must never leak to a normal read.
     const [hidden, raw] = await Promise.all([prisma.practice.count(), withDeleted(() => prisma.practice.count())])
@@ -117,8 +120,14 @@ async function main() {
     assert.equal(nested._count.swims, 1)
     assert.equal((await prisma.meetRoom.updateMany({ where: { formId: both.roomForm.id }, data: { label: "No" } })).count, 0)
     await assert.rejects(prisma.meetSignupEntry.create({ data: { formId: both.signupForm.id, athleteId: athlete.id } }))
-    assert.equal(await slug.uniqueMeetSlug("hide-swims"), "hide-swims-2")
+    // A trashed meet gives up its slug: a new meet can take it, and a restore picks a fresh one.
+    assert.equal((await withDeleted(() => prisma.meet.findUnique({ where: { id: both.id } }))).slug, null)
+    assert.equal(await slug.uniqueMeetSlug("hide-swims"), "hide-swims")
+    const taker = await prisma.meet.create({ data: { name: "hide-swims", slug: await slug.uniqueMeetSlug("hide-swims", { startsAt: now }), startsAt: now, season: "2026-2027" } })
     assert.equal(await service.restoreDeleted("meet", both.id), true)
+    const restoredSlug = (await prisma.meet.findUnique({ where: { id: both.id } })).slug
+    assert.ok(restoredSlug && restoredSlug !== taker.slug, `restored meet got a fresh slug (${restoredSlug})`)
+    await prisma.meet.delete({ where: { id: taker.id } })
     assert.equal(await prisma.swim.count(), 2)
     assert.equal(await prisma.meetSignupEntry.count(), 1)
     assert.equal(await prisma.meetRoomAssignment.count(), 1)
@@ -223,7 +232,7 @@ async function main() {
       assert.equal((await routes.DELETE(request({ kind: "invalid", id: "x" }))).status, 400)
       assert.equal((await routes.DELETE(request({ kind: "meet", id: "missing" }))).status, 409)
     }
-    console.log("Recovery checks passed: visibility, nested reads/counts, stale writes, slug reservation, restore, permanent delete, expiry, purge retries, swim preservation, private practices (visibility, cap, hard delete, owner cascade), and API permissions.")
+    console.log("Recovery checks passed: visibility, nested reads/counts, stale writes, slug reservation (practices) and release (meets), restore, permanent delete, expiry, purge retries, swim preservation, private practices (visibility, cap, hard delete, owner cascade), and API permissions.")
   } finally { await prisma.$disconnect() }
 }
 main().catch(error => { console.error(error.stdout?.toString() || "", error.stderr?.toString() || error); process.exitCode = 1 }).finally(() => fs.rmSync(tmp, { recursive: true, force: true }))

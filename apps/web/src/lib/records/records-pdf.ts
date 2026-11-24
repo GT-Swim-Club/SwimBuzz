@@ -1,5 +1,7 @@
 import { jsPDF } from "jspdf"
 import {
+  MANUAL_RECORD_FOOTNOTE,
+  MANUAL_RECORD_MARK,
   RECORDS_EXPORT,
   recordSwimmerName,
   recordTimeLabel,
@@ -208,7 +210,15 @@ function drawRecordsPdf(input: RecordsPdfInput, orientation: "portrait" | "lands
       }
       setType(style, m.textSize, color)
       if (column.key === "year") doc.text(String(record.year), center, baseline, { align: "center" })
-      else if (column.key === "time") doc.text(fit(recordTimeLabel(record), room), center, baseline, { align: "center" })
+      else if (column.key === "time") {
+        const time = fit(recordTimeLabel(record), room)
+        doc.text(time, center, baseline, { align: "center" })
+        if (record.manual) {
+          // The gold "*" hangs off the time's left edge, like on the page.
+          doc.setTextColor(...ACCENT)
+          doc.text(MANUAL_RECORD_MARK, center - doc.getTextWidth(time) / 2 - px(1), baseline, { align: "right" })
+        }
+      }
       else {
         const names = record.swimmers.map((swimmer) => recordSwimmerName(swimmer))
         const blockTop = top + (rowHeight - names.length * m.lineHeight) / 2
@@ -219,6 +229,8 @@ function drawRecordsPdf(input: RecordsPdfInput, orientation: "portrait" | "lands
       }
     }
   }
+
+  const anyManual = rows.some((row) => Object.values(row.records).some((record) => record?.manual))
 
   let y = labelTop + m.labelHeight
   rows.forEach((row, index) => {
@@ -233,9 +245,12 @@ function drawRecordsPdf(input: RecordsPdfInput, orientation: "portrait" | "lands
     const record = (gender: RecordGender) => row.records[gender]
     drawSide(record(mixed ? "X" : "F"), womenColumns, y, rowHeight)
     if (mixed) {
-      // The empty cell holds the date, at its bottom right.
+      // The empty cell holds the date, at its bottom right, and any "*" footnote at its top left.
       setType("normal", m.asOfSize, INK_SECONDARY)
       doc.text(input.asOf, menX + sideWidth - m.asOfInset, y + rowHeight - m.asOfInset, { align: "right" })
+      if (anyManual) {
+        doc.text(fit(MANUAL_RECORD_FOOTNOTE, sideWidth - m.asOfInset * 2), menX + m.asOfInset, y + m.asOfInset + m.asOfSize * 0.75)
+      }
     } else {
       drawSide(record("M"), menColumns, y, rowHeight)
     }

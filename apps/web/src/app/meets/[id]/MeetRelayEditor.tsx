@@ -24,7 +24,8 @@ import { DetailEventBadge } from "./SwimDetailModal"
 
 const RELAY_EVENTS = RELAY_SWIM_EVENTS
 
-const RELAY_LETTERS = ["A", "B", "C", "D"]
+// Any letter, so an imported E, F, … relay can be edited (the relay builder still makes A–D).
+const RELAY_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")
 
 const subscribeToNothing = () => () => {}
 

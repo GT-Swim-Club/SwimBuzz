@@ -767,6 +767,8 @@ export function createApiClient(options: ApiClientOptions = {}) {
         deleted?: number
         parsed: number
         errors: Array<{ row: number; message: string }>
+        /** New athletes skipped for lacking a @gatech.edu email ("Last, First"). */
+        missingEmail?: string[]
         tab?: string
       }>("/api/roster/import/sheet", {
         method: "POST",

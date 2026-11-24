@@ -1,12 +1,12 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { useState, useTransition } from "react"
+import { useMemo, useState, useTransition } from "react"
 import { parseTime } from "@/lib/utils"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/ui/SegmentedToggle"
 import { DatePicker } from "@/components/ui/CustomDateTimePicker"
-import { normalizeEventName } from "@/lib/swim/swim-parse"
+import AthletePairingSelect, { rosterOptionsFromLastFirst } from "@/components/meet/AthletePairingSelect"
 import { addMeetSwim } from "./meet-swims.actions"
 import { upsertRelayEntry } from "./meet-entries.actions"
 import { INDIVIDUAL_SWIM_EVENTS, RELAY_SWIM_EVENTS } from "@swimbuzz/shared"
@@ -16,6 +16,31 @@ const INDIVIDUAL_EVENTS = INDIVIDUAL_SWIM_EVENTS
 const RELAY_EVENTS = RELAY_SWIM_EVENTS
 
 type AthleteOption = { id: string; name: string; gender?: "M" | "F" }
+
+type Round = "" | "P" | "F"
+
+/** One box per 50 for races of 100 and up ("200 Free" → 4); none for a 50. */
+function splitCount(event: string): number {
+  const distance = parseInt(event, 10)
+  return Number.isFinite(distance) && distance >= 100 ? Math.floor(distance / 50) : 0
+}
+
+function RoundSelect({ value, onChange }: { value: Round; onChange: (round: Round) => void }) {
+  return (
+    <div className="mt-3">
+      <label className="block text-xs font-medium text-foreground-secondary mb-1">Round</label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value as Round)}
+        className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
+      >
+        <option value="">Timed final</option>
+        <option value="P">Prelims</option>
+        <option value="F">Finals</option>
+      </select>
+    </div>
+  )
+}
 
 export default function AddResultButton({
   meetId,
@@ -44,13 +69,18 @@ export default function AddResultButton({
     time: "",
     course: defaultCourse,
     date: defaultDate,
+    round: "" as Round,
+    splits: [] as string[],
     relayForm: {
       event: RELAY_EVENTS[0],
       legs: ["", "", "", ""] as [string, string, string, string],
-      gender: "F" as "F" | "M",
+      splits: ["", "", "", ""] as [string, string, string, string],
+      round: "" as Round,
+      gender: "F" as "F" | "M" | "X",
     }
   })
   const loading = isPending
+  const roster = useMemo(() => rosterOptionsFromLastFirst(athletes), [athletes])
 
   function openModal() {
     setForm({
@@ -59,9 +89,13 @@ export default function AddResultButton({
       time: "",
       course: defaultCourse,
       date: defaultDate,
+      round: "",
+      splits: [],
       relayForm: {
         event: RELAY_EVENTS[0],
         legs: ["", "", "", ""],
+        splits: ["", "", "", ""],
+        round: "",
         gender: "F",
       }
     })
@@ -74,6 +108,10 @@ export default function AddResultButton({
     setError(null)
 
     if (type === "individual") {
+      if (!form.athleteId) {
+        setError("Pick a swimmer")
+        return
+      }
       const timeMs = Math.round(parseTime(form.time))
       if (!Number.isFinite(timeMs) || timeMs <= 0) {
         setError("Invalid time format")
@@ -90,6 +128,8 @@ export default function AddResultButton({
             meet: meetName,
             meetId,
             timeMs,
+            round: form.round,
+            splits: form.splits.slice(0, splitCount(form.event)),
           })
           setOpen(false)
         } catch (err) {
@@ -97,7 +137,7 @@ export default function AddResultButton({
         }
       })
     } else {
-      if (new Set(form.relayForm.legs).size !== 4) {
+      if (form.relayForm.legs.some((id) => !id) || new Set(form.relayForm.legs).size !== 4) {
         setError("Pick four different swimmers")
         return
       }
@@ -107,11 +147,12 @@ export default function AddResultButton({
           const saved = await upsertRelayEntry(meetId, {
             event: form.relayForm.event,
             relayLetter: "A",
-            relayRound: "",
+            relayRound: form.relayForm.round,
             gender: form.relayForm.gender,
             legs: form.relayForm.legs.map((athleteId, i) => ({
               leg: i + 1,
               athleteId,
+              splitTime: form.relayForm.splits[i].trim() || undefined,
             })),
             resultTime: form.time,
           })
@@ -184,10 +225,13 @@ export default function AddResultButton({
          <>
             <div>
               <label className="block text-xs font-medium text-foreground-secondary mb-1">Athlete <span className="text-error">*</span></label>
-              <select required value={form.athleteId} onChange={(e) => setForm((f) => ({ ...f, athleteId: e.target.value }))} className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background">
-                <option value="">Select swimmer...</option>
-                {athletes.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
-              </select>
+              <AthletePairingSelect
+                value={form.athleteId}
+                roster={roster}
+                onChange={(athleteId) => setForm((f) => ({ ...f, athleteId }))}
+                label="Athlete"
+                placeholder="Select swimmer…"
+              />
             </div>
             <div className="grid grid-cols-2 gap-3 mt-3">
               <div>
@@ -219,6 +263,31 @@ export default function AddResultButton({
                 />
               </div>
             </div>
+            <RoundSelect value={form.round} onChange={(round) => setForm((f) => ({ ...f, round }))} />
+            {splitCount(form.event) > 0 ? (
+              <div className="mt-3">
+                <label className="block text-xs font-medium text-foreground-secondary mb-1">Splits</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {Array.from({ length: splitCount(form.event) }, (_, i) => (
+                    <div key={i}>
+                      <span className="mb-0.5 block text-[11px] tabular-nums text-foreground-tertiary">{(i + 1) * 50}</span>
+                      <input
+                        aria-label={`${(i + 1) * 50} split`}
+                        placeholder="26.10"
+                        value={form.splits[i] ?? ""}
+                        onChange={(e) => {
+                          const splits = [...form.splits]
+                          splits[i] = e.target.value
+                          setForm((f) => ({ ...f, splits: Array.from(splits, (v) => v ?? "") }))
+                        }}
+                        className="w-full rounded-lg border border-border px-2 py-1.5 text-sm font-mono bg-background"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-1 text-xs text-foreground-tertiary">Each 50&apos;s time, or the running time at each mark.</p>
+              </div>
+            ) : null}
          </>
         ) : (
           <>
@@ -231,18 +300,44 @@ export default function AddResultButton({
               </div>
               <div>
                 <label className="block text-xs font-medium text-foreground-secondary mb-1">Gender</label>
-                <select value={form.relayForm.gender} onChange={(e) => setForm(f => ({ ...f, relayForm: {...f.relayForm, gender: e.target.value as "F" | "M"} }))} className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background">
-                  <option value="F">Women's</option><option value="M">Men's</option>
+                <select value={form.relayForm.gender} onChange={(e) => setForm(f => ({ ...f, relayForm: {...f.relayForm, gender: e.target.value as "F" | "M" | "X"} }))} className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background">
+                  <option value="F">Women&apos;s</option><option value="M">Men&apos;s</option><option value="X">Mixed</option>
                 </select>
               </div>
             </div>
+            <RoundSelect
+              value={form.relayForm.round}
+              onChange={(round) => setForm((f) => ({ ...f, relayForm: { ...f.relayForm, round } }))}
+            />
             <div className="space-y-2 mt-3">
               <label className="block text-xs font-medium text-foreground-secondary">Athletes <span className="text-error">*</span></label>
               {[0, 1, 2, 3].map(i => (
-                <select required key={i} value={form.relayForm.legs[i]} onChange={(e) => { const legs = [...form.relayForm.legs] as [string, string, string, string]; legs[i] = e.target.value; setForm(f => ({ ...f, relayForm: {...f.relayForm, legs} })) }} className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background">
-                  <option value="">Select swimmer...</option>
-                  {athletes.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-                </select>
+                <div key={i} className="flex items-center gap-2">
+                <div className="min-w-0 flex-1">
+                <AthletePairingSelect
+                  value={form.relayForm.legs[i]}
+                  roster={roster}
+                  onChange={(athleteId) => {
+                    const legs = [...form.relayForm.legs] as [string, string, string, string]
+                    legs[i] = athleteId
+                    setForm((f) => ({ ...f, relayForm: { ...f.relayForm, legs } }))
+                  }}
+                  label={`Leg ${i + 1} swimmer`}
+                  placeholder="Select swimmer…"
+                />
+                </div>
+                <input
+                  aria-label={`Leg ${i + 1} split`}
+                  placeholder="Split"
+                  value={form.relayForm.splits[i]}
+                  onChange={(e) => {
+                    const splits = [...form.relayForm.splits] as [string, string, string, string]
+                    splits[i] = e.target.value
+                    setForm((f) => ({ ...f, relayForm: { ...f.relayForm, splits } }))
+                  }}
+                  className="w-24 shrink-0 rounded-lg border border-border px-3 py-2 text-sm font-mono bg-background"
+                />
+                </div>
               ))}
             </div>
             <div className="mt-3">

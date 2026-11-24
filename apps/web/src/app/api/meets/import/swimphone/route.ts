@@ -14,11 +14,13 @@ import {
 import { prisma } from "@/lib/prisma"
 import { parseSeason } from "@/lib/season"
 import { coerceParsedRelayResults } from "@/lib/meet/relay-results"
-import { ScraperJobStatus, ScraperJobType } from "@prisma/client"
+import { isEventOrder } from "@/lib/meet/meet-event-order"
+import { Prisma, ScraperJobStatus, ScraperJobType } from "@prisma/client"
 import { notifyMeetRosterOfInfoDrops } from "@/lib/meet/meet-roster-notify"
 import { notifyNewNationalCuts } from "@/lib/notifications/national-cut-notify"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
+import { addPairedAthletesToSeason } from "@/lib/athlete/paired-athlete-seasons"
 
 export const runtime = "nodejs"
 export const maxDuration = 300
@@ -44,6 +46,8 @@ type ScrapedMeet = {
   course?: string
   results?: ParsedResult[]
   relay_results?: unknown[]
+  /** SwimPhone's order of events (event numbers by gender), shaped like a packet's eventOrder. */
+  event_order?: unknown
   captcha_limited?: boolean
   incomplete_relays?: string[]
 }
@@ -189,6 +193,8 @@ export async function applySwimphoneImportJob(
   }
 
   const relayResults = coerceParsedRelayResults(scraped.relay_results)
+  // Athletes paired from another season join this one before the import reads its roster.
+  await addPairedAthletesToSeason(pairing ? pairing.nameMappings : ctx.nameMappings, ctx.season)
   // SwimPhone results carry no teams, so the meet's per-team split (resultTeams) stays as it was.
   const { athleteTeams, ...summary } = await importMeetResults({
     season: ctx.season,
@@ -218,7 +224,14 @@ export async function applySwimphoneImportJob(
   if (meet?.id) {
     await prisma.meet.update({
       where: { id: meet.id },
-      data: { swimphoneUrl: ctx.meetUrl },
+      data: {
+        swimphoneUrl: ctx.meetUrl,
+        // SwimPhone's event numbers fill in the meet's order of events only when nothing else
+        // (a meet packet, a results PDF) has given it one yet.
+        ...(!isEventOrder(meet.eventOrder) && isEventOrder(scraped.event_order)
+          ? { eventOrder: scraped.event_order as unknown as Prisma.InputJsonValue }
+          : {}),
+      },
     })
     if (summary.imported > 0) {
       notifyMeetRosterOfInfoDrops({

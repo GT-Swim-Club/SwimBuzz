@@ -33,6 +33,7 @@ type ImportResult = {
   leadoffsImported?: number
   nameConfirmations?: NameConfirmation[]
   rosterForPairing?: RosterPairingOption[]
+  pairingSeason?: string
   cachedParse?: unknown
   /** Finished SwimPhone scrape; pairing re-applies its results instead of scraping again. */
   scraperJobId?: string
@@ -165,6 +166,7 @@ export function useResultsImport({ meetId, season }: { meetId?: string; season: 
       requestPairing({
         confirmations,
         roster: data.rosterForPairing ?? [],
+        season: data.pairingSeason ?? season,
         description:
           "These names matched your team code but not the roster. Pair them to a roster athlete to import their results.",
         occurrenceNoun: ["result", "results"],

@@ -1,0 +1,2420 @@
+{
+  "course": "SCY",
+  "detectedSheetType": "results",
+  "event_order": {
+    "sessions": [
+      {
+        "label": "Order of Events",
+        "rows": [
+          {
+            "event": "50 Back",
+            "men": 2,
+            "women": 1
+          },
+          {
+            "event": "100 Free",
+            "men": 4,
+            "women": 3
+          },
+          {
+            "event": "50 Breast",
+            "men": 6,
+            "women": 5
+          },
+          {
+            "event": "100 Fly",
+            "men": 8,
+            "women": 7
+          },
+          {
+            "event": "100 Back",
+            "men": 10,
+            "women": 9
+          },
+          {
+            "event": "50 Free",
+            "men": 12,
+            "women": 11
+          },
+          {
+            "event": "100 Breast",
+            "men": 14,
+            "women": 13
+          },
+          {
+            "event": "50 Fly",
+            "men": 16,
+            "women": 15
+          },
+          {
+            "event": "100 IM",
+            "men": 18,
+            "women": 17
+          }
+        ]
+      }
+    ]
+  },
+  "meet_date": "2017-09-29",
+  "meet_name": "AuburnVSGeorgiaTech2017",
+  "relay_results": [],
+  "results": [
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Rice, Genevieve",
+      "place": 1,
+      "points": 9.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "29.96"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Laffey, Makenna",
+      "place": 2,
+      "points": 7.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "30.34"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Herron, Tori",
+      "place": 3,
+      "points": 6.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "32.09"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Gerwe, Janae",
+      "place": 4,
+      "points": 5.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "33.21"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Lucky, Shannon",
+      "place": 5,
+      "points": 4.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "33.53"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Thaeler, Chloe",
+      "place": 5,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "33.53"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Almy, Taylor",
+      "place": 7,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "34.39"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Strebel, Leila",
+      "place": 8,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "35.97"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Mallett, Katherine",
+      "place": 9,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "40.93"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Johnson, Mark",
+      "place": 1,
+      "points": 9.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "26.45"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Turrall, Teddy",
+      "place": 2,
+      "points": 7.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "28.57"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Gant, Sean",
+      "place": 3,
+      "points": 6.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "28.59"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Zhou, Maxwell",
+      "place": 4,
+      "points": 5.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "28.89"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Grant, Jake",
+      "place": 5,
+      "points": 4.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "28.93"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Barr, James",
+      "place": 6,
+      "points": 3.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "29.09"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Williams, Matt",
+      "place": 7,
+      "points": 2.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "29.76"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Holtslander, Thomas",
+      "place": 8,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "30.02"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Vallamattam, Ashok",
+      "place": 9,
+      "points": 1.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "30.52"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Carvalhedo, Rodrigo",
+      "place": 10,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "31.15"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Phillips, Connor",
+      "place": 11,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "32.01"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Nohl, Adam",
+      "place": 12,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "32.13"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "McManus, Sam",
+      "place": 13,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "32.94"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Prygoski, David",
+      "place": 14,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "38.39"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Rice, Genevieve",
+      "place": 1,
+      "points": 9.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "56.91"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Knapp, Lindsay",
+      "place": 2,
+      "points": 7.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "57.01"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Nastasi, Ally",
+      "place": 3,
+      "points": 6.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "58.52"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Boland, Casey",
+      "place": 4,
+      "points": 5.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:00.52"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Garguilo, Emily",
+      "place": 5,
+      "points": 4.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:00.53"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Sibilia, Maddie",
+      "place": 6,
+      "points": 3.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:02.10"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Keller, Amelia",
+      "place": 7,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:02.33"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "McDaniel, Riley",
+      "place": 8,
+      "points": 2.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:02.90"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Williams, Margaret",
+      "place": 9,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:03.43"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Stokes, Kelly",
+      "place": 10,
+      "points": 1.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:04.83"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Ortega, Claudia",
+      "place": 11,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:04.87"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Foster, Darby",
+      "place": 12,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:05.13"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Blair, Holly",
+      "place": 13,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:07.97"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Strebel, Leila",
+      "place": 14,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:08.30"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Freeman, Grace",
+      "place": 15,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:08.87"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Strickland, Grace",
+      "place": 16,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:12.40"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Solomon, Sarah",
+      "place": 17,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:30.45"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Pinon, Julien",
+      "place": 1,
+      "points": 9.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "48.28"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Quillen, Michael",
+      "place": 2,
+      "points": 7.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "48.60"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Zacarias, Mathias",
+      "place": 3,
+      "points": 6.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "49.06"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Kurtz, Michael",
+      "place": 4,
+      "points": 5.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "49.72"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Lrbedev, Peter",
+      "place": 5,
+      "points": 4.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "50.07"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Turrall, Teddy",
+      "place": 6,
+      "points": 3.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "50.25"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Fregosi, Carson",
+      "place": 7,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "51.00"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Grant, Jake",
+      "place": 8,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "52.87"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Xiao, Michael",
+      "place": 9,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "53.21"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Paradis, Bennett",
+      "place": 10,
+      "points": 2.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "53.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Jones, Jacob",
+      "place": 11,
+      "points": 1.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "53.77"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Sturgill, John",
+      "place": 12,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "54.38"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Williams, Matt",
+      "place": 13,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "55.46"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Rhoda, Jack",
+      "place": 14,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "56.15"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Glowniak, Brian",
+      "place": 15,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "56.19"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Deshmukh, Atharva",
+      "place": 16,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "56.21"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Nohl, Adam",
+      "place": 17,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "56.81"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Schumacher, Jason",
+      "place": 18,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "56.82"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Barr, James",
+      "place": 19,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "58.77"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Sayedzada, Sultan",
+      "place": 20,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "59.65"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "McManus, Sam",
+      "place": 21,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:00.01"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Carvalhedo, Rodrigo",
+      "place": 22,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:01.00"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Mastando, Nick",
+      "place": 23,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:01.71"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Wilson, Michaela",
+      "place": 1,
+      "points": 9.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "33.68"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Fassett, Olivia",
+      "place": 2,
+      "points": 7.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "33.85"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Cuccinelli, Reilly",
+      "place": 3,
+      "points": 6.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "36.58"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Spinosa, Olivia",
+      "place": 4,
+      "points": 5.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "36.82"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Higby, Leigh",
+      "place": 5,
+      "points": 4.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "36.94"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Lucky, Shannon",
+      "place": 6,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "37.14"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Sanders, Isabella",
+      "place": 7,
+      "points": 3.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "38.20"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Keller, Amelia",
+      "place": 8,
+      "points": 2.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "38.63"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "LaMontagne, Sarah",
+      "place": 9,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "39.07"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Strickland, Grace",
+      "place": 10,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "46.45"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Ellwanger, Robbie",
+      "place": 1,
+      "points": 9.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "28.27"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Kalontarov, Ziv",
+      "place": 2,
+      "points": 7.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "28.46"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Sterns, Andrew",
+      "place": 3,
+      "points": 6.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "28.51"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Pease, Nathan",
+      "place": 4,
+      "points": 5.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "29.47"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Wong, Justin",
+      "place": 5,
+      "points": 4.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "29.83"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Robertson, Stephen",
+      "place": 6,
+      "points": 3.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "30.78"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Zhou, Maxwell",
+      "place": 7,
+      "points": 2.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "30.94"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Sykora, Connor",
+      "place": 8,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "30.96"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Zhang, Daniel",
+      "place": 9,
+      "points": 1.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "31.21"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Ragoowansi, Evan",
+      "place": 10,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "31.64"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Howard, Collin",
+      "place": 11,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "31.88"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Deshmukh, Atharva",
+      "place": 12,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "32.71"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Lehrer, Jarrad",
+      "place": 13,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "32.89"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Williams, Matt",
+      "place": 14,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "34.33"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Schumacher, Jason",
+      "place": 15,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "34.84"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Mavrakos, Alex",
+      "place": 16,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "36.15"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Glowniak, Brian",
+      "place": 17,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "37.50"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Nastasi, Ally",
+      "place": 1,
+      "points": 9.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:04.14"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Fassett, Olivia",
+      "place": 2,
+      "points": 7.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:05.72"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Herron, Tori",
+      "place": 3,
+      "points": 6.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:05.93"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Blair, Holly",
+      "place": 4,
+      "points": 5.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:14.89"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Johnson, Mark",
+      "place": 1,
+      "points": 9.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "54.47"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Pinon, Julien",
+      "place": 2,
+      "points": 7.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "54.63"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Thrift, Josh",
+      "place": 3,
+      "points": 6.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "55.83"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "He, Byron",
+      "place": 4,
+      "points": 5.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:02.57"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Fregosi, Carson",
+      "place": 5,
+      "points": 4.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:03.26"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Morris, Evan",
+      "place": 6,
+      "points": 3.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:04.02"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Xiao, Michael",
+      "place": 7,
+      "points": 2.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:07.94"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Laffey, Makenna",
+      "place": 1,
+      "points": 9.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:04.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Sibilia, Maddie",
+      "place": 2,
+      "points": 7.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:05.02"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Gerwe, Janae",
+      "place": 3,
+      "points": 6.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:12.81"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Thaeler, Chloe",
+      "place": 4,
+      "points": 5.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:13.46"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Blair, Holly",
+      "place": 5,
+      "points": 4.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:19.72"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Mallett, Katherine",
+      "place": 6,
+      "points": 3.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:29.46"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Lrbedev, Peter",
+      "place": 1,
+      "points": 9.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "58.83"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Johnson, Mark",
+      "place": 2,
+      "points": 7.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:01.34"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Zacarias, Mathias",
+      "place": 3,
+      "points": 6.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:01.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Barr, James",
+      "place": 4,
+      "points": 5.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:07.39"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Carvalhedo, Rodrigo",
+      "place": 5,
+      "points": 4.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:09.33"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Phillips, Connor",
+      "place": 6,
+      "points": 3.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:09.94"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Rice, Genevieve",
+      "place": 1,
+      "points": 9.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "26.20"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Knapp, Lindsay",
+      "place": 2,
+      "points": 7.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "26.51"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Falejczyk, Erin",
+      "place": 3,
+      "points": 6.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "27.32"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Boland, Casey",
+      "place": 4,
+      "points": 5.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "27.46"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Sanders, Isabella",
+      "place": 5,
+      "points": 4.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "28.63"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Keller, Amelia",
+      "place": 6,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "28.68"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Cuccinelli, Reilly",
+      "place": 7,
+      "points": 3.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "28.75"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Thaeler, Chloe",
+      "place": 8,
+      "points": 2.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "28.97"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Spinosa, Olivia",
+      "place": 9,
+      "points": 1.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "29.83"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Stokes, Kelly",
+      "place": 10,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "30.20"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Foster, Darby",
+      "place": 11,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "30.41"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Ortega, Claudia",
+      "place": 12,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "30.46"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Freeman, Grace",
+      "place": 13,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "30.51"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Strebel, Leila",
+      "place": 14,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "31.03"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Gerwe, Janae",
+      "place": 15,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "32.12"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Strickland, Grace",
+      "place": 16,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "33.40"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Zwiercan, Cate",
+      "place": 17,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "35.22"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Stanley, Mary",
+      "place": 18,
+      "tags": "",
+      "team": "Grace Auburn Club Swim Team",
+      "time": "36.09"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Mallett, Katherine",
+      "place": 19,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "39.37"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Solomon, Sarah",
+      "place": 20,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "40.50"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Kalontarov, Ziv",
+      "place": 1,
+      "points": 9.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "21.96"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Kurtz, Michael",
+      "place": 2,
+      "points": 7.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "22.69"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Turrall, Teddy",
+      "place": 3,
+      "points": 6.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "22.70"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Zhang, Daniel",
+      "place": 4,
+      "points": 5.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "23.37"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Paradis, Bennett",
+      "place": 5,
+      "points": 4.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "23.59"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Jones, Jacob",
+      "place": 6,
+      "points": 3.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "23.82"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "He, Byron",
+      "place": 7,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "24.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Fregosi, Carson",
+      "place": 8,
+      "points": 2.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "24.13"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Hopkins, Matthew",
+      "place": 9,
+      "points": 1.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "24.20"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Sturgill, John",
+      "place": 10,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "24.46"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Xiao, Michael",
+      "place": 11,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "24.56"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Sykora, Connor",
+      "place": 12,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "24.96"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Nohl, Adam",
+      "place": 13,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "25.06"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Mavrakos, Alex",
+      "place": 14,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "25.25"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Gant, Sean",
+      "place": 15,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "25.32"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Glowniak, Brian",
+      "place": 16,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "25.38"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Ragoowansi, Evan",
+      "place": 17,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "25.72"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "McManus, Sam",
+      "place": 18,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "26.16"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Purdy, Jack",
+      "place": 19,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "26.44"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Scharm, Kenny",
+      "place": 20,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "26.53"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Rhoda, Jack",
+      "place": 21,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "26.64"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Mastando, Nick",
+      "place": 22,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "26.84"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Howard, Collin",
+      "place": 23,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "27.70"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Fassett, Olivia",
+      "place": 1,
+      "points": 9.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:13.70"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Wilson, Michaela",
+      "place": 2,
+      "points": 7.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:14.82"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Higby, Leigh",
+      "place": 3,
+      "points": 6.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:20.72"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Spinosa, Olivia",
+      "place": 4,
+      "points": 5.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:22.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Falejczyk, Erin",
+      "place": 5,
+      "points": 4.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:22.59"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "McDaniel, Riley",
+      "place": 6,
+      "points": 3.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:22.77"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Sterns, Andrew",
+      "place": 1,
+      "points": 9.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:01.58"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Ellwanger, Robbie",
+      "place": 2,
+      "points": 7.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:02.71"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Pease, Nathan",
+      "place": 3,
+      "points": 6.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:05.00"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Zhou, Maxwell",
+      "place": 4,
+      "points": 5.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:08.26"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Sykora, Connor",
+      "place": 5,
+      "points": 4.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:10.40"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Deshmukh, Atharva",
+      "place": 6,
+      "points": 3.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:11.58"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Howard, Collin",
+      "place": 7,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:13.87"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Sayedzada, Sultan",
+      "place": 8,
+      "points": 2.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:20.44"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Knapp, Lindsay",
+      "place": 1,
+      "points": 9.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "29.34"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Garguilo, Emily",
+      "place": 2,
+      "points": 7.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "30.40"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Coleman, Kate",
+      "place": 3,
+      "points": 6.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "30.50"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Falejczyk, Erin",
+      "place": 4,
+      "points": 5.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "31.62"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Boland, Casey",
+      "place": 5,
+      "points": 4.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "31.64"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Almy, Taylor",
+      "place": 6,
+      "points": 3.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "31.75"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Freeman, Grace",
+      "place": 7,
+      "points": 2.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "31.89"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Williams, Margaret",
+      "place": 8,
+      "points": 1.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "32.15"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Foster, Darby",
+      "place": 9,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "33.84"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Stokes, Kelly",
+      "place": 10,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "33.89"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "LaMontagne, Sarah",
+      "place": 11,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "34.37"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Ortega, Claudia",
+      "place": 12,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "35.20"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Pinon, Julien",
+      "place": 1,
+      "points": 9.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "23.46"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Thrift, Josh",
+      "place": 2,
+      "points": 7.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "24.94"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Wong, Justin",
+      "place": 3,
+      "points": 6.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "25.63"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Sturgill, John",
+      "place": 4,
+      "points": 5.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "27.03"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Paradis, Bennett",
+      "place": 5,
+      "points": 4.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "27.07"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Morris, Evan",
+      "place": 6,
+      "points": 3.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "27.18"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Jones, Jacob",
+      "place": 7,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "27.19"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Purdy, Jack",
+      "place": 8,
+      "points": 2.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "27.40"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Vallamattam, Ashok",
+      "place": 9,
+      "points": 1.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "27.64"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Mastando, Nick",
+      "place": 10,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "28.83"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Lehrer, Jarrad",
+      "place": 11,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "28.96"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Schumacher, Jason",
+      "place": 12,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "29.58"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Laffey, Makenna",
+      "place": 1,
+      "points": 9.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:06.33"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Nastasi, Ally",
+      "place": 2,
+      "points": 7.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:07.68"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Wilson, Michaela",
+      "place": 3,
+      "points": 6.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:07.69"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Higby, Leigh",
+      "place": 4,
+      "points": 5.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:10.00"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Cuccinelli, Reilly",
+      "place": 5,
+      "points": 4.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:11.90"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Lucky, Shannon",
+      "place": 6,
+      "points": 3.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:12.57"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "McDaniel, Riley",
+      "place": 7,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:12.77"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Sibilia, Maddie",
+      "place": 8,
+      "points": 2.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:14.32"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Williams, Margaret",
+      "place": 9,
+      "points": 1.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:15.90"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Almy, Taylor",
+      "place": 10,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:15.95"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Kalontarov, Ziv",
+      "place": 1,
+      "points": 9.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "53.90"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Sterns, Andrew",
+      "place": 2,
+      "points": 7.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "55.95"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Quillen, Michael",
+      "place": 3,
+      "points": 6.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "57.58"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Zacarias, Mathias",
+      "place": 4,
+      "points": 5.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "58.16"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Thrift, Josh",
+      "place": 5,
+      "points": 4.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "58.52"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Wong, Justin",
+      "place": 6,
+      "points": 3.0,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "58.64"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Ellwanger, Robbie",
+      "place": 7,
+      "points": 2.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:00.47"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Pease, Nathan",
+      "place": 8,
+      "points": 1.0,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:01.68"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Robertson, Stephen",
+      "place": 9,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:01.76"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Grant, Jake",
+      "place": 10,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:01.78"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "He, Byron",
+      "place": 11,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:05.00"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Ragoowansi, Evan",
+      "place": 12,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:06.20"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Vallamattam, Ashok",
+      "place": 13,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:08.91"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Phillips, Connor",
+      "place": 14,
+      "tags": "",
+      "team": "Auburn Club Swim Team",
+      "time": "1:12.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Sayedzada, Sultan",
+      "place": 15,
+      "tags": "",
+      "team": "Georgia Tech Club Swim",
+      "time": "1:12.70"
+    }
+  ],
+  "team_scores": {
+    "combined": [
+      {
+        "place": 1,
+        "points": 363.0,
+        "team": "Auburn Club Swim Team"
+      },
+      {
+        "place": 2,
+        "points": 275.0,
+        "team": "Georgia Tech Club Swim"
+      }
+    ],
+    "men": [
+      {
+        "place": 1,
+        "points": 198.0,
+        "team": "Auburn Club Swim Team"
+      },
+      {
+        "place": 2,
+        "points": 130.0,
+        "team": "Georgia Tech Club Swim"
+      }
+    ],
+    "source": "computed",
+    "women": [
+      {
+        "place": 1,
+        "points": 165.0,
+        "team": "Auburn Club Swim Team"
+      },
+      {
+        "place": 2,
+        "points": 145.0,
+        "team": "Georgia Tech Club Swim"
+      }
+    ]
+  }
+}

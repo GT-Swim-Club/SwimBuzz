@@ -1,5 +1,5 @@
 import type { Prisma, RecordGender, TeamRecord } from "@prisma/client"
-import { athletePreferredName, countsForRecords, recordEventDef, RECORD_EVENTS, type TeamRecordSwimmer } from "@swimbuzz/shared"
+import { countsForRecords, recordEventDef, RECORD_EVENTS, type TeamRecordSwimmer } from "@swimbuzz/shared"
 import { prisma } from "@/lib/prisma"
 import {
   effectiveRelayGender,
@@ -17,7 +17,7 @@ import {
 import type { SheetEntry } from "@/lib/meet/meet-sheet-summary"
 import { SWIMCLOUD_SOURCE } from "@/lib/swim/swimcloud-import"
 import { parseSwimTime } from "@/lib/swim/swim-parse"
-import { readRecordSwimmers, recordKey } from "@/lib/records/record-rows"
+import { isRecordedRelay, isRecordedSwim, readRecordSwimmers, recordKey } from "@/lib/records/record-rows"
 import { expireTopTimesCache } from "@/lib/records/top-times-cache"
 import { notifyTeamRecordsBroken, type NewTeamRecord } from "@/lib/notifications/record-notify"
 
@@ -52,8 +52,9 @@ export const RECORD_SWIM_WHERE = {
   meetRef: { is: { deletedAt: null, course: "SCY" } },
 } satisfies Prisma.SwimWhereInput
 
-export function swimmerOf(athlete: Pick<AthleteName, "id" | "firstName" | "lastName" | "preferredName">): TeamRecordSwimmer {
-  return { name: athletePreferredName(athlete), athleteId: athlete.id }
+/** A record holder: by legal name ("Samuel Wygonik"), as records and top 10s show them. */
+export function swimmerOf(athlete: Pick<AthleteName, "id" | "firstName" | "lastName">): TeamRecordSwimmer {
+  return { name: `${athlete.firstName} ${athlete.lastName}`.trim(), athleteId: athlete.id }
 }
 
 /** A relay team's status (DQ, DNF, …) in the round its time is from, when the results gave one. */
@@ -158,6 +159,11 @@ export async function relayCandidates(athletes: Map<string, AthleteName>): Promi
   return out
 }
 
+/** The swim or relay result behind a candidate (or a row linked to one). */
+function sourceOf(candidate: Pick<Candidate, "swimId" | "relayKey">): string {
+  return candidate.swimId ?? candidate.relayKey!
+}
+
 /** Fields a "meet" row copies from its candidate; also how a changed candidate is detected. */
 function candidateData(candidate: Candidate) {
   return {
@@ -181,11 +187,100 @@ function sameAsCandidate(row: TeamRecord, candidate: Candidate): boolean {
   )
 }
 
+/** Fields a sheet row takes from the imported swim or relay behind it (all null when it has none). */
+function sheetLinkData(candidate: Candidate | undefined) {
+  return {
+    swimId: candidate?.swimId ?? null,
+    relayKey: candidate?.relayKey ?? null,
+    meetId: candidate?.meetId ?? null,
+    meetName: candidate?.meetName ?? null,
+    date: candidate?.date ?? null,
+  }
+}
+
+function sameSheetLink(row: TeamRecord, candidate: Candidate | undefined): boolean {
+  const data = sheetLinkData(candidate)
+  return (
+    row.swimId === data.swimId &&
+    row.relayKey === data.relayKey &&
+    row.meetId === data.meetId &&
+    row.meetName === data.meetName &&
+    row.date?.getTime() === data.date?.getTime()
+  )
+}
+
+/** Whether a sheet row is this imported swim or relay: same time and year, and for a swim the same holder. */
+function sheetRowMatches(row: TeamRecord, candidate: Candidate, athletes: Map<string, AthleteName>): boolean {
+  if (candidate.relayKey) return isRecordedRelay(row, candidate)
+  const athleteId = candidate.swimmers[0]?.athleteId
+  const athlete = athleteId ? athletes.get(athleteId) : undefined
+  return !!athlete && isRecordedSwim(row, { timeMs: candidate.timeMs, date: candidate.date, athleteId: athlete.id, athlete })
+}
+
 /**
- * Bring team records in step with imported meets: keep each "meet" row matching the swim or relay
- * behind it (dropping it when that's gone or no longer beats the record before it), then make the
- * fastest imported swim the record wherever it beats the current one. Staff-set rows are never
- * touched. Idempotent; call after any write that changes imported swims or relay results.
+ * Pair each sheet row (typed in from the records sheet or by staff) with the imported swim or relay
+ * it matches, keeping a link that still holds. Each swim backs at most one row.
+ */
+function linkSheetRows(
+  sheetRows: TeamRecord[],
+  candidates: Candidate[],
+  athletes: Map<string, AthleteName>
+): Map<string, Candidate | undefined> {
+  const links = new Map<string, Candidate | undefined>()
+  const taken = new Set<string>()
+  for (const row of sheetRows) {
+    const linked = row.swimId ?? row.relayKey
+    const candidate = linked ? candidates.find((c) => sourceOf(c) === linked) : undefined
+    if (candidate && sheetRowMatches(row, candidate, athletes)) {
+      links.set(row.id, candidate)
+      taken.add(linked!)
+    }
+  }
+  for (const row of sheetRows) {
+    if (links.has(row.id)) continue
+    const candidate = candidates.find((c) => !taken.has(sourceOf(c)) && sheetRowMatches(row, c, athletes))
+    if (candidate) taken.add(sourceOf(candidate))
+    links.set(row.id, candidate)
+  }
+  return links
+}
+
+/**
+ * The imported swims and relays that were team records when swum: walking them in the order swum,
+ * each one faster than every swim before it and every sheet record from before it. A sheet record
+ * without a swim behind it is known only by its year, so it counts as set before every swim that
+ * year. A same-day tie goes to the faster swim; a tie in time is never a new record.
+ */
+function recordsWhenSwum(
+  candidates: Candidate[],
+  sheetRows: TeamRecord[],
+  links: Map<string, Candidate | undefined>
+): Candidate[] {
+  const order = [...candidates].sort((a, b) => a.date.getTime() - b.date.getTime() || a.timeMs - b.timeMs)
+  const position = new Map(order.map((c, i) => [sourceOf(c), i]))
+  const out: Candidate[] = []
+  let fastestBefore = Infinity
+  order.forEach((candidate, i) => {
+    const sheetBefore = sheetRows.filter((row) => {
+      const linked = links.get(row.id)
+      if (linked) return position.get(sourceOf(linked))! < i
+      return row.year <= candidate.date.getUTCFullYear()
+    })
+    const bar = Math.min(fastestBefore, ...sheetBefore.map((row) => row.timeMs))
+    if (candidate.timeMs < bar) out.push(candidate)
+    fastestBefore = Math.min(fastestBefore, candidate.timeMs)
+  })
+  return out
+}
+
+/**
+ * Bring team records in step with imported meets. Each sheet row (records sheet or staff) is linked
+ * to the imported swim or relay behind it, so it shows its meet and date. Every other imported swim
+ * that was a team record when swum gets a "meet" row, kept matching its swim, so an event's history
+ * runs from the sheet through imported results in the order they were set; "meet" rows that no
+ * longer qualify (their swim is gone, or an earlier swim now beats them) are dropped. Swims behind a
+ * row staff cleared are left out entirely. Idempotent; call after any write that changes imported
+ * swims or relay results.
  */
 export async function syncTeamRecords(): Promise<void> {
   const athleteRows = await prisma.athlete.findMany({
@@ -193,15 +288,12 @@ export async function syncTeamRecords(): Promise<void> {
   })
   const athletes = new Map(athleteRows.map((a) => [a.id, a]))
   const candidates = [...(await individualCandidates()), ...(await relayCandidates(athletes))]
-  const bySource = new Map<string, Candidate>()
-  for (const c of candidates) bySource.set(c.swimId ?? c.relayKey!, c)
 
   const byEvent = new Map<string, Candidate[]>()
   for (const c of candidates) {
     const key = recordKey(c.gender, c.event)
     byEvent.set(key, [...(byEvent.get(key) ?? []), c])
   }
-  for (const list of byEvent.values()) list.sort((a, b) => a.timeMs - b.timeMs || a.date.getTime() - b.date.getTime())
 
   /** Records this sync set from a swim; announced once the transaction commits. */
   const newRecords: NewTeamRecord[] = []
@@ -221,57 +313,72 @@ export async function syncTeamRecords(): Promise<void> {
       for (const def of RECORD_EVENTS) {
         for (const gender of def.genders) {
           const key = recordKey(gender, def.event)
-          const eventRows: TeamRecord[] = []
+          const eventRows = rowsByEvent.get(key) ?? []
+          const cleared = new Set(
+            eventRows.filter((r) => r.dismissed).flatMap((r) => [r.swimId, r.relayKey]).filter((id): id is string => !!id)
+          )
+          const eventCandidates = (byEvent.get(key) ?? []).filter((c) => !cleared.has(sourceOf(c)))
+          const sheetRows = eventRows.filter((r) => r.source !== "meet" && !r.dismissed)
+          const meetRows = eventRows.filter((r) => r.source === "meet" && !r.dismissed)
 
-          // Reconcile meet rows with their swims; earlier rows are already settled when a later one is checked.
-          for (const row of rowsByEvent.get(key) ?? []) {
-            if (row.source !== "meet" || row.dismissed) {
-              eventRows.push(row)
-              continue
+          // Sheet rows take on the imported swim or relay behind them (or lose one that's gone).
+          const links = linkSheetRows(sheetRows, eventCandidates, athletes)
+          for (const row of sheetRows) {
+            const linked = links.get(row.id)
+            // Only clear what a link set: a row never linked keeps what was typed in.
+            if (!linked && !row.swimId && !row.relayKey) continue
+            if (!sameSheetLink(row, linked)) {
+              await tx.teamRecord.update({ where: { id: row.id }, data: sheetLinkData(linked) })
             }
-            const candidate = bySource.get(row.swimId ?? row.relayKey ?? "")
-            const previous = eventRows.filter((r) => !r.dismissed).at(-1)
-            const stillRecord =
-              candidate &&
-              candidate.gender === row.gender &&
-              candidate.event === row.event &&
-              (!previous || candidate.timeMs < previous.timeMs)
-            if (!stillRecord) {
+          }
+          const linkedSources = new Set([...links.values()].flatMap((c) => (c ? [sourceOf(c)] : [])))
+
+          // Every other imported swim that was a record when swum has its own "meet" row.
+          const wanted = recordsWhenSwum(eventCandidates, sheetRows, links).filter((c) => !linkedSources.has(sourceOf(c)))
+          const wantedSources = new Set(wanted.map(sourceOf))
+          const kept = new Set<string>()
+          for (const row of meetRows) {
+            const source = row.swimId ?? row.relayKey ?? ""
+            if (!wantedSources.has(source) || kept.has(source)) {
               await tx.teamRecord.delete({ where: { id: row.id } })
               continue
             }
-            if (sameAsCandidate(row, candidate)) {
-              eventRows.push(row)
-            } else {
-              eventRows.push(await tx.teamRecord.update({ where: { id: row.id }, data: candidateData(candidate) }))
+            kept.add(source)
+            const candidate = wanted.find((c) => sourceOf(c) === source)!
+            if (!sameAsCandidate(row, candidate)) {
+              await tx.teamRecord.update({ where: { id: row.id }, data: candidateData(candidate) })
             }
           }
 
-          // Promote the fastest imported swim not already behind a row (including staff-cleared ones).
-          const current = eventRows.filter((r) => !r.dismissed).at(-1)
-          const used = new Set(eventRows.flatMap((r) => [r.swimId, r.relayKey]).filter(Boolean))
-          const best = (byEvent.get(key) ?? []).find((c) => !used.has(c.swimId ?? c.relayKey))
-          if (best && (!current || best.timeMs < current.timeMs)) {
+          const fastestOther = Math.min(
+            ...sheetRows.map((row) => row.timeMs),
+            ...wanted.filter((c) => kept.has(sourceOf(c))).map((c) => c.timeMs)
+          )
+          for (const candidate of wanted) {
+            if (kept.has(sourceOf(candidate))) continue
             await tx.teamRecord.create({
               data: {
                 course: "SCY",
                 gender,
                 event: def.event,
-                ...candidateData(best),
-                swimId: best.swimId,
-                relayKey: best.relayKey,
+                ...candidateData(candidate),
+                swimId: candidate.swimId,
+                relayKey: candidate.relayKey,
                 source: "meet",
               },
             })
+            // Announce only a new current record, not a past one filled in from older results.
+            const current = candidate.timeMs < fastestOther && wanted.every((c) => c === candidate || c.timeMs > candidate.timeMs)
+            if (!current) continue
             newRecords.push({
               gender,
               event: def.event,
-              timeMs: best.timeMs,
-              date: best.date,
-              swimmers: best.swimmers,
-              leadoff: best.leadoff,
-              meetId: best.meetId,
-              meetName: best.meetName,
+              timeMs: candidate.timeMs,
+              date: candidate.date,
+              swimmers: candidate.swimmers,
+              leadoff: candidate.leadoff,
+              meetId: candidate.meetId,
+              meetName: candidate.meetName,
             })
           }
         }

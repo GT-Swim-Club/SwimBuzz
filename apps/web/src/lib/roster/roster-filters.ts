@@ -16,6 +16,9 @@ export type FilterableAthlete = {
   clearance: AthleteClearanceSummary | null
 }
 
+/** The roster's `season` URL value for every season (the default is the current season). */
+export const ALL_SEASONS = "all"
+
 export type GenderFilter = "all" | "M" | "F"
 export type ClearanceFilter = "all" | "cleared" | "uncleared" | "physical" | "concussion"
 export type SwimCloudFilter = "all" | "imported" | "never" | "unlinked"

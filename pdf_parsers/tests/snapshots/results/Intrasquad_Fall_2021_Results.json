@@ -1,0 +1,1443 @@
+{
+  "course": "SCY",
+  "detectedSheetType": "results",
+  "event_order": {
+    "sessions": [
+      {
+        "label": "Order of Events",
+        "rows": [
+          {
+            "event": "50 Fly",
+            "men": 2,
+            "women": 1
+          },
+          {
+            "event": "100 Free",
+            "men": 4,
+            "women": 3
+          },
+          {
+            "event": "50 Back",
+            "men": 6,
+            "women": 5
+          },
+          {
+            "event": "200 Free Relay",
+            "men": 8,
+            "women": 7
+          },
+          {
+            "event": "50 Breast",
+            "men": 10,
+            "women": 9
+          },
+          {
+            "event": "100 IM",
+            "men": 12,
+            "women": 11
+          },
+          {
+            "event": "50 Free",
+            "men": 14,
+            "women": 13
+          },
+          {
+            "event": "200 Medley Relay",
+            "men": 18,
+            "women": 17
+          }
+        ]
+      }
+    ]
+  },
+  "meet_date": "2021-09-07",
+  "meet_name": "Fall 2021 Intrasquad Meet",
+  "relay_results": [
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 1,
+      "points": 40.0,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "WHITE",
+      "time": "1:50.06"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 2,
+      "points": 34.0,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "WHITE",
+      "time": "1:54.80"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 3,
+      "points": 32.0,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "GOLD",
+      "time": "1:57.19"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 4,
+      "points": 30.0,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "GOLD",
+      "time": "2:02.64"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 1,
+      "points": 40.0,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "GOLD",
+      "time": "1:35.14"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 2,
+      "points": 33.0,
+      "relayLetter": "C",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "GOLD",
+      "time": "1:36.83"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 2,
+      "points": 33.0,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "WHITE",
+      "time": "1:36.83"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 4,
+      "points": 30.0,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "WHITE",
+      "time": "1:38.47"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 5,
+      "points": 28.0,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "GOLD",
+      "time": "1:45.56"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 1,
+      "points": 40.0,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "WHITE",
+      "time": "2:02.75"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 2,
+      "points": 34.0,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "GOLD",
+      "time": "2:15.16"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 1,
+      "points": 40.0,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "WHITE",
+      "time": "1:35.94"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 2,
+      "points": 34.0,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "WHITE",
+      "time": "1:47.00"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 3,
+      "points": 32.0,
+      "relayLetter": "C",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "GOLD",
+      "time": "1:48.00"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 4,
+      "points": 30.0,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "GOLD",
+      "time": "1:52.69"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 5,
+      "points": 28.0,
+      "relayLetter": "C",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "WHITE",
+      "time": "2:02.15"
+    }
+  ],
+  "results": [
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Holshouser, Audrey",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "White",
+      "time": "27.68"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Hicks, Taylor",
+      "place": 2,
+      "tags": "",
+      "team": "Gold",
+      "time": "16.50"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Heeren, Rachel",
+      "place": 2,
+      "tags": "",
+      "team": "White",
+      "time": "16.50"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Plantamura, Natalie",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "White",
+      "time": "29.87"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Wojack, Emma",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "White",
+      "time": "30.06"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Edwards, Taryn",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "White",
+      "time": "31.34"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Edmond, Shani",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "32.02"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Nielsen, Mari",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "White",
+      "time": "33.46"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Butkus, Camille",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "34.33"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Golloshi, Mateo",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "White",
+      "time": "24.28"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Liu, Benjamin",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "24.59"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Jozwiak, Nicholas",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "25.26"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Wong, Justin",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "25.30"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Connors, Justin",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "White",
+      "time": "25.47"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Geller, Maxim",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "25.78"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Xue, Anthony",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "26.30"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Stigman, Maxwell",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "26.90"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Shetty, Varun",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "White",
+      "time": "26.96"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Miao, Nathan",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "White",
+      "time": "27.46"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Liu, Alex",
+      "place": 11,
+      "tags": "",
+      "team": "Gold",
+      "time": "5.50"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Barnes, Luke",
+      "place": 11,
+      "tags": "",
+      "team": "Gold",
+      "time": "5.50"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Page, Colton",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "White",
+      "time": "28.41"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Polevoy, Josh",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "White",
+      "time": "28.69"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Williams, Mayon",
+      "place": 15,
+      "points": 2.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "29.31"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Garcia, Leopoldo",
+      "place": 16,
+      "points": 1.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "30.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Sundius, Sarah",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "White",
+      "time": "1:01.39"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Meckley, Irelyn",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "1:03.28"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Lloyd, Annelise",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "1:05.13"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Ortega, Claudia",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "White",
+      "time": "1:08.06"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Wharton, Angela",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "1:09.47"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Agarwal, Savi",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "White",
+      "time": "1:26.28"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "O'Neill, Patrick",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "White",
+      "time": "49.28"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "White, Keller",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "50.38"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Keith, Jackson",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "51.47"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Hagan, Ben",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "White",
+      "time": "51.88"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Connors, Justin",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "White",
+      "time": "52.30"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Morano, Matthew",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "53.09"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Rondinella, Matthew",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "53.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Vlady, George",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "White",
+      "time": "55.89"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Golloshi, Mateo",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "White",
+      "time": "59.34"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Ragoowansi, Evan",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "White",
+      "time": "1:00.13"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Williams, Mayon",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "1:00.40"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Bryant, Jack",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "White",
+      "time": "1:02.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Heeren, Rachel",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "White",
+      "time": "33.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Manley, Caitlin",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "33.46"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Ramsey, Ari",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "33.87"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Agarwal, Savi",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "White",
+      "time": "46.66"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Lardot, Louis",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "White",
+      "time": "24.28"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Xue, Anthony",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "26.21"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Choudhury, Sumit",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "White",
+      "time": "28.18"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Watson, Blake",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "White",
+      "time": "28.51"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Giegengack, Finn",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "White",
+      "time": "29.21"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Butz, Steven",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "White",
+      "time": "29.90"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Jones, Bradley",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "White",
+      "time": "34.51"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Sundius, Sarah",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "White",
+      "time": "34.38"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Plantamura, Natalie",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "White",
+      "time": "36.47"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Lloyd, Annelise",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "38.10"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Nielsen, Mari",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "White",
+      "time": "39.50"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Ramsey, Ari",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "41.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Stigman, Maxwell",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "28.47"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Miao, Nathan",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "White",
+      "time": "28.57"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Montes, Gabriel",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "White",
+      "time": "30.70"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Geller, Maxim",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "32.40"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Ragoowansi, Evan",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "White",
+      "time": "33.59"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Cheung, Chris",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "33.89"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Watson, Blake",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "White",
+      "time": "34.31"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Hicks, Taylor",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "1:05.22"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Butkus, Camille",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "1:15.51"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Wharton, Angela",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "1:20.13"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Edmond, Shani",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "1:28.20"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Wong, Justin",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "56.89"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Lardot, Louis",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "White",
+      "time": "57.13"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Frost, Joshua",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "57.20"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Yu, Caleb",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "White",
+      "time": "58.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Jozwiak, Nicholas",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "58.81"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Liu, Alex",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "1:02.01"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Hagan, Ben",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "White",
+      "time": "1:02.07"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Montes, Gabriel",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "White",
+      "time": "1:02.50"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Lee, Mark",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "1:02.63"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Hellgoth, Chris",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "White",
+      "time": "1:14.06"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Holshouser, Audrey",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "White",
+      "time": "26.33"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Wojack, Emma",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "White",
+      "time": "27.25"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Meckley, Irelyn",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "28.72"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Manley, Caitlin",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "29.81"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Ortega, Claudia",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "White",
+      "time": "30.52"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "White, Keller",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "22.70"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Liu, Benjamin",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "22.96"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Keith, Jackson",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "23.51"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "O'Neill, Patrick",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "White",
+      "time": "23.65"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Butz, Steven",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "White",
+      "time": "23.95"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Morano, Matthew",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "24.28"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Choudhury, Sumit",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "White",
+      "time": "24.39"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Vlady, George",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "White",
+      "time": "24.71"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Rondinella, Matthew",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "24.81"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Frost, Joshua",
+      "place": 10,
+      "points": 7.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "25.31"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Giegengack, Finn",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "White",
+      "time": "25.40"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Polevoy, Josh",
+      "place": 12,
+      "points": 5.0,
+      "tags": "",
+      "team": "White",
+      "time": "25.46"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Shetty, Varun",
+      "place": 13,
+      "points": 4.0,
+      "tags": "",
+      "team": "White",
+      "time": "25.51"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Ragasa, Ethan",
+      "place": 14,
+      "points": 3.0,
+      "tags": "",
+      "team": "White",
+      "time": "25.63"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Barnes, Luke",
+      "place": 15,
+      "points": 2.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "25.69"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Garcia, Leopoldo",
+      "place": 16,
+      "points": 1.0,
+      "tags": "",
+      "team": "Gold",
+      "time": "27.02"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Cheung, Chris",
+      "place": 17,
+      "tags": "",
+      "team": "Gold",
+      "time": "27.81"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Jones, Bradley",
+      "place": 18,
+      "tags": "",
+      "team": "White",
+      "time": "28.71"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Hellgoth, Chris",
+      "place": 19,
+      "tags": "",
+      "team": "White",
+      "time": "29.00"
+    }
+  ],
+  "team_scores": {
+    "combined": [
+      {
+        "place": 1,
+        "points": 973.5,
+        "team": "White"
+      },
+      {
+        "place": 2,
+        "points": 889.5,
+        "team": "Gold"
+      }
+    ],
+    "men": [
+      {
+        "place": 1,
+        "points": 584.0,
+        "team": "White"
+      },
+      {
+        "place": 2,
+        "points": 547.0,
+        "team": "Gold"
+      }
+    ],
+    "source": "pdf",
+    "women": [
+      {
+        "place": 1,
+        "points": 389.5,
+        "team": "White"
+      },
+      {
+        "place": 2,
+        "points": 342.5,
+        "team": "Gold"
+      }
+    ]
+  }
+}

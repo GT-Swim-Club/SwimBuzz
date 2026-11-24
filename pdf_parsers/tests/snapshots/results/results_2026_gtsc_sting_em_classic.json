@@ -470,6 +470,11 @@
           "leg": 3,
           "name": "Schelin, Jessie",
           "splitTime": "28.99"
+        },
+        {
+          "leg": 4,
+          "name": "de Jager, Artemisa",
+          "splitTime": "28.98"
         }
       ],
       "tags": "",
@@ -2522,6 +2527,18 @@
     {
       "course": "SCY",
       "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "CLT-NC",
+      "time": "SCR"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
       "event": "400 Free Relay",
       "gender": "F",
       "place": 1,
@@ -2836,6 +2853,21 @@
             {
               "distance": 100,
               "splitTime": "30.47"
+            }
+          ]
+        },
+        {
+          "leg": 2,
+          "name": "de Jager, Artemisa",
+          "splitTime": "1:04.20",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "30.98"
+            },
+            {
+              "distance": 100,
+              "splitTime": "33.22"
             }
           ]
         },
@@ -4052,6 +4084,64 @@
       "tags": "",
       "team": "UCFFL-FL",
       "time": "4:12.57"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Emre, Emir"
+        },
+        {
+          "leg": 2,
+          "name": "Wen, Lawrence"
+        },
+        {
+          "leg": 3,
+          "name": "Harting, Alden"
+        },
+        {
+          "leg": 4,
+          "name": "Kim, Timothy"
+        }
+      ],
+      "tags": "",
+      "team": "ECS",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "He, Howard"
+        },
+        {
+          "leg": 2,
+          "name": "Emerson, Drewes"
+        },
+        {
+          "leg": 3,
+          "name": "Radde, Preston"
+        },
+        {
+          "leg": 4,
+          "name": "Bishop, Aidan"
+        }
+      ],
+      "tags": "",
+      "team": "TULSC-LA",
+      "time": "NS"
     }
   ],
   "results": [
@@ -4320,8 +4410,8 @@
       "course": "SCY",
       "event": "200 Free",
       "gender": "F",
-      "name": "Jager, Artemisa",
-      "place": null,
+      "name": "de Jager, Artemisa",
+      "place": 10,
       "points": 12.0,
       "splits": [
         {
@@ -12242,8 +12332,8 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
-      "name": "Jager, Artemisa",
-      "place": null,
+      "name": "de Jager, Artemisa",
+      "place": 24,
       "points": 3.0,
       "tags": "",
       "team": "MSST-US",
@@ -14872,8 +14962,8 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "F",
-      "name": "Jager, Artemisa",
-      "place": null,
+      "name": "de Jager, Artemisa",
+      "place": 24,
       "splits": [
         {
           "distance": 50,

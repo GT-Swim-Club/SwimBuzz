@@ -5,6 +5,8 @@ import * as Sharing from "expo-sharing"
 import { File, Paths } from "expo-file-system"
 import {
   formatRecordTime,
+  MANUAL_RECORD_LABEL,
+  MANUAL_RECORD_MARK,
   recordsAsOfLabel,
   recordsExportFilename,
   recordSwimmerLabel,
@@ -269,7 +271,10 @@ export function RecordsSection() {
                     )}
                   </View>
                   <View style={styles.rowSide}>
-                    <Text style={[styles.time, season]}>{record ? formatRecordTime(record.timeMs) : "—"}</Text>
+                    <Text style={[styles.time, season]}>
+                      {record?.manual ? <Text style={styles.manualMark}>{MANUAL_RECORD_MARK}</Text> : null}
+                      {record ? formatRecordTime(record.timeMs) : "—"}
+                    </Text>
                     {record ? <Text style={[styles.year, season]}>{record.year}</Text> : null}
                   </View>
                 </Pressable>
@@ -278,6 +283,12 @@ export function RecordsSection() {
           </View>
         </View>
       ))}
+
+      {view === "records" && data?.rows.some((row) => Object.values(row.records).some((record) => record?.manual)) ? (
+        <Text style={styles.footnote}>
+          <Text style={styles.manualMark}>{MANUAL_RECORD_MARK}</Text> {MANUAL_RECORD_LABEL}
+        </Text>
+      ) : null}
 
       <ActionSheet
         visible={shareOpen}
@@ -371,6 +382,9 @@ function makeStyles(c: ColorPalette) {
     time: { color: c.text, fontSize: 15, fontVariant: ["tabular-nums"], fontWeight: "700" },
     year: { color: c.textSecondary, fontSize: 13, fontVariant: ["tabular-nums"] },
     thisSeason: { color: c.accent, fontWeight: "800" },
+    /** The gold "*" before a manually added record's time. */
+    manualMark: { color: c.accent },
+    footnote: { color: c.textSecondary, fontSize: 13, marginBottom: spacing.md },
     offscreen: { position: "absolute", top: 0, left: -10000 },
   })
 }

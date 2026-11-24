@@ -263,6 +263,12 @@ function rowRoundResult(entry: SummaryEntry, allEntries?: SummaryEntry[], coach 
   if (entry.entryType === "relay_team") {
     const round = effectiveRelayRound(entry)
     const time = relayTeamTime(entry) ?? undefined
+    // DQ / NS / … in place of a time — a finals NS (scratched from finals) reads as unswum,
+    // as for individual swims.
+    const status =
+      !time && entry.resultStatus && !(round === "F" && entry.resultStatus === "NS")
+        ? entry.resultStatus
+        : undefined
     // A timed final seeded only on a finals heat sheet (an event swum in the finals session) keeps
     // that sheet's seed once its results read as timed finals rather than finals.
     const seed =
@@ -274,7 +280,7 @@ function rowRoundResult(entry: SummaryEntry, allEntries?: SummaryEntry[], coach 
         ? "Prelims"
         : round === "F"
           ? "Finals"
-          : time
+          : time || status
             ? isTimedFinalsEntry(entry)
               ? "Timed Finals"
               : "Finals"
@@ -282,6 +288,7 @@ function rowRoundResult(entry: SummaryEntry, allEntries?: SummaryEntry[], coach 
     return {
       label,
       time,
+      status,
       place: time ? relayTeamPlace(entry) : undefined,
       points: time ? entry.resultPoints : undefined,
       seed,
@@ -983,6 +990,7 @@ function SummaryEntryRow({
         {
           label: res.label ?? "Relay",
           time: res.time,
+          status: res.status,
           place: res.place,
           points: res.points,
           podium: effectiveRelayRound(entry) !== "P",

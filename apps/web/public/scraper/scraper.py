@@ -148,20 +148,42 @@ async def complete_job(
 
 
 def progress_reporter(client: httpx.AsyncClient, base_url: str, token: str, job_id: str):
-    """Fire-and-forget progress posts so the app's toast can show live status."""
-    url = f"{base_url.rstrip('/')}/api/scraper/jobs/{job_id}/progress"
-    pending: set[asyncio.Task] = set()
+    """Progress posts so the app's toast can show live status, sent in the background.
 
-    async def post(progress: dict) -> None:
-        try:
-            await client.post(url, headers=scraper_headers(token), json=progress, timeout=10.0)
-        except httpx.RequestError:
-            pass
+    Each report is a full snapshot, so only the newest matters: posts go one at a time
+    and a report made mid-post replaces any still waiting. Concurrent posts could land
+    out of order and leave an older snapshot in the app — e.g. the event count without
+    the SwimPhone reCAPTCHA alert reported a moment later — and nothing reports again
+    while the scraper waits on the coach, so the alert never showed.
+    """
+    url = f"{base_url.rstrip('/')}/api/scraper/jobs/{job_id}/progress"
+    latest: dict | None = None
+    sender: asyncio.Task | None = None
+
+    async def send() -> None:
+        nonlocal latest
+        failures = 0
+        while latest is not None:
+            progress, latest = latest, None
+            try:
+                res = await client.post(url, headers=scraper_headers(token), json=progress, timeout=10.0)
+                sent = res.status_code < 500
+            except httpx.RequestError:
+                sent = False
+            if sent:
+                failures = 0
+                continue
+            failures += 1
+            # Retry a dropped snapshot unless a newer one has already replaced it.
+            if latest is None and failures < 3:
+                latest = progress
+                await asyncio.sleep(failures)
 
     def report(progress: dict) -> None:
-        task = asyncio.create_task(post(progress))
-        pending.add(task)
-        task.add_done_callback(pending.discard)
+        nonlocal latest, sender
+        latest = progress
+        if sender is None or sender.done():
+            sender = asyncio.create_task(send())
 
     return report
 

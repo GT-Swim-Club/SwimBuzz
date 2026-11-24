@@ -12,6 +12,7 @@ type RosterImportResult =
       pending: true
       nameConfirmations: NameConfirmation[]
       rosterForPairing: RosterPairingOption[]
+      pairingSeason: string
     }
   | {
       pending?: false
@@ -112,6 +113,7 @@ export default function ImportMeetRosterButton({
             requestPairing({
               confirmations: data.nameConfirmations,
               roster: data.rosterForPairing,
+              season: data.pairingSeason,
               description:
                 "These roster names didn't match anyone on the team. Pair them to an athlete to keep them on the meet roster.",
               occurrenceNoun: ["row", "rows"],

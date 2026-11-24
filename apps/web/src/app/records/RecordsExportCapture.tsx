@@ -1,6 +1,7 @@
 "use client"
 
 import {
+  MANUAL_RECORD_MARK,
   RECORDS_EXPORT,
   recordSwimmerName,
   recordTimeLabel,
@@ -36,7 +37,14 @@ function SideCells({ record, mirrored }: { record: TeamRecordItem | undefined; m
         : empty}
     </div>,
     <div key="time" className={`${cellClass} font-mono tabular-nums ${seasonClass(record)}`}>
-      {record ? recordTimeLabel(record) : empty}
+      {record ? (
+        <span>
+          {record.manual ? <span className="-ml-2 inline-block w-2 pr-px text-right text-accent">{MANUAL_RECORD_MARK}</span> : null}
+          {recordTimeLabel(record)}
+        </span>
+      ) : (
+        empty
+      )}
     </div>,
   ]
   return <>{mirrored ? cells.reverse() : cells}</>
@@ -86,8 +94,9 @@ export default function RecordsExportCapture({ rows, asOf }: { rows: TeamRecordR
               {row.label}
             </div>
             {mixed ? (
-              <div className="col-span-3 flex items-end justify-end px-3 py-2 text-sm text-foreground-secondary">
-                {asOf}
+              // The date at the bottom right.
+              <div className="col-span-3 flex flex-col justify-end px-3 py-2 text-sm text-foreground-secondary">
+                <span className="self-end">{asOf}</span>
               </div>
             ) : (
               <SideCells record={record("M")} mirrored />

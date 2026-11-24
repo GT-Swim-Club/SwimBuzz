@@ -1,0 +1,971 @@
+{
+  "course": "SCY",
+  "detectedSheetType": "results",
+  "event_order": null,
+  "meet_date": "2019-11-18",
+  "meet_name": "GTSC Time Trials - Fall 2019",
+  "relay_results": [],
+  "results": [
+    {
+      "course": "SCY",
+      "event": "200 Breast",
+      "gender": "F",
+      "name": "Benner, Josie",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Boland, Casey",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "30.39"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Burch, Audrey",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:16.05"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Burch, Audrey",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "30.08"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "F",
+      "name": "Burch, Audrey",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "2:29.49"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "F",
+      "name": "Burch, Audrey",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "5:58.69"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Butkus, Camille",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:28.57"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Butkus, Camille",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "38.56"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Butkus, Camille",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:13.23"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Carpet, Juliette",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:08.83"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Carpet, Juliette",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "2:29.50"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Choudhury, Sumit",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "59.94"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Choudhury, Sumit",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "24.56"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Choudhury, Sumit",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "26.35"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Coronado, Yllona",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "28.84"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "F",
+      "name": "DeRonja, Josie",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "5:40.06"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "DeRonja, Josie",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:15.14"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Edmond, Shani",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "28.53"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Edmond, Shani",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "30.37"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Edwards, Taryn",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Edwards, Taryn",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Edwards, Taryn",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Eldridge, Lauren",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Eldridge, Lauren",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Eldridge, Lauren",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Eldridge, Lauren",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Geller, Maxim",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:52.60"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Geller, Maxim",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "32.90"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "gender": "M",
+      "name": "Geller, Maxim",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Back",
+      "gender": "M",
+      "name": "Grant, Jake",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "M",
+      "name": "Grant, Jake",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "5:17.68"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Lara Gunesen, Deniz",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "27.53"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "M",
+      "name": "Helgoth, Chris",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "5:50.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Helgoth, Chris",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "28.48"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Helgoth, Chris",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Keith, Jackson",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:59.97"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Languell, Christopher",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:00.86"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Languell, Christopher",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "25.60"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Languell, Christopher",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "31.26"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Fly",
+      "gender": "M",
+      "name": "Liu, Alexander",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "2:09.09"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "M",
+      "name": "Liu, Alexander",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Liu, Alexander",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:00.78"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Murali, Nila",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "32.92"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Murali, Nila",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:17.85"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Murali, Nila",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:11.62"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Back",
+      "gender": "F",
+      "name": "Murali, Nila",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "2:35.90"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "gender": "F",
+      "name": "Nastasi, Ally",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "F",
+      "name": "Nastasi, Ally",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Breast",
+      "gender": "F",
+      "name": "Nielsen, Mari",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Nielsen, Mari",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Nielsen, Mari",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Nielsen, Mari",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Ortega, Claudia",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:16.28"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Ortega, Claudia",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "31.23"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Ortega, Claudia",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "41.25"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Ortega, Claudia",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "27.62"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Pendley, Owen",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Pendley, Owen",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Polevoy, Josh",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "32.23"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Polevoy, Josh",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "34.41"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Polevoy, Josh",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "25.55"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Polevoy, Josh",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "57.55"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Reinhart, Trina",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Reinhart, Trina",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "33.21"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Reinhart, Trina",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "29.48"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Reinhart, Trina",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:13.51"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "F",
+      "name": "Riddell, Allie",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "5:36.07"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Riddell, Allie",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "28.46"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Fly",
+      "gender": "F",
+      "name": "Riddell, Allie",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Riddell, Allie",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Ridgeway, Robert",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:00.34"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Ridgeway, Robert",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Ridgeway, Robert",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "26.34"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "F",
+      "name": "Sundius, Sarah",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "5:56.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Sundius, Sarah",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "27.85"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Thomas, Christina",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:11.50"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Thomas, Christina",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:15.40"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Thomas, Christina",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "31.92"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Walters, Sam",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "24.56"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Walters, Sam",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "1:01.92"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Walters, Sam",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Walters, Sam",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "55.51"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "gender": "M",
+      "name": "Whalen, Austin",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "M",
+      "name": "Whalen, Austin",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Wharton, Angela",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Wharton, Angela",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "F",
+      "name": "Wharton, Angela",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "2:41.03"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Wharton, Angela",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "2:23.27"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Wojack, Emma",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Wojack, Emma",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Wojack, Emma",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Wojack, Emma",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Zhou, Frank",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "53.95"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Zhou, Frank",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Zhou, Frank",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Zhou, Frank",
+      "place": null,
+      "tags": "",
+      "team": "GTSC-GA",
+      "time": "NS"
+    }
+  ],
+  "team_scores": null
+}

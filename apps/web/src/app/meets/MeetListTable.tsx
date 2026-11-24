@@ -14,7 +14,7 @@ export type MeetListRow = {
   location: string
   /** Short status ending the meta line under the name ("in 6 days", "12 days left"). */
   status?: ReactNode
-  /** A pill right after the name on its line (an unofficial meet's). */
+  /** Pills right after the name on its line (Unofficial, No results). */
   nameBadge?: ReactNode
   actions?: ReactNode
 }

@@ -7,14 +7,37 @@ import { ourTeamSides } from "./team-scores"
  */
 export function athleteTeamSides(raw: unknown): Record<string, string> {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {}
-  const teams: Record<string, string> = {}
+  const printed: Record<string, string> = {}
   for (const [athleteId, team] of Object.entries(raw as Record<string, unknown>)) {
-    if (typeof team === "string" && team.trim()) teams[athleteId] = team.trim()
+    if (typeof team === "string" && team.trim()) printed[athleteId] = team.trim()
   }
+  const teams = mergeTeamSpellings(printed)
   const names = [...new Set(Object.values(teams))]
   if (names.length < 2) return {}
   const sides = ourTeamSides(names)
   return Object.fromEntries(Object.entries(teams).map(([id, team]) => [id, sides.get(team) ?? team]))
+}
+
+/**
+ * Folds spellings of one team that differ only in case, spacing or punctuation into one name, so a
+ * results PDF that prints "Georgia Tech Swim Club" on swims and "GEORGIA TECH SWIM CLUB" on relays
+ * reads as one team, not two. Each group keeps its most used spelling, preferring one not in all caps.
+ */
+export function mergeTeamSpellings(teams: Readonly<Record<string, string>>): Record<string, string> {
+  const key = (team: string) => team.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim()
+  const counts = new Map<string, Map<string, number>>()
+  for (const team of Object.values(teams)) {
+    const spellings = counts.get(key(team)) ?? new Map<string, number>()
+    spellings.set(team, (spellings.get(team) ?? 0) + 1)
+    counts.set(key(team), spellings)
+  }
+  const shouty = (team: string) => (team === team.toUpperCase() && team !== team.toLowerCase() ? 1 : 0)
+  const chosen = new Map<string, string>()
+  for (const [k, spellings] of counts) {
+    const best = [...spellings].sort((a, b) => shouty(a[0]) - shouty(b[0]) || b[1] - a[1])[0][0]
+    chosen.set(k, best)
+  }
+  return Object.fromEntries(Object.entries(teams).map(([id, team]) => [id, chosen.get(key(team)) ?? team]))
 }
 
 /** The team most of these swimmers are on (a relay's), or undefined when none of them has one. */

@@ -111,7 +111,11 @@ export default function ImportRosterFromSheetScreen() {
         parts.push(deleted > 0 ? `${result.removed} removed (${deleted} deleted)` : `${result.removed} removed`)
       }
       if (result.errors?.length > 0) parts.push(`${result.errors.length} row(s) skipped`)
-      Alert.alert("Import finished", parts.join(" · "), [
+      let message = parts.join(" · ")
+      if (result.missingEmail?.length) {
+        message += `\n\nNot added — new athletes need a @gatech.edu email: ${result.missingEmail.join("; ")}`
+      }
+      Alert.alert("Import finished", message, [
         { text: "OK", onPress: () => router.replace("/roster") },
       ])
     } catch (err) {

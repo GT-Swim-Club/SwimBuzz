@@ -196,6 +196,9 @@ export async function saveRelayTeam(meetId: string, input: SaveRelayInput) {
   }
 
   const entries = upsertRelayTeamEntries(existing, relayToSave, roster, athleteGenders)
+  // A DQ'd (or otherwise unfinished) relay keeps its leg splits, but its leadoff isn't a swim.
+  const savedRelay = entries[entries.length - 1]
+  const relayUnfinished = Boolean(savedRelay?.resultStatus && !savedRelay.resultTime)
 
   await prisma.meet.update({
     where: { id: meetId },
@@ -211,7 +214,7 @@ export async function saveRelayTeam(meetId: string, input: SaveRelayInput) {
       meet,
       relayToSave.event,
       leg1.athleteId,
-      leg1.splitTime,
+      relayUnfinished ? undefined : leg1.splitTime,
       "relay",
       undefined,
       relayToSave.relayRound ?? ""

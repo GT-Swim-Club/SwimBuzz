@@ -1,11 +1,11 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { useState, useTransition } from "react"
+import { useMemo, useState, useTransition } from "react"
 import { isValidSignupEntryTime } from "@/lib/meet/meet-signup"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/ui/SegmentedToggle"
-import { normalizeEventName } from "@/lib/swim/swim-parse"
+import AthletePairingSelect, { rosterOptionsFromLastFirst } from "@/components/meet/AthletePairingSelect"
 import { addIndividualSheetEntry, upsertRelayEntry } from "./meet-entries.actions"
 import { RELAY_SWIM_EVENTS } from "@swimbuzz/shared"
 
@@ -34,7 +34,7 @@ export default function AddIndividualEntryButton({
     relayForm: {
       event: RELAY_EVENTS[0],
       legs: ["", "", "", ""] as [string, string, string, string],
-      gender: "F" as "F" | "M",
+      gender: "F" as "F" | "M" | "X",
     }
   })
   const loading = isPending
@@ -116,7 +116,7 @@ export default function AddIndividualEntryButton({
     }
   }
 
-  const swimmerOptions = athletes
+  const roster = useMemo(() => rosterOptionsFromLastFirst(athletes), [athletes])
   
   const isIndividualValid = form.athleteId !== "" && form.event !== "" && isValidSignupEntryTime(form.seedTime)
   const isRelayValid = form.relayForm.legs.every(id => id !== "") && (new Set(form.relayForm.legs).size === 4) && isValidSignupEntryTime(form.seedTime)
@@ -179,19 +179,13 @@ export default function AddIndividualEntryButton({
               <label className="block text-xs font-medium text-foreground-secondary mb-1">
                 Athlete <span className="text-error">*</span>
               </label>
-              <select
-                required
+              <AthletePairingSelect
                 value={form.athleteId}
-                onChange={(e) => setForm((f) => ({ ...f, athleteId: e.target.value }))}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
-              >
-                <option value="">Select swimmer...</option>
-                {athletes.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.name}
-                  </option>
-                ))}
-              </select>
+                roster={roster}
+                onChange={(athleteId) => setForm((f) => ({ ...f, athleteId }))}
+                label="Athlete"
+                placeholder="Select swimmer…"
+              />
             </div>
             <div className="grid grid-cols-2 gap-3 mt-3">
               <div>
@@ -243,11 +237,12 @@ export default function AddIndividualEntryButton({
                 </label>
                 <select
                   value={form.relayForm.gender}
-                  onChange={(e) => setForm(f => ({ ...f, relayForm: {...f.relayForm, gender: e.target.value as "F" | "M"} }))}
+                  onChange={(e) => setForm(f => ({ ...f, relayForm: {...f.relayForm, gender: e.target.value as "F" | "M" | "X"} }))}
                   className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
                 >
-                  <option value="F">Women's</option>
-                  <option value="M">Men's</option>
+                  <option value="F">Women&apos;s</option>
+                  <option value="M">Men&apos;s</option>
+                  <option value="X">Mixed</option>
                 </select>
               </div>
             </div>
@@ -255,20 +250,18 @@ export default function AddIndividualEntryButton({
             <div className="space-y-2 mt-3">
               <label className="block text-xs font-medium text-foreground-secondary">Athletes <span className="text-error">*</span></label>
               {[0, 1, 2, 3].map(i => (
-                <select
+                <AthletePairingSelect
                   key={i}
-                  required
                   value={form.relayForm.legs[i]}
-                  onChange={(e) => {
+                  roster={roster}
+                  onChange={(athleteId) => {
                     const legs = [...form.relayForm.legs] as [string, string, string, string]
-                    legs[i] = e.target.value
-                    setForm(f => ({ ...f, relayForm: {...f.relayForm, legs} }))
+                    legs[i] = athleteId
+                    setForm((f) => ({ ...f, relayForm: { ...f.relayForm, legs } }))
                   }}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
-                >
-                  <option value="">Select swimmer...</option>
-                  {swimmerOptions.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-                </select>
+                  label={`Leg ${i + 1} swimmer`}
+                  placeholder="Select swimmer…"
+                />
               ))}
             </div>
             

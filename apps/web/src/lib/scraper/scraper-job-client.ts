@@ -7,8 +7,7 @@ import { holdScraperJob, unholdScraperJob } from "@/lib/scraper/scraper-job-lock
 
 export const CLOUDFLARE_ALERT = "Complete the Cloudflare check in the browser."
 
-export const SWIMPHONE_VERIFICATION_ALERT =
-  "This meet is archived. Fill in the email and reCAPTCHA form in the SwimPhone window on your computer to continue."
+export const SWIMPHONE_VERIFICATION_ALERT = "Complete the reCAPTCHA check in the browser"
 
 const FINALIZE_PATH: Record<string, string> = {
   times_sync: "/api/times/sync/finalize",

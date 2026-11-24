@@ -220,9 +220,14 @@ export function MeetTravelCard({
           <AddTravelInfoButton
             meetId={meetId}
             initial={travelInitial}
-            trigger={(open) => (
-              <LedgerIconButton icon="pencil" label="Edit travel info" onClick={open} />
-            )}
+            trigger={(open) =>
+              // "+" until there's travel info to edit, like the Competition and Photos cards.
+              items.length === 0 ? (
+                <LedgerIconButton icon="plus" label="Add travel info" onClick={open} />
+              ) : (
+                <LedgerIconButton icon="pencil" label="Edit travel info" onClick={open} />
+              )
+            }
           />
         ) : null
       }

@@ -116,8 +116,8 @@ function meetSlugYear(startsAt: Date | null | undefined, timeZone: string | null
 
 /**
  * A free slug for a meet: its name then its start year ("sting-em-classic-2027"), or just the name
- * when it already ends in that year or the meet has no start date. One taken by another meet
- * (deleted ones included) gets a counter ("…-2027-2").
+ * when it already ends in that year or the meet has no start date. One taken by another meet gets a
+ * counter ("…-2027-2"). Trashed meets give up their slugs (softDeleteMeet), so they hold none.
  */
 export async function uniqueMeetSlug(
   name: string,

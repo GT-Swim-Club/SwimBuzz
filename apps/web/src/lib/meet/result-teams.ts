@@ -1,3 +1,5 @@
+import { mergeTeamSpellings } from "@swimbuzz/shared"
+
 /**
  * A meet's resultTeams — each swimmer's team from its results PDF, by athlete id — or an empty map
  * for none. Only kept when the results name several of our teams (an intrasquad's Gold and White).
@@ -8,13 +10,14 @@ export function coerceResultTeams(raw: unknown): Record<string, string> {
   for (const [athleteId, team] of Object.entries(raw as Record<string, unknown>)) {
     if (typeof team === "string" && team.trim()) out[athleteId] = team.trim()
   }
-  return out
+  return mergeTeamSpellings(out)
 }
 
 /**
  * Each swimmer's team as the team code it matches, so the results' spellings ("Gold" on a swim,
  * "GTSC GOLD" on a relay) read as one team: the code whose words all appear in the printed team,
- * ignoring case ("White, Gold" → "Gold"). A team no code matches keeps its printed name.
+ * ignoring case ("White, Gold" → "Gold"). A team no code matches keeps its printed name, with
+ * spellings differing only in case folded together ("GEORGIA TECH SWIM CLUB" on relays).
  */
 export function canonicalResultTeams(
   athleteTeams: Record<string, string>,
@@ -28,5 +31,5 @@ export function canonicalResultTeams(
     const code = codes.find((c) => words(c).every((w) => printed.has(w)))
     out[athleteId] = code ?? team
   }
-  return out
+  return mergeTeamSpellings(out)
 }

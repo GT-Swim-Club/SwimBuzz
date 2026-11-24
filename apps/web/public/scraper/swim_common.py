@@ -28,11 +28,12 @@ STROKE_ALIASES: dict[str, str] = {
 TIME_PATTERN = re.compile(r"^\d{1,2}:\d{2}\.\d{2}$|^\d{1,3}\.\d{2}$")
 INVALID_TIMES = {"NT", "NS", "DQ", "DFS", "DNF", "SCR"}
 
-_VALID_RELAY_LETTERS = frozenset({"A", "B", "C", "D"})
+# Any single letter: Hy-Tek letters a club's relays as far as it needs (A, B, … G).
+_VALID_RELAY_LETTERS = frozenset("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 
 def normalize_relay_letter(letter: str | None) -> str | None:
-    """Return A–D relay letter, or None when missing / not a team letter."""
+    """Return the relay letter (A–Z), or None when missing / not a team letter."""
     token = (letter or "").strip().upper()
     if token in _VALID_RELAY_LETTERS:
         return token

@@ -1,9 +1,10 @@
 "use client"
 
+import Link from "next/link"
 import type { ReactNode } from "react"
 import type { RecordEventDef, RecordGender, TeamRecordRow } from "@swimbuzz/shared"
 import { ledgerHeaderClass } from "@/components/meet/Ledger"
-import { RecordNames, RecordTime, RecordYear, type SideProps } from "./RecordCells"
+import { RecordNames, RecordTime, RecordYear, recordHref, type SideProps } from "./RecordCells"
 
 /** Year · Name · Time | Event | Time · Name · Year, mirrored like the records sheet. */
 const COLS = "grid-cols-[4.5rem_minmax(0,1fr)_6rem_minmax(13rem,15rem)_6rem_minmax(0,1fr)_4.5rem]"
@@ -11,20 +12,30 @@ const COLS = "grid-cols-[4.5rem_minmax(0,1fr)_6rem_minmax(13rem,15rem)_6rem_minm
 const cellClass = "flex min-w-0 items-center justify-center px-2 py-2 text-[15px]"
 const columnLabelClass = "px-2 py-1.5 text-center text-[11px] font-semibold tracking-[0.11em] text-foreground-tertiary"
 
-/** One gender's cells, in reading order from the outside edge in (women) or the center out (men). */
+/**
+ * One gender's cells, in reading order from the outside edge in (women) or the center out (men).
+ * A record with an imported swim or relay links to it on its meet page, like a Top 10 row.
+ */
 function SideCells({ side, mirrored }: { side: SideProps; mirrored: boolean }) {
+  const href = recordHref(side.record)
   const cells = [
     <div key="year" className={cellClass}>
       <RecordYear {...side} />
     </div>,
     <div key="names" className={`${cellClass} flex-col`}>
-      <RecordNames {...side} className="w-full" />
+      <RecordNames {...side} className="w-full" linkNames={!href} />
     </div>,
     <div key="time" className={cellClass}>
       <RecordTime {...side} />
     </div>,
   ]
-  return <>{mirrored ? cells.reverse() : cells}</>
+  if (mirrored) cells.reverse()
+  if (!href) return <>{cells}</>
+  return (
+    <Link href={href} className="col-span-3 grid grid-cols-subgrid transition-colors hover:bg-background-hover">
+      {cells}
+    </Link>
+  )
 }
 
 function SideHeader({ mirrored }: { mirrored: boolean }) {

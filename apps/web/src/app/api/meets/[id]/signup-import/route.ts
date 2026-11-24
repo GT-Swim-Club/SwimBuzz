@@ -30,6 +30,7 @@ import {
   meetHasImportedResults,
 } from "@/lib/meet/meet-sheet-summary"
 import { isRelayResultsSummary } from "@/lib/meet/relay-results"
+import { addPairedAthletesToSeason } from "@/lib/athlete/paired-athlete-seasons"
 
 export const runtime = "nodejs"
 
@@ -93,6 +94,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const parsed = parseSignupRecords(source.values)
   if (parsed.error) return NextResponse.json({ error: parsed.error }, { status: 400 })
 
+  const nameMappings = normalizeNameMappings(source.nameMappings)
+  const rejectedNames = normalizeRejectedNames(source.rejectedNames)
+  // Athletes paired from another season join this one first, so the roster below includes them.
+  await addPairedAthletesToSeason(nameMappings, meet.season)
+
   const athletes = await prisma.athlete.findMany({
     where: { seasons: { has: meet.season } },
     select: {
@@ -113,8 +119,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     email: a.user.email,
   }))
 
-  const nameMappings = normalizeNameMappings(source.nameMappings)
-  const rejectedNames = normalizeRejectedNames(source.rejectedNames)
   const resolved = resolveSignupImport(parsed.rows, roster, eventOptions, nameMappings, rejectedNames)
 
   // With a final roster imported, only roster athletes' sign-ups reach the summary.
@@ -183,5 +187,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     warnings: resolved.warnings,
     nameConfirmations,
     rosterForPairing,
+    pairingSeason: meet.season,
   })
 }

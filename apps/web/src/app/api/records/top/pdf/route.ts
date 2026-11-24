@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { attachmentDisposition, recordsAsOfLabel, topTimesExportFilename } from "@swimbuzz/shared"
+import { attachmentDisposition, topTimesExportFilename } from "@swimbuzz/shared"
 import { getSession } from "@/lib/auth/session"
 import { RecordInputError } from "@/lib/records/records"
 import { teamAllTopTimesCached } from "@/lib/records/record-top-times"
@@ -18,7 +18,7 @@ export async function GET(req: Request) {
   const url = new URL(req.url)
   try {
     const data = await teamAllTopTimesCached(url.searchParams.get("gender"), url.searchParams.get("mode"))
-    const bytes = new Uint8Array(buildTopTimesPdf({ data, asOf: recordsAsOfLabel() }).output("arraybuffer"))
+    const bytes = new Uint8Array(buildTopTimesPdf({ data }).output("arraybuffer"))
     return new NextResponse(bytes, {
       headers: {
         "Content-Type": "application/pdf",

@@ -77,6 +77,19 @@ const inputClass =
   "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary focus:ring-[3px] focus:ring-primary/35"
 const labelClass = "mb-1 block text-xs font-medium text-foreground-secondary"
 
+/**
+ * Tab (not Shift+Tab) out of an empty field fills in its placeholder, so a suggested default like
+ * the home pool is one keystroke; focus still moves on as usual.
+ */
+function tabFillsPlaceholder(value: string, placeholder: string, fill: (value: string) => void) {
+  return (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Tab" && !e.shiftKey && !e.altKey && !e.metaKey && !e.ctrlKey && !value.trim()) fill(placeholder)
+  }
+}
+
+const LOCATION_PLACEHOLDER = "McAuley Aquatic Center"
+const SCHOOL_PLACEHOLDER = "Georgia Tech"
+
 const COURSES = ["SCY", "SCM", "LCM"] as const
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"]
@@ -198,6 +211,16 @@ function FloatingDateRangePanel({
   useLayoutEffect(() => {
     reposition()
   }, [reposition])
+
+  // Once placed (it's measured hidden first, and hidden fields can't take focus), put the cursor
+  // in the start date with its text selected, so typing replaces it straight away.
+  const placed = position !== null
+  useEffect(() => {
+    if (!placed) return
+    const start = panelRef.current?.querySelector<HTMLInputElement>('input[aria-label="Start Date"]')
+    start?.focus({ preventScroll: true })
+    start?.select()
+  }, [placed])
 
   useEffect(() => {
     function onPointerDown(event: MouseEvent) {
@@ -381,14 +404,14 @@ function MeetDateRangePanel({
     <div className="flex flex-col gap-3 rounded-xl border border-border bg-background-layout p-3.5">
       <div className="grid grid-cols-2 gap-3">
         <TypedDateInput
-          label="Start date"
+          label="Start Date"
           value={form.startDate}
           placeholder="MM/DD/YYYY"
           onCommit={commitStart}
           onPreview={showMonthOf}
         />
         <TypedDateInput
-          label="End date"
+          label="End Date"
           value={form.endDate}
           placeholder={form.startDate ? "Same day" : "MM/DD/YYYY"}
           disabled={!form.startDate}
@@ -456,7 +479,7 @@ function MeetDateRangePanel({
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className={labelClass}>First session</label>
+          <label className={labelClass}>First Session</label>
           <TimePicker
             value={form.startTime}
             onChange={(value) => setForm((f) => ({ ...f, startTime: value }))}
@@ -465,7 +488,7 @@ function MeetDateRangePanel({
           />
         </div>
         <div>
-          <label className={labelClass}>Time zone</label>
+          <label className={labelClass}>Time Zone</label>
           <TimeZonePicker
             value={form.timeZone}
             onChange={(value) => setForm((f) => ({ ...f, timeZone: value }))}
@@ -736,7 +759,7 @@ export default function MeetFields({
     <div className="flex flex-col gap-3.5">
       <div>
         <label className={labelClass}>
-          Meet name <span className="text-error">*</span>
+          Meet Name <span className="text-error">*</span>
         </label>
         <input
           required
@@ -753,7 +776,8 @@ export default function MeetFields({
           <input
             value={form.location}
             onChange={(e) => set("location", e.target.value)}
-            placeholder="McAuley Aquatic Center"
+            onKeyDown={tabFillsPlaceholder(form.location, LOCATION_PLACEHOLDER, (v) => set("location", v))}
+            placeholder={LOCATION_PLACEHOLDER}
             className={inputClass}
           />
         </div>
@@ -762,7 +786,8 @@ export default function MeetFields({
           <input
             value={form.school}
             onChange={(e) => set("school", e.target.value)}
-            placeholder="Georgia Tech"
+            onKeyDown={tabFillsPlaceholder(form.school, SCHOOL_PLACEHOLDER, (v) => set("school", v))}
+            placeholder={SCHOOL_PLACEHOLDER}
             className={inputClass}
           />
         </div>
@@ -777,7 +802,7 @@ export default function MeetFields({
           type="button"
           onClick={() => setCalendarOpen((o) => !o)}
           aria-expanded={calendarOpen}
-          className={`flex w-full items-center justify-between gap-2 rounded-lg border bg-background px-3 py-2 text-left text-sm transition-[border-color,box-shadow] ${
+          className={`flex w-full items-center justify-between gap-2 rounded-lg border bg-background px-3 py-2 text-left text-sm outline-none transition-[border-color,box-shadow] focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-primary/35 ${
             calendarOpen ? "border-primary ring-[3px] ring-primary/35" : "border-border"
           }`}
         >
@@ -893,7 +918,7 @@ function MeetSwitch({
         aria-checked={on}
         aria-label={label}
         onClick={() => onChange(!on)}
-        className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full transition-colors ${
+        className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full outline-none transition-[background-color,box-shadow] focus-visible:ring-[3px] focus-visible:ring-primary/35 ${
           on ? "bg-primary" : "bg-fill-secondary"
         }`}
       >
@@ -922,7 +947,7 @@ function ScoringFields({
   return (
     <div className="flex flex-col gap-2">
       <div>
-        <label className={labelClass}>Individual points by place</label>
+        <label className={labelClass}>Individual Points by Place</label>
         <input
           value={form.scoringIndividual ?? ""}
           onChange={(e) => set("scoringIndividual", e.target.value)}
@@ -933,7 +958,7 @@ function ScoringFields({
       </div>
       <div>
         <div className="mb-1 flex items-baseline justify-between gap-2">
-          <label className="block text-xs font-medium text-foreground-secondary">Relay points by place</label>
+          <label className="block text-xs font-medium text-foreground-secondary">Relay Points by Place</label>
           <button
             type="button"
             onClick={() => individual && set("scoringRelay", formatScoringValues(doubledScoringValues(individual)))}

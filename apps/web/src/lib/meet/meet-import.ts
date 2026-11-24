@@ -10,7 +10,7 @@ import {
   type RosterAthlete,
 } from "@/lib/athlete/athlete-match"
 import { assignSwimOccurrences } from "@/lib/swim/swim-dedup"
-import { removeSwimCloudCopiesOfMeet } from "@/lib/swim/swimcloud-import"
+import { removeSwimCloudCopiesOfMeet, SWIMCLOUD_SOURCE } from "@/lib/swim/swimcloud-import"
 import { parseCourse, parseMeetDate, parseSwimStatus, parseSwimTime, normalizeEventName } from "@/lib/swim/swim-parse"
 import {
   matchRelayResultsToRoster,
@@ -87,6 +87,8 @@ export type MeetImportSummary = {
   nameConfirmations: NameConfirmation[]
   /** Season roster for the coach pairing UI (only when confirmations exist). */
   rosterForPairing: RosterPairingOption[]
+  /** The season the roster is from; the pairing dialog searches other seasons and adds athletes to it. */
+  pairingSeason: string
   /**
    * Each matched swimmer's team, by athlete id, from the rows imported (individual swims and relay
    * legs) — the meet's resultTeams when they name several teams.
@@ -648,7 +650,9 @@ export async function importMeetResults({
   }
 
   // Link any pre-existing (duplicate) swims from this meet so re-imports still
-  // attach to the meet dashboard.
+  // attach to the meet dashboard — but not SwimCloud's extracted ("X") times: a split from a
+  // longer race (the first 50 of a 100 Breast), not a swim in that event, so it stays in the
+  // athlete's history without a row on the meet page.
   if (meetId) {
     const dates = [...swimDates].map((iso) => new Date(iso))
     await prisma.swim.updateMany({
@@ -656,6 +660,7 @@ export async function importMeetResults({
         meetId: null,
         meet: meetName,
         date: { in: dates.length > 0 ? dates : [meetDate] },
+        NOT: { source: SWIMCLOUD_SOURCE, tags: { contains: "X" } },
       },
       data: { meetId },
     })
@@ -695,6 +700,7 @@ export async function importMeetResults({
     statusesMatched: statusEntries.length,
     nameConfirmations,
     rosterForPairing,
+    pairingSeason: season,
     athleteTeams,
   }
 }

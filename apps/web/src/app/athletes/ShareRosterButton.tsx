@@ -23,7 +23,8 @@ export default function ShareRosterButton({
   filters,
   query,
 }: {
-  season: string
+  /** null = every season. */
+  season: string | null
   filters: RosterFilters
   query: string
 }) {
@@ -47,7 +48,8 @@ export default function ShareRosterButton({
     setError(null)
     setOpen(false)
     try {
-      const params = new URLSearchParams({ season })
+      const params = new URLSearchParams()
+      if (season) params.set("season", season)
       for (const [key, value] of Object.entries(filters)) if (value !== "all") params.set(key, value)
       if (query) params.set("q", query)
       const res = await fetch(`/api/roster/${format}?${params.toString()}`)

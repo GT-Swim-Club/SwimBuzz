@@ -115,8 +115,10 @@ export type UpsertRelayEntryInput = {
   event: string
   relayLetter?: string | null
   relayRound?: string
-  gender: "F" | "M"
-  legs: { leg: number; athleteId: string }[]
+  /** "X" = mixed. */
+  gender: "F" | "M" | "X"
+  /** Each leg's own split ("24.81"), optional. */
+  legs: { leg: number; athleteId: string; splitTime?: string }[]
   resultTime?: string
   resultPlace?: number
   seedTime?: string
@@ -132,9 +134,10 @@ function parseRelayInput(input: UpsertRelayEntryInput): RelayTeamInput | null {
       const athleteId = String(leg.athleteId ?? "").trim()
       const legNum = Number(leg.leg)
       if (!athleteId || !Number.isFinite(legNum)) return null
-      return { leg: legNum, athleteId }
+      const splitTime = String(leg.splitTime ?? "").trim()
+      return splitTime ? { leg: legNum, athleteId, splitTime } : { leg: legNum, athleteId }
     })
-    .filter((leg): leg is { leg: number; athleteId: string } => leg !== null)
+    .filter((leg): leg is { leg: number; athleteId: string; splitTime?: string } => leg !== null)
 
   if (legs.length !== 4) return null
   const uniqueAthletes = new Set(legs.map((l) => l.athleteId))
@@ -262,6 +265,9 @@ export async function upsertRelayEntry(meetId: string, input: UpsertRelayEntryIn
   }
 
   const entries = upsertRelayTeamEntries(existing, relayToSave, roster, athleteGenders)
+  // A DQ'd (or otherwise unfinished) relay keeps its leg splits, but its leadoff isn't a swim.
+  const savedRelay = entries[entries.length - 1]
+  const relayUnfinished = Boolean(savedRelay?.resultStatus && !savedRelay.resultTime)
 
   await prisma.meet.update({
     where: { id: meetId },
@@ -277,7 +283,7 @@ export async function upsertRelayEntry(meetId: string, input: UpsertRelayEntryIn
       meet,
       relayToSave.event,
       leg1.athleteId,
-      leg1.splitTime,
+      relayUnfinished ? undefined : leg1.splitTime,
       "relay",
       undefined,
       relayToSave.relayRound ?? ""

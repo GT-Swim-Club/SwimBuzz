@@ -17,10 +17,8 @@ export async function getScraperConnectionFromRequest(req: Request) {
     return null
   }
 
-  if (!isScraperConnectionAlive(connection.lastSeenAt)) {
-    await prisma.scraperConnection.delete({ where: { id: connection.id } }).catch(() => undefined)
-    return null
-  }
+  // Stale rows are left for the daily cleanup cron (pruneStaleScraperConnections), not deleted here.
+  if (!isScraperConnectionAlive(connection.lastSeenAt)) return null
 
   await touchScraperConnection(connection.id)
   return connection

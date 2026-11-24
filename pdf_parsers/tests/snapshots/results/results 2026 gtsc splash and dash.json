@@ -2428,6 +2428,63 @@
     {
       "course": "SCY",
       "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Harsh, Daniel",
+          "splitTime": "24.95"
+        },
+        {
+          "leg": 2,
+          "name": "Selzer, Patrick",
+          "splitTime": "24.50"
+        },
+        {
+          "leg": 3,
+          "name": "Feller, Curtis",
+          "splitTime": "25.92"
+        },
+        {
+          "leg": 4,
+          "name": "Ward, Mark",
+          "splitTime": "23.47"
+        }
+      ],
+      "tags": "",
+      "team": "FSUC",
+      "time": "DQ"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "SCAR-SC",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "SCAR-SC",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
       "event": "400 Free Relay",
       "gender": "F",
       "place": 1,
@@ -2868,6 +2925,42 @@
       "tags": "",
       "team": "GTSC-GA",
       "time": "4:20.85"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "SCAR-SC",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "SCAR-SC",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "UNCCH-NC",
+      "time": "NS"
     },
     {
       "course": "SCY",
@@ -3460,6 +3553,103 @@
       "tags": "",
       "team": "KSU",
       "time": "3:56.71"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "50.81",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "23.99"
+            },
+            {
+              "distance": 100,
+              "splitTime": "26.82"
+            }
+          ]
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "55.29",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "27.75"
+            },
+            {
+              "distance": 100,
+              "splitTime": "27.54"
+            }
+          ]
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "57.77",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "28.19"
+            },
+            {
+              "distance": 100,
+              "splitTime": "29.58"
+            }
+          ]
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "1:11.69",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "38.59"
+            },
+            {
+              "distance": 100,
+              "splitTime": "33.10"
+            }
+          ]
+        }
+      ],
+      "tags": "",
+      "team": "SCAR-SC",
+      "time": "DQ"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "SCAR-SC",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "UNCCH-NC",
+      "time": "NS"
     }
   ],
   "results": [
@@ -6910,8 +7100,8 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Riessen, Cassie",
-      "place": null,
+      "name": "van Riessen, Cassie",
+      "place": 68,
       "tags": "",
       "team": "UNCCH-NC",
       "time": "31.93"

@@ -11,7 +11,7 @@ import {
   type RelayRound,
   sanitizeRelaySplitTime,
 } from "@/lib/meet/relay-results"
-import { parseMeetDate, parseSwimTime } from "@/lib/swim/swim-parse"
+import { parseMeetDate, parseSwimStatus, parseSwimTime } from "@/lib/swim/swim-parse"
 
 type MeetLike = Pick<Meet, "id" | "name" | "course" | "startsAt" | "endsAt" | "createdAt">
 
@@ -152,6 +152,8 @@ export async function importRelayLeadoffSwims({
   let imported = 0
 
   for (const row of relayResults) {
+    // A DQ'd (or otherwise unfinished) relay's leadoff split isn't an official swim.
+    if (parseSwimStatus(row.time)) continue
     const leg1 = row.relaySwimmers.find((s) => s.leg === 1)
     if (!leg1) continue
     const splitTime = sanitizeRelaySplitTime(leg1.splitTime)

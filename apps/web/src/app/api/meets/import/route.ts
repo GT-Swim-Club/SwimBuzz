@@ -21,6 +21,7 @@ import { isClientDisconnected, throwIfDisconnected } from "@/lib/client-disconne
 import { getSession } from "@/lib/auth/session"
 import { coerceTeamScores, isStaffRole } from "@swimbuzz/shared"
 import { Prisma } from "@prisma/client"
+import { addPairedAthletesToSeason } from "@/lib/athlete/paired-athlete-seasons"
 
 function isUpload(value: unknown): value is Blob {
   return value != null && typeof value !== "string" && typeof (value as Blob).arrayBuffer === "function"
@@ -95,6 +96,9 @@ async function applyParsedMeetPdf(input: {
   const meetName =
     meet?.name ?? ((parsed.meet_name ?? "").trim() || fileName.replace(/\.pdf$/i, ""))
   const meetDate = meet?.startsAt ?? resolveMeetDate(parsed.meet_date) ?? new Date()
+
+  // Athletes paired from another season join this one before anything reads its roster.
+  await addPairedAthletesToSeason(nameMappings, season)
 
   // Women and men scored separately: the results' combined places and points are recomputed.
   const byGender = meet?.scoreByGender

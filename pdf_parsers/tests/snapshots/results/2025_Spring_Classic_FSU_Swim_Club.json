@@ -524,6 +524,43 @@
       "course": "SCY",
       "entryType": "relay_team",
       "event": "200 Medley Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "age": 18,
+          "leg": 1,
+          "name": "Greaux, Lauren",
+          "splitTime": "31.32"
+        },
+        {
+          "age": 18,
+          "leg": 2,
+          "name": "Bontrager, Allison",
+          "splitTime": "38.83"
+        },
+        {
+          "age": 18,
+          "leg": 3,
+          "name": "Britto, Camryn",
+          "splitTime": "32.03"
+        },
+        {
+          "age": 18,
+          "leg": 4,
+          "name": "Davey, Olivia",
+          "splitTime": "28.62"
+        }
+      ],
+      "tags": "",
+      "team": "FSUC",
+      "time": "DQ"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
       "gender": "M",
       "place": 1,
       "points": 40.0,
@@ -722,14 +759,12 @@
         {
           "age": 20,
           "leg": 1,
-          "name": "Conners, Jack",
-          "splitTime": "24.92"
+          "name": "Conners, Jack"
         },
         {
           "age": 18,
           "leg": 2,
-          "name": "Cresap, Brandon",
-          "splitTime": "24.40"
+          "name": "Cresap, Brandon"
         },
         {
           "age": 21,
@@ -1870,6 +1905,51 @@
       "tags": "",
       "team": "KSU",
       "time": "2:01.32"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "age": 19,
+          "leg": 1,
+          "name": "Jeon, Peyton"
+        },
+        {
+          "age": 20,
+          "leg": 2,
+          "name": "Schmidt, Logan"
+        },
+        {
+          "age": 18,
+          "leg": 3,
+          "name": "Payne, Tristan"
+        },
+        {
+          "age": 19,
+          "leg": 4,
+          "name": "Sanders, Maxwell"
+        }
+      ],
+      "tags": "",
+      "team": "AUB",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "FLOR",
+      "time": "NS"
     }
   ],
   "results": [

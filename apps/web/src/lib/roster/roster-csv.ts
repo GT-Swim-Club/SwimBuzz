@@ -10,6 +10,8 @@ export type ParsedRosterCsvRow = {
   dob?: Date
   year?: string
   email?: string
+  /** The row's email when it isn't a valid @gatech.edu address (not imported). */
+  invalidEmail?: string
   gender: "M" | "F"
   preferredName: string | null
   /**
@@ -387,8 +389,9 @@ export function parseRosterRecords(rawRecords: string[][]): RosterCsvParseResult
       continue
     }
 
-    // Only GT emails are imported; other domains are ignored for that row.
-    const email = normalizeGatechEmail(cell(cells, headers, "email")) ?? undefined
+    // Only GT emails are imported; a row creating a new athlete needs one (roster-import.ts).
+    const emailRaw = cell(cells, headers, "email").trim()
+    const email = normalizeGatechEmail(emailRaw) ?? undefined
     const gtid = cell(cells, headers, "gtid") || undefined
     const dob = parseDob(cell(cells, headers, "dob"))
     const year = cell(cells, headers, "year") || undefined
@@ -420,7 +423,7 @@ export function parseRosterRecords(rawRecords: string[][]): RosterCsvParseResult
       firstName,
       lastName,
       gender,
-      ...(email ? { email } : {}),
+      ...(email ? { email } : emailRaw ? { invalidEmail: emailRaw } : {}),
       ...(gtid ? { gtid } : {}),
       ...(dob ? { dob } : {}),
       ...(year ? { year } : {}),

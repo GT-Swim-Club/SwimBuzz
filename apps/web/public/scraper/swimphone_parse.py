@@ -50,6 +50,41 @@ class SwimPhoneParseError(Exception):
     pass
 
 
+class SwimPhoneBrowserClosedError(SwimPhoneParseError):
+    """The coach closed the scraper's SwimPhone browser window mid-import."""
+
+
+BROWSER_CLOSED_ERROR = (
+    "The SwimPhone browser window was closed, so the import stopped. Run the import "
+    "again and leave the window open until it finishes."
+)
+
+
+def _browser_closed(page) -> bool:
+    """Whether the scraper's SwimPhone window (or the whole browser) has been closed."""
+    try:
+        if page.is_closed():
+            return True
+        browser = page.context.browser
+        return browser is not None and not browser.is_connected()
+    except Exception:
+        return True
+
+
+async def _goto_html(page, url: str):
+    """Navigate and read the page, as (response, html). Closing the browser mid-navigation
+    surfaces as SwimPhoneBrowserClosedError instead of Playwright's raw "Target closed"."""
+    if _browser_closed(page):
+        raise SwimPhoneBrowserClosedError(BROWSER_CLOSED_ERROR)
+    try:
+        response = await page.goto(url, wait_until="domcontentloaded", timeout=60000)
+        return response, await page.content()
+    except Exception:
+        if _browser_closed(page):
+            raise SwimPhoneBrowserClosedError(BROWSER_CLOSED_ERROR) from None
+        raise
+
+
 class SwimPhoneAccessError(SwimPhoneParseError):
     """Raised when SwimPhone blocks the scraper (datacenter IP, bot detection, etc.)."""
 
@@ -75,6 +110,10 @@ class SwimPhoneEvent:
     results_url: str | None
     is_relay: bool = False
     date: str | None = None
+    # The event a swim's splits page names was read (see verify_event_from_splits), and
+    # whether it differed from the label SwimPhone's event order / results header gave.
+    verified: bool = False
+    relabeled: bool = False
 
 
 # Stroke labels as they appear in the relay splits swimmer table
@@ -287,6 +326,110 @@ def parse_event_order(html: str, smid: int, meet_default: str) -> list[SwimPhone
         )
 
     return events
+
+
+# "200 Y IM", "50 L Free", "200 Free Relay" — the start of a splits page's event line, before
+# its heat / lane / round.
+_SPLITS_EVENT = re.compile(r"^(\d{2,4})\s*([YLM])?\s+([A-Za-z][A-Za-z ]*?)\s*$", re.I)
+_SPLITS_EVENT_TAIL = re.compile(r"\b(?:Heat|Lane|Prelims?|Finals?|Swim-?offs?)\b.*$", re.I)
+
+
+def parse_splits_page_event(html: str) -> tuple[str, str | None, str, bool] | None:
+    """The event a SwimPhone splits page names, as (distance, course code or None, label,
+    is_relay) — ("200", "Y", "200 IM", False) or ("200", None, "200 Free Relay", True).
+
+    Each swim's splits page carries its real event even when the meet's event list on
+    SwimPhone is out of step with its results (Raleighwood 2024: "Event 29: Women 500 Y
+    Free" lists the 200 IM)."""
+    soup = BeautifulSoup(html, "html.parser")
+    for heading in soup.find_all("h3"):
+        first = next(heading.stripped_strings, "")
+        match = _SPLITS_EVENT.match(_SPLITS_EVENT_TAIL.sub("", first).strip())
+        if not match:
+            continue
+        distance, code, stroke_raw = match.groups()
+        stroke_raw = re.sub(r"\s+", " ", stroke_raw)
+        if "relay" in stroke_raw.lower():
+            return distance, (code or "").upper() or None, f"{distance} {stroke_raw}", True
+        label = normalize_event(distance, stroke_raw)
+        if label:
+            return distance, (code or "").upper() or None, label, False
+    return None
+
+
+async def verify_event_from_splits(access: Any, results_html: str, event: SwimPhoneEvent) -> None:
+    """Relabel ``event`` from one of its swims' splits pages when SwimPhone's event list
+    names another event, so its results import under the event actually swum. Leaves the
+    event as it was when the results link no splits or the page can't be read."""
+    soup = BeautifulSoup(results_html, "html.parser")
+    hrefs = [
+        (link.get("href") or "").strip()
+        for link in soup.select('a[href*="splits.cfm"]')
+        if re.search(r"[?&](?:mrid|rid)=\d+", link.get("href") or "")
+    ]
+    if not hrefs:
+        return
+    # A relay's splits links carry rid, an individual swim's mrid; prefer the kind expected.
+    want = r"[?&]rid=\d+" if event.is_relay else r"[?&]mrid=\d+"
+    href = next((h for h in hrefs if re.search(want, h)), hrefs[0])
+    try:
+        parsed = parse_splits_page_event(await access.goto(urljoin(BASE_URL, href)))
+    except SwimPhoneBrowserClosedError:
+        raise
+    except Exception:
+        return
+    if not parsed:
+        return
+    distance, code, label, is_relay = parsed
+    event.verified = True
+    if label == event.label and is_relay == event.is_relay:
+        return
+    event.relabeled = True
+    event.label = label
+    event.distance = distance
+    event.is_relay = is_relay
+    event.stroke = "Relay" if is_relay else (_normalize_stroke(label.split(" ", 1)[1]) or event.stroke)
+    if code:
+        event.course = {"Y": "SCY", "L": "LCM", "M": "SCM"}[code]
+
+
+def _gender_code(text: str) -> str:
+    """SwimPhone's Sex column ("Women", "Men", "Mixed", …) as F / M / X, or "" when unknown."""
+    g = text.strip().lower()
+    if g in {"women", "woman", "girls", "girl", "female", "f", "w"}:
+        return "F"
+    if g in {"men", "man", "boys", "boy", "male", "m"}:
+        return "M"
+    if g in {"mixed", "x", "co-ed", "coed", "open"}:
+        return "X"
+    return ""
+
+
+def event_order_from_events(events: list[SwimPhoneEvent]) -> dict[str, Any] | None:
+    """The meet's order of events from SwimPhone's event order page, in the shape the PDF
+    results parser gives (``{"sessions": [{"label", "rows": [{women, event, men}]}]}``) — the
+    meet page's event numbers when nothing else (a packet, a results PDF) has given them. One
+    row per event: its women's and men's numbers (a mixed event's number is both).
+
+    Once any event's splits showed SwimPhone's labels are out of step with its results, only
+    the events whose splits were read are trusted."""
+    if any(e.relabeled for e in events):
+        events = [e for e in events if e.verified]
+    rows: dict[str, dict[str, Any]] = {}
+    for event in events:
+        gender = _gender_code(event.gender)
+        row = rows.setdefault(event.label, {"women": None, "event": event.label, "men": None})
+        if gender in ("F", "X", "") and row["women"] is None:
+            row["women"] = event.event_num
+        if gender in ("M", "X", "") and row["men"] is None:
+            row["men"] = event.event_num
+    if not rows:
+        return None
+    ordered = sorted(
+        rows.values(),
+        key=lambda r: min(n for n in (r["women"], r["men"]) if n is not None),
+    )
+    return {"sessions": [{"label": "Order of Events", "rows": ordered}]}
 
 
 def _is_captcha_page(html: str, title: str) -> bool:
@@ -932,7 +1075,8 @@ def parse_event_results_html(
 
     header = soup.find(["h3", "h4"])
     event_label = event.label
-    if header:
+    # A splits page already named the event; the results header may be another event's.
+    if header and not event.verified:
         header_text = header.get_text(" ", strip=True)
         parsed = re.search(
             r"Event\s+\d+:\s*(?:Women|Men|Mixed)\s+(\d+)\s*([YLM])?\s*(.+)",
@@ -1102,12 +1246,56 @@ def _place_from_cell(cells: list, idx: int | None) -> int | None:
     return parse_place_token(cells[idx].get_text(" ", strip=True))
 
 
+def _relay_round_status_indices(
+    headers: list[str],
+) -> tuple[int | None, int | None, int | None]:
+    """(prelim, final, generic) result-time column indices of a relay results table."""
+    prelim_idx: int | None = None
+    final_idx: int | None = None
+    generic_idx: int | None = None
+    for i, h in enumerate(headers):
+        if "time" not in h or "seed" in h:
+            continue
+        if "final" in h:
+            final_idx = i
+        elif "prelim" in h:
+            prelim_idx = i
+        elif generic_idx is None:
+            generic_idx = i
+    return prelim_idx, final_idx, generic_idx
+
+
+def _status_from_cell(cells: list, idx: int | None) -> str | None:
+    if idx is None or idx >= len(cells):
+        return None
+    status = parse_status_token(cells[idx].get_text(" ", strip=True))
+    return status if status and status != "NT" else None
+
+
+def relay_status_for_session(entry: dict[str, Any], session: str, *, timed_finals: bool) -> str | None:
+    """The DQ/NS/… a relay finished a session's swim with, from its results-table row.
+
+    A relay's splits page never says it was disqualified — a DQ'd relay's page has full
+    splits — so this is the only place its status shows up.
+    """
+    if timed_finals:
+        return entry.get("status") or entry.get("finalStatus") or entry.get("prelimStatus")
+    if session == "finals":
+        return entry.get("finalStatus") or entry.get("status")
+    return entry.get("prelimStatus") or entry.get("status")
+
+
 def parse_team_relay_split_rids(html: str, team: str | None) -> list[dict[str, Any]]:
-    """Return relay splits-page ids with finish place, optionally filtered to one club."""
+    """Return relay splits-page ids with finish place (and any DQ/NS/… status), optionally
+    filtered to one club."""
     team_norm = (team or "").strip().lower()
     if not team_norm:
-        return [{"rid": rid, "place": None} for rid in parse_relay_split_rids(html)]
+        entries = _team_relay_split_rid_rows(html, team_norm)
+        return entries or [{"rid": rid, "place": None} for rid in parse_relay_split_rids(html)]
+    return _team_relay_split_rid_rows(html, team_norm)
 
+
+def _team_relay_split_rid_rows(html: str, team_norm: str) -> list[dict[str, Any]]:
     soup = BeautifulSoup(html, "html.parser")
     entries: list[dict[str, Any]] = []
     seen: set[str] = set()
@@ -1117,6 +1305,7 @@ def parse_team_relay_split_rids(html: str, team: str | None) -> list[dict[str, A
             continue
         club_i = headers.index("club") if "club" in headers else headers.index("team")
         prelim_pi, final_pi, generic_pi = _result_place_indices(headers)
+        prelim_ti, final_ti, generic_ti = _relay_round_status_indices(headers)
         seed_idx = _seed_time_index(headers)
         name_i = headers.index("name") if "name" in headers else None
         prelim_ht_idx, final_ht_idx, generic_ht_idx = _round_heat_lane_indices(headers)
@@ -1209,6 +1398,14 @@ def parse_team_relay_split_rids(html: str, team: str | None) -> list[dict[str, A
                     seed_time = _parse_seed_from_cells(cells, seed_idx)
                     if seed_time:
                         item["seedTime"] = seed_time
+                    for key, idx in (
+                        ("prelimStatus", prelim_ti),
+                        ("finalStatus", final_ti),
+                        ("status", generic_ti),
+                    ):
+                        status = _status_from_cell(cells, idx)
+                        if status:
+                            item[key] = status
                     entries.append(item)
     return entries
 
@@ -1438,12 +1635,20 @@ def parse_relay_result(
     lane: int | None = None,
     heat_total: int | None = None,
     seed_time: str | None = None,
+    status: str | None = None,
 ) -> dict | None:
-    """Relay team result from a splits page — roster optional if finish time exists."""
+    """Relay team result from a splits page — roster optional if finish time exists.
+
+    With a ``status`` (DQ, NS… from the results table) the relay is kept with that status as
+    its time and no place, plus whatever swimmers and splits its page lists — a DQ'd relay's
+    page has full splits, so its last split must never be read as a legal finish.
+    """
     soup = BeautifulSoup(html, "html.parser")
-    finish = _parse_relay_finish_time(soup)
+    finish = status or _parse_relay_finish_time(soup)
     if not finish:
         return None
+    if status:
+        place = None
     swimmers = _parse_relay_swimmers(soup)
     total = _relay_total_distance(event_label)
     leg_details = _leg_split_details(soup, total) if total else {}
@@ -1465,14 +1670,7 @@ def parse_relay_result(
             }
     swimmers = [by_leg[k] for k in sorted(by_leg)]
     event = re.sub(r"\s+", " ", event_label.strip())
-    gender_code = ""
-    g = gender.strip().lower()
-    if g in {"women", "girl", "female", "f"}:
-        gender_code = "F"
-    elif g in {"men", "boy", "male", "m"}:
-        gender_code = "M"
-    elif g in {"mixed", "x", "co-ed", "coed"}:
-        gender_code = "X"
+    gender_code = _gender_code(gender)
     result: dict[str, Any] = {
         "entryType": "relay_team",
         "event": event,
@@ -1536,7 +1734,7 @@ def parse_relay_leadoff(html: str, course: str, event_label: str = "") -> dict |
 
 
 async def _fetch_page_html(page, url: str) -> str:
-    response = await page.goto(url, wait_until="domcontentloaded", timeout=60000)
+    response, html = await _goto_html(page, url)
     if response and response.status == 403:
         raise SwimPhoneAccessError(
             "SwimPhone blocked this request (403). Open Run scraper in the app, "
@@ -1544,7 +1742,7 @@ async def _fetch_page_html(page, url: str) -> str:
         )
     if response and response.status >= 400:
         raise SwimPhoneParseError(f"SwimPhone returned HTTP {response.status} for {url}")
-    return await page.content()
+    return html
 
 
 ARCHIVE_ACCESS_ERROR = (
@@ -1570,8 +1768,7 @@ class _ArchiveAccess:
 
     async def goto(self, url: str) -> str:
         page = self.page
-        await page.goto(url, wait_until="domcontentloaded", timeout=60000)
-        html = await page.content()
+        _, html = await _goto_html(page, url)
         if not _is_captcha_page(html, await page.title()):
             return html
         if self.declined:
@@ -1597,6 +1794,9 @@ class _ArchiveAccess:
         try:
             while loop.time() < deadline:
                 await asyncio.sleep(2)
+                # Closing the window means the coach gave up — stop now, not after the timeout.
+                if _browser_closed(page):
+                    raise SwimPhoneBrowserClosedError(BROWSER_CLOSED_ERROR)
                 try:
                     if _is_captcha_page(await page.content(), await page.title()):
                         continue
@@ -1631,6 +1831,7 @@ async def scrape_swimphone_meet(
     captcha = False
     captcha_error = ARCHIVE_ACCESS_ERROR
     events_with_results: list[SwimPhoneEvent] = []
+    event_order: dict[str, Any] | None = None
     meet_name = ""
     meet_date: str | None = None
     meet_default = "SCY"
@@ -1705,6 +1906,7 @@ async def scrape_swimphone_meet(
                 captcha_error = str(exc)
                 break
 
+            await verify_event_from_splits(access, html, event)
             if event.is_relay:
                 relay_entries = parse_team_relay_split_rids(html, team)
                 relay_result_found = False
@@ -1728,24 +1930,33 @@ async def scrape_swimphone_meet(
                         relay_heat, relay_lane, relay_heat_total = _relay_entry_heat_lane(
                             entry, sess, timed_finals=timed_finals_event
                         )
+                        relay_status = relay_status_for_session(
+                            entry, sess, timed_finals=timed_finals_event
+                        )
                         splits_url = f"{BASE_URL}splits.cfm?smid={smid}&rid={rid}&s={sess}"
+                        relay_kwargs: dict[str, Any] = dict(
+                            course=event.course,
+                            event_label=event.label,
+                            tags=tag,
+                            place=relay_place,
+                            relay_letter=relay_letter,
+                            gender=event.gender,
+                            heat=relay_heat,
+                            lane=relay_lane,
+                            heat_total=relay_heat_total,
+                            seed_time=entry.get("seedTime"),
+                            status=relay_status,
+                        )
                         try:
                             splits_html = await access.goto(splits_url)
-                            relay_full = parse_relay_result(
-                                splits_html,
-                                course=event.course,
-                                event_label=event.label,
-                                tags=tag,
-                                place=relay_place,
-                                relay_letter=relay_letter,
-                                gender=event.gender,
-                                heat=relay_heat,
-                                lane=relay_lane,
-                                heat_total=relay_heat_total,
-                                seed_time=entry.get("seedTime"),
-                            )
+                            relay_full = parse_relay_result(splits_html, **relay_kwargs)
+                        except SwimPhoneBrowserClosedError:
+                            raise
                         except Exception:
-                            relay_full = None
+                            # A DQ/NS relay is still worth keeping without its swimmers.
+                            relay_full = (
+                                parse_relay_result("", **relay_kwargs) if relay_status else None
+                            )
                         await asyncio.sleep(0.2)
                         if relay_full:
                             if event.date:
@@ -1778,6 +1989,8 @@ async def scrape_swimphone_meet(
                             timed_finals=timed_finals_event,
                         )
                         rows = merge_swimphone_result_rows(rows, sess_rows)
+                    except SwimPhoneBrowserClosedError:
+                        raise
                     except Exception:
                         pass
                     await asyncio.sleep(0.2)
@@ -1803,6 +2016,8 @@ async def scrape_swimphone_meet(
                         splits = parse_individual_splits(splits_html)
                         if splits:
                             r["splits"] = splits
+                    except SwimPhoneBrowserClosedError:
+                        raise
                     except Exception:
                         pass
                     await asyncio.sleep(0.2)
@@ -1812,6 +2027,9 @@ async def scrape_swimphone_meet(
                 await asyncio.sleep(0.35)
 
         await browser.close()
+
+    # After the events were checked against their splits pages.
+    event_order = event_order_from_events(events)
 
     if captcha and not all_results:
         raise SwimPhoneCaptchaError(captcha_error)
@@ -1857,6 +2075,7 @@ async def scrape_swimphone_meet(
         "course": default_course,
         "results": deduped,
         "relay_results": deduped_relays,
+        "event_order": event_order,
         "events_scraped": len(events_with_results) if not captcha else None,
         "captcha_limited": captcha,
         "incomplete_relays": incomplete_relays,

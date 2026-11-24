@@ -8,6 +8,13 @@ import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
 import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
 import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
+import { formatTime, parseTime } from "@/lib/utils"
+import {
+  isResultStatusesSummary,
+  resultKey,
+  type MeetResultEntry,
+  type ResultSplit,
+} from "@/lib/meet/meet-sheet-summary"
 
 export type AddMeetSwimInput = {
   athleteId: string
@@ -17,6 +24,62 @@ export type AddMeetSwimInput = {
   meet: string
   meetId: string
   timeMs: number
+  /** Prelims ("P") or finals ("F"); "" or absent for a timed final. */
+  round?: "P" | "F" | ""
+  /** The 50 splits in order, as lap times or cumulative marks ("" where missing). */
+  splits?: string[]
+}
+
+/** Lap times for each 50 from what was typed: cumulative marks (rising to the final time) become laps. */
+function manualSwimSplits(raw: string[] | undefined, timeMs: number): ResultSplit[] {
+  const marks = (raw ?? []).map((t) => {
+    const ms = t.trim() ? Math.round(parseTime(t)) : NaN
+    return Number.isFinite(ms) && ms > 0 ? ms : null
+  })
+  if (marks.every((ms) => ms == null)) return []
+  const complete = marks.every((ms) => ms != null)
+  const values = marks as number[]
+  const rising = complete && values.every((ms, i) => i === 0 || ms > values[i - 1])
+  const lapsSum = complete ? values.reduce((sum, ms) => sum + ms, 0) : 0
+  const cumulative =
+    rising &&
+    values.length > 1 &&
+    Math.abs(values[values.length - 1] - timeMs) <= 200 &&
+    Math.abs(lapsSum - timeMs) > 200
+  return marks.flatMap((ms, i) => {
+    if (ms == null) return []
+    const lap = cumulative && i > 0 ? ms - values[i - 1] : ms
+    return [{ distance: (i + 1) * 50, splitTime: formatTime(lap) }]
+  })
+}
+
+/** Saves a manual swim's splits on the meet's result details, replacing that round's splits. */
+async function saveManualSwimSplits(
+  meetId: string,
+  athleteId: string,
+  event: string,
+  round: "P" | "F" | "",
+  splits: ResultSplit[]
+) {
+  const [meet, athlete] = await Promise.all([
+    prisma.meet.findUnique({ where: { id: meetId }, select: { resultStatusesSummary: true } }),
+    prisma.athlete.findUnique({ where: { id: athleteId }, select: { firstName: true, lastName: true } }),
+  ])
+  if (!meet || !athlete) return
+  const entries = isResultStatusesSummary(meet.resultStatusesSummary) ? meet.resultStatusesSummary.entries : []
+  const key = resultKey(athleteId, event, false)
+  const field = round === "P" ? "prelimSplits" : round === "F" ? "finalSplits" : "splits"
+  const index = entries.findIndex(
+    (e) => !e.isRelayLeadoff && !e.isSwimOff && resultKey(e.athleteId, e.event, false) === key
+  )
+  const next: MeetResultEntry[] =
+    index >= 0
+      ? entries.map((e, i) => (i === index ? { ...e, [field]: splits } : e))
+      : [...entries, { athleteId, athleteName: `${athlete.lastName}, ${athlete.firstName}`, event, [field]: splits }]
+  await prisma.meet.update({
+    where: { id: meetId },
+    data: { resultStatusesSummary: { entries: next } as unknown as Prisma.InputJsonValue },
+  })
 }
 
 /** Same logic as POST /api/swims (used by both web and mobile) — kept in
@@ -41,13 +104,18 @@ export async function addMeetSwim(input: AddMeetSwimInput) {
     date,
     source: "manual",
     meet: input.meet,
-    meetId: input.meetId})
+    meetId: input.meetId,
+    tags: input.round === "P" || input.round === "F" ? input.round : ""})
+  const splits = input.meetId ? manualSwimSplits(input.splits, base.timeMs) : []
 
   let occurrence = await nextSwimOccurrence(prisma, base)
 
   for (let attempt = 0; attempt < 5; attempt++) {
     try {
       const created = await prisma.swim.create({ data: { ...base, occurrence } })
+      if (created.meetId && splits.length > 0) {
+        await saveManualSwimSplits(created.meetId, athleteId, base.event, input.round ?? "", splits)
+      }
       if (created.meetId) await syncTeamRecordsSafely()
       revalidatePath("/meets/[id]", "page")
       return created

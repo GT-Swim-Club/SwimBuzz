@@ -41,7 +41,8 @@ INVALID_TIMES = {"NT", "NQT", "NS", "DNS", "DQ", "DFS", "DNF", "SCR"}
 # over a partial "NS" match; splice into a larger pattern as needed.
 INVALID_TIME_PATTERN = "|".join(sorted(INVALID_TIMES, key=len, reverse=True))
 
-_VALID_RELAY_LETTERS = frozenset({"A", "B", "C", "D"})
+# Any single letter: Hy-Tek letters a club's relays as far as it needs (A, B, … G).
+_VALID_RELAY_LETTERS = frozenset("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 # Real Unicode ligature glyphs (U+FB00-FB06) some Hy-Tek PDFs embed directly —
 # expand to their letter pairs at the text-extraction boundary so downstream
@@ -78,7 +79,7 @@ _STROKE_ALIAS_KEYS.setdefault("butterly", "Fly")
 
 
 def normalize_relay_letter(letter: str | None) -> str | None:
-    """Return A–D relay letter, or None when missing / not a team letter."""
+    """Return the relay letter (A–Z), or None when missing / not a team letter."""
     token = (letter or "").strip().upper()
     if token in _VALID_RELAY_LETTERS:
         return token

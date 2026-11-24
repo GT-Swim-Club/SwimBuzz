@@ -4,7 +4,7 @@ import {
   type RosterAthlete,
 } from "@/lib/athlete/athlete-match"
 import type { ResultSplit, SheetEntry } from "@/lib/meet/meet-sheet-summary"
-import { canonicalizeStrokeEvent, normalizeEventName, parseSwimTime } from "@/lib/swim/swim-parse"
+import { canonicalizeStrokeEvent, normalizeEventName, parseSwimStatus, parseSwimTime } from "@/lib/swim/swim-parse"
 
 export type ParsedRelaySwimmer = {
   leg: number
@@ -103,17 +103,18 @@ export function relayGenderLabel(gender: RelayGender): string {
 }
 
 /** An intrasquad relay's side + letter ("White A", "Gold C"). */
-const SIDE_RELAY_LETTER = /^([A-Za-z][A-Za-z'&.\- ]{0,23}?)\s+([A-D])$/i
+const SIDE_RELAY_LETTER = /^([A-Za-z][A-Za-z'&.\- ]{0,23}?)\s+([A-Z])$/i
 const NOT_A_SIDE = new Set(["relay", "team"])
 
 /**
- * Valid relay team letter, or null when missing / not A–D. Intrasquad relays keep their side
+ * Valid relay team letter (any single letter — clubs enter A, B, … as far as G and beyond), or
+ * null when missing / not a letter. Intrasquad relays keep their side
  * ("White A", "Gold A") so two sides' A relays in one event stay separate teams.
  */
 export function normalizeRelayLetter(relayLetter: string | null | undefined): string | null {
   const raw = (relayLetter ?? "").trim()
   const letter = raw.toUpperCase()
-  if (letter === "A" || letter === "B" || letter === "C" || letter === "D") return letter
+  if (/^[A-Z]$/.test(letter)) return letter
   const sided = raw.match(SIDE_RELAY_LETTER)
   if (sided) {
     const side = sided[1].trim().replace(/\s+/g, " ")
@@ -356,7 +357,10 @@ export function matchRelayResultsToRoster(
       `Relay ${row.relayLetter ?? ""}`.trim() ||
       event
 
-    const place = row.place != null && row.place > 0 ? row.place : undefined
+    // A relay that didn't finish legally (DQ, NS, SCR…) keeps its status in place of a time:
+    // no place or points, and nothing downstream reads it as a swum time.
+    const status = parseSwimStatus(row.time)
+    const place = !status && row.place != null && row.place > 0 ? row.place : undefined
     const heat = row.heat != null && row.heat > 0 ? row.heat : undefined
     const lane = row.lane != null ? row.lane : undefined
     const heatTotal = row.heatTotal != null && heat != null ? row.heatTotal : undefined
@@ -371,9 +375,9 @@ export function matchRelayResultsToRoster(
       relayRound,
       gender,
       relaySwimmers,
-      resultTime: row.time,
+      ...(status ? { resultStatus: status } : { resultTime: row.time }),
       resultPlace: place,
-      ...(row.points != null ? { resultPoints: row.points } : {}),
+      ...(row.points != null && !status ? { resultPoints: row.points } : {}),
       resultTags: row.tags ?? "",
       manual: false,
       ...(heat != null ? { heat } : {}),
@@ -577,13 +581,16 @@ export function preserveRelayEntryFields(
     finalTime: existing.finalTime ?? updated.finalTime,
     prelimPlace: existing.prelimPlace ?? updated.prelimPlace,
     finalPlace: existing.finalPlace ?? updated.finalPlace,
-    resultStatus: existing.resultStatus ?? updated.resultStatus,
+    // A result is a time or a status, never both: whichever the update brings replaces the other.
+    resultStatus: updated.resultTime
+      ? updated.resultStatus
+      : (updated.resultStatus ?? existing.resultStatus),
     prelimStatus: existing.prelimStatus ?? updated.prelimStatus,
     finalStatus: existing.finalStatus ?? updated.finalStatus,
     resultTags: existing.resultTags ?? updated.resultTags,
     resultRound: existing.resultRound ?? updated.resultRound,
-    resultTime: updated.resultTime ?? existing.resultTime,
-    resultPlace: updated.resultPlace ?? existing.resultPlace,
+    resultTime: updated.resultStatus ? undefined : (updated.resultTime ?? existing.resultTime),
+    resultPlace: updated.resultStatus ? undefined : (updated.resultPlace ?? existing.resultPlace),
     manual: updated.manual ?? existing.manual,
   }
 }

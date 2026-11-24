@@ -5,12 +5,15 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   type FormEvent,
   type ReactNode,
 } from "react"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { useImportTask } from "@/components/ui/ImportTaskProvider"
+import AthletePairingSelect from "@/components/meet/AthletePairingSelect"
+import AddAthleteDialog, { type AddedAthlete } from "@/components/athlete/AddAthleteDialog"
 
 /**
  * App-level host for the "Pair unmatched athletes" step after a results or sheet import.
@@ -29,11 +32,18 @@ export type RosterPairingOption = {
   id: string
   firstName: string
   lastName: string
+  /** Set for "Search all seasons" athletes, to tag the ones from other seasons. */
+  seasons?: string[]
 }
 
 export type PairingRequest = {
   confirmations: NameConfirmation[]
   roster: RosterPairingOption[]
+  /**
+   * The roster's season. When set, each dropdown can "Search all seasons" (an athlete paired from
+   * another season is added to this one by the import) and create an athlete on this roster.
+   */
+  season?: string
   description: string
   /** What one occurrence of a name is, singular and plural, e.g. ["result", "results"]. */
   occurrenceNoun: [string, string]
@@ -76,10 +86,59 @@ export function useBlockAthletePairing(blocked: boolean) {
 
 let nextRequestId = 1
 
+/** First and last name from a results name: "Page, Cole M" or "Cole Page". */
+function splitResultName(name: string): { firstName: string; lastName: string } {
+  const trimmed = name.trim().replace(/\s+/g, " ")
+  if (trimmed.includes(",")) {
+    const [last, ...rest] = trimmed.split(",")
+    return { firstName: rest.join(" ").trim().split(" ")[0] ?? "", lastName: last.trim() }
+  }
+  const parts = trimmed.split(" ")
+  if (parts.length < 2) return { firstName: trimmed, lastName: "" }
+  return { firstName: parts[0], lastName: parts.slice(1).join(" ") }
+}
+
+/** "Cole Page" for a results name like "Page, Cole M". */
+function displayName(name: string): string {
+  const { firstName, lastName } = splitResultName(name)
+  return [firstName, lastName].filter(Boolean).join(" ")
+}
+
+type AthleteListRow = { id: string; firstName: string; lastName: string; seasons?: string[] }
+
+const byName = (a: RosterPairingOption, b: RosterPairingOption) =>
+  a.lastName.localeCompare(b.lastName) || a.firstName.localeCompare(b.firstName)
+
 export default function AthletePairingProvider({ children }: { children: ReactNode }) {
   const { startTask } = useImportTask()
   const [queue, setQueue] = useState<QueuedRequest[]>([])
   const [blockers, setBlockers] = useState(0)
+  /** Every athlete, all seasons — fetched the first time a dropdown asks, per batch of requests. */
+  const [allAthletes, setAllAthletes] = useState<RosterPairingOption[] | null>(null)
+  const [allAthletesError, setAllAthletesError] = useState<string | null>(null)
+  const loadingAll = useRef(false)
+  /** The name whose "Create athlete" dialog is open (the pairing dialog hides meanwhile). */
+  const [creating, setCreating] = useState<string | null>(null)
+
+  const loadAllAthletes = useCallback(() => {
+    if (loadingAll.current) return
+    loadingAll.current = true
+    setAllAthletesError(null)
+    fetch("/api/athletes")
+      .then(async (res) => {
+        if (!res.ok) throw new Error()
+        const rows = (await res.json()) as AthleteListRow[]
+        setAllAthletes(
+          rows
+            .map((a) => ({ id: a.id, firstName: a.firstName, lastName: a.lastName, seasons: a.seasons ?? [] }))
+            .sort(byName)
+        )
+      })
+      .catch(() => {
+        loadingAll.current = false
+        setAllAthletesError("Couldn't load athletes from other seasons")
+      })
+  }, [])
 
   const requestPairing = useCallback((request: PairingRequest) => {
     const selections: Record<string, string> = {}
@@ -101,6 +160,9 @@ export default function AthletePairingProvider({ children }: { children: ReactNo
 
   function remove(id: number) {
     setQueue((prev) => prev.filter((r) => r.id !== id))
+    // Each batch of names reloads other seasons fresh (athletes may have changed since).
+    setAllAthletes(null)
+    loadingAll.current = false
   }
 
   function skip() {
@@ -112,11 +174,42 @@ export default function AthletePairingProvider({ children }: { children: ReactNo
   function select(pdfName: string, athleteId: string) {
     if (!current) return
     const id = current.id
+    // An athlete picked from another season joins the request's roster, so their name still shows
+    // if the dialog comes back (a failed import) after the all-seasons list is dropped.
+    const fromOtherSeason =
+      athleteId && !current.roster.some((a) => a.id === athleteId)
+        ? allAthletes?.find((a) => a.id === athleteId)
+        : undefined
     setQueue((prev) =>
       prev.map((r) =>
-        r.id === id ? { ...r, selections: { ...r.selections, [pdfName]: athleteId } } : r
+        r.id === id
+          ? {
+              ...r,
+              roster: fromOtherSeason ? [...r.roster, fromOtherSeason].sort(byName) : r.roster,
+              selections: { ...r.selections, [pdfName]: athleteId },
+            }
+          : r
       )
     )
+  }
+
+  /** A newly created athlete joins the request's roster (they're on its season) and is paired. */
+  function added(pdfName: string, athlete: AddedAthlete) {
+    if (!current) return
+    const id = current.id
+    const option = { id: athlete.id, firstName: athlete.firstName, lastName: athlete.lastName, seasons: athlete.seasons }
+    setQueue((prev) =>
+      prev.map((r) =>
+        r.id === id
+          ? {
+              ...r,
+              roster: [...r.roster, option].sort(byName),
+              selections: { ...r.selections, [pdfName]: athlete.id },
+            }
+          : r
+      )
+    )
+    setAllAthletes((prev) => (prev ? [...prev, option].sort(byName) : prev))
   }
 
   function handleSubmit(e: FormEvent) {
@@ -158,7 +251,7 @@ export default function AthletePairingProvider({ children }: { children: ReactNo
     <AthletePairingContext.Provider value={{ requestPairing, block }}>
       {children}
       <Modal
-        open={Boolean(current) && blockers === 0}
+        open={Boolean(current) && blockers === 0 && creating === null}
         onClose={skip}
         title="Pair unmatched athletes"
         description={current?.description}
@@ -185,7 +278,8 @@ export default function AthletePairingProvider({ children }: { children: ReactNo
         }
       >
         {current ? (
-          <ul className="space-y-3">
+          // Keyed per request so each batch's dropdowns start on the season's roster.
+          <ul key={current.id} className="space-y-3">
             {current.confirmations.map((c) => {
               const [singular, plural] = current.occurrenceNoun
               return (
@@ -202,28 +296,39 @@ export default function AthletePairingProvider({ children }: { children: ReactNo
                       <span> · suggested match: {c.athleteName}</span>
                     ) : null}
                   </p>
-                  <label className="mt-3 block">
-                    <span className="sr-only">Roster athlete for {c.pdfName}</span>
-                    <select
+                  <div className="mt-3">
+                    <AthletePairingSelect
+                      label={`Roster athlete for ${c.pdfName}`}
                       value={current.selections[c.pdfName] ?? ""}
-                      onChange={(e) => select(c.pdfName, e.target.value)}
-                      className="w-full rounded-lg border border-border-secondary px-3 py-2 text-sm bg-background"
-                    >
-                      <option value="">Leave unmatched</option>
-                      {current.roster.map((a) => (
-                        <option key={a.id} value={a.id}>
-                          {a.lastName}, {a.firstName}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                      roster={current.roster}
+                      onChange={(athleteId) => select(c.pdfName, athleteId)}
+                      season={current.season}
+                      allSeasons={current.season ? { athletes: allAthletes, load: loadAllAthletes } : undefined}
+                      createLabel={
+                        current.season ? `Create athlete “${displayName(c.pdfName)}”…` : undefined
+                      }
+                      onCreate={current.season ? () => setCreating(c.pdfName) : undefined}
+                    />
+                  </div>
                 </li>
               )
             })}
           </ul>
         ) : null}
+        {allAthletesError ? <p className="text-sm text-error">{allAthletesError}</p> : null}
         {current?.error ? <p className="text-sm text-error">{current.error}</p> : null}
       </Modal>
+      {current?.season ? (
+        <AddAthleteDialog
+          open={creating !== null && blockers === 0}
+          onClose={() => setCreating(null)}
+          season={current.season}
+          initial={creating !== null ? splitResultName(creating) : undefined}
+          onAdded={(athlete) => {
+            if (creating !== null) added(creating, athlete)
+          }}
+        />
+      ) : null}
     </AthletePairingContext.Provider>
   )
 }

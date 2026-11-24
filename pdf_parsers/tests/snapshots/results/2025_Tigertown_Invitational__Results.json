@@ -557,6 +557,10 @@
       "relayLetter": "A",
       "relaySwimmers": [
         {
+          "leg": 1,
+          "name": "de Jager, Artemisa"
+        },
+        {
           "leg": 2,
           "name": "Carraway, Leslie"
         },
@@ -638,6 +642,35 @@
       "tags": "",
       "team": "EAST CAROLINA UNIVERSITY-NC",
       "time": "2:03.44"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Flores, Sophia"
+        },
+        {
+          "leg": 2,
+          "name": "Kreel, Gwen"
+        },
+        {
+          "leg": 3,
+          "name": "Speilman, Madison"
+        },
+        {
+          "leg": 4,
+          "name": "Schneider, Jennifer"
+        }
+      ],
+      "tags": "",
+      "team": "VIRGINIA TECH SWIM CLUB-VA",
+      "time": "DQ"
     },
     {
       "course": "SCY",
@@ -1233,6 +1266,59 @@
     {
       "course": "SCY",
       "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "EAST CAROLINA UNIVERSITY-NC",
+      "time": "DQ"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Hall, Nathan"
+        },
+        {
+          "leg": 2,
+          "name": "Ellis, Colton"
+        },
+        {
+          "leg": 3,
+          "name": "Ivan, David"
+        },
+        {
+          "leg": 4,
+          "name": "Krom, Tyler"
+        }
+      ],
+      "tags": "",
+      "team": "UNCW CLUB SWIM-NC",
+      "time": "DQ"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "UNC CHAPEL HILL-NC",
+      "time": "DQ"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
       "event": "200 Medley Relay",
       "gender": "F",
       "place": 1,
@@ -1708,6 +1794,10 @@
           "name": "Carraway, Leslie"
         },
         {
+          "leg": 3,
+          "name": "de Jager, Artemisa"
+        },
+        {
           "leg": 4,
           "name": "Sostak, Sydney"
         }
@@ -2176,6 +2266,66 @@
       "relaySwimmers": [
         {
           "leg": 1,
+          "name": "Otten, Evan"
+        },
+        {
+          "leg": 2,
+          "name": "Heath, Zachary"
+        },
+        {
+          "leg": 3,
+          "name": "Corkey, William"
+        },
+        {
+          "leg": 4,
+          "name": "Littlefield, Ayden"
+        }
+      ],
+      "tags": "",
+      "team": "ELON UNIVERSITY CLUB SWIM-NC",
+      "time": "1:48.81"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 14,
+      "points": 5.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Butler, Aiden"
+        },
+        {
+          "leg": 2,
+          "name": "Keleher, Hayes"
+        },
+        {
+          "leg": 3,
+          "name": "Ogle, James"
+        },
+        {
+          "leg": 4,
+          "name": "Padget, Avery"
+        }
+      ],
+      "tags": "",
+      "team": "VOLS SWIM CLUB-SE",
+      "time": "1:52.01"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 14,
+      "points": 5.0,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
           "name": "Smith, Matthew"
         },
         {
@@ -2192,8 +2342,8 @@
         }
       ],
       "tags": "",
-      "team": "ELON UNIVERSITY CLUB SWIM-NC",
-      "time": "1:48.81"
+      "team": "CLEMSON CLUB SWIM-SC",
+      "time": "1:52.01"
     },
     {
       "course": "SCY",
@@ -2741,7 +2891,7 @@
       "points": 20.0,
       "seedTime": "59.90",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "1:00.40"
     },
     {
@@ -2893,7 +3043,7 @@
       "place": 13,
       "points": 3.5,
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "1:07.16"
     },
     {
@@ -2927,7 +3077,7 @@
       "place": 16,
       "seedTime": "1:20.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "1:12.43"
     },
     {
@@ -3064,7 +3214,7 @@
       "points": 11.0,
       "seedTime": "28.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "28.79"
     },
     {
@@ -3232,12 +3382,32 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
+      "name": "Miltenberger, Gianna",
+      "place": 22,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "29.44"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
       "name": "Dunnigan, Caitlyn",
       "place": 24,
       "seedTime": "29.00",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "29.47"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Davis, Brianna",
+      "place": 25,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "29.50"
     },
     {
       "course": "SCY",
@@ -3298,6 +3468,36 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
+      "name": "Turk, Sydney",
+      "place": 31,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "29.78"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Elgazzar, Ava",
+      "place": 32,
+      "tags": "",
+      "team": "High Point Club Swimming-NC",
+      "time": "29.97"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "McKinley, Tess",
+      "place": 33,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "29.99"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
       "name": "Vu, Celina",
       "place": 34,
       "seedTime": "29.50",
@@ -3309,12 +3509,32 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
+      "name": "Calderon, Heather",
+      "place": 35,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "30.07"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
       "name": "Chapman, Morgan",
       "place": 36,
       "seedTime": "28.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "30.15"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Caicedo, Haley",
+      "place": 37,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "30.19"
     },
     {
       "course": "SCY",
@@ -3364,6 +3584,16 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
+      "name": "Vollmer, Josie",
+      "place": 42,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "30.74"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
       "name": "Pechuekonis, Nikole",
       "place": 43,
       "seedTime": "32.23",
@@ -3408,23 +3638,83 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
+      "name": "Hammond, Audrey",
+      "place": 46,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "31.01"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
       "name": "Sostak, Sydney",
       "place": 48,
       "seedTime": "31.15",
       "tags": "",
-      "team": null,
+      "team": "Swimming at Mississippi State-US",
       "time": "31.02"
     },
     {
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
-      "name": "Jager, Artemisa",
-      "place": null,
+      "name": "Dale, Loralai",
+      "place": 49,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "31.11"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Bowser, Sydney",
+      "place": 50,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "31.33"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Bargellini, Faith",
+      "place": 51,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "31.51"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Elwell, Abby",
+      "place": 52,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "31.57"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "de Jager, Artemisa",
+      "place": 53,
       "seedTime": "32.00",
       "tags": "",
-      "team": null,
+      "team": "Swimming at Mississippi State-US",
       "time": "31.66"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Riolo, Lexi",
+      "place": 54,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "31.78"
     },
     {
       "course": "SCY",
@@ -3540,6 +3830,26 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
+      "name": "Ramkisson, Amiya",
+      "place": 65,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "32.99"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Daou, Isabella",
+      "place": 66,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "33.02"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
       "name": "Hair, Chloe",
       "place": 67,
       "seedTime": "32.00",
@@ -3557,6 +3867,16 @@
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "33.37"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Cortright, Betti",
+      "place": 69,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "33.40"
     },
     {
       "course": "SCY",
@@ -3584,12 +3904,42 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
+      "name": "Kimzey, Emma",
+      "place": 72,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "33.64"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
       "name": "Watson, Abby",
       "place": 73,
       "seedTime": "32.71",
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "33.95"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Omlor, Karli",
+      "place": 74,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "33.99"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Lennon, Anna",
+      "place": 75,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "34.00"
     },
     {
       "course": "SCY",
@@ -3623,6 +3973,66 @@
       "tags": "",
       "team": "Vols Swim Club-SE",
       "time": "34.30"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Reback, Trinity",
+      "place": 79,
+      "tags": "",
+      "team": "Swim Club ucf-FL",
+      "time": "35.27"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Chatson, Nikki",
+      "place": 80,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "36.13"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Johnson, Lillian",
+      "place": 81,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "36.24"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Ewing, Lucille",
+      "place": 82,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "36.66"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Lloyd, Courtney",
+      "place": 83,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "37.53"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Selikoff, Emily",
+      "place": 84,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "41.83"
     },
     {
       "course": "SCY",
@@ -3751,7 +4161,7 @@
       "points": 9.0,
       "seedTime": "24.88",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "24.40"
     },
     {
@@ -3851,12 +4261,32 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "M",
+      "name": "Kellman, Adam",
+      "place": 18,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "24.87"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
       "name": "Freeman, Jacob",
       "place": 19,
       "seedTime": "24.69",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "24.88"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Nemnem, Ayman",
+      "place": 20,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "24.90"
     },
     {
       "course": "SCY",
@@ -3906,6 +4336,26 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "M",
+      "name": "Lohr, Grant",
+      "place": 25,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "24.97"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Council, Devin",
+      "place": 26,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "25.04"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
       "name": "Otten, Evan",
       "place": 27,
       "seedTime": "25.00",
@@ -3928,6 +4378,16 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "M",
+      "name": "Cobb, Dylan",
+      "place": 29,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "25.28"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
       "name": "Conaton, William",
       "place": 30,
       "seedTime": "24.20",
@@ -3939,12 +4399,32 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "M",
+      "name": "Slater, Landon",
+      "place": 31,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "25.45"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
       "name": "Reiniche, Ryan",
       "place": 31,
       "seedTime": "25.50",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "25.45"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Golinski, Lucas",
+      "place": 33,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "25.50"
     },
     {
       "course": "SCY",
@@ -3972,11 +4452,21 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "M",
+      "name": "Mezzgori, Luca",
+      "place": 36,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "25.72"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
       "name": "Jordan, Cole",
       "place": 37,
       "seedTime": "24.48",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "25.90"
     },
     {
@@ -4027,12 +4517,42 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "M",
+      "name": "Gross, Will",
+      "place": 42,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "26.08"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
       "name": "Hite, Alex",
       "place": 43,
       "seedTime": "27.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "26.11"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Hay, Griffin",
+      "place": 44,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "26.20"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Garrett, Joss",
+      "place": 45,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "26.35"
     },
     {
       "course": "SCY",
@@ -4082,6 +4602,16 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "M",
+      "name": "Sweeney, Samuel",
+      "place": 50,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "26.60"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
       "name": "Keleher, Hayes",
       "place": 51,
       "seedTime": "26.99",
@@ -4108,7 +4638,7 @@
       "place": 53,
       "seedTime": "27.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "26.69"
     },
     {
@@ -4181,6 +4711,16 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "M",
+      "name": "Sergile, Ian",
+      "place": 60,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "27.63"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
       "name": "Hinckley, Casey",
       "place": 61,
       "seedTime": "27.50",
@@ -4225,12 +4765,32 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "M",
+      "name": "Terhune, Tyler",
+      "place": 65,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "28.02"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
       "name": "Manley, Adam",
       "place": 66,
       "seedTime": "35.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "28.07"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Bell, Micheal",
+      "place": 67,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "28.12"
     },
     {
       "course": "SCY",
@@ -4258,6 +4818,16 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "M",
+      "name": "Chapman, James",
+      "place": 70,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "28.29"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
       "name": "Negrete, Alex",
       "place": 70,
       "seedTime": "28.51",
@@ -4273,7 +4843,7 @@
       "place": 72,
       "seedTime": "27.69",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "28.43"
     },
     {
@@ -4302,12 +4872,62 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "M",
+      "name": "Rea, Cody",
+      "place": 75,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "29.49"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Burgin, Matthew",
+      "place": 76,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "29.81"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
       "name": "Baker, Mayes",
       "place": 77,
       "seedTime": "30.00",
       "tags": "",
       "team": "High Point Club Swimming-NC",
       "time": "29.98"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Braun, Peter",
+      "place": 78,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "30.07"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Humann, Brent",
+      "place": 79,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "30.25"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Malek, Zachary",
+      "place": 80,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "30.51"
     },
     {
       "course": "SCY",
@@ -4324,12 +4944,52 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "M",
+      "name": "Offhaus, Carter",
+      "place": 82,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "31.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Alcazar, Sebastian",
+      "place": 83,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "31.38"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Fernandez, Charles",
+      "place": 84,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "31.81"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
       "name": "Mendoza, Benjiro",
       "place": 85,
       "seedTime": "33.62",
       "tags": "",
       "team": "High Point Club Swimming-NC",
       "time": "33.02"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Elorza, Ignacio",
+      "place": 86,
+      "tags": "",
+      "team": "Swim Club ucf-FL",
+      "time": "36.20"
     },
     {
       "course": "SCY",
@@ -4364,7 +5024,7 @@
       "points": 16.0,
       "seedTime": "5:48.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "5:44.18"
     },
     {
@@ -4526,7 +5186,7 @@
       "place": 5,
       "points": 14.0,
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "5:23.03"
     },
     {
@@ -4550,7 +5210,7 @@
       "points": 12.0,
       "seedTime": "5:45.00",
       "tags": "",
-      "team": null,
+      "team": "Swimming at Mississippi State-US",
       "time": "5:37.23"
     },
     {
@@ -4665,7 +5325,7 @@
       "place": 17,
       "seedTime": "6:44.14",
       "tags": "",
-      "team": null,
+      "team": "Swimming at Mississippi State-US",
       "time": "6:41.01"
     },
     {
@@ -5064,11 +5724,11 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "F",
-      "name": "Jager, Artemisa",
-      "place": null,
+      "name": "de Jager, Artemisa",
+      "place": 36,
       "seedTime": "1:16.50",
       "tags": "",
-      "team": null,
+      "team": "Swimming at Mississippi State-US",
       "time": "1:13.00"
     },
     {
@@ -5452,7 +6112,7 @@
       "points": 17.0,
       "seedTime": "56.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "55.88"
     },
     {
@@ -5638,6 +6298,16 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "M",
+      "name": "Mezzgori, Luca",
+      "place": 18,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "58.36"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
       "name": "Benedict, William",
       "place": 19,
       "seedTime": "58.90",
@@ -5649,12 +6319,32 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "M",
+      "name": "Cobb, Dylan",
+      "place": 20,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "58.67"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
       "name": "Long, Carter",
       "place": 21,
       "seedTime": "1:00.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "58.68"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Herger, Tripp",
+      "place": 22,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "58.82"
     },
     {
       "course": "SCY",
@@ -5697,7 +6387,7 @@
       "place": 26,
       "seedTime": "1:00.00",
       "tags": "",
-      "team": null,
+      "team": "Swimming at Mississippi State-US",
       "time": "1:01.13"
     },
     {
@@ -5751,7 +6441,7 @@
       "place": 31,
       "seedTime": "1:10.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "1:02.71"
     },
     {
@@ -5834,7 +6524,7 @@
       "place": 39,
       "seedTime": "1:04.73",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "1:06.52"
     },
     {
@@ -5887,7 +6577,7 @@
       "place": 44,
       "seedTime": "1:03.50",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "1:08.08"
     },
     {
@@ -6101,7 +6791,7 @@
       "points": 5.0,
       "seedTime": "33.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "31.20"
     },
     {
@@ -6167,6 +6857,36 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
+      "name": "Turk, Sydney",
+      "place": 18,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "32.14"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Reed, Maddy",
+      "place": 19,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "32.17"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Moro, Sofia",
+      "place": 19,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "32.17"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
       "name": "Rodas, Jaydenne",
       "place": 21,
       "seedTime": "31.00",
@@ -6189,11 +6909,21 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
+      "name": "Calderon, Heather",
+      "place": 23,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "32.91"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
       "name": "Carraway, Leslie",
       "place": 24,
       "seedTime": "30.00",
       "tags": "",
-      "team": null,
+      "team": "Swimming at Mississippi State-US",
       "time": "32.93"
     },
     {
@@ -6215,8 +6945,18 @@
       "place": 26,
       "seedTime": "32.50",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "33.11"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Bartlett, Jessi",
+      "place": 27,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "33.16"
     },
     {
       "course": "SCY",
@@ -6270,7 +7010,7 @@
       "place": 31,
       "seedTime": "34.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "33.34"
     },
     {
@@ -6288,12 +7028,32 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
+      "name": "Reese, Riley",
+      "place": 33,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "33.36"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
       "name": "Spahn, Mia",
       "place": 35,
       "seedTime": "33.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "33.53"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Seitz, Libby",
+      "place": 36,
+      "tags": "",
+      "team": "Uncw Club Swim-NC",
+      "time": "33.56"
     },
     {
       "course": "SCY",
@@ -6316,6 +7076,26 @@
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "34.37"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Berry, Emma",
+      "place": 39,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "34.51"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "McKinney, Natalie",
+      "place": 40,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "34.86"
     },
     {
       "course": "SCY",
@@ -6354,6 +7134,16 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
+      "name": "Johnson, Lillian",
+      "place": 44,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "35.71"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
       "name": "Simerson, Kynley",
       "place": 45,
       "seedTime": "39.17",
@@ -6371,6 +7161,16 @@
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "35.90"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Kimzey, Emma",
+      "place": 47,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "35.96"
     },
     {
       "course": "SCY",
@@ -6398,6 +7198,26 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
+      "name": "Lennon, Anna",
+      "place": 50,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "36.55"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Noonan, Ashleigh",
+      "place": 51,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "36.87"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
       "name": "Lewis, Abigail",
       "place": 52,
       "seedTime": "35.83",
@@ -6409,12 +7229,82 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
+      "name": "Ewing, Lucille",
+      "place": 53,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "37.87"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Phelps, Lilly",
+      "place": 54,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "38.28"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Sutton, Jennifer",
+      "place": 55,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "38.90"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Dawick, Caitlin",
+      "place": 56,
+      "tags": "",
+      "team": "High Point Club Swimming-NC",
+      "time": "39.42"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
       "name": "Wilderson, Breanna",
       "place": 57,
       "seedTime": "42.26",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "40.17"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Kimball, Reese",
+      "place": 58,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "40.51"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Patel, Jesal",
+      "place": 59,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "42.22"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Holtz, Katrina",
+      "place": 60,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "43.93"
     },
     {
       "course": "SCY",
@@ -6437,6 +7327,26 @@
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "50.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Nishida, Erina",
+      "place": 63,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "50.55"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Ramkisson, Amiya",
+      "place": 64,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "54.61"
     },
     {
       "course": "SCY",
@@ -6664,6 +7574,16 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "M",
+      "name": "Bock, Matthew",
+      "place": 19,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "28.64"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
       "name": "Hite, Alex",
       "place": 20,
       "seedTime": "28.00",
@@ -6681,6 +7601,36 @@
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "28.78"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Sweeney, Samuel",
+      "place": 22,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "28.94"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Hay, Griffin",
+      "place": 23,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "29.83"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Weitzel, Logan",
+      "place": 24,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "29.85"
     },
     {
       "course": "SCY",
@@ -6708,12 +7658,72 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "M",
+      "name": "Bell, Micheal",
+      "place": 27,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "30.27"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Reason, Blake",
+      "place": 28,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "31.94"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
       "name": "Facey, Alexander",
       "place": 29,
       "seedTime": "32.19",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "32.09"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Braun, Peter",
+      "place": 30,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "32.62"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Laber, Brady",
+      "place": 31,
+      "tags": "",
+      "team": "Clemson Club Swim-SC",
+      "time": "35.51"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Gutierrez, Gianfranco",
+      "place": 32,
+      "tags": "",
+      "team": "Swim Club ucf-FL",
+      "time": "37.93"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Appel, David",
+      "place": 33,
+      "tags": "",
+      "team": "High Point Club Swimming-NC",
+      "time": "44.70"
     },
     {
       "course": "SCY",
@@ -6891,7 +7901,7 @@
       "points": 2.0,
       "seedTime": "57.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "58.63"
     },
     {
@@ -7001,7 +8011,7 @@
       "place": 25,
       "seedTime": "57.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "1:00.76"
     },
     {
@@ -7139,7 +8149,7 @@
       "place": 38,
       "seedTime": "1:04.00",
       "tags": "",
-      "team": null,
+      "team": "Swimming at Mississippi State-US",
       "time": "1:04.05"
     },
     {
@@ -7204,7 +8214,7 @@
       "place": 44,
       "seedTime": "1:07.14",
       "tags": "",
-      "team": null,
+      "team": "Swimming at Mississippi State-US",
       "time": "1:05.82"
     },
     {
@@ -7331,7 +8341,7 @@
       "place": 57,
       "seedTime": "1:07.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "1:09.99"
     },
     {
@@ -7626,8 +8636,18 @@
       "points": 1.0,
       "seedTime": "51.05",
       "tags": "",
-      "team": null,
+      "team": "Swimming at Mississippi State-US",
       "time": "51.83"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Lohr, Grant",
+      "place": 17,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "51.90"
     },
     {
       "course": "SCY",
@@ -7648,7 +8668,7 @@
       "place": 19,
       "seedTime": "52.38",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "53.14"
     },
     {
@@ -7666,12 +8686,42 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "M",
+      "name": "Frank, Jack",
+      "place": 21,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "53.17"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Golinski, Lucas",
+      "place": 22,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "53.22"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
       "name": "Sem, Kevin",
       "place": 23,
       "seedTime": "56.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "53.59"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Mitchell, Thomas",
+      "place": 24,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "53.83"
     },
     {
       "course": "SCY",
@@ -7683,6 +8733,16 @@
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "54.06"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Vazquez-Soto, Jay",
+      "place": 26,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "54.22"
     },
     {
       "course": "SCY",
@@ -7743,6 +8803,26 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "M",
+      "name": "Chapman, James",
+      "place": 32,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "55.29"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Sergile, Ian",
+      "place": 33,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "55.41"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
       "name": "Will, Samuel",
       "place": 34,
       "seedTime": "56.04",
@@ -7765,11 +8845,41 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "M",
+      "name": "Lakeman, Michael",
+      "place": 36,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "57.57"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Languell, Cole",
+      "place": 37,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "57.68"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Grieve, Brian",
+      "place": 38,
+      "tags": "",
+      "team": "Clemson Club Swim-SC",
+      "time": "57.87"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
       "name": "Jordan, Cole",
       "place": 39,
       "seedTime": "49.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "58.07"
     },
     {
@@ -7782,6 +8892,16 @@
       "tags": "",
       "team": "Appalachian State Club Swim-NC",
       "time": "58.56"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Johnston, Connor",
+      "place": 41,
+      "tags": "",
+      "team": "Furman University Club Swim",
+      "time": "58.94"
     },
     {
       "course": "SCY",
@@ -7802,7 +8922,7 @@
       "place": 43,
       "seedTime": "1:01.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "1:00.96"
     },
     {
@@ -7813,7 +8933,7 @@
       "place": 44,
       "seedTime": "1:05.65",
       "tags": "",
-      "team": null,
+      "team": "Swimming at Mississippi State-US",
       "time": "1:01.54"
     },
     {
@@ -8050,12 +9170,12 @@
       "course": "SCY",
       "event": "200 Free",
       "gender": "F",
-      "name": "Jager, Artemisa",
-      "place": null,
+      "name": "de Jager, Artemisa",
+      "place": 15,
       "points": 2.0,
       "seedTime": "2:23.00",
       "tags": "",
-      "team": null,
+      "team": "Swimming at Mississippi State-US",
       "time": "2:23.83"
     },
     {
@@ -8146,7 +9266,7 @@
       "place": 5,
       "points": 14.0,
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "1:56.89"
     },
     {
@@ -8170,7 +9290,7 @@
       "points": 12.0,
       "seedTime": "1:57.30",
       "tags": "",
-      "team": null,
+      "team": "Swimming at Mississippi State-US",
       "time": "1:57.58"
     },
     {
@@ -8181,7 +9301,7 @@
       "place": 8,
       "points": 11.0,
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "1:58.00"
     },
     {
@@ -8504,12 +9624,32 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "F",
+      "name": "Pham, Haily",
+      "place": 18,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "36.96"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
       "name": "Tadder, Emerson",
       "place": 20,
       "seedTime": "38.00",
       "tags": "",
       "team": "Clemson Club Swim-SC",
       "time": "37.22"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Flores, Sophia",
+      "place": 21,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "37.24"
     },
     {
       "course": "SCY",
@@ -8592,6 +9732,16 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "F",
+      "name": "Cully, Anna",
+      "place": 29,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "38.31"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
       "name": "Dawick, Caitlin",
       "place": 30,
       "seedTime": "41.27",
@@ -8603,12 +9753,32 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "F",
+      "name": "Siegel, Piper",
+      "place": 31,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "38.44"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
       "name": "Berned, Brooke",
       "place": 32,
       "seedTime": "35.00",
       "tags": "",
       "team": "Uncw Club Swim-NC",
       "time": "38.45"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Hickey, Regan",
+      "place": 33,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "38.72"
     },
     {
       "course": "SCY",
@@ -8647,6 +9817,16 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "F",
+      "name": "Bartlett, Jessi",
+      "place": 37,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "39.22"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
       "name": "Cheek, Katy",
       "place": 38,
       "seedTime": "36.91",
@@ -8680,12 +9860,62 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "F",
+      "name": "Phung, Thi",
+      "place": 41,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "39.60"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Miller, Amberly",
+      "place": 42,
+      "tags": "",
+      "team": "Clemson Club Swim-SC",
+      "time": "39.84"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Reidenbach, Peyton",
+      "place": 43,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "40.20"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Bloom, Lindsay",
+      "place": 44,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "40.31"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
       "name": "Schmid, Sarah",
       "place": 45,
       "seedTime": "40.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "40.70"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Vander Griend, Lucy",
+      "place": 46,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "41.23"
     },
     {
       "course": "SCY",
@@ -8724,12 +9954,52 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "F",
+      "name": "West, Lara",
+      "place": 50,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "42.41"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
       "name": "Algeo, Kaitlyn",
       "place": 51,
       "seedTime": "40.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "43.58"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Brown, Miya",
+      "place": 52,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "45.09"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Patel, Jesal",
+      "place": 53,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "45.44"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Noble, Lila",
+      "place": 54,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "51.00"
     },
     {
       "course": "SCY",
@@ -8786,7 +10056,7 @@
       "points": 16.0,
       "seedTime": "27.70",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "27.42"
     },
     {
@@ -8903,7 +10173,7 @@
       "points": 4.0,
       "seedTime": "29.72",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "29.78"
     },
     {
@@ -8967,11 +10237,21 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "M",
+      "name": "Stickle, Alec",
+      "place": 19,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "30.65"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
       "name": "Page, Chris",
       "place": 20,
       "seedTime": "31.50",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "31.04"
     },
     {
@@ -8995,6 +10275,16 @@
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "31.90"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Garrett, Joss",
+      "place": 23,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "33.15"
     },
     {
       "course": "SCY",
@@ -9077,6 +10367,16 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "M",
+      "name": "Baker, Mayes",
+      "place": 31,
+      "tags": "",
+      "team": "High Point Club Swimming-NC",
+      "time": "35.91"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
       "name": "Hernandez, Joshua",
       "place": 32,
       "seedTime": "35.69",
@@ -9088,12 +10388,52 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "M",
+      "name": "Rudd, Austin",
+      "place": 33,
+      "tags": "",
+      "team": "Mercer Swim Club-GA",
+      "time": "36.62"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
       "name": "Randle, Jonas",
       "place": 34,
       "seedTime": "37.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "37.11"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Malek, Zachary",
+      "place": 35,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "37.30"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Humann, Brent",
+      "place": 36,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "38.16"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Russo, Giacomo",
+      "place": 37,
+      "tags": "",
+      "team": "High Point Club Swimming-NC",
+      "time": "39.43"
     },
     {
       "course": "SCY",
@@ -9194,7 +10534,7 @@
       "points": 13.0,
       "seedTime": "1:03.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "1:08.81"
     },
     {
@@ -9242,7 +10582,7 @@
       "points": 7.0,
       "seedTime": "1:08.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "1:11.59"
     },
     {
@@ -9266,7 +10606,7 @@
       "points": 5.0,
       "seedTime": "1:11.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "1:13.21"
     },
     {
@@ -9290,7 +10630,7 @@
       "points": 3.0,
       "seedTime": "1:14.25",
       "tags": "",
-      "team": null,
+      "team": "Swimming at Mississippi State-US",
       "time": "1:13.96"
     },
     {
@@ -9336,7 +10676,7 @@
       "place": 18,
       "seedTime": "1:20.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "1:22.04"
     },
     {
@@ -9913,7 +11253,7 @@
       "place": 9,
       "points": 9.0,
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "57.30"
     },
     {
@@ -9961,7 +11301,7 @@
       "points": 4.0,
       "seedTime": "1:00.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "59.56"
     },
     {
@@ -10030,7 +11370,7 @@
       "place": 19,
       "seedTime": "57.18",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "1:06.58"
     },
     {
@@ -10184,7 +11524,7 @@
       "points": 17.0,
       "seedTime": "1:59.50",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "2:01.69"
     },
     {
@@ -10469,7 +11809,7 @@
       "points": 3.0,
       "seedTime": "25.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "26.96"
     },
     {
@@ -10495,6 +11835,16 @@
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "27.06"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Turk, Sydney",
+      "place": 17,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "27.14"
     },
     {
       "course": "SCY",
@@ -10581,7 +11931,7 @@
       "place": 24,
       "seedTime": "26.90",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "27.80"
     },
     {
@@ -10632,11 +11982,21 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
+      "name": "Dale, Loralai",
+      "place": 30,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "28.43"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
       "name": "Salmon, Imani",
       "place": 31,
       "seedTime": "29.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "28.51"
     },
     {
@@ -10654,12 +12014,52 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
+      "name": "Reese, Riley",
+      "place": 33,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "28.65"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
       "name": "Sostak, Sydney",
       "place": 34,
       "seedTime": "28.82",
       "tags": "",
-      "team": null,
+      "team": "Swimming at Mississippi State-US",
       "time": "28.75"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Moro, Sofia",
+      "place": 35,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "28.85"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Monk, Abby",
+      "place": 36,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "28.90"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Elgazzar, Ava",
+      "place": 37,
+      "tags": "",
+      "team": "High Point Club Swimming-NC",
+      "time": "28.93"
     },
     {
       "course": "SCY",
@@ -10671,6 +12071,16 @@
       "tags": "",
       "team": "Elon University Club Swim-NC",
       "time": "29.10"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Bowser, Sydney",
+      "place": 39,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "29.11"
     },
     {
       "course": "SCY",
@@ -10709,12 +12119,32 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
+      "name": "Layton, Tori",
+      "place": 43,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "29.42"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
       "name": "Chen, Zoe",
       "place": 44,
       "seedTime": "31.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "29.44"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Pham, Haily",
+      "place": 45,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "29.53"
     },
     {
       "course": "SCY",
@@ -10775,6 +12205,16 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
+      "name": "Bargellini, Faith",
+      "place": 51,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "29.95"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
       "name": "Bach, Caroline",
       "place": 52,
       "seedTime": "27.00",
@@ -10819,6 +12259,16 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
+      "name": "Miller, Amberly",
+      "place": 56,
+      "tags": "",
+      "team": "Clemson Club Swim-SC",
+      "time": "30.34"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
       "name": "Hwang, Gabrielle",
       "place": 57,
       "seedTime": "29.24",
@@ -10847,6 +12297,26 @@
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "30.59"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Siegel, Piper",
+      "place": 60,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "30.67"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Omlor, Karli",
+      "place": 61,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "30.73"
     },
     {
       "course": "SCY",
@@ -10885,12 +12355,82 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
+      "name": "McKinney, Natalie",
+      "place": 65,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "31.08"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Clements, Helen",
+      "place": 66,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "31.18"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Noonan, Ashleigh",
+      "place": 67,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "31.73"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
       "name": "Brown, Miya",
       "place": 68,
       "seedTime": "32.00",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "33.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Chatson, Nikki",
+      "place": 69,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "33.24"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Phung, Thi",
+      "place": 70,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "33.29"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Holtz, Katrina",
+      "place": 71,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "33.45"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Boyd, Dana",
+      "place": 72,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "33.57"
     },
     {
       "course": "SCY",
@@ -10907,12 +12447,62 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
+      "name": "Gray, Katherine",
+      "place": 74,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "34.74"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
       "name": "Miller, Julia",
       "place": 75,
       "seedTime": "32.00",
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "34.94"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Courtney, Cara",
+      "place": 76,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "35.02"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Selikoff, Emily",
+      "place": 77,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "36.01"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Reed, Zoe",
+      "place": 78,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "37.94"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Noble, Lila",
+      "place": 79,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "39.65"
     },
     {
       "course": "SCY",
@@ -10980,7 +12570,7 @@
       "points": 16.0,
       "seedTime": "21.73",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "22.26"
     },
     {
@@ -11165,6 +12755,16 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "M",
+      "name": "Corkey, William",
+      "place": 19,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "23.11"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
       "name": "Mocchetti, Giacomo",
       "place": 20,
       "seedTime": "22.70",
@@ -11202,7 +12802,7 @@
       "place": 23,
       "seedTime": "23.06",
       "tags": "",
-      "team": null,
+      "team": "Swimming at Mississippi State-US",
       "time": "23.36"
     },
     {
@@ -11224,8 +12824,18 @@
       "place": 25,
       "seedTime": "23.50",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "23.61"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Vazquez-Soto, Jay",
+      "place": 26,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "23.79"
     },
     {
       "course": "SCY",
@@ -11281,6 +12891,16 @@
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "23.88"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Freeman, Jacob",
+      "place": 32,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "23.89"
     },
     {
       "course": "SCY",
@@ -11345,7 +12965,7 @@
       "place": 38,
       "seedTime": "23.94",
       "tags": "",
-      "team": null,
+      "team": "Swimming at Mississippi State-US",
       "time": "24.35"
     },
     {
@@ -11356,7 +12976,7 @@
       "place": 39,
       "seedTime": "25.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "24.36"
     },
     {
@@ -11385,12 +13005,32 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "M",
+      "name": "Bock, Matthew",
+      "place": 42,
+      "tags": "",
+      "team": "Virginia Tech Swim Club-VA",
+      "time": "24.45"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
       "name": "Joe, Alexander",
       "place": 43,
       "seedTime": "24.23",
       "tags": "",
       "team": "UNC Chapel Hill-NC",
       "time": "24.50"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Herger, Tripp",
+      "place": 44,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "24.72"
     },
     {
       "course": "SCY",
@@ -11473,12 +13113,32 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "M",
+      "name": "Grieve, Brian",
+      "place": 52,
+      "tags": "",
+      "team": "Clemson Club Swim-SC",
+      "time": "25.33"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
       "name": "Will, Samuel",
       "place": 53,
       "seedTime": "26.73",
       "tags": "",
       "team": "East Carolina University-NC",
       "time": "25.42"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Chapman, James",
+      "place": 54,
+      "tags": "",
+      "team": "East Carolina University-NC",
+      "time": "25.51"
     },
     {
       "course": "SCY",
@@ -11532,7 +13192,7 @@
       "place": 59,
       "seedTime": "27.00",
       "tags": "",
-      "team": null,
+      "team": "Swim Club ucf-FL",
       "time": "26.55"
     },
     {
@@ -11545,6 +13205,16 @@
       "tags": "",
       "team": "Furman University Club Swim",
       "time": "26.76"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Littlefield, Ayden",
+      "place": 61,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "27.17"
     },
     {
       "course": "SCY",
@@ -11583,6 +13253,36 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "M",
+      "name": "LaChapelle, Nick",
+      "place": 65,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "27.56"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Winick, Zev",
+      "place": 66,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "27.88"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Alcazar, Sebastian",
+      "place": 67,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "28.01"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
       "name": "Ryan, Christopher",
       "place": 68,
       "seedTime": "26.05",
@@ -11600,6 +13300,16 @@
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "28.19"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Rudd, Austin",
+      "place": 70,
+      "tags": "",
+      "team": "Mercer Swim Club-GA",
+      "time": "28.33"
     },
     {
       "course": "SCY",
@@ -11631,8 +13341,18 @@
       "place": 73,
       "seedTime": "28.70",
       "tags": "",
-      "team": null,
+      "team": "Swimming at Mississippi State-US",
       "time": "29.05"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Gutierrez, Gianfranco",
+      "place": 74,
+      "tags": "",
+      "team": "Swim Club ucf-FL",
+      "time": "29.25"
     },
     {
       "course": "SCY",
@@ -11644,6 +13364,26 @@
       "tags": "",
       "team": "High Point Club Swimming-NC",
       "time": "29.27"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Burgin, Matthew",
+      "place": 76,
+      "tags": "",
+      "team": "Gamecock Club Swimming-SC",
+      "time": "29.45"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Elorza, Ignacio",
+      "place": 77,
+      "tags": "",
+      "team": "Swim Club ucf-FL",
+      "time": "29.98"
     },
     {
       "course": "SCY",
@@ -11688,6 +13428,16 @@
       "tags": "",
       "team": "Virginia Tech Swim Club-VA",
       "time": "35.98"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Glatt, Zachary",
+      "place": 82,
+      "tags": "",
+      "team": "Elon University Club Swim-NC",
+      "time": "40.73"
     }
   ],
   "team_scores": {

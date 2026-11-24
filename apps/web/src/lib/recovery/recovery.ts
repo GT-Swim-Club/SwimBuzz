@@ -3,6 +3,7 @@ import { withDeleted } from "../../../soft-delete-policy"
 import { deleteAllMeetFiles } from "@/lib/meet/meet-storage"
 import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
 import { deleteNotificationsFor } from "@/lib/notifications/notification-refs"
+import { uniqueMeetSlug } from "@/lib/slug"
 import { RECOVERY_RETENTION_DAYS } from "@swimbuzz/shared"
 
 export type RecoveryKind = "practice" | "meet"
@@ -31,7 +32,8 @@ export async function removePractice(id: string, practice: { visibility: string 
 }
 export async function softDeleteMeet(id: string, deleteSwims: boolean) {
   const dates = deletionDates()
-  const meet = await prisma.meet.update({ where: { id }, data: { ...dates, deleteSwimsOnPurge: deleteSwims } })
+  // A trashed meet gives up its slug, so a new meet can take that URL; a restore picks a fresh one.
+  const meet = await prisma.meet.update({ where: { id }, data: { ...dates, deleteSwimsOnPurge: deleteSwims, slug: null } })
   await deleteNotificationsFor("meet", id)
   // Records set at a deleted meet fall back to the ones before them.
   await syncTeamRecordsSafely()
@@ -64,9 +66,12 @@ export async function restoreDeleted(kind: RecoveryKind, id: string) {
     // The conditional UPDATE takes a row lock: only restore or purge can win.
     const where = { id, deletedAt: { not: null }, purgeAfter: { gt: new Date() }, purgeStartedAt: null }
     const data = { deletedAt: null, purgeAfter: null }
-    const result = kind === "practice"
-      ? await prisma.practice.updateMany({ where, data })
-      : await prisma.meet.updateMany({ where, data: { ...data, deleteSwimsOnPurge: false } })
+    if (kind === "practice") return (await prisma.practice.updateMany({ where, data })).count === 1
+    // Its slug was freed when it was trashed: back under its own name and year if still free, else the next one.
+    const meet = await prisma.meet.findFirst({ where, select: { name: true, startsAt: true, timeZone: true } })
+    if (!meet) return false
+    const slug = await uniqueMeetSlug(meet.name, { startsAt: meet.startsAt, timeZone: meet.timeZone, excludeId: id })
+    const result = await prisma.meet.updateMany({ where, data: { ...data, deleteSwimsOnPurge: false, slug } })
     return result.count === 1
   })
   // Outside withDeleted, so the sync only sees active meets.

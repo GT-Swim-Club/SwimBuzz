@@ -11,6 +11,7 @@ import {
   type RecordGender,
   type TeamRecordItem,
 } from "@swimbuzz/shared"
+import ManualRecordMark from "@/components/ui/ManualRecordMark"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/ui/SegmentedToggle"
@@ -19,7 +20,7 @@ import { athletePath, meetPath } from "@/lib/slug"
 const api = createApiClient({})
 
 function genderTitle(gender: RecordGender): string {
-  return gender === "F" ? "Women's" : gender === "M" ? "Men's" : ""
+  return gender === "F" ? "Women" : gender === "M" ? "Men" : ""
 }
 
 /**
@@ -162,6 +163,7 @@ export default function RecordHistoryModal({
               <span
                 className={`shrink-0 font-mono text-sm tabular-nums ${record.isThisSeason ? "font-semibold text-accent" : "text-foreground"}`}
               >
+                <ManualRecordMark manual={record.manual} />
                 {formatRecordTime(record.timeMs)}
               </span>
             </li>

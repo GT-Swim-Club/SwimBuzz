@@ -3,10 +3,13 @@ import { StyleSheet, Text, View } from "react-native"
 import { useQuery } from "@tanstack/react-query"
 import {
   formatRecordTime,
+  MANUAL_RECORD_LABEL,
+  MANUAL_RECORD_MARK,
   recordSwimmerLabel,
+  topTimesEventTitle,
   type TopTimesMode,
 } from "@swimbuzz/shared"
-import { ErrorBlock, LoadingBlock, usePalette } from "@swimbuzz/ui"
+import { ErrorBlock, Skeleton, usePalette } from "@swimbuzz/ui"
 import { radii, spacing, type ColorPalette } from "@swimbuzz/tokens"
 import { api } from "../lib/api"
 import { recordsErrorMessage } from "./RecordSheets"
@@ -23,13 +26,7 @@ export function RecordTopTimesBoard({ gender, mode }: { gender: "F" | "M"; mode:
     queryFn: () => api.getAllRecordTopTimes(gender, mode),
   })
   if (error) return <ErrorBlock message={recordsErrorMessage(error, "Couldn't load the top 10")} />
-  if (isPending) {
-    return (
-      <View style={styles.card}>
-        <LoadingBlock />
-      </View>
-    )
-  }
+  if (isPending) return <TopTimesSkeleton styles={styles} />
 
   return (
     <View>
@@ -37,7 +34,7 @@ export function RecordTopTimesBoard({ gender, mode }: { gender: "F" | "M"; mode:
         <View key={`${event.gender}|${event.event}`} style={[styles.card, styles.eventCard]}>
           <View style={styles.eventHeader}>
             <Text accessibilityRole="header" style={styles.eventTitle}>
-              {event.label}
+              {topTimesEventTitle(event)}
             </Text>
           </View>
           {event.times.length === 0 ? <Text style={styles.empty}>No swims yet.</Text> : null}
@@ -57,10 +54,46 @@ export function RecordTopTimesBoard({ gender, mode }: { gender: "F" | "M"; mode:
                   ))}
                 </View>
                 <Text style={[styles.year, season]}>{time.year}</Text>
-                <Text style={[styles.time, season]}>{formatRecordTime(time.timeMs)}</Text>
+                <Text style={[styles.time, season]}>
+                  {time.manual ? <Text style={styles.manualMark}>{MANUAL_RECORD_MARK}</Text> : null}
+                  {formatRecordTime(time.timeMs)}
+                </Text>
               </View>
             )
           })}
+        </View>
+      ))}
+      {data.events.some((event) => event.times.some((time) => time.manual)) ? (
+        <Text style={styles.footnote}>
+          <Text style={styles.manualMark}>{MANUAL_RECORD_MARK}</Text> {MANUAL_RECORD_LABEL}
+        </Text>
+      ) : null}
+    </View>
+  )
+}
+
+/** Name widths per line, varied so the cards don't look stamped. */
+const NAME_WIDTHS = ["45%", "55%", "40%", "60%", "50%", "35%", "55%", "40%", "50%", "55%"] as const
+
+/** Mirrors the board: event cards, each a title band over ten rank · name · year · time lines. */
+function TopTimesSkeleton({ styles }: { styles: ReturnType<typeof makeStyles> }) {
+  return (
+    <View accessibilityState={{ busy: true }}>
+      {Array.from({ length: 3 }, (_, card) => (
+        <View key={card} style={[styles.card, styles.eventCard]}>
+          <View style={styles.eventHeader}>
+            <Skeleton style={styles.skeletonTitle} />
+          </View>
+          {NAME_WIDTHS.map((_, line) => (
+            <View key={line} style={[styles.row, styles.skeletonRow, line > 0 && styles.rowDivider]}>
+              <Skeleton style={{ height: 13, width: 18, marginLeft: 8 }} />
+              <View style={styles.names}>
+                <Skeleton style={{ height: 13, width: NAME_WIDTHS[(line + card * 3) % NAME_WIDTHS.length] }} />
+              </View>
+              <Skeleton style={{ height: 13, width: 32 }} />
+              <Skeleton style={{ height: 13, width: 48 }} />
+            </View>
+          ))}
         </View>
       ))}
     </View>
@@ -96,6 +129,9 @@ function makeStyles(c: ColorPalette) {
       paddingHorizontal: spacing.sm,
       paddingVertical: 7,
     },
+    /** The title band is fillSecondary like the Skeleton, so its bar takes the border shade to show. */
+    skeletonTitle: { backgroundColor: c.border, height: 15, marginVertical: 2, width: "50%" },
+    skeletonRow: { alignItems: "center", paddingVertical: 10 },
     rowDivider: { borderTopColor: c.border, borderTopWidth: StyleSheet.hairlineWidth },
     rank: {
       color: c.textTertiary,
@@ -110,5 +146,8 @@ function makeStyles(c: ColorPalette) {
     year: { color: c.textTertiary, fontSize: 13, fontVariant: ["tabular-nums"], paddingTop: 1 },
     time: { color: c.text, fontSize: 14, fontVariant: ["tabular-nums"], fontWeight: "700", minWidth: 58, textAlign: "right" },
     thisSeason: { color: c.accent, fontWeight: "800" },
+    /** The gold "*" before a manually added record's time. */
+    manualMark: { color: c.accent },
+    footnote: { color: c.textSecondary, fontSize: 13, marginBottom: spacing.md },
   })
 }

@@ -75,11 +75,11 @@ export async function POST(req: Request) {
   const execute = async (onProgress?: (progress: RosterImportProgress) => void) => {
     const summary = await runRosterImport(parsed.rows, season, parsed.errors, onProgress, req.signal)
 
-    const { created, updated, removed, deleted, deletedNames, errors } = summary
+    const { created, updated, removed, deleted, deletedNames, errors, missingEmail } = summary
     console.log("[roster sheet import] summary:", { created, updated, removed, deleted, errors: errors.length })
     if (deleted > 0) console.log("[roster sheet import] deleted athletes:", deletedNames)
 
-    return { created, updated, removed, deleted, parsed: parsed.rows.length, errors, tab: tabTitle }
+    return { created, updated, removed, deleted, parsed: parsed.rows.length, errors, missingEmail, tab: tabTitle }
   }
 
   if (wantsRosterImportStream(req)) {

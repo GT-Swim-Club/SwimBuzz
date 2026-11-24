@@ -1,10 +1,11 @@
 "use client"
 
+import Link from "next/link"
 import type { ReactNode } from "react"
 import type { RecordEventDef, RecordGender, RecordGroup, TeamRecordRow } from "@swimbuzz/shared"
 import { ledgerHeaderClass } from "@/components/meet/Ledger"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/ui/SegmentedToggle"
-import { RecordNames, RecordTime, RecordYear, type SideProps } from "./RecordCells"
+import { RecordNames, RecordTime, RecordYear, recordHref, type SideProps } from "./RecordCells"
 
 const GENDERS = [
   { value: "F", label: "Women" },
@@ -64,20 +65,24 @@ export default function RecordsList({
             {groupRows.map((row) => {
               const recordGender: RecordGender = row.genders.includes("X") ? "X" : gender
               const side: SideProps = { def: row, gender: recordGender, record: row.records[recordGender] }
+              // A record with an imported swim or relay opens it on its meet page (the whole row, like
+              // a Top 10 row); the event name above it still opens the record history.
+              const href = recordHref(side.record)
               return (
                 <div
                   key={`${row.genders.join("")}|${row.event}`}
-                  className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1 px-4 py-2.5 text-[15px]"
+                  className={`relative grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1 px-4 py-2.5 text-[15px] ${href ? "transition-colors hover:bg-background-hover" : ""}`}
                 >
+                  {href ? <Link href={href} aria-label={`${row.label} record`} className="absolute inset-0" /> : null}
                   <button
                     type="button"
                     onClick={() => onOpenHistory(row, recordGender)}
-                    className="justify-self-start text-left font-medium text-foreground transition-colors hover:text-primary"
+                    className="relative z-[1] justify-self-start text-left font-medium text-foreground transition-colors hover:text-primary"
                   >
                     {row.label}
                   </button>
                   <RecordTime {...side} className="justify-self-end text-right" />
-                  <RecordNames {...side} align="start" />
+                  <RecordNames {...side} align="start" linkNames={!href} />
                   <RecordYear {...side} className="justify-self-end text-right" />
                 </div>
               )

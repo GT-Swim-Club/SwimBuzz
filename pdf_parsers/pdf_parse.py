@@ -5,6 +5,7 @@ from typing import Any
 
 import pdfplumber
 
+from .team_manager_parse import is_team_manager_report, parse_team_manager_report
 from .swim_common import (
     EXHIBITION_TIME_TOKEN_PATTERN,
     INVALID_TIME_PATTERN,
@@ -12,6 +13,7 @@ from .swim_common import (
     TIME_TOKEN_PATTERN,
     expand_ligatures,
     leg_times_from_cumulative,
+    ms_to_time_token,
     normalize_event,
     normalize_relay_letter,
     parse_status_token,
@@ -40,6 +42,17 @@ _SCRATCH_STATUS_TOKENS = INVALID_TIMES - {"NT", "NQT"}
 SCRATCH_MARKER = re.compile(
     rf"(?<![A-Za-z])(?:{'|'.join(sorted(_SCRATCH_STATUS_TOKENS, key=len, reverse=True))})(?![A-Za-z])"
 )
+
+# A swimmer's name as Hy-Tek prints it: "Last, First". Last names may be several
+# words, start with a lowercase particle ("van den Bosch", "del Aguila", "Van de
+# Goor") and carry accented letters ("Galvaàn"); only the first given name is kept.
+NAME_LETTERS = r"A-Za-zÀ-ÖØ-öø-ÿ'\-"
+NAME_PARTICLE = r"(?:d[aeiou]|del|della|der|den|dos|das|la|le|van|von|ten|ter|y|st\.?)"
+NAME_WORD = rf"[A-ZÀ-ÖØ-Þ][{NAME_LETTERS}]+"
+# A given name can be a lone initial ("Lobitz, C").
+FIRST_NAME = rf"[A-ZÀ-ÖØ-Þ][{NAME_LETTERS}]*"
+LAST_NAME = rf"(?:{NAME_PARTICLE}\s+)*{NAME_WORD}(?:\s+(?:{NAME_PARTICLE}\s+)*{NAME_WORD})*"
+SWIMMER_NAME = rf"{LAST_NAME},\s*{FIRST_NAME}"
 
 EVENT_LINE = re.compile(
     r"(?:(\d{2,4})\s*(?:yard|meter|scy|lcm|scm)?\s*)?"
@@ -75,18 +88,18 @@ _ROUND_BARE_FINAL = re.compile(r"^Finals?\s*$", re.I)
 # Leadoff swimmer of a relay, e.g. "1) Chimidkhorloo, Sarnai 18 2) Mrzyglod, Sabina 22"
 LEADOFF_NAME = re.compile(
     r"\b1\s*\)\s*"
-    r"([A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
+    rf"({SWIMMER_NAME})"
 )
 
 # The age is optional, and never the next leg's number: without an age, "1) Dunbar, Jack 2) Altera,
 # Ryan 22" would read the "2" of "2)" as Dunbar's age and lose leg 2.
 RELAY_LEG = re.compile(
     r"(\d)\)\s*"
-    r"([A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
+    rf"({SWIMMER_NAME})"
     r"(?:\s+(\d+)\b(?!\s*\)))?",
 )
 
-# Relay team result line: place, team code, optional A-D letter, times.
+# Relay team result line: place, team code, optional relay letter (A–Z), times.
 # e.g. "1 GTSC-GA A 1:52.14 50" — no swimmer name on this row (unlike individual
 # results). Place is normally numeric, but a scratched relay ("--- AUB-SE C
 # NS") prints the scratch marker where the place would be — accept it so the
@@ -94,9 +107,10 @@ RELAY_LEG = re.compile(
 # instead of falling through unrecognized and letting the next team's roster
 # lines merge into whatever relay was parsed last.
 RELAY_TEAM_RESULT = re.compile(
-    r"^(\d+|-{2,3})\s+"
-    r"((?:[A-Z][A-Za-z]+\s+)*[A-Z][A-Za-z]+(?:-[A-Z]{2})?)\s+"
-    r"([ABCD])?\s*"
+    r"^\*?(\d+|-{2,3})\s+"
+    r"((?:(?:[A-Z][A-Za-z'’]+\.?|&)\s+)*[A-Z][A-Za-z'’]+\.?(?:-[A-Z]{2})?)\s+"
+    # The letter is a lone capital ("A".."G"); never the "x" of an exhibition time.
+    r"(?:((?-i:[A-Z]))\s+)?"
     r"(.+)$",
     re.I,
 )
@@ -208,6 +222,9 @@ def detect_hytek_doc_type(text: str) -> str:
     alone can't, since they rest on the document's shape rather than one
     string that might appear anywhere.
     """
+    # A Team Manager "Individual Meet Results" report is results, by swimmer.
+    if is_team_manager_report(text):
+        return "results"
     lines = text.split("\n")
 
     scores: dict[str, float] = {doc_type: 0.0 for doc_type in _DOC_TYPES}
@@ -338,6 +355,10 @@ def strip_points_column(line: str) -> str:
     # Only consider stripping if we detected a Points column in the PDF
     if not _pdf_has_points_column.get():
         return line
+
+    # A splits-only line (no name or team) never carries a points value.
+    if not re.search(r"[A-Za-z]", line):
+        return line
     
     # Count times by looking for time patterns (to avoid infinite recursion with extract_times_from_line)
     times = re.findall(EXHIBITION_TIME_TOKEN_PATTERN, line, re.I)
@@ -346,11 +367,15 @@ def strip_points_column(line: str) -> str:
     if len(times) == 2:
         return line
     
-    # If 3+ times, the last numeric value is likely points - strip it
+    # Otherwise the last numeric value may be points - strip it, but only when a
+    # swum time is still left on the row. A row with no seed column and a
+    # sub-minute final ("… Club-GA 24.34", "… NT 29.44") ends in the time itself.
     match = re.search(r'\s+(\d+(?:\.\d+)?)\s*$', line)
     if match:
-        return line[:match.start()]
-    
+        rest = line[:match.start()]
+        if re.findall(EXHIBITION_TIME_TOKEN_PATTERN, rest, re.I):
+            return rest
+
     return line
 
 
@@ -676,7 +701,11 @@ def club_matches(club: str, team_norm: str) -> bool:
 
 # Given names past the first ("Regalado, Elise Victoria 22 GTSC"), taken only when an
 # age follows, so a full club name printed without an age isn't read as a middle name.
-MORE_GIVEN_NAMES = r"(?:(?:\s+[A-Z][a-z][A-Za-z'\-]*)+(?=\s+\d{1,3}(?:\s|[A-Z])))?"
+MORE_GIVEN_NAMES = (
+    r"(?:(?:\s+[A-Z][a-z][A-Za-z'\-]*)+(?=(?:\s+\([^()]{1,30}\))?\s+\d{1,3}(?:\s|[A-Z])))?"
+    # A preferred name in parentheses after the given names ("Kopkas, Emma (Grace) 18 GTSC").
+    r"(?:\s+\([A-Z][A-Za-z'\- ]{0,29}\))?"
+)
 
 
 def parse_team_from_line(line: str) -> str | None:
@@ -691,7 +720,7 @@ def parse_team_from_line(line: str) -> str | None:
     # Try short code with concatenated age+team: name + age+team (no space) + time/paren
     # e.g. "Smith, Benjamin 18GTSC 1:52.91"
     concat_match = re.search(
-        r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
+        rf"(?:{SWIMMER_NAME})"
         r"(?:\s+[A-Z]\.?(?=\s))?"
         + MORE_GIVEN_NAMES +
         r"\s+\d{1,3}([A-Z0-9]{2,10}(?:-[A-Z]{2})?)"
@@ -704,7 +733,7 @@ def parse_team_from_line(line: str) -> str | None:
     # Try short code first: name + optional age + short code + time/paren/status
     # (e.g. "UKCS DQ"). A status token is never the code itself.
     match = re.search(
-        r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
+        rf"(?:{SWIMMER_NAME})"
         r"(?:\s+[A-Z]\.?(?=\s))?"
         + MORE_GIVEN_NAMES +
         r"(?:\s+\d{1,3})?"
@@ -720,11 +749,11 @@ def parse_team_from_line(line: str) -> str | None:
     # never a status token, so an "NT" seed isn't swallowed into the name.
     team_word = rf"(?!(?:{INVALID_TIME_PATTERN})\b)[A-Z][A-Za-z]+"
     full_match = re.search(
-        r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
+        rf"(?:{SWIMMER_NAME})"
         r"(?:\s+[A-Z]\.?(?=\s))?"
         + MORE_GIVEN_NAMES +
         r"(?:\s+\d{1,3})?"
-        rf"\s+((?:{team_word}\s+){{1,6}}(?:{team_word})(?:-[A-Z]{{2}})?)"
+        rf"\s+((?:{team_word}\s+(?:(?:of|at|the|and|&)\s+)?){{1,6}}(?:{team_word})(?:-[A-Z]{{2}})?)"
         rf"\s+(?:{INVALID_TIME_PATTERN}|{TIME_TOKEN_PATTERN})",
         line,
     )
@@ -734,7 +763,7 @@ def parse_team_from_line(line: str) -> str | None:
     # One-word team name ('Unattached'): only right after the age, where it
     # can't be a swimmer's middle name.
     single_match = re.search(
-        r"(?:[A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*,\s*[A-Z][A-Za-z'\-]+)"
+        rf"(?:{SWIMMER_NAME})"
         r"(?:\s+[A-Z]\.?(?=\s))?"
         + MORE_GIVEN_NAMES +
         r"\s+\d{1,3}"
@@ -828,7 +857,7 @@ def parse_team_after_name(line: str) -> str | None:
     → "White". A middle initial ("Smith, John A Gold") is skipped.
     """
     name_match = re.search(
-        r"([A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*),\s*([A-Z][A-Za-z'\-]+)", line
+        rf"(?<![A-Za-z])({LAST_NAME}),\s*({FIRST_NAME})", line
     )
     if not name_match:
         return None
@@ -847,7 +876,7 @@ def parse_team_after_name(line: str) -> str | None:
 
 def parse_place_from_line(line: str) -> int | None:
     """Leading finish place on a Hy-Tek result row."""
-    match = re.match(r"^\s*\*?\s*(\d{1,3})\s+(?=[A-Z\"'(])", line)
+    match = re.match(rf"^\s*\*?\s*(\d{{1,3}})\s+(?=[A-ZÀ-ÖØ-Þ\"'(]|{NAME_PARTICLE}\s)", line)
     if not match:
         return None
     place = int(match.group(1))
@@ -859,7 +888,7 @@ def parse_name_from_line(line: str) -> str | None:
     # Last name may be multiple words; capture only the first given name so team
     # codes (e.g. "UCFFL-FL") and middle names don't leak into the result.
     comma_match = re.search(
-        r"([A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-]+)*),\s*([A-Z][A-Za-z'\-]+)",
+        rf"(?<![A-Za-z])({LAST_NAME}),\s*({FIRST_NAME})",
         line,
     )
     if comma_match:
@@ -1089,8 +1118,79 @@ def parse_table_rows(table: list[list[Any]], current_event: str | None, course: 
     return rows
 
 
+# Hy-Tek's "cumulative with subtracted" splits print each mark followed by its lap
+# (or relay leg) time in parentheses: "29.85 1:02.03 (32.18) 1:34.69 (32.66)".
+_PAREN_SPLIT = re.compile(r"\(\s*(?:" + TIME_TOKEN_PATTERN + r")?\s*\)")
+
+
+def cumulative_split_tokens(line: str) -> list[str] | None:
+    """The cumulative marks of a "cumulative (interval)" splits line, else None.
+
+    Only lines that are nothing but times and parenthesized times qualify; the
+    parenthesized interval times are dropped, leaving one rising cumulative series.
+    """
+    if "(" not in line or re.search(r"[A-Za-z]", line):
+        return None
+    bare = _PAREN_SPLIT.sub(" ", line)
+    if re.search(r"[()]", bare):
+        return None
+    tokens = extract_times_from_line(bare)
+    return tokens or None
+
+
+def splits_from_cumulative(tokens: list[str], event: str, finish: str | None) -> list[dict[str, Any]]:
+    """Lap splits from a "cumulative (interval)" series, or [] when it isn't clean.
+
+    A mark the timing system missed, or a finish printed twice ("2:07.07 2:07.07 ( )"),
+    leaves the series short or flat — store no splits rather than misplaced ones.
+    """
+    distance = event_race_distance(event)
+    finish_ms = time_token_to_ms(finish) if finish else None
+    ms = [time_token_to_ms(t) for t in tokens]
+    if distance is None or finish_ms is None or any(v is None for v in ms):
+        return []
+    while len(ms) >= 2 and ms[-1] == ms[-2]:
+        ms.pop()
+    laps = distance // 50
+    if laps < 2 or len(ms) != laps or abs(ms[-1] - finish_ms) > 20:
+        return []
+    if any(b <= a for a, b in zip(ms, ms[1:])):
+        return []
+    out: list[dict[str, Any]] = []
+    prev = 0
+    for i, cum in enumerate(ms, start=1):
+        formatted = ms_to_time_token(cum - prev)
+        if not formatted:
+            return []
+        out.append({"distance": 50 * i, "splitTime": formatted})
+        prev = cum
+    return out
+
+
+def relay_tokens_from_cumulative(tokens: list[str], values_per_leg: int) -> list[str] | None:
+    """Re-express a relay's cumulative-from-the-start marks the way the other relay
+    split formats print them: each leg's marks cumulative within that leg."""
+    if len(tokens) != 4 * values_per_leg:
+        return None
+    ms = [time_token_to_ms(t) for t in tokens]
+    if any(v is None for v in ms) or any(b <= a for a, b in zip(ms, ms[1:])):
+        return None
+    out: list[str] = []
+    for leg in range(4):
+        start = ms[leg * values_per_leg - 1] if leg else 0
+        for i in range(values_per_leg):
+            formatted = ms_to_time_token(ms[leg * values_per_leg + i] - start)
+            if not formatted:
+                return None
+            out.append(formatted)
+    return out
+
+
 def _is_split_line(line: str) -> bool:
-    """A relay splits line is only split times — digits, colons, dots, spaces."""
+    """A relay splits line is only split times — digits, colons, dots, spaces —
+    or a "cumulative (interval)" line."""
+    if cumulative_split_tokens(line):
+        return True
     if re.search(r"[A-Za-z)]", line):
         return False
     return len(extract_times_from_line(line)) >= 2
@@ -1188,6 +1288,25 @@ SWIM_OFF_TAG = "S"
 # rather than taken as the individual event.
 LEAD_OFF_EVENT_HEADER = re.compile(r"^\(?\s*(?:Event|#)\s*\d+\b.*\blead[\s-]*off\b", re.I)
 
+# Lead-off events can also be unlabeled: "Event 235 Women 100 Yard Backstroke" holds the
+# 400 Medley Relay's leadoffs, numbered 200 (or 100) past the individual "Event 35 Women
+# 100 Yard Backstroke" it shadows.
+LEAD_OFF_EVENT_OFFSETS = (100, 200)
+
+
+def is_unlabeled_lead_off_event(
+    number: int | None, gender: str, event: str, individual_events: dict[int, tuple[str, str]]
+) -> bool:
+    """An event header repeating an earlier individual event (same gender and event) at that
+    event's number plus 100 or 200 — a relay lead-off event without "Lead Off" in its name."""
+    if number is None:
+        return False
+    return any(
+        individual_events.get(number - offset) == (gender, event)
+        for offset in LEAD_OFF_EVENT_OFFSETS
+        if number - offset > 0
+    )
+
 
 def parse_text_lines(lines: list[str], course: str) -> list[dict]:
     results: list[dict] = []
@@ -1204,6 +1323,9 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
     # Hy-Tek wraps long races (400+) onto multiple split-only lines; collect
     # consecutive ones before mapping distances (same idea as relay _split_parts).
     pending_split_tokens: list[str] = []
+    pending_cumulative = False
+    # Each individual event's number → (gender, event), to spot unlabeled lead-off events.
+    individual_events: dict[int, tuple[str, str]] = {}
 
     def attach_splits(tokens: list[str]) -> None:
         if not tokens or not last_result_indices:
@@ -1211,14 +1333,19 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
         idx = last_result_indices[-1]
         row = results[idx]
         finish = row.get("time") if not parse_status_token(str(row.get("time", ""))) else None
-        splits = individual_splits_from_tokens(tokens, str(row.get("event", "")), finish)
+        if pending_cumulative:
+            splits = splits_from_cumulative(tokens, str(row.get("event", "")), finish)
+        else:
+            splits = individual_splits_from_tokens(tokens, str(row.get("event", "")), finish)
         if splits:
             row["splits"] = splits
 
     def flush_pending_splits() -> None:
+        nonlocal pending_cumulative
         if pending_split_tokens:
             attach_splits(pending_split_tokens)
             pending_split_tokens.clear()
+        pending_cumulative = False
 
     for line in lines:
         stripped = line.strip()
@@ -1255,8 +1382,19 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
         maybe_event = parse_event_from_line(stripped)
         if maybe_event and len(stripped) < 120:
             flush_pending_splits()
+            number_match = EVENT_NUMBER_HEADER.match(stripped)
+            number = int(number_match.group(1)) if number_match else None
+            gender = relay_gender_from_header(stripped)
+            if is_unlabeled_lead_off_event(number, gender, maybe_event, individual_events):
+                current_event = None
+                in_relay_section = False
+                in_swim_off = False
+                last_result_indices = []
+                continue
+            if number is not None:
+                individual_events.setdefault(number, (gender, maybe_event))
             current_event = maybe_event
-            current_gender = relay_gender_from_header(stripped)
+            current_gender = gender
             # "#35S Women 50 Yard Fly Swim-off" — its rows are tie-breaker swims,
             # not the event's prelims/finals.
             in_swim_off = bool(SWIM_OFF_HEADER.search(stripped))
@@ -1283,6 +1421,14 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
         if RELAY_TEAM_RESULT.match(stripped) and not re.search(r"[A-Z][a-z]+,", stripped):
             continue
 
+        cumulative = cumulative_split_tokens(stripped)
+        if cumulative:
+            if pending_split_tokens and not pending_cumulative:
+                flush_pending_splits()
+            pending_split_tokens.extend(cumulative)
+            pending_cumulative = True
+            continue
+
         split_times = extract_times_from_line(stripped)
         # Continue a multi-row block even if the last row has a single leftover
         # 50 (e.g. 1650 with 33 splits → …4 + 1).
@@ -1300,8 +1446,13 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
         if not name:
             continue
 
-        team = (parse_team_after_name(stripped) if ageless_columns else None) or parse_team_from_line(
-            stripped
+        # Some results print an Age column header but leave it blank on every row
+        # ("1 Holshouser, Audrey White 27.68 20"), so fall back to the words between
+        # the name and the time when no team turns up the usual way.
+        team = (
+            (parse_team_after_name(stripped) if ageless_columns else None)
+            or parse_team_from_line(stripped)
+            or parse_team_after_name(stripped)
         )
         last_result_indices = []
 
@@ -1432,14 +1583,65 @@ def relay_gender_from_header(line: str) -> str:
     return ""
 
 
+def _segment_relay_leg_tokens(
+    tokens: list[str], values_per_leg: int, finish: str | None = None
+) -> list[list[str]] | None:
+    """Group a relay's split tokens into its four legs, or None when unsure.
+
+    Longer relays print each leg's marks cumulative within the leg (a 400 relay:
+    the 50 then the 100). A mark the timing system missed is simply left blank,
+    so the tokens stop falling into fixed groups — "51.93 27.05 57.14 23.38 50.12
+    1:02.12" is 51.93 | 27.05 57.14 | 23.38 50.12 | 1:02.12. Then try every
+    grouping of 1..values_per_leg marks per leg whose marks rise within the leg,
+    and keep it only if exactly one grouping's leg times add up to the finish.
+    """
+    if len(tokens) >= 4 * values_per_leg:
+        return [
+            tokens[leg * values_per_leg : (leg + 1) * values_per_leg]
+            for leg in range(4)
+        ]
+    finish_ms = time_token_to_ms(finish) if finish else None
+    if values_per_leg == 1 or len(tokens) < 4 or finish_ms is None:
+        return None
+    ms = [time_token_to_ms(t) for t in tokens]
+    if any(v is None for v in ms):
+        return None
+
+    matches: list[list[tuple[int, int]]] = []
+
+    def walk(start: int, legs: list[tuple[int, int]]) -> None:
+        if len(legs) == 4:
+            if start == len(tokens):
+                matches.append(legs)
+            return
+        for size in range(1, values_per_leg + 1):
+            end = start + size
+            if end > len(tokens):
+                break
+            if any(ms[i] <= ms[i - 1] for i in range(start + 1, end)):
+                continue
+            walk(end, legs + [(start, end)])
+
+    walk(0, [])
+    matches = [
+        legs
+        for legs in matches
+        if abs(sum(ms[end - 1] for _start, end in legs) - finish_ms) <= 10
+    ]
+    if len(matches) != 1:
+        return None
+    return [tokens[start:end] for start, end in matches[0]]
+
+
 def _relay_leg_splits_from_line(
-    line: str, total_distance: int
+    line: str, total_distance: int, finish: str | None = None
 ) -> dict[int, dict[str, Any]]:
     """Map leg number -> {splitTime, splits?} from a relay splits line.
 
     Hy-Tek results PDFs print individual leg times (200 relays: 4 values on one line).
     Longer relays print cumulative-within-leg marks every 50 (e.g. 50 + 100 per leg).
     Intermediate 50s are stored as interval splits; splitTime is the full leg time.
+    A leg missing some of its marks keeps its leg time but no 50 splits.
     """
     tokens = extract_times_from_line(line)
     if not tokens:
@@ -1456,15 +1658,14 @@ def _relay_leg_splits_from_line(
             out[leg] = {"splitTime": tokens[leg - 1]}
         return out
 
-    for leg in range(1, 5):
-        start = (leg - 1) * values_per_leg
-        end = start + values_per_leg
-        if end > len(tokens):
-            break
-        leg_tokens = tokens[start:end]
+    legs = _segment_relay_leg_tokens(tokens, values_per_leg, finish)
+    if legs is None:
+        return out
+
+    for leg, leg_tokens in enumerate(legs, start=1):
         leg_total = leg_tokens[-1]
         entry: dict[str, Any] = {"splitTime": leg_total}
-        if values_per_leg > 1:
+        if len(leg_tokens) == values_per_leg > 1:
             # Tokens are cumulative within the leg; convert to interval 50s.
             interval_map = leg_times_from_cumulative(leg_tokens)
             if interval_map:
@@ -1489,7 +1690,10 @@ def _apply_relay_splits(block: dict[str, Any], line: str, event: str) -> None:
     total_match = re.match(r"(\d+)", event)
     if not total_match:
         return
-    leg_splits = _relay_leg_splits_from_line(line, int(total_match.group(1)))
+    rounds = block.get("rounds") or []
+    # Splits belong to the last round swum (finals when both are printed).
+    finish = rounds[-1].get("time") if rounds else None
+    leg_splits = _relay_leg_splits_from_line(line, int(total_match.group(1)), finish)
     if not leg_splits:
         return
     swimmers = block.get("relaySwimmers") or []
@@ -1519,12 +1723,35 @@ def _finish_block_splits(block: dict[str, Any], event: str) -> None:
     parts = block.pop("_split_parts", None)
     if not parts:
         return
+    if any(cumulative_split_tokens(part) for part in parts):
+        tokens = [t for part in parts for t in (cumulative_split_tokens(part) or [])]
+        total_match = re.match(r"(\d+)", event)
+        per_leg = max(1, int(total_match.group(1)) // 4 // 50) if total_match else 1
+        relay_tokens = relay_tokens_from_cumulative(tokens, per_leg)
+        if not relay_tokens:
+            return
+        parts = relay_tokens
     combined = " ".join(parts)
     _apply_relay_splits(block, combined, event)
 
 
+def relay_row_status(tail: str) -> str | None:
+    """The status a relay team row finished with ("NT DQ", "2:03.52 NS"), else None.
+
+    It's the row's last token (an "NT" seed is never the finish); a trailing points value
+    is skipped over.
+    """
+    for token in reversed(tail.split()):
+        if re.fullmatch(r"\d+(?:\.\d+)?", token):
+            continue
+        status = parse_status_token(token)
+        return status if status in _SCRATCH_STATUS_TOKENS else None
+    return None
+
+
 def parse_relay_results(lines: list[str], course: str) -> list[dict[str, Any]]:
-    """Extract relay team results — roster optional; time required.
+    """Extract relay team results — roster optional; a time or a finish status (DQ, NS…)
+    required.
 
     Hy-Tek order per team: result line, optional name lines, optional splits line.
     """
@@ -1584,7 +1811,9 @@ def parse_relay_results(lines: list[str], course: str) -> list[dict[str, Any]]:
                 current_round = None
             continue
 
-        if parse_event_from_line(line) and "relay" not in line.lower():
+        # The team standings after the last event end any relay block — their
+        # "University of Tennessee, Knoxv 253" would otherwise read as a swimmer.
+        if (parse_event_from_line(line) and "relay" not in line.lower()) or _scores_section(line):
             flush_block()
             current_event = None
             current_gender = ""
@@ -1600,13 +1829,19 @@ def parse_relay_results(lines: list[str], course: str) -> list[dict[str, Any]]:
         team_match = RELAY_TEAM_RESULT.match(line)
         if team_match:
             flush_block()
-            if SCRATCH_MARKER.search(line):
-                continue
             place_str, team_code, letter, tail = team_match.groups()
-            rounds = apply_section_round(pick_round_times(tail), current_round)
+            # A relay that didn't finish legally ("--- GTSC-GA B NT DQ") is kept with its
+            # status as the time — no place or points — and its swimmers and splits.
+            status = relay_row_status(tail)
+            if status:
+                rounds = apply_section_round([{"time": status, "tags": ""}], current_round)
+            else:
+                if SCRATCH_MARKER.search(line):
+                    continue
+                rounds = apply_section_round(pick_round_times(tail), current_round)
             if not rounds:
                 continue
-            place = int(place_str) if place_str.isdigit() else None
+            place = int(place_str) if place_str.isdigit() and not status else None
             seed_time = pick_seed_time(tail)
             block = {
                 "relayLetter": normalize_relay_letter(letter.upper() if letter else None),
@@ -1622,6 +1857,11 @@ def parse_relay_results(lines: list[str], course: str) -> list[dict[str, Any]]:
 
         if block and _is_split_line(line):
             block.setdefault("_split_parts", []).append(line)
+            continue
+
+        # A page break's header ("Results - Clemson Spring Invitational, Session 1") can
+        # fall inside a relay's block; it never names a swimmer.
+        if _HYTEK_BANNER.search(line) or re.match(r"^Results\b", line):
             continue
 
         # Try explicit leg format (1), 2)...)
@@ -1664,7 +1904,7 @@ def parse_relay_leadoffs(lines: list[str], course: str) -> list[dict]:
     Only the leadoff leg counts as an official individual time (later legs use a
     flying start). Medley relay leadoffs are backstroke; free relay leadoffs are
     freestyle. Each relay entry appears as a team result line, then the swimmer
-    names ("1) Last, First ..."), then a per-leg splits line whose first
+    names ("1) Last, First ..."), then per-leg splits line(s) whose first
     value(s) are the leadoff's time."""
     results: list[dict] = []
     in_relay = False
@@ -1672,31 +1912,70 @@ def parse_relay_leadoffs(lines: list[str], course: str) -> list[dict]:
     stroke: str | None = None
     leadoff_name: str | None = None
     current_team: str | None = None
+    current_finish: str | None = None
+    current_status: str | None = None
+    pending_splits: list[str] = []
+
+    def flush_leadoff() -> None:
+        nonlocal leadoff_name
+        if leadoff_name and stroke and leg_distance > 0 and pending_splits and not current_status:
+            # Splits are printed every 50 and are cumulative within each leg, e.g.
+            # a 400 relay's 100 leg shows "<50 split> <100 time>". So the leadoff's
+            # official time is the last mark of leg 1 — not the first 50 or a sum
+            # of splits. Grouping the marks into legs copes with a missing 50.
+            values_per_leg = max(1, leg_distance // 50)
+            # Cumulative-from-the-start marks: leg 1's last mark is still the leadoff's time.
+            legs = _segment_relay_leg_tokens(
+                pending_splits, values_per_leg, current_finish
+            )
+            if legs:
+                results.append(
+                    {
+                        "name": leadoff_name,
+                        "event": f"{leg_distance} {stroke}",
+                        "time": legs[0][-1],
+                        "course": course,
+                        "tags": "R",
+                        "team": current_team,
+                    }
+                )
+        leadoff_name = None
+        pending_splits.clear()
 
     for raw in lines:
         line = raw.strip()
         if not line:
             continue
 
+        if pending_splits and not _is_split_line(line):
+            flush_leadoff()
+
         team_match = RELAY_TEAM_RESULT.match(line)
         if team_match:
+            flush_leadoff()
             current_team = team_match.group(2).upper()
+            rounds = pick_round_times(team_match.group(4))
+            current_finish = rounds[-1]["time"] if rounds else None
+            # A DQ'd (or otherwise unfinished) relay's leadoff split isn't an official swim.
+            current_status = relay_row_status(team_match.group(4))
 
         event = relay_event_from_header(line)
         if event:
+            flush_leadoff()
             total_match = re.match(r"(\d+)", event)
             total = int(total_match.group(1)) if total_match else 0
             leg_distance = total // 4
             stroke = "Back" if "medley" in event.lower() else "Free"
             in_relay = True
-            leadoff_name = None
             current_team = None
+            current_finish = None
+            current_status = None
             continue
 
         # Any non-relay event header ends the current relay section.
         if parse_event_from_line(line) and "relay" not in line.lower():
+            flush_leadoff()
             in_relay = False
-            leadoff_name = None
             continue
 
         if not in_relay:
@@ -1704,30 +1983,14 @@ def parse_relay_leadoffs(lines: list[str], course: str) -> list[dict]:
 
         name_match = LEADOFF_NAME.search(line)
         if name_match:
+            flush_leadoff()
             leadoff_name = name_match.group(1)
             continue
 
-        if leadoff_name and stroke and leg_distance > 0 and _is_split_line(line):
-            splits = extract_times_from_line(line)
-            # Splits are printed every 50 and are cumulative within each leg, e.g.
-            # a 400 relay's 100 leg shows "<50 split> <100 time>". So the leadoff's
-            # official time is the cumulative value at the end of leg 1 — the
-            # (leg_distance / 50)-th split, not the first 50 or a sum of splits.
-            values_per_leg = max(1, leg_distance // 50)
-            if len(splits) >= values_per_leg:
-                time_value = splits[values_per_leg - 1]
-                results.append(
-                    {
-                        "name": leadoff_name,
-                        "event": f"{leg_distance} {stroke}",
-                        "time": time_value,
-                        "course": course,
-                        "tags": "R",
-                        "team": current_team,
-                    }
-                )
-            leadoff_name = None
+        if leadoff_name and _is_split_line(line):
+            pending_splits.extend(cumulative_split_tokens(line) or extract_times_from_line(line))
 
+    flush_leadoff()
     return results
 
 
@@ -2240,6 +2503,36 @@ def label_relay_sides(relays: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return out
 
 
+# Hy-Tek "with reaction times" results print each start's reaction ("r:+0.65") ahead
+# of a swim's splits and beside each relay leg ("Tarrh, Sydney r:0.33 Milstead, McKenzie").
+REACTION_TIME = re.compile(r"(?<!\S)r:\s?[+-]?\d+\.\d\d(?!\S)")
+
+
+# A season tag some clubs carry in their registered name: "Georgia Tech Swim Club '19-'20-GA".
+TEAM_SEASON_TAG = re.compile(r"\s+['’]\d{2}\s*-\s*['’]\d{2}(?=-[A-Z]{2}\b|\s|$)")
+# What some results print between the place and the swimmer or team: a registration id
+# ("1 02983 Lawson, Taylor") or a heat-order-lane code ("3 2-3-4 Hayes, Daniel").
+PLACE_EXTRA_TOKEN = re.compile(
+    r"^(\*?\d{1,3}|-{2,3})\s+(?:\d{4,7}|\d{1,2}-\d{1,2}-\d{1,2})\s+(?=[A-Za-zÀ-ÿ])"
+)
+
+
+def strip_reaction_times(lines: list[str]) -> list[str]:
+    """Normalize result lines: drop reaction times, team season tags and the id / heat
+    code some results print after the place, so every row reads "place name … team …"."""
+    out: list[str] = []
+    for line in lines:
+        if "r:" in line:
+            line = re.sub(r"\s{2,}", " ", REACTION_TIME.sub(" ", line)).strip()
+            if not line:
+                continue
+        if "'" in line or "’" in line:
+            line = TEAM_SEASON_TAG.sub("", line)
+        line = PLACE_EXTRA_TOKEN.sub(r"\1 ", line)
+        out.append(line)
+    return out
+
+
 def parse_meet_pdf_bytes(
     content: bytes, default_course: str = "SCY", team: str | None = None
 ) -> dict[str, Any]:
@@ -2248,6 +2541,21 @@ def parse_meet_pdf_bytes(
     has_points_column = False
 
     with pdfplumber.open(io.BytesIO(content)) as pdf:
+        # A Team Manager "Individual Meet Results" report lists swims by swimmer, not event.
+        first_page = (pdf.pages[0].extract_text() or "") if pdf.pages else ""
+        if is_team_manager_report(first_page):
+            report = parse_team_manager_report(
+                [page.extract_text() or "" for page in pdf.pages], default_course
+            )
+            return {
+                **report,
+                "detectedSheetType": "results",
+                "event_order": None,
+                "results": filter_results_by_team(report["results"], team),
+                "relay_results": [],
+                "team_scores": None,
+            }
+
         # Detect column layout once from the first data page (usually page 1 or 2),
         # then apply it consistently to ALL pages.  Per-page detection can fail on
         # pages that happen to have long cross-column header lines or sparse content.
@@ -2297,7 +2605,11 @@ def parse_meet_pdf_bytes(
 
         # Second pass: extract lines using the globally-detected split points.
         for page in pdf.pages:
-            all_text.extend(extract_page_lines(page, forced_splits=pdf_splits, text_flow=True))
+            all_text.extend(
+                strip_reaction_times(
+                    extract_page_lines(page, forced_splits=pdf_splits, text_flow=True)
+                )
+            )
 
     # Store this flag in a context variable for use in extract_times_from_line
     _pdf_has_points_column.set(has_points_column)

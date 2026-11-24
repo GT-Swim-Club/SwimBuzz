@@ -4,6 +4,8 @@ import { useRouter } from "expo-router"
 import { useQuery } from "@tanstack/react-query"
 import {
   formatRecordTime,
+  MANUAL_RECORD_LABEL,
+  MANUAL_RECORD_MARK,
   recordSetLabel,
   recordSwimmerLabel,
   type RecordEventDef,
@@ -18,7 +20,7 @@ import { api } from "../lib/api"
 export type RecordTarget = { def: RecordEventDef; gender: RecordGender; record: TeamRecordItem | undefined }
 
 export function recordTitle({ def, gender }: Pick<RecordTarget, "def" | "gender">): string {
-  return `${gender === "F" ? "Women's" : gender === "M" ? "Men's" : ""} ${def.label}`.trim()
+  return `${gender === "F" ? "Women" : gender === "M" ? "Men" : ""} ${def.label}`.trim()
 }
 
 export function recordsErrorMessage(error: unknown, fallback: string): string {
@@ -86,9 +88,15 @@ function RecordHistoryList({
                   )
                 )}
                 <Text style={styles.historyMeta}>{recordSetLabel(record)}</Text>
+                {record.manual ? (
+                  <Text style={styles.historyMeta}>
+                    <Text style={styles.manualMark}>{MANUAL_RECORD_MARK}</Text> {MANUAL_RECORD_LABEL}
+                  </Text>
+                ) : null}
                 {index === 0 ? <Text style={styles.historySource}>Current</Text> : null}
               </View>
               <Text style={[styles.historyTime, record.isThisSeason && styles.thisSeason]}>
+                {record.manual ? <Text style={styles.manualMark}>{MANUAL_RECORD_MARK}</Text> : null}
                 {formatRecordTime(record.timeMs)}
               </Text>
             </View>
@@ -118,5 +126,7 @@ function makeStyles(c: ColorPalette) {
     historySource: { color: c.textTertiary, fontSize: 12 },
     historyTime: { color: c.text, fontSize: 15, fontVariant: ["tabular-nums"], fontWeight: "700" },
     thisSeason: { color: c.accent, fontWeight: "800" },
+    /** The gold "*" before a manually added record's time. */
+    manualMark: { color: c.accent },
   })
 }

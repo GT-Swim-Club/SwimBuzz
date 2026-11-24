@@ -144,20 +144,6 @@ export function swimCloudIdConflict(
   return null
 }
 
-function placeholderEmail(
-  firstName: string,
-  lastName: string,
-  swimCloudId?: number,
-  suffix = 0
-): string {
-  if (swimCloudId) return `${swimCloudId}@swimcloud.placeholder`
-  const base = `${lastName}.${firstName}`
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ".")
-    .replace(/^\.+|\.+$/g, "")
-  return suffix > 0 ? `${base}.${suffix}@roster.placeholder` : `${base || "athlete"}@roster.placeholder`
-}
-
 function isPlaceholderEmail(email: string): boolean {
   const lower = email.toLowerCase()
   return lower.endsWith("@roster.placeholder") || lower.endsWith("@swimcloud.placeholder")
@@ -317,12 +303,12 @@ function importYearData(input: RosterImportInput, season: string) {
   return athleteYearData(year ? { [season]: year } : {}, [season])
 }
 
+/** A new athlete from an import row. Needs a real @gatech.edu email so they can sign in. */
 export async function createImportAthlete(
-  input: RosterImportInput,
-  season: string,
-  rowNumber?: number
+  input: RosterImportInput & { email: string },
+  season: string
 ): Promise<RosterImportAthlete> {
-  let email = input.email ?? placeholderEmail(input.firstName, input.lastName, undefined)
+  const email = input.email.toLowerCase()
   const preferredName = input.preferredName ?? null
 
   const existingUser = await prisma.user.findUnique({
@@ -361,12 +347,7 @@ export async function createImportAthlete(
   }
 
   if (existingUser?.athlete) {
-    email = placeholderEmail(input.firstName, input.lastName, undefined, rowNumber ?? 0)
-  }
-
-  let suffix = 1
-  while (await prisma.user.findUnique({ where: { email } })) {
-    email = placeholderEmail(input.firstName, input.lastName, undefined, suffix++)
+    throw new Error(`${email} already belongs to another athlete`)
   }
 
   const user = await prisma.user.create({
@@ -444,6 +425,8 @@ export type RosterImportSummary = {
   deletedNames: string[]
   parsed: number
   errors: Array<{ row: number; message: string }>
+  /** Rows skipped because they'd create a new athlete without a @gatech.edu email ("Last, First"). */
+  missingEmail: string[]
   rowOutcomes: RosterImportRowOutcome[]
 }
 
@@ -472,12 +455,13 @@ export async function runRosterImport(
   let updated = 0
   const errors: RosterImportSummary["errors"] = [...parseErrors]
   const rowOutcomes: RosterImportRowOutcome[] = []
+  const missingEmail: string[] = []
   const keptIds = new Set<string>()
 
   const context = await loadRosterImportContext()
 
   if (rows.length === 0) {
-    return { created, updated, removed: 0, deleted: 0, deletedNames: [], parsed: 0, errors, rowOutcomes }
+    return { created, updated, removed: 0, deleted: 0, deletedNames: [], parsed: 0, errors, missingEmail, rowOutcomes }
   }
 
   for (const [index, row] of rows.entries()) {
@@ -523,7 +507,18 @@ export async function runRosterImport(
         continue
       }
 
-      const athlete = await createImportAthlete(input, season, row.rowNumber)
+      // Existing athletes update without one, but a new athlete needs a GT email to sign in.
+      if (!input.email) {
+        const message = row.invalidEmail
+          ? `"${row.invalidEmail}" isn't a @gatech.edu email — new athletes need one`
+          : "Missing email — new athletes need a @gatech.edu email"
+        errors.push({ row: row.rowNumber, message: `${label}: ${message}` })
+        missingEmail.push(label)
+        rowOutcomes.push({ row: row.rowNumber, action: "skipped", name: label, detail: message })
+        continue
+      }
+
+      const athlete = await createImportAthlete({ ...input, email: input.email }, season)
       registerImportAthlete(context, athlete)
       keptIds.add(athlete.id)
       created++
@@ -531,7 +526,7 @@ export async function runRosterImport(
         row: row.rowNumber,
         action: "created",
         name: label,
-        detail: row.email ?? athlete.userEmail,
+        detail: athlete.userEmail,
       })
     } catch (err) {
       if (isClientDisconnected(err)) throw err
@@ -578,6 +573,7 @@ export async function runRosterImport(
     deletedNames,
     parsed: rows.length,
     errors,
+    missingEmail,
     rowOutcomes,
   }
 }

@@ -1,4 +1,4 @@
-import { athleteYearForSeason, swimCloudTimesStatus } from "@swimbuzz/shared"
+import { athleteYearForSeason } from "@swimbuzz/shared"
 import { isPlaceholderEmail } from "@/lib/auth/gatech-email"
 import { athleteAge } from "@/lib/utils"
 import type { RosterExportAthlete } from "@/lib/roster/roster-export"
@@ -20,17 +20,9 @@ function isoDate(date: Date | null): string {
   return date ? date.toISOString().slice(0, 10) : ""
 }
 
-function timesImported(a: RosterExportAthlete): string {
-  const status = swimCloudTimesStatus(a.swimCloudIds, a.timesSyncedAt)
-  if (status === "unlinked") return "No profile"
-  if (status === "never" || !a.timesSyncedAt) return "Never"
-  return isoDate(a.timesSyncedAt)
-}
-
 /**
  * The roster as CSV: a row per athlete with First Name, Last Name, Preferred Name, Gender, Year
- * and Age; staff also get Email, GTID, DOB, SwimCloud ID, Physical, Concussion Test and Times
- * Imported. Headers and values are the ones Import roster reads, so the file re-imports as is
+ * and Age; staff also get Email, GTID, DOB, SwimCloud ID, Physical and Concussion Test. Headers and values are the ones Import roster reads, so the file re-imports as is
  * (Age and the status columns are ignored there). UTF-8 with a BOM so Excel keeps "Ríos".
  */
 export function buildRosterCsv(athletes: RosterExportAthlete[], opts: { season: string | null; staff: boolean }): string {
@@ -42,7 +34,7 @@ export function buildRosterCsv(athletes: RosterExportAthlete[], opts: { season: 
     "Year",
     "Age",
     ...(opts.staff
-      ? ["Email", "GTID", "DOB", "SwimCloud ID", "Physical", "Concussion Test", "Times Imported"]
+      ? ["Email", "GTID", "DOB", "SwimCloud ID", "Physical", "Concussion Test"]
       : []),
   ]
 
@@ -63,7 +55,6 @@ export function buildRosterCsv(athletes: RosterExportAthlete[], opts: { season: 
           a.swimCloudIds.join(" "),
           a.clearance.physical.cleared ? "Complete" : "Incomplete",
           a.clearance.concussion.cleared ? "Complete" : "Incomplete",
-          timesImported(a),
         ]
       : []),
   ])

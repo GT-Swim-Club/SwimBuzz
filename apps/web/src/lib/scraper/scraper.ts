@@ -34,12 +34,20 @@ export async function getActiveScraperConnection(userId: string) {
     where: { userId },
     orderBy: { lastSeenAt: "desc" },
   })
-  if (!connection) return null
-  if (!isScraperConnectionAlive(connection.lastSeenAt)) {
-    await prisma.scraperConnection.delete({ where: { id: connection.id } }).catch(() => undefined)
-    return null
-  }
+  if (!connection || !isScraperConnectionAlive(connection.lastSeenAt)) return null
   return connection
+}
+
+/**
+ * Delete connections the scraper stopped heartbeating. Only the daily cleanup cron calls this,
+ * never a request: a DELETE waits on the row's lock, so pruning inline from status polls let one
+ * stuck heartbeat transaction pile up waiting deletes until they held the whole connection pool.
+ */
+export async function pruneStaleScraperConnections(): Promise<{ deleted: number }> {
+  const deleted = await prisma.scraperConnection.deleteMany({
+    where: { lastSeenAt: { lt: new Date(Date.now() - CONNECTION_TTL_MS) } },
+  })
+  return { deleted: deleted.count }
 }
 
 export async function createScraperPairing(userId: string) {

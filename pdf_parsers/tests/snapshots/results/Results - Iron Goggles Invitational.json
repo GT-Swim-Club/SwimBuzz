@@ -2059,7 +2059,7 @@
       "place": 11,
       "points": 6.0,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "3:06.86"
     },
     {
@@ -2285,7 +2285,7 @@
       "name": "Sikder, Ash",
       "place": null,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "DQ"
     },
     {
@@ -2528,6 +2528,16 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
+      "name": "Molinares, Valeria",
+      "place": 23,
+      "tags": "",
+      "team": "Ksu Swim Club",
+      "time": "33.12"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
       "name": "Costilow, Elliott",
       "place": 24,
       "tags": "",
@@ -2541,7 +2551,7 @@
       "name": "Overway, Sora",
       "place": 25,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "33.97"
     },
     {
@@ -2561,7 +2571,7 @@
       "name": "Marshall, Valerie",
       "place": 27,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "34.04"
     },
     {
@@ -2578,10 +2588,20 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
+      "name": "Schmid, Sarah",
+      "place": 29,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "35.21"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
       "name": "Sloggy, Laila",
       "place": 30,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "35.50"
     },
     {
@@ -2611,7 +2631,7 @@
       "name": "Kim, Seonae",
       "place": 33,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "44.82"
     },
     {
@@ -2854,6 +2874,16 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "M",
+      "name": "Houck, Ryan",
+      "place": 22,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "26.13"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
       "name": "Felix, Adrian",
       "place": 23,
       "tags": "",
@@ -2874,6 +2904,16 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "M",
+      "name": "Witham, Noah",
+      "place": 25,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "26.62"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
       "name": "Patterson, Alexander",
       "place": 26,
       "tags": "",
@@ -2889,6 +2929,16 @@
       "tags": "",
       "team": "Mississippi State Swim Club",
       "time": "26.83"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Kidin, Roman",
+      "place": 28,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "27.23"
     },
     {
       "course": "SCY",
@@ -2977,7 +3027,7 @@
       "name": "Torchia, Henry",
       "place": 37,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "28.38"
     },
     {
@@ -3027,7 +3077,7 @@
       "name": "Venu Bangrae, Vishal",
       "place": 42,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "29.43"
     },
     {
@@ -3104,10 +3154,20 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "M",
+      "name": "Patil, Svayam",
+      "place": 50,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "31.53"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
       "name": "Clua, Bernat",
       "place": 51,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "31.59"
     },
     {
@@ -3800,6 +3860,16 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
+      "name": "Calhoun, Margaret",
+      "place": 30,
+      "tags": "",
+      "team": "Samford University Swim Club",
+      "time": "30.70"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
       "name": "Schmid, Sarah",
       "place": 31,
       "tags": "",
@@ -3813,7 +3883,7 @@
       "name": "Horwitz, Mia",
       "place": 32,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "31.15"
     },
     {
@@ -3870,6 +3940,26 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
+      "name": "Lown, Olivia",
+      "place": 38,
+      "tags": "",
+      "team": "Samford University Swim Club",
+      "time": "32.65"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Hakola, Abigail",
+      "place": 39,
+      "tags": "",
+      "team": "UA Club Swimming",
+      "time": "32.81"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
       "name": "Dickson, Sophia",
       "place": 40,
       "tags": "",
@@ -3893,8 +3983,18 @@
       "name": "Overway, Sora",
       "place": 42,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "33.04"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Patel, Jesal",
+      "place": 43,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "34.47"
     },
     {
       "course": "SCY",
@@ -3903,7 +4003,7 @@
       "name": "Kim, Seonae",
       "place": 44,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "35.89"
     },
     {
@@ -3913,8 +4013,18 @@
       "name": "Soriano, Lesly",
       "place": 45,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "36.61"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Savinkov, Katie",
+      "place": 46,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "37.37"
     },
     {
       "course": "SCY",
@@ -3933,7 +4043,7 @@
       "name": "Dang, Bao",
       "place": 48,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "39.77"
     },
     {
@@ -3943,8 +4053,18 @@
       "name": "Gonzalez, Arleth",
       "place": 49,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "40.14"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Jung, Sangyoon",
+      "place": 50,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "43.31"
     },
     {
       "course": "SCY",
@@ -3963,7 +4083,7 @@
       "name": "Mandujano, Katie",
       "place": 52,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "45.92"
     },
     {
@@ -4519,8 +4639,18 @@
       "name": "Kang, Matthew",
       "place": 53,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "26.23"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Trouve, Antoine",
+      "place": 54,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "26.71"
     },
     {
       "course": "SCY",
@@ -4531,6 +4661,16 @@
       "tags": "",
       "team": "Ksu Swim Club",
       "time": "26.76"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Ganne, Axel",
+      "place": 56,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "26.81"
     },
     {
       "course": "SCY",
@@ -4559,7 +4699,7 @@
       "name": "Venu Bangrae, Vishal",
       "place": 59,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "27.34"
     },
     {
@@ -4606,6 +4746,16 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "M",
+      "name": "Guedje Ngatsi, Yemeli",
+      "place": 64,
+      "tags": "",
+      "team": "Swim Club at Georgia State Uni",
+      "time": "27.84"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
       "name": "Chouteau, Benjamin",
       "place": 65,
       "tags": "",
@@ -4639,7 +4789,7 @@
       "name": "Bagighni, Yoseph",
       "place": 68,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "28.34"
     },
     {
@@ -4669,7 +4819,7 @@
       "name": "Clua, Bernat",
       "place": 71,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "28.97"
     },
     {
@@ -4726,11 +4876,41 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "M",
+      "name": "Brady, Daniel",
+      "place": 77,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "30.16"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Vonfischbach, Parker",
+      "place": 78,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "30.76"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
       "name": "Guerrier, Zion",
       "place": 79,
       "tags": "",
       "team": "Ksu Swim Club",
       "time": "32.01"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Kofsky, Jakob",
+      "place": 80,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "37.13"
     },
     {
       "course": "SCY",
@@ -4749,7 +4929,7 @@
       "name": "Sikder, Ash",
       "place": 82,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "45.06"
     },
     {
@@ -4815,7 +4995,7 @@
       "place": 6,
       "points": 13.0,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "7:58.23"
     },
     {
@@ -4850,6 +5030,17 @@
       "tags": "",
       "team": "Mizzou Swim Club",
       "time": "5:18.61"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "M",
+      "name": "Pola\u00e1k, Filip",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "5:33.94"
     },
     {
       "course": "SCY",
@@ -5067,7 +5258,7 @@
       "name": "Marshall, Valerie",
       "place": 17,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "1:17.14"
     },
     {
@@ -5097,7 +5288,7 @@
       "name": "Sloggy, Laila",
       "place": 20,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "1:21.88"
     },
     {
@@ -5167,7 +5358,7 @@
       "name": "Gonzalez, Arleth",
       "place": 27,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "1:47.48"
     },
     {
@@ -5656,7 +5847,7 @@
       "place": 13,
       "points": 4.0,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "1:39.03"
     },
     {
@@ -5667,7 +5858,7 @@
       "place": 14,
       "points": 3.0,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "1:47.32"
     },
     {
@@ -5853,7 +6044,7 @@
       "name": "Bagighni, Yoseph",
       "place": 17,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "1:31.25"
     },
     {
@@ -6095,6 +6286,17 @@
       "tags": "",
       "team": "Georgia Tech Swim Club",
       "time": "58.57"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Pola\u00e1k, Filip",
+      "place": 11,
+      "points": 6.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "58.82"
     },
     {
       "course": "SCY",
@@ -6394,8 +6596,18 @@
       "place": 16,
       "points": 1.0,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "36.97"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Savinkov, Katie",
+      "place": 17,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "44.67"
     },
     {
       "course": "SCY",
@@ -6424,7 +6636,7 @@
       "name": "Soriano, Lesly",
       "place": 20,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "55.52"
     },
     {
@@ -6441,10 +6653,20 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
+      "name": "Jung, Sangyoon",
+      "place": 22,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "56.92"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
       "name": "Mandujano, Katie",
       "place": 23,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "1:00.66"
     },
     {
@@ -6609,7 +6831,7 @@
       "place": 15,
       "points": 2.0,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "31.59"
     },
     {
@@ -6622,6 +6844,16 @@
       "tags": "",
       "team": "UC Club Swimming",
       "time": "31.72"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Ganne, Axel",
+      "place": 17,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "32.62"
     },
     {
       "course": "SCY",
@@ -6715,7 +6947,7 @@
       "place": 5,
       "points": 14.0,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "2:55.92"
     },
     {
@@ -7041,7 +7273,7 @@
       "name": "Sloggy, Laila",
       "place": 20,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "1:17.20"
     },
     {
@@ -7051,7 +7283,7 @@
       "name": "Gonzalez Cerulli, Ludmila",
       "place": 21,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "1:20.32"
     },
     {
@@ -7374,6 +7606,16 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "M",
+      "name": "Pola\u00e1k, Filip",
+      "place": 30,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "54.12"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
       "name": "Elarabi, Farouk",
       "place": 31,
       "tags": "",
@@ -7484,10 +7726,20 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "M",
+      "name": "Roy, Ishan",
+      "place": 42,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "59.73"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
       "name": "Kang, Matthew",
       "place": 43,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "1:00.04"
     },
     {
@@ -7597,7 +7849,7 @@
       "name": "Guedje Ngatsi, Yemeli",
       "place": 54,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "1:07.69"
     },
     {
@@ -7667,7 +7919,7 @@
       "name": "Sikder, Ash",
       "place": 61,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "1:54.79"
     },
     {
@@ -7843,7 +8095,7 @@
       "place": 16,
       "points": 1.0,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "43.32"
     },
     {
@@ -7863,7 +8115,7 @@
       "name": "Walsh, Bridget",
       "place": 18,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "43.94"
     },
     {
@@ -7873,7 +8125,7 @@
       "name": "Gonzalez, Arleth",
       "place": 19,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "50.95"
     },
     {
@@ -7883,8 +8135,18 @@
       "name": "Dang, Bao",
       "place": 20,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "51.98"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Jung, Sangyoon",
+      "place": 21,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "54.68"
     },
     {
       "course": "SCY",
@@ -8076,6 +8338,16 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "M",
+      "name": "Stickle, Alec",
+      "place": 18,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "32.79"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
       "name": "Purser, Kaleb",
       "place": 19,
       "tags": "",
@@ -8119,7 +8391,7 @@
       "name": "Kang, Matthew",
       "place": 23,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "35.12"
     },
     {
@@ -8139,7 +8411,7 @@
       "name": "Torchia, Henry",
       "place": 25,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "35.38"
     },
     {
@@ -8156,11 +8428,31 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "M",
+      "name": "Guedje Ngatsi, Yemeli",
+      "place": 27,
+      "tags": "",
+      "team": "Swim Club at Georgia State Uni",
+      "time": "36.95"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
       "name": "Bagighni, Yoseph",
       "place": 28,
       "tags": "",
-      "team": null,
+      "team": "Swim Club at Georgia State Uni",
       "time": "37.12"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Ganne, Axel",
+      "place": 29,
+      "tags": "",
+      "team": "Georgia Tech Swim Club",
+      "time": "37.53"
     },
     {
       "course": "SCY",
@@ -8201,6 +8493,26 @@
       "tags": "",
       "team": "Ksu Swim Club",
       "time": "43.66"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Kofsky, Jakob",
+      "place": 34,
+      "tags": "",
+      "team": "Emory Club Swimming",
+      "time": "47.36"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Vonfischbach, Parker",
+      "place": 35,
+      "tags": "",
+      "team": "Mizzou Swim Club",
+      "time": "47.43"
     }
   ],
   "team_scores": {

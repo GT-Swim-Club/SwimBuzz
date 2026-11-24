@@ -3,8 +3,8 @@ import type { ListLayout } from "@/lib/list-layout"
 import { MEET_LIST_COLS } from "./MeetListTable"
 
 /**
- * Mirrors the meets toolbar: search box, the Season and All/My meets selects,
- * then the List/Gallery toggle. Phones get FluidToolbar's collapsed search
+ * Mirrors the meets toolbar: search box, the All/My meets select, then the
+ * List/Gallery toggle. Phones get FluidToolbar's collapsed search
  * button instead of the box (the real switch is measured; sm approximates it).
  */
 export function MeetsToolbarSkeleton() {
@@ -17,15 +17,10 @@ export function MeetsToolbarSkeleton() {
         <div className="mr-auto flex h-[42px] w-[42px] items-center justify-center rounded-lg border border-border-secondary bg-background sm:hidden">
           <Skeleton className="h-4 w-4" />
         </div>
-        {["w-24", "w-20"].map((w) => (
-          <div
-            key={w}
-            className="flex h-[42px] items-center gap-3 rounded-lg border border-border-secondary bg-background px-3"
-          >
-            <Skeleton className={`h-3.5 ${w}`} />
-            <Skeleton className="h-3 w-3" />
-          </div>
-        ))}
+        <div className="flex h-[42px] items-center gap-3 rounded-lg border border-border-secondary bg-background px-3">
+          <Skeleton className="h-3.5 w-20" />
+          <Skeleton className="h-3 w-3" />
+        </div>
         <div className="flex h-[42px] items-center gap-1 rounded-lg border border-border-secondary bg-background p-1">
           <Skeleton className="h-8 w-8 rounded-md" />
           <div className="flex h-8 w-8 items-center justify-center">

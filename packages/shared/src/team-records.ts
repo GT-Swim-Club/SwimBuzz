@@ -69,8 +69,14 @@ export type TeamRecordItem = {
   meetId: string | null
   /** Slug (or id) of the imported meet, for a link. */
   meetSlug: string | null
+  /** The imported swim behind it (individual events), whose detail opens on its meet page. */
+  swimId: string | null
+  /** The relay behind it: its team key in its meet (event | letter | round | gender). */
+  relayKey: string | null
   /** Swum in the current season (dated records only). */
   isThisSeason: boolean
+  /** Typed in from the records sheet with no imported swim or relay behind it — shown with a "*". */
+  manual: boolean
 }
 
 export type TeamRecordRow = RecordEventDef & {
@@ -118,6 +124,8 @@ export type TeamTopTime = {
   /** Was a team record when swum (current or past). */
   isRecord: boolean
   isThisSeason: boolean
+  /** A record typed in from the records sheet with no imported swim or relay behind it — shown with a "*". */
+  manual: boolean
 }
 
 export type TeamTopTimesResponse = {
@@ -140,6 +148,8 @@ export type TeamAllTopTimesResponse = {
   gender: "F" | "M"
   mode: TopTimesMode
   events: TeamTopTimesEvent[]
+  /** Start of the earliest imported meet the top 10s draw from (ISO), or null with none yet. */
+  since: string | null
 }
 
 /** The events shown in a gender's top 10 view: its own, plus the mixed relay (both teams' event). */
@@ -149,23 +159,34 @@ export function topTimesEventDefs(gender: "F" | "M"): Array<RecordEventDef & { g
   )
 }
 
-/** "Women's Top 10" */
-export function topTimesTitle(gender: "F" | "M"): string {
-  return `${gender === "F" ? "Women's" : "Men's"} Top 10`
+/**
+ * A top 10 card's title, naming its gender: "Women 50 Freestyle", "Men 200 Medley Relay". The
+ * mixed relay keeps its own label ("200 Mixed Free Relay").
+ */
+export function topTimesEventTitle(event: Pick<TeamTopTimesEvent, "gender" | "label">): string {
+  if (event.gender === "X") return event.label
+  return `${event.gender === "F" ? "Women" : "Men"} ${event.label}`
 }
 
-/** The top 10 view's mode as a line under its title: "Performers · each swimmer at their best". */
-export function topTimesModeLabel(mode: TopTimesMode): string {
-  return mode === "performers" ? "Performers · each swimmer at their best" : "Performances · the fastest swims"
+/** "Women Top 10 Performers", "Men Top 10 Performances" */
+export function topTimesTitle(gender: "F" | "M", mode: TopTimesMode): string {
+  return `${gender === "F" ? "Women" : "Men"} Top 10 ${mode === "performers" ? "Performers" : "Performances"}`
 }
 
-/** "Women's Top 10 Performers - Georgia Tech Swim Club.pdf" */
+/**
+ * The span a top 10 export covers, under its title: "Nov 1, 2017 – Nov 23, 2026", from the earliest
+ * imported meet (`since`) to today, in the team's time zone. Just today's date with no meets yet.
+ */
+export function topTimesSpanLabel(since: string | null, today: Date = new Date()): string {
+  const day = (date: Date) =>
+    date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: DEFAULT_TIME_ZONE })
+  const start = since ? new Date(since) : null
+  return start && !Number.isNaN(start.getTime()) ? `${day(start)} – ${day(today)}` : day(today)
+}
+
+/** "Women Top 10 Performers - Georgia Tech Swim Club.pdf" */
 export function topTimesExportFilename(gender: "F" | "M", mode: TopTimesMode): string {
-  return meetFileName(
-    `${topTimesTitle(gender)} ${mode === "performers" ? "Performers" : "Performances"}`,
-    RECORDS_EXPORT.eyebrow,
-    "pdf"
-  )
+  return meetFileName(topTimesTitle(gender, mode), RECORDS_EXPORT.eyebrow, "pdf")
 }
 
 /** Parse a typed record time ("1:38.65", "22.29", "16:43.1") to ms, or null when it isn't one. */
@@ -200,6 +221,20 @@ export function recordTimeLabel(record: Pick<TeamRecordItem, "timeMs" | "leadoff
   const time = formatRecordTime(record.timeMs)
   return record.leadoff ? `${time} (R)` : time
 }
+
+/** Marker before a manually added record's time ("*22.48"), the same gold "*" as an unofficial time. */
+export const MANUAL_RECORD_MARK = "*"
+
+/** Tooltip / accessible label for a manually added record. */
+export const MANUAL_RECORD_LABEL = "Added manually, not from imported results"
+
+/** A formatted record time with the manual marker when it applies: "*22.48". */
+export function markManualRecord(formatted: string, manual?: boolean | null): string {
+  return manual ? `${MANUAL_RECORD_MARK}${formatted}` : formatted
+}
+
+/** Footnote for exports that list any manually added record. */
+export const MANUAL_RECORD_FOOTNOTE = `${MANUAL_RECORD_MARK} ${MANUAL_RECORD_LABEL}`
 
 /** Year, or the full date when known, for a record's hover/press detail. */
 export function recordSetLabel(record: Pick<TeamRecordItem, "year" | "date" | "meetName">): string {

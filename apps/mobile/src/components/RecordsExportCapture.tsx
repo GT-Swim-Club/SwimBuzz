@@ -4,6 +4,7 @@ import {
   RECORDS_EXPORT,
   recordSwimmerName,
   recordTimeLabel,
+  MANUAL_RECORD_MARK,
   type RecordGender,
   type TeamRecordItem,
   type TeamRecordRow,
@@ -48,7 +49,14 @@ export const RecordsExportCapture = forwardRef<View, { rows: TeamRecordRow[]; as
             : empty}
         </View>,
         <View key="time" style={[styles.cell, { width: TIME_WIDTH }]}>
-          {record ? <Text style={[styles.text, styles.number, season]}>{recordTimeLabel(record)}</Text> : empty}
+          {record ? (
+            <Text style={[styles.text, styles.number, season]}>
+              {record.manual ? <Text style={styles.manualMark}>{MANUAL_RECORD_MARK}</Text> : null}
+              {recordTimeLabel(record)}
+            </Text>
+          ) : (
+            empty
+          )}
         </View>,
       ]
       return mirrored ? cells.reverse() : cells
@@ -92,6 +100,7 @@ export const RecordsExportCapture = forwardRef<View, { rows: TeamRecordRow[]; as
                   <Text style={[styles.text, styles.eventText]}>{row.label}</Text>
                 </View>
                 {mixed ? (
+                  // The date at the bottom right.
                   <View style={styles.mixedEmpty}>
                     <Text style={styles.asOf}>{asOf}</Text>
                   </View>
@@ -151,6 +160,8 @@ function makeStyles(c: ColorPalette) {
     eventText: { fontWeight: "500" },
     empty: { color: c.textTertiary, fontSize: 15, lineHeight: 22 },
     thisSeason: { color: c.accent, fontWeight: "800" },
+    /** The gold "*" before a manually added record's time. */
+    manualMark: { color: c.accent },
     // Grows like the names column from the year and time columns' width, so it lines up with a men's side.
     // The date sits at its bottom right.
     mixedEmpty: {

@@ -1,0 +1,1294 @@
+{
+  "course": "SCY",
+  "detectedSheetType": "results",
+  "event_order": {
+    "sessions": [
+      {
+        "label": "Order of Events",
+        "rows": [
+          {
+            "event": "200 IM",
+            "men": 1,
+            "women": 1
+          },
+          {
+            "event": "50 Fly",
+            "men": 2,
+            "women": 2
+          },
+          {
+            "event": "200 Free",
+            "men": 3,
+            "women": 3
+          },
+          {
+            "event": "100 Back",
+            "men": 4,
+            "women": 4
+          },
+          {
+            "event": "50 Breast",
+            "men": 5,
+            "women": 5
+          },
+          {
+            "event": "200 Fly",
+            "men": 6,
+            "women": 6
+          },
+          {
+            "event": "100 Free",
+            "men": 7,
+            "women": 7
+          },
+          {
+            "event": "400 IM",
+            "men": 8,
+            "women": 8
+          },
+          {
+            "event": "500 Free",
+            "men": 9,
+            "women": 9
+          },
+          {
+            "event": "100 Breast",
+            "men": 10,
+            "women": 10
+          },
+          {
+            "event": "50 Free",
+            "men": 12,
+            "women": 12
+          },
+          {
+            "event": "100 Fly",
+            "men": 13,
+            "women": 13
+          },
+          {
+            "event": "50 Back",
+            "men": 14,
+            "women": 14
+          },
+          {
+            "event": "200 Breast",
+            "men": 15,
+            "women": 15
+          },
+          {
+            "event": "100 IM",
+            "men": 16,
+            "women": 16
+          }
+        ]
+      }
+    ]
+  },
+  "meet_date": "2022-11-01",
+  "meet_name": "GTSC Ghost and Zombie Intrasquad",
+  "relay_results": [],
+  "results": [
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "X",
+      "name": "Smith, Benjamin",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:06.07"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "X",
+      "name": "O'Neill, Patrick",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:09.56"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "X",
+      "name": "Rohweder, Andrew",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:09.83"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "X",
+      "name": "Donahoe, John",
+      "place": 4,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:10.16"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "X",
+      "name": "Montes, Gabriel",
+      "place": 5,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:17.22"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "X",
+      "name": "Petersen, Ingrid",
+      "place": 6,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:31.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Altera, Ryan",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "24.34"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Cattanach, Quinn",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "24.65"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Geller, Maxim",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "24.95"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Anderson, Noah",
+      "place": 4,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "25.24"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Rice, Thomas",
+      "place": 5,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "25.46"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Armentrout, Will",
+      "place": 6,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "26.72"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Miao, Nathan",
+      "place": 7,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "27.19"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Munger, Audrey",
+      "place": 8,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "27.80"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Sapough, Henry",
+      "place": 9,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "28.01"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Allibone, Jessica",
+      "place": 10,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "28.75"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Tibbs, Zoe",
+      "place": 11,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "29.26"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Beuchel, Katherine",
+      "place": 12,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "29.48"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Hicks, Erin",
+      "place": 13,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "29.50"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Collerette, Hannah",
+      "place": 14,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "29.77"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Yie, Emiley",
+      "place": 15,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "30.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Murdock, Madeline",
+      "place": 16,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "32.31"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Meckley, Irelyn",
+      "place": 17,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "32.34"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "X",
+      "name": "Ballot, Mathilde",
+      "place": 18,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "32.72"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "X",
+      "name": "Glasscock, Gregory",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:57.40"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "X",
+      "name": "Rondinella, Matthew",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:00.09"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "X",
+      "name": "Abrahamse, Nadine",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:11.97"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "X",
+      "name": "Wojack, Emma",
+      "place": 4,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:13.90"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "X",
+      "name": "Petersen, Ingrid",
+      "place": 5,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:15.58"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "X",
+      "name": "Gonen, Selin",
+      "place": 6,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:21.69"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "X",
+      "name": "Ortega, Claudia",
+      "place": 7,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:29.14"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "X",
+      "name": "Bataillon, Daniel",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "58.25"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "X",
+      "name": "Murdock, Madeline",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:17.53"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "X",
+      "name": "Donahoe, John",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "29.02"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "X",
+      "name": "Quesada, Jorge",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "30.38"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "X",
+      "name": "Stephens, Clay",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "30.41"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "X",
+      "name": "Montes, Gabriel",
+      "place": 4,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "30.44"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "X",
+      "name": "Gandis, Zoe",
+      "place": 5,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "35.63"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "X",
+      "name": "Ballot, Mathilde",
+      "place": 5,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "35.63"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "X",
+      "name": "Volkmann, Emma",
+      "place": 7,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "36.94"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "X",
+      "name": "Munger, Audrey",
+      "place": 8,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "38.07"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Fly",
+      "gender": "X",
+      "name": "Balkcum, Kyle",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:35.50"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Kornegay, Max",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "50.21"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Huang, Daniel",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "51.56"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "O'Neill, Patrick",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "51.96"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Quesada, Jorge",
+      "place": 4,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "52.51"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Vlady, George",
+      "place": 5,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "53.71"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Bataillon, Daniel",
+      "place": 6,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "55.47"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Anderson, Noah",
+      "place": 7,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "55.70"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Beuchel, Katherine",
+      "place": 8,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "57.41"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Bonkur, Suhaas",
+      "place": 9,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "57.69"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Collerette, Hannah",
+      "place": 10,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "58.53"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Allibone, Jessica",
+      "place": 11,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:00.13"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Ayalew, Raey",
+      "place": 12,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:00.32"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Malcomson, Brynn",
+      "place": 13,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:00.34"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Tibbs, Zoe",
+      "place": 14,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:00.41"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Sapough, Henry",
+      "place": 15,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:00.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Matos, Marc",
+      "place": 16,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:00.94"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Witthoff, Mia",
+      "place": 17,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:01.15"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Meckley, Irelyn",
+      "place": 18,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:02.46"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "X",
+      "name": "Wharton, Angela",
+      "place": 19,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:06.51"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "gender": "X",
+      "name": "Rice, Thomas",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "4:40.09"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "gender": "X",
+      "name": "Hicks, Taylor",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "5:07.69"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "gender": "X",
+      "name": "Sundius, Sarah",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "5:13.00"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "gender": "X",
+      "name": "Wojack, Emma",
+      "place": 4,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "5:38.45"
+    },
+    {
+      "course": "SCY",
+      "event": "400 IM",
+      "gender": "X",
+      "name": "Wharton, Angela",
+      "place": 5,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "5:46.60"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "X",
+      "name": "Rondinella, Matthew",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "6:02.57"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "X",
+      "name": "Plantamura, Natalie",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "6:12.62"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "X",
+      "name": "Gonen, Selin",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "6:14.34"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "X",
+      "name": "Sapough, Henry",
+      "place": 4,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "6:19.33"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "X",
+      "name": "Altera, Ryan",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:02.90"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "X",
+      "name": "Donahoe, John",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:05.63"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "X",
+      "name": "Kornegay, Max",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:10.06"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "X",
+      "name": "Stephens, Clay",
+      "place": 4,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:10.45"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "X",
+      "name": "Yie, Emiley",
+      "place": 5,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:13.72"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "X",
+      "name": "Volkmann, Emma",
+      "place": 6,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:21.44"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Kornegay, Max",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "23.58"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Huang, Daniel",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "23.83"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Vlady, George",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "24.01"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Quesada, Jorge",
+      "place": 4,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "24.14"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Anderson, Noah",
+      "place": 5,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "24.38"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Balkcum, Kyle",
+      "place": 6,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "25.08"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Tibbs, Zoe",
+      "place": 7,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "25.92"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Beuchel, Katherine",
+      "place": 8,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "26.88"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Collerette, Hannah",
+      "place": 9,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "27.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Malcomson, Brynn",
+      "place": 10,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "27.32"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Hicks, Erin",
+      "place": 11,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "27.53"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Allibone, Jessica",
+      "place": 12,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "27.56"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Matos, Marc",
+      "place": 13,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "27.82"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Witthoff, Mia",
+      "place": 14,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "28.62"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Gandis, Zoe",
+      "place": 15,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "29.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "X",
+      "name": "Moreira, Kaitlyn",
+      "place": 16,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "32.31"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "X",
+      "name": "Altera, Ryan",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "54.82"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "X",
+      "name": "Cattanach, Quinn",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "57.26"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "X",
+      "name": "Bataillon, Daniel",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "57.52"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "X",
+      "name": "Rice, Thomas",
+      "place": 4,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "59.96"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "X",
+      "name": "O'Neill, Patrick",
+      "place": 5,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:03.83"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "X",
+      "name": "Munger, Audrey",
+      "place": 6,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:05.27"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "X",
+      "name": "Bonkur, Suhaas",
+      "place": 7,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:05.42"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "X",
+      "name": "Hicks, Erin",
+      "place": 8,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:09.91"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "X",
+      "name": "Witthoff, Mia",
+      "place": 9,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:18.03"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "X",
+      "name": "Miao, Nathan",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "28.57"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "X",
+      "name": "Malcomson, Brynn",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "33.03"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "X",
+      "name": "Moreira, Kaitlyn",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "36.53"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Breast",
+      "gender": "X",
+      "name": "Rohweder, Andrew",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:18.09"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Breast",
+      "gender": "X",
+      "name": "Stephens, Clay",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:38.01"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Breast",
+      "gender": "X",
+      "name": "Yie, Emiley",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:38.58"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Breast",
+      "gender": "X",
+      "name": "Ballot, Mathilde",
+      "place": 4,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:45.19"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Breast",
+      "gender": "X",
+      "name": "Gandis, Zoe",
+      "place": 5,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:59.96"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "X",
+      "name": "Smith, Benjamin",
+      "place": 1,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "57.78"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "X",
+      "name": "Geller, Maxim",
+      "place": 2,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "58.22"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "X",
+      "name": "Huang, Daniel",
+      "place": 3,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:02.77"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "X",
+      "name": "Montes, Gabriel",
+      "place": 4,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:03.31"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "X",
+      "name": "Collerette, Hannah",
+      "place": 5,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:07.44"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "X",
+      "name": "Matos, Marc",
+      "place": 6,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:08.88"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "X",
+      "name": "Bonkur, Suhaas",
+      "place": 7,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:11.45"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "X",
+      "name": "Gonen, Selin",
+      "place": 8,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:12.82"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "X",
+      "name": "Meckley, Irelyn",
+      "place": 9,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:15.51"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "X",
+      "name": "Volkmann, Emma",
+      "place": 10,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:17.47"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "X",
+      "name": "Wharton, Angela",
+      "place": 11,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:19.78"
+    }
+  ],
+  "team_scores": null
+}

@@ -1,14 +1,13 @@
 "use client"
 
 import { useSearchParams } from "next/navigation"
-import { parseSeason } from "@/lib/season"
 
 export type MeetsScope = "all" | "mine"
 
 /**
- * Season / scope / Trash filters for /meets, read from the URL. Writes go
- * through `history.replaceState`, which Next.js syncs into `useSearchParams`
- * without a server round trip — all three filters are applied client-side
+ * Scope / Trash filters for /meets, read from the URL. Writes go through
+ * `history.replaceState`, which Next.js syncs into `useSearchParams` without a
+ * server round trip — both filters are applied client-side
  * (Trash fetches its own data), so changing a dropdown is instant.
  */
 export function useMeetsFilters() {
@@ -26,7 +25,6 @@ export function useMeetsFilters() {
 
   return {
     query: searchParams.get("q")?.trim() ?? "",
-    season: parseSeason(searchParams.get("season")),
     scope: (searchParams.get("scope") === "mine" ? "mine" : "all") as MeetsScope,
     inTrash: searchParams.get("view") === "deleted",
     setFilters,

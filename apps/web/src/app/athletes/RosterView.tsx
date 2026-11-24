@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, type ReactNode } from "react"
+import { useMemo, useOptimistic, useTransition, type ReactNode } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { formatSeasonLabel } from "@swimbuzz/shared"
@@ -8,12 +8,13 @@ import FluidToolbar from "@/components/ui/FluidToolbar"
 import ToolbarSelect from "@/components/ui/ToolbarSelect"
 import RosterFilterMenu from "./RosterFilterMenu"
 import ShareRosterButton from "./ShareRosterButton"
-import { matchesRosterFilters, matchesRosterSearch, readRosterFilters, rosterFiltersActive } from "@/lib/roster/roster-filters"
+import { ALL_SEASONS, matchesRosterFilters, matchesRosterSearch, readRosterFilters, rosterFiltersActive } from "@/lib/roster/roster-filters"
 import JumpRail, { JUMP_RAIL_LAYOUT_CLASS, JUMP_RAIL_LETTERS } from "@/components/ui/JumpRail"
 import { ListLayoutToggle, useListLayout } from "@/components/ui/ListLayout"
 import { athletePath } from "@/lib/slug"
 import { athleteAge } from "@/lib/utils"
 import AthleteGalleryCard from "./AthleteGalleryCard"
+import { RosterResultsSkeleton } from "./RosterSkeleton"
 import {
   AthleteAvatar,
   AthleteName,
@@ -35,10 +36,11 @@ const LIST_COLS = {
 type Row = { athlete: RosterAthlete; isYou: boolean; anchor?: string }
 
 /**
- * Roster toolbar and results. The page loads the whole season (all genders),
+ * Roster toolbar and results. The page loads the whole season (all genders), or every season,
  * so the filters (gender; staff: clearance and SwimCloud status) and search are
  * applied here and only rewrite the URL in place; changing season navigates for
- * a fresh server query.
+ * a fresh server query — the dropdown shows the new season at once, with a skeleton
+ * in place of the results until it loads.
  */
 export default function RosterView({
   athletes,
@@ -51,7 +53,8 @@ export default function RosterView({
   /** Sorted by last name, then first name. */
   athletes: RosterAthlete[]
   seasons: string[]
-  season: string
+  /** null = All seasons (`season=all`). */
+  season: string | null
   viewerAthleteId: string | null
   /** Staff: clearance & SwimCloud status icons beside each name (everyone sees their own). */
   showStatus: boolean
@@ -61,6 +64,9 @@ export default function RosterView({
   const router = useRouter()
   const searchParams = useSearchParams()
   const { layout } = useListLayout()
+  const [loadingSeason, startSeasonChange] = useTransition()
+  // The season just picked, until its roster arrives and `season` catches up.
+  const [shownSeason, showSeason] = useOptimistic(season ?? ALL_SEASONS)
 
   const filters = readRosterFilters(searchParams, showStatus)
   const { gender, clearance, swimcloud } = filters
@@ -68,15 +74,24 @@ export default function RosterView({
   const query = searchParams.get("q")?.trim() ?? ""
   const showGender = gender === "all"
 
-  function setParam(key: string, value: string, navigate: boolean) {
+  function rosterHref(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString())
     params.delete("year")
     // Filters drop out of the URL when back to "all".
     if (value === "all" && key !== "season") params.delete(key)
     else params.set(key, value)
-    const href = `/athletes?${params.toString()}`
-    if (navigate) router.push(href)
-    else window.history.replaceState(null, "", href)
+    return `/athletes?${params.toString()}`
+  }
+
+  function setFilter(key: string, value: string) {
+    window.history.replaceState(null, "", rosterHref(key, value))
+  }
+
+  function setSeason(value: string) {
+    startSeasonChange(() => {
+      showSeason(value)
+      router.push(rosterHref("season", value))
+    })
   }
 
   const pool = useMemo(
@@ -112,7 +127,7 @@ export default function RosterView({
     <>
       <FluidToolbar
         pathname="/athletes"
-        placeholder={`Search ${pool.length} athletes…`}
+        placeholder={loadingSeason ? "Search athletes…" : `Search ${pool.length} athletes…`}
         searchLabel="Search athletes"
         shallow
         controls={
@@ -120,11 +135,12 @@ export default function RosterView({
             <ToolbarSelect
               label="Season"
               icon="calendar"
-              current={formatSeasonLabel(season)}
+              current={shownSeason === ALL_SEASONS ? "All seasons" : formatSeasonLabel(shownSeason)}
               active={false}
-              value={season}
-              onChange={(v) => setParam("season", v, true)}
+              value={shownSeason}
+              onChange={setSeason}
             >
+              <option value={ALL_SEASONS}>All seasons</option>
               {seasons.map((s) => (
                 <option key={s} value={s}>
                   {formatSeasonLabel(s)}
@@ -133,7 +149,7 @@ export default function RosterView({
             </ToolbarSelect>
             {/* Athletes only filter by gender, so they keep the plain dropdown; staff get the Filters menu. */}
             {showStatus ? (
-              <RosterFilterMenu filters={filters} staff onChange={(key, v) => setParam(key, v, false)} />
+              <RosterFilterMenu filters={filters} staff onChange={setFilter} />
             ) : (
               <ToolbarSelect
                 label="Gender"
@@ -141,7 +157,7 @@ export default function RosterView({
                 current={gender === "all" ? "All" : genderLabel(gender)}
                 active={gender !== "all"}
                 value={gender}
-                onChange={(v) => setParam("gender", v, false)}
+                onChange={(v) => setFilter("gender", v)}
               >
                 <option value="all">All</option>
                 <option value="M">Men</option>
@@ -155,13 +171,19 @@ export default function RosterView({
         }
       />
 
-      {rows.length === 0 ? (
+      {loadingSeason ? (
+        <div aria-busy="true" aria-label="Loading roster">
+          <RosterResultsSkeleton layout={layout} />
+        </div>
+      ) : rows.length === 0 ? (
         <div className="rounded-xl border border-border-secondary bg-background px-4 py-12 text-center text-sm text-foreground-secondary">
           {query
             ? `No athletes matching “${query}”.`
             : filtering
               ? "No athletes match these filters."
-              : "No athletes found for this season."}
+              : season
+                ? "No athletes found for this season."
+                : "No athletes found."}
         </div>
       ) : (
         // The A–Z rail sits beside the list, or out in the page's right margin once that's wide

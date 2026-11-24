@@ -10,11 +10,14 @@ import {
   type TeamRecordsResponse,
 } from "@swimbuzz/shared"
 import { prisma } from "@/lib/prisma"
-import { currentRecordRow, readRecordSwimmers, recordKey, toRecordItem, type RecordLinks } from "@/lib/records/record-rows"
+import { compareRecordRows, currentRecordRow, readRecordSwimmers, recordKey, toRecordItem, type RecordLinks } from "@/lib/records/record-rows"
 
 export class RecordInputError extends Error {}
 
-/** Profile and meet slugs for the athletes and meets that records (or top times) point at. */
+/**
+ * Profile and meet slugs for the athletes and meets that records (or top times) point at, and the
+ * athletes' legal names: records name linked holders by them, not by a preferred name.
+ */
 export async function recordLinks(rows: Array<{ swimmers: unknown; meetId: string | null }>): Promise<RecordLinks> {
   const athleteIds = [
     ...new Set(rows.flatMap((row) => readRecordSwimmers(row.swimmers).map((s) => s.athleteId).filter((id): id is string => !!id))),
@@ -22,12 +25,16 @@ export async function recordLinks(rows: Array<{ swimmers: unknown; meetId: strin
   const meetIds = [...new Set(rows.map((row) => row.meetId).filter((id): id is string => !!id))]
   const [athletes, meets] = await Promise.all([
     athleteIds.length > 0
-      ? prisma.athlete.findMany({ where: { id: { in: athleteIds } }, select: { id: true, slug: true } })
+      ? prisma.athlete.findMany({
+          where: { id: { in: athleteIds } },
+          select: { id: true, slug: true, firstName: true, lastName: true },
+        })
       : [],
     meetIds.length > 0 ? prisma.meet.findMany({ where: { id: { in: meetIds } }, select: { id: true, slug: true } }) : [],
   ])
   return {
     athleteSlugs: new Map(athletes.map((a) => [a.id, a.slug ?? a.id])),
+    athleteNames: new Map(athletes.map((a) => [a.id, `${a.firstName} ${a.lastName}`.trim()])),
     meetSlugs: new Map(meets.map((m) => [m.id, m.slug ?? m.id])),
   }
 }
@@ -70,10 +77,9 @@ export async function teamRecordHistory(gender: unknown, event: unknown): Promis
   const key = requireEvent(gender, event)
   const rows = await prisma.teamRecord.findMany({
     where: { course: "SCY", ...key, dismissed: false },
-    orderBy: { createdAt: "desc" },
   })
   const links = await recordLinks(rows)
-  return { records: rows.map((row) => toRecordItem(row, links)) }
+  return { records: rows.sort(compareRecordRows).map((row) => toRecordItem(row, links)) }
 }
 
 /**

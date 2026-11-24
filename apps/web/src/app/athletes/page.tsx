@@ -5,7 +5,7 @@ import { redirect } from "next/navigation"
 import RosterAddMenu from "./RosterAddMenu"
 import RosterView from "./RosterView"
 import RosterSkeleton from "./RosterSkeleton"
-import { parseSeason, resolveListedSeason } from "@/lib/season"
+import { currentSeason, parseSeason, resolveListedSeason } from "@/lib/season"
 import { listSeasons } from "@/lib/season-store"
 import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete/athlete-view-server"
 import { getSession } from "@/lib/auth/session"
@@ -14,6 +14,7 @@ import { ListLayoutProvider } from "@/components/ui/ListLayout"
 import PinSearchParams from "@/components/ui/PinSearchParams"
 import type { ListLayout } from "@/lib/list-layout"
 import { athleteYearForSeason } from "@swimbuzz/shared"
+import { ALL_SEASONS } from "@/lib/roster/roster-filters"
 
 export const dynamic = 'force-dynamic'
 
@@ -28,12 +29,14 @@ async function RosterContent({ searchParams, layout }: { searchParams: Promise<R
     ])
     if (!session) redirect("/signin")
 
-    const season = resolveListedSeason(parseSeason(seasonParam ?? legacyYear), seasons)
+    // `season=all` lists every athlete (like the roster PDF/CSV with no season); otherwise one season.
+    const season =
+      seasonParam === ALL_SEASONS ? null : resolveListedSeason(parseSeason(seasonParam ?? legacyYear), seasons)
 
     // Every gender for the season: RosterView filters gender and search client-side.
     const [rows, viewerAthleteId, isCoach] = await Promise.all([
       prisma.athlete.findMany({
-        where: { seasons: { has: season } },
+        where: season ? { seasons: { has: season } } : undefined,
         select: {
           id: true,
           slug: true,
@@ -54,19 +57,21 @@ async function RosterContent({ searchParams, layout }: { searchParams: Promise<R
       isStaffUi(session.user.role),
     ])
 
-    // The year each athlete was in the season on screen, not their latest.
+    // The year each athlete was in the season on screen, not their latest (latest for all seasons).
     const athletes = rows.map(({ yearBySeason, seasons: athleteSeasons, clearance, ...athlete }) => ({
       ...athlete,
       // Clearance & SwimCloud status icons: staff see everyone's, an athlete only their own.
       clearance: isCoach || athlete.id === viewerAthleteId ? clearanceSummary(clearance) : null,
-      year: athleteYearForSeason({ yearBySeason, year: athlete.year, seasons: athleteSeasons }, season),
+      year: season
+        ? athleteYearForSeason({ yearBySeason, year: athlete.year, seasons: athleteSeasons }, season)
+        : athlete.year,
     }))
 
     return (
         <ListLayoutProvider page="roster" initial={layout}>
             {/* Pin the resolved season in place rather than redirect()ing, which
                 would flash the skeleton a second time. */}
-            <PinSearchParams params={{ season, year: null }} />
+            <PinSearchParams params={{ season: season ?? ALL_SEASONS, year: null }} />
             <RosterView
                 athletes={athletes}
                 seasons={seasons}
@@ -74,7 +79,8 @@ async function RosterContent({ searchParams, layout }: { searchParams: Promise<R
                 viewerAthleteId={viewerAthleteId}
                 showStatus={isCoach}
                 actions={
-                    isCoach ? <RosterAddMenu season={season} /> : null
+                    // Imports target one season: the current one while viewing all seasons.
+                    isCoach ? <RosterAddMenu season={season ?? currentSeason()} /> : null
                 }
             />
         </ListLayoutProvider>

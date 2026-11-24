@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, type ReactNode } from "react"
 import { UnofficialMeetBadge } from "@/components/meet/MeetUnofficialContext"
 import { currentSeason, formatMeetDateRange, formatSeasonLabel } from "@swimbuzz/shared"
 import { RelativeDateRange, eventDaysAhead, useTodayKey, wholeWeeks } from "@/components/ui/RelativeDate"
@@ -12,6 +13,18 @@ import MeetCountdown from "@/components/meet/MeetCountdown"
 import { toDateInput, toTimeInput } from "@/lib/date-input"
 import { useMeetsFilters } from "./use-meets-filters"
 import { useListLayout } from "@/components/ui/ListLayout"
+
+/** Gray "No results" pill after a past meet's name in the List view, until its results are imported. */
+function NoResultsBadge() {
+  return (
+    <span
+      title="Results haven't been imported yet"
+      className="inline-flex items-center rounded-full border border-border bg-fill px-2 py-0.5 text-xs font-semibold uppercase tracking-[0.08em] text-foreground-secondary"
+    >
+      No results
+    </span>
+  )
+}
 
 export type MeetListItem = {
   id: string
@@ -107,6 +120,33 @@ function RowCountdown({ meet }: { meet: MeetListItem }) {
 type CardKind = "upcoming" | "past" | "last"
 
 const sectionHeadingClass = "text-sm font-medium uppercase tracking-wide text-foreground-secondary"
+
+/** Past seasons dropdown beside the heading, newest first; reads like the heading's text with a chevron. */
+function PastSeasonSelect({
+  seasons,
+  value,
+  onChange,
+}: {
+  seasons: string[]
+  value: string
+  onChange: (season: string) => void
+}) {
+  return (
+    // globals.css draws every native select's chevron (and its right padding).
+    <select
+      aria-label="Past season"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="h-7 cursor-pointer rounded-md bg-transparent pl-2 text-sm tabular-nums text-foreground-secondary transition-colors hover:bg-fill hover:text-foreground pointer-coarse:h-9"
+    >
+      {seasons.map((season) => (
+        <option key={season} value={season}>
+          {formatSeasonLabel(season)}
+        </option>
+      ))}
+    </select>
+  )
+}
 /**
  * The hover wash is a gradient layer, not a background color, so it lands on
  * top of the glass fill a card gives its actions when it pins them top right.
@@ -132,34 +172,50 @@ export default function MeetsClientWrapper({
 }) {
   const filters = useMeetsFilters()
   const { layout } = useListLayout()
-  const season = filters.season
+  const [pastSeason, setPastSeason] = useState<string | null>(null)
   const scope = canScope ? filters.scope : "all"
   const pool = scope === "mine" ? meets.filter((m) => m.mine) : meets
   const upcoming = pool.filter((m) => m.upcoming).sort((a, b) => +new Date(a.startsAt) - +new Date(b.startsAt))
   const past = pool.filter((m) => !m.upcoming).sort((a, b) => +new Date(b.startsAt) - +new Date(a.startsAt))
 
-  const inSeason = (m: MeetListItem) => !season || m.season === season
-
   // With nothing upcoming, the gallery gives the most recent meet its own
   // "Last meet" section (unless searching) and drops it from the past list
   // below. The list keeps it in place — a lone row wouldn't stand out anyway.
   const lastMeet = layout === "gallery" && !query && upcoming.length === 0 ? past[0] : undefined
-  const pastInView = past.filter((m) => m !== lastMeet && inSeason(m))
-  // The season section leads with what's coming up (soonest first), then what
-  // already happened (latest first). All seasons: older seasons follow below.
-  const headlineSeason = season ?? currentSeason()
-  const seasonPast = season ? pastInView : pastInView.filter((m) => m.season === headlineSeason)
-  const olderPast = season ? [] : pastInView.filter((m) => m.season !== headlineSeason)
-  const sections: { label: string; groups: { kind: CardKind; items: MeetListItem[] }[] }[] = [
-    { label: "Last meet", groups: [{ kind: "last" as const, items: lastMeet ? [lastMeet] : [] }] },
+  const pastInView = past.filter((m) => m !== lastMeet)
+  // The current season leads with what's coming up (soonest first), then what
+  // already happened (latest first); older seasons follow below.
+  const headlineSeason = currentSeason()
+  const seasonPast = pastInView.filter((m) => m.season === headlineSeason)
+  const olderPast = pastInView.filter((m) => m.season !== headlineSeason)
+  // Past seasons show one season at a time, newest first, picked from the section heading's dropdown.
+  const pastSeasons = [...new Set(olderPast.map((m) => m.season))].sort().reverse()
+  const pageSeason = pastSeason && pastSeasons.includes(pastSeason) ? pastSeason : pastSeasons[0]
+  const sections: {
+    key: string
+    label: string
+    aside?: ReactNode
+    groups: { kind: CardKind; items: MeetListItem[] }[]
+  }[] = [
+    { key: "last", label: "Last meet", groups: [{ kind: "last" as const, items: lastMeet ? [lastMeet] : [] }] },
     {
+      key: "season",
       label: formatSeasonLabel(headlineSeason),
       groups: [
-        { kind: "upcoming" as const, items: upcoming.filter(inSeason) },
+        { kind: "upcoming" as const, items: upcoming },
         { kind: "past" as const, items: seasonPast },
       ],
     },
-    { label: "Past seasons", groups: [{ kind: "past" as const, items: olderPast }] },
+    {
+      key: "past",
+      // With one past season the heading names it; with more, the dropdown beside it does.
+      label: pageSeason && pastSeasons.length === 1 ? `Past seasons · ${formatSeasonLabel(pageSeason)}` : "Past seasons",
+      aside:
+        pageSeason && pastSeasons.length > 1 ? (
+          <PastSeasonSelect seasons={pastSeasons} value={pageSeason} onChange={setPastSeason} />
+        ) : undefined,
+      groups: [{ kind: "past" as const, items: olderPast.filter((m) => m.season === pageSeason) }],
+    },
   ]
     .map((s) => ({ ...s, groups: s.groups.filter((g) => g.items.length > 0) }))
     .filter((s) => s.groups.length > 0)
@@ -212,7 +268,13 @@ export default function MeetsClientWrapper({
       date: formatMeetDateRange(m.startsAt, m.endsAt, m.timeZone),
       location: [m.location, m.school].filter(Boolean).join(" · "),
       status: m.upcoming ? <RowCountdown meet={m} /> : undefined,
-      nameBadge: m.unofficial ? <UnofficialMeetBadge meetName={m.name} /> : undefined,
+      nameBadge:
+        m.unofficial || (!m.upcoming && !m.hasSwims) ? (
+          <span className="flex items-center gap-1.5">
+            {m.unofficial && <UnofficialMeetBadge meetName={m.name} />}
+            {!m.upcoming && !m.hasSwims && <NoResultsBadge />}
+          </span>
+        ) : undefined,
       actions: isCoach && (
         <EditMeetButton meetId={m.id} initial={meetFormInitial(m)} seasons={seasonOptions} hasSwims={m.hasSwims} />
       ),
@@ -224,7 +286,7 @@ export default function MeetsClientWrapper({
       <div className="rounded-xl border border-border bg-background px-4 py-12 text-center text-sm text-foreground-secondary">
         {query
           ? "No meets match your search."
-          : season || scope === "mine"
+          : scope === "mine"
             ? "No meets match these filters."
             : `No meets yet.${isCoach ? " Create one to start tracking results." : ""}`}
       </div>
@@ -234,8 +296,16 @@ export default function MeetsClientWrapper({
   return (
     <div className="flex flex-col gap-8">
       {sections.map((s) => (
-        <section key={s.label} className="flex flex-col gap-3">
-          <h2 className={sectionHeadingClass}>{s.label}</h2>
+        <section key={s.key} className="flex flex-col gap-3">
+          {s.aside ? (
+            // The dropdown is taller than the heading; -my keeps the gap to the list the same.
+            <div className="-my-1 flex items-center gap-3">
+              <h2 className={sectionHeadingClass}>{s.label}</h2>
+              {s.aside}
+            </div>
+          ) : (
+            <h2 className={sectionHeadingClass}>{s.label}</h2>
+          )}
           {layout === "list" ? (
             <MeetListTable
               rows={s.groups.flatMap((g) => g.items.map(listRow))}

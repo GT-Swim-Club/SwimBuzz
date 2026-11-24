@@ -25,6 +25,7 @@ type RosterReplaceResult = {
   removed?: number
   deleted?: number
   errors?: unknown[]
+  missingEmail?: string[]
 }
 
 function formatRosterReplaceResult(data: RosterReplaceResult) {
@@ -37,7 +38,11 @@ function formatRosterReplaceResult(data: RosterReplaceResult) {
   if (updated > 0) parts.push(`${updated} updated`)
   if (removed > 0) parts.push(deleted > 0 ? `${removed} removed (${deleted} deleted)` : `${removed} removed`)
   if ((data.errors?.length ?? 0) > 0) parts.push(`${data.errors!.length} row(s) skipped`)
-  return parts.join(" · ")
+  const summary = parts.join(" · ")
+  const missingEmail = data.missingEmail ?? []
+  return missingEmail.length > 0
+    ? `${summary}. Not added — new athletes need a @gatech.edu email: ${missingEmail.join("; ")}`
+    : summary
 }
 
 export default function ImportRosterButton({
@@ -344,7 +349,9 @@ function RosterColumnsHint() {
     <div className="rounded-lg border border-border-secondary bg-fill-secondary px-4 py-3 text-sm">
       <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5">
         <dt className="font-medium text-foreground">Required</dt>
-        <dd className="text-foreground-secondary">Full Name (First &amp; Last Name), Gender, Email</dd>
+        <dd className="text-foreground-secondary">
+          Full Name (First &amp; Last Name), Gender, @gatech.edu Email (for athletes not yet on the roster)
+        </dd>
         <dt className="font-medium text-foreground">Recommended</dt>
         <dd className="text-foreground-secondary">Preferred Name, GTID, DOB, Year, SwimCloud URL</dd>
       </dl>

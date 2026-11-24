@@ -16,13 +16,13 @@ import { isRelayResultsSummary } from "@/lib/meet/relay-results"
 import { readListLayout } from "@/lib/list-layout-server"
 import { ListLayoutProvider } from "@/components/ui/ListLayout"
 
-// Seasons come from the canonical Season table, matching how /athletes and
-// meets/[id] source their season lists — independent of the meets list stream.
+// The New meet form's seasons come from the canonical Season table, matching how
+// /athletes and meets/[id] source their season lists.
 async function ToolbarControlsSection({ isCoach, showScope }: { isCoach: boolean; showScope: boolean }) {
   const seasons = await listSeasons()
   // No wrapper: FluidToolbar lays these out (and measures them) directly.
   return (
-    <MeetsToolbarSelects seasons={seasons} showTrash={isCoach} showScope={showScope}>
+    <MeetsToolbarSelects showTrash={isCoach} showScope={showScope}>
       {isCoach && <CreateMeetButton seasons={seasons} />}
     </MeetsToolbarSelects>
   )
@@ -127,7 +127,7 @@ export default async function MeetsPage({
     readListLayout("meets"),
   ])
   // Only the search query is read server-side (it narrows the DB query).
-  // Season / scope / Trash are applied client-side from the URL so switching
+  // Scope / Trash are applied client-side from the URL so switching
   // them is instant — see useMeetsFilters.
   const query = (await searchParams).q?.trim() ?? ""
 

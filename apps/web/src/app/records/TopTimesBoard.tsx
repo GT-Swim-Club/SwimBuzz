@@ -7,13 +7,14 @@ import {
   formatRecordTime,
   recordSetLabel,
   recordSwimmerLabel,
+  topTimesEventTitle,
   type TeamAllTopTimesResponse,
   type TeamTopTime,
   type TeamTopTimesEvent,
   type TopTimesMode,
 } from "@swimbuzz/shared"
 import HoverDetail from "@/components/ui/HoverDetail"
-import SpinnerScreen from "@/components/ui/SpinnerScreen"
+import ManualRecordMark from "@/components/ui/ManualRecordMark"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { athletePath, meetRelayPath, meetSwimPath } from "@/lib/slug"
 
@@ -40,7 +41,7 @@ function TopTimesCard({ event }: { event: TeamTopTimesEvent }) {
   return (
     <section className="overflow-hidden rounded-xl border border-border bg-background shadow-sm">
       <h3 className="border-b border-border bg-fill-secondary/60 px-3.5 py-2.5 text-[15px] font-semibold text-foreground">
-        {event.label}
+        {topTimesEventTitle(event)}
       </h3>
       {event.times.length === 0 ? (
         <p className="px-3.5 py-3 text-sm text-foreground-tertiary">No swims yet.</p>
@@ -90,6 +91,7 @@ function TopTimesCard({ event }: { event: TeamTopTimesEvent }) {
                 <span
                   className={`w-[4.25rem] shrink-0 text-right font-mono tabular-nums ${season ? "font-semibold text-accent" : "text-foreground"}`}
                 >
+                  <ManualRecordMark manual={time.manual} />
                   {formatRecordTime(time.timeMs)}
                 </span>
               </>
@@ -141,9 +143,6 @@ export function useAllTopTimes(gender: "F" | "M", mode: TopTimesMode, enabled: b
   return { key, data, error: error?.key === key && !data ? error.message : null }
 }
 
-/** How long a load waits before the skeleton gives way to the spinner (a cached list is well inside it). */
-const SPINNER_AFTER_MS = 700
-
 /** Name widths per line, varied so the cards don't look stamped. */
 const NAME_WIDTHS = ["w-28", "w-32", "w-24", "w-36", "w-28", "w-20", "w-32", "w-24", "w-28", "w-32"]
 
@@ -174,25 +173,12 @@ function TopTimesSkeleton() {
 
 /** Every record event's top 10 for one gender as one grid of cards, in records-table order. */
 export default function TopTimesBoard({
-  gender,
-  mode,
   data,
   error,
 }: {
-  gender: "F" | "M"
-  mode: TopTimesMode
   data: TeamAllTopTimesResponse | undefined
   error: string | null
 }) {
-  const key = `${gender}|${mode}`
-  const [slowKey, setSlowKey] = useState<string | null>(null)
-  const slow = slowKey === key
-  useEffect(() => {
-    if (data) return
-    const timer = setTimeout(() => setSlowKey(key), SPINNER_AFTER_MS)
-    return () => clearTimeout(timer)
-  }, [data, key])
-
   if (error) {
     return (
       <p role="alert" className="text-sm text-error">
@@ -200,19 +186,7 @@ export default function TopTimesBoard({
       </p>
     )
   }
-  if (!data) {
-    // A cached list arrives at once: skeleton cards. Still loading after a moment means the server
-    // is computing it fresh (first view after a records sync): the spinner says what's happening.
-    if (!slow) return <TopTimesSkeleton />
-    return (
-      // Keyed so each gender/mode switch replays the fade, and the label names what's loading.
-      <SpinnerScreen
-        key={key}
-        label={`Fetching ${gender === "M" ? "men’s" : "women’s"} top 10 ${mode} for every event…`}
-        className="min-h-80 rounded-xl border border-border-secondary bg-background"
-      />
-    )
-  }
+  if (!data) return <TopTimesSkeleton />
 
   return (
     <div className={GRID}>

@@ -40,6 +40,8 @@ export async function syncMeetRelaySplitSwims(meetId: string): Promise<void> {
 
   const wanted = new Map<string, WantedSplit>()
   for (const entry of entries) {
+    // A DQ'd relay's legs are shown with its result, but never become swims.
+    if (entry.resultStatus && !entry.resultTime) continue
     const relayRound = effectiveRelayRound(entry)
     for (const swimmer of entry.relaySwimmers ?? []) {
       if (!swimmer.athleteId) continue

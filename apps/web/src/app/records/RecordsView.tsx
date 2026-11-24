@@ -127,7 +127,7 @@ export default function RecordsView({ initial }: { initial: TeamRecordsResponse 
       </div>
 
       {view === "top" ? (
-        <TopTimesBoard gender={gender} mode={mode} data={topTimes.data} error={topTimes.error} />
+        <TopTimesBoard data={topTimes.data} error={topTimes.error} />
       ) : (
         <>
           <RecordsTable rows={initial.rows} action={recordsShare} onOpenHistory={openHistory} />

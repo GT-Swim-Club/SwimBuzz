@@ -1,0 +1,8808 @@
+{
+  "course": "SCY",
+  "detectedSheetType": "results",
+  "event_order": {
+    "sessions": [
+      {
+        "label": "Order of Events",
+        "rows": [
+          {
+            "event": "200 Free Relay",
+            "men": 2,
+            "women": 1
+          },
+          {
+            "event": "100 Breast",
+            "men": 4,
+            "women": 3
+          },
+          {
+            "event": "50 Fly",
+            "men": 6,
+            "women": 5
+          },
+          {
+            "event": "500 Free",
+            "men": 8,
+            "women": 7
+          },
+          {
+            "event": "100 IM",
+            "men": 10,
+            "women": 9
+          },
+          {
+            "event": "50 Back",
+            "men": 12,
+            "women": 11
+          },
+          {
+            "event": "100 Free",
+            "men": 14,
+            "women": 13
+          },
+          {
+            "event": "200 Medley Relay",
+            "men": 16,
+            "women": 15
+          },
+          {
+            "event": "200 Free",
+            "men": 18,
+            "women": 17
+          },
+          {
+            "event": "50 Breast",
+            "men": 20,
+            "women": 19
+          },
+          {
+            "event": "100 Back",
+            "men": 22,
+            "women": 21
+          },
+          {
+            "event": "100 Fly",
+            "men": 24,
+            "women": 23
+          },
+          {
+            "event": "200 IM",
+            "men": 26,
+            "women": 25
+          },
+          {
+            "event": "50 Free",
+            "men": 28,
+            "women": 27
+          },
+          {
+            "event": "400 Free Relay",
+            "men": 30,
+            "women": 29
+          },
+          {
+            "event": "200 Back",
+            "men": null,
+            "women": 31
+          },
+          {
+            "event": "200 Breast",
+            "men": 32,
+            "women": 32
+          }
+        ]
+      }
+    ]
+  },
+  "meet_date": "2020-03-07",
+  "meet_name": "Clemson Spring Invitational 2020",
+  "relay_results": [
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 1,
+      "points": 40.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "26.41"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "25.63"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "26.23"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "26.31"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB-GA",
+      "time": "1:44.58"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 2,
+      "points": 34.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Franchi, Madeleine",
+          "splitTime": "27.47"
+        },
+        {
+          "leg": 2,
+          "name": "Polak, Claire",
+          "splitTime": "28.17"
+        },
+        {
+          "leg": 3,
+          "name": "Heath, Lindsey",
+          "splitTime": "27.22"
+        },
+        {
+          "leg": 4,
+          "name": "McArdle, Maeve",
+          "splitTime": "26.63"
+        }
+      ],
+      "tags": "",
+      "team": "CLEMSON CLUB SWIMMING-SC",
+      "time": "1:49.49"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 3,
+      "points": 32.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "28.81"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "35.19"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "30.68"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "27.77"
+        }
+      ],
+      "tags": "",
+      "team": "CHARLESTON CLUB SWIMMING-SC",
+      "time": "2:02.45"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 4,
+      "points": 30.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "30.35"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "35.01"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "29.85"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "28.24"
+        }
+      ],
+      "tags": "",
+      "team": "KENNESAW STATE UNIVERSITY-GA",
+      "time": "2:03.45"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": 5,
+      "points": 28.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "31.09"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "38.88"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "31.61"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "28.31"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA SOUTHERN UNIVERSITY SC-GA",
+      "time": "2:09.89"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "27.37"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "26.91"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "27.90"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "26.66"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB-GA",
+      "time": "1:48.84"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Cary, Jordan",
+          "splitTime": "28.41"
+        },
+        {
+          "leg": 2,
+          "name": "Daher, Kira",
+          "splitTime": "29.90"
+        },
+        {
+          "leg": 3,
+          "name": "Madden, Kristina",
+          "splitTime": "29.07"
+        },
+        {
+          "leg": 4,
+          "name": "Brokaw, Grace",
+          "splitTime": "27.89"
+        }
+      ],
+      "tags": "",
+      "team": "CLEMSON CLUB SWIMMING-SC",
+      "time": "1:55.27"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "30.12"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "31.27"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "33.13"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "22.56"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB-GA",
+      "time": "1:57.08"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 1,
+      "points": 40.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Lobitz, C",
+          "splitTime": "22.33"
+        },
+        {
+          "leg": 2,
+          "name": "Eibel, Scott",
+          "splitTime": "22.68"
+        },
+        {
+          "leg": 3,
+          "name": "Cathapermal, Dylan",
+          "splitTime": "23.20"
+        },
+        {
+          "leg": 4,
+          "name": "Smith, Luke",
+          "splitTime": "21.67"
+        }
+      ],
+      "tags": "",
+      "team": "CLEMSON CLUB SWIMMING-SC",
+      "time": "1:29.88"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 2,
+      "points": 34.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "22.68"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "22.70"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "22.78"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "22.02"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB-GA",
+      "time": "1:30.18"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": 3,
+      "points": 32.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "25.24"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "25.43"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "25.06"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "26.10"
+        }
+      ],
+      "tags": "",
+      "team": "CHARLESTON CLUB SWIMMING-SC",
+      "time": "1:41.83"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "24.90"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "23.24"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "23.40"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "22.81"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB-GA",
+      "time": "1:34.35"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Weaver, Brian",
+          "splitTime": "24.21"
+        },
+        {
+          "leg": 2,
+          "name": "Brooks, Joseph",
+          "splitTime": "22.45"
+        },
+        {
+          "leg": 3,
+          "name": "Hunt, Gavin",
+          "splitTime": "23.76"
+        },
+        {
+          "leg": 4,
+          "name": "Hutton, Phillip",
+          "splitTime": "24.11"
+        }
+      ],
+      "tags": "",
+      "team": "CLEMSON CLUB SWIMMING-SC",
+      "time": "1:34.53"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Gleaton, Chris",
+          "splitTime": "25.78"
+        },
+        {
+          "leg": 2,
+          "name": "Grove, Mason",
+          "splitTime": "23.98"
+        },
+        {
+          "leg": 3,
+          "name": "Blanton, Zach",
+          "splitTime": "24.31"
+        },
+        {
+          "leg": 4,
+          "name": "Martin, David",
+          "splitTime": "24.98"
+        }
+      ],
+      "tags": "",
+      "team": "CLEMSON CLUB SWIMMING-SC",
+      "time": "1:39.05"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "25.88"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "27.29"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "25.16"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "25.02"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB-GA",
+      "time": "1:43.35"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 1,
+      "points": 40.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "30.73"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "32.31"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "27.77"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "26.82"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB-GA",
+      "time": "1:57.63"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 2,
+      "points": 34.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Heath, Lindsey",
+          "splitTime": "35.08"
+        },
+        {
+          "leg": 2,
+          "name": "Kalinowski, Lindsay",
+          "splitTime": "36.24"
+        },
+        {
+          "leg": 3,
+          "name": "McArdle, Maeve",
+          "splitTime": "28.51"
+        },
+        {
+          "leg": 4,
+          "name": "Franchi, Madeleine",
+          "splitTime": "27.59"
+        }
+      ],
+      "tags": "",
+      "team": "CLEMSON CLUB SWIMMING-SC",
+      "time": "2:07.42"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 3,
+      "points": 32.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "33.36"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "37.73"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "30.39"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "31.23"
+        }
+      ],
+      "tags": "",
+      "team": "CHARLESTON CLUB SWIMMING-SC",
+      "time": "2:12.71"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": 4,
+      "points": 30.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "41.92"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "38.52"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "31.20"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "35.63"
+        }
+      ],
+      "tags": "",
+      "team": "KENNESAW STATE UNIVERSITY-GA",
+      "time": "2:27.27"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "30.74"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "33.19"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "29.03"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "27.98"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB-GA",
+      "time": "2:00.94"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "McKernan, Julia",
+          "splitTime": "33.62"
+        },
+        {
+          "leg": 2,
+          "name": "Antonopoulos, Francesca",
+          "splitTime": "37.61"
+        },
+        {
+          "leg": 3,
+          "name": "Connolly, Emma",
+          "splitTime": "31.31"
+        },
+        {
+          "leg": 4,
+          "name": "Haeberle, Lily",
+          "splitTime": "28.60"
+        }
+      ],
+      "tags": "",
+      "team": "CLEMSON CLUB SWIMMING-SC",
+      "time": "2:11.14"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 1,
+      "points": 40.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "28.22"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "28.93"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "22.73"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "22.72"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB-GA",
+      "time": "1:42.60"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 2,
+      "points": 34.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Eshelman, Blake",
+          "splitTime": "30.21"
+        },
+        {
+          "leg": 2,
+          "name": "Peyatte, Nick",
+          "splitTime": "27.97"
+        },
+        {
+          "leg": 3,
+          "name": "Lobitz, C",
+          "splitTime": "23.37"
+        },
+        {
+          "leg": 4,
+          "name": "Smith, Luke",
+          "splitTime": "21.98"
+        }
+      ],
+      "tags": "",
+      "team": "CLEMSON CLUB SWIMMING-SC",
+      "time": "1:43.53"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 3,
+      "points": 32.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "O'Connor, Sean",
+          "splitTime": "31.35"
+        },
+        {
+          "leg": 2,
+          "name": "Elkins, Ethan",
+          "splitTime": "33.81"
+        },
+        {
+          "leg": 3,
+          "name": "Sherrer, Logan",
+          "splitTime": "30.90"
+        },
+        {
+          "leg": 4,
+          "name": "Markham, Logan",
+          "splitTime": "22.96"
+        }
+      ],
+      "tags": "",
+      "team": "ETSU SWIM CLUB",
+      "time": "1:59.02"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": 4,
+      "points": 30.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "34.13"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "33.89"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "27.56"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "24.25"
+        }
+      ],
+      "tags": "",
+      "team": "CHARLESTON CLUB SWIMMING-SC",
+      "time": "1:59.83"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Huntley, Steven",
+          "splitTime": "27.67"
+        },
+        {
+          "leg": 2,
+          "name": "Klimas, Kipling",
+          "splitTime": "27.99"
+        },
+        {
+          "leg": 3,
+          "name": "Brooks, Joseph",
+          "splitTime": "24.66"
+        },
+        {
+          "leg": 4,
+          "name": "Haertel, Matt",
+          "splitTime": "24.29"
+        }
+      ],
+      "tags": "",
+      "team": "CLEMSON CLUB SWIMMING-SC",
+      "time": "1:44.61"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "30.50"
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "32.79"
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "26.88"
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "27.20"
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB-GA",
+      "time": "1:57.37"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Martin, David",
+          "splitTime": "29.84"
+        },
+        {
+          "leg": 2,
+          "name": "Weaver, Brian",
+          "splitTime": "32.94"
+        },
+        {
+          "leg": 3,
+          "name": "Gleaton, Chris",
+          "splitTime": "28.89"
+        },
+        {
+          "leg": 4,
+          "name": "Heitzeg, Nik",
+          "splitTime": "25.75"
+        }
+      ],
+      "tags": "",
+      "team": "CLEMSON CLUB SWIMMING-SC",
+      "time": "1:57.42"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "F",
+      "place": 1,
+      "points": 40.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "59.73",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "28.96"
+            },
+            {
+              "distance": 100,
+              "splitTime": "30.77"
+            }
+          ]
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "1:02.51",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "29.30"
+            },
+            {
+              "distance": 100,
+              "splitTime": "33.21"
+            }
+          ]
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "59.56",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "27.84"
+            },
+            {
+              "distance": 100,
+              "splitTime": "31.72"
+            }
+          ]
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "1:01.82",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "28.62"
+            },
+            {
+              "distance": 100,
+              "splitTime": "33.20"
+            }
+          ]
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB-GA",
+      "time": "4:03.62"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "F",
+      "place": 2,
+      "points": 34.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Heath, Lindsey",
+          "splitTime": "1:00.65",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "29.23"
+            },
+            {
+              "distance": 100,
+              "splitTime": "31.42"
+            }
+          ]
+        },
+        {
+          "leg": 2,
+          "name": "Polak, Claire",
+          "splitTime": "1:07.39",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "31.19"
+            },
+            {
+              "distance": 100,
+              "splitTime": "36.20"
+            }
+          ]
+        },
+        {
+          "leg": 3,
+          "name": "Madden, Kristina",
+          "splitTime": "1:06.44",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "32.52"
+            },
+            {
+              "distance": 100,
+              "splitTime": "33.92"
+            }
+          ]
+        },
+        {
+          "leg": 4,
+          "name": "Franchi, Madeleine",
+          "splitTime": "1:04.27",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "30.09"
+            },
+            {
+              "distance": 100,
+              "splitTime": "34.18"
+            }
+          ]
+        }
+      ],
+      "tags": "",
+      "team": "CLEMSON CLUB SWIMMING-SC",
+      "time": "4:18.75"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "M",
+      "place": 1,
+      "points": 40.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "",
+          "splitTime": "48.54",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "23.11"
+            },
+            {
+              "distance": 100,
+              "splitTime": "25.43"
+            }
+          ]
+        },
+        {
+          "leg": 2,
+          "name": "",
+          "splitTime": "49.75",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "23.34"
+            },
+            {
+              "distance": 100,
+              "splitTime": "26.41"
+            }
+          ]
+        },
+        {
+          "leg": 3,
+          "name": "",
+          "splitTime": "50.89",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "24.27"
+            },
+            {
+              "distance": 100,
+              "splitTime": "26.62"
+            }
+          ]
+        },
+        {
+          "leg": 4,
+          "name": "",
+          "splitTime": "50.39",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "24.07"
+            },
+            {
+              "distance": 100,
+              "splitTime": "26.32"
+            }
+          ]
+        }
+      ],
+      "tags": "",
+      "team": "GEORGIA TECH SWIM CLUB-GA",
+      "time": "3:19.57"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "M",
+      "place": 2,
+      "points": 34.0,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Webber, James",
+          "splitTime": "52.82",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "24.71"
+            },
+            {
+              "distance": 100,
+              "splitTime": "28.11"
+            }
+          ]
+        },
+        {
+          "leg": 2,
+          "name": "Sands, Will",
+          "splitTime": "55.39",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "25.84"
+            },
+            {
+              "distance": 100,
+              "splitTime": "29.55"
+            }
+          ]
+        },
+        {
+          "leg": 3,
+          "name": "Hunt, Gavin",
+          "splitTime": "54.29",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "25.47"
+            },
+            {
+              "distance": 100,
+              "splitTime": "28.82"
+            }
+          ]
+        },
+        {
+          "leg": 4,
+          "name": "Eibel, Scott",
+          "splitTime": "53.94",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "24.65"
+            },
+            {
+              "distance": 100,
+              "splitTime": "29.29"
+            }
+          ]
+        }
+      ],
+      "tags": "",
+      "team": "CLEMSON CLUB SWIMMING-SC",
+      "time": "3:36.44"
+    }
+  ],
+  "results": [
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Cochell, Abbie",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.35"
+        },
+        {
+          "distance": 100,
+          "splitTime": "37.49"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:11.84"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Sundius, Sarah",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.29"
+        },
+        {
+          "distance": 100,
+          "splitTime": "39.81"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:14.10"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Pegram, Allison",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "37.69"
+        },
+        {
+          "distance": 100,
+          "splitTime": "39.86"
+        }
+      ],
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "1:17.55"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Groscost, Lucy",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "36.97"
+        },
+        {
+          "distance": 100,
+          "splitTime": "40.61"
+        }
+      ],
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "1:17.58"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Kalinowski, Lindsay",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "37.15"
+        },
+        {
+          "distance": 100,
+          "splitTime": "41.05"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:18.20"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Nguyen, Britney",
+      "place": 6,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "37.02"
+        },
+        {
+          "distance": 100,
+          "splitTime": "41.54"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:18.56"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Nielsen, Mari",
+      "place": 7,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "39.12"
+        },
+        {
+          "distance": 100,
+          "splitTime": "40.26"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:19.38"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Kropilak, Katherine",
+      "place": 8,
+      "points": 12.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "37.78"
+        },
+        {
+          "distance": 100,
+          "splitTime": "41.98"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:19.76"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Pawlowski, Abby",
+      "place": 9,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "38.83"
+        },
+        {
+          "distance": 100,
+          "splitTime": "42.49"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:21.32"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Antonopoulos, Francesca",
+      "place": 10,
+      "points": 11.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "38.10"
+        },
+        {
+          "distance": 100,
+          "splitTime": "43.85"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:21.95"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Bradford, Lindsey",
+      "place": 11,
+      "points": 9.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "38.68"
+        },
+        {
+          "distance": 100,
+          "splitTime": "43.63"
+        }
+      ],
+      "tags": "",
+      "team": "Kennesaw State University-GA",
+      "time": "1:22.31"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Butkus, Camille",
+      "place": 12,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "39.13"
+        },
+        {
+          "distance": 100,
+          "splitTime": "43.96"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:23.09"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Godwin, Avery",
+      "place": 13,
+      "points": 7.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "39.86"
+        },
+        {
+          "distance": 100,
+          "splitTime": "45.26"
+        }
+      ],
+      "tags": "",
+      "team": "University of North Georgia-GA",
+      "time": "1:25.12"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Smith, Kayla",
+      "place": 14,
+      "points": 6.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "39.82"
+        },
+        {
+          "distance": 100,
+          "splitTime": "45.73"
+        }
+      ],
+      "tags": "",
+      "team": "Uab Swim Club-SE",
+      "time": "1:25.55"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Purdy, Madyson",
+      "place": 15,
+      "points": 5.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "47.63"
+        },
+        {
+          "distance": 100,
+          "splitTime": "56.84"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Southern University SC-GA",
+      "time": "1:44.47"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "F",
+      "name": "Medrano, Camila",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "36.28"
+        },
+        {
+          "distance": 100,
+          "splitTime": "42.03"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:18.31"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Rohweder, Andrew",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "59.83"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Riordan, Bryan",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.11"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.80"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:01.91"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Peyatte, Nick",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.04"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.58"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:02.62"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Klimas, Kipling",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.20"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.99"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:03.19"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Wong, Justin",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.34"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.49"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:04.83"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Brooks, Joseph",
+      "place": 6,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.67"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.76"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:05.43"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Webber, James",
+      "place": 7,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.55"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.15"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:05.70"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Huntley, Steven",
+      "place": 8,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.50"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.53"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:07.03"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Eshelman, Blake",
+      "place": 9,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.83"
+        },
+        {
+          "distance": 100,
+          "splitTime": "36.47"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:07.30"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Hunt, Gavin",
+      "place": 10,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.23"
+        },
+        {
+          "distance": 100,
+          "splitTime": "36.90"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:08.13"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Moore, John",
+      "place": 11,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.22"
+        },
+        {
+          "distance": 100,
+          "splitTime": "36.32"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:08.54"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "McCaffrey, Ty",
+      "place": 12,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.79"
+        },
+        {
+          "distance": 100,
+          "splitTime": "36.82"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:08.61"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Plaskon, Dean",
+      "place": 13,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.09"
+        },
+        {
+          "distance": 100,
+          "splitTime": "36.96"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:09.05"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Madsen, Drew",
+      "place": 14,
+      "points": 12.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.87"
+        },
+        {
+          "distance": 100,
+          "splitTime": "37.93"
+        }
+      ],
+      "tags": "",
+      "team": "Kennesaw State University-GA",
+      "time": "1:09.80"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Ellet, Jackson",
+      "place": 15,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.50"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.59"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:11.09"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Withycombe, Owen",
+      "place": 16,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.32"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.37"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:11.69"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Hall, Andrew",
+      "place": 17,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.61"
+        },
+        {
+          "distance": 100,
+          "splitTime": "37.40"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:12.01"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Pendley, Owen",
+      "place": 18,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.56"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.59"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:12.15"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Ragoowansi, Evan",
+      "place": 19,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.95"
+        },
+        {
+          "distance": 100,
+          "splitTime": "39.83"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:12.78"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Dhawan, Shaan",
+      "place": 20,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.78"
+        },
+        {
+          "distance": 100,
+          "splitTime": "40.59"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:15.37"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Glass, Russell",
+      "place": 21,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "36.47"
+        },
+        {
+          "distance": 100,
+          "splitTime": "43.49"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:19.96"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Gleaton, Chris",
+      "place": 22,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "36.99"
+        },
+        {
+          "distance": 100,
+          "splitTime": "45.00"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:21.99"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Riddell, Allie",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "28.13"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Seabrook, Elli",
+      "place": 2,
+      "points": 16.5,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "29.08"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "DeRonja, Josie",
+      "place": 2,
+      "points": 16.5,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "29.08"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Groscost, Lucy",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "29.73"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Fassett, Olivia",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "29.89"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Winston, Kendall",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "30.23"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Connolly, Emma",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "30.38"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Cary, Jordan",
+      "place": 8,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "30.40"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Burch, Audrey",
+      "place": 8,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "30.40"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Pegram, Allison",
+      "place": 10,
+      "points": 11.0,
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "30.45"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Brokaw, Grace",
+      "place": 11,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "30.48"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Bradford, Samantha",
+      "place": 12,
+      "points": 9.0,
+      "tags": "",
+      "team": "Kennesaw State University-GA",
+      "time": "30.72"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Edwards, Taryn",
+      "place": 13,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "30.75"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Abad, Allison",
+      "place": 14,
+      "points": 7.0,
+      "tags": "",
+      "team": "Uab Swim Club-SE",
+      "time": "30.84"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Sundius, Sarah",
+      "place": 15,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "30.87"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Boland, Casey",
+      "place": 16,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "30.91"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "McElhinny, Julia",
+      "place": 17,
+      "points": 6.0,
+      "tags": "",
+      "team": "Wake Forest Club Swimming",
+      "time": "31.12"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Williams, Margaret",
+      "place": 18,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "31.33"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Thomas, Christina",
+      "place": 19,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "31.57"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Daher, Kira",
+      "place": 20,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "31.92"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Ortega, Claudia",
+      "place": 20,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "31.92"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "McPike, Jade",
+      "place": 22,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "32.33"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Perrone, Elizabeth",
+      "place": 23,
+      "points": 5.0,
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "32.61"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Wharton, Angela",
+      "place": 24,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "32.78"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Long, Lillian",
+      "place": 25,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "33.49"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Meyers, Madison",
+      "place": 26,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "33.98"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Graham, Sofia",
+      "place": 27,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "35.90"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Borrego, Nayla",
+      "place": 28,
+      "points": 4.0,
+      "tags": "",
+      "team": "University of North Georgia-GA",
+      "time": "48.58"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Smith, Luke",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "24.05"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Jozwiak, Nicholas",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "24.16"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Laensirinne, Pessi",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "24.69"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Fischer, Adam",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "25.20"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Daw, Andrew",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "25.38"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Evans, Tyler",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "25.41"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Languell, Christopher",
+      "place": 7,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "25.80"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Walters, Samuel",
+      "place": 8,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "25.92"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Haertel, Matt",
+      "place": 8,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "25.92"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Zhou, Frank",
+      "place": 10,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "26.10"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Gonzalez, Miguel",
+      "place": 11,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "26.25"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Hergott, Isaac",
+      "place": 12,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "26.36"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Choudhury, Sumit",
+      "place": 13,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "26.41"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Sands, Will",
+      "place": 14,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "26.56"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Cathapermal, Dylan",
+      "place": 15,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "26.63"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Lukehart, Spencer",
+      "place": 16,
+      "points": 12.0,
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "27.14"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Page, Colton",
+      "place": 17,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "27.25"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Little, Hunt",
+      "place": 18,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "27.43"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Taibi, Charles",
+      "place": 19,
+      "points": 11.0,
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "27.97"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Brooks, Joseph",
+      "place": 20,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "28.56"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Markham, Logan",
+      "place": 20,
+      "points": 9.0,
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "28.56"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Boye, Jared",
+      "place": 22,
+      "points": 7.0,
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "28.66"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Peyatte, Nick",
+      "place": 23,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "28.71"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Helgoth, Chris",
+      "place": 24,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "28.85"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Clawson, Kaleb",
+      "place": 25,
+      "points": 6.0,
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "29.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Norman, Josh",
+      "place": 26,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "29.07"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Ellet, Jackson",
+      "place": 27,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "29.13"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Caldwell, Jack",
+      "place": 28,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "29.27"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "O'Connor, Sean",
+      "place": 29,
+      "points": 5.0,
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "30.93"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "F",
+      "name": "Gerton, Marina",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.05"
+        },
+        {
+          "distance": 100,
+          "splitTime": "36.00"
+        },
+        {
+          "distance": 150,
+          "splitTime": "37.80"
+        },
+        {
+          "distance": 200,
+          "splitTime": "38.29"
+        },
+        {
+          "distance": 250,
+          "splitTime": "38.99"
+        },
+        {
+          "distance": 300,
+          "splitTime": "39.60"
+        },
+        {
+          "distance": 350,
+          "splitTime": "40.31"
+        },
+        {
+          "distance": 400,
+          "splitTime": "40.64"
+        },
+        {
+          "distance": 450,
+          "splitTime": "40.77"
+        },
+        {
+          "distance": 500,
+          "splitTime": "39.40"
+        }
+      ],
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "6:23.85"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "F",
+      "name": "Bradford, Lindsey",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.47"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.56"
+        },
+        {
+          "distance": 150,
+          "splitTime": "40.77"
+        },
+        {
+          "distance": 200,
+          "splitTime": "41.84"
+        },
+        {
+          "distance": 250,
+          "splitTime": "42.37"
+        },
+        {
+          "distance": 300,
+          "splitTime": "42.67"
+        },
+        {
+          "distance": 350,
+          "splitTime": "42.45"
+        },
+        {
+          "distance": 400,
+          "splitTime": "41.59"
+        },
+        {
+          "distance": 450,
+          "splitTime": "42.43"
+        },
+        {
+          "distance": 500,
+          "splitTime": "42.17"
+        }
+      ],
+      "tags": "",
+      "team": "Kennesaw State University-GA",
+      "time": "6:49.32"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "F",
+      "name": "Brougham, Pangur",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "36.24"
+        },
+        {
+          "distance": 100,
+          "splitTime": "43.11"
+        },
+        {
+          "distance": 150,
+          "splitTime": "47.04"
+        },
+        {
+          "distance": 200,
+          "splitTime": "49.22"
+        },
+        {
+          "distance": 250,
+          "splitTime": "50.07"
+        },
+        {
+          "distance": 300,
+          "splitTime": "50.68"
+        },
+        {
+          "distance": 350,
+          "splitTime": "50.73"
+        },
+        {
+          "distance": 400,
+          "splitTime": "51.57"
+        },
+        {
+          "distance": 450,
+          "splitTime": "50.81"
+        },
+        {
+          "distance": 500,
+          "splitTime": "45.54"
+        }
+      ],
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "7:55.01"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "M",
+      "name": "Fregosi, Carson",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "26.40"
+        },
+        {
+          "distance": 100,
+          "splitTime": "28.57"
+        },
+        {
+          "distance": 150,
+          "splitTime": "29.16"
+        },
+        {
+          "distance": 200,
+          "splitTime": "29.78"
+        },
+        {
+          "distance": 250,
+          "splitTime": "30.25"
+        },
+        {
+          "distance": 300,
+          "splitTime": "30.14"
+        },
+        {
+          "distance": 350,
+          "splitTime": "30.05"
+        },
+        {
+          "distance": 400,
+          "splitTime": "30.46"
+        },
+        {
+          "distance": 450,
+          "splitTime": "30.73"
+        },
+        {
+          "distance": 500,
+          "splitTime": "30.37"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "4:55.91"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "M",
+      "name": "O'Neill, Patrick",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "25.88"
+        },
+        {
+          "distance": 100,
+          "splitTime": "28.10"
+        },
+        {
+          "distance": 150,
+          "splitTime": "29.32"
+        },
+        {
+          "distance": 200,
+          "splitTime": "30.56"
+        },
+        {
+          "distance": 250,
+          "splitTime": "31.05"
+        },
+        {
+          "distance": 300,
+          "splitTime": "32.07"
+        },
+        {
+          "distance": 350,
+          "splitTime": "32.68"
+        },
+        {
+          "distance": 400,
+          "splitTime": "32.88"
+        },
+        {
+          "distance": 450,
+          "splitTime": "32.89"
+        },
+        {
+          "distance": 500,
+          "splitTime": "31.21"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "5:06.64"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "M",
+      "name": "Kendinger, Nolan",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.39"
+        },
+        {
+          "distance": 100,
+          "splitTime": "30.82"
+        },
+        {
+          "distance": 150,
+          "splitTime": "31.91"
+        },
+        {
+          "distance": 200,
+          "splitTime": "32.28"
+        },
+        {
+          "distance": 250,
+          "splitTime": "32.39"
+        },
+        {
+          "distance": 300,
+          "splitTime": "32.79"
+        },
+        {
+          "distance": 350,
+          "splitTime": "32.84"
+        },
+        {
+          "distance": 400,
+          "splitTime": "32.86"
+        },
+        {
+          "distance": 450,
+          "splitTime": "32.63"
+        },
+        {
+          "distance": 500,
+          "splitTime": "32.32"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "5:19.23"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "M",
+      "name": "Daw, Andrew",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.02"
+        },
+        {
+          "distance": 100,
+          "splitTime": "31.30"
+        },
+        {
+          "distance": 150,
+          "splitTime": "32.47"
+        },
+        {
+          "distance": 200,
+          "splitTime": "33.25"
+        },
+        {
+          "distance": 250,
+          "splitTime": "33.40"
+        },
+        {
+          "distance": 300,
+          "splitTime": "34.30"
+        },
+        {
+          "distance": 350,
+          "splitTime": "34.31"
+        },
+        {
+          "distance": 400,
+          "splitTime": "35.30"
+        },
+        {
+          "distance": 450,
+          "splitTime": "35.67"
+        },
+        {
+          "distance": 500,
+          "splitTime": "36.29"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "5:34.31"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "M",
+      "name": "Cason, Will",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.23"
+        },
+        {
+          "distance": 100,
+          "splitTime": "36.54"
+        },
+        {
+          "distance": 150,
+          "splitTime": "39.42"
+        },
+        {
+          "distance": 200,
+          "splitTime": "39.62"
+        },
+        {
+          "distance": 250,
+          "splitTime": "40.27"
+        },
+        {
+          "distance": 300,
+          "splitTime": "41.85"
+        },
+        {
+          "distance": 350,
+          "splitTime": "41.79"
+        },
+        {
+          "distance": 400,
+          "splitTime": "40.31"
+        },
+        {
+          "distance": 450,
+          "splitTime": "41.10"
+        },
+        {
+          "distance": 500,
+          "splitTime": "39.63"
+        }
+      ],
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "6:32.76"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Ridgeway, Ellie",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.34"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.07"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:03.41"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Nastasi, Ally",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.35"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.87"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:05.22"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "McArdle, Maeve",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.29"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.31"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:05.60"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Burch, Audrey",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.89"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.71"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:09.60"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Haeberle, Lily",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.93"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.68"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:09.61"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Bradford, Samantha",
+      "place": 6,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.94"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.63"
+        }
+      ],
+      "tags": "",
+      "team": "Kennesaw State University-GA",
+      "time": "1:10.57"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Seabrook, Elli",
+      "place": 7,
+      "points": 12.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.90"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.85"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:10.75"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Abad, Allison",
+      "place": 8,
+      "points": 11.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.75"
+        },
+        {
+          "distance": 100,
+          "splitTime": "37.17"
+        }
+      ],
+      "tags": "",
+      "team": "Uab Swim Club-SE",
+      "time": "1:10.92"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Thomas, Christina",
+      "place": 9,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.96"
+        },
+        {
+          "distance": 100,
+          "splitTime": "37.93"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:11.89"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Franchi, Madeleine",
+      "place": 10,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.00"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.99"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:11.99"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Nielsen, Mari",
+      "place": 11,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.43"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.84"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:12.27"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Depalle, Claire",
+      "place": 12,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.05"
+        },
+        {
+          "distance": 100,
+          "splitTime": "39.96"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:13.01"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Connolly, Emma",
+      "place": 13,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.26"
+        },
+        {
+          "distance": 100,
+          "splitTime": "40.06"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:13.32"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Tilson, Mallory",
+      "place": 14,
+      "points": 9.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.07"
+        },
+        {
+          "distance": 100,
+          "splitTime": "39.79"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Southern University SC-GA",
+      "time": "1:13.86"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Wharton, Angela",
+      "place": 15,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.98"
+        },
+        {
+          "distance": 100,
+          "splitTime": "40.06"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:14.04"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Winston, Kendall",
+      "place": 16,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.77"
+        },
+        {
+          "distance": 100,
+          "splitTime": "39.93"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:14.70"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Vrooman, Kelsey",
+      "place": 17,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.28"
+        },
+        {
+          "distance": 100,
+          "splitTime": "41.51"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:14.79"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Benner, Josie",
+      "place": 18,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "35.93"
+        },
+        {
+          "distance": 100,
+          "splitTime": "39.22"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:15.15"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Ortega, Claudia",
+      "place": 19,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.64"
+        },
+        {
+          "distance": 100,
+          "splitTime": "40.61"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:15.25"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Daher, Kira",
+      "place": 20,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.96"
+        },
+        {
+          "distance": 100,
+          "splitTime": "41.55"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:15.51"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Smith, Kayla",
+      "place": 21,
+      "points": 7.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "35.03"
+        },
+        {
+          "distance": 100,
+          "splitTime": "40.70"
+        }
+      ],
+      "tags": "",
+      "team": "Uab Swim Club-SE",
+      "time": "1:15.73"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Murali, Nila",
+      "place": 22,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.94"
+        },
+        {
+          "distance": 100,
+          "splitTime": "42.84"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:15.78"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Long, Lillian",
+      "place": 23,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.79"
+        },
+        {
+          "distance": 100,
+          "splitTime": "41.23"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:16.02"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Pawlowski, Abby",
+      "place": 24,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "35.16"
+        },
+        {
+          "distance": 100,
+          "splitTime": "41.47"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:16.63"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "McPike, Jade",
+      "place": 25,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "36.57"
+        },
+        {
+          "distance": 100,
+          "splitTime": "40.82"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:17.39"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Lawrence, Chelsea",
+      "place": 26,
+      "points": 6.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "35.95"
+        },
+        {
+          "distance": 100,
+          "splitTime": "42.19"
+        }
+      ],
+      "tags": "",
+      "team": "Kennesaw State University-GA",
+      "time": "1:18.14"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Meyers, Madison",
+      "place": 27,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "36.52"
+        },
+        {
+          "distance": 100,
+          "splitTime": "45.73"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:22.25"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "F",
+      "name": "Borrego, Nayla",
+      "place": 28,
+      "points": 5.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "47.34"
+        },
+        {
+          "distance": 100,
+          "splitTime": "50.19"
+        }
+      ],
+      "tags": "",
+      "team": "University of North Georgia-GA",
+      "time": "1:37.53"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Shaheen, Jonathan",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "24.74"
+        },
+        {
+          "distance": 100,
+          "splitTime": "29.54"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "54.28"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Walters, Samuel",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "27.52"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.51"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:00.03"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Webber, James",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.97"
+        },
+        {
+          "distance": 100,
+          "splitTime": "31.69"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:00.66"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Laensirinne, Pessi",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.32"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.48"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:00.80"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Moore, John",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.23"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.90"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:01.13"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Zhou, Frank",
+      "place": 6,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.33"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.00"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:01.33"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Plaskon, Dean",
+      "place": 7,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.38"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.01"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:01.39"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "McCaffrey, Ty",
+      "place": 8,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "27.96"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.08"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:02.04"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Huang, Edward",
+      "place": 9,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.36"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.32"
+        }
+      ],
+      "tags": "",
+      "team": "Uab Swim Club-SE",
+      "time": "1:02.68"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Keith, Jackson",
+      "place": 10,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.30"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.72"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:03.02"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Grant, Jake",
+      "place": 11,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.69"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.39"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:03.08"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Little, Hunt",
+      "place": 12,
+      "points": 12.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.44"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.46"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:03.90"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Pendley, Owen",
+      "place": 13,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.41"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.60"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:04.01"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Erling, Connor",
+      "place": 14,
+      "points": 11.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.85"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.72"
+        }
+      ],
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "1:04.57"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Boye, Jared",
+      "place": 15,
+      "points": 9.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.33"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.69"
+        }
+      ],
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "1:06.02"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Zidek, Thomas",
+      "place": 16,
+      "points": 7.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.16"
+        },
+        {
+          "distance": 100,
+          "splitTime": "36.19"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Southern University SC-GA",
+      "time": "1:06.35"
+    },
+    {
+      "course": "SCY",
+      "event": "100 IM",
+      "gender": "M",
+      "name": "Ragoowansi, Evan",
+      "place": 17,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.77"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.85"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:06.62"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Riddell, Allie",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "29.72"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Abrahamse, Nadine",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "30.32"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Heath, Lindsey",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "31.56"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "McKernan, Julia",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "31.66"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Beebe, Amelia",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Georgia College Swimcats-GA",
+      "time": "32.54"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Belille, Jessica",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "32.94"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Wojack, Emma",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "33.70"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Vrooman, Kelsey",
+      "place": 8,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "34.04"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Shealy, Denise",
+      "place": 9,
+      "points": 11.0,
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "34.10"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Reinhart, Trina",
+      "place": 10,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "34.14"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Empoliti, Isabella",
+      "place": 11,
+      "points": 9.0,
+      "tags": "",
+      "team": "Georgia College Swimcats-GA",
+      "time": "34.41"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Perrone, Elizabeth",
+      "place": 12,
+      "points": 7.0,
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "34.71"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Bradford, Lindsey",
+      "place": 13,
+      "points": 6.0,
+      "tags": "",
+      "team": "Kennesaw State University-GA",
+      "time": "35.23"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Ramia, Zoe",
+      "place": 14,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "35.26"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Allen, Sadie",
+      "place": 15,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "35.70"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Van Alstine, Alex",
+      "place": 16,
+      "points": 5.0,
+      "tags": "",
+      "team": "Georgia Southern University SC-GA",
+      "time": "37.28"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Grabner, Carly",
+      "place": 17,
+      "points": 4.0,
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "37.59"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Endozo, Jacqui",
+      "place": 18,
+      "points": 3.0,
+      "tags": "",
+      "team": "Kennesaw State University-GA",
+      "time": "38.30"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Smith, Akasha",
+      "place": 19,
+      "points": 2.0,
+      "tags": "",
+      "team": "University of North Georgia-GA",
+      "time": "39.98"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Evans, Dusty",
+      "place": 20,
+      "points": 1.0,
+      "tags": "",
+      "team": "Kennesaw State University-GA",
+      "time": "40.34"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Brown, Sarah",
+      "place": 21,
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "48.52"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Lee, Hannah",
+      "place": 22,
+      "tags": "",
+      "team": "Georgia Southern University SC-GA",
+      "time": "49.41"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Smith, Luke",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "25.90"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Riordan, Bryan",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "26.75"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "O'Neill, Patrick",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "27.86"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Martin, David",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "28.68"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Taibi, Charles",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "29.27"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Teuscher, Noah",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "30.15"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Zidek, Thomas",
+      "place": 7,
+      "points": 12.0,
+      "tags": "",
+      "team": "Georgia Southern University SC-GA",
+      "time": "31.56"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Clawson, Kaleb",
+      "place": 8,
+      "points": 11.0,
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "32.98"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "M",
+      "name": "Dukes, Logan",
+      "place": 9,
+      "points": 9.0,
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "34.01"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Beuchel, Katherine",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "27.76"
+        },
+        {
+          "distance": 100,
+          "splitTime": "28.93"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "56.69"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Cochell, Abbie",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.07"
+        },
+        {
+          "distance": 100,
+          "splitTime": "29.68"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "57.75"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Brokaw, Grace",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.51"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.88"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:02.39"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Edwards, Taryn",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.33"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.13"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:02.46"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Gerton, Marina",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.81"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.94"
+        }
+      ],
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "1:02.75"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Heath, Lindsey",
+      "place": 6,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.92"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.32"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:03.24"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Godwin, Avery",
+      "place": 7,
+      "points": 12.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.46"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.90"
+        }
+      ],
+      "tags": "",
+      "team": "University of North Georgia-GA",
+      "time": "1:03.36"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Bauer, Sara",
+      "place": 8,
+      "points": 11.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.87"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.59"
+        }
+      ],
+      "tags": "",
+      "team": "Uab Swim Club-SE",
+      "time": "1:03.46"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Drew, Kennedy",
+      "place": 9,
+      "points": 9.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.50"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.01"
+        }
+      ],
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "1:03.51"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Polak, Claire",
+      "place": 10,
+      "points": 7.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.50"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.54"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:04.04"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Wojack, Emma",
+      "place": 11,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.47"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.00"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:04.47"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Winston, Kendall",
+      "place": 12,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.43"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.95"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:05.38"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Edmond, Shani",
+      "place": 13,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.40"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.10"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:05.50"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Madden, Kristina",
+      "place": 14,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.00"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.60"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:05.60"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Kropilak, Katherine",
+      "place": 15,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.23"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.53"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:05.76"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Ortega, Claudia",
+      "place": 16,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.65"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.56"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:06.21"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Williams, Margaret",
+      "place": 17,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.76"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.57"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:06.33"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Perrone, Elizabeth",
+      "place": 18,
+      "points": 6.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.12"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.11"
+        }
+      ],
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "1:07.23"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Allen, Sadie",
+      "place": 19,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.87"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.89"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:07.76"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Nguyen, Britney",
+      "place": 20,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.23"
+        },
+        {
+          "distance": 100,
+          "splitTime": "36.06"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:08.29"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Belille, Jessica",
+      "place": 21,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.04"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.58"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:08.62"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Sinkes, Samantha",
+      "place": 22,
+      "points": 5.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.19"
+        },
+        {
+          "distance": 100,
+          "splitTime": "37.92"
+        }
+      ],
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "1:11.11"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Purdy, Madyson",
+      "place": 23,
+      "points": 4.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.72"
+        },
+        {
+          "distance": 100,
+          "splitTime": "37.66"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Southern University SC-GA",
+      "time": "1:11.38"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Brougham, Pangur",
+      "place": 24,
+      "points": 3.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.07"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.63"
+        }
+      ],
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "1:12.70"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Borrego, Nayla",
+      "place": 25,
+      "points": 2.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "38.53"
+        },
+        {
+          "distance": 100,
+          "splitTime": "43.21"
+        }
+      ],
+      "tags": "",
+      "team": "University of North Georgia-GA",
+      "time": "1:21.74"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Nielsen, Mari",
+      "place": 26,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "38.97"
+        },
+        {
+          "distance": 100,
+          "splitTime": "44.13"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:23.10"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "F",
+      "name": "Smith, Akasha",
+      "place": 27,
+      "points": 1.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "38.67"
+        },
+        {
+          "distance": 100,
+          "splitTime": "47.25"
+        }
+      ],
+      "tags": "",
+      "team": "University of North Georgia-GA",
+      "time": "1:25.92"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Rohweder, Andrew",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "24.26"
+        },
+        {
+          "distance": 100,
+          "splitTime": "25.42"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "49.68"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Jozwiak, Nicholas",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "23.85"
+        },
+        {
+          "distance": 100,
+          "splitTime": "26.20"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "50.05"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Eshelman, Blake",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "23.78"
+        },
+        {
+          "distance": 100,
+          "splitTime": "26.74"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "50.52"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Geller, Maxim",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "24.89"
+        },
+        {
+          "distance": 100,
+          "splitTime": "26.46"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "51.35"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Evans, Tyler",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "24.86"
+        },
+        {
+          "distance": 100,
+          "splitTime": "26.64"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "51.50"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Keith, Jackson",
+      "place": 6,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "25.42"
+        },
+        {
+          "distance": 100,
+          "splitTime": "26.62"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "52.04"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Autera, Garret",
+      "place": 7,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "25.21"
+        },
+        {
+          "distance": 100,
+          "splitTime": "26.85"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia College Swimcats-GA",
+      "time": "52.06"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Webber, James",
+      "place": 8,
+      "points": 12.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "52.24"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Haertel, Matt",
+      "place": 9,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "23.90"
+        },
+        {
+          "distance": 100,
+          "splitTime": "28.91"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "52.81"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Hergott, Isaac",
+      "place": 10,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "25.75"
+        },
+        {
+          "distance": 100,
+          "splitTime": "27.70"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "53.45"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Gonzalez, Miguel",
+      "place": 11,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "25.53"
+        },
+        {
+          "distance": 100,
+          "splitTime": "28.13"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "53.66"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Languell, Christopher",
+      "place": 12,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "26.08"
+        },
+        {
+          "distance": 100,
+          "splitTime": "27.63"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "53.71"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Hunt, Gavin",
+      "place": 13,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "25.57"
+        },
+        {
+          "distance": 100,
+          "splitTime": "28.36"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "53.93"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Choudhury, Sumit",
+      "place": 14,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "26.40"
+        },
+        {
+          "distance": 100,
+          "splitTime": "27.80"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "54.20"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Liu, Alexander",
+      "place": 14,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "25.79"
+        },
+        {
+          "distance": 100,
+          "splitTime": "28.41"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "54.20"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Blanton, Zach",
+      "place": 16,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "25.07"
+        },
+        {
+          "distance": 100,
+          "splitTime": "29.71"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "54.78"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Hutton, Phillip",
+      "place": 17,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "25.93"
+        },
+        {
+          "distance": 100,
+          "splitTime": "29.41"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "55.34"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Weaver, Brian",
+      "place": 18,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "25.91"
+        },
+        {
+          "distance": 100,
+          "splitTime": "29.55"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "55.46"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Sherrer, Logan",
+      "place": 19,
+      "points": 11.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "26.33"
+        },
+        {
+          "distance": 100,
+          "splitTime": "29.61"
+        }
+      ],
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "55.94"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Zhou, Frank",
+      "place": 20,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "27.44"
+        },
+        {
+          "distance": 100,
+          "splitTime": "31.40"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "58.84"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Caldwell, Jack",
+      "place": 21,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.02"
+        },
+        {
+          "distance": 100,
+          "splitTime": "30.58"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "59.60"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Davis, Lee",
+      "place": 22,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "27.20"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.95"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:00.15"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Norman, Josh",
+      "place": 23,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.20"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.74"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:00.94"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "O'Connor, Sean",
+      "place": 24,
+      "points": 9.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.38"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.52"
+        }
+      ],
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "1:01.90"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Giles, David",
+      "place": 25,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.43"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.40"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:02.83"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Teuscher, Noah",
+      "place": 26,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.05"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.37"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:03.42"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Nastasi, Ally",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.44"
+        },
+        {
+          "distance": 100,
+          "splitTime": "31.65"
+        },
+        {
+          "distance": 150,
+          "splitTime": "32.19"
+        },
+        {
+          "distance": 200,
+          "splitTime": "31.63"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:03.91"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "DeRonja, Josie",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.39"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.32"
+        },
+        {
+          "distance": 150,
+          "splitTime": "32.40"
+        },
+        {
+          "distance": 200,
+          "splitTime": "33.29"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:08.40"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "McArdle, Maeve",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.43"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.67"
+        },
+        {
+          "distance": 150,
+          "splitTime": "33.63"
+        },
+        {
+          "distance": 200,
+          "splitTime": "32.94"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "2:08.67"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "McElhinny, Julia",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.73"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.27"
+        },
+        {
+          "distance": 150,
+          "splitTime": "35.74"
+        },
+        {
+          "distance": 200,
+          "splitTime": "35.15"
+        }
+      ],
+      "tags": "",
+      "team": "Wake Forest Club Swimming",
+      "time": "2:17.89"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Racioppi, Elizabeth",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.52"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.99"
+        },
+        {
+          "distance": 150,
+          "splitTime": "36.75"
+        },
+        {
+          "distance": 200,
+          "splitTime": "35.97"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "2:20.23"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Tilson, Mallory",
+      "place": 6,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.67"
+        },
+        {
+          "distance": 100,
+          "splitTime": "36.07"
+        },
+        {
+          "distance": 150,
+          "splitTime": "37.08"
+        },
+        {
+          "distance": 200,
+          "splitTime": "36.14"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Southern University SC-GA",
+      "time": "2:20.96"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Madden, Kristina",
+      "place": 7,
+      "points": 12.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.29"
+        },
+        {
+          "distance": 100,
+          "splitTime": "36.46"
+        },
+        {
+          "distance": 150,
+          "splitTime": "37.93"
+        },
+        {
+          "distance": 200,
+          "splitTime": "35.58"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "2:23.26"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Shultz, Ceci",
+      "place": 8,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.64"
+        },
+        {
+          "distance": 100,
+          "splitTime": "36.37"
+        },
+        {
+          "distance": 150,
+          "splitTime": "38.46"
+        },
+        {
+          "distance": 200,
+          "splitTime": "37.09"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "2:24.56"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Ortega, Claudia",
+      "place": 9,
+      "points": 11.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.16"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.36"
+        },
+        {
+          "distance": 150,
+          "splitTime": "37.59"
+        },
+        {
+          "distance": 200,
+          "splitTime": "39.83"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:24.94"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "F",
+      "name": "Graham, Sofia",
+      "place": 10,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.43"
+        },
+        {
+          "distance": 100,
+          "splitTime": "39.08"
+        },
+        {
+          "distance": 150,
+          "splitTime": "41.99"
+        },
+        {
+          "distance": 200,
+          "splitTime": "42.73"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "2:38.23"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Jozwiak, Nicholas",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "25.00"
+        },
+        {
+          "distance": 100,
+          "splitTime": "28.19"
+        },
+        {
+          "distance": 150,
+          "splitTime": "29.45"
+        },
+        {
+          "distance": 200,
+          "splitTime": "28.78"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:51.42"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Riordan, Bryan",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "26.57"
+        },
+        {
+          "distance": 100,
+          "splitTime": "28.03"
+        },
+        {
+          "distance": 150,
+          "splitTime": "28.74"
+        },
+        {
+          "distance": 200,
+          "splitTime": "28.23"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:51.57"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "O'Neill, Patrick",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "25.51"
+        },
+        {
+          "distance": 100,
+          "splitTime": "28.36"
+        },
+        {
+          "distance": 150,
+          "splitTime": "29.36"
+        },
+        {
+          "distance": 200,
+          "splitTime": "28.50"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:51.73"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Daw, Andrew",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "26.05"
+        },
+        {
+          "distance": 100,
+          "splitTime": "28.79"
+        },
+        {
+          "distance": 150,
+          "splitTime": "29.81"
+        },
+        {
+          "distance": 200,
+          "splitTime": "31.77"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:56.42"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Grant, Jake",
+      "place": 5,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "27.18"
+        },
+        {
+          "distance": 100,
+          "splitTime": "29.68"
+        },
+        {
+          "distance": 150,
+          "splitTime": "30.79"
+        },
+        {
+          "distance": 200,
+          "splitTime": "29.96"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:57.61"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Keith, Jackson",
+      "place": 6,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "26.69"
+        },
+        {
+          "distance": 100,
+          "splitTime": "29.55"
+        },
+        {
+          "distance": 150,
+          "splitTime": "30.98"
+        },
+        {
+          "distance": 200,
+          "splitTime": "31.26"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:58.48"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Hunt, Gavin",
+      "place": 7,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "26.92"
+        },
+        {
+          "distance": 100,
+          "splitTime": "30.88"
+        },
+        {
+          "distance": 150,
+          "splitTime": "32.68"
+        },
+        {
+          "distance": 200,
+          "splitTime": "33.50"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "2:03.98"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Free",
+      "gender": "M",
+      "name": "Helgoth, Chris",
+      "place": 8,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.80"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.06"
+        },
+        {
+          "distance": 150,
+          "splitTime": "35.24"
+        },
+        {
+          "distance": 200,
+          "splitTime": "36.28"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:13.38"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Cochell, Abbie",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "34.24"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Beuchel, Katherine",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "34.31"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Fassett, Olivia",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "35.76"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Kropilak, Katherine",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "36.50"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Kalinowski, Lindsay",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "36.78"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Hufnagel, Dharma",
+      "place": 6,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "36.80"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Pawlowski, Abby",
+      "place": 7,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "36.81"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Benner, Josie",
+      "place": 8,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "37.02"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Antonopoulos, Francesca",
+      "place": 9,
+      "points": 13.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "37.66"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Gerton, Marina",
+      "place": 10,
+      "points": 12.0,
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "37.80"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Thomas, Christina",
+      "place": 11,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "37.88"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Bradford, Lindsey",
+      "place": 12,
+      "points": 11.0,
+      "tags": "",
+      "team": "Kennesaw State University-GA",
+      "time": "38.87"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Shealy, Denise",
+      "place": 13,
+      "points": 9.0,
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "39.25"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Godwin, Avery",
+      "place": 14,
+      "points": 7.0,
+      "tags": "",
+      "team": "University of North Georgia-GA",
+      "time": "39.32"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Belille, Jessica",
+      "place": 15,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "40.11"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Lawrence, Chelsea",
+      "place": 16,
+      "points": 6.0,
+      "tags": "",
+      "team": "Kennesaw State University-GA",
+      "time": "40.70"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Beebe, Amelia",
+      "place": 17,
+      "points": 5.0,
+      "tags": "",
+      "team": "Georgia College Swimcats-GA",
+      "time": "41.14"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Ramia, Zoe",
+      "place": 18,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "41.55"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "McPike, Jade",
+      "place": 19,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "41.94"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Eldridge, Lauren",
+      "place": 20,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "42.86"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Evans, Dusty",
+      "place": 21,
+      "points": 4.0,
+      "tags": "",
+      "team": "Kennesaw State University-GA",
+      "time": "46.55"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "F",
+      "name": "Edinger, Abigail",
+      "place": 22,
+      "points": 3.0,
+      "tags": "",
+      "team": "Georgia College Swimcats-GA",
+      "time": "49.40"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Rohweder, Andrew",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "28.37"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Brooks, Joseph",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "28.85"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Jozwiak, Nicholas",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "28.96"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Peyatte, Nick",
+      "place": 4,
+      "points": 15.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "28.97"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Fischer, Adam",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "29.34"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Laensirinne, Pessi",
+      "place": 6,
+      "points": 13.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "29.92"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Smith, Luke",
+      "place": 7,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "29.93"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Hergott, Isaac",
+      "place": 8,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "29.99"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Webber, James",
+      "place": 9,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "30.49"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Cathapermal, Dylan",
+      "place": 10,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "30.58"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Fregosi, Carson",
+      "place": 11,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "30.74"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Withycombe, Owen",
+      "place": 12,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "31.03"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Ellet, Jackson",
+      "place": 13,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "31.28"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Plaskon, Dean",
+      "place": 14,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "31.29"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Madsen, Drew",
+      "place": 15,
+      "points": 12.0,
+      "tags": "",
+      "team": "Kennesaw State University-GA",
+      "time": "31.41"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Hunt, Gavin",
+      "place": 16,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "31.44"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Hall, Andrew",
+      "place": 17,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "31.45"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Weaver, Brian",
+      "place": 18,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "31.73"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Zidek, Thomas",
+      "place": 19,
+      "points": 11.0,
+      "tags": "",
+      "team": "Georgia Southern University SC-GA",
+      "time": "32.43"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Pendley, Owen",
+      "place": 20,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "33.45"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Little, Hunt",
+      "place": 21,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "33.78"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Grove, Mason",
+      "place": 22,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "33.85"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Dhawan, Shaan",
+      "place": 23,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "34.13"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Boye, Jared",
+      "place": 24,
+      "points": 9.0,
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "34.48"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Glass, Russell",
+      "place": 25,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "35.37"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Davis, Lee",
+      "place": 26,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "35.58"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Dukes, Logan",
+      "place": 27,
+      "points": 7.0,
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "35.66"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
+      "name": "Scharm, Kenny",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "33.73"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Abrahamse, Nadine",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.77"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.15"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:04.92"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "McKernan, Julia",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.89"
+        },
+        {
+          "distance": 100,
+          "splitTime": "37.43"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:11.32"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Murali, Nila",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.30"
+        },
+        {
+          "distance": 100,
+          "splitTime": "37.77"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:12.07"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Heath, Lindsey",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "35.68"
+        },
+        {
+          "distance": 100,
+          "splitTime": "37.42"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:13.10"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Wharton, Angela",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "36.13"
+        },
+        {
+          "distance": 100,
+          "splitTime": "37.50"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:13.63"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Reinhart, Trina",
+      "place": 6,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "37.21"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.03"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:15.24"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "F",
+      "name": "Pawlowski, Abby",
+      "place": 7,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "37.69"
+        },
+        {
+          "distance": 100,
+          "splitTime": "39.43"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:17.12"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Eibel, Scott",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "27.25"
+        },
+        {
+          "distance": 100,
+          "splitTime": "29.14"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "56.39"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Geller, Maxim",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.15"
+        },
+        {
+          "distance": 100,
+          "splitTime": "28.77"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "56.92"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Autera, Garret",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.46"
+        },
+        {
+          "distance": 100,
+          "splitTime": "30.07"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia College Swimcats-GA",
+      "time": "58.53"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Huntley, Steven",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.30"
+        },
+        {
+          "distance": 100,
+          "splitTime": "31.41"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:00.71"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Teuscher, Noah",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.96"
+        },
+        {
+          "distance": 100,
+          "splitTime": "31.59"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:01.55"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Languell, Christopher",
+      "place": 6,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.27"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.26"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:02.53"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Martin, David",
+      "place": 7,
+      "points": 12.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.08"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.73"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:04.81"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Gleaton, Chris",
+      "place": 8,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.17"
+        },
+        {
+          "distance": 100,
+          "splitTime": "36.01"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:10.18"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "O'Connor, Sean",
+      "place": 9,
+      "points": 11.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.43"
+        },
+        {
+          "distance": 100,
+          "splitTime": "49.20"
+        }
+      ],
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "1:19.63"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Ridgeway, Ellie",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.20"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.27"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:02.47"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Riddell, Allie",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.78"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.74"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:03.52"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "McArdle, Maeve",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "30.13"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.37"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:04.50"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "DeRonja, Josie",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.06"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.65"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:05.71"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Bradford, Samantha",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.08"
+        },
+        {
+          "distance": 100,
+          "splitTime": "37.31"
+        }
+      ],
+      "tags": "",
+      "team": "Kennesaw State University-GA",
+      "time": "1:09.39"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Brokaw, Grace",
+      "place": 6,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.67"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.93"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:10.60"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Tilson, Mallory",
+      "place": 7,
+      "points": 12.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.91"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.75"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Southern University SC-GA",
+      "time": "1:10.66"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Pegram, Allison",
+      "place": 8,
+      "points": 11.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.68"
+        },
+        {
+          "distance": 100,
+          "splitTime": "39.01"
+        }
+      ],
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "1:11.69"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "McPike, Jade",
+      "place": 9,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.55"
+        },
+        {
+          "distance": 100,
+          "splitTime": "39.38"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:13.93"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Thomas, Christina",
+      "place": 10,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.13"
+        },
+        {
+          "distance": 100,
+          "splitTime": "41.40"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:14.53"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "F",
+      "name": "Edmond, Shani",
+      "place": 11,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.48"
+        },
+        {
+          "distance": 100,
+          "splitTime": "42.48"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:15.96"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Shaheen, Jonathan",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "24.34"
+        },
+        {
+          "distance": 100,
+          "splitTime": "27.85"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "52.19"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Lobitz, C",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "25.65"
+        },
+        {
+          "distance": 100,
+          "splitTime": "28.68"
+        }
+      ],
+      "tags": "",
+      "team": null,
+      "time": "54.33"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Walters, Samuel",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "27.34"
+        },
+        {
+          "distance": 100,
+          "splitTime": "30.71"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "58.05"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Liu, Alexander",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "27.47"
+        },
+        {
+          "distance": 100,
+          "splitTime": "31.04"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "58.51"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Evans, Tyler",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "59.09"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Daw, Andrew",
+      "place": 6,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "26.84"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.82"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "59.66"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Riordan, Bryan",
+      "place": 7,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "26.72"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.01"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "1:00.73"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Page, Colton",
+      "place": 8,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.92"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.22"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:02.14"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Fly",
+      "gender": "M",
+      "name": "Choudhury, Sumit",
+      "place": 9,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.34"
+        },
+        {
+          "distance": 100,
+          "splitTime": "34.30"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "1:02.64"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "F",
+      "name": "Nastasi, Ally",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.42"
+        },
+        {
+          "distance": 100,
+          "splitTime": "36.15"
+        },
+        {
+          "distance": 150,
+          "splitTime": "42.61"
+        },
+        {
+          "distance": 200,
+          "splitTime": "33.52"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:23.70"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "F",
+      "name": "Sundius, Sarah",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.42"
+        },
+        {
+          "distance": 100,
+          "splitTime": "39.98"
+        },
+        {
+          "distance": 150,
+          "splitTime": "42.13"
+        },
+        {
+          "distance": 200,
+          "splitTime": "34.99"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:29.52"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "F",
+      "name": "Burch, Audrey",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.34"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.20"
+        },
+        {
+          "distance": 150,
+          "splitTime": "44.36"
+        },
+        {
+          "distance": 200,
+          "splitTime": "34.72"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:29.62"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "F",
+      "name": "Groscost, Lucy",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.46"
+        },
+        {
+          "distance": 100,
+          "splitTime": "39.25"
+        },
+        {
+          "distance": 150,
+          "splitTime": "43.32"
+        },
+        {
+          "distance": 200,
+          "splitTime": "36.52"
+        }
+      ],
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "2:30.55"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "F",
+      "name": "McElhinny, Julia",
+      "place": 5,
+      "points": 14.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.93"
+        },
+        {
+          "distance": 100,
+          "splitTime": "38.13"
+        },
+        {
+          "distance": 150,
+          "splitTime": "46.86"
+        },
+        {
+          "distance": 200,
+          "splitTime": "36.46"
+        }
+      ],
+      "tags": "",
+      "team": "Wake Forest Club Swimming",
+      "time": "2:33.38"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "F",
+      "name": "Bradford, Samantha",
+      "place": 6,
+      "points": 13.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.56"
+        },
+        {
+          "distance": 100,
+          "splitTime": "41.30"
+        },
+        {
+          "distance": 150,
+          "splitTime": "47.09"
+        },
+        {
+          "distance": 200,
+          "splitTime": "37.75"
+        }
+      ],
+      "tags": "",
+      "team": "Kennesaw State University-GA",
+      "time": "2:39.70"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "F",
+      "name": "Butkus, Camille",
+      "place": 7,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "37.02"
+        },
+        {
+          "distance": 100,
+          "splitTime": "39.53"
+        },
+        {
+          "distance": 150,
+          "splitTime": "46.60"
+        },
+        {
+          "distance": 200,
+          "splitTime": "36.58"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:39.73"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "M",
+      "name": "Fregosi, Carson",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "26.98"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.35"
+        },
+        {
+          "distance": 150,
+          "splitTime": "36.64"
+        },
+        {
+          "distance": 200,
+          "splitTime": "27.79"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:04.76"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "M",
+      "name": "Wong, Justin",
+      "place": 2,
+      "points": 17.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "27.46"
+        },
+        {
+          "distance": 100,
+          "splitTime": "32.61"
+        },
+        {
+          "distance": 150,
+          "splitTime": "35.84"
+        },
+        {
+          "distance": 200,
+          "splitTime": "29.52"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:05.43"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "M",
+      "name": "Sands, Will",
+      "place": 3,
+      "points": 16.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.65"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.56"
+        },
+        {
+          "distance": 150,
+          "splitTime": "37.78"
+        },
+        {
+          "distance": 200,
+          "splitTime": "31.71"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "2:11.70"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "M",
+      "name": "Moore, John",
+      "place": 4,
+      "points": 15.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.17"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.46"
+        },
+        {
+          "distance": 150,
+          "splitTime": "38.71"
+        },
+        {
+          "distance": 200,
+          "splitTime": "32.27"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "2:13.61"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "M",
+      "name": "Zhou, Frank",
+      "place": 5,
+      "points": 14.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:17.13"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "M",
+      "name": "McCaffrey, Ty",
+      "place": 6,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "28.17"
+        },
+        {
+          "distance": 100,
+          "splitTime": "33.41"
+        },
+        {
+          "distance": 150,
+          "splitTime": "41.94"
+        },
+        {
+          "distance": 200,
+          "splitTime": "34.19"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:17.71"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "M",
+      "name": "Plaskon, Dean",
+      "place": 7,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.30"
+        },
+        {
+          "distance": 100,
+          "splitTime": "37.48"
+        },
+        {
+          "distance": 150,
+          "splitTime": "39.47"
+        },
+        {
+          "distance": 200,
+          "splitTime": "33.11"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:19.36"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "M",
+      "name": "Pendley, Owen",
+      "place": 8,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "29.09"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.03"
+        },
+        {
+          "distance": 150,
+          "splitTime": "41.22"
+        },
+        {
+          "distance": 200,
+          "splitTime": "34.31"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:19.65"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Beuchel, Katherine",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "26.16"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Ridgeway, Ellie",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "26.41"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Cochell, Abbie",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "27.38"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Boland, Casey",
+      "place": 4,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "27.43"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Franchi, Madeleine",
+      "place": 5,
+      "points": 15.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "27.78"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Abrahamse, Nadine",
+      "place": 6,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "27.79"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Cary, Jordan",
+      "place": 7,
+      "points": 14.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "28.18"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Seabrook, Elli",
+      "place": 8,
+      "points": 13.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "28.24"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Edwards, Taryn",
+      "place": 9,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "28.28"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Brokaw, Grace",
+      "place": 10,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "28.29"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Winston, Kendall",
+      "place": 11,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "28.41"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Bauer, Sara",
+      "place": 12,
+      "points": 12.0,
+      "tags": "",
+      "team": "Uab Swim Club-SE",
+      "time": "28.42"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Abad, Allison",
+      "place": 13,
+      "points": 11.0,
+      "tags": "",
+      "team": "Uab Swim Club-SE",
+      "time": "28.51"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Polak, Claire",
+      "place": 14,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "28.73"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Gerton, Marina",
+      "place": 15,
+      "points": 9.0,
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "28.83"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Burch, Audrey",
+      "place": 16,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "28.93"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Godwin, Avery",
+      "place": 17,
+      "points": 7.0,
+      "tags": "",
+      "team": "University of North Georgia-GA",
+      "time": "28.95"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Wojack, Emma",
+      "place": 17,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "28.95"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Vrooman, Kelsey",
+      "place": 19,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "29.16"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Madden, Kristina",
+      "place": 20,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "29.44"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Kropilak, Katherine",
+      "place": 20,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "29.44"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Perrone, Elizabeth",
+      "place": 22,
+      "points": 6.0,
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "29.54"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Wharton, Angela",
+      "place": 23,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "29.56"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Empoliti, Isabella",
+      "place": 24,
+      "points": 5.0,
+      "tags": "",
+      "team": "Georgia College Swimcats-GA",
+      "time": "29.63"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Van Alstine, Alex",
+      "place": 25,
+      "points": 4.0,
+      "tags": "",
+      "team": "Georgia Southern University SC-GA",
+      "time": "30.22"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Murali, Nila",
+      "place": 26,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "30.59"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Reinhart, Trina",
+      "place": 27,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "30.61"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Allen, Sadie",
+      "place": 28,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "30.67"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Shultz, Ceci",
+      "place": 29,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "30.68"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Edmond, Shani",
+      "place": 30,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "30.78"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Brougham, Pangur",
+      "place": 31,
+      "points": 3.0,
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "30.80"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Carpet, Juliette",
+      "place": 32,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "30.93"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Sinkes, Samantha",
+      "place": 33,
+      "points": 2.0,
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "31.24"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Grabner, Carly",
+      "place": 34,
+      "points": 1.0,
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "31.43"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Meyers, Madison",
+      "place": 35,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "33.24"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Lee, Hannah",
+      "place": 36,
+      "tags": "",
+      "team": "Georgia Southern University SC-GA",
+      "time": "34.26"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Borrego, Nayla",
+      "place": 37,
+      "tags": "",
+      "team": "University of North Georgia-GA",
+      "time": "35.41"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Endozo, Jacqui",
+      "place": 38,
+      "tags": "",
+      "team": "Kennesaw State University-GA",
+      "time": "35.63"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Johnson, Navia",
+      "place": 39,
+      "tags": "",
+      "team": "Georgia Southern University SC-GA",
+      "time": "37.44"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "F",
+      "name": "Medrano, Camila",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "27.98"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Lobitz, C",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": null,
+      "time": "22.33"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Smith, Luke",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "22.82"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Fischer, Adam",
+      "place": 3,
+      "points": 16.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "23.04"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Brooks, Joseph",
+      "place": 4,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "23.06"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Evans, Tyler",
+      "place": 5,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "23.42"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Kendinger, Nolan",
+      "place": 6,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "23.57"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Markham, Logan",
+      "place": 7,
+      "points": 15.0,
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "23.66"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Keith, Jackson",
+      "place": 8,
+      "points": 14.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "23.67"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Eshelman, Blake",
+      "place": 9,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "23.70"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Hergott, Isaac",
+      "place": 10,
+      "points": 13.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "23.80"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Weaver, Brian",
+      "place": 11,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "24.14"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Cathapermal, Dylan",
+      "place": 12,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "24.17"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "O'Neill, Patrick",
+      "place": 13,
+      "points": 12.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "24.30"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Choudhury, Sumit",
+      "place": 14,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "24.54"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Huang, Edward",
+      "place": 15,
+      "points": 11.0,
+      "tags": "",
+      "team": "Uab Swim Club-SE",
+      "time": "24.65"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Gonzalez, Miguel",
+      "place": 16,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "24.66"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Erling, Connor",
+      "place": 17,
+      "points": 9.0,
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "24.67"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Languell, Christopher",
+      "place": 18,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "24.73"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Grove, Mason",
+      "place": 19,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "24.79"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Martin, David",
+      "place": 20,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "24.86"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Liu, Alexander",
+      "place": 21,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "24.92"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Hutton, Phillip",
+      "place": 22,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "24.97"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Ellet, Jackson",
+      "place": 23,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "25.05"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Laensirinne, Pessi",
+      "place": 24,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "25.20"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Sherrer, Logan",
+      "place": 25,
+      "points": 7.0,
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "25.37"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Davis, Lee",
+      "place": 26,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "25.52"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Cason, Will",
+      "place": 27,
+      "points": 6.0,
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "25.84"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Hall, Andrew",
+      "place": 28,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "26.08"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Ragoowansi, Evan",
+      "place": 29,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "26.15"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Page, Colton",
+      "place": 30,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "26.22"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Gleaton, Chris",
+      "place": 31,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "26.42"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Taibi, Charles",
+      "place": 32,
+      "points": 5.0,
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "26.55"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Boye, Jared",
+      "place": 33,
+      "tags": "",
+      "team": "Charleston Club Swimming-SC",
+      "time": "26.66"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Madsen, Drew",
+      "place": 34,
+      "points": 4.0,
+      "tags": "",
+      "team": "Kennesaw State University-GA",
+      "time": "26.95"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Caldwell, Jack",
+      "place": 35,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "27.10"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Norman, Josh",
+      "place": 36,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "27.22"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Teuscher, Noah",
+      "place": 37,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "27.32"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Sleeper, Ben",
+      "place": 38,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "27.35"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Glass, Russell",
+      "place": 39,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "27.48"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Dukes, Logan",
+      "place": 40,
+      "points": 3.0,
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "27.62"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Giles, David",
+      "place": 41,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "27.89"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Price, Connor",
+      "place": 42,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "28.40"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Clawson, Kaleb",
+      "place": 43,
+      "tags": "",
+      "team": "Etsu Swim Club",
+      "time": "28.95"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Dhawan, Shaan",
+      "place": 44,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "29.00"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Heitzeg, Nik",
+      "place": 1,
+      "points": 20.0,
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "25.92"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
+      "name": "Scharm, Kenny",
+      "place": 2,
+      "points": 17.0,
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "30.88"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Back",
+      "gender": "F",
+      "name": "Riddell, Allie",
+      "place": null,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "32.05"
+        },
+        {
+          "distance": 100,
+          "splitTime": "35.51"
+        },
+        {
+          "distance": 150,
+          "splitTime": "35.89"
+        },
+        {
+          "distance": 200,
+          "splitTime": "34.54"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:17.99"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Back",
+      "gender": "F",
+      "name": "Racioppi, Elizabeth",
+      "place": null,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "34.54"
+        },
+        {
+          "distance": 100,
+          "splitTime": "37.38"
+        },
+        {
+          "distance": 150,
+          "splitTime": "38.38"
+        },
+        {
+          "distance": 200,
+          "splitTime": "37.27"
+        }
+      ],
+      "tags": "",
+      "team": "Clemson Club Swimming-SC",
+      "time": "2:27.57"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Breast",
+      "gender": "F",
+      "name": "Cochell, Abbie",
+      "place": 1,
+      "points": 20.0,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "35.29"
+        },
+        {
+          "distance": 100,
+          "splitTime": "40.16"
+        },
+        {
+          "distance": 150,
+          "splitTime": "41.60"
+        },
+        {
+          "distance": 200,
+          "splitTime": "42.37"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:39.42"
+    },
+    {
+      "course": "SCY",
+      "event": "200 Breast",
+      "gender": "M",
+      "name": "Wong, Justin",
+      "place": null,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.68"
+        },
+        {
+          "distance": 100,
+          "splitTime": "36.99"
+        },
+        {
+          "distance": 150,
+          "splitTime": "36.58"
+        },
+        {
+          "distance": 200,
+          "splitTime": "36.85"
+        }
+      ],
+      "tags": "",
+      "team": "Georgia Tech Swim Club-GA",
+      "time": "2:24.10"
+    }
+  ],
+  "team_scores": {
+    "combined": [
+      {
+        "place": 1,
+        "points": 1457.5,
+        "team": "Georgia Tech Swim Club"
+      },
+      {
+        "place": 2,
+        "points": 1117.5,
+        "team": "Clemson Club Swimming"
+      },
+      {
+        "place": 3,
+        "points": 382.0,
+        "team": "Charleston Club Swimming"
+      },
+      {
+        "place": 4,
+        "points": 211.0,
+        "team": "Etsu Swim Club"
+      },
+      {
+        "place": 5,
+        "points": 200.0,
+        "team": "Kennesaw State University"
+      },
+      {
+        "place": 6,
+        "points": 110.0,
+        "team": "Georgia Southern University SC"
+      },
+      {
+        "place": 7,
+        "points": 89.0,
+        "team": "Uab Swim Club"
+      },
+      {
+        "place": 8,
+        "points": 65.0,
+        "team": "Georgia College Swimcats"
+      },
+      {
+        "place": 9,
+        "points": 47.0,
+        "team": "University of North Georgia"
+      },
+      {
+        "place": 10,
+        "points": 35.0,
+        "team": "Wake Forest Club Swimming"
+      }
+    ],
+    "men": [
+      {
+        "place": 1,
+        "points": 715.0,
+        "team": "Georgia Tech Swim Club"
+      },
+      {
+        "place": 2,
+        "points": 628.0,
+        "team": "Clemson Club Swimming"
+      },
+      {
+        "place": 3,
+        "points": 169.0,
+        "team": "Charleston Club Swimming"
+      },
+      {
+        "place": 4,
+        "points": 135.0,
+        "team": "Etsu Swim Club"
+      },
+      {
+        "place": 5,
+        "points": 30.0,
+        "team": "Georgia Southern University SC"
+      },
+      {
+        "place": 6,
+        "points": 29.0,
+        "team": "Georgia College Swimcats"
+      },
+      {
+        "place": 7,
+        "points": 28.0,
+        "team": "Kennesaw State University"
+      },
+      {
+        "place": 8,
+        "points": 24.0,
+        "team": "Uab Swim Club"
+      }
+    ],
+    "source": "pdf",
+    "women": [
+      {
+        "place": 1,
+        "points": 742.5,
+        "team": "Georgia Tech Swim Club"
+      },
+      {
+        "place": 2,
+        "points": 489.5,
+        "team": "Clemson Club Swimming"
+      },
+      {
+        "place": 3,
+        "points": 213.0,
+        "team": "Charleston Club Swimming"
+      },
+      {
+        "place": 4,
+        "points": 172.0,
+        "team": "Kennesaw State University"
+      },
+      {
+        "place": 5,
+        "points": 80.0,
+        "team": "Georgia Southern University SC"
+      },
+      {
+        "place": 6,
+        "points": 76.0,
+        "team": "Etsu Swim Club"
+      },
+      {
+        "place": 7,
+        "points": 65.0,
+        "team": "Uab Swim Club"
+      },
+      {
+        "place": 8,
+        "points": 47.0,
+        "team": "University of North Georgia"
+      },
+      {
+        "place": 9,
+        "points": 36.0,
+        "team": "Georgia College Swimcats"
+      },
+      {
+        "place": 10,
+        "points": 35.0,
+        "team": "Wake Forest Club Swimming"
+      }
+    ]
+  }
+}

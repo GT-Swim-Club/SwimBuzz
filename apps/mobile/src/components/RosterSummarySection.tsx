@@ -370,7 +370,10 @@ function formatTimes(entry: RosterSummaryEntry): string | null {
   if (entry.resultTime && !entry.prelimTime && !entry.finalTime) {
     parts.push(entry.isSwimOff ? `Swim-off ${entry.resultTime}` : entry.resultTime)
   }
-  if (entry.resultStatus) parts.push(entry.resultStatus)
+  // A relay scratched from finals (finals NS) reads as unswum, as on the web.
+  const finalsNoSwim =
+    entry.entryType === "relay_team" && entry.relayRound === "F" && entry.resultStatus === "NS"
+  if (entry.resultStatus && !finalsNoSwim) parts.push(entry.resultStatus)
   return parts.length ? parts.join(" · ") : null
 }
 

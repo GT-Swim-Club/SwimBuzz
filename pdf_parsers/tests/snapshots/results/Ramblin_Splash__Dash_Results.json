@@ -988,6 +988,39 @@
       "course": "SCY",
       "entryType": "relay_team",
       "event": "200 Medley Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Lee, Sophia",
+          "splitTime": "34.79"
+        },
+        {
+          "leg": 2,
+          "name": "Armstrong, Clara",
+          "splitTime": "35.83"
+        },
+        {
+          "leg": 3,
+          "name": "Golden, Andrea",
+          "splitTime": "34.91"
+        },
+        {
+          "leg": 4,
+          "name": "Roller, Mary",
+          "splitTime": "23.16"
+        }
+      ],
+      "tags": "",
+      "team": "ECS-GA",
+      "time": "DQ"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
       "gender": "M",
       "place": 1,
       "points": 50.0,
@@ -1960,6 +1993,68 @@
       "tags": "",
       "team": "SCGSU-GA",
       "time": "2:22.50"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Costilow, Elliot",
+          "splitTime": "42.31"
+        },
+        {
+          "leg": 2,
+          "name": "Bagighni, Yoseph",
+          "splitTime": "39.17"
+        },
+        {
+          "leg": 3,
+          "name": "Estrada-Marquez, Derek",
+          "splitTime": "30.77"
+        },
+        {
+          "leg": 4,
+          "name": "Olsen, Erik",
+          "splitTime": "27.91"
+        }
+      ],
+      "tags": "",
+      "team": "KSU-GA",
+      "time": "DQ"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Zealey-Chen, Owen"
+        },
+        {
+          "leg": 2,
+          "name": "Lancellotti, Mason"
+        },
+        {
+          "leg": 3,
+          "name": "Miao, Mikael"
+        },
+        {
+          "leg": 4,
+          "name": "Kim, Timothy"
+        }
+      ],
+      "tags": "",
+      "team": "ECS-GA",
+      "time": "NS"
     },
     {
       "course": "SCY",
@@ -3554,6 +3649,39 @@
     {
       "course": "SCY",
       "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Rodemsky, William",
+          "splitTime": "26.08"
+        },
+        {
+          "leg": 2,
+          "name": "Chown, Victor",
+          "splitTime": "32.38"
+        },
+        {
+          "leg": 3,
+          "name": "Salazar, Jose",
+          "splitTime": "30.04"
+        },
+        {
+          "leg": 4,
+          "name": "Roy, Ishan",
+          "splitTime": "27.54"
+        }
+      ],
+      "tags": "",
+      "team": "SCGSU-GA",
+      "time": "DQ"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
       "event": "400 Free Relay",
       "gender": "F",
       "place": 1,
@@ -4068,6 +4196,93 @@
       "tags": "",
       "team": "UTK-SE",
       "time": "4:23.58"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Armstrong, Clara"
+        },
+        {
+          "leg": 2,
+          "name": "Golden, Andrea"
+        },
+        {
+          "leg": 3,
+          "name": "Roller, Mary"
+        },
+        {
+          "leg": 4,
+          "name": "Daniel, Chelsea"
+        }
+      ],
+      "tags": "",
+      "team": "ECS-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Bohinc, Kaylee"
+        },
+        {
+          "leg": 2,
+          "name": "Tadder, Emerson"
+        },
+        {
+          "leg": 3,
+          "name": "McCoy, Mia"
+        },
+        {
+          "leg": 4,
+          "name": "Forrer, Therese"
+        }
+      ],
+      "tags": "",
+      "team": "CLEM-SC",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Babb, Lilian"
+        },
+        {
+          "leg": 2,
+          "name": "Del Rio, Kaylee"
+        },
+        {
+          "leg": 3,
+          "name": "Mackert, Addison"
+        },
+        {
+          "leg": 4,
+          "name": "Knight, Jordyn"
+        }
+      ],
+      "tags": "",
+      "team": "FLOR-FL",
+      "time": "NS"
     },
     {
       "course": "SCY",
@@ -4882,6 +5097,122 @@
       "tags": "",
       "team": "WCU-NC",
       "time": "3:53.31"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Gabriele, Noah"
+        },
+        {
+          "leg": 2,
+          "name": "Vargas, Jack"
+        },
+        {
+          "leg": 3,
+          "name": "Simpkins, Ben"
+        },
+        {
+          "leg": 4,
+          "name": "Hafner, Justin"
+        }
+      ],
+      "tags": "",
+      "team": "CLEM-SC",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Forkey, Carson"
+        },
+        {
+          "leg": 2,
+          "name": "Grann, Gavin"
+        },
+        {
+          "leg": 3,
+          "name": "Burdyn, Alex"
+        },
+        {
+          "leg": 4,
+          "name": "Christy, Kaden"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Fleischer, Eli"
+        },
+        {
+          "leg": 2,
+          "name": "Frame, Peter"
+        },
+        {
+          "leg": 3,
+          "name": "McGahagin, Connor"
+        },
+        {
+          "leg": 4,
+          "name": "Le, Jaden"
+        }
+      ],
+      "tags": "",
+      "team": "KSU-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "leg": 1,
+          "name": "Westin, Michael"
+        },
+        {
+          "leg": 2,
+          "name": "Shirai, Rio"
+        },
+        {
+          "leg": 3,
+          "name": "Radomski, Eric"
+        },
+        {
+          "leg": 4,
+          "name": "Chao, Mitchell"
+        }
+      ],
+      "tags": "",
+      "team": "FLOR-FL",
+      "time": "NS"
     }
   ],
   "results": [
@@ -12419,7 +12750,7 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "James FLOR-FL",
       "time": "1:09.51"
     },
     {
@@ -14491,7 +14822,7 @@
       "name": "Smith, Elinor",
       "place": 38,
       "tags": "",
-      "team": null,
+      "team": "James FLOR-FL",
       "time": "31.21"
     },
     {

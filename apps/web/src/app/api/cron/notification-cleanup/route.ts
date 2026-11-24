@@ -5,6 +5,7 @@ import {
   cleanupOldNotifications,
   cleanupOldScraperJobs,
 } from "@/lib/notifications/notification-cleanup"
+import { pruneStaleScraperConnections } from "@/lib/scraper/scraper"
 
 export const runtime = "nodejs"
 export const maxDuration = 60
@@ -12,8 +13,9 @@ export const maxDuration = 60
 async function run() {
   const notifications = await cleanupOldNotifications()
   const scraperJobs = await cleanupOldScraperJobs()
+  const scraperConnections = await pruneStaleScraperConnections()
   const recovery = await purgeRecentlyDeleted()
-  return { ok: recovery.failedMeets === 0, notifications, scraperJobs, recovery }
+  return { ok: recovery.failedMeets === 0, notifications, scraperJobs, scraperConnections, recovery }
 }
 
 export async function GET(req: Request) {

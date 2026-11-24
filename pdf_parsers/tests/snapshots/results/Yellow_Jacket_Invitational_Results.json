@@ -754,6 +754,51 @@
       "course": "SCY",
       "entryType": "relay_team",
       "event": "200 Medley Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "C",
+      "relaySwimmers": [
+        {
+          "age": 19,
+          "leg": 1,
+          "name": "King, Carson"
+        },
+        {
+          "age": 18,
+          "leg": 2,
+          "name": "LaGrone, Allison"
+        },
+        {
+          "age": 18,
+          "leg": 3,
+          "name": "Heritage, Preston"
+        },
+        {
+          "age": 20,
+          "leg": 4,
+          "name": "Long, Piper"
+        }
+      ],
+      "tags": "",
+      "team": "AUB-SE",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "TTECH",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
       "gender": "M",
       "place": 1,
       "points": 40.0,
@@ -1435,6 +1480,121 @@
     {
       "course": "SCY",
       "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "age": 18,
+          "leg": 1,
+          "name": "Helenthal, Zachary",
+          "splitTime": "34.02"
+        },
+        {
+          "age": 22,
+          "leg": 2,
+          "name": "Vizmeg, Alek",
+          "splitTime": "26.24"
+        },
+        {
+          "age": 23,
+          "leg": 3,
+          "name": "Collins, Seamus",
+          "splitTime": "28.87"
+        },
+        {
+          "age": 19,
+          "leg": 4,
+          "name": "Kaesemeyer, Jacob",
+          "splitTime": "23.90"
+        }
+      ],
+      "tags": "",
+      "team": "UCCS-NI",
+      "time": "DQ"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "ECS-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": 20,
+          "leg": 1,
+          "name": "Zealey-Chen, Owen"
+        },
+        {
+          "age": 20,
+          "leg": 2,
+          "name": "He, Kenneth"
+        },
+        {
+          "age": 19,
+          "leg": 3,
+          "name": "Lancellotti, Mason"
+        },
+        {
+          "age": 23,
+          "leg": 4,
+          "name": "Hong, Jerry"
+        }
+      ],
+      "tags": "",
+      "team": "ECS-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": 20,
+          "leg": 1,
+          "name": "Horton, Fabian"
+        },
+        {
+          "age": null,
+          "leg": 2,
+          "name": "Tidwell, Kit"
+        },
+        {
+          "age": 20,
+          "leg": 3,
+          "name": "Palmer, Jacob"
+        },
+        {
+          "age": null,
+          "leg": 4,
+          "name": "Durham, Will"
+        }
+      ],
+      "tags": "",
+      "team": "WCU-NC",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
       "event": "200 Free Relay",
       "gender": "F",
       "place": 1,
@@ -1968,14 +2128,12 @@
         {
           "age": 17,
           "leg": 1,
-          "name": "Ladner, Samantha",
-          "splitTime": "27.42"
+          "name": "Ladner, Samantha"
         },
         {
           "age": 18,
           "leg": 2,
-          "name": "Heritage, Preston",
-          "splitTime": "28.47"
+          "name": "Heritage, Preston"
         },
         {
           "age": 19,
@@ -2103,6 +2261,63 @@
       "tags": "",
       "team": "UNCW-NC",
       "time": "2:20.75"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "SCAR-SC",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "age": 19,
+          "leg": 1,
+          "name": "Foran, Lucilia"
+        },
+        {
+          "age": 19,
+          "leg": 2,
+          "name": "Whalen, Adelyn"
+        },
+        {
+          "age": 19,
+          "leg": 3,
+          "name": "DeLosh, McKenzie"
+        },
+        {
+          "age": 21,
+          "leg": 4,
+          "name": "Halterman, Grace"
+        }
+      ],
+      "tags": "",
+      "team": "KSU-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "TTECH",
+      "time": "NS"
     },
     {
       "course": "SCY",
@@ -2822,6 +3037,129 @@
     {
       "course": "SCY",
       "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": 20,
+          "leg": 1,
+          "name": "Horton, Fabian"
+        },
+        {
+          "age": null,
+          "leg": 2,
+          "name": "Durham, Will"
+        },
+        {
+          "age": null,
+          "leg": 3,
+          "name": "Tidwell, Kit"
+        },
+        {
+          "age": 20,
+          "leg": 4,
+          "name": "Palmer, Jacob"
+        }
+      ],
+      "tags": "",
+      "team": "WCU-NC",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "VUSC",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "ECS-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": 20,
+          "leg": 1,
+          "name": "Zealey-Chen, Owen"
+        },
+        {
+          "age": 19,
+          "leg": 2,
+          "name": "Lancellotti, Mason"
+        },
+        {
+          "age": 18,
+          "leg": 3,
+          "name": "Harting, Alden"
+        },
+        {
+          "age": 23,
+          "leg": 4,
+          "name": "Hong, Jerry"
+        }
+      ],
+      "tags": "",
+      "team": "ECS-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [
+        {
+          "age": 20,
+          "leg": 1,
+          "name": "Chambers, Campbell"
+        },
+        {
+          "age": null,
+          "leg": 2,
+          "name": "Bogan, Connor"
+        },
+        {
+          "age": null,
+          "leg": 3,
+          "name": "Major, Zachary"
+        },
+        {
+          "age": null,
+          "leg": 4,
+          "name": "Madgett, Gavin"
+        }
+      ],
+      "tags": "",
+      "team": "SCAR-SC",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
       "event": "400 Free Relay",
       "gender": "F",
       "place": 1,
@@ -3130,6 +3468,72 @@
       "tags": "",
       "team": "GTSC-GA",
       "time": "3:55.54"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": 20,
+          "leg": 1,
+          "name": "Staebell, Sydney"
+        },
+        {
+          "age": 18,
+          "leg": 2,
+          "name": "Fetting, Ava"
+        },
+        {
+          "age": 20,
+          "leg": 3,
+          "name": "Lyon, Ava"
+        },
+        {
+          "age": 20,
+          "leg": 4,
+          "name": "Springer, Ellie"
+        }
+      ],
+      "tags": "",
+      "team": "OMISS",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "F",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": 19,
+          "leg": 1,
+          "name": "Shumaker, Erin"
+        },
+        {
+          "age": 19,
+          "leg": 2,
+          "name": "Foran, Lucilia"
+        },
+        {
+          "age": 21,
+          "leg": 3,
+          "name": "Nolan, Maura"
+        },
+        {
+          "age": 19,
+          "leg": 4,
+          "name": "Fetcinko, Nicole"
+        }
+      ],
+      "tags": "",
+      "team": "KSU-GA",
+      "time": "NS"
     },
     {
       "course": "SCY",
@@ -3534,23 +3938,21 @@
           "age": 18,
           "leg": 1,
           "name": "Bratu, Dan",
-          "splitTime": "27.05",
-          "splits": [
-            {
-              "distance": 50,
-              "splitTime": "51.93"
-            }
-          ]
+          "splitTime": "51.93"
         },
         {
           "age": 19,
           "leg": 2,
           "name": "Curtiss, Jacob",
-          "splitTime": "23.38",
+          "splitTime": "57.14",
           "splits": [
             {
               "distance": 50,
-              "splitTime": "57.14"
+              "splitTime": "27.05"
+            },
+            {
+              "distance": 100,
+              "splitTime": "30.09"
             }
           ]
         },
@@ -3558,22 +3960,23 @@
           "age": 18,
           "leg": 3,
           "name": "Hernandez, Joshua",
-          "splitTime": "1:02.12",
+          "splitTime": "50.12",
           "splits": [
             {
               "distance": 50,
-              "splitTime": "50.12"
+              "splitTime": "23.38"
             },
             {
               "distance": 100,
-              "splitTime": "12.00"
+              "splitTime": "26.74"
             }
           ]
         },
         {
           "age": 20,
           "leg": 4,
-          "name": "Smith, Ben"
+          "name": "Smith, Ben",
+          "splitTime": "1:02.12"
         }
       ],
       "tags": "",
@@ -3765,35 +4168,188 @@
           "age": null,
           "leg": 2,
           "name": "Beatty, Alex",
-          "splitTime": "28.19",
-          "splits": [
-            {
-              "distance": 50,
-              "splitTime": "1:04.76"
-            }
-          ]
+          "splitTime": "1:04.76"
         },
         {
           "age": 19,
           "leg": 3,
           "name": "Martin, Wes",
-          "splitTime": "33.54",
+          "splitTime": "1:00.58",
           "splits": [
             {
               "distance": 50,
-              "splitTime": "1:00.58"
+              "splitTime": "28.19"
+            },
+            {
+              "distance": 100,
+              "splitTime": "32.39"
             }
           ]
         },
         {
           "age": 21,
           "leg": 4,
-          "name": "Bender, Matthew"
+          "name": "Bender, Matthew",
+          "splitTime": "1:08.69",
+          "splits": [
+            {
+              "distance": 50,
+              "splitTime": "33.54"
+            },
+            {
+              "distance": 100,
+              "splitTime": "35.15"
+            }
+          ]
         }
       ],
       "tags": "",
       "team": "UNG-GA",
       "time": "4:21.16"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": null,
+          "leg": 1,
+          "name": "Ivan, David"
+        },
+        {
+          "age": null,
+          "leg": 2,
+          "name": "Krom, Tyler"
+        },
+        {
+          "age": null,
+          "leg": 3,
+          "name": "Nixon, Carson"
+        },
+        {
+          "age": null,
+          "leg": 4,
+          "name": "Powell, Will"
+        }
+      ],
+      "tags": "",
+      "team": "UNCW-NC",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": 18,
+          "leg": 1,
+          "name": "Pantazo, Jake"
+        },
+        {
+          "age": 19,
+          "leg": 2,
+          "name": "Busby, JD"
+        },
+        {
+          "age": 19,
+          "leg": 3,
+          "name": "Reimer, Bradley"
+        },
+        {
+          "age": 19,
+          "leg": 4,
+          "name": "Wait, Eli"
+        }
+      ],
+      "tags": "",
+      "team": "OMISS",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "B",
+      "relaySwimmers": [],
+      "tags": "",
+      "team": "ECS-GA",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": null,
+          "leg": 1,
+          "name": "James, Alex"
+        },
+        {
+          "age": 19,
+          "leg": 2,
+          "name": "Council, Devin"
+        },
+        {
+          "age": null,
+          "leg": 3,
+          "name": "Jarr, Ethan"
+        },
+        {
+          "age": null,
+          "leg": 4,
+          "name": "Parramore, Bennett"
+        }
+      ],
+      "tags": "",
+      "team": "SCAR-SC",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "entryType": "relay_team",
+      "event": "400 Free Relay",
+      "gender": "M",
+      "place": null,
+      "relayLetter": "A",
+      "relaySwimmers": [
+        {
+          "age": 18,
+          "leg": 1,
+          "name": "Harting, Alden"
+        },
+        {
+          "age": 19,
+          "leg": 2,
+          "name": "Lancellotti, Mason"
+        },
+        {
+          "age": 20,
+          "leg": 3,
+          "name": "He, Kenneth"
+        },
+        {
+          "age": 20,
+          "leg": 4,
+          "name": "Zealey-Chen, Owen"
+        }
+      ],
+      "tags": "",
+      "team": "ECS-GA",
+      "time": "NS"
     }
   ],
   "results": [

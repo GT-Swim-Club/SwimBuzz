@@ -108,7 +108,7 @@ class _SheetTeam:
         """Return a regex fragment for the team field in a relay entry line.
 
         Unlike *_team_name_pattern*, this variant must NOT greedily consume the
-        relay letter (A/B/C/D) or the seed time that follow the team name.  It
+        relay letter (A–Z) or the seed time that follow the team name.  It
         stops at the last word that doesn't look like a relay letter or a time.
 
         Strategy: build explicit alternates from longest to shortest, each
@@ -117,7 +117,7 @@ class _SheetTeam:
         """
         # Lookahead: next non-space must be a relay letter followed by space,
         # or a time / status token.
-        time_look = rf"(?=\s*(?:[ABCD]\s+|(?:{INVALID_TIME_PATTERN})\b|{TIME_TOKEN_PATTERN}))"
+        time_look = rf"(?=\s*(?:(?-i:[A-Z])\s+|(?:{INVALID_TIME_PATTERN})\b|{TIME_TOKEN_PATTERN}))"
 
         if not self.base:
             return _ANY_TEAM_NAME + time_look
@@ -133,7 +133,7 @@ class _SheetTeam:
         for length in range(len(word_parts), 1, -1):
             core = r"\s+".join(word_parts[:length])
             # Allow extra words only when they don't look like relay letters / times
-            extra = rf"(?:\s+(?![ABCD]\s+|(?:{INVALID_TIME_PATTERN})\b|\d)\S+)*"
+            extra = rf"(?:\s+(?!(?-i:[A-Z])\s+|(?:{INVALID_TIME_PATTERN})\b|\d)\S+)*"
             region = r"(?:-[A-Z]{2})?"
             full_name_alts.append(core + extra + region + time_look)
 
@@ -162,7 +162,7 @@ class _SheetTeam:
         return re.compile(
             rf"(\d+)\s+"
             rf"({team_pat})\s*"
-            rf"([ABCD])?\s*"
+            rf"(?:((?-i:[A-Z]))\s+)?"
             rf"({time_pat})",
             re.I,
         )
@@ -325,11 +325,12 @@ _CID_LIGATURES = {
     "976": "f",
 }
 
-_VALID_RELAY_LETTERS = frozenset({"A", "B", "C", "D"})
+# Any single letter: Hy-Tek letters a club's relays as far as it needs (A, B, … G).
+_VALID_RELAY_LETTERS = frozenset("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 
 def normalize_relay_letter(letter: str | None) -> str | None:
-    """Return A–D relay letter, or None when missing / not a team letter."""
+    """Return the relay letter (A–Z), or None when missing / not a team letter."""
     token = (letter or "").strip().upper()
     if token in _VALID_RELAY_LETTERS:
         return token

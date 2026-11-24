@@ -26,6 +26,7 @@ import {
   meetHasImportedResults,
 } from "@/lib/meet/meet-sheet-summary"
 import { isRelayResultsSummary } from "@/lib/meet/relay-results"
+import { addPairedAthletesToSeason } from "@/lib/athlete/paired-athlete-seasons"
 
 export const runtime = "nodejs"
 
@@ -87,6 +88,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const parsed = parseMeetRosterRecords(source.values)
   if (parsed.error) return NextResponse.json({ error: parsed.error }, { status: 400 })
 
+  const nameMappings = normalizeNameMappings(source.nameMappings)
+  const rejectedNames = normalizeRejectedNames(source.rejectedNames)
+  // Athletes paired from another season join this one first, so the roster below includes them.
+  await addPairedAthletesToSeason(nameMappings, meet.season)
+
   const athletes = await prisma.athlete.findMany({
     where: { seasons: { has: meet.season } },
     select: { id: true, firstName: true, lastName: true, preferredName: true, gender: true },
@@ -99,8 +105,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     gender: a.gender === Gender.F ? "F" : "M",
   }))
 
-  const nameMappings = normalizeNameMappings(source.nameMappings)
-  const rejectedNames = normalizeRejectedNames(source.rejectedNames)
   const resolved = resolveMeetRosterImport(parsed.rows, roster, nameMappings, rejectedNames)
 
   const nameConfirmations = collectNameConfirmations(
@@ -120,7 +124,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   // Saving now would drop unpaired athletes' sign-up rows before the coach pairs
   // them, so wait for the re-run (paired or skipped) when names need pairing.
   if (nameConfirmations.length > 0 && !source.paired) {
-    return NextResponse.json({ pending: true, nameConfirmations, rosterForPairing })
+    return NextResponse.json({ pending: true, nameConfirmations, rosterForPairing, pairingSeason: meet.season })
   }
 
   // Start from the summary without the previous roster, so replacing it matches a fresh import.

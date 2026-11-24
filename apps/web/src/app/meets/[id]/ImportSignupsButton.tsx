@@ -16,6 +16,7 @@ type SignupImportResult = {
   warnings: string[]
   nameConfirmations?: NameConfirmation[]
   rosterForPairing?: RosterPairingOption[]
+  pairingSeason?: string
 }
 
 function formatSignupImportResult(data: SignupImportResult) {
@@ -67,6 +68,7 @@ export default function ImportSignupsButton({
               requestPairing({
                 confirmations,
                 roster: data.rosterForPairing ?? [],
+                season: data.pairingSeason,
                 description:
                   "These sign-ups didn't match anyone on the roster. Pair them to a roster athlete to import their events.",
                 occurrenceNoun: ["sign-up", "sign-ups"],
