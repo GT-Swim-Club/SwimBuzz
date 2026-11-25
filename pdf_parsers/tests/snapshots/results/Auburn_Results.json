@@ -1225,7 +1225,7 @@
       "points": 12.0,
       "seedTime": "1:01.00",
       "tags": "",
-      "team": "Clayton Auburn University Club Swim-SE",
+      "team": "Auburn University Club Swim-SE",
       "time": "1:02.69"
     },
     {
@@ -2484,7 +2484,7 @@
       "points": 15.0,
       "seedTime": "27.50",
       "tags": "",
-      "team": "Clayton Auburn University Club Swim-SE",
+      "team": "Auburn University Club Swim-SE",
       "time": "27.64"
     },
     {
@@ -4280,13 +4280,8 @@
       },
       {
         "place": 2,
-        "points": 1209.0,
+        "points": 1236.0,
         "team": "Auburn University Club Swim"
-      },
-      {
-        "place": 3,
-        "points": 27.0,
-        "team": "Clayton Auburn University Club Swim"
       }
     ],
     "men": [
@@ -4310,13 +4305,8 @@
       },
       {
         "place": 2,
-        "points": 630.0,
+        "points": 657.0,
         "team": "Auburn University Club Swim"
-      },
-      {
-        "place": 3,
-        "points": 27.0,
-        "team": "Clayton Auburn University Club Swim"
       }
     ]
   }

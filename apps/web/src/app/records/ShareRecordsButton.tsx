@@ -80,8 +80,13 @@ export default function ShareRecordsButton({
     setOpen(false)
     try {
       if (topTimes?.data) {
-        const { buildTopTimesPdf } = await import("@/lib/records/top-times-pdf")
-        const doc = buildTopTimesPdf({ data: topTimes.data })
+        const { buildTopTimesPdf, TOP_TIMES_LOGO_PATH } = await import("@/lib/records/top-times-pdf")
+        // The club logo for the header; the PDF goes without it if it can't be fetched.
+        const logoPng = await fetch(TOP_TIMES_LOGO_PATH)
+          .then((res) => (res.ok ? res.arrayBuffer() : null))
+          .then((buffer) => (buffer ? new Uint8Array(buffer) : null))
+          .catch(() => null)
+        const doc = buildTopTimesPdf({ data: topTimes.data, logoPng })
         downloadBlob(doc.output("blob"), topTimesExportFilename(topTimes.gender, topTimes.mode))
         return
       }

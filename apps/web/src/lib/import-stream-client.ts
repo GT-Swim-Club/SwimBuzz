@@ -1,11 +1,11 @@
 import type { ImportTaskProgress } from "@/components/ui/ImportTaskProvider"
-import { ROSTER_IMPORT_STREAM_TYPE, type RosterImportStreamEvent } from "@/lib/roster/roster-import-stream"
+import { IMPORT_STREAM_TYPE, type ImportStreamEvent } from "@/lib/import-stream"
 
 /**
- * POST a roster import and report its streamed progress. Resolves with the
+ * POST an import and report its streamed progress. Resolves with the
  * final result payload; throws with the server's message on failure.
  */
-export async function postRosterImport<T>(
+export async function postImportStream<T>(
   url: string,
   init: { body: BodyInit; headers?: Record<string, string> },
   report: (progress: ImportTaskProgress) => void
@@ -13,7 +13,7 @@ export async function postRosterImport<T>(
   const res = await fetch(url, {
     method: "POST",
     body: init.body,
-    headers: { ...init.headers, Accept: ROSTER_IMPORT_STREAM_TYPE },
+    headers: { ...init.headers, Accept: IMPORT_STREAM_TYPE },
   })
 
   if (!res.ok || !res.body) {
@@ -27,7 +27,7 @@ export async function postRosterImport<T>(
 
   const handle = (line: string) => {
     if (!line.trim()) return
-    const event = JSON.parse(line) as RosterImportStreamEvent
+    const event = JSON.parse(line) as ImportStreamEvent
     if (event.type === "progress") report({ progress: event.progress, detail: event.detail })
     else if (event.type === "error") throw new Error(event.error)
     else result = event.data as T

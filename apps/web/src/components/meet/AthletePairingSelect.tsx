@@ -8,6 +8,11 @@ import { LedgerIcon } from "@/components/meet/Ledger"
 import type { RosterPairingOption } from "@/components/meet/AthletePairingProvider"
 
 const UNMATCHED = "Leave unmatched"
+/** The list's tallest (Tailwind max-h-64), and the least it shrinks to before it may overflow. */
+const LIST_MAX_HEIGHT = 256
+const LIST_MIN_HEIGHT = 120
+const LIST_GAP = 4
+const VIEWPORT_MARGIN = 8
 
 type Option = { kind: "athlete"; id: string; label: string; search: string; hint?: string }
 /** Rows under the athletes that act instead of picking: widen the search, or create an athlete. */
@@ -82,7 +87,13 @@ export default function AthletePairingSelect({
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState("")
   const [active, setActive] = useState(0)
-  const [rect, setRect] = useState<{ top: number; left: number; width: number } | null>(null)
+  const [rect, setRect] = useState<{
+    top?: number
+    bottom?: number
+    left: number
+    width: number
+    maxHeight: number
+  } | null>(null)
   const [scope, setScope] = useState<"season" | "all">("season")
   const everyone = allSeasons?.athletes ?? null
   const loadingAll = scope === "all" && !everyone
@@ -121,7 +132,20 @@ export default function AthletePairingSelect({
 
   const place = useCallback(() => {
     const box = inputRef.current?.getBoundingClientRect()
-    if (box) setRect({ top: box.bottom + 4, left: box.left, width: box.width })
+    if (!box) return
+    // Open below unless that would run off the page and there's more room above; either way,
+    // shrink the list to fit what's left of the viewport.
+    const roomBelow = window.innerHeight - box.bottom - LIST_GAP - VIEWPORT_MARGIN
+    const roomAbove = box.top - LIST_GAP - VIEWPORT_MARGIN
+    const below = roomBelow >= LIST_MAX_HEIGHT || roomBelow >= roomAbove
+    const maxHeight = Math.max(LIST_MIN_HEIGHT, Math.min(LIST_MAX_HEIGHT, below ? roomBelow : roomAbove))
+    setRect({
+      // Pin the edge nearest the field so the list hugs it whatever its own height.
+      ...(below ? { top: box.bottom + LIST_GAP } : { bottom: window.innerHeight - box.top + LIST_GAP }),
+      left: box.left,
+      width: box.width,
+      maxHeight,
+    })
   }, [])
 
   function openList() {
@@ -242,8 +266,8 @@ export default function AthletePairingSelect({
               data-floating-popover
               // Keep focus in the input so its blur doesn't close the list before a pick.
               onMouseDown={(e) => e.preventDefault()}
-              style={{ top: rect.top, left: rect.left, width: rect.width }}
-              className="fixed z-[60] max-h-64 overflow-auto rounded-lg border border-border bg-background-elevated py-1 shadow-lg"
+              style={rect}
+              className="fixed z-[60] overflow-auto rounded-lg border border-border bg-background-elevated py-1 shadow-lg"
             >
               {loadingAll ? (
                 <li className="px-3 py-2 text-sm text-foreground-secondary">Loading all seasons…</li>

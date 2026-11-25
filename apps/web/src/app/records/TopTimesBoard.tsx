@@ -7,6 +7,7 @@ import {
   formatRecordTime,
   recordSetLabel,
   recordSwimmerLabel,
+  TOP_TIMES_LIMIT,
   topTimesEventTitle,
   type TeamAllTopTimesResponse,
   type TeamTopTime,
@@ -31,11 +32,44 @@ function rowHref(time: TeamTopTime): string | null {
   return null
 }
 
-const GRID = "grid gap-3 md:grid-cols-2 xl:grid-cols-3"
+/** Two cards to a row, like the PDF: wide enough for each swim's meet. */
+const GRID = "grid gap-3 lg:grid-cols-2"
+/** Relays, with all four swimmers on a line beside the meet, get the full width: one card a row, like the PDF. */
+const RELAY_GRID = "grid gap-3"
+/** Relay swimmers per line: all four, as the PDF lays them out (they wrap on phones). */
+const RELAY_NAMES_PER_LINE = 4
+
+/** A row's swimmers split into lines: one each for an individual swim, all four on one for a relay. */
+function swimmerLines<T>(relay: boolean, swimmers: T[]): T[][] {
+  if (!relay) return swimmers.map((swimmer) => [swimmer])
+  const lines: T[][] = []
+  for (let i = 0; i < swimmers.length; i += RELAY_NAMES_PER_LINE) lines.push(swimmers.slice(i, i + RELAY_NAMES_PER_LINE))
+  return lines
+}
 
 /**
- * One event's ranked list: rank · swimmer(s) · year · time. A row with an imported swim or relay
- * links to it on its meet page, which opens its detail.
+ * Blank space as tall as a row with a meet (swimmer(s) and meet side by side, or stacked on phones; a
+ * relay's swimmers, wrapping onto a second line on phones), so a card with fewer than ten swims keeps a full card's height.
+ */
+function EmptyRow({ relay }: { relay: boolean }) {
+  return (
+    <div aria-hidden className="invisible flex items-start border-t border-transparent px-3.5 py-2 text-sm">
+      <div className="flex flex-1 flex-col sm:flex-row">
+        <div className="flex flex-col">
+          <span>–</span>
+          {relay ? <span className="sm:hidden">–</span> : null}
+        </div>
+        <span>–</span>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * One event's ranked list: rank · swimmer(s) · meet · year · time. A row with an imported swim or
+ * relay links to it on its meet page, which opens its detail. The meet is a column beside the
+ * swimmer(s) (a line under them on phones), a relay's four swimmers share a line (wrapping on phones), and a relay with no
+ * names known is one "–".
  */
 function TopTimesCard({ event }: { event: TeamTopTimesEvent }) {
   return (
@@ -53,33 +87,51 @@ function TopTimesCard({ event }: { event: TeamTopTimesEvent }) {
             // A row with an imported swim or relay links to it (its names then aren't links of their own).
             const href = rowHref(time)
             const opens = href !== null
+            const nameClass = season ? "font-semibold text-accent" : "text-foreground"
+            const labels = time.swimmers.map((swimmer) => recordSwimmerLabel(time, swimmer))
+            const unnamed = labels.length === 0 || labels.every((label) => label === "–")
+            const swimmers = time.swimmers.map((swimmer, i) => ({ swimmer, label: labels[i] }))
             const row = (
               <>
                 <span
                   className="w-6 shrink-0 text-right font-semibold tabular-nums text-foreground-tertiary"
-                  aria-label={tied ? `Tied ${time.rank}` : `${time.rank}`}
                 >
-                  {tied ? `T${time.rank}` : time.rank}
+                  <ManualRecordMark manual={time.manual} />
+                  <span aria-label={tied ? `Tied ${time.rank}` : `${time.rank}`}>{tied ? `T${time.rank}` : time.rank}</span>
                 </span>
-                <div className="flex min-w-0 flex-1 flex-col">
-                  {time.swimmers.map((swimmer, i) => {
-                    const label = recordSwimmerLabel(time, swimmer)
-                    const nameClass = `truncate ${season ? "font-semibold text-accent" : "text-foreground"}`
-                    return (
-                      <span key={i} className="flex min-w-0">
-                        {swimmer.athleteSlug && !opens ? (
-                          <Link
-                            href={athletePath(swimmer.athleteSlug)}
-                            className={`${nameClass} hover:text-primary hover:underline`}
-                          >
-                            {label}
-                          </Link>
-                        ) : (
-                          <span className={nameClass}>{label}</span>
-                        )}
-                      </span>
-                    )
-                  })}
+                <div className="flex min-w-0 flex-1 flex-col sm:flex-row sm:gap-2.5">
+                  <div className={`flex min-w-0 flex-col sm:shrink-0 ${event.relay ? "sm:w-[65%]" : "sm:w-[48%]"}`}>
+                    {unnamed ? (
+                      <span className={nameClass}>–</span>
+                    ) : (
+                      swimmerLines(event.relay, swimmers).map((line, lineIndex) => (
+                        <span key={lineIndex} className={`${event.relay ? "sm:truncate" : "truncate"} ${nameClass}`}>
+                          {line.map(({ swimmer, label }, i) => (
+                            <span key={i}>
+                              {i > 0 && ", "}
+                              {swimmer.athleteSlug && !opens ? (
+                                <Link
+                                  href={athletePath(swimmer.athleteSlug)}
+                                  className="hover:text-primary hover:underline"
+                                >
+                                  {label}
+                                </Link>
+                              ) : (
+                                label
+                              )}
+                            </span>
+                          ))}
+                        </span>
+                      ))
+                    )}
+                  </div>
+                  {time.meetName ? (
+                    <span
+                      className={`min-w-0 truncate sm:flex-1 ${season ? "text-accent" : "text-foreground-secondary"}`}
+                    >
+                      {time.meetName}
+                    </span>
+                  ) : null}
                 </div>
                 <span
                   tabIndex={opens ? undefined : 0}
@@ -91,7 +143,6 @@ function TopTimesCard({ event }: { event: TeamTopTimesEvent }) {
                 <span
                   className={`w-[4.25rem] shrink-0 text-right font-mono tabular-nums ${season ? "font-semibold text-accent" : "text-foreground"}`}
                 >
-                  <ManualRecordMark manual={time.manual} />
                   {formatRecordTime(time.timeMs)}
                 </span>
               </>
@@ -111,6 +162,10 @@ function TopTimesCard({ event }: { event: TeamTopTimesEvent }) {
           })}
         </ol>
       )}
+      {/* Room for the rest of a top 10 ("No swims yet." takes the first row's place). */}
+      {Array.from({ length: Math.max(0, TOP_TIMES_LIMIT - Math.max(1, event.times.length)) }, (_, i) => (
+        <EmptyRow key={i} relay={event.relay} />
+      ))}
     </section>
   )
 }
@@ -146,7 +201,7 @@ export function useAllTopTimes(gender: "F" | "M", mode: TopTimesMode, enabled: b
 /** Name widths per line, varied so the cards don't look stamped. */
 const NAME_WIDTHS = ["w-28", "w-32", "w-24", "w-36", "w-28", "w-20", "w-32", "w-24", "w-28", "w-32"]
 
-/** Mirrors the board: a grid of event cards, each a title band over ten rank · name · year · time lines. */
+/** Mirrors the board: a grid of event cards, each a title band over ten rank · name · meet · year · time lines. */
 function TopTimesSkeleton() {
   return (
     <div aria-busy className={GRID}>
@@ -159,8 +214,14 @@ function TopTimesSkeleton() {
             {NAME_WIDTHS.map((_, line) => (
               <div key={line} className="flex items-center gap-2.5 px-3.5 py-2.5">
                 <Skeleton className="h-3.5 w-5" />
-                <Skeleton className={`h-3.5 ${NAME_WIDTHS[(line + card * 3) % NAME_WIDTHS.length]}`} />
-                <Skeleton className="ml-auto h-3.5 w-9" />
+                <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-row sm:gap-2.5">
+                  <div className="sm:w-[48%] sm:shrink-0">
+                    <Skeleton className={`h-3.5 ${NAME_WIDTHS[(line + card * 3) % NAME_WIDTHS.length]}`} />
+                  </div>
+                  {/* The meet: a column on wider screens, a line under the name on phones. */}
+                  <Skeleton className={`h-3.5 ${NAME_WIDTHS[(line + card * 3 + 5) % NAME_WIDTHS.length]}`} />
+                </div>
+                <Skeleton className="h-3.5 w-9" />
                 <Skeleton className="h-3.5 w-12" />
               </div>
             ))}
@@ -188,10 +249,22 @@ export default function TopTimesBoard({
   }
   if (!data) return <TopTimesSkeleton />
 
+  // Runs of consecutive events of one kind, each its own grid: relays get full-width cards.
+  const runs: TeamTopTimesEvent[][] = []
+  for (const event of data.events) {
+    const last = runs[runs.length - 1]
+    if (last && last[0].relay === event.relay) last.push(event)
+    else runs.push([event])
+  }
+
   return (
-    <div className={GRID}>
-      {data.events.map((event) => (
-        <TopTimesCard key={`${event.gender}|${event.event}`} event={event} />
+    <div className="flex flex-col gap-3">
+      {runs.map((run) => (
+        <div key={`${run[0].gender}|${run[0].event}`} className={run[0].relay ? RELAY_GRID : GRID}>
+          {run.map((event) => (
+            <TopTimesCard key={`${event.gender}|${event.event}`} event={event} />
+          ))}
+        </div>
       ))}
     </div>
   )

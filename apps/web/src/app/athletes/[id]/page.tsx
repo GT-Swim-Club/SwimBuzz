@@ -195,6 +195,7 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
               email={athlete.user?.email ?? ""}
               swimCloudIds={athlete.swimCloudIds}
               preferredName={athlete.preferredName}
+              gender={athlete.gender}
               gtid={athlete.gtid}
               dob={athlete.dob ? zonedDayKey(athlete.dob, DEFAULT_TIME_ZONE) : null}
               seasons={athlete.seasons}

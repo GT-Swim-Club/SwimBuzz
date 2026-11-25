@@ -2,6 +2,7 @@
 
 import {
   MANUAL_RECORD_MARK,
+  MANUAL_RECORD_NOTE,
   RECORDS_EXPORT,
   recordSwimmerName,
   recordTimeLabel,
@@ -52,10 +53,11 @@ function SideCells({ record, mirrored }: { record: TeamRecordItem | undefined; m
 
 /**
  * Off-screen copy of the records sheet for PNG export, both genders side by side like the wide
- * table, with the date in the mixed relay's empty men's cell at the bottom right. Not shown in the
- * page layout.
+ * table, with the date in the mixed relay's empty men's cell at the bottom right (and "*Unverified"
+ * just above it when any record carries the gold "*"). Not shown in the page layout.
  */
 export default function RecordsExportCapture({ rows, asOf }: { rows: TeamRecordRow[]; asOf: string }) {
+  const anyManual = rows.some((row) => Object.values(row.records).some((record) => record?.manual))
   return (
     // Edge to edge: no margin around the sheet and no outer border, only the lines inside it.
     <div className="bg-background text-foreground" style={{ width: SHEET_WIDTH_PX }}>
@@ -94,9 +96,15 @@ export default function RecordsExportCapture({ rows, asOf }: { rows: TeamRecordR
               {row.label}
             </div>
             {mixed ? (
-              // The date at the bottom right.
-              <div className="col-span-3 flex flex-col justify-end px-3 py-2 text-sm text-foreground-secondary">
-                <span className="self-end">{asOf}</span>
+              // The date at the bottom right, under what the gold "*" means.
+              <div className="col-span-3 flex flex-col items-end justify-end px-3 py-2 text-sm text-foreground-secondary">
+                {anyManual ? (
+                  <span className="text-foreground-tertiary">
+                    <span className="text-accent">{MANUAL_RECORD_MARK}</span>
+                    {MANUAL_RECORD_NOTE}
+                  </span>
+                ) : null}
+                <span>{asOf}</span>
               </div>
             ) : (
               <SideCells record={record("M")} mirrored />

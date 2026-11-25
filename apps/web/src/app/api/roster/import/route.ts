@@ -5,7 +5,7 @@ import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
 import { runRosterImport, type RosterImportProgress } from "@/lib/roster/roster-import"
 import { isClientDisconnected } from "@/lib/client-disconnect"
-import { streamRosterImport, wantsRosterImportStream } from "@/lib/roster/roster-import-stream"
+import { streamImport, wantsImportStream } from "@/lib/import-stream"
 
 export const runtime = "nodejs"
 
@@ -80,8 +80,8 @@ export async function POST(req: Request) {
     return { created, updated, removed, deleted, parsed: parsed.rows.length, errors, missingEmail }
   }
 
-  if (wantsRosterImportStream(req)) {
-    return streamRosterImport(execute, "Import failed while saving athletes")
+  if (wantsImportStream(req)) {
+    return streamImport(execute, { label: "roster import", failureMessage: "Import failed while saving athletes" })
   }
 
   try {

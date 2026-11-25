@@ -19,6 +19,13 @@ import { isEventOrder } from "@/lib/meet/meet-event-order"
 import { rescoreResultsByGender } from "@/lib/meet/gender-scoring"
 import { isClientDisconnected, throwIfDisconnected } from "@/lib/client-disconnect"
 import { getSession } from "@/lib/auth/session"
+import {
+  creepProgress,
+  scaleProgress,
+  streamImport,
+  wantsImportStream,
+  type ImportStreamProgress,
+} from "@/lib/import-stream"
 import { coerceTeamScores, isStaffRole } from "@swimbuzz/shared"
 import { Prisma } from "@prisma/client"
 import { addPairedAthletesToSeason } from "@/lib/athlete/paired-athlete-seasons"
@@ -84,6 +91,8 @@ async function applyParsedMeetPdf(input: {
   fileName: string
   /** The import's team codes ("White, Gold"), naming each swimmer's team. */
   teamCodes: string | null
+  /** Live progress, 0–1 across saving the parsed results. */
+  onProgress?: (progress: ImportStreamProgress) => void
 }) {
   const { parsed, season, courseDefault, meet, nameMappings, rejectedNames, pairOnly, resultsPdfUrl, fileName } =
     input
@@ -100,7 +109,9 @@ async function applyParsedMeetPdf(input: {
   // Athletes paired from another season join this one before anything reads its roster.
   await addPairedAthletesToSeason(nameMappings, season)
 
+  const { onProgress } = input
   // Women and men scored separately: the results' combined places and points are recomputed.
+  if (meet?.scoreByGender) onProgress?.({ progress: 0, detail: "Scoring women and men…" })
   const byGender = meet?.scoreByGender
     ? await rescoreResultsByGender({
         results: parsed.results ?? [],
@@ -128,6 +139,7 @@ async function applyParsedMeetPdf(input: {
     allResults: results,
     allRelayResults: coerceParsedRelayResults(parsed.relay_results),
     rescored: byGender != null,
+    onProgress: scaleProgress(onProgress, 0.03, 0.97),
   })
 
   const athleteTeams = canonicalResultTeams(printedTeams, input.teamCodes)
@@ -286,12 +298,44 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Team code is required" }, { status: 400 })
   }
 
-  // Pairing / cached parse stays synchronous (no scraper).
-  if (cachedParse?.results) {
-    try {
+  type ParsedPdf = {
+    course?: string
+    meet_name?: string | null
+    meet_date?: string | null
+    detectedSheetType?: string | null
+    results: ParsedResult[]
+    relay_results?: unknown[]
+    team_scores?: unknown
+    event_order?: unknown
+  }
+
+  const applyParsed = (
+    parsed: ParsedPdf,
+    resultsPdfUrl: string | null,
+    onProgress?: (progress: ImportStreamProgress) => void
+  ) =>
+    applyParsedMeetPdf({
+      parsed,
+      season,
+      courseDefault,
+      meet,
+      nameMappings,
+      rejectedNames,
+      pairOnly,
+      resultsPdfUrl,
+      fileName,
+      teamCodes: team,
+      onProgress,
+    })
+
+  const execute = async (
+    onProgress?: (progress: ImportStreamProgress) => void
+  ): Promise<Record<string, unknown>> => {
+    // Pairing re-applies the earlier parse: no upload, no parser.
+    if (cachedParse?.results) {
       throwIfDisconnected(req.signal)
-      const summary = await applyParsedMeetPdf({
-        parsed: {
+      return applyParsed(
+        {
           course: cachedParse.course,
           meet_name: cachedParse.meet_name,
           meet_date: cachedParse.meet_date,
@@ -299,84 +343,77 @@ export async function POST(req: Request) {
           results: cachedParse.results,
           relay_results: cachedParse.relay_results,
         },
-        season,
-        courseDefault,
-        meet,
-        nameMappings,
-        rejectedNames,
-        pairOnly,
-        resultsPdfUrl: pdfUrl,
-        fileName,
-        teamCodes: team,
-      })
-      return NextResponse.json(summary)
-    } catch (err) {
-      if (isClientDisconnected(err)) return new NextResponse(null, { status: 499 })
-      if (err instanceof MeetImportValidationError) {
-        return NextResponse.json({ error: err.message }, { status: 400 })
-      }
-      throw err
-    }
-  }
-
-  let resultsPdfUrl = pdfUrl
-  /** A copy uploaded here; deleted at the end unless the meet saved it as its results PDF. */
-  let uploadedUrl: string | null = null
-  if (!resultsPdfUrl && fileBytes) {
-    try {
-      const { url } = await uploadMeetFile(
-        Buffer.from(fileBytes),
-        fileName,
-        fileType,
-        meet ? meetFileFolder(meet.id) : PARSE_TMP_FOLDER
+        pdfUrl,
+        onProgress
       )
-      resultsPdfUrl = url
-      uploadedUrl = url
-    } catch (err) {
-      console.error("Failed to upload meet PDF before parsing:", err)
+    }
+
+    let resultsPdfUrl = pdfUrl
+    /** A copy uploaded here; deleted at the end unless the meet saved it as its results PDF. */
+    let uploadedUrl: string | null = null
+    try {
+      if (!resultsPdfUrl && fileBytes) {
+        onProgress?.({ progress: 0, detail: "Saving PDF…" })
+        try {
+          const { url } = await uploadMeetFile(
+            Buffer.from(fileBytes),
+            fileName,
+            fileType,
+            meet ? meetFileFolder(meet.id) : PARSE_TMP_FOLDER
+          )
+          resultsPdfUrl = url
+          uploadedUrl = url
+        } catch (err) {
+          console.error("Failed to upload meet PDF before parsing:", err)
+        }
+      }
+
+      if (!resultsPdfUrl) throw new Error("Could not prepare PDF for parsing")
+
+      throwIfDisconnected(req.signal)
+      // The parser can't report its own progress, so the bar eases forward while it reads.
+      const stopCreep = creepProgress(onProgress, {
+        from: 0.05,
+        to: 0.5,
+        detail: "Reading PDF…",
+        expectedMs: 8000,
+      })
+      let parsed: ParsedPdf
+      try {
+        parsed = await parseMeetPdf<ParsedPdf>(session.user.id, resultsPdfUrl, {
+          course: courseDefault,
+          team,
+          fileName,
+        })
+      } finally {
+        stopCreep()
+      }
+
+      throwIfDisconnected(req.signal)
+      return await applyParsed(parsed, resultsPdfUrl, scaleProgress(onProgress, 0.5, 1))
+    } finally {
+      // Reference-checked, so it stays when the meet now points at it.
+      if (uploadedUrl) await deleteUnreferencedStoredFiles([uploadedUrl])
     }
   }
 
-  if (!resultsPdfUrl) {
-    return NextResponse.json({ error: "Could not prepare PDF for parsing" }, { status: 502 })
+  if (wantsImportStream(req)) {
+    return streamImport(execute, {
+      label: "meet results import",
+      failureMessage: (err) =>
+        err instanceof Error && err.message ? err.message : "Failed to import results",
+    })
   }
 
   try {
-    throwIfDisconnected(req.signal)
-    const parsed = await parseMeetPdf<{
-      course?: string
-      meet_name?: string | null
-      meet_date?: string | null
-      detectedSheetType?: string | null
-      results: ParsedResult[]
-      relay_results?: unknown[]
-      team_scores?: unknown
-      event_order?: unknown
-    }>(session.user.id, resultsPdfUrl, { course: courseDefault, team, fileName })
-
-    throwIfDisconnected(req.signal)
-    const summary = await applyParsedMeetPdf({
-      parsed,
-      season,
-      courseDefault,
-      meet,
-      nameMappings,
-      rejectedNames,
-      pairOnly: false,
-      resultsPdfUrl,
-      fileName,
-      teamCodes: team,
-    })
-    return NextResponse.json(summary)
+    return NextResponse.json(await execute())
   } catch (err) {
     if (isClientDisconnected(err)) return new NextResponse(null, { status: 499 })
     if (err instanceof MeetImportValidationError) {
       return NextResponse.json({ error: err.message }, { status: 400 })
     }
+    if (cachedParse?.results) throw err
     const message = err instanceof Error ? err.message : "Failed to parse PDF"
     return NextResponse.json({ error: message }, { status: 502 })
-  } finally {
-    // Reference-checked, so it stays when the meet now points at it.
-    if (uploadedUrl) await deleteUnreferencedStoredFiles([uploadedUrl])
   }
 }

@@ -20,6 +20,7 @@ import { StaffBadge } from "../../../src/components/StaffBadge"
 import { RemoveSeasonsSheet } from "../../../src/components/RemoveSeasonsSheet"
 import { AthleteStatusIcons } from "../../../src/components/AthleteStatusIcons"
 import { AthleteYearsSheet } from "../../../src/components/AthleteYearsSheet"
+import { AthleteGenderSheet } from "../../../src/components/AthleteGenderSheet"
 import { ProgressionSection } from "../../../src/components/ProgressionSection"
 import {
   Body,
@@ -110,6 +111,8 @@ export default function AthleteDetailScreen() {
   const [removingSeasons, setRemovingSeasons] = useState(false)
   const [yearsSheetOpen, setYearsSheetOpen] = useState(false)
   const [savingYears, setSavingYears] = useState(false)
+  const [genderSheetOpen, setGenderSheetOpen] = useState(false)
+  const [savingGender, setSavingGender] = useState(false)
   const queryClient = useQueryClient()
   const [swimEvent, setSwimEvent] = useState("")
   const [swimCourse, setSwimCourse] = useState<(typeof COURSES)[number]>("SCY")
@@ -252,6 +255,20 @@ export default function AthleteDetailScreen() {
       Alert.alert("Could not save year", err instanceof Error ? err.message : "Something went wrong")
     } finally {
       setSavingYears(false)
+    }
+  }
+
+  async function saveGender(gender: "M" | "F") {
+    if (!id) return
+    setSavingGender(true)
+    try {
+      await api.updateAthlete(id, { gender })
+      setGenderSheetOpen(false)
+      await Promise.all([refetch(), queryClient.invalidateQueries({ queryKey: ["athletes"] })])
+    } catch (err) {
+      Alert.alert("Could not save gender", err instanceof Error ? err.message : "Something went wrong")
+    } finally {
+      setSavingGender(false)
     }
   }
 
@@ -436,6 +453,12 @@ export default function AthleteDetailScreen() {
           </View>
         ) : null}
 
+        {isStaff ? (
+          <View style={{ marginBottom: spacing.sm }}>
+            <Button label="Edit gender" variant="secondary" onPress={() => setGenderSheetOpen(true)} />
+          </View>
+        ) : null}
+
         {canManage ? (
           <View style={{ marginBottom: spacing.lg }}>
             <Button
@@ -582,6 +605,15 @@ export default function AthleteDetailScreen() {
           yearBySeason={yearBySeason}
           saving={savingYears}
           onSave={(next) => void saveYears(next)}
+        />
+      ) : null}
+      {isStaff ? (
+        <AthleteGenderSheet
+          visible={genderSheetOpen}
+          onClose={() => setGenderSheetOpen(false)}
+          gender={athlete.gender === "M" || athlete.gender === "F" ? athlete.gender : null}
+          saving={savingGender}
+          onSave={(gender) => void saveGender(gender)}
         />
       ) : null}
       {isStaff ? (

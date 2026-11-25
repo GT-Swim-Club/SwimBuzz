@@ -40,6 +40,7 @@ import {
 } from "@/lib/meet/meet-sheet-summary"
 import { isEditableSignupSheetSeed } from "@/lib/meet/meet-signup"
 import { Prisma } from "@prisma/client"
+import type { ImportStreamProgress } from "@/lib/import-stream"
 
 export type ParsedMeetResult = {
   name: string
@@ -146,6 +147,7 @@ export async function importMeetResults({
   allResults = null,
   allRelayResults = null,
   rescored = false,
+  onProgress,
 }: {
   season: string
   meetName: string
@@ -169,7 +171,10 @@ export async function importMeetResults({
    * onto existing swims even when cleared, rather than keeping the old ones.
    */
   rescored?: boolean
+  /** Live progress, 0–1 across this import's own steps. */
+  onProgress?: (progress: ImportStreamProgress) => void
 }): Promise<MeetImportSummary> {
+  onProgress?.({ progress: 0, detail: "Matching swimmers…" })
   const roster = await prisma.athlete.findMany({
     where: { seasons: { has: season } },
     select: { id: true, firstName: true, lastName: true, preferredName: true },
@@ -462,6 +467,10 @@ export async function importMeetResults({
   }
 
   const swimsToInsert = assignSwimOccurrences(swims)
+  onProgress?.({
+    progress: 0.1,
+    detail: `Saving ${swimsToInsert.length} swim${swimsToInsert.length === 1 ? "" : "s"}…`,
+  })
   const result = await prisma.swim.createMany({
     data: swimsToInsert,
     skipDuplicates: true,
@@ -474,6 +483,7 @@ export async function importMeetResults({
   if (swimsWithPlace.length > 0 && result.count < swimsToInsert.length) {
     const PLACE_UPDATE_BATCH = 5
     for (let i = 0; i < swimsWithPlace.length; i += PLACE_UPDATE_BATCH) {
+      onProgress?.({ progress: 0.2 + (i / swimsWithPlace.length) * 0.3, detail: "Updating places and points…" })
       const batch = swimsWithPlace.slice(i, i + PLACE_UPDATE_BATCH)
       await Promise.all(
         batch.map((swim) =>
@@ -515,6 +525,7 @@ export async function importMeetResults({
     }
   )
   const courseForLeadoffs = parseCourse("", courseDefault)
+  onProgress?.({ progress: 0.5, detail: "Saving relays…" })
   const leadoffsImported = await importRelayLeadoffSwims({
     meetName,
     meetId,
@@ -667,9 +678,15 @@ export async function importMeetResults({
   }
 
   // Uploaded results replace any SwimCloud-synced copies of the same swims.
+  if (meetId) onProgress?.({ progress: 0.65, detail: "Replacing SwimCloud copies…" })
   const swimCloudCopiesRemoved = meetId ? await removeSwimCloudCopiesOfMeet(meetId) : 0
-  if (meetId) await syncMeetRelaySplitSwims(meetId)
-  if (meetId) await syncTeamRecordsSafely()
+  if (meetId) {
+    onProgress?.({ progress: 0.72, detail: "Updating relay splits…" })
+    await syncMeetRelaySplitSwims(meetId)
+    onProgress?.({ progress: 0.8, detail: "Updating team records…" })
+    await syncTeamRecordsSafely()
+  }
+  onProgress?.({ progress: 1, detail: "Finishing up…" })
 
   console.log(
     `\n--- Meet import (${source}): ${meetName} (${matched.length} matched, ${unmatched.length} unmatched) ---`

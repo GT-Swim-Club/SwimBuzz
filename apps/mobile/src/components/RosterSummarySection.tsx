@@ -402,7 +402,7 @@ function entryTitle(entry: RosterSummaryEntry): string {
     const relayRound = entry.relayRound || (coachRound === "P" || coachRound === "F" ? coachRound : "")
     const round = relayRound ? ` (${relayRound})` : ""
     // Our team's side goes before "Relay": "200 Free White Relay A".
-    return `${relayDisplayName(entry.event, entry.relayLetter)}${round}`
+    return `${relayDisplayName(entry.event, entry.relayLetter, false, entry.gender)}${round}`
   }
   return entry.event
 }
@@ -524,7 +524,7 @@ function pdfRow(
   const legSubSplits = isRelay ? relayLegSubSplits(entry) : []
   // Compact ("200 Medley White A (P)") or spelled out ("200 Medley White Relay A (P)").
   const relayTitle = (compact: boolean) =>
-    [relayDisplayName(entry.event, entry.relayLetter, compact), entry.relayRound ? `(${entry.relayRound})` : null]
+    [relayDisplayName(entry.event, entry.relayLetter, compact, entry.gender), entry.relayRound ? `(${entry.relayRound})` : null]
       .filter(Boolean)
       .join(" ")
   return {

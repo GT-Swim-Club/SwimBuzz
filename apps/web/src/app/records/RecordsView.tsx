@@ -4,6 +4,8 @@ import { useState } from "react"
 import { useSearchParams } from "next/navigation"
 import {
   isTopTimesMode,
+  MANUAL_RECORD_MARK,
+  MANUAL_RECORD_NOTE,
   type RecordEventDef,
   type RecordGender,
   type TeamRecordsResponse,
@@ -35,6 +37,16 @@ const MODES: Array<{ value: TopTimesMode; label: string }> = [
 
 type ModalTarget = { def: RecordEventDef; gender: RecordGender }
 
+/** What the gold "*" on a time means ("*Unverified"), beside the share button. */
+function UnverifiedNote() {
+  return (
+    <span className="mr-1.5 whitespace-nowrap text-xs font-normal normal-case tracking-normal text-foreground-secondary">
+      <span className="text-accent">{MANUAL_RECORD_MARK}</span>
+      {MANUAL_RECORD_NOTE}
+    </span>
+  )
+}
+
 /**
  * The records page: the club's records sheet (Women's · Event · Men's) on wide screens, one gender
  * at a time on phones — or, under Top 10, every event's top 10 for one gender as cards. Records come
@@ -60,7 +72,12 @@ export default function RecordsView({ initial }: { initial: TeamRecordsResponse 
   }
 
   const openHistory = (def: RecordEventDef, recordGender: RecordGender) => setModal({ def, gender: recordGender })
-  const recordsShare = <ShareRecordsButton rows={initial.rows} />
+  const recordsShare = (
+    <>
+      <UnverifiedNote />
+      <ShareRecordsButton rows={initial.rows} />
+    </>
+  )
 
   return (
     <>
@@ -120,17 +137,21 @@ export default function RecordsView({ initial }: { initial: TeamRecordsResponse 
               ))}
             </SegmentedToggle>
             <div className="ml-auto flex items-center gap-1">
+              <UnverifiedNote />
               <ShareRecordsButton rows={initial.rows} topTimes={{ gender, mode, data: topTimes.data }} />
             </div>
           </>
-        ) : null}
+        ) : (
+          // Above the sheet table (lg+); the phone list keeps them in its own gender toolbar.
+          <div className="ml-auto hidden items-center gap-1 lg:flex">{recordsShare}</div>
+        )}
       </div>
 
       {view === "top" ? (
         <TopTimesBoard data={topTimes.data} error={topTimes.error} />
       ) : (
         <>
-          <RecordsTable rows={initial.rows} action={recordsShare} onOpenHistory={openHistory} />
+          <RecordsTable rows={initial.rows} onOpenHistory={openHistory} />
           <RecordsList
             rows={initial.rows}
             gender={gender}

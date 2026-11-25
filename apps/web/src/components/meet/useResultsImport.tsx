@@ -8,6 +8,7 @@ import {
 } from "@/components/meet/AthletePairingProvider"
 import { useScraperUi } from "@/components/scraper/ScraperUiProvider"
 import { useImportTask, type ImportTaskProgress } from "@/components/ui/ImportTaskProvider"
+import { postImportStream } from "@/lib/import-stream-client"
 import {
   scraperJobFraction,
   SWIMPHONE_VERIFICATION_ALERT,
@@ -81,8 +82,9 @@ export function useResultsImport({ meetId, season }: { meetId?: string; season: 
 
   async function runPdfImport(
     run: ImportRun,
+    report: (progress: ImportTaskProgress) => void,
     opts?: { nameMappings?: Record<string, string>; rejectedNames?: string[]; cachedParse?: unknown }
-  ) {
+  ): Promise<ImportResult> {
     const source = run.source as Extract<ResultsImportSource, { kind: "pdf" }>
     const pdfUrl = source.pdfUrl?.trim() ?? ""
     if (!opts?.cachedParse && !source.file && !pdfUrl) {
@@ -102,22 +104,9 @@ export function useResultsImport({ meetId, season }: { meetId?: string; season: 
     if (opts?.rejectedNames?.length) body.append("rejectedNames", JSON.stringify(opts.rejectedNames))
     if (opts?.cachedParse) body.append("cachedParse", JSON.stringify(opts.cachedParse))
 
-    const res = await fetch("/api/meets/import", { method: "POST", body })
-    const data = await res.json()
-    if (!res.ok) throw new Error(data.error ?? "Import failed")
-    if (data.jobId) {
-      const { pollScraperJob } = await import("@/lib/scraper/scraper-job-client")
-      await pollScraperJob(data.jobId)
-      const fin = await fetch("/api/meets/import/finalize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ jobId: data.jobId }),
-      })
-      const finalized = await fin.json()
-      if (!fin.ok) throw new Error(finalized.error ?? "Import failed")
-      return finalized as ImportResult
-    }
-    return data as ImportResult
+    // Nothing streams back while the browser is still sending the PDF.
+    if (!opts?.cachedParse) report({ progress: 0, detail: "Uploading PDF…" })
+    return postImportStream<ImportResult>("/api/meets/import", { body }, report)
   }
 
   async function finalizeSwimphoneJob(
@@ -172,10 +161,10 @@ export function useResultsImport({ meetId, season }: { meetId?: string; season: 
         occurrenceNoun: ["result", "results"],
         submitVerb: "Import",
         taskLabel: "Importing paired results…",
-        submit: async (nameMappings, rejectedNames) => {
+        submit: async (nameMappings, rejectedNames, report) => {
           let paired: ImportResult
           if (run.source.kind === "pdf") {
-            paired = await runPdfImport(run, { nameMappings, rejectedNames, cachedParse })
+            paired = await runPdfImport(run, report, { nameMappings, rejectedNames, cachedParse })
           } else {
             if (!scraperJobId) throw new Error("Import the meet from SwimPhone again to pair athletes")
             paired = await finalizeSwimphoneJob(scraperJobId, { nameMappings, rejectedNames })
@@ -217,7 +206,7 @@ export function useResultsImport({ meetId, season }: { meetId?: string; season: 
       onStart?.()
       startTask(swimphone ? "Scraping meet…" : "Importing results…", (report) => {
         const importPromise = Promise.resolve(before?.())
-          .then(() => (swimphone ? runSwimphoneImport(run, report) : runPdfImport(run)))
+          .then(() => (swimphone ? runSwimphoneImport(run, report) : runPdfImport(run, report)))
           .then((data) => handleImportResponse(run, data))
         importPromise.then(
           () => onSettled?.(true),

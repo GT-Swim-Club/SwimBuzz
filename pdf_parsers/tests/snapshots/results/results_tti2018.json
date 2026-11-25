@@ -5354,7 +5354,7 @@
       "name": "Mitchel, Mary",
       "place": 43,
       "tags": "",
-      "team": "Gayle AUB-SE",
+      "team": "AUB-SE",
       "time": "30.36"
     },
     {
@@ -10327,7 +10327,7 @@
       "name": "Mitchel, Mary",
       "place": 15,
       "tags": "",
-      "team": "Gayle AUB-SE",
+      "team": "AUB-SE",
       "time": "38.34"
     },
     {
@@ -15041,7 +15041,7 @@
       "place": 2,
       "points": 17.0,
       "tags": "",
-      "team": "Rose MUSC-GA",
+      "team": "MUSC-GA",
       "time": "31.85"
     },
     {
@@ -15235,7 +15235,7 @@
       "place": 20,
       "points": 1.0,
       "tags": "",
-      "team": "Gayle AUB-SE",
+      "team": "AUB-SE",
       "time": "35.84"
     },
     {
@@ -17366,7 +17366,7 @@
       "place": 3,
       "points": 16.0,
       "tags": "",
-      "team": "Rose MUSC-GA",
+      "team": "MUSC-GA",
       "time": "57.73"
     },
     {
@@ -18983,7 +18983,7 @@
       },
       {
         "place": 3,
-        "points": 660.0,
+        "points": 661.0,
         "team": "AUB"
       },
       {
@@ -19033,7 +19033,7 @@
       },
       {
         "place": 13,
-        "points": 103.0,
+        "points": 136.0,
         "team": "MUSC"
       },
       {
@@ -19053,18 +19053,8 @@
       },
       {
         "place": 17,
-        "points": 33.0,
-        "team": "Rose MUSC"
-      },
-      {
-        "place": 18,
         "points": 18.0,
         "team": "ETSU"
-      },
-      {
-        "place": 19,
-        "points": 1.0,
-        "team": "Gayle AUB"
       }
     ],
     "men": [
@@ -19168,7 +19158,7 @@
       },
       {
         "place": 3,
-        "points": 360.0,
+        "points": 361.0,
         "team": "AUB"
       },
       {
@@ -19217,14 +19207,14 @@
         "team": "ALABAMA CLUB SWIMMING"
       },
       {
-        "place": 13,
-        "points": 52.0,
-        "team": "RADFORD UNIVERSITY CLUB SWIM"
+        "place": 12,
+        "points": 58.0,
+        "team": "MUSC"
       },
       {
         "place": 14,
-        "points": 33.0,
-        "team": "Rose MUSC"
+        "points": 52.0,
+        "team": "RADFORD UNIVERSITY CLUB SWIM"
       },
       {
         "place": 15,
@@ -19238,18 +19228,8 @@
       },
       {
         "place": 17,
-        "points": 25.0,
-        "team": "MUSC"
-      },
-      {
-        "place": 18,
         "points": 16.0,
         "team": "ETSU"
-      },
-      {
-        "place": 19,
-        "points": 1.0,
-        "team": "Gayle AUB"
       }
     ]
   }

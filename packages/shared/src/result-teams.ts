@@ -152,10 +152,17 @@ function splitRelayLetter(relayLetter: string | null | undefined): { side?: stri
 /**
  * A relay's name with its team side before "Relay": ("200 Free Relay", "White A") → "200 Free White
  * Relay A", ("", "White A") → "White Relay A", ("200 Free Relay", "A") → "200 Free Relay A".
- * `compact` leaves "Relay" out: "200 Free White A".
+ * `compact` leaves "Relay" out: "200 Free White A". A mixed relay (`gender` "X") leads with "Mixed":
+ * "Mixed 200 Free Relay A".
  */
-export function relayDisplayName(event: string, relayLetter: string | null | undefined, compact = false): string {
+export function relayDisplayName(
+  event: string,
+  relayLetter: string | null | undefined,
+  compact = false,
+  gender?: string | null
+): string {
   const { side, letter } = splitRelayLetter(relayLetter)
   const base = event.replace(/\s*\bRelay$/i, "").trim()
-  return [base, side, compact ? null : "Relay", letter].filter(Boolean).join(" ")
+  const mixed = gender === "X" && base !== "" && !/\bmixed\b/i.test(base) ? "Mixed" : null
+  return [mixed, base, side, compact ? null : "Relay", letter].filter(Boolean).join(" ")
 }

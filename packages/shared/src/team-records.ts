@@ -10,7 +10,7 @@ export type RecordGroup = "Freestyle" | "Backstroke" | "Butterfly" | "Breaststro
 export type RecordEventDef = {
   /** Normalized event name, matching imported swims ("50 Free", "400 Medley Relay"). */
   event: string
-  /** The records sheet's label ("50 Freestyle", "200 Mixed Free Relay"). */
+  /** The records sheet's label ("50 Freestyle", "Mixed 200 Free Relay"). */
   label: string
   group: RecordGroup
   relay: boolean
@@ -34,7 +34,7 @@ export const RECORD_EVENTS: RecordEventDef[] = [
   ...["200 Free Relay", "400 Free Relay", "800 Free Relay", "200 Medley Relay", "400 Medley Relay"].map(
     (event): RecordEventDef => ({ event, label: event, group: "Relays", relay: true, genders: BOTH })
   ),
-  { event: "200 Free Relay", label: "200 Mixed Free Relay", group: "Relays", relay: true, genders: ["X"] },
+  { event: "200 Free Relay", label: "Mixed 200 Free Relay", group: "Relays", relay: true, genders: ["X"] },
 ]
 
 /** The table row for an event in a gender, or undefined when the team keeps no record there. */
@@ -161,7 +161,7 @@ export function topTimesEventDefs(gender: "F" | "M"): Array<RecordEventDef & { g
 
 /**
  * A top 10 card's title, naming its gender: "Women 50 Freestyle", "Men 200 Medley Relay". The
- * mixed relay keeps its own label ("200 Mixed Free Relay").
+ * mixed relay keeps its own label ("Mixed 200 Free Relay").
  */
 export function topTimesEventTitle(event: Pick<TeamTopTimesEvent, "gender" | "label">): string {
   if (event.gender === "X") return event.label
@@ -233,8 +233,11 @@ export function markManualRecord(formatted: string, manual?: boolean | null): st
   return manual ? `${MANUAL_RECORD_MARK}${formatted}` : formatted
 }
 
-/** Footnote for exports that list any manually added record. */
-export const MANUAL_RECORD_FOOTNOTE = `${MANUAL_RECORD_MARK} ${MANUAL_RECORD_LABEL}`
+/** What the "*" means, in the footnote on the records page and in the exports' footers. */
+export const MANUAL_RECORD_NOTE = "Unverified"
+
+/** Footnote for exports that list any manually added record: "*Unverified". */
+export const MANUAL_RECORD_FOOTNOTE = `${MANUAL_RECORD_MARK}${MANUAL_RECORD_NOTE}`
 
 /** Year, or the full date when known, for a record's hover/press detail. */
 export function recordSetLabel(record: Pick<TeamRecordItem, "year" | "date" | "meetName">): string {

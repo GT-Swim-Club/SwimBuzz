@@ -44,6 +44,7 @@ export function RecordTopTimesBoard({ gender, mode }: { gender: "F" | "M"; mode:
             return (
               <View key={time.key} style={[styles.row, index > 0 && styles.rowDivider]}>
                 <Text style={styles.rank} accessibilityLabel={tied ? `Tied ${time.rank}` : String(time.rank)}>
+                  {time.manual ? <Text style={styles.manualMark}>{MANUAL_RECORD_MARK}</Text> : null}
                   {tied ? `T${time.rank}` : time.rank}
                 </Text>
                 <View style={styles.names}>
@@ -55,7 +56,6 @@ export function RecordTopTimesBoard({ gender, mode }: { gender: "F" | "M"; mode:
                 </View>
                 <Text style={[styles.year, season]}>{time.year}</Text>
                 <Text style={[styles.time, season]}>
-                  {time.manual ? <Text style={styles.manualMark}>{MANUAL_RECORD_MARK}</Text> : null}
                   {formatRecordTime(time.timeMs)}
                 </Text>
               </View>
@@ -146,7 +146,7 @@ function makeStyles(c: ColorPalette) {
     year: { color: c.textTertiary, fontSize: 13, fontVariant: ["tabular-nums"], paddingTop: 1 },
     time: { color: c.text, fontSize: 14, fontVariant: ["tabular-nums"], fontWeight: "700", minWidth: 58, textAlign: "right" },
     thisSeason: { color: c.accent, fontWeight: "800" },
-    /** The gold "*" before a manually added record's time. */
+    /** The gold "*" before a manually added time's rank. */
     manualMark: { color: c.accent },
     footnote: { color: c.textSecondary, fontSize: 13, marginBottom: spacing.md },
   })

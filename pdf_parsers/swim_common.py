@@ -160,4 +160,7 @@ def leg_times_from_cumulative(cumulative_tokens: list[str]) -> dict[int, str]:
 
 def parse_status_token(token: str) -> str | None:
     cleaned = token.strip().upper()
+    # An exhibition swim's status carries the same "x" as its time ("XNS", "XDQ").
+    if cleaned not in INVALID_TIMES and cleaned[:1] == "X" and cleaned[1:] in INVALID_TIMES:
+        cleaned = cleaned[1:]
     return cleaned if cleaned in INVALID_TIMES else None

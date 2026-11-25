@@ -280,9 +280,10 @@
       "gender": "F",
       "name": "Hicks, Taylor",
       "place": 2,
+      "points": 16.5,
       "tags": "",
       "team": "Gold",
-      "time": "16.50"
+      "time": "29.37"
     },
     {
       "course": "SCY",
@@ -290,9 +291,10 @@
       "gender": "F",
       "name": "Heeren, Rachel",
       "place": 2,
+      "points": 16.5,
       "tags": "",
       "team": "White",
-      "time": "16.50"
+      "time": "29.37"
     },
     {
       "course": "SCY",
@@ -476,9 +478,10 @@
       "gender": "M",
       "name": "Liu, Alex",
       "place": 11,
+      "points": 5.5,
       "tags": "",
       "team": "Gold",
-      "time": "5.50"
+      "time": "28.03"
     },
     {
       "course": "SCY",
@@ -486,9 +489,10 @@
       "gender": "M",
       "name": "Barnes, Luke",
       "place": 11,
+      "points": 5.5,
       "tags": "",
       "team": "Gold",
-      "time": "5.50"
+      "time": "28.03"
     },
     {
       "course": "SCY",

@@ -11,9 +11,12 @@ import {
   type ReactNode,
 } from "react"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
-import { useImportTask } from "@/components/ui/ImportTaskProvider"
+import { useImportTask, type ImportTaskProgress } from "@/components/ui/ImportTaskProvider"
 import AthletePairingSelect from "@/components/meet/AthletePairingSelect"
 import AddAthleteDialog, { type AddedAthlete } from "@/components/athlete/AddAthleteDialog"
+
+/** How long after the pairing dialog appears before clicking off it (or Escape) dismisses it. */
+const DISMISS_GRACE_MS = 1500
 
 /**
  * App-level host for the "Pair unmatched athletes" step after a results or sheet import.
@@ -52,7 +55,12 @@ export type PairingRequest = {
   /** Toast label while the paired import runs. */
   taskLabel: string
   /** Re-runs the import with the pairings; resolves to the toast's success summary. */
-  submit: (nameMappings: Record<string, string>, rejectedNames: string[]) => Promise<string>
+  submit: (
+    nameMappings: Record<string, string>,
+    rejectedNames: string[],
+    /** Live progress for the toast's bar, when the import can report it. */
+    report: (progress: ImportTaskProgress) => void
+  ) => Promise<string>
   /** Runs when the coach skips, or submits with nothing paired. */
   onSkip?: () => void
 }
@@ -157,6 +165,20 @@ export default function AthletePairingProvider({ children }: { children: ReactNo
   }, [])
 
   const current = queue[0]
+  const dialogOpen = Boolean(current) && blockers === 0 && creating === null
+
+  // The dialog pops up on its own when an import finishes, often mid-click on the page
+  // behind it — ignore backdrop clicks / Escape for a moment so that click doesn't skip
+  // the whole batch. Skip still works immediately.
+  const shownAt = useRef(0)
+  useEffect(() => {
+    if (dialogOpen) shownAt.current = Date.now()
+  }, [dialogOpen, current?.id])
+
+  function dismiss() {
+    if (Date.now() - shownAt.current < DISMISS_GRACE_MS) return
+    skip()
+  }
 
   function remove(id: number) {
     setQueue((prev) => prev.filter((r) => r.id !== id))
@@ -231,9 +253,8 @@ export default function AthletePairingProvider({ children }: { children: ReactNo
     }
 
     remove(request.id)
-    startTask(
-      request.taskLabel,
-      request.submit(nameMappings, rejectedNames).catch((err: unknown) => {
+    startTask(request.taskLabel, (report) =>
+      request.submit(nameMappings, rejectedNames, report).catch((err: unknown) => {
         // Bring the dialog back with the coach's picks so a failed import doesn't lose them.
         const error = err instanceof Error ? err.message : "Import failed"
         setQueue((prev) => [{ ...request, error }, ...prev])
@@ -251,8 +272,8 @@ export default function AthletePairingProvider({ children }: { children: ReactNo
     <AthletePairingContext.Provider value={{ requestPairing, block }}>
       {children}
       <Modal
-        open={Boolean(current) && blockers === 0 && creating === null}
-        onClose={skip}
+        open={dialogOpen}
+        onClose={dismiss}
         title="Pair unmatched athletes"
         description={current?.description}
         onSubmit={handleSubmit}

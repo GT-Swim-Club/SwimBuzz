@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import type { ReactNode } from "react"
 import type { RecordEventDef, RecordGender, TeamRecordRow } from "@swimbuzz/shared"
 import { ledgerHeaderClass } from "@/components/meet/Ledger"
 import { RecordNames, RecordTime, RecordYear, recordHref, type SideProps } from "./RecordCells"
@@ -50,11 +49,9 @@ function SideHeader({ mirrored }: { mirrored: boolean }) {
 /** The records sheet layout, for wide screens (lg+). */
 export default function RecordsTable({
   rows,
-  action,
   onOpenHistory,
 }: {
   rows: TeamRecordRow[]
-  action?: ReactNode
   onOpenHistory: (def: RecordEventDef, gender: RecordGender) => void
 }) {
   return (
@@ -62,12 +59,7 @@ export default function RecordsTable({
       <div className={`grid ${COLS} border-b border-border bg-fill-secondary/60`}>
         <h2 className={`col-span-3 py-3 text-center ${ledgerHeaderClass}`}>Women&apos;s Records</h2>
         <p className={`whitespace-nowrap border-x border-border px-2 py-3 text-center ${ledgerHeaderClass}`}>Georgia Tech Swim Club</p>
-        <div className="relative col-span-3 flex items-center justify-center">
-          <h2 className={`py-3 text-center ${ledgerHeaderClass}`}>Men&apos;s Records</h2>
-          {/* z-20: the translate makes this its own stacking context, so the share menu's z-index only
-              counts inside it — without this the rows below (positioned year cells) paint over the menu. */}
-          {action ? <div className="absolute right-2 top-1/2 z-20 flex -translate-y-1/2 items-center gap-1">{action}</div> : null}
-        </div>
+        <h2 className={`col-span-3 py-3 text-center ${ledgerHeaderClass}`}>Men&apos;s Records</h2>
       </div>
       <div className={`grid ${COLS} border-b border-fill`}>
         <SideHeader mirrored={false} />

@@ -173,22 +173,30 @@ export default function MeetsClientWrapper({
   const filters = useMeetsFilters()
   const { layout } = useListLayout()
   const [pastSeason, setPastSeason] = useState<string | null>(null)
-  const scope = canScope ? filters.scope : "all"
-  const pool = scope === "mine" ? meets.filter((m) => m.mine) : meets
+  const scope =
+    (filters.scope === "mine" && canScope) || (filters.scope === "no-results" && isCoach) ? filters.scope : "all"
+  const pool =
+    scope === "mine"
+      ? meets.filter((m) => m.mine)
+      : scope === "no-results"
+        ? meets.filter((m) => !m.upcoming && !m.hasSwims)
+        : meets
   const upcoming = pool.filter((m) => m.upcoming).sort((a, b) => +new Date(a.startsAt) - +new Date(b.startsAt))
   const past = pool.filter((m) => !m.upcoming).sort((a, b) => +new Date(b.startsAt) - +new Date(a.startsAt))
 
   // With nothing upcoming, the gallery gives the most recent meet its own
   // "Last meet" section (unless searching) and drops it from the past list
   // below. The list keeps it in place — a lone row wouldn't stand out anyway.
-  const lastMeet = layout === "gallery" && !query && upcoming.length === 0 ? past[0] : undefined
+  const lastMeet =
+    layout === "gallery" && !query && scope !== "no-results" && upcoming.length === 0 ? past[0] : undefined
   const pastInView = past.filter((m) => m !== lastMeet)
   // The current season leads with what's coming up (soonest first), then what
   // already happened (latest first); older seasons follow below.
   const headlineSeason = currentSeason()
   const seasonPast = pastInView.filter((m) => m.season === headlineSeason)
   const olderPast = pastInView.filter((m) => m.season !== headlineSeason)
-  // Past seasons show one season at a time, newest first, picked from the section heading's dropdown.
+  // Past seasons show one season at a time, newest first, picked from the section heading's dropdown
+  // (except under No results, which lists them all).
   const pastSeasons = [...new Set(olderPast.map((m) => m.season))].sort().reverse()
   const pageSeason = pastSeason && pastSeasons.includes(pastSeason) ? pastSeason : pastSeasons[0]
   const sections: {
@@ -206,6 +214,16 @@ export default function MeetsClientWrapper({
         { kind: "past" as const, items: seasonPast },
       ],
     },
+    // No results lists every past season at once (one section each) so nothing
+    // waiting on an import hides behind the season dropdown.
+    ...(scope === "no-results"
+      ? pastSeasons.map((season) => ({
+          key: `past-${season}`,
+          label: formatSeasonLabel(season),
+          aside: undefined,
+          groups: [{ kind: "past" as const, items: olderPast.filter((m) => m.season === season) }],
+        }))
+      : []),
     {
       key: "past",
       // With one past season the heading names it; with more, the dropdown beside it does.
@@ -214,7 +232,12 @@ export default function MeetsClientWrapper({
         pageSeason && pastSeasons.length > 1 ? (
           <PastSeasonSelect seasons={pastSeasons} value={pageSeason} onChange={setPastSeason} />
         ) : undefined,
-      groups: [{ kind: "past" as const, items: olderPast.filter((m) => m.season === pageSeason) }],
+      groups: [
+        {
+          kind: "past" as const,
+          items: scope === "no-results" ? [] : olderPast.filter((m) => m.season === pageSeason),
+        },
+      ],
     },
   ]
     .map((s) => ({ ...s, groups: s.groups.filter((g) => g.items.length > 0) }))
@@ -286,8 +309,10 @@ export default function MeetsClientWrapper({
       <div className="rounded-xl border border-border bg-background px-4 py-12 text-center text-sm text-foreground-secondary">
         {query
           ? "No meets match your search."
-          : scope === "mine"
-            ? "No meets match these filters."
+          : scope === "no-results"
+            ? "Every past meet has results."
+            : scope === "mine"
+              ? "No meets match these filters."
             : `No meets yet.${isCoach ? " Create one to start tracking results." : ""}`}
       </div>
     )

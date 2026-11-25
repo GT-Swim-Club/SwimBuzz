@@ -4,6 +4,7 @@ import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import ActionIcon from "@/components/ui/ActionIcon"
+import { AppIcon } from "@/components/ui/AppIcon"
 import HoverDetail from "@/components/ui/HoverDetail"
 import { ICON_BUTTON, ICON_BUTTON_DANGER, SwimCloudProfileLinks } from "./AthleteIconButton"
 import SwimCloudIdsInput, { useSwimCloudIdsField } from "@/components/athlete/SwimCloudIdsInput"
@@ -19,6 +20,7 @@ type AthleteActionsProps = {
   email: string
   swimCloudIds: number[]
   preferredName: string | null
+  gender: "M" | "F"
   gtid: string | null
   /** "YYYY-MM-DD", the Eastern calendar day it's stored on. */
   dob: string | null
@@ -38,6 +40,7 @@ export default function AthleteActions({
   email,
   swimCloudIds,
   preferredName,
+  gender,
   gtid,
   dob,
   seasons,
@@ -56,6 +59,7 @@ export default function AthleteActions({
     lastName,
     email,
     preferredName: preferredName ?? "",
+    gender,
     gtid: gtid ?? "",
     dob: dob ?? "",
   })
@@ -68,6 +72,7 @@ export default function AthleteActions({
       lastName,
       email,
       preferredName: preferredName ?? "",
+      gender,
       gtid: gtid ?? "",
       dob: dob ?? "",
     })
@@ -91,6 +96,7 @@ export default function AthleteActions({
           email: form.email,
           swimCloudIds: swimCloud.allIds,
           preferredName: form.preferredName,
+          gender: form.gender,
           gtid: form.gtid === "" ? null : form.gtid,
           dob: form.dob === "" ? null : form.dob,
           yearBySeason: Object.fromEntries(seasons.map((season) => [season, years[season]?.trim() || null])),
@@ -232,16 +238,39 @@ export default function AthleteActions({
           </div>
         </div>
 
-        <div>
-          <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
-            Preferred name
-          </label>
-          <input
-            type="text"
-            value={form.preferredName}
-            onChange={(e) => setForm((f) => ({ ...f, preferredName: e.target.value }))}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary focus:ring-[3px] focus:ring-primary/35"
-          />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <label className="block text-xs font-medium text-foreground-secondary mb-1">
+              Preferred name
+            </label>
+            <input
+              type="text"
+              value={form.preferredName}
+              onChange={(e) => setForm((f) => ({ ...f, preferredName: e.target.value }))}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary focus:ring-[3px] focus:ring-primary/35"
+            />
+          </div>
+          <div>
+            <label htmlFor="edit-athlete-gender" className="block text-xs font-medium text-foreground-secondary mb-1">
+              Gender <span className="text-error">*</span>
+            </label>
+            <div className="relative">
+              <select
+                id="edit-athlete-gender"
+                required
+                value={form.gender}
+                onChange={(e) => setForm((f) => ({ ...f, gender: e.target.value as "M" | "F" }))}
+                className="w-full appearance-none rounded-lg border border-border bg-background py-2 pl-3 pr-9 text-sm text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary focus:ring-[3px] focus:ring-primary/35"
+              >
+                <option value="F">Women</option>
+                <option value="M">Men</option>
+              </select>
+              <AppIcon
+                name="chevronDown"
+                className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground-tertiary"
+              />
+            </div>
+          </div>
         </div>
 
         <div>

@@ -1474,7 +1474,7 @@
         {
           "age": 20,
           "leg": 2,
-          "name": "Pierre, Ella",
+          "name": "St. Pierre, Ella",
           "splitTime": "31.27"
         },
         {
@@ -2427,7 +2427,7 @@
       "event": "200 Free",
       "gender": "M",
       "name": "Williams, Mayon",
-      "place": null,
+      "place": 8,
       "points": 11.0,
       "splits": [
         {
@@ -4286,7 +4286,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Pierre, Ella",
+      "name": "St. Pierre, Ella",
       "place": 49,
       "tags": "",
       "team": "FSUC",
@@ -10149,7 +10149,7 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
-      "name": "Pierre, Ella",
+      "name": "St. Pierre, Ella",
       "place": 30,
       "tags": "",
       "team": "FSUC",

@@ -22,6 +22,8 @@ const nextConfig: NextConfig = {
   // so sharp fails to load on Vercel (ERR_DLOPEN_FAILED). Include it explicitly.
   outputFileTracingIncludes: {
     "/api/meets/*": ["./node_modules/@img/**/*", "../../node_modules/@img/**/*"],
+    // The Top 10 PDF reads the club logo from public/ (not bundled into functions by default).
+    "/api/records/top/pdf": ["./public/swimbuzz-logo.png"],
   },
   transpilePackages: [
     // Prefer not pulling workspace packages into web server routes; mobile uses @swimbuzz/*.

@@ -21,6 +21,7 @@ export type UpdateAthleteInput = {
   /** Main profile first; replaces the stored list. */
   swimCloudIds?: number[]
   preferredName?: string | null
+  gender?: "M" | "F"
   gtid?: string | null
   /** "YYYY-MM-DD". */
   dob?: string | null
@@ -69,6 +70,11 @@ export async function updateAthlete(athleteId: string, input: UpdateAthleteInput
 
   if (input.preferredName !== undefined) {
     data.preferredName = normalizePreferredName(input.preferredName)
+  }
+
+  if (input.gender !== undefined && input.gender !== athlete.gender) {
+    if (input.gender !== "M" && input.gender !== "F") throw new Error("Choose a gender")
+    data.gender = input.gender
   }
 
   if (input.swimCloudIds !== undefined) {
@@ -143,6 +149,8 @@ export async function updateAthlete(athleteId: string, input: UpdateAthleteInput
   // When the slug changed, the page the caller is on (old slug) would 404 on re-render, so it
   // skips the revalidation: the client swaps in the new URL and calls router.refresh() itself.
   if (updated.slug === athlete.slug) revalidatePath("/athletes/[id]", "page")
+  // The roster's gender filter and grouping read it.
+  if (data.gender !== undefined) revalidatePath("/athletes")
   return updated
 }
 

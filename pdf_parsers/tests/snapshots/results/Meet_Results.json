@@ -2437,7 +2437,7 @@
       "place": 4,
       "points": 15.0,
       "tags": "",
-      "team": "Rose Mercer University Swim Club-GA",
+      "team": "Mercer University Swim Club-GA",
       "time": "2:07.34"
     },
     {
@@ -6509,7 +6509,7 @@
       "place": 7,
       "points": 12.0,
       "tags": "",
-      "team": "Rose Mercer University Swim Club-GA",
+      "team": "Mercer University Swim Club-GA",
       "time": "31.79"
     },
     {
@@ -7609,7 +7609,7 @@
       "place": 4,
       "points": 15.0,
       "tags": "",
-      "team": "Rose Mercer University Swim Club-GA",
+      "team": "Mercer University Swim Club-GA",
       "time": "57.15"
     },
     {
@@ -9292,13 +9292,13 @@
       },
       {
         "place": 8,
-        "points": 159.0,
-        "team": "Alabama Club Swimming"
+        "points": 160.0,
+        "team": "Mercer University Swim Club"
       },
       {
         "place": 9,
-        "points": 118.0,
-        "team": "Mercer University Swim Club"
+        "points": 159.0,
+        "team": "Alabama Club Swimming"
       },
       {
         "place": 10,
@@ -9312,11 +9312,6 @@
       },
       {
         "place": 12,
-        "points": 42.0,
-        "team": "Rose Mercer University Swim Club"
-      },
-      {
-        "place": 13,
         "points": 7.0,
         "team": "Mississippi State Swim Club"
       }
@@ -9422,13 +9417,13 @@
       },
       {
         "place": 8,
-        "points": 61.0,
-        "team": "University of North Alabama"
+        "points": 67.0,
+        "team": "Mercer University Swim Club"
       },
       {
         "place": 9,
-        "points": 42.0,
-        "team": "Rose Mercer University Swim Club"
+        "points": 61.0,
+        "team": "University of North Alabama"
       },
       {
         "place": 10,
@@ -9437,11 +9432,6 @@
       },
       {
         "place": 11,
-        "points": 25.0,
-        "team": "Mercer University Swim Club"
-      },
-      {
-        "place": 12,
         "points": 21.0,
         "team": "Georgia College and State Univ"
       }

@@ -768,7 +768,7 @@ function summaryRowView(
         ? relayLetter
         : entry.athleteName
       : isRelay
-        ? relayDisplayName(eventName, displayRelayLetter(entry.relayLetter))
+        ? relayDisplayName(eventName, displayRelayLetter(entry.relayLetter), false, entry.gender)
         : eventName,
     team: !eventView && isRelay && swimmer ? (legSplit ?? undefined) : undefined,
     teamPill,
@@ -829,8 +829,8 @@ function summaryRowPdf(
   // letter folded in rather than repeated in the meta — spelled out ("200 Medley Relay A") where
   // the line has room.
   const relayLetter = displayRelayLetter(entry.relayLetter)
-  const relayName = eventView ? view.label : relayDisplayName(entry.event, relayLetter, true)
-  const relayFullName = eventView ? undefined : relayDisplayName(entry.event, relayLetter)
+  const relayName = eventView ? view.label : relayDisplayName(entry.event, relayLetter, true, entry.gender)
+  const relayFullName = eventView ? undefined : relayDisplayName(entry.event, relayLetter, false, entry.gender)
   const startTime = (display.showHeatLane && entry.startTime) || undefined
   // As on screen, a relay athlete's leg follows the name ("200 Medley A (4th)") and their split
   // sits under the time; the round rides beside the name (then any result tags). Under the name go
@@ -1182,11 +1182,11 @@ function SummaryEntryRow({
           !eventView && isRelay ? (
             legSuffix ? (
               <>
-                {relayDisplayName(view.eventName, displayRelayLetter(entry.relayLetter), true)}
+                {relayDisplayName(view.eventName, displayRelayLetter(entry.relayLetter), true, entry.gender)}
                 {legSuffix}
               </>
             ) : (
-              relayDisplayName(view.eventName, displayRelayLetter(entry.relayLetter), true)
+              relayDisplayName(view.eventName, displayRelayLetter(entry.relayLetter), true, entry.gender)
             )
           )
             : eventView && !isRelay && splitRosterName(entry.athleteName).preferred

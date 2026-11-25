@@ -2,14 +2,19 @@
 
 import { useSearchParams } from "next/navigation"
 
-export type MeetsScope = "all" | "mine"
+/** "no-results": past meets whose results haven't been imported yet (staff only). */
+export type MeetsScope = "all" | "mine" | "no-results"
 
 /**
- * Scope / Trash filters for /meets, read from the URL. Writes go through
+ * Scope (All / My meets / No results) / Trash filters for /meets, read from the URL. Writes go through
  * `history.replaceState`, which Next.js syncs into `useSearchParams` without a
  * server round trip — both filters are applied client-side
  * (Trash fetches its own data), so changing a dropdown is instant.
  */
+function parseScope(value: string | null): MeetsScope {
+  return value === "mine" || value === "no-results" ? value : "all"
+}
+
 export function useMeetsFilters() {
   const searchParams = useSearchParams()
 
@@ -25,7 +30,7 @@ export function useMeetsFilters() {
 
   return {
     query: searchParams.get("q")?.trim() ?? "",
-    scope: (searchParams.get("scope") === "mine" ? "mine" : "all") as MeetsScope,
+    scope: parseScope(searchParams.get("scope")),
     inTrash: searchParams.get("view") === "deleted",
     setFilters,
   }

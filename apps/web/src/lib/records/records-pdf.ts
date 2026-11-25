@@ -1,7 +1,7 @@
 import { jsPDF } from "jspdf"
 import {
-  MANUAL_RECORD_FOOTNOTE,
   MANUAL_RECORD_MARK,
+  MANUAL_RECORD_NOTE,
   RECORDS_EXPORT,
   recordSwimmerName,
   recordTimeLabel,
@@ -13,7 +13,7 @@ import {
 
 export type RecordsPdfInput = {
   rows: TeamRecordRow[]
-  /** "Rev. Nov 9, 2026", in the mixed relay's empty men's cell at the table's bottom right. */
+  /** "Rev. Nov 9, 2026", in the mixed relay's empty men's cell at the table's bottom right (under "*Unverified"). */
   asOf: string
 }
 
@@ -41,6 +41,8 @@ const TABLE = {
   asOfSize: px(12),
   /** The date's distance from the empty cell's bottom and right edges. */
   asOfInset: px(8),
+  /** Baseline to baseline from "*Unverified" down to the date. */
+  asOfLineHeight: px(16),
   labelHeight: px(24),
   labelSize: px(9),
   labelCharSpace: px(1.1),
@@ -245,11 +247,19 @@ function drawRecordsPdf(input: RecordsPdfInput, orientation: "portrait" | "lands
     const record = (gender: RecordGender) => row.records[gender]
     drawSide(record(mixed ? "X" : "F"), womenColumns, y, rowHeight)
     if (mixed) {
-      // The empty cell holds the date, at its bottom right, and any "*" footnote at its top left.
+      // The empty cell holds the date at its bottom right, with what the gold "*" means
+      // ("*Unverified") just above it when any record carries one.
+      const asOfRight = menX + sideWidth - m.asOfInset
+      const asOfBaseline = y + rowHeight - m.asOfInset
       setType("normal", m.asOfSize, INK_SECONDARY)
-      doc.text(input.asOf, menX + sideWidth - m.asOfInset, y + rowHeight - m.asOfInset, { align: "right" })
+      doc.text(input.asOf, asOfRight, asOfBaseline, { align: "right" })
       if (anyManual) {
-        doc.text(fit(MANUAL_RECORD_FOOTNOTE, sideWidth - m.asOfInset * 2), menX + m.asOfInset, y + m.asOfInset + m.asOfSize * 0.75)
+        const noteBaseline = asOfBaseline - m.asOfLineHeight
+        setType("normal", m.asOfSize, INK_TERTIARY)
+        doc.text(MANUAL_RECORD_NOTE, asOfRight, noteBaseline, { align: "right" })
+        const noteWidth = doc.getTextWidth(MANUAL_RECORD_NOTE)
+        doc.setTextColor(...ACCENT)
+        doc.text(MANUAL_RECORD_MARK, asOfRight - noteWidth, noteBaseline, { align: "right" })
       }
     } else {
       drawSide(record("M"), menColumns, y, rowHeight)

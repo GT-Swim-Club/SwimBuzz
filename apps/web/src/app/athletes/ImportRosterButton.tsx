@@ -12,7 +12,7 @@ import ImportIcon from "./ImportIcon"
 import { useImportTask } from "@/components/ui/ImportTaskProvider"
 import { FileDropzone, FileDropzoneContent, fileDropzoneSurfaceClassName } from "@/components/ui/FileDropzone"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/ui/SegmentedToggle"
-import { postRosterImport } from "@/lib/roster/roster-import-client"
+import { postImportStream } from "@/lib/import-stream-client"
 import { pickSpreadsheet, type PickedSpreadsheet } from "@/lib/roster/google-picker-client"
 
 type ImportSource = "csv" | "sheets"
@@ -126,7 +126,7 @@ export default function ImportRosterButton({
       startTask(
         "Importing roster (Google Sheets)…",
         async (report) => {
-          const data = await postRosterImport<RosterReplaceResult>(
+          const data = await postImportStream<RosterReplaceResult>(
             "/api/roster/import/sheet",
             {
               headers: { "Content-Type": "application/json" },
@@ -157,7 +157,7 @@ export default function ImportRosterButton({
         body.append("file", file, file.name)
         body.append("season", season)
 
-        const data = await postRosterImport<RosterReplaceResult>("/api/roster/import", { body }, report)
+        const data = await postImportStream<RosterReplaceResult>("/api/roster/import", { body }, report)
 
         router.refresh()
         return formatRosterReplaceResult(data)

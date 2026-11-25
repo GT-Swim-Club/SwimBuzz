@@ -37,9 +37,8 @@ function TableSkeleton() {
         <div className="flex justify-center border-x border-border-secondary py-3.5">
           <Skeleton className="h-3 w-40" />
         </div>
-        <div className="relative col-span-3 flex justify-center py-3.5">
+        <div className="col-span-3 flex justify-center py-3.5">
           <Skeleton className="h-3 w-28" />
-          <Skeleton className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 rounded-md" />
         </div>
       </div>
       <div className={`grid ${COLS} border-b border-border-secondary`}>
@@ -104,10 +103,17 @@ function ListSkeleton() {
 export default function RecordsSkeleton() {
   return (
     <>
-      <div className="flex h-[42px] w-full items-center gap-1 rounded-lg border border-border-secondary bg-background p-1 sm:w-56">
-        <Skeleton className="h-full flex-1 rounded-md" />
-        <div className="flex flex-1 justify-center">
-          <Skeleton className="h-3.5 w-12" />
+      <div className="flex items-center gap-2">
+        <div className="flex h-[42px] w-full items-center gap-1 rounded-lg border border-border-secondary bg-background p-1 sm:w-56">
+          <Skeleton className="h-full flex-1 rounded-md" />
+          <div className="flex flex-1 justify-center">
+            <Skeleton className="h-3.5 w-12" />
+          </div>
+        </div>
+        {/* The "*Unverified" note and share button, above the sheet table (lg+). */}
+        <div className="ml-auto hidden items-center gap-2.5 lg:flex">
+          <Skeleton className="h-3 w-16" />
+          <Skeleton className="h-8 w-8 rounded-md" />
         </div>
       </div>
       <TableSkeleton />

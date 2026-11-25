@@ -27,6 +27,14 @@ from .swim_common import (
 _pdf_has_points_column: contextvars.ContextVar[bool] = contextvars.ContextVar(
     "_pdf_has_points_column", default=False
 )
+# Whether the current PDF prints a seed (or prelim) time column before the
+# finals time. Without one a row carries a single swum time, so a trailing
+# time-shaped number is the Points column — a tie's split points ("*11 … 28.03
+# 5.50") — not a final after a seed.
+_pdf_has_seed_column: contextvars.ContextVar[bool] = contextvars.ContextVar(
+    "_pdf_has_seed_column", default=True
+)
+_SEED_COLUMN_HEADING = re.compile(r"\b(?:Seed|Prelims?)\s+Time\b", re.I)
 
 # CID ligatures from Hy-Tek PDFs (e.g., "Butter(cid:976)ly" where 976 = 'f')
 _CID_LIGATURES = {
@@ -39,18 +47,20 @@ _CID_LIGATURES = {
 # NT/NQT are excluded — those mean "no time" in a *seed*-time context, not a
 # scratched race, and don't appear as an official-result marker.
 _SCRATCH_STATUS_TOKENS = INVALID_TIMES - {"NT", "NQT"}
+# An exhibition swim's status carries the time's "x" ("XDQ", "XNS"); "status" is the bare token.
 SCRATCH_MARKER = re.compile(
-    rf"(?<![A-Za-z])(?:{'|'.join(sorted(_SCRATCH_STATUS_TOKENS, key=len, reverse=True))})(?![A-Za-z])"
+    rf"(?<![A-Za-z])[xX]?(?P<status>{'|'.join(sorted(_SCRATCH_STATUS_TOKENS, key=len, reverse=True))})(?![A-Za-z])"
 )
 
 # A swimmer's name as Hy-Tek prints it: "Last, First". Last names may be several
 # words, start with a lowercase particle ("van den Bosch", "del Aguila", "Van de
 # Goor") and carry accented letters ("Galvaàn"); only the first given name is kept.
 NAME_LETTERS = r"A-Za-zÀ-ÖØ-öø-ÿ'\-"
-NAME_PARTICLE = r"(?:d[aeiou]|del|della|der|den|dos|das|la|le|van|von|ten|ter|y|st\.?)"
+# "St." is printed capitalized too ("St. Pierre, Richard").
+NAME_PARTICLE = r"(?:d[aeiou]|del|della|der|den|dos|das|la|le|van|von|ten|ter|y|[Ss]t\.?)"
 NAME_WORD = rf"[A-ZÀ-ÖØ-Þ][{NAME_LETTERS}]+"
-# A given name can be a lone initial ("Lobitz, C").
-FIRST_NAME = rf"[A-ZÀ-ÖØ-Þ][{NAME_LETTERS}]*"
+# A given name can be a lone initial ("Lobitz, C") or dotted initials ("Reed, T.J.").
+FIRST_NAME = rf"(?:[A-Z](?:\.[A-Z])*\.(?=\s)|[A-ZÀ-ÖØ-Þ][{NAME_LETTERS}]*)"
 LAST_NAME = rf"(?:{NAME_PARTICLE}\s+)*{NAME_WORD}(?:\s+(?:{NAME_PARTICLE}\s+)*{NAME_WORD})*"
 SWIMMER_NAME = rf"{LAST_NAME},\s*{FIRST_NAME}"
 
@@ -84,6 +94,7 @@ _ROUND_PRELIM_SECTION = re.compile(
 )
 _ROUND_ABC_FINAL = re.compile(r"[ABCD]\s*-\s*Finals?\b", re.I)
 _ROUND_BARE_FINAL = re.compile(r"^Finals?\s*$", re.I)
+_FINALS_COLUMN_HEADING = re.compile(r"\bPrelims?\s*Time\s+Finals?\s*Time\b", re.I)
 
 # Leadoff swimmer of a relay, e.g. "1) Chimidkhorloo, Sarnai 18 2) Mrzyglod, Sabina 22"
 LEADOFF_NAME = re.compile(
@@ -106,9 +117,14 @@ RELAY_LEG = re.compile(
 # scratched row is recognized (and its stale swimmer-roster block flushed)
 # instead of falling through unrecognized and letting the next team's roster
 # lines merge into whatever relay was parsed last.
+# Team words take "A&M" / "S&T", "A-State" and a comma ("University of Tennessee, Knoxv").
+# Hy-Tek cuts team names at 30 characters, so one can end in a lone letter ("Northeastern
+# University Swim C A 1:59.07"): that letter is the team's when another follows it.
+_RELAY_TEAM_WORD = r"(?:[A-Z][A-Za-z'’]+|(?-i:[A-Z]+&[A-Z]+)|(?-i:[A-Z])-[A-Z][A-Za-z]+),?\.?"
 RELAY_TEAM_RESULT = re.compile(
     r"^\*?(\d+|-{2,3})\s+"
-    r"((?:(?:[A-Z][A-Za-z'’]+\.?|&)\s+)*[A-Z][A-Za-z'’]+\.?(?:-[A-Z]{2})?)\s+"
+    rf"((?:(?:{_RELAY_TEAM_WORD}|&)\s+)*{_RELAY_TEAM_WORD}(?:-[A-Z]{{2}})?"
+    r"(?:\s+(?-i:[A-Z])(?=\s+(?-i:[A-Z])\s))?)\s+"
     # The letter is a lone capital ("A".."G"); never the "x" of an exhibition time.
     r"(?:((?-i:[A-Z]))\s+)?"
     r"(.+)$",
@@ -117,6 +133,10 @@ RELAY_TEAM_RESULT = re.compile(
 
 
 _HYTEK_BANNER = re.compile(r"hy-tek|meet manager", re.I)
+
+# A diving event ("#47 Women 3 mtr Diving"): its scores ("1 Oscar, Meagan CU 206.15") are
+# never swims, nor legs of the relay before it.
+DIVING_EVENT_HEADER = re.compile(r"^\(?(?:Event\s+\d+|#\d+)\b.*\bDiving\b", re.I)
 
 MEET_DATE = re.compile(r"\b(\d{1,2})/(\d{1,2})/(\d{2}|\d{4})\b")
 _MONTH_NAMES: dict[str, int] = {
@@ -363,8 +383,9 @@ def strip_points_column(line: str) -> str:
     # Count times by looking for time patterns (to avoid infinite recursion with extract_times_from_line)
     times = re.findall(EXHIBITION_TIME_TOKEN_PATTERN, line, re.I)
     
-    # If exactly 2 times (seed and final), no points value present
-    if len(times) == 2:
+    # If exactly 2 times (seed and final), no points value present — unless the
+    # PDF has no seed column, where the second "time" is a tie's points ("5.50").
+    if len(times) == 2 and _pdf_has_seed_column.get():
         return line
     
     # Otherwise the last numeric value may be points - strip it, but only when a
@@ -748,13 +769,23 @@ def parse_team_from_line(line: str) -> str | None:
     # e.g. 'Georgia Tech Swim Club-GA' or 'Uncw Club Swim-NC'. A team word is
     # never a status token, so an "NT" seed isn't swallowed into the name.
     team_word = rf"(?!(?:{INVALID_TIME_PATTERN})\b)[A-Z][A-Za-z]+"
+    # Hy-Tek cuts a full team name at 30 characters, so it can end mid-phrase
+    # ("Club Swim at the University of", "Northeastern University Swim C") and its words
+    # can carry "&", an apostrophe, a hyphen or a comma ("Texas A&M University Club Swim",
+    # "Liberty University Men's Swimm", "A-State Swimming", "University of Tennessee, Knoxv").
+    full_team_word = (
+        rf"(?!(?:{INVALID_TIME_PATTERN})\b)"
+        r"(?:[A-Z][A-Za-z'’]+|[A-Z]+&[A-Z]+|[A-Z]-[A-Z][A-Za-z]+),?"
+    )
+    connector = r"(?:of|at|the|and|&)"
     full_match = re.search(
         rf"(?:{SWIMMER_NAME})"
         r"(?:\s+[A-Z]\.?(?=\s))?"
         + MORE_GIVEN_NAMES +
         r"(?:\s+\d{1,3})?"
-        rf"\s+((?:{team_word}\s+(?:(?:of|at|the|and|&)\s+)?){{1,6}}(?:{team_word})(?:-[A-Z]{{2}})?)"
-        rf"\s+(?:{INVALID_TIME_PATTERN}|{TIME_TOKEN_PATTERN})",
+        rf"\s+((?:{full_team_word}\s+(?:{connector}\s+)*){{1,6}}"
+        rf"(?:{full_team_word}(?:-[A-Z]{{2}})?|{connector}|(?!(?:{INVALID_TIME_PATTERN})\b)[A-Z]))"
+        rf"\s+[xX]?(?:{INVALID_TIME_PATTERN}|{TIME_TOKEN_PATTERN})",
         line,
     )
     if full_match:
@@ -974,6 +1005,29 @@ def parse_event_from_line(line: str) -> str | None:
     return normalize_event(match.group(1), match.group(2))
 
 
+def drop_given_name_from_teams(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Without an Age column nothing ends a swimmer's given names, so a second one can lead
+    the team ("Stanley, Mary Grace Auburn Club Swim Team" → team "Grace Auburn Club Swim
+    Team"). A team that is another, commoner team of this PDF behind one given-name-like word
+    is that team."""
+    counts: dict[str, int] = {}
+    for row in results:
+        team = row.get("team")
+        if team:
+            counts[team] = counts.get(team, 0) + 1
+    for row in results:
+        team = row.get("team")
+        if not team or " " not in team:
+            continue
+        first, rest = team.split(" ", 1)
+        if (
+            re.fullmatch(r"[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'\-]+", first)
+            and counts.get(rest, 0) > counts[team]
+        ):
+            row["team"] = rest
+    return results
+
+
 def dedupe_results(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
     seen: set[tuple[str, str, str, str]] = set()
     unique: list[dict[str, Any]] = []
@@ -1046,7 +1100,7 @@ def parse_table_rows(table: list[list[Any]], current_event: str | None, course: 
                 {
                     "name": name,
                     "event": event,
-                    "time": scratch.group(0).upper(),
+                    "time": scratch.group("status").upper(),
                     "course": course,
                     "tags": "",
                     "place": place,
@@ -1371,7 +1425,7 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
             last_result_indices = []
             continue
 
-        if LEAD_OFF_EVENT_HEADER.search(stripped):
+        if LEAD_OFF_EVENT_HEADER.search(stripped) or DIVING_EVENT_HEADER.search(stripped):
             flush_pending_splits()
             current_event = None
             in_relay_section = False
@@ -1461,7 +1515,7 @@ def parse_text_lines(lines: list[str], course: str) -> list[dict]:
             row = {
                 "name": name,
                 "event": current_event,
-                "time": scratch.group(0).upper(),
+                "time": scratch.group("status").upper(),
                 "course": course,
                 "tags": SWIM_OFF_TAG if in_swim_off else current_round or "",
                 "place": place,
@@ -1546,6 +1600,10 @@ def parse_round_section(line: str) -> str | None:
         return None
     if re.search(r"Timed\s+Finals?", stripped, re.I):
         return None
+    # A finals table's column headings ("Team Relay Prelim Time Finals Time Points") — on a
+    # page that continues a B final, right under "B - Final ... (Event 15 …)".
+    if _FINALS_COLUMN_HEADING.search(stripped):
+        return "F"
     if _ROUND_PRELIM_SECTION.search(stripped):
         return "P"
     if _ROUND_ABC_FINAL.search(stripped):
@@ -1813,7 +1871,11 @@ def parse_relay_results(lines: list[str], course: str) -> list[dict[str, Any]]:
 
         # The team standings after the last event end any relay block — their
         # "University of Tennessee, Knoxv 253" would otherwise read as a swimmer.
-        if (parse_event_from_line(line) and "relay" not in line.lower()) or _scores_section(line):
+        if (
+            (parse_event_from_line(line) and "relay" not in line.lower())
+            or _scores_section(line)
+            or DIVING_EVENT_HEADER.search(line)
+        ):
             flush_block()
             current_event = None
             current_gender = ""
@@ -1827,6 +1889,15 @@ def parse_relay_results(lines: list[str], course: str) -> list[dict[str, Any]]:
             continue
 
         team_match = RELAY_TEAM_RESULT.match(line)
+        # A legs line that starts with the previous line's overflowed age ("19 Gregurich,
+        # Annie 19 Coolman, Katherine 19") reads like "place team"; it has no time or status.
+        if (
+            team_match
+            and "," in team_match.group(2)
+            and not re.search(EXHIBITION_TIME_TOKEN_PATTERN, team_match.group(4), re.I)
+            and not relay_row_status(team_match.group(4))
+        ):
+            team_match = None
         if team_match:
             flush_block()
             place_str, team_code, letter, tail = team_match.groups()
@@ -1873,6 +1944,13 @@ def parse_relay_results(lines: list[str], course: str) -> list[dict[str, Any]]:
         # Try result format (Name, Name Age)
         if not found_legs:
             matches = re.findall(r"([A-Za-z'\-]+,\s*[A-Za-z'\-]+)(?:\s+(\d+))?", line)
+            # Whole multi-word last names ("Ortiz De Zarate, Valentina 19") when every
+            # name starts the line or follows an age, so none can swallow a given name.
+            whole = re.findall(
+                rf"(?:^|(?<=\d\s))({LAST_NAME},\s*{FIRST_NAME})(?:\s+(\d+))?", line
+            )
+            if whole and len(whole) == len(matches):
+                matches = whole
             
             if matches and block:
                 # Use current length of relaySwimmers to assign leg numbers
@@ -2003,8 +2081,19 @@ _NAME_OVERFLOW_PAST_AGE = re.compile(
 )
 
 
+# On a relay's two-swimmers-per-line roster, a long name pushes its age between the next
+# swimmer's last and first names: "Ortiz De Zarate, Valentina Dresden, 19 Brooke 18".
+# Move that age back in front of the last name it interrupts.
+_LEG_AGE_INSIDE_NEXT_NAME = re.compile(
+    r"(?<=\S)\s+([A-Z][A-Za-z'\-]+,)\s+(\d{1,3})\s+([A-Z][a-z][A-Za-z'\-]*)(?=\s+\d{1,3}(?:\s|$))"
+)
+
+
 def _fix_name_overflow(lines: list[str]) -> list[str]:
-    return [_NAME_OVERFLOW_PAST_AGE.sub(r"\1 \3 \2", line) for line in lines]
+    return [
+        _LEG_AGE_INSIDE_NEXT_NAME.sub(r" \2 \1 \3", _NAME_OVERFLOW_PAST_AGE.sub(r"\1 \3 \2", line))
+        for line in lines
+    ]
 
 
 def group_words_into_lines(words: list[dict], y_tol: float = 3.0) -> list[str]:
@@ -2270,12 +2359,30 @@ def extract_page_lines(
 # "Scores - Women" / "Women - Team Rankings - Through Event 38", and a
 # "(Combined Team Scores)" continuation header when a list runs onto the next page.
 _SCORES_COMBINED = re.compile(r"^\(?\s*Combined\s+Team\s+Scores\b", re.I)
-_SCORES_WOMEN = re.compile(r"\b(?:Women|Girls|Female)\s*-\s*Team\s+Rankings\b", re.I)
-_SCORES_MEN = re.compile(r"\b(?:Men|Boys|Male)\s*-\s*Team\s+Rankings\b", re.I)
+_SCORES_WOMEN = re.compile(r"\b(?:Women|Girls|Female)\s*-\s*Team\s+(?:Rankings|Scores)\b", re.I)
+_SCORES_MEN = re.compile(r"\b(?:Men|Boys|Male)\s*-\s*Team\s+(?:Rankings|Scores)\b", re.I)
+# The individual high-point rankings some PDFs print after the team standings.
+_INDIVIDUAL_SCORES = re.compile(r"\bIndividual\s+(?:Rankings|Scores)\b", re.I)
 # "1. Georgia Tech Swim Club 1815.5" — Day 1 PDFs print two per line.
 _STANDING_ENTRY = re.compile(
     r"(?:^|\s)(\d{1,3})\.\s+(\S.*?)\s+(-?\d+(?:\.\d+)?)(?=\s+\d{1,3}\.\s|\s*$)"
 )
+# "1 Georgia Tech Swim Club Georgia Tech Swim Club 843" — no period after the place, the
+# team printed twice (name and abbreviation columns), thousands commas and a tie's half
+# point split off ("1,132. 50").
+_STANDING_ROW = re.compile(r"^(\d{1,3})\s+(\S.*?)\s+(-?\d{1,3}(?:,\d{3})*(?:\.\s?\d+)?)$")
+
+
+def _standing_row(line: str) -> tuple[int, str, float] | None:
+    match = _STANDING_ROW.match(line)
+    if not match:
+        return None
+    place, team, points = match.groups()
+    words = team.split()
+    half = len(words) // 2
+    if len(words) % 2 == 0 and words[:half] == words[half:]:
+        team = " ".join(words[:half])
+    return int(place), team, float(points.replace(",", "").replace(" ", ""))
 _TEAM_REGION_SUFFIX = re.compile(r"-[A-Z]{2}$")
 
 
@@ -2294,10 +2401,12 @@ def parse_team_scores(lines: list[str]) -> dict[str, list[dict[str, Any]]]:
     """The team standings a results PDF prints, keyed women/men/combined.
 
     A list restarts on each new header for it, so a PDF that prints standings
-    after every session keeps the last (whole-meet) standings.
+    after every session keeps the last (whole-meet) standings — unless the list
+    picks up past 1, as one does when its header repeats atop the next page.
     """
     lists: dict[str, list[dict[str, Any]]] = {}
     section: str | None = None
+    restart = False
     for raw in lines:
         line = raw.strip()
         if not line:
@@ -2305,18 +2414,31 @@ def parse_team_scores(lines: list[str]) -> dict[str, list[dict[str, Any]]]:
         header = _scores_section(line)
         if header:
             section, continuation = header
-            if not continuation:
-                lists[section] = []
+            restart = not continuation
+            lists.setdefault(section, [])
             continue
         if section is None:
             continue
-        if relay_header_match(line) or re.match(r"^(?:Event\s+\d+|#\d+)\b", line, re.I):
+        if (
+            relay_header_match(line)
+            or re.match(r"^(?:Event\s+\d+|#\d+)\b", line, re.I)
+            or _INDIVIDUAL_SCORES.search(line)
+        ):
             section = None
             continue
-        for place, team, points in _STANDING_ENTRY.findall(line):
-            lists[section].append(
-                {"place": int(place), "team": team.strip(), "points": float(points)}
-            )
+        entries = [
+            (int(place), team.strip(), float(points))
+            for place, team, points in _STANDING_ENTRY.findall(line)
+        ]
+        if not entries:
+            row = _standing_row(line)
+            entries = [row] if row else []
+        for place, team, points in entries:
+            if restart:
+                restart = False
+                if place == 1 or not lists[section]:
+                    lists[section] = []
+            lists[section].append({"place": place, "team": team, "points": points})
     return {k: v for k, v in lists.items() if v}
 
 
@@ -2410,11 +2532,20 @@ def _mark_our_team(
 
 
 def build_team_scores(
-    lines: list[str], rows: list[dict[str, Any]], team: str | None
+    lines: list[str],
+    rows: list[dict[str, Any]],
+    team: str | None,
+    standings_lines: list[str] | None = None,
 ) -> dict[str, Any] | None:
     """Women/men/combined standings — printed by the PDF, else computed from
-    its Points column — with our team's entries flagged."""
-    printed = parse_team_scores(lines)
+    its Points column — with our team's entries flagged.
+
+    `standings_lines` are the standings pages' own text lines, read when the
+    column-split lines yield none: a multi-column results layout applied to
+    single-column standings pages scrambles them."""
+    printed = parse_team_scores(lines) or (
+        parse_team_scores(standings_lines) if standings_lines else {}
+    )
     scores = printed or compute_team_scores(rows)
     if not scores:
         return None
@@ -2515,6 +2646,10 @@ TEAM_SEASON_TAG = re.compile(r"\s+['’]\d{2}\s*-\s*['’]\d{2}(?=-[A-Z]{2}\b|\s
 PLACE_EXTRA_TOKEN = re.compile(
     r"^(\*?\d{1,3}|-{2,3})\s+(?:\d{4,7}|\d{1,2}-\d{1,2}-\d{1,2})\s+(?=[A-Za-zÀ-ÿ])"
 )
+# A long name in the column to the left can push its age past the column edge, onto the
+# start of this column's row ("20--- UWM B X2:05.55", "20 64 FGCU A 1:53.90"): a row never
+# starts with two places, so the first number is that age.
+OVERFLOW_AGE = re.compile(r"^\d{1,3}\s*(?=-{3}\s)|^\d{1,3}\s+(?=\*?\d{1,3}\s+[A-Z])")
 
 
 def strip_reaction_times(lines: list[str]) -> list[str]:
@@ -2528,6 +2663,7 @@ def strip_reaction_times(lines: list[str]) -> list[str]:
                 continue
         if "'" in line or "’" in line:
             line = TEAM_SEASON_TAG.sub("", line)
+        line = OVERFLOW_AGE.sub("", line)
         line = PLACE_EXTRA_TOKEN.sub(r"\1 ", line)
         out.append(line)
     return out
@@ -2538,7 +2674,9 @@ def parse_meet_pdf_bytes(
 ) -> dict[str, Any]:
     all_text: list[str] = []
     header_lines: list[str] = []
+    standings_lines: list[str] = []
     has_points_column = False
+    has_seed_column = False
 
     with pdfplumber.open(io.BytesIO(content)) as pdf:
         # A Team Manager "Individual Meet Results" report lists swims by swimmer, not event.
@@ -2584,8 +2722,13 @@ def parse_meet_pdf_bytes(
 
             # Check if this PDF has a "Points" column (indicates results PDF format)
             page_text = page.extract_text() or ""
+            page_lines = page_text.split("\n")
+            if any(_scores_section(line.strip()) for line in page_lines):
+                standings_lines.extend(page_lines)
             if "Points" in page_text and ("Finals Time" in page_text or "Seed Time" in page_text):
                 has_points_column = True
+            if _SEED_COLUMN_HEADING.search(page_text):
+                has_seed_column = True
 
             # Prefer the richest column layout found on any page (3-col over 2-col).
             # Combined prelim/finals PDFs often fail detection on early relay pages.
@@ -2613,6 +2756,7 @@ def parse_meet_pdf_bytes(
 
     # Store this flag in a context variable for use in extract_times_from_line
     _pdf_has_points_column.set(has_points_column)
+    _pdf_has_seed_column.set(has_seed_column)
 
     joined_text = "\n".join(all_text)
     header_blob = "\n".join(header_lines) if header_lines else joined_text
@@ -2622,7 +2766,7 @@ def parse_meet_pdf_bytes(
 
     course = detect_course(joined_text, default_course)
     meet_name, meet_date = parse_meet_header(header_lines or all_text)
-    all_results = parse_text_lines(all_text, course)
+    all_results = drop_given_name_from_teams(parse_text_lines(all_text, course))
     all_relay_results = parse_relay_results(all_text, course)
     results = filter_results_by_team(all_results, team)
     relay_results = filter_results_by_team(all_relay_results, team)
@@ -2638,6 +2782,6 @@ def parse_meet_pdf_bytes(
         "results": dedupe_results(results),
         "relay_results": relay_results,
         "team_scores": build_team_scores(
-            all_text, [*dedupe_results(all_results), *all_relay_results], team
+            all_text, [*dedupe_results(all_results), *all_relay_results], team, standings_lines
         ),
     }

@@ -1,9 +1,11 @@
+import { readFile } from "node:fs/promises"
+import path from "node:path"
 import { NextResponse } from "next/server"
 import { attachmentDisposition, topTimesExportFilename } from "@swimbuzz/shared"
 import { getSession } from "@/lib/auth/session"
 import { RecordInputError } from "@/lib/records/records"
 import { teamAllTopTimesCached } from "@/lib/records/record-top-times"
-import { buildTopTimesPdf } from "@/lib/records/top-times-pdf"
+import { TOP_TIMES_LOGO_PATH, buildTopTimesPdf } from "@/lib/records/top-times-pdf"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -18,7 +20,11 @@ export async function GET(req: Request) {
   const url = new URL(req.url)
   try {
     const data = await teamAllTopTimesCached(url.searchParams.get("gender"), url.searchParams.get("mode"))
-    const bytes = new Uint8Array(buildTopTimesPdf({ data }).output("arraybuffer"))
+    // The club logo for the header, from apps/web/public (traced into this function in next.config.ts).
+    const logoPng = await readFile(path.join(process.cwd(), "public", TOP_TIMES_LOGO_PATH))
+      .then((buffer) => new Uint8Array(buffer))
+      .catch(() => null)
+    const bytes = new Uint8Array(buildTopTimesPdf({ data, logoPng }).output("arraybuffer"))
     return new NextResponse(bytes, {
       headers: {
         "Content-Type": "application/pdf",

@@ -297,8 +297,18 @@ function eventTopEntries(
   return ranked(shown === "performers" ? bestPerPerson(entries) : entries)
 }
 
-function toTopTimes(top: RankedEntry[], links: RecordLinks, season: string): TeamTopTime[] {
+/**
+ * A Top 10 time as cached: with its meet's id, so a read can show the meet's current name and slug
+ * (a rename changes both) even when the cached list predates it. Dropped before it's sent.
+ */
+type CachedTopTime = TeamTopTime & { meetId: string | null }
+type CachedAllTopTimes = Omit<TeamAllTopTimesResponse, "events"> & {
+  events: Array<Omit<TeamAllTopTimesResponse["events"][number], "times"> & { times: CachedTopTime[] }>
+}
+
+function toTopTimes(top: RankedEntry[], links: RecordLinks, season: string): CachedTopTime[] {
   return top.map((entry) => ({
+    meetId: entry.meetId,
     key: entry.key,
     rank: entry.rank,
     timeMs: entry.timeMs,
@@ -338,14 +348,17 @@ export async function teamTopTimes(gender: unknown, event: unknown, mode: unknow
     def.relay ? relayCandidates(athletes) : [],
   ])
   const top = eventTopEntries({ ...def, gender: key.gender }, shown, rows, swims.get(key.event) ?? [], relays)
-  return { mode: shown, times: toTopTimes(top, await recordLinks(top), currentSeason()) }
+  // Read fresh, so its meets' names and slugs are current; the meet id is only for the cached lists
+  // (undefined drops it from the JSON).
+  const times = toTopTimes(top, await recordLinks(top), currentSeason()).map((time) => ({ ...time, meetId: undefined }))
+  return { mode: shown, times }
 }
 
 /**
  * Every record event's top 10 for women or men (the mixed relay included), as `teamTopTimes`
  * lists each one, ranked in memory from one load of the record rows, swims and relay results.
  */
-export async function teamAllTopTimes(gender: unknown, mode: unknown): Promise<TeamAllTopTimesResponse> {
+async function teamAllTopTimes(gender: unknown, mode: unknown): Promise<CachedAllTopTimes> {
   if (gender !== "F" && gender !== "M") throw new RecordInputError("Gender must be F or M")
   const shownMode: TopTimesMode = isTopTimesMode(mode) ? mode : "performers"
   const defs = topTimesEventDefs(gender)
@@ -397,8 +410,8 @@ export async function teamAllTopTimes(gender: unknown, mode: unknown): Promise<T
  * it: each gender and mode is read from the database once per change rather than on every view or
  * PDF. A day at most, so "this season" turns over with the season.
  */
-/** Bump when TeamAllTopTimesResponse's shape changes: cached entries outlive deploys. */
-const TOP_TIMES_CACHE_VERSION = "6"
+/** Bump when TeamAllTopTimesResponse's shape or an event label changes: cached entries outlive deploys. */
+const TOP_TIMES_CACHE_VERSION = "8"
 
 const cachedAllTopTimes = unstable_cache(
   (gender: "F" | "M", mode: TopTimesMode) => teamAllTopTimes(gender, mode),
@@ -408,5 +421,25 @@ const cachedAllTopTimes = unstable_cache(
 
 export async function teamAllTopTimesCached(gender: unknown, mode: unknown): Promise<TeamAllTopTimesResponse> {
   if (gender !== "F" && gender !== "M") throw new RecordInputError("Gender must be F or M")
-  return cachedAllTopTimes(gender, isTopTimesMode(mode) ? mode : "performers")
+  const cached = await cachedAllTopTimes(gender, isTopTimesMode(mode) ? mode : "performers")
+  // Meet names and slugs are read fresh: renaming a meet must show (and link) right away, whether
+  // or not the cached lists were dropped since.
+  const meetIds = [...new Set(cached.events.flatMap((e) => e.times.map((t) => t.meetId)))].filter(
+    (id): id is string => !!id
+  )
+  const meets = new Map(
+    (await prisma.meet.findMany({ where: { id: { in: meetIds } }, select: { id: true, name: true, slug: true } })).map(
+      (meet) => [meet.id, meet]
+    )
+  )
+  return {
+    ...cached,
+    events: cached.events.map((event) => ({
+      ...event,
+      times: event.times.map(({ meetId, ...time }) => {
+        const meet = meetId ? meets.get(meetId) : undefined
+        return meet ? { ...time, meetName: meet.name, meetSlug: meet.slug ?? meet.id } : time
+      }),
+    })),
+  }
 }

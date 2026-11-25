@@ -16705,6 +16705,16 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "M",
+      "name": "Sopheareak, Aryan",
+      "place": null,
+      "tags": "",
+      "team": "UKCS",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
       "name": "Burd, Jacob",
       "place": null,
       "tags": "",
@@ -18658,6 +18668,16 @@
       "place": null,
       "tags": "",
       "team": "UNCCH",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "F",
+      "name": "Fullen, Catherine",
+      "place": null,
+      "tags": "",
+      "team": "UKCS",
       "time": "NS"
     },
     {
@@ -22607,6 +22627,16 @@
       "tags": "",
       "team": "AUB",
       "time": "DQ"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Sopheareak, Aryan",
+      "place": null,
+      "tags": "",
+      "team": "UKCS",
+      "time": "NS"
     },
     {
       "course": "SCY",
@@ -34709,6 +34739,16 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "M",
+      "name": "Sopheareak, Aryan",
+      "place": null,
+      "tags": "",
+      "team": "UKCS",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Breast",
+      "gender": "M",
       "name": "Smith, Conner",
       "place": null,
       "tags": "",
@@ -43420,6 +43460,16 @@
       "course": "SCY",
       "event": "200 IM",
       "gender": "M",
+      "name": "Graves, Jack",
+      "place": null,
+      "tags": "",
+      "team": "UKCS",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "200 IM",
+      "gender": "M",
       "name": "Fravert, Brennan",
       "place": null,
       "tags": "",
@@ -45822,6 +45872,16 @@
       "course": "SCY",
       "event": "100 Back",
       "gender": "M",
+      "name": "Neuman, Chase",
+      "place": null,
+      "tags": "",
+      "team": "UKCS",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
       "name": "Singleton, Jacob",
       "place": null,
       "tags": "",
@@ -45836,6 +45896,16 @@
       "place": null,
       "tags": "",
       "team": "UABSC",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Back",
+      "gender": "M",
+      "name": "Graves, Jack",
+      "place": null,
+      "tags": "",
+      "team": "UKCS",
       "time": "NS"
     },
     {
@@ -48658,6 +48728,16 @@
       "place": null,
       "tags": "",
       "team": "FSUC",
+      "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "500 Free",
+      "gender": "F",
+      "name": "Wiley, Macie",
+      "place": null,
+      "tags": "",
+      "team": "UKCS",
       "time": "NS"
     },
     {
