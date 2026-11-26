@@ -105,7 +105,7 @@ export async function saveRelayPrelimsFinalsChoice(
   if (!relaysChanged) return
   notifyRelayLineupChanges({ meetId, before: meet.relayResultsSummary, after: nextEntries, actorUserId: userId })
   for (const leadoff of leadoffs) {
-    await deleteRelayLeadoffSwim(meet, leadoff.event, leadoff.athleteId, leadoff.round)
+    await deleteRelayLeadoffSwim(meet, leadoff.event, leadoff.athleteId, leadoff.round, sibling)
   }
   if (leadoffs.length > 0) await syncMeetRelaySplitSwims(meetId)
 }

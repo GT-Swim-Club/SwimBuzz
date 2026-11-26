@@ -244,7 +244,8 @@ export async function POST(
       meet,
       relayToSave.event,
       priorLeg1AthleteId,
-      relayToSave.relayRound ?? ""
+      relayToSave.relayRound ?? "",
+      relayToSave.gender ?? ""
     )
   }
   // Seed-only saves (e.g. relay builder → roster) omit splits/result times — leave leadoff swims alone.
@@ -259,7 +260,8 @@ export async function POST(
       relayUnfinished ? undefined : leg1.splitTime,
       "relay",
       undefined,
-      relayToSave.relayRound ?? ""
+      relayToSave.relayRound ?? "",
+      relayToSave.gender ?? ""
     )
   }
   await syncMeetRelaySplitSwims(id)
@@ -329,7 +331,13 @@ export async function DELETE(
 
   const leg1AthleteId = sample?.relaySwimmers?.find((s) => s.leg === 1)?.athleteId
   if (leg1AthleteId) {
-    await deleteRelayLeadoffSwim(meet, event, leg1AthleteId, relayRound)
+    await deleteRelayLeadoffSwim(
+      meet,
+      event,
+      leg1AthleteId,
+      relayRound,
+      sample ? effectiveRelayGender(sample, athleteGenders) : gender
+    )
   }
 
   const entries = removeRelayTeamEntries(

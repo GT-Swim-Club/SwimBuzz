@@ -1,7 +1,7 @@
 "use client"
 
 import { isMixedIndividualEvent, resolveEntryEventNumber } from "@/lib/meet/event-number"
-import { useEffect, useOptimistic, useRef, useState, Fragment, type ReactNode } from "react"
+import { useEffect, useOptimistic, useRef, useState, useTransition, Fragment, type ReactNode } from "react"
 import Link from "next/link"
 import {
   alternateLabel,
@@ -90,6 +90,7 @@ import { SegmentedToggle, segmentedIconOptionClass } from "@/components/ui/Segme
 import RosterName from "@/components/athlete/RosterName"
 import TeamPill, { teamPillColumnWidth } from "@/components/meet/TeamPill"
 import EditMeetSwimButton from "./EditMeetSwimButton"
+import { removeMeetSwimTime } from "./meet-swims.actions"
 import EditSheetSeedButton from "./EditSheetSeedButton"
 import type { HeatLaneEdit } from "./HeatLaneInlineEdit"
 import RemoveRosterOnlyButton from "./RemoveRosterOnlyButton"
@@ -99,7 +100,7 @@ import ShareRosterSummaryButton from "./ShareRosterSummaryButton"
 import JumpRail, { JUMP_RAIL_LAYOUT_CLASS, JUMP_RAIL_LETTERS, type JumpRailItem } from "@/components/ui/JumpRail"
 import { MenuDivider, MenuItem, MenuSubmenu, menuPanel } from "./MeetMenu"
 import SummaryRow, { EventBadge, SUMMARY_INSET, SummaryRowFold, type RowDisplay, type RowDensity, type RowResult } from "./SummaryRow"
-import type { DetailRound, SwimDetail } from "./SwimDetailModal"
+import type { DetailRound, RemoveTimeAction, SwimDetail } from "./SwimDetailModal"
 import { useEscapeToClose } from "@/lib/use-escape-to-close"
 import { buildRosterSummary, rosterSummaryHasResults } from "@/lib/meet/roster-summary-display"
 import {
@@ -203,7 +204,7 @@ function entryRowKey(
 ) {
   const gender = effectiveRelayGender(entry, athleteGenders)
   const athleteKey = entry.entryType !== "relay_team" ? `-${entry.athleteId}` : ""
-  return `${entry.event}-${entry.eventNumber}-${entry.entryType}-${gender}-${entry.relayLetter ?? ""}-${entry.relayRound ?? ""}-${entry.resultRound ?? ""}-${entry.relayLeadoffSource ?? ""}-${entry.relayLeadoffRound ?? ""}-${entry.isRelayLeadoff ? "leadoff" : ""}${athleteKey}-${i}`
+  return `${entry.event}-${entry.eventNumber}-${entry.entryType}-${gender}-${entry.relayLetter ?? ""}-${entry.relayRound ?? ""}-${entry.resultRound ?? ""}-${entry.relayLeadoffSource ?? ""}-${entry.relayLeadoffRound ?? ""}${entry.relayLeadoffMixed ? "-mixed" : ""}-${entry.isRelayLeadoff ? "leadoff" : ""}${athleteKey}-${i}`
 }
 
 function resolveDisplayEventNumber(
@@ -878,16 +879,16 @@ function relayRowAnchors(
   const owns = (leg: (typeof legs)[number]) => eventView || (!!leg.athleteId && leg.athleteId === sectionAthleteId)
   const anchors: string[] = []
   const firstLeg = [...legs].filter((s) => s.athleteId).sort((a, b) => a.leg - b.leg)[0]
+  const gender = effectiveRelayGender(entry, athleteGenders)
   if (eventView || (firstLeg && firstLeg.athleteId === sectionAthleteId)) {
-    const gender = effectiveRelayGender(entry, athleteGenders) ?? ""
     anchors.push(relayAnchorId(relayTeamKey(entry.event, entry.relayLetter, round, gender)))
   }
   for (const leg of legs) {
     if (!leg.athleteId || !owns(leg)) continue
     const tags =
       leg.leg === 1
-        ? [leadoffSwimTags(entry.event, round), leadoffSwimTags(entry.event)]
-        : [relaySplitSwimTags(entry.event, leg.leg, round)]
+        ? [leadoffSwimTags(entry.event, round, gender), leadoffSwimTags(entry.event, "", gender)]
+        : [relaySplitSwimTags(entry.event, leg.leg, round, gender)]
     const swim = legSwims.find((s) => s.athleteId === leg.athleteId && tags.includes(s.tags))
     if (swim) anchors.push(`swim-${swim.id}`)
   }
@@ -944,6 +945,8 @@ function SummaryEntryRow({
   heatLaneEditable?: boolean
 }) {
   const [editOpen, setEditOpen] = useState(false)
+  const [removingTime, startRemoveTime] = useTransition()
+  const [removeTimeError, setRemoveTimeError] = useState<string | null>(null)
   const athleteRecord = athletes?.find((a) => a.id === entry.athleteId)
   const compact = display.density === "compact"
   const view = summaryRowView(
@@ -1038,6 +1041,43 @@ function SummaryEntryRow({
       headline,
     }
   }
+
+  // A coach can remove an individual swim's time (a faulty one): its swim goes, its row stays as NT.
+  const roundSwimId =
+    entry.swimId ??
+    (entry.resultRound === "P"
+      ? entry.prelimSwimId
+      : entry.resultRound === "F"
+        ? entry.finalSwimId
+        : entry.resultSwimId)
+  const removeTimeSwimId =
+    canEdit && meetId && !isRelay && !entry.isRelayLeadoff && res.time ? roundSwimId : undefined
+  const removeTime: RemoveTimeAction | undefined = removeTimeSwimId
+    ? {
+        pending: removingTime,
+        error: removeTimeError,
+        run: (done) => {
+          const who = rosterNameFirstLast(rosterNamePreferred(entry.athleteName))
+          const round = res.label === "Prelims" || res.label === "Finals" ? ` ${res.label.toLowerCase()}` : ""
+          if (
+            !confirm(
+              `Remove ${who}'s ${entry.event}${round} time (${res.time})? Its place, points and splits go too; the row stays, marked NT.`
+            )
+          ) {
+            return
+          }
+          setRemoveTimeError(null)
+          startRemoveTime(async () => {
+            try {
+              await removeMeetSwimTime(removeTimeSwimId)
+              done()
+            } catch (err) {
+              setRemoveTimeError(err instanceof Error ? err.message : "Failed to remove time")
+            }
+          })
+        },
+      }
+    : undefined
 
   // Entries are edited from the detail modal's edit button, so the row has no pencil.
   // Only roster-only entries keep a row button (remove), since there is nothing to edit.
@@ -1211,6 +1251,7 @@ function SummaryEntryRow({
         onEdit={editor ? () => setEditOpen(true) : undefined}
         editLabel={isRelay ? "Edit relay" : "Edit"}
         heatLaneEdit={heatLaneEdit}
+        removeTime={removeTime}
       />
       {editor}
     </>

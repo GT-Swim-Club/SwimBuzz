@@ -3,7 +3,7 @@
 import { useEffect, useState, useSyncExternalStore, useTransition } from "react"
 import { createPortal } from "react-dom"
 import { eventGenderWord, RELAY_SWIM_EVENTS } from "@swimbuzz/shared"
-import { deleteRelayTeam, saveRelayTeam } from "./meet-relay.actions"
+import { clearRelayTeamTime, deleteRelayTeam, saveRelayTeam } from "./meet-relay.actions"
 import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 import type { SheetEntry } from "@/lib/meet/meet-sheet-summary"
 import { normalizeEventName } from "@/lib/swim/swim-parse"
@@ -133,6 +133,7 @@ function RelayModal({
   initial,
   onClose,
   allowDelete,
+  allowRemoveTime,
   deleteParams,
   rosterOnly = false,
   header,
@@ -145,6 +146,9 @@ function RelayModal({
   initial: RelayForm
   onClose: () => void
   allowDelete?: boolean
+  /** Offer "Remove time": clears the team time, place and leg splits, keeping the relay. */
+  allowRemoveTime?: boolean
+  /** Which relay Delete and Remove time act on. */
   deleteParams?: {
     event: string
     relayLetter: string | null
@@ -218,6 +222,29 @@ function RelayModal({
         onClose()
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to delete relay")
+      }
+    })
+  }
+
+  function handleRemoveTime() {
+    if (
+      !deleteParams ||
+      !confirm("Remove this relay's time, place and splits? The relay and its swimmers stay.")
+    ) {
+      return
+    }
+    setError(null)
+    startTransition(async () => {
+      try {
+        await clearRelayTeamTime(meetId, {
+          event: deleteParams.event,
+          relayLetter: deleteParams.relayLetter,
+          relayRound: deleteParams.relayRound,
+          gender: deleteParams.gender,
+        })
+        onClose()
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to remove relay time")
       }
     })
   }
@@ -445,6 +472,16 @@ function RelayModal({
                 Delete
               </button>
             )}
+            {allowRemoveTime && (
+              <button
+                type="button"
+                onClick={handleRemoveTime}
+                disabled={loading}
+                className="whitespace-nowrap rounded-lg border border-error-border px-4 py-2.5 text-sm font-medium text-error hover:bg-error-bg disabled:opacity-50"
+              >
+                Remove time
+              </button>
+            )}
             <button
               type="button"
               onClick={onClose}
@@ -524,6 +561,10 @@ export function EditRelayButton({
   const open = openProp ?? openState
   const setOpen = onOpenChange ?? setOpenState
   const rosterOnly = !entry.manual
+  const hasResult =
+    Boolean(relayTeamTime(entry)) ||
+    (relayTeamPlace(entry) ?? 0) > 0 ||
+    (entry.relaySwimmers ?? []).some((s) => s.splitTime || s.splits?.length)
   const round = effectiveRelayRound(entry)
   const athleteGenders = new Map(
     athletes
@@ -573,6 +614,7 @@ export function EditRelayButton({
           initial={formFromEntry(entry, athleteGenders)}
           onClose={() => setOpen(false)}
           allowDelete={entry.manual === true}
+          allowRemoveTime={hasResult}
           rosterOnly={rosterOnly}
           deleteParams={{
             event: relayEventKey(entry.event) || normalizeEventName(entry.event),

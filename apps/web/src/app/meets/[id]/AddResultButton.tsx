@@ -25,9 +25,43 @@ function splitCount(event: string): number {
   return Number.isFinite(distance) && distance >= 100 ? Math.floor(distance / 50) : 0
 }
 
-function RoundSelect({ value, onChange }: { value: Round; onChange: (round: Round) => void }) {
+function PlaceInput({ value, onChange }: { value: string; onChange: (place: string) => void }) {
   return (
-    <div className="mt-3">
+    <div>
+      <label className="block text-xs font-medium text-foreground-secondary mb-1">Place</label>
+      <input
+        type="number"
+        inputMode="numeric"
+        min={1}
+        step={1}
+        placeholder="1"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-background"
+      />
+    </div>
+  )
+}
+
+/** A place typed in the form: a whole number from 1, or undefined when blank; null when invalid. */
+function parsePlace(raw: string): number | undefined | null {
+  const trimmed = raw.trim()
+  if (!trimmed) return undefined
+  const place = Number(trimmed)
+  return Number.isInteger(place) && place > 0 ? place : null
+}
+
+function RoundSelect({
+  value,
+  onChange,
+  className = "mt-3",
+}: {
+  value: Round
+  onChange: (round: Round) => void
+  className?: string
+}) {
+  return (
+    <div className={className}>
       <label className="block text-xs font-medium text-foreground-secondary mb-1">Round</label>
       <select
         value={value}
@@ -67,6 +101,7 @@ export default function AddResultButton({
     athleteId: athletes[0]?.id ?? "",
     event: INDIVIDUAL_EVENTS[0],
     time: "",
+    place: "",
     course: defaultCourse,
     date: defaultDate,
     round: "" as Round,
@@ -87,6 +122,7 @@ export default function AddResultButton({
       athleteId: athletes[0]?.id ?? "",
       event: INDIVIDUAL_EVENTS[0],
       time: "",
+      place: "",
       course: defaultCourse,
       date: defaultDate,
       round: "",
@@ -106,6 +142,11 @@ export default function AddResultButton({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
+    const place = parsePlace(form.place)
+    if (place === null) {
+      setError("Place must be a whole number from 1")
+      return
+    }
 
     if (type === "individual") {
       if (!form.athleteId) {
@@ -130,6 +171,7 @@ export default function AddResultButton({
             timeMs,
             round: form.round,
             splits: form.splits.slice(0, splitCount(form.event)),
+            place,
           })
           setOpen(false)
         } catch (err) {
@@ -155,6 +197,7 @@ export default function AddResultButton({
               splitTime: form.relayForm.splits[i].trim() || undefined,
             })),
             resultTime: form.time,
+            resultPlace: place,
           })
           // A relay being edited in the relay builder comes back as an error, not a throw.
           if (!saved.ok) {
@@ -263,7 +306,14 @@ export default function AddResultButton({
                 />
               </div>
             </div>
-            <RoundSelect value={form.round} onChange={(round) => setForm((f) => ({ ...f, round }))} />
+            <div className="grid grid-cols-2 gap-3 mt-3">
+              <RoundSelect
+                value={form.round}
+                onChange={(round) => setForm((f) => ({ ...f, round }))}
+                className=""
+              />
+              <PlaceInput value={form.place} onChange={(place) => setForm((f) => ({ ...f, place }))} />
+            </div>
             {splitCount(form.event) > 0 ? (
               <div className="mt-3">
                 <label className="block text-xs font-medium text-foreground-secondary mb-1">Splits</label>
@@ -340,9 +390,12 @@ export default function AddResultButton({
                 </div>
               ))}
             </div>
-            <div className="mt-3">
-              <label className="block text-xs font-medium text-foreground-secondary mb-1">Time <span className="text-error">*</span></label>
-              <input required placeholder="1:23.45" value={form.time} onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))} className="w-full rounded-lg border border-border px-3 py-2 text-sm font-mono bg-background" />
+            <div className="grid grid-cols-2 gap-3 mt-3">
+              <div>
+                <label className="block text-xs font-medium text-foreground-secondary mb-1">Time <span className="text-error">*</span></label>
+                <input required placeholder="1:23.45" value={form.time} onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))} className="w-full rounded-lg border border-border px-3 py-2 text-sm font-mono bg-background" />
+              </div>
+              <PlaceInput value={form.place} onChange={(place) => setForm((f) => ({ ...f, place }))} />
             </div>
           </>
         )}

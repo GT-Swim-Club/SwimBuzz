@@ -55,8 +55,13 @@ const RELAY_COLUMNS = 1
 const NAME_SHARE = 0.48
 /** A relay's swimmer column, for all four names on one line. */
 const RELAY_NAME_SHARE = 0.65
-/** A swimmer or meet name too wide for its column shrinks to this much of the text size before it's cut. */
+/** A meet name too wide for its column shrinks to this much of the text size before it's cut. */
 const MIN_TEXT_SCALE = 0.85
+/**
+ * A swimmer name shrinks further, so a long name with a leadoff's "(R)" ("Sarnai Chimidkhorloo (R)")
+ * still fits whole rather than losing letters.
+ */
+const NAME_MIN_TEXT_SCALE = 0.75
 /** The logo's corner radius as a share of its size, like the nav's rounded-md 32px logo. */
 const LOGO_RADIUS = 6 / 32
 
@@ -124,23 +129,28 @@ export function buildTopTimesPdf({ data, logoPng = null }: TopTimesPdfInput): js
     doc.setTextColor(...color)
   }
 
-  /** Text cut to `maxWidth` with an ellipsis, in the current font. */
+  /**
+   * Text cut to `maxWidth` with an ellipsis, in the current font. A trailing marker like a relay
+   * leadoff's " (R)" is kept and the name before it cut instead, so a cut never reads as the whole
+   * name followed by "…".
+   */
   function fit(raw: string, maxWidth: number): string {
     const text = pdfText(raw)
     if (doc.getTextWidth(text) <= maxWidth) return text
-    let cut = text
-    while (cut.length > 0 && doc.getTextWidth(`${cut}…`) > maxWidth) cut = cut.slice(0, -1)
-    return `${cut.trimEnd()}…`
+    const marker = /\s\([A-Z]{1,3}\)$/.exec(text)?.[0] ?? ""
+    let cut = text.slice(0, text.length - marker.length)
+    while (cut.length > 0 && doc.getTextWidth(`${cut}…${marker}`) > maxWidth) cut = cut.slice(0, -1)
+    return `${cut.trimEnd()}…${marker}`
   }
 
   /**
-   * Text at (x, y) in the current font, shrunk (down to MIN_TEXT_SCALE) to fit `maxWidth` before
-   * it's cut with an ellipsis, so long swimmer and meet names rarely lose letters.
+   * Text at (x, y) in the current font, shrunk (down to `minScale`) to fit `maxWidth` before it's
+   * cut with an ellipsis, so long swimmer and meet names rarely lose letters.
    */
-  function textFitted(raw: string, x: number, y: number, maxWidth: number) {
+  function textFitted(raw: string, x: number, y: number, maxWidth: number, minScale = MIN_TEXT_SCALE) {
     const size = doc.getFontSize()
     const width = doc.getTextWidth(pdfText(raw))
-    if (width > maxWidth) doc.setFontSize(Math.max(size * MIN_TEXT_SCALE, (size * maxWidth) / width))
+    if (width > maxWidth) doc.setFontSize(Math.max(size * minScale, (size * maxWidth) / width))
     doc.text(fit(raw, maxWidth), x, y)
     doc.setFontSize(size)
   }
@@ -255,20 +265,20 @@ export function buildTopTimesPdf({ data, logoPng = null }: TopTimesPdfInput): js
       const cost = (w: number): [number, number] => {
         let cuts = 0
         let shrink = 0
-        const tally = (list: number[], column: number) => {
+        const tally = (list: number[], column: number, minScale: number) => {
           for (const textWidth of list) {
-            if (textWidth * MIN_TEXT_SCALE > column) cuts++
+            if (textWidth * minScale > column) cuts++
             shrink += Math.max(0, textWidth - column)
           }
         }
-        tally(nameWidths, w)
-        tally(meetWidths, room - w)
+        tally(nameWidths, w, NAME_MIN_TEXT_SCALE)
+        tally(meetWidths, room - w, MIN_TEXT_SCALE)
         return [cuts, shrink]
       }
       // Only the widths where some entry starts or stops fitting (at full or shrunk size) matter.
       const candidates = [
         room * share,
-        ...nameWidths.flatMap((textWidth) => [textWidth, textWidth * MIN_TEXT_SCALE]),
+        ...nameWidths.flatMap((textWidth) => [textWidth, textWidth * NAME_MIN_TEXT_SCALE]),
         ...meetWidths.flatMap((textWidth) => [room - textWidth, room - textWidth * MIN_TEXT_SCALE]),
       ].filter((w) => w > 0 && w < room)
       width = candidates.reduce((best, w) => {
@@ -339,7 +349,9 @@ export function buildTopTimesPdf({ data, logoPng = null }: TopTimesPdfInput): js
       }
       setType(season ? "bold" : "normal", M.textSize, season ? ACCENT : INK)
       const lines = nameLines(event, time)
-      lines.forEach((name, i) => textFitted(name, nameX, firstLine + i * M.lineHeight, nameWidth))
+      lines.forEach((name, i) =>
+        textFitted(name, nameX, firstLine + i * M.lineHeight, nameWidth, NAME_MIN_TEXT_SCALE)
+      )
       if (time.meetName) {
         setType("normal", M.textSize, season ? ACCENT : INK_SECONDARY)
         textFitted(time.meetName, meetX, firstLine, meetWidth)

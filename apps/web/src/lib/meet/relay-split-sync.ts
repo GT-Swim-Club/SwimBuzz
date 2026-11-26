@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { withRelaySplitSwims } from "../../../soft-delete-policy"
 import {
+  effectiveRelayGender,
   effectiveRelayRound,
   isRelayResultsSummary,
   leadoffSwimTags,
@@ -8,6 +9,7 @@ import {
   relaySplitEventFromRelay,
   relaySplitSwimTags,
   sanitizeRelaySplitTime,
+  type RelayGender,
 } from "@/lib/meet/relay-results"
 import { meetDayRange, nextSwimOccurrence, normalizeSwimForInsert, pairSameSwims } from "@/lib/swim/swim-dedup"
 import { SWIMCLOUD_SOURCE } from "@/lib/swim/swimcloud-import"
@@ -37,20 +39,31 @@ export async function syncMeetRelaySplitSwims(meetId: string): Promise<void> {
     select: { tags: true, date: true },
   })
   const leadoffDates = new Map(leadoffs.map((swim) => [swim.tags, swim.date]))
+  // Older relay entries may carry no gender: a mixed one is told by its swimmers.
+  const legAthleteIds = [...new Set(entries.flatMap((e) => (e.relaySwimmers ?? []).flatMap((s) => (s.athleteId ? [s.athleteId] : []))))]
+  const athleteGenders = new Map<string, RelayGender>(
+    (await prisma.athlete.findMany({ where: { id: { in: legAthleteIds } }, select: { id: true, gender: true } })).map(
+      (a) => [a.id, a.gender]
+    )
+  )
 
   const wanted = new Map<string, WantedSplit>()
   for (const entry of entries) {
     // A DQ'd relay's legs are shown with its result, but never become swims.
     if (entry.resultStatus && !entry.resultTime) continue
     const relayRound = effectiveRelayRound(entry)
+    const relayGender = effectiveRelayGender(entry, athleteGenders)
     for (const swimmer of entry.relaySwimmers ?? []) {
       if (!swimmer.athleteId) continue
       const event = relaySplitEventFromRelay(entry.event, swimmer.leg)
       const splitTime = sanitizeRelaySplitTime(swimmer.splitTime)
       const timeMs = splitTime ? parseSwimTime(splitTime) : null
       if (!event || !timeMs) continue
-      const tags = relaySplitSwimTags(entry.event, swimmer.leg, relayRound)
-      const date = leadoffDates.get(leadoffSwimTags(entry.event, relayRound)) ?? meet.startsAt
+      const tags = relaySplitSwimTags(entry.event, swimmer.leg, relayRound, relayGender)
+      const date =
+        leadoffDates.get(leadoffSwimTags(entry.event, relayRound, relayGender)) ??
+        leadoffDates.get(leadoffSwimTags(entry.event, relayRound)) ??
+        meet.startsAt
       wanted.set(`${swimmer.athleteId}|${tags}`, { athleteId: swimmer.athleteId, event, timeMs, tags, date })
     }
   }

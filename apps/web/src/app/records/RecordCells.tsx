@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import {
   formatRecordTime,
   recordSetLabel,
@@ -11,7 +10,7 @@ import {
 } from "@swimbuzz/shared"
 import HoverDetail from "@/components/ui/HoverDetail"
 import ManualRecordMark from "@/components/ui/ManualRecordMark"
-import { athletePath, meetRelayPath, meetSwimPath } from "@/lib/slug"
+import { meetRelayPath, meetSwimPath } from "@/lib/slug"
 
 export type SideProps = { def: RecordEventDef; gender: RecordGender; record: TeamRecordItem | undefined }
 
@@ -51,27 +50,19 @@ export function RecordTime({ record, className = "" }: SideProps & { className?:
   )
 }
 
-/**
- * Holder (or relay legs 1–4, one per line), linking to roster athletes — unless the record itself
- * links to its swim (`linkNames` false), whose link the names then sit inside.
- */
+/** Holder (or relay legs 1–4, one per line), as plain text: names don't link to athletes. */
 export function RecordNames({
   record,
   className = "",
   align = "center",
-  linkNames = true,
-}: SideProps & { className?: string; align?: "center" | "start"; linkNames?: boolean }) {
+}: SideProps & { className?: string; align?: "center" | "start" }) {
   if (!record) return <span className={`text-foreground-tertiary ${className}`}>—</span>
   const alignClass = align === "center" ? "items-center text-center" : "items-start text-left"
   return (
     <div className={`flex min-w-0 flex-col ${alignClass} ${seasonClass(record)} ${className}`}>
       {record.swimmers.map((swimmer, i) => {
         const text = recordSwimmerLabel(record, swimmer)
-        return swimmer.athleteSlug && linkNames ? (
-          <Link key={i} href={athletePath(swimmer.athleteSlug)} className="max-w-full truncate transition-colors hover:text-primary hover:underline">
-            {text}
-          </Link>
-        ) : (
+        return (
           <span key={i} className="max-w-full truncate">
             {text}
           </span>

@@ -16,7 +16,7 @@ import {
 } from "react"
 import { flushSync } from "react-dom"
 import { formatDisplayTime, formatOrdinal } from "@/lib/utils"
-import SwimDetailModal, { deltaPillClass, formatDelta, type SwimDetail } from "./SwimDetailModal"
+import SwimDetailModal, { deltaPillClass, formatDelta, type RemoveTimeAction, type SwimDetail } from "./SwimDetailModal"
 import type { HeatLaneEdit } from "./HeatLaneInlineEdit"
 
 export type RowDensity = "cozy" | "compact"
@@ -302,6 +302,7 @@ export default function SummaryRow({
   onEdit,
   editLabel,
   heatLaneEdit,
+  removeTime,
   highlighted = false,
   teamColumn,
 }: {
@@ -344,6 +345,8 @@ export default function SummaryRow({
   editLabel?: string
   /** Coach round, heat & lane, filled in inline in the detail modal. */
   heatLaneEdit?: HeatLaneEdit
+  /** Coach "Remove time", offered from the detail modal. */
+  removeTime?: RemoveTimeAction
   /**
    * The row's team pill in a column of its own before the heat & lane and result, `width` wide (the
    * same for every row in the list, so the pills line up).
@@ -722,6 +725,7 @@ export default function SummaryRow({
               : undefined
           }
           heatLaneEdit={heatLaneEdit}
+          removeTime={removeTime}
         />
       ) : null}
     </>

@@ -22,7 +22,7 @@ function SideCells({ side, mirrored }: { side: SideProps; mirrored: boolean }) {
       <RecordYear {...side} />
     </div>,
     <div key="names" className={`${cellClass} flex-col`}>
-      <RecordNames {...side} className="w-full" linkNames={!href} />
+      <RecordNames {...side} className="w-full" />
     </div>,
     <div key="time" className={cellClass}>
       <RecordTime {...side} />

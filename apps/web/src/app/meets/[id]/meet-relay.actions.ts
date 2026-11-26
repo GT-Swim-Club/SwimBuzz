@@ -21,7 +21,8 @@ import {
   type RelayTeamInput } from "@/lib/meet/relay-results"
 import {
   isResultStatusesSummary,
-  meetHasImportedResults } from "@/lib/meet/meet-sheet-summary"
+  meetHasImportedResults,
+  type SheetEntry } from "@/lib/meet/meet-sheet-summary"
 import { Gender } from "@prisma/client"
 import { syncRelayLeadoffSwim, deleteRelayLeadoffSwim } from "@/lib/meet/relay-leadoff-sync"
 import { syncMeetRelaySplitSwims } from "@/lib/meet/relay-split-sync"
@@ -207,7 +208,7 @@ export async function saveRelayTeam(meetId: string, input: SaveRelayInput) {
 
   const leg1 = relayToSave.legs.find((leg) => leg.leg === 1)
   if (priorLeg1AthleteId && priorLeg1AthleteId !== leg1?.athleteId) {
-    await deleteRelayLeadoffSwim(meet, relayToSave.event, priorLeg1AthleteId, relayToSave.relayRound ?? "")
+    await deleteRelayLeadoffSwim(meet, relayToSave.event, priorLeg1AthleteId, relayToSave.relayRound ?? "", relayToSave.gender ?? "")
   }
   if (leg1 && (leg1.splitTime || rosterOnly || Boolean(relay.resultTime))) {
     await syncRelayLeadoffSwim(
@@ -217,7 +218,8 @@ export async function saveRelayTeam(meetId: string, input: SaveRelayInput) {
       relayUnfinished ? undefined : leg1.splitTime,
       "relay",
       undefined,
-      relayToSave.relayRound ?? ""
+      relayToSave.relayRound ?? "",
+      relayToSave.gender ?? ""
     )
   }
   await syncMeetRelaySplitSwims(meetId)
@@ -225,6 +227,77 @@ export async function saveRelayTeam(meetId: string, input: SaveRelayInput) {
 
   revalidatePath("/meets/[id]", "page")
   return { ok: true, entries: entries.length }
+}
+
+/**
+ * Remove a relay's result (team time, place and every leg split, plus the leadoff swim) but keep
+ * the relay and its swimmers — for a faulty imported or hand-entered time. A later results import
+ * brings the time back.
+ */
+export async function clearRelayTeamTime(
+  meetId: string,
+  params: { event: string; relayLetter: string | null; relayRound: RelayRound; gender: RelayGender }
+) {
+  const meet = await requireStaffMeet(meetId)
+
+  const event = normalizeEventName(params.event)
+  if (!event) throw new Error("Event is required")
+
+  const roster = await prisma.athlete.findMany({
+    where: { seasons: { has: meet.season } },
+    select: { id: true, gender: true }})
+  const athleteGenders = new Map<string, RelayGender>(
+    roster.map((a) => [a.id, a.gender === Gender.F ? "F" : "M"])
+  )
+
+  const existing = isRelayResultsSummary(meet.relayResultsSummary)
+    ? meet.relayResultsSummary.entries
+    : []
+  const entry = findRelayTeamEntry(
+    existing,
+    event,
+    params.relayLetter,
+    params.relayRound,
+    params.gender,
+    athleteGenders
+  )
+  if (!entry) throw new Error("Relay not found")
+
+  // Pin the round and gender first: both can be inferred from the times and swimmers being
+  // cleared, and the relay must keep the same key (and place on the page) afterwards.
+  const round = effectiveRelayRound(entry)
+  const gender = effectiveRelayGender(entry, athleteGenders)
+  const cleared: SheetEntry = {
+    ...entry,
+    relayRound: round,
+    ...(gender ? { gender } : {}),
+    resultTime: undefined,
+    resultPlace: undefined,
+    prelimTime: undefined,
+    prelimPlace: undefined,
+    finalTime: undefined,
+    finalPlace: undefined,
+    relaySwimmers: entry.relaySwimmers?.map((swimmer) => ({
+      ...swimmer,
+      splitTime: undefined,
+      splits: undefined,
+    })),
+  }
+  const entries = existing.map((e) => (e === entry ? cleared : e))
+
+  const leg1AthleteId = entry.relaySwimmers?.find((s) => s.leg === 1)?.athleteId
+  if (leg1AthleteId) {
+    await deleteRelayLeadoffSwim(meet, event, leg1AthleteId, round, gender)
+  }
+
+  await prisma.meet.update({
+    where: { id: meetId },
+    data: { relayResultsSummary: { entries } }})
+  await syncMeetRelaySplitSwims(meetId)
+  await syncTeamRecordsSafely()
+
+  revalidatePath("/meets/[id]", "page")
+  return { ok: true }
 }
 
 export async function deleteRelayTeam(
@@ -261,7 +334,13 @@ export async function deleteRelayTeam(
 
   const leg1AthleteId = sample?.relaySwimmers?.find((s) => s.leg === 1)?.athleteId
   if (leg1AthleteId) {
-    await deleteRelayLeadoffSwim(meet, event, leg1AthleteId, params.relayRound)
+    await deleteRelayLeadoffSwim(
+      meet,
+      event,
+      leg1AthleteId,
+      params.relayRound,
+      sample ? effectiveRelayGender(sample, athleteGenders) : params.gender
+    )
   }
 
   const entries = removeRelayTeamEntries(

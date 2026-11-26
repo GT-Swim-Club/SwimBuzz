@@ -5,9 +5,13 @@ import { normalizeSwimForInsert, nextSwimOccurrence } from "@/lib/swim/swim-dedu
 import {
   isRealRelaySwimmerName,
   leadoffEventFromRelay,
+  effectiveRelayGender,
   leadoffSwimTags,
+  parseRelayGender,
+  relayGenderFromEventName,
   relayRoundFromTags,
   type ParsedRelayResult,
+  type RelayGender,
   type RelayRound,
   sanitizeRelaySplitTime,
 } from "@/lib/meet/relay-results"
@@ -20,13 +24,14 @@ function leadoffSwimWhere(
   leadoffAthleteId: string,
   leadoffEvent: string,
   relayEvent: string,
-  relayRound: RelayRound = ""
+  relayRound: RelayRound = "",
+  relayGender: RelayGender = ""
 ) {
   return {
     athleteId: leadoffAthleteId,
     ...(meet.id ? { meetId: meet.id } : { meet: meet.name }),
     event: leadoffEvent,
-    tags: leadoffSwimTags(relayEvent, relayRound),
+    tags: leadoffSwimTags(relayEvent, relayRound, relayGender),
   }
 }
 
@@ -35,13 +40,14 @@ export async function deleteRelayLeadoffSwim(
   meet: MeetLike,
   relayEvent: string,
   leadoffAthleteId: string,
-  relayRound: RelayRound = ""
+  relayRound: RelayRound = "",
+  relayGender: RelayGender = ""
 ) {
   const leadoffEvent = leadoffEventFromRelay(relayEvent)
   if (!leadoffEvent || !leadoffAthleteId) return null
 
   const existing = await prisma.swim.findFirst({
-    where: leadoffSwimWhere(meet, leadoffAthleteId, leadoffEvent, relayEvent, relayRound),
+    where: leadoffSwimWhere(meet, leadoffAthleteId, leadoffEvent, relayEvent, relayRound, relayGender),
     orderBy: { createdAt: "desc" },
   })
   if (!existing) return null
@@ -57,14 +63,15 @@ export async function syncRelayLeadoffSwim(
   splitTime: string | undefined,
   source = "relay",
   date?: Date,
-  relayRound: RelayRound = ""
+  relayRound: RelayRound = "",
+  relayGender: RelayGender = ""
 ) {
   const leadoffEvent = leadoffEventFromRelay(relayEvent)
   if (!leadoffEvent || !leadoffAthleteId) return null
 
   const sanitized = sanitizeRelaySplitTime(splitTime)
   if (!sanitized) {
-    return deleteRelayLeadoffSwim(meet, relayEvent, leadoffAthleteId, relayRound)
+    return deleteRelayLeadoffSwim(meet, relayEvent, leadoffAthleteId, relayRound, relayGender)
   }
 
   const timeMs = parseSwimTime(sanitized)
@@ -80,12 +87,12 @@ export async function syncRelayLeadoffSwim(
     date: swimDate,
     meet: meet.name,
     meetId: meet.id || null,
-    tags: leadoffSwimTags(relayEvent, relayRound),
+    tags: leadoffSwimTags(relayEvent, relayRound, relayGender),
     source,
   })
 
   const existing = await prisma.swim.findFirst({
-    where: leadoffSwimWhere(meet, leadoffAthleteId, leadoffEvent, relayEvent, relayRound),
+    where: leadoffSwimWhere(meet, leadoffAthleteId, leadoffEvent, relayEvent, relayRound, relayGender),
     orderBy: { createdAt: "desc" },
   })
 
@@ -109,6 +116,35 @@ export async function syncRelayLeadoffSwim(
   })
 }
 
+/**
+ * A parsed relay's gender as its saved entry will read (effectiveRelayGender): the results' own
+ * label, else "Mixed" in the event name, else from its matched swimmers' genders.
+ */
+function parsedRelayGender(
+  row: ParsedRelayResult,
+  lookup: ReturnType<typeof buildAthleteLookup>,
+  nameMappings: Record<string, string> | null,
+  athleteGenders: Map<string, RelayGender> | undefined
+): RelayGender {
+  const labeled = parseRelayGender(row.gender) || relayGenderFromEventName(row.event)
+  if (labeled || !athleteGenders) return labeled
+  return effectiveRelayGender(
+    {
+      athleteId: "",
+      athleteName: "",
+      event: row.event,
+      eventNumber: 0,
+      entryType: "relay_team",
+      relaySwimmers: row.relaySwimmers.map((s) => ({
+        leg: s.leg,
+        name: s.name,
+        athleteId: isRealRelaySwimmerName(s.name) ? (matchAthleteIdFast(s.name, lookup, nameMappings) ?? undefined) : undefined,
+      })),
+    },
+    athleteGenders
+  )
+}
+
 /** Import leadoff swims from leg-1 relay split times (not separate leadoff rows). */
 export async function importRelayLeadoffSwims({
   meetName,
@@ -119,6 +155,7 @@ export async function importRelayLeadoffSwims({
   roster,
   source,
   nameMappings = null,
+  athleteGenders,
 }: {
   meetName: string
   meetId: string | null
@@ -128,6 +165,8 @@ export async function importRelayLeadoffSwims({
   roster: RosterAthlete[]
   source: string
   nameMappings?: Record<string, string> | null
+  /** Roster genders, to tell a mixed relay the results don't label as one by its swimmers. */
+  athleteGenders?: Map<string, RelayGender>
 }): Promise<number> {
   const lookup = buildAthleteLookup(roster)
   const meet: MeetLike = meetId
@@ -166,8 +205,9 @@ export async function importRelayLeadoffSwims({
     if (!leadoffEvent) continue
 
     const relayRound = relayRoundFromTags(row.tags ?? "")
+    const relayGender = parsedRelayGender(row, lookup, nameMappings, athleteGenders)
     const swimDate = row.date ? (parseMeetDate(row.date) ?? meetDate) : meetDate
-    const key = `${athleteId}|${leadoffEvent}|${row.event}|${relayRound}|${splitTime}|${swimDate.toISOString()}`
+    const key = `${athleteId}|${leadoffEvent}|${row.event}|${relayRound}|${relayGender}|${splitTime}|${swimDate.toISOString()}`
     if (seen.has(key)) continue
     seen.add(key)
 
@@ -178,7 +218,8 @@ export async function importRelayLeadoffSwims({
       splitTime,
       source,
       swimDate,
-      relayRound
+      relayRound,
+      relayGender
     )
     if (created) imported++
   }

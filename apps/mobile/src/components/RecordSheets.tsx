@@ -1,6 +1,5 @@
 import { useMemo } from "react"
-import { Pressable, StyleSheet, Text, View } from "react-native"
-import { useRouter } from "expo-router"
+import { StyleSheet, Text, View } from "react-native"
 import { useQuery } from "@tanstack/react-query"
 import {
   formatRecordTime,
@@ -37,23 +36,15 @@ export function RecordHistorySheet({
 }) {
   return (
     <BottomSheet visible onClose={onClose} title={recordTitle(target)}>
-      <RecordHistoryList target={target} onNavigate={onClose} />
+      <RecordHistoryList target={target} />
     </BottomSheet>
   )
 }
 
 /** An event's records, newest first; the first is the current record. */
-function RecordHistoryList({
-  target,
-  onNavigate,
-}: {
-  target: Pick<RecordTarget, "def" | "gender">
-  /** Close the sheet before leaving for an athlete's profile. */
-  onNavigate: () => void
-}) {
+function RecordHistoryList({ target }: { target: Pick<RecordTarget, "def" | "gender"> }) {
   const c = usePalette()
   const styles = useMemo(() => makeStyles(c), [c])
-  const router = useRouter()
   const { def, gender } = target
   const { data, isPending, error } = useQuery({
     queryKey: ["records", "history", gender, def.event],
@@ -69,24 +60,11 @@ function RecordHistoryList({
           {data.records.map((record, index) => (
             <View key={record.id} style={[styles.historyRow, index > 0 && styles.historyDivider]}>
               <View style={styles.historyMain}>
-                {record.swimmers.map((swimmer, i) =>
-                  swimmer.athleteSlug ? (
-                    <Pressable
-                      key={i}
-                      accessibilityRole="link"
-                      onPress={() => {
-                        onNavigate()
-                        router.push(`/roster/${swimmer.athleteSlug}`)
-                      }}
-                    >
-                      <Text style={[styles.historyName, styles.historyLink]}>{recordSwimmerLabel(record, swimmer)}</Text>
-                    </Pressable>
-                  ) : (
-                    <Text key={i} style={styles.historyName}>
-                      {recordSwimmerLabel(record, swimmer)}
-                    </Text>
-                  )
-                )}
+                {record.swimmers.map((swimmer, i) => (
+                  <Text key={i} style={styles.historyName}>
+                    {recordSwimmerLabel(record, swimmer)}
+                  </Text>
+                ))}
                 <Text style={styles.historyMeta}>{recordSetLabel(record)}</Text>
                 {record.manual ? (
                   <Text style={styles.historyMeta}>
@@ -121,7 +99,6 @@ function makeStyles(c: ColorPalette) {
     historyDivider: { borderTopColor: c.border, borderTopWidth: StyleSheet.hairlineWidth },
     historyMain: { flex: 1, gap: 2 },
     historyName: { color: c.text, fontSize: 15, fontWeight: "600" },
-    historyLink: { color: c.primaryActive },
     historyMeta: { color: c.textSecondary, fontSize: 13, marginTop: 2 },
     historySource: { color: c.textTertiary, fontSize: 12 },
     historyTime: { color: c.text, fontSize: 15, fontVariant: ["tabular-nums"], fontWeight: "700" },

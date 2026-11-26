@@ -173,7 +173,13 @@ export async function publishBuilderLineups(
     const leg1 = entry.relaySwimmers?.find((s) => s.leg === 1)
     if (!leg1?.athleteId || !sanitizeRelaySplitTime(leg1.splitTime)) continue
     if (leadoffs.get(keyOf(entry)) === leg1.athleteId) continue
-    await deleteRelayLeadoffSwim(meet, entry.event, leg1.athleteId, effectiveRelayRound(entry))
+    await deleteRelayLeadoffSwim(
+      meet,
+      entry.event,
+      leg1.athleteId,
+      effectiveRelayRound(entry),
+      effectiveRelayGender(entry, athleteGenders)
+    )
   }
   if (hadSplits) await syncMeetRelaySplitSwims(meetId)
   return { ok: true }

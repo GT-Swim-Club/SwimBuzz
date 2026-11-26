@@ -17,7 +17,7 @@ import {
 import HoverDetail from "@/components/ui/HoverDetail"
 import ManualRecordMark from "@/components/ui/ManualRecordMark"
 import { Skeleton } from "@/components/ui/Skeleton"
-import { athletePath, meetRelayPath, meetSwimPath } from "@/lib/slug"
+import { meetRelayPath, meetSwimPath } from "@/lib/slug"
 
 const api = createApiClient({})
 
@@ -38,6 +38,12 @@ const GRID = "grid gap-3 lg:grid-cols-2"
 const RELAY_GRID = "grid gap-3"
 /** Relay swimmers per line: all four, as the PDF lays them out (they wrap on phones). */
 const RELAY_NAMES_PER_LINE = 4
+
+/** A label's trailing marker (a relay leadoff's " (R)") apart from the name before it. */
+function splitLabelMarker(label: string): { name: string; marker: string } {
+  const marker = /\s\([A-Z]{1,3}\)$/.exec(label)?.[0] ?? ""
+  return { name: label.slice(0, label.length - marker.length), marker }
+}
 
 /** A row's swimmers split into lines: one each for an individual swim, all four on one for a relay. */
 function swimmerLines<T>(relay: boolean, swimmers: T[]): T[][] {
@@ -104,25 +110,28 @@ function TopTimesCard({ event }: { event: TeamTopTimesEvent }) {
                     {unnamed ? (
                       <span className={nameClass}>–</span>
                     ) : (
-                      swimmerLines(event.relay, swimmers).map((line, lineIndex) => (
-                        <span key={lineIndex} className={`${event.relay ? "sm:truncate" : "truncate"} ${nameClass}`}>
-                          {line.map(({ swimmer, label }, i) => (
-                            <span key={i}>
-                              {i > 0 && ", "}
-                              {swimmer.athleteSlug && !opens ? (
-                                <Link
-                                  href={athletePath(swimmer.athleteSlug)}
-                                  className="hover:text-primary hover:underline"
-                                >
-                                  {label}
-                                </Link>
-                              ) : (
-                                label
-                              )}
+                      swimmerLines(event.relay, swimmers).map((line, lineIndex) => {
+                        if (!event.relay) {
+                          // The name truncates; a leadoff's "(R)" always shows after it.
+                          const { name, marker } = splitLabelMarker(line[0]?.label ?? "")
+                          return (
+                            <span key={lineIndex} className={`flex min-w-0 ${nameClass}`}>
+                              <span className="min-w-0 truncate">{name}</span>
+                              {marker ? <span className="shrink-0 whitespace-pre">{marker}</span> : null}
                             </span>
-                          ))}
-                        </span>
-                      ))
+                          )
+                        }
+                        return (
+                          <span key={lineIndex} className={`sm:truncate ${nameClass}`}>
+                            {line.map(({ label }, i) => (
+                              <span key={i}>
+                                {i > 0 && ", "}
+                                {label}
+                              </span>
+                            ))}
+                          </span>
+                        )
+                      })
                     )}
                   </div>
                   {time.meetName ? (

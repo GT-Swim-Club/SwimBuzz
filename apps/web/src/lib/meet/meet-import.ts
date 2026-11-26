@@ -177,7 +177,7 @@ export async function importMeetResults({
   onProgress?.({ progress: 0, detail: "Matching swimmers…" })
   const roster = await prisma.athlete.findMany({
     where: { seasons: { has: season } },
-    select: { id: true, firstName: true, lastName: true, preferredName: true },
+    select: { id: true, firstName: true, lastName: true, preferredName: true, gender: true },
   })
 
   const lookup = buildAthleteLookup(roster)
@@ -542,6 +542,7 @@ export async function importMeetResults({
     roster,
     source,
     nameMappings,
+    athleteGenders: new Map(roster.map((a) => [a.id, a.gender === "F" ? ("F" as const) : ("M" as const)])),
   })
   const statusEntries = statusesToMeetResults(statusRows)
   const placementEntries = placementsToMeetResults(placementRows)
@@ -569,7 +570,8 @@ export async function importMeetResults({
           entry.event,
           !!entry.isRelayLeadoff,
           entry.relayLeadoffSource,
-          entry.relayLeadoffRound
+          entry.relayLeadoffRound,
+          entry.relayLeadoffMixed
         )
         return parsedResultsKeys.has(key)
       })

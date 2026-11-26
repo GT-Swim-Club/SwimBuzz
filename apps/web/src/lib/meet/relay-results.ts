@@ -216,10 +216,18 @@ export function relaySplitEventFromRelay(relayEvent: string, leg: number): strin
   return normalizeEventName(`${legDistance} ${stroke}`)
 }
 
-/** Swim tags for a relay leadoff — encodes source relay and round. */
-export function leadoffSwimTags(relayEvent: string, relayRound: RelayRound = ""): string {
+/**
+ * Last tag segment of a mixed relay's leadoff and split swims, so they never share tags (and get
+ * overwritten) with the same swimmer's women's or men's relay of the same event and round. A word,
+ * not "X": one-letter tag parts are display flags (displaySwimTags), and X is SwimCloud's.
+ */
+const MIXED_RELAY_TAG = "Mixed"
+
+/** Swim tags for a relay leadoff — encodes source relay, round, and (only for mixed) gender. */
+export function leadoffSwimTags(relayEvent: string, relayRound: RelayRound = "", relayGender: RelayGender = ""): string {
   const event = normalizeEventName(relayEvent)
   if (!event) return "R"
+  if (relayGender === "X") return `R|${event}|${relayRound}|${MIXED_RELAY_TAG}`
   return relayRound ? `R|${event}|${relayRound}` : `R|${event}`
 }
 
@@ -235,8 +243,14 @@ export function isRelayLeadoffSwimTag(tags: string): boolean {
 export const RELAY_SPLIT_TAG_PREFIX = "SPLIT|"
 
 /** Swim tags for a relay split; leg is null when SwimCloud only says "Split" (leg 2 or 3) and the sync couldn't place it. */
-export function relaySplitSwimTags(relayEvent: string, leg: number | null, relayRound: RelayRound = ""): string {
-  return `${RELAY_SPLIT_TAG_PREFIX}${normalizeEventName(relayEvent)}|${leg ?? ""}|${relayRound}`
+export function relaySplitSwimTags(
+  relayEvent: string,
+  leg: number | null,
+  relayRound: RelayRound = "",
+  relayGender: RelayGender = ""
+): string {
+  const tags = `${RELAY_SPLIT_TAG_PREFIX}${normalizeEventName(relayEvent)}|${leg ?? ""}|${relayRound}`
+  return relayGender === "X" ? `${tags}|${MIXED_RELAY_TAG}` : tags
 }
 
 export function isRelaySplitSwimTag(tags: string): boolean {
@@ -245,20 +259,22 @@ export function isRelaySplitSwimTag(tags: string): boolean {
 
 export function parseRelaySplitTag(
   tags: string
-): { relayEvent: string; leg: number | null; round: RelayRound } | null {
+): { relayEvent: string; leg: number | null; round: RelayRound; mixed: boolean } | null {
   if (!isRelaySplitSwimTag(tags)) return null
-  const [, relayEvent = "", leg = "", round = ""] = tags.split("|")
+  const [, relayEvent = "", leg = "", round = "", gender = ""] = tags.split("|")
   const legNumber = Number(leg)
   return {
     relayEvent,
     leg: leg && Number.isInteger(legNumber) ? legNumber : null,
     round: relayRoundFromTags(round),
+    mixed: gender === MIXED_RELAY_TAG,
   }
 }
 
 export function parseLeadoffTag(tags: string): {
   relayEvent?: string
   round?: RelayRound
+  mixed?: boolean
 } {
   const trimmed = tags.trim()
   if (!isRelayLeadoffSwimTag(trimmed)) return {}
@@ -268,6 +284,7 @@ export function parseLeadoffTag(tags: string): {
   return {
     relayEvent: normalizeEventName(parts[1] ?? ""),
     round: relayRoundFromTags(parts[2] ?? ""),
+    mixed: parts[3] === MIXED_RELAY_TAG,
   }
 }
 
@@ -275,9 +292,11 @@ export function leadoffResultKey(
   athleteId: string,
   leadoffEvent: string,
   relaySource?: string,
-  relayRound?: RelayRound
+  relayRound?: RelayRound,
+  mixed = false
 ): string {
-  return `${athleteId}|${normalizeEventName(leadoffEvent)}|leadoff|${normalizeEventName(relaySource ?? "")}|${relayRound ?? ""}`
+  const key = `${athleteId}|${normalizeEventName(leadoffEvent)}|leadoff|${normalizeEventName(relaySource ?? "")}|${relayRound ?? ""}`
+  return mixed ? `${key}|X` : key
 }
 
 /** Infer round from stored fields (legacy rows without relayRound). */

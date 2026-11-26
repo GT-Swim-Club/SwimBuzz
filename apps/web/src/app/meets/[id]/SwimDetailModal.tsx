@@ -384,12 +384,21 @@ const tableHead =
   "bg-fill-secondary/60 px-3 py-2 text-xs font-medium uppercase tracking-[0.025em] text-foreground-tertiary dark:bg-fill-secondary"
 const totalRow = "border-t border-border bg-fill-secondary/60 px-3 py-[9px] text-sm font-semibold dark:bg-fill-secondary"
 
+/** A coach's "Remove time" in the detail modal's footer. */
+export type RemoveTimeAction = {
+  /** Confirms and removes the time, calling `done` (which closes the modal) once it's gone. */
+  run: (done: () => void) => void
+  pending: boolean
+  error: string | null
+}
+
 export default function SwimDetailModal({
   detail,
   onClose,
   onEdit,
   editLabel = "Edit",
   heatLaneEdit,
+  removeTime,
 }: {
   detail: SwimDetail
   onClose: () => void
@@ -398,6 +407,8 @@ export default function SwimDetailModal({
   editLabel?: string
   /** For coaches: fill in, inline, the round, heat & lane no import has given this row. */
   heatLaneEdit?: HeatLaneEdit
+  /** For coaches: remove this row's time (the row stays, marked NT). */
+  removeTime?: RemoveTimeAction
 }) {
   const meetUnofficial = useMeetUnofficial()
   const [mounted, setMounted] = useState(false)
@@ -965,7 +976,20 @@ export default function SwimDetailModal({
             </>
           ) : null}
         </div>
+        {removeTime?.error ? (
+          <p className="shrink-0 px-6 pb-1 text-sm text-error">{removeTime.error}</p>
+        ) : null}
         <div className={`flex shrink-0 gap-3 border-t px-6 pb-3 transition-[padding,border-color] ${canScrollDown ? "border-border-subtle pt-3" : "border-transparent pt-2"}`}>
+          {removeTime ? (
+            <button
+              type="button"
+              onClick={() => removeTime.run(onClose)}
+              disabled={removeTime.pending}
+              className="whitespace-nowrap rounded-lg border border-error-border bg-background px-4 py-2 text-sm font-medium text-error transition-colors hover:bg-error-bg disabled:opacity-50"
+            >
+              {removeTime.pending ? "Removing…" : "Remove time"}
+            </button>
+          ) : null}
           {onEdit ? (
             <button
               type="button"

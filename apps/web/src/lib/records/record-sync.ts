@@ -146,7 +146,10 @@ export async function relayCandidates(athletes: Map<string, AthleteName>): Promi
         gender,
         event,
         timeMs,
-        date: leadoffDates.get(`${meet.id}|${leadoffSwimTags(entry.event, round)}`) ?? meet.startsAt,
+        date:
+          leadoffDates.get(`${meet.id}|${leadoffSwimTags(entry.event, round, gender)}`) ??
+          leadoffDates.get(`${meet.id}|${leadoffSwimTags(entry.event, round)}`) ??
+          meet.startsAt,
         swimmers,
         leadoff: false,
         meetId: meet.id,

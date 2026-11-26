@@ -276,7 +276,7 @@ export async function upsertRelayEntry(meetId: string, input: UpsertRelayEntryIn
 
   const leg1 = relayToSave.legs.find((leg) => leg.leg === 1)
   if (priorLeg1AthleteId && priorLeg1AthleteId !== leg1?.athleteId) {
-    await deleteRelayLeadoffSwim(meet, relayToSave.event, priorLeg1AthleteId, relayToSave.relayRound ?? "")
+    await deleteRelayLeadoffSwim(meet, relayToSave.event, priorLeg1AthleteId, relayToSave.relayRound ?? "", relayToSave.gender ?? "")
   }
   if (leg1 && (leg1.splitTime || rosterOnly || Boolean(relay.resultTime))) {
     await syncRelayLeadoffSwim(
@@ -286,7 +286,8 @@ export async function upsertRelayEntry(meetId: string, input: UpsertRelayEntryIn
       relayUnfinished ? undefined : leg1.splitTime,
       "relay",
       undefined,
-      relayToSave.relayRound ?? ""
+      relayToSave.relayRound ?? "",
+      relayToSave.gender ?? ""
     )
   }
   await syncMeetRelaySplitSwims(meetId)
@@ -332,7 +333,13 @@ export async function removeRelayEntry(
 
   const leg1AthleteId = sample?.relaySwimmers?.find((s) => s.leg === 1)?.athleteId
   if (leg1AthleteId) {
-    await deleteRelayLeadoffSwim(meet, event, leg1AthleteId, relayRound)
+    await deleteRelayLeadoffSwim(
+      meet,
+      event,
+      leg1AthleteId,
+      relayRound,
+      sample ? effectiveRelayGender(sample, athleteGenders) : gender
+    )
   }
 
   const entries = removeRelayTeamEntries(existing, event, relayLetter, relayRound, gender, athleteGenders)

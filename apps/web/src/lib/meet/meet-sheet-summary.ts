@@ -91,6 +91,8 @@ export type SheetEntry = {
   /** Parent relay event for a leadoff row (e.g. 200 Medley Relay). */
   relayLeadoffSource?: string
   relayLeadoffRound?: "P" | "F" | ""
+  /** The leadoff's relay was mixed (its swim is tagged …|Mixed). */
+  relayLeadoffMixed?: boolean
   resultPlace?: number
   prelimPlace?: number
   finalPlace?: number
@@ -172,6 +174,8 @@ export type MeetResultEntry = {
   isRelayLeadoff?: boolean
   relayLeadoffSource?: string
   relayLeadoffRound?: "P" | "F" | ""
+  /** The leadoff's relay was mixed (its swim is tagged …|Mixed). */
+  relayLeadoffMixed?: boolean
   resultPlace?: number
   prelimPlace?: number
   finalPlace?: number
@@ -205,8 +209,8 @@ export type MeetResultEntry = {
 
 function resultGroupKey(athleteId: string, event: string, tags: string): string {
   if (isRelayLeadoffSwimTag(tags)) {
-    const { relayEvent, round } = parseLeadoffTag(tags)
-    return leadoffResultKey(athleteId, event, relayEvent, round)
+    const { relayEvent, round, mixed } = parseLeadoffTag(tags)
+    return leadoffResultKey(athleteId, event, relayEvent, round, mixed)
   }
   if (isSwimOffTag(tags)) return `${athleteId}|${event}|swimoff`
   return `${athleteId}|${event}|swim`
@@ -535,6 +539,7 @@ function mergeMeetResultEntry(
     isRelayLeadoff: a.isRelayLeadoff || b.isRelayLeadoff,
     relayLeadoffSource: a.relayLeadoffSource ?? b.relayLeadoffSource,
     relayLeadoffRound: a.relayLeadoffRound || b.relayLeadoffRound || "",
+    relayLeadoffMixed: a.relayLeadoffMixed || b.relayLeadoffMixed || undefined,
     resultPlace: a.resultPlace ?? b.resultPlace,
     prelimPlace: a.prelimPlace ?? b.prelimPlace,
     finalPlace: a.finalPlace ?? b.finalPlace,
@@ -600,7 +605,8 @@ export function relayLeadoffsFromSplits(
 
     const round = effectiveRelayRound(relay)
     const source = normalizeEventName(relay.event)
-    const key = leadoffResultKey(leg1.athleteId, leadoffEvent, source, round)
+    const mixed = effectiveRelayGender(relay) === "X"
+    const key = leadoffResultKey(leg1.athleteId, leadoffEvent, source, round, mixed)
     if (seen.has(key)) continue
     seen.add(key)
 
@@ -614,6 +620,7 @@ export function relayLeadoffsFromSplits(
       relayLeadoffTime: split,
       relayLeadoffSource: source,
       relayLeadoffRound: round,
+      ...(mixed ? { relayLeadoffMixed: true } : {}),
       ...(leadoffSplits?.length ? { splits: leadoffSplits } : {}),
     })
   }
@@ -852,8 +859,9 @@ export function swimsToMeetResults(swims: SwimResultInput[]): MeetResultEntry[] 
     const time = formatTime(swim.timeMs)
 
     if (isRelayLeadoffSwimTag(swim.tags)) {
-      const { relayEvent, round } = parseLeadoffTag(swim.tags)
+      const { relayEvent, round, mixed } = parseLeadoffTag(swim.tags)
       existing.isRelayLeadoff = true
+      if (mixed) existing.relayLeadoffMixed = true
       existing.relayLeadoffTime = time
       existing.swimId = swim.id
       if (relayEvent) existing.relayLeadoffSource = relayEvent
@@ -2168,7 +2176,8 @@ function entryKey(entry: SheetEntry): string {
       entry.athleteId,
       entry.event,
       entry.relayLeadoffSource,
-      entry.relayLeadoffRound
+      entry.relayLeadoffRound,
+      entry.relayLeadoffMixed
     )
   }
   return `${entry.athleteId}|${normalizeEventName(entry.event)}|${entry.entryType}|`
@@ -2431,14 +2440,16 @@ export function resultKey(
   event: string,
   isLeadoff = false,
   relaySource?: string,
-  relayRound?: string
+  relayRound?: string,
+  relayMixed = false
 ): string {
   if (isLeadoff) {
     return leadoffResultKey(
       athleteId,
       event,
       relaySource,
-      (relayRound ?? "") as "P" | "F" | ""
+      (relayRound ?? "") as "P" | "F" | "",
+      relayMixed
     )
   }
   return `${athleteId}|${normalizeEventName(event)}|individual|`
@@ -2448,7 +2459,13 @@ export function resultKey(
 export function entryResultKey(
   entry: Pick<
     MeetResultEntry,
-    "athleteId" | "event" | "isRelayLeadoff" | "relayLeadoffSource" | "relayLeadoffRound" | "isSwimOff"
+    | "athleteId"
+    | "event"
+    | "isRelayLeadoff"
+    | "relayLeadoffSource"
+    | "relayLeadoffRound"
+    | "relayLeadoffMixed"
+    | "isSwimOff"
   >
 ): string {
   if (entry.isSwimOff && !entry.isRelayLeadoff) {
@@ -2459,7 +2476,8 @@ export function entryResultKey(
     entry.event,
     entry.isRelayLeadoff,
     entry.relayLeadoffSource,
-    entry.relayLeadoffRound
+    entry.relayLeadoffRound,
+    entry.relayLeadoffMixed
   )
 }
 
@@ -2734,6 +2752,7 @@ function mergeEntries(a: SheetEntry, b: SheetEntry): SheetEntry {
     isRelayLeadoff: primary.isRelayLeadoff || secondary.isRelayLeadoff,
     relayLeadoffSource: primary.relayLeadoffSource ?? secondary.relayLeadoffSource,
     relayLeadoffRound: primary.relayLeadoffRound || secondary.relayLeadoffRound || "",
+    relayLeadoffMixed: primary.relayLeadoffMixed || secondary.relayLeadoffMixed || undefined,
     resultPlace: primary.resultPlace ?? secondary.resultPlace,
     prelimPlace: primary.prelimPlace ?? secondary.prelimPlace,
     finalPlace: primary.finalPlace ?? secondary.finalPlace,
@@ -2842,6 +2861,7 @@ export function mergeSheetSummaries(
         isRelayLeadoff: result.isRelayLeadoff ?? existing.isRelayLeadoff,
         relayLeadoffSource: result.relayLeadoffSource ?? existing.relayLeadoffSource,
         relayLeadoffRound: result.relayLeadoffRound || existing.relayLeadoffRound || "",
+        relayLeadoffMixed: result.relayLeadoffMixed || existing.relayLeadoffMixed || undefined,
         resultPlace: result.resultPlace ?? existing.resultPlace,
         prelimPlace: result.prelimPlace ?? existing.prelimPlace,
         finalPlace: result.finalPlace ?? existing.finalPlace,
@@ -2888,6 +2908,7 @@ export function mergeSheetSummaries(
         isRelayLeadoff: result.isRelayLeadoff,
         relayLeadoffSource: result.relayLeadoffSource,
         relayLeadoffRound: result.relayLeadoffRound,
+        relayLeadoffMixed: result.relayLeadoffMixed,
         resultPlace: result.resultPlace,
         prelimPlace: result.prelimPlace,
         finalPlace: result.finalPlace,

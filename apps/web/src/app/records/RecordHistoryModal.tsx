@@ -15,7 +15,7 @@ import ManualRecordMark from "@/components/ui/ManualRecordMark"
 import Modal, { ModalFooter } from "@/components/ui/Modal"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { SegmentedToggle, segmentedOptionClass } from "@/components/ui/SegmentedToggle"
-import { athletePath, meetPath } from "@/lib/slug"
+import { meetPath } from "@/lib/slug"
 
 const api = createApiClient({})
 
@@ -126,21 +126,11 @@ export default function RecordHistoryModal({
             <li key={record.id} className="flex items-start justify-between gap-3 px-3.5 py-3">
               <div className="min-w-0 space-y-0.5">
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                  {record.swimmers.map((swimmer, i) =>
-                    swimmer.athleteSlug ? (
-                      <Link
-                        key={i}
-                        href={athletePath(swimmer.athleteSlug)}
-                        className="text-sm font-medium text-foreground hover:text-primary hover:underline"
-                      >
-                        {recordSwimmerLabel(record, swimmer)}
-                      </Link>
-                    ) : (
-                      <span key={i} className="text-sm font-medium text-foreground">
-                        {recordSwimmerLabel(record, swimmer)}
-                      </span>
-                    )
-                  )}
+                  {record.swimmers.map((swimmer, i) => (
+                    <span key={i} className="text-sm font-medium text-foreground">
+                      {recordSwimmerLabel(record, swimmer)}
+                    </span>
+                  ))}
                   {index === 0 ? (
                     <span className="rounded-full bg-primary px-1.5 text-[11px] font-semibold leading-4 text-primary-contrast">
                       Current

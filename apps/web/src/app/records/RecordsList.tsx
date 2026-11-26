@@ -82,7 +82,7 @@ export default function RecordsList({
                     {row.label}
                   </button>
                   <RecordTime {...side} className="justify-self-end text-right" />
-                  <RecordNames {...side} align="start" linkNames={!href} />
+                  <RecordNames {...side} align="start" />
                   <RecordYear {...side} className="justify-self-end text-right" />
                 </div>
               )

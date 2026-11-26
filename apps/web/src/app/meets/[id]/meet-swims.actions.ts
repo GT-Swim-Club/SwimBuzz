@@ -6,11 +6,14 @@ import { prisma } from "@/lib/prisma"
 import { normalizeSwimForInsert, nextSwimOccurrence } from "@/lib/swim/swim-dedup"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
-import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
+import { isRelayLeadoffSwimTag, isRelaySplitSwimTag } from "@/lib/meet/relay-results"
 import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
 import { formatTime, parseTime } from "@/lib/utils"
 import {
+  entryResultKey,
+  isPrelimTag,
   isResultStatusesSummary,
+  isSwimOffTag,
   resultKey,
   type MeetResultEntry,
   type ResultSplit,
@@ -28,6 +31,8 @@ export type AddMeetSwimInput = {
   round?: "P" | "F" | ""
   /** The 50 splits in order, as lap times or cumulative marks ("" where missing). */
   splits?: string[]
+  /** The swim's place in its event (round), if known. */
+  place?: number
 }
 
 /** Lap times for each 50 from what was typed: cumulative marks (rising to the final time) become laps. */
@@ -112,7 +117,10 @@ export async function addMeetSwim(input: AddMeetSwimInput) {
 
   for (let attempt = 0; attempt < 5; attempt++) {
     try {
-      const created = await prisma.swim.create({ data: { ...base, occurrence } })
+      const place =
+        input.place != null && Number.isInteger(input.place) && input.place > 0 ? input.place : null
+      const created = await prisma.swim.create({ data: { ...base, occurrence, place } })
+      if (created.meetId) await clearRemovedTimeMark(created.meetId, athleteId, base.event, base.tags)
       if (created.meetId && splits.length > 0) {
         await saveManualSwimSplits(created.meetId, athleteId, base.event, input.round ?? "", splits)
       }
@@ -215,6 +223,104 @@ export async function deleteMeetSwim(swimId: string) {
 
   await prisma.swim.delete({ where: { id: swimId } })
   if (swim.meetId) await syncTeamRecordsSafely()
+  revalidatePath("/meets/[id]", "page")
+  return { ok: true }
+}
+
+/** The result-details fields of one round of a swim: prelims, finals, or the only (or swim-off) swim. */
+function roundResultFields(tags: string) {
+  const t = tags.trim().toUpperCase()
+  if (isPrelimTag(t)) {
+    return { time: "prelimTime", status: "prelimStatus", place: "prelimPlace", points: "prelimPoints", splits: "prelimSplits" } as const
+  }
+  if (!isSwimOffTag(t) && (t === "F" || t.includes("FINAL"))) {
+    return { time: "finalTime", status: "finalStatus", place: "finalPlace", points: "finalPoints", splits: "finalSplits" } as const
+  }
+  return { time: "resultTime", status: "resultStatus", place: "resultPlace", points: "resultPoints", splits: "splits" } as const
+}
+
+/** A swim logged into a round whose time was removed replaces that round's "NT" mark. */
+async function clearRemovedTimeMark(meetId: string, athleteId: string, event: string, tags: string) {
+  const meet = await prisma.meet.findUnique({ where: { id: meetId }, select: { resultStatusesSummary: true } })
+  if (!meet || !isResultStatusesSummary(meet.resultStatusesSummary)) return
+  const swimOff = isSwimOffTag(tags)
+  const key = swimOff
+    ? entryResultKey({ athleteId, event, isSwimOff: true })
+    : resultKey(athleteId, event, false)
+  const { status } = roundResultFields(tags)
+  const entries = meet.resultStatusesSummary.entries
+  const index = entries.findIndex((e) => !e.isRelayLeadoff && entryResultKey(e) === key && e[status] === "NT")
+  if (index < 0) return
+  const next = entries.map((e, i) => (i === index ? { ...e, [status]: undefined } : e))
+  await prisma.meet.update({
+    where: { id: meetId },
+    data: { resultStatusesSummary: { entries: next } as unknown as Prisma.InputJsonValue },
+  })
+}
+
+/**
+ * Remove a meet swim's time (imported or hand-logged) but keep the athlete's row for that event:
+ * the swim is deleted (so it leaves PBs, records and Top 10s) and its round is marked "NT" in the
+ * meet's result details, with that round's place, points and splits cleared. Only the swim's own
+ * round is touched — removing a finals time keeps the prelims swim. Relay leadoffs and splits are
+ * removed through the relay. A later results import brings the time back.
+ */
+export async function removeMeetSwimTime(swimId: string) {
+  const session = await getSession()
+  if (!session || !isStaffRole(session.user.role)) {
+    throw new Error("Forbidden")
+  }
+
+  const swim = await prisma.swim.findUnique({
+    where: { id: swimId },
+    include: { athlete: { select: { firstName: true, lastName: true } } },
+  })
+  if (!swim) throw new Error("Not found")
+  if (!swim.meetId) throw new Error("Only meet swims can have their time removed")
+  if (isRelayLeadoffSwimTag(swim.tags) || isRelaySplitSwimTag(swim.tags)) {
+    throw new Error("Relay swims can only be changed through the relay")
+  }
+
+  const meet = await prisma.meet.findUnique({
+    where: { id: swim.meetId },
+    select: { resultStatusesSummary: true },
+  })
+  if (!meet) throw new Error("Not found")
+
+  const swimOff = isSwimOffTag(swim.tags)
+  const key = swimOff
+    ? entryResultKey({ athleteId: swim.athleteId, event: swim.event, isSwimOff: true })
+    : resultKey(swim.athleteId, swim.event, false)
+  const fields = roundResultFields(swim.tags)
+  const entries = isResultStatusesSummary(meet.resultStatusesSummary)
+    ? meet.resultStatusesSummary.entries
+    : []
+  const index = entries.findIndex((e) => !e.isRelayLeadoff && entryResultKey(e) === key)
+  const cleared: MeetResultEntry = {
+    ...(index >= 0
+      ? entries[index]
+      : {
+          athleteId: swim.athleteId,
+          athleteName: `${swim.athlete.lastName}, ${swim.athlete.firstName}`,
+          event: swim.event,
+          ...(swimOff ? { isSwimOff: true } : {}),
+        }),
+    [fields.time]: undefined,
+    [fields.place]: undefined,
+    [fields.points]: undefined,
+    [fields.splits]: undefined,
+    [fields.status]: "NT",
+  }
+  const next = index >= 0 ? entries.map((e, i) => (i === index ? cleared : e)) : [...entries, cleared]
+
+  await prisma.$transaction([
+    prisma.swim.delete({ where: { id: swimId } }),
+    prisma.meet.update({
+      where: { id: swim.meetId },
+      data: { resultStatusesSummary: { entries: next } as unknown as Prisma.InputJsonValue },
+    }),
+  ])
+  await syncTeamRecordsSafely()
   revalidatePath("/meets/[id]", "page")
   return { ok: true }
 }
